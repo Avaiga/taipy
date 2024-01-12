@@ -130,20 +130,34 @@ def is_editable(
     Returns:
         True if the given entity can be edited. False otherwise.
     """
-    if _is_cycle(entity):
+    if isinstance(entity, Cycle):
         return _CycleManagerFactory._build_manager()._is_editable(entity)
-    if _is_scenario(entity):
+    if isinstance(entity, str) and entity.startswith(Cycle._ID_PREFIX):
+        return _CycleManagerFactory._build_manager()._is_editable(CycleId(entity))
+    if isinstance(entity, Scenario):
         return _ScenarioManagerFactory._build_manager()._is_editable(entity)
-    if _is_sequence(entity):
+    if isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX):
+        return _ScenarioManagerFactory._build_manager()._is_editable(ScenarioId(entity))
+    if isinstance(entity, Sequence):
         return _SequenceManagerFactory._build_manager()._is_editable(entity)
-    if _is_task(entity):
+    if isinstance(entity, str) and entity.startswith(Sequence._ID_PREFIX):
+        return _SequenceManagerFactory._build_manager()._is_editable(SequenceId(entity))
+    if isinstance(entity, Task):
         return _TaskManagerFactory._build_manager()._is_editable(entity)
-    if _is_job(entity):
+    if isinstance(entity, str) and entity.startswith(Task._ID_PREFIX):
+        return _TaskManagerFactory._build_manager()._is_editable(TaskId(entity))
+    if isinstance(entity, Job):
         return _JobManagerFactory._build_manager()._is_editable(entity)
-    if _is_data_node(entity):
+    if isinstance(entity, str) and entity.startswith(Job._ID_PREFIX):
+        return _JobManagerFactory._build_manager()._is_editable(JobId(entity))
+    if isinstance(entity, DataNode):
         return _DataManagerFactory._build_manager()._is_editable(entity)
-    if _is_submission(entity):
+    if isinstance(entity, str) and entity.startswith(DataNode._ID_PREFIX):
+        return _DataManagerFactory._build_manager()._is_editable(DataNodeId(entity))
+    if isinstance(entity, Submission):
         return _SubmissionManagerFactory._build_manager()._is_editable(entity)
+    if isinstance(entity, str) and entity.startswith(Submission._ID_PREFIX):
+        return _SubmissionManagerFactory._build_manager()._is_editable(SequenceId(entity))
     return False
 
 
@@ -172,20 +186,34 @@ def is_readable(
     Returns:
         True if the given entity can be read. False otherwise.
     """
-    if _is_cycle(entity):
+    if isinstance(entity, Cycle):
         return _CycleManagerFactory._build_manager()._is_readable(entity)
-    if _is_scenario(entity):
+    if isinstance(entity, str) and entity.startswith(Cycle._ID_PREFIX):
+        return _CycleManagerFactory._build_manager()._is_readable(CycleId(entity))
+    if isinstance(entity, Scenario):
         return _ScenarioManagerFactory._build_manager()._is_readable(entity)
-    if _is_sequence(entity):
+    if isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX):
+        return _ScenarioManagerFactory._build_manager()._is_readable(ScenarioId(entity))
+    if isinstance(entity, Sequence):
         return _SequenceManagerFactory._build_manager()._is_readable(entity)
-    if _is_task(entity):
+    if isinstance(entity, str) and entity.startswith(Sequence._ID_PREFIX):
+        return _SequenceManagerFactory._build_manager()._is_readable(SequenceId(entity))
+    if isinstance(entity, Task):
         return _TaskManagerFactory._build_manager()._is_readable(entity)
-    if _is_job(entity):
-        return _JobManagerFactory._build_manager()._is_readable(entity)
-    if _is_data_node(entity):
+    if isinstance(entity, str) and entity.startswith(Task._ID_PREFIX):
+        return _TaskManagerFactory._build_manager()._is_readable(TaskId(entity))
+    if isinstance(entity, Job):
+        return _JobManagerFactory._build_manager()._is_editable(entity)
+    if isinstance(entity, str) and entity.startswith(Job._ID_PREFIX):
+        return _JobManagerFactory._build_manager()._is_editable(JobId(entity))
+    if isinstance(entity, DataNode):
         return _DataManagerFactory._build_manager()._is_readable(entity)
-    if _is_submission(entity):
+    if isinstance(entity, str) and entity.startswith(DataNode._ID_PREFIX):
+        return _DataManagerFactory._build_manager()._is_readable(DataNodeId(entity))
+    if isinstance(entity, Submission):
         return _SubmissionManagerFactory._build_manager()._is_readable(entity)
+    if isinstance(entity, str) and entity.startswith(Submission._ID_PREFIX):
+        return _SubmissionManagerFactory._build_manager()._is_readable(SequenceId(entity))
     return False
 
 
@@ -217,11 +245,11 @@ def submit(
             - If a `Scenario^` or a `Sequence^` is provided, it will return a list of `Job^`.
             - If a `Task^` is provided, it will return the created `Job^`.
     """
-    if _is_scenario(entity):
+    if isinstance(entity, Scenario):
         return _ScenarioManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)
-    if _is_sequence(entity):
+    if isinstance(entity, Sequence):
         return _SequenceManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)
-    if _is_task(entity):
+    if isinstance(entity, Task):
         return _TaskManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)
     return None
 
@@ -275,7 +303,7 @@ def exists(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, C
     representations.
 
     Parameters:
-        entity_id (Union[DataNodeId^, TaskId^, SequenceId^, ScenarioId^, JobId^, CycleId^]): The
+        entity_id (Union[DataNodeId^, TaskId^, SequenceId^, ScenarioId^, JobId^, CycleId^, SubmissionId^, str]): The
             identifier of the entity to check for existence.
 
     Returns:
@@ -286,7 +314,7 @@ def exists(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, C
 
     Note:
         The function performs checks for various entity types
-        (`Job^`, `Cycle^`, `Scenario^`, `Sequence^`, `Task^`, `DataNode^`)
+        (`Job^`, `Cycle^`, `Scenario^`, `Sequence^`, `Task^`, `DataNode^`, `Submission^`)
         based on their respective identifier prefixes.
     """
     if _is_job(entity_id):
@@ -303,7 +331,6 @@ def exists(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, C
         return _DataManagerFactory._build_manager()._exists(DataNodeId(entity_id))
     if _is_submission(entity_id):
         return _SubmissionManagerFactory._build_manager()._exists(SubmissionId(entity_id))
-
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 
@@ -411,12 +438,18 @@ def is_deletable(entity: Union[Scenario, Job, Submission, ScenarioId, JobId, Sub
     Returns:
         True if the given scenario, job or submission can be deleted. False otherwise.
     """
-    if _is_job(entity):
+    if isinstance(entity, Job):
         return _JobManagerFactory._build_manager()._is_deletable(entity)
-    if _is_scenario(entity):
+    if isinstance(entity, str) and entity.startswith(Job._ID_PREFIX):
+        return _JobManagerFactory._build_manager()._is_deletable(JobId(entity))
+    if isinstance(entity, Scenario):
         return _ScenarioManagerFactory._build_manager()._is_deletable(entity)
-    if _is_submission(entity):
+    if isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX):
+        return _ScenarioManagerFactory._build_manager()._is_deletable(ScenarioId(entity))
+    if isinstance(entity, Submission):
         return _SubmissionManagerFactory._build_manager()._is_deletable(entity)
+    if isinstance(entity, str) and entity.startswith(Submission._ID_PREFIX):
+        return _SubmissionManagerFactory._build_manager()._is_deletable(SubmissionId(entity))
     return True
 
 
