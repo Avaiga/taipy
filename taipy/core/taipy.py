@@ -70,19 +70,19 @@ def set(entity: Union[DataNode, Task, Sequence, Scenario, Cycle]):
         entity (Union[DataNode^, Task^, Sequence^, Scenario^, Cycle^]): The
             entity to save or update.
     """
-    if _is_cycle(entity):
+    if isinstance(entity, Cycle):
         return _CycleManagerFactory._build_manager()._set(entity)
-    if _is_scenario(entity):
+    if isinstance(entity, Scenario):
         return _ScenarioManagerFactory._build_manager()._set(entity)
-    if _is_sequence(entity):
+    if isinstance(entity, Sequence):
         return _SequenceManagerFactory._build_manager()._set(entity)
-    if _is_task(entity):
+    if isinstance(entity, Task):
         return _TaskManagerFactory._build_manager()._set(entity)
-    if _is_data_node(entity):
+    if isinstance(entity, DataNode):
         return _DataManagerFactory._build_manager()._set(entity)
 
 
-def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Task, TaskId]) -> bool:
+def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Task, TaskId, str]) -> bool:
     """Indicate if an entity can be submitted.
 
     This function checks if the given entity can be submitted for execution.
@@ -90,12 +90,18 @@ def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Tas
     Returns:
         True if the given entity can be submitted. False otherwise.
     """
-    if _is_scenario(entity):
+    if isinstance(entity, Scenario):
         return _ScenarioManagerFactory._build_manager()._is_submittable(entity)
-    if _is_sequence(entity):
+    if isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX):
+        return _ScenarioManagerFactory._build_manager()._is_submittable(ScenarioId(entity))
+    if isinstance(entity, Sequence):
         return _SequenceManagerFactory._build_manager()._is_submittable(entity)
-    if _is_task(entity):
+    if isinstance(entity, str) and entity.startswith(Sequence._ID_PREFIX):
+        return _SequenceManagerFactory._build_manager()._is_submittable(SequenceId(entity))
+    if isinstance(entity, Task):
         return _TaskManagerFactory._build_manager()._is_submittable(entity)
+    if isinstance(entity, str) and entity.startswith(Task._ID_PREFIX):
+        return _TaskManagerFactory._build_manager()._is_submittable(TaskId(entity))
     return False
 
 
