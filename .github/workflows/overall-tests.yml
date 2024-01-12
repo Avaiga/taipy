@@ -25,7 +25,7 @@ jobs:
 
       - name: Install dependencies
         id: install-dependencies
-        uses: ./.github/install/actions
+        uses: ./.github/actions/install
         with:
           python-version: ${{ matrix.python-version }}
           os: ${{ matrix.os }}
