@@ -11,6 +11,7 @@
 
 import os
 import sys
+from importlib.util import find_spec
 
 from taipy._cli._base_cli import _CLI
 from taipy.core._core_cli import _CoreCLI
@@ -52,3 +53,8 @@ def _entrypoint():
 
     _CLI._remove_argument("help")
     _CLI._parser.print_help()
+
+    if find_spec("taipy.enterprise"):
+        from taipy.enterprise._entrypoint import _entrypoint as _enterprise_entrypoint
+
+        _enterprise_entrypoint()
