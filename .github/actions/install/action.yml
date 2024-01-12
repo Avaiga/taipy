@@ -19,6 +19,11 @@ inputs:
     required: false
     description: 'The pipfile version to use. Can be min, max, latest'
     default: 'min'
+outputs:
+  to-update:
+    description: "True if the dependencies can be updated"
+    type: boolean
+    value: ${{ steps.install-dependencies.outputs.diff }} != ''
 runs:
   using: "composite"
   steps:
