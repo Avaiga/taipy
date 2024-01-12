@@ -55,7 +55,7 @@ version = "==4.2.13"
 "openpyxl" = {version="<=3.1.0"}
 "pandas" = {version="<=2.0.0"}
 "pymongo" = {version="<=4.2.0", extras=["srv"]}
-"sqlalchemy" = {version="<=2.0.16"}
+"sqlalchemy" = {version="<=2.0.0"}
 "toml" = {version="<=0.10"}
 "boto3" = {version="<=1.29.4"}
 "taipy-config" = {version="<=3.0.0"}
