@@ -52,7 +52,7 @@ version = "==4.2.13"
 [packages]
 "pyarrow" = {version="<=10.0.1"}
 "networkx" = {version="<=2.6"}
-"openpyxl" = {version="<=3.1.2"}
+"openpyxl" = {version="<=3.1.0"}
 "pandas" = {version="<=2.0.0"}
 "pymongo" = {version="<=4.2.0", extras=["srv"]}
 "sqlalchemy" = {version="<=2.0.16"}
