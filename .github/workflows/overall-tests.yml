@@ -51,7 +51,12 @@ jobs:
           pip install -r tools/packages/requirements.txt
           python tools/packages/manager.py pipfile tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt Pipfile
           # If Pipfile and Pipfile.sup are different, put something in the GitHub convertation
-          echo "diff=`diff Pipfile Pipfile.sup`" >> "$GITHUB_OUTPUT"
+          $DIFF=`diff Pipfile Pipfile.sup | tail -n +1`
+          {
+            echo 'Diff between packages<<EOF'
+            echo $DIFF
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
 
       - name: Comment PR
         if: steps.install-dependencies.outputs.diff != ''
@@ -60,7 +65,7 @@ jobs:
           message: |
             Diff deteteced ! Please update the Pipfile.sup file with the following diff:
             ```
-            ${{ steps.install-dependencies.outputs.diff }}
+            "${{ steps.install-dependencies.outputs.diff }}"
             ```
 
       - name: Install Dependencies
