@@ -21,8 +21,10 @@ jobs:
         pipenv-version: ['min', 'max', 'latest']
     runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions/checkout@v4
+
       - name: Install packages
-        uses: ./.github/workflows/install.yml
+        uses: ./.github/actions/install.yml
         with:
           python-version: ${{ matrix.python-version }}
           os: ${{ matrix.os }}
