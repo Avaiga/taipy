@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -24,15 +24,15 @@ data = {
     # ["Hole1", "Hole2", ..., "Hole9"]
     "Hole": [f"Hole{h}" for h in range(1, n_holes + 1)] + ["Score"],
     # Par for each hole
-    "Par": [3, 4, 4, 5, 3, 5, 4, 5, 3] + [None],
+    "Par": [3, 4, 4, 5, 3, 5, 4, 5, 3] + [None],  # type: ignore
     # Score for each hole
-    "Score": [4, 4, 5, 4, 4, 5, 4, 5, 4] + [None],
+    "Score": [4, 4, 5, 4, 4, 5, 4, 5, 4] + [None],  # type: ignore
     # Represented as relative values except for the last one
     "M": n_holes * ["relative"] + ["total"],
 }
 
 # Compute difference (Score-Par)
-data["Diff"] = [data["Score"][i] - data["Par"][i] for i in range(0, n_holes)] + [None]
+data["Diff"] = [data["Score"][i] - data["Par"][i] for i in range(0, n_holes)] + [None]  # type: ignore[index]
 
 # Show positive values in red, and negative values in green
 options = {"decreasing": {"marker": {"color": "green"}}, "increasing": {"marker": {"color": "red"}}}

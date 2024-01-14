@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -11,7 +11,9 @@
 
 from flask import request
 from flask_restful import Resource
+
 from taipy.config.config import Config
+from taipy.core import Scenario
 from taipy.core.exceptions.exceptions import NonExistingScenario, NonExistingScenarioConfig
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 
@@ -21,7 +23,7 @@ from ..middlewares._middleware import _middleware
 from ..schemas import ScenarioResponseSchema
 
 
-def _get_or_raise(scenario_id: str):
+def _get_or_raise(scenario_id: str) -> Scenario:
     manager = _ScenarioManagerFactory._build_manager()
     scenario = manager._get(scenario_id)
     if scenario is None:

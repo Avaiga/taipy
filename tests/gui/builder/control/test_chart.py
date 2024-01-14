@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -30,7 +30,7 @@ def test_chart_builder_1(gui: Gui, helpers, csvdata):
     chart_type = [None, "scatter"]  # noqa: F841
     xaxis = [None, "x2"]  # noqa: F841
     with tgb.Page(frame=None) as page:
-        tgb.chart(
+        tgb.chart(  # type: ignore[attr-defined]
             data="{csvdata}",
             x="Day",
             selected_color="green",
@@ -51,7 +51,7 @@ def test_chart_builder_1(gui: Gui, helpers, csvdata):
         "selected0={tpec_TpExPr_selected_indices_TPMDL_0}",
         "selected1={tpec_TpExPr_selected_indices_TPMDL_0}",
         'height="100%"',
-        'defaultLayout="{&quot;grid&quot;: &#x7B;&quot;rows&quot;: 1, &quot;columns&quot;: 2, &quot;subplots&quot;: [[&quot;xy&quot;, &quot;x2y&quot;]], &quot;roworder&quot;: &quot;bottom to top&quot;&#x7D;}"',
+        'defaultLayout="{&quot;grid&quot;: &#x7B;&quot;rows&quot;: 1, &quot;columns&quot;: 2, &quot;subplots&quot;: [[&quot;xy&quot;, &quot;x2y&quot;]], &quot;roworder&quot;: &quot;bottom to top&quot;&#x7D;}"',  # noqa: E501
         'onRangeChange="range_change"',
         'updateVars="layout=_TpDi_tpec_TpExPr_subplot_layout_TPMDL_0;selected0=tpec_TpExPr_selected_indices_TPMDL_0;selected1=tpec_TpExPr_selected_indices_TPMDL_0"',
         'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
@@ -65,7 +65,7 @@ def test_chart_builder_1(gui: Gui, helpers, csvdata):
 def test_chart_builder_2(gui: Gui, helpers, csvdata):
     selected_indices = [14258]  # noqa: F841
     with tgb.Page(frame=None) as page:
-        tgb.chart(
+        tgb.chart(  # type: ignore[attr-defined]
             data="{csvdata}",
             x="Day",
             selected_color="green",
@@ -86,7 +86,7 @@ def test_chart_builder_2(gui: Gui, helpers, csvdata):
         "selected0={tpec_TpExPr_selected_indices_TPMDL_0}",
         "selected1={tpec_TpExPr_selected_indices_TPMDL_0}",
         'height="100%"',
-        'defaultLayout="{&quot;grid&quot;: &#x7B;&quot;rows&quot;: 1, &quot;columns&quot;: 2, &quot;subplots&quot;: [[&quot;xy&quot;, &quot;x2y&quot;]], &quot;roworder&quot;: &quot;bottom to top&quot;&#x7D;}"',
+        'defaultLayout="{&quot;grid&quot;: &#x7B;&quot;rows&quot;: 1, &quot;columns&quot;: 2, &quot;subplots&quot;: [[&quot;xy&quot;, &quot;x2y&quot;]], &quot;roworder&quot;: &quot;bottom to top&quot;&#x7D;}"',  # noqa: E501
         'onRangeChange="range_change"',
         'updateVars="selected0=tpec_TpExPr_selected_indices_TPMDL_0;selected1=tpec_TpExPr_selected_indices_TPMDL_0"',
         'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
@@ -161,7 +161,7 @@ def test_map_builder(gui: Gui, helpers):
         "margin": {"r": 0, "t": 0, "b": 0, "l": 0},
     }
     with tgb.Page(frame=None) as page:
-        tgb.chart(
+        tgb.chart(  # type: ignore[attr-defined]
             data="{mapData}",
             type="scattermapbox",
             marker="{marker}",
@@ -177,7 +177,7 @@ def test_map_builder(gui: Gui, helpers):
         "&quot;Lat&quot;: &#x7B;&quot;index&quot;:",
         "&quot;Lon&quot;: &#x7B;&quot;index&quot;:",
         "data={_TpD_tpec_TpExPr_mapData_TPMDL_0}",
-        'defaultLayout="{&quot;dragmode&quot;: &quot;zoom&quot;, &quot;mapbox&quot;: &#x7B;&quot;style&quot;: &quot;open-street-map&quot;, &quot;center&quot;: &#x7B;&quot;lat&quot;: 38, &quot;lon&quot;: -90&#x7D;, &quot;zoom&quot;: 3&#x7D;, &quot;margin&quot;: &#x7B;&quot;r&quot;: 0, &quot;t&quot;: 0, &quot;b&quot;: 0, &quot;l&quot;: 0&#x7D;}"',
+        'defaultLayout="{&quot;dragmode&quot;: &quot;zoom&quot;, &quot;mapbox&quot;: &#x7B;&quot;style&quot;: &quot;open-street-map&quot;, &quot;center&quot;: &#x7B;&quot;lat&quot;: 38, &quot;lon&quot;: -90&#x7D;, &quot;zoom&quot;: 3&#x7D;, &quot;margin&quot;: &#x7B;&quot;r&quot;: 0, &quot;t&quot;: 0, &quot;b&quot;: 0, &quot;l&quot;: 0&#x7D;}"',  # noqa: E501
         'updateVarName="_TpD_tpec_TpExPr_mapData_TPMDL_0"',
     ]
     helpers.test_control_builder(gui, page, expected_list)
@@ -198,7 +198,7 @@ def test_chart_indexed_properties_builder(gui: Gui, helpers):
     data["Montpellier 2"] = [x * (1 - (random.random() / 10)) for x in data["Montpellier"]]
 
     with tgb.Page(frame=None) as page:
-        tgb.chart(
+        tgb.chart(  # type: ignore[attr-defined]
             data="{data}",
             x="Date",
             mode="lines",
@@ -210,8 +210,8 @@ def test_chart_indexed_properties_builder(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     expected_list = [
         "<Chart",
-        "&quot;traces&quot;: [[&quot;Date_str&quot;, &quot;La Rochelle&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 1&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 2&quot;], [&quot;Date_str&quot;, &quot;Montpellier&quot;], [&quot;Date_str&quot;, &quot;Montpellier 1&quot;], [&quot;Date_str&quot;, &quot;Montpellier 2&quot;]]",
-        "&quot;lines&quot;: [null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;, null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;]",
+        "&quot;traces&quot;: [[&quot;Date_str&quot;, &quot;La Rochelle&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 1&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 2&quot;], [&quot;Date_str&quot;, &quot;Montpellier&quot;], [&quot;Date_str&quot;, &quot;Montpellier 1&quot;], [&quot;Date_str&quot;, &quot;Montpellier 2&quot;]]",  # noqa: E501
+        "&quot;lines&quot;: [null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;, null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;]",  # noqa: E501
     ]
     helpers.test_control_builder(gui, page, expected_list)
 
@@ -242,7 +242,7 @@ def test_chart_indexed_properties_with_arrays_builder(gui: Gui, helpers):
     colors = [None, "blue", "blue", None, "red", "red"]  # noqa: F841
 
     with tgb.Page(frame=None) as page:
-        tgb.chart(
+        tgb.chart(  # type: ignore[attr-defined]
             data="{data}",
             x="Date",
             mode="lines",
@@ -254,7 +254,7 @@ def test_chart_indexed_properties_with_arrays_builder(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     expected_list = [
         "<Chart",
-        "&quot;traces&quot;: [[&quot;Date_str&quot;, &quot;La Rochelle&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 1&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 2&quot;], [&quot;Date_str&quot;, &quot;Montpellier&quot;], [&quot;Date_str&quot;, &quot;Montpellier 1&quot;], [&quot;Date_str&quot;, &quot;Montpellier 2&quot;]]",
-        "&quot;lines&quot;: [null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;, null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;]",
+        "&quot;traces&quot;: [[&quot;Date_str&quot;, &quot;La Rochelle&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 1&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 2&quot;], [&quot;Date_str&quot;, &quot;Montpellier&quot;], [&quot;Date_str&quot;, &quot;Montpellier 1&quot;], [&quot;Date_str&quot;, &quot;Montpellier 2&quot;]]",  # noqa: E501
+        "&quot;lines&quot;: [null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;, null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;]",  # noqa: E501
     ]
     helpers.test_control_builder(gui, page, expected_list)

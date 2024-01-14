@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -664,7 +664,7 @@ class TestDataNodeConfigChecker:
             Config.check()
         assert len(Config._collector.errors) == 1
         expected_error_message = (
-            'The `exposed_type` of DataNodeConfig `default` must be either "pandas", "modin"'
+            'The `exposed_type` of DataNodeConfig `default` must be either "pandas"'
             ', "numpy", or a custom type. Current value of property `exposed_type` is "foo".'
         )
         assert expected_error_message in caplog.text
@@ -675,9 +675,10 @@ class TestDataNodeConfigChecker:
         assert len(Config._collector.errors) == 0
 
         config._sections[DataNodeConfig.name]["default"].properties = {"exposed_type": "modin"}
-        Config._collector = IssueCollector()
-        Config.check()
-        assert len(Config._collector.errors) == 0
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
 
         config._sections[DataNodeConfig.name]["default"].properties = {"exposed_type": "numpy"}
         Config._collector = IssueCollector()

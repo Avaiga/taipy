@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -85,6 +85,7 @@ class _Factory:
             control_type=control_type,
             element_name="Chart",
             attributes=attrs,
+            default_value=None
         )
         .set_value_and_default(with_default=False, var_type=PropertyType.data)
         .set_attributes(
@@ -103,6 +104,7 @@ class _Factory:
                 ("template", PropertyType.dict),
                 ("template[dark]", PropertyType.dict, gui._get_config("chart_dark_template", None)),
                 ("template[light]", PropertyType.dict),
+                ("figure", PropertyType.to_json)
             ]
         )
         ._get_chart_config("scatter", "lines+markers")

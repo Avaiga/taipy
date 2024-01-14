@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from typing import Set
+from typing import Set, cast
 
 from taipy.config._config import _Config
 from taipy.config.checker._checkers._config_checker import _ConfigChecker
@@ -19,7 +19,6 @@ from ..core_section import CoreSection
 
 
 class _CoreSectionChecker(_ConfigChecker):
-
     _ACCEPTED_REPOSITORY_TYPES: Set[str] = {"filesystem", "sql"}
 
     def __init__(self, config: _Config, collector: IssueCollector):
@@ -27,6 +26,7 @@ class _CoreSectionChecker(_ConfigChecker):
 
     def _check(self) -> IssueCollector:
         if core_section := self._config._unique_sections.get(CoreSection.name):
+            core_section = cast(CoreSection, core_section)
             self._check_repository_type(core_section)
         return self._collector
 

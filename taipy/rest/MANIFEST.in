@@ -1,1 +1,1 @@
-include src/taipy/rest/*.json
+include *.json

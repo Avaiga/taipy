@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -179,7 +179,6 @@ class TestConfigComparator:
 
     def test_comparator_with_different_order_list_attributes(self):
         _config_1 = _Config._default_config()
-        _config_1._unique_sections
         _config_1._sections[SectionForTest.name] = {"section_3": self.section_3b}
 
         # Create _config_2 with different order of list attributes

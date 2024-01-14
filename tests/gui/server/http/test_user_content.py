@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -30,7 +30,7 @@ def test_user_content_with_wrong_callback(gui: Gui, helpers):
     def on_user_content_cb(state, path, args):
         return None
 
-    on_user_content = on_user_content_cb
+    on_user_content = on_user_content_cb  # noqa: F841
     gui._set_frame(inspect.currentframe())
     with patch("sys.argv", ["prog"]):
         gui.run(run_server=False, single_client=True)
@@ -44,7 +44,7 @@ def test_user_content_with_callback(gui: Gui, helpers):
     def on_user_content_cb(state, path, args):
         return ""
 
-    on_user_content = on_user_content_cb
+    on_user_content = on_user_content_cb  # noqa: F841
     gui._set_frame(inspect.currentframe())
     with patch("sys.argv", ["prog"]):
         gui.run(run_server=False, single_client=True)

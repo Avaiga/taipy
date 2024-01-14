@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -22,7 +22,8 @@ from setuptools.command.build_py import build_py
 
 readme = Path("README.md").read_text()
 
-with open(f"src{os.sep}taipy{os.sep}gui{os.sep}version.json") as version_file:
+version_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "version.json")
+with open(version_path) as version_file:
     version = json.load(version_file)
     version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
     if vext := version.get("ext"):
@@ -94,8 +95,7 @@ setup(
     include_package_data=True,
     keywords="taipy-gui",
     name="taipy-gui",
-    package_dir={"": "src"},
-    packages=find_namespace_packages(where="src") + find_packages(include=["taipy", "taipy.gui", "taipy.gui.*"]),
+    packages=find_namespace_packages(where=".") + find_packages(include=["taipy", "taipy.gui", "taipy.gui.*"]),
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-gui",
