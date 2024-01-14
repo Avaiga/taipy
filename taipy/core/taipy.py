@@ -203,9 +203,9 @@ def is_readable(
     if isinstance(entity, str) and entity.startswith(Task._ID_PREFIX):
         return _TaskManagerFactory._build_manager()._is_readable(TaskId(entity))
     if isinstance(entity, Job):
-        return _JobManagerFactory._build_manager()._is_editable(entity)
+        return _JobManagerFactory._build_manager()._is_readable(entity)
     if isinstance(entity, str) and entity.startswith(Job._ID_PREFIX):
-        return _JobManagerFactory._build_manager()._is_editable(JobId(entity))
+        return _JobManagerFactory._build_manager()._is_readable(JobId(entity))
     if isinstance(entity, DataNode):
         return _DataManagerFactory._build_manager()._is_readable(entity)
     if isinstance(entity, str) and entity.startswith(DataNode._ID_PREFIX):

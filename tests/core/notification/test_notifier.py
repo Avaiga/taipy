@@ -808,13 +808,13 @@ def test_publish_deletion_event():
 
     expected_event_types = [
         EventEntityType.JOB,
+        EventEntityType.SUBMISSION,
         EventEntityType.CYCLE,
         EventEntityType.SCENARIO,
         EventEntityType.TASK,
         EventEntityType.DATA_NODE,
-        EventEntityType.SUBMISSION,
     ]
-    expected_event_entity_id = [None, cycle.id, scenario.id, None, None, None]
+    expected_event_entity_id = [None, None, cycle.id, scenario.id, None, None]
 
     assert all(
         event.entity_type == expected_event_types[i]
