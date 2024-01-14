@@ -49,7 +49,7 @@ class ResourceHandler(ABC):
         return self.id if id != "" else str(id(self))
 
     @abstractmethod
-    def get_resources(self, path: str, custom_file_path: str) -> t.Any:
+    def get_resources(self, path: str, base_bundle_path: str) -> t.Any:
         raise NotImplementedError
 
 

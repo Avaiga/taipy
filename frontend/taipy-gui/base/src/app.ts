@@ -4,10 +4,10 @@ import { Socket, io } from "socket.io-client";
 import { VariableManager } from "./variableManager";
 import { initSocket } from "./utils";
 
-export type OnInitHandler = (appManager: AppManager) => void;
-export type OnUpdateHandler = (appManager: AppManager, encodedName: string, value: unknown) => void;
+export type OnInitHandler = (appManager: TaipyApp) => void;
+export type OnUpdateHandler = (appManager: TaipyApp, encodedName: string, value: unknown) => void;
 
-export class AppManager {
+export class TaipyApp {
     socket: Socket;
     onInit: OnInitHandler | undefined;
     onUpdate: OnUpdateHandler | undefined;
@@ -75,11 +75,11 @@ export class AppManager {
     }
 }
 
-export const createAppManager = (
+export const createApp = (
     onInit?: OnInitHandler,
     onUpdate?: OnUpdateHandler,
     path?: string,
     socket?: Socket
 ) => {
-    return new AppManager(onInit, onUpdate, path, socket);
+    return new TaipyApp(onInit, onUpdate, path, socket);
 };

@@ -1,7 +1,7 @@
 import { Socket } from "socket.io-client";
 import { IdMessage, getLocalStorageValue, storeClientId } from "../../src/context/utils";
 import { TAIPY_CLIENT_ID, WsMessage, sendWsMessage } from "../../src/context/wsUtils";
-import { AppManager } from "./appManager";
+import { TaipyApp } from "./app";
 import { VariableManager, VariableModuleData } from "./variableManager";
 
 interface MultipleUpdatePayload {
@@ -9,7 +9,7 @@ interface MultipleUpdatePayload {
     payload: { value: unknown };
 }
 
-export const initSocket = (socket: Socket, appManager: AppManager) => {
+export const initSocket = (socket: Socket, appManager: TaipyApp) => {
     socket.on("connect", () => {
         const id = getLocalStorageValue(TAIPY_CLIENT_ID, "");
         sendWsMessage(socket, "ID", TAIPY_CLIENT_ID, id, id, undefined, false);
@@ -40,7 +40,7 @@ export const initSocket = (socket: Socket, appManager: AppManager) => {
     }
 };
 
-export const processIncomingMessage = (message: WsMessage, appManager: AppManager) => {
+export const processIncomingMessage = (message: WsMessage, appManager: TaipyApp) => {
     if (message.type) {
         if (message.type === "MU" && Array.isArray(message.payload)) {
             for (const muPayload of message.payload as [MultipleUpdatePayload]) {

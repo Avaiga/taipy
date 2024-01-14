@@ -40,7 +40,7 @@
     "start": "echo no start see python",
     "build:dev": "webpack --mode development",
     "build": "webpack --mode production",
-    "build-custom": "webpack --mode production --config ./custom/webpack.config.js",
+    "build-base": "webpack --mode production --config ./base/webpack.config.js",
     "test": "cross-env TZ=UTC jest",
     "lint": "eslint --ext .ts,.tsx",
     "lint:fix": "npm run lint -- --fix",

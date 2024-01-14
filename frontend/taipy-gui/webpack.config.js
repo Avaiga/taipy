@@ -27,7 +27,7 @@ const taipyBundle = "taipy-gui"
 
 const reactBundleName = "TaipyGuiDependencies"
 const taipyBundleName = "TaipyGui"
-const taipyCustomBundleName = "TaipyGuiCustom"
+const taipyGuiBaseBundleName = "TaipyGuiBase"
 
 const basePath = "../../taipy/gui/webapp";
 const webAppPath = resolveApp(basePath);
@@ -171,13 +171,13 @@ module.exports = (env, options) => {
     },
     {
         mode: options.mode,
-        entry: ["./custom/src/index.ts"],
+        entry: ["./base/src/index.ts"],
         output: {
-            filename: "taipy-gui-custom.js",
+            filename: "taipy-gui-base.js",
             path: webAppPath,
             globalObject: "this",
             library: {
-                name: taipyCustomBundleName,
+                name: taipyGuiBaseBundleName,
                 type: "umd",
             },
         },

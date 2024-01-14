@@ -1,13 +1,13 @@
 const path = require("path");
 const webpack = require("webpack");
 
-const moduleName = "TaipyGuiCustom";
+const moduleName = "TaipyGuiBase";
 
 module.exports = {
     target: "web",
-    entry: "./custom/src/index.ts",
+    entry: "./base/src/index.ts",
     output: {
-        filename: "taipy-gui-custom.js",
+        filename: "taipy-gui-base.js",
         path: path.resolve(__dirname, "dist"),
         globalObject: "this",
         library: {

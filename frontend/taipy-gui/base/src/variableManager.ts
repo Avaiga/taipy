@@ -17,37 +17,37 @@ export class VariableManager {
     // key: encoded name, value: real-time value
     _data: Record<string, unknown>;
     // Initial data fetched from taipy-gui backend
-    _variableData: VariableModuleData;
+    _variables: VariableModuleData;
 
     constructor(variableModuleData: VariableModuleData) {
         this._data = {};
-        this._variableData = {};
+        this._variables = {};
         this.resetInitData(variableModuleData);
     }
 
     resetInitData(variableModuleData: VariableModuleData) {
-        this._variableData = variableModuleData;
+        this._variables = variableModuleData;
         this._data = {};
-        for (const context in this._variableData) {
-            for (const variable in this._variableData[context]) {
-                const vData = this._variableData[context][variable];
+        for (const context in this._variables) {
+            for (const variable in this._variables[context]) {
+                const vData = this._variables[context][variable];
                 this._data[vData["encoded_name"]] = vData.value;
             }
         }
     }
 
     getEncodedName(varName: string, module: string): string | undefined {
-        if (module in this._variableData && varName in this._variableData[module]) {
-            return this._variableData[module][varName].encoded_name;
+        if (module in this._variables && varName in this._variables[module]) {
+            return this._variables[module][varName].encoded_name;
         }
         return undefined;
     }
 
     // return [name, moduleName]
     getName(encodedName: string): [string, string] | undefined {
-        for (const context in this._variableData) {
-            for (const variable in this._variableData[context]) {
-                const vData = this._variableData[context][variable];
+        for (const context in this._variables) {
+            for (const variable in this._variables[context]) {
+                const vData = this._variables[context][variable];
                 if (vData.encoded_name === encodedName) {
                     return [variable, context];
                 }
@@ -64,9 +64,9 @@ export class VariableManager {
     }
 
     getInfo(encodedName: string): VariableData | undefined {
-        for (const context in this._variableData) {
-            for (const variable in this._variableData[context]) {
-                const vData = this._variableData[context][variable];
+        for (const context in this._variables) {
+            for (const variable in this._variables[context]) {
+                const vData = this._variables[context][variable];
                 if (vData.encoded_name === encodedName) {
                     return { ...vData, value: this._data[encodedName] };
                 }
@@ -76,7 +76,7 @@ export class VariableManager {
     }
 
     getDataTree(): VariableModuleData {
-        return this._variableData;
+        return this._variables;
     }
 
     getAllData(): Record<string, unknown> {
