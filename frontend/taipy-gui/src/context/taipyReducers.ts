@@ -15,14 +15,15 @@ import { Dispatch } from "react";
 import { PaletteMode } from "@mui/material";
 import { createTheme, Theme } from "@mui/material/styles";
 import { io, Socket } from "socket.io-client";
-import { v4 as uuidv4 } from "uuid";
 import merge from "lodash/merge";
 
+import { TAIPY_CLIENT_ID, WsMessage, sendWsMessage } from "./wsUtils";
 import { getBaseURL, TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 import { MenuProps } from "../utils/lov";
 import { FilterDesc } from "../components/Taipy/TableFilter";
 import { stylekitModeThemes, stylekitTheme } from "../themes/stylekit";
+import { getLocalStorageValue, storeClientId, IdMessage } from "./utils";
 
 enum Types {
     SocketConnected = "SOCKET_CONNECTED",
@@ -126,10 +127,6 @@ interface NavigateMessage {
 
 interface TaipyNavigateAction extends TaipyBaseAction, NavigateMessage {}
 
-interface IdMessage {
-    id: string;
-}
-
 export interface FileDownloadProps {
     content?: string;
     name?: string;
@@ -185,13 +182,6 @@ const themes = {
     dark: getUserTheme("dark"),
 };
 
-export const getLocalStorageValue = <T = string>(key: string, defaultValue: T, values?: T[]) => {
-    const val = localStorage && (localStorage.getItem(key) as unknown as T);
-    return !val ? defaultValue : !values ? val : values.indexOf(val) == -1 ? defaultValue : val;
-};
-
-const TAIPY_CLIENT_ID = "TaipyClientId";
-
 export const INITIAL_STATE: TaipyState = {
     data: {},
     theme: window.taipyConfig?.darkMode ? themes.dark : themes.light,
@@ -212,8 +202,6 @@ export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
     isSocketConnected: false,
     socket: io("/", { autoConnect: false, path: `${getBaseURL()}socket.io` }),
 });
-
-const storeClientId = (id: string) => localStorage && localStorage.setItem(TAIPY_CLIENT_ID, id);
 
 const messageToAction = (message: WsMessage) => {
     if (message.type) {
@@ -822,39 +810,3 @@ export const createPartialAction = (name: string, create: boolean): TaipyPartial
     name,
     create,
 });
-
-type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID" | "MS" | "DF" | "PR" | "ACK";
-
-interface WsMessage {
-    type: WsMessageType;
-    name: string;
-    payload: Record<string, unknown> | unknown;
-    propagate: boolean;
-    client_id: string;
-    module_context: string;
-    ack_id?: string;
-}
-
-const sendWsMessage = (
-    socket: Socket | undefined,
-    type: WsMessageType,
-    name: string,
-    payload: Record<string, unknown> | unknown,
-    id: string,
-    moduleContext = "",
-    propagate = true,
-    serverAck?: (val: unknown) => void
-): string => {
-    const ackId = uuidv4();
-    const msg: WsMessage = {
-        type: type,
-        name: name,
-        payload: payload,
-        propagate: propagate,
-        client_id: id,
-        ack_id: ackId,
-        module_context: moduleContext,
-    };
-    socket?.emit("message", msg, serverAck);
-    return ackId;
-};

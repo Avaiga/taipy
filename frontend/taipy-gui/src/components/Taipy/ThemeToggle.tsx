@@ -22,8 +22,9 @@ import Brightness3 from "@mui/icons-material/Brightness3";
 
 import { TaipyActiveProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
-import { createThemeAction, getLocalStorageValue } from "../../context/taipyReducers";
+import { createThemeAction } from "../../context/taipyReducers";
 import { useClassNames } from "../../utils/hooks";
+import { getLocalStorageValue } from "../../context/utils";
 
 interface ThemeToggleProps extends TaipyActiveProps {
     style?: CSSProperties;
@@ -42,7 +43,7 @@ const boxSx = {
     },
 } as CSSProperties;
 
-const groupSx = {verticalAlign: "middle"};
+const groupSx = { verticalAlign: "middle" };
 
 const ThemeToggle = (props: ThemeToggleProps) => {
     const { id, label = "Mode", style = {}, active = true } = props;

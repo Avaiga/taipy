@@ -27,6 +27,7 @@ const taipyBundle = "taipy-gui"
 
 const reactBundleName = "TaipyGuiDependencies"
 const taipyBundleName = "TaipyGui"
+const taipyCustomBundleName = "TaipyGuiCustom"
 
 const basePath = "../../taipy/gui/webapp";
 const webAppPath = resolveApp(basePath);
@@ -167,5 +168,43 @@ module.exports = (env, options) => {
                     hash: true
                 }]),
             ],
+    },
+    {
+        mode: options.mode,
+        entry: ["./custom/src/index.ts"],
+        output: {
+            filename: "taipy-gui-custom.js",
+            path: webAppPath,
+            globalObject: "this",
+            library: {
+                name: taipyCustomBundleName,
+                type: "umd",
+            },
+        },
+        plugins: [
+            new webpack.optimize.LimitChunkCountPlugin({
+                maxChunks: 1,
+            }),
+        ],
+        module: {
+            rules: [
+                {
+                    test: /\.tsx?$/,
+                    use: "ts-loader",
+                    exclude: /node_modules/,
+                },
+            ],
+        },
+        resolve: {
+            extensions: [".tsx", ".ts", ".js", ".tsx"],
+        },
+        // externals: {
+        //     "socket.io-client": {
+        //         commonjs: "socket.io-client",
+        //         commonjs2: "socket.io-client",
+        //         amd: "socket.io-client",
+        //         root: "_",
+        //     },
+        // },
     }];
 };
