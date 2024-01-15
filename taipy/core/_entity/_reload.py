@@ -11,6 +11,7 @@
 
 import functools
 
+from .._manager._manager import _Manager
 from ..notification import EventOperation, Notifier, _make_event
 
 
@@ -89,7 +90,7 @@ def _self_setter(manager):
 
 
 @functools.lru_cache
-def _get_manager(manager: str):
+def _get_manager(manager: str) -> _Manager:
     from ..cycle._cycle_manager_factory import _CycleManagerFactory
     from ..data._data_manager_factory import _DataManagerFactory
     from ..job._job_manager_factory import _JobManagerFactory
@@ -106,4 +107,6 @@ def _get_manager(manager: str):
         "job": _JobManagerFactory._build_manager(),
         "task": _TaskManagerFactory._build_manager(),
         "submission": _SubmissionManagerFactory._build_manager(),
-    }[manager]
+    }[
+        manager
+    ]  # type: ignore

@@ -151,6 +151,16 @@ class NonExistingJob(RuntimeError):
         self.message = f"Job: {job_id} does not exist."
 
 
+class SubmissionNotDeletedException(RuntimeError):
+    """Raised if there is an attempt to delete a submission that cannot be deleted.
+
+    This exception can be raised by `taipy.delete()^`.
+    """
+
+    def __init__(self, submission_id: str):
+        self.message = f"Submission: {submission_id} cannot be deleted."
+
+
 class DataNodeWritingError(RuntimeError):
     """Raised if an error happens during the writing in a data node."""
 
