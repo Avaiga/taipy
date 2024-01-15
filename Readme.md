@@ -19,8 +19,9 @@ Show us what you're made of!💪
 
 - Remove unnecessary dependencies.
 - Clone our main GitHub repository.
-- Add your project to the “submission” folder.
-- Submit your project before **January 14th** through a Pull Request to our main [repo](https://github.com/Avaiga/taipy/submissions)
+- Check out the "[taipython](https://github.com/Avaiga/taipy/tree/taipython)" branch
+- Add your project to the “submission” folder (in the right hackathon date subfolder).
+- Submit through a PR before the date mentioned on the subfolder  [repo](https://github.com/Avaiga/taipy/submissions)
 
 ## 🏆Prizes
 Win an iPad for the best project!
