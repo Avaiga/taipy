@@ -33,7 +33,7 @@ jobs:
           can-comment-pr: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' && matrix.pipenv-version == 'latest'
 
       - name: Pytest
-        if: ${{ !steps.install-dependencies.outputs.to-update }}
+        if: matrix.pipenv-version != 'latest' || steps.install-dependencies.outputs.to-update
         continue-on-error: ${{ steps.install-dependencies.outputs.to-update }}
         run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
 
