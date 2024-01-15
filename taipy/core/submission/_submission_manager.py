@@ -11,13 +11,15 @@
 
 from typing import List, Optional, Union
 
+from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._repository._abstract_repository import _AbstractRepository
 from .._version._version_mixin import _VersionMixin
+from ..exceptions.exceptions import SubmissionNotDeletedException
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
 from ..scenario.scenario import Scenario
 from ..sequence.sequence import Sequence
-from ..submission.submission import Submission
+from ..submission.submission import Submission, SubmissionId, SubmissionStatus
 from ..task.task import Task
 
 
@@ -53,3 +55,40 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
             return submissions_of_task[0]
         else:
             return max(submissions_of_task)
+
+    @classmethod
+    def _is_editable(cls, entity: Union[Submission, str]) -> bool:
+        return False
+
+    @classmethod
+    def _delete(cls, submission: Union[Submission, SubmissionId]):
+        if isinstance(submission, str):
+            submission = cls._get(submission)
+        if cls._is_deletable(submission):
+            super()._delete(submission.id)
+        else:
+            err = SubmissionNotDeletedException(submission.id)
+            cls._logger.error(err)
+            raise err
+
+    @classmethod
+    def _hard_delete(cls, submission_id: SubmissionId):
+        submission = cls._get(submission_id)
+        entity_ids_to_delete = cls._get_children_entity_ids(submission)
+        entity_ids_to_delete.submission_ids.add(submission.id)
+        cls._delete_entities_of_multiple_types(entity_ids_to_delete)
+
+    @classmethod
+    def _get_children_entity_ids(cls, submission: Submission):
+        entity_ids = _EntityIds()
+
+        for job in submission.jobs:
+            entity_ids.job_ids.add(job.id)
+
+        return entity_ids
+
+    @classmethod
+    def _is_deletable(cls, submission: Union[Submission, SubmissionId]) -> bool:
+        if isinstance(submission, str):
+            submission = cls._get(submission)
+        return submission.is_finished() or submission.submission_status == SubmissionStatus.UNDEFINED
