@@ -22,7 +22,7 @@ inputs:
 outputs:
   to-update:
     description: "True if the dependencies can be updated"
-    value: ${{ steps.install-dependencies.outputs.diff }} != ''
+    value: ${{ steps.install-dependencies.outputs.diff != '' }}
 runs:
   using: "composite"
   steps:
