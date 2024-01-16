@@ -19,7 +19,7 @@ Show us what you're made of!💪
 - Remove unnecessary dependencies.
 - Fork our main [GitHub repository](https://github.com/Avaiga/taipy).
 - Create a branch out of "[taipython](https://github.com/Avaiga/taipy/tree/taipython)" branch
-- Add your project to the “submission” folder (in the right hackathon date subfolder).
+- Add your project to the “submission” folder (choose the right hackathon date subfolder. For instance: 2024-01-21: you have to submit before Jan 21st at 11:45 PM CET).
 - Submit through a Pull Request before the date mentioned on the subfolder in this [repository](https://github.com/Avaiga/taipy/tree/taipython/submissions)
 
 ## 🏆Prizes
