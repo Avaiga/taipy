@@ -202,7 +202,7 @@ describe("Selector Component", () => {
     describe("Selector Component radio mode", () => {
         //dropdown
         it("displays a list of unselected radios", async () => {
-            const { getByText, getByRole } = render(<Selector lov={lov} mode="radio" />);
+            const { getByText, getByRole } = render(<Selector lov={lov} mode="radio" className="taipy-selector" />);
             getByText("Item 1");
             getByRole("radiogroup");
             expect(document.querySelector("div.taipy-selector-radio-group")).not.toBeNull();
