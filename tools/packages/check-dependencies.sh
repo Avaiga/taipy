@@ -1,4 +1,4 @@
-$PACKAGES="taipy-core/setup.requirements.txt taipy/setup.requirements.txt taipy-gui/setup.requirements.txt taipy-config/setup.requirements.txt taipy-rest/setup.requirements.txt"
+PACKAGES="taipy-core/setup.requirements.txt taipy/setup.requirements.txt taipy-gui/setup.requirements.txt taipy-config/setup.requirements.txt taipy-rest/setup.requirements.txt"
 
 # Ensure package are using the same version of dependencies
 python3 check-dependencies.py ensure-same-version $PACKAGES
