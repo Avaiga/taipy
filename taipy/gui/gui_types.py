@@ -46,6 +46,8 @@ class _WsType(Enum):
     DOWNLOAD_FILE = "DF"
     PARTIAL = "PR"
     ACKNOWLEDGEMENT = "ACK"
+    GET_MODULE_CONTEXT = "GMC"
+    GET_VARIABLES = "GVS"
 
 
 NumberTypes = {"int", "int64", "float", "float64"}
