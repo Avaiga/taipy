@@ -60,7 +60,7 @@ def test_create_jobs():
     assert job_1.submit_id == "submit_id"
     assert job_1.submit_entity_id == "secnario_id"
     assert job_1.force
-    assert not _JobManager._is_editable(job_1)
+    assert _JobManager._is_editable(job_1)
 
     job_2 = _JobManager._create(task, [print], "submit_id_1", "secnario_id", False)
     assert _JobManager._get(job_2.id) == job_2
@@ -70,7 +70,7 @@ def test_create_jobs():
     assert job_2.submit_id == "submit_id_1"
     assert job_2.submit_entity_id == "secnario_id"
     assert not job_2.force
-    assert not _JobManager._is_editable(job_2)
+    assert _JobManager._is_editable(job_2)
 
 
 def test_get_job():
@@ -479,6 +479,54 @@ def test_is_deletable():
     assert not _JobManager._is_deletable(job)
     assert not _JobManager._is_deletable(job.id)
 
+def test_is_deletable():
+    assert len(_JobManager._get_all()) == 0
+    task = _create_task(print, 0, "task")
+    job = _OrchestratorFactory._orchestrator.submit_task(task).jobs[0]
+
+    assert job.is_completed()
+    assert _JobManager._is_deletable(job)
+    assert _JobManager._is_deletable(job.id)
+
+    job.abandoned()
+    assert job.is_abandoned()
+    assert _JobManager._is_deletable(job)
+    assert _JobManager._is_deletable(job.id)
+
+    job.canceled()
+    assert job.is_canceled()
+    assert _JobManager._is_deletable(job)
+    assert _JobManager._is_deletable(job.id)
+
+    job.failed()
+    assert job.is_failed()
+    assert _JobManager._is_deletable(job)
+    assert _JobManager._is_deletable(job.id)
+
+    job.skipped()
+    assert job.is_skipped()
+    assert _JobManager._is_deletable(job)
+    assert _JobManager._is_deletable(job.id)
+
+    job.blocked()
+    assert job.is_blocked()
+    assert not _JobManager._is_deletable(job)
+    assert not _JobManager._is_deletable(job.id)
+
+    job.running()
+    assert job.is_running()
+    assert not _JobManager._is_deletable(job)
+    assert not _JobManager._is_deletable(job.id)
+
+    job.pending()
+    assert job.is_pending()
+    assert not _JobManager._is_deletable(job)
+    assert not _JobManager._is_deletable(job.id)
+
+    job.status = Status.SUBMITTED
+    assert job.is_submitted()
+    assert not _JobManager._is_deletable(job)
+    assert not _JobManager._is_deletable(job.id)
 
 def _create_task(function, nb_outputs=1, name=None):
     input1_dn_config = Config.configure_data_node("input1", "pickle", Scope.SCENARIO, default_data=21)
