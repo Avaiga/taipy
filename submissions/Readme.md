@@ -2,11 +2,11 @@
 
 ### HOW TO PARTICIPATE IN THE CONTEST: 
 This hackathon is virtual.
-To participate in the Contest, you must submit an application (the “Application”)in this folder.
+To participate in the Contest, you must submit an application (the “Application”) in this folder.
 
 ### Duration:
-This hackathon is opened from Jan 19th 5:00 PM CET to Jan 21st 11:45 PM CET.
-Any submission outside this interval won't be taken into consideration.
+This hackathon is opened from **Jan 19th 5:00 PM CET** to **Jan 21st 11:45 PM CET**.
+Any submission outside this interval won't be considered.
 
 ### Scoring of APPLICATIONS:
 The Applications will be judged according to the following criteria:
