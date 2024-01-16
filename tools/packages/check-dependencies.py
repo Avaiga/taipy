@@ -224,7 +224,7 @@ def extract_extras_packages(package: str) -> List[str]:
     return package.split('[')[1].split(']')[0].split(',')
 
 
-def load_packages(requirements_filenames: List[str]) -> Dict[str, Package]:
+def load_packages(requirements_filenames: List[str], enforce_format: bool) -> Dict[str, Package]:
     """
     Load and concat packages from requirements files.
     """
@@ -239,7 +239,10 @@ def load_packages(requirements_filenames: List[str]) -> Dict[str, Package]:
             if not package_requirements:
                 continue
 
-            Package.check_format(package_requirements)
+            # Ensure the package is correctly formatted with born min and max.
+            if enforce_format:
+                Package.check_format(package_requirements)
+
             package = Package.from_requirements(package_requirements, filename)
 
             # Packages may be present multiple times in different files.
@@ -320,13 +323,13 @@ def update_pipfile(packages: Dict[str, Package], pipfile: str):
 
 if __name__ == '__main__':
     if sys.argv[1] == 'ensure-same-version':
-        _packages = load_packages(sys.argv[2: len(sys.argv)])
+        _packages = load_packages(sys.argv[2: len(sys.argv)], True)
         display_packages_versions(_packages)
         sys.exit(0)
     if sys.argv[1] == 'dependencies-to-update':
-        _version_targetted = load_packages([sys.argv[2]])
-        _current_packages = load_packages(sys.argv[3: len(sys.argv)])
+        _version_targetted = load_packages([sys.argv[2]], False)
+        _current_packages = load_packages(sys.argv[3: len(sys.argv)], False)
         packages_to_updates(_version_targetted, _current_packages)
     if sys.argv[1] == 'raw-packages':
-        _packages = load_packages(sys.argv[2: len(sys.argv)])
+        _packages = load_packages(sys.argv[2: len(sys.argv)], False)
         display_raw_packages(_packages)
