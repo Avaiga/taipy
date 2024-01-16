@@ -5,12 +5,12 @@ import { VariableManager } from "./variableManager";
 import { initSocket } from "./utils";
 
 export type OnInitHandler = (appManager: TaipyApp) => void;
-export type OnUpdateHandler = (appManager: TaipyApp, encodedName: string, value: unknown) => void;
+export type OnChangeHandler = (appManager: TaipyApp, encodedName: string, value: unknown) => void;
 
 export class TaipyApp {
     socket: Socket;
-    onInit: OnInitHandler | undefined;
-    onUpdate: OnUpdateHandler | undefined;
+    _onInit: OnInitHandler | undefined;
+    _onChange: OnChangeHandler | undefined;
     variableManager: VariableManager | undefined;
     clientId: string;
     context: string;
@@ -18,13 +18,13 @@ export class TaipyApp {
 
     constructor(
         onInit: OnInitHandler | undefined = undefined,
-        onUpdate: OnUpdateHandler | undefined = undefined,
+        onChange: OnChangeHandler | undefined = undefined,
         path: string | undefined = undefined,
         socket: Socket | undefined = undefined
     ) {
         socket = socket || io("/", { autoConnect: false });
         this.onInit = onInit;
-        this.onUpdate = onUpdate;
+        this.onChange = onChange;
         this.variableManager = undefined;
         this.clientId = "";
         this.context = "";
@@ -33,6 +33,28 @@ export class TaipyApp {
         initSocket(socket, this);
     }
 
+    // Getter and setter
+    get onInit() {
+        return this._onInit;
+    }
+    set onInit(handler: OnInitHandler | undefined) {
+        if (handler !== undefined && handler?.length !== 1) {
+            throw new Error("onInit function requires 1 parameter")
+        }
+        this._onInit = handler
+    }
+
+    get onChange() {
+        return this._onChange;
+    }
+    set onChange(handler: OnChangeHandler | undefined) {
+        if (handler !== undefined && handler?.length !== 3) {
+            throw new Error("onChange function requires 3 parameters")
+        }
+        this._onChange = handler
+    }
+
+    // Public methods
     getEncodedName(varName: string, module: string) {
         return this.variableManager?.getEncodedName(varName, module);
     }
@@ -75,11 +97,6 @@ export class TaipyApp {
     }
 }
 
-export const createApp = (
-    onInit?: OnInitHandler,
-    onUpdate?: OnUpdateHandler,
-    path?: string,
-    socket?: Socket
-) => {
-    return new TaipyApp(onInit, onUpdate, path, socket);
+export const createApp = (onInit?: OnInitHandler, onChange?: OnChangeHandler, path?: string, socket?: Socket) => {
+    return new TaipyApp(onInit, onChange, path, socket);
 };

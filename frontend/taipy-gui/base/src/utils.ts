@@ -47,7 +47,7 @@ export const processIncomingMessage = (message: WsMessage, appManager: TaipyApp)
                 const encodedName = muPayload.name;
                 const value = muPayload.payload.value;
                 appManager.variableManager?.update(encodedName, value);
-                appManager.onUpdate && appManager.onUpdate(appManager, encodedName, value);
+                appManager.onChange && appManager.onChange(appManager, encodedName, value);
             }
         } else if (message.type === "ID") {
             const id = (message as unknown as IdMessage).id;
