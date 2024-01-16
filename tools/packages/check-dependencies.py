@@ -178,6 +178,9 @@ def extract_min_version(package: str) -> str:
     Extract the min version of a package from a requirements line.
     ex: "pandas>=1.0.0,<2.0.0;python_version<'3.9'" -> "1.0.0"
     """
+    # The max version is the defined version if it is a fixed version.
+    if '==' in package:
+        return package.split('==')[1]
     return package.split('>=')[1].split(',')[0]
 
 
@@ -186,6 +189,10 @@ def extract_max_version(package: str) -> str:
     Extract the max version of a package from a requirements line.
     ex: "pandas>=1.0.0,<2.0.0;python_version<'3.9'" -> "2.0.0"
     """
+    # The max version is the defined version if it is a fixed version.
+    if '==' in package:
+        return package.split('==')[1]
+
     version = None
 
     if ',<=' in package:
