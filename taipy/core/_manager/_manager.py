@@ -167,7 +167,3 @@ class _Manager(Generic[EntityType]):
     @classmethod
     def _is_readable(cls, entity: Union[EntityType, str]) -> bool:
         return True
-
-    @classmethod
-    def _is_deletable(cls, entity: Union[EntityType, str]) -> bool:
-        return True

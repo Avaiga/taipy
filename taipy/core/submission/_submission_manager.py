@@ -86,7 +86,7 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
         return entity_ids
 
     @classmethod
-    def _is_deletable(cls, submission: Union[Submission, SubmissionId]) -> bool:
+    def _is_deletable(cls, submission: Union[Submission, SubmissionId]) -> bool:  # type: ignore
         if isinstance(submission, str):
             submission = cls._get(submission)
         return submission.is_finished() or submission.submission_status == SubmissionStatus.UNDEFINED
