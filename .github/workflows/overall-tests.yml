@@ -27,6 +27,7 @@ jobs:
         run: |
           # Generate the Pipfile with the latest version
           pip install -r requirements.txt
+          bash check-dependencies.sh
           # If Pipfile and Pipfile.sup are different, put something in the GitHub convertation
           {
             echo 'diff<<EOF'
