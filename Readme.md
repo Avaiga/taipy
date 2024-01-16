@@ -12,14 +12,13 @@ Show us what you're made of!💪
 
 **Step 2: Install Taipy** ```pip install taipy```
 
-
 **Step 3: Create Your Project**  Build an innovative application using Taipy.
 
 **Step 4: Clean and Submit**
 
 - Remove unnecessary dependencies.
 - Fork our main [GitHub repository](https://github.com/Avaiga/taipy).
-- Check out the "[taipython](https://github.com/Avaiga/taipy/tree/taipython)" branch
+- Create a branch out of "[taipython](https://github.com/Avaiga/taipy/tree/taipython)" branch
 - Add your project to the “submission” folder (in the right hackathon date subfolder).
 - Submit through a Pull Request before the date mentioned on the subfolder in this [repository](https://github.com/Avaiga/taipy/tree/taipython/submissions)
 
