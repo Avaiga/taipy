@@ -8,7 +8,7 @@ Show us what you're made of!💪
 
 ## Instructions
 
-**Step 1: Join our community** on our **[Discord Server](https://discord.com/invite/SJyz2VJGxV)**
+**Step 1: Join our community** on our **[Discord Server](https://discord.com/channels/1125797687476887563/1195336078954090536)**
 
 **Step 2: Install Taipy** ```pip install taipy```
 
@@ -18,7 +18,7 @@ Show us what you're made of!💪
 **Step 4: Clean and Submit**
 
 - Remove unnecessary dependencies.
-- Clone our main GitHub repository.
+- Fork our main [GitHub repository](https://github.com/Avaiga/taipy).
 - Add your project to the “submission” folder.
 - Submit through a Pull Request before the date mentioned on the subfolder in this [repo]([https://github.com/Avaiga/taipy/submissions](https://github.com/Avaiga/taipy/tree/taipython/submissions))
 
