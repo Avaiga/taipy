@@ -26,7 +26,7 @@ jobs:
         working-directory: tools/packages
         run: |
           # Generate the Pipfile with the latest version
-          pip install -r tools/packages/requirements.txt
+          pip install -r requirements.txt
           # If Pipfile and Pipfile.sup are different, put something in the GitHub convertation
           bash check-dependencies >> "$GITHUB_OUTPUT"
           # {
