@@ -1,32 +1,23 @@
-# Win an iPad with Your Taipy Project!
+# Welcome to 🐍 Taipython🏆 !
 
-🚀 Join Our Taipy Project Challenge! 🚀
+Here, you will find out about all the past and upcoming Taipythons.
 
-## What to build?
-Use Taipy to create anything you like! 😎
-Show us what you're made of!💪
+## Stay Connected 🤝
 
-## Instructions
+To get the latest update on Taipythons, join our community on [Discord](https://discord.com/invite/SJyz2VJGxV). There, chat with fellow Taipy enthusiasts, ask questions, share ideas, and be the first to know about the ongoing Taipythons 🐍✨.
 
-**Step 1: Join our community** on our **[Discord Server](https://discord.com/channels/1125797687476887563/1195336078954090536)**
+## Submissions folders 📂
 
-**Step 2: Install Taipy** ```pip install taipy```
+1- Join our [Discord](https://discord.com/invite/SJyz2VJGxV) for the latest information about Taipythons.
 
-**Step 3: Create Your Project**  Build an innovative application using Taipy.
+2- Check out the ** Submissions folder **: There you will find all the Taipython organized chronologically. Each event has its dedicated folder complete with a readme and participant submissions.
 
-**Step 4: Clean and Submit**
+Don't miss out on the chance to code, collaborate and win prizes! 🏆👩‍💻
 
-- Remove unnecessary dependencies.
-- Fork our main [GitHub repository](https://github.com/Avaiga/taipy).
-- Create a branch out of "[taipython](https://github.com/Avaiga/taipy/tree/taipython)" branch
-- Add your project to the “submission” folder (choose the right hackathon date subfolder. For instance: 2024-01-21: you have to submit before Jan 21st at 11:45 PM CET).
-- Submit through a Pull Request before the date mentioned on the subfolder in this [repository](https://github.com/Avaiga/taipy/tree/taipython/submissions)
+## Kickstart Your Taipython Journey 🚀
 
-## 🏆Prizes
-Win an iPad for the best project!
+- Main repository: [Avaiga/taipy](https://github.com/Avaiga/taipy)
+- Documentation: [GEt started](https://docs.taipy.io/en/latest/)
+- Website: [Visit Us](https://www.taipy.io/)
 
-## 🌟 Open to everyone!
-Showcase your skills, join our community, and win!
-
-## Conditions
-Same as our partner [MLH](https://github.com/MLH/mlh-policies/blob/main/contest-terms.md)
+We can't wait to see what you'll create. Happy coding!
