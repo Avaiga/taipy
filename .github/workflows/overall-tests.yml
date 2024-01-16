@@ -28,12 +28,11 @@ jobs:
           # Generate the Pipfile with the latest version
           pip install -r requirements.txt
           # If Pipfile and Pipfile.sup are different, put something in the GitHub convertation
-          bash check-dependencies.sh >> "$GITHUB_OUTPUT"
-          # {
-          #   echo 'diff<<EOF'
-          #   echo `diff Pipfile Pipfile.sup | tail -n +1`
-          #   echo EOF
-          # } >> "$GITHUB_OUTPUT"
+          {
+            echo 'diff<<EOF'
+            echo `bash check-dependencies.sh`
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
 
 
   #     - name: Install dependencies
