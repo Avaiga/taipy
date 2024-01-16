@@ -19,8 +19,9 @@ Show us what you're made of!💪
 
 - Remove unnecessary dependencies.
 - Fork our main [GitHub repository](https://github.com/Avaiga/taipy).
-- Add your project to the “submission” folder.
-- Submit through a Pull Request before the date mentioned on the subfolder in this [repo]([https://github.com/Avaiga/taipy/submissions](https://github.com/Avaiga/taipy/tree/taipython/submissions))
+- Check out the "[taipython](https://github.com/Avaiga/taipy/tree/taipython)" branch
+- Add your project to the “submission” folder (in the right hackathon date subfolder).
+- Submit through a Pull Request before the date mentioned on the subfolder in this [repository](https://github.com/Avaiga/taipy/tree/taipython/submissions)
 
 ## 🏆Prizes
 Win an iPad for the best project!
