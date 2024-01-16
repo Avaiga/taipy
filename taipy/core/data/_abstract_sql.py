@@ -16,7 +16,6 @@ from abc import abstractmethod
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set, Tuple, Union
 
-import modin.pandas as modin_pd
 import numpy as np
 import pandas as pd
 from sqlalchemy import create_engine, text
@@ -35,13 +34,6 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
     """Abstract base class for data node implementations (SQLDataNode and SQLTableDataNode) that use SQL."""
 
     __STORAGE_TYPE = "NOT_IMPLEMENTED"
-
-    __EXPOSED_TYPE_PROPERTY = "exposed_type"
-    __EXPOSED_TYPE_NUMPY = "numpy"
-    __EXPOSED_TYPE_PANDAS = "pandas"
-    __EXPOSED_TYPE_MODIN = "modin"
-    __VALID_STRING_EXPOSED_TYPES = [__EXPOSED_TYPE_PANDAS, __EXPOSED_TYPE_NUMPY, __EXPOSED_TYPE_MODIN]
-
     __DB_NAME_KEY = "db_name"
     __DB_USERNAME_KEY = "db_username"
     __DB_PASSWORD_KEY = "db_password"
@@ -103,9 +95,12 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
             properties = {}
         self._check_required_properties(properties)
 
-        if self.__EXPOSED_TYPE_PROPERTY not in properties.keys():
-            properties[self.__EXPOSED_TYPE_PROPERTY] = self.__EXPOSED_TYPE_PANDAS
-        self._check_exposed_type(properties[self.__EXPOSED_TYPE_PROPERTY], self.__VALID_STRING_EXPOSED_TYPES)
+        if self._EXPOSED_TYPE_PROPERTY not in properties.keys():
+            properties[self._EXPOSED_TYPE_PROPERTY] = self._EXPOSED_TYPE_PANDAS
+        elif properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_MODIN:
+            # Deprecated in favor of pandas since 3.1.0
+            properties[self._EXPOSED_TYPE_PROPERTY] = self._EXPOSED_TYPE_PANDAS
+        self._check_exposed_type(properties[self._EXPOSED_TYPE_PROPERTY])
 
         super().__init__(
             config_id,
@@ -138,7 +133,7 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
                 self.__DB_EXTRA_ARGS_KEY,
                 self.__SQLITE_FOLDER_PATH,
                 self.__SQLITE_FILE_EXTENSION,
-                self.__EXPOSED_TYPE_PROPERTY,
+                self._EXPOSED_TYPE_PROPERTY,
             }
         )
 
@@ -200,25 +195,21 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
         raise UnknownDatabaseEngine(f"Unknown engine: {engine}")
 
     def filter(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
             return self._read_as_pandas_dataframe(operators=operators, join_operator=join_operator)
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_MODIN:
-            return self._read_as_modin_dataframe(operators=operators, join_operator=join_operator)
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy(operators=operators, join_operator=join_operator)
         return self._read_as(operators=operators, join_operator=join_operator)
 
     def _read(self):
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
             return self._read_as_pandas_dataframe()
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_MODIN:
-            return self._read_as_modin_dataframe()
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy()
         return self._read_as()
 
     def _read_as(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
-        custom_class = self.properties[self.__EXPOSED_TYPE_PROPERTY]
+        custom_class = self.properties[self._EXPOSED_TYPE_PROPERTY]
         with self._get_engine().connect() as connection:
             query_result = connection.execute(text(self._get_read_query(operators, join_operator)))
         return [custom_class(**row) for row in query_result]
@@ -238,18 +229,6 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
             if columns:
                 return pd.DataFrame(conn.execute(text(self._get_read_query(operators, join_operator))))[columns]
             return pd.DataFrame(conn.execute(text(self._get_read_query(operators, join_operator))))
-
-    def _read_as_modin_dataframe(
-        self,
-        columns: Optional[List[str]] = None,
-        operators: Optional[Union[List, Tuple]] = None,
-        join_operator=JoinOperator.AND,
-    ):
-        if columns:
-            return modin_pd.read_sql_query(self._get_read_query(operators, join_operator), con=self._get_engine())[
-                columns
-            ]
-        return modin_pd.read_sql_query(self._get_read_query(operators, join_operator), con=self._get_engine())
 
     @abstractmethod
     def _get_read_query(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):

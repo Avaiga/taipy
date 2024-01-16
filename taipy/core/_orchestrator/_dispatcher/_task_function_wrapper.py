@@ -40,7 +40,6 @@ class _TaskFunctionWrapper:
         try:
             config_as_string = kwargs.pop("config_as_string", None)
             if config_as_string:
-                logger.info("Updating with given config.")
                 Config._applied_config._update(_TomlSerializer()._deserialize(config_as_string))
                 Config.block_update()
 

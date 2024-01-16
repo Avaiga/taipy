@@ -85,6 +85,7 @@ class _Factory:
             control_type=control_type,
             element_name="Chart",
             attributes=attrs,
+            default_value=None
         )
         .set_value_and_default(with_default=False, var_type=PropertyType.data)
         .set_attributes(
@@ -103,6 +104,7 @@ class _Factory:
                 ("template", PropertyType.dict),
                 ("template[dark]", PropertyType.dict, gui._get_config("chart_dark_template", None)),
                 ("template[light]", PropertyType.dict),
+                ("figure", PropertyType.to_json)
             ]
         )
         ._get_chart_config("scatter", "lines+markers")

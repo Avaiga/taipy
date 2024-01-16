@@ -201,6 +201,28 @@ class Submission(_Entity, _Labeled):
         else:
             self.submission_status = SubmissionStatus.UNDEFINED  # type: ignore
 
+    def is_finished(self) -> bool:
+        """Indicate if the submission is finished.
+
+        Returns:
+            True if the submission is finished.
+        """
+        return self.submission_status in [
+            SubmissionStatus.COMPLETED,
+            SubmissionStatus.FAILED,
+            SubmissionStatus.CANCELED,
+        ]
+
+    def is_deletable(self) -> bool:
+        """Indicate if the submission can be deleted.
+
+        Returns:
+            True if the submission can be deleted. False otherwise.
+        """
+        from ... import core as tp
+
+        return tp.is_deletable(self)
+
 
 @_make_event.register(Submission)
 def _make_event_for_submission(

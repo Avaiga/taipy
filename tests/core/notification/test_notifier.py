@@ -800,7 +800,7 @@ def test_publish_deletion_event():
         registration_queue.get()
 
     tp.clean_all_entities_by_version()
-    assert registration_queue.qsize() == 5
+    assert registration_queue.qsize() == 6
 
     published_events = []
     while registration_queue.qsize() != 0:
@@ -808,12 +808,13 @@ def test_publish_deletion_event():
 
     expected_event_types = [
         EventEntityType.JOB,
+        EventEntityType.SUBMISSION,
         EventEntityType.CYCLE,
         EventEntityType.SCENARIO,
         EventEntityType.TASK,
         EventEntityType.DATA_NODE,
     ]
-    expected_event_entity_id = [None, cycle.id, scenario.id, None, None]
+    expected_event_entity_id = [None, None, cycle.id, scenario.id, None, None]
 
     assert all(
         event.entity_type == expected_event_types[i]

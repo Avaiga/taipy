@@ -28,6 +28,7 @@ from .utils import (
     _TaipyLov,
     _TaipyLovValue,
     _TaipyNumber,
+    _TaipyToJson,
 )
 
 
@@ -137,6 +138,7 @@ class PropertyType(Enum):
     The property holds an inner attributes that is defined by a library and cannot be overridden by the user.
     """
     inner = "inner"
+    to_json = _TaipyToJson
 
 
 @t.overload  # noqa: F811

@@ -12,11 +12,9 @@
 from importlib import util
 from unittest.mock import patch
 
-import modin.pandas as modin_pd
 import numpy as np
 import pandas as pd
 import pytest
-from modin.pandas.test.utils import df_equals
 from pandas.testing import assert_frame_equal
 
 from taipy.config.common.scope import Scope
@@ -47,19 +45,6 @@ class TestSQLTableDataNode:
         },
     ]
 
-    __modin_properties = [
-        {
-            "db_name": "taipy",
-            "db_engine": "sqlite",
-            "table_name": "example",
-            "exposed_type": "modin",
-            "db_extra_args": {
-                "TrustServerCertificate": "yes",
-                "other": "value",
-            },
-        },
-    ]
-
     if util.find_spec("pyodbc"):
         __pandas_properties.append(
             {
@@ -68,19 +53,6 @@ class TestSQLTableDataNode:
                 "db_name": "taipy",
                 "db_engine": "mssql",
                 "table_name": "example",
-                "db_extra_args": {
-                    "TrustServerCertificate": "yes",
-                },
-            },
-        )
-        __modin_properties.append(
-            {
-                "db_username": "sa",
-                "db_password": "Passw0rd",
-                "db_name": "taipy",
-                "db_engine": "mssql",
-                "table_name": "example",
-                "exposed_type": "modin",
                 "db_extra_args": {
                     "TrustServerCertificate": "yes",
                 },
@@ -100,19 +72,6 @@ class TestSQLTableDataNode:
                 },
             },
         )
-        __modin_properties.append(
-            {
-                "db_username": "sa",
-                "db_password": "Passw0rd",
-                "db_name": "taipy",
-                "db_engine": "mysql",
-                "table_name": "example",
-                "exposed_type": "modin",
-                "db_extra_args": {
-                    "TrustServerCertificate": "yes",
-                },
-            },
-        )
 
     if util.find_spec("psycopg2"):
         __pandas_properties.append(
@@ -127,23 +86,9 @@ class TestSQLTableDataNode:
                 },
             },
         )
-        __modin_properties.append(
-            {
-                "db_username": "sa",
-                "db_password": "Passw0rd",
-                "db_name": "taipy",
-                "db_engine": "postgresql",
-                "table_name": "example",
-                "exposed_type": "modin",
-                "db_extra_args": {
-                    "TrustServerCertificate": "yes",
-                },
-            },
-        )
 
     @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    @pytest.mark.parametrize("modin_properties", __modin_properties)
-    def test_create(self, pandas_properties, modin_properties):
+    def test_create(self, pandas_properties):
         dn = SQLTableDataNode(
             "foo_bar",
             Scope.SCENARIO,
@@ -158,23 +103,6 @@ class TestSQLTableDataNode:
         assert dn.job_ids == []
         assert dn.is_ready_for_reading
         assert dn.exposed_type == "pandas"
-        assert dn.table_name == "example"
-        assert dn._get_base_read_query() == "SELECT * FROM example"
-
-        dn = SQLTableDataNode(
-            "foo_bar",
-            Scope.SCENARIO,
-            properties=modin_properties,
-        )
-        assert isinstance(dn, SQLTableDataNode)
-        assert dn.storage_type() == "sql_table"
-        assert dn.config_id == "foo_bar"
-        assert dn.scope == Scope.SCENARIO
-        assert dn.id is not None
-        assert dn.owner_id is None
-        assert dn.job_ids == []
-        assert dn.is_ready_for_reading
-        assert dn.exposed_type == "modin"
         assert dn.table_name == "example"
         assert dn._get_base_read_query() == "SELECT * FROM example"
 
@@ -204,20 +132,24 @@ class TestSQLTableDataNode:
         with pytest.raises(MissingRequiredProperty):
             SQLTableDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
 
+    @patch("taipy.core.data.sql_table.SQLTableDataNode._read_as_pandas_dataframe", return_value="pandas")
+    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
+    def test_modin_deprecated_in_favor_of_pandas(self, mock_read_as_pandas_dataframe, pandas_properties):
+        pandas_properties["exposed_type"] = "modin"
+        sql_data_node_as_modin = SQLTableDataNode("foo", Scope.SCENARIO, properties=pandas_properties)
+        assert sql_data_node_as_modin.properties["exposed_type"] == "pandas"
+        assert sql_data_node_as_modin.read() == "pandas"
+
     @patch("taipy.core.data.sql_table.SQLTableDataNode._read_as", return_value="custom")
     @patch("taipy.core.data.sql_table.SQLTableDataNode._read_as_pandas_dataframe", return_value="pandas")
-    @patch("taipy.core.data.sql_table.SQLTableDataNode._read_as_modin_dataframe", return_value="modin")
     @patch("taipy.core.data.sql_table.SQLTableDataNode._read_as_numpy", return_value="numpy")
     @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    @pytest.mark.parametrize("modin_properties", __modin_properties)
     def test_read(
         self,
         mock_read_as,
         mock_read_as_pandas_dataframe,
-        mock_read_as_modin_dataframe,
         mock_read_as_numpy,
         pandas_properties,
-        modin_properties,
     ):
         custom_properties = pandas_properties.copy()
         # Create SQLTableDataNode without exposed_type (Default is pandas.DataFrame)
@@ -241,10 +173,6 @@ class TestSQLTableDataNode:
 
         assert sql_data_source_as_numpy_object.read() == "numpy"
 
-        # Create the same SQLDataSource but with modin exposed_type
-        sql_data_source_as_modin_object = SQLTableDataNode("foo", Scope.SCENARIO, properties=modin_properties)
-        assert sql_data_source_as_modin_object.properties["exposed_type"] == "modin"
-        assert sql_data_source_as_modin_object.read() == "modin"
 
     @pytest.mark.parametrize("pandas_properties", __pandas_properties)
     def test_read_as(self, pandas_properties):
@@ -337,30 +265,13 @@ class TestSQLTableDataNode:
             SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
     @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    @pytest.mark.parametrize("modin_properties", __modin_properties)
-    def test_write_dataframe(self, pandas_properties, modin_properties):
+    def test_write_dataframe(self, pandas_properties):
         # test write pandas dataframe
         custom_properties = pandas_properties.copy()
         custom_properties.pop("db_extra_args")
         dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
         df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        with patch("sqlalchemy.engine.Engine.connect") as engine_mock, patch(
-            "taipy.core.data.sql_table.SQLTableDataNode._create_table"
-        ):
-            cursor_mock = engine_mock.return_value.__enter__.return_value
-            cursor_mock.execute.side_effect = None
-
-            with patch("taipy.core.data.sql_table.SQLTableDataNode._SQLTableDataNode__insert_dataframe") as mck:
-                dn.write(df)
-                assert mck.call_args[0][0].equals(df)
-
-        # test write modin dataframe
-        custom_properties = modin_properties.copy()
-        custom_properties.pop("db_extra_args")
-        dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
-
-        df = modin_pd.DataFrame({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         with patch("sqlalchemy.engine.Engine.connect") as engine_mock, patch(
             "taipy.core.data.sql_table.SQLTableDataNode._create_table"
         ):
@@ -465,27 +376,6 @@ class TestSQLTableDataNode:
         dn.append(append_data_1)
         assert_frame_equal(dn.read(), pd.concat([original_data, append_data_1]).reset_index(drop=True))
 
-    @pytest.mark.modin
-    def test_sqlite_append_modin(self, tmp_sqlite_sqlite3_file_path):
-        folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
-        properties = {
-            "db_engine": "sqlite",
-            "table_name": "example",
-            "db_name": db_name,
-            "sqlite_folder_path": folder_path,
-            "sqlite_file_extension": file_extension,
-            "exposed_type": "modin",
-        }
-
-        dn = SQLTableDataNode("sqlite_dn", Scope.SCENARIO, properties=properties)
-        original_data = modin_pd.DataFrame([{"foo": 1, "bar": 2}, {"foo": 3, "bar": 4}])
-        data = dn.read()
-        df_equals(data, original_data)
-
-        append_data_1 = modin_pd.DataFrame([{"foo": 5, "bar": 6}, {"foo": 7, "bar": 8}])
-        dn.append(append_data_1)
-        df_equals(dn.read(), modin_pd.concat([original_data, append_data_1]).reset_index(drop=True))
-
     def test_filter_pandas_exposed_type(self, tmp_sqlite_sqlite3_file_path):
         folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
         properties = {
@@ -540,62 +430,6 @@ class TestSQLTableDataNode:
         )
         assert_frame_equal(filtered_by_filter_method.reset_index(drop=True), expected_data)
         assert_frame_equal(filtered_by_indexing.reset_index(drop=True), expected_data)
-
-    @pytest.mark.modin
-    def test_filter_modin_exposed_type(self, tmp_sqlite_sqlite3_file_path):
-        folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
-        properties = {
-            "db_engine": "sqlite",
-            "table_name": "example",
-            "db_name": db_name,
-            "sqlite_folder_path": folder_path,
-            "sqlite_file_extension": file_extension,
-            "exposed_type": "modin",
-        }
-        dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=properties)
-        dn.write(
-            pd.DataFrame(
-                [
-                    {"foo": 1, "bar": 1},
-                    {"foo": 1, "bar": 2},
-                    {"foo": 1, "bar": 3},
-                    {"foo": 2, "bar": 1},
-                    {"foo": 2, "bar": 2},
-                    {"foo": 2, "bar": 3},
-                ]
-            )
-        )
-
-        # Test datanode indexing and slicing
-        assert dn["foo"].equals(pd.Series([1, 1, 1, 2, 2, 2]))
-        assert dn["bar"].equals(pd.Series([1, 2, 3, 1, 2, 3]))
-        assert dn[:2].equals(modin_pd.DataFrame([{"foo": 1, "bar": 1}, {"foo": 1, "bar": 2}]))
-
-        # Test filter data
-        filtered_by_filter_method = dn.filter(("foo", 1, Operator.EQUAL))
-        filtered_by_indexing = dn[dn["foo"] == 1]
-        expected_data = modin_pd.DataFrame([{"foo": 1, "bar": 1}, {"foo": 1, "bar": 2}, {"foo": 1, "bar": 3}])
-        df_equals(filtered_by_filter_method.reset_index(drop=True), expected_data)
-        df_equals(filtered_by_indexing.reset_index(drop=True), expected_data)
-
-        filtered_by_filter_method = dn.filter(("foo", 1, Operator.NOT_EQUAL))
-        filtered_by_indexing = dn[dn["foo"] != 1]
-        expected_data = modin_pd.DataFrame([{"foo": 2, "bar": 1}, {"foo": 2, "bar": 2}, {"foo": 2, "bar": 3}])
-        df_equals(filtered_by_filter_method.reset_index(drop=True), expected_data)
-        df_equals(filtered_by_indexing.reset_index(drop=True), expected_data)
-
-        filtered_by_filter_method = dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)
-        filtered_by_indexing = dn[(dn["bar"] == 1) | (dn["bar"] == 2)]
-        expected_data = modin_pd.DataFrame(
-            [
-                {"foo": 1, "bar": 1},
-                {"foo": 1, "bar": 2},
-                {"foo": 2, "bar": 1},
-                {"foo": 2, "bar": 2},
-            ]
-        )
-        df_equals(filtered_by_filter_method.reset_index(drop=True), expected_data)
-        df_equals(filtered_by_indexing.reset_index(drop=True), expected_data)
 
     def test_filter_numpy_exposed_type(self, tmp_sqlite_sqlite3_file_path):
         folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
