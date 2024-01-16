@@ -408,6 +408,7 @@ class _Factory:
                 ("width", PropertyType.string_or_number),
                 ("on_change", PropertyType.function),
                 ("label",),
+                ("mode",),
             ]
         )
         ._set_propagate(),
@@ -499,7 +500,7 @@ class _Factory:
                 ("id",),
                 ("hover_text", PropertyType.dynamic_string),
                 ("raw", PropertyType.boolean, False),
-                ("mode", PropertyType.string),
+                ("mode",),
             ]
         ),
         "toggle": lambda gui, control_type, attrs: _Builder(
