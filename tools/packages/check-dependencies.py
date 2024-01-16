@@ -3,12 +3,12 @@ Display and update in place packages versions in requirements files.
 
 Usage:
     # Update in place requirements files.
-    python tools/packages/manager.py tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt
+    python tools/packages/check-dependencies.py ensure-same-version tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt
     # Update in place requirements files and update the pipfile.
     python tools/packages/manager.py pipfile tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt
 """
 import sys
-from typing import List
+from typing import List, Dict
 import requests
 import itertools
 from pathlib import Path
@@ -92,20 +92,6 @@ class Package:
 
         self.releases.sort(key=lambda x: x.upload_date, reverse=True)
         self.latest_release = self.releases[0]
-
-    def as_requirements_line(self) -> str:
-        """
-        Return the package as a requirements line.
-        """
-        if self.is_taipy:
-            return self.name
-
-        name = self.name
-        if self.extras_packages:
-            name += f'[{",".join(self.extras_packages)}]'
-        if self.installation_markers:
-            return f'{name}>={self.min_version},<={self.latest_release.version};{self.installation_markers}'
-        return f'{name}>={self.min_version},<={self.latest_release.version}'
 
     def as_pipfile_line(self, min_version=True) -> str:
         """
@@ -222,7 +208,7 @@ def extract_extras_packages(package: str) -> List[str]:
     return package.split('[')[1].split(']')[0].split(',')
 
 
-def load_packages(requirements_filenames: List[str]) -> List[Package]:
+def load_packages(requirements_filenames: List[str]) -> Dict[str, Package]:
     """
     Load and concat packages from requirements files.
     """
@@ -253,13 +239,12 @@ def load_packages(requirements_filenames: List[str]) -> List[Package]:
                 # Stop processing, package is already extracted.
                 continue
 
-            package.load_releases()
             packages[package.name] = package
 
     return packages
 
 
-def display_packages_versions(packages: List[Package]):
+def display_packages_versions(packages: Dict[str, Package]):
     """
     Display packages information.
     """
@@ -268,6 +253,10 @@ def display_packages_versions(packages: List[Package]):
     for package_name, package in packages.items():
         if package.is_taipy:
             continue
+
+        # Load the latest releases of the package.
+        package.load_releases()
+
         to_print.append((
             package_name,
             f'{package.min_version} ({package.min_release.upload_date if package.min_release else "N.A."})',
@@ -280,17 +269,24 @@ def display_packages_versions(packages: List[Package]):
     print(tabulate.tabulate(to_print, headers=h, tablefmt='pretty'))
 
 
-def update_packages(requirements_filenames: List[str], packages: List[Package]):
+def packages_to_updates(targetted_version: Dict[str, Package], current_packages: Dict[str, Package]):
     """
-    Updates requirements files with the latest versions of packages.
+    Display dependencies to updates.
     """
-    for filename in requirements_filenames:
-        file_packages = [p for p in packages.values() if filename in p.files]
+    # Sort packages by name to ensure they will be the same during iteration.
+    _targetted_version = sorted(targetted_version.values(), key=lambda x: x.name)
+    _current_packages = sorted(current_packages.values(), key=lambda x: x.name)
 
-        Path(filename).write_text(
-            '\n'.join(p.as_requirements_line() for p in file_packages),
-            'UTF-8'
-        )
+    to_print = []
+    for tpackage, cpackage in zip(_targetted_version, _current_packages):
+        if tpackage.max_version != cpackage.max_version:
+            to_print.append((
+                tpackage.name,
+                tpackage.max_version,
+                ",".join(cpackage.files)
+            ))
+
+    print(tabulate.tabulate(to_print, headers=['name', 'version', 'files'], tablefmt='pretty'))
 
 
 def update_pipfile(packages: List[Package], pipfile: str):
@@ -302,16 +298,11 @@ def update_pipfile(packages: List[Package], pipfile: str):
 
 
 if __name__ == '__main__':
-    must_update_pipfile = sys.argv[1] == 'pipfile'
-
-    if must_update_pipfile:
-        _requirements_filenames = sys.argv[2: len(sys.argv) - 1]
-    else:
-        _requirements_filenames = sys.argv[1: len(sys.argv)]
-
-    _packages = load_packages(_requirements_filenames)
-    display_packages_versions(_packages)
-    update_packages(_requirements_filenames, _packages)
-
-    if must_update_pipfile:
-        update_pipfile(_packages, sys.argv[len(sys.argv) - 1])
+    if sys.argv[1] == 'ensure-same-version':
+        _packages = load_packages(sys.argv[2: len(sys.argv)])
+        display_packages_versions(_packages)
+        sys.exit(0)
+    if sys.argv[1] == 'dependencies-to-update':
+        _version_targetted = load_packages([sys.argv[2]])
+        _current_packages = load_packages(sys.argv[3: len(sys.argv)])
+        packages_to_updates(_version_targetted, _current_packages)
