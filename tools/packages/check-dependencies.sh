@@ -6,8 +6,8 @@ python check-dependencies.py ensure-same-version $PACKAGES
 # Retrieve requirements then install them to check the latest requirements installable
 cat $PACKAGES | grep -v "taipy" | grep -Eo "[^>]*" | grep -v "=" > requirements.txt.tmp
 python -m venv tmp-venv
-./tmp-venv/bin/python -m pip install -r requirements.txt.tmp
-./tmp-venv/bin/python -m pip freeze > real-requirements.txt
+./tmp-venv/bin/python3 -m pip install -r requirements.txt.tmp
+./tmp-venv/bin/python3 -m pip freeze > real-requirements.txt
 grep -Ff requirements.txt.tmp real-requirements.txt
 rm -rf tmp-venv requirements.txt.tmp
 
