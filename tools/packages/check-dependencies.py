@@ -93,6 +93,22 @@ class Package:
         self.releases.sort(key=lambda x: x.upload_date, reverse=True)
         self.latest_release = self.releases[0]
 
+    def as_requirements_line(self, without_version: bool) -> str:
+        """
+        Return the package as a requirements line.
+        """
+        if self.is_taipy:
+            return self.name
+
+        name = self.name
+        if self.extras_packages:
+            name += f'[{",".join(self.extras_packages)}]'
+        if without_version:
+            return f'{name};{self.installation_markers}'
+        if self.installation_markers:
+            return f'{name}>={self.min_version},<={self.latest_release.version};{self.installation_markers}'
+        return f'{name}>={self.min_version},<={self.latest_release.version}'
+
     def as_pipfile_line(self, min_version=True) -> str:
         """
         Return the package as a pipfile line.
@@ -289,7 +305,12 @@ def packages_to_updates(targetted_version: Dict[str, Package], current_packages:
     print(tabulate.tabulate(to_print, headers=['name', 'version', 'files'], tablefmt='pretty'))
 
 
-def update_pipfile(packages: List[Package], pipfile: str):
+def display_raw_packages(packages: Dict[str, Package]):
+    for package in packages.values():
+        print(package.as_requirements_line(without_version=True))
+
+
+def update_pipfile(packages: Dict[str, Package], pipfile: str):
     pipfile_obj = toml.load(pipfile)
     del pipfile_obj['packages']
     toml_str = toml.dumps(pipfile_obj)
@@ -306,3 +327,6 @@ if __name__ == '__main__':
         _version_targetted = load_packages([sys.argv[2]])
         _current_packages = load_packages(sys.argv[3: len(sys.argv)])
         packages_to_updates(_version_targetted, _current_packages)
+    if sys.argv[1] == 'raw-packages':
+        _packages = load_packages(sys.argv[2: len(sys.argv)])
+        display_raw_packages(_packages)

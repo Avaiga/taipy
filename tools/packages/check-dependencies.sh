@@ -4,7 +4,7 @@ PACKAGES="taipy-core/setup.requirements.txt taipy/setup.requirements.txt taipy-g
 python check-dependencies.py ensure-same-version $PACKAGES
 
 # Retrieve requirements then install them to check the latest requirements installable
-cat $PACKAGES | grep -v "taipy" | grep -Eo "[^>]*" | grep -v "=" > requirements.txt.tmp
+python check-dependencies.py raw-packages $PACKAGES > requirements.txt.tmp
 python -m venv tmp-venv
 ./tmp-venv/bin/python3 -m pip install -r requirements.txt.tmp
 ./tmp-venv/bin/python3 -m pip freeze > real-requirements.txt
