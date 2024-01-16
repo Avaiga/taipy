@@ -1,0 +1,78 @@
+[TAIPY]
+
+[DATA_NODE.initial_data]
+storage_type = "csv"
+scope = "GLOBAL:SCOPE"
+validity_period = "5d0h0m0s:timedelta"
+path = "data/covid-19-all.csv"
+cacheable = "True:bool"
+
+[DATA_NODE.country]
+validity_period = "5d0h0m0s:timedelta"
+default_data = "France"
+
+[DATA_NODE.date]
+validity_period = "5d0h0m0s:timedelta"
+default_data = "2020-10-01T00:00:00:datetime"
+
+[DATA_NODE.final_data]
+validity_period = "5d0h0m0s:timedelta"
+
+[DATA_NODE.train_data]
+validity_period = "5d0h0m0s:timedelta"
+
+[DATA_NODE.model_arima]
+validity_period = "5d0h0m0s:timedelta"
+
+[DATA_NODE.model_linear_regression]
+validity_period = "5d0h0m0s:timedelta"
+
+[DATA_NODE.predictions_arima]
+
+[DATA_NODE.predictions_linear_regression]
+
+[DATA_NODE.result]
+
+[TASK.task_preprocess_data]
+function = "algos.algos.preprocess:function"
+inputs = [ "initial_data:SECTION", "country:SECTION", "date:SECTION",]
+outputs = [ "final_data:SECTION", "train_data:SECTION",]
+skippable = "False:bool"
+
+[TASK.task_train]
+function = "algos.algos.train_arima:function"
+inputs = [ "train_data:SECTION",]
+outputs = [ "model_arima:SECTION",]
+skippable = "False:bool"
+
+[TASK.task_forecast]
+function = "algos.algos.forecast:function"
+inputs = [ "model_arima:SECTION",]
+outputs = [ "predictions_arima:SECTION",]
+skippable = "False:bool"
+
+[TASK.task_train_linear_regression]
+function = "algos.algos.train_linear_regression:function"
+inputs = [ "train_data:SECTION",]
+outputs = [ "model_linear_regression:SECTION",]
+skippable = "False:bool"
+
+[TASK.task_forecast_linear_regression]
+function = "algos.algos.forecast_linear_regression:function"
+inputs = [ "model_linear_regression:SECTION", "date:SECTION",]
+outputs = [ "predictions_linear_regression:SECTION",]
+skippable = "False:bool"
+
+[TASK.task_result]
+function = "algos.algos.concat:function"
+inputs = [ "final_data:SECTION", "predictions_arima:SECTION", "predictions_linear_regression:SECTION", "date:SECTION",]
+outputs = [ "result:SECTION",]
+skippable = "False:bool"
+
+[SCENARIO.scenario]
+tasks = [ "task_preprocess_data:SECTION", "task_train:SECTION", "task_forecast:SECTION", "task_train_linear_regression:SECTION", "task_forecast_linear_regression:SECTION", "task_result:SECTION",]
+additional_data_nodes = []
+
+[SCENARIO.scenario.comparators]
+
+[SCENARIO.scenario.sequences]
