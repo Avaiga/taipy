@@ -25,7 +25,7 @@ class Page(BasePage):
     """NOT DOCUMENTED
     A custom page for external application that can be added to Taipy GUI"""
 
-    def __init__(self, resource_handler: ResourceHandler, binding_variables: t.List[str] = None, **kwargs) -> None:
+    def __init__(self, resource_handler: ResourceHandler, binding_variables: t.Optional[t.List[str]] = None, **kwargs) -> None:
         if binding_variables is None:
             binding_variables = []
         super().__init__(**kwargs)
