@@ -1,6 +1,6 @@
-# Welcome to 🐍 Taipython🏆 The Taipy Hackathons in Python!
+# Welcome to 🐍 Taipython🏆!
 
-Here, you will find out about all the past and upcoming Taipythons.
+In this branch, you will find out about all the past and upcoming Taipythons, the Taipy Hackathons in Python.
 
 ## Stay Connected 🤝
 
