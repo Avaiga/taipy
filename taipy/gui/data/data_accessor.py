@@ -94,7 +94,8 @@ class _DataAccessors(object):
         value = value.get()
         access = self.__access_4_type.get(type(value).__name__)
         if access is None:
-            _warn(f"Can't find Data Accessor for type {type(value).__name__}.")
+            if value:
+                _warn(f"Can't find Data Accessor for type {type(value).__name__}.")
             return self.__invalid_data_accessor
         return access
 

@@ -37,7 +37,7 @@ from ..utils import (
 )
 from ..utils.chart_config_builder import _CHART_NAMES, _build_chart_config
 from ..utils.table_col_builder import _enhance_columns, _get_name_indexed_property
-from ..utils.types import _TaipyBase, _TaipyData
+from ..utils.types import _TaipyBase, _TaipyData, _TaipyToJson
 from .json import _TaipyJsonEncoder
 from .utils import _add_to_dict_and_get, _get_columns_dict, _get_tuple_val
 
@@ -569,10 +569,14 @@ class _Builder:
     def _set_chart_selected(self, max=0):
         name = "selected"
         default_sel = self.__attributes.get(name)
+        if not isinstance(default_sel, list) and name in self.__attributes:
+            default_sel = []
         idx = 1
         name_idx = f"{name}[{idx}]"
         sel = self.__attributes.get(name_idx)
-        while idx <= max:
+        if not isinstance(sel, list) and name_idx in self.__attributes:
+            sel = []
+        while idx <= max or name_idx in self.__attributes:
             if sel is not None or default_sel is not None:
                 self.__update_vars.extend(
                     self.__set_list_attribute(
@@ -585,6 +589,8 @@ class _Builder:
             idx += 1
             name_idx = f"{name}[{idx}]"
             sel = self.__attributes.get(name_idx)
+            if not isinstance(sel, list) and name_idx in self.__attributes:
+                sel = []
 
     def _get_list_attribute(self, name: str, list_type: PropertyType):
         varname = self.__hashes.get(name)
@@ -893,6 +899,8 @@ class _Builder:
             if not isinstance(attr, tuple):
                 attr = (attr,)
             var_type = _get_tuple_val(attr, 1, PropertyType.string)
+            if var_type == PropertyType.to_json:
+                var_type = _TaipyToJson
             if var_type == PropertyType.boolean:
                 def_val = _get_tuple_val(attr, 2, False)
                 val = self.__get_boolean_attribute(attr[0], def_val)

@@ -38,7 +38,7 @@ class DataNodeConfig(Section):
             are : "csv", "excel", "pickle", "sql_table", "sql", "mongo_collection", "generic", "json", "parquet",
             "in_memory and "s3_object".
             The default value is "pickle".
-            Note that the "in_memory" value can only be used when `JobConfig^`.mode is "standalone".
+            Note that the "in_memory" value can only be used when `JobConfig^` mode is "development".
         scope (Optional[Scope^]): The optional `Scope^` of the data nodes instantiated from the data node config.
             The default value is SCENARIO.
         **properties (dict[str, any]): A dictionary of additional properties.
@@ -76,13 +76,12 @@ class DataNodeConfig(Section):
 
     _EXPOSED_TYPE_KEY = "exposed_type"
     _EXPOSED_TYPE_PANDAS = "pandas"
-    _EXPOSED_TYPE_MODIN = "modin"
+    _EXPOSED_TYPE_MODIN = "modin"  # Deprecated in favor of pandas since 3.1.0
     _EXPOSED_TYPE_NUMPY = "numpy"
     _DEFAULT_EXPOSED_TYPE = _EXPOSED_TYPE_PANDAS
 
     _ALL_EXPOSED_TYPES = [
         _EXPOSED_TYPE_PANDAS,
-        _EXPOSED_TYPE_MODIN,
         _EXPOSED_TYPE_NUMPY,
     ]
 
@@ -281,6 +280,15 @@ class DataNodeConfig(Section):
         self._scope = scope
         self._validity_period = validity_period
         super().__init__(id, **properties)
+
+        # modin exposed type is deprecated since taipy 3.1.0
+        # It is automatically replaced by pandas
+        if "exposed_type" in properties and properties["exposed_type"] == DataNodeConfig._EXPOSED_TYPE_MODIN:
+            _warn_deprecated(
+                "exposed_type='modin'",
+                suggest="exposed_type='pandas'",
+            )
+            properties["exposed_type"] = DataNodeConfig._EXPOSED_TYPE_PANDAS
 
     def __copy__(self):
         return DataNodeConfig(self.id, self._storage_type, self._scope, self._validity_period, **copy(self._properties))

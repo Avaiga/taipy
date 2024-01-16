@@ -736,3 +736,43 @@ def test_update_submission_status_with_two_jobs_failed(job_ids, job_statuses, ex
 )
 def test_update_submission_status_with_two_jobs_canceled(job_ids, job_statuses, expected_submission_statuses):
     __test_update_submission_status_with_two_jobs(job_ids, job_statuses, expected_submission_statuses)
+
+
+def test_is_finished():
+    submission_manager = _SubmissionManagerFactory._build_manager()
+
+    submission = Submission("entity_id", "entity_type", "entity_config_id", "submission_id")
+    submission_manager._set(submission)
+
+    assert len(submission_manager._get_all()) == 1
+
+    assert submission._submission_status == SubmissionStatus.SUBMITTED
+    assert not submission.is_finished()
+
+    submission.submission_status = SubmissionStatus.UNDEFINED
+    assert submission.submission_status == SubmissionStatus.UNDEFINED
+    assert not submission.is_finished()
+
+    submission.submission_status = SubmissionStatus.CANCELED
+    assert submission.submission_status == SubmissionStatus.CANCELED
+    assert submission.is_finished()
+
+    submission.submission_status = SubmissionStatus.FAILED
+    assert submission.submission_status == SubmissionStatus.FAILED
+    assert submission.is_finished()
+
+    submission.submission_status = SubmissionStatus.BLOCKED
+    assert submission.submission_status == SubmissionStatus.BLOCKED
+    assert not submission.is_finished()
+
+    submission.submission_status = SubmissionStatus.RUNNING
+    assert submission.submission_status == SubmissionStatus.RUNNING
+    assert not submission.is_finished()
+
+    submission.submission_status = SubmissionStatus.PENDING
+    assert submission.submission_status == SubmissionStatus.PENDING
+    assert not submission.is_finished()
+
+    submission.submission_status = SubmissionStatus.COMPLETED
+    assert submission.submission_status == SubmissionStatus.COMPLETED
+    assert submission.is_finished()
