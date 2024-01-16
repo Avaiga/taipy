@@ -171,23 +171,15 @@ def is_readable(
         Sequence,
         Scenario,
         Cycle,
-<<<<<<< HEAD
         Submission,
-=======
->>>>>>> 7b7fef75 (update gui-core and minor changes)
         DataNodeId,
         TaskId,
         JobId,
         SequenceId,
         ScenarioId,
-<<<<<<< HEAD
         CycleId,
-        SubmissionId
+        SubmissionId,
     ],
-=======
-        CycleId
-    ]
->>>>>>> 7b7fef75 (update gui-core and minor changes)
 ) -> bool:
     """Indicate if an entity can be read.
 
