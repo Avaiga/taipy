@@ -19,7 +19,7 @@ Don't miss out on the chance to code, collaborate and win prizes! 🏆👩‍�
 ## Kickstart Your Taipython Journey 🚀
 
 - Main repository: [Avaiga/taipy](https://github.com/Avaiga/taipy)
-- Documentation: [GEt started](https://docs.taipy.io/en/latest/)
+- Documentation: [Get started](https://docs.taipy.io/en/latest/)
 - Website: [Visit Us](https://www.taipy.io/)
 
 We can't wait to see what you'll create. Happy coding!
