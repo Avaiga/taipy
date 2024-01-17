@@ -10,3 +10,4 @@ python -m venv tmp-venv > /dev/null
 
 # Update requirements based on the latest installable requirements
 python check-dependencies.py dependencies-to-update real-requirements.txt $PACKAGES
+python check-dependencies.py generate-pipfile $1 real-requirements.txt $PACKAGES

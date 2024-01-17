@@ -9,14 +9,10 @@ Usage:
 """
 import sys
 from typing import List, Dict
-import requests
 import itertools
 from pathlib import Path
 from dataclasses import dataclass, field
 from datetime import datetime
-
-import toml
-import tabulate
 
 
 @dataclass
@@ -69,6 +65,8 @@ class Package:
         """
         Retrieve all releases of the package from PyPI.
         """
+        import requests  # pylint: disable=import-outside-toplevel
+
         releases = requests.get(
             f"https://pypi.org/pypi/{self.name}/json",
             timeout=5
@@ -111,7 +109,7 @@ class Package:
             return f'{name}>={self.min_version},<={self.latest_release.version};{self.installation_markers}'
         return f'{name}>={self.min_version},<={self.latest_release.version}'
 
-    def as_pipfile_line(self, min_version=True) -> str:
+    def as_pipfile_line(self, min_version=True, force_version=False) -> str:
         """
         Return the package as a pipfile line.
         If min_version is True, the min version is used.
@@ -120,7 +118,11 @@ class Package:
             version = self.latest_release.version
         else:
             version = self.min_version if min_version else self.max_version
-        line = f'"{self.name}" = {{version="<={version}"'
+
+        if force_version:
+            line = f'"{self.name}" = {{version="=={version}"'
+        else:
+            line = f'"{self.name}" = {{version="<={version}"'
 
         if self.installation_markers:
             line += f', markers="{self.installation_markers}"'
@@ -289,6 +291,8 @@ def display_packages_versions(packages: Dict[str, Package]):
     """
     Display packages information.
     """
+    import tabulate  # pylint: disable=import-outside-toplevel
+
     to_print = []
 
     for package_name, package in packages.items():
@@ -314,6 +318,8 @@ def packages_to_updates(packages_in_use: Dict[str, Package], packages_set: Dict[
     """
     Display dependencies to updates.
     """
+    import tabulate  # pylint: disable=import-outside-toplevel
+
     to_print = []
 
     for name, ps in packages_set.items():
@@ -349,11 +355,31 @@ def display_raw_packages(packages: Dict[str, Package]):
             print(package.as_requirements_line(without_version=True))
 
 
-def update_pipfile(packages: Dict[str, Package], pipfile: str):
+def update_pipfile(packages_in_use: Dict[str, Package], packages_set: Dict[str, Package], pipfile: str):
+    import toml  # pylint: disable=import-outside-toplevel
+
     pipfile_obj = toml.load(pipfile)
     del pipfile_obj['packages']
     toml_str = toml.dumps(pipfile_obj)
-    packages_str = "\n".join(p.as_pipfile_line(min_version=True) for p in packages.values())
+
+    for name, ps in packages_set.items():
+        if ps.is_taipy:
+            continue
+
+        # Find the package in use.
+        rp = packages_in_use.get(name)
+        # Some package as 'gitignore-parser' becomes 'gitignore_parser' during the installation.
+        if not rp:
+            rp = packages_in_use.get(name.replace('-', '_'))
+
+        # Keep the new version proposed.
+        if rp:
+            packages_set[name] = rp
+
+    packages_str = "\n".join(
+        p.as_pipfile_line(min_version=True, force_version=True)
+        for p in packages_set.values()
+    )
     Path(pipfile).write_text(f'{toml_str}\n\n[packages]\n{packages_str}', 'UTF-8')
 
 
@@ -369,3 +395,8 @@ if __name__ == '__main__':
     if sys.argv[1] == 'raw-packages':
         _packages = load_packages(sys.argv[2: len(sys.argv)], False)
         display_raw_packages(_packages)
+    if sys.argv[1] == 'generate-pipfile':
+        _pipfile_path = sys.argv[2]
+        _packages_in_use = load_packages([sys.argv[3]], False)
+        _packages_set = load_packages(sys.argv[4: len(sys.argv)], False)
+        update_pipfile(_packages_in_use, _packages_set, _pipfile_path)
