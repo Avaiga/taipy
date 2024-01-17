@@ -258,7 +258,7 @@ def load_packages(requirements_filenames: List[str], enforce_format: bool) -> Di
                 existing_package = packages[package.name]
                 if not existing_package.min_version == package.min_version or \
                     not existing_package.max_version == package.max_version:
-                    raise Exception(f"Package {package.name} is present twice but differently")
+                    raise Exception(f"Inconsistent version of '{package.name}' between '{filename}' and {','.join(package.files)}.")
 
                 # Add the file as dependency of the package.
                 existing_package.files.append(filename)
