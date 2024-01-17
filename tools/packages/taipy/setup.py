@@ -41,7 +41,7 @@ extras_require = {
         "python-magic-bin>=0.4.14,<0.5;platform_system=='Windows'",
     ],
     "rdp": ["rdp>=0.8"],
-    "arrow": ["pyarrow>=10.0.1,<11.0"],
+    "arrow": ["pyarrow>=14.0.2,<15.0"],
     "mssql": ["pyodbc>=4"],
 }
 
