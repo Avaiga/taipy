@@ -7,7 +7,7 @@ name = "pypi"
 pandas = "==2.0.0"
 networkx = "==2.6"
 openpyxl = "==3.1.2"
-pyarrow = "==10.0.1"
+pyarrow = "==14.0.2"
 pymongo = {extras = ["srv"], version = "==4.2.0"}
 sqlalchemy = "==2.0.16"
 toml = "==0.10"
