@@ -325,7 +325,7 @@ def packages_to_updates(packages_in_use: Dict[str, Package], packages_set: Dict[
                 to_print.append((
                     name,
                     ps.max_version,
-                    ",".join(ps.files)
+                    ",".join(f.split('/')[0] for f in ps.files)
                 ))
         else:
             to_print.append((
