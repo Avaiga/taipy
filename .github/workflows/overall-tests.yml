@@ -23,6 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check if the latest version supported is up to date.
+        id: ensure-dependencies-are-up-to-date
         working-directory: tools/packages
         run: |
           # Generate the Pipfile with the latest version
@@ -34,6 +35,16 @@ jobs:
             echo `bash check-dependencies.sh`
             echo EOF
           } >> "$GITHUB_OUTPUT"
+
+      - name: Comment PR
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            Diff deteteced ! Please update the Pipfile.sup file with the following diff:
+            ```
+            ${{ steps.install-dependencies.outputs.diff }}
+            ```
 
 
   #     - name: Install dependencies
