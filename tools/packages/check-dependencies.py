@@ -182,7 +182,7 @@ def extract_min_version(package: str) -> str:
     """
     # The max version is the defined version if it is a fixed version.
     if '==' in package:
-        return package.split('==')[1]
+        return package.split('==')[0]
     return package.split('>=')[1].split(',')[0]
 
 
@@ -193,7 +193,7 @@ def extract_max_version(package: str) -> str:
     """
     # The max version is the defined version if it is a fixed version.
     if '==' in package:
-        return package.split('==')[1]
+        return package.split('==')[0]
 
     version = None
 
