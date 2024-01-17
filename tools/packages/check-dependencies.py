@@ -320,7 +320,13 @@ def packages_to_updates(packages_in_use: Dict[str, Package], packages_set: Dict[
         if ps.is_taipy:
             continue
 
-        if rp := packages_in_use.get(name):
+        # Find the package in use.
+        rp = packages_in_use.get(name)
+        # Some package as 'gitignore-parser' becomes 'gitignore_parser' during the installation.
+        if not rp:
+            rp = packages_in_use.get(name.replace('-', '_'))
+
+        if rp:
             if rp.max_version != ps.max_version:
                 to_print.append((
                     name,

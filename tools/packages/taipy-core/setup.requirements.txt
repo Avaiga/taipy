@@ -1,5 +1,5 @@
-pyarrow>=14.0.2,<=10.0.1
-networkx>=2.6,<=2.8.8
+pyarrow>=14.0.2,<=14.0.2
+networkx>=2.6,<=3.2.1
 openpyxl>=3.1.2,<=3.1.2
 pandas>=2.0.0,<=2.1.4
 pymongo[srv]>=4.2.0,<=4.6.1
