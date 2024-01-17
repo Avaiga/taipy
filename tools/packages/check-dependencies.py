@@ -295,21 +295,22 @@ def display_packages_versions(packages: Dict[str, Package]):
     print(tabulate.tabulate(to_print, headers=h, tablefmt='pretty'))
 
 
-def packages_to_updates(targetted_version: Dict[str, Package], current_packages: Dict[str, Package]):
+def packages_to_updates(packages_used: Dict[str, Package], current_package_set: Dict[str, Package]):
     """
     Display dependencies to updates.
     """
-    # Sort packages by name to ensure they will be the same during iteration.
-    _targetted_version = sorted(targetted_version.values(), key=lambda x: x.name)
-    _current_packages = sorted(current_packages.values(), key=lambda x: x.name)
-
     to_print = []
-    for tpackage, cpackage in zip(_targetted_version, _current_packages):
-        if tpackage.max_version != cpackage.max_version:
+
+    for name, package_set in current_package_set:
+        if package_set.is_taipy:
+            continue
+
+        real_package = packages_used[name]
+        if real_package.max_version != package_set.max_version:
             to_print.append((
-                tpackage.name,
-                tpackage.max_version,
-                ",".join(cpackage.files)
+                package_set.name,
+                package_set.max_version,
+                ",".join(package_set.files)
             ))
 
     print(tabulate.tabulate(to_print, headers=['name', 'version', 'files'], tablefmt='pretty'))
@@ -334,9 +335,9 @@ if __name__ == '__main__':
         display_packages_versions(_packages)
         sys.exit(0)
     if sys.argv[1] == 'dependencies-to-update':
-        _version_targetted = load_packages([sys.argv[2]], False)
-        _current_packages = load_packages(sys.argv[3: len(sys.argv)], False)
-        packages_to_updates(_version_targetted, _current_packages)
+        _real_version_used = load_packages([sys.argv[2]], False)
+        _current_version_set = load_packages(sys.argv[3: len(sys.argv)], False)
+        packages_to_updates(_real_version_used, _current_version_set)
     if sys.argv[1] == 'raw-packages':
         _packages = load_packages(sys.argv[2: len(sys.argv)], False)
         display_raw_packages(_packages)
