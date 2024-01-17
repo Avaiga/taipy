@@ -38,6 +38,9 @@ const Navigate = ({ to, params, tab, force }: NavigateProps) => {
                     navigate(0);
                 } else {
                     navigate({ pathname: to, search: `?${searchParams.toString()}` });
+                    if (searchParams.has("tprh")) {
+                        navigate(0);
+                    }
                 }
             } else {
                 window.open(`${to}?${searchParams.toString()}`, tab || "_blank")?.focus();
