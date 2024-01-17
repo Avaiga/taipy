@@ -104,7 +104,9 @@ class Package:
         if self.extras_packages:
             name += f'[{",".join(self.extras_packages)}]'
         if without_version:
-            return f'{name};{self.installation_markers}'
+            if self.installation_markers:
+                return f'{name};{self.installation_markers}'
+            return name
         if self.installation_markers:
             return f'{name}>={self.min_version},<={self.latest_release.version};{self.installation_markers}'
         return f'{name}>={self.min_version},<={self.latest_release.version}'
