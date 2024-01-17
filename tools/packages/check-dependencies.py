@@ -295,22 +295,22 @@ def display_packages_versions(packages: Dict[str, Package]):
     print(tabulate.tabulate(to_print, headers=h, tablefmt='pretty'))
 
 
-def packages_to_updates(packages_used: Dict[str, Package], current_package_set: Dict[str, Package]):
+def packages_to_updates(packages_in_use: Dict[str, Package], packages_set: Dict[str, Package]):
     """
     Display dependencies to updates.
     """
     to_print = []
 
-    for name, package_set in current_package_set:
-        if package_set.is_taipy:
+    for name, ps in packages_set.items():
+        if ps.is_taipy:
             continue
 
-        real_package = packages_used[name]
-        if real_package.max_version != package_set.max_version:
+        rp = packages_in_use[name]
+        if rp.max_version != ps.max_version:
             to_print.append((
-                package_set.name,
-                package_set.max_version,
-                ",".join(package_set.files)
+                ps.name,
+                ps.max_version,
+                ",".join(ps.files)
             ))
 
     print(tabulate.tabulate(to_print, headers=['name', 'version', 'files'], tablefmt='pretty'))
@@ -335,9 +335,9 @@ if __name__ == '__main__':
         display_packages_versions(_packages)
         sys.exit(0)
     if sys.argv[1] == 'dependencies-to-update':
-        _real_version_used = load_packages([sys.argv[2]], False)
-        _current_version_set = load_packages(sys.argv[3: len(sys.argv)], False)
-        packages_to_updates(_real_version_used, _current_version_set)
+        _packages_in_use = load_packages([sys.argv[2]], False)
+        _packages_set = load_packages(sys.argv[3: len(sys.argv)], False)
+        packages_to_updates(_packages_in_use, _packages_set)
     if sys.argv[1] == 'raw-packages':
         _packages = load_packages(sys.argv[2: len(sys.argv)], False)
         display_raw_packages(_packages)
