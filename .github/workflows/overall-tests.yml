@@ -42,7 +42,7 @@ jobs:
           message: |
             Diff deteteced ! Please update the Pipfile.sup file with the following diff:
             ```
-            ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
+            "${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}"
             ```
 
 
