@@ -115,7 +115,7 @@ class Package:
         If min_version is True, the min version is used.
         """
         if self.is_taipy:
-            version = self.latest_release.version
+            version = self.max_version
         else:
             version = self.min_version if min_version else self.max_version
 
