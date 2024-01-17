@@ -149,7 +149,8 @@ class Package:
         ex: "pandas>=1.0.0,<2.0.0;python_version<'3.9'"
         """
         try:
-            name = extract_name(package)
+            # Lower the name to avoid case issues.
+            name = extract_name(package).lower()
             is_taipy = 'taipy' in name
             return cls(
                 name,
