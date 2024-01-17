@@ -22,6 +22,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{matrix.python-version}}
       - name: Check if the latest version supported is up to date.
         id: ensure-dependencies-are-up-to-date
         working-directory: tools/packages
