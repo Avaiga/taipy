@@ -431,8 +431,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         entity = core_get(entity_id)
         if entity:
             try:
-                jobs = core_submit(entity)
-                submission_entity = core_get_submission(jobs[0].submit_id if isinstance(jobs, list) else jobs.submit_id)
+                submission_entity = core_submit(entity)
                 if submission_cb := data.get("on_submission_change"):
                     submission_fn = self.gui._get_user_function(submission_cb)
                     if callable(submission_fn):

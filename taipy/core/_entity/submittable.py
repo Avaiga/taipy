@@ -19,6 +19,7 @@ from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
 from ..data.data_node import DataNode
 from ..job.job import Job
+from ..submission.submission import Submission
 from ..task.task import Task
 from ._dag import _DAG
 
@@ -42,7 +43,7 @@ class Submittable:
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
-    ):
+    ) -> Submission:
         raise NotImplementedError
 
     def get_inputs(self) -> Set[DataNode]:

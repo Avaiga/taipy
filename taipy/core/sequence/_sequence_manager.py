@@ -34,6 +34,7 @@ from ..scenario._scenario_manager_factory import _ScenarioManagerFactory
 from ..scenario.scenario import Scenario
 from ..scenario.scenario_id import ScenarioId
 from ..submission._submission_manager_factory import _SubmissionManagerFactory
+from ..submission.submission import Submission
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task, TaskId
 from .sequence import Sequence
@@ -309,7 +310,8 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
         check_inputs_are_ready: bool = True,
-    ) -> List[Job]:
+        **properties,
+    ) -> Submission:
         sequence_id = sequence.id if isinstance(sequence, Sequence) else sequence
         sequence = cls._get(sequence_id)
         if sequence is None:
@@ -319,13 +321,20 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         if check_inputs_are_ready:
             _warn_if_inputs_not_ready(sequence.get_inputs())
 
-        jobs = (
+        submission = (
             _TaskManagerFactory._build_manager()
             ._orchestrator()
-            .submit(sequence, callbacks=sequence_subscription_callback, force=force, wait=wait, timeout=timeout)
+            .submit(
+                sequence,
+                callbacks=sequence_subscription_callback,
+                force=force,
+                wait=wait,
+                timeout=timeout,
+                **properties,
+            )
         )
         Notifier.publish(_make_event(sequence, EventOperation.SUBMISSION))
-        return jobs
+        return submission
 
     @classmethod
     def _exists(cls, entity_id: str) -> bool:

@@ -37,8 +37,10 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
         return cls._repository._load_all(filters)
 
     @classmethod
-    def _create(cls, entity_id: str, entity_type: str, entity_config: Optional[str]) -> Submission:
-        submission = Submission(entity_id=entity_id, entity_type=entity_type, entity_config_id=entity_config)
+    def _create(cls, entity_id: str, entity_type: str, entity_config: Optional[str], **properties) -> Submission:
+        submission = Submission(
+            entity_id=entity_id, entity_type=entity_type, entity_config_id=entity_config, properties=properties
+        )
         cls._set(submission)
 
         Notifier.publish(_make_event(submission, EventOperation.CREATION))
@@ -55,10 +57,6 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
             return submissions_of_task[0]
         else:
             return max(submissions_of_task)
-
-    @classmethod
-    def _is_editable(cls, entity: Union[Submission, str]) -> bool:
-        return False
 
     @classmethod
     def _delete(cls, submission: Union[Submission, SubmissionId]):

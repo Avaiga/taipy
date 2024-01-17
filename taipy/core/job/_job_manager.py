@@ -50,9 +50,9 @@ class _JobManager(_Manager[Job], _VersionMixin):
             force=force,
             version=version,
         )
-        cls._set(job)
         Notifier.publish(_make_event(job, EventOperation.CREATION))
         job._on_status_change(*callbacks)
+        cls._set(job)
         return job
 
     @classmethod

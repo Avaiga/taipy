@@ -13,7 +13,7 @@ __all__ = ["Job"]
 
 import traceback
 from datetime import datetime
-from typing import Any, Callable, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, List, Optional
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
@@ -23,9 +23,11 @@ from .._entity._reload import _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._utils import _fcts_to_dict
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
-from ..task.task import Task
 from .job_id import JobId
 from .status import Status
+
+if TYPE_CHECKING:
+    from ..task.task import Task
 
 
 def _run_callbacks(fn):
@@ -58,7 +60,7 @@ class Job(_Entity, _Labeled):
     _MANAGER_NAME = "job"
     _ID_PREFIX = "JOB"
 
-    def __init__(self, id: JobId, task: Task, submit_id: str, submit_entity_id: str, force=False, version=None):
+    def __init__(self, id: JobId, task: "Task", submit_id: str, submit_entity_id: str, force=False, version=None):
         self.id = id
         self._task = task
         self._force = force
@@ -146,7 +148,7 @@ class Job(_Entity, _Labeled):
     def version(self):
         return self._version
 
-    def __contains__(self, task: Task):
+    def __contains__(self, task: "Task"):
         return self.task.id == task.id
 
     def __lt__(self, other):
