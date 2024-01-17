@@ -339,7 +339,8 @@ def packages_to_updates(packages_in_use: Dict[str, Package], packages_set: Dict[
 
 def display_raw_packages(packages: Dict[str, Package]):
     for package in packages.values():
-        print(package.as_requirements_line(without_version=True))
+        if not package.is_taipy:
+            print(package.as_requirements_line(without_version=True))
 
 
 def update_pipfile(packages: Dict[str, Package], pipfile: str):
