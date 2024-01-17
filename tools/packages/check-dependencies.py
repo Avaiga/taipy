@@ -375,7 +375,7 @@ def update_pipfile(packages_in_use: Dict[str, Package], packages_set: Dict[str, 
 
     packages_str = "\n".join(
         p.as_pipfile_line(min_version=True, force_version=True)
-        for p in packages_set.values()
+        for p in packages_set.values() if not p.is_taipy
     )
     Path(pipfile).write_text(f'{toml_str}\n\n[packages]\n{packages_str}', 'UTF-8')
 

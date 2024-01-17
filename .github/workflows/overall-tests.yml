@@ -42,16 +42,16 @@ jobs:
           message: ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
 
 
-  #     - name: Install dependencies
-  #       id: install-dependencies
-  #       uses: ./.github/actions/install
-  #       with:
-  #         python-version: ${{ matrix.python-version }}
-  #         os: ${{ matrix.os }}
-  #         pipenv-version: ${{ matrix.pipenv-version }}
+      - name: Install dependencies
+        id: install-dependencies
+        uses: ./.github/actions/install
+        with:
+          python-version: ${{ matrix.python-version }}
+          os: ${{ matrix.os }}
+          pipenv-version: ${{ matrix.pipenv-version }}
 
-  #     - name: Pytest
-  #       run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
+      - name: Pytest
+        run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
 
   #     - name: Coverage
   #       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' && matrix.pipenv-version == 'min'
