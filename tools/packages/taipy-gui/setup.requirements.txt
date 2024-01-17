@@ -6,7 +6,7 @@ flask-socketio>=5.3.6,<=5.3.6
 markdown>=3.4.4,<=3.5.2
 pandas>=2.0.0,<=2.1.4
 python-dotenv>=1.0.0,<=1.0.0
-pytz>=2021.3,<=2023.3
+pytz>=2021.3,<=2023.3.post1
 tzlocal>=3.0,<=5.2
 gevent>=23.7.0,<=23.9.1
 gevent-websocket>=0.10.1,<=0.10.1
