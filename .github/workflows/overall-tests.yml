@@ -28,7 +28,7 @@ jobs:
         run: |
           # Generate the Pipfile with the latest version
           pip install -r requirements.txt
-          python check-dependencies.py ensure-same-version taipy-*/*requirements.txt
+          python check-dependencies.py ensure-same-version taipy*/*requirements.txt
           # If Pipfile and Pipfile.sup are different, put something in the GitHub convertation
           echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
           bash check-dependencies.sh ../../Pipfile >> "$GITHUB_OUTPUT"
