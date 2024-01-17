@@ -866,6 +866,11 @@
             "type": "str",
             "default_value": "None",
             "doc": "The label associated with the selector when in dropdown mode."
+          },
+          {
+            "name": "mode",
+            "type": "str",
+            "doc": "Define the way the selector is displayed:<ul><li>&quote;radio&quote;: list of radio buttons</li><li>&quote;check&quote;: list of check buttons</li><li>any other value: selector as usual."
           }
         ]
       }
