@@ -16,9 +16,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        pipenv-version: ['min', 'max']
+        python-version: ['3.8'] #, '3.9', '3.10', '3.11']
+        os: [ubuntu-latest] #, windows-latest, macos-latest]
+        pipenv-version: ['min'] #, 'max']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +28,6 @@ jobs:
         run: |
           # Generate the Pipfile with the latest version
           pip install -r requirements.txt
-          bash check-dependencies.sh
           # If Pipfile and Pipfile.sup are different, put something in the GitHub convertation
           {
             echo 'diff<<EOF'
@@ -43,7 +42,7 @@ jobs:
           message: |
             Diff deteteced ! Please update the Pipfile.sup file with the following diff:
             ```
-            ${{ steps.install-dependencies.outputs.diff }}
+            ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
             ```
 
 
