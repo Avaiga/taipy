@@ -10,21 +10,24 @@ jobs:
   #partial-tests:
   #  uses: ./.github/workflows/partial-tests.yml
 
-  overall-tests:
+  latest-versions:
     #needs: [partial-tests]
     timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.8'] #, '3.9', '3.10', '3.11']
-        os: [ubuntu-latest] #, windows-latest, macos-latest]
-        pipenv-version: ['min'] #, 'max']
+        python-version: ['3.8', '3.9', '3.10', '3.11']
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    env:
+      DEPENDENCIES_VERSION_BASED_ON_PYTHON_VERSION: '3.11'
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: ${{matrix.python-version}}
+
       - name: Check if the latest version supported is up to date.
         id: ensure-dependencies-are-up-to-date
         working-directory: tools/packages
@@ -36,10 +39,11 @@ jobs:
           echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
           bash check-dependencies.sh ../../Pipfile >> "$GITHUB_OUTPUT"
           echo EOF >> "$GITHUB_OUTPUT"
+          echo "Pipfile:"
           cat ../../Pipfile
 
       - name: Comment PR
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == $DEPENDENCIES_VERSION_BASED_ON_PYTHON_VERSION && matrix.os == 'ubuntu-latest'
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
@@ -50,10 +54,55 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           os: ${{ matrix.os }}
-          pipenv-version: ${{ matrix.pipenv-version }}
 
       - name: Pytest
         run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
+
+
+  # overall-tests:
+  #   #needs: [partial-tests]
+  #   timeout-minutes: 40
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python-version: ['3.8', '3.9', '3.10', '3.11']
+  #       os: [ubuntu-latest, windows-latest, macos-latest]
+  #       pipenv-version: ['min', 'max']
+  #   runs-on: ${{ matrix.os }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: ${{matrix.python-version}}
+  #     - name: Check if the latest version supported is up to date.
+  #       id: ensure-dependencies-are-up-to-date
+  #       working-directory: tools/packages
+  #       run: |
+  #         # Generate the Pipfile with the latest version
+  #         pip install -r requirements.txt
+  #         python check-dependencies.py ensure-same-version taipy*/*requirements.txt
+  #         # If Pipfile and Pipfile.sup are different, put something in the GitHub convertation
+  #         echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
+  #         bash check-dependencies.sh ../../Pipfile >> "$GITHUB_OUTPUT"
+  #         echo EOF >> "$GITHUB_OUTPUT"
+  #         cat ../../Pipfile
+
+  #     - name: Comment PR
+  #       if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
+  #       uses: thollander/actions-comment-pull-request@v2
+  #       with:
+  #         message: ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
+
+  #     - name: Install dependencies
+  #       id: install-dependencies
+  #       uses: ./.github/actions/install
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+  #         os: ${{ matrix.os }}
+  #         pipenv-version: ${{ matrix.pipenv-version }}
+
+  #     - name: Pytest
+  #       run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
 
   #     - name: Coverage
   #       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' && matrix.pipenv-version == 'min'
