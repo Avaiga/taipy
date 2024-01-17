@@ -32,6 +32,8 @@ class _OrchestratorFactory:
 
     @classmethod
     def _build_orchestrator(cls) -> Type[_AbstractOrchestrator]:
+        if cls._orchestrator:
+            return cls._orchestrator
         if util.find_spec(cls._TAIPY_ENTERPRISE_MODULE) is not None:
             cls._orchestrator = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_ORCHESTRATOR_MODULE,
