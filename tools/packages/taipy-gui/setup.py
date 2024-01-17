@@ -41,7 +41,7 @@ extras_require = {
         "python-magic>=0.4.24,<0.5;platform_system!='Windows'",
         "python-magic-bin>=0.4.14,<0.5;platform_system=='Windows'",
     ],
-    "arrow": ["pyarrow>=10.0.1,<11.0"],
+    "arrow": ["pyarrow>=14.0.2,<15.0"],
 }
 
 

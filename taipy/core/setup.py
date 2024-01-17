@@ -28,7 +28,7 @@ with open(version_path) as version_file:
         version_string = f"{version_string}.{vext}"
 
 requirements = [
-    "pyarrow>=10.0.1,<11.0",
+    "pyarrow>=14.0.2,<15.0",
     "networkx>=2.6,<3.0",
     "openpyxl>=3.1.2,<3.2",
     "pandas>=2.0.0,<3.0",
