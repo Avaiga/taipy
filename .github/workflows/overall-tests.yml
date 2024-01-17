@@ -29,21 +29,15 @@ jobs:
           # Generate the Pipfile with the latest version
           pip install -r requirements.txt
           # If Pipfile and Pipfile.sup are different, put something in the GitHub convertation
-          {
-            echo 'diff<<EOF'
-            echo `bash check-dependencies.sh`
-            echo EOF
-          } >> "$GITHUB_OUTPUT"
+          echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
+          bash check-dependencies.sh >> "$GITHUB_OUTPUT"
+          echo EOF >> "$GITHUB_OUTPUT"
 
       - name: Comment PR
         if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
         uses: thollander/actions-comment-pull-request@v2
         with:
-          message: |
-            Diff deteteced ! Please update the Pipfile.sup file with the following diff:
-            ```
-            "${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}"
-            ```
+          message: ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
 
 
   #     - name: Install dependencies
