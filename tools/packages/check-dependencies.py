@@ -320,11 +320,17 @@ def packages_to_updates(packages_in_use: Dict[str, Package], packages_set: Dict[
         if ps.is_taipy:
             continue
 
-        rp = packages_in_use[name]
-        if rp.max_version != ps.max_version:
+        if rp := packages_in_use.get(name):
+            if rp.max_version != ps.max_version:
+                to_print.append((
+                    name,
+                    ps.max_version,
+                    ",".join(ps.files)
+                ))
+        else:
             to_print.append((
-                ps.name,
-                ps.max_version,
+                name,
+                'N.C.',
                 ",".join(ps.files)
             ))
 
