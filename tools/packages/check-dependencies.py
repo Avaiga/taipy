@@ -321,7 +321,6 @@ def packages_to_updates(packages_in_use: Dict[str, Package], packages_set: Dict[
             continue
 
         if rp := packages_in_use.get(name):
-            print(rp.max_version, ' ', ps.max_version)
             if rp.max_version != ps.max_version:
                 to_print.append((
                     name,
