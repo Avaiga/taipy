@@ -35,3 +35,7 @@
   display: flex;
   max-width: initial;
 }
+
+.taipy-selector-radio-group.row-radio-group, .taipy-selector-check-group.row-check-group{
+    flex-direction: row;
+}
