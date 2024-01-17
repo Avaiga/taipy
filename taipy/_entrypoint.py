@@ -40,6 +40,11 @@ def _entrypoint():
     _MigrateCLI.create_parser()
     _HelpCLI.create_parser()
 
+    if find_spec("taipy.enterprise"):
+        from taipy.enterprise._entrypoint import _entrypoint as _enterprise_entrypoint
+
+        _enterprise_entrypoint()
+
     args = _CLI._parse()
     if args.version:
         print(f"Taipy {_get_version()}")  # noqa: T201
@@ -53,8 +58,3 @@ def _entrypoint():
 
     _CLI._remove_argument("help")
     _CLI._parser.print_help()
-
-    if find_spec("taipy.enterprise"):
-        from taipy.enterprise._entrypoint import _entrypoint as _enterprise_entrypoint
-
-        _enterprise_entrypoint()
