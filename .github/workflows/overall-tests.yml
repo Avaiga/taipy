@@ -41,7 +41,6 @@ jobs:
         with:
           message: ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
 
-
       - name: Install dependencies
         id: install-dependencies
         uses: ./.github/actions/install
