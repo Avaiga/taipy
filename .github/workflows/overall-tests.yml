@@ -31,7 +31,7 @@ jobs:
           python check-dependencies.py ensure-same-version taipy-*/*requirements.txt
           # If Pipfile and Pipfile.sup are different, put something in the GitHub convertation
           echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
-          bash check-dependencies.sh # >> "$GITHUB_OUTPUT"
+          bash check-dependencies.sh >> "$GITHUB_OUTPUT"
           echo EOF >> "$GITHUB_OUTPUT"
 
       - name: Comment PR
