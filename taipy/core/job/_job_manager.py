@@ -89,10 +89,6 @@ class _JobManager(_Manager[Job], _VersionMixin):
     def _is_deletable(cls, job: Union[Job, JobId]) -> bool:
         if isinstance(job, str):
             job = cls._get(job)
-        if job.is_finished():
-            return True
-        return False
-
-    @classmethod
-    def _is_editable(cls, entity: Union[Job, str]) -> bool:
-        return False
+        if not job.is_finished():
+            return False
+        return True

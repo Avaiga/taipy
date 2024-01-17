@@ -163,7 +163,7 @@ class TestTaipy:
         assert tp.is_editable(sequence)
         assert tp.is_editable(task)
         assert tp.is_editable(cycle)
-        assert not tp.is_editable(job)
+        assert tp.is_editable(job)
         assert tp.is_editable(submission)
         assert tp.is_editable(dn)
 
