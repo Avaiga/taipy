@@ -1,3 +1,5 @@
+PACKAGES=taipy-*/*requirements.txt
+
 # Retrieve requirements then install them to check the latest requirements installable
 python check-dependencies.py raw-packages $PACKAGES > requirements.txt.tmp
 python -m venv tmp-venv > /dev/null
