@@ -19,8 +19,6 @@ jobs:
         python-version: ['3.8', '3.9', '3.10', '3.11']
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
-    env:
-      DEPENDENCIES_VERSION_BASED_ON_PYTHON_VERSION: '3.11'
     steps:
       - uses: actions/checkout@v4
 
@@ -43,7 +41,7 @@ jobs:
           cat ../../Pipfile
 
       - name: Comment PR
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == $DEPENDENCIES_VERSION_BASED_ON_PYTHON_VERSION && matrix.os == 'ubuntu-latest'
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
