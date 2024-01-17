@@ -168,9 +168,9 @@ class Submission(_Entity, _Labeled):
     def submission_status(self, submission_status):
         self._submission_status = submission_status
 
-    @property  # type: ignore
+    @property
     @_self_reload(_MANAGER_NAME)
-    def is_abandoned(self):
+    def is_abandoned(self) -> bool:
         return self._is_abandoned
 
     @is_abandoned.setter  # type: ignore
@@ -178,9 +178,9 @@ class Submission(_Entity, _Labeled):
     def is_abandoned(self, val):
         self._is_abandoned = val
 
-    @property  # type: ignore
+    @property
     @_self_reload(_MANAGER_NAME)
-    def is_completed(self):
+    def is_completed(self) -> bool:
         return self._is_completed
 
     @is_completed.setter  # type: ignore
@@ -188,9 +188,9 @@ class Submission(_Entity, _Labeled):
     def is_completed(self, val):
         self._is_completed = val
 
-    @property  # type: ignore
+    @property
     @_self_reload(_MANAGER_NAME)
-    def is_canceled(self):
+    def is_canceled(self) -> bool:
         return self._is_canceled
 
     @is_canceled.setter  # type: ignore

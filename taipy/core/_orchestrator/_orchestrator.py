@@ -65,9 +65,10 @@ class _Orchestrator(_AbstractOrchestrator):
                 finished in asynchronous mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
                 before returning.
-             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+             **properties (dict[str, any]): A keyworded variable length list of user additional arguments
+                that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
         Returns:
-            The created Jobs.
+            The created `Submission^` containing the information about the submission.
         """
         submission = _SubmissionManagerFactory._build_manager()._create(
             submittable.id,  # type: ignore
@@ -118,9 +119,10 @@ class _Orchestrator(_AbstractOrchestrator):
                 in asynchronous mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the job
                 to be finished before returning.
-             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+             **properties (dict[str, any]): A keyworded variable length list of user additional arguments
+                that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
         Returns:
-            The created `Job^`.
+            The created `Submission^` containing the information about the submission.
         """
         submission = _SubmissionManagerFactory._build_manager()._create(
             task.id, task._ID_PREFIX, task.config_id, **properties
@@ -187,7 +189,7 @@ class _Orchestrator(_AbstractOrchestrator):
             return True
 
         start = datetime.now()
-        jobs = jobs if isinstance(jobs, Iterable) else [jobs]
+        jobs = list(jobs) if isinstance(jobs, Iterable) else [jobs]
         index = 0
         while __check_if_timeout(start, timeout) and index < len(jobs):
             try:

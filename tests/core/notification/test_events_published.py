@@ -172,6 +172,7 @@ def test_events_published_for_scenario_submission():
     # 1 submission creation event
     # 1 submission update event for jobs
     # 3 submission update events (for status: PENDING, RUNNING and COMPLETED)
+    # 1 submission update event for is_completed
     scenario.submit()
     snapshot = all_evts.capture()
     assert len(snapshot.collected_events) == 18
