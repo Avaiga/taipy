@@ -3,13 +3,13 @@ backports.zoneinfo>=0.2.1,<=0.2.1;python_version<'3.9'
 flask>=3.0.0,<=3.0.0
 flask-cors>=4.0.0,<=4.0.0
 flask-socketio>=5.3.6,<=5.3.6
-markdown>=3.4.4,<=3.5.1
+markdown>=3.4.4,<=3.5.2
 pandas>=2.0.0,<=2.1.4
 python-dotenv>=1.0.0,<=1.0.0
 pytz>=2021.3,<=2023.3
 tzlocal>=3.0,<=5.2
 gevent>=23.7.0,<=23.9.1
-gevent-websocket>=0.10.1,<=0.10
+gevent-websocket>=0.10.1,<=0.10.1
 kthread>=0.2.3,<=0.2.3
 gitignore-parser>=0.1,<=0.1.9
 simple-websocket>=0.10.1,<=1.0.0
