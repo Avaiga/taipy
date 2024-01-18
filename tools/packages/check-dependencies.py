@@ -351,7 +351,8 @@ def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
     dependencies_str = ""
     pipfile_obj = toml.load(pipfile)
 
-    for name, dep in pipfile_obj['packages'].items():
+    packages = pipfile_obj.pop('packages')
+    for name, dep in packages.items():
         # Find the package in use.
         rp = dependencies_version.get(name)
         # Some package as 'gitignore-parser' becomes 'gitignore_parser' during the installation.
@@ -361,14 +362,14 @@ def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
         if not rp:
             # Package not found. Can be due to python version.
             # Ex: backports.zoneinfo
-            dependencies_str += f'"name" = {dep}\n'
+            dependencies_str += f'"{name}" = {dep}\n'
         else:
             if isinstance(dep, dict):
                 rp.max_version = dep['version'].replace('==', '')
             else:
                 rp.max_version = dep.replace('==', '')
+            dependencies_str += f'{rp.as_pipfile_line()}\n'
 
-    del pipfile_obj['packages']
     toml_str = toml.dumps(pipfile_obj)
     Path(pipfile).write_text(f'{toml_str}\n\n[packages]\n{dependencies_str}', 'UTF-8')
 
