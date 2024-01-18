@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import uuid
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional, Set, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
 
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
@@ -23,10 +23,8 @@ from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..data.data_node import DataNode
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
+from ..submission.submission import Submission
 from .task_id import TaskId
-
-if TYPE_CHECKING:
-    from ..job.job import Job
 
 
 class Task(_Entity, _Labeled):
@@ -180,7 +178,8 @@ class Task(_Entity, _Labeled):
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
-    ) -> "Job":  # noqa
+        **properties,
+    ) -> Submission:
         """Submit the task for execution.
 
         Parameters:
@@ -191,13 +190,13 @@ class Task(_Entity, _Labeled):
                 mode.
             timeout (Union[float, int]): The maximum number of seconds to wait for the job to be finished before
                 returning.
-
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
-            The created `Job^`.
+            A `Submission^` containing the information of the submission.
         """
         from ._task_manager_factory import _TaskManagerFactory
 
-        return _TaskManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
+        return _TaskManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout, **properties)
 
     def get_label(self) -> str:
         """Returns the task simple label prefixed by its owner label.

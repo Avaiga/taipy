@@ -30,6 +30,7 @@ from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingTask
 from ..job.job import Job
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
+from ..submission.submission import Submission
 from ..task.task import Task
 from ..task.task_id import TaskId
 from .sequence_id import SequenceId
@@ -225,7 +226,8 @@ class Sequence(_Entity, Submittable, _Labeled):
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
-    ) -> List[Job]:
+        **properties,
+    ) -> Submission:
         """Submit the sequence for execution.
 
         All the `Task^`s of the sequence will be submitted for execution.
@@ -238,12 +240,13 @@ class Sequence(_Entity, Submittable, _Labeled):
                 in asynchronous mode.
             timeout (Union[float, int]): The maximum number of seconds to wait for the jobs to be finished before
                 returning.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
-            A list of created `Job^`s.
+            A `Submission^` containing the information of the submission.
         """
         from ._sequence_manager_factory import _SequenceManagerFactory
 
-        return _SequenceManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
+        return _SequenceManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout, **properties)
 
     def get_label(self) -> str:
         """Returns the sequence simple label prefixed by its owner label.

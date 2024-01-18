@@ -466,7 +466,7 @@ def test_modify_job_configuration_dont_stop_application(caplog, init_config):
         Config.configure_job_executions(mode="development")
         core.run(force_restart=True)
         scenario = _ScenarioManager._create(scenario_config)
-        jobs = taipy.submit(scenario)
+        jobs = taipy.submit(scenario).jobs
         assert all(job.is_finished() for job in jobs)
         core.stop()
     init_config()
@@ -476,7 +476,7 @@ def test_modify_job_configuration_dont_stop_application(caplog, init_config):
         Config.configure_job_executions(mode="standalone", max_nb_of_workers=5)
         core.run(force_restart=True)
         scenario = _ScenarioManager._create(scenario_config)
-        jobs = taipy.submit(scenario)
+        jobs = taipy.submit(scenario).jobs
         assert_true_after_time(lambda: all(job.is_finished() for job in jobs))
         error_message = str(caplog.text)
         assert 'JOB "mode" was modified' in error_message

@@ -17,8 +17,9 @@ from taipy.core.data._data_sql_repository import _DataSQLRepository
 from taipy.core.exceptions import ModelNotFound
 from taipy.core.job._job_fs_repository import _JobFSRepository
 from taipy.core.job._job_sql_repository import _JobSQLRepository
-from taipy.core.job.job import Job, JobId, Task
+from taipy.core.job.job import Job, JobId
 from taipy.core.task._task_sql_repository import _TaskSQLRepository
+from taipy.core.task.task import Task
 
 
 class TestJobRepository:
