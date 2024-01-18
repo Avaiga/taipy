@@ -61,42 +61,34 @@ def test_submit_task_multithreading_multiple_task():
 
     with lock_1:
         with lock_2:
-            job_1 = _Orchestrator.submit_task(task_1)
-            job_2 = _Orchestrator.submit_task(task_2)
+            submission_1 = _Orchestrator.submit_task(task_1)
+            job_1 = submission_1._jobs[0]
+            submission_2 = _Orchestrator.submit_task(task_2)
+            job_2 = submission_2._jobs[0]
 
             assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
             assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
             assert_true_after_time(job_1.is_running)
             assert_true_after_time(job_2.is_running)
             assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 2)
-            assert_true_after_time(
-                lambda: _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.RUNNING
-            )
-            assert_true_after_time(
-                lambda: _SubmissionManager._get(job_2.submit_id).submission_status == SubmissionStatus.RUNNING
-            )
+            assert_true_after_time(lambda: submission_1.submission_status == SubmissionStatus.RUNNING)
+            assert_true_after_time(lambda: submission_2.submission_status == SubmissionStatus.RUNNING)
 
         assert_true_after_time(lambda: task_2.output[f"{task_2.config_id}_output0"].read() == 42)
         assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
         assert_true_after_time(job_2.is_completed)
         assert_true_after_time(job_1.is_running)
         assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
-        assert_true_after_time(
-            lambda: _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.RUNNING
-        )
-        assert_true_after_time(
-            lambda: _SubmissionManager._get(job_2.submit_id).submission_status == SubmissionStatus.COMPLETED
-        )
+        assert_true_after_time(lambda: submission_1.submission_status == SubmissionStatus.RUNNING)
+        assert_true_after_time(lambda: submission_2.submission_status == SubmissionStatus.COMPLETED)
 
     assert_true_after_time(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
     assert_true_after_time(job_1.is_completed)
     assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
-    assert_true_after_time(
-        lambda: _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.COMPLETED
-    )
+    assert_true_after_time(lambda: submission_1.submission_status == SubmissionStatus.COMPLETED)
 
     assert job_2.is_completed()
-    assert _SubmissionManager._get(job_2.submit_id).submission_status == SubmissionStatus.COMPLETED
+    assert submission_2.submission_status == SubmissionStatus.COMPLETED
 
 
 @pytest.mark.orchestrator_dispatcher
@@ -116,7 +108,8 @@ def test_submit_submittable_multithreading_multiple_task():
 
     with lock_1:
         with lock_2:
-            tasks_jobs = {job._task.id: job for job in _Orchestrator.submit(scenario)}
+            submission = _Orchestrator.submit(scenario)
+            tasks_jobs = {job._task.id: job for job in submission._jobs}
             job_1 = tasks_jobs[task_1.id]
             job_2 = tasks_jobs[task_2.id]
 
@@ -125,25 +118,19 @@ def test_submit_submittable_multithreading_multiple_task():
             assert_true_after_time(job_1.is_running)
             assert_true_after_time(job_2.is_running)
             assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 2)
-            assert_true_after_time(
-                lambda: _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.RUNNING
-            )
+            assert_true_after_time(lambda: submission.submission_status == SubmissionStatus.RUNNING)
         assert_true_after_time(lambda: task_2.output[f"{task_2.config_id}_output0"].read() == 42)
         assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
         assert_true_after_time(job_2.is_completed)
         assert_true_after_time(job_1.is_running)
         assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
-        assert_true_after_time(
-            lambda: _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.RUNNING
-        )
+        assert_true_after_time(lambda: submission.submission_status == SubmissionStatus.RUNNING)
 
     assert_true_after_time(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
     assert_true_after_time(job_1.is_completed)
     assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
     assert_true_after_time(job_2.is_completed)
-    assert_true_after_time(
-        lambda: _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.COMPLETED
-    )
+    assert_true_after_time(lambda: submission.submission_status == SubmissionStatus.COMPLETED)
 
 
 @pytest.mark.orchestrator_dispatcher
@@ -162,7 +149,8 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
     _OrchestratorFactory._build_dispatcher()
 
     with lock_0:
-        job_0 = _Orchestrator.submit_task(task_0)
+        submission_0 = _Orchestrator.submit_task(task_0)
+        job_0 = submission_0._jobs[0]
         assert_true_after_time(job_0.is_running)
         assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
         assert_true_after_time(
@@ -172,20 +160,16 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
             with lock_2:
                 assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
                 assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
-                job_2 = _Orchestrator.submit_task(task_2)
-                job_1 = _Orchestrator.submit_task(task_1)
+                submission_2 = _Orchestrator.submit_task(task_2)
+                job_2 = submission_2._jobs[0]
+                submission_1 = _Orchestrator.submit_task(task_1)
+                job_1 = submission_1._jobs[0]
                 assert_true_after_time(job_0.is_running)
                 assert_true_after_time(job_1.is_pending)
                 assert_true_after_time(job_2.is_running)
-                assert_true_after_time(
-                    lambda: _SubmissionManager._get(job_0.submit_id).submission_status == SubmissionStatus.RUNNING
-                )
-                assert_true_after_time(
-                    lambda: _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.PENDING
-                )
-                assert_true_after_time(
-                    lambda: _SubmissionManager._get(job_2.submit_id).submission_status == SubmissionStatus.RUNNING
-                )
+                assert_true_after_time(lambda: submission_0.submission_status == SubmissionStatus.RUNNING)
+                assert_true_after_time(lambda: submission_1.submission_status == SubmissionStatus.PENDING)
+                assert_true_after_time(lambda: submission_2.submission_status == SubmissionStatus.RUNNING)
                 assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 2)
 
             assert_true_after_time(lambda: task_2.output[f"{task_2.config_id}_output0"].read() == 42)
@@ -193,30 +177,20 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
             assert_true_after_time(job_0.is_running)
             assert_true_after_time(job_1.is_running)
             assert_true_after_time(job_2.is_completed)
-            assert_true_after_time(
-                lambda: _SubmissionManager._get(job_0.submit_id).submission_status == SubmissionStatus.RUNNING
-            )
-            assert_true_after_time(
-                lambda: _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.RUNNING
-            )
-            assert_true_after_time(
-                lambda: _SubmissionManager._get(job_2.submit_id).submission_status == SubmissionStatus.COMPLETED
-            )
+            assert_true_after_time(lambda: submission_0.submission_status == SubmissionStatus.RUNNING)
+            assert_true_after_time(lambda: submission_1.submission_status == SubmissionStatus.RUNNING)
+            assert_true_after_time(lambda: submission_2.submission_status == SubmissionStatus.COMPLETED)
             assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 2)
 
         assert_true_after_time(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
         assert task_0.output[f"{task_0.config_id}_output0"].read() == 0
         assert_true_after_time(job_0.is_running)
         assert_true_after_time(job_1.is_completed)
-        assert_true_after_time(
-            lambda: _SubmissionManager._get(job_0.submit_id).submission_status == SubmissionStatus.RUNNING
-        )
-        assert_true_after_time(
-            lambda: _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.COMPLETED
-        )
+        assert_true_after_time(lambda: submission_0.submission_status == SubmissionStatus.RUNNING)
+        assert_true_after_time(lambda: submission_1.submission_status == SubmissionStatus.COMPLETED)
 
         assert job_2.is_completed()
-        assert _SubmissionManager._get(job_2.submit_id).submission_status == SubmissionStatus.COMPLETED
+        assert submission_2.submission_status == SubmissionStatus.COMPLETED
         assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
 
     assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
@@ -255,44 +229,36 @@ def test_blocked_task():
     assert not task_2.baz.is_ready_for_reading  # neither does baz
 
     assert len(_Orchestrator.blocked_jobs) == 0
-    job_2 = _Orchestrator.submit_task(task_2)  # job 2 is submitted first
+    submission_2 = _Orchestrator.submit_task(task_2)
+    job_2 = submission_2._jobs[0]  # job 2 is submitted first
     assert job_2.is_blocked()  # since bar is not is_valid the job 2 is blocked
     assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
     assert _SubmissionManager._get(job_2.submit_id).submission_status == SubmissionStatus.BLOCKED
     assert len(_Orchestrator.blocked_jobs) == 1
     with lock_2:
         with lock_1:
-            job_1 = _Orchestrator.submit_task(task_1)  # job 1 is submitted and locked
+            submission_1 = _Orchestrator.submit_task(task_1)
+            job_1 = submission_1._jobs[0]  # job 1 is submitted and locked
             assert_true_after_time(job_1.is_running)  # so it is still running
             assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
             assert not _DataManager._get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
             assert_true_after_time(job_2.is_blocked)  # the job_2 remains blocked
-            assert_true_after_time(
-                lambda: _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.RUNNING
-            )
-            assert_true_after_time(
-                lambda: _SubmissionManager._get(job_2.submit_id).submission_status == SubmissionStatus.BLOCKED
-            )
+            assert_true_after_time(lambda: submission_1.submission_status == SubmissionStatus.RUNNING)
+            assert_true_after_time(lambda: submission_2.submission_status == SubmissionStatus.BLOCKED)
         assert_true_after_time(job_1.is_completed)  # job1 unlocked and can complete
         assert _DataManager._get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
         assert _DataManager._get(task_1.bar.id).read() == 2  # the data is computed and written
         assert_true_after_time(job_2.is_running)  # And job 2 can start running
         assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
         assert len(_Orchestrator.blocked_jobs) == 0
-        assert_true_after_time(
-            lambda: _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.COMPLETED
-        )
-        assert_true_after_time(
-            lambda: _SubmissionManager._get(job_2.submit_id).submission_status == SubmissionStatus.RUNNING
-        )
+        assert_true_after_time(lambda: submission_1.submission_status == SubmissionStatus.COMPLETED)
+        assert_true_after_time(lambda: submission_2.submission_status == SubmissionStatus.RUNNING)
     assert_true_after_time(job_2.is_completed)  # job 2 unlocked so it can complete
     assert _DataManager._get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
     assert _DataManager._get(task_2.baz.id).read() == 6  # the data is computed and written
     assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
-    assert _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.COMPLETED
-    assert_true_after_time(
-        lambda: _SubmissionManager._get(job_2.submit_id).submission_status == SubmissionStatus.COMPLETED
-    )
+    assert submission_1.submission_status == SubmissionStatus.COMPLETED
+    assert_true_after_time(lambda: submission_2.submission_status == SubmissionStatus.COMPLETED)
 
 
 @pytest.mark.orchestrator_dispatcher
@@ -324,32 +290,26 @@ def test_blocked_submittable():
     assert len(_Orchestrator.blocked_jobs) == 0
     with lock_2:
         with lock_1:
-            jobs = _Orchestrator.submit(scenario)  # scenario is submitted
-            tasks_jobs = {job._task.id: job for job in jobs}
+            submission = _Orchestrator.submit(scenario)  # scenario is submitted
+            tasks_jobs = {job._task.id: job for job in submission._jobs}
             job_1, job_2 = tasks_jobs[task_1.id], tasks_jobs[task_2.id]
             assert_true_after_time(job_1.is_running)  # job 1 is submitted and locked so it is still running
             assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
             assert not _DataManager._get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
             assert_true_after_time(job_2.is_blocked)  # the job_2 remains blocked
-            assert_true_after_time(
-                lambda: _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.RUNNING
-            )
+            assert_true_after_time(lambda: submission.submission_status == SubmissionStatus.RUNNING)
         assert_true_after_time(job_1.is_completed)  # job1 unlocked and can complete
         assert _DataManager._get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
         assert _DataManager._get(task_1.bar.id).read() == 2  # the data is computed and written
         assert_true_after_time(job_2.is_running)  # And job 2 can start running
         assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
         assert len(_Orchestrator.blocked_jobs) == 0
-        assert_true_after_time(
-            lambda: _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.RUNNING
-        )
+        assert_true_after_time(lambda: submission.submission_status == SubmissionStatus.RUNNING)
     assert_true_after_time(job_2.is_completed)  # job 2 unlocked so it can complete
     assert _DataManager._get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
     assert _DataManager._get(task_2.baz.id).read() == 6  # the data is computed and written
     assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
-    assert_true_after_time(
-        lambda: _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.COMPLETED
-    )
+    assert_true_after_time(lambda: submission.submission_status == SubmissionStatus.COMPLETED)
 
 
 # ################################  UTIL METHODS    ##################################

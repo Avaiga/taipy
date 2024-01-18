@@ -163,8 +163,8 @@ class TestTaipy:
         assert tp.is_editable(sequence)
         assert tp.is_editable(task)
         assert tp.is_editable(cycle)
-        assert not tp.is_editable(job)
-        assert not tp.is_editable(submission)
+        assert tp.is_editable(job)
+        assert tp.is_editable(submission)
         assert tp.is_editable(dn)
 
     def test_is_readable_is_called(self, cycle, job, data_node):
@@ -665,7 +665,7 @@ class TestTaipy:
         scenario_cfg_2 = Config.configure_scenario("s2", [task_cfg_2], [], Frequency.DAILY)
 
         scenario_1 = tp.create_scenario(scenario_cfg_1)
-        job_1 = tp.submit(scenario_1)[0]
+        job_1 = tp.submit(scenario_1).jobs[0]
 
         # Export scenario 1
         tp.export_scenario(scenario_1.id, "./tmp/exp_scenario_1")
@@ -678,7 +678,7 @@ class TestTaipy:
         assert sorted(os.listdir("./tmp/exp_scenario_1/cycles")) == sorted([f"{scenario_1.cycle.id}.json"])
 
         scenario_2 = tp.create_scenario(scenario_cfg_2)
-        job_2 = tp.submit(scenario_2)[0]
+        job_2 = tp.submit(scenario_2).jobs[0]
 
         # Export scenario 2
         scenario_2.export(pathlib.Path.cwd() / "./tmp/exp_scenario_2")

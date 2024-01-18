@@ -42,6 +42,7 @@ from ..exceptions.exceptions import (
 from ..job.job import Job
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
 from ..sequence.sequence import Sequence
+from ..submission.submission import Submission
 from ..task.task import Task
 from ..task.task_id import TaskId
 from .scenario_id import ScenarioId
@@ -492,7 +493,8 @@ class Scenario(_Entity, Submittable, _Labeled):
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
-    ) -> List[Job]:
+        **properties,
+    ) -> Submission:
         """Submit this scenario for execution.
 
         All the `Task^`s of the scenario will be submitted for execution.
@@ -505,13 +507,13 @@ class Scenario(_Entity, Submittable, _Labeled):
                 asynchronous mode.
             timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
                 before returning.
-
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
-            A list of created `Job^`s.
+            A `Submission^` containing the information of the submission.
         """
         from ._scenario_manager_factory import _ScenarioManagerFactory
 
-        return _ScenarioManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
+        return _ScenarioManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout, **properties)
 
     def export(
         self,

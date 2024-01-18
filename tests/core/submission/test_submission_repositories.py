@@ -43,13 +43,19 @@ class TestSubmissionRepository:
         job._task = task
         _JobManagerFactory._build_manager()._repository._save(job)
 
-        submission = Submission(task.id, task._ID_PREFIX, task.config_id)
+        submission = Submission(
+            task.id, task._ID_PREFIX, task.config_id, properties={"debug": True, "log": "log_file", "retry_note": 5}
+        )
         submission_repository = _SubmissionManagerFactory._build_manager()._repository
         submission_repository._save(submission)
         submission.jobs = [job]
 
         obj = submission_repository._load(submission.id)
         assert isinstance(obj, Submission)
+        assert obj.entity_id == task.id
+        assert obj.entity_type == task._ID_PREFIX
+        assert obj.entity_config_id == task.config_id
+        assert obj.properties == {"debug": True, "log": "log_file", "retry_note": 5}
 
     @pytest.mark.parametrize("configure_repo", [configure_fs_repo, configure_sql_repo])
     def test_exists(self, configure_repo):
