@@ -530,10 +530,10 @@ const Chart = (props: ChartProp) => {
         [data, dataKey, props.figure]
     );
 
-    const selectHandler = useCallback(
-        (points?: PlotDatum[]) => {
+    const onSelect = useCallback(
+        (evt?: PlotSelectionEvent) => {
             if (updateVars) {
-                const traces = (points || []).reduce((tr, pt) => {
+                const traces = (evt?.points || []).reduce((tr, pt) => {
                     tr[pt.curveNumber] = tr[pt.curveNumber] || [];
                     tr[pt.curveNumber].push(getRealIndex(getPlotIndex(pt)));
                     return tr;
@@ -556,9 +556,6 @@ const Chart = (props: ChartProp) => {
         [getRealIndex, dispatch, updateVars, propagate, props.onChange, config.traces.length, module]
     );
 
-    const onSelect = useCallback((evt?: PlotSelectionEvent) => selectHandler(evt?.points), [selectHandler]);
-    const onDeselect = useCallback((evt?: PlotSelectionEvent) => selectHandler(evt?.points), [selectHandler]);
-
     return render ? (
         <Box id={id} key="div" data-testid={props.testId} className={className} ref={plotRef}>
             <Tooltip title={hover || ""}>
@@ -571,7 +568,7 @@ const Chart = (props: ChartProp) => {
                             onRelayout={onRelayout}
                             onAfterPlot={onAfterPlot}
                             onSelected={onSelect}
-                            onDeselect={onDeselect}
+                            onDeselect={onSelect}
                             config={plotConfig}
                         />
                     ) : (
@@ -582,7 +579,7 @@ const Chart = (props: ChartProp) => {
                             onRelayout={onRelayout}
                             onAfterPlot={onAfterPlot}
                             onSelected={isOnClick(config.types) ? undefined : onSelect}
-                            onDeselect={isOnClick(config.types) ? undefined : onDeselect}
+                            onDeselect={isOnClick(config.types) ? undefined : onSelect}
                             onClick={isOnClick(config.types) ? onSelect : undefined}
                             config={plotConfig}
                         />
