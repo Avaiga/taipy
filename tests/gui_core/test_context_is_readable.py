@@ -83,6 +83,7 @@ class TestGuiCoreContext_is_readable:
                 "",
                 {
                     "args": [
+                        "",
                         True,
                         False,
                         {"name": "name", "id": a_scenario.id},
@@ -98,6 +99,7 @@ class TestGuiCoreContext_is_readable:
                     "",
                     {
                         "args": [
+                            "",
                             True,
                             False,
                             {"name": "name", "id": a_scenario.id},
