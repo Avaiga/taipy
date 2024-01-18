@@ -5,6 +5,7 @@ It can be used:
 - To generate a Pipfile from requirements files.
 - To display a summary of the dependencies to update.
 """
+from collections import defaultdict
 import sys
 import glob
 import itertools
@@ -93,7 +94,7 @@ class Package:
         self.releases.sort(key=lambda x: x.upload_date, reverse=True)
         self.latest_release = self.releases[0]
 
-    def as_requirements_line(self, without_version: bool) -> str:
+    def as_requirements_line(self, with_version: bool = True) -> str:
         """
         Return the package as a requirements line.
         """
@@ -103,13 +104,15 @@ class Package:
         name = self.name
         if self.extras_dependencies:
             name += f'[{",".join(self.extras_dependencies)}]'
-        if without_version:
+
+        if with_version:
             if self.installation_markers:
-                return f'{name};{self.installation_markers}'
-            return name
+                return f'{name}>={self.min_version},<={self.latest_release.version};{self.installation_markers}'
+            return f'{name}>={self.min_version},<={self.latest_release.version}'
+
         if self.installation_markers:
-            return f'{name}>={self.min_version},<={self.latest_release.version};{self.installation_markers}'
-        return f'{name}>={self.min_version},<={self.latest_release.version}'
+            return f'{name};{self.installation_markers}'
+        return name
 
     def as_pipfile_line(self) -> str:
         """
@@ -307,32 +310,44 @@ def display_dependencies_versions(dependencies: Dict[str, Package]):
     print(tabulate.tabulate(to_print, headers=h, tablefmt='pretty'))
 
 
-def dependencies_summary(dependencies_in_use: Dict[str, Package], dependencies_set: Dict[str, Package]):
+def update_dependencies(dependencies_in_use: Dict[str, Package], dependencies_set: Dict[str, Package]):
     """
     Display dependencies to updates.
     """
     to_print = []
 
-    for name, ps in dependencies_set.items():
-        if ps.is_taipy:
+    for name, ds in dependencies_set.items():
+        if ds.is_taipy:
             continue
 
         # Find the package in use.
-        rp = dependencies_in_use.get(name)
+        diu = dependencies_in_use.get(name)
         # Some package as 'gitignore-parser' becomes 'gitignore_parser' during the installation.
-        if not rp:
-            rp = dependencies_in_use.get(name.replace('-', '_'))
+        if not diu:
+            diu = dependencies_in_use.get(name.replace('-', '_'))
 
-        if rp:
-            if rp.max_version != ps.max_version:
+        if diu:
+            if diu.max_version != ds.max_version:
                 to_print.append((
                     name,
-                    rp.max_version,
-                    ','.join(f.split('/')[0] for f in ps.files)
+                    diu.max_version,
+                    ','.join(f.split('/')[0] for f in ds.files)
                 ))
+                # Save the new dependency version.
+                ds.max_version = diu.max_version
 
     to_print.sort(key=lambda x: x[0])
     print(tabulate.tabulate(to_print, headers=['name', 'version', 'files'], tablefmt='pretty'))
+
+    # Update requirements files.
+    requirements_to_update = set(d.files for d in dependencies_set.values())
+    for fd in requirements_to_update:
+        Path(fd).write_text(
+            '\n'.join(
+                d.as_requirements_line()
+                for d in dependencies_set.values()
+                if d.files == fd
+            ), 'UTF-8')
 
 
 def generate_raw_requirements_txt(dependencies: Dict[str, Package]):
@@ -341,7 +356,7 @@ def generate_raw_requirements_txt(dependencies: Dict[str, Package]):
     """
     for package in dependencies.values():
         if not package.is_taipy:
-            print(package.as_requirements_line(without_version=True))
+            print(package.as_requirements_line(with_version=False))
 
 
 def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
@@ -377,7 +392,6 @@ if __name__ == '__main__':
         _requirements_filenames = glob.glob('taipy*/*requirements.txt')
         _dependencies = load_dependencies(_requirements_filenames, True)
         display_dependencies_versions(_dependencies)
-        sys.exit(0)
     if sys.argv[1] == 'dependencies-summary':
         # Load and compare dependencies from requirements files.
         # The first file is the reference to the other.
@@ -385,7 +399,7 @@ if __name__ == '__main__':
         _requirements_filenames = glob.glob('taipy*/*requirements.txt')
         _dependencies_in_use = load_dependencies([sys.argv[2]], False)
         _dependencies_set = load_dependencies(_requirements_filenames, False)
-        dependencies_summary(_dependencies_in_use, _dependencies_set)
+        update_dependencies(_dependencies_in_use, _dependencies_set)
     if sys.argv[1] == 'generate-raw-requirements':
         # Load dependencies from requirements files.
         # Print the dependencies as requirements lines without born.
