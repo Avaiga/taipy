@@ -48,39 +48,107 @@ allow_prereleases = true
 extras = [ "s3",]
 version = "==4.2.13"
 
+[packages.pyarrow]
+version = "==14.0.2"
 
-[packages]
-"pyarrow" = {version="<=10.0.1"}
-"networkx" = {version="<=2.6"}
-"openpyxl" = {version="<=3.1.0"}
-"pandas" = {version="<=2.0.0"}
-"pymongo" = {version="<=4.2.0", extras=["srv"]}
-"sqlalchemy" = {version="<=2.0.0"}
-"toml" = {version="<=0.10"}
-"boto3" = {version="<=1.29.4"}
-"taipy-config" = {version="<=3.0.0"}
-"backports.zoneinfo" = {version="<=0.2.1", markers="python_version<'3.9'"}
-"cookiecutter" = {version="<=2.1.1"}
-"taipy-gui" = {version="<=3.0.0"}
-"taipy-rest" = {version="<=3.0.0"}
-"taipy-templates" = {version="<=3.0.0"}
-"flask" = {version="<=3.0.0"}
-"flask-cors" = {version="<=4.0.0"}
-"flask-socketio" = {version="<=5.3.6"}
-"markdown" = {version="<=3.4.4"}
-"python-dotenv" = {version="<=1.0.0"}
-"pytz" = {version="<=2021.3"}
-"tzlocal" = {version="<=3.0"}
-"gevent" = {version="<=23.7.0"}
-"gevent-websocket" = {version="<=0.10.1"}
-"kthread" = {version="<=0.2.3"}
-"gitignore-parser" = {version="<=0.1"}
-"simple-websocket" = {version="<=0.10.1"}
-"twisted" = {version="<=23.8.0"}
-"deepdiff" = {version="<=6.2.2"}
-"flask-restful" = {version="<=0.3.9"}
-"passlib" = {version="<=1.7.4"}
-"marshmallow" = {version="<=3.20.1"}
-"apispec" = {version="<=6.3", extras=["yaml"]}
-"apispec-webframeworks" = {version="<=0.5.2"}
-"taipy-core" = {version="<=3.0.0"}
+[packages.networkx]
+version = "==3.2.1"
+
+[packages.openpyxl]
+version = "==3.1.2"
+
+[packages.pandas]
+version = "==2.1.4"
+
+[packages.pymongo]
+version = "==4.6.1"
+extras = [ "srv",]
+
+[packages.sqlalchemy]
+version = "==2.0.25"
+
+[packages.toml]
+version = "==0.10.2"
+
+[packages.boto3]
+version = "==1.34.21"
+
+[packages.taipy-config]
+version = "<=3.0.0"
+
+[packages."backports.zoneinfo"]
+version = "<=0.2.1"
+markers = "python_version<'3.9'"
+
+[packages.cookiecutter]
+version = "==2.5.0"
+
+[packages.taipy-gui]
+version = "<=3.0.0"
+
+[packages.taipy-rest]
+version = "<=3.0.0"
+
+[packages.taipy-templates]
+version = "<=3.0.0"
+
+[packages.flask]
+version = "==3.0.0"
+
+[packages.flask-cors]
+version = "==4.0.0"
+
+[packages.flask-socketio]
+version = "==5.3.6"
+
+[packages.markdown]
+version = "==3.5.2"
+
+[packages.python-dotenv]
+version = "==1.0.0"
+
+[packages.pytz]
+version = "==2023.3.post1"
+
+[packages.tzlocal]
+version = "==5.2"
+
+[packages.gevent]
+version = "==23.9.1"
+
+[packages.gevent-websocket]
+version = "==0.10.1"
+
+[packages.kthread]
+version = "==0.2.3"
+
+[packages.gitignore-parser]
+version = "==0.1.10"
+
+[packages.simple-websocket]
+version = "==1.0.0"
+
+[packages.twisted]
+version = "==23.10.0"
+
+[packages.deepdiff]
+version = "==6.7.1"
+
+[packages.flask-restful]
+version = "==0.3.10"
+
+[packages.passlib]
+version = "==1.7.4"
+
+[packages.marshmallow]
+version = "==3.20.2"
+
+[packages.apispec]
+version = "==6.4.0"
+extras = [ "yaml",]
+
+[packages.apispec-webframeworks]
+version = "==1.0.0"
+
+[packages.taipy-core]
+version = "<=3.0.0"
