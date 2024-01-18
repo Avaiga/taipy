@@ -111,6 +111,23 @@ class Package:
             return f'{name}>={self.min_version},<={self.latest_release.version};{self.installation_markers}'
         return f'{name}>={self.min_version},<={self.latest_release.version}'
 
+    def as_pipfile_line(self) -> str:
+        """
+        Return the package as a pipfile line.
+        If min_version is True, the min version is used.
+        """
+        line = f'"{self.name}" = {{version="=={self.max_version}"'
+
+        if self.installation_markers:
+            line += f', markers="{self.installation_markers}"'
+
+        if self.extras_dependencies:
+            dep = ','.join(f'"{p}"' for p in self.extras_dependencies)
+            line += f', extras=[{dep}]'
+
+        line += '}'
+        return line
+
     @classmethod
     def check_format(cls, package: str):
         """
@@ -331,7 +348,9 @@ def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
     """
     Update dependencies version of a Pipfile in place.
     """
+    dependencies_str = ""
     pipfile_obj = toml.load(pipfile)
+
     for name, dep in pipfile_obj['packages'].items():
         # Find the package in use.
         rp = dependencies_version.get(name)
@@ -342,14 +361,16 @@ def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
         if not rp:
             # Package not found. Can be due to python version.
             # Ex: backports.zoneinfo
-            continue
-
-        if isinstance(dep, dict):
-            dep['version'] = f'=={rp.max_version}'
+            dependencies_str += f'"name" = {dep}\n'
         else:
-            pipfile_obj['packages'][name] = f'=={rp.max_version}'
+            if isinstance(dep, dict):
+                rp.max_version = dep['version'].replace('==', '')
+            else:
+                rp.max_version = dep.replace('==', '')
 
-    Path(pipfile).write_text(toml.dumps(pipfile_obj), 'UTF-8')
+    del pipfile_obj['packages']
+    toml_str = toml.dumps(pipfile_obj)
+    Path(pipfile).write_text(f'{toml_str}\n\n[packages]\n{dependencies_str}', 'UTF-8')
 
 
 if __name__ == '__main__':
