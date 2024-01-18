@@ -339,6 +339,8 @@ def update_pipfile(dependencies_version: Dict[str, Package], pipfile: str):
     pipfile_obj = toml.load(pipfile)
 
     for name, dep in pipfile_obj['packages'].items():
+        if isinstance(dep, dict):
+            name = f'{name}[{",".join(dep["extras"])}]'
         # Find the package in use.
         rp = dependencies_version.get(name)
         # Some package as 'gitignore-parser' becomes 'gitignore_parser' during the installation.
