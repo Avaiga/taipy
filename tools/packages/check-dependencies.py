@@ -385,12 +385,14 @@ def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
             # Package not found. Can be due to python version.
             # Ex: backports.zoneinfo
             if isinstance(dep, dict):
+                new_dep = ""
                 # Format as a Pipfile line.
-                dep = f"version={dep['version']}"
+                new_dep = f"version={dep['version']}"
                 if dep.get('markers'):
-                    dep += f', markers="{dep["markers"]}"'
+                    new_dep += f', markers="{dep["markers"]}"'
                 if dep.get('extras'):
-                    dep += f', extras=["{dep["extras"]}"]'
+                    new_dep += f', extras=["{dep["extras"]}"]'
+                dep = new_dep
             dependencies_str += f'"{name}" = {dep}\n'
         else:
             dependencies_str += f'{rp.as_pipfile_line()}\n'
