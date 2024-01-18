@@ -129,7 +129,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 self.jobs_list = None
             if event.operation == EventOperation.UPDATE:
                 try:
-                    job_entity = core_get(str(event.entity_id))
+                    job_entity = t.cast(Job, core_get(str(event.entity_id)))
                     self.gui._broadcast(
                         _GuiCoreContext._CORE_CHANGED_NAME,
                         {"task": {"id": job_entity.task.id, "status": job_entity.status.name}},
@@ -469,9 +469,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def get_datanodes_tree(self, scenario: t.Optional[Scenario]):
         with self.lock:
             self.__do_datanodes_tree()
-        return (self.data_nodes_by_owner.get(scenario, []) if self.data_nodes_by_owner else []) + (
-            self.get_scenarios() if not scenario else []
-        )
+        return (
+            self.data_nodes_by_owner.get(scenario.id if scenario else None, []) if self.data_nodes_by_owner else []
+        ) + (self.get_scenarios() if not scenario else [])
 
     def data_node_adapter(self, data):
         try:
