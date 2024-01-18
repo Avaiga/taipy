@@ -37,7 +37,7 @@ jobs:
           # Any new packages available are printed to stdout.
           # If nothing is printed, the Pipfile is up to date and workflow can stop.
           echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
-          bash check-dependencies.sh >> "$GITHUB_OUTPUT"
+          bash check-dependencies.sh ../../Pipfile >> "$GITHUB_OUTPUT"
           echo EOF >> "$GITHUB_OUTPUT"
 
       - name: Comment PR
