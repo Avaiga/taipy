@@ -18,6 +18,7 @@ jobs:
         python-version: ['3.11']
         os: [ubuntu-latest]
     permissions:
+      contents: write
       pull-requests: write
     runs-on: ${{ matrix.os }}
     steps:
