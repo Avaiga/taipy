@@ -18,8 +18,6 @@ jobs:
         python-version: ['3.8', '3.9', '3.10', '3.11']
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
-    env:
-      PIPFILE_PATH: ../../Pipfile
     steps:
       - uses: actions/checkout@v4
 
@@ -39,7 +37,7 @@ jobs:
           # Any new packages available are printed to stdout.
           # If nothing is printed, the Pipfile is up to date and workflow can stop.
           #echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
-          bash check-dependencies.sh $PIPFILE_PATH #>> "$GITHUB_OUTPUT"
+          bash check-dependencies.sh #>> "$GITHUB_OUTPUT"
           #echo EOF >> "$GITHUB_OUTPUT"
 
       - name: Comment PR
