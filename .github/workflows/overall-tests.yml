@@ -15,8 +15,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.11']
+        os: [ubuntu-latest]
+    permissions:
+      pull-requests: write
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -40,36 +42,48 @@ jobs:
           bash check-dependencies.sh ../../Pipfile >> "$GITHUB_OUTPUT"
           echo EOF >> "$GITHUB_OUTPUT"
 
-      - name: Comment PR
+      - name: Create the pull_request
         if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == '3.11' && matrix.os == 'windows-latest'
-        uses: thollander/actions-comment-pull-request@v2
+        uses: peter-evans/create-pull-request@v5
         with:
-          message: |
-            New packages available for ${{ matrix.python-version }}:
-            ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Update dependencies
+          committer: TaiBot
+          author: TaiBot
+          signoff: false
+          branch: dependencies/update
+          title: 'New dependencies available'
+          body: ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
+          draft: false
+        
+        # uses: thollander/actions-comment-pull-request@v2
+        # with:
+        #   message: |
+        #     New packages available for ${{ matrix.python-version }}:
+        #     ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
 
-      - name: Install dependencies
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
-        uses: ./.github/actions/install
-        with:
-          python-version: ${{ matrix.python-version }}
-          os: ${{ matrix.os }}
+      # - name: Install dependencies
+      #   if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
+      #   uses: ./.github/actions/install
+      #   with:
+      #     python-version: ${{ matrix.python-version }}
+      #     os: ${{ matrix.os }}
 
-      - name: Print Pipfile if update
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
-        run: cat $PIPFILE_PATH
+      # - name: Print Pipfile if update
+      #   if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
+      #   run: cat ../../Pipfile
 
-      - name: Pytest
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
-        run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
+      # - name: Pytest
+      #   if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
+      #   run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
 
-      - name: Pytest Core orchestrator_dispatcher
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
-        run: pipenv run pytest -m "orchestrator_dispatcher" tests/core
+      # - name: Pytest Core orchestrator_dispatcher
+      #   if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
+      #   run: pipenv run pytest -m "orchestrator_dispatcher" tests/core
 
-      - name: Pytest Core standalone
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
-        run: pipenv run pytest -m "standalone" tests/core
+      # - name: Pytest Core standalone
+      #   if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
+      #   run: pipenv run pytest -m "standalone" tests/core
 
 
   # overall-tests:

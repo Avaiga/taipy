@@ -313,12 +313,6 @@ def dependencies_summary(dependencies_in_use: Dict[str, Package], dependencies_s
                     rp.max_version,
                     ','.join(f.split('/')[0] for f in ps.files)
                 ))
-        else:
-            to_print.append((
-                name,
-                'N.C.',
-                ','.join(f.split('/')[0] for f in ps.files)
-            ))
 
     to_print.sort(key=lambda x: x[0])
     print(tabulate.tabulate(to_print, headers=['name', 'version', 'files'], tablefmt='pretty'))
