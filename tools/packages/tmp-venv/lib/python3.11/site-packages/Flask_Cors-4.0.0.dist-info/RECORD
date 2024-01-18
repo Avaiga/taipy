@@ -1,0 +1,17 @@
+Flask_Cors-4.0.0.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+Flask_Cors-4.0.0.dist-info/LICENSE,sha256=bhob3FSDTB4HQMvOXV9vLK4chG_Sp_SCsRZJWU-vvV0,1069
+Flask_Cors-4.0.0.dist-info/METADATA,sha256=iien2vLs6EIqceJgaNEJ6FPinwfjzFWSNl7XOkuyc10,5419
+Flask_Cors-4.0.0.dist-info/RECORD,,
+Flask_Cors-4.0.0.dist-info/REQUESTED,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0
+Flask_Cors-4.0.0.dist-info/WHEEL,sha256=a-zpFRIJzOq5QfuhBzbhiA1eHTzNCJn8OdRvhdNX0Rk,110
+Flask_Cors-4.0.0.dist-info/top_level.txt,sha256=aWye_0QNZPp_QtPF4ZluLHqnyVLT9CPJsfiGhwqkWuo,11
+flask_cors/__init__.py,sha256=wZDCvPTHspA2g1VV7KyKN7R-uCdBnirTlsCzgPDcQtI,792
+flask_cors/__pycache__/__init__.cpython-311.pyc,,
+flask_cors/__pycache__/core.cpython-311.pyc,,
+flask_cors/__pycache__/decorator.cpython-311.pyc,,
+flask_cors/__pycache__/extension.cpython-311.pyc,,
+flask_cors/__pycache__/version.cpython-311.pyc,,
+flask_cors/core.py,sha256=e1u_o5SOcS_gMWGjcQrkyk91uPICnzZ3AXZvy5jQ_FE,14063
+flask_cors/decorator.py,sha256=BeJsyX1wYhVKWN04FAhb6z8YqffiRr7wKqwzHPap4bw,5009
+flask_cors/extension.py,sha256=nP4Zq_BhgDVWwPdIl_f-uucNxD38pXUo-dkL-voXc58,7832
+flask_cors/version.py,sha256=61rJjfThnbRdElpSP2tm31hPmFnHJmcwoPhtqA0Bi_Q,22

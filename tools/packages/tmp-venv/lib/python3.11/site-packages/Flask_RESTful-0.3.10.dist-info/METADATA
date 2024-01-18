@@ -1,0 +1,29 @@
+Metadata-Version: 2.1
+Name: Flask-RESTful
+Version: 0.3.10
+Summary: Simple framework for creating REST APIs
+Home-page: https://www.github.com/flask-restful/flask-restful/
+Author: Twilio API Team
+Author-email: help@twilio.com
+License: BSD
+Project-URL: Source, https://github.com/flask-restful/flask-restful
+Platform: any
+Classifier: Framework :: Flask
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: License :: OSI Approved :: BSD License
+License-File: LICENSE
+License-File: AUTHORS.md
+Requires-Dist: aniso8601 (>=0.82)
+Requires-Dist: Flask (>=0.8)
+Requires-Dist: six (>=1.3.0)
+Requires-Dist: pytz
+Provides-Extra: docs
+Requires-Dist: sphinx ; extra == 'docs'
+

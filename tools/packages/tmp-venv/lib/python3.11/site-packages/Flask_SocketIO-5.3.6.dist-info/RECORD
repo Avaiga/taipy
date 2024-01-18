@@ -1,0 +1,13 @@
+Flask_SocketIO-5.3.6.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+Flask_SocketIO-5.3.6.dist-info/LICENSE,sha256=aNCWbkgKjS_T1cJtACyZbvCM36KxWnfQ0LWTuavuYKQ,1082
+Flask_SocketIO-5.3.6.dist-info/METADATA,sha256=vmIOzjkNLXRjmocRXtso6hLV27aiJgH7_A55TVJyD4k,2631
+Flask_SocketIO-5.3.6.dist-info/RECORD,,
+Flask_SocketIO-5.3.6.dist-info/REQUESTED,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0
+Flask_SocketIO-5.3.6.dist-info/WHEEL,sha256=yQN5g4mg4AybRjkgi-9yy4iQEFibGQmlz78Pik5Or-A,92
+Flask_SocketIO-5.3.6.dist-info/top_level.txt,sha256=C1ugzQBJ3HHUJsWGzyt70XRVOX-y4CUAR8MWKjwJOQ8,15
+flask_socketio/__init__.py,sha256=ea3QXRYKBje4JQGcNSEOmj42qlf2peRNbCzZZWfD9DE,54731
+flask_socketio/__pycache__/__init__.cpython-311.pyc,,
+flask_socketio/__pycache__/namespace.cpython-311.pyc,,
+flask_socketio/__pycache__/test_client.cpython-311.pyc,,
+flask_socketio/namespace.py,sha256=b3oyXEemu2po-wpoy4ILTHQMVuVQqicogCDxfymfz_w,2020
+flask_socketio/test_client.py,sha256=9_R1y_vP8yr8wzimQUEMAUyVqX12FMXurLj8t1ecDdc,11034

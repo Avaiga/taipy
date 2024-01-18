@@ -1,0 +1,147 @@
+Metadata-Version: 2.1
+Name: deepdiff
+Version: 6.7.1
+Summary: Deep Difference and Search of any Python object/data. Recreate objects by adding adding deltas to each other.
+Home-page: https://github.com/seperman/deepdiff
+Download-URL: https://github.com/seperman/deepdiff/tarball/master
+Author: Seperman
+Author-email: sep@zepworks.com
+License: MIT
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: License :: OSI Approved :: MIT License
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+License-File: AUTHORS.md
+Requires-Dist: ordered-set <4.2.0,>=4.0.2
+Provides-Extra: cli
+Requires-Dist: click ==8.1.3 ; extra == 'cli'
+Requires-Dist: pyyaml ==6.0.1 ; extra == 'cli'
+Provides-Extra: optimize
+Requires-Dist: orjson ; extra == 'optimize'
+
+# DeepDiff v 6.7.1
+
+![Downloads](https://img.shields.io/pypi/dm/deepdiff.svg?style=flat)
+![Python Versions](https://img.shields.io/pypi/pyversions/deepdiff.svg?style=flat)
+![License](https://img.shields.io/pypi/l/deepdiff.svg?version=latest)
+[![Build Status](https://github.com/seperman/deepdiff/workflows/Unit%20Tests/badge.svg)](https://github.com/seperman/deepdiff/actions)
+[![codecov](https://codecov.io/gh/seperman/deepdiff/branch/master/graph/badge.svg?token=KkHZ3siA3m)](https://codecov.io/gh/seperman/deepdiff)
+
+## Modules
+
+- [DeepDiff](https://zepworks.com/deepdiff/current/diff.html): Deep Difference of dictionaries, iterables, strings, and ANY other object.
+- [DeepSearch](https://zepworks.com/deepdiff/current/dsearch.html): Search for objects within other objects.
+- [DeepHash](https://zepworks.com/deepdiff/current/deephash.html): Hash any object based on their content.
+- [Delta](https://zepworks.com/deepdiff/current/delta.html): Store the difference of objects and apply them to other objects.
+- [Extract](https://zepworks.com/deepdiff/current/extract.html): Extract an item from a nested Python object using its path.
+- [commandline](https://zepworks.com/deepdiff/current/commandline.html): Use DeepDiff from commandline.
+
+Tested on Python 3.7+ and PyPy3.
+
+- **[Documentation](https://zepworks.com/deepdiff/6.7.1/)**
+
+## What is new?
+
+Please check the [ChangeLog](CHANGELOG.md) file for the detailed information.
+
+DeepDiff 6-7-1
+
+- Support for subtracting delta objects when iterable_compare_func is used.
+- Better handling of force adding a delta to an object. 
+- Fix for [`Can't compare dicts with both single and double quotes in keys`](https://github.com/seperman/deepdiff/issues/430)
+- Updated docs for Inconsistent Behavior with math_epsilon and ignore_order = True
+
+DeepDiff 6-7-0
+
+- Delta can be subtracted from other objects now.
+- verify_symmetry is deprecated. Use bidirectional instead.
+- always_include_values flag in Delta can be enabled to include values in the delta for every change.
+- Fix for Delta.__add__ breaks with esoteric dict keys.
+- You can load a delta from the list of flat dictionaries.
+
+DeepDiff 6-6-1
+
+- Fix for [DeepDiff raises decimal exception when using significant digits](https://github.com/seperman/deepdiff/issues/426)
+- Introducing group_by_sort_key
+- Adding group_by 2D. For example `group_by=['last_name', 'zip_code']`
+
+
+## Installation
+
+### Install from PyPi:
+
+`pip install deepdiff`
+
+If you want to use DeepDiff from commandline:
+
+`pip install "deepdiff[cli]"`
+
+If you want to improve the performance of DeepDiff with certain functionalities such as improved json serialization:
+
+`pip install "deepdiff[optimize]"`
+
+Install optional packages:
+- [yaml](https://pypi.org/project/PyYAML/)
+- [tomli](https://pypi.org/project/tomli/) (python 3.10 and older) and [tomli-w](https://pypi.org/project/tomli-w/) for writing
+- [clevercsv](https://pypi.org/project/clevercsv/) for more rubust CSV parsing
+- [orjson](https://pypi.org/project/orjson/) for speed and memory optimized parsing
+- [pydantic](https://pypi.org/project/pydantic/)
+
+
+# Documentation
+
+<https://zepworks.com/deepdiff/current/>
+
+### A message from Sep, the creator of DeepDiff
+
+> 👋 Hi there,
+>
+> Thank you for using DeepDiff!
+> As an engineer, I understand the frustration of wrestling with **unruly data** in pipelines.
+> That's why I developed a new tool - [Qluster](https://qluster.ai/solution) to empower non-engineers to control and resolve data issues at scale autonomously and **stop bugging the engineers**! 🛠️
+>
+> If you are going through this pain now, I would love to give you [early access](https://www.qluster.ai/try-qluster) to Qluster and get your feedback.
+
+
+# ChangeLog
+
+Please take a look at the [CHANGELOG](CHANGELOG.md) file.
+
+# Survey
+
+:mega: **Please fill out our [fast 5-question survey](https://forms.gle/E6qXexcgjoKnSzjB8)** so that we can learn how & why you use DeepDiff, and what improvements we should make. Thank you! :dancers:
+
+# Contribute
+
+1. Please make your PR against the dev branch
+2. Please make sure that your PR has tests. Since DeepDiff is used in many sensitive data driven projects, we strive to maintain around 100% test coverage on the code.
+
+Please run `pytest --cov=deepdiff --runslow` to see the coverage report. Note that the `--runslow` flag will run some slow tests too. In most cases you only want to run the fast tests which so you wont add the `--runslow` flag.
+
+Or to see a more user friendly version, please run: `pytest --cov=deepdiff --cov-report term-missing --runslow`.
+
+Thank you!
+
+# Citing
+
+How to cite this library (APA style):
+
+    Dehpour, S. (2023). DeepDiff (Version 6.7.1) [Software]. Available from https://github.com/seperman/deepdiff.
+
+How to cite this library (Chicago style):
+
+    Dehpour, Sep. 2023. DeepDiff (version 6.7.1).
+
+# Authors
+
+Please take a look at the [AUTHORS](AUTHORS.md) file.

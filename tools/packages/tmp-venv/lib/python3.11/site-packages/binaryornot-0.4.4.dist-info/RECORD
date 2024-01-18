@@ -1,0 +1,13 @@
+binaryornot-0.4.4.dist-info/DESCRIPTION.rst,sha256=QGOp8ciWl3QJXmtUSCWTYNLFy4exWZ4IIieSuJ1YWmQ,5120
+binaryornot-0.4.4.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+binaryornot-0.4.4.dist-info/METADATA,sha256=ZbKKAHfl5XQchYqQmoQ6sE7ya3RfAyNBECqYmmtany8,5995
+binaryornot-0.4.4.dist-info/RECORD,,
+binaryornot-0.4.4.dist-info/WHEEL,sha256=o2k-Qa-RMNIJmUdIc7KU6VWR_ErNRbWNlxDIpl7lm34,110
+binaryornot-0.4.4.dist-info/metadata.json,sha256=MDiTh918QrO8YioOU2Rjh-6NO2xehibwl5nSc0NJWWg,1022
+binaryornot-0.4.4.dist-info/top_level.txt,sha256=xSk7ScGP__GIh_D2caJfJk0oRzgpyyqjWiozi5_nvms,12
+binaryornot/__init__.py,sha256=XfSXEYNIhIlBmsiUBzn8nDNSUA-2P5iseHo6sD1ZlyE,80
+binaryornot/__pycache__/__init__.cpython-311.pyc,,
+binaryornot/__pycache__/check.cpython-311.pyc,,
+binaryornot/__pycache__/helpers.cpython-311.pyc,,
+binaryornot/check.py,sha256=Doh9gd_DUYWdGpJ8CCMmu4A-bul3_kV3qnl4OsgDp10,756
+binaryornot/helpers.py,sha256=p6aDimVStPQKZeQNHKkQNneeD8jfT4qpm9hCiV_8jYU,4737

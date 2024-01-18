@@ -1,0 +1,132 @@
+Authors
+=======
+
+A huge thanks to all of our contributors:
+
+- Adam Chainz
+- Alec Nikolas Reiter
+- Alex Gaynor
+- Alex M
+- Alex Morken
+- Andrew Dunham
+- Andriy Yurchuk
+- Anil Kulkarni
+- Antonio Dourado
+- Antonio Herraiz
+- Ares Ou
+- Artur Rodrigues
+- Axel Haustant
+- Belousow Makc
+- Benjamin Dopplinger
+- Bennett, Bryan
+- Bohan Zhang
+- Bryan Bennett
+- Bulat Bochkariov
+- Cameron Brandon White
+- Catherine Devlin
+- Dan Quirk
+- Daniele Esposti
+- Dario Bertini
+- David Arnold
+- David Baumgold
+- David Boucha
+- David Crawford
+- Dimitris Theodorou
+- Doug Black
+- Evan Dale Aromin
+- Eyal Levin
+- Francesco Della Vedova
+- Frank Stratton
+- Garret Raziel
+- Gary Belvin
+- Gilles Dartiguelongue
+- Giorgio Salluzzo
+- Guillaume BINET
+- Heston Liebowitz
+- Hu WQ
+- Jacob Magnusson
+- James Booth
+- James Ogura
+- James Turk
+- Jeff Widman
+- Joakim Ekberg
+- Johannes
+- Jordan Yelloz
+- Josh Friend
+- Joshua C. Randall
+- Joshua Randall
+- José Fernández Ramos
+- Juan Rossi
+- JuneHyeon Bae
+- Kamil Gałuszka
+- Kevin Burke
+- Kevin Deldycke
+- Kevin Funk
+- Kyle Conroy
+- Lance Ingle
+- Lars Holm Nielsen
+- Luiz Armesto
+- Malthe Borch
+- Marek Hlobil
+- Matt Wright
+- Max Mautner
+- Max Peterson
+- Maxim
+- Michael Hwang
+- Michael Newman
+- Miguel Grinberg
+- Mihai Tomescu
+- Neil Halelamien
+- Nicolas Harraudeau
+- Pavel Tyslyatsky
+- Petrus J.v.Rensburg
+- Philippe Ndiaye
+- Piotr Husiatyński
+- Prasanna Swaminathan
+- Robert Warner
+- Rod Cloutier
+- Ryan Horn
+- Rémi Alvergnat
+- Sam Kimbrel
+- Samarth Shah
+- Sami Jaktholm
+- Sander Sink
+- Sasha Baranov
+- Saul Diez-Guerra
+- Sergey Romanov
+- Shreyans Sheth
+- Steven Leggett
+- Sven-Hendrik Haase
+- Usman Ehtesham Gul
+- Victor Neo
+- Vlad Frolov
+- Vladimir Pal
+- WooParadog
+- Yaniv Aknin
+- akash
+- bret barker
+- hachichaud
+- jbouzekri
+- jobou
+- johnrichter
+- justanr
+- k-funk
+- kelvinhammond
+- kenjones
+- kieran gorman
+- kumy
+- lyschoening
+- mailto1587
+- mniebla
+- mozillazg
+- muchosalsa
+- nachinius
+- nixdata
+- papaeye
+- pingz
+- saml
+- siavashg
+- silasray
+- soasme
+- ueg1990
+- y-p

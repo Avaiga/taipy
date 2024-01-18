@@ -1,0 +1,1 @@
+If twist or twistd exit with a signal it now delivers that signal to itself instead of exiting normally.  On Unix platforms this results in a nonzero exit code where previously a zero exit code was returned.

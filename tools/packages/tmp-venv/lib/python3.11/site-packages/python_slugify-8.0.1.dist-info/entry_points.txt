@@ -1,0 +1,3 @@
+[console_scripts]
+slugify = slugify.__main__:main
+

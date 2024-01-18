@@ -1,0 +1,1 @@
+twisted.runner.procmon now logs to a twisted.logger.Logger instance defined on instances of ProcessMonitor instead of to the global legacy twisted.python.log instance.

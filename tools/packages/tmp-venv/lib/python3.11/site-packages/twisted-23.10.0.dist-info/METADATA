@@ -1,0 +1,224 @@
+Metadata-Version: 2.1
+Name: Twisted
+Version: 23.10.0
+Summary: An asynchronous networking framework written in Python
+Project-URL: Changelog, https://github.com/twisted/twisted/blob/HEAD/NEWS.rst
+Project-URL: Documentation, https://docs.twistedmatrix.com/
+Project-URL: Homepage, https://twistedmatrix.com/
+Project-URL: Issues, https://twistedmatrix.com/trac/report
+Project-URL: Source, https://github.com/twisted/twisted
+Project-URL: Twitter, https://twitter.com/twistedmatrix
+Author-email: Twisted Matrix Laboratories <twisted-python@twistedmatrix.com>
+License: MIT License
+License-File: LICENSE
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.8.0
+Requires-Dist: attrs>=21.3.0
+Requires-Dist: automat>=0.8.0
+Requires-Dist: constantly>=15.1
+Requires-Dist: hyperlink>=17.1.1
+Requires-Dist: incremental>=22.10.0
+Requires-Dist: twisted-iocpsupport<2,>=1.0.2; platform_system == 'Windows'
+Requires-Dist: typing-extensions>=4.2.0
+Requires-Dist: zope-interface>=5
+Provides-Extra: all-non-platform
+Requires-Dist: twisted[conch,http2,serial,test,tls]; extra == 'all-non-platform'
+Provides-Extra: all_non_platform
+Requires-Dist: twisted[conch,http2,serial,test,tls]; extra == 'all_non_platform'
+Provides-Extra: conch
+Requires-Dist: appdirs>=1.4.0; extra == 'conch'
+Requires-Dist: bcrypt>=3.1.3; extra == 'conch'
+Requires-Dist: cryptography>=3.3; extra == 'conch'
+Provides-Extra: dev
+Requires-Dist: coverage<7,>=6b1; extra == 'dev'
+Requires-Dist: pyflakes~=2.2; extra == 'dev'
+Requires-Dist: python-subunit~=1.4; extra == 'dev'
+Requires-Dist: twisted[dev-release]; extra == 'dev'
+Requires-Dist: twistedchecker~=0.7; extra == 'dev'
+Provides-Extra: dev-release
+Requires-Dist: pydoctor~=23.9.0; extra == 'dev-release'
+Requires-Dist: sphinx-rtd-theme~=1.3; extra == 'dev-release'
+Requires-Dist: sphinx<7,>=6; extra == 'dev-release'
+Requires-Dist: towncrier~=23.6; extra == 'dev-release'
+Provides-Extra: dev_release
+Requires-Dist: pydoctor~=23.9.0; extra == 'dev_release'
+Requires-Dist: sphinx-rtd-theme~=1.3; extra == 'dev_release'
+Requires-Dist: sphinx<7,>=6; extra == 'dev_release'
+Requires-Dist: towncrier~=23.6; extra == 'dev_release'
+Provides-Extra: gtk-platform
+Requires-Dist: pygobject; extra == 'gtk-platform'
+Requires-Dist: twisted[all-non-platform]; extra == 'gtk-platform'
+Provides-Extra: gtk_platform
+Requires-Dist: pygobject; extra == 'gtk_platform'
+Requires-Dist: twisted[all-non-platform]; extra == 'gtk_platform'
+Provides-Extra: http2
+Requires-Dist: h2<5.0,>=3.0; extra == 'http2'
+Requires-Dist: priority<2.0,>=1.1.0; extra == 'http2'
+Provides-Extra: macos-platform
+Requires-Dist: pyobjc-core; extra == 'macos-platform'
+Requires-Dist: pyobjc-framework-cfnetwork; extra == 'macos-platform'
+Requires-Dist: pyobjc-framework-cocoa; extra == 'macos-platform'
+Requires-Dist: twisted[all-non-platform]; extra == 'macos-platform'
+Provides-Extra: macos_platform
+Requires-Dist: pyobjc-core; extra == 'macos_platform'
+Requires-Dist: pyobjc-framework-cfnetwork; extra == 'macos_platform'
+Requires-Dist: pyobjc-framework-cocoa; extra == 'macos_platform'
+Requires-Dist: twisted[all-non-platform]; extra == 'macos_platform'
+Provides-Extra: mypy
+Requires-Dist: mypy-zope~=1.0.1; extra == 'mypy'
+Requires-Dist: mypy~=1.5.1; extra == 'mypy'
+Requires-Dist: twisted[all-non-platform,dev]; extra == 'mypy'
+Requires-Dist: types-pyopenssl; extra == 'mypy'
+Requires-Dist: types-setuptools; extra == 'mypy'
+Provides-Extra: osx-platform
+Requires-Dist: twisted[macos-platform]; extra == 'osx-platform'
+Provides-Extra: osx_platform
+Requires-Dist: twisted[macos-platform]; extra == 'osx_platform'
+Provides-Extra: serial
+Requires-Dist: pyserial>=3.0; extra == 'serial'
+Requires-Dist: pywin32!=226; platform_system == 'Windows' and extra == 'serial'
+Provides-Extra: test
+Requires-Dist: cython-test-exception-raiser<2,>=1.0.2; extra == 'test'
+Requires-Dist: hypothesis>=6.56; extra == 'test'
+Requires-Dist: pyhamcrest>=2; extra == 'test'
+Provides-Extra: tls
+Requires-Dist: idna>=2.4; extra == 'tls'
+Requires-Dist: pyopenssl>=21.0.0; extra == 'tls'
+Requires-Dist: service-identity>=18.1.0; extra == 'tls'
+Provides-Extra: windows-platform
+Requires-Dist: pywin32!=226; extra == 'windows-platform'
+Requires-Dist: twisted[all-non-platform]; extra == 'windows-platform'
+Provides-Extra: windows_platform
+Requires-Dist: pywin32!=226; extra == 'windows_platform'
+Requires-Dist: twisted[all-non-platform]; extra == 'windows_platform'
+Description-Content-Type: text/x-rst
+
+Twisted
+#######
+
+|gitter|_
+|rtd|_
+|pypi|_
+|ci|_
+
+For information on changes in this release, see the `NEWS <https://github.com/twisted/twisted/blob/trunk/NEWS.rst>`_ file.
+
+
+What is this?
+-------------
+
+Twisted is an event-based framework for internet applications, supporting Python 3.6+.
+It includes modules for many different purposes, including the following:
+
+- ``twisted.web``: HTTP clients and servers, HTML templating, and a WSGI server
+- ``twisted.conch``: SSHv2 and Telnet clients and servers and terminal emulators
+- ``twisted.words``: Clients and servers for IRC, XMPP, and other IM protocols
+- ``twisted.mail``: IMAPv4, POP3, SMTP clients and servers
+- ``twisted.positioning``: Tools for communicating with NMEA-compatible GPS receivers
+- ``twisted.names``: DNS client and tools for making your own DNS servers
+- ``twisted.trial``: A unit testing framework that integrates well with Twisted-based code.
+
+Twisted supports all major system event loops -- ``select`` (all platforms), ``poll`` (most POSIX platforms), ``epoll`` (Linux), ``kqueue`` (FreeBSD, macOS), IOCP (Windows), and various GUI event loops (GTK+2/3, Qt, wxWidgets).
+Third-party reactors can plug into Twisted, and provide support for additional event loops.
+
+
+Installing
+----------
+
+To install the latest version of Twisted using pip::
+
+  $ pip install twisted
+
+Additional instructions for installing this software are in `the installation instructions <https://github.com/twisted/twisted/blob/trunk/INSTALL.rst>`_.
+
+
+Documentation and Support
+-------------------------
+
+Twisted's documentation is available from the `Twisted Matrix website <https://twistedmatrix.com/documents/current/>`_.
+This documentation contains how-tos, code examples, and an API reference.
+
+Help is also available on the `Twisted mailing list <https://mail.python.org/mailman3/lists/twisted.python.org/>`_.
+
+There is also an IRC channel, ``#twisted``,
+on the `Libera.Chat <https://libera.chat/>`_ network.
+A web client is available at `web.libera.chat <https://web.libera.chat/>`_.
+
+
+Unit Tests
+----------
+
+Twisted has a comprehensive test suite, which can be run by ``tox``::
+
+  $ tox -l                       # to view all test environments
+  $ tox -e nocov                 # to run all the tests without coverage
+  $ tox -e withcov               # to run all the tests with coverage
+  $ tox -e alldeps-withcov-posix # install all dependencies, run tests with coverage on POSIX platform
+
+
+You can test running the test suite under the different reactors with the ``TWISTED_REACTOR`` environment variable::
+
+  $ env TWISTED_REACTOR=epoll tox -e alldeps-withcov-posix
+
+Some of these tests may fail if you:
+
+* don't have the dependencies required for a particular subsystem installed,
+* have a firewall blocking some ports (or things like Multicast, which Linux NAT has shown itself to do), or
+* run them as root.
+
+
+Static Code Checkers
+--------------------
+
+You can ensure that code complies to Twisted `coding standards <https://twistedmatrix.com/documents/current/core/development/policy/coding-standard.html>`_::
+
+  $ tox -e lint   # run pre-commit to check coding stanards
+  $ tox -e mypy   # run MyPy static type checker to check for type errors
+
+Or, for speed, use pre-commit directly::
+
+  $ pipx run pre-commit run
+
+
+Copyright
+---------
+
+All of the code in this distribution is Copyright (c) 2001-2023 Twisted Matrix Laboratories.
+
+Twisted is made available under the MIT license.
+The included `LICENSE <https://github.com/twisted/twisted/blob/trunk/LICENSE>`_ file describes this in detail.
+
+
+Warranty
+--------
+
+  THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+  EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS
+  TO THE USE OF THIS SOFTWARE IS WITH YOU.
+
+  IN NO EVENT WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY
+  AND/OR REDISTRIBUTE THE LIBRARY, BE LIABLE TO YOU FOR ANY DAMAGES, EVEN IF
+  SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+  DAMAGES.
+
+Again, see the included `LICENSE <https://github.com/twisted/twisted/blob/trunk/LICENSE>`_ file for specific legal details.
+
+
+.. |pypi| image:: https://img.shields.io/pypi/v/twisted.svg
+.. _pypi: https://pypi.python.org/pypi/twisted
+
+.. |gitter| image:: https://img.shields.io/gitter/room/twisted/twisted.svg
+.. _gitter: https://gitter.im/twisted/twisted
+
+.. |ci| image:: https://github.com/twisted/twisted/actions/workflows/test.yaml/badge.svg
+.. _ci: https://github.com/twisted/twisted
+
+.. |rtd| image:: https://readthedocs.org/projects/twisted/badge/?version=latest&style=flat
+.. _rtd: https://docs.twistedmatrix.com
