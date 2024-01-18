@@ -28,6 +28,8 @@ jobs:
       - name: Check if the latest version supported is up to date.
         id: ensure-dependencies-are-up-to-date
         working-directory: tools/packages
+        env:
+          PIPFILE_PATH: ../../Pipfile
         run: |
           # Ensure dependencies are aligned between Taipy packages
           pip install -r requirements.txt
@@ -37,11 +39,11 @@ jobs:
           # Any new packages available are printed to stdout.
           # If nothing is printed, the Pipfile is up to date and workflow can stop.
           #echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
-          bash check-dependencies.sh ../../Pipfile #>> "$GITHUB_OUTPUT"
+          bash check-dependencies.sh $PIPFILE_PATH #>> "$GITHUB_OUTPUT"
           #echo EOF >> "$GITHUB_OUTPUT"
 
       - name: Comment PR
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == '3.11' && matrix.os == 'windows-latest'
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
