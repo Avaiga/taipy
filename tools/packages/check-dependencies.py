@@ -348,6 +348,8 @@ def update_dependencies(dependencies_in_use: Dict[str, Package], dependencies_se
                 for d in dependencies_set.values()
                 if d.files == fd
             ), 'UTF-8')
+        print(f"Updated {fd}")
+        print(Path(fd).read_text('UTF-8'))
 
 
 def generate_raw_requirements_txt(dependencies: Dict[str, Package]):
