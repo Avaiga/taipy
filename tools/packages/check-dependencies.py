@@ -310,7 +310,11 @@ def display_dependencies_versions(dependencies: Dict[str, Package]):
     print(tabulate.tabulate(to_print, headers=h, tablefmt='pretty'))
 
 
-def update_dependencies(dependencies_in_use: Dict[str, Package], dependencies_set: Dict[str, Package]):
+def update_dependencies(
+        dependencies_in_use: Dict[str, Package],
+        dependencies_set: Dict[str, Package],
+        requirements_filenames: List[str]
+    ):
     """
     Display dependencies to updates.
     """
@@ -340,8 +344,7 @@ def update_dependencies(dependencies_in_use: Dict[str, Package], dependencies_se
     print(tabulate.tabulate(to_print, headers=['name', 'version', 'files'], tablefmt='pretty'))
 
     # Update requirements files.
-    requirements_to_update = set(d.files for d in dependencies_set.values())
-    for fd in requirements_to_update:
+    for fd in requirements_filenames:
         Path(fd).write_text(
             '\n'.join(
                 d.as_requirements_line()
@@ -401,7 +404,7 @@ if __name__ == '__main__':
         _requirements_filenames = glob.glob('taipy*/*requirements.txt')
         _dependencies_in_use = load_dependencies([sys.argv[2]], False)
         _dependencies_set = load_dependencies(_requirements_filenames, False)
-        update_dependencies(_dependencies_in_use, _dependencies_set)
+        update_dependencies(_dependencies_in_use, _dependencies_set, _requirements_filenames)
     if sys.argv[1] == 'generate-raw-requirements':
         # Load dependencies from requirements files.
         # Print the dependencies as requirements lines without born.
