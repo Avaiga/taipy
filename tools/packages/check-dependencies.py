@@ -352,8 +352,6 @@ def update_dependencies(
                 for d in sorted(dependencies_set.values(), key=lambda d: d.name)
                 if fd in d.files
             ), 'UTF-8')
-        print(f"Updated {fd}")
-        print(Path(fd).read_text('UTF-8'))
 
 
 def generate_raw_requirements_txt(dependencies: Dict[str, Package]):
