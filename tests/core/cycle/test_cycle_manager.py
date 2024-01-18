@@ -291,6 +291,7 @@ def test_get_primary(tmpdir, cycle, current_datetime):
         == 0
     )
 
+
 def test_get_scenarios_by_time(at=datetime(2024, 1, 17, 1, 0, 0, 0)):
     creation_date_1 = datetime(2024, 1, 1, 1, 0, 0, 0)
     scenario_config = Config.configure_scenario("sc", None, None, Frequency.MONTHLY)
@@ -306,4 +307,4 @@ def test_get_scenarios_by_time(at=datetime(2024, 1, 17, 1, 0, 0, 0)):
 
     results = _CycleManager._get_scenarios_by_time(at)
 
-    assert len(results) == 2 
+    assert len(results) == 2
