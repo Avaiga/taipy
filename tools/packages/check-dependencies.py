@@ -6,11 +6,15 @@ It can be used:
 - To display a summary of the dependencies to update.
 """
 import sys
+import glob
 import itertools
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict
 from dataclasses import dataclass, field
+
+import toml
+import tabulate
 
 
 @dataclass
@@ -264,8 +268,6 @@ def display_dependencies_versions(dependencies: Dict[str, Package]):
     """
     Display dependencies information.
     """
-    import tabulate  # pylint: disable=import-outside-toplevel
-
     to_print = []
 
     for package_name, package in dependencies.items():
@@ -291,8 +293,6 @@ def dependencies_summary(dependencies_in_use: Dict[str, Package], dependencies_s
     """
     Display dependencies to updates.
     """
-    import tabulate  # pylint: disable=import-outside-toplevel
-
     to_print = []
 
     for name, ps in dependencies_set.items():
@@ -332,12 +332,11 @@ def generate_raw_requirements_txt(dependencies: Dict[str, Package]):
 
 
 def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
-    import toml  # pylint: disable=import-outside-toplevel
-
+    """
+    Update dependencies version of a Pipfile in place.
+    """
     pipfile_obj = toml.load(pipfile)
-    print(dependencies_version.keys())
     for name, dep in pipfile_obj['packages'].items():
-        print(name)
         # Find the package in use.
         rp = dependencies_version.get(name)
         # Some package as 'gitignore-parser' becomes 'gitignore_parser' during the installation.
@@ -368,13 +367,15 @@ if __name__ == '__main__':
         # Load and compare dependencies from requirements files.
         # The first file is the reference to the other.
         # Display the differences including new version available on Pypi.
+        _requirements_filenames = glob.glob('taipy*/*requirements.txt')
         _dependencies_in_use = load_dependencies([sys.argv[2]], False)
-        _dependencies_set = load_dependencies(sys.argv[3: len(sys.argv)], False)
+        _dependencies_set = load_dependencies(_requirements_filenames, False)
         dependencies_summary(_dependencies_in_use, _dependencies_set)
     if sys.argv[1] == 'generate-raw-requirements':
         # Load dependencies from requirements files.
         # Print the dependencies as requirements lines without born.
-        _dependencies = load_dependencies(sys.argv[2: len(sys.argv)], False)
+        _requirements_filenames = glob.glob('taipy*/*requirements.txt')
+        _dependencies = load_dependencies(_requirements_filenames, False)
         generate_raw_requirements_txt(_dependencies)
     if sys.argv[1] == 'generate-pipfile':
         # Generate a new Pipfile from requirements files using dependencies versions

@@ -3,10 +3,9 @@
 # Then install and dump them to check the latest installable requirements.
 # If the program detect a new package available, it print it on stdout.
 # Finally, it will generate a Pipfile with the latest version available.
-DEPENDENCIES=taipy*/*requirements.txt
 
 # Generate requirements.txt without born.
-python check-dependencies.py generate-raw-requirements $DEPENDENCIES > raw-requirements.txt
+python check-dependencies.py generate-raw-requirements > raw-requirements.txt
 
 # Create a virtual environment, install dependencies, and freeze them
 python -m venv tmp-venv > /dev/null
@@ -19,7 +18,7 @@ else
 fi
 
 # Display dependencies summary.
-python check-dependencies.py dependencies-summary new-requirements.txt $DEPENDENCIES
+python check-dependencies.py dependencies-summary new-requirements.txt
 
 # Generate a Pipfile based on the new dependencies.
 python check-dependencies.py generate-pipfile $1 new-requirements.txt
