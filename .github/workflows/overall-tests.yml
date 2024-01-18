@@ -43,7 +43,7 @@ jobs:
           echo EOF >> "$GITHUB_OUTPUT"
 
       - name: Create the pull_request
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == '3.11' && matrix.os == 'windows-latest'
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
