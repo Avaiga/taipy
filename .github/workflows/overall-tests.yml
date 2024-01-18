@@ -57,7 +57,7 @@ jobs:
           body: |
             ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
           draft: false
-          add-paths:
+          add-paths: |
             Pipfile.sup
             tools/packages/taipy*/*requirements.txt
         
