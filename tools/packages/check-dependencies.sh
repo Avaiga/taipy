@@ -3,7 +3,7 @@
 # Then install and dump them to check the latest installable requirements.
 # If the program detect a new package available, it print it on stdout.
 # Finally, it will generate a Pipfile with the latest version available.
-
+echo "trace2 1=$1 2=$2"
 # Generate requirements.txt without born.
 python check-dependencies.py generate-raw-requirements > raw-requirements.txt
 
