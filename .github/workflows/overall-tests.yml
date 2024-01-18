@@ -31,14 +31,14 @@ jobs:
         run: |
           # Ensure dependencies are aligned between Taipy packages
           pip install -r requirements.txt
-          python check-dependencies.py ensure-same-version taipy*/*requirements.txt
+          python check-dependencies.py ensure-same-version
 
           # Try to update the Pipfile.
           # Any new packages available are printed to stdout.
           # If nothing is printed, the Pipfile is up to date and workflow can stop.
-          echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
-          bash check-dependencies.sh ../../Pipfile >> "$GITHUB_OUTPUT"
-          echo EOF >> "$GITHUB_OUTPUT"
+          #echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
+          bash check-dependencies.sh ../../Pipfile #>> "$GITHUB_OUTPUT"
+          #echo EOF >> "$GITHUB_OUTPUT"
 
       - name: Comment PR
         if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'

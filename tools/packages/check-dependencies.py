@@ -360,7 +360,8 @@ if __name__ == '__main__':
     if sys.argv[1] == 'ensure-same-version':
         # Load dependencies from requirements files.
         # Verify that the same version is set for the same package across files.
-        _dependencies = load_dependencies(sys.argv[2: len(sys.argv)], True)
+        _requirements_filenames = glob.glob('taipy*/*requirements.txt')
+        _dependencies = load_dependencies(_requirements_filenames, True)
         display_dependencies_versions(_dependencies)
         sys.exit(0)
     if sys.argv[1] == 'dependencies-summary':

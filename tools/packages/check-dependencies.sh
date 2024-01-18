@@ -20,5 +20,6 @@ fi
 # Display dependencies summary.
 python check-dependencies.py dependencies-summary new-requirements.txt
 
+echo python check-dependencies.py generate-pipfile $1 new-requirements.txt
 # Generate a Pipfile based on the new dependencies.
-python check-dependencies.py generate-pipfile ../../Pipfile new-requirements.txt
+python check-dependencies.py generate-pipfile $1 new-requirements.txt
