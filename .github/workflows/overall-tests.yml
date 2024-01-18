@@ -50,11 +50,10 @@ jobs:
           commit-message: Update dependencies
           committer: TaiBot
           author: TaiBot
-          signoff: false
           branch: dependencies/update
-          base: feature/#414-package-updates
           title: 'New dependencies available'
-          body: ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
+          body: |
+            ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
           draft: false
         
         # uses: thollander/actions-comment-pull-request@v2
