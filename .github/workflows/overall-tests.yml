@@ -11,7 +11,6 @@ jobs:
   #  uses: ./.github/workflows/partial-tests.yml
 
   latest-versions:
-    #needs: [partial-tests]
     timeout-minutes: 40
     strategy:
       fail-fast: false
@@ -44,7 +43,9 @@ jobs:
         if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
         uses: thollander/actions-comment-pull-request@v2
         with:
-          message: ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
+          message: |
+            New packages available for ${{ matrix.python-version }}:
+            ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
 
       - name: Install dependencies
         id: install-dependencies
@@ -55,6 +56,12 @@ jobs:
 
       - name: Pytest
         run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
+
+      - name: Pytest Core orchestrator_dispatcher
+        run: pipenv run pytest -m "orchestrator_dispatcher" tests/core
+
+      - name: Pytest Core standalone
+        run: pipenv run pytest -m "standalone" tests/core
 
 
   # overall-tests:
