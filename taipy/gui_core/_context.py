@@ -53,32 +53,12 @@ from taipy.core.data._abstract_tabular import _AbstractTabularDataNode
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event, EventOperation
 from taipy.core.notification.notifier import Notifier
-from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
-from taipy.core.submission.submission import Submission
 from taipy.core.submission.submission_status import SubmissionStatus
 from taipy.gui import Gui, State
 from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
 
 from ._adapters import _EntityType
-
-
-class _SubmissionDetails:
-    def __init__(
-        self,
-        client_id: str,
-        module_context: str,
-        callback: t.Callable,
-        submission_status: SubmissionStatus,
-    ) -> None:
-        self.client_id = client_id
-        self.module_context = module_context
-        self.callback = callback
-        self.submission_status = submission_status
-
-    def set_submission_status(self, submission_status: SubmissionStatus):
-        self.submission_status = submission_status
-        return self
 
 
 class _GuiCoreContext(CoreEventConsumerBase):
@@ -102,6 +82,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
     _DATANODE_VIZ_DATA_ID_VAR = "gui_core_dv_data_id"
     _DATANODE_VIZ_DATA_CHART_ID_VAR = "gui_core_dv_data_chart_id"
     _DATANODE_VIZ_DATA_NODE_PROP = "data_node"
+    _DATANODE_SEL_SCENARIO_PROP = "scenario"
 
     def __init__(self, gui: Gui) -> None:
         self.gui = gui
@@ -109,7 +90,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         self.data_nodes_by_owner: t.Optional[t.Dict[t.Optional[str], DataNode]] = None
         self.scenario_configs: t.Optional[t.List[t.Tuple[str, str]]] = None
         self.jobs_list: t.Optional[t.List[Job]] = None
-        self.client_submission: t.Dict[str, _SubmissionDetails] = dict()
+        self.client_submission: t.Dict[str, SubmissionStatus] = dict()
         # register to taipy core notification
         reg_id, reg_queue = Notifier.register()
         # locks
@@ -121,9 +102,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def process_event(self, event: Event):
         if event.entity_type == EventEntityType.SCENARIO:
-            if event.operation == EventOperation.SUBMISSION:
-                self.scenario_status_callback(event.attribute_name)
-                return
             self.scenario_refresh(
                 event.entity_id
                 if event.operation != EventOperation.DELETION and is_readable(t.cast(ScenarioId, event.entity_id))
@@ -147,6 +125,15 @@ class _GuiCoreContext(CoreEventConsumerBase):
         elif event.entity_type == EventEntityType.JOB:
             with self.lock:
                 self.jobs_list = None
+            if event.operation == EventOperation.UPDATE:
+                try:
+                    job_entity: Job = core_get(event.entity_id)
+                    self.gui._broadcast(
+                        _GuiCoreContext._CORE_CHANGED_NAME,
+                        {"task": {"id": job_entity.task.id, "status": job_entity.status.name}},
+                    )
+                except Exception as e:
+                    _warn(f"Access to sequence {event.entity_id} failed", e)
         elif event.entity_type == EventEntityType.SUBMISSION:
             self.scenario_status_callback(event.entity_id)
         elif event.entity_type == EventEntityType.DATA_NODE:
@@ -167,14 +154,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
         )
 
     def scenario_status_callback(self, submission_id: t.Optional[str]):
-        if not submission_id or not is_readable_submission(submission_id):
+        if not submission_id or not is_readable(submission_id):
             return
         try:
-            sub_details: t.Optional[_SubmissionDetails] = self.client_submission.get(submission_id)
-            if not sub_details:
+            last_status = self.client_submission.get(submission_id)
+            if not last_status:
                 return
 
-            submission = core_get_submission(submission_id)
+            submission = core_get(submission_id)
             if not submission or not submission.entity_id:
                 return
 
@@ -183,13 +170,19 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return
 
             new_status = submission.submission_status
-            if sub_details.submission_status != new_status:
+            if last_status != new_status:
                 # callback
+                submission_name = submission.properties.get("on_submission")
+                if not submission_name:
+                    return
+                submission_fn = self.gui._get_user_function(submission_name)
+                if not callable(submission_fn):
+                    return
                 self.gui._call_user_callback(
-                    sub_details.client_id,
-                    sub_details.callback,
+                    submission.properties.get("client_id"),
+                    submission_fn,
                     [entity, {"submission_status": new_status.name}],
-                    sub_details.module_context,
+                    submission.properties.get("module_context"),
                 )
             with self.submissions_lock:
                 if new_status in (
@@ -199,7 +192,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 ):
                     self.client_submission.pop(submission_id, None)
                 else:
-                    self.client_submission[submission_id] = sub_details.set_submission_status(new_status)
+                    self.client_submission[submission_id] = new_status
 
         except Exception as e:
             _warn(f"Submission ({submission_id}) is not available", e)
@@ -278,15 +271,16 @@ class _GuiCoreContext(CoreEventConsumerBase):
         if (
             args is None
             or not isinstance(args, list)
-            or len(args) < 3
-            or not isinstance(args[0], bool)
+            or len(args) < 4
             or not isinstance(args[1], bool)
-            or not isinstance(args[2], dict)
+            or not isinstance(args[2], bool)
+            or not isinstance(args[3], dict)
         ):
             return
-        update = args[0]
-        delete = args[1]
-        data = args[2]
+        update = args[1]
+        delete = args[2]
+        data = args[3]
+        with_dialog = True if len(args) < 5 else bool(args[4])
         scenario = None
 
         name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
@@ -309,21 +303,27 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     return
                 scenario = core_get(scenario_id)
         else:
-            config_id = data.get(_GuiCoreContext.__PROP_CONFIG_ID)
-            scenario_config = Config.scenarios.get(config_id)
-            if scenario_config is None:
-                state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Invalid configuration id ({config_id})")
-                return
-            date_str = data.get(_GuiCoreContext.__PROP_DATE)
-            try:
-                date = parser.parse(date_str) if isinstance(date_str, str) else None
-            except Exception as e:
-                state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Invalid date ({date_str}).{e}")
-                return
+            if with_dialog:
+                config_id = data.get(_GuiCoreContext.__PROP_CONFIG_ID)
+                scenario_config = Config.scenarios.get(config_id)
+                if with_dialog and scenario_config is None:
+                    state.assign(
+                        _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Invalid configuration id ({config_id})"
+                    )
+                    return
+                date_str = data.get(_GuiCoreContext.__PROP_DATE)
+                try:
+                    date = parser.parse(date_str) if isinstance(date_str, str) else None
+                except Exception as e:
+                    state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Invalid date ({date_str}).{e}")
+                    return
+            else:
+                scenario_config = None
+                date = None
             scenario_id = None
             try:
                 gui: Gui = state._gui
-                on_creation = args[3] if len(args) > 3 and isinstance(args[3], str) else None
+                on_creation = args[0] if isinstance(args[0], str) else None
                 on_creation_function = gui._get_user_function(on_creation) if on_creation else None
                 if callable(on_creation_function):
                     try:
@@ -361,6 +361,16 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         return
                 elif on_creation is not None:
                     _warn(f"on_creation(): '{on_creation}' is not a function.")
+                elif not with_dialog:
+                    if len(Config.scenarios) == 2:
+                        scenario_config = [sc for k, sc in Config.scenarios.items() if k != "default"][0]
+                    else:
+                        state.assign(
+                            _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR,
+                            f"Error creating Scenario: need only one scenario config ({len(Config.scenarios)}).",
+                        )
+                        return
+
                 scenario = create_scenario(scenario_config, date, name)
                 scenario_id = scenario.id
             except Exception as e:
@@ -431,22 +441,19 @@ class _GuiCoreContext(CoreEventConsumerBase):
         entity = core_get(entity_id)
         if entity:
             try:
-                submission_entity = core_submit(entity)
-                if submission_cb := data.get("on_submission_change"):
-                    submission_fn = self.gui._get_user_function(submission_cb)
-                    if callable(submission_fn):
-                        client_id = self.gui._get_client_id()
-                        module_context = self.gui._get_locals_context()
-                        with self.submissions_lock:
-                            self.client_submission[submission_entity.id] = _SubmissionDetails(
-                                client_id,
-                                module_context,
-                                submission_fn,
-                                submission_entity.submission_status,
-                            )
-                    else:
-                        _warn(f"on_submission_change(): '{submission_cb}' is not a valid function.")
-                self.scenario_status_callback(submission_entity.id)
+                on_submission = data.get("on_submission_change")
+                submission_entity = core_submit(
+                    entity,
+                    on_submission=on_submission,
+                    client_id=self.gui._get_client_id(),
+                    module_context=self.gui._get_locals_context(),
+                )
+                if on_submission:
+                    with self.submissions_lock:
+                        self.client_submission[submission_entity.id] = submission_entity.submission_status
+                    if Config.core.mode == "development":
+                        self.client_submission[submission_entity.id] = SubmissionStatus.SUBMITTED
+                        self.scenario_status_callback(submission_entity.id)
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
@@ -457,10 +464,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
             for dn in get_data_nodes():
                 self.data_nodes_by_owner[dn.owner_id].append(dn)
 
-    def get_datanodes_tree(self):
+    def get_datanodes_tree(self, scenario: t.Optional[Scenario]):
         with self.lock:
             self.__do_datanodes_tree()
-        return self.data_nodes_by_owner.get(None, []) + self.get_scenarios()
+        return (self.data_nodes_by_owner.get(scenario, []) if self.data_nodes_by_owner else []) + (
+            self.get_scenarios() if not scenario else []
+        )
 
     def data_node_adapter(self, data):
         try:
@@ -839,12 +848,3 @@ class _GuiCoreContext(CoreEventConsumerBase):
             state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, data_id)
         elif chart_id := data.get("chart_id"):
             state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_CHART_ID_VAR, chart_id)
-
-
-# TODO remove when Submission is supported by Core API
-def is_readable_submission(id: str):
-    return _SubmissionManagerFactory._build_manager()._is_readable(t.cast(Submission, id))
-
-
-def core_get_submission(id: str):
-    return _SubmissionManagerFactory._build_manager()._get(id)
