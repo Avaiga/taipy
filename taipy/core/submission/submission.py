@@ -119,7 +119,7 @@ class Submission(_Entity, _Labeled):
         """
         return self._get_simple_label()
 
-    @property
+    @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def jobs(self) -> List[Job]:
         from ..job._job_manager_factory import _JobManagerFactory
@@ -158,7 +158,7 @@ class Submission(_Entity, _Labeled):
     def __eq__(self, other):
         return self.id == other.id
 
-    @property
+    @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def submission_status(self) -> SubmissionStatus:
         return self._submission_status
@@ -168,7 +168,7 @@ class Submission(_Entity, _Labeled):
     def submission_status(self, submission_status):
         self._submission_status = submission_status
 
-    @property
+    @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def is_abandoned(self) -> bool:
         return self._is_abandoned
@@ -178,7 +178,7 @@ class Submission(_Entity, _Labeled):
     def is_abandoned(self, val):
         self._is_abandoned = val
 
-    @property
+    @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def is_completed(self) -> bool:
         return self._is_completed
@@ -188,7 +188,7 @@ class Submission(_Entity, _Labeled):
     def is_completed(self, val):
         self._is_completed = val
 
-    @property
+    @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def is_canceled(self) -> bool:
         return self._is_canceled

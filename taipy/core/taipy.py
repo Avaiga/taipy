@@ -738,6 +738,15 @@ def get_jobs() -> List[Job]:
     return _JobManagerFactory._build_manager()._get_all()
 
 
+def get_submissions() -> List[Submission]:
+    """Return all the existing submissions.
+
+    Returns:
+        The list of all submissions.
+    """
+    return _SubmissionManagerFactory._build_manager()._get_all()
+
+
 def delete_job(job: Job, force: Optional[bool] = False):
     """Delete a job.
 

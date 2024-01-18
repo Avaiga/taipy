@@ -58,7 +58,7 @@ def cb(s, j):
 
 
 class TestTaipy:
-    def test_set(self, scenario, cycle, sequence, data_node, task):
+    def test_set(self, scenario, cycle, sequence, data_node, task, submission):
         with mock.patch("taipy.core.data._data_manager._DataManager._set") as mck:
             tp.set(data_node)
             mck.assert_called_once_with(data_node)
@@ -74,6 +74,9 @@ class TestTaipy:
         with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._set") as mck:
             tp.set(cycle)
             mck.assert_called_once_with(cycle)
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._set") as mck:
+            tp.set(submission)
+            mck.assert_called_once_with(submission)
 
     def test_is_editable_is_called(self, cycle, job, data_node):
         with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._is_editable") as mck:
@@ -569,15 +572,26 @@ class TestTaipy:
             tp.get_latest_job(task)
             mck.assert_called_once_with(task)
 
-    def test_get_latest_submission(self, task):
-        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._get_latest") as mck:
-            tp.get_latest_submission(task)
-            mck.assert_called_once_with(task)
-
     def test_cancel_job(self):
         with mock.patch("taipy.core.job._job_manager._JobManager._cancel") as mck:
             tp.cancel_job("job_id")
             mck.assert_called_once_with("job_id")
+
+    def test_get_submissions(self):
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._get_all") as mck:
+            tp.get_submissions()
+            mck.assert_called_once_with()
+
+    def test_get_submission(self, task):
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._get") as mck:
+            submission_id = SubmissionId("SUBMISSION_id")
+            tp.get(submission_id)
+            mck.assert_called_once_with(submission_id)
+
+    def test_get_latest_submission(self, task):
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._get_latest") as mck:
+            tp.get_latest_submission(task)
+            mck.assert_called_once_with(task)
 
     def test_block_config_when_core_is_running(self):
         Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
