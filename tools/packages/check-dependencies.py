@@ -107,8 +107,8 @@ class Package:
 
         if with_version:
             if self.installation_markers:
-                return f'{name}>={self.min_version},<={self.latest_release.version};{self.installation_markers}'
-            return f'{name}>={self.min_version},<={self.latest_release.version}'
+                return f'{name}>={self.min_version},<={self.max_version};{self.installation_markers}'
+            return f'{name}>={self.min_version},<={self.max_version}'
 
         if self.installation_markers:
             return f'{name};{self.installation_markers}'
