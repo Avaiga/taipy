@@ -119,7 +119,7 @@ class Submission(_Entity, _Labeled):
         """
         return self._get_simple_label()
 
-    @property  # type: ignore
+    @property
     @_self_reload(_MANAGER_NAME)
     def jobs(self) -> List[Job]:
         from ..job._job_manager_factory import _JobManagerFactory
@@ -158,9 +158,9 @@ class Submission(_Entity, _Labeled):
     def __eq__(self, other):
         return self.id == other.id
 
-    @property  # type: ignore
+    @property
     @_self_reload(_MANAGER_NAME)
-    def submission_status(self):
+    def submission_status(self) -> SubmissionStatus:
         return self._submission_status
 
     @submission_status.setter  # type: ignore
