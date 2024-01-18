@@ -12,7 +12,7 @@ jobs:
 
   overall-tests:
     needs: [partial-tests]
-    timeout-minutes: 40
+    timeout-minutes: 50
     strategy:
       fail-fast: false
       matrix:
@@ -27,10 +27,13 @@ jobs:
           python-version: ${{matrix.python-version}}
 
       - name: Install pipenv
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+        run: pip install --upgrade pipenv
+
+      - name: Install Setuptools and wheel
+        run: pip install --upgrade setuptools wheel
 
       - name: Install Dependencies
-        run: pipenv install --dev --python=${{ matrix.python-version }}
+        run: pipenv install --dev --python=${{ matrix.python-version }} --verbose
 
       - name: Setup LibMagic (MacOS)
         if: matrix.os == 'macos-latest'
@@ -71,10 +74,10 @@ jobs:
           python-version: ${{matrix.python-version}}
 
       - name: Install pipenv
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+        run: pip install --upgrade pipenv
 
       - name: Install Dependencies
-        run: pipenv install --dev --python=${{ matrix.python-version }}
+        run: pipenv install --dev --python=${{ matrix.python-version }} --verbose
 
       - name: Setup LibMagic (MacOS)
         if: matrix.os == 'macos-latest'
@@ -100,10 +103,10 @@ jobs:
           python-version: ${{matrix.python-version}}
 
       - name: Install pipenv
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+        run: pip install --upgrade pipenv
 
       - name: Install Dependencies
-        run: pipenv install --dev --python=${{ matrix.python-version }}
+        run: pipenv install --dev --python=${{ matrix.python-version }} --verbose
 
       - name: Setup LibMagic (MacOS)
         if: matrix.os == 'macos-latest'

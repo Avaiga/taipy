@@ -21,7 +21,7 @@ jobs:
       - uses: chartboost/ruff-action@v1
   tests:
     needs: linter
-    timeout-minutes: 40
+    timeout-minutes: 50
     strategy:
       fail-fast: false
       matrix:
@@ -55,12 +55,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{matrix.python-version}}
+      - name: Install Setuptools and wheel
+        run: pip install --upgrade setuptools wheel
 
       - name: Install pipenv
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+        run: pip install --upgrade pipenv
 
       - name: Install Dependencies
-        run: pipenv install --dev --python=${{ matrix.python-version }}
+        run: pipenv install --dev --python=${{ matrix.python-version }} --verbose
 
       - name: Setup LibMagic (MacOS)
         if: matrix.os == 'macos-latest'
@@ -134,11 +136,11 @@ jobs:
 
       - name: Install pipenv
         if: steps.changes.outputs.core == 'true'
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+        run: pip install --upgrade pipenv
 
       - name: Install Dependencies
         if: steps.changes.outputs.core == 'true'
-        run: pipenv install --dev --python=${{ matrix.python-version }}
+        run: pipenv install --dev --python=${{ matrix.python-version }} --verbose
 
       - name: Setup LibMagic (MacOS)
         if: matrix.os == 'macos-latest' && steps.changes.outputs.core == 'true'
@@ -173,11 +175,11 @@ jobs:
 
       - name: Install pipenv
         if: steps.changes.outputs.core == 'true'
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+        run: pip install --upgrade pipenv
 
       - name: Install Dependencies
         if: steps.changes.outputs.core == 'true'
-        run: pipenv install --dev --python=${{ matrix.python-version }}
+        run: pipenv install --dev --python=${{ matrix.python-version }} --verbose
 
       - name: Setup LibMagic (MacOS)
         if: matrix.os == 'macos-latest' && steps.changes.outputs.core == 'true'
