@@ -52,6 +52,7 @@ jobs:
           author: TaiBot
           signoff: false
           branch: dependencies/update
+          base: develop
           title: 'New dependencies available'
           body: ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
           draft: false
