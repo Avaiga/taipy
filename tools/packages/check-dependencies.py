@@ -1,11 +1,11 @@
 """
-Display and update in place packages versions in requirements files.
+Display and update in place dependencies versions in requirements files.
 
 Usage:
     # Update in place requirements files.
-    python tools/packages/check-dependencies.py ensure-same-version tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt
+    python tools/dependencies/check-dependencies.py ensure-same-version tools/dependencies/taipy-core/setup.requirements.txt tools/dependencies/taipy/setup.requirements.txt tools/dependencies/taipy-gui/setup.requirements.txt tools/dependencies/taipy-config/setup.requirements.txt tools/dependencies/taipy-rest/setup.requirements.txt
     # Update in place requirements files and update the pipfile.
-    python tools/packages/manager.py pipfile tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt
+    python tools/dependencies/manager.py pipfile tools/dependencies/taipy-core/setup.requirements.txt tools/dependencies/taipy/setup.requirements.txt tools/dependencies/taipy-gui/setup.requirements.txt tools/dependencies/taipy-config/setup.requirements.txt tools/dependencies/taipy-rest/setup.requirements.txt
 """
 import sys
 from typing import List, Dict
@@ -38,10 +38,10 @@ class Package:
     # Setup installation markers of the package.
     # ex: ;python_version>="3.6"
     installation_markers: str
-    # Taipy packages are ignored.
+    # Taipy dependencies are ignored.
     is_taipy: bool
-    # Optional packages
-    extras_packages: List[str]
+    # Optional dependencies
+    extras_dependencies: List[str]
     # Files where the package is set as requirement.
     files: List[str]
     # List of releases of the package.
@@ -99,8 +99,8 @@ class Package:
             return self.name
 
         name = self.name
-        if self.extras_packages:
-            name += f'[{",".join(self.extras_packages)}]'
+        if self.extras_dependencies:
+            name += f'[{",".join(self.extras_dependencies)}]'
         if without_version:
             if self.installation_markers:
                 return f'{name};{self.installation_markers}'
@@ -109,35 +109,13 @@ class Package:
             return f'{name}>={self.min_version},<={self.latest_release.version};{self.installation_markers}'
         return f'{name}>={self.min_version},<={self.latest_release.version}'
 
-    def as_pipfile_line(self, min_version=True, force_version=False) -> str:
-        """
-        Return the package as a pipfile line.
-        If min_version is True, the min version is used.
-        """
-        version = self.min_version if min_version else self.max_version
-
-        if force_version:
-            line = f'"{self.name}" = {{version="=={version}"'
-        else:
-            line = f'"{self.name}" = {{version="<={version}"'
-
-        if self.installation_markers:
-            line += f', markers="{self.installation_markers}"'
-
-        if self.extras_packages:
-            packages = ','.join(f'"{p}"' for p in self.extras_packages)
-            line += f', extras=[{packages}]'
-
-        line += '}'
-        return line
-
     @classmethod
     def check_format(cls, package: str):
         """
         Check if a package definition is correctly formatted.
         """
         if '>=' not in package or '<' not in package:
-            # Only Taipy packages can be without version.
+            # Only Taipy dependencies can be without version.
             if 'taipy' not in package:
                 raise Exception(f"Invalid package: {package}")
 
@@ -157,7 +135,7 @@ class Package:
                 extract_max_version(package) if not is_taipy else '',
                 extract_installation_markers(package) if not is_taipy else '',
                 is_taipy,
-                extract_extras_packages(package),
+                extract_extras_dependencies(package),
                 [filename]
             )
         except Exception as e:
@@ -235,9 +213,9 @@ def extract_name(package: str) -> str:
     return name
 
 
-def extract_extras_packages(package: str) -> List[str]:
+def extract_extras_dependencies(package: str) -> List[str]:
     """
-    Extract the extras packages of a package from a requirements line.
+    Extract the extras dependencies of a package from a requirements line.
     """
     if '[' not in package:
         return []
@@ -245,17 +223,17 @@ def extract_extras_packages(package: str) -> List[str]:
     return package.split('[')[1].split(']')[0].split(',')
 
 
-def load_packages(requirements_filenames: List[str], enforce_format: bool) -> Dict[str, Package]:
+def load_dependencies(requirements_filenames: List[str], enforce_format: bool) -> Dict[str, Package]:
     """
-    Load and concat packages from requirements files.
+    Load and concat dependencies from requirements files.
     """
-    # Extracted packages from requirements files.
-    packages = {}
+    # Extracted dependencies from requirements files.
+    dependencies = {}
 
     for filename in requirements_filenames:
-        file_packages = Path(filename).read_text("UTF-8").split("\n")
+        file_dependencies = Path(filename).read_text("UTF-8").split("\n")
 
-        for package_requirements in file_packages:
+        for package_requirements in file_dependencies:
             # Ignore empty lines.
             if not package_requirements:
                 continue
@@ -266,10 +244,10 @@ def load_packages(requirements_filenames: List[str], enforce_format: bool) -> Di
 
             package = Package.from_requirements(package_requirements, filename)
 
-            # Packages may be present multiple times in different files.
+            # dependencies may be present multiple times in different files.
             # In that case, do not load the releases again but ensure versions are the same.
-            if package.name in packages:
-                existing_package = packages[package.name]
+            if package.name in dependencies:
+                existing_package = dependencies[package.name]
                 if not existing_package.min_version == package.min_version or \
                     not existing_package.max_version == package.max_version:
                     raise Exception(f"Inconsistent version of '{package.name}' between '{filename}' and {','.join(package.files)}.")
@@ -279,20 +257,20 @@ def load_packages(requirements_filenames: List[str], enforce_format: bool) -> Di
                 # Stop processing, package is already extracted.
                 continue
 
-            packages[package.name] = package
+            dependencies[package.name] = package
 
-    return packages
+    return dependencies
 
 
-def display_packages_versions(packages: Dict[str, Package]):
+def display_dependencies_versions(dependencies: Dict[str, Package]):
     """
-    Display packages information.
+    Display dependencies information.
     """
     import tabulate  # pylint: disable=import-outside-toplevel
 
     to_print = []
 
-    for package_name, package in packages.items():
+    for package_name, package in dependencies.items():
         if package.is_taipy:
             continue
 
@@ -311,7 +289,7 @@ def display_packages_versions(packages: Dict[str, Package]):
     print(tabulate.tabulate(to_print, headers=h, tablefmt='pretty'))
 
 
-def packages_to_updates(packages_in_use: Dict[str, Package], packages_set: Dict[str, Package]):
+def dependencies_summary(dependencies_in_use: Dict[str, Package], dependencies_set: Dict[str, Package]):
     """
     Display dependencies to updates.
     """
@@ -319,15 +297,15 @@ def packages_to_updates(packages_in_use: Dict[str, Package], packages_set: Dict[
 
     to_print = []
 
-    for name, ps in packages_set.items():
+    for name, ps in dependencies_set.items():
         if ps.is_taipy:
             continue
 
         # Find the package in use.
-        rp = packages_in_use.get(name)
+        rp = dependencies_in_use.get(name)
         # Some package as 'gitignore-parser' becomes 'gitignore_parser' during the installation.
         if not rp:
-            rp = packages_in_use.get(name.replace('-', '_'))
+            rp = dependencies_in_use.get(name.replace('-', '_'))
 
         if rp:
             if rp.max_version != ps.max_version:
@@ -346,54 +324,57 @@ def packages_to_updates(packages_in_use: Dict[str, Package], packages_set: Dict[
     print(tabulate.tabulate(to_print, headers=['name', 'version', 'files'], tablefmt='pretty'))
 
 
-def display_raw_packages(packages: Dict[str, Package]):
-    for package in packages.values():
+def generate_raw_requirements_txt(dependencies: Dict[str, Package]):
+    """
+    Print the dependencies as requirements lines.
+    """
+    for package in dependencies.values():
         if not package.is_taipy:
             print(package.as_requirements_line(without_version=True))
 
 
-def update_pipfile(packages_in_use: Dict[str, Package], packages_set: Dict[str, Package], pipfile: str):
+def update_pipfile(dependencies_version: Dict[str, Package], pipfile: str):
     import toml  # pylint: disable=import-outside-toplevel
 
     pipfile_obj = toml.load(pipfile)
-    del pipfile_obj['packages']
-    toml_str = toml.dumps(pipfile_obj)
 
-    for name, ps in packages_set.items():
-        if ps.is_taipy:
-            continue
-
+    for name, dep in pipfile_obj['packages'].items():
         # Find the package in use.
-        rp = packages_in_use.get(name)
+        rp = dependencies_version.get(name)
         # Some package as 'gitignore-parser' becomes 'gitignore_parser' during the installation.
         if not rp:
-            rp = packages_in_use.get(name.replace('-', '_'))
+            rp = dependencies_version.get(name.replace('-', '_'))
 
-        # Keep the new version proposed.
-        if rp:
-            packages_set[name] = rp
+        if isinstance(dep, dict):
+            dep['version'] = f'=={rp.max_version}'
+        else:
+            pipfile_obj['packages'][name] = f'=={rp.max_version}'
 
-    packages_str = "\n".join(
-        p.as_pipfile_line(min_version=True, force_version=True)
-        for p in packages_set.values() if not p.is_taipy
-    )
-    Path(pipfile).write_text(f'{toml_str}\n\n[packages]\n{packages_str}', 'UTF-8')
+    Path(pipfile).write_text(toml.dumps(pipfile_obj), 'UTF-8')
 
 
 if __name__ == '__main__':
     if sys.argv[1] == 'ensure-same-version':
-        _packages = load_packages(sys.argv[2: len(sys.argv)], True)
-        display_packages_versions(_packages)
+        # Load dependencies from requirements files.
+        # Verify that the same version is set for the same package across files.
+        _dependencies = load_dependencies(sys.argv[2: len(sys.argv)], True)
+        display_dependencies_versions(_dependencies)
         sys.exit(0)
-    if sys.argv[1] == 'dependencies-to-update':
-        _packages_in_use = load_packages([sys.argv[2]], False)
-        _packages_set = load_packages(sys.argv[3: len(sys.argv)], False)
-        packages_to_updates(_packages_in_use, _packages_set)
-    if sys.argv[1] == 'raw-packages':
-        _packages = load_packages(sys.argv[2: len(sys.argv)], False)
-        display_raw_packages(_packages)
+    if sys.argv[1] == 'dependencies-summary':
+        # Load and compare dependencies from requirements files.
+        # The first file is the reference to the other.
+        # Display the differences including new version available on Pypi.
+        _dependencies_in_use = load_dependencies([sys.argv[2]], False)
+        _dependencies_set = load_dependencies(sys.argv[3: len(sys.argv)], False)
+        dependencies_summary(_dependencies_in_use, _dependencies_set)
+    if sys.argv[1] == 'generate-raw-requirements':
+        # Load dependencies from requirements files.
+        # Print the dependencies as requirements lines without born.
+        _dependencies = load_dependencies(sys.argv[2: len(sys.argv)], False)
+        generate_raw_requirements_txt(_dependencies)
     if sys.argv[1] == 'generate-pipfile':
+        # Generate a new Pipfile from requirements files using dependencies versions
+        # set in the requirement file.
         _pipfile_path = sys.argv[2]
-        _packages_in_use = load_packages([sys.argv[3]], False)
-        _packages_set = load_packages(sys.argv[4: len(sys.argv)], False)
-        update_pipfile(_packages_in_use, _packages_set, _pipfile_path)
+        _dependencies_version = load_dependencies([sys.argv[3]], False)
+        update_pipfile(_dependencies_version, _pipfile_path)

@@ -18,6 +18,8 @@ jobs:
         python-version: ['3.8', '3.9', '3.10', '3.11']
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    env:
+      PIPFILE_PATH: ../../Pipfile
     steps:
       - uses: actions/checkout@v4
 
@@ -29,15 +31,16 @@ jobs:
         id: ensure-dependencies-are-up-to-date
         working-directory: tools/packages
         run: |
-          # Generate the Pipfile with the latest version
+          # Ensure dependencies are aligned between Taipy packages
           pip install -r requirements.txt
           python check-dependencies.py ensure-same-version taipy*/*requirements.txt
-          # If Pipfile and Pipfile.sup are different, put something in the GitHub conversation
+
+          # Try to update the Pipfile.
+          # Any new packages available are printed to stdout.
+          # If nothing is printed, the Pipfile is up to date and workflow can stop.
           echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
-          bash check-dependencies.sh ../../Pipfile >> "$GITHUB_OUTPUT"
+          bash check-dependencies.sh $PIPFILE_PATH >> "$GITHUB_OUTPUT"
           echo EOF >> "$GITHUB_OUTPUT"
-          echo "Pipfile:"
-          cat ../../Pipfile
 
       - name: Comment PR
         if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
@@ -48,19 +51,26 @@ jobs:
             ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
 
       - name: Install dependencies
-        id: install-dependencies
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
         uses: ./.github/actions/install
         with:
           python-version: ${{ matrix.python-version }}
           os: ${{ matrix.os }}
 
+      - name: Print Pipfile if update
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
+        run: cat $PIPFILE_PATH
+
       - name: Pytest
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
         run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
 
       - name: Pytest Core orchestrator_dispatcher
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
         run: pipenv run pytest -m "orchestrator_dispatcher" tests/core
 
       - name: Pytest Core standalone
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
         run: pipenv run pytest -m "standalone" tests/core
 
 

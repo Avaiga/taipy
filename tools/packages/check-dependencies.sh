@@ -1,18 +1,25 @@
-PACKAGES=taipy*/*requirements.txt
+# This script is used to check the latest installable requirements for each package.
+# It will generate a requirements.txt file without born for each package.
+# Then install and dump them to check the latest installable requirements.
+# If the program detect a new package available, it print it on stdout.
+# Finally, it will generate a Pipfile with the latest version available.
+DEPENDENCIES=taipy*/*requirements.txt
 
-# Retrieve requirements then install them to check the latest requirements installable
-python check-dependencies.py raw-packages $PACKAGES > requirements.txt.tmp
+# Generate requirements.txt without born.
+python check-dependencies.py generate-raw-requirements $DEPENDENCIES > raw-requirements.txt
 
-# Create a virtual environment, install packages, and freeze them
+# Create a virtual environment, install dependencies, and freeze them
 python -m venv tmp-venv > /dev/null
 if [ -f "./tmp-venv/bin/python3" ]; then
-    ./tmp-venv/bin/python3 -m pip install -r requirements.txt.tmp > /dev/null
-    ./tmp-venv/bin/python3 -m pip freeze > real-requirements.txt
+    ./tmp-venv/bin/python3 -m pip install -r raw-requirements.txt > /dev/null
+    ./tmp-venv/bin/python3 -m pip freeze > new-requirements.txt
 else
-    ./tmp-venv/Scripts/python.exe -m pip install -r requirements.txt.tmp > /dev/null
-    ./tmp-venv/Scripts/python.exe -m pip freeze > real-requirements.txt
+    ./tmp-venv/Scripts/python.exe -m pip install -r raw-requirements.txt > /dev/null
+    ./tmp-venv/Scripts/python.exe -m pip freeze > new-requirements.txt
 fi
 
-# Update requirements based on the latest installable requirements
-python check-dependencies.py dependencies-to-update real-requirements.txt $PACKAGES
-python check-dependencies.py generate-pipfile $1 real-requirements.txt $PACKAGES
+# Display dependencies summary.
+python check-dependencies.py dependencies-summary new-requirements.txt $DEPENDENCIES
+
+# Generate a Pipfile based on the new dependencies.
+python check-dependencies.py generate-pipfile $1 new-requirements.txt $DEPENDENCIES
