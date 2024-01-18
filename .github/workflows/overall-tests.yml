@@ -10,55 +10,6 @@ jobs:
   partial-tests:
    uses: ./.github/workflows/partial-tests.yml
 
-  latest-versions:
-    timeout-minutes: 20
-    strategy:
-      matrix:
-        python-version: ['3.11']
-        os: [ubuntu-latest]
-    permissions:
-      contents: write
-      pull-requests: write
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{matrix.python-version}}
-
-      - name: Check if the latest version supported is up to date.
-        id: ensure-dependencies-are-up-to-date
-        working-directory: tools/packages
-        run: |
-          # Ensure dependencies are aligned between Taipy packages
-          pip install -r requirements.txt
-          python check-dependencies.py ensure-same-version
-
-          # Try to update the Pipfile.
-          # Any new packages available are printed to stdout.
-          # If nothing is printed, the Pipfile is up to date and workflow can stop.
-          echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
-          bash check-dependencies.sh ../../Pipfile.sup >> "$GITHUB_OUTPUT"
-          echo EOF >> "$GITHUB_OUTPUT"
-          cat ../../Pipfile.sup
-
-      - name: Create the pull_request
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: Update dependencies
-          branch: dependencies/update
-          base: feature/#414-package-updates
-          title: 'New dependencies available'
-          body: |
-            ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
-          draft: false
-          add-paths: |
-            Pipfile.sup
-            tools/packages/taipy*/*requirements.txt
-
   overall-tests:
     needs: [partial-tests]
     timeout-minutes: 40
