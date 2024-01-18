@@ -337,8 +337,9 @@ def update_pipfile(dependencies_version: Dict[str, Package], pipfile: str):
     import toml  # pylint: disable=import-outside-toplevel
 
     pipfile_obj = toml.load(pipfile)
-
+    print(dependencies_version.values())
     for name, dep in pipfile_obj['packages'].items():
+        print(name)
         if isinstance(dep, dict):
             name = f'{name}[{",".join(dep["extras"])}]'
         # Find the package in use.
