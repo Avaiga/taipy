@@ -340,6 +340,7 @@ def update_dependencies(
                 # Save the new dependency version.
                 ds.max_version = diu.max_version
 
+    # Print the dependencies to update.
     to_print.sort(key=lambda x: x[0])
     print(tabulate.tabulate(to_print, headers=['name', 'version', 'files'], tablefmt='pretty'))
 
@@ -348,8 +349,8 @@ def update_dependencies(
         Path(fd).write_text(
             '\n'.join(
                 d.as_requirements_line()
-                for d in dependencies_set.values()
-                if d.files == fd
+                for d in sorted(dependencies_set.values(), key=lambda d: d.name)
+                if fd in d.files
             ), 'UTF-8')
         print(f"Updated {fd}")
         print(Path(fd).read_text('UTF-8'))
