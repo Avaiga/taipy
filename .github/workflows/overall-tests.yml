@@ -40,7 +40,7 @@ jobs:
           # Any new packages available are printed to stdout.
           # If nothing is printed, the Pipfile is up to date and workflow can stop.
           echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
-          bash check-dependencies.sh ../../Pipfile >> "$GITHUB_OUTPUT"
+          bash check-dependencies.sh ../../Pipfile.sup >> "$GITHUB_OUTPUT"
           echo EOF >> "$GITHUB_OUTPUT"
 
       - name: Create the pull_request
@@ -57,6 +57,9 @@ jobs:
           body: |
             ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
           draft: false
+          add-paths:
+            Pipfile.sup
+            tools/packages/taipy*/*requirements.txt
         
         # uses: thollander/actions-comment-pull-request@v2
         # with:

@@ -9,13 +9,8 @@ python check-dependencies.py generate-raw-requirements > raw-requirements.txt
 
 # Create a virtual environment, install dependencies, and freeze them
 python -m venv tmp-venv > /dev/null
-if [ -f "./tmp-venv/bin/python3" ]; then
-    ./tmp-venv/bin/python3 -m pip install -r raw-requirements.txt > /dev/null
-    ./tmp-venv/bin/python3 -m pip freeze > new-requirements.txt
-else
-    ./tmp-venv/Scripts/python.exe -m pip install -r raw-requirements.txt > /dev/null
-    ./tmp-venv/Scripts/python.exe -m pip freeze > new-requirements.txt
-fi
+./tmp-venv/bin/python3 -m pip install -r raw-requirements.txt > /dev/null
+./tmp-venv/bin/python3 -m pip freeze > new-requirements.txt
 
 # Display dependencies summary.
 python check-dependencies.py dependencies-summary new-requirements.txt
