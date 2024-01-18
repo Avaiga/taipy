@@ -290,3 +290,20 @@ def test_get_primary(tmpdir, cycle, current_datetime):
         )
         == 0
     )
+
+def test_get_scenarios_by_time(at=datetime(2024, 1, 17, 1, 0, 0, 0)):
+    creation_date_1 = datetime(2024, 1, 1, 1, 0, 0, 0)
+    scenario_config = Config.configure_scenario("sc", None, None, Frequency.MONTHLY)
+    scenario = _ScenarioManager._create(scenario_config, creation_date=creation_date_1, name="name_1")
+
+    creation_date_2 = datetime(2024, 1, 2, 1, 0, 0, 0)
+    scenario_config_2 = Config.configure_scenario("sc_2", None, None, Frequency.YEARLY)
+    scenario_2 = _ScenarioManager._create(scenario_config_2, creation_date=creation_date_2, name="name_2")
+
+    _ScenarioManager._set(scenario)
+    _ScenarioManager._set(scenario_2)
+
+
+    results = _CycleManager._get_scenarios_by_time(at)
+
+    assert len(results) == 2 
