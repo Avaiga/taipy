@@ -285,6 +285,7 @@ def display_dependencies_versions(dependencies: Dict[str, Package]):
             len(list(itertools.takewhile(lambda x: x.version != package.max_version, package.releases))),
         ))
 
+    to_print.sort(key=lambda x: x[0])
     h = ['name', 'version-min', 'version-max', 'current-version', 'nb-releases-behind']
     print(tabulate.tabulate(to_print, headers=h, tablefmt='pretty'))
 
@@ -319,6 +320,7 @@ def dependencies_summary(dependencies_in_use: Dict[str, Package], dependencies_s
                 ','.join(f.split('/')[0] for f in ps.files)
             ))
 
+    to_print.sort(key=lambda x: x[0])
     print(tabulate.tabulate(to_print, headers=['name', 'version', 'files'], tablefmt='pretty'))
 
 
