@@ -1,18 +1,16 @@
 """
-Display and update in place dependencies versions in requirements files.
-
-Usage:
-    # Update in place requirements files.
-    python tools/dependencies/check-dependencies.py ensure-same-version tools/dependencies/taipy-core/setup.requirements.txt tools/dependencies/taipy/setup.requirements.txt tools/dependencies/taipy-gui/setup.requirements.txt tools/dependencies/taipy-config/setup.requirements.txt tools/dependencies/taipy-rest/setup.requirements.txt
-    # Update in place requirements files and update the pipfile.
-    python tools/dependencies/manager.py pipfile tools/dependencies/taipy-core/setup.requirements.txt tools/dependencies/taipy/setup.requirements.txt tools/dependencies/taipy-gui/setup.requirements.txt tools/dependencies/taipy-config/setup.requirements.txt tools/dependencies/taipy-rest/setup.requirements.txt
+This script is a helper on the dependencies management of the project.
+It can be used:
+- To check that the same version of a package is set across files.
+- To generate a Pipfile from requirements files.
+- To display a summary of the dependencies to update.
 """
 import sys
-from typing import List, Dict
 import itertools
 from pathlib import Path
-from dataclasses import dataclass, field
 from datetime import datetime
+from typing import List, Dict
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -345,6 +343,11 @@ def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
         # Some package as 'gitignore-parser' becomes 'gitignore_parser' during the installation.
         if not rp:
             rp = dependencies_version.get(name.replace('-', '_'))
+
+        if not rp:
+            # Package not found. Can be due to python version.
+            # Ex: backports.zoneinfo
+            continue
 
         if isinstance(dep, dict):
             dep['version'] = f'=={rp.max_version}'
