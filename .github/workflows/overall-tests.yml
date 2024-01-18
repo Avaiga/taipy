@@ -51,6 +51,7 @@ jobs:
           committer: TaiBot
           author: TaiBot
           branch: dependencies/update
+          base: feature/#414-package-updates
           title: 'New dependencies available'
           body: |
             ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
