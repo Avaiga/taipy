@@ -398,7 +398,7 @@ def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
             if isinstance(dep, dict):
                 # Requirements does not have installation markers and extras.
                 rp.installation_markers = dep.get('markers', '')
-                rp.extras_dependencies = [dep.get('extras')] if dep.get('extras') else []
+                rp.extras_dependencies = [dep.get('extras')[0]] if dep.get('extras') else []
             dependencies_str += f'{rp.as_pipfile_line()}\n'
 
     toml_str = toml.dumps(pipfile_obj)
