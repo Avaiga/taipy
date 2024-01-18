@@ -48,8 +48,8 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: Update dependencies
-          committer: TaiBot
-          author: TaiBot
+          committer: TaiBot <taibot@github.com>
+          author: TaiBot <taibot@users.noreply.github.com>
           branch: dependencies/update
           base: feature/#414-package-updates
           title: 'New dependencies available'
