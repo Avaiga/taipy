@@ -33,6 +33,8 @@ from taipy.core import (
     ScenarioId,
     Sequence,
     SequenceId,
+    Submission,
+    SubmissionId,
     cancel_job,
     create_scenario,
     delete_job,
@@ -127,7 +129,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 self.jobs_list = None
             if event.operation == EventOperation.UPDATE:
                 try:
-                    job_entity: Job = core_get(event.entity_id)
+                    job_entity = core_get(str(event.entity_id))
                     self.gui._broadcast(
                         _GuiCoreContext._CORE_CHANGED_NAME,
                         {"task": {"id": job_entity.task.id, "status": job_entity.status.name}},
@@ -154,14 +156,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
         )
 
     def scenario_status_callback(self, submission_id: t.Optional[str]):
-        if not submission_id or not is_readable(submission_id):
+        if not submission_id or not is_readable(t.cast(SubmissionId, submission_id)):
             return
         try:
             last_status = self.client_submission.get(submission_id)
             if not last_status:
                 return
 
-            submission = core_get(submission_id)
+            submission = t.cast(Submission, core_get(submission_id))
             if not submission or not submission.entity_id:
                 return
 
