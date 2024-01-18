@@ -88,7 +88,7 @@ jobs:
 
       - name: Pytest Core
         if: steps.changes.outputs.core == 'true'
-        run: pipenv run pytest tests/core
+        run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone" tests/core
 
       - name: Pytest GUI
         if: steps.changes.outputs.gui == 'true'

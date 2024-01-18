@@ -91,79 +91,79 @@ jobs:
       #   run: pipenv run pytest -m "standalone" tests/core
 
 
-  # overall-tests:
-  #   #needs: [partial-tests]
-  #   timeout-minutes: 40
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       python-version: ['3.8', '3.9', '3.10', '3.11']
-  #       os: [ubuntu-latest, windows-latest, macos-latest]
-  #       pipenv-version: ['min', 'max']
-  #   runs-on: ${{ matrix.os }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-python@v5
-  #       with:
-  #         python-version: ${{matrix.python-version}}
-  #     - name: Check if the latest version supported is up to date.
-  #       id: ensure-dependencies-are-up-to-date
-  #       working-directory: tools/packages
-  #       run: |
-  #         # Generate the Pipfile with the latest version
-  #         pip install -r requirements.txt
-  #         python check-dependencies.py ensure-same-version taipy*/*requirements.txt
-  #         # If Pipfile and Pipfile.sup are different, put something in the GitHub conversation
-  #         echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
-  #         bash check-dependencies.sh ../../Pipfile >> "$GITHUB_OUTPUT"
-  #         echo EOF >> "$GITHUB_OUTPUT"
-  #         cat ../../Pipfile
+  overall-tests:
+    needs: [partial-tests]
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11']
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        pipenv-version: ['min', 'max']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{matrix.python-version}}
+      - name: Check if the latest version supported is up to date.
+        id: ensure-dependencies-are-up-to-date
+        working-directory: tools/packages
+        run: |
+          # Generate the Pipfile with the latest version
+          pip install -r requirements.txt
+          python check-dependencies.py ensure-same-version taipy*/*requirements.txt
+          # If Pipfile and Pipfile.sup are different, put something in the GitHub conversation
+          echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
+          bash check-dependencies.sh ../../Pipfile >> "$GITHUB_OUTPUT"
+          echo EOF >> "$GITHUB_OUTPUT"
+          cat ../../Pipfile
 
-  #     - name: Comment PR
-  #       if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
-  #       uses: thollander/actions-comment-pull-request@v2
-  #       with:
-  #         message: ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
+      - name: Comment PR
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != ''
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
 
-  #     - name: Install dependencies
-  #       id: install-dependencies
-  #       uses: ./.github/actions/install
-  #       with:
-  #         python-version: ${{ matrix.python-version }}
-  #         os: ${{ matrix.os }}
-  #         pipenv-version: ${{ matrix.pipenv-version }}
+      - name: Install dependencies
+        id: install-dependencies
+        uses: ./.github/actions/install
+        with:
+          python-version: ${{ matrix.python-version }}
+          os: ${{ matrix.os }}
+          pipenv-version: ${{ matrix.pipenv-version }}
 
-  #     - name: Pytest
-  #       run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
+      - name: Pytest
+        run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
 
-  #     - name: Coverage
-  #       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' && matrix.pipenv-version == 'min'
-  #       uses: MishaKav/pytest-coverage-comment@main
-  #       with:
-  #         pytest-xml-coverage-path: ./overall-coverage.xml
-  #         title: Taipy Overall Coverage Report
+      - name: Coverage
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' && matrix.pipenv-version == 'min'
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-xml-coverage-path: ./overall-coverage.xml
+          title: Taipy Overall Coverage Report
 
-  # orchestrator-tests:
-  #   #needs: [partial-tests]
-  #   timeout-minutes: 20
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       python-version: ['3.8', '3.9', '3.10', '3.11']
-  #       os: [ubuntu-latest, windows-latest, macos-latest]
-  #       orchestrator: ['orchestrator_dispatcher', 'standalone']
-  #   runs-on: ${{ matrix.os }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-python@v5
-  #       with:
-  #         python-version: ${{matrix.python-version}}
+  orchestrator-tests:
+    needs: [partial-tests]
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11']
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        orchestrator: ['orchestrator_dispatcher', 'standalone']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{matrix.python-version}}
 
-  #     - name: Install pipenv
-  #       run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+      - name: Install pipenv
+        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 
-  #     - name: Install Dependencies
-  #       run: pipenv install --dev --python=${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: pipenv install --dev --python=${{ matrix.python-version }}
 
-  #     - name: Pytest Core orchestrator_dispatcher
-  #       run: pipenv run pytest -m "${{ matrix.orchestrator }}" tests/core
+      - name: Pytest Core orchestrator_dispatcher
+        run: pipenv run pytest -m "${{ matrix.orchestrator }}" tests/core

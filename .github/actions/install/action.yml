@@ -13,7 +13,7 @@ inputs:
     default: true
   pipfile-version:
     required: false
-    description: 'The Pipfile type: one of min, max, or latest'
+    description: 'The Pipfile type: one of min, max'
     default: 'min'
 outputs:
   to-update:
