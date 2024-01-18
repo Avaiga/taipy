@@ -333,15 +333,13 @@ def generate_raw_requirements_txt(dependencies: Dict[str, Package]):
             print(package.as_requirements_line(without_version=True))
 
 
-def update_pipfile(dependencies_version: Dict[str, Package], pipfile: str):
+def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
     import toml  # pylint: disable=import-outside-toplevel
 
     pipfile_obj = toml.load(pipfile)
-    print(dependencies_version.values())
+    print(dependencies_version.keys())
     for name, dep in pipfile_obj['packages'].items():
         print(name)
-        if isinstance(dep, dict):
-            name = f'{name}[{",".join(dep["extras"])}]'
         # Find the package in use.
         rp = dependencies_version.get(name)
         # Some package as 'gitignore-parser' becomes 'gitignore_parser' during the installation.
@@ -380,4 +378,4 @@ if __name__ == '__main__':
         # set in the requirement file.
         _pipfile_path = sys.argv[2]
         _dependencies_version = load_dependencies([sys.argv[3]], False)
-        update_pipfile(_dependencies_version, _pipfile_path)
+        update_pipfile(_pipfile_path, _dependencies_version)
