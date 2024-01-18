@@ -364,11 +364,6 @@ def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
             # Ex: backports.zoneinfo
             dependencies_str += f'"{name}" = {dep}\n'
         else:
-            print(rp.max_version, dep)
-            if isinstance(dep, dict):
-                rp.max_version = dep['version'].replace('==', '')
-            else:
-                rp.max_version = dep.replace('==', '')
             dependencies_str += f'{rp.as_pipfile_line()}\n'
 
     toml_str = toml.dumps(pipfile_obj)
