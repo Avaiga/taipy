@@ -29,6 +29,7 @@ def test_build_orchestrator():
     with mock.patch("taipy.core._orchestrator._orchestrator_factory._OrchestratorFactory._build_dispatcher") as bd:
         with mock.patch("taipy.core._orchestrator._orchestrator._Orchestrator.initialize") as initialize:
             orchestrator = _OrchestratorFactory._build_orchestrator()
+            _OrchestratorFactory._build_orchestrator()  # Call it one more time!
             assert orchestrator == _Orchestrator
             assert _OrchestratorFactory._orchestrator == _Orchestrator
             initialize.assert_called_once()
