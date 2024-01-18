@@ -377,10 +377,20 @@ def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
         # Some package as 'gitignore-parser' becomes 'gitignore_parser' during the installation.
         if not rp:
             rp = dependencies_version.get(name.replace('-', '_'))
+            if rp:
+                # Change for the real name of the package.
+                rp.name = name
 
         if not rp:
             # Package not found. Can be due to python version.
             # Ex: backports.zoneinfo
+            if isinstance(dep, dict):
+                # Format as a Pipfile line.
+                dep = f"version={dep['version']}"
+                if dep.get('markers'):
+                    dep += f', markers="{dep["markers"]}"'
+                if dep.get('extras'):
+                    dep += f', extras=["{dep["extras"]}"]'
             dependencies_str += f'"{name}" = {dep}\n'
         else:
             dependencies_str += f'{rp.as_pipfile_line()}\n'
