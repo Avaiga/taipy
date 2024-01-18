@@ -3,17 +3,17 @@ description: Install the package and dependencies
 inputs:
   python-version:
     required: true
-    description: 'The python version to use'
+    description: 'Python version'
   os:
     required: true
-    description: 'The OS to use'
+    description: 'Operating system'
   install-gui:
     required: false
     description: 'Whether to install the GUI dependencies'
     default: true
   pipfile-version:
     required: false
-    description: 'The pipfile version to use. Can be min, max, latest'
+    description: 'The Pipfile type: one of min, max, or latest'
     default: 'min'
 outputs:
   to-update:
@@ -35,7 +35,7 @@ runs:
       run: pipenv install --dev --python=${{ inputs.python-version }}
       shell: bash
 
-    - name: Install unperbound supported dependencies
+    - name: Install maximum version supported dependencies
       if: inputs.pipfile-version == 'max'
       run: |
         # Override the current Pipfile with the Pipfile containing the max versions

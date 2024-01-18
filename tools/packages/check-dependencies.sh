@@ -1,10 +1,10 @@
 # This script is used to check the latest installable requirements for each package.
-# It will generate a requirements.txt file without born for each package.
+# It will generate a requirements.txt file without bound for each package.
 # Then install and dump them to check the latest installable requirements.
 # If the program detect a new package available, it print it on stdout.
 # Finally, it will generate a Pipfile with the latest version available.
 
-# Generate requirements.txt without born.
+# Generate requirements.txt without bound.
 python check-dependencies.py generate-raw-requirements > raw-requirements.txt
 
 # Create a virtual environment, install dependencies, and freeze them
