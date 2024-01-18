@@ -391,7 +391,7 @@ def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
                 if dep.get('markers'):
                     new_dep += f', markers="{dep["markers"]}"'
                 if dep.get('extras'):
-                    new_dep += f', extras=["{dep["extras"]}"]'
+                    new_dep += f', extras={dep["extras"]}'
                 dep = f"{{{new_dep}}}"
             dependencies_str += f'"{name}" = {dep}\n'
         else:
