@@ -8,7 +8,7 @@ on:
 
 jobs:
   partial-tests:
-   uses: ./.github/workflows/partial-tests.yml
+    uses: ./.github/workflows/partial-tests.yml
 
   overall-tests:
     needs: [partial-tests]

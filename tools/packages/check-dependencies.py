@@ -2,10 +2,9 @@
 This script is a helper on the dependencies management of the project.
 It can be used:
 - To check that the same version of a package is set across files.
-- To generate a Pipfile from requirements files.
+- To generate a Pipfile and requirements files with the latest version installables.
 - To display a summary of the dependencies to update.
 """
-from collections import defaultdict
 import sys
 import glob
 import itertools
@@ -194,7 +193,11 @@ def extract_min_version(package: str) -> str:
 def extract_max_version(package: str) -> str:
     """
     Extract the max version of a package from a requirements line.
-    ex: "pandas>=1.0.0,<2.0.0;python_version<'3.9'" -> "2.0.0"
+    Ex:
+        - pandas==1.0.0 -> 1.0.0
+        - pandas>=1.0.0,<=2.0.0 -> 2.0.0
+        - pandas==1.0.0;python_version<'3.9' -> 1.0.0
+        - pandas>=1.0.0,<2.0.0;python_version<'3.9' -> 2.0.0
     """
     # The max version is the defined version if it is a fixed version.
     if '==' in package:
@@ -221,7 +224,11 @@ def extract_max_version(package: str) -> str:
 def extract_name(package: str) -> str:
     """
     Extract the name of a package from a requirements line.
-    ex: "pandas>=1.0.0,<2.0.0;python_version<'3.9'" -> "pandas"
+    Ex:
+        - pandas==1.0.0 -> pandas
+        - pandas>=1.0.0,<2.0.0 -> pandas
+        - pandas==1.0.0;python_version<'3.9' -> pandas
+        - pandas>=1.0.0,<2.0.0;python_version<'3.9' -> pandas
     """
     if '==' in package:
         return package.split('==')[0]
@@ -238,6 +245,8 @@ def extract_name(package: str) -> str:
 def extract_extras_dependencies(package: str) -> List[str]:
     """
     Extract the extras dependencies of a package from a requirements line.
+    Ex:
+        - pymongo[srv]>=4.2.0,<=4.6.1 -> ["srv"]
     """
     if '[' not in package:
         return []
@@ -311,12 +320,15 @@ def display_dependencies_versions(dependencies: Dict[str, Package]):
 
 
 def update_dependencies(
-        dependencies_in_use: Dict[str, Package],
+        # Dependencies installed in the environment.
+        dependencies_installed: Dict[str, Package],
+        # Dependencies set in requirements files.
         dependencies_set: Dict[str, Package],
+        # Requirements files to update.
         requirements_filenames: List[str]
     ):
     """
-    Display dependencies to updates.
+    Display and updates dependencies.
     """
     to_print = []
 
@@ -325,20 +337,20 @@ def update_dependencies(
             continue
 
         # Find the package in use.
-        diu = dependencies_in_use.get(name)
+        di = dependencies_installed.get(name)
         # Some package as 'gitignore-parser' becomes 'gitignore_parser' during the installation.
-        if not diu:
-            diu = dependencies_in_use.get(name.replace('-', '_'))
+        if not di:
+            di = dependencies_installed.get(name.replace('-', '_'))
 
-        if diu:
-            if diu.max_version != ds.max_version:
+        if di:
+            if di.max_version != ds.max_version:
                 to_print.append((
                     name,
-                    diu.max_version,
+                    di.max_version,
                     ','.join(f.split('/')[0] for f in ds.files)
                 ))
                 # Save the new dependency version.
-                ds.max_version = diu.max_version
+                ds.max_version = di.max_version
 
     # Print the dependencies to update.
     to_print.sort(key=lambda x: x[0])
@@ -356,7 +368,7 @@ def update_dependencies(
 
 def generate_raw_requirements_txt(dependencies: Dict[str, Package]):
     """
-    Print the dependencies as requirements lines.
+    Print the dependencies as requirements lines without version.
     """
     for package in dependencies.values():
         if not package.is_taipy:
@@ -365,7 +377,11 @@ def generate_raw_requirements_txt(dependencies: Dict[str, Package]):
 
 def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
     """
-    Update dependencies version of a Pipfile in place.
+    Update in place dependencies version of a Pipfile.
+    
+    Warning:
+      Dependencies are loaded from requirements files without extras or markers.
+      The Pipfile contains extras and markers information.
     """
     dependencies_str = ""
     pipfile_obj = toml.load(pipfile)
@@ -385,7 +401,7 @@ def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
             # Package not found. Can be due to python version.
             # Ex: backports.zoneinfo
             if isinstance(dep, dict):
-                new_dep = ""
+                new_dep = ''
                 # Format as a Pipfile line.
                 new_dep = f'version="{dep["version"]}"'
                 if dep.get('markers'):
@@ -417,9 +433,9 @@ if __name__ == '__main__':
         # The first file is the reference to the other.
         # Display the differences including new version available on Pypi.
         _requirements_filenames = glob.glob('taipy*/*requirements.txt')
-        _dependencies_in_use = load_dependencies([sys.argv[2]], False)
+        _dependencies_installed = load_dependencies([sys.argv[2]], False)
         _dependencies_set = load_dependencies(_requirements_filenames, False)
-        update_dependencies(_dependencies_in_use, _dependencies_set, _requirements_filenames)
+        update_dependencies(_dependencies_installed, _dependencies_set, _requirements_filenames)
     if sys.argv[1] == 'generate-raw-requirements':
         # Load dependencies from requirements files.
         # Print the dependencies as requirements lines without born.
