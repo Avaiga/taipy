@@ -18,7 +18,6 @@ from taipy.config import Config
 from taipy.core import taipy
 from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from taipy.core.job.job import Job
 from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from taipy.core.submission.submission_status import SubmissionStatus
 
@@ -64,8 +63,8 @@ def test_submit_task_development_mode():
     assert job.submit_entity_id == scenario.t1.id
     assert job.creation_date == submit_time
     assert job.stacktrace == []
-    assert len(job._subscribers) == 2  # Job._update_submission_status and _Orchestrator._on_status_change
-    assert job._subscribers[0].__code__ == Job._update_submission_status.__code__
+    assert len(job._subscribers) == 2  # _Orchestrator._update_submission_status and _Orchestrator._on_status_change
+    assert job._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
     assert job._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
 
     # submission is created and correct
@@ -104,8 +103,8 @@ def test_submit_task_development_mode_blocked_job():
     assert job.is_blocked()  # input data is not ready
     assert job.submit_entity_id == scenario.t2.id
     assert job.creation_date == submit_time
-    assert len(job._subscribers) == 2  # Job._update_submission_status and _Orchestrator._on_status_change
-    assert job._subscribers[0].__code__ == Job._update_submission_status.__code__
+    assert len(job._subscribers) == 2  # _Orchestrator._update_submission_status and _Orchestrator._on_status_change
+    assert job._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
     assert job._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
     assert job.stacktrace == []
 
@@ -150,8 +149,8 @@ def test_submit_task_standalone_mode():
     assert not job.force
     assert job.is_pending()
     assert job.submit_entity_id == sc.t1.id
-    assert len(job._subscribers) == 2  # Job._update_submission_status and _Orchestrator._on_status_change
-    assert job._subscribers[0].__code__ == Job._update_submission_status.__code__
+    assert len(job._subscribers) == 2  # _Orchestrator._update_submission_status and _Orchestrator._on_status_change
+    assert job._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
     assert job._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
     assert job.stacktrace == []
 
@@ -196,8 +195,8 @@ def test_submit_task_standalone_mode_blocked_job():
     assert not job.force
     assert job.is_blocked()  # input data is not ready
     assert job.stacktrace == []
-    assert len(job._subscribers) == 2  # Job._update_submission_status and _Orchestrator._on_status_change
-    assert job._subscribers[0].__code__ == Job._update_submission_status.__code__
+    assert len(job._subscribers) == 2  # _Orchestrator._update_submission_status and _Orchestrator._on_status_change
+    assert job._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
     assert job._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
     assert job.submit_entity_id == sc.t2.id
 
@@ -229,9 +228,11 @@ def test_submit_task_with_callbacks_and_force_and_wait():
         # job exists and is correct
         assert job.task == scenario.t1
         assert job.force
-        assert len(job._subscribers) == 3  # nothing, Job._update_submission_status, and _Orchestrator._on_status_change
+        assert (
+            len(job._subscribers) == 3
+        )  # nothing, _Orchestrator._update_submission_status, and _Orchestrator._on_status_change
         assert job._subscribers[0].__code__ == nothing.__code__
-        assert job._subscribers[1].__code__ == Job._update_submission_status.__code__
+        assert job._subscribers[1].__code__ == _Orchestrator._update_submission_status.__code__
         assert job._subscribers[2].__code__ == _Orchestrator._on_status_change.__code__
 
         mck.assert_called_once_with(job, timeout=2)

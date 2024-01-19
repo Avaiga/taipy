@@ -327,12 +327,6 @@ class Job(_Entity, _Labeled):
             self.completed()
             self.__logger.info(f"job {self.id} is completed.")
 
-    @classmethod
-    def _update_submission_status(cls, job: "Job"):
-        from ..submission._submission_manager_factory import _SubmissionManagerFactory
-
-        _SubmissionManagerFactory._build_manager()._get(job.submit_id)._update_submission_status(job)
-
     def __hash__(self):
         return hash(self.id)
 

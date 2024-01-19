@@ -86,7 +86,7 @@ class _Orchestrator(_AbstractOrchestrator):
                             task,
                             submission.id,
                             submission.entity_id,
-                            callbacks=itertools.chain([Job._update_submission_status], callbacks or []),
+                            callbacks=itertools.chain([cls._update_submission_status], callbacks or []),
                             force=force,  # type: ignore
                         )
                     )
@@ -133,7 +133,7 @@ class _Orchestrator(_AbstractOrchestrator):
                 task,
                 submit_id,
                 submission.entity_id,
-                itertools.chain([Job._update_submission_status], callbacks or []),
+                itertools.chain([cls._update_submission_status], callbacks or []),
                 force,
             )
         jobs = [job]
@@ -162,6 +162,10 @@ class _Orchestrator(_AbstractOrchestrator):
         )
 
         return job
+
+    @classmethod
+    def _update_submission_status(cls, job: Job):
+        _SubmissionManagerFactory._build_manager()._get(job.submit_id)._update_submission_status(job)
 
     @classmethod
     def _orchestrate_job_to_run_or_block(cls, jobs: List[Job]):
