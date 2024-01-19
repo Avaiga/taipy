@@ -88,7 +88,7 @@ interface NodeProps {
     engine: DiagramEngine;
 }
 
-const getStatusLib = (status?: TaskStatus) => status == TaskStatus.Running ? "Running" : status == TaskStatus.Pending ? "Pending" : undefined
+const getStatusLabel = (status?: TaskStatus) => status == TaskStatus.Running ? "Running" : status == TaskStatus.Pending ? "Pending" : undefined
 const getStatusColor = (status?: TaskStatus) => status == TaskStatus.Running ? "rgb(0,163,108)" : status == TaskStatus.Pending ? "rgb(255,165,0)" : "black"
 
 const NodeWidget = ({ node, engine }: NodeProps) => {
@@ -115,7 +115,7 @@ const NodeWidget = ({ node, engine }: NodeProps) => {
             data-default-node-name={node.getOptions().name}
             selected={node.isSelected()}
             background={node.getOptions().color}
-            title={getStatusLib(node.status)}
+            title={getStatusLabel(node.status)}
             $status={node.status}
         >
             <S.Title>

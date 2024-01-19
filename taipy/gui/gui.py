@@ -1792,7 +1792,7 @@ class Gui:
         self._config._load(config)
 
     def _broadcast(self, name: str, value: t.Any, client_id: t.Optional[str] = None):
-        """NOT UNDOCUMENTED
+        """NOT DOCUMENTED
         Send the new value of a variable to all connected clients.
 
         Arguments:
