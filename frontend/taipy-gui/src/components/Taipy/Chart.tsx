@@ -193,6 +193,9 @@ const defaultConfig = {
     addIndex: [],
 } as ChartConfig;
 
+const emptyLayout = {} as Record<string, Record<string, unknown>>;
+const emptyData = {} as Record<string, TraceValueType>;
+
 const Chart = (props: ChartProp) => {
     const {
         title = "",
@@ -201,7 +204,7 @@ const Chart = (props: ChartProp) => {
         updateVarName,
         updateVars,
         id,
-        data = {},
+        data = emptyData,
         onRangeChange,
         propagate = true,
     } = props;
@@ -218,14 +221,13 @@ const Chart = (props: ChartProp) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
-    const baseLayout = useDynamicJsonProperty(
-        props.layout,
-        props.defaultLayout || "",
-        {} as Record<string, Record<string, unknown>>
-    );
+    const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
 
     // get props.selected[i] values
     useEffect(() => {
+        if (props.figure) {
+            return;
+        }
         setSelected((sel) => {
             Object.keys(props).forEach((key) => {
                 const res = selectedPropRe.exec(key);
@@ -356,6 +358,9 @@ const Chart = (props: ChartProp) => {
     const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
 
     const dataPl = useMemo(() => {
+        if (props.figure) {
+            return lastDataPl.current;
+        }
         if (typeof data === "number" && lastDataPl.current) {
             return lastDataPl.current;
         }
@@ -437,7 +442,7 @@ const Chart = (props: ChartProp) => {
               })
             : [];
         return lastDataPl.current;
-    }, [data, config, selected, dataKey]);
+    }, [props.figure, selected, data, config, dataKey]);
 
     const plotConfig = useMemo(() => {
         let plconf = {};
