@@ -29,7 +29,7 @@ class _JobDispatcher(threading.Thread):
 
     _STOP_FLAG = False
     _dispatched_processes: Dict = {}
-    __logger = _TaipyLogger._get_logger()
+    _logger = _TaipyLogger._get_logger()
     _nb_available_workers: int = 1
 
     def __init__(self, orchestrator: Optional[_AbstractOrchestrator]):
@@ -72,13 +72,13 @@ class _JobDispatcher(threading.Thread):
     def _execute_job(self, job: Job):
         if job.force or self._needs_to_run(job.task):
             if job.force:
-                self.__logger.info(f"job {job.id} is forced to be executed.")
+                self._logger.info(f"job {job.id} is forced to be executed.")
             job.running()
             self._dispatch(job)
         else:
             job._unlock_edit_on_outputs()
             job.skipped()
-            self.__logger.info(f"job {job.id} is skipped.")
+            self._logger.info(f"job {job.id} is skipped.")
 
     def _execute_jobs_synchronously(self):
         while not self.orchestrator.jobs_to_run.empty():
@@ -86,7 +86,7 @@ class _JobDispatcher(threading.Thread):
                 try:
                     job = self.orchestrator.jobs_to_run.get()
                 except Exception:  # In case the last job of the queue has been removed.
-                    self.__logger.warning(f"{job.id} is no longer in the list of jobs to run.")
+                    self._logger.warning(f"{job.id} is no longer in the list of jobs to run.")
             self._execute_job(job)
 
     @staticmethod
