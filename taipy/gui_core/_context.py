@@ -170,7 +170,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         if job.is_running()
                         else SubmissionStatus.PENDING.value
                         if job.is_pending()
-                        else SubmissionStatus.RUNNING.value
+                        else None
                     )
                 self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"tasks": running_tasks}, client_id)
 

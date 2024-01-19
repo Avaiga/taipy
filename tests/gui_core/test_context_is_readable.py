@@ -15,7 +15,7 @@ from unittest.mock import Mock, patch
 from taipy.config.common.scope import Scope
 from taipy.core import Job, JobId, Scenario, Task
 from taipy.core.data.pickle import PickleDataNode
-from taipy.core.submission.submission import Submission
+from taipy.core.submission.submission import Submission, SubmissionStatus
 from taipy.gui import Gui
 from taipy.gui_core._context import _GuiCoreContext
 
@@ -24,7 +24,12 @@ a_task = Task("task_config_id", {}, print)
 a_job = Job(t.cast(JobId, "JOB_job_id"), a_task, "submit_id", a_scenario.id)
 a_job.isfinished = lambda s: True  # type: ignore[attr-defined]
 a_datanode = PickleDataNode("data_node_config_id", Scope.SCENARIO)
-a_submission = Submission(a_scenario.id, "Scenario", a_scenario.config_id)
+a_submission = Submission(
+    a_scenario.id,
+    "Scenario",
+    a_scenario.config_id,
+    properties={"client_id": "client_id", "on_submission": "on_submission"},
+)
 
 
 def mock_is_readable_false(entity_id):
@@ -150,7 +155,7 @@ class TestGuiCoreContext_is_readable:
             def sub_cb():
                 return True
 
-            gui_core_context.client_submission[a_submission.id] = a_submission.submission_status
+            gui_core_context.client_submission[a_submission.id] = SubmissionStatus.UNDEFINED
             gui_core_context.submission_status_callback(a_submission.id)
             mockget.assert_called()
             found = False
