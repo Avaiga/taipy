@@ -16,7 +16,12 @@ from taipy.gui import Gui, State
 from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
 
 from ..version import _get_version
-from ._adapters import _GuiCoreDatanodeAdapter, _GuiCoreScenarioAdapter, _GuiCoreScenarioDagAdapter
+from ._adapters import (
+    _GuiCoreDatanodeAdapter,
+    _GuiCoreScenarioAdapter,
+    _GuiCoreScenarioDagAdapter,
+    _GuiCoreScenarioNoUpdate,
+)
 from ._context import _GuiCoreContext
 
 
@@ -41,6 +46,7 @@ class _GuiCore(ElementLibrary):
                 "class_name": ElementProperty(PropertyType.dynamic_string),
                 "show_pins": ElementProperty(PropertyType.boolean, False),
                 "on_creation": ElementProperty(PropertyType.function),
+                "show_dialog": ElementProperty(PropertyType.boolean, True),
             },
             inner_properties={
                 "scenarios": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_scenarios()}}"),
@@ -109,9 +115,13 @@ class _GuiCore(ElementLibrary):
                 "height": ElementProperty(PropertyType.string, "50vh"),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
                 "show_pins": ElementProperty(PropertyType.boolean, True),
+                _GuiCoreContext._DATANODE_SEL_SCENARIO_PROP: ElementProperty(_GuiCoreScenarioNoUpdate),
             },
             inner_properties={
-                "datanodes": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_datanodes_tree()}}"),
+                "datanodes": ElementProperty(
+                    PropertyType.lov,
+                    f"{{{__CTX_VAR_NAME}.get_datanodes_tree(<tp:prop:{_GuiCoreContext._DATANODE_SEL_SCENARIO_PROP}>)}}",
+                ),
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
                 "type": ElementProperty(PropertyType.inner, __DATANODE_ADAPTER),
             },

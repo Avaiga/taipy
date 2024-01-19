@@ -17,7 +17,7 @@ from taipy.core import Job, JobId, Scenario, Task
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.submission.submission import Submission
 from taipy.gui import Gui
-from taipy.gui_core._context import _GuiCoreContext, _SubmissionDetails
+from taipy.gui_core._context import _GuiCoreContext
 
 a_scenario = Scenario("scenario_config_id", None, {}, sequences={"sequence": {}})
 a_task = Task("task_config_id", {}, print)
@@ -83,6 +83,7 @@ class TestGuiCoreContext_is_readable:
                 "",
                 {
                     "args": [
+                        "",
                         True,
                         False,
                         {"name": "name", "id": a_scenario.id},
@@ -98,6 +99,7 @@ class TestGuiCoreContext_is_readable:
                     "",
                     {
                         "args": [
+                            "",
                             True,
                             False,
                             {"name": "name", "id": a_scenario.id},
@@ -141,18 +143,14 @@ class TestGuiCoreContext_is_readable:
                 assert str(assign.call_args.args[1]).endswith("is not readable.")
 
     def test_scenario_status_callback(self):
-        with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get) as mockget, patch(
-            "taipy.gui_core._context.core_get_submission", side_effect=mock_core_get
-        ):
+        with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get) as mockget:
             mockget.reset_mock()
             gui_core_context = _GuiCoreContext(Mock())
 
             def sub_cb():
                 return True
 
-            gui_core_context.client_submission[a_submission.id] = _SubmissionDetails(
-                "client_id", "", sub_cb, a_submission
-            )
+            gui_core_context.client_submission[a_submission.id] = a_submission.submission_status
             gui_core_context.scenario_status_callback(a_submission.id)
             mockget.assert_called()
             found = False
@@ -163,7 +161,7 @@ class TestGuiCoreContext_is_readable:
             assert found is True
             mockget.reset_mock()
 
-            with patch("taipy.gui_core._context.is_readable_submission", side_effect=mock_is_readable_false):
+            with patch("taipy.gui_core._context.is_readable", side_effect=mock_is_readable_false):
                 gui_core_context.scenario_status_callback(a_submission.id)
                 mockget.assert_not_called()
 
