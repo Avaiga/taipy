@@ -369,7 +369,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     else:
                         state.assign(
                             _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR,
-                            f"Error creating Scenario: need only one scenario config ({len(Config.scenarios)}).",
+                            "Error creating Scenario: only one scenario config needed "
+                            + f"({len(Config.scenarios) - 1}) found.",
                         )
                         return
 
