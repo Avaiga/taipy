@@ -57,6 +57,7 @@ jobs:
             tools/packages/taipy*/*requirements.txt
 
   partial-tests:
+    needs: [latest-versions]
     uses: ./.github/workflows/partial-tests.yml
 
   overall-tests:
