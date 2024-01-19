@@ -1,10 +1,10 @@
-"""
+'''
 This script is a helper on the dependencies management of the project.
 It can be used:
 - To check that the same version of a package is set across files.
 - To generate a Pipfile and requirements files with the latest version installables.
 - To display a summary of the dependencies to update.
-"""
+'''
 import sys
 import glob
 import itertools
@@ -281,7 +281,9 @@ def load_dependencies(requirements_filenames: List[str], enforce_format: bool) -
                 existing_package = dependencies[package.name]
                 if not existing_package.min_version == package.min_version or \
                     not existing_package.max_version == package.max_version:
-                    raise Exception(f"Inconsistent version of '{package.name}' between '{filename}' and {','.join(package.files)}.")
+                    raise Exception(
+                        f"Inconsistent version of '{package.name}' between '{filename}' and {','.join(package.files)}."
+                    )
 
                 # Add the file as dependency of the package.
                 existing_package.files.append(filename)
@@ -377,8 +379,7 @@ def generate_raw_requirements_txt(dependencies: Dict[str, Package]):
 
 def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
     """
-    Update in place dependencies version of a Pipfile.
-    
+    Update in place dependencies version of a Pipfile.    
     Warning:
       Dependencies are loaded from requirements files without extras or markers.
       The Pipfile contains extras and markers information.
