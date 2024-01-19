@@ -16,17 +16,21 @@ import { DefaultNodeModel, DefaultNodeModelOptions, DefaultPortModel, DefaultPor
 import { IN_PORT_NAME, OUT_PORT_NAME } from "../utils/diagram";
 import { getChildType } from "../utils/childtype";
 import { DataNode, Task } from "../utils/names";
+import { TaskStatus } from "../utils/types";
 
 export class TaipyDiagramModel extends DiagramModel {}
 
 export interface TaipyNodeModelOptions extends DefaultNodeModelOptions {
     subtype?: string;
+    status?: TaskStatus;
 }
 export class TaipyNodeModel extends DefaultNodeModel {
     subtype: string | undefined;
+    status: TaskStatus | undefined;
     constructor(options?: TaipyNodeModelOptions) {
         super(options);
         this.subtype = options?.subtype;
+        this.status = options?.status
     }
 }
 
