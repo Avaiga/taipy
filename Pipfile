@@ -1,29 +1,78 @@
-"pyarrow" = {version="==15.0.0"}
-"networkx" = {version="==3.1"}
-"openpyxl" = {version="==3.1.2"}
-"pandas" = {version="==2.0.3"}
-"pymongo" = {version="==4.6.1", extras=["srv"]}
-"sqlalchemy" = {version="==2.0.25"}
-"toml" = {version="==0.10.2"}
-"boto3" = {version="==1.34.23"}
-"backports.zoneinfo" = {version="==0.2.1", markers="python_version<'3.9'"}
-"cookiecutter" = {version="==2.5.0"}
-"flask" = {version="==3.0.1"}
-"flask-cors" = {version="==4.0.0"}
-"flask-socketio" = {version="==5.3.6"}
-"markdown" = {version="==3.5.2"}
-"python-dotenv" = {version="==1.0.0"}
-"pytz" = {version="==2023.3.post1"}
-"tzlocal" = {version="==5.2"}
-"gevent" = {version="==23.9.1"}
-"gevent-websocket" = {version="==0.10.1"}
-"kthread" = {version="==0.2.3"}
-"gitignore-parser" = {version="==0.1.11"}
-"simple-websocket" = {version="==1.0.0"}
-"twisted" = {version="==23.10.0"}
-"deepdiff" = {version="==6.7.1"}
-"flask-restful" = {version="==0.3.10"}
-"passlib" = {version="==1.7.4"}
-"marshmallow" = {version="==3.20.2"}
-"apispec" = {version="==6.4.0", extras=["yaml"]}
-"apispec-webframeworks" = {version="==1.0.0"}
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+apispec = {extras = ["yaml"], version = "==6.3"}
+apispec-webframeworks = "==0.5.2"
+"backports.zoneinfo" = {version="==0.2.1", markers="python_version < '3.9'", extras=["tzdata"]}
+cookiecutter = "==2.1.1"
+deepdiff = "==6.2.2"
+flask = "==3.0.0"
+flask-cors = "==4.0.0"
+flask-socketio = "==5.3.6"
+Flask-RESTful = ">=0.3.9"
+gevent = "==23.7.0"
+gevent-websocket = "==0.10.1"
+gitignore-parser = "==0.1.1"
+kthread = "==0.2.3"
+markdown = "==3.4.4"
+marshmallow = "==3.20.1"
+networkx = "==2.6"
+openpyxl = "==3.1.2"
+pandas = "==2.0.0"
+pyarrow = "==14.0.2"
+pymongo = {extras = ["srv"], version = "==4.2.0"}
+python-dotenv = "==1.0.0"
+python-magic = {version = "==0.4.24", markers="sys_platform != 'win32'"}
+python-magic-bin = {version = "==0.4.14", markers="sys_platform == 'win32'"}
+pytz = "==2021.3"
+simple-websocket = "==0.10.1"
+sqlalchemy = "==2.0.16"
+toml = "==0.10"
+twisted = "==23.8.0"
+tzlocal = "==3.0"
+boto3 = "==1.29.1"
+
+[dev-packages]
+freezegun = "*"
+ipython = "*"
+ipykernel = "*"
+mkdocs = "*"
+mkdocs-autorefs = "*"
+mkdocs-include-markdown-plugin = "*"
+mkdocs-macros-plugin = "*"
+mkdocs-material = "==7.3.0"
+mkdocs-material-extensions = "*"
+mkdocstrings = "*"
+mongomock = "*"
+moto = {extras = ["s3"], version = "==4.2.13"}
+requests = "*"
+ruff = "*"
+pandas-stubs = "*"
+playwright = "*"
+pre-commit = "*"
+pyopenssl = "*"
+pytest = "==7.4.3"
+pytest-cov = "*"
+pytest-mock = "*"
+pytest-playwright = "*"
+pytest-timeout = "*"
+python-dotenv = "*"
+testbook = "*"
+tox = "*"
+twine = "*"
+types-flask = "*"
+types-Flask-Cors = "*"
+types-Markdown = "*"
+types-python-dateutil = "*"
+types-pytz = "*"
+types-toml = ">=0.10.0"
+types-tzlocal = "*"
+
+[requires]
+python_version = "3"
+
+[pipenv]
+allow_prereleases = true
