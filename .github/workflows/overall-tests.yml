@@ -11,7 +11,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        python-version: ['3.11']
+        python-version: ['3.8', '3.11']
         os: [ubuntu-latest]
     permissions:
       contents: write
@@ -35,26 +35,26 @@ jobs:
           # Try to update the Pipfile.
           # Any new packages available are printed to stdout.
           # If nothing is printed, the Pipfile is up to date and workflow can stop.
-          echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
-          bash check-dependencies.sh ../../Pipfile.sup >> "$GITHUB_OUTPUT"
-          echo EOF >> "$GITHUB_OUTPUT"
+          #echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
+          bash check-dependencies.sh ../../Pipfile.sup # >> "$GITHUB_OUTPUT"
+          #echo EOF >> "$GITHUB_OUTPUT"
           cat ../../Pipfile.sup
 
-      - name: Create the pull_request
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: Update dependencies
-          branch: dependencies/update
-          base: feature/#414-package-updates
-          title: 'New dependencies available'
-          body: |
-            ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
-          draft: false
-          add-paths: |
-            Pipfile.sup
-            tools/packages/taipy*/*requirements.txt
+      # - name: Create the pull_request
+      #   if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
+      #   uses: peter-evans/create-pull-request@v5
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     commit-message: Update dependencies
+      #     branch: dependencies/update
+      #     base: feature/#414-package-updates
+      #     title: 'New dependencies available'
+      #     body: |
+      #       ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
+      #     draft: false
+      #     add-paths: |
+      #       Pipfile.sup
+      #       tools/packages/taipy*/*requirements.txt
 
   partial-tests:
     needs: [latest-versions]
