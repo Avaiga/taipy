@@ -61,7 +61,7 @@ jobs:
   #   uses: ./.github/workflows/partial-tests.yml
 
   overall-tests:
-    needs: [partial-tests]
+    #needs: [partial-tests]
     timeout-minutes: 40
     strategy:
       fail-fast: false
@@ -96,7 +96,7 @@ jobs:
           title: Taipy Overall Coverage Report
 
   orchestrator-tests:
-    needs: [partial-tests]
+    #needs: [partial-tests]
     timeout-minutes: 20
     strategy:
       fail-fast: false
