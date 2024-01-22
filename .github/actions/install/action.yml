@@ -40,7 +40,7 @@ runs:
       run: |
         # Override the current Pipfile with the Pipfile containing the max versions
         rm Pipfile
-        mv Pipfile.sup Pipfile
+        mv tools/packages/pipfiles/Pipfile${{ inputs.python-version }}.max Pipfile
         pipenv install --dev --python=${{ inputs.python-version }}
       shell: bash
 
