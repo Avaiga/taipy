@@ -14,7 +14,7 @@ from taipy.gui import Gui
 
 def test_toggle_md(gui: Gui, helpers):
     md_string = "<|toggle|theme|>"
-    expected_list = ["<Toggle", 'kind="theme"', 'unselectedValue=""']
+    expected_list = ["<Toggle", 'mode="theme"', 'unselectedValue=""']
     helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -44,7 +44,7 @@ def test_toggle_lov_md(gui: Gui, test_client, helpers):
 
 def test_toggle_html_1(gui: Gui, helpers):
     html_string = '<taipy:toggle theme="True" />'
-    expected_list = ["<Toggle", 'kind="theme"', 'unselectedValue=""']
+    expected_list = ["<Toggle", 'mode="theme"', 'unselectedValue=""']
     helpers.test_control_html(gui, html_string, expected_list)
 
 
