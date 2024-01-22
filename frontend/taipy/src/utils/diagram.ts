@@ -26,19 +26,20 @@ import { getNodeColor } from "./config";
 import { TaipyDiagramModel, TaipyNodeModel } from "../projectstorm/models";
 import { TaipyNodeFactory, TaipyPortFactory } from "../projectstorm/factories";
 import { nodeTypes } from "./config";
-import { DisplayModel } from "./types";
+import { DisplayModel, TaskStatus, TaskStatuses } from "./types";
 
-export const createDagreEngine = () => new DagreEngine({
-    graph: {
-        rankdir: "LR",
-        ranker: "longest-path",
-        marginx: 25,
-        marginy: 25,
-    },
-    includeLinks: false,
-});
+export const createDagreEngine = () =>
+    new DagreEngine({
+        graph: {
+            rankdir: "LR",
+            ranker: "longest-path",
+            marginx: 25,
+            marginy: 25,
+        },
+        includeLinks: false,
+    });
 
-export const initDiagram = (engine: DiagramEngine)  => {
+export const initDiagram = (engine: DiagramEngine) => {
     nodeTypes.forEach((nodeType) => engine.getNodeFactories().registerFactory(new TaipyNodeFactory(nodeType)));
     engine.getPortFactories().registerFactory(new TaipyPortFactory());
     const state = engine.getStateMachine().getCurrentState();
@@ -58,13 +59,14 @@ export const getLinkId = (link: LinkModel) =>
     )}`;
 export const getNodeId = (node: DefaultNodeModel) => `${node.getType()}.${node.getID()}`;
 
-export const createNode = (nodeType: string, id: string, name: string, subtype: string) =>
+export const createNode = (nodeType: string, id: string, name: string, subtype: string, status?: TaskStatus) =>
     new TaipyNodeModel({
         id: id,
         type: nodeType,
         name: name,
         color: getNodeColor(nodeType),
         subtype: subtype,
+        status: status,
     });
 
 export const createLink = (outPort: DefaultPortModel, inPort: DefaultPortModel) =>
@@ -127,6 +129,17 @@ export const relayoutDiagram = (engine: DiagramEngine, dagreEngine: DagreEngine)
     engine.repaintCanvas();
 };
 
+export const addStatusToDisplayModel = (dm?: DisplayModel, taskStatuses?: TaskStatuses) => {
+    if (dm && taskStatuses) {
+        Object.values(dm[1]).forEach((node) =>
+            Object.entries(node).forEach(([id, detail]) => {
+                detail.status = taskStatuses[id];
+            })
+        );
+    }
+    return dm;
+};
+
 export const populateModel = (displayModel: DisplayModel, model: TaipyDiagramModel) => {
     const linkModels: DefaultLinkModel[] = [];
     const nodeModels: Record<string, Record<string, DefaultNodeModel>> = {};
@@ -134,7 +147,7 @@ export const populateModel = (displayModel: DisplayModel, model: TaipyDiagramMod
     displayModel[1] &&
         Object.entries(displayModel[1]).forEach(([nodeType, n]) => {
             Object.entries(n).forEach(([id, detail]) => {
-                const node = createNode(nodeType, id, detail.name, detail.type);
+                const node = createNode(nodeType, id, detail.name, detail.type, detail.status);
                 nodeModels[nodeType] = nodeModels[nodeType] || {};
                 nodeModels[nodeType][id] = node;
             });
@@ -157,4 +170,5 @@ export const populateModel = (displayModel: DisplayModel, model: TaipyDiagramMod
     Object.values(nodeModels).forEach((nm) => Object.values(nm).forEach((n) => nodeLayer.addModel(n)));
     const linkLayer = model.getActiveLinkLayer();
     linkModels.forEach((l) => linkLayer.addModel(l));
+    return Object.keys(nodeModels).length > 1;
 };

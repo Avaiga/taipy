@@ -1102,11 +1102,13 @@ class Gui:
         else:
             grouping_message.append(payload)
 
-    def __broadcast_ws(self, payload: dict):
+    def __broadcast_ws(self, payload: dict, client_id: t.Optional[str] = None):
         try:
+            to = list(self.__get_sids(client_id)) if client_id else []
             self._server._ws.emit(
                 "message",
                 payload,
+                to=to if to else None
             )
             time.sleep(0.001)
         except Exception as e:  # pragma: no cover
@@ -1188,19 +1190,23 @@ class Gui:
         else:
             self.__send_ws({"type": _WsType.MULTIPLE_UPDATE.value, "payload": payload})
 
-    def __send_ws_broadcast(self, var_name: str, var_value: t.Any):
+    def __send_ws_broadcast(self, var_name: str, var_value: t.Any, client_id: t.Optional[str] = None):
         self.__broadcast_ws(
-            {"type": _WsType.UPDATE.value, "name": _get_broadcast_var_name(var_name), "payload": {"value": var_value}}
+            {"type": _WsType.UPDATE.value, "name": _get_broadcast_var_name(var_name), "payload": {"value": var_value}},
+            client_id,
         )
 
     def __get_ws_receiver(self) -> t.Union[t.List[str], t.Any, None]:
         if self._bindings()._is_single_client():
             return None
         sid = getattr(request, "sid", None) if request else None
-        sids = self.__client_id_2_sid.get(self._get_client_id(), set())
+        sids = self.__get_sids(self._get_client_id())
         if sid:
             sids.add(sid)
         return list(sids)
+
+    def __get_sids(self, client_id: str) -> t.Set[str]:
+        return self.__client_id_2_sid.get(client_id, set())
 
     def __get_message_grouping(self):
         return (
@@ -1785,15 +1791,16 @@ class Gui:
     def load_config(self, config: Config) -> None:
         self._config._load(config)
 
-    def _broadcast(self, name: str, value: t.Any):
-        """NOT UNDOCUMENTED
+    def _broadcast(self, name: str, value: t.Any, client_id: t.Optional[str] = None):
+        """NOT DOCUMENTED
         Send the new value of a variable to all connected clients.
 
         Arguments:
             name: The name of the variable to update or create.
             value: The value (must be serializable to the JSON format).
+            client_id: The client id (broadcast to all client if None)
         """
-        self.__send_ws_broadcast(name, value)
+        self.__send_ws_broadcast(name, value, client_id)
 
     def _broadcast_all_clients(self, name: str, value: t.Any):
         try:

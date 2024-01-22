@@ -127,17 +127,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
         elif event.entity_type == EventEntityType.JOB:
             with self.lock:
                 self.jobs_list = None
-            if event.operation == EventOperation.UPDATE:
-                try:
-                    job_entity = t.cast(Job, core_get(str(event.entity_id)))
-                    self.gui._broadcast(
-                        _GuiCoreContext._CORE_CHANGED_NAME,
-                        {"task": {"id": job_entity.task.id, "status": job_entity.status.name}},
-                    )
-                except Exception as e:
-                    _warn(f"Access to sequence {event.entity_id} failed", e)
         elif event.entity_type == EventEntityType.SUBMISSION:
-            self.scenario_status_callback(event.entity_id)
+            self.submission_status_callback(event.entity_id)
         elif event.entity_type == EventEntityType.DATA_NODE:
             with self.lock:
                 self.data_nodes_by_owner = None
@@ -155,7 +146,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             {"scenario": scenario_id or True},
         )
 
-    def scenario_status_callback(self, submission_id: t.Optional[str]):
+    def submission_status_callback(self, submission_id: t.Optional[str]):
         if not submission_id or not is_readable(t.cast(SubmissionId, submission_id)):
             return
         try:
@@ -167,25 +158,35 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if not submission or not submission.entity_id:
                 return
 
-            entity = core_get(submission.entity_id)
-            if not entity:
-                return
-
             new_status = submission.submission_status
-            if last_status != new_status:
-                # callback
-                submission_name = submission.properties.get("on_submission")
-                if not submission_name:
-                    return
-                submission_fn = self.gui._get_user_function(submission_name)
-                if not callable(submission_fn):
-                    return
-                self.gui._call_user_callback(
-                    submission.properties.get("client_id"),
-                    submission_fn,
-                    [entity, {"submission_status": new_status.name}],
-                    submission.properties.get("module_context"),
-                )
+
+            client_id = submission.properties.get("client_id")
+            if client_id:
+                running_tasks = {}
+                for job in submission.jobs:
+                    job = job if isinstance(job, Job) else core_get(job)
+                    running_tasks[job.task.id] = (
+                        SubmissionStatus.RUNNING.value
+                        if job.is_running()
+                        else SubmissionStatus.PENDING.value
+                        if job.is_pending()
+                        else None
+                    )
+                self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"tasks": running_tasks}, client_id)
+
+                if last_status != new_status:
+                    # callback
+                    submission_name = submission.properties.get("on_submission")
+                    if submission_name:
+                        submission_fn = self.gui._get_user_function(submission_name)
+                        if callable(submission_fn):
+                            self.gui._call_user_callback(
+                                submission.properties.get("client_id"),
+                                submission_fn,
+                                [core_get(submission.entity_id), {"submission_status": new_status.name}],
+                                submission.properties.get("module_context"),
+                            )
+
             with self.submissions_lock:
                 if new_status in (
                     SubmissionStatus.COMPLETED,
@@ -455,8 +456,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     with self.submissions_lock:
                         self.client_submission[submission_entity.id] = submission_entity.submission_status
                     if Config.core.mode == "development":
-                        self.client_submission[submission_entity.id] = SubmissionStatus.SUBMITTED
-                        self.scenario_status_callback(submission_entity.id)
+                        with self.submissions_lock:
+                            self.client_submission[submission_entity.id] = SubmissionStatus.SUBMITTED
+                        self.submission_status_callback(submission_entity.id)
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
