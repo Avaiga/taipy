@@ -21,7 +21,7 @@ markdown = "==3.4.4"
 marshmallow = "==3.20.1"
 networkx = "==2.6"
 openpyxl = "==3.1.2"
-pandas = "==2.0.0"
+pandas = "*"
 pyarrow = "==14.0.2"
 pymongo = {extras = ["srv"], version = "==4.2.0"}
 python-dotenv = "==1.0.0"
