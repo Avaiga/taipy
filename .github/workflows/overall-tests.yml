@@ -33,7 +33,7 @@ jobs:
         run: pip install --upgrade setuptools wheel
 
       - name: Install Dependencies
-        run: pipenv install --dev --python=${{ matrix.python-version }} --verbose
+        run: pipenv install --dev --python=${{ matrix.python-version }}
 
       - name: Setup LibMagic (MacOS)
         if: matrix.os == 'macos-latest'
@@ -77,7 +77,7 @@ jobs:
         run: pip install --upgrade pipenv
 
       - name: Install Dependencies
-        run: pipenv install --dev --python=${{ matrix.python-version }} --verbose
+        run: pipenv install --dev --python=${{ matrix.python-version }}
 
       - name: Setup LibMagic (MacOS)
         if: matrix.os == 'macos-latest'
@@ -106,7 +106,7 @@ jobs:
         run: pip install --upgrade pipenv
 
       - name: Install Dependencies
-        run: pipenv install --dev --python=${{ matrix.python-version }} --verbose
+        run: pipenv install --dev --python=${{ matrix.python-version }}
 
       - name: Setup LibMagic (MacOS)
         if: matrix.os == 'macos-latest'
