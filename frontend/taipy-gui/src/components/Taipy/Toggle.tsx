@@ -35,6 +35,7 @@ interface ToggleProps extends LovProps<string> {
     unselectedValue?: string;
     allowUnselect?: boolean;
     mode?: string;
+    isSwitch? : boolean;
 }
 
 const Toggle = (props: ToggleProps) => {
@@ -50,6 +51,7 @@ const Toggle = (props: ToggleProps) => {
         updateVars = "",
         valueById,
         mode = "",
+        isSwitch = false,
     } = props;
     const dispatch = useDispatch();
     const [value, setValue] = useState(props.defaultValue);
@@ -67,8 +69,6 @@ const Toggle = (props: ToggleProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const lovList = useLovListMemo(lov, defaultLov);
-
-    const isSwitch = lovList.length == 0 && typeof props.defaultValue !== "string" && typeof props.value !== "string";
 
     const changeValue = useCallback(
         (evt: MouseEvent, val: string) => {

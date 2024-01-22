@@ -744,6 +744,7 @@ class _Builder:
                 var_type = PropertyType.lov_value
                 native_type = False
             elif var_type == PropertyType.toggle_value:
+                self.__set_react_attribute(_to_camel_case("is_switch"), True)
                 var_type = PropertyType.dynamic_boolean
                 native_type = True
             else:

@@ -70,6 +70,7 @@ def test_toggle_switch_md(gui: Gui, test_client, helpers):
     md_string = "<|{x}|toggle|label=Label|>"
     expected_list = [
         "<Toggle",
+        'isSwitch={true}',
         'defaultValue={true}',
         'libClassName="taipy-toggle"',
         'updateVarName="_TpB_tpec_TpExPr_x_TPMDL_0"',
