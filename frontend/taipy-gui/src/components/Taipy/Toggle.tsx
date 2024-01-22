@@ -53,7 +53,13 @@ const Toggle = (props: ToggleProps) => {
     } = props;
     const dispatch = useDispatch();
     const [value, setValue] = useState(props.defaultValue);
-    const [bVal, setBVal] = useState(() => (typeof props.defaultValue === "boolean" ? props.defaultValue : false));
+    const [bVal, setBVal] = useState(() =>
+        typeof props.defaultValue === "boolean"
+            ? props.defaultValue
+            : typeof props.value === "boolean"
+            ? props.value
+            : false
+    );
     const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
@@ -62,7 +68,7 @@ const Toggle = (props: ToggleProps) => {
 
     const lovList = useLovListMemo(lov, defaultLov);
 
-    const isSwitch = lovList.length == 0 && typeof props.defaultValue === "boolean";
+    const isSwitch = lovList.length == 0 && typeof props.defaultValue !== "string" && typeof props.value !== "string";
 
     const changeValue = useCallback(
         (evt: MouseEvent, val: string) => {
@@ -110,7 +116,14 @@ const Toggle = (props: ToggleProps) => {
             {label && !isSwitch ? <Typography>{label}</Typography> : null}
             <Tooltip title={hover || ""}>
                 {isSwitch ? (
-                    <FormControlLabel control={<Switch />} checked={bVal} onChange={changeSwitchValue} disabled={!active} label={label} className={getSuffixedClassNames(className, "-switch")} />
+                    <FormControlLabel
+                        control={<Switch />}
+                        checked={bVal}
+                        onChange={changeSwitchValue}
+                        disabled={!active}
+                        label={label}
+                        className={getSuffixedClassNames(className, "-switch")}
+                    />
                 ) : (
                     <ToggleButtonGroup value={value} exclusive onChange={changeValue} disabled={!active} sx={groupSx}>
                         {lovList &&
