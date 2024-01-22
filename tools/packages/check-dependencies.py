@@ -7,6 +7,7 @@ It can be used:
 '''
 import sys
 import glob
+import logging
 import itertools
 from pathlib import Path
 from datetime import datetime
@@ -160,7 +161,7 @@ class Package:
                 [filename]
             )
         except Exception as e:
-            print(f"Error while parsing package {package}: {e}")
+            logging.error(f"Error while parsing package {package}: {e}")
             raise
 
 
@@ -313,12 +314,12 @@ def display_dependencies_versions(dependencies: Dict[str, Package]):
             f'{package.min_version} ({package.min_release.upload_date if package.min_release else "N.A."})',
             f'{package.max_version} ({package.max_release.upload_date if package.max_release else "N.C."})',
             f'{package.releases[0].version} ({package.releases[0].upload_date})',
-            len(list(itertools.takewhile(lambda x: x.version != package.max_version, package.releases))),
+            len(list(itertools.takewhile(lambda x: x.version != package.max_version, package.releases))),  # noqa: W0640
         ))
 
     to_print.sort(key=lambda x: x[0])
     h = ['name', 'version-min', 'version-max', 'current-version', 'nb-releases-behind']
-    print(tabulate.tabulate(to_print, headers=h, tablefmt='pretty'))
+    logging.info(tabulate.tabulate(to_print, headers=h, tablefmt='pretty'))
 
 
 def update_dependencies(
@@ -356,7 +357,7 @@ def update_dependencies(
 
     # Print the dependencies to update.
     to_print.sort(key=lambda x: x[0])
-    print(tabulate.tabulate(to_print, headers=['name', 'version', 'files'], tablefmt='pretty'))
+    logging.info(tabulate.tabulate(to_print, headers=['name', 'version', 'files'], tablefmt='pretty'))
 
     # Update requirements files.
     for fd in requirements_filenames:
@@ -374,12 +375,12 @@ def generate_raw_requirements_txt(dependencies: Dict[str, Package]):
     """
     for package in dependencies.values():
         if not package.is_taipy:
-            print(package.as_requirements_line(with_version=False))
+            logging.info(package.as_requirements_line(with_version=False))
 
 
 def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
     """
-    Update in place dependencies version of a Pipfile.    
+    Update in place dependencies version of a Pipfile.
     Warning:
       Dependencies are loaded from requirements files without extras or markers.
       The Pipfile contains extras and markers information.

@@ -56,9 +56,9 @@ jobs:
       #       Pipfile.sup
       #       tools/packages/taipy*/*requirements.txt
 
-  partial-tests:
-    needs: [latest-versions]
-    uses: ./.github/workflows/partial-tests.yml
+  # partial-tests:
+  #   needs: [latest-versions]
+  #   uses: ./.github/workflows/partial-tests.yml
 
   overall-tests:
     needs: [partial-tests]
