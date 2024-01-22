@@ -143,4 +143,60 @@ describe("Toggle Component", () => {
         await userEvent.click(elt);
         expect(dispatch).not.toHaveBeenCalled();
     });
+
+    describe("As Switch", () => {
+        it("renders", async () => {
+            const { getByText } = render(<Toggle defaultValue={false as unknown as string} label="switch" />);
+            const elt = getByText("switch");
+            expect(elt.tagName).toBe("SPAN");
+        });
+        it("uses the class", async () => {
+            const { getByText } = render(<Toggle defaultValue={false as unknown as string} label="switch" className="taipy-toggle" />);
+            const elt = getByText("switch");
+            expect(elt.parentElement).toHaveClass("taipy-toggle-switch");
+        });
+        it("shows a selection at start", async () => {
+            const { getByText } = render(<Toggle defaultValue={true as unknown as string} label="switch" />);
+            const elt = getByText("switch");
+            expect(elt.parentElement?.querySelector(".MuiSwitch-switchBase")).toHaveClass("Mui-checked");
+        });
+        it("shows a selection at start through value", async () => {
+            const { getByText } = render(<Toggle value={true as unknown as string} defaultValue={false as unknown as string} label="switch" />);
+            const elt = getByText("switch");
+            expect(elt.parentElement?.querySelector(".MuiSwitch-switchBase")).toHaveClass("Mui-checked");
+        });
+        it("is disabled", async () => {
+            const { getByText } = render(<Toggle defaultValue={false as unknown as string} label="switch" active={false} />);
+            const elt = getByText("switch");
+            expect(elt.parentElement?.querySelector("input")).toBeDisabled();
+        });
+        it("is enabled by default", async () => {
+            const { getByText } = render(<Toggle defaultValue={false as unknown as string} label="switch" />);
+            const elt = getByText("switch");
+            expect(elt.parentElement?.querySelector("input")).not.toBeDisabled();
+        });
+        it("is enabled by active", async () => {
+            const { getByText } = render(<Toggle defaultValue={false as unknown as string} label="switch" active={true} />);
+            const elt = getByText("switch");
+            expect(elt.parentElement?.querySelector("input")).not.toBeDisabled();
+        });
+        it("dispatch a well formed message", async () => {
+            const dispatch = jest.fn();
+            const state: TaipyState = INITIAL_STATE;
+            const { getByText } = render(
+                <TaipyContext.Provider value={{ state, dispatch }}>
+                    <Toggle updateVarName="varname" defaultValue={false as unknown as string} label="switch" />
+                </TaipyContext.Provider>
+            );
+            const elt = getByText("switch");
+            await userEvent.click(elt);
+            expect(dispatch).toHaveBeenCalledWith({
+                name: "varname",
+                payload: { value: true },
+                propagate: true,
+                type: "SEND_UPDATE_ACTION",
+            });
+        });
+
+    });
 });

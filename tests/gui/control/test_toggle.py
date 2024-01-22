@@ -64,3 +64,18 @@ def test_toggle_html_2(gui: Gui, test_client, helpers):
         "value={_TpLv_tpec_TpExPr_x_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
+
+def test_toggle_switch_md(gui: Gui, test_client, helpers):
+    gui._bind_var_val("x", True)
+    md_string = "<|{x}|toggle|label=Label|>"
+    expected_list = [
+        "<Toggle",
+        'defaultValue={true}',
+        'libClassName="taipy-toggle"',
+        'updateVarName="_TpB_tpec_TpExPr_x_TPMDL_0"',
+        'value={_TpB_tpec_TpExPr_x_TPMDL_0}',
+        'label="Label"',
+    ]
+    helpers.test_control_md(gui, md_string, expected_list)
+
+
