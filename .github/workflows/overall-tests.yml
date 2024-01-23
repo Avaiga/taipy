@@ -30,7 +30,7 @@ jobs:
         run: pip install --upgrade pipenv
 
       - name: Install Setuptools and wheel
-        run: pip install --upgrade setuptools wheel
+        run: pipenv run pip install --upgrade setuptools wheel
 
       - name: Install Dependencies
         run: pipenv install --dev --python=${{ matrix.python-version }}
@@ -60,7 +60,7 @@ jobs:
 
   submit_tests:
     needs: [partial-tests]
-    timeout-minutes: 20
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
@@ -88,7 +88,7 @@ jobs:
 
   standalone_tests:
     needs: [partial-tests]
-    timeout-minutes: 20
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:

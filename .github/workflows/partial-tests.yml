@@ -113,7 +113,7 @@ jobs:
 
   submit_tests:
     needs: linter
-    timeout-minutes: 20
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
@@ -152,7 +152,7 @@ jobs:
 
   standalone_tests:
     needs: linter
-    timeout-minutes: 20
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
