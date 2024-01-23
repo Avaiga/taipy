@@ -308,9 +308,6 @@ class Job(_Entity, _Labeled):
         function = functions.pop()
         self._subscribers.append(function)
 
-        if self.status != Status.SUBMITTED:
-            function(self)
-
         if functions:
             self._on_status_change(*functions)
 
