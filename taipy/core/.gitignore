@@ -82,6 +82,8 @@ dataset
 # Filesystem default local storage
 .data/
 .my_data/
+.user_data/
+.taipy_data/
 
 # python notebook
 *.ipynb

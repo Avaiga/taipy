@@ -128,6 +128,8 @@ Dockerfile.dev
 
 # Filesystem default local storage
 .data/
+.user_data/
+.taipy_data/
 
 # Python notebook
 *.ipynb
