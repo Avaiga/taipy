@@ -421,7 +421,7 @@ def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
             dependencies_str += f'{rp.as_pipfile_line()}\n'
 
     toml_str = toml.dumps(pipfile_obj)
-    Path(pipfile).write_text(f'{toml_str}\n\n[packages]\n{dependencies_str}\n', 'UTF-8')
+    Path(pipfile).write_text(f'{toml_str}\n\n[packages]\n{dependencies_str}', 'UTF-8')
 
 
 if __name__ == '__main__':
