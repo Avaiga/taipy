@@ -46,7 +46,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: Update dependencies
-          branch: dependencies/update
+          branch: dependencies/update-python${{matrix.python-version}}
           base: feature/#414-package-updates
           title: 'New dependencies available for Python${{matrix.python-version}}'
           body: |
