@@ -375,6 +375,8 @@ def generate_raw_requirements_txt(dependencies: Dict[str, Package]):
     for package in dependencies.values():
         if not package.is_taipy:
             print(package.as_requirements_line(with_version=False))
+    # Add a blank line at the end.
+    print("")
 
 
 def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
