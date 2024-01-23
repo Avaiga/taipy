@@ -145,6 +145,12 @@ class _GuiCoreScenarioDagAdapter(_TaipyBase):
         return _TaipyBase._HOLDER_PREFIX + "ScG"
 
 
+class _GuiCoreScenarioNoUpdate(_TaipyBase, _DoNotUpdate):
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "ScN"
+
+
 class _GuiCoreDatanodeAdapter(_TaipyBase):
     __INNER_PROPS = ["name"]
 

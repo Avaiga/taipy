@@ -739,10 +739,14 @@ class _Builder:
             default_val (optional(Any)): the default value.
         """
         var_name = self.__default_property_name if var_name is None else var_name
-        if var_type == PropertyType.slider_value:
+        if var_type == PropertyType.slider_value or var_type == PropertyType.toggle_value:
             if self.__attributes.get("lov"):
                 var_type = PropertyType.lov_value
                 native_type = False
+            elif var_type == PropertyType.toggle_value:
+                self.__set_react_attribute(_to_camel_case("is_switch"), True)
+                var_type = PropertyType.dynamic_boolean
+                native_type = True
             else:
                 var_type = (
                     PropertyType.dynamic_lo_numbers
@@ -832,7 +836,7 @@ class _Builder:
 
     def _set_kind(self):
         if self.__attributes.get("theme", False):
-            self.set_attribute("kind", "theme")
+            self.set_attribute("mode", "theme")
         return self
 
     def __get_typed_hash_name(self, hash_name: str, var_type: t.Optional[PropertyType]) -> str:
