@@ -12,7 +12,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        python-version: ['3.11']
+        python-version: ['3.8', '3.9', '3.10', '3.11']
         os: [ubuntu-latest]
     permissions:
       contents: write
@@ -37,22 +37,23 @@ jobs:
           # Any new packages available are printed to stdout.
           # If nothing is printed, the Pipfile is up to date and workflow can stop.
           echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
-          bash check-dependencies.sh ../../Pipfile.sup >> "$GITHUB_OUTPUT"
+          bash check-dependencies.sh pipfiles/Pipfile${{matrix.python-version}}.max >> "$GITHUB_OUTPUT"
           echo EOF >> "$GITHUB_OUTPUT"
-          cat ../../Pipfile.sup
+          cat pipfiles/Pipfile${{matrix.python-version}}.max
 
       - name: Create the pull_request
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
+        # Python3.8 must not update the dependencies.
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' and ${{matrix.python-version}} != '3.8'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: Update dependencies
-          branch: dependencies/update
-          base: feature/#414-package-updates
-          title: 'New dependencies available'
+          branch: dependencies/update-python${{matrix.python-version}}
+          base: develop
+          title: 'New dependencies available for Python${{matrix.python-version}}'
           body: |
             ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
           draft: false
           add-paths: |
-            Pipfile.sup
+            tools/packages/pipfiles/Pipfile${{matrix.python-version}}.max
             tools/packages/taipy*/*requirements.txt
