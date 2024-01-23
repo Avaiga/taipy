@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -11,7 +11,7 @@
 
 """The setup script."""
 
-
+import os
 import json
 import platform
 import subprocess
@@ -25,14 +25,14 @@ root_folder = Path(__file__).parent
 readme = (root_folder / "README.md").read_text("UTF-8")
 
 # get current version
-with open(root_folder / "taipy" / "version.json") as version_file:
+with open(os.path.join("taipy", "version.json")) as version_file:
     version = json.load(version_file)
     version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
 # build MANIFEST.in from tools/packages/taipy*/MANIFEST.in
-with open(root_folder / "MANIFEST.in", "w") as man:
+with open(os.path.join(root_folder, "MANIFEST.in"), "a") as man:
     for pman in [
         dir / "MANIFEST.in"
         for dir in (root_folder / "tools" / "packages").iterdir()
@@ -59,7 +59,7 @@ extras_require = {
         "python-magic-bin>=0.4.14,<0.5;platform_system=='Windows'",
     ],
     "rdp": ["rdp>=0.8"],
-    "arrow": ["pyarrow>=10.0.1,<11.0"],
+    "arrow": ["pyarrow>=14.0.2,<15.0"],
     "mssql": ["pyodbc>=4"],
 }
 

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -32,6 +32,8 @@ from taipy.core import (
     ScenarioId,
     Sequence,
     SequenceId,
+    Submission,
+    SubmissionId,
     Task,
     TaskId,
 )
@@ -47,7 +49,12 @@ from taipy.core.exceptions.exceptions import DataNodeConfigIsNotGlobal, InvalidE
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job
 from taipy.core.scenario._scenario_manager import _ScenarioManager
+from taipy.core.submission._submission_manager import _SubmissionManager
 from taipy.core.task._task_manager import _TaskManager
+
+
+def cb(s, j):
+    print()  # noqa: T201
 
 
 class TestTaipy:
@@ -126,6 +133,16 @@ class TestTaipy:
             tp.is_editable(data_node)
             mck.assert_called_once_with(data_node)
 
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._is_editable") as mck:
+            submission = Submission(scenario.id, scenario._ID_PREFIX, scenario.config_id, "submission_id")
+            tp.is_editable(submission)
+            mck.assert_called_once_with(submission)
+
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._is_editable") as mck:
+            submission_id = SubmissionId("SUBMISSION_id")
+            tp.is_editable(submission_id)
+            mck.assert_called_once_with(submission_id)
+
     def test_is_editable(self):
         a_date = datetime.datetime.now()
         cycle = Cycle(Frequency.DAILY, {}, a_date, a_date, a_date)
@@ -133,11 +150,13 @@ class TestTaipy:
         task = Task("task_config_id", {}, print)
         job = Job(JobId("job_id"), task, "submit_id", scenario.id)
         dn = PickleDataNode(config_id="data_node_config_id", scope=Scope.SCENARIO)
+        submission = Submission(scenario.id, scenario._ID_PREFIX, scenario.config_id, "submission_id")
         _CycleManager._set(cycle)
         _ScenarioManager._set(scenario)
         _TaskManager._set(task)
         _JobManager._set(job)
         _DataManager._set(dn)
+        _SubmissionManager._set(submission)
         sequence = scenario.sequences["sequence"]
 
         assert tp.is_editable(scenario)
@@ -145,6 +164,7 @@ class TestTaipy:
         assert tp.is_editable(task)
         assert tp.is_editable(cycle)
         assert tp.is_editable(job)
+        assert tp.is_editable(submission)
         assert tp.is_editable(dn)
 
     def test_is_readable_is_called(self, cycle, job, data_node):
@@ -205,6 +225,16 @@ class TestTaipy:
             tp.is_readable(data_node)
             mck.assert_called_once_with(data_node)
 
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._is_readable") as mck:
+            submission = Submission(scenario.id, scenario._ID_PREFIX, scenario.config_id, "submission_id")
+            tp.is_readable(submission)
+            mck.assert_called_once_with(submission)
+
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._is_readable") as mck:
+            submission_id = SubmissionId("SUBMISSION_id")
+            tp.is_readable(submission_id)
+            mck.assert_called_once_with(submission_id)
+
     def test_is_readable(self):
         a_date = datetime.datetime.now()
         cycle = Cycle(Frequency.DAILY, {}, a_date, a_date, a_date)
@@ -212,11 +242,13 @@ class TestTaipy:
         task = Task("task_config_id", {}, print)
         job = Job(JobId("a_job_id"), task, "submit_id", scenario.id)
         dn = PickleDataNode(config_id="a_data_node_config_id", scope=Scope.SCENARIO)
+        submission = Submission(scenario.id, scenario._ID_PREFIX, scenario.config_id, "submission_id")
         _CycleManager._set(cycle)
         _ScenarioManager._set(scenario)
         _TaskManager._set(task)
         _JobManager._set(job)
         _DataManager._set(dn)
+        _SubmissionManager._set(submission)
         sequence = scenario.sequences["sequence"]
 
         assert tp.is_readable(scenario)
@@ -225,6 +257,7 @@ class TestTaipy:
         assert tp.is_readable(cycle)
         assert tp.is_readable(job)
         assert tp.is_readable(dn)
+        assert tp.is_readable(submission)
 
     def test_is_submittable_is_called(self):
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._is_submittable") as mck:
@@ -356,6 +389,16 @@ class TestTaipy:
             tp.is_deletable(job)
             mck.assert_called_once_with(job)
 
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._is_deletable") as mck:
+            submission = Submission(scenario.id, scenario._ID_PREFIX, scenario.config_id, "submission_id")
+            tp.is_deletable(submission)
+            mck.assert_called_once_with(submission)
+
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._is_deletable") as mck:
+            submission_id = SubmissionId("SUBMISSION_id")
+            tp.is_deletable(submission_id)
+            mck.assert_called_once_with(submission_id)
+
     def test_is_promotable(self):
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._is_promotable_to_primary") as mck:
             scenario_id = ScenarioId("SCENARIO_id")
@@ -431,9 +474,6 @@ class TestTaipy:
             mck.assert_called_once_with(scenario, scenario, data_node_config_id="dn")
 
     def test_subscribe_scenario(self, scenario):
-        def cb(s, j):
-            print()
-
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._subscribe") as mck:
             tp.subscribe_scenario(cb)
             mck.assert_called_once_with(cb, [], None)
@@ -442,9 +482,6 @@ class TestTaipy:
             mck.assert_called_once_with(cb, [], scenario)
 
     def test_unsubscribe_scenario(self, scenario):
-        def cb(s, j):
-            print()
-
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._unsubscribe") as mck:
             tp.unsubscribe_scenario(cb)
             mck.assert_called_once_with(cb, None, None)
@@ -453,9 +490,6 @@ class TestTaipy:
             mck.assert_called_once_with(cb, None, scenario)
 
     def test_subscribe_sequence(self, sequence):
-        def cb(s, j):
-            print()
-
         with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._subscribe") as mck:
             tp.subscribe_sequence(cb)
             mck.assert_called_once_with(cb, None, None)
@@ -464,9 +498,6 @@ class TestTaipy:
             mck.assert_called_once_with(cb, None, sequence)
 
     def test_unsubscribe_sequence(self, sequence):
-        def cb(s, j):
-            print()
-
         with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._unsubscribe") as mck:
             tp.unsubscribe_sequence(callback=cb)
             mck.assert_called_once_with(cb, None, None)
@@ -634,7 +665,7 @@ class TestTaipy:
         scenario_cfg_2 = Config.configure_scenario("s2", [task_cfg_2], [], Frequency.DAILY)
 
         scenario_1 = tp.create_scenario(scenario_cfg_1)
-        job_1 = tp.submit(scenario_1)[0]
+        job_1 = tp.submit(scenario_1).jobs[0]
 
         # Export scenario 1
         tp.export_scenario(scenario_1.id, "./tmp/exp_scenario_1")
@@ -647,7 +678,7 @@ class TestTaipy:
         assert sorted(os.listdir("./tmp/exp_scenario_1/cycles")) == sorted([f"{scenario_1.cycle.id}.json"])
 
         scenario_2 = tp.create_scenario(scenario_cfg_2)
-        job_2 = tp.submit(scenario_2)[0]
+        job_2 = tp.submit(scenario_2).jobs[0]
 
         # Export scenario 2
         scenario_2.export(pathlib.Path.cwd() / "./tmp/exp_scenario_2")
@@ -677,7 +708,7 @@ class TestTaipy:
             for key, items in expected_parents.items():
                 assert len(parents[key]) == len(expected_parents[key])
                 parent_ids = [parent.id for parent in parents[key]]
-                assert all([item.id in parent_ids for item in items])
+                assert all(item.id in parent_ids for item in items)
 
         dn_config_1 = Config.configure_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
         dn_config_2 = Config.configure_data_node(id="d2", storage_type="in_memory", scope=Scope.SCENARIO)

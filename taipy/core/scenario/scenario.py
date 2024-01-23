@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -42,6 +42,7 @@ from ..exceptions.exceptions import (
 from ..job.job import Job
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
 from ..sequence.sequence import Sequence
+from ..submission.submission import Submission
 from ..task.task import Task
 from ..task.task_id import TaskId
 from .scenario_id import ScenarioId
@@ -108,10 +109,10 @@ class Scenario(_Entity, Submittable, _Labeled):
         self._properties = _Properties(self, **properties)
         self._sequences: Dict[str, Dict] = sequences or {}
 
-        _scenario_task_ids = set([task.id if isinstance(task, Task) else task for task in self._tasks])
+        _scenario_task_ids = set(task.id if isinstance(task, Task) else task for task in self._tasks)
         for sequence_name, sequence_data in self._sequences.items():
             sequence_task_ids = set(
-                [task.id if isinstance(task, Task) else task for task in sequence_data.get("tasks", [])]
+                task.id if isinstance(task, Task) else task for task in sequence_data.get("tasks", [])
             )
             self.__check_sequence_tasks_exist_in_scenario_tasks(
                 sequence_name, sequence_task_ids, self.id, _scenario_task_ids
@@ -195,8 +196,8 @@ class Scenario(_Entity, Submittable, _Labeled):
             SequenceTaskDoesNotExistInScenario^: If a task in the sequence does not exist in the scenario.
         """
         _scenario = _Reloader()._reload(self._MANAGER_NAME, self)
-        _scenario_task_ids = set([task.id if isinstance(task, Task) else task for task in _scenario._tasks])
-        _sequence_task_ids: Set[TaskId] = set([task.id if isinstance(task, Task) else task for task in tasks])
+        _scenario_task_ids = set(task.id if isinstance(task, Task) else task for task in _scenario._tasks)
+        _sequence_task_ids: Set[TaskId] = set(task.id if isinstance(task, Task) else task for task in tasks)
         self.__check_sequence_tasks_exist_in_scenario_tasks(name, _sequence_task_ids, self.id, _scenario_task_ids)
         _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
         _sequences.update(
@@ -228,9 +229,9 @@ class Scenario(_Entity, Submittable, _Labeled):
             SequenceTaskDoesNotExistInScenario^: If a task in the sequence does not exist in the scenario.
         """
         _scenario = _Reloader()._reload(self._MANAGER_NAME, self)
-        _sc_task_ids = set([task.id if isinstance(task, Task) else task for task in _scenario._tasks])
+        _sc_task_ids = set(task.id if isinstance(task, Task) else task for task in _scenario._tasks)
         for name, tasks in sequences.items():
-            _seq_task_ids: Set[TaskId] = set([task.id if isinstance(task, Task) else task for task in tasks])
+            _seq_task_ids: Set[TaskId] = set(task.id if isinstance(task, Task) else task for task in tasks)
             self.__check_sequence_tasks_exist_in_scenario_tasks(name, _seq_task_ids, self.id, _sc_task_ids)
         # Need to parse twice the sequences to avoid adding some sequences and not others in case of exception
         for name, tasks in sequences.items():
@@ -492,7 +493,8 @@ class Scenario(_Entity, Submittable, _Labeled):
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
-    ) -> List[Job]:
+        **properties,
+    ) -> Submission:
         """Submit this scenario for execution.
 
         All the `Task^`s of the scenario will be submitted for execution.
@@ -505,13 +507,13 @@ class Scenario(_Entity, Submittable, _Labeled):
                 asynchronous mode.
             timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
                 before returning.
-
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
-            A list of created `Job^`s.
+            A `Submission^` containing the information of the submission.
         """
         from ._scenario_manager_factory import _ScenarioManagerFactory
 
-        return _ScenarioManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
+        return _ScenarioManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout, **properties)
 
     def export(
         self,

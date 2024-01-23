@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -13,13 +13,13 @@ import threading
 import uuid
 from collections.abc import MutableSet
 from datetime import datetime
-from typing import Any, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
-from .._entity._reload import _self_reload, _self_setter
+from .._entity._properties import _Properties
+from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job, JobId, Status
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
 from .submission_id import SubmissionId
@@ -33,6 +33,7 @@ class Submission(_Entity, _Labeled):
         entity_id (str): The identifier of the entity that was submitted.
         id (str): The identifier of the `Submission^` entity.
         jobs (Optional[Union[List[Job], List[JobId]]]): A list of jobs.
+        properties (dict[str, Any]): A dictionary of additional properties.
         creation_date (Optional[datetime]): The date of this submission's creation.
         submission_status (Optional[SubmissionStatus]): The current status of this submission.
         version (Optional[str]): The string indicates the application version of the submission to instantiate.
@@ -51,6 +52,7 @@ class Submission(_Entity, _Labeled):
         entity_config_id: Optional[str] = None,
         id: Optional[str] = None,
         jobs: Optional[Union[List[Job], List[JobId]]] = None,
+        properties: Optional[Dict[str, Any]] = None,
         creation_date: Optional[datetime] = None,
         submission_status: Optional[SubmissionStatus] = None,
         version: Optional[str] = None,
@@ -63,6 +65,9 @@ class Submission(_Entity, _Labeled):
         self._creation_date = creation_date or datetime.now()
         self._submission_status = submission_status or SubmissionStatus.SUBMITTED
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
+
+        properties = properties or {}
+        self._properties = _Properties(self, **properties.copy())
 
         self.__abandoned = False
         self.__completed = False
@@ -90,6 +95,11 @@ class Submission(_Entity, _Labeled):
         return self._entity_config_id
 
     @property
+    def properties(self):
+        self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
+        return self._properties
+
+    @property
     def creation_date(self):
         return self._creation_date
 
@@ -112,6 +122,8 @@ class Submission(_Entity, _Labeled):
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def jobs(self) -> List[Job]:
+        from ..job._job_manager_factory import _JobManagerFactory
+
         jobs = []
         job_manager = _JobManagerFactory._build_manager()
 
@@ -200,6 +212,28 @@ class Submission(_Entity, _Labeled):
             self.submission_status = SubmissionStatus.COMPLETED  # type: ignore
         else:
             self.submission_status = SubmissionStatus.UNDEFINED  # type: ignore
+
+    def is_finished(self) -> bool:
+        """Indicate if the submission is finished.
+
+        Returns:
+            True if the submission is finished.
+        """
+        return self.submission_status in [
+            SubmissionStatus.COMPLETED,
+            SubmissionStatus.FAILED,
+            SubmissionStatus.CANCELED,
+        ]
+
+    def is_deletable(self) -> bool:
+        """Indicate if the submission can be deleted.
+
+        Returns:
+            True if the submission can be deleted. False otherwise.
+        """
+        from ... import core as tp
+
+        return tp.is_deletable(self)
 
 
 @_make_event.register(Submission)

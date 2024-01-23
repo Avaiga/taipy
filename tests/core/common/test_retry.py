@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -10,18 +10,20 @@
 # specific language governing permissions and limitations under the License.
 
 import pytest
+
 from taipy.config import Config
 from taipy.core.common._utils import _retry_read_entity
+from taipy.core.exceptions import InvalidExposedType
 
 
 def test_retry_decorator(mocker):
-    func = mocker.Mock(side_effect=Exception())
+    func = mocker.Mock(side_effect=InvalidExposedType())
 
-    @_retry_read_entity((Exception,))
+    @_retry_read_entity((InvalidExposedType,))
     def decorated_func():
         func()
 
-    with pytest.raises(Exception):
+    with pytest.raises(InvalidExposedType):
         decorated_func()
     # Called once in the normal flow and no retry
     # The Config.core.read_entity_retry is set to 0 at conftest.py
@@ -31,7 +33,7 @@ def test_retry_decorator(mocker):
     func.reset_mock()
 
     Config.core.read_entity_retry = 3
-    with pytest.raises(Exception):
+    with pytest.raises(InvalidExposedType):
         decorated_func()
     # Called once in the normal flow and 3 more times on the retry flow
     assert func.call_count == 4
@@ -41,7 +43,7 @@ def test_retry_decorator_exception_not_in_list(mocker):
     func = mocker.Mock(side_effect=KeyError())
     Config.core.read_entity_retry = 3
 
-    @_retry_read_entity((Exception,))
+    @_retry_read_entity((InvalidExposedType,))
     def decorated_func():
         func()
 

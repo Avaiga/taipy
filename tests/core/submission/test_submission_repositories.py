@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -12,7 +12,6 @@
 import os
 
 import pytest
-from tests.core.conftest import init_sql_repo
 
 from taipy.config.config import Config
 from taipy.core.data._data_manager_factory import _DataManagerFactory
@@ -22,6 +21,7 @@ from taipy.core.submission._submission_manager_factory import _SubmissionManager
 from taipy.core.submission.submission import Submission
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
+from tests.core.conftest import init_sql_repo
 
 
 def configure_fs_repo():
@@ -29,7 +29,7 @@ def configure_fs_repo():
 
 
 def configure_sql_repo():
-    init_sql_repo
+    init_sql_repo  # noqa: B018
 
 
 class TestSubmissionRepository:
@@ -43,13 +43,19 @@ class TestSubmissionRepository:
         job._task = task
         _JobManagerFactory._build_manager()._repository._save(job)
 
-        submission = Submission(task.id, task._ID_PREFIX, task.config_id)
+        submission = Submission(
+            task.id, task._ID_PREFIX, task.config_id, properties={"debug": True, "log": "log_file", "retry_note": 5}
+        )
         submission_repository = _SubmissionManagerFactory._build_manager()._repository
         submission_repository._save(submission)
         submission.jobs = [job]
 
         obj = submission_repository._load(submission.id)
         assert isinstance(obj, Submission)
+        assert obj.entity_id == task.id
+        assert obj.entity_type == task._ID_PREFIX
+        assert obj.entity_config_id == task.config_id
+        assert obj.properties == {"debug": True, "log": "log_file", "retry_note": 5}
 
     @pytest.mark.parametrize("configure_repo", [configure_fs_repo, configure_sql_repo])
     def test_exists(self, configure_repo):

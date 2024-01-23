@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -12,8 +12,6 @@
 import inspect
 from os import path
 from unittest.mock import patch
-
-from flask import g
 
 from taipy.gui import Gui
 
@@ -66,6 +64,7 @@ def test_get_status_with_user_status(gui: Gui):
     ret = flask_client.get("/taipy.status.json")
     assert ret.status_code == 200, f"status_code => {ret.status_code} != 200"
     assert ret.json, "json is not defined"
-    gui = ret.json.get("gui")
-    assert "user_status" in gui, "json.gui has no key user_status"
-    assert gui.get("user_status") == user_status, f'json.gui.user_status => {gui.get("user_status")} != {user_status}'
+    gui_ret = ret.json.get("gui")
+    assert "user_status" in gui_ret, "json.gui has no key user_status"
+    assert gui_ret.get("user_status") == user_status
+    assert f'json.gui.user_status => {gui_ret.get("user_status")} != {user_status}'

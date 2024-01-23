@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -94,7 +94,8 @@ class _DataAccessors(object):
         value = value.get()
         access = self.__access_4_type.get(type(value).__name__)
         if access is None:
-            _warn(f"Can't find Data Accessor for type {type(value).__name__}.")
+            if value:
+                _warn(f"Can't find Data Accessor for type {type(value).__name__}.")
             return self.__invalid_data_accessor
         return access
 

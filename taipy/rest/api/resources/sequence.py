@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -13,6 +13,7 @@
 from flask import request
 from flask_restful import Resource
 
+from taipy.core import Sequence
 from taipy.core.exceptions.exceptions import NonExistingScenario, NonExistingSequence
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
@@ -23,7 +24,7 @@ from ..middlewares._middleware import _middleware
 from ..schemas import SequenceResponseSchema
 
 
-def _get_or_raise(sequence_id: str):
+def _get_or_raise(sequence_id: str) -> Sequence:
     manager = _SequenceManagerFactory._build_manager()
     sequence = manager._get(sequence_id)
     if sequence is None:

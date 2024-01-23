@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -27,6 +27,7 @@ class _SubmissionConverter(_AbstractConverter):
             entity_type=submission.entity_type,
             entity_config_id=submission._entity_config_id,
             job_ids=[job.id if isinstance(job, Job) else JobId(str(job)) for job in list(submission._jobs)],
+            properties=submission._properties.data.copy(),
             creation_date=submission._creation_date.isoformat(),
             submission_status=submission._submission_status,
             version=submission._version,
@@ -40,6 +41,7 @@ class _SubmissionConverter(_AbstractConverter):
             entity_config_id=model.entity_config_id,
             id=SubmissionId(model.id),
             jobs=model.job_ids,
+            properties=model.properties,
             creation_date=datetime.fromisoformat(model.creation_date),
             submission_status=model.submission_status,
             version=model.version,

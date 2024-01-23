@@ -554,6 +554,11 @@
             "type": "dynamic(bool)",
             "default_value": "False",
             "doc": "Allows dynamic config refresh if set to True."
+          },
+          {
+            "name": "figure",
+            "type": "plotly.graph_objects.Figure",
+            "doc": "A figure as produced by plotly."
           }
         ]
       }
@@ -861,6 +866,11 @@
             "type": "str",
             "default_value": "None",
             "doc": "The label associated with the selector when in dropdown mode."
+          },
+          {
+            "name": "mode",
+            "type": "str",
+            "doc": "Define the way the selector is displayed:<ul><li>&quote;radio&quote;: list of radio buttons</li><li>&quote;check&quote;: list of check buttons</li><li>any other value: selector as usual."
           }
         ]
       }
@@ -984,12 +994,12 @@
           {
             "name": "tooltip",
             "type": "str",
-            "doc": "The name of the function that must return a tooltip text for a cell.<br/>See <a href=\"#cell%20tooltip\">below</a> for details."
+            "doc": "The name of the function that must return a tooltip text for a cell.<br/>See <a href=\"#cell-tooltips\">below</a> for details."
           },
           {
             "name": "tooltip[<i>column_name</i>]",
             "type": "str",
-            "doc": "The name of the function that must return a tooltip text for a cell.<br/>See <a href=\"#cell%20tooltip\">below</a> for details."
+            "doc": "The name of the function that must return a tooltip text for a cell.<br/>See <a href=\"#cell-tooltips\">below</a> for details."
           },
           {
             "name": "width",

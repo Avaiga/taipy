@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -149,6 +149,16 @@ class NonExistingJob(RuntimeError):
 
     def __init__(self, job_id: str):
         self.message = f"Job: {job_id} does not exist."
+
+
+class SubmissionNotDeletedException(RuntimeError):
+    """Raised if there is an attempt to delete a submission that cannot be deleted.
+
+    This exception can be raised by `taipy.delete()^`.
+    """
+
+    def __init__(self, submission_id: str):
+        self.message = f"Submission: {submission_id} cannot be deleted."
 
 
 class DataNodeWritingError(RuntimeError):

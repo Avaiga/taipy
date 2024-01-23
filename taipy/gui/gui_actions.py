@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -322,9 +322,9 @@ def invoke_state_callback(gui: Gui, state_id: str, callback: t.Callable, args: t
 def invoke_long_callback(
     state: State,
     user_function: t.Callable,
-    user_function_args: t.Union[t.Tuple, t.List] = [],
+    user_function_args: t.Union[t.Tuple, t.List] = None,
     user_status_function: t.Optional[t.Callable] = None,
-    user_status_function_args: t.Union[t.Tuple, t.List] = [],
+    user_status_function_args: t.Union[t.Tuple, t.List] = None,
     period=0,
 ):
     """Invoke a long running user callback.
@@ -369,7 +369,17 @@ def invoke_long_callback(
     """
     if not state or not isinstance(state._gui, Gui):
         _warn("'invoke_long_callback()' must be called in the context of a callback.")
+
+    if user_status_function_args is None:
+        user_status_function_args = []
+    if user_function_args is None:
+        user_function_args = []
         return
+
+    if user_status_function_args is None:
+        user_status_function_args = []
+    if user_function_args is None:
+        user_function_args = []
 
     state_id = get_state_id(state)
     module_context = get_module_context(state)

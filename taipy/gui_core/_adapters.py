@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -12,9 +12,20 @@
 import typing as t
 from enum import Enum
 
-from taipy.core import Cycle, DataNode, Job, Scenario, Sequence, Task
+from taipy.core import (
+    Cycle,
+    DataNode,
+    Job,
+    Scenario,
+    Sequence,
+    Task,
+    is_deletable,
+    is_editable,
+    is_promotable,
+    is_readable,
+    is_submittable,
+)
 from taipy.core import get as core_get
-from taipy.core import is_deletable, is_editable, is_promotable, is_readable, is_submittable
 from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
 from taipy.gui.utils import _TaipyBase
@@ -132,6 +143,12 @@ class _GuiCoreScenarioDagAdapter(_TaipyBase):
     @staticmethod
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "ScG"
+
+
+class _GuiCoreScenarioNoUpdate(_TaipyBase, _DoNotUpdate):
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "ScN"
 
 
 class _GuiCoreDatanodeAdapter(_TaipyBase):

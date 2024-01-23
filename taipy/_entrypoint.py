@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -11,6 +11,7 @@
 
 import os
 import sys
+from importlib.util import find_spec
 
 from taipy._cli._base_cli import _CLI
 from taipy.core._core_cli import _CoreCLI
@@ -39,9 +40,14 @@ def _entrypoint():
     _MigrateCLI.create_parser()
     _HelpCLI.create_parser()
 
+    if find_spec("taipy.enterprise"):
+        from taipy.enterprise._entrypoint import _entrypoint as _enterprise_entrypoint
+
+        _enterprise_entrypoint()
+
     args = _CLI._parse()
     if args.version:
-        print(f"Taipy {_get_version()}")
+        print(f"Taipy {_get_version()}")  # noqa: T201
         sys.exit(0)
 
     _RunCLI.parse_arguments()

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -14,8 +14,10 @@
 #     python <script>
 # -----------------------------------------------------------------------------------------
 import random
+from typing import List
 
 import numpy
+
 from taipy.gui import Gui
 
 # x = [0..20]
@@ -39,7 +41,7 @@ config = {
     "displayModeBar": False
 }
 
-selected_indices = []
+selected_indices: List = []
 
 mean_value = 0.0
 

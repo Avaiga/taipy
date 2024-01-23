@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -20,17 +20,18 @@ from setuptools import find_namespace_packages, find_packages, setup
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
-with open(f"src{os.sep}taipy{os.sep}core{os.sep}version.json") as version_file:
+version_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "version.json")
+with open(version_path) as version_file:
     version = json.load(version_file)
     version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
 requirements = [
-    "pyarrow>=10.0.1,<11.0",
+    "pyarrow>=14.0.2,<15.0",
     "networkx>=2.6,<3.0",
     "openpyxl>=3.1.2,<3.2",
-    "modin[dask]>=0.23.0,<1.0",
+    "pandas>=2.0.0,<3.0",
     "pymongo[srv]>=4.2.0,<5.0",
     "sqlalchemy>=2.0.16,<2.1",
     "toml>=0.10,<0.11",
@@ -67,8 +68,7 @@ setup(
     license="Apache License 2.0",
     keywords="taipy-core",
     name="taipy-core",
-    package_dir={"": "src"},
-    packages=find_namespace_packages(where="src") + find_packages(include=["taipy", "taipy.core", "taipy.core.*"]),
+    packages=find_namespace_packages(where=".") + find_packages(include=["taipy", "taipy.core", "taipy.core.*"]),
     include_package_data=True,
     test_suite="tests",
     tests_require=test_requirements,

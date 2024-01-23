@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -34,6 +34,7 @@ from ..scenario._scenario_manager_factory import _ScenarioManagerFactory
 from ..scenario.scenario import Scenario
 from ..scenario.scenario_id import ScenarioId
 from ..submission._submission_manager_factory import _SubmissionManagerFactory
+from ..submission.submission import Submission
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task, TaskId
 from .sequence import Sequence
@@ -98,7 +99,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
                     Notifier.publish(Event(cls._EVENT_ENTITY_TYPE, EventOperation.DELETION, entity_id=sequence_id))
         except (ModelNotFound, KeyError):
             cls.__log_error_entity_not_found(sequence_id)
-            raise ModelNotFound(cls._model_name, sequence_id)
+            raise ModelNotFound(cls._model_name, sequence_id) from None
 
     @classmethod
     def _delete_by_version(cls, version_number: str):
@@ -185,7 +186,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
             return sequence_name, scenario_id
         except (ValueError, IndexError):
             cls._logger.error(f"SequenceId {sequence_id} is invalid.")
-            raise InvalidSequenceId(sequence_id)
+            raise InvalidSequenceId(sequence_id) from None
 
     @classmethod
     def _get(cls, sequence: Union[str, Sequence], default=None) -> Sequence:
@@ -227,7 +228,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         filtered_sequences = []
         for sequence in sequences:
             for filter in filters:
-                if all([getattr(sequence, key) == item for key, item in filter.items()]):
+                if all(getattr(sequence, key) == item for key, item in filter.items()):
                     filtered_sequences.append(sequence)
         return filtered_sequences
 
@@ -309,7 +310,8 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
         check_inputs_are_ready: bool = True,
-    ) -> List[Job]:
+        **properties,
+    ) -> Submission:
         sequence_id = sequence.id if isinstance(sequence, Sequence) else sequence
         sequence = cls._get(sequence_id)
         if sequence is None:
@@ -319,13 +321,20 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         if check_inputs_are_ready:
             _warn_if_inputs_not_ready(sequence.get_inputs())
 
-        jobs = (
+        submission = (
             _TaskManagerFactory._build_manager()
             ._orchestrator()
-            .submit(sequence, callbacks=sequence_subscription_callback, force=force, wait=wait, timeout=timeout)
+            .submit(
+                sequence,
+                callbacks=sequence_subscription_callback,
+                force=force,
+                wait=wait,
+                timeout=timeout,
+                **properties,
+            )
         )
         Notifier.publish(_make_event(sequence, EventOperation.SUBMISSION))
-        return jobs
+        return submission
 
     @classmethod
     def _exists(cls, entity_id: str) -> bool:

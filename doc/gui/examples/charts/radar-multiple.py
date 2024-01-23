@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -13,11 +13,13 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
+from typing import Dict, List
+
 from taipy.gui import Gui
 
 # Skill categories
 skills = ["HTML", "CSS", "Java", "Python", "PHP", "JavaScript", "Photoshop"]
-data = [
+data: List[Dict[str, List]] = [
     # Proportion of skills used for Backend development
     {"Backend": [10, 10, 80, 70, 90, 30, 0], "Skills": skills},
     # Proportion of skills used for Frontend development

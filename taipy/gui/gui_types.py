@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -28,6 +28,7 @@ from .utils import (
     _TaipyLov,
     _TaipyLovValue,
     _TaipyNumber,
+    _TaipyToJson,
 )
 
 
@@ -45,6 +46,8 @@ class _WsType(Enum):
     DOWNLOAD_FILE = "DF"
     PARTIAL = "PR"
     ACKNOWLEDGEMENT = "ACK"
+    GET_MODULE_CONTEXT = "GMC"
+    GET_VARIABLES = "GVS"
 
 
 NumberTypes = {"int", "int64", "float", "float64"}
@@ -135,6 +138,7 @@ class PropertyType(Enum):
     The property holds an inner attributes that is defined by a library and cannot be overridden by the user.
     """
     inner = "inner"
+    to_json = _TaipyToJson
 
 
 @t.overload  # noqa: F811

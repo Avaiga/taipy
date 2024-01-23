@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -513,8 +513,8 @@ def test_modify_job_configuration_dont_stop_application(caplog, init_sql_repo, i
         core = Core()
         core.run(force_restart=True)
         scenario = _ScenarioManager._create(scenario_config)
-        jobs = _ScenarioManager._submit(scenario)
-        assert all([job.is_finished() for job in jobs])
+        jobs = _ScenarioManager._submit(scenario).jobs
+        assert all(job.is_finished() for job in jobs)
         core.stop()
 
     init_config()
@@ -528,7 +528,7 @@ def test_modify_job_configuration_dont_stop_application(caplog, init_sql_repo, i
         core.run(force_restart=True)
         scenario = _ScenarioManager._create(scenario_config)
 
-        jobs = _ScenarioManager._submit(scenario)
+        jobs = _ScenarioManager._submit(scenario).jobs
         assert_true_after_time(lambda: all(job.is_finished() for job in jobs))
         error_message = str(caplog.text)
         assert 'JOB "mode" was modified' in error_message

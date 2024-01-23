@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -12,6 +12,7 @@
 from datetime import datetime
 
 import pytest
+
 from taipy.core import TaskId
 from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.job.job import Job
@@ -41,6 +42,7 @@ def test_create_submission(scenario, job, current_datetime):
         scenario.config_id,
         "submission_id",
         [job],
+        {"debug": True, "log": "log_file", "retry_note": 5},
         current_datetime,
         SubmissionStatus.COMPLETED,
         "version_id",
@@ -51,6 +53,7 @@ def test_create_submission(scenario, job, current_datetime):
     assert submission_2.entity_type == scenario._ID_PREFIX
     assert submission_2.entity_config_id == scenario.config_id
     assert submission_2._jobs == [job]
+    assert submission_2._properties == {"debug": True, "log": "log_file", "retry_note": 5}
     assert submission_2.creation_date == current_datetime
     assert submission_2._submission_status == SubmissionStatus.COMPLETED
     assert submission_2._version == "version_id"
@@ -262,7 +265,7 @@ def test_update_submission_status_with_wrong_case_abandoned_without_cancel_or_fa
 
 def test_auto_set_and_reload():
     task = Task(config_id="name_1", properties={}, function=print, id=TaskId("task_1"))
-    submission_1 = Submission(task.id, task._ID_PREFIX, task.config_id)
+    submission_1 = Submission(task.id, task._ID_PREFIX, task.config_id, properties={})
     job_1 = Job("job_1", task, submission_1.id, submission_1.entity_id)
     job_2 = Job("job_2", task, submission_1.id, submission_1.entity_id)
 
@@ -304,20 +307,93 @@ def test_auto_set_and_reload():
     assert submission_1.submission_status == SubmissionStatus.COMPLETED
     assert submission_2.submission_status == SubmissionStatus.COMPLETED
 
+    # auto set & reload on properties attribute
+    assert submission_1.properties == {}
+    assert submission_2.properties == {}
+    submission_1._properties["qux"] = 4
+    assert submission_1.properties["qux"] == 4
+    assert submission_2.properties["qux"] == 4
+
+    assert submission_1.properties == {"qux": 4}
+    assert submission_2.properties == {"qux": 4}
+    submission_2._properties["qux"] = 5
+    assert submission_1.properties["qux"] == 5
+    assert submission_2.properties["qux"] == 5
+
+    submission_1.properties["temp_key_1"] = "temp_value_1"
+    submission_1.properties["temp_key_2"] = "temp_value_2"
+    assert submission_1.properties == {
+        "qux": 5,
+        "temp_key_1": "temp_value_1",
+        "temp_key_2": "temp_value_2",
+    }
+    assert submission_2.properties == {
+        "qux": 5,
+        "temp_key_1": "temp_value_1",
+        "temp_key_2": "temp_value_2",
+    }
+    submission_1.properties.pop("temp_key_1")
+    assert "temp_key_1" not in submission_1.properties.keys()
+    assert "temp_key_1" not in submission_1.properties.keys()
+    assert submission_1.properties == {
+        "qux": 5,
+        "temp_key_2": "temp_value_2",
+    }
+    assert submission_2.properties == {
+        "qux": 5,
+        "temp_key_2": "temp_value_2",
+    }
+    submission_2.properties.pop("temp_key_2")
+    assert submission_1.properties == {"qux": 5}
+    assert submission_2.properties == {"qux": 5}
+    assert "temp_key_2" not in submission_1.properties.keys()
+    assert "temp_key_2" not in submission_2.properties.keys()
+
+    submission_1.properties["temp_key_3"] = 0
+    assert submission_1.properties == {"qux": 5, "temp_key_3": 0}
+    assert submission_2.properties == {"qux": 5, "temp_key_3": 0}
+    submission_1.properties.update({"temp_key_3": 1})
+    assert submission_1.properties == {"qux": 5, "temp_key_3": 1}
+    assert submission_2.properties == {"qux": 5, "temp_key_3": 1}
+    submission_1.properties.update(dict())
+    assert submission_1.properties == {"qux": 5, "temp_key_3": 1}
+    assert submission_2.properties == {"qux": 5, "temp_key_3": 1}
+    submission_1.properties["temp_key_4"] = 0
+    submission_1.properties["temp_key_5"] = 0
+
     with submission_1 as submission:
         assert submission.jobs == [job_2, job_1]
         assert submission.submission_status == SubmissionStatus.COMPLETED
+        assert submission.properties["qux"] == 5
+        assert submission.properties["temp_key_3"] == 1
+        assert submission.properties["temp_key_4"] == 0
+        assert submission.properties["temp_key_5"] == 0
 
         submission.jobs = [job_1]
         submission.submission_status = SubmissionStatus.PENDING
+        submission.properties["qux"] = 9
+        submission.properties.pop("temp_key_3")
+        submission.properties.pop("temp_key_4")
+        submission.properties.update({"temp_key_4": 1})
+        submission.properties.update({"temp_key_5": 2})
+        submission.properties.pop("temp_key_5")
+        submission.properties.update(dict())
 
         assert submission.jobs == [job_2, job_1]
         assert submission.submission_status == SubmissionStatus.COMPLETED
+        assert submission.properties["qux"] == 5
+        assert submission.properties["temp_key_3"] == 1
+        assert submission.properties["temp_key_4"] == 0
+        assert submission.properties["temp_key_5"] == 0
 
     assert submission_1.jobs == [job_1]
     assert submission_1.submission_status == SubmissionStatus.PENDING
     assert submission_2.jobs == [job_1]
     assert submission_2.submission_status == SubmissionStatus.PENDING
+    assert submission_1.properties["qux"] == 9
+    assert "temp_key_3" not in submission_1.properties.keys()
+    assert submission_1.properties["temp_key_4"] == 1
+    assert "temp_key_5" not in submission_1.properties.keys()
 
 
 @pytest.mark.parametrize(
@@ -735,3 +811,43 @@ def test_update_submission_status_with_two_jobs_failed(job_ids, job_statuses, ex
 )
 def test_update_submission_status_with_two_jobs_canceled(job_ids, job_statuses, expected_submission_statuses):
     __test_update_submission_status_with_two_jobs(job_ids, job_statuses, expected_submission_statuses)
+
+
+def test_is_finished():
+    submission_manager = _SubmissionManagerFactory._build_manager()
+
+    submission = Submission("entity_id", "entity_type", "entity_config_id", "submission_id")
+    submission_manager._set(submission)
+
+    assert len(submission_manager._get_all()) == 1
+
+    assert submission._submission_status == SubmissionStatus.SUBMITTED
+    assert not submission.is_finished()
+
+    submission.submission_status = SubmissionStatus.UNDEFINED
+    assert submission.submission_status == SubmissionStatus.UNDEFINED
+    assert not submission.is_finished()
+
+    submission.submission_status = SubmissionStatus.CANCELED
+    assert submission.submission_status == SubmissionStatus.CANCELED
+    assert submission.is_finished()
+
+    submission.submission_status = SubmissionStatus.FAILED
+    assert submission.submission_status == SubmissionStatus.FAILED
+    assert submission.is_finished()
+
+    submission.submission_status = SubmissionStatus.BLOCKED
+    assert submission.submission_status == SubmissionStatus.BLOCKED
+    assert not submission.is_finished()
+
+    submission.submission_status = SubmissionStatus.RUNNING
+    assert submission.submission_status == SubmissionStatus.RUNNING
+    assert not submission.is_finished()
+
+    submission.submission_status = SubmissionStatus.PENDING
+    assert submission.submission_status == SubmissionStatus.PENDING
+    assert not submission.is_finished()
+
+    submission.submission_status = SubmissionStatus.COMPLETED
+    assert submission.submission_status == SubmissionStatus.COMPLETED
+    assert submission.is_finished()

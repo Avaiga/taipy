@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -31,6 +31,7 @@ class _SubmissionModel(_BaseModel):
         Column("entity_type", String),
         Column("entity_config_id", String),
         Column("job_ids", JSON),
+        Column("properties", JSON),
         Column("creation_date", String),
         Column("submission_status", Enum(SubmissionStatus)),
         Column("version", String),
@@ -40,6 +41,7 @@ class _SubmissionModel(_BaseModel):
     entity_type: str
     entity_config_id: Optional[str]
     job_ids: Union[List[JobId], List]
+    properties: Dict[str, Any]
     creation_date: str
     submission_status: SubmissionStatus
     version: str
@@ -52,6 +54,7 @@ class _SubmissionModel(_BaseModel):
             entity_type=data["entity_type"],
             entity_config_id=data.get("entity_config_id"),
             job_ids=_BaseModel._deserialize_attribute(data["job_ids"]),
+            properties=_BaseModel._deserialize_attribute(data["properties"]),
             creation_date=data["creation_date"],
             submission_status=SubmissionStatus._from_repr(data["submission_status"]),
             version=data["version"],
@@ -64,6 +67,7 @@ class _SubmissionModel(_BaseModel):
             self.entity_type,
             self.entity_config_id,
             _BaseModel._serialize_attribute(self.job_ids),
+            _BaseModel._serialize_attribute(self.properties),
             self.creation_date,
             repr(self.submission_status),
             self.version,

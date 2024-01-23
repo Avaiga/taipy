@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -41,7 +41,7 @@ extras_require = {
         "python-magic>=0.4.24,<0.5;platform_system!='Windows'",
         "python-magic-bin>=0.4.14,<0.5;platform_system=='Windows'",
     ],
-    "arrow": ["pyarrow>=10.0.1,<11.0"],
+    "arrow": ["pyarrow>=14.0.2,<15.0"],
 }
 
 

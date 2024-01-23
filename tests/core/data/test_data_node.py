@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -15,6 +15,7 @@ from time import sleep
 from unittest import mock
 
 import pytest
+
 import taipy.core as tp
 from taipy.config import Config
 from taipy.config.common.scope import Scope
@@ -32,17 +33,17 @@ from .utils import FakeDataNode
 
 
 def funct_a_b(input: str):
-    print("task_a_b")
+    print("task_a_b")  # noqa: T201
     return "B"
 
 
 def funct_b_c(input: str):
-    print("task_b_c")
+    print("task_b_c")  # noqa: T201
     return "C"
 
 
 def funct_b_d(input: str):
-    print("task_b_d")
+    print("task_b_d")  # noqa: T201
     return "D"
 
 
@@ -398,7 +399,7 @@ class TestDataNode:
         dn = FakeDataNode("foo")
 
         with pytest.raises(NoData):
-            dn.expiration_date
+            _ = dn.expiration_date
 
     def test_validity_null_if_never_write(self):
         dn = FakeDataNode("foo")
@@ -655,13 +656,13 @@ class TestDataNode:
     def test_cacheable_deprecated_false(self):
         dn = FakeDataNode("foo")
         with pytest.warns(DeprecationWarning):
-            dn.cacheable
+            _ = dn.cacheable
         assert dn.cacheable is False
 
     def test_cacheable_deprecated_true(self):
         dn = FakeDataNode("foo", properties={"cacheable": True})
         with pytest.warns(DeprecationWarning):
-            dn.cacheable
+            _ = dn.cacheable
         assert dn.cacheable is True
 
     def test_data_node_with_env_variable_value_not_stored(self):
