@@ -18,7 +18,7 @@ import toml
 import tabulate
 
 
-logging.basicConfig(encoding='utf-8', level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 
 @dataclass
