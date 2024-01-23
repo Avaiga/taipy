@@ -81,11 +81,7 @@ class _Factory:
             ]
         ),
         "chart": lambda gui, control_type, attrs: _Builder(
-            gui=gui,
-            control_type=control_type,
-            element_name="Chart",
-            attributes=attrs,
-            default_value=None
+            gui=gui, control_type=control_type, element_name="Chart", attributes=attrs, default_value=None
         )
         .set_value_and_default(with_default=False, var_type=PropertyType.data)
         .set_attributes(
@@ -104,7 +100,7 @@ class _Factory:
                 ("template", PropertyType.dict),
                 ("template[dark]", PropertyType.dict, gui._get_config("chart_dark_template", None)),
                 ("template[light]", PropertyType.dict),
-                ("figure", PropertyType.to_json)
+                ("figure", PropertyType.to_json),
             ]
         )
         ._get_chart_config("scatter", "lines+markers")
@@ -506,7 +502,7 @@ class _Factory:
         "toggle": lambda gui, control_type, attrs: _Builder(
             gui=gui, control_type=control_type, element_name="Toggle", attributes=attrs, default_value=None
         )
-        .set_value_and_default(with_default=False, var_type=PropertyType.lov_value)
+        .set_value_and_default(with_default=False, var_type=PropertyType.toggle_value)
         ._get_adapter("lov", multi_selection=False)  # need to be called before set_lov
         ._set_lov()
         .set_attributes(
@@ -519,6 +515,7 @@ class _Factory:
                 ("unselected_value", PropertyType.string, ""),
                 ("allow_unselect", PropertyType.boolean),
                 ("on_change", PropertyType.function),
+                ("mode",),
             ]
         )
         ._set_kind()
