@@ -28,9 +28,12 @@ class CoreSection(UniqueSection):
 
     Attributes:
         root_folder (str): Path of the base folder for the taipy application. The default value is "./taipy/"
-        storage_folder (str): Folder name used to store Taipy data. The default value is ".data/". It is used in
+        storage_folder (str): Folder name used to store user data. The default value is ".user_data/". It is used in
             conjunction with the *root_folder* attribute. That means the storage path is <root_folder><storage_folder>
-            (The default path is "./taipy/.data/").
+            (The default path is "./taipy/.user_data/").
+        tp_storage_folder (str): Folder name used to store Taipy data. The default value is ".taipy_data/". It is used
+            in conjunction with the *root_folder* attribute. That means the storage path is
+            <root_folder><storage_folder> (The default path is "./taipy/.taipy_data/").
         repository_type (str): Type of the repository to be used to store Taipy data. The default value is
             "filesystem".
         repository_properties (Dict[str, Union[str, int]]): A dictionary of additional properties to be used by the
@@ -53,8 +56,11 @@ class CoreSection(UniqueSection):
     _ROOT_FOLDER_KEY = "root_folder"
     _DEFAULT_ROOT_FOLDER = "./taipy/"
 
-    _STORAGE_FOLDER_KEY = "storage_folder"
-    _DEFAULT_STORAGE_FOLDER = ".data/"
+    _STORAGE_FOLDER_KEY = "tp_storage_folder"
+    _DEFAULT_STORAGE_FOLDER = ".taipy_data/"
+
+    _STORAGE_FOLDER_USER_KEY = "storage_folder"
+    _DEFAULT_STORAGE_FOLDER_USER = ".user_data/"
 
     _REPOSITORY_TYPE_KEY = "repository_type"
     _DEFAULT_REPOSITORY_TYPE = "filesystem"
@@ -83,6 +89,7 @@ class CoreSection(UniqueSection):
         self,
         root_folder: Optional[str] = None,
         storage_folder: Optional[str] = None,
+        tp_storage_folder: Optional[str] = None,
         repository_type: Optional[str] = None,
         repository_properties: Optional[Dict[str, Union[str, int]]] = None,
         read_entity_retry: Optional[int] = None,
@@ -94,6 +101,7 @@ class CoreSection(UniqueSection):
     ):
         self._root_folder = root_folder
         self._storage_folder = storage_folder
+        self._tp_storage_folder = tp_storage_folder
         self._repository_type = repository_type
         self._repository_properties = repository_properties or {}
         self._read_entity_retry = (
@@ -112,6 +120,7 @@ class CoreSection(UniqueSection):
         return CoreSection(
             self.root_folder,
             self.storage_folder,
+            self.tp_storage_folder,
             self.repository_type,
             self.repository_properties,
             self.read_entity_retry,
@@ -130,6 +139,15 @@ class CoreSection(UniqueSection):
     @_ConfigBlocker._check()
     def storage_folder(self, val):
         self._storage_folder = val
+
+    @property
+    def tp_storage_folder(self):
+        return _tpl._replace_templates(self._tp_storage_folder)
+
+    @tp_storage_folder.setter  # type: ignore
+    @_ConfigBlocker._check()
+    def tp_storage_folder(self, val):
+        self._tp_storage_folder = val
 
     @property
     def root_folder(self):
