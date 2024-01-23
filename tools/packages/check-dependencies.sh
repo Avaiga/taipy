@@ -11,8 +11,9 @@ python check-dependencies.py generate-raw-requirements > raw-requirements.txt
 python -m venv tmp-venv > /dev/null
 ./tmp-venv/bin/python3 -m pip install -r raw-requirements.txt > /dev/null
 ./tmp-venv/bin/python3 -m pip freeze > new-requirements.txt
+echo "coucou"
 cat new-requirements.txt
-
+echo "coucuo2"
 # Display dependencies summary.
 python check-dependencies.py dependencies-summary new-requirements.txt
 
