@@ -45,8 +45,9 @@ def get_requirements():
     # get requirements from the different setups in tools/packages (removing taipy packages)
     reqs = set()
     for pkg in (root_folder / "tools" / "packages").iterdir():
-        if pkg.is_dir():
-            reqs.update((pkg / "setup.requirements.txt").read_text("UTF-8").splitlines())
+        requirements_file = pkg / "setup.requirements.txt"
+        if requirements_file.exists():
+            reqs.update(requirements_file.read_text("UTF-8").splitlines())
 
     return [r for r in reqs if r and not r.startswith("taipy")]
 
