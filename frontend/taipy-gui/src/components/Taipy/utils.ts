@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { MouseEvent } from "react";
+import { CSSProperties, MouseEvent } from "react";
 
 export interface TaipyActiveProps extends TaipyDynamicProps, TaipyHoverProps {
     defaultActive?: boolean;
@@ -109,3 +109,5 @@ export const getSuffixedClassNames = (names: string | undefined, suffix: string)
         .split(/\s+/)
         .map((n) => n + suffix)
         .join(" ");
+
+export const emptyStyle = {} as CSSProperties;
