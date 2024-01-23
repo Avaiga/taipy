@@ -1,4 +1,4 @@
 # Taipy
 .data/
-.user_data/
-.taipy_data/
+user_data/
+.taipy/

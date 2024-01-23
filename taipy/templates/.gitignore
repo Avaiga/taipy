@@ -18,8 +18,8 @@ dist/
 
 # Core .data directory
 .data/
-.user_data/
-.taipy_data/
+user_data/
+.taipy/
 
 # demo files
 demo-*
