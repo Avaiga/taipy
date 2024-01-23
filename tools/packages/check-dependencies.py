@@ -7,7 +7,6 @@ It can be used:
 '''
 import sys
 import glob
-import logging
 import itertools
 from pathlib import Path
 from datetime import datetime
@@ -16,9 +15,6 @@ from dataclasses import dataclass, field
 
 import toml
 import tabulate
-
-
-logging.basicConfig(level=logging.INFO)
 
 
 @dataclass
@@ -164,7 +160,7 @@ class Package:
                 [filename]
             )
         except Exception as e:
-            logging.error(f"Error while parsing package {package}: {e}")
+            print(f"Error while parsing package {package}: {e}")
             raise
 
 
@@ -322,7 +318,7 @@ def display_dependencies_versions(dependencies: Dict[str, Package]):
 
     to_print.sort(key=lambda x: x[0])
     h = ['name', 'version-min', 'version-max', 'current-version', 'nb-releases-behind']
-    logging.info(tabulate.tabulate(to_print, headers=h, tablefmt='pretty'))
+    print(tabulate.tabulate(to_print, headers=h, tablefmt='pretty'))
 
 
 def update_dependencies(
@@ -360,7 +356,7 @@ def update_dependencies(
 
     # Print the dependencies to update.
     to_print.sort(key=lambda x: x[0])
-    logging.info(tabulate.tabulate(to_print, headers=['name', 'version', 'files'], tablefmt='pretty'))
+    print(tabulate.tabulate(to_print, headers=['name', 'version', 'files'], tablefmt='pretty'))
 
     # Update requirements files.
     for fd in requirements_filenames:
@@ -378,7 +374,7 @@ def generate_raw_requirements_txt(dependencies: Dict[str, Package]):
     """
     for package in dependencies.values():
         if not package.is_taipy:
-            logging.info(package.as_requirements_line(with_version=False))
+            print(package.as_requirements_line(with_version=False))
 
 
 def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
