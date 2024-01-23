@@ -18,6 +18,9 @@ import toml
 import tabulate
 
 
+logging.basicConfig(encoding='utf-8', level=logging.INFO)
+
+
 @dataclass
 class Release:
     """
