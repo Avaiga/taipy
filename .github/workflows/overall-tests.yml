@@ -53,7 +53,7 @@ jobs:
             ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
           draft: false
           add-paths: |
-            pipfiles/Pipfile${{matrix.python-version}}.max
+            tools/packages/pipfiles/Pipfile${{matrix.python-version}}.max
             tools/packages/taipy*/*requirements.txt
 
   # partial-tests:
