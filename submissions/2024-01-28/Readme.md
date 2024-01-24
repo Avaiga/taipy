@@ -1,5 +1,5 @@
 <h1 align="center">🚀 Win an iPad with Your Taipy Project! 🚀 </h1>
-<h3 align="center"> Event 📅: Taipython 2024-01-21
+<h3 align="center"> Event 📅: Taipython 2024-01-28
 </h3>
 
 <br />
@@ -9,7 +9,7 @@ This hackathon is virtual.
 To participate in the Contest, you must submit an application (the “Application”) in this folder.
 
 ## Duration ⏱️
-This hackathon is opened from **Jan 19th 5:00 PM CET** to **Jan 21st 11:45 PM CET**. 
+This hackathon is opened from **Jan 19th 5:00 PM CET** to **Jan 28th 11:45 PM CET**. 
 <br />
 ***Any submission outside this interval won't be considered.***
 
@@ -32,7 +32,7 @@ Showcase your skills, join our community, and win!
 - Remove unnecessary dependencies.
 - **Fork** our main [GitHub repository](https://github.com/Avaiga/taipy).
 - **Create a branch** out of "[taipython](https://github.com/Avaiga/taipy/tree/taipython)" branch
-- **Add your project** to the “submission” folder (choose the right hackathon date subfolder. For instance, 2024-01-21: you have to submit before Jan 21st at 11:45 PM CET).
+- **Add your project** to the “submission” folder (choose the right hackathon date subfolder. For instance, 2024-01-28: you have to submit before Jan 28th at 11:45 PM CET).
 - Give your project a **unique name** with this specific nomenclature:  **{your github username}-{your project name}**
 - **Submit through a Pull Request** before the date mentioned on the subfolder in this [repository](https://github.com/Avaiga/taipy/tree/taipython/submissions)
 
