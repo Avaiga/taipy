@@ -132,6 +132,7 @@ class PropertyType(Enum):
     """
     boolean_or_list = "boolean|list"
     slider_value = "number|number[]|lovValue"
+    toggle_value = "boolean|lovValue"
     string_list = "stringlist"
     decimator = Decimator
     """

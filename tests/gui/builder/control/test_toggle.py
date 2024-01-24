@@ -16,7 +16,7 @@ from taipy.gui import Gui
 def test_toggle_builder(gui: Gui, helpers):
     with tgb.Page(frame=None) as page:
         tgb.toggle(theme=True)  # type: ignore[attr-defined]
-    expected_list = ["<Toggle", 'kind="theme"', 'unselectedValue=""']
+    expected_list = ["<Toggle", 'mode="theme"', 'unselectedValue=""']
     helpers.test_control_builder(gui, page, expected_list)
 
 
