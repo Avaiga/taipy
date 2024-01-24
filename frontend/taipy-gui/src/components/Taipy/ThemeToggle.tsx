@@ -20,7 +20,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import WbSunny from "@mui/icons-material/WbSunny";
 import Brightness3 from "@mui/icons-material/Brightness3";
 
-import { TaipyActiveProps } from "./utils";
+import { TaipyActiveProps, emptyStyle } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createThemeAction } from "../../context/taipyReducers";
 import { useClassNames } from "../../utils/hooks";
@@ -46,7 +46,7 @@ const boxSx = {
 const groupSx = { verticalAlign: "middle" };
 
 const ThemeToggle = (props: ThemeToggleProps) => {
-    const { id, label = "Mode", style = {}, active = true } = props;
+    const { id, label = "Mode", style = emptyStyle, active = true } = props;
     const { state, dispatch } = useContext(TaipyContext);
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
