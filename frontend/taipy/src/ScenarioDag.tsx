@@ -10,8 +10,8 @@ import { ZoomIn } from "@mui/icons-material";
 import createEngine from "@projectstorm/react-diagrams";
 import deepEqual from "fast-deep-equal/es6";
 
-import { DisplayModel } from "./utils/types";
-import { createDagreEngine, initDiagram, populateModel, relayoutDiagram } from "./utils/diagram";
+import { DisplayModel, TaskStatuses } from "./utils/types";
+import { addStatusToDisplayModel, createDagreEngine, initDiagram, populateModel, relayoutDiagram } from "./utils/diagram";
 import {
     createRequestUpdateAction,
     createSendUpdateAction,
@@ -72,6 +72,7 @@ const ScenarioDag = (props: ScenarioDagProps) => {
     const [engine] = useState(createEngine);
     const [dagreEngine] = useState(createDagreEngine);
     const [displayModel, setDisplayModel] = useState<DisplayModel>();
+    const [taskStatuses, setTaskStatuses] = useState<TaskStatuses>();
     const dispatch = useDispatch();
     const module = useModule();
 
@@ -95,6 +96,10 @@ const ScenarioDag = (props: ScenarioDagProps) => {
         if (typeof ids === "string" ? ids === scenarioId : Array.isArray(ids) ? ids.includes(scenarioId) : ids) {
             props.updateVarName && dispatch(createRequestUpdateAction(props.id, module, [props.updateVarName], true));
         }
+        const tasks = props.coreChanged?.tasks;
+        if (tasks) {
+            setTaskStatuses(tasks as TaskStatuses);
+        }
     }, [props.coreChanged, props.updateVarName, scenarioId, module, dispatch, props.id]);
 
     useEffect(() => {
@@ -108,8 +113,9 @@ const ScenarioDag = (props: ScenarioDagProps) => {
                 // Do nothing
             }
         }
+        dm = addStatusToDisplayModel(dm, taskStatuses);
         setDisplayModel((oldDm) => (deepEqual(oldDm, dm) ? oldDm : dm));
-    }, [props.scenario, props.defaultScenario]);
+    }, [props.scenario, props.defaultScenario, taskStatuses]);
 
     const relayout = useCallback(() => relayoutDiagram(engine, dagreEngine), [engine, dagreEngine]);
 
@@ -118,17 +124,17 @@ const ScenarioDag = (props: ScenarioDagProps) => {
     useEffect(() => {
         const model = new TaipyDiagramModel();
         initDiagram(engine);
-
+        let doLayout = false;
         if (displayModel) {
             setScenarioId(displayModel[0]);
             // populate model
-            populateModel(displayModel, model);
+            doLayout = populateModel(displayModel, model);
         }
         engine.setModel(model);
         // Block deletion
         //engine.getActionEventBus().registerAction(new DeleteItemsAction({ keyCodes: [1] }));
         model.setLocked(true);
-        setTimeout(relayout, 500);
+        doLayout && setTimeout(relayout, 500);
     }, [displayModel, engine, relayout]);
 
     useEffect(() => {
