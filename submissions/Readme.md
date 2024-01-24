@@ -6,4 +6,4 @@ Each Taipython event has:
 - Project submissions
 
 # Taipython in progress 🏁
-🚀 https://github.com/Avaiga/taipy/tree/taipython/submissions/2024-01-21
+🚀 https://github.com/Avaiga/taipy/tree/taipython/submissions/2024-01-28
