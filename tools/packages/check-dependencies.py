@@ -5,16 +5,16 @@ It can be used:
 - To generate a Pipfile and requirements files with the latest version installables.
 - To display a summary of the dependencies to update.
 '''
-import sys
 import glob
 import itertools
-from pathlib import Path
-from datetime import datetime
-from typing import List, Dict
+import sys
 from dataclasses import dataclass, field
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List
 
-import toml
 import tabulate
+import toml
 
 
 @dataclass
@@ -160,7 +160,7 @@ class Package:
                 [filename]
             )
         except Exception as e:
-            print(f"Error while parsing package {package}: {e}")
+            print(f"Error while parsing package {package}: {e}") # noqa: T201
             raise
 
 
@@ -313,12 +313,12 @@ def display_dependencies_versions(dependencies: Dict[str, Package]):
             f'{package.min_version} ({package.min_release.upload_date if package.min_release else "N.A."})',
             f'{package.max_version} ({package.max_release.upload_date if package.max_release else "N.C."})',
             f'{package.releases[0].version} ({package.releases[0].upload_date})',
-            len(list(itertools.takewhile(lambda x: x.version != package.max_version, package.releases))),  # noqa: W0640
+            len(list(itertools.takewhile(lambda x: x.version != package.max_version, package.releases))),  # noqa: B023
         ))
 
     to_print.sort(key=lambda x: x[0])
     h = ['name', 'version-min', 'version-max', 'current-version', 'nb-releases-behind']
-    print(tabulate.tabulate(to_print, headers=h, tablefmt='pretty'))
+    print(tabulate.tabulate(to_print, headers=h, tablefmt='pretty')) # noqa: T201
 
 
 def update_dependencies(
@@ -356,7 +356,7 @@ def update_dependencies(
 
     # Print the dependencies to update.
     to_print.sort(key=lambda x: x[0])
-    print(tabulate.tabulate(to_print, headers=['name', 'version', 'files'], tablefmt='pretty'))
+    print(tabulate.tabulate(to_print, headers=['name', 'version', 'files'], tablefmt='pretty')) # noqa: T201
 
     # Update requirements files.
     for fd in requirements_filenames:
@@ -376,7 +376,7 @@ def generate_raw_requirements_txt(dependencies: Dict[str, Package]):
     """
     for package in dependencies.values():
         if not package.is_taipy:
-            print(package.as_requirements_line(with_version=False))
+            print(package.as_requirements_line(with_version=False)) # noqa: T201
 
 
 def update_pipfile(pipfile: str, dependencies_version: Dict[str, Package]):
