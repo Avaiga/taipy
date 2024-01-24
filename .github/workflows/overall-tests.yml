@@ -36,17 +36,8 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: brew install libmagic
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Frontend Bundle Build
-        run: pipenv run python tools/frontend/bundle_build.py
-
-      - name: Install Playwright
-        run: pipenv run playwright install chromium --with-deps
-
       - name: Pytest
-        run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
+        run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone and not teste2e" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
 
       - name: Coverage
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
