@@ -45,7 +45,7 @@ jobs:
           pytest-xml-coverage-path: ./overall-coverage.xml
           title: Taipy Overall Coverage Report
 
-  orchestrator-tests:
+  intermittent-tests:
     needs: [partial-tests]
     timeout-minutes: 40
     strategy:
