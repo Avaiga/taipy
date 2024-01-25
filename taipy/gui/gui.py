@@ -2074,7 +2074,7 @@ class Gui:
                 _warn(f"Using webapp_path: '{_conf_webapp_path}'.")
             else:  # pragma: no cover
                 _warn(
-                    f"webapp_path: '{_conf_webapp_path}' is not a valid directory path. Falling back to '{_webapp_path}'."  # noqa: E501
+                    f"webapp_path: '{_conf_webapp_path}' is not a valid directory. Falling back to '{_webapp_path}'."  # noqa: E501
                 )
         return _webapp_path
 
