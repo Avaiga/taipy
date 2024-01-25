@@ -81,6 +81,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     description="Low-code library to create graphical user interfaces on the Web for your Python applications.",
     long_description=readme,

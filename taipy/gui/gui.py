@@ -2063,6 +2063,21 @@ class Gui:
         if isinstance(state, State):
             self.__state = state
 
+    def _get_webapp_path(self):
+        _conf_webapp_path = (
+            pathlib.Path(self._get_config("webapp_path", None)) if self._get_config("webapp_path", None) else None
+        )
+        _webapp_path = str((pathlib.Path(__file__).parent / "webapp").resolve())
+        if _conf_webapp_path:
+            if _conf_webapp_path.is_dir():
+                _webapp_path = str(_conf_webapp_path.resolve())
+                _warn(f"Using webapp_path: '{_conf_webapp_path}'.")
+            else:  # pragma: no cover
+                _warn(
+                    f"webapp_path: '{_conf_webapp_path}' is not a valid directory. Falling back to '{_webapp_path}'."  # noqa: E501
+                )
+        return _webapp_path
+
     def __get_client_config(self) -> t.Dict[str, t.Any]:
         config = {
             "timeZone": self._config.get_time_zone(),
@@ -2190,18 +2205,7 @@ class Gui:
 
         self._flask_blueprint.append(extension_bp)
 
-        _conf_webapp_path = (
-            pathlib.Path(self._get_config("webapp_path", None)) if self._get_config("webapp_path", None) else None
-        )
-        _webapp_path = str((pathlib.Path(__file__).parent / "webapp").resolve())
-        if _conf_webapp_path:
-            if _conf_webapp_path.is_dir():
-                _webapp_path = str(_conf_webapp_path.resolve())
-                _warn(f"Using webapp_path: '{_conf_webapp_path}'.")
-            else:  # pragma: no cover
-                _warn(
-                    f"webapp_path: '{_conf_webapp_path}' is not a valid directory path. Falling back to '{_webapp_path}'."  # noqa: E501
-                )
+        _webapp_path = self._get_webapp_path()
 
         self._flask_blueprint.append(
             self._server._get_default_blueprint(

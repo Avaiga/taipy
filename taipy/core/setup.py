@@ -60,6 +60,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     description="A Python library to build powerful and customized data-driven back-end applications.",
     install_requires=requirements,
