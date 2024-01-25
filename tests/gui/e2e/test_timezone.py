@@ -67,6 +67,7 @@ def _timezone_test_template(page: "Page", gui: Gui, helpers, time_zone, texts):
     assert text1.inner_text() in texts
 
 
+@pytest.mark.teste2e
 def test_date_only(page: "Page", gui: Gui, helpers):
     page_md = """
 <|{t}|id=text1|>
