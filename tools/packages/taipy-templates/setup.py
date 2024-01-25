@@ -44,6 +44,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     description="An open-source package holding Taipy application templates.",
     license="Apache License 2.0",

@@ -12,11 +12,11 @@ jobs:
 
   overall-tests:
     needs: [partial-tests]
-    timeout-minutes: 40
+    timeout-minutes: 50
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -27,7 +27,10 @@ jobs:
           python-version: ${{matrix.python-version}}
 
       - name: Install pipenv
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+        run: pip install --upgrade pipenv
+
+      - name: Install Setuptools and wheel
+        run: pipenv run pip install --upgrade setuptools wheel
 
       - name: Install Dependencies
         run: pipenv install --dev --python=${{ matrix.python-version }}
@@ -48,11 +51,11 @@ jobs:
 
   submit_tests:
     needs: [partial-tests]
-    timeout-minutes: 20
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -62,7 +65,7 @@ jobs:
           python-version: ${{matrix.python-version}}
 
       - name: Install pipenv
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+        run: pip install --upgrade pipenv
 
       - name: Install Dependencies
         run: pipenv install --dev --python=${{ matrix.python-version }}
@@ -76,11 +79,11 @@ jobs:
 
   standalone_tests:
     needs: [partial-tests]
-    timeout-minutes: 20
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -91,7 +94,7 @@ jobs:
           python-version: ${{matrix.python-version}}
 
       - name: Install pipenv
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+        run: pip install --upgrade pipenv
 
       - name: Install Dependencies
         run: pipenv install --dev --python=${{ matrix.python-version }}
