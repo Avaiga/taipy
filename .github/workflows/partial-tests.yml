@@ -95,6 +95,8 @@ jobs:
       - name: Run GUI Test Action
         if: steps.changes.outputs.gui == 'true'
         uses: ./.github/actions/gui-test
+        with:
+          os: ${{ matrix.os }}
 
       - name: Pytest GUI Core
         if: steps.changes.outputs.gui-core == 'true'

@@ -1,5 +1,8 @@
 name: GUI test
 description: Run specific test cases for Taipy GUI
+inputs:
+  os:
+    required: true
 runs:
   using: "composite"
   steps:
@@ -8,5 +11,5 @@ runs:
     - name: prefix tests
       uses: ./.github/actions/gui-test/prefix
     - name: verify pyi
-      if: matrix.os == 'ubuntu-latest'
+      if: inputs.os == 'ubuntu-latest'
       uses: ./.github/actions/gui-test/pyi
