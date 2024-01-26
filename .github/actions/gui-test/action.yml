@@ -8,4 +8,5 @@ runs:
     - name: prefix tests
       uses: ./.github/actions/gui-test/prefix
     - name: verify pyi
+      if: matrix.os == 'ubuntu-latest'
       uses: ./.github/actions/gui-test/pyi
