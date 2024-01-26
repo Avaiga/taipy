@@ -3,6 +3,9 @@ description: Verify automatic pyi file generation process
 runs:
   using: "composite"
   steps:
+    - name: install dependency
+      shell: bash
+      run: pipenv run pip install mypy
     - name: Generate pyi
       shell: bash
       run: cp tools/gui/generate_pyi.py pyi_temp.py && pipenv run python pyi_temp.py && rm pyi_temp.py
