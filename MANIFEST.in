@@ -10,7 +10,7 @@ include taipy/config/*.json
 include taipy/core/*.json
 include taipy/core/config/*.json
 # Package taipy-gui
-recursive-include webapp *
+recursive-include taipy/gui/webapp *
 include taipy/gui/version.json
 include taipy/gui/viselements.json
 include taipy/gui/*.pyi
