@@ -1,0 +1,11 @@
+name: GUI test
+description: Run specific test cases for Taipy GUI
+runs:
+  using: "composite"
+  steps:
+    - name: end-to-end tests
+      uses: ./.github/actions/gui-test/e2e-test-action.yml
+    - name: prefix tests
+      uses: ./.github/actions/gui-test/prefix-test-action.yml
+    - name: verify pyi
+      uses: ./.github/actions/gui-test/verify-pyi-action.yml

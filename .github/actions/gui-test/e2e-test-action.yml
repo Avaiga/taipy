@@ -1,0 +1,8 @@
+name: end-to-end test
+runs:
+  using: "composite"
+  steps:
+    - name: install kernel
+      run: pipenv run ipython kernel install --name "python3" --user
+    - name: run tests
+      run: pipenv run pytest -m "teste2e" tests/gui/e2e
