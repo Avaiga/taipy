@@ -5,4 +5,4 @@ runs:
     - name: install kernel
       run: pipenv run ipython kernel install --name "python3" --user
     - name: run tests
-      run: pipenv run pytest -m "teste2e" tests/gui/e2e
+      run: pipenv run pytest -m "teste2e" tests/gui
