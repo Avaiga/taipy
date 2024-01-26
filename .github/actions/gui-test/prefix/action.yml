@@ -1,6 +1,9 @@
 name: Prefix (baseURL) Test
 runs:
   using: "composite"
+  defaults:
+    run:
+      shell: bash
   steps:
     - name: Build the Docker image
       working-directory: ./tools/gui/docker/nginx-prefix

@@ -1,6 +1,9 @@
 name: end-to-end test
 runs:
   using: "composite"
+  defaults:
+    run:
+      shell: bash
   steps:
     - name: install kernel
       run: pipenv run ipython kernel install --name "python3" --user
