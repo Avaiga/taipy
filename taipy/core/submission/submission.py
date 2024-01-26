@@ -12,7 +12,7 @@
 import threading
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Set, Union
 
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
@@ -133,17 +133,17 @@ class Submission(_Entity, _Labeled):
         return jobs
 
     @property
-    def running_jobs(self) -> _SelfSetterSet:
+    def running_jobs(self) -> Set[Job]:
         self._running_jobs = _Reloader()._reload(self._MANAGER_NAME, self)._running_jobs
         return self._running_jobs
 
     @property
-    def blocked_jobs(self) -> _SelfSetterSet:
+    def blocked_jobs(self) -> Set[Job]:
         self._blocked_jobs = _Reloader()._reload(self._MANAGER_NAME, self)._blocked_jobs
         return self._blocked_jobs
 
     @property
-    def pending_jobs(self) -> _SelfSetterSet:
+    def pending_jobs(self) -> Set[Job]:
         self._pending_jobs = _Reloader()._reload(self._MANAGER_NAME, self)._pending_jobs
         return self._pending_jobs
 

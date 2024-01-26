@@ -12,3 +12,42 @@ include taipy/config/*.pyi
 include taipy/config/*.json
 recursive-include taipy/templates *
 include taipy/rest/*.json
+include taipy/core/*.json
+include taipy/core/config/*.json
+include taipy/*.json
+include taipy/gui_core/*.json
+include taipy/gui_core/lib/*.js
+recursive-include taipy/gui/webapp *
+include taipy/gui/version.json
+include taipy/gui/viselements.json
+include taipy/gui/*.pyi
+include taipy/config/*.pyi
+include taipy/config/*.json
+recursive-include taipy/templates *
+include taipy/rest/*.json
+include taipy/core/*.json
+include taipy/core/config/*.json
+include taipy/*.json
+include taipy/gui_core/*.json
+include taipy/gui_core/lib/*.js
+recursive-include taipy/gui/webapp *
+include taipy/gui/version.json
+include taipy/gui/viselements.json
+include taipy/gui/*.pyi
+include taipy/config/*.pyi
+include taipy/config/*.json
+recursive-include taipy/templates *
+include taipy/rest/*.json
+include taipy/core/*.json
+include taipy/core/config/*.json
+include taipy/*.json
+include taipy/gui_core/*.json
+include taipy/gui_core/lib/*.js
+recursive-include taipy/gui/webapp *
+include taipy/gui/version.json
+include taipy/gui/viselements.json
+include taipy/gui/*.pyi
+include taipy/config/*.pyi
+include taipy/config/*.json
+recursive-include taipy/templates *
+include taipy/rest/*.json
