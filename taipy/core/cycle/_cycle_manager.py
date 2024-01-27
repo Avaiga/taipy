@@ -152,12 +152,8 @@ class _CycleManager(_Manager[Cycle]):
         return [cycle for cycle in cycles if cdt(cycle)]
 
     @classmethod
-    def _get_scenarios_by_time(cls , at: datetime):
-        from ..scenario._scenario_manager_factory import _ScenarioManagerFactory
-
-        scenarios = []
-        for scenario in _ScenarioManagerFactory._build_manager()._get_all():
-            cycle = scenario.cycle
-            if cycle.start_date <= at and at <=  cycle.end_date:
-                scenarios.append(scenario)
-        return scenarios
+    def _get_cycles_by_overlapping_date(cls , date: datetime) -> List[Cycle]:
+        cycles=cls._get_all()
+        return cls._get_cycles_cdt(
+            lambda cycle: cycle.start_date <= date and date <= cycle.end_date, cycles
+        )
