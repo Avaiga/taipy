@@ -842,3 +842,20 @@ class TestTaipy:
         assert len(tp.get_scenarios()) == 5
         assert len(tp.get_entities_by_config_id(scenario_config_1.id)) == 3
         assert len(tp.get_entities_by_config_id(scenario_config_2.id)) == 2
+
+    def test_get_scenarios_by_time(self):
+        at = datetime.datetime(2024,1,5)
+        #Initialize Yearly Scenario
+        scenario_config = Config.configure_scenario("sc", None, None, Frequency.YEARLY)
+        creation_date = datetime.datetime(2024,1,1)
+        _ScenarioManager._create(
+            scenario_config, creation_date=creation_date, name="1")
+
+        #Initialize Monthly Scenario
+        scenario_config_2 = Config.configure_scenario("sc2", None, None, Frequency.MONTHLY)
+        creation_date_2 = datetime.datetime(2024,1,3)
+        _ScenarioManager._create(
+            scenario_config_2, creation_date=creation_date_2, name="2")
+
+        results = tp.get_scenarios_by_time(at)
+        assert len(results) == 2
