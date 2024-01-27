@@ -1,0 +1,11 @@
+Flask==3.0.1
+Pillow==10.2.0
+protobuf==4.25.2
+python-dotenv==1.0.1
+taipy==3.0.0
+taipy_config==3.0.0
+taipy_core==3.0.0
+taipy_gui==3.0.0
+taipy_rest==3.0.0
+taipy_templates==3.0.0
+google-generativeai
