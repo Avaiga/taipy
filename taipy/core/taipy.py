@@ -1038,3 +1038,23 @@ def get_entities_by_config_id(
     if entities := _DataManagerFactory._build_manager()._get_by_config_id(config_id):
         return entities
     return entities
+
+def get_scenarios_by_time(at: datetime) -> List[Scenario]:
+    """Retrieve the all scenarios occurring within a specific period.
+
+    Parameters:
+        at (datetime): The date on which we want to get it's occuring scenarios.
+
+    Returns:
+        The scenarios  of the given time. If the time has no
+            scenario, this method returns an empty List.
+    """
+
+    scenarios = []
+    cycles =_CycleManagerFactory._build_manager()._get_cycles_by_overlapping_date(at)
+
+    for cycle in cycles:
+        scenarios.extend(_ScenarioManagerFactory._build_manager()._get_all_by_cycle(cycle))
+
+    return scenarios
+
