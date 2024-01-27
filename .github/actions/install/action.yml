@@ -1,0 +1,65 @@
+name: install
+description: Install the package and dependencies
+inputs:
+  python-version:
+    required: true
+    description: 'Python version'
+  os:
+    required: true
+    description: 'Operating system'
+  install-gui:
+    required: false
+    description: 'Whether to install the GUI dependencies'
+    default: true
+  pipfile-version:
+    required: false
+    description: 'The Pipfile type: one of min, max'
+    default: 'min'
+outputs:
+  to-update:
+    description: "True if the dependencies can be updated"
+    value: ${{ steps.install-dependencies.outputs.diff != '' }}
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install pipenv
+      run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+      shell: bash
+
+    - name: Install minimum supported dependencies
+      if: inputs.pipfile-version == 'min'
+      run: pipenv install --dev --python=${{ inputs.python-version }}
+      shell: bash
+
+    - name: Install maximum version supported dependencies
+      if: inputs.pipfile-version == 'max'
+      run: |
+        # Override the current Pipfile with the Pipfile containing the max versions
+        rm Pipfile
+        mv tools/packages/pipfiles/Pipfile${{ inputs.python-version }}.max Pipfile
+        pipenv install --dev --python=${{ inputs.python-version }}
+      shell: bash
+
+    - name: Setup LibMagic (MacOS)
+      if: inputs.os == 'macos-latest' && inputs.install-gui
+      run: brew install libmagic
+      shell: bash
+
+    - uses: actions/setup-node@v4
+      if: inputs.install-gui
+      with:
+        node-version: 20
+
+    - name: Frontend Bundle Build
+      if: inputs.install-gui
+      run: pipenv run python tools/frontend/bundle_build.py
+      shell: bash
+
+    - name: Install Playwright
+      if: inputs.install-gui
+      run: pipenv run playwright install chromium --with-deps
+      shell: bash

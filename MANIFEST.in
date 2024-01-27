@@ -1,14 +1,20 @@
 recursive-include tools *
-include taipy/core/*.json
-include taipy/core/config/*.json
+# Package taipy
 include taipy/*.json
 include taipy/gui_core/*.json
 include taipy/gui_core/lib/*.js
+# Package taipy-config
+include taipy/config/*.pyi
+include taipy/config/*.json
+# Package taipy-core
+include taipy/core/*.json
+include taipy/core/config/*.json
+# Package taipy-gui
 recursive-include taipy/gui/webapp *
 include taipy/gui/version.json
 include taipy/gui/viselements.json
 include taipy/gui/*.pyi
-include taipy/config/*.pyi
-include taipy/config/*.json
-recursive-include taipy/templates *
+# Package taipy-rest
 include taipy/rest/*.json
+# Package taipy-templates
+recursive-include taipy/templates *
