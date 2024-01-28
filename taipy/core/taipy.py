@@ -1043,7 +1043,7 @@ def get_scenarios_by_time(at: datetime) -> List[Scenario]:
     """Retrieve the all scenarios occurring within a specific period.
 
     Parameters:
-        at (datetime): The date on which we want to get it's occuring scenarios.
+        at (datetime): The date on which we want to get it's occurring scenarios.
 
     Returns:
         The scenarios  of the given time. If the time has no
