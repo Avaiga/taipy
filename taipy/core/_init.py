@@ -46,6 +46,7 @@ from .taipy import (
     get_primary,
     get_primary_scenarios,
     get_scenarios,
+    get_scenarios_by_time,
     get_sequences,
     get_tasks,
     is_deletable,
