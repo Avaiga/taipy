@@ -45,4 +45,4 @@ jobs:
           # If the issue is in the Closed column, it will be closed.
           closed_statuses: Closed
           # If the issue is in any of the following columns, it will be opened.
-          open_statuses: New Issue,Icebox,Contributor,Product Backlog,Sprint Backlog,In Progress,Review/QA,Done
+          open_statuses: New Issues - waiting for triage,Icebox,Contributor,Product Backlog,Sprint Backlog,In Progress,Review/QA
