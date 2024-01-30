@@ -217,7 +217,6 @@ class TestCSVDataNode:
             pd.concat([default_data_frame, pd.DataFrame(content, columns=["a", "b", "c"])]).reset_index(drop=True),
         )
 
-
     @pytest.mark.parametrize(
         "content,columns",
         [
@@ -333,14 +332,16 @@ class TestCSVDataNode:
     def test_filter_numpy_exposed_type(self, csv_file):
         dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": csv_file, "exposed_type": "numpy"})
         dn.write(
-            [
-                [1, 1],
-                [1, 2],
-                [1, 3],
-                [2, 1],
-                [2, 2],
-                [2, 3],
-            ]
+            np.array(
+                [
+                    [1, 1],
+                    [1, 2],
+                    [1, 3],
+                    [2, 1],
+                    [2, 2],
+                    [2, 3],
+                ]
+            )
         )
 
         # Test datanode indexing and slicing

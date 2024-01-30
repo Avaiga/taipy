@@ -219,11 +219,25 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
                 self._path, mode="a", index=False, encoding=self.properties[self.__ENCODING_KEY], header=False
             )
 
-    def _write(self, data: Any):
-        if isinstance(data, pd.DataFrame):
-            data.to_csv(self._path, index=False, encoding=self.properties[self.__ENCODING_KEY])
+    def __convert_data_to_dataframe(self, data: Any):
+        exposed_type = self.properties[self._EXPOSED_TYPE_PROPERTY]
+        if exposed_type == self._EXPOSED_TYPE_PANDAS and isinstance(data, (pd.DataFrame, pd.Series)):
+            return data
+        elif exposed_type == self._EXPOSED_TYPE_NUMPY and isinstance(data, np.ndarray):
+            return pd.DataFrame(data)
+        elif (
+            isinstance(data, list)
+            and not isinstance(exposed_type, str)
+            and all(isinstance(row, exposed_type) for row in data)
+        ):
+            return pd.DataFrame.from_records([row.to_dict() for row in data])
         else:
-            pd.DataFrame(data).to_csv(self._path, index=False, encoding=self.properties[self.__ENCODING_KEY])
+            return pd.DataFrame(data)
+
+    def _write(self, data: Any):
+        self.__convert_data_to_dataframe(data).to_csv(
+            self._path, index=False, encoding=self.properties[self.__ENCODING_KEY]
+        )
 
     def write_with_column_names(self, data: Any, columns: Optional[List[str]] = None, job_id: Optional[JobId] = None):
         """Write a selection of columns.
