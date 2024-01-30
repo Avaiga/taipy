@@ -212,6 +212,7 @@ class Gui:
     __DO_NOT_UPDATE_VALUE = _DoNotUpdate()
     _HTML_CONTENT_KEY = "__taipy_html_content"
     __USER_CONTENT_CB = "custom_user_content_cb"
+    __ROBOTO_FONT = "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
 
     __RE_HTML = re.compile(r"(.*?)\.html$")
     __RE_MD = re.compile(r"(.*?)\.md$")
@@ -2208,7 +2209,7 @@ class Gui:
         if self._get_config("stylekit", True):
             styles.append("stylekit/stylekit.css")
         else:
-            styles.append("https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap")
+            styles.append(Gui.__ROBOTO_FONT)
         if self.__css_file:
             styles.append(f"/{self.__css_file}")
 

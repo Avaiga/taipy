@@ -1,0 +1,16 @@
+name: GUI test
+description: Run specific test cases for Taipy GUI
+inputs:
+  os:
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: end-to-end tests
+      uses: ./.github/actions/gui-test/e2e
+    - name: prefix tests
+      if: inputs.os == 'ubuntu-latest'
+      uses: ./.github/actions/gui-test/prefix
+    - name: verify pyi
+      if: inputs.os == 'ubuntu-latest'
+      uses: ./.github/actions/gui-test/pyi
