@@ -178,14 +178,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     # callback
                     submission_name = submission.properties.get("on_submission")
                     if submission_name:
-                        submission_fn = self.gui._get_user_function(submission_name)
-                        if callable(submission_fn):
-                            self.gui._call_user_callback(
-                                submission.properties.get("client_id"),
-                                submission_fn,
-                                [core_get(submission.entity_id), {"submission_status": new_status.name}],
-                                submission.properties.get("module_context"),
-                            )
+                        self.gui._call_user_callback(
+                            client_id,
+                            submission_name,
+                            [core_get(submission.entity_id), {"submission_status": new_status.name}],
+                            submission.properties.get("module_context"),
+                        )
 
             with self.submissions_lock:
                 if new_status in (
