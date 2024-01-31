@@ -54,5 +54,5 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         self._update_job_status(job, ft.result())
 
     def stop(self):
-        self._executor.shutdown(wait=True, cancel_futures=True)
         super().stop()
+        self._executor.shutdown(wait=True, cancel_futures=True)
