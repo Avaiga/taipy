@@ -43,6 +43,7 @@ jobs:
               - 'taipy/core/**'
             gui:
               - 'taipy/gui/**'
+              - 'frontend/taipy-gui/**'
             gui-core:
               - 'taipy/gui_core/**'
             logger:
@@ -91,9 +92,11 @@ jobs:
         if: steps.changes.outputs.core == 'true'
         run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone" tests/core
 
-      - name: Pytest GUI
+      - name: Run GUI Test Action
         if: steps.changes.outputs.gui == 'true'
-        run: pipenv run pytest tests/gui
+        uses: ./.github/actions/gui-test
+        with:
+          os: ${{ matrix.os }}
 
       - name: Pytest GUI Core
         if: steps.changes.outputs.gui-core == 'true'
