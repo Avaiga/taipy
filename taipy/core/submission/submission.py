@@ -233,24 +233,24 @@ class Submission(_Entity, _Labeled):
                 submission._blocked_jobs.discard(job.id)
                 submission._pending_jobs.discard(job.id)
 
-        submission_manager._set(submission)
+            submission_manager._set(submission)
 
-        # The submission_status is set later to make sure notification for updating
-        # the submission_status attribute is triggered
-        if submission._is_canceled:
-            submission.submission_status = SubmissionStatus.CANCELED
-        elif submission._is_abandoned:
-            submission.submission_status = SubmissionStatus.UNDEFINED
-        elif submission._running_jobs:
-            submission.submission_status = SubmissionStatus.RUNNING
-        elif submission._pending_jobs:
-            submission.submission_status = SubmissionStatus.PENDING
-        elif submission._blocked_jobs:
-            submission.submission_status = SubmissionStatus.BLOCKED
-        elif submission._is_completed:
-            submission.submission_status = SubmissionStatus.COMPLETED
-        else:
-            submission.submission_status = SubmissionStatus.UNDEFINED
+            # The submission_status is set later to make sure notification for updating
+            # the submission_status attribute is triggered
+            if submission._is_canceled:
+                submission.submission_status = SubmissionStatus.CANCELED  # type: ignore
+            elif submission._is_abandoned:
+                submission.submission_status = SubmissionStatus.UNDEFINED  # type: ignore
+            elif submission._running_jobs:
+                submission.submission_status = SubmissionStatus.RUNNING  # type: ignore
+            elif submission._pending_jobs:
+                submission.submission_status = SubmissionStatus.PENDING  # type: ignore
+            elif submission._blocked_jobs:
+                submission.submission_status = SubmissionStatus.BLOCKED  # type: ignore
+            elif submission._is_completed:
+                submission.submission_status = SubmissionStatus.COMPLETED  # type: ignore
+            else:
+                submission.submission_status = SubmissionStatus.UNDEFINED  # type: ignore
 
     def is_finished(self) -> bool:
         """Indicate if the submission is finished.
