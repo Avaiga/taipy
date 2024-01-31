@@ -353,72 +353,6 @@ def test_auto_set_and_reload():
     assert submission_2.submission_status == SubmissionStatus.PENDING
 
 
-def test_auto_set_and_reload_job_sets():
-    # pending_jobs, running_jobs, blocked_jobs have the same behavior
-    # so we will only test 1 attribute (pending_jobs) as representative
-
-    task = Task(config_id="name_1", properties={}, function=print, id=TaskId("task_1"))
-    submission_1 = Submission(task.id, task._ID_PREFIX, task.config_id, properties={})
-
-    _TaskManagerFactory._build_manager()._set(task)
-    _SubmissionManagerFactory._build_manager()._set(submission_1)
-
-    submission_2 = _SubmissionManagerFactory._build_manager()._get(submission_1)
-
-    # auto set & reload on pending_jobs attribute
-    assert len(submission_1.pending_jobs) == 0
-    assert len(submission_1.pending_jobs) == 0
-    submission_1.pending_jobs.add("job_id_1")
-    assert submission_1.pending_jobs.data == set(["job_id_1"])
-    assert submission_2.pending_jobs.data == set(["job_id_1"])
-
-    assert len(submission_1.pending_jobs) == 1
-    assert len(submission_1.pending_jobs) == 1
-    submission_2.pending_jobs.add("job_id_2")
-    assert submission_1.pending_jobs.data == set(["job_id_1", "job_id_2"])
-    assert submission_2.pending_jobs.data == set(["job_id_1", "job_id_2"])
-
-    submission_1.pending_jobs.add("job_id_tmp_1")
-    submission_2.pending_jobs.add("job_id_tmp_2")
-    assert submission_1.pending_jobs.data == set(["job_id_1", "job_id_2", "job_id_tmp_1", "job_id_tmp_2"])
-    assert submission_2.pending_jobs.data == set(["job_id_1", "job_id_2", "job_id_tmp_1", "job_id_tmp_2"])
-
-    submission_1.pending_jobs.remove("job_id_tmp_1")
-    assert submission_1.pending_jobs.data == set(["job_id_1", "job_id_2", "job_id_tmp_2"])
-    assert submission_2.pending_jobs.data == set(["job_id_1", "job_id_2", "job_id_tmp_2"])
-    submission_2.pending_jobs.remove("job_id_tmp_2")
-    assert submission_1.pending_jobs.data == set(["job_id_1", "job_id_2"])
-    assert submission_2.pending_jobs.data == set(["job_id_1", "job_id_2"])
-
-    submission_1.pending_jobs.add("job_id_tmp_1")
-    submission_2.pending_jobs.add("job_id_tmp_2")
-    assert submission_1.pending_jobs.data == set(["job_id_1", "job_id_2", "job_id_tmp_1", "job_id_tmp_2"])
-    assert submission_2.pending_jobs.data == set(["job_id_1", "job_id_2", "job_id_tmp_1", "job_id_tmp_2"])
-
-    submission_1.pending_jobs.discard("job_id_tmp_1")
-    assert submission_1.pending_jobs.data == set(["job_id_1", "job_id_2", "job_id_tmp_2"])
-    assert submission_2.pending_jobs.data == set(["job_id_1", "job_id_2", "job_id_tmp_2"])
-    submission_2.pending_jobs.discard("job_id_tmp_2")
-    assert submission_1.pending_jobs.data == set(["job_id_1", "job_id_2"])
-    assert submission_2.pending_jobs.data == set(["job_id_1", "job_id_2"])
-
-    submission_1.pending_jobs.add("job_id_tmp_1")
-    submission_2.pending_jobs.add("job_id_tmp_2")
-    assert submission_1.pending_jobs.data == set(["job_id_1", "job_id_2", "job_id_tmp_1", "job_id_tmp_2"])
-    assert submission_2.pending_jobs.data == set(["job_id_1", "job_id_2", "job_id_tmp_1", "job_id_tmp_2"])
-
-    submission_1.pending_jobs.pop()
-    assert len(submission_1.pending_jobs.data) == 3
-    assert len(submission_2.pending_jobs.data) == 3
-    submission_2.pending_jobs.pop()
-    assert len(submission_1.pending_jobs.data) == 2
-    assert len(submission_2.pending_jobs.data) == 2
-
-    submission_1.pending_jobs.clear()
-    assert len(submission_1.pending_jobs.data) == 0
-    assert len(submission_2.pending_jobs.data) == 0
-
-
 def test_auto_set_and_reload_properties():
     task = Task(config_id="name_1", properties={}, function=print, id=TaskId("task_1"))
     submission_1 = Submission(task.id, task._ID_PREFIX, task.config_id, properties={})
@@ -523,6 +457,7 @@ def test_auto_set_and_reload_properties():
 def test_update_submission_status_with_single_job_completed(job_statuses, expected_submission_statuses):
     job = MockJob("job_id", Status.SUBMITTED)
     submission = Submission("submission_id", "ENTITY_TYPE", "entity_config_id")
+    _SubmissionManagerFactory._build_manager()._set(submission)
 
     assert submission.submission_status == SubmissionStatus.SUBMITTED
 
@@ -535,6 +470,7 @@ def test_update_submission_status_with_single_job_completed(job_statuses, expect
 def __test_update_submission_status_with_two_jobs(job_ids, job_statuses, expected_submission_statuses):
     jobs = {job_id: MockJob(job_id, Status.SUBMITTED) for job_id in job_ids}
     submission = Submission("submission_id", "ENTITY_TYPE", "entity_config_id")
+    _SubmissionManagerFactory._build_manager()._set(submission)
 
     assert submission.submission_status == SubmissionStatus.SUBMITTED
 
