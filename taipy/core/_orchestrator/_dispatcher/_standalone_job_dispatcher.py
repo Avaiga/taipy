@@ -52,3 +52,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
     def _update_job_status_from_future(self, job: Job, ft):
         self._pop_dispatched_process(job.id)  # type: ignore
         self._update_job_status(job, ft.result())
+
+    def stop(self):
+        self._executor.shutdown(wait=True, cancel_futures=True)
+        super().stop()
