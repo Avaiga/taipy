@@ -34,13 +34,6 @@ def cleanup():
         os.remove(path)
 
 
-class MyCustomObject:
-    def __init__(self, id, integer, text):
-        self.id = id
-        self.integer = integer
-        self.text = text
-
-
 class TestCSVDataNode:
     def test_create(self):
         path = "data/node/path"

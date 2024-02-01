@@ -277,7 +277,6 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 
-
     def __append_excel_with_single_sheet(self, append_excel_fct, *args, **kwargs):
         sheet_name = self.properties.get(self.__SHEET_NAME_PROPERTY)
 
@@ -309,9 +308,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
                 )
 
     def _append(self, data: Any):
-        if isinstance(data, Dict) and all(
-            isinstance(x, (pd.DataFrame, np.ndarray)) for x in data.values()
-        ):
+        if isinstance(data, Dict) and all(isinstance(x, (pd.DataFrame, np.ndarray)) for x in data.values()):
             self.__append_excel_with_multiple_sheets(data)
         elif isinstance(data, pd.DataFrame):
             self.__append_excel_with_single_sheet(data.to_excel, index=False, header=False)
@@ -345,9 +342,19 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
                 df.to_excel(writer, key, index=False)
 
     def _write(self, data: Any):
-        if isinstance(data, Dict) and all(
-            isinstance(x, (pd.DataFrame, np.ndarray)) for x in data.values()
-        ):
+        # TODO:
+        # if dict -> multi sheet
+        # 1 pandas as child
+        # 2 numpy as child
+        # 3 custom as child
+
+        # if pandas
+
+        # if numpy
+
+        # if custom exposed type
+
+        if isinstance(data, Dict) and all(isinstance(x, (pd.DataFrame, np.ndarray)) for x in data.values()):
             self.__write_excel_with_multiple_sheets(data)
         elif isinstance(data, pd.DataFrame):
             self.__write_excel_with_single_sheet(data.to_excel, self._path, index=False)
@@ -362,9 +369,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             columns (List[str]): The list of column names to write.
             job_id (JobId^): An optional identifier of the writer.
         """
-        if isinstance(data, Dict) and all(
-            isinstance(x, (pd.DataFrame, np.ndarray)) for x in data.values()
-        ):
+        if isinstance(data, Dict) and all(isinstance(x, (pd.DataFrame, np.ndarray)) for x in data.values()):
             self.__write_excel_with_multiple_sheets(data, columns=columns)
         else:
             df = pd.DataFrame(data)

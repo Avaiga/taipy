@@ -30,13 +30,6 @@ def cleanup():
         os.remove(path)
 
 
-class MyCustomObject:
-    def __init__(self, id, integer, text):
-        self.id = id
-        self.integer = integer
-        self.text = text
-
-
 def test_filter_pandas_exposed_type(csv_file):
     dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": csv_file, "exposed_type": "pandas"})
     dn.write(
