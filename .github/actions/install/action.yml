@@ -27,7 +27,7 @@ runs:
         python-version: ${{ inputs.python-version }}
 
     - name: Install pipenv
-      run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+      run: pip install pipenv --upgrade
       shell: bash
 
     - name: Install minimum supported dependencies
