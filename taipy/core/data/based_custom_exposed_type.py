@@ -30,5 +30,5 @@ class BasedCustomExposedType:
         return self.__column_names
 
     @property
-    def to_json(self):
+    def to_dict(self):
         return {col: getattr(self, col) for col in self.__column_names}
