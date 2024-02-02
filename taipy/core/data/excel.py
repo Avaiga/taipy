@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import os
-from collections import defaultdict
 from datetime import datetime, timedelta
 from os.path import isfile
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
@@ -191,21 +190,17 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             return self._read_as_numpy()
         return self._read_as()
 
-    def __sheet_name_to_list(self, properties):
-        if properties[self.__SHEET_NAME_PROPERTY]:
-            sheet_names = properties[self.__SHEET_NAME_PROPERTY]
-        else:
-            excel_file = load_workbook(properties[self.__PATH_KEY])
-            sheet_names = excel_file.sheetnames
-            excel_file.close()
-        return sheet_names if isinstance(sheet_names, (List, Set, Tuple)) else [sheet_names]
-
     def _read_as(self):
         excel_file = load_workbook(self._path)
         exposed_type = self.properties[self._EXPOSED_TYPE_PROPERTY]
-        work_books = defaultdict()
+        work_books = dict()
         sheet_names = excel_file.sheetnames
-        provided_sheet_names = self.__sheet_name_to_list(self.properties)
+
+        user_provided_sheet_names = self.properties.get(self.__SHEET_NAME_PROPERTY) or []
+        if not isinstance(user_provided_sheet_names, (List, Set, Tuple)):
+            user_provided_sheet_names = [user_provided_sheet_names]
+
+        provided_sheet_names = user_provided_sheet_names or sheet_names
 
         for sheet_name in provided_sheet_names:
             if sheet_name not in sheet_names:
@@ -251,6 +246,11 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
 
         if len(provided_sheet_names) == 1:
             return work_books[provided_sheet_names[0]]
+
+        # TODO: Decide to change or not?
+        # if user_provided_sheet_names == 1:
+        #     return work_books[user_provided_sheet_names]
+
         return work_books
 
     def _read_as_numpy(self):
@@ -336,14 +336,16 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
                 if columns:
                     data[key].columns = columns
 
-                df.to_excel(writer, key, index=False)
+                df.to_excel(writer, key, index=False, header=self.properties[self.__HAS_HEADER_PROPERTY] or None)
 
     def _write(self, data: Any):
         if isinstance(data, Dict):
             return self.__write_excel_with_multiple_sheets(data)
         else:
             data = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
-            self.__write_excel_with_single_sheet(data.to_excel, self._path, index=False)
+            self.__write_excel_with_single_sheet(
+                data.to_excel, self._path, index=False, header=self.properties[self.__HAS_HEADER_PROPERTY] or None
+            )
 
     def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None):
         """Write a set of columns.
@@ -353,6 +355,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             columns (List[str]): The list of column names to write.
             job_id (JobId^): An optional identifier of the writer.
         """
+        # TODO: add tests for this and on csv
         if isinstance(data, Dict) and all(isinstance(x, (pd.DataFrame, np.ndarray)) for x in data.values()):
             self.__write_excel_with_multiple_sheets(data, columns=columns)
         else:
