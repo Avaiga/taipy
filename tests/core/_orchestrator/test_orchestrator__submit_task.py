@@ -16,6 +16,7 @@ import pytest
 
 from taipy.config import Config
 from taipy.core import taipy
+from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from taipy.core.submission.submission_status import SubmissionStatus
@@ -62,11 +63,13 @@ def test_submit_task_development_mode():
     assert job.submit_entity_id == scenario.t1.id
     assert job.creation_date == submit_time
     assert job.stacktrace == []
-    assert len(job._subscribers) == 2  # submission._update_submission_status and orchestrator._on_status_change
+    assert len(job._subscribers) == 2  # _Orchestrator._update_submission_status and _Orchestrator._on_status_change
+    assert job._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert job._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
 
     # submission is created and correct
     assert len(_SubmissionManagerFactory._build_manager()._get_all()) == 1
-    submission = _SubmissionManagerFactory._build_manager()._get(job.submit_id)
+    submission = _SubmissionManagerFactory._build_manager()._get(submission)
     assert submission.creation_date == submit_time
     assert submission.submission_status == SubmissionStatus.COMPLETED
     assert submission.jobs == [job]
@@ -100,12 +103,14 @@ def test_submit_task_development_mode_blocked_job():
     assert job.is_blocked()  # input data is not ready
     assert job.submit_entity_id == scenario.t2.id
     assert job.creation_date == submit_time
-    assert len(job._subscribers) == 2  # submission._update_submission_status and orchestrator._on_status_change
+    assert len(job._subscribers) == 2  # _Orchestrator._update_submission_status and _Orchestrator._on_status_change
+    assert job._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert job._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
     assert job.stacktrace == []
 
     # submission is created and correct
     assert len(_SubmissionManagerFactory._build_manager()._get_all()) == 1
-    submission = _SubmissionManagerFactory._build_manager()._get(job.submit_id)
+    submission = _SubmissionManagerFactory._build_manager()._get(submission)
     assert submission.submission_status == SubmissionStatus.BLOCKED
     assert submission.creation_date == submit_time
     assert submission.jobs == [job]
@@ -144,12 +149,14 @@ def test_submit_task_standalone_mode():
     assert not job.force
     assert job.is_pending()
     assert job.submit_entity_id == sc.t1.id
-    assert len(job._subscribers) == 2  # submission._update_submission_status and orchestrator._on_status_change
+    assert len(job._subscribers) == 2  # _Orchestrator._update_submission_status and _Orchestrator._on_status_change
+    assert job._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert job._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
     assert job.stacktrace == []
 
     # submission is created and correct
     assert len(_SubmissionManagerFactory._build_manager()._get_all()) == 1
-    submission = _SubmissionManagerFactory._build_manager()._get(job.submit_id)
+    submission = _SubmissionManagerFactory._build_manager()._get(submission)
     assert submission.creation_date == submit_time
     assert submission.submission_status == SubmissionStatus.PENDING
     assert submission.jobs == [job]
@@ -188,12 +195,14 @@ def test_submit_task_standalone_mode_blocked_job():
     assert not job.force
     assert job.is_blocked()  # input data is not ready
     assert job.stacktrace == []
-    assert len(job._subscribers) == 2  # submission._update_submission_status and orchestrator._on_status_change
+    assert len(job._subscribers) == 2  # _Orchestrator._update_submission_status and _Orchestrator._on_status_change
+    assert job._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert job._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
     assert job.submit_entity_id == sc.t2.id
 
     # submission is created and correct
     assert len(_SubmissionManagerFactory._build_manager()._get_all()) == 1
-    submission = _SubmissionManagerFactory._build_manager()._get(job.submit_id)
+    submission = _SubmissionManagerFactory._build_manager()._get(submission)
     assert submission.creation_date == submit_time
     assert submission.submission_status == SubmissionStatus.BLOCKED
     assert submission.jobs == [job]
@@ -219,5 +228,11 @@ def test_submit_task_with_callbacks_and_force_and_wait():
         # job exists and is correct
         assert job.task == scenario.t1
         assert job.force
-        assert len(job._subscribers) == 3  # nothing, _update_submission_status, and _on_status_change
+        assert (
+            len(job._subscribers) == 3
+        )  # nothing, _Orchestrator._update_submission_status, and _Orchestrator._on_status_change
+        assert job._subscribers[0].__code__ == nothing.__code__
+        assert job._subscribers[1].__code__ == _Orchestrator._update_submission_status.__code__
+        assert job._subscribers[2].__code__ == _Orchestrator._on_status_change.__code__
+
         mck.assert_called_once_with(job, timeout=2)

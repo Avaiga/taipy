@@ -12,7 +12,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 
-from sqlalchemy import JSON, Column, Enum, String, Table
+from sqlalchemy import JSON, Boolean, Column, Enum, String, Table
 
 from .._repository._base_taipy_model import _BaseModel
 from .._repository.db._sql_base_model import mapper_registry
@@ -35,6 +35,12 @@ class _SubmissionModel(_BaseModel):
         Column("creation_date", String),
         Column("submission_status", Enum(SubmissionStatus)),
         Column("version", String),
+        Column("is_completed", Boolean),
+        Column("is_abandoned", Boolean),
+        Column("is_canceled", Boolean),
+        Column("running_jobs", JSON),
+        Column("blocked_jobs", JSON),
+        Column("pending_jobs", JSON),
     )
     id: str
     entity_id: str
@@ -45,6 +51,12 @@ class _SubmissionModel(_BaseModel):
     creation_date: str
     submission_status: SubmissionStatus
     version: str
+    is_completed: bool
+    is_abandoned: bool
+    is_canceled: bool
+    running_jobs: List[str]
+    blocked_jobs: List[str]
+    pending_jobs: List[str]
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
@@ -58,6 +70,12 @@ class _SubmissionModel(_BaseModel):
             creation_date=data["creation_date"],
             submission_status=SubmissionStatus._from_repr(data["submission_status"]),
             version=data["version"],
+            is_completed=data["is_completed"],
+            is_abandoned=data["is_abandoned"],
+            is_canceled=data["is_canceled"],
+            running_jobs=_BaseModel._deserialize_attribute(data["running_jobs"]),
+            blocked_jobs=_BaseModel._deserialize_attribute(data["blocked_jobs"]),
+            pending_jobs=_BaseModel._deserialize_attribute(data["pending_jobs"]),
         )
 
     def to_list(self):
@@ -71,4 +89,10 @@ class _SubmissionModel(_BaseModel):
             self.creation_date,
             repr(self.submission_status),
             self.version,
+            self.is_completed,
+            self.is_abandoned,
+            self.is_canceled,
+            _BaseModel._serialize_attribute(self.running_jobs),
+            _BaseModel._serialize_attribute(self.blocked_jobs),
+            _BaseModel._serialize_attribute(self.pending_jobs),
         ]

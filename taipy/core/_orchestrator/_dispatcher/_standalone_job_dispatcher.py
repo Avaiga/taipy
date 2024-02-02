@@ -43,8 +43,8 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         future = self._executor.submit(_TaskFunctionWrapper(job.id, job.task), config_as_string=config_as_string)
 
         self._set_dispatched_processes(job.id, future)  # type: ignore
-        future.add_done_callback(self._release_worker)
         future.add_done_callback(partial(self._update_job_status_from_future, job))
+        future.add_done_callback(self._release_worker)
 
     def _release_worker(self, _):
         self._nb_available_workers += 1

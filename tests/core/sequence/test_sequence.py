@@ -582,6 +582,32 @@ def test_auto_set_and_reload(task):
     assert len(sequence_1.subscribers) == 0
     assert len(sequence_2.subscribers) == 0
 
+    with sequence_1 as sequence:
+        assert len(sequence.tasks) == 1
+        assert sequence.tasks[task.config_id].id == task.id
+        assert len(sequence.subscribers) == 0
+        assert sequence._is_in_context
+
+        sequence.tasks = []
+        sequence.subscribers = [print]
+        assert len(sequence.tasks) == 1
+        assert sequence.tasks[task.config_id].id == task.id
+        assert len(sequence.subscribers) == 0
+        assert sequence._is_in_context
+
+    assert len(sequence_1.tasks) == 0
+    assert len(sequence_1.subscribers) == 1
+    assert not sequence_1._is_in_context
+
+
+def test_auto_set_and_reload_properties():
+    scenario = Scenario("scenario", [], {}, sequences={"foo": {}})
+
+    _ScenarioManager._set(scenario)
+
+    sequence_1 = scenario.sequences["foo"]
+    sequence_2 = _SequenceManager._get(sequence_1)
+
     # auto set & reload on properties attribute
     assert sequence_1.properties == {"name": "foo"}
     assert sequence_2.properties == {"name": "foo"}
@@ -638,17 +664,12 @@ def test_auto_set_and_reload(task):
     sequence_1.properties["temp_key_5"] = 0
 
     with sequence_1 as sequence:
-        assert len(sequence.tasks) == 1
-        assert sequence.tasks[task.config_id].id == task.id
-        assert len(sequence.subscribers) == 0
         assert sequence._is_in_context
         assert sequence.properties["qux"] == 5
         assert sequence.properties["temp_key_3"] == 1
         assert sequence.properties["temp_key_4"] == 0
         assert sequence.properties["temp_key_5"] == 0
 
-        sequence.tasks = []
-        sequence.subscribers = [print]
         sequence.properties["qux"] = 9
         sequence.properties.pop("temp_key_3")
         sequence.properties.pop("temp_key_4")
@@ -657,17 +678,12 @@ def test_auto_set_and_reload(task):
         sequence.properties.pop("temp_key_5")
         sequence.properties.update(dict())
 
-        assert len(sequence.tasks) == 1
-        assert sequence.tasks[task.config_id].id == task.id
-        assert len(sequence.subscribers) == 0
         assert sequence._is_in_context
         assert sequence.properties["qux"] == 5
         assert sequence.properties["temp_key_3"] == 1
         assert sequence.properties["temp_key_4"] == 0
         assert sequence.properties["temp_key_5"] == 0
 
-    assert len(sequence_1.tasks) == 0
-    assert len(sequence_1.subscribers) == 1
     assert not sequence_1._is_in_context
     assert sequence_1.properties["qux"] == 9
     assert "temp_key_3" not in sequence_1.properties.keys()

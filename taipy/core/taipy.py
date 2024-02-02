@@ -241,8 +241,8 @@ def submit(
             in asynchronous mode.
         timeout (Union[float, int]): The optional maximum number of seconds to wait
             for the jobs to be finished before returning.
-        **properties (dict[str, any]): A keyworded variable length list of additional arguments
-            that will be stored within the `Submission^`.
+        **properties (dict[str, any]): A keyworded variable length list of user additional arguments
+            that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
 
     Returns:
         The created `Submission^` containing the information about the submission.
@@ -736,6 +736,15 @@ def get_jobs() -> List[Job]:
         The list of all jobs.
     """
     return _JobManagerFactory._build_manager()._get_all()
+
+
+def get_submissions() -> List[Submission]:
+    """Return all the existing submissions.
+
+    Returns:
+        The list of all submissions.
+    """
+    return _SubmissionManagerFactory._build_manager()._get_all()
 
 
 def delete_job(job: Job, force: Optional[bool] = False):

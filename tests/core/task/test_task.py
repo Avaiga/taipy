@@ -196,6 +196,38 @@ def test_auto_set_and_reload(data_node):
     assert task_1.parent_ids == {"sc1"}
     assert task_2.parent_ids == {"sc1"}
 
+    with task_1 as task:
+        assert task.config_id == "foo"
+        assert task.owner_id is None
+        assert task.function == mock_func
+        assert not task.skippable
+        assert task._is_in_context
+
+        task.function = print
+        task.skippable = True
+
+        assert task.config_id == "foo"
+        assert task.owner_id is None
+        assert task.function == mock_func
+        assert not task.skippable
+        assert task._is_in_context
+
+    assert task_1.config_id == "foo"
+    assert task_1.owner_id is None
+    assert task_1.function == print
+    assert task.skippable
+    assert not task_1._is_in_context
+
+
+def test_auto_set_and_reload_properties():
+    task_1 = Task(
+        config_id="foo", properties={}, function=print, input=None, output=None, owner_id=None, skippable=False
+    )
+
+    _TaskManager._set(task_1)
+
+    task_2 = _TaskManager._get(task_1)
+
     # auto set & reload on properties attribute
     assert task_1.properties == {}
     assert task_2.properties == {}
@@ -251,18 +283,12 @@ def test_auto_set_and_reload(data_node):
     task_1.properties["temp_key_5"] = 0
 
     with task_1 as task:
-        assert task.config_id == "foo"
-        assert task.owner_id is None
-        assert task.function == mock_func
-        assert not task.skippable
         assert task._is_in_context
         assert task.properties["qux"] == 5
         assert task.properties["temp_key_3"] == 1
         assert task.properties["temp_key_4"] == 0
         assert task.properties["temp_key_5"] == 0
 
-        task.function = print
-        task.skippable = True
         task.properties["qux"] = 9
         task.properties.pop("temp_key_3")
         task.properties.pop("temp_key_4")
@@ -271,20 +297,12 @@ def test_auto_set_and_reload(data_node):
         task.properties.pop("temp_key_5")
         task.properties.update(dict())
 
-        assert task.config_id == "foo"
-        assert task.owner_id is None
-        assert task.function == mock_func
-        assert not task.skippable
         assert task._is_in_context
         assert task.properties["qux"] == 5
         assert task.properties["temp_key_3"] == 1
         assert task.properties["temp_key_4"] == 0
         assert task.properties["temp_key_5"] == 0
 
-    assert task_1.config_id == "foo"
-    assert task_1.owner_id is None
-    assert task_1.function == print
-    assert task.skippable
     assert not task_1._is_in_context
     assert task_1.properties["qux"] == 9
     assert "temp_key_3" not in task_1.properties.keys()

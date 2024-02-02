@@ -31,6 +31,12 @@ class _SubmissionConverter(_AbstractConverter):
             creation_date=submission._creation_date.isoformat(),
             submission_status=submission._submission_status,
             version=submission._version,
+            is_abandoned=submission._is_abandoned,
+            is_completed=submission._is_completed,
+            is_canceled=submission._is_canceled,
+            running_jobs=list(submission._running_jobs),
+            blocked_jobs=list(submission._blocked_jobs),
+            pending_jobs=list(submission._pending_jobs),
         )
 
     @classmethod
@@ -46,4 +52,13 @@ class _SubmissionConverter(_AbstractConverter):
             submission_status=model.submission_status,
             version=model.version,
         )
+
+        submission._is_abandoned = model.is_abandoned
+        submission._is_completed = model.is_completed
+        submission._is_canceled = model.is_canceled
+
+        submission._running_jobs = set(model.running_jobs)
+        submission._blocked_jobs = set(model.blocked_jobs)
+        submission._pending_jobs = set(model.pending_jobs)
+
         return submission

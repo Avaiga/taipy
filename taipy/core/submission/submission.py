@@ -11,9 +11,8 @@
 
 import threading
 import uuid
-from collections.abc import MutableSet
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Set, Union
 
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
@@ -69,13 +68,13 @@ class Submission(_Entity, _Labeled):
         properties = properties or {}
         self._properties = _Properties(self, **properties.copy())
 
-        self.__abandoned = False
-        self.__completed = False
+        self._is_abandoned = False
+        self._is_completed = False
+        self._is_canceled = False
 
-        self.__is_canceled = False
-        self.__running_jobs: MutableSet[str] = set()
-        self.__blocked_jobs: MutableSet[str] = set()
-        self.__pending_jobs: MutableSet[str] = set()
+        self._running_jobs: Set = set()
+        self._blocked_jobs: Set = set()
+        self._pending_jobs: Set = set()
 
     @staticmethod
     def __new_id() -> str:
@@ -145,13 +144,43 @@ class Submission(_Entity, _Labeled):
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def submission_status(self):
+    def submission_status(self) -> SubmissionStatus:
         return self._submission_status
 
     @submission_status.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
     def submission_status(self, submission_status):
         self._submission_status = submission_status
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def is_abandoned(self) -> bool:
+        return self._is_abandoned
+
+    @is_abandoned.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def is_abandoned(self, val):
+        self._is_abandoned = val
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def is_completed(self) -> bool:
+        return self._is_completed
+
+    @is_completed.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def is_completed(self, val):
+        self._is_completed = val
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def is_canceled(self) -> bool:
+        return self._is_canceled
+
+    @is_canceled.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def is_canceled(self, val):
+        self._is_canceled = val
 
     def __lt__(self, other):
         return self.creation_date.timestamp() < other.creation_date.timestamp()
@@ -166,52 +195,62 @@ class Submission(_Entity, _Labeled):
         return self.creation_date.timestamp() >= other.creation_date.timestamp()
 
     def _update_submission_status(self, job: Job):
-        if self._submission_status == SubmissionStatus.FAILED:
-            return
+        from ._submission_manager_factory import _SubmissionManagerFactory
 
-        job_status = job.status
+        submission_manager = _SubmissionManagerFactory._build_manager()
 
-        if job_status == Status.FAILED:
-            self.submission_status = SubmissionStatus.FAILED  # type: ignore
+        submission = submission_manager._get(self)
+
+        if submission._submission_status == SubmissionStatus.FAILED:
             return
 
         with self.lock:
-            if job_status == Status.CANCELED:
-                self.__is_canceled = True
-            elif job_status == Status.BLOCKED:
-                self.__blocked_jobs.add(job.id)
-                self.__pending_jobs.discard(job.id)
-            elif job_status == Status.PENDING or job_status == Status.SUBMITTED:
-                self.__pending_jobs.add(job.id)
-                self.__blocked_jobs.discard(job.id)
-            elif job_status == Status.RUNNING:
-                self.__running_jobs.add(job.id)
-                self.__pending_jobs.discard(job.id)
-            elif job_status == Status.COMPLETED or job_status == Status.SKIPPED:
-                self.__completed = True
-                self.__blocked_jobs.discard(job.id)
-                self.__pending_jobs.discard(job.id)
-                self.__running_jobs.discard(job.id)
-            elif job_status == Status.ABANDONED:
-                self.__abandoned = True
-                self.__running_jobs.discard(job.id)
-                self.__blocked_jobs.discard(job.id)
-                self.__pending_jobs.discard(job.id)
+            job_status = job.status
 
-        if self.__is_canceled:
-            self.submission_status = SubmissionStatus.CANCELED  # type: ignore
-        elif self.__abandoned:
-            self.submission_status = SubmissionStatus.UNDEFINED  # type: ignore
-        elif self.__running_jobs:
-            self.submission_status = SubmissionStatus.RUNNING  # type: ignore
-        elif self.__pending_jobs:
-            self.submission_status = SubmissionStatus.PENDING  # type: ignore
-        elif self.__blocked_jobs:
-            self.submission_status = SubmissionStatus.BLOCKED  # type: ignore
-        elif self.__completed:
-            self.submission_status = SubmissionStatus.COMPLETED  # type: ignore
-        else:
-            self.submission_status = SubmissionStatus.UNDEFINED  # type: ignore
+            if job_status == Status.FAILED:
+                submission._submission_status = SubmissionStatus.FAILED
+                _SubmissionManagerFactory._build_manager()._set(submission)
+                return
+            if job_status == Status.CANCELED:
+                submission._is_canceled = True
+            elif job_status == Status.BLOCKED:
+                submission._blocked_jobs.add(job.id)
+                submission._pending_jobs.discard(job.id)
+            elif job_status == Status.PENDING or job_status == Status.SUBMITTED:
+                submission._pending_jobs.add(job.id)
+                submission._blocked_jobs.discard(job.id)
+            elif job_status == Status.RUNNING:
+                submission._running_jobs.add(job.id)
+                submission._pending_jobs.discard(job.id)
+            elif job_status == Status.COMPLETED or job_status == Status.SKIPPED:
+                submission._is_completed = True  # type: ignore
+                submission._blocked_jobs.discard(job.id)
+                submission._pending_jobs.discard(job.id)
+                submission._running_jobs.discard(job.id)
+            elif job_status == Status.ABANDONED:
+                submission._is_abandoned = True  # type: ignore
+                submission._running_jobs.discard(job.id)
+                submission._blocked_jobs.discard(job.id)
+                submission._pending_jobs.discard(job.id)
+
+            submission_manager._set(submission)
+
+            # The submission_status is set later to make sure notification for updating
+            # the submission_status attribute is triggered
+            if submission._is_canceled:
+                submission.submission_status = SubmissionStatus.CANCELED  # type: ignore
+            elif submission._is_abandoned:
+                submission.submission_status = SubmissionStatus.UNDEFINED  # type: ignore
+            elif submission._running_jobs:
+                submission.submission_status = SubmissionStatus.RUNNING  # type: ignore
+            elif submission._pending_jobs:
+                submission.submission_status = SubmissionStatus.PENDING  # type: ignore
+            elif submission._blocked_jobs:
+                submission.submission_status = SubmissionStatus.BLOCKED  # type: ignore
+            elif submission._is_completed:
+                submission.submission_status = SubmissionStatus.COMPLETED  # type: ignore
+            else:
+                submission.submission_status = SubmissionStatus.UNDEFINED  # type: ignore
 
     def is_finished(self) -> bool:
         """Indicate if the submission is finished.

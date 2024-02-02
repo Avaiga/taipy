@@ -56,6 +56,7 @@ from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactor
 from taipy.core.sequence.sequence import Sequence
 from taipy.core.sequence.sequence_id import SequenceId
 from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
+from taipy.core.submission.submission import Submission
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
 
@@ -283,6 +284,11 @@ def sequence():
 @pytest.fixture(scope="function")
 def job(task):
     return Job(JobId("job"), task, "foo", "bar", version="random_version_number")
+
+
+@pytest.fixture(scope="function")
+def submission(task):
+    return Submission(task.id, task._ID_PREFIX, task.config_id, properties={})
 
 
 @pytest.fixture(scope="function")

@@ -297,6 +297,36 @@ def test_auto_set_and_reload():
     assert submission_1.jobs == [job_2, job_1]
     assert submission_2.jobs == [job_2, job_1]
 
+    # auto set & reload on is_canceled attribute
+    assert not submission_1.is_canceled
+    assert not submission_2.is_canceled
+    submission_1.is_canceled = True
+    assert submission_1.is_canceled
+    assert submission_2.is_canceled
+    submission_2.is_canceled = False
+    assert not submission_1.is_canceled
+    assert not submission_2.is_canceled
+
+    # auto set & reload on is_completed attribute
+    assert not submission_1.is_completed
+    assert not submission_2.is_completed
+    submission_1.is_completed = True
+    assert submission_1.is_completed
+    assert submission_2.is_completed
+    submission_2.is_completed = False
+    assert not submission_1.is_completed
+    assert not submission_2.is_completed
+
+    # auto set & reload on is_abandoned attribute
+    assert not submission_1.is_abandoned
+    assert not submission_2.is_abandoned
+    submission_1.is_abandoned = True
+    assert submission_1.is_abandoned
+    assert submission_2.is_abandoned
+    submission_2.is_abandoned = False
+    assert not submission_1.is_abandoned
+    assert not submission_2.is_abandoned
+
     # auto set & reload on submission_status attribute
     assert submission_1.submission_status == SubmissionStatus.SUBMITTED
     assert submission_2.submission_status == SubmissionStatus.SUBMITTED
@@ -306,6 +336,31 @@ def test_auto_set_and_reload():
     submission_2.submission_status = SubmissionStatus.COMPLETED
     assert submission_1.submission_status == SubmissionStatus.COMPLETED
     assert submission_2.submission_status == SubmissionStatus.COMPLETED
+
+    with submission_1 as submission:
+        assert submission.jobs == [job_2, job_1]
+        assert submission.submission_status == SubmissionStatus.COMPLETED
+
+        submission.jobs = [job_1]
+        submission.submission_status = SubmissionStatus.PENDING
+
+        assert submission.jobs == [job_2, job_1]
+        assert submission.submission_status == SubmissionStatus.COMPLETED
+
+    assert submission_1.jobs == [job_1]
+    assert submission_1.submission_status == SubmissionStatus.PENDING
+    assert submission_2.jobs == [job_1]
+    assert submission_2.submission_status == SubmissionStatus.PENDING
+
+
+def test_auto_set_and_reload_properties():
+    task = Task(config_id="name_1", properties={}, function=print, id=TaskId("task_1"))
+    submission_1 = Submission(task.id, task._ID_PREFIX, task.config_id, properties={})
+
+    _TaskManagerFactory._build_manager()._set(task)
+    _SubmissionManagerFactory._build_manager()._set(submission_1)
+
+    submission_2 = _SubmissionManagerFactory._build_manager()._get(submission_1)
 
     # auto set & reload on properties attribute
     assert submission_1.properties == {}
@@ -322,27 +377,13 @@ def test_auto_set_and_reload():
 
     submission_1.properties["temp_key_1"] = "temp_value_1"
     submission_1.properties["temp_key_2"] = "temp_value_2"
-    assert submission_1.properties == {
-        "qux": 5,
-        "temp_key_1": "temp_value_1",
-        "temp_key_2": "temp_value_2",
-    }
-    assert submission_2.properties == {
-        "qux": 5,
-        "temp_key_1": "temp_value_1",
-        "temp_key_2": "temp_value_2",
-    }
+    assert submission_1.properties == {"qux": 5, "temp_key_1": "temp_value_1", "temp_key_2": "temp_value_2"}
+    assert submission_2.properties == {"qux": 5, "temp_key_1": "temp_value_1", "temp_key_2": "temp_value_2"}
     submission_1.properties.pop("temp_key_1")
     assert "temp_key_1" not in submission_1.properties.keys()
     assert "temp_key_1" not in submission_1.properties.keys()
-    assert submission_1.properties == {
-        "qux": 5,
-        "temp_key_2": "temp_value_2",
-    }
-    assert submission_2.properties == {
-        "qux": 5,
-        "temp_key_2": "temp_value_2",
-    }
+    assert submission_1.properties == {"qux": 5, "temp_key_2": "temp_value_2"}
+    assert submission_2.properties == {"qux": 5, "temp_key_2": "temp_value_2"}
     submission_2.properties.pop("temp_key_2")
     assert submission_1.properties == {"qux": 5}
     assert submission_2.properties == {"qux": 5}
@@ -362,15 +403,11 @@ def test_auto_set_and_reload():
     submission_1.properties["temp_key_5"] = 0
 
     with submission_1 as submission:
-        assert submission.jobs == [job_2, job_1]
-        assert submission.submission_status == SubmissionStatus.COMPLETED
         assert submission.properties["qux"] == 5
         assert submission.properties["temp_key_3"] == 1
         assert submission.properties["temp_key_4"] == 0
         assert submission.properties["temp_key_5"] == 0
 
-        submission.jobs = [job_1]
-        submission.submission_status = SubmissionStatus.PENDING
         submission.properties["qux"] = 9
         submission.properties.pop("temp_key_3")
         submission.properties.pop("temp_key_4")
@@ -379,17 +416,11 @@ def test_auto_set_and_reload():
         submission.properties.pop("temp_key_5")
         submission.properties.update(dict())
 
-        assert submission.jobs == [job_2, job_1]
-        assert submission.submission_status == SubmissionStatus.COMPLETED
         assert submission.properties["qux"] == 5
         assert submission.properties["temp_key_3"] == 1
         assert submission.properties["temp_key_4"] == 0
         assert submission.properties["temp_key_5"] == 0
 
-    assert submission_1.jobs == [job_1]
-    assert submission_1.submission_status == SubmissionStatus.PENDING
-    assert submission_2.jobs == [job_1]
-    assert submission_2.submission_status == SubmissionStatus.PENDING
     assert submission_1.properties["qux"] == 9
     assert "temp_key_3" not in submission_1.properties.keys()
     assert submission_1.properties["temp_key_4"] == 1
@@ -426,6 +457,7 @@ def test_auto_set_and_reload():
 def test_update_submission_status_with_single_job_completed(job_statuses, expected_submission_statuses):
     job = MockJob("job_id", Status.SUBMITTED)
     submission = Submission("submission_id", "ENTITY_TYPE", "entity_config_id")
+    _SubmissionManagerFactory._build_manager()._set(submission)
 
     assert submission.submission_status == SubmissionStatus.SUBMITTED
 
@@ -438,6 +470,7 @@ def test_update_submission_status_with_single_job_completed(job_statuses, expect
 def __test_update_submission_status_with_two_jobs(job_ids, job_statuses, expected_submission_statuses):
     jobs = {job_id: MockJob(job_id, Status.SUBMITTED) for job_id in job_ids}
     submission = Submission("submission_id", "ENTITY_TYPE", "entity_config_id")
+    _SubmissionManagerFactory._build_manager()._set(submission)
 
     assert submission.submission_status == SubmissionStatus.SUBMITTED
 

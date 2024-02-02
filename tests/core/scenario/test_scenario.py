@@ -549,6 +549,75 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
     assert len(scenario_1.tags) == 1
     assert len(scenario_2.tags) == 1
 
+    with scenario_1 as scenario:
+        assert scenario.config_id == "foo"
+        assert len(scenario.tasks) == 1
+        assert len(scenario.sequences) == 1
+        assert scenario.sequences["sequence_1"] == sequence_1
+        assert scenario.tasks[task.config_id] == task
+        assert len(scenario.additional_data_nodes) == 1
+        assert scenario.additional_data_nodes[additional_dn.config_id] == additional_dn
+        assert scenario.creation_date == new_datetime
+        assert scenario.cycle == cycle
+        assert scenario.is_primary
+        assert len(scenario.subscribers) == 0
+        assert len(scenario.tags) == 1
+        assert scenario._is_in_context
+        assert scenario.name == "baz"
+
+        new_datetime_2 = new_datetime + timedelta(5)
+        scenario._config_id = "foo"
+        scenario.tasks = set()
+        scenario.additional_data_nodes = set()
+        scenario.remove_sequences([sequence_1_name])
+        scenario.creation_date = new_datetime_2
+        scenario.cycle = None
+        scenario.is_primary = False
+        scenario.subscribers = [print]
+        scenario.tags = None
+        scenario.name = "qux"
+
+        assert scenario.config_id == "foo"
+        assert len(scenario.sequences) == 1
+        assert scenario.sequences[sequence_1_name] == sequence_1
+        assert len(scenario.tasks) == 1
+        assert scenario.tasks[task.config_id] == task
+        assert len(scenario.additional_data_nodes) == 1
+        assert scenario.additional_data_nodes[additional_dn.config_id] == additional_dn
+        assert scenario.creation_date == new_datetime
+        assert scenario.cycle == cycle
+        assert scenario.is_primary
+        assert len(scenario.subscribers) == 0
+        assert len(scenario.tags) == 1
+        assert scenario._is_in_context
+        assert scenario.name == "baz"
+
+    assert scenario_1.config_id == "foo"
+    assert len(scenario_1.sequences) == 0
+    assert len(scenario_1.tasks) == 0
+    assert len(scenario_1.additional_data_nodes) == 0
+    assert scenario_1.tasks == {}
+    assert scenario_1.additional_data_nodes == {}
+    assert scenario_1.creation_date == new_datetime_2
+    assert scenario_1.cycle is None
+    assert not scenario_1.is_primary
+    assert len(scenario_1.subscribers) == 1
+    assert len(scenario_1.tags) == 0
+    assert not scenario_1._is_in_context
+
+
+def test_auto_set_and_reload_properties():
+    scenario_1 = Scenario(
+        "foo",
+        set(),
+        {"name": "baz"},
+    )
+
+    scenario_manager = _ScenarioManagerFactory._build_manager()
+    scenario_manager._set(scenario_1)
+
+    scenario_2 = scenario_manager._get(scenario_1)
+
     # auto set & reload on properties attribute
     assert scenario_1.properties == {"name": "baz"}
     assert scenario_2.properties == {"name": "baz"}
@@ -608,36 +677,11 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
     scenario_1.properties["temp_key_5"] = 0
 
     with scenario_1 as scenario:
-        assert scenario.config_id == "foo"
-        assert len(scenario.tasks) == 1
-        assert len(scenario.sequences) == 1
-        assert scenario.sequences["sequence_1"] == sequence_1
-        assert scenario.tasks[task.config_id] == task
-        assert len(scenario.additional_data_nodes) == 1
-        assert scenario.additional_data_nodes[additional_dn.config_id] == additional_dn
-        assert scenario.creation_date == new_datetime
-        assert scenario.cycle == cycle
-        assert scenario.is_primary
-        assert len(scenario.subscribers) == 0
-        assert len(scenario.tags) == 1
-        assert scenario._is_in_context
-        assert scenario.name == "baz"
         assert scenario.properties["qux"] == 5
         assert scenario.properties["temp_key_3"] == 1
         assert scenario.properties["temp_key_4"] == 0
         assert scenario.properties["temp_key_5"] == 0
 
-        new_datetime_2 = new_datetime + timedelta(5)
-        scenario._config_id = "foo"
-        scenario.tasks = set()
-        scenario.additional_data_nodes = set()
-        scenario.remove_sequences([sequence_1_name])
-        scenario.creation_date = new_datetime_2
-        scenario.cycle = None
-        scenario.is_primary = False
-        scenario.subscribers = [print]
-        scenario.tags = None
-        scenario.name = "qux"
         scenario.properties["qux"] = 9
         scenario.properties.pop("temp_key_3")
         scenario.properties.pop("temp_key_4")
@@ -646,36 +690,12 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         scenario.properties.pop("temp_key_5")
         scenario.properties.update(dict())
 
-        assert scenario.config_id == "foo"
-        assert len(scenario.sequences) == 1
-        assert scenario.sequences[sequence_1_name] == sequence_1
-        assert len(scenario.tasks) == 1
-        assert scenario.tasks[task.config_id] == task
-        assert len(scenario.additional_data_nodes) == 1
-        assert scenario.additional_data_nodes[additional_dn.config_id] == additional_dn
-        assert scenario.creation_date == new_datetime
-        assert scenario.cycle == cycle
-        assert scenario.is_primary
-        assert len(scenario.subscribers) == 0
-        assert len(scenario.tags) == 1
         assert scenario._is_in_context
-        assert scenario.name == "baz"
         assert scenario.properties["qux"] == 5
         assert scenario.properties["temp_key_3"] == 1
         assert scenario.properties["temp_key_4"] == 0
         assert scenario.properties["temp_key_5"] == 0
 
-    assert scenario_1.config_id == "foo"
-    assert len(scenario_1.sequences) == 0
-    assert len(scenario_1.tasks) == 0
-    assert len(scenario_1.additional_data_nodes) == 0
-    assert scenario_1.tasks == {}
-    assert scenario_1.additional_data_nodes == {}
-    assert scenario_1.creation_date == new_datetime_2
-    assert scenario_1.cycle is None
-    assert not scenario_1.is_primary
-    assert len(scenario_1.subscribers) == 1
-    assert len(scenario_1.tags) == 0
     assert not scenario_1._is_in_context
     assert scenario_1.properties["qux"] == 9
     assert "temp_key_3" not in scenario_1.properties.keys()
