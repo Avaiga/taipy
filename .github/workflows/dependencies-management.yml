@@ -1,0 +1,59 @@
+name: Dependencies management
+
+on:
+  schedule:
+    # Run each Sunday at mid day
+    - cron: 00 12 * * 0
+
+  workflow_dispatch:
+
+jobs:
+  latest-versions:
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        os: [ubuntu-latest]
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{matrix.python-version}}
+
+      - name: Check if the latest version supported is up to date.
+        id: ensure-dependencies-are-up-to-date
+        working-directory: tools/packages
+        run: |
+          # Ensure dependencies are aligned between Taipy packages
+          pip install -r requirements.txt
+          python check-dependencies.py ensure-same-version
+
+          # Try to update the Pipfile.
+          # Any new packages available are printed to stdout.
+          # If nothing is printed, the Pipfile is up to date and workflow can stop.
+          echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
+          bash check-dependencies.sh pipfiles/Pipfile${{matrix.python-version}}.max >> "$GITHUB_OUTPUT"
+          echo EOF >> "$GITHUB_OUTPUT"
+          cat pipfiles/Pipfile${{matrix.python-version}}.max
+
+      - name: Create the pull_request
+        # Python3.8 must not update the dependencies.
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' and ${{matrix.python-version}} != '3.8'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Update dependencies
+          branch: dependencies/update-python${{matrix.python-version}}
+          base: develop
+          title: 'New dependencies available for Python${{matrix.python-version}}'
+          body: |
+            ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
+          draft: false
+          add-paths: |
+            tools/packages/pipfiles/Pipfile${{matrix.python-version}}.max
+            tools/packages/taipy*/*requirements.txt

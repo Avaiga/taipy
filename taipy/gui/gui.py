@@ -212,6 +212,7 @@ class Gui:
     __DO_NOT_UPDATE_VALUE = _DoNotUpdate()
     _HTML_CONTENT_KEY = "__taipy_html_content"
     __USER_CONTENT_CB = "custom_user_content_cb"
+    __ROBOTO_FONT = "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
 
     __RE_HTML = re.compile(r"(.*?)\.html$")
     __RE_MD = re.compile(r"(.*?)\.md$")
@@ -1105,11 +1106,7 @@ class Gui:
     def __broadcast_ws(self, payload: dict, client_id: t.Optional[str] = None):
         try:
             to = list(self.__get_sids(client_id)) if client_id else []
-            self._server._ws.emit(
-                "message",
-                payload,
-                to=to if to else None
-            )
+            self._server._ws.emit("message", payload, to=to if to else None)
             time.sleep(0.001)
         except Exception as e:  # pragma: no cover
             _warn(f"Exception raised in WebSocket communication in '{self.__frame.f_code.co_name}'", e)
@@ -1312,16 +1309,29 @@ class Gui:
         return self._set_locals_context(module_context) if module_context is not None else contextlib.nullcontext()
 
     def _call_user_callback(
-        self, state_id: t.Optional[str], user_callback: t.Callable, args: t.List[t.Any], module_context: t.Optional[str]
+        self,
+        state_id: t.Optional[str],
+        user_callback: t.Union[t.Callable, str],
+        args: t.List[t.Any],
+        module_context: t.Optional[str],
     ) -> t.Any:
         try:
             with self.get_flask_app().app_context():
                 self.__set_client_id_in_context(state_id)
                 with self._set_module_context(module_context):
+                    if not callable(user_callback):
+                        user_callback = self._get_user_function(user_callback)
+                    if not callable(user_callback):
+                        _warn(f"invoke_callback(): {user_callback} is not callable.")
+                        return None
                     return self._call_function_with_state(user_callback, args)
         except Exception as e:  # pragma: no cover
-            if not self._call_on_exception(user_callback.__name__, e):
-                _warn(f"invoke_callback(): Exception raised in '{user_callback.__name__}()'", e)
+            if not self._call_on_exception(user_callback.__name__ if callable(user_callback) else user_callback, e):
+                _warn(
+                    "invoke_callback(): Exception raised in "
+                    + f"'{user_callback.__name__ if callable(user_callback) else user_callback}()'",
+                    e,
+                )
         return None
 
     def _call_broadcast_callback(
@@ -2199,7 +2209,7 @@ class Gui:
         if self._get_config("stylekit", True):
             styles.append("stylekit/stylekit.css")
         else:
-            styles.append("https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap")
+            styles.append(Gui.__ROBOTO_FONT)
         if self.__css_file:
             styles.append(f"/{self.__css_file}")
 
