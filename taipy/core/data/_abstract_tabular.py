@@ -9,6 +9,12 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from dataclasses import asdict, is_dataclass
+from typing import Any, Union
+
+import numpy as np
+import pandas as pd
+
 from ..exceptions.exceptions import InvalidExposedType
 
 
@@ -21,6 +27,16 @@ class _AbstractTabularDataNode(object):
     _EXPOSED_TYPE_PANDAS = "pandas"
     _EXPOSED_TYPE_MODIN = "modin"  # Deprecated in favor of pandas since 3.1.0
     __VALID_STRING_EXPOSED_TYPES = [_EXPOSED_TYPE_PANDAS, _EXPOSED_TYPE_NUMPY]
+
+    def _convert_data_to_dataframe(self, exposed_type: Any, data: Any) -> Union[pd.DataFrame, pd.Series]:
+        if exposed_type == self._EXPOSED_TYPE_PANDAS and isinstance(data, (pd.DataFrame, pd.Series)):
+            return data
+        elif exposed_type == self._EXPOSED_TYPE_NUMPY and isinstance(data, np.ndarray):
+            return pd.DataFrame(data)
+        elif isinstance(data, list) and not isinstance(exposed_type, str):
+            if all(is_dataclass(row) for row in data):
+                return pd.DataFrame.from_records([asdict(row) for row in data])
+        return pd.DataFrame(data)
 
     @staticmethod
     def _check_exposed_type(exposed_type):

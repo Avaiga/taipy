@@ -263,7 +263,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         return pd.read_excel(self._path, sheet_name=sheet_names, **kwargs)
 
     def __get_sheet_names_and_header(self, sheet_names):
-        kwargs: Dict[str, Any] = {}
+        kwargs = {}
         if sheet_names is None:
             sheet_names = self.properties[self.__SHEET_NAME_PROPERTY]
         if not self.properties[self.__HAS_HEADER_PROPERTY]:
@@ -331,10 +331,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         with pd.ExcelWriter(self._path) as writer:
             # Each key stands for a sheet name
             for key in data.keys():
-                if isinstance(data[key], np.ndarray):
-                    df = pd.DataFrame(data[key])
-                else:
-                    df = data[key]
+                df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data[key])
 
                 if columns:
                     data[key].columns = columns
@@ -342,24 +339,11 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
                 df.to_excel(writer, key, index=False)
 
     def _write(self, data: Any):
-        # TODO:
-        # if dict -> multi sheet
-        # 1 pandas as child
-        # 2 numpy as child
-        # 3 custom as child
-
-        # if pandas
-
-        # if numpy
-
-        # if custom exposed type
-
-        if isinstance(data, Dict) and all(isinstance(x, (pd.DataFrame, np.ndarray)) for x in data.values()):
-            self.__write_excel_with_multiple_sheets(data)
-        elif isinstance(data, pd.DataFrame):
-            self.__write_excel_with_single_sheet(data.to_excel, self._path, index=False)
+        if isinstance(data, Dict):
+            return self.__write_excel_with_multiple_sheets(data)
         else:
-            self.__write_excel_with_single_sheet(pd.DataFrame(data).to_excel, self._path, index=False)
+            data = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
+            self.__write_excel_with_single_sheet(data.to_excel, self._path, index=False)
 
     def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None):
         """Write a set of columns.

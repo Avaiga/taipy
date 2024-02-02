@@ -11,7 +11,6 @@
 
 import csv
 import os
-from dataclasses import asdict, is_dataclass
 from datetime import datetime, timedelta
 from os.path import isfile
 from typing import Any, Dict, List, Optional, Set
@@ -185,9 +184,7 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
                 for line in reader:
                     res.append(custom_class(**line))
             else:
-                reader = csv.reader(
-                    csvFile,
-                )
+                reader = csv.reader(csvFile)
                 for line in reader:
                     res.append(custom_class(*line))
             return res
@@ -220,26 +217,14 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
                 self._path, mode="a", index=False, encoding=self.properties[self.__ENCODING_KEY], header=False
             )
 
-    def __convert_data_to_dataframe(self, data: Any):
-        exposed_type = self.properties[self._EXPOSED_TYPE_PROPERTY]
-        if exposed_type == self._EXPOSED_TYPE_PANDAS and isinstance(data, (pd.DataFrame, pd.Series)):
-            return data
-        elif exposed_type == self._EXPOSED_TYPE_NUMPY and isinstance(data, np.ndarray):
-            return pd.DataFrame(data)
-        elif isinstance(data, list) and not isinstance(exposed_type, str):
-            if all(is_dataclass(row) for row in data):
-                return pd.DataFrame.from_records([asdict(row) for row in data])
-            # return pd.DataFrame.from_records([row.to_dict() for row in data])
-        else:
-            return pd.DataFrame(data)
-
     def _write(self, data: Any):
+        exposed_type = self.properties[self._EXPOSED_TYPE_PROPERTY]
         if self.properties[self.__HAS_HEADER_PROPERTY]:
-            self.__convert_data_to_dataframe(data).to_csv(
+            self._convert_data_to_dataframe(exposed_type, data).to_csv(
                 self._path, index=False, encoding=self.properties[self.__ENCODING_KEY]
             )
         else:
-            self.__convert_data_to_dataframe(data).to_csv(
+            self._convert_data_to_dataframe(exposed_type, data).to_csv(
                 self._path, index=False, encoding=self.properties[self.__ENCODING_KEY], header=None
             )
 

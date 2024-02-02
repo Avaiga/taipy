@@ -96,7 +96,7 @@ class _Orchestrator(_AbstractOrchestrator):
             cls._check_and_execute_jobs_if_development_mode()
         else:
             if wait:
-                cls._wait_until_job_finished(jobs, timeout=timeout)
+                cls._wait_until_job_finished(jobs, timeout=timeout or 0)
         return submission
 
     @classmethod
@@ -143,7 +143,7 @@ class _Orchestrator(_AbstractOrchestrator):
             cls._check_and_execute_jobs_if_development_mode()
         else:
             if wait:
-                cls._wait_until_job_finished(job, timeout=timeout)
+                cls._wait_until_job_finished(job, timeout=timeout or 0)
         return submission
 
     @classmethod
@@ -185,12 +185,10 @@ class _Orchestrator(_AbstractOrchestrator):
             cls.jobs_to_run.put(job)
 
     @classmethod
-    def _wait_until_job_finished(cls, jobs: Union[List[Job], Job], timeout: Optional[Union[float, int]] = None):
+    def _wait_until_job_finished(cls, jobs: Union[List[Job], Job], timeout: float = 0):
         #  Note: this method should be prefixed by two underscores, but it has only one, so it can be mocked in tests.
         def __check_if_timeout(st, to):
-            if to:
-                return (datetime.now() - st).seconds < to
-            return True
+            return (datetime.now() - st).seconds < to
 
         start = datetime.now()
         jobs = list(jobs) if isinstance(jobs, Iterable) else [jobs]
@@ -286,7 +284,7 @@ class _Orchestrator(_AbstractOrchestrator):
 
     @classmethod
     def __remove_jobs_to_run(cls, jobs):
-        new_jobs_to_run: Queue = Queue()
+        new_jobs_to_run = Queue()
         while not cls.jobs_to_run.empty():
             current_job = cls.jobs_to_run.get()
             if current_job not in jobs:

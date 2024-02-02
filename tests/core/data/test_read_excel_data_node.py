@@ -55,59 +55,126 @@ class MyCustomObject2:
         self.text = text
 
 
-def test_read_with_header():
+excel_file_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
+sheet_names = ["Sheet1", "Sheet2"]
+custom_class_dict = {"Sheet1": MyCustomObject1, "Sheet2": MyCustomObject2}
+
+
+def test_raise_no_data_with_header():
     with pytest.raises(NoData):
         not_existing_excel = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": "WRONG.xlsx"})
         assert not_existing_excel.read() is None
         not_existing_excel.read_or_raise()
 
+
+def test_read_empty_excel_with_header():
     empty_excel_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/empty.xlsx")
     empty_excel = ExcelDataNode(
         "foo",
         Scope.SCENARIO,
-        properties={"path": empty_excel_path, "exposed_type": MyCustomObject, "has_header": True},
+        properties={"path": empty_excel_path, "exposed_type": MyCustomObject},
     )
     assert len(empty_excel.read()) == 0
 
-    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
 
-    # Create ExcelDataNode without exposed_type (Default is pandas.DataFrame)
-    excel_data_node_as_pandas = ExcelDataNode("bar", Scope.SCENARIO, properties={"path": path, "sheet_name": "Sheet1"})
+def test_raise_no_data_without_header():
+    with pytest.raises(NoData):
+        not_existing_excel = ExcelDataNode(
+            "foo", Scope.SCENARIO, properties={"path": "WRONG.xlsx", "has_header": False}
+        )
+        assert not_existing_excel.read() is None
+        not_existing_excel.read_or_raise()
+
+
+def test_read_empty_excel_without_header():
+    empty_excel_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/empty.xlsx")
+    empty_excel = ExcelDataNode(
+        "foo",
+        Scope.SCENARIO,
+        properties={"path": empty_excel_path, "exposed_type": MyCustomObject, "has_header": False},
+    )
+    assert len(empty_excel.read()) == 0
+
+
+def test_read_multi_sheet_with_header_no_data():
+    not_existing_excel = ExcelDataNode(
+        "foo",
+        Scope.SCENARIO,
+        properties={"path": "WRONG.xlsx", "sheet_name": ["sheet_name_1", "sheet_name_2"]},
+    )
+    with pytest.raises(NoData):
+        assert not_existing_excel.read() is None
+        not_existing_excel.read_or_raise()
+
+
+def test_read_multi_sheet_without_header_no_data():
+    not_existing_excel = ExcelDataNode(
+        "foo",
+        Scope.SCENARIO,
+        properties={"path": "WRONG.xlsx", "has_header": False, "sheet_name": ["sheet_name_1", "sheet_name_2"]},
+    )
+    with pytest.raises(NoData):
+        assert not_existing_excel.read() is None
+        not_existing_excel.read_or_raise()
+
+
+########################## SINGLE SHEET ##########################
+
+
+def test_read_single_sheet_with_header_no_existing_sheet():
+    non_existing_sheet_name_custom = ExcelDataNode(
+        "bar",
+        Scope.SCENARIO,
+        properties={"path": excel_file_path, "sheet_name": "abc", "exposed_type": MyCustomObject},
+    )
+    with pytest.raises(NonExistingExcelSheet):
+        non_existing_sheet_name_custom.read()
+
+
+def test_read_single_sheet_without_header_no_existing_sheet():
+    non_existing_sheet_name_custom = ExcelDataNode(
+        "bar",
+        Scope.SCENARIO,
+        properties={"path": excel_file_path, "has_header": False, "sheet_name": "abc", "exposed_type": MyCustomObject},
+    )
+    with pytest.raises(NonExistingExcelSheet):
+        non_existing_sheet_name_custom.read()
+
+
+def test_read_with_header_pandas():
+    excel_data_node_as_pandas = ExcelDataNode(
+        "bar", Scope.SCENARIO, properties={"path": excel_file_path, "sheet_name": "Sheet1"}
+    )
 
     data_pandas = excel_data_node_as_pandas.read()
     assert isinstance(data_pandas, pd.DataFrame)
     assert len(data_pandas) == 5
-    assert np.array_equal(data_pandas.to_numpy(), pd.read_excel(path).to_numpy())
+    assert pd.DataFrame.equals(data_pandas, pd.read_excel(excel_file_path))
 
-    # Create ExcelDataNode with numpy exposed_type
+
+def test_read_with_header_numpy():
     excel_data_node_as_numpy = ExcelDataNode(
-        "bar", Scope.SCENARIO, properties={"path": path, "exposed_type": "numpy", "sheet_name": "Sheet1"}
+        "bar", Scope.SCENARIO, properties={"path": excel_file_path, "exposed_type": "numpy", "sheet_name": "Sheet1"}
     )
 
     data_numpy = excel_data_node_as_numpy.read()
     assert isinstance(data_numpy, np.ndarray)
     assert len(data_numpy) == 5
-    assert np.array_equal(data_numpy, pd.read_excel(path).to_numpy())
+    assert np.array_equal(data_numpy, pd.read_excel(excel_file_path).to_numpy())
 
-    # Create the same ExcelDataNode but with custom exposed_type
-    non_existing_sheet_name_custom = ExcelDataNode(
-        "bar",
-        Scope.SCENARIO,
-        properties={"path": path, "sheet_name": "abc", "exposed_type": MyCustomObject},
-    )
-    with pytest.raises(NonExistingExcelSheet):
-        non_existing_sheet_name_custom.read()
 
+def test_read_with_header_custom_exposed_type():
     excel_data_node_as_custom_object = ExcelDataNode(
         "bar",
         Scope.SCENARIO,
-        properties={"path": path, "exposed_type": MyCustomObject, "sheet_name": "Sheet1"},
+        properties={"path": excel_file_path, "exposed_type": MyCustomObject, "sheet_name": "Sheet1"},
     )
 
     data_custom = excel_data_node_as_custom_object.read()
     assert isinstance(data_custom, list)
     assert len(data_custom) == 5
 
+    data_pandas = pd.read_excel(excel_file_path)
     for (_, row_pandas), row_custom in zip(data_pandas.iterrows(), data_custom):
         assert isinstance(row_custom, MyCustomObject)
         assert row_pandas["id"] == row_custom.id
@@ -115,49 +182,35 @@ def test_read_with_header():
         assert row_pandas["text"] == row_custom.text
 
 
-def test_read_without_header():
-    not_existing_excel = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": "WRONG.xlsx", "has_header": False})
-    with pytest.raises(NoData):
-        assert not_existing_excel.read() is None
-        not_existing_excel.read_or_raise()
-
-    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
-
-    # Create ExcelDataNode without exposed_type (Default is pandas.DataFrame)
+def test_read_without_header_pandas():
     excel_data_node_as_pandas = ExcelDataNode(
-        "bar", Scope.SCENARIO, properties={"path": path, "has_header": False, "sheet_name": "Sheet1"}
+        "bar", Scope.SCENARIO, properties={"path": excel_file_path, "has_header": False, "sheet_name": "Sheet1"}
     )
     data_pandas = excel_data_node_as_pandas.read()
     assert isinstance(data_pandas, pd.DataFrame)
     assert len(data_pandas) == 6
-    assert np.array_equal(data_pandas.to_numpy(), pd.read_excel(path, header=None).to_numpy())
+    assert pd.DataFrame.equals(data_pandas, pd.read_excel(excel_file_path, header=None))
 
-    # Create ExcelDataNode with numpy exposed_type
+
+def test_read_without_header_numpy():
     excel_data_node_as_numpy = ExcelDataNode(
         "bar",
         Scope.SCENARIO,
-        properties={"path": path, "has_header": False, "exposed_type": "numpy", "sheet_name": "Sheet1"},
+        properties={"path": excel_file_path, "has_header": False, "exposed_type": "numpy", "sheet_name": "Sheet1"},
     )
 
     data_numpy = excel_data_node_as_numpy.read()
     assert isinstance(data_numpy, np.ndarray)
     assert len(data_numpy) == 6
-    assert np.array_equal(data_numpy, pd.read_excel(path, header=None).to_numpy())
+    assert np.array_equal(data_numpy, pd.read_excel(excel_file_path, header=None).to_numpy())
 
-    # Create the same ExcelDataNode but with custom exposed_type
-    non_existing_sheet_name_custom = ExcelDataNode(
-        "bar",
-        Scope.SCENARIO,
-        properties={"path": path, "has_header": False, "sheet_name": "abc", "exposed_type": MyCustomObject},
-    )
-    with pytest.raises(NonExistingExcelSheet):
-        non_existing_sheet_name_custom.read()
 
+def test_read_without_header_exposed_custom_type():
     excel_data_node_as_custom_object = ExcelDataNode(
         "bar",
         Scope.SCENARIO,
         properties={
-            "path": path,
+            "path": excel_file_path,
             "has_header": False,
             "exposed_type": MyCustomObject,
             "sheet_name": "Sheet1",
@@ -168,6 +221,7 @@ def test_read_without_header():
     assert isinstance(data_custom, list)
     assert len(data_custom) == 6
 
+    data_pandas = pd.read_excel(excel_file_path, header=None)
     for (_, row_pandas), row_custom in zip(data_pandas.iterrows(), data_custom):
         assert isinstance(row_custom, MyCustomObject)
         assert row_pandas[0] == row_custom.id
@@ -175,22 +229,71 @@ def test_read_without_header():
         assert row_pandas[2] == row_custom.text
 
 
-def test_read_multi_sheet_with_header():
-    not_existing_excel = ExcelDataNode(
-        "foo",
+########################## MULTI SHEET ##########################
+
+
+def test_read_multi_sheet_with_header_no_existing_sheet():
+    non_existing_sheet_name_custom = ExcelDataNode(
+        "bar",
         Scope.SCENARIO,
-        properties={"path": "WRONG.xlsx", "sheet_name": ["sheet_name_1", "sheet_name_2"]},
+        properties={
+            "path": excel_file_path,
+            "sheet_name": ["Sheet1", "xyz"],
+            "exposed_type": MyCustomObject1,
+        },
     )
-    with pytest.raises(NoData):
-        assert not_existing_excel.read() is None
-        not_existing_excel.read_or_raise()
+    with pytest.raises(NonExistingExcelSheet):
+        non_existing_sheet_name_custom.read()
 
-    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
-    sheet_names = ["Sheet1", "Sheet2"]
 
-    # Create ExcelDataNode without exposed_type (Default is pandas.DataFrame)
+def test_read_multi_sheet_without_header_no_existing_sheet():
+    non_existing_sheet_name_custom = ExcelDataNode(
+        "bar",
+        Scope.SCENARIO,
+        properties={
+            "path": excel_file_path,
+            "has_header": False,
+            "sheet_name": ["Sheet1", "xyz"],
+            "exposed_type": MyCustomObject1,
+        },
+    )
+    with pytest.raises(NonExistingExcelSheet):
+        non_existing_sheet_name_custom.read()
+
+
+def test_raise_exposed_type_length_mismatch_with_header():
+    with pytest.raises(ExposedTypeLengthMismatch):
+        dn = ExcelDataNode(
+            "bar",
+            Scope.SCENARIO,
+            properties={
+                "path": excel_file_path,
+                "sheet_name": ["Sheet1"],
+                "exposed_type": [MyCustomObject1, MyCustomObject2],
+            },
+        )
+        dn.read()
+
+
+def test_raise_exposed_type_length_mismatch_without_header():
+    with pytest.raises(ExposedTypeLengthMismatch):
+        dn = ExcelDataNode(
+            "bar",
+            Scope.SCENARIO,
+            properties={
+                "path": excel_file_path,
+                "sheet_name": ["Sheet1"],
+                "exposed_type": [MyCustomObject1, MyCustomObject2],
+                "has_header": False,
+            },
+        )
+        dn.read()
+
+
+def test_read_multi_sheet_with_header_pandas():
+    # With sheet name
     excel_data_node_as_pandas = ExcelDataNode(
-        "bar", Scope.SCENARIO, properties={"path": path, "sheet_name": sheet_names}
+        "bar", Scope.SCENARIO, properties={"path": excel_file_path, "sheet_name": sheet_names}
     )
 
     data_pandas = excel_data_node_as_pandas.read()
@@ -202,9 +305,10 @@ def test_read_multi_sheet_with_header():
     )
     assert list(data_pandas.keys()) == sheet_names
     for sheet_name in sheet_names:
-        assert data_pandas[sheet_name].equals(pd.read_excel(path, sheet_name=sheet_name))
+        assert pd.DataFrame.equals(data_pandas[sheet_name], pd.read_excel(excel_file_path, sheet_name=sheet_name))
 
-    excel_data_node_as_pandas_no_sheet_name = ExcelDataNode("bar", Scope.SCENARIO, properties={"path": path})
+    # Without sheet name
+    excel_data_node_as_pandas_no_sheet_name = ExcelDataNode("bar", Scope.SCENARIO, properties={"path": excel_file_path})
 
     data_pandas_no_sheet_name = excel_data_node_as_pandas_no_sheet_name.read()
     assert isinstance(data_pandas_no_sheet_name, Dict)
@@ -212,11 +316,15 @@ def test_read_multi_sheet_with_header():
         assert isinstance(data_pandas_no_sheet_name[key], pd.DataFrame)
         assert data_pandas[key].equals(data_pandas_no_sheet_name[key])
 
-    # Create ExcelDataNode with numpy exposed_type
+
+def test_read_multi_sheet_with_header_numpy():
+    data_pandas = pd.read_excel(excel_file_path, sheet_name=sheet_names)
+
+    # With sheet name
     excel_data_node_as_numpy = ExcelDataNode(
         "bar",
         Scope.SCENARIO,
-        properties={"path": path, "sheet_name": sheet_names, "exposed_type": "numpy"},
+        properties={"path": excel_file_path, "sheet_name": sheet_names, "exposed_type": "numpy"},
     )
 
     data_numpy = excel_data_node_as_numpy.read()
@@ -228,12 +336,13 @@ def test_read_multi_sheet_with_header():
     )
     assert list(data_numpy.keys()) == sheet_names
     for sheet_name in sheet_names:
-        assert np.array_equal(data_pandas[sheet_name], pd.read_excel(path, sheet_name=sheet_name).to_numpy())
+        assert np.array_equal(data_pandas[sheet_name], pd.read_excel(excel_file_path, sheet_name=sheet_name).to_numpy())
 
+    # Without sheet name
     excel_data_node_as_numpy_no_sheet_name = ExcelDataNode(
         "bar",
         Scope.SCENARIO,
-        properties={"path": path, "exposed_type": "numpy"},
+        properties={"path": excel_file_path, "exposed_type": "numpy"},
     )
 
     data_numpy_no_sheet_name = excel_data_node_as_numpy_no_sheet_name.read()
@@ -242,23 +351,15 @@ def test_read_multi_sheet_with_header():
         assert isinstance(data_numpy_no_sheet_name[key], np.ndarray)
         assert np.array_equal(data_numpy[key], data_numpy_no_sheet_name[key])
 
-    # Create the same ExcelDataNode but with custom exposed_type
-    non_existing_sheet_name_custom = ExcelDataNode(
-        "bar",
-        Scope.SCENARIO,
-        properties={
-            "path": path,
-            "sheet_name": ["Sheet1", "xyz"],
-            "exposed_type": MyCustomObject1,
-        },
-    )
-    with pytest.raises(NonExistingExcelSheet):
-        non_existing_sheet_name_custom.read()
 
+def test_read_multi_sheet_with_header_single_custom_exposed_type():
+    data_pandas = pd.read_excel(excel_file_path, sheet_name=sheet_names)
+
+    # With sheet name
     excel_data_node_as_custom_object = ExcelDataNode(
         "bar",
         Scope.SCENARIO,
-        properties={"path": path, "sheet_name": sheet_names, "exposed_type": MyCustomObject1},
+        properties={"path": excel_file_path, "sheet_name": sheet_names, "exposed_type": MyCustomObject1},
     )
 
     data_custom = excel_data_node_as_custom_object.read()
@@ -275,10 +376,11 @@ def test_read_multi_sheet_with_header():
             assert row_pandas["integer"] == row_custom.integer
             assert row_pandas["text"] == row_custom.text
 
+    # Without sheet name
     excel_data_node_as_custom_object_no_sheet_name = ExcelDataNode(
         "bar",
         Scope.SCENARIO,
-        properties={"path": path, "exposed_type": MyCustomObject1},
+        properties={"path": excel_file_path, "exposed_type": MyCustomObject1},
     )
 
     data_custom_no_sheet_name = excel_data_node_as_custom_object_no_sheet_name.read()
@@ -297,31 +399,26 @@ def test_read_multi_sheet_with_header():
             assert row_custom_no_sheet_name.integer == row_custom.integer
             assert row_custom_no_sheet_name.text == row_custom.text
 
-    with pytest.raises(ExposedTypeLengthMismatch):
-        dn = ExcelDataNode(
-            "bar",
-            Scope.SCENARIO,
-            properties={
-                "path": path,
-                "sheet_name": ["Sheet1"],
-                "exposed_type": [MyCustomObject1, MyCustomObject2],
-            },
-        )
-        dn.read()
 
-    custom_class_dict = {"Sheet1": MyCustomObject1, "Sheet2": MyCustomObject2}
+def test_read_multi_sheet_with_header_multiple_custom_exposed_type():
+    data_pandas = pd.read_excel(excel_file_path, sheet_name=sheet_names)
 
+    # With sheet name
     excel_data_node_as_multi_custom_object = ExcelDataNode(
         "bar",
         Scope.SCENARIO,
-        properties={"path": path, "sheet_name": sheet_names, "exposed_type": custom_class_dict},
+        properties={"path": excel_file_path, "sheet_name": sheet_names, "exposed_type": custom_class_dict},
     )
     assert excel_data_node_as_multi_custom_object.properties["exposed_type"] == custom_class_dict
 
     excel_data_node_as_multi_custom_object = ExcelDataNode(
         "bar",
         Scope.SCENARIO,
-        properties={"path": path, "sheet_name": sheet_names, "exposed_type": [MyCustomObject1, MyCustomObject2]},
+        properties={
+            "path": excel_file_path,
+            "sheet_name": sheet_names,
+            "exposed_type": [MyCustomObject1, MyCustomObject2],
+        },
     )
     assert excel_data_node_as_multi_custom_object.properties["exposed_type"] == [MyCustomObject1, MyCustomObject2]
 
@@ -339,10 +436,11 @@ def test_read_multi_sheet_with_header():
             assert row_pandas["integer"] == row_custom.integer
             assert row_pandas["text"] == row_custom.text
 
+    # Without sheet name
     excel_data_node_as_multi_custom_object_no_sheet_name = ExcelDataNode(
         "bar",
         Scope.SCENARIO,
-        properties={"path": path, "exposed_type": custom_class_dict},
+        properties={"path": excel_file_path, "exposed_type": custom_class_dict},
     )
     assert excel_data_node_as_multi_custom_object_no_sheet_name.properties["exposed_type"] == custom_class_dict
 
@@ -363,22 +461,10 @@ def test_read_multi_sheet_with_header():
             assert row_custom_no_sheet_name.text == row_custom.text
 
 
-def test_read_multi_sheet_without_header():
-    not_existing_excel = ExcelDataNode(
-        "foo",
-        Scope.SCENARIO,
-        properties={"path": "WRONG.xlsx", "has_header": False, "sheet_name": ["sheet_name_1", "sheet_name_2"]},
-    )
-    with pytest.raises(NoData):
-        assert not_existing_excel.read() is None
-        not_existing_excel.read_or_raise()
-
-    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
-    sheet_names = ["Sheet1", "Sheet2"]
-
-    # Create ExcelDataNode without exposed_type (Default is pandas.DataFrame)
+def test_read_multi_sheet_without_header_pandas():
+    # With sheet name
     excel_data_node_as_pandas = ExcelDataNode(
-        "bar", Scope.SCENARIO, properties={"path": path, "has_header": False, "sheet_name": sheet_names}
+        "bar", Scope.SCENARIO, properties={"path": excel_file_path, "has_header": False, "sheet_name": sheet_names}
     )
     data_pandas = excel_data_node_as_pandas.read()
     assert isinstance(data_pandas, Dict)
@@ -387,22 +473,29 @@ def test_read_multi_sheet_without_header():
     assert list(data_pandas.keys()) == sheet_names
     for sheet_name in sheet_names:
         assert isinstance(data_pandas[sheet_name], pd.DataFrame)
-        assert data_pandas[sheet_name].equals(pd.read_excel(path, header=None, sheet_name=sheet_name))
+        assert pd.DataFrame.equals(
+            data_pandas[sheet_name], pd.read_excel(excel_file_path, header=None, sheet_name=sheet_name)
+        )
 
+    # Without sheet name
     excel_data_node_as_pandas_no_sheet_name = ExcelDataNode(
-        "bar", Scope.SCENARIO, properties={"path": path, "has_header": False}
+        "bar", Scope.SCENARIO, properties={"path": excel_file_path, "has_header": False}
     )
     data_pandas_no_sheet_name = excel_data_node_as_pandas_no_sheet_name.read()
     assert isinstance(data_pandas_no_sheet_name, Dict)
     for key in data_pandas_no_sheet_name.keys():
         assert isinstance(data_pandas_no_sheet_name[key], pd.DataFrame)
-        assert data_pandas[key].equals(data_pandas_no_sheet_name[key])
+        assert pd.DataFrame.equals(data_pandas[key], data_pandas_no_sheet_name[key])
 
-    # Create ExcelDataNode with numpy exposed_type
+
+def test_read_multi_sheet_without_header_numpy():
+    data_pandas = pd.read_excel(excel_file_path, header=None, sheet_name=sheet_names)
+
+    # With sheet name
     excel_data_node_as_numpy = ExcelDataNode(
         "bar",
         Scope.SCENARIO,
-        properties={"path": path, "has_header": False, "sheet_name": sheet_names, "exposed_type": "numpy"},
+        properties={"path": excel_file_path, "has_header": False, "sheet_name": sheet_names, "exposed_type": "numpy"},
     )
 
     data_numpy = excel_data_node_as_numpy.read()
@@ -415,13 +508,14 @@ def test_read_multi_sheet_without_header():
     assert list(data_numpy.keys()) == sheet_names
     for sheet_name in sheet_names:
         assert np.array_equal(
-            data_pandas[sheet_name], pd.read_excel(path, header=None, sheet_name=sheet_name).to_numpy()
+            data_pandas[sheet_name], pd.read_excel(excel_file_path, header=None, sheet_name=sheet_name).to_numpy()
         )
 
+    # Without sheet name
     excel_data_node_as_numpy_no_sheet_name = ExcelDataNode(
         "bar",
         Scope.SCENARIO,
-        properties={"path": path, "has_header": False, "exposed_type": "numpy"},
+        properties={"path": excel_file_path, "has_header": False, "exposed_type": "numpy"},
     )
 
     data_numpy_no_sheet_name = excel_data_node_as_numpy_no_sheet_name.read()
@@ -430,25 +524,16 @@ def test_read_multi_sheet_without_header():
         assert isinstance(data_numpy_no_sheet_name[key], np.ndarray)
         assert np.array_equal(data_numpy[key], data_numpy_no_sheet_name[key])
 
-    # Create the same ExcelDataNode but with custom exposed_type
-    non_existing_sheet_name_custom = ExcelDataNode(
-        "bar",
-        Scope.SCENARIO,
-        properties={
-            "path": path,
-            "has_header": False,
-            "sheet_name": ["Sheet1", "xyz"],
-            "exposed_type": MyCustomObject1,
-        },
-    )
-    with pytest.raises(NonExistingExcelSheet):
-        non_existing_sheet_name_custom.read()
 
+def test_read_multi_sheet_without_header_single_custom_exposed_type():
+    data_pandas = pd.read_excel(excel_file_path, header=None, sheet_name=sheet_names)
+
+    # With sheet name
     excel_data_node_as_custom_object = ExcelDataNode(
         "bar",
         Scope.SCENARIO,
         properties={
-            "path": path,
+            "path": excel_file_path,
             "has_header": False,
             "sheet_name": sheet_names,
             "exposed_type": MyCustomObject1,
@@ -470,10 +555,11 @@ def test_read_multi_sheet_without_header():
             assert row_pandas[1] == row_custom.integer
             assert row_pandas[2] == row_custom.text
 
+    # Without sheet name
     excel_data_node_as_custom_object_no_sheet_name = ExcelDataNode(
         "bar",
         Scope.SCENARIO,
-        properties={"path": path, "has_header": False, "exposed_type": MyCustomObject1},
+        properties={"path": excel_file_path, "has_header": False, "exposed_type": MyCustomObject1},
     )
 
     data_custom_no_sheet_name = excel_data_node_as_custom_object_no_sheet_name.read()
@@ -492,26 +578,16 @@ def test_read_multi_sheet_without_header():
             assert row_custom_no_sheet_name.integer == row_custom.integer
             assert row_custom_no_sheet_name.text == row_custom.text
 
-    with pytest.raises(ExposedTypeLengthMismatch):
-        dn = ExcelDataNode(
-            "bar",
-            Scope.SCENARIO,
-            properties={
-                "path": path,
-                "sheet_name": ["Sheet1"],
-                "exposed_type": [MyCustomObject1, MyCustomObject2],
-                "has_header": False,
-            },
-        )
-        dn.read()
 
-    custom_class_dict = {"Sheet1": MyCustomObject1, "Sheet2": MyCustomObject2}
+def test_read_multi_sheet_without_header_multiple_custom_exposed_type():
+    data_pandas = pd.read_excel(excel_file_path, header=None, sheet_name=sheet_names)
 
+    # With sheet names
     excel_data_node_as_multi_custom_object = ExcelDataNode(
         "bar",
         Scope.SCENARIO,
         properties={
-            "path": path,
+            "path": excel_file_path,
             "sheet_name": sheet_names,
             "exposed_type": custom_class_dict,
             "has_header": False,
@@ -523,7 +599,7 @@ def test_read_multi_sheet_without_header():
         "bar",
         Scope.SCENARIO,
         properties={
-            "path": path,
+            "path": excel_file_path,
             "sheet_name": sheet_names,
             "exposed_type": [MyCustomObject1, MyCustomObject2],
             "has_header": False,
@@ -545,10 +621,11 @@ def test_read_multi_sheet_without_header():
             assert row_pandas[1] == row_custom.integer
             assert row_pandas[2] == row_custom.text
 
+    # Without sheet names
     excel_data_node_as_multi_custom_object_no_sheet_name = ExcelDataNode(
         "bar",
         Scope.SCENARIO,
-        properties={"path": path, "has_header": False, "exposed_type": custom_class_dict},
+        properties={"path": excel_file_path, "has_header": False, "exposed_type": custom_class_dict},
     )
 
     multi_data_custom_no_sheet_name = excel_data_node_as_multi_custom_object_no_sheet_name.read()
