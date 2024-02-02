@@ -8,7 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+import sys
 from concurrent.futures import Executor, ProcessPoolExecutor
 from functools import partial
 from typing import Callable, Optional
@@ -52,3 +52,10 @@ class _StandaloneJobDispatcher(_JobDispatcher):
     def _update_job_status_from_future(self, job: Job, ft):
         self._pop_dispatched_process(job.id)  # type: ignore
         self._update_job_status(job, ft.result())
+
+    def stop(self):
+        super().stop()
+        if sys.version_info >= (3, 9):
+            self._executor.shutdown(wait=True, cancel_futures=False)
+        else:
+            self._executor.shutdown(wait=True)  # cancel_futures is not available in Python 3.8
