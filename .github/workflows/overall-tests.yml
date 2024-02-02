@@ -76,6 +76,10 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.8', '3.9']
     steps:
       - name: Trigger Workflow
         uses: actions/github-script@v6
@@ -85,5 +89,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'dependencies-management.yml',
-              ref: 'fix/#414-run-tests-with-new-dependencies',
+              ref: 'fix/#414-run-tests-with-new-dependencies${{matrix.python-version}}',
             })
