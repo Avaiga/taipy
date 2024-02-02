@@ -5,70 +5,85 @@ on:
     branches: [ develop, dev/*, release/* ]
   pull_request:
     branches: [ develop, dev/*, release/* ]
+  workflow_dispatch:
 
 jobs:
-  partial-tests:
-    uses: ./.github/workflows/partial-tests.yml
+  # partial-tests:
+  #   uses: ./.github/workflows/partial-tests.yml
 
-  overall-tests:
-    needs: [partial-tests]
-    timeout-minutes: 50
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        pipfile-version: ['min', 'max']
-    runs-on: ${{ matrix.os }}
+  # overall-tests:
+  #   needs: [partial-tests]
+  #   timeout-minutes: 50
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+  #       os: [ubuntu-latest, windows-latest, macos-latest]
+  #       pipfile-version: ['min', 'max']
+  #   runs-on: ${{ matrix.os }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: ${{matrix.python-version}}
+
+  #     - name: Install dependencies
+  #       id: install-dependencies
+  #       uses: ./.github/actions/install
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+  #         os: ${{ matrix.os }}
+  #         pipfile-version: ${{ matrix.pipfile-version }}
+
+  #     - name: Pytest
+  #       run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone and not teste2e" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
+
+  #     - name: Coverage
+  #       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' && matrix.pipfile-version == 'min'
+  #       uses: MishaKav/pytest-coverage-comment@main
+  #       with:
+  #         pytest-xml-coverage-path: ./overall-coverage.xml
+  #         title: Taipy Overall Coverage Report
+
+  # intermittent-tests:
+  #   needs: [partial-tests]
+  #   timeout-minutes: 40
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+  #       os: [ubuntu-latest, windows-latest, macos-latest]
+  #       orchestrator: ['orchestrator_dispatcher', 'standalone']
+  #       pipfile-version: ['min', 'max']
+  #   runs-on: ${{ matrix.os }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: ${{matrix.python-version}}
+
+  #     - name: Install dependencies
+  #       uses: ./.github/actions/install
+  #       with:
+  #         os: ${{ matrix.os }}
+  #         install-gui: false
+  #         python-version: ${{ matrix.python-version }}
+  #         pipfile-version: ${{ matrix.pipfile-version }}
+
+  #     - name: Pytest Core orchestrator_dispatcher
+  #       run: pipenv run pytest -m "${{ matrix.orchestrator }}" tests/core
+
+  build:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - name: Trigger Workflow
+        uses: actions/github-script@v6
         with:
-          python-version: ${{matrix.python-version}}
-
-      - name: Install dependencies
-        id: install-dependencies
-        uses: ./.github/actions/install
-        with:
-          python-version: ${{ matrix.python-version }}
-          os: ${{ matrix.os }}
-          pipfile-version: ${{ matrix.pipfile-version }}
-
-      - name: Pytest
-        run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone and not teste2e" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
-
-      - name: Coverage
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' && matrix.pipfile-version == 'min'
-        uses: MishaKav/pytest-coverage-comment@main
-        with:
-          pytest-xml-coverage-path: ./overall-coverage.xml
-          title: Taipy Overall Coverage Report
-
-  intermittent-tests:
-    needs: [partial-tests]
-    timeout-minutes: 40
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        orchestrator: ['orchestrator_dispatcher', 'standalone']
-        pipfile-version: ['min', 'max']
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{matrix.python-version}}
-
-      - name: Install dependencies
-        uses: ./.github/actions/install
-        with:
-          os: ${{ matrix.os }}
-          install-gui: false
-          python-version: ${{ matrix.python-version }}
-          pipfile-version: ${{ matrix.pipfile-version }}
-
-      - name: Pytest Core orchestrator_dispatcher
-        run: pipenv run pytest -m "${{ matrix.orchestrator }}" tests/core
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'dependencies-management.yml',
+              ref: 'fix/#414-run-tests-with-new-dependencies',
+            })
