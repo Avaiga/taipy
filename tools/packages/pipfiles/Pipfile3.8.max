@@ -57,15 +57,15 @@ version = "==4.2.13"
 "pymongo" = {version="==4.6.1", extras=["srv"]}
 "sqlalchemy" = {version="==2.0.25"}
 "toml" = {version="==0.10.2"}
-"boto3" = {version="==1.34.25"}
+"boto3" = {version="==1.34.34"}
 "backports.zoneinfo" = {version="==0.2.1", markers="python_version<'3.9'"}
 "cookiecutter" = {version="==2.5.0"}
-"flask" = {version="==3.0.1"}
+"flask" = {version="==3.0.2"}
 "flask-cors" = {version="==4.0.0"}
 "flask-socketio" = {version="==5.3.6"}
 "markdown" = {version="==3.5.2"}
 "python-dotenv" = {version="==1.0.1"}
-"pytz" = {version="==2023.3.post1"}
+"pytz" = {version="==2024.1"}
 "tzlocal" = {version="==5.2"}
 "gevent" = {version="==23.9.1"}
 "gevent-websocket" = {version="==0.10.1"}
