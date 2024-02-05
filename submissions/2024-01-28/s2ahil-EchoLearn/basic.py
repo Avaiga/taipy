@@ -5,7 +5,7 @@ import taipy as tp
 import google.generativeai as palm
 import json
 from bs4 import BeautifulSoup
-palm.configure(api_key='InPut_PALm_API_KeY')
+palm.configure(api_key='<YOUR_PALM_ API_KEY>')
 
 
 
