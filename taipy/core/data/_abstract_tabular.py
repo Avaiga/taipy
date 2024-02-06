@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from typing import Any, Dict, List, Union
+from typing import Any, Callable, Dict, List, Union
 
 import numpy as np
 import pandas as pd
@@ -29,6 +29,7 @@ class _AbstractTabularDataNode(object):
     __VALID_STRING_EXPOSED_TYPES = [_EXPOSED_TYPE_PANDAS, _EXPOSED_TYPE_NUMPY]
 
     def __init__(self, **kwargs) -> None:
+        self._decoder: Union[Callable[[List[Any]], Any], Callable[[Dict[Any, Any]], Any]]
         self.custom_document = kwargs.get(self._EXPOSED_TYPE_PROPERTY)
         if kwargs.get(self._HAS_HEADER_PROPERTY, True):
             self._decoder = self._default_decoder_with_header

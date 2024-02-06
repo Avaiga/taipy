@@ -110,6 +110,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         self._check_exposed_type(properties[self._EXPOSED_TYPE_PROPERTY])
 
         DataNode.__init__(
+            self,
             config_id,
             scope,
             id,
