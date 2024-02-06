@@ -30,6 +30,7 @@ interface SliderProps extends LovProps<number | string | number[] | string[], nu
     height?: string;
     min?: number;
     max?: number;
+    step?:number;
     textAnchor?: string;
     continuous?: boolean;
     labels?: string | boolean;
@@ -68,6 +69,7 @@ const Slider = (props: SliderProps) => {
 
     const min = lovList.length ? 0 : props.min;
     const max = lovList.length ? lovList.length - 1 : props.max;
+    const step = props.step === undefined ? 1 : props.step;
     const horizontalOrientation = props.orientation ? props.orientation.charAt(0).toLowerCase() !== "v" : true;
 
     // Converts the slider value (number or array of numbers) to a proper backend value
@@ -282,7 +284,7 @@ const Slider = (props: SliderProps) => {
                         valueLabelDisplay="auto"
                         min={min}
                         max={max}
-                        step={1}
+                        step={step}
                         marks={marks}
                         valueLabelFormat={getLabel}
                         orientation={horizontalOrientation ? undefined : "vertical"}
@@ -299,7 +301,7 @@ const Slider = (props: SliderProps) => {
                         valueLabelDisplay="auto"
                         min={min}
                         max={max}
-                        step={1}
+                        step={step}
                         marks={marks}
                         valueLabelFormat={getLabel}
                         orientation={horizontalOrientation ? undefined : "vertical"}
