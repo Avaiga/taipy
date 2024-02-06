@@ -50,7 +50,7 @@ export class TaipyApp {
     }
     set onChange(handler: OnChangeHandler | undefined) {
         if (handler !== undefined && handler?.length !== 3) {
-            throw new Error("onChange function requires 3 parameters");
+            throw new Error("onChange() requires three parameters");
         }
         this._onChange = handler;
     }
