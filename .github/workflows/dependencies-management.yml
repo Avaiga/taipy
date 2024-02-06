@@ -57,3 +57,17 @@ jobs:
           add-paths: |
             tools/packages/pipfiles/Pipfile${{matrix.python-version}}.max
             tools/packages/taipy*/*requirements.txt
+
+      # PRs created with the GITHUB_TOKEN don't trigger workflows.
+      # This action triggers the overall-tests.yml workflow on the PR
+      # to allow the tests to run on the new dependencies.
+      - name: Run tests on PR
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'overall-tests.yml',
+              ref: 'dependencies/update-python${{matrix.python-version}}',
+            })
