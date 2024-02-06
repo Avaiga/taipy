@@ -40,7 +40,7 @@ export class TaipyApp {
     }
     set onInit(handler: OnInitHandler | undefined) {
         if (handler !== undefined && handler?.length !== 1) {
-            throw new Error("onInit function requires 1 parameter");
+            throw new Error("onInit() requires one parameter");
         }
         this._onInit = handler;
     }
