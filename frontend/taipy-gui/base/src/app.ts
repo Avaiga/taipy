@@ -1,4 +1,5 @@
 import { sendWsMessage } from "../../src/context/wsUtils";
+import { uploadFile } from "../../src/workers/fileupload";
 
 import { Socket, io } from "socket.io-client";
 import { VariableManager } from "./variableManager";
@@ -39,9 +40,9 @@ export class TaipyApp {
     }
     set onInit(handler: OnInitHandler | undefined) {
         if (handler !== undefined && handler?.length !== 1) {
-            throw new Error("onInit function requires 1 parameter")
+            throw new Error("onInit() requires one parameter");
         }
-        this._onInit = handler
+        this._onInit = handler;
     }
 
     get onChange() {
@@ -49,9 +50,9 @@ export class TaipyApp {
     }
     set onChange(handler: OnChangeHandler | undefined) {
         if (handler !== undefined && handler?.length !== 3) {
-            throw new Error("onChange function requires 3 parameters")
+            throw new Error("onChange() requires three parameters");
         }
-        this._onChange = handler
+        this._onChange = handler;
     }
 
     // Public methods
@@ -94,6 +95,15 @@ export class TaipyApp {
             path = window.location.pathname.slice(1);
         }
         sendWsMessage(this.socket, "GMC", "get_module_context", { path: path }, this.clientId);
+    }
+
+    trigger(actionName: string, triggerId: string, payload: Record<string, unknown> = {}) {
+        payload["action"] = actionName;
+        sendWsMessage(this.socket, "A", triggerId, payload, this.clientId, this.context);
+    }
+
+    upload(encodedName: string, files: FileList, progressCallback: (val: number) => void) {
+        return uploadFile(encodedName, files, progressCallback, this.clientId);
     }
 }
 

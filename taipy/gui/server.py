@@ -49,7 +49,6 @@ class _Server:
     __OPENING_CURLY = r"\1&#x7B;"
     __CLOSING_CURLY = r"&#x7D;\2"
     _RESOURCE_HANDLER_ARG = "tprh"
-    __BASE_FILE_NAME = "taipy-gui-base.js"
 
     def __init__(
         self,
@@ -158,9 +157,7 @@ class _Server:
                 if resource_handler is None:
                     return (f"Invalid value for query {_Server._RESOURCE_HANDLER_ARG}", 404)
                 try:
-                    return resource_handler.get_resources(
-                        path, f"{static_folder}{os.path.sep}{_Server.__BASE_FILE_NAME}"
-                    )
+                    return resource_handler.get_resources(path, static_folder)
                 except Exception as e:
                     raise RuntimeError("Can't get resources from custom resource handler") from e
             if path == "" or path == "index.html" or "." not in path:
