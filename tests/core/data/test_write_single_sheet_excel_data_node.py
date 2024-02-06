@@ -51,8 +51,7 @@ class MyCustomObject:
                 setattr(self, field.name, field.type(value))
 
 
-def test_write_with_header_single_sheet_pandas(tmp_excel_file):
-    # With sheet name
+def test_write_with_header_single_sheet_pandas_with_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "sheet_name": "Sheet1"})
 
     df = pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
@@ -73,13 +72,15 @@ def test_write_with_header_single_sheet_pandas(tmp_excel_file):
     excel_dn.write(None)
     assert excel_dn.read().empty
 
-    # Without sheet name
+
+def test_write_with_header_single_sheet_pandas_without_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": tmp_excel_file})
 
     df = pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
 
     excel_dn.write(df)
     excel_data = excel_dn.read()
+
     assert isinstance(excel_data, dict) and "Sheet1" in excel_data.keys()
     assert pd.DataFrame.equals(excel_data["Sheet1"], df)
 
@@ -105,8 +106,7 @@ def test_write_with_header_single_sheet_pandas(tmp_excel_file):
     assert excel_dn.read()["Sheet1"].empty
 
 
-def test_write_without_header_single_sheet_pandas(tmp_excel_file):
-    # With sheet name
+def test_write_without_header_single_sheet_pandas_with_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode(
         "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "sheet_name": "Sheet1", "has_header": False}
     )
@@ -129,7 +129,8 @@ def test_write_without_header_single_sheet_pandas(tmp_excel_file):
     excel_dn.write(None)
     assert excel_dn.read().empty
 
-    # Without sheet name
+
+def test_write_without_header_single_sheet_pandas_without_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "has_header": False})
 
     df = pd.DataFrame([*zip([1, 2, 3], [4, 5, 6])])
@@ -161,8 +162,7 @@ def test_write_without_header_single_sheet_pandas(tmp_excel_file):
     assert excel_dn.read()["Sheet1"].empty
 
 
-def test_write_with_header_single_sheet_numpy(tmp_excel_file):
-    # With sheet name
+def test_write_with_header_single_sheet_numpy_with_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode(
         "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "sheet_name": "Sheet1", "exposed_type": "numpy"}
     )
@@ -178,7 +178,8 @@ def test_write_with_header_single_sheet_numpy(tmp_excel_file):
     excel_dn.write(None)
     assert excel_dn.read().size == 0
 
-    # Without sheet name
+
+def test_write_with_header_single_sheet_numpy_without_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": "numpy"})
 
     arr = np.array([[1], [2], [3], [4], [5]])
@@ -199,8 +200,7 @@ def test_write_with_header_single_sheet_numpy(tmp_excel_file):
     assert excel_dn.read()["Sheet1"].size == 0
 
 
-def test_write_without_header_single_sheet_numpy(tmp_excel_file):
-    # With sheet name
+def test_write_without_header_single_sheet_numpy_with_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode(
         "foo",
         Scope.SCENARIO,
@@ -218,7 +218,8 @@ def test_write_without_header_single_sheet_numpy(tmp_excel_file):
     excel_dn.write(None)
     assert excel_dn.read().size == 0
 
-    # Without sheet name
+
+def test_write_without_header_single_sheet_numpy_without_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode(
         "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": "numpy", "has_header": False}
     )
@@ -241,8 +242,7 @@ def test_write_without_header_single_sheet_numpy(tmp_excel_file):
     assert excel_dn.read()["Sheet1"].size == 0
 
 
-def test_write_with_header_single_sheet_custom_exposed_type(tmp_excel_file):
-    # With sheet name
+def test_write_with_header_single_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode(
         "foo",
         Scope.SCENARIO,
@@ -256,27 +256,19 @@ def test_write_with_header_single_sheet_custom_exposed_type(tmp_excel_file):
     excel_dn.write(None)
     assert excel_dn.read() == []
 
-    # TODO: fix this part
-    # Without sheet name
-    # excel_dn = ExcelDataNode(
-    #     "foo", Scope.SCENARIO,
-    #     properties={"path": tmp_excel_file, "exposed_type": MyCustomObject}
-    # )
 
-    # data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
-    # excel_dn.write(data)
-    # excel_data = excel_dn.read()
-    # assert isinstance(excel_data, dict) and "Sheet1" in excel_data.keys()
-    # assert all(actual == expected for actual, expected in zip(excel_dn.read()["Sheet1"], data))
+def test_write_with_header_single_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file):
+    excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": MyCustomObject})
 
-    # excel_dn.write(None)
-    # excel_data = excel_dn.read()
-    # assert isinstance(excel_data, dict) and "Sheet1" in excel_data.keys()
-    # assert excel_dn.read()["Sheet1"] == []
+    data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
+    excel_dn.write(data)
+    assert all(actual == expected for actual, expected in zip(excel_dn.read(), data))
+
+    excel_dn.write(None)
+    assert excel_dn.read() == []
 
 
-def test_write_without_header_single_sheet_custom_exposed_type(tmp_excel_file):
-    # With sheet name
+def test_write_without_header_single_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode(
         "foo",
         Scope.SCENARIO,
@@ -295,24 +287,18 @@ def test_write_without_header_single_sheet_custom_exposed_type(tmp_excel_file):
     excel_dn.write(None)
     assert excel_dn.read() == []
 
-    # TODO: fix this part
-    # Without sheet name
-    # excel_dn = ExcelDataNode(
-    #     "foo",
-    #     Scope.SCENARIO,
-    #     properties={"path": tmp_excel_file, "exposed_type": MyCustomObject, "has_header": False}
-    # )
 
-    # data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
-    # excel_dn.write(data)
-    # excel_data = excel_dn.read()
-    # assert isinstance(excel_data, dict) and "Sheet1" in excel_data.keys()
-    # assert all(actual == expected for actual, expected in zip(excel_dn.read()["Sheet1"], data))
+def test_write_without_header_single_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file):
+    excel_dn = ExcelDataNode(
+        "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": MyCustomObject, "has_header": False}
+    )
 
-    # excel_dn.write(None)
-    # excel_data = excel_dn.read()
-    # assert isinstance(excel_data, dict) and "Sheet1" in excel_data.keys()
-    # assert excel_dn.read()["Sheet1"] == []
+    data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
+    excel_dn.write(data)
+    assert all(actual == expected for actual, expected in zip(excel_dn.read(), data))
+
+    excel_dn.write(None)
+    assert excel_dn.read() == []
 
 
 def test_raise_write_with_sheet_name_length_mismatch(excel_file_with_sheet_name):
@@ -321,7 +307,6 @@ def test_raise_write_with_sheet_name_length_mismatch(excel_file_with_sheet_name)
         Scope.SCENARIO,
         properties={"path": excel_file_with_sheet_name, "sheet_name": ["sheet_name_1", "sheet_name_2"]},
     )
-    # TODO: only raised in single sheet case?
     with pytest.raises(SheetNameLengthMismatch):
         excel_dn.write([])
 
@@ -334,7 +319,6 @@ def test_raise_write_with_sheet_name_length_mismatch(excel_file_with_sheet_name)
     ],
 )
 def test_write_with_column_and_sheet_name(excel_file_with_sheet_name, default_data_frame, content, columns, sheet_name):
-    # TODO: fix this test??
     excel_dn = ExcelDataNode(
         "foo", Scope.SCENARIO, properties={"path": excel_file_with_sheet_name, "sheet_name": sheet_name}
     )

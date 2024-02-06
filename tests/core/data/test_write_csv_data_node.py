@@ -178,3 +178,13 @@ def test_write_with_different_encoding(csv_file):
     assert np.array_equal(utf16_dn.read(), data)
     with pytest.raises(UnicodeError):
         utf8_dn.read()
+
+
+def test_write_with_column_names(tmp_csv_file):
+    data = [[11, 22, 33], [44, 55, 66]]
+    columns = ["e", "f", "g"]
+
+    csv_dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": tmp_csv_file})
+    csv_dn.write_with_column_names(data, columns)
+    df = pd.DataFrame(data, columns=columns)
+    assert pd.DataFrame.equals(df, csv_dn.read())
