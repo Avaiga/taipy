@@ -102,7 +102,7 @@ export class TaipyApp {
         sendWsMessage(this.socket, "A", triggerId, payload, this.clientId, this.context);
     }
 
-    uploadFile(encodedName: string, files: FileList, progressCallback: (val: number) => void) {
+    upload(encodedName: string, files: FileList, progressCallback: (val: number) => void) {
         return uploadFile(encodedName, files, progressCallback, this.clientId);
     }
 }
