@@ -109,7 +109,7 @@ class DataNode(_Entity, _Labeled):
         self._owner_id = owner_id
         self._parent_ids = parent_ids or set()
         self._scope = scope
-        self._last_edit_date = last_edit_date
+        self._last_edit_date: Optional[datetime] = last_edit_date
         self._edit_in_progress = edit_in_progress
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
         self._validity_period = validity_period
