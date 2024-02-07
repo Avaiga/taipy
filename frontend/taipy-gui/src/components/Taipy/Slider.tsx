@@ -52,6 +52,7 @@ const Slider = (props: SliderProps) => {
         width = "300px",
         updateVars = "",
         valueById,
+        step = 1,
     } = props;
     const [value, setValue] = useState<number|number[]>(0);
     const dispatch = useDispatch();
@@ -69,7 +70,6 @@ const Slider = (props: SliderProps) => {
 
     const min = lovList.length ? 0 : props.min;
     const max = lovList.length ? lovList.length - 1 : props.max;
-    const step = props.step === undefined ? 1 : props.step;
     const horizontalOrientation = props.orientation ? props.orientation.charAt(0).toLowerCase() !== "v" : true;
 
     // Converts the slider value (number or array of numbers) to a proper backend value
