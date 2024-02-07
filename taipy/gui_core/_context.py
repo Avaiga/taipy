@@ -116,7 +116,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 with self.gui._get_autorization(system=True):
                     sequence = (
                         core_get(event.entity_id)
-                        if event.operation != EventOperation.DELETION and is_readable(t.cast(SequenceId, event.entity_id))
+                        if event.operation != EventOperation.DELETION
+                        and is_readable(t.cast(SequenceId, event.entity_id))
                         else None
                     )
                     if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:  # type: ignore
