@@ -30,7 +30,7 @@ interface SliderProps extends LovProps<number | string | number[] | string[], nu
     height?: string;
     min?: number;
     max?: number;
-    step?:number;
+    step?: number;
     textAnchor?: string;
     continuous?: boolean;
     labels?: string | boolean;
