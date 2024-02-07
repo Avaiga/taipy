@@ -13,4 +13,4 @@ jobs:
           token: ${{secrets.TAIPY_INTEGRATION_TESTING_ACCESS_TOKEN}}
           repository: avaiga/taipy-benchmark
           event-type: benchmark
-          client-payload: '{"repo": "taipy-core", "commitSHA": "${{ github.sha }}"}'
+          client-payload: '{"repo": "taipy", "commitSHA": "${{ github.sha }}"}'
