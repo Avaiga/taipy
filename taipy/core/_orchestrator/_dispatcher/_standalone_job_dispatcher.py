@@ -53,8 +53,8 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         self._pop_dispatched_process(job.id)  # type: ignore
         self._update_job_status(job, ft.result())
 
-    def stop(self):
-        super().stop()
+    def stop(self, wait: bool = True, timeout: Optional[float] = None):
+        super().stop(wait, timeout)
         if sys.version_info >= (3, 9):
             self._executor.shutdown(wait=True, cancel_futures=False)
         else:

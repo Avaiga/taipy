@@ -28,7 +28,7 @@ class _DevelopmentJobDispatcher(_JobDispatcher):
     def is_running(self) -> bool:
         return True
 
-    def stop(self):
+    def stop(self, wait: bool = True, timeout: Optional[float] = None):
         raise NotImplementedError
 
     def run(self):

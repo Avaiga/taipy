@@ -47,9 +47,16 @@ class _JobDispatcher(threading.Thread):
         """Return True if the dispatcher is running"""
         return self.is_alive()
 
-    def stop(self):
-        """Stop the dispatcher"""
+    def stop(self, wait: bool = True, timeout: Optional[float] = None):
+        """Stop the dispatcher.
+
+        Parameters:
+            wait (bool): If True, the method will wait for the dispatcher to stop.
+            timeout (Optional[float]): The maximum time to wait. If None, the method will wait indefinitely.
+        """
         self._STOP_FLAG = True
+        if wait and self.is_alive():
+            self.join(timeout=timeout)
 
     def run(self):
         _TaipyLogger._get_logger().info("Start job dispatcher...")
