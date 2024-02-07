@@ -196,17 +196,13 @@ class Submission(_Entity, _Labeled):
 
     def _update_submission_status(self, job: Job):
         from ._submission_manager_factory import _SubmissionManagerFactory
-
-        submission_manager = _SubmissionManagerFactory._build_manager()
-
-        submission = submission_manager._get(self)
-
-        if submission._submission_status == SubmissionStatus.FAILED:
-            return
-
         with self.lock:
-            job_status = job.status
+            submission_manager = _SubmissionManagerFactory._build_manager()
+            submission = submission_manager._get(self)
+            if submission._submission_status == SubmissionStatus.FAILED:
+                return
 
+            job_status = job.status
             if job_status == Status.FAILED:
                 submission._submission_status = SubmissionStatus.FAILED
                 _SubmissionManagerFactory._build_manager()._set(submission)
@@ -232,7 +228,6 @@ class Submission(_Entity, _Labeled):
                 submission._running_jobs.discard(job.id)
                 submission._blocked_jobs.discard(job.id)
                 submission._pending_jobs.discard(job.id)
-
             submission_manager._set(submission)
 
             # The submission_status is set later to make sure notification for updating
