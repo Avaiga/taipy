@@ -9,11 +9,11 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from datetime import datetime
+from time import sleep
+
 
 def assert_true_after_time(assertion, msg=None, time=120):
-    from datetime import datetime
-    from time import sleep
-
     loops = 0
     start = datetime.now()
     while (datetime.now() - start).seconds < time:
