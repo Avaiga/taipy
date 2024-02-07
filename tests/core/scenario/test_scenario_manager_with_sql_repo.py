@@ -16,9 +16,7 @@ import pytest
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core._version._version_manager import _VersionManager
-from taipy.core.config.job_config import JobConfig
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
@@ -32,12 +30,7 @@ from taipy.core.task.task import Task
 from taipy.core.task.task_id import TaskId
 
 
-def test_set_and_get_scenario(cycle, init_sql_repo, init_managers):
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    init_managers()
-    _OrchestratorFactory._build_dispatcher()
-
+def test_set_and_get_scenario(cycle, init_sql_repo):
     scenario_id_1 = ScenarioId("scenario_id_1")
     scenario_1 = Scenario("scenario_name_1", [], {}, [], scenario_id_1)
 
@@ -200,9 +193,7 @@ def test_set_and_get_scenario(cycle, init_sql_repo, init_managers):
     assert _TaskManager._get(task_2.id).id == task_2.id
 
 
-def test_get_all_on_multiple_versions_environment(init_sql_repo, init_managers):
-    init_managers()
-
+def test_get_all_on_multiple_versions_environment(init_sql_repo):
     # Create 5 scenarios with 2 versions each
     # Only version 1.0 has the scenario with config_id = "config_id_1"
     # Only version 2.0 has the scenario with config_id = "config_id_6"
@@ -233,16 +224,10 @@ def test_get_all_on_multiple_versions_environment(init_sql_repo, init_managers):
     assert len(_ScenarioManager._get_all_by(filters=[{"version": "2.0", "config_id": "config_id_6"}])) == 1
 
 
-def test_create_scenario_does_not_modify_config(init_sql_repo, init_managers):
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    init_managers()
-
+def test_create_scenario_does_not_modify_config(init_sql_repo):
     creation_date_1 = datetime.now()
     name_1 = "name_1"
     scenario_config = Config.configure_scenario("sc", None, None, Frequency.DAILY)
-
-    _OrchestratorFactory._build_dispatcher()
 
     assert scenario_config.properties.get("name") is None
     assert len(scenario_config.properties) == 0
@@ -265,11 +250,7 @@ def test_create_scenario_does_not_modify_config(init_sql_repo, init_managers):
     assert scenario_2.name is None
 
 
-def test_create_and_delete_scenario(init_sql_repo, init_managers):
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    init_managers()
-
+def test_create_and_delete_scenario(init_sql_repo):
     creation_date_1 = datetime.now()
     creation_date_2 = creation_date_1 + timedelta(minutes=10)
 
@@ -279,8 +260,6 @@ def test_create_and_delete_scenario(init_sql_repo, init_managers):
     assert len(_ScenarioManager._get_all()) == 0
 
     scenario_config = Config.configure_scenario("sc", None, None, Frequency.DAILY)
-
-    _OrchestratorFactory._build_dispatcher()
 
     scenario_1 = _ScenarioManager._create(scenario_config, creation_date=creation_date_1, name=name_1)
     assert scenario_1.config_id == "sc"
@@ -350,11 +329,7 @@ def mult_by_4(nb: int):
     return nb * 4
 
 
-def test_scenario_manager_only_creates_data_node_once(init_sql_repo, init_managers):
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    init_managers()
-
+def test_scenario_manager_only_creates_data_node_once(init_sql_repo):
     # dn_1 ---> mult_by_2 ---> dn_2 ---> mult_by_3 ---> dn_6
     # dn_1 ---> mult_by_4 ---> dn_4
 
@@ -371,8 +346,6 @@ def test_scenario_manager_only_creates_data_node_once(init_sql_repo, init_manage
     scenario_config.add_sequences(
         {"by_6": [task_mult_by_2_config, task_mult_by_3_config], "by_4": [task_mult_by_4_config]}
     )
-
-    _OrchestratorFactory._build_dispatcher()
 
     assert len(_DataManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 0
@@ -409,9 +382,7 @@ def test_scenario_manager_only_creates_data_node_once(init_sql_repo, init_manage
     assert len(_ScenarioManager._get_all()) == 2
 
 
-def test_get_scenarios_by_config_id(init_sql_repo, init_managers):
-    init_managers()
-
+def test_get_scenarios_by_config_id(init_sql_repo):
     scenario_config_1 = Config.configure_scenario("s1", sequence_configs=[])
     scenario_config_2 = Config.configure_scenario("s2", sequence_configs=[])
     scenario_config_3 = Config.configure_scenario("s3", sequence_configs=[])
@@ -441,9 +412,7 @@ def test_get_scenarios_by_config_id(init_sql_repo, init_managers):
     assert sorted([s_3_1.id]) == sorted([scenario.id for scenario in s3_scenarios])
 
 
-def test_get_scenarios_by_config_id_in_multiple_versions_environment(init_sql_repo, init_managers):
-    init_managers()
-
+def test_get_scenarios_by_config_id_in_multiple_versions_environment(init_sql_repo):
     scenario_config_1 = Config.configure_scenario("s1", sequence_configs=[])
     scenario_config_2 = Config.configure_scenario("s2", sequence_configs=[])
 

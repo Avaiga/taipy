@@ -20,11 +20,9 @@ import pytest
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.core._orchestrator._orchestrator import _Orchestrator
-from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core.common import _utils
 from taipy.core.common._utils import _Subscriber
-from taipy.core.config.job_config import JobConfig
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.exceptions.exceptions import (
@@ -72,8 +70,6 @@ def test_raise_sequence_does_not_belong_to_scenario():
 
 
 def __init():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _OrchestratorFactory._build_dispatcher()
     input_dn = InMemoryDataNode("foo", Scope.SCENARIO)
     output_dn = InMemoryDataNode("foo", Scope.SCENARIO)
     task = Task("task", {}, print, [input_dn], [output_dn], TaskId("task_id"))
@@ -230,9 +226,6 @@ def test_is_submittable():
 
 
 def test_submit():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _OrchestratorFactory._build_dispatcher()
-
     data_node_1 = InMemoryDataNode("foo", Scope.SCENARIO, "s1")
     data_node_2 = InMemoryDataNode("bar", Scope.SCENARIO, "s2")
     data_node_3 = InMemoryDataNode("baz", Scope.SCENARIO, "s3")
@@ -341,9 +334,6 @@ def mock_function_no_input_one_output():
 
 
 def test_submit_sequence_from_tasks_with_one_or_no_input_output():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _OrchestratorFactory._build_dispatcher()
-
     # test no input and no output Task
     task_no_input_no_output = Task("task_no_input_no_output", {}, mock_function_no_input_no_output)
     scenario_1 = Scenario("scenario_1", {task_no_input_no_output}, {})
@@ -410,8 +400,6 @@ def mult_by_3(nb: int):
 
 def test_get_or_create_data():
     # only create intermediate data node once
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     dn_config_1 = Config.configure_data_node("foo", "in_memory", Scope.SCENARIO, default_data=1)
     dn_config_2 = Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0)
     dn_config_6 = Config.configure_data_node("baz", "in_memory", Scope.SCENARIO, default_data=0)
@@ -420,8 +408,6 @@ def test_get_or_create_data():
     task_config_mult_by_3 = Config.configure_task("mult_by_3", mult_by_3, [dn_config_2], dn_config_6)
     # dn_1 ---> mult_by_two ---> dn_2 ---> mult_by_3 ---> dn_6
     scenario_config = Config.configure_scenario("scenario", [task_config_mult_by_two, task_config_mult_by_3])
-
-    _OrchestratorFactory._build_dispatcher()
 
     assert len(_DataManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 0
@@ -473,8 +459,6 @@ def notify_multi_param(*args, **kwargs):
 
 
 def test_sequence_notification_subscribe(mocker):
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     mocker.patch("taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
 
     task_configs = [
@@ -485,8 +469,6 @@ def test_sequence_notification_subscribe(mocker):
             Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
         )
     ]
-
-    _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create(task_configs=task_configs)
     scenario = Scenario("scenario", set(tasks), {}, sequences={"by_1": {"tasks": tasks}})
@@ -527,8 +509,6 @@ def test_sequence_notification_subscribe(mocker):
 
 
 def test_sequence_notification_subscribe_multi_param(mocker):
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     mocker.patch("taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
 
     task_configs = [
@@ -539,8 +519,6 @@ def test_sequence_notification_subscribe_multi_param(mocker):
             Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
         )
     ]
-
-    _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create(task_configs)
     scenario = Scenario("scenario", set(tasks), {}, sequences={"by_6": {"tasks": tasks}})
@@ -562,8 +540,6 @@ def test_sequence_notification_subscribe_multi_param(mocker):
 
 
 def test_sequence_notification_unsubscribe(mocker):
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     mocker.patch("taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
 
     task_configs = [
@@ -574,8 +550,6 @@ def test_sequence_notification_unsubscribe(mocker):
             Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
         )
     ]
-
-    _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create(task_configs)
     scenario = Scenario("scenario", set(tasks), {}, sequences={"by_6": {"tasks": tasks}})
@@ -597,8 +571,6 @@ def test_sequence_notification_unsubscribe(mocker):
 
 
 def test_sequence_notification_unsubscribe_multi_param():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     task_configs = [
         Config.configure_task(
             "mult_by_two",
@@ -607,8 +579,6 @@ def test_sequence_notification_unsubscribe_multi_param():
             Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
         )
     ]
-
-    _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create(task_configs)
     scenario = Scenario("scenario", tasks, {}, sequences={"by_6": {"tasks": tasks}})
@@ -635,8 +605,6 @@ def test_sequence_notification_unsubscribe_multi_param():
 
 
 def test_sequence_notification_subscribe_all():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     task_configs = [
         Config.configure_task(
             "mult_by_two",
@@ -645,8 +613,6 @@ def test_sequence_notification_subscribe_all():
             Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
         )
     ]
-
-    _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create(task_configs)
     scenario = Scenario("scenario", tasks, {}, sequences={"by_6": {"tasks": tasks}, "other_sequence": {"tasks": tasks}})
@@ -813,13 +779,9 @@ def test_export(tmpdir_factory):
 
 
 def test_hard_delete_one_single_sequence_with_scenario_data_nodes():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
-
-    _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create([task_config])
     scenario = Scenario("scenario", tasks, {}, sequences={"sequence": {"tasks": tasks}})
@@ -842,13 +804,9 @@ def test_hard_delete_one_single_sequence_with_scenario_data_nodes():
 
 
 def test_hard_delete_one_single_sequence_with_cycle_data_nodes():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.CYCLE, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.CYCLE)
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
-
-    _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create([task_config])
     scenario = Scenario("scenario", tasks, {}, sequences={"sequence": {"tasks": tasks}})
@@ -871,15 +829,11 @@ def test_hard_delete_one_single_sequence_with_cycle_data_nodes():
 
 
 def test_hard_delete_shared_entities():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     input_dn = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     intermediate_dn = Config.configure_data_node("my_inter", "in_memory", scope=Scope.GLOBAL, default_data="testing")
     output_dn = Config.configure_data_node("my_output", "in_memory", scope=Scope.GLOBAL, default_data="testing")
     task_1 = Config.configure_task("task_1", print, input_dn, intermediate_dn)
     task_2 = Config.configure_task("task_2", print, intermediate_dn, output_dn)
-
-    _OrchestratorFactory._build_dispatcher()
 
     tasks_scenario_1 = _TaskManager._bulk_get_or_create([task_1, task_2], scenario_id="scenario_id_1")
     tasks_scenario_2 = _TaskManager._bulk_get_or_create([task_1, task_2], scenario_id="scenario_id_2")

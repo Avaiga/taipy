@@ -20,8 +20,6 @@ import taipy.core as tp
 from taipy.config import Config
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
-from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from taipy.core.config.job_config import JobConfig
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.data_node_id import DataNodeId
@@ -355,8 +353,6 @@ class TestDataNode:
         assert not dn_3.is_up_to_date
 
     def test_do_not_recompute_data_node_valid_but_continue_sequence_execution(self):
-        Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
         a = Config.configure_data_node("A", "pickle", default_data="A")
         b = Config.configure_data_node("B", "pickle")
         c = Config.configure_data_node("C", "pickle")
@@ -366,8 +362,6 @@ class TestDataNode:
         task_b_c = Config.configure_task("task_b_c", funct_b_c, input=b, output=c)
         task_b_d = Config.configure_task("task_b_d", funct_b_d, input=b, output=d)
         scenario_cfg = Config.configure_scenario("scenario", [task_a_b, task_b_c, task_b_d])
-
-        _OrchestratorFactory._build_dispatcher()
 
         scenario = tp.create_scenario(scenario_cfg)
         scenario.submit()
