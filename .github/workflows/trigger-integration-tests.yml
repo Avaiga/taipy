@@ -15,10 +15,10 @@ jobs:
           owner: Avaiga
           repo: taipy-integration-testing
           github_token: ${{secrets.TAIPY_INTEGRATION_TESTING_ACCESS_TOKEN}}
-          workflow_file_name: tests.yml
+          workflow_file_name: taipy-trigger-tests.yml
           ref: develop
           wait_interval: 60
           propagate_failure: true
           trigger_workflow: true
           wait_workflow: true
-          client_payload: '{"repo": "taipy-core", "commitSHA": "${{ github.sha }}"}'
+          client_payload: '{"repo": "taipy", "commitSHA": "${{ github.sha }}"}'
