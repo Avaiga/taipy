@@ -142,7 +142,8 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
             properties[self._EXPOSED_TYPE_PROPERTY] = self._EXPOSED_TYPE_PANDAS
         self._check_exposed_type(properties[self._EXPOSED_TYPE_PROPERTY])
 
-        super().__init__(
+        DataNode.__init__(
+            self,
             config_id,
             scope,
             id,
@@ -248,6 +249,7 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
             data.to_parquet(self._path, **kwargs)
         else:
             pd.DataFrame(data).to_parquet(self._path, **kwargs)
+
         self.track_edit(timestamp=datetime.now(), job_id=job_id)
 
     def read_with_kwargs(self, **read_kwargs):
