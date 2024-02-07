@@ -364,6 +364,8 @@ def init_managers():
 @pytest.fixture
 def init_orchestrator():
     def _init_orchestrator():
+        if _OrchestratorFactory._dispatcher is not None:
+            _OrchestratorFactory._remove_dispatcher()
         if _OrchestratorFactory._orchestrator is None:
             _OrchestratorFactory._build_orchestrator()
         _OrchestratorFactory._build_dispatcher()
