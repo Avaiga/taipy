@@ -227,7 +227,8 @@ class _Evaluator:
             ctx.update(self.__global_ctx)
             # entries in var_val are not always seen (NameError) when passed as locals
             ctx.update(var_val)
-            expr_evaluated = eval(not_encoded_expr if is_edge_case else expr_string, ctx)
+            with gui._get_autorization():
+                expr_evaluated = eval(not_encoded_expr if is_edge_case else expr_string, ctx)
         except Exception as e:
             _warn(f"Cannot evaluate expression '{not_encoded_expr if is_edge_case else expr_string}'", e)
             expr_evaluated = None

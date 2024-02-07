@@ -595,26 +595,27 @@ class Gui:
             self.__set_client_id_in_context(expected_client_id)
             g.ws_client_id = expected_client_id
             with self._set_locals_context(message.get("module_context") or None):
-                payload = message.get("payload", {})
-                if msg_type == _WsType.UPDATE.value:
-                    self.__front_end_update(
-                        str(message.get("name")),
-                        payload.get("value"),
-                        message.get("propagate", True),
-                        payload.get("relvar"),
-                        payload.get("on_change"),
-                    )
-                elif msg_type == _WsType.ACTION.value:
-                    self.__on_action(message.get("name"), message.get("payload"))
-                elif msg_type == _WsType.DATA_UPDATE.value:
-                    self.__request_data_update(str(message.get("name")), message.get("payload"))
-                elif msg_type == _WsType.REQUEST_UPDATE.value:
-                    self.__request_var_update(message.get("payload"))
-                elif msg_type == _WsType.GET_MODULE_CONTEXT.value:
-                    self.__handle_ws_get_module_context(payload)
-                elif msg_type == _WsType.GET_VARIABLES.value:
-                    self.__handle_ws_get_variables()
-            self.__send_ack(message.get("ack_id"))
+                with self._get_autorization():
+                    payload = message.get("payload", {})
+                    if msg_type == _WsType.UPDATE.value:
+                        self.__front_end_update(
+                            str(message.get("name")),
+                            payload.get("value"),
+                            message.get("propagate", True),
+                            payload.get("relvar"),
+                            payload.get("on_change"),
+                        )
+                    elif msg_type == _WsType.ACTION.value:
+                        self.__on_action(message.get("name"), message.get("payload"))
+                    elif msg_type == _WsType.DATA_UPDATE.value:
+                        self.__request_data_update(str(message.get("name")), message.get("payload"))
+                    elif msg_type == _WsType.REQUEST_UPDATE.value:
+                        self.__request_var_update(message.get("payload"))
+                    elif msg_type == _WsType.GET_MODULE_CONTEXT.value:
+                        self.__handle_ws_get_module_context(payload)
+                    elif msg_type == _WsType.GET_VARIABLES.value:
+                        self.__handle_ws_get_variables()
+                self.__send_ack(message.get("ack_id"))
         except Exception as e:  # pragma: no cover
             _warn(f"Decoding Message has failed: {message}", e)
 
@@ -1948,7 +1949,7 @@ class Gui:
                     if isinstance(page._renderer, CustomPage):
                         self._bind_custom_page_variables(page._renderer, self._get_client_id())
                     else:
-                        page.render(self)
+                        page.render(self, silent=True)
 
     def _get_navigated_page(self, page_name: str) -> t.Any:
         nav_page = page_name
@@ -2429,3 +2430,6 @@ class Gui:
         if hasattr(self, "_server") and hasattr(self._server, "_thread") and self._server._is_running:
             self._server.stop_thread()
             _TaipyLogger._get_logger().info("Gui server has been stopped.")
+
+    def _get_autorization(self, client_id: t.Optional[str] = None, system: t.Optional[bool] = False):
+        return contextlib.nullcontext()

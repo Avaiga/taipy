@@ -24,6 +24,7 @@ import FileSelector from "./FileSelector";
 import Image from "./Image";
 import Indicator from "./Indicator";
 import Input from "./Input";
+import Login from "./Login";
 import Layout from "./Layout";
 import Link from "./Link";
 import MenuCtl from "./MenuCtl";
@@ -56,6 +57,7 @@ export const getRegisteredComponents = () => {
             Image: Image,
             Indicator: Indicator,
             Input: Input,
+            Login: Login,
             Layout: Layout,
             MenuCtl: MenuCtl,
             NavBar: NavBar,
