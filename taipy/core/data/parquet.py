@@ -248,8 +248,10 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
         if isinstance(data, pd.DataFrame):
             data.to_parquet(self._path, **kwargs)
         else:
-            pd.DataFrame(data).to_parquet(self._path, **kwargs)
-
+            _df = pd.DataFrame(data)
+            # Ensure that the columns are strings, otherwise writing will fail with pandas 1.3.5
+            _df.columns = _df.columns.astype(str)
+            _df.to_parquet(self._path, **kwargs)
         self.track_edit(timestamp=datetime.now(), job_id=job_id)
 
     def read_with_kwargs(self, **read_kwargs):
