@@ -9,3 +9,4 @@ taipy_gui==3.0.0
 taipy_rest==3.0.0
 taipy_templates==3.0.0
 google-generativeai
+openai
