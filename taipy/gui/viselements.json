@@ -781,7 +781,7 @@
               {
                 "name": "message",
                 "type": "dynamic(str)",
-                "doc": "A message that is shown in the dialog."
+                "doc": "The message shown in the dialog."
               }
 
         ]
