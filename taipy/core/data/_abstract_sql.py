@@ -118,7 +118,7 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
             **properties,
         )
         self._engine = None
-        if not self._last_edit_date:
+        if not self._last_edit_date:  # type: ignore
             self._last_edit_date = datetime.now()
 
         self._TAIPY_PROPERTIES.update(
@@ -226,9 +226,14 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
         join_operator=JoinOperator.AND,
     ):
         with self._get_engine().connect() as conn:
+            result = conn.execute(text(self._get_read_query(operators, join_operator)))
+
+            # On pandas 1.3.5 there's a bug that makes that the dataframe from sqlalchemy query is
+            # created without headers
+            keys = [col for col in result.keys()]
             if columns:
-                return pd.DataFrame(conn.execute(text(self._get_read_query(operators, join_operator))))[columns]
-            return pd.DataFrame(conn.execute(text(self._get_read_query(operators, join_operator))))
+                return pd.DataFrame(result, columns=keys)[columns]
+            return pd.DataFrame(result, columns=keys)
 
     @abstractmethod
     def _get_read_query(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
