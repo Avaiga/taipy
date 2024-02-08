@@ -768,7 +768,7 @@
                 "name": "title",
                 "default_property": true,
                 "type": "str",
-                "default_value": "Log-in",
+                "default_value": "Log in",
                 "doc": "The title of the login dialog."
             },
             {
