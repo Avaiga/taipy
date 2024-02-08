@@ -151,6 +151,12 @@
             "doc": "The maximum value.<br/>This is ignored when <i>lov</i> is defined."
           },
           {
+            "name": "step",
+            "type": "int|float",
+            "default_value": "1",
+            "doc": "The step value.<br/>This is ignored when <i>lov</i> is defined."
+          },
+          {
             "name": "text_anchor",
             "type": "str",
             "default_value": "\"bottom\"",
