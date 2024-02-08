@@ -31,7 +31,7 @@ const Navigate = ({ to, params, tab, force }: NavigateProps) => {
     useEffect(() => {
         if (to) {
             const tos = to === "/" ? to : "/" + to;
-            const searchParams = new URLSearchParams(params);
+            const searchParams = new URLSearchParams(params || "");
             if (Object.keys(state.locations || {}).some((route) => tos === route)) {
                 const searchParamsLocation = new URLSearchParams(location.search);
                 if (force && location.pathname === tos && searchParamsLocation.toString() === searchParams.toString()) {

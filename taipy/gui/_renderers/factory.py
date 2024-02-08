@@ -43,6 +43,7 @@ class _Factory:
         "indicator": "display",
         "input": "value",
         "layout": "columns",
+        "login": "title",
         "menu": "lov",
         "navbar": "value",
         "number": "value",
@@ -296,6 +297,17 @@ class _Factory:
                 ("id",),
                 ("columns[mobile]",),
                 ("gap",),
+            ]
+        ),
+        "login": lambda gui, control_type, attrs: _Builder(
+            gui=gui, control_type=control_type, element_name="Login", attributes=attrs, default_value=None
+        )
+        .set_value_and_default(default_val="Log-in")
+        .set_attributes(
+            [
+                ("id",),
+                ("message", PropertyType.dynamic_string),
+                ("on_action", PropertyType.function, "on_login"),
             ]
         ),
         "menu": lambda gui, control_type, attrs: _Builder(
@@ -612,15 +624,16 @@ class _Factory:
         name = name[len(_Factory.__TAIPY_NAME_SPACE) :] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
         builder = _Factory.__CONTROL_BUILDERS.get(name)
         built = None
-        if builder is None:
-            lib, element_name, element = _Factory.__get_library_element(name)
-            if lib:
-                from ..extension.library import Element
+        with gui._get_autorization():
+            if builder is None:
+                lib, element_name, element = _Factory.__get_library_element(name)
+                if lib:
+                    from ..extension.library import Element
 
-                if isinstance(element, Element):
-                    return element._call_builder(element_name, gui, all_properties, lib, is_html)
-        else:
-            built = builder(gui, name, all_properties)
-        if isinstance(built, _Builder):
-            return built._build_to_string() if is_html else built.el
+                    if isinstance(element, Element):
+                        return element._call_builder(element_name, gui, all_properties, lib, is_html)
+            else:
+                built = builder(gui, name, all_properties)
+            if isinstance(built, _Builder):
+                return built._build_to_string() if is_html else built.el
         return None

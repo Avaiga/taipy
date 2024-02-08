@@ -13,6 +13,7 @@
 
 import Chart from "../components/Taipy/Chart";
 import Dialog from "../components/Taipy/Dialog";
+import Login from "../components/Taipy/Login";
 import Router from "../components/Router";
 import Table from "../components/Taipy/Table";
 import { useLovListMemo, LoV, LoVElt } from "../components/Taipy/lovUtils";
@@ -32,6 +33,7 @@ import {
 export {
     Chart,
     Dialog,
+    Login,
     Router,
     Table,
     TaipyContext as Context,
