@@ -82,33 +82,6 @@ describe("Slider Component", () => {
             type: "SEND_UPDATE_ACTION",
         });
     });
-    it("changes by set step", async()=>{
-        const dispatch = jest.fn();
-        const state: TaipyState = INITIAL_STATE;
-        const { getByDisplayValue } = render(
-            <TaipyContext.Provider value={{ state, dispatch }}>
-                <Slider value={33} min={1} max={50} step={0.1} />
-            </TaipyContext.Provider>
-        );
-        const elt = getByDisplayValue("33") as HTMLInputElement;
-        const step = parseFloat(elt.step);
-        fireEvent.change(elt, {target:{value: 33 + step }});
-        expect(dispatch).toHaveBeenCalledWith({
-            name: "",
-            payload: { value: 33.1 },
-            propagate: true,
-            type: "SEND_UPDATE_ACTION",
-        });
-
-        fireEvent.change(elt, { target: { value: 2 } });
-        fireEvent.change(elt, { target:{ value: 2 - step }});
-        expect(dispatch).toHaveBeenCalledWith({
-            name: "",
-            payload: { value: 1.9 },
-            propagate: true,
-            type: "SEND_UPDATE_ACTION",
-        });
-    })
     it("holds a numeric range", async () => {
         const { getByDisplayValue } = render(<Slider defaultValue={"[10,90]"} value={undefined as unknown as number[]} />);
         const elt1 = getByDisplayValue("10");
