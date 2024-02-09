@@ -104,24 +104,27 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def process_event(self, event: Event):
         if event.entity_type == EventEntityType.SCENARIO:
-            self.scenario_refresh(
-                event.entity_id
-                if event.operation != EventOperation.DELETION and is_readable(t.cast(ScenarioId, event.entity_id))
-                else None
-            )
+            with self.gui._get_autorization(system=True):
+                self.scenario_refresh(
+                    event.entity_id
+                    if event.operation != EventOperation.DELETION and is_readable(t.cast(ScenarioId, event.entity_id))
+                    else None
+                )
         elif event.entity_type == EventEntityType.SEQUENCE and event.entity_id:
             sequence = None
             try:
-                sequence = (
-                    core_get(event.entity_id)
-                    if event.operation != EventOperation.DELETION and is_readable(t.cast(SequenceId, event.entity_id))
-                    else None
-                )
-                if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:  # type: ignore
-                    self.gui._broadcast(
-                        _GuiCoreContext._CORE_CHANGED_NAME,
-                        {"scenario": [x for x in sequence.parent_ids]},  # type: ignore
+                with self.gui._get_autorization(system=True):
+                    sequence = (
+                        core_get(event.entity_id)
+                        if event.operation != EventOperation.DELETION
+                        and is_readable(t.cast(SequenceId, event.entity_id))
+                        else None
                     )
+                    if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:  # type: ignore
+                        self.gui._broadcast(
+                            _GuiCoreContext._CORE_CHANGED_NAME,
+                            {"scenario": [x for x in sequence.parent_ids]},  # type: ignore
+                        )
             except Exception as e:
                 _warn(f"Access to sequence {event.entity_id} failed", e)
         elif event.entity_type == EventEntityType.JOB:
@@ -163,27 +166,28 @@ class _GuiCoreContext(CoreEventConsumerBase):
             client_id = submission.properties.get("client_id")
             if client_id:
                 running_tasks = {}
-                for job in submission.jobs:
-                    job = job if isinstance(job, Job) else core_get(job)
-                    running_tasks[job.task.id] = (
-                        SubmissionStatus.RUNNING.value
-                        if job.is_running()
-                        else SubmissionStatus.PENDING.value
-                        if job.is_pending()
-                        else None
-                    )
-                self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"tasks": running_tasks}, client_id)
-
-                if last_status != new_status:
-                    # callback
-                    submission_name = submission.properties.get("on_submission")
-                    if submission_name:
-                        self.gui._call_user_callback(
-                            client_id,
-                            submission_name,
-                            [core_get(submission.entity_id), {"submission_status": new_status.name}],
-                            submission.properties.get("module_context"),
+                with self.gui._get_autorization(client_id):
+                    for job in submission.jobs:
+                        job = job if isinstance(job, Job) else core_get(job)
+                        running_tasks[job.task.id] = (
+                            SubmissionStatus.RUNNING.value
+                            if job.is_running()
+                            else SubmissionStatus.PENDING.value
+                            if job.is_pending()
+                            else None
                         )
+                    self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"tasks": running_tasks}, client_id)
+
+                    if last_status != new_status:
+                        # callback
+                        submission_name = submission.properties.get("on_submission")
+                        if submission_name:
+                            self.gui._call_user_callback(
+                                client_id,
+                                submission_name,
+                                [core_get(submission.entity_id), {"submission_status": new_status.name}],
+                                submission.properties.get("module_context"),
+                            )
 
             with self.submissions_lock:
                 if new_status in (
