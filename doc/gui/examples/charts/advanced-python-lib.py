@@ -13,12 +13,15 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
+# This script needs to run in a Python environment where the plotly-express package is
+# installed.
+# -----------------------------------------------------------------------------------------
 import numpy as np
 import plotly.graph_objects as go
 
 from taipy.gui import Gui
 
-# Create the Plotly figure
+# Create the Plotly figure object
 figure = go.Figure()
 
 # Add trace for Normal Distribution
