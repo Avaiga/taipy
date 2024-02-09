@@ -411,26 +411,52 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return
         data = args[0]
         entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
+        data_type = data.get("type", "Scenario")
+        sequence_creation = False
+        if data_type == "Sequence" and not entity_id:
+            sequence_creation = True
+            entity_id = data.get("scenario_id")
         if not self.__check_readable_editable(
-            state, entity_id, data.get("type", "Scenario"), _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR
+            state, entity_id, data_type, _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR
         ):
             return
         entity: t.Union[Scenario, Sequence] = core_get(entity_id)
         if entity:
             try:
                 if isinstance(entity, Scenario):
-                    primary = data.get(_GuiCoreContext.__PROP_SCENARIO_PRIMARY)
-                    if primary is True:
-                        if not is_promotable(entity):
-                            state.assign(
-                                _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Scenario {entity_id} is not promotable."
-                            )
-                            return
-                        set_primary(entity)
+                    if sequence_creation and (name := data.get(_GuiCoreContext.__PROP_ENTITY_NAME)):
+                        entity.add_sequence(name, data.get("task_ids"))
+                        entity = entity.sequences[name]
+                    else:
+                        primary = data.get(_GuiCoreContext.__PROP_SCENARIO_PRIMARY)
+                        if primary is True:
+                            if not is_promotable(entity):
+                                state.assign(
+                                    _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Scenario {entity_id} is not promotable."
+                                )
+                                return
+                            set_primary(entity)
+
+                elif isinstance(entity, Sequence):
+                    if data.get("del", False):
+                        if scenario := t.cast(Scenario, core_get(entity.owner_id)):
+                            scenario.remove_sequence(entity._get_name())
+                    else:
+                        name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
+                        tasks = data.get("task_ids")
+                        if entity._get_name() != name:
+                            if scenario := t.cast(Scenario, core_get(entity.owner_id)):
+                                with scenario:
+                                    scenario.add_sequence(name, tasks)
+                                    scenario.remove_sequence(entity._get_name())
+                                    entity = scenario.sequences[name]
+                        else:
+                            entity.tasks = tasks
+
                 self.__edit_properties(entity, data)
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
             except Exception as e:
-                state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error updating Scenario. {e}")
+                state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error updating {type(entity).__name__}. {e}")
 
     def submit_entity(self, state: State, id: str, payload: t.Dict[str, str]):
         args = payload.get("args")
@@ -627,7 +653,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     ent.tags = {t for t in tags}
             name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
             if isinstance(name, str):
-                ent.properties[_GuiCoreContext.__PROP_ENTITY_NAME] = name
+                if hasattr(ent, _GuiCoreContext.__PROP_ENTITY_NAME):
+                    setattr(ent, _GuiCoreContext.__PROP_ENTITY_NAME, name)
+                else:
+                    ent.properties[_GuiCoreContext.__PROP_ENTITY_NAME] = name
             props = data.get("properties")
             if isinstance(props, (list, tuple)):
                 for prop in props:

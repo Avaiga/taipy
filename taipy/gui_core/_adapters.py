@@ -77,11 +77,20 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                         if scenario.properties
                         else [],
                         [
-                            (p.id, p.get_simple_label(), is_submittable(p), is_editable(p))
-                            for p in scenario.sequences.values()
+                            (
+                                s.id,
+                                s.get_simple_label(),
+                                [t.id for t in s.tasks.values()] if hasattr(s, "tasks") else [],
+                                is_submittable(s),
+                                is_editable(s),
+                            )
+                            for s in scenario.sequences.values()
                         ]
                         if hasattr(scenario, "sequences") and scenario.sequences
                         else [],
+                        {t.id: t.get_simple_label() for t in scenario.tasks.values()}
+                        if hasattr(scenario, "tasks")
+                        else {},
                         list(scenario.properties.get("authorized_tags", [])) if scenario.properties else [],
                         is_deletable(scenario),
                         is_promotable(scenario),

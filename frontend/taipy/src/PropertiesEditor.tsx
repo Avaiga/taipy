@@ -22,7 +22,7 @@ import { DeleteOutline, CheckCircle, Cancel } from "@mui/icons-material";
 
 import { createSendActionNameAction, useDispatch, useModule } from "taipy-gui";
 
-import { FieldNoMaxWidth, IconPaddingSx, disableColor, hoverSx } from "./utils";
+import { DeleteIconSx, FieldNoMaxWidth, IconPaddingSx, disableColor, hoverSx } from "./utils";
 
 type Property = {
     id: string;
@@ -35,8 +35,6 @@ type PropertiesEditPayload = {
     properties?: Property[];
     deleted_properties?: Array<Partial<Property>>;
 };
-
-const DeleteIconSx = { height: 50, width: 50, p: 0 };
 
 interface PropertiesEditorProps {
     id?: string;

@@ -24,7 +24,8 @@ export type ScenarioFull = [
     string,     // label
     string[],   // tags
     Array<[string, string]>,    // properties
-    Array<[string, string, boolean, boolean]>,   // sequences
+    Array<[string, string, string[], boolean, boolean]>,   // sequences (id, label, task ids, submittable, editable)
+    Record<string, string>, // tasks (id: label)
     string[],   // authorized_tags
     boolean,    // deletable
     boolean,    // promotable
@@ -43,6 +44,7 @@ export enum ScFProps {
     tags,
     properties,
     sequences,
+    tasks,
     authorized_tags,
     deletable,
     promotable,
@@ -211,3 +213,6 @@ export const MenuProps = {
     },
 };
 export const selectSx = { m: 1, width: 300 };
+
+export const DeleteIconSx = { height: 50, width: 50, p: 0 };
+
