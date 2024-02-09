@@ -10,5 +10,5 @@ This directory contains the source code for the front-end parts of Taipy GUI and
 
 Note that before the `taipy` part is built, the `taipy-gui` part must have been built.
 
-Please check the [Taipy GUI Front-end](taipy-gui/README.md) and [Taipy Front-end](taipyREADME.md)
+Please check the [Taipy GUI Front-end](taipy-gui/README.md) and [Taipy Front-end](taipy/README.md)
 README files for details.
