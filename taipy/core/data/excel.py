@@ -305,6 +305,11 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
                 )
 
     def _append(self, data: Any):
+        from importlib.metadata import version
+
+        if version("pandas") < "1.4":
+            raise ImportError("The append method is only available for pandas version 1.4 or higher.")
+
         if isinstance(data, Dict) and all(isinstance(x, (pd.DataFrame, np.ndarray)) for x in data.values()):
             self.__append_excel_with_multiple_sheets(data)
         elif isinstance(data, pd.DataFrame):
