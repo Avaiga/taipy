@@ -22,7 +22,7 @@ from taipy.core.cycle.cycle import Cycle, CycleId
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.in_memory import DataNode, InMemoryDataNode
 from taipy.core.data.pickle import PickleDataNode
-from taipy.core.exceptions.exceptions import SequenceTaskDoesNotExistInScenario, SequenceAlreadyExists
+from taipy.core.exceptions.exceptions import SequenceAlreadyExists, SequenceTaskDoesNotExistInScenario
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from taipy.core.scenario.scenario import Scenario
 from taipy.core.scenario.scenario_id import ScenarioId

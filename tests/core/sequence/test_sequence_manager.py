@@ -31,7 +31,8 @@ from taipy.core.exceptions.exceptions import (
     InvalidSequenceId,
     ModelNotFound,
     NonExistingSequence,
-    SequenceAlreadyExists, SequenceBelongsToNonExistingScenario,
+    SequenceAlreadyExists,
+    SequenceBelongsToNonExistingScenario,
 )
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.scenario._scenario_manager import _ScenarioManager
