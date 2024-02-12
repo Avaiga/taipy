@@ -238,7 +238,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         self.__check_sequence_tasks_exist_in_scenario_tasks(name, _sequence_task_ids, self.id, _scenario_task_ids)
         from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
         seq_manager = _SequenceManagerFactory._build_manager()
-        seq = seq_manager._create(name, tasks, properties or {}, subscribers or [], self.id, self.version)
+        seq = seq_manager._create(name, tasks, subscribers or [], properties or {}, self.id, self.version)
         if not seq._is_consistent():
             raise InvalidSequence(name)
 
