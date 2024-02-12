@@ -346,6 +346,7 @@ def test_write_without_header_multiple_sheet_custom_exposed_type_without_sheet_n
         assert all(actual == expected for actual, expected in zip(excel_dn_data[sheet_name], sheet_data[sheet_name]))
 
 
+@pytest.mark.skip(reason="Not implemented on pandas 1.3.5")
 @pytest.mark.parametrize(
     "content",
     [
