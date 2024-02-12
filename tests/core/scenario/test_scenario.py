@@ -413,23 +413,23 @@ def test_add_rename_and_remove_sequences():
     scenario.remove_sequences(["seq_1"])
     assert scenario.sequences == {"seq_2": sequence_2}
 
-    scenario.add_sequences({"seq_1": [task_1], "seq_3": [task_1, task_5, task_3]})
-    assert scenario.sequences == {"seq_2": sequence_2, "seq_1": sequence_1, "seq_3": sequence_3}
+    scenario.add_sequences({"seq_1": [task_1], "seq 3": [task_1, task_5, task_3]})
+    assert scenario.sequences == {"seq_2": sequence_2, "seq_1": sequence_1, "seq 3": sequence_3}
 
-    scenario.remove_sequences(["seq_2", "seq_3"])
+    scenario.remove_sequences(["seq_2", "seq 3"])
     assert scenario.sequences == {"seq_1": sequence_1}
 
     scenario.add_sequence("seq_2", [task_1, task_2])
     assert scenario.sequences == {"seq_1": sequence_1, "seq_2": sequence_2}
 
-    scenario.add_sequence("seq_3", [task_1.id, task_5.id, task_3.id])
-    assert scenario.sequences == {"seq_1": sequence_1, "seq_2": sequence_2, "seq_3": sequence_3}
+    scenario.add_sequence("seq 3", [task_1.id, task_5.id, task_3.id])
+    assert scenario.sequences == {"seq_1": sequence_1, "seq_2": sequence_2, "seq 3": sequence_3}
 
     scenario.remove_sequence("seq_1")
-    assert scenario.sequences == {"seq_2": sequence_2, "seq_3": sequence_3}
+    assert scenario.sequences == {"seq_2": sequence_2, "seq 3": sequence_3}
 
     scenario.rename_sequence("seq_2", "new_seq_2")
-    assert scenario.sequences == {"new_seq_2": new_seq_2, "seq_3": sequence_3}
+    assert scenario.sequences == {"new_seq_2": new_seq_2, "seq 3": sequence_3}
 
 
 def test_update_sequence(data_node):
