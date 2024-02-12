@@ -244,9 +244,9 @@ class Scenario(_Entity, Submittable, _Labeled):
                 }
             }
         )
-        self.sequences = _sequences  # type: ignore
-        if not self.sequences[name]._is_consistent():
+        if not _sequences[name]._is_consistent():
             raise InvalidSequence(name)
+        self.sequences = _sequences  # type: ignore
 
     def add_sequences(self, sequences: Dict[str, Union[List[Task], List[TaskId]]]):
         """Add multiple sequences to the scenario.
@@ -313,6 +313,8 @@ class Scenario(_Entity, Submittable, _Labeled):
         Raises:
             SequenceAlreadyExists^: If a sequence with the same name already exists in the scenario.
         """
+        if old_name == new_name:
+            return
         if new_name in self.sequences:
             raise SequenceAlreadyExists(new_name, self.id)
         self._sequences[new_name] = self._sequences[old_name]
