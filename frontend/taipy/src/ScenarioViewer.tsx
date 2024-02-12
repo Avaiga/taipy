@@ -273,7 +273,7 @@ const SequenceRow = ({
                         )}
                     </Grid>
                     <Grid item xs={1} alignContent="center" alignItems="center" justifyContent="center">
-                        <Tooltip title="Delete Sequence">
+                        <Tooltip title={`Delete Sequence '${label}'`}>
                             <span>
                                 <IconButton
                                     size="small"
@@ -287,7 +287,7 @@ const SequenceRow = ({
                     </Grid>
                     <Grid item xs={1} alignContent="center" alignItems="center" justifyContent="center">
                         {id && submit ? (
-                            <Tooltip title={disabledSubmit ? "Cannot submit Sequence" : "Submit Sequence"}>
+                            <Tooltip title={disabledSubmit ? `Cannot submit Sequence '${label}'` : `Submit Sequence '${label}'`}>
                                 <span>
                                     <IconButton size="small" onClick={onSubmitSequence} disabled={disabledSubmit}>
                                         <Send color={disableColor("info", disabledSubmit)} />
@@ -607,9 +607,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 {showSubmit ? (
                                     <Tooltip title={disabled ? "Cannot submit Scenario" : "Submit Scenario"}>
                                         <span>
-                                            <IconButton sx={IconPaddingSx} onClick={submitScenario} disabled={disabled}>
-                                                <Send fontSize="medium" color={disableColor("info", disabled)} />
-                                            </IconButton>
+                                            <Button onClick={submitScenario} disabled={disabled} endIcon={<Send fontSize="medium" color={disableColor("info", disabled)} />}>Submit</Button>
                                         </span>
                                     </Tooltip>
                                 ) : null}

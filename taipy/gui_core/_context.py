@@ -446,11 +446,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         tasks = data.get("task_ids")
                         if entity._get_name() != name:
                             if scenario := t.cast(Scenario, core_get(entity.owner_id)):
-                                with scenario:
-                                    scenario.add_sequence(name, tasks)
-                                    scenario.remove_sequence(entity._get_name())
-                                    entity = scenario.sequences[name]
-                        else:
+                                scenario.rename_sequence(entity._get_name(), name)
+                                entity = scenario.sequences[name]
                             entity.tasks = tasks
 
                 self.__edit_properties(entity, data)
