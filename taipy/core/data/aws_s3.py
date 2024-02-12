@@ -10,9 +10,13 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime, timedelta
+from importlib import util
 from typing import Any, Dict, List, Optional, Set
 
-import boto3
+from ..common._check_dependencies import _check_dependency_is_installed
+
+if util.find_spec("boto3"):
+    import boto3
 
 from taipy.config.common.scope import Scope
 
@@ -94,6 +98,7 @@ class S3ObjectDataNode(DataNode):
         editor_expiration_date: Optional[datetime] = None,
         properties: Optional[Dict] = None,
     ):
+        _check_dependency_is_installed("S3 Data Node", "boto3")
         if properties is None:
             properties = {}
         required = self._REQUIRED_PROPERTIES
@@ -123,7 +128,7 @@ class S3ObjectDataNode(DataNode):
             aws_secret_access_key=properties.get(self.__AWS_SECRET_ACCESS_KEY),
         )
 
-        if not self._last_edit_date:
+        if not self._last_edit_date:  # type: ignore
             self._last_edit_date = datetime.now()
 
         self._TAIPY_PROPERTIES.update(
