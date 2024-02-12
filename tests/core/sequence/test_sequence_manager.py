@@ -31,7 +31,7 @@ from taipy.core.exceptions.exceptions import (
     InvalidSequenceId,
     ModelNotFound,
     NonExistingSequence,
-    SequenceBelongsToNonExistingScenario,
+    SequenceBelongsToNonExistingScenario, SequenceAlreadyExists,
 )
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.scenario._scenario_manager import _ScenarioManager
@@ -123,28 +123,14 @@ def test_set_and_get():
     assert len(_SequenceManager._get(sequence_2).tasks) == 1
     assert _TaskManager._get(task.id).id == task.id
 
-    # We save the first sequence again. We expect nothing to change
-    scenario.add_sequence(sequence_name_1, [])
+    # We save the first sequence again. We expect an exception and nothing to change
+    with pytest.raises(SequenceAlreadyExists):
+       scenario.add_sequence(sequence_name_1, [])
     sequence_1 = scenario.sequences[sequence_name_1]
     assert _SequenceManager._get(sequence_id_1).id == sequence_1.id
     assert len(_SequenceManager._get(sequence_id_1).tasks) == 0
     assert _SequenceManager._get(sequence_1).id == sequence_1.id
     assert len(_SequenceManager._get(sequence_1).tasks) == 0
-    assert _SequenceManager._get(sequence_id_2).id == sequence_2.id
-    assert len(_SequenceManager._get(sequence_id_2).tasks) == 1
-    assert _SequenceManager._get(sequence_2).id == sequence_2.id
-    assert len(_SequenceManager._get(sequence_2).tasks) == 1
-    assert _TaskManager._get(task.id).id == task.id
-
-    # We save a third sequence with same name as the first one.
-    # We expect the first sequence to be updated
-    scenario.add_sequences({sequence_name_1: [task]})
-    sequence_3 = scenario.sequences[sequence_name_1]
-    assert _SequenceManager._get(sequence_id_1).id == sequence_1.id
-    assert _SequenceManager._get(sequence_id_1).id == sequence_3.id
-    assert len(_SequenceManager._get(sequence_id_1).tasks) == 1
-    assert _SequenceManager._get(sequence_1).id == sequence_1.id
-    assert len(_SequenceManager._get(sequence_1).tasks) == 1
     assert _SequenceManager._get(sequence_id_2).id == sequence_2.id
     assert len(_SequenceManager._get(sequence_id_2).tasks) == 1
     assert _SequenceManager._get(sequence_2).id == sequence_2.id
@@ -272,7 +258,7 @@ def test_submit():
             return super()._lock_dn_output_and_create_job(task, submit_id, submit_entity_id, callbacks, force)
 
     with mock.patch("taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
-        # sequence does not exists. We expect an exception to be raised
+        # sequence does not exist. We expect an exception to be raised
         with pytest.raises(NonExistingSequence):
             _SequenceManager._submit(sequence_id)
 
@@ -668,31 +654,33 @@ def test_delete():
     with pytest.raises(ModelNotFound):
         _SequenceManager._delete(sequence_id)
 
-    scenario_1 = Scenario("scenario_1", [], {}, scenario_id="SCENARIO_scenario_id_1")
-    scenario_2 = Scenario("scenario_2", [], {}, scenario_id="SCENARIO_scenario_id_2")
+    scenario_1 = Scenario("scenario_1", set(), {}, scenario_id="SCENARIO_scenario_id_1")
+    scenario_2 = Scenario("scenario_2", set(), {}, scenario_id="SCENARIO_scenario_id_2")
     _ScenarioManager._set(scenario_1)
     _ScenarioManager._set(scenario_2)
     with pytest.raises(ModelNotFound):
-        _SequenceManager._delete(sequence_id)
+        _SequenceManager._delete(SequenceId(sequence_id))
 
-    scenario_1.add_sequences({"sequence": {}})
+    scenario_1.add_sequences({"sequence": []})
     assert len(_SequenceManager._get_all()) == 1
-    _SequenceManager._delete(sequence_id)
+    _SequenceManager._delete(SequenceId(sequence_id))
     assert len(_SequenceManager._get_all()) == 0
 
-    scenario_1.add_sequences({"sequence": {}, "sequence_1": {}})
+    scenario_1.add_sequences({"sequence": [], "sequence_1": []})
     assert len(_SequenceManager._get_all()) == 2
-    _SequenceManager._delete(sequence_id)
+    _SequenceManager._delete(SequenceId(sequence_id))
     assert len(_SequenceManager._get_all()) == 1
 
-    scenario_1.add_sequences({"sequence_1": {}, "sequence_2": {}, "sequence_3": {}})
-    scenario_2.add_sequences({"sequence_1_2": {}, "sequence_2_2": {}})
+    with pytest.raises(SequenceAlreadyExists):
+        scenario_1.add_sequences({"sequence_1": [], "sequence_2": [], "sequence_3": []})
+    scenario_1.add_sequences({"sequence_2": [], "sequence_3": []})
+    scenario_2.add_sequences({"sequence_1_2": [], "sequence_2_2": []})
     assert len(_SequenceManager._get_all()) == 5
     _SequenceManager._delete_all()
     assert len(_SequenceManager._get_all()) == 0
 
-    scenario_1.add_sequences({"sequence_1": {}, "sequence_2": {}, "sequence_3": {}, "sequence_4": {}})
-    scenario_2.add_sequences({"sequence_1_2": {}, "sequence_2_2": {}})
+    scenario_1.add_sequences({"sequence_1": [], "sequence_2": [], "sequence_3": [], "sequence_4": []})
+    scenario_2.add_sequences({"sequence_1_2": [], "sequence_2_2": []})
     assert len(_SequenceManager._get_all()) == 6
     _SequenceManager._delete_many(
         [

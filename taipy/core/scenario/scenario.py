@@ -37,7 +37,7 @@ from ..exceptions.exceptions import (
     NonExistingDataNode,
     NonExistingSequence,
     NonExistingTask,
-    SequenceTaskDoesNotExistInScenario,
+    SequenceTaskDoesNotExistInScenario, SequenceAlreadyExists,
 )
 from ..job.job import Job
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
@@ -194,11 +194,43 @@ class Scenario(_Entity, Submittable, _Labeled):
 
         Raises:
             SequenceTaskDoesNotExistInScenario^: If a task in the sequence does not exist in the scenario.
+            SequenceAlreadyExists^: If a sequence with the same name already exists in the scenario.
         """
+        if name in self.sequences:
+            raise SequenceAlreadyExists(name, self.id)
+        self._set_sequence(name, tasks, properties, subscribers)
+        Notifier.publish(_make_event(self.sequences[name], EventOperation.CREATION))
+
+    def update_sequence(
+        self,
+        name: str,
+        tasks: Union[List[Task], List[TaskId]],
+        properties: Optional[Dict] = None,
+        subscribers: Optional[List[_Subscriber]] = None,
+    ):
+        """Update an existing sequence.
+
+        Parameters:
+            name (str): The name of the sequence to update.
+            tasks (Union[List[Task], List[TaskId]]): The new list of scenario's tasks.
+            properties (Optional[Dict]): The new properties of the sequence.
+            subscribers (Optional[List[_Subscriber]]): The new list of callbacks to be called on `Job^`'s status change.
+
+        Raises:
+            SequenceTaskDoesNotExistInScenario^: If a task in the list does not exist in the scenario.
+            SequenceAlreadyExists^: If a sequence with the same name already exists in the scenario.
+        """
+        if name not in self.sequences:
+            raise NonExistingSequence(name, self.id)
+        self._set_sequence(name, tasks, properties, subscribers)
+        Notifier.publish(_make_event(self.sequences[name], EventOperation.UPDATE))
+
+    def _set_sequence(self, name, tasks, properties, subscribers):
         _scenario = _Reloader()._reload(self._MANAGER_NAME, self)
-        _scenario_task_ids = set(task.id if isinstance(task, Task) else task for task in _scenario._tasks)
-        _sequence_task_ids: Set[TaskId] = set(task.id if isinstance(task, Task) else task for task in tasks)
-        self.__check_sequence_tasks_exist_in_scenario_tasks(name, _sequence_task_ids, self.id, _scenario_task_ids)
+        if tasks:
+            _scenario_task_ids = set(task.id if isinstance(task, Task) else task for task in _scenario._tasks)
+            _sequence_task_ids: Set[TaskId] = set(task.id if isinstance(task, Task) else task for task in tasks)
+            self.__check_sequence_tasks_exist_in_scenario_tasks(name, _sequence_task_ids, self.id, _scenario_task_ids)
         _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
         _sequences.update(
             {
@@ -212,7 +244,6 @@ class Scenario(_Entity, Submittable, _Labeled):
         self.sequences = _sequences  # type: ignore
         if not self.sequences[name]._is_consistent():
             raise InvalidSequence(name)
-        Notifier.publish(_make_event(self.sequences[name], EventOperation.CREATION))
 
     def add_sequences(self, sequences: Dict[str, Union[List[Task], List[TaskId]]]):
         """Add multiple sequences to the scenario.
@@ -269,6 +300,27 @@ class Scenario(_Entity, Submittable, _Labeled):
             )
         self.sequences = _sequences  # type: ignore
 
+    def rename_sequence(self, old_name, new_name):
+        """Rename a sequence of the scenario.
+
+        Parameters:
+            old_name (str): The current name of the sequence to rename.
+            new_name (str): The new name of the sequence.
+
+        Raises:
+            SequenceAlreadyExists^: If a sequence with the same name already exists in the scenario.
+        """
+        if new_name in self.sequences:
+            raise SequenceAlreadyExists(new_name, self.id)
+        self._sequences[new_name] = self._sequences[old_name]
+        del self._sequences[old_name]
+        self.sequences = self._sequences  # type: ignore
+        Notifier.publish(Event(EventEntityType.SCENARIO,
+                               EventOperation.UPDATE,
+                               entity_id=self.id,
+                               attribute_name="sequences",
+                               attribute_value=self._sequences))
+
     @staticmethod
     def __check_sequence_tasks_exist_in_scenario_tasks(
         sequence_name: str, sequence_task_ids: Set[TaskId], scenario_id: ScenarioId, scenario_task_ids: Set[TaskId]
@@ -299,7 +351,7 @@ class Scenario(_Entity, Submittable, _Labeled):
                 self.version,
             )
             if not isinstance(p, Sequence):
-                raise NonExistingSequence(sequence_name)
+                raise NonExistingSequence(sequence_name, self.id)
             _sequences[sequence_name] = p
         return _sequences
 
