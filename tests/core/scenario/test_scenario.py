@@ -446,6 +446,29 @@ def test_update_sequence(data_node):
     assert scenario.sequences["seq_1"].properties["new_key"] == "new_value"
 
 
+def test_add_rename_and_remove_sequences_within_context(data_node):
+    task_1 = Task("task_1", {}, print, output=[data_node])
+    task_2 = Task("task_2", {}, print, input=[data_node])
+    _TaskManagerFactory._build_manager()._set(task_1)
+    scenario = Scenario(config_id="scenario", tasks={task_1, task_2}, properties={})
+    _ScenarioManagerFactory._build_manager()._set(scenario)
+
+    with scenario as sc:
+        sc.add_sequence("seq_name", [task_1])
+    assert len(scenario.sequences) == 1
+    assert scenario.sequences["seq_name"].tasks == {"task_1": task_1}
+
+    with scenario as sc:
+        sc.update_sequence("seq_name", [task_2])
+    assert len(scenario.sequences) == 1
+    assert scenario.sequences["seq_name"].tasks == {"task_2": task_2}
+
+    with scenario as sc:
+        sc.remove_sequence("seq_name")
+    assert len(scenario.sequences) == 0
+
+
+
 def test_add_property_to_scenario():
     scenario = Scenario("foo", set(), {"key": "value"})
     assert scenario.properties == {"key": "value"}

@@ -198,8 +198,8 @@ class Scenario(_Entity, Submittable, _Labeled):
         """
         if name in self.sequences:
             raise SequenceAlreadyExists(name, self.id)
-        self._set_sequence(name, tasks, properties, subscribers)
-        Notifier.publish(_make_event(self.sequences[name], EventOperation.CREATION))
+        seq = self._set_sequence(name, tasks, properties, subscribers)
+        Notifier.publish(_make_event(seq, EventOperation.CREATION))
 
     def update_sequence(
         self,
@@ -222,8 +222,8 @@ class Scenario(_Entity, Submittable, _Labeled):
         """
         if name not in self.sequences:
             raise NonExistingSequence(name, self.id)
-        self._set_sequence(name, tasks, properties, subscribers)
-        Notifier.publish(_make_event(self.sequences[name], EventOperation.UPDATE))
+        seq = self._set_sequence(name, tasks, properties, subscribers)
+        Notifier.publish(_make_event(seq, EventOperation.UPDATE))
 
     def _set_sequence(
         self,
@@ -231,7 +231,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         tasks: Union[List[Task], List[TaskId]],
         properties: Optional[Dict] = None,
         subscribers: Optional[List[_Subscriber]] = None,
-    ):
+    ) -> Sequence:
         _scenario = _Reloader()._reload(self._MANAGER_NAME, self)
         _scenario_task_ids = set(task.id if isinstance(task, Task) else task for task in _scenario._tasks)
         _sequence_task_ids: Set[TaskId] = set(task.id if isinstance(task, Task) else task for task in tasks)
@@ -253,6 +253,7 @@ class Scenario(_Entity, Submittable, _Labeled):
             }
         )
         self.sequences = _sequences  # type: ignore
+        return seq
 
     def add_sequences(self, sequences: Dict[str, Union[List[Task], List[TaskId]]]):
         """Add multiple sequences to the scenario.
