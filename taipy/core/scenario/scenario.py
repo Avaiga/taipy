@@ -36,7 +36,7 @@ from ..exceptions.exceptions import (
     NonExistingDataNode,
     NonExistingSequence,
     NonExistingTask,
-    SequenceTaskDoesNotExistInScenario, SequenceAlreadyExists,
+    SequenceAlreadyExists, SequenceTaskDoesNotExistInScenario
 )
 from ..job.job import Job
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
