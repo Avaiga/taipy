@@ -236,6 +236,12 @@ class Scenario(_Entity, Submittable, _Labeled):
         _scenario_task_ids = set(task.id if isinstance(task, Task) else task for task in _scenario._tasks)
         _sequence_task_ids: Set[TaskId] = set(task.id if isinstance(task, Task) else task for task in tasks)
         self.__check_sequence_tasks_exist_in_scenario_tasks(name, _sequence_task_ids, self.id, _scenario_task_ids)
+        from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
+        seq_manager = _SequenceManagerFactory._build_manager()
+        seq = seq_manager._create(name, tasks, properties or {}, subscribers or [], self.id, self.version)
+        if not seq._is_consistent():
+            raise InvalidSequence(name)
+
         _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
         _sequences.update(
             {
@@ -246,8 +252,6 @@ class Scenario(_Entity, Submittable, _Labeled):
                 }
             }
         )
-        if not _sequences[name]._is_consistent():
-            raise InvalidSequence(name)
         self.sequences = _sequences  # type: ignore
 
     def add_sequences(self, sequences: Dict[str, Union[List[Task], List[TaskId]]]):
