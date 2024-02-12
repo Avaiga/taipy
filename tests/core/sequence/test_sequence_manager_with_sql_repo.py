@@ -18,6 +18,7 @@ from taipy.core._version._version_manager import _VersionManager
 from taipy.core.config.job_config import JobConfig
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.exceptions import SequenceAlreadyExists
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.scenario.scenario import Scenario
@@ -74,8 +75,9 @@ def test_set_and_get_sequence(init_sql_repo, init_managers):
     assert _SequenceManager._get(sequence_2).id == sequence_2.id
     assert len(_SequenceManager._get(sequence_2).tasks) == 1
 
-    # We save the first sequence again. We expect nothing to change
-    scenario.add_sequences({sequence_name_1: {}})
+    # We save the first sequence again. We expect an exception and nothing to change
+    with pytest.raises(SequenceAlreadyExists):
+        scenario.add_sequences({sequence_name_1: {}})
     sequence_1 = scenario.sequences[sequence_name_1]
     assert _SequenceManager._get(sequence_id_1).id == sequence_1.id
     assert len(_SequenceManager._get(sequence_id_1).tasks) == 0
@@ -85,21 +87,6 @@ def test_set_and_get_sequence(init_sql_repo, init_managers):
     assert len(_SequenceManager._get(sequence_id_2).tasks) == 1
     assert _SequenceManager._get(sequence_2).id == sequence_2.id
     assert len(_SequenceManager._get(sequence_2).tasks) == 1
-
-    # We save a third sequence with same id as the first one.
-    # We expect the first sequence to be updated
-    scenario.add_sequences({sequence_name_1: [task]})
-    sequence_3 = scenario.sequences[sequence_name_1]
-    assert _SequenceManager._get(sequence_id_1).id == sequence_1.id
-    assert _SequenceManager._get(sequence_id_1).id == sequence_3.id
-    assert len(_SequenceManager._get(sequence_id_1).tasks) == 1
-    assert _SequenceManager._get(sequence_1).id == sequence_1.id
-    assert len(_SequenceManager._get(sequence_1).tasks) == 1
-    assert _SequenceManager._get(sequence_id_2).id == sequence_2.id
-    assert len(_SequenceManager._get(sequence_id_2).tasks) == 1
-    assert _SequenceManager._get(sequence_2).id == sequence_2.id
-    assert len(_SequenceManager._get(sequence_2).tasks) == 1
-    assert _TaskManager._get(task.id).id == task.id
 
 
 def test_get_all_on_multiple_versions_environment(init_sql_repo, init_managers):
