@@ -17,9 +17,9 @@ __INVALID_TAIPY_ID_TERMS = ["CYCLE", "SCENARIO", "SEQUENCE", "TASK", "DATANODE"]
 
 
 def _validate_id(name: str):
-    for invalid_taipy_id_term in __INVALID_TAIPY_ID_TERMS:
-        if invalid_taipy_id_term in name:
-            raise InvalidConfigurationId(f"'{name}' is not a valid identifier. '{invalid_taipy_id_term}' is restricted.")
+    for invalid__id_term in __INVALID_TAIPY_ID_TERMS:
+        if invalid__id_term in name:
+            raise InvalidConfigurationId(f"'{name}' is not a valid identifier. '{invalid__id_term}' is restricted.")
 
     if name.isidentifier() and not keyword.iskeyword(name):
         return name

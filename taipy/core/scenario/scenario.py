@@ -11,12 +11,11 @@
 
 from __future__ import annotations
 
+import networkx as nx
 import pathlib
 import uuid
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set, Union
-
-import networkx as nx
 
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
