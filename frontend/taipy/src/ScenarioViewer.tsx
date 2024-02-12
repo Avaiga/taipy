@@ -26,12 +26,13 @@ import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import Add from "@mui/icons-material/Add";
+import ArrowForwardIosSharp from "@mui/icons-material/ArrowForwardIosSharp";
+import Cancel from "@mui/icons-material/Cancel";
+import CheckCircle from "@mui/icons-material/CheckCircle";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import FlagOutlined from "@mui/icons-material/FlagOutlined";
 import Send from "@mui/icons-material/Send";
-import CheckCircle from "@mui/icons-material/CheckCircle";
-import Cancel from "@mui/icons-material/Cancel";
-import ArrowForwardIosSharp from "@mui/icons-material/ArrowForwardIosSharp";
 import deepEqual from "fast-deep-equal/es6";
 
 import {
@@ -45,7 +46,6 @@ import {
 import {
     AccordionIconSx,
     AccordionSummarySx,
-    DeleteIconSx,
     FieldNoMaxWidth,
     FlagSx,
     IconPaddingSx,
@@ -105,6 +105,7 @@ interface SequencesRowProps {
     setFocusName: (name: string) => void;
     submittable: boolean;
     editable: boolean;
+    isValid: (seqId: string, label: string) => boolean;
 }
 
 const ChipSx = { ml: 1 };
@@ -124,7 +125,6 @@ type SequenceFull = [string, string, string[], boolean, boolean];
 //     submittable,
 //     editable,
 // }
-// const SequenceFullLength = Object.keys(SeFProps).length / 2;
 
 const SequenceRow = ({
     active,
@@ -142,17 +142,22 @@ const SequenceRow = ({
     setFocusName,
     submittable,
     editable,
+    isValid,
 }: SequencesRowProps) => {
     const [label, setLabel] = useState("");
     const [taskIds, setTaskIds] = useState<string[]>([]);
+    const [valid, setValid] = useState(false);
 
     const onChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setLabel(e.currentTarget.value), []);
+
     const onSaveSequence = useCallback(
         (e?: MouseEvent<Element>) => {
             e && e.stopPropagation();
-            editSequence(id, label, taskIds);
+            if (isValid(id, label)) {
+                editSequence(id, label, taskIds);
+            }
         },
-        [id, label, taskIds, editSequence]
+        [id, label, taskIds, editSequence, isValid]
     );
     const onCancelSequence = useCallback(
         (e?: MouseEvent<Element>) => {
@@ -177,6 +182,8 @@ const SequenceRow = ({
         },
         [editSequence, id]
     );
+
+    useEffect(() => setValid(isValid(id, label)), [id, label, isValid]);
 
     // Tasks
     const onChangeTasks = useCallback((_: SyntheticEvent, taskIds: string[]) => setTaskIds(taskIds), []);
@@ -204,6 +211,9 @@ const SequenceRow = ({
                             sx={FieldNoMaxWidth}
                             disabled={disabled}
                             fullWidth
+                            error={!valid}
+                            helperText={valid ? "" : "This name is already used."}
+
                         />
                     </Grid>
                     <Grid item xs={4}>
@@ -241,8 +251,8 @@ const SequenceRow = ({
                     </Grid>
                     <Grid item xs={2} container alignContent="center" alignItems="center" justifyContent="center">
                         <Tooltip title="Apply">
-                            <IconButton sx={IconPaddingSx} onClick={onSaveSequence} size="small">
-                                <CheckCircle color="primary" />
+                            <IconButton sx={IconPaddingSx} onClick={onSaveSequence} size="small" disabled={!valid}>
+                                <CheckCircle color={disableColor("primary", !valid)} />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title="Cancel">
@@ -265,14 +275,18 @@ const SequenceRow = ({
                     <Grid item xs={1} alignContent="center" alignItems="center" justifyContent="center">
                         <Tooltip title="Delete Sequence">
                             <span>
-                                <IconButton size="small" sx={DeleteIconSx} onClick={onDeleteSequence} disabled={disabled}>
-                                    <DeleteOutline fontSize="small" color={disableColor("primary", disabled)} />
+                                <IconButton
+                                    size="small"
+                                    onClick={onDeleteSequence}
+                                    disabled={disabled}
+                                >
+                                    <DeleteOutline color={disableColor("primary", disabled)} />
                                 </IconButton>
                             </span>
                         </Tooltip>
                     </Grid>
                     <Grid item xs={1} alignContent="center" alignItems="center" justifyContent="center">
-                        {submit ? (
+                        {id && submit ? (
                             <Tooltip title={disabledSubmit ? "Cannot submit Sequence" : "Submit Sequence"}>
                                 <span>
                                     <IconButton size="small" onClick={onSubmitSequence} disabled={disabledSubmit}>
@@ -511,23 +525,37 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const editSequence = useCallback(
         (seqId: string, label: string, taskIds: string[], del?: boolean) => {
             if (valid) {
-                dispatch(
-                    createSendActionNameAction(id, module, props.onEdit, {
-                        id: seqId,
-                        name: label,
-                        task_ids: taskIds,
-                        del: !!del,
-                        type: "Sequence",
-                        scenario_id: scId,
-                    })
-                );
+                if (seqId) {
+                    dispatch(
+                        createSendActionNameAction(id, module, props.onEdit, {
+                            id: seqId,
+                            name: label,
+                            task_ids: taskIds,
+                            del: !!del,
+                            type: "Sequence",
+                            scenario_id: scId,
+                        })
+                    );
+                } else {
+                    setSequences((seqs) => seqs.filter((seq) => seq[0]));
+                }
                 setFocusName("");
             }
         },
         [valid, id, scId, props.onEdit, dispatch, module]
     );
+    const isValidSequence = useCallback(
+        (seqId: string, label: string) => {
+            const curSeq = sequences.find((seq) => seq[1] === label);
+            return !curSeq || curSeq[0] === seqId;
+        },
+        [sequences]
+    );
 
-    const addSequenceHandler = useCallback(() => setSequences((seq) => [...seq, ["", `Sequence${seq.length+1}`, [], true, true]]), []);
+    const addSequenceHandler = useCallback(
+        () => setSequences((seq) => [...seq, ["", `Sequence${seq.length + 1}`, [], true, true]]),
+        []
+    );
 
     // on scenario change
     useEffect(() => {
@@ -782,7 +810,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                             <Typography variant="h6">Sequences</Typography>
                                         </Grid>
                                         <Grid item xs={3} sx={{ ml: "auto" }}>
-                                            <Button onClick={addSequenceHandler}>Add</Button>
+                                            <Button onClick={addSequenceHandler} endIcon={<Add />}>Add</Button>
                                         </Grid>
                                     </Grid>
 
@@ -806,6 +834,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                 setFocusName={setFocusName}
                                                 submittable={submittable}
                                                 editable={editable}
+                                                isValid={isValidSequence}
                                             />
                                         );
                                     })}
