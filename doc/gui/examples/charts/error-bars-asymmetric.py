@@ -24,7 +24,7 @@ y = range(0, n_samples)
 
 data = {
     # The x series is made of random numbers between 1 and 10
-    "x": [random.uniform(1, 10) for i in y],
+    "x": [random.uniform(1, 10) for _ in y],
     "y": y,
 }
 
@@ -34,9 +34,9 @@ options = {
         # Allows for a 'plus' and a 'minus' error data
         "symmetric": False,
         # The 'plus' error data is a series of random numbers
-        "array": [random.uniform(0, 5) for i in y],
+        "array": [random.uniform(0, 5) for _ in y],
         # The 'minus' error data is a series of random numbers
-        "arrayminus": [random.uniform(0, 2) for i in y],
+        "arrayminus": [random.uniform(0, 2) for _ in y],
         # Color of the error bar
         "color": "red",
     }
