@@ -567,8 +567,8 @@
             "doc": "Allows dynamic config refresh if set to True."
           },
           {
-            "name": "dynamic(figure)",
-            "type": "plotly.graph_objects.Figure",
+            "name": "figure",
+            "type": "dynamic(plotly.graph_objects.Figure)",
             "doc": "A figure as produced by plotly."
           }
         ]
@@ -774,14 +774,13 @@
                 "name": "title",
                 "default_property": true,
                 "type": "str",
-                "default_value": "Log in",
+                "default_value": "\"Log in\"",
                 "doc": "The title of the login dialog."
             },
             {
                 "name": "on_action",
                 "type": "Callback",
-                "default_value": "on_login",
-                "doc": "The name of the function that is triggered when the dialog's button is pressed.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: a list with three elements:<ul><li>The first element is the user name</li><li>The second element is the password</li><li>The third element is the current page name</li></ul></li></li>\n</ul>\n</li>\n</ul>",
+                "doc": "The name of the function that is triggered when the dialog button is pressed.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: a list with three elements:<ul><li>The first element is the username</li><li>The second element is the password</li><li>The third element is the current page name</li></ul></li></li>\n</ul>\n</li>\n</ul><br/>When the button is pressed, and if this property is not set, Taipy will try to find a callback function called <i>on_login()</i> and invoke it with the parameters listed above.",
                 "signature": [["state", "State"], ["id", "str"], ["payload", "dict"]]
               },
               {
