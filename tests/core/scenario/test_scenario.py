@@ -387,7 +387,7 @@ def test_add_rename_and_remove_sequences():
     sequence_1 = Sequence({"name": "seq_1"}, [task_1], SequenceId(f"SEQUENCE_seq_1_{scenario.id}"))
     sequence_2 = Sequence({"name": "seq_2"}, [task_1, task_2], SequenceId(f"SEQUENCE_seq_2_{scenario.id}"))
     new_seq_2 = Sequence({"name": "seq_2"}, [task_1, task_2], SequenceId(f"SEQUENCE_new_seq_2_{scenario.id}"))
-    sequence_3 = Sequence({"name": "seq_3"}, [task_1, task_5, task_3], SequenceId(f"SEQUENCE_seq_3_{scenario.id}"))
+    seq_3 = Sequence({"name": "seq 3"}, [task_1, task_5, task_3], SequenceId(f"SEQUENCE_seqTPSPACE3_{scenario.id}"))
 
     task_manager = _TaskManagerFactory._build_manager()
     data_manager = _DataManagerFactory._build_manager()
@@ -412,7 +412,7 @@ def test_add_rename_and_remove_sequences():
     assert scenario.sequences == {"seq_2": sequence_2}
 
     scenario.add_sequences({"seq_1": [task_1], "seq 3": [task_1, task_5, task_3]})
-    assert scenario.sequences == {"seq_2": sequence_2, "seq_1": sequence_1, "seq 3": sequence_3}
+    assert scenario.sequences == {"seq_2": sequence_2, "seq_1": sequence_1, "seq 3": seq_3}
 
     scenario.remove_sequences(["seq_2", "seq 3"])
     assert scenario.sequences == {"seq_1": sequence_1}
@@ -421,13 +421,13 @@ def test_add_rename_and_remove_sequences():
     assert scenario.sequences == {"seq_1": sequence_1, "seq_2": sequence_2}
 
     scenario.add_sequence("seq 3", [task_1.id, task_5.id, task_3.id])
-    assert scenario.sequences == {"seq_1": sequence_1, "seq_2": sequence_2, "seq 3": sequence_3}
+    assert scenario.sequences == {"seq_1": sequence_1, "seq_2": sequence_2, "seq 3": seq_3}
 
     scenario.remove_sequence("seq_1")
-    assert scenario.sequences == {"seq_2": sequence_2, "seq 3": sequence_3}
+    assert scenario.sequences == {"seq_2": sequence_2, "seq 3": seq_3}
 
     scenario.rename_sequence("seq_2", "new_seq_2")
-    assert scenario.sequences == {"new_seq_2": new_seq_2, "seq 3": sequence_3}
+    assert scenario.sequences == {"new_seq_2": new_seq_2, "seq 3": seq_3}
 
 
 def test_update_sequence(data_node):
