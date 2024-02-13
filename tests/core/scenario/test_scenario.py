@@ -464,7 +464,11 @@ def test_add_rename_and_remove_sequences_within_context(data_node):
     assert scenario.sequences["seq_name"].tasks == {"task_2": task_2}
 
     with scenario as sc:
-        sc.remove_sequence("seq_name")
+        sc.rename_sequence("seq_name", "seq name")
+    assert scenario.sequences["seq name"].tasks == {"task_2": task_2}
+
+    with scenario as sc:
+        sc.remove_sequence("seq name")
     assert len(scenario.sequences) == 0
 
 
