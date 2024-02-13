@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import contextlib
 import typing as t
 from unittest.mock import Mock, patch
 
@@ -150,7 +151,9 @@ class TestGuiCoreContext_is_readable:
     def test_submission_status_callback(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get) as mockget:
             mockget.reset_mock()
-            gui_core_context = _GuiCoreContext(Mock())
+            mockGui = Mock(Gui)
+            mockGui._get_autorization = lambda s: contextlib.nullcontext()
+            gui_core_context = _GuiCoreContext(mockGui)
 
             def sub_cb():
                 return True

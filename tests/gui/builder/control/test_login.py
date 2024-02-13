@@ -9,19 +9,16 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import keyword
-
-from ..exceptions.exceptions import InvalidConfigurationId
-
-__INVALID_TAIPY_ID_TERMS = ["CYCLE", "SCENARIO", "SEQUENCE", "TASK", "DATANODE"]
+import taipy.gui.builder as tgb
+from taipy.gui import Gui
 
 
-def _validate_id(name: str):
-    for invalid__id_term in __INVALID_TAIPY_ID_TERMS:
-        if invalid__id_term in name:
-            raise InvalidConfigurationId(f"'{name}' is not a valid identifier. '{invalid__id_term}' is restricted.")
-
-    if name.isidentifier() and not keyword.iskeyword(name):
-        return name
-
-    raise InvalidConfigurationId(f"'{name}' is not a valid identifier.")
+def test_login_builder(gui: Gui, test_client, helpers):
+    with tgb.Page(frame=None) as page:
+        tgb.login(on_action="on_login_action")  # type: ignore[attr-defined]
+    expected_list = [
+        "<Login",
+        'libClassName="taipy-login"',
+        'onAction="on_login_action"',
+    ]
+    helpers.test_control_builder(gui, page, expected_list)
