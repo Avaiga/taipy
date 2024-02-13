@@ -1448,7 +1448,7 @@
             "name": "change_delay",
             "type": "int",
             "default_value": "<i>App config</i>",
-            "doc": "Minimum time between triggering two calls to the <i>on_change</i> callback.<br/>The default value is defined at the application configuration level by the <strong>change_delay</strong> configuration option. if None, the delay is set to 300 ms. if -1, the input change is triggered only on Enter"
+            "doc": "Minimum time between triggering two calls to the <i>on_change</i> callback.<br/>The default value is defined at the application configuration level by the <strong>change_delay</strong> configuration option. if None, the delay is set to 300 ms.<br/>If set to -1, the input change is triggered only when the user presses the Enter key."
           },
           {
             "name": "on_action",
