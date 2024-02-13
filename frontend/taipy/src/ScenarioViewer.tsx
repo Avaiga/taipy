@@ -92,20 +92,19 @@ interface ScenarioViewerProps {
 interface SequencesRowProps {
     active: boolean;
     number: number;
-    id: string;
     label: string;
     taskIds: string[];
     tasks: Record<string, string>;
     enableScenarioFields: boolean;
-    submitEntity: (id: string) => void;
+    submitEntity: (label: string) => void;
     submit: boolean;
-    editSequence: (id: string, label: string, taskIds: string[], del?: boolean) => void;
+    editSequence: (sLabel: string, label: string, taskIds: string[], del?: boolean) => void;
     onFocus: (e: MouseEvent<HTMLElement>) => void;
     focusName: string;
     setFocusName: (name: string) => void;
     submittable: boolean;
     editable: boolean;
-    isValid: (seqId: string, label: string) => boolean;
+    isValid: (sLabel: string, label: string) => boolean;
 }
 
 const ChipSx = { ml: 1 };
@@ -117,9 +116,8 @@ const tagsAutocompleteSx = {
     maxWidth: "none",
 };
 
-type SequenceFull = [string, string, string[], boolean, boolean];
+type SequenceFull = [string, string[], boolean, boolean];
 // enum SeFProps {
-//     id,
 //     label,
 //     tasks,
 //     submittable,
@@ -129,7 +127,6 @@ type SequenceFull = [string, string, string[], boolean, boolean];
 const SequenceRow = ({
     active,
     number,
-    id,
     label: pLabel,
     taskIds: pTaskIds,
     tasks,
@@ -153,11 +150,13 @@ const SequenceRow = ({
     const onSaveSequence = useCallback(
         (e?: MouseEvent<Element>) => {
             e && e.stopPropagation();
-            if (isValid(id, label)) {
-                editSequence(id, label, taskIds);
+            if (isValid(pLabel, label)) {
+                editSequence(pLabel, label, taskIds);
+            } else {
+                setValid(false);
             }
         },
-        [id, label, taskIds, editSequence, isValid]
+        [pLabel, label, taskIds, editSequence, isValid]
     );
     const onCancelSequence = useCallback(
         (e?: MouseEvent<Element>) => {
@@ -171,19 +170,19 @@ const SequenceRow = ({
     const onSubmitSequence = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            submitEntity(id);
+            submitEntity(pLabel);
         },
-        [submitEntity, id]
+        [submitEntity, pLabel]
     );
     const onDeleteSequence = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            editSequence(id, "", [], true);
+            editSequence(pLabel, "", [], true);
         },
-        [editSequence, id]
+        [editSequence, pLabel]
     );
 
-    useEffect(() => setValid(isValid(id, label)), [id, label, isValid]);
+    useEffect(() => setValid(isValid(pLabel, label)), [pLabel, label, isValid]);
 
     // Tasks
     const onChangeTasks = useCallback((_: SyntheticEvent, taskIds: string[]) => setTaskIds(taskIds), []);
@@ -212,8 +211,7 @@ const SequenceRow = ({
                             disabled={disabled}
                             fullWidth
                             error={!valid}
-                            helperText={valid ? "" : "This name is already used."}
-
+                            helperText={valid ? "" : label ? "This name is already used." : "Cannot be empty."}
                         />
                     </Grid>
                     <Grid item xs={4}>
@@ -265,7 +263,7 @@ const SequenceRow = ({
             ) : (
                 <>
                     <Grid item xs={5}>
-                        <Typography variant="subtitle2">{label}</Typography>
+                        <Typography variant="subtitle2">{label || "New Sequence"}</Typography>
                     </Grid>
                     <Grid item xs={5}>
                         {taskIds.map((id) =>
@@ -275,19 +273,19 @@ const SequenceRow = ({
                     <Grid item xs={1} alignContent="center" alignItems="center" justifyContent="center">
                         <Tooltip title={`Delete Sequence '${label}'`}>
                             <span>
-                                <IconButton
-                                    size="small"
-                                    onClick={onDeleteSequence}
-                                    disabled={disabled}
-                                >
+                                <IconButton size="small" onClick={onDeleteSequence} disabled={disabled}>
                                     <DeleteOutline color={disableColor("primary", disabled)} />
                                 </IconButton>
                             </span>
                         </Tooltip>
                     </Grid>
                     <Grid item xs={1} alignContent="center" alignItems="center" justifyContent="center">
-                        {id && submit ? (
-                            <Tooltip title={disabledSubmit ? `Cannot submit Sequence '${label}'` : `Submit Sequence '${label}'`}>
+                        {pLabel && submit ? (
+                            <Tooltip
+                                title={
+                                    disabledSubmit ? `Cannot submit Sequence '${label}'` : `Submit Sequence '${label}'`
+                                }
+                            >
                                 <span>
                                     <IconButton size="small" onClick={onSubmitSequence} disabled={disabledSubmit}>
                                         <Send color={disableColor("info", disabledSubmit)} />
@@ -416,16 +414,17 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
     // submits
     const submitSequence = useCallback(
-        (sequenceId: string) => {
-            dispatch(
-                createSendActionNameAction(id, module, props.onSubmit, {
-                    id: sequenceId,
-                    on_submission_change: props.onSubmissionChange,
-                    type: "Sequence",
-                })
-            );
+        (label: string) => {
+            label &&
+                dispatch(
+                    createSendActionNameAction(id, module, props.onSubmit, {
+                        id: scId,
+                        sequence: label,
+                        on_submission_change: props.onSubmissionChange,
+                    })
+                );
         },
-        [props.onSubmit, props.onSubmissionChange, id, dispatch, module]
+        [scId, props.onSubmit, props.onSubmissionChange, id, dispatch, module]
     );
 
     const submitScenario = useCallback(
@@ -523,17 +522,16 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     // sequences
     const [sequences, setSequences] = useState<SequenceFull[]>([]);
     const editSequence = useCallback(
-        (seqId: string, label: string, taskIds: string[], del?: boolean) => {
+        (seqLabel: string, label: string, taskIds: string[], del?: boolean) => {
             if (valid) {
-                if (seqId) {
+                if (del || label) {
                     dispatch(
                         createSendActionNameAction(id, module, props.onEdit, {
-                            id: seqId,
+                            id: scId,
+                            sequence: seqLabel,
                             name: label,
                             task_ids: taskIds,
                             del: !!del,
-                            type: "Sequence",
-                            scenario_id: scId,
                         })
                     );
                 } else {
@@ -545,17 +543,11 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         [valid, id, scId, props.onEdit, dispatch, module]
     );
     const isValidSequence = useCallback(
-        (seqId: string, label: string) => {
-            const curSeq = sequences.find((seq) => seq[1] === label);
-            return !curSeq || curSeq[0] === seqId;
-        },
+        (sLabel: string, label: string) => !!label && (sLabel == label || !sequences.find((seq) => seq[0] === label)),
         [sequences]
     );
 
-    const addSequenceHandler = useCallback(
-        () => setSequences((seq) => [...seq, ["", `Sequence${seq.length + 1}`, [], true, true]]),
-        []
-    );
+    const addSequenceHandler = useCallback(() => setSequences((seq) => [...seq, ["", [], true, true]]), []);
 
     // on scenario change
     useEffect(() => {
@@ -607,7 +599,15 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 {showSubmit ? (
                                     <Tooltip title={disabled ? "Cannot submit Scenario" : "Submit Scenario"}>
                                         <span>
-                                            <Button onClick={submitScenario} disabled={disabled} endIcon={<Send fontSize="medium" color={disableColor("info", disabled)} />}>Submit</Button>
+                                            <Button
+                                                onClick={submitScenario}
+                                                disabled={disabled}
+                                                endIcon={
+                                                    <Send fontSize="medium" color={disableColor("info", disabled)} />
+                                                }
+                                            >
+                                                Submit
+                                            </Button>
                                         </span>
                                     </Tooltip>
                                 ) : null}
@@ -808,21 +808,22 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                             <Typography variant="h6">Sequences</Typography>
                                         </Grid>
                                         <Grid item xs={3} sx={{ ml: "auto" }}>
-                                            <Button onClick={addSequenceHandler} endIcon={<Add />}>Add</Button>
+                                            <Button onClick={addSequenceHandler} endIcon={<Add />}>
+                                                Add
+                                            </Button>
                                         </Grid>
                                     </Grid>
 
                                     {sequences.map((item, index) => {
-                                        const [key, value, taskIds, submittable, editable] = item;
+                                        const [label, taskIds, submittable, editable] = item;
                                         return (
                                             <SequenceRow
                                                 active={active}
                                                 number={index}
-                                                id={key}
-                                                label={value}
+                                                label={label}
                                                 taskIds={taskIds}
                                                 tasks={scTasks}
-                                                key={key}
+                                                key={label}
                                                 submitEntity={submitSequence}
                                                 enableScenarioFields={valid}
                                                 submit={showSubmitSequences}

@@ -78,7 +78,6 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                         else [],
                         [
                             (
-                                s.id,
                                 s.get_simple_label(),
                                 [t.id for t in s.tasks.values()] if hasattr(s, "tasks") else [],
                                 is_submittable(s),
