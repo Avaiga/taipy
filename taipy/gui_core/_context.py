@@ -411,42 +411,64 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return
         data = args[0]
         entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
-        if not self.__check_readable_editable(
-            state, entity_id, data.get("type", "Scenario"), _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR
-        ):
+        sequence = data.get("sequence")
+        if not self.__check_readable_editable(state, entity_id, "Scenario", _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR):
             return
-        entity: t.Union[Scenario, Sequence] = core_get(entity_id)
-        if entity:
+        scenario: Scenario = core_get(entity_id)
+        if scenario:
             try:
-                if isinstance(entity, Scenario):
-                    primary = data.get(_GuiCoreContext.__PROP_SCENARIO_PRIMARY)
-                    if primary is True:
-                        if not is_promotable(entity):
+                if not sequence:
+                    if isinstance(sequence, str) and (name := data.get(_GuiCoreContext.__PROP_ENTITY_NAME)):
+                        scenario.add_sequence(name, data.get("task_ids"))
+                    else:
+                        primary = data.get(_GuiCoreContext.__PROP_SCENARIO_PRIMARY)
+                        if primary is True:
+                            if not is_promotable(scenario):
+                                state.assign(
+                                    _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Scenario {entity_id} is not promotable."
+                                )
+                                return
+                            set_primary(scenario)
+                        self.__edit_properties(scenario, data)
+                else:
+                    if data.get("del", False):
+                        scenario.remove_sequence(sequence)
+                    else:
+                        name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
+                        if sequence != name:
+                            scenario.rename_sequence(sequence, name)
+                        if seqEntity := scenario.sequences.get(name):
+                            seqEntity.tasks = data.get("task_ids")
+                            self.__edit_properties(seqEntity, data)
+                        else:
                             state.assign(
-                                _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Scenario {entity_id} is not promotable."
+                                _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR,
+                                f"Sequence {name} is not available in Scenario {entity_id}.",
                             )
                             return
-                        set_primary(entity)
-                self.__edit_properties(entity, data)
+
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
             except Exception as e:
-                state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error updating Scenario. {e}")
+                state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error updating {type(scenario).__name__}. {e}")
 
     def submit_entity(self, state: State, id: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
         data = args[0]
-        entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
-        if not is_submittable(entity_id):
-            state.assign(
-                _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR,
-                f"{data.get('type', 'Scenario')} {entity_id} is not submittable.",
-            )
-            return
-        entity = core_get(entity_id)
-        if entity:
-            try:
+        try:
+            scenario_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
+            entity = core_get(scenario_id)
+            if sequence := data.get("sequence"):
+                entity = entity.sequences.get(sequence)
+
+            if not is_submittable(entity):
+                state.assign(
+                    _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR,
+                    f"{'Sequence' if sequence else 'Scenario'} {sequence or scenario_id} is not submittable.",
+                )
+                return
+            if entity:
                 on_submission = data.get("on_submission_change")
                 submission_entity = core_submit(
                     entity,
@@ -462,8 +484,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             self.client_submission[submission_entity.id] = SubmissionStatus.SUBMITTED
                         self.submission_status_callback(submission_entity.id)
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
-            except Exception as e:
-                state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
+        except Exception as e:
+            state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
 
     def __do_datanodes_tree(self):
         if self.data_nodes_by_owner is None:
@@ -627,7 +649,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     ent.tags = {t for t in tags}
             name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
             if isinstance(name, str):
-                ent.properties[_GuiCoreContext.__PROP_ENTITY_NAME] = name
+                if hasattr(ent, _GuiCoreContext.__PROP_ENTITY_NAME):
+                    setattr(ent, _GuiCoreContext.__PROP_ENTITY_NAME, name)
+                else:
+                    ent.properties[_GuiCoreContext.__PROP_ENTITY_NAME] = name
             props = data.get("properties")
             if isinstance(props, (list, tuple)):
                 for prop in props:
@@ -720,12 +745,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return (None, None, None, f"Data unavailable for {dn.get_simple_label()}")
         return _DoNotUpdate()
 
-    def __check_readable_editable(self, state: State, id: str, type: str, var: str):
-        if not is_readable(t.cast(DataNodeId, id)):
-            state.assign(var, f"{type} {id} is not readable.")
+    def __check_readable_editable(self, state: State, id: str, ent_type: str, var: str):
+        if not is_readable(t.cast(ScenarioId, id)):
+            state.assign(var, f"{ent_type} {id} is not readable.")
             return False
-        if not is_editable(t.cast(DataNodeId, id)):
-            state.assign(var, f"{type} {id} is not editable.")
+        if not is_editable(t.cast(ScenarioId, id)):
+            state.assign(var, f"{ent_type} {id} is not editable.")
             return False
         return True
 

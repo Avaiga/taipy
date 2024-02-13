@@ -183,6 +183,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
             sequence_name, scenario_id = sequence_id.split(Scenario._ID_PREFIX)
             scenario_id = f"{Scenario._ID_PREFIX}{scenario_id}"
             sequence_name = sequence_name.split(Sequence._ID_PREFIX)[1].strip("_")
+            sequence_name = sequence_name.replace("TPSPACE", " ")
             return sequence_name, scenario_id
         except (ValueError, IndexError):
             cls._logger.error(f"SequenceId {sequence_id} is invalid.")
