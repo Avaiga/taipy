@@ -57,6 +57,8 @@ class _JobDispatcher(threading.Thread):
             try:
                 if self._can_execute():
                     with self.lock:
+                        if self._STOP_FLAG:
+                            break
                         job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
                     self._execute_job(job)
             except Empty:  # In case the last job of the queue has been removed.
@@ -64,6 +66,9 @@ class _JobDispatcher(threading.Thread):
             except Exception as e:
                 _TaipyLogger._get_logger().exception(e)
                 pass
+
+        # The dispatcher is now shutting down, let's shutdown its executor.
+        self._executor.shutdown(wait=True)
 
     def _can_execute(self) -> bool:
         """Returns True if the dispatcher have resources to execute a new job."""
