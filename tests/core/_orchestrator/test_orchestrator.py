@@ -90,6 +90,8 @@ def test_submit_task_multithreading_multiple_task():
     assert job_2.is_completed()
     assert submission_2.submission_status == SubmissionStatus.COMPLETED
 
+    _OrchestratorFactory._remove_dispatcher()
+
 
 @pytest.mark.orchestrator_dispatcher
 def test_submit_submittable_multithreading_multiple_task():
@@ -131,6 +133,8 @@ def test_submit_submittable_multithreading_multiple_task():
     assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
     assert_true_after_time(job_2.is_completed)
     assert_true_after_time(lambda: submission.submission_status == SubmissionStatus.COMPLETED)
+
+    _OrchestratorFactory._remove_dispatcher()
 
 
 @pytest.mark.orchestrator_dispatcher
@@ -202,6 +206,8 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
     assert _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.COMPLETED
     assert _SubmissionManager._get(job_2.submit_id).submission_status == SubmissionStatus.COMPLETED
 
+    _OrchestratorFactory._remove_dispatcher()
+
 
 @pytest.mark.orchestrator_dispatcher
 def test_blocked_task():
@@ -260,6 +266,8 @@ def test_blocked_task():
     assert submission_1.submission_status == SubmissionStatus.COMPLETED
     assert_true_after_time(lambda: submission_2.submission_status == SubmissionStatus.COMPLETED)
 
+    _OrchestratorFactory._remove_dispatcher()
+
 
 @pytest.mark.orchestrator_dispatcher
 def test_blocked_submittable():
@@ -310,6 +318,8 @@ def test_blocked_submittable():
     assert _DataManager._get(task_2.baz.id).read() == 6  # the data is computed and written
     assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
     assert_true_after_time(lambda: submission.submission_status == SubmissionStatus.COMPLETED)
+
+    _OrchestratorFactory._remove_dispatcher()
 
 
 # ################################  UTIL METHODS    ##################################
