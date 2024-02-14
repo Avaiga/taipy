@@ -48,7 +48,6 @@ from taipy.core.sequence._sequence_manager import _SequenceManager
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 from taipy.core.task.task_id import TaskId
-from tests.core.utils import assert_true_after_time
 from tests.core.utils.NotifyMock import NotifyMock
 
 
