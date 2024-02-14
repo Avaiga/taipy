@@ -19,7 +19,7 @@ from ._task_function_wrapper import _TaskFunctionWrapper
 class _DevelopmentJobDispatcher(_JobDispatcher):
     """Manages job dispatching (instances of `Job^` class) in a synchronous way."""
 
-    def __init__(self, orchestrator: Optional[_AbstractOrchestrator]):
+    def __init__(self, orchestrator: _AbstractOrchestrator):
         super().__init__(orchestrator)
 
     def start(self):

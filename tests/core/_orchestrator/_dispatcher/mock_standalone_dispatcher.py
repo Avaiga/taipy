@@ -35,7 +35,7 @@ class MockProcessPoolExecutor(Executor):
 
 
 class MockStandaloneDispatcher(_StandaloneJobDispatcher):
-    def __init__(self, orchestrator: Optional[_AbstractOrchestrator]):
+    def __init__(self, orchestrator: _AbstractOrchestrator):
         super(_StandaloneJobDispatcher, self).__init__(orchestrator)
         self._executor: Executor = MockProcessPoolExecutor()
         self.dispatch_calls: List = []
