@@ -66,6 +66,7 @@ class _JobDispatcher(threading.Thread):
             except Exception as e:
                 _TaipyLogger._get_logger().exception(e)
                 pass
+        self._logger.info("Job dispatcher stopped.")
 
     def _can_execute(self) -> bool:
         """Returns True if the dispatcher have resources to execute a new job."""
