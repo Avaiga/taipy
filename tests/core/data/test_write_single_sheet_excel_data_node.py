@@ -348,6 +348,7 @@ def test_write_with_column_and_sheet_name(excel_file_with_sheet_name, default_da
         assert len(excel_dn.read()) == 1
 
 
+@pytest.mark.skip(reason="Not implemented on pandas 1.3.5")
 @pytest.mark.parametrize(
     "content",
     [
@@ -367,6 +368,7 @@ def test_append_pandas_with_sheetname(excel_file, default_data_frame, content):
     )
 
 
+@pytest.mark.skip(reason="Not implemented on pandas 1.3.5")
 @pytest.mark.parametrize(
     "content",
     [
@@ -386,6 +388,7 @@ def test_append_pandas_without_sheetname(excel_file, default_data_frame, content
     )
 
 
+@pytest.mark.skip(reason="Not implemented on pandas 1.3.5")
 @pytest.mark.parametrize(
     "content",
     [
