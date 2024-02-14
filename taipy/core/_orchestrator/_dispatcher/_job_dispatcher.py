@@ -12,7 +12,7 @@
 import threading
 from abc import abstractmethod
 from queue import Empty
-from typing import Dict, Optional
+from typing import Dict
 
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
