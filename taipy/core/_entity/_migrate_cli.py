@@ -13,6 +13,7 @@ import sys
 from typing import List
 
 from taipy._cli._base_cli import _CLI
+from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._migrate import (
@@ -84,7 +85,7 @@ class _MigrateCLI:
     @classmethod
     def __handle_remove_backup(cls, repository_type: str, repository_args: List):
         if repository_type == "filesystem":
-            path = repository_args[0] or ".data"
+            path = repository_args[0] or Config.core.taipy_storage_folder
             if not _remove_backup_file_entities(path):
                 sys.exit(1)
         elif repository_type == "sql":
@@ -102,7 +103,7 @@ class _MigrateCLI:
     @classmethod
     def __handle_restore_backup(cls, repository_type: str, repository_args: List):
         if repository_type == "filesystem":
-            path = repository_args[0] or ".data"
+            path = repository_args[0] or Config.core.taipy_storage_folder
             if not _restore_migrate_file_entities(path):
                 sys.exit(1)
         elif repository_type == "sql":
@@ -120,7 +121,7 @@ class _MigrateCLI:
     @classmethod
     def __migrate_entities(cls, repository_type: str, repository_args: List, do_backup: bool):
         if repository_type == "filesystem":
-            path = repository_args[0] or ".data"
+            path = repository_args[0] or Config.core.taipy_storage_folder
             if not _migrate_fs_entities(path, do_backup):
                 sys.exit(1)
 
