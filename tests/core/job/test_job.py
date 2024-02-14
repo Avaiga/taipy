@@ -310,10 +310,10 @@ def _dispatch(task: Task, job: Job, mode=JobConfig._DEVELOPMENT_MODE):
     _TaskManager._set(task)
     _JobManager._set(job)
     dispatcher: Union[_StandaloneJobDispatcher, _DevelopmentJobDispatcher] = _StandaloneJobDispatcher(
-        _OrchestratorFactory._orchestrator
+        _OrchestratorFactory._orchestrator  # type: ignore
     )
     if mode == JobConfig._DEVELOPMENT_MODE:
-        dispatcher = _DevelopmentJobDispatcher(_OrchestratorFactory._orchestrator)
+        dispatcher = _DevelopmentJobDispatcher(_OrchestratorFactory._orchestrator)  # type: ignore
     dispatcher._dispatch(job)
 
 
