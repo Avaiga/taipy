@@ -51,7 +51,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         self._nb_available_workers -= 1
         config_as_string = _TomlSerializer()._serialize(Config._applied_config)  # type: ignore[attr-defined]
         # TODO REMOVE THIS
-        if self._executor._shutdown_thread:
+        if self._executor._shutdown_thread:  # type: ignore
             print(f"{job.id=}, {job.task.id=} is not dispatched because executor is closed.")
         future = self._executor.submit(_TaskFunctionWrapper(job.id, job.task), config_as_string=config_as_string)
 

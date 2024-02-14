@@ -27,7 +27,7 @@ class _OrchestratorFactory:
     _TAIPY_ENTERPRISE_CORE_DISPATCHER_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core._orchestrator._dispatcher"
     __TAIPY_ENTERPRISE_BUILD_DISPATCHER_METHOD = "_build_dispatcher"
 
-    _orchestrator: Optional[_Orchestrator] = None
+    _orchestrator: _AbstractOrchestrator = None
     _dispatcher: Optional[_JobDispatcher] = None
 
     @classmethod
