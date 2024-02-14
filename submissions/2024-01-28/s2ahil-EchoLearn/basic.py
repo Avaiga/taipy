@@ -5,7 +5,7 @@ import taipy as tp
 import google.generativeai as palm
 import json
 from bs4 import BeautifulSoup
-palm.configure(api_key='AIzaSyA-LiZDpliZS0DWEbluHyJTbJ28XPb1d1A')
+palm.configure(api_key='<YOUR_PALM_API_KEY>')
 
 
 
@@ -21,10 +21,10 @@ print(model)
 # from metaphor_python import Metaphor
 
 # # Set your OpenAI API key
-# openai.api_key = "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"
+# openai.api_key = "<YOUR_OPENAI_API_KEY>"
 
 # # Set your Metaphor API key
-# metaphor_api_key = "78680482-9066-4983-8119-fb342968edc7"
+# metaphor_api_key = "<YOUR_METAPHOR_API_KEY>"
 # metaphor = Metaphor(metaphor_api_key)
 
 import requests
