@@ -36,6 +36,10 @@ class _StandaloneJobDispatcher(_JobDispatcher):
     def run(self):
         with self._executor:
             super().run()
+            # TODO REMOVE THIS
+            print("Thread is stopped")
+        # TODO REMOVE THIS
+        print("Executor is closed")
 
     def _dispatch(self, job: Job):
         """Dispatches the given `Job^` on an available worker for execution.
@@ -43,9 +47,12 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         Parameters:
             job (Job^): The job to submit on an executor with an available worker.
         """
-        self._nb_available_workers -= 1
 
+        self._nb_available_workers -= 1
         config_as_string = _TomlSerializer()._serialize(Config._applied_config)  # type: ignore[attr-defined]
+        # TODO REMOVE THIS
+        if self._executor._shutdown_thread:
+            print(f"{job.id=}, {job.task.id=} is not dispatched because executor is closed.")
         future = self._executor.submit(_TaskFunctionWrapper(job.id, job.task), config_as_string=config_as_string)
 
         self._set_dispatched_processes(job.id, future)  # type: ignore
