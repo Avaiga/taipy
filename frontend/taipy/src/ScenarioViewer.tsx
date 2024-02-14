@@ -26,7 +26,13 @@ import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { FlagOutlined, Send, CheckCircle, Cancel, ArrowForwardIosSharp } from "@mui/icons-material";
+import Add from "@mui/icons-material/Add";
+import ArrowForwardIosSharp from "@mui/icons-material/ArrowForwardIosSharp";
+import Cancel from "@mui/icons-material/Cancel";
+import CheckCircle from "@mui/icons-material/CheckCircle";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import FlagOutlined from "@mui/icons-material/FlagOutlined";
+import Send from "@mui/icons-material/Send";
 import deepEqual from "fast-deep-equal/es6";
 
 import {
@@ -86,17 +92,19 @@ interface ScenarioViewerProps {
 interface SequencesRowProps {
     active: boolean;
     number: number;
-    id: string;
     label: string;
+    taskIds: string[];
+    tasks: Record<string, string>;
     enableScenarioFields: boolean;
-    submitEntity: (id: string) => void;
+    submitEntity: (label: string) => void;
     submit: boolean;
-    editLabel: (id: string, label: string) => void;
+    editSequence: (sLabel: string, label: string, taskIds: string[], del?: boolean) => void;
     onFocus: (e: MouseEvent<HTMLElement>) => void;
     focusName: string;
     setFocusName: (name: string) => void;
     submittable: boolean;
     editable: boolean;
+    isValid: (sLabel: string, label: string) => boolean;
 }
 
 const ChipSx = { ml: 1 };
@@ -108,113 +116,186 @@ const tagsAutocompleteSx = {
     maxWidth: "none",
 };
 
+type SequenceFull = [string, string[], boolean, boolean];
+// enum SeFProps {
+//     label,
+//     tasks,
+//     submittable,
+//     editable,
+// }
+
 const SequenceRow = ({
     active,
     number,
-    id,
-    label,
+    label: pLabel,
+    taskIds: pTaskIds,
+    tasks,
     submitEntity,
     enableScenarioFields,
     submit,
-    editLabel,
+    editSequence,
     onFocus,
     focusName,
     setFocusName,
     submittable,
     editable,
+    isValid,
 }: SequencesRowProps) => {
-    const [sequence, setSequence] = useState<string>(label);
+    const [label, setLabel] = useState("");
+    const [taskIds, setTaskIds] = useState<string[]>([]);
+    const [valid, setValid] = useState(false);
 
-    const onChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setSequence(e.currentTarget.value), []);
-    const onSaveField = useCallback(
+    const onChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setLabel(e.currentTarget.value), []);
+
+    const onSaveSequence = useCallback(
         (e?: MouseEvent<Element>) => {
             e && e.stopPropagation();
-            editLabel(id, sequence);
+            if (isValid(pLabel, label)) {
+                editSequence(pLabel, label, taskIds);
+            } else {
+                setValid(false);
+            }
         },
-        [id, sequence, editLabel]
+        [pLabel, label, taskIds, editSequence, isValid]
     );
-    const onCancelField = useCallback(
+    const onCancelSequence = useCallback(
         (e?: MouseEvent<Element>) => {
             e && e.stopPropagation();
-            setSequence(label);
+            setLabel(pLabel);
+            setTaskIds(pTaskIds);
             setFocusName("");
         },
-        [label, setFocusName]
+        [pLabel, pTaskIds, setFocusName]
     );
     const onSubmitSequence = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            submitEntity(id);
+            submitEntity(pLabel);
         },
-        [submitEntity, id]
+        [submitEntity, pLabel]
     );
-    const onKeyDown = useCallback(
-        (e: KeyboardEvent<HTMLInputElement>) => {
-            if (!e.shiftKey && !e.ctrlKey && !e.altKey) {
-                if (e.key == "Enter") {
-                    onSaveField();
-                    e.preventDefault();
-                    e.stopPropagation();
-                } else if (e.key == "Escape") {
-                    onCancelField();
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-            }
+    const onDeleteSequence = useCallback(
+        (e: MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            editSequence(pLabel, "", [], true);
         },
-        [onSaveField, onCancelField]
+        [editSequence, pLabel]
     );
 
-    useEffect(() => setSequence(label), [label]);
+    useEffect(() => setValid(isValid(pLabel, label)), [pLabel, label, isValid]);
+
+    // Tasks
+    const onChangeTasks = useCallback((_: SyntheticEvent, taskIds: string[]) => setTaskIds(taskIds), []);
+    const getTaskLabel = useCallback((id: string) => tasks[id], [tasks]);
+
+    useEffect(() => {
+        setLabel(pLabel);
+        setTaskIds(pTaskIds);
+    }, [pLabel, pTaskIds]);
 
     const name = `sequence${number}`;
-    const disabled = !enableScenarioFields || !active || !submittable;
+    const disabled = !enableScenarioFields || !active;
+    const disabledSubmit = disabled || !submittable;
 
     return (
         <Grid item xs={12} container justifyContent="space-between" data-focus={name} onClick={onFocus} sx={hoverSx}>
-            <Grid item container xs={10}>
-                {active && editable && focusName === name ? (
-                    <TextField
-                        label={`Sequence ${number + 1}`}
-                        variant="outlined"
-                        value={sequence}
-                        onChange={onChange}
-                        sx={FieldNoMaxWidth}
-                        disabled={!enableScenarioFields || !active}
-                        fullWidth
-                        InputProps={{
-                            onKeyDown: onKeyDown,
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <Tooltip title="Apply">
-                                        <IconButton sx={IconPaddingSx} onClick={onSaveField} size="small">
-                                            <CheckCircle color="primary" />
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Cancel">
-                                        <IconButton sx={IconPaddingSx} onClick={onCancelField} size="small">
-                                            <Cancel color="inherit" />
-                                        </IconButton>
-                                    </Tooltip>
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
-                ) : (
-                    <Typography variant="subtitle2">{sequence}</Typography>
-                )}
-            </Grid>
-            <Grid item xs={2} container alignContent="center" alignItems="center" justifyContent="center">
-                {submit ? (
-                    <Tooltip title={disabled ? "Cannot submit Sequence" : "Submit Sequence"}>
-                        <span>
-                            <IconButton size="small" onClick={onSubmitSequence} disabled={disabled}>
-                                <Send color={disableColor("info", disabled)} />
+            {active && editable && focusName === name ? (
+                <>
+                    <Grid item xs={4}>
+                        <TextField
+                            label={`Sequence ${number + 1}`}
+                            variant="outlined"
+                            value={label}
+                            onChange={onChange}
+                            sx={FieldNoMaxWidth}
+                            disabled={disabled}
+                            fullWidth
+                            error={!valid}
+                            helperText={valid ? "" : label ? "This name is already used." : "Cannot be empty."}
+                        />
+                    </Grid>
+                    <Grid item xs={4}>
+                        <Autocomplete
+                            multiple
+                            options={Object.keys(tasks)}
+                            getOptionLabel={getTaskLabel}
+                            renderTags={(values: readonly string[], getTagProps) =>
+                                values.map((id: string, index: number) => {
+                                    return (
+                                        // eslint-disable-next-line react/jsx-key
+                                        <Chip
+                                            variant="outlined"
+                                            label={tasks[id]}
+                                            sx={IconPaddingSx}
+                                            {...getTagProps({ index })}
+                                        />
+                                    );
+                                })
+                            }
+                            value={taskIds}
+                            onChange={onChangeTasks}
+                            fullWidth
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    variant="outlined"
+                                    label="Tasks"
+                                    sx={tagsAutocompleteSx}
+                                    fullWidth
+                                />
+                            )}
+                            disabled={disabled}
+                        />
+                    </Grid>
+                    <Grid item xs={2} container alignContent="center" alignItems="center" justifyContent="center">
+                        <Tooltip title="Apply">
+                            <IconButton sx={IconPaddingSx} onClick={onSaveSequence} size="small" disabled={!valid}>
+                                <CheckCircle color={disableColor("primary", !valid)} />
                             </IconButton>
-                        </span>
-                    </Tooltip>
-                ) : null}
-            </Grid>
+                        </Tooltip>
+                        <Tooltip title="Cancel">
+                            <IconButton sx={IconPaddingSx} onClick={onCancelSequence} size="small">
+                                <Cancel color="inherit" />
+                            </IconButton>
+                        </Tooltip>
+                    </Grid>
+                </>
+            ) : (
+                <>
+                    <Grid item xs={5}>
+                        <Typography variant="subtitle2">{label || "New Sequence"}</Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                        {taskIds.map((id) =>
+                            tasks[id] ? <Chip key={id} label={tasks[id]} variant="outlined" /> : null
+                        )}
+                    </Grid>
+                    <Grid item xs={1} alignContent="center" alignItems="center" justifyContent="center">
+                        <Tooltip title={`Delete Sequence '${label}'`}>
+                            <span>
+                                <IconButton size="small" onClick={onDeleteSequence} disabled={disabled}>
+                                    <DeleteOutline color={disableColor("primary", disabled)} />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                    </Grid>
+                    <Grid item xs={1} alignContent="center" alignItems="center" justifyContent="center">
+                        {pLabel && submit ? (
+                            <Tooltip
+                                title={
+                                    disabledSubmit ? `Cannot submit Sequence '${label}'` : `Submit Sequence '${label}'`
+                                }
+                            >
+                                <span>
+                                    <IconButton size="small" onClick={onSubmitSequence} disabled={disabledSubmit}>
+                                        <Send color={disableColor("info", disabledSubmit)} />
+                                    </IconButton>
+                                </span>
+                            </Tooltip>
+                        ) : null}
+                    </Grid>
+                </>
+            )}
         </Grid>
     );
 };
@@ -226,7 +307,24 @@ const getValidScenario = (scenar: ScenarioFull | ScenarioFull[]) =>
         ? (scenar[0] as ScenarioFull)
         : undefined;
 
-const invalidScenario: ScenarioFull = ["", false, "", "", "", "", [], [], [], [], false, false, false, false, false];
+const invalidScenario: ScenarioFull = [
+    "",
+    false,
+    "",
+    "",
+    "",
+    "",
+    [],
+    [],
+    [],
+    {},
+    [],
+    false,
+    false,
+    false,
+    false,
+    false,
+];
 
 const ScenarioViewer = (props: ScenarioViewerProps) => {
     const {
@@ -275,6 +373,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         scTags,
         scProperties,
         scSequences,
+        scTasks,
         scAuthorizedTags,
         scDeletable,
         scPromotable,
@@ -315,16 +414,17 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
     // submits
     const submitSequence = useCallback(
-        (sequenceId: string) => {
-            dispatch(
-                createSendActionNameAction(id, module, props.onSubmit, {
-                    id: sequenceId,
-                    on_submission_change: props.onSubmissionChange,
-                    type: "Sequence",
-                })
-            );
+        (label: string) => {
+            label &&
+                dispatch(
+                    createSendActionNameAction(id, module, props.onSubmit, {
+                        id: scId,
+                        sequence: label,
+                        on_submission_change: props.onSubmissionChange,
+                    })
+                );
         },
-        [props.onSubmit, props.onSubmissionChange, id, dispatch, module]
+        [scId, props.onSubmit, props.onSubmissionChange, id, dispatch, module]
     );
 
     const submitScenario = useCallback(
@@ -420,24 +520,43 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     );
 
     // sequences
+    const [sequences, setSequences] = useState<SequenceFull[]>([]);
     const editSequence = useCallback(
-        (id: string, label: string) => {
+        (seqLabel: string, label: string, taskIds: string[], del?: boolean) => {
             if (valid) {
-                dispatch(
-                    createSendActionNameAction(id, module, props.onEdit, { id: id, name: label, type: "Sequence" })
-                );
+                if (del || label) {
+                    dispatch(
+                        createSendActionNameAction(id, module, props.onEdit, {
+                            id: scId,
+                            sequence: seqLabel,
+                            name: label,
+                            task_ids: taskIds,
+                            del: !!del,
+                        })
+                    );
+                } else {
+                    setSequences((seqs) => seqs.filter((seq) => seq[0]));
+                }
                 setFocusName("");
             }
         },
-        [valid, props.onEdit, dispatch, module]
+        [valid, id, scId, props.onEdit, dispatch, module]
     );
+    const isValidSequence = useCallback(
+        (sLabel: string, label: string) => !!label && (sLabel == label || !sequences.find((seq) => seq[0] === label)),
+        [sequences]
+    );
+
+    const addSequenceHandler = useCallback(() => setSequences((seq) => [...seq, ["", [], true, true]]), []);
 
     // on scenario change
     useEffect(() => {
         showTags && setTags(scTags);
         setLabel(scLabel);
+        showSequences && setSequences(scSequences);
         setUserExpanded(expanded && valid);
-    }, [scTags, scLabel, valid, showTags, expanded]);
+        setFocusName("");
+    }, [scTags, scLabel, scSequences, valid, showTags, showSequences, expanded]);
 
     // Refresh on broadcast
     useEffect(() => {
@@ -480,9 +599,15 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 {showSubmit ? (
                                     <Tooltip title={disabled ? "Cannot submit Scenario" : "Submit Scenario"}>
                                         <span>
-                                            <IconButton sx={IconPaddingSx} onClick={submitScenario} disabled={disabled}>
-                                                <Send fontSize="medium" color={disableColor("info", disabled)} />
-                                            </IconButton>
+                                            <Button
+                                                onClick={submitScenario}
+                                                disabled={disabled}
+                                                endIcon={
+                                                    <Send fontSize="medium" color={disableColor("info", disabled)} />
+                                                }
+                                            >
+                                                Submit
+                                            </Button>
                                         </span>
                                     </Tooltip>
                                 ) : null}
@@ -679,31 +804,39 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             {showSequences ? (
                                 <>
                                     <Grid item xs={12} container justifyContent="space-between">
-                                        <Typography variant="h6">Sequences</Typography>
+                                        <Grid item xs={9}>
+                                            <Typography variant="h6">Sequences</Typography>
+                                        </Grid>
+                                        <Grid item xs={3} sx={{ ml: "auto" }}>
+                                            <Button onClick={addSequenceHandler} endIcon={<Add />}>
+                                                Add
+                                            </Button>
+                                        </Grid>
                                     </Grid>
 
-                                    {scSequences &&
-                                        scSequences.map((item, index) => {
-                                            const [key, value, submittable, editable] = item;
-                                            return (
-                                                <SequenceRow
-                                                    active={active}
-                                                    number={index}
-                                                    id={key}
-                                                    label={value}
-                                                    key={key}
-                                                    submitEntity={submitSequence}
-                                                    enableScenarioFields={valid}
-                                                    submit={showSubmitSequences}
-                                                    editLabel={editSequence}
-                                                    onFocus={onFocus}
-                                                    focusName={focusName}
-                                                    setFocusName={setFocusName}
-                                                    submittable={submittable}
-                                                    editable={editable}
-                                                />
-                                            );
-                                        })}
+                                    {sequences.map((item, index) => {
+                                        const [label, taskIds, submittable, editable] = item;
+                                        return (
+                                            <SequenceRow
+                                                active={active}
+                                                number={index}
+                                                label={label}
+                                                taskIds={taskIds}
+                                                tasks={scTasks}
+                                                key={label}
+                                                submitEntity={submitSequence}
+                                                enableScenarioFields={valid}
+                                                submit={showSubmitSequences}
+                                                editSequence={editSequence}
+                                                onFocus={onFocus}
+                                                focusName={focusName}
+                                                setFocusName={setFocusName}
+                                                submittable={submittable}
+                                                editable={editable}
+                                                isValid={isValidSequence}
+                                            />
+                                        );
+                                    })}
 
                                     <Grid item xs={12}>
                                         <Divider />

@@ -117,7 +117,8 @@ max_nb_of_workers = "1:int"
 
 [CORE]
 root_folder = "./taipy/"
-storage_folder = ".data/"
+storage_folder = "user_data/"
+taipy_storage_folder = ".taipy/"
 repository_type = "filesystem"
 read_entity_retry = "0:int"
 mode = "development"
@@ -289,7 +290,8 @@ def test_read_write_json_configuration_file():
 },
 "CORE": {
 "root_folder": "./taipy/",
-"storage_folder": ".data/",
+"storage_folder": "user_data/",
+"taipy_storage_folder": ".taipy/",
 "repository_type": "filesystem",
 "read_entity_retry": "0:int",
 "mode": "development",

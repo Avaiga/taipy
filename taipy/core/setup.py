@@ -31,7 +31,7 @@ requirements = [
     "pyarrow>=14.0.2,<15.0",
     "networkx>=2.6,<3.0",
     "openpyxl>=3.1.2,<3.2",
-    "pandas>=2.0.0,<3.0",
+    "pandas>=1.3.5,<3.0",
     "pymongo[srv]>=4.2.0,<5.0",
     "sqlalchemy>=2.0.16,<2.1",
     "toml>=0.10,<0.11",
@@ -45,6 +45,9 @@ extras_require = {
     "mssql": ["pyodbc>=4,<4.1"],
     "mysql": ["pymysql>1,<1.1"],
     "postgresql": ["psycopg2>2.9,<2.10"],
+    "parquet": ["fastparquet==2022.11.0"],
+    "s3": ["boto3==1.29.1"],
+    "mongo": ["pymongo[srv]>=4.2.0,<5.0"],
 }
 
 setup(

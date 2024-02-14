@@ -18,7 +18,7 @@ import random
 from taipy import Gui
 
 # Random data set
-data = [random.gauss(0, 5) for i in range(1000)]
+data = [random.gauss(0, 5) for _ in range(1000)]
 
 page = """
 # Histogram - Simple

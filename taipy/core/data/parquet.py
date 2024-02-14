@@ -159,8 +159,12 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
             **properties,
         )
         self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
+
+        if self._path and ".data" in self._path:
+            self._path = self._migrate_path(self.storage_type(), self._path)
         if not self._path:
             self._path = self._build_path(self.storage_type())
+
         properties[self.__PATH_KEY] = self._path
 
         if default_value is not None and not os.path.exists(self._path):
@@ -248,8 +252,10 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
         if isinstance(data, pd.DataFrame):
             data.to_parquet(self._path, **kwargs)
         else:
-            pd.DataFrame(data).to_parquet(self._path, **kwargs)
-
+            _df = pd.DataFrame(data)
+            # Ensure that the columns are strings, otherwise writing will fail with pandas 1.3.5
+            _df.columns = _df.columns.astype(str)
+            _df.to_parquet(self._path, **kwargs)
         self.track_edit(timestamp=datetime.now(), job_id=job_id)
 
     def read_with_kwargs(self, **read_kwargs):

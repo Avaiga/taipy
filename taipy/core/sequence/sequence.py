@@ -74,7 +74,8 @@ class Sequence(_Entity, Submittable, _Labeled):
 
     @staticmethod
     def _new_id(sequence_name: str, scenario_id) -> SequenceId:
-        return SequenceId(Sequence._SEPARATOR.join([Sequence._ID_PREFIX, _validate_id(sequence_name), scenario_id]))
+        seq_id = sequence_name.replace(" ", "TPSPACE")
+        return SequenceId(Sequence._SEPARATOR.join([Sequence._ID_PREFIX, _validate_id(seq_id), scenario_id]))
 
     def __hash__(self):
         return hash(self.id)
