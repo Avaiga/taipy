@@ -51,9 +51,8 @@ class _ConfigChecker:
                 config_value,
                 f"{config_key} field of {parent_config_class.__name__} `{config_id}` is empty.",
             )
-        else:
-            if not (
-                (isinstance(config_value, List) or isinstance(config_value, Set))
+        elif not (
+                (isinstance(config_value, (List, Set)))
                 and all(isinstance(x, child_config_class) for x in config_value)
             ):
                 self._error(
