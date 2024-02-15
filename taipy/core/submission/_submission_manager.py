@@ -46,7 +46,7 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
             entity_id=entity_id, entity_type=entity_type, entity_config_id=entity_config, properties=properties
         )
         cls._set(submission)
-        LOGGER.warn("Submission created: %s", submission.id)
+        LOGGER.info("Submission created: %s", submission.id)
 
         Notifier.publish(_make_event(submission, EventOperation.CREATION))
 
