@@ -1,4 +1,0 @@
-recursive-include webapp *
-include version.json
-include viselements.json
-include *.pyi
