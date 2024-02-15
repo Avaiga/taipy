@@ -56,10 +56,11 @@ class _JobDispatcher(threading.Thread):
         """
         self._STOP_FLAG = True
         if wait and self.is_alive():
+            self._logger.debug("Waiting for the dispatcher thread to stop...")
             self.join(timeout=timeout)
 
     def run(self):
-        _TaipyLogger._get_logger().info("Start job dispatcher...")
+        self._logger.info("Start job dispatcher...")
         while not self._STOP_FLAG:
             try:
                 if self._can_execute():
@@ -71,7 +72,7 @@ class _JobDispatcher(threading.Thread):
             except Empty:  # In case the last job of the queue has been removed.
                 pass
             except Exception as e:
-                _TaipyLogger._get_logger().exception(e)
+                self._logger.exception(e)
                 pass
 
         # The dispatcher is now shutting down, let's shutdown its executor.
