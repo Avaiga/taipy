@@ -36,7 +36,7 @@ def test_migrate_fs_default(caplog):
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "migrate", "--repository-type", "filesystem", "--skip-backup"]):
             _MigrateCLI.parse_arguments()
-    assert "Starting entity migration from '.data' folder" in caplog.text
+    assert "Starting entity migration from '.taipy/' folder" in caplog.text
 
 
 def test_migrate_fs_specified_folder(caplog):

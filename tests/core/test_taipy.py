@@ -713,7 +713,7 @@ class TestTaipy:
         assert sorted(os.listdir("./tmp/exp_scenario_1/cycles")) == sorted([f"{scenario_2.cycle.id}.json"])
 
         with pytest.raises(InvalidExportPath):
-            tp.export_scenario(scenario_2.id, Config.core.storage_folder)
+            tp.export_scenario(scenario_2.id, Config.core.taipy_storage_folder)
 
         shutil.rmtree("./tmp", ignore_errors=True)
 

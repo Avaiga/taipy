@@ -8,8 +8,9 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+import os
 import pathlib
+import shutil
 
 
 class _AbstractFileDataNode(object):
@@ -26,3 +27,9 @@ class _AbstractFileDataNode(object):
         if not dir_path.exists():
             dir_path.mkdir(parents=True, exist_ok=True)
         return dir_path / f"{self.id}.{self.__EXTENSION_MAP.get(storage_type)}"
+
+    def _migrate_path(self, storage_type, old_path):
+        new_path = self._build_path(storage_type)
+        if os.path.exists(old_path):
+            shutil.move(old_path, new_path)
+        return new_path

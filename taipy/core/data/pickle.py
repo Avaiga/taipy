@@ -102,10 +102,12 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
             editor_expiration_date,
             **properties,
         )
+        if self._path and ".data" in self._path:
+            self._path = self._migrate_path(self.storage_type(), self._path)
+
         if self._path is None:
             self._path = self._build_path(self.storage_type())
-        if not self._last_edit_date and os.path.exists(self._path):
-            self._last_edit_date = datetime.now()
+
         if default_value is not None and not os.path.exists(self._path):
             self._write(default_value)
             self._last_edit_date = datetime.now()
@@ -118,6 +120,8 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
                     }
                 )
             )
+        if not self._last_edit_date and os.path.exists(self._path):
+            self._last_edit_date = datetime.now()
 
         self._TAIPY_PROPERTIES.update(
             {

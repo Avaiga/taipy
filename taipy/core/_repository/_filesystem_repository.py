@@ -52,7 +52,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
     @property
     def _storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.core.storage_folder)
+        return pathlib.Path(Config.core.taipy_storage_folder)
 
     ###############################
     # ##   Inherited methods   ## #

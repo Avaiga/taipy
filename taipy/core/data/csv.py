@@ -124,12 +124,13 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         _AbstractTabularDataNode.__init__(self, **properties)
 
         self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
+        if self._path and ".data" in self._path:
+            self._path = self._migrate_path(self.storage_type(), self._path)
+
         if not self._path:
             self._path = self._build_path(self.storage_type())
         properties[self.__PATH_KEY] = self._path
 
-        if not self._last_edit_date and isfile(self._path):
-            self._last_edit_date = datetime.now()
         if default_value is not None and not os.path.exists(self._path):
             self._write(default_value)
             self._last_edit_date = datetime.now()
@@ -142,6 +143,8 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
                     }
                 )
             )
+        if not self._last_edit_date and isfile(self._path):
+            self._last_edit_date = datetime.now()
 
         self._TAIPY_PROPERTIES.update(
             {
