@@ -33,6 +33,29 @@ def cleanup(tmp_excel_file):
     if os.path.exists(tmp_excel_file):
         os.remove(tmp_excel_file)
 
+@pytest.fixture(scope="function")
+def tmp_excel_file_2():
+    return os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp2.xlsx")
+
+
+@pytest.fixture(scope="function", autouse=True)
+def cleanup_2(tmp_excel_file_2):
+    yield
+    if os.path.exists(tmp_excel_file_2):
+        os.remove(tmp_excel_file_2)
+
+@pytest.fixture(scope="function")
+def tmp_excel_file_3():
+    return os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp3.xlsx")
+
+
+@pytest.fixture(scope="function", autouse=True)
+def cleanup_3(tmp_excel_file_3):
+    yield
+    if os.path.exists(tmp_excel_file_3):
+        os.remove(tmp_excel_file_3)
+
+
 
 @dataclasses.dataclass
 class MyCustomObject:
@@ -161,11 +184,11 @@ def test_write_with_header_multiple_sheet_numpy_without_sheet_name(tmp_excel_fil
         assert np.array_equal(excel_dn_data[sheet_name], sheet_data[sheet_name])
 
 
-def test_write_with_header_multiple_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file):
+def test_write_with_header_multiple_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file_2):
     excel_dn = ExcelDataNode(
         "foo",
         Scope.SCENARIO,
-        properties={"path": tmp_excel_file, "sheet_name": sheet_names, "exposed_type": MyCustomObject},
+        properties={"path": tmp_excel_file_2, "sheet_name": sheet_names, "exposed_type": MyCustomObject},
     )
 
     row_1 = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
@@ -179,8 +202,11 @@ def test_write_with_header_multiple_sheet_custom_exposed_type_with_sheet_name(tm
         assert all(actual == expected for actual, expected in zip(excel_dn_data[sheet_name], sheet_data[sheet_name]))
 
 
-def test_write_with_header_multiple_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file):
-    excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": MyCustomObject})
+def test_write_with_header_multiple_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file_2):
+    excel_dn = ExcelDataNode(
+        "foo",
+        Scope.SCENARIO,
+        properties={"path": tmp_excel_file_2, "exposed_type": MyCustomObject})
 
     row_1 = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
     row_2 = [MyCustomObject(0, 4, "hello"), MyCustomObject(1, 5, "abc"), MyCustomObject(2, 6, ".")]
@@ -193,9 +219,11 @@ def test_write_with_header_multiple_sheet_custom_exposed_type_without_sheet_name
         assert all(actual == expected for actual, expected in zip(excel_dn_data[sheet_name], sheet_data[sheet_name]))
 
 
-def test_write_without_header_multiple_sheet_pandas_with_sheet_name(tmp_excel_file):
+def test_write_without_header_multiple_sheet_pandas_with_sheet_name(tmp_excel_file_2):
     excel_dn = ExcelDataNode(
-        "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "sheet_name": sheet_names, "has_header": False}
+        "foo",
+        Scope.SCENARIO,
+        properties={"path": tmp_excel_file_2, "sheet_name": sheet_names, "has_header": False}
     )
 
     df_1 = pd.DataFrame([*zip([1, 2, 3])])
@@ -224,8 +252,8 @@ def test_write_without_header_multiple_sheet_pandas_with_sheet_name(tmp_excel_fi
         assert np.array_equal(excel_dn_data[sheet_name].to_numpy(), pd.DataFrame(sheet_data[sheet_name]).to_numpy())
 
 
-def test_write_without_header_multiple_sheet_pandas_without_sheet_name(tmp_excel_file):
-    excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "has_header": False})
+def test_write_without_header_multiple_sheet_pandas_without_sheet_name(tmp_excel_file_2):
+    excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": tmp_excel_file_2, "has_header": False})
 
     df_1 = pd.DataFrame([*zip([1, 2, 3])])
     df_2 = pd.DataFrame([*zip([4, 5, 6])])
@@ -253,11 +281,11 @@ def test_write_without_header_multiple_sheet_pandas_without_sheet_name(tmp_excel
         assert np.array_equal(excel_dn_data[sheet_name].to_numpy(), pd.DataFrame(sheet_data[sheet_name]).to_numpy())
 
 
-def test_write_without_header_multiple_sheet_numpy_with_sheet_name(tmp_excel_file):
+def test_write_without_header_multiple_sheet_numpy_with_sheet_name(tmp_excel_file_3):
     excel_dn = ExcelDataNode(
         "foo",
         Scope.SCENARIO,
-        properties={"path": tmp_excel_file, "sheet_name": sheet_names, "exposed_type": "numpy", "has_header": False},
+        properties={"path": tmp_excel_file_3, "sheet_name": sheet_names, "exposed_type": "numpy", "has_header": False},
     )
 
     arr_1 = np.array([[1], [2], [3]])
@@ -281,9 +309,11 @@ def test_write_without_header_multiple_sheet_numpy_with_sheet_name(tmp_excel_fil
         assert np.array_equal(excel_dn_data[sheet_name], sheet_data[sheet_name])
 
 
-def test_write_without_header_multiple_sheet_numpy_without_sheet_name(tmp_excel_file):
+def test_write_without_header_multiple_sheet_numpy_without_sheet_name(tmp_excel_file_3):
     excel_dn = ExcelDataNode(
-        "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": "numpy", "has_header": False}
+        "foo",
+        Scope.SCENARIO,
+        properties={"path": tmp_excel_file_3, "exposed_type": "numpy", "has_header": False}
     )
 
     arr_1 = np.array([[1], [2], [3]])
@@ -307,12 +337,12 @@ def test_write_without_header_multiple_sheet_numpy_without_sheet_name(tmp_excel_
         assert np.array_equal(excel_dn_data[sheet_name], sheet_data[sheet_name])
 
 
-def test_write_without_header_multiple_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file):
+def test_write_without_header_multiple_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file_3):
     excel_dn = ExcelDataNode(
         "foo",
         Scope.SCENARIO,
         properties={
-            "path": tmp_excel_file,
+            "path": tmp_excel_file_3,
             "sheet_name": sheet_names,
             "exposed_type": MyCustomObject,
             "has_header": False,
@@ -330,9 +360,11 @@ def test_write_without_header_multiple_sheet_custom_exposed_type_with_sheet_name
         assert all(actual == expected for actual, expected in zip(excel_dn_data[sheet_name], sheet_data[sheet_name]))
 
 
-def test_write_without_header_multiple_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file):
+def test_write_without_header_multiple_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file_3):
     excel_dn = ExcelDataNode(
-        "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": MyCustomObject, "has_header": False}
+        "foo",
+        Scope.SCENARIO,
+        properties={"path": tmp_excel_file_3, "exposed_type": MyCustomObject, "has_header": False}
     )
 
     row_1 = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
