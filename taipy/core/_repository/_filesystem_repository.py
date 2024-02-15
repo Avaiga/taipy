@@ -11,7 +11,6 @@
 
 import copy
 import json
-import os
 import pathlib
 import shutil
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Type, Union
@@ -62,14 +61,10 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def _save(self, entity: Entity):
         self.__create_directory_if_not_exists()
         model = self.converter._entity_to_model(entity)  # type: ignore
-        # fd = self.__get_path(model.id).write_text(
-        #     json.dumps(model.to_dict(), ensure_ascii=False, indent=0, cls=_Encoder, check_circular=False),
-        #     encoding="UTF-8",
-        # )
-        with open(self.__get_path(model.id), "w", encoding="utf-8") as f:
-            f.write(json.dumps(model.to_dict(), ensure_ascii=False, indent=0, cls=_Encoder, check_circular=False))
-            f.flush()
-            os.fsync(f.fileno())
+        self.__get_path(model.id).write_text(
+            json.dumps(model.to_dict(), ensure_ascii=False, indent=0, cls=_Encoder, check_circular=False),
+            encoding="UTF-8",
+        )
 
     def _exists(self, entity_id: str) -> bool:
         return self.__get_path(entity_id).exists()
