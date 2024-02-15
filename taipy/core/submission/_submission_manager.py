@@ -11,6 +11,8 @@
 
 from typing import List, Optional, Union
 
+from taipy.logger._taipy_logger import _TaipyLogger
+
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._repository._abstract_repository import _AbstractRepository
@@ -21,6 +23,8 @@ from ..scenario.scenario import Scenario
 from ..sequence.sequence import Sequence
 from ..submission.submission import Submission, SubmissionId, SubmissionStatus
 from ..task.task import Task
+
+LOGGER = _TaipyLogger._get_logger()
 
 
 class _SubmissionManager(_Manager[Submission], _VersionMixin):
@@ -42,6 +46,7 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
             entity_id=entity_id, entity_type=entity_type, entity_config_id=entity_config, properties=properties
         )
         cls._set(submission)
+        LOGGER.warn("Submission created: %s", submission.id)
 
         Notifier.publish(_make_event(submission, EventOperation.CREATION))
 

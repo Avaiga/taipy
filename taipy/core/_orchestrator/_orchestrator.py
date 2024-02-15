@@ -165,7 +165,13 @@ class _Orchestrator(_AbstractOrchestrator):
 
     @classmethod
     def _update_submission_status(cls, job: Job):
-        _SubmissionManagerFactory._build_manager()._get(job.submit_id)._update_submission_status(job)
+        submission = _SubmissionManagerFactory._build_manager()._get(job.submit_id)
+        if submission:
+            submission._update_submission_status(job)
+        else:
+            cls.__logger.warn("Submission not found, Submission ID: %s, Job ID: %s", job.submit_id, job.id)
+            all_submissions = _SubmissionManagerFactory._build_manager()._get_all()
+            cls.__logger.debug("Existing submissions: %s", ", ".join([submission.id for submission in all_submissions]))
 
     @classmethod
     def _orchestrate_job_to_run_or_block(cls, jobs: List[Job]):
