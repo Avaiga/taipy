@@ -61,7 +61,7 @@ class _OrchestratorFactory:
         return cls._dispatcher
 
     @classmethod
-    def _remove_dispatcher(cls, wait: bool = True, timeout: Optional[float] = None) -> Optional[_JobDispatcher]:
+    def _remove_dispatcher(cls, wait: bool = True, timeout: Optional[float] = None) -> None:
         if cls._dispatcher is not None and not isinstance(cls._dispatcher, _DevelopmentJobDispatcher):
             cls._dispatcher.stop(wait, timeout)
         cls._dispatcher = None
