@@ -183,7 +183,7 @@ def test_write_with_header_multiple_sheet_custom_exposed_type_with_sheet_name(tm
     sheet_data = {"Sheet1": row_1, "Sheet2": row_2}
 
     excel_dn.write(sheet_data)
-    excel_dn_data = excel_dn.read()
+    excel_dn.read()
     # assert len(excel_dn_data) == len(sheet_data) == 2
     # for sheet_name in sheet_data.keys():
     #     assert all(actual == expected for actual, expected in zip(excel_dn_data[sheet_name], sheet_data[sheet_name]))
