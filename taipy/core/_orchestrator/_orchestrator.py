@@ -169,7 +169,7 @@ class _Orchestrator(_AbstractOrchestrator):
         if submission:
             submission._update_submission_status(job)
         else:
-            cls.__logger.warn("Submission not found, Submission ID: %s, Job ID: %s", job.submit_id, job.id)
+            cls.__logger.warning("Submission not found, Submission ID: %s, Job ID: %s", job.submit_id, job.id)
             all_submissions = _SubmissionManagerFactory._build_manager()._get_all()
             cls.__logger.debug("Existing submissions: %s", ", ".join([submission.id for submission in all_submissions]))
 
