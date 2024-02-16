@@ -192,10 +192,8 @@ def read(excel_dn: ExcelDataNode):
             work_books[sheet_name] = res
     finally:
         excel_file.close()
-
     if len(provided_sheet_names) == 1:
         return work_books[provided_sheet_names[0]]
-
     return work_books
 
 
