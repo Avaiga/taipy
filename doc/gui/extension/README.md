@@ -148,14 +148,14 @@ the "TAIPY_DIR" variable is set, we can build the JavaScript module file:
 - Set your directory to `example_library/front-end`
 - Install the Taipy GUI JavaScript bundle and the other dependencies:<br/>
   You must run the command:
-  ```
-  npm install
+  ```bash
+  $ npm install
   ```
   This command will fail with a message indicating that the Taipy GUI 'webapp' directory
   could not be found if the "TAIPY_DIR" environment variable was not set properly.
 - You can now build the custom element library JavaScript bundle file:
-  ```
-  npm run build
+  ```bash
+  $ npm run build
   ```
   This generates the bundle `exampleLibrary.js` in the `dist` directory (if you have not
   changed the `output` settings in `webpack.config.js`). This file contains the definition
@@ -168,8 +168,8 @@ creates a Taipy GUI application with a page that demonstrates the various
 elements defined by this extension library example.
 
 To execute this application, you can run:
-```sh
-python main.py
+```bash
+$ python main.py
 ```
 (prefixed by `pipenv run` if you are using `pipenv`)
 
@@ -180,16 +180,15 @@ You can create an autonomous Python package for this extension library.
 The following two simple steps must be performed:
 
 - Install the build package:
-  ```sh
-  pip install build
+  ```bash
+  $ pip install build
   ```
   (prefixed by `pipenv run` if you are using `pipenv`)
 - Build the package:
-  ```sh
-  python -m build
+  ```bash
+  $ python -m build
   ```
   (prefixed by `pipenv run` if you are using `pipenv`)
 
 This generates an autonomous Python package that contains both the back-end and the
 front-end code for the extension library.
-

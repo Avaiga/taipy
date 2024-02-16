@@ -97,9 +97,9 @@ working on it.
    This tool will run before each commit and will automatically reformat code or raise warnings and errors based on the
    code format or Python typing.
    You can install and setup it up by doing:
-   ```
-     pipenv install pre-commit
-     pipenv run python -m pre-commit install
+   ```bash
+   $ pipenv install pre-commit
+   $ pipenv run python -m pre-commit install
    ```
 
 4. Make the changes.<br/>

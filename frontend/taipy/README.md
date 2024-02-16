@@ -13,7 +13,7 @@ Check [this file](../taipy-gui/README.md) for more information.
 To build the Taipy bundle, you must set your current directory to this directory and then
 run the following commands:
 
-```console
+```bash
 # Current directory is the directory where this README file is located:
 #   [taipy-dir]/frontend/taipy
 #

@@ -15,7 +15,7 @@ of the standard installation.
 To build the Taipy GUI bundle, you must set your current directory to this directory and then
 run the following commands:
 
-```console
+```bash
 # Current directory is the directory where this README file is located:
 #   [taipy-dir]/frontend/taipy-gui
 #
