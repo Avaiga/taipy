@@ -51,22 +51,6 @@ class MyCustomObject:
                 setattr(self, field.name, field.type(value))
 
 
-def is_file_deletable(file_path):
-    file_dirname = os.path.dirname(file_path)  # get the directory name of file_path
-
-    if os.path.isfile(file_path):  # if file_path exists and is a file
-        if os.access(file_path, os.W_OK):  # if file_path has write permission
-            if os.access(file_dirname, os.W_OK | os.X_OK):  # directory containing file_path has w and x permission
-                try:  # if file_path can be opened for write
-                    file = open(file_path, 'w')  # Attention: This will delete all the content from the file
-                    file.close()
-                    return True  # file_path is not locked
-                except OSError:  # if file_path can't be opened for write
-                    pass  # file_path is locked
-
-    return False
-
-
 def test_fail():
     path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp2.xlsx")
 
@@ -75,30 +59,19 @@ def test_fail():
     from taipy.logger._taipy_logger import _TaipyLogger
     logger = _TaipyLogger._get_logger()
 
-    # logger.warning("------------------------ WRITE ----------------------------------")
-    # #excel_dn.write(expected_data)
-    # logger.warning(f"Writing to {path}")
-    # expected_data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
-    # df = pd.DataFrame.from_records([row.__dict__ for row in expected_data])
-    # df.to_excel(path, index=False, header=True, sheet_name="Sheet1")
-    # logger.warning("-----------------------------------------------------------------")
-
     logger.warning("------------------------ READ -----------------------------------")
-    # actual_data = excel_dn.read()
     logger.warning(f"Reading from {path}")
     excel_file = load_workbook(path)
     work_sheet = excel_file["Sheet1"]
 
-    actual_data = list()
     for row in work_sheet.rows:
-        actual_data.append([col.value for col in row])
-    if actual_data:
-        header = actual_data.pop(0)
-        for i, row in enumerate(actual_data):
-            from typing import Dict
-            params: Dict[str, str] = {h: r for h, r in zip(header, row)}
-            actual_data[i] = MyCustomObject(**params)
+        header = [str(col.value) for col in row]
+        break
+    for row in work_sheet.rows:
+        for h, r in zip(header, row):
+            logger.warning(f"{str(h)}: {str(r)}")
     excel_file.close()
+
     if os.path.exists(path):
         logger.warning(f"trying to delete {path}.")
         os.remove(path)
