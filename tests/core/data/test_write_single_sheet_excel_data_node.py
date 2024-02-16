@@ -88,40 +88,36 @@ def read(excel_dn: ExcelDataNode):
 
     from taipy.logger._taipy_logger import _TaipyLogger
     logger = _TaipyLogger._get_logger()
-    try:
-        logger.warning("------------------------ READ -----------------------------------")
-        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp2.xlsx")
-        logger.warning(f"Reading from {path}")
+    exposed_type = excel_dn.exposed_type
+    work_books = dict()
 
-        excel_file = load_workbook(excel_dn._path)
-        exposed_type = excel_dn.exposed_type
-        work_books = dict()
-        provided_sheet_names = [excel_dn.sheet_name]
-        for _, sheet_name in enumerate(provided_sheet_names):
-            work_sheet = excel_file[sheet_name]
-            res = list()
-            for row in work_sheet.rows:
-                res.append([col.value for col in row])
-            if res:
-                header = res.pop(0)
-                for i, row in enumerate(res):
-                    from typing import Dict
-                    params: Dict[str, str] = {h: r for h, r in zip(header, row)}
-                    res[i] = exposed_type(**params)
-            work_books[sheet_name] = res
-    finally:
-        excel_file.close()
-        if is_file_deletable(path):
-            logger.warning(f"{path} is deletable.")
-        if os.path.exists(path):
-            os.remove(path)
-            logger.warning(f"{path} has been deleted.")
-        logger.warning("-----------------------------------------------------------------")
+    logger.warning("------------------------ READ -----------------------------------")
+    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp2.xlsx")
+    logger.warning(f"Reading from {path}")
 
-    if len(provided_sheet_names) == 1:
-        return work_books[provided_sheet_names[0]]
-    return work_books
+    excel_file = load_workbook(excel_dn._path)
+    work_sheet = excel_file[excel_dn.sheet_name]
 
+    excel_file.close()
+    if is_file_deletable(path):
+        logger.warning(f"{path} is deletable.")
+    if os.path.exists(path):
+        logger.warning(f"trying to delete {path}.")
+        os.remove(path)
+        logger.warning(f"{path} has been deleted.")
+    logger.warning("-----------------------------------------------------------------")
+
+    res = list()
+    for row in work_sheet.rows:
+        res.append([col.value for col in row])
+    if res:
+        header = res.pop(0)
+        for i, row in enumerate(res):
+            from typing import Dict
+            params: Dict[str, str] = {h: r for h, r in zip(header, row)}
+            res[i] = exposed_type(**params)
+    work_books[excel_dn.sheet_name] = res
+    return work_books[excel_dn.sheet_name]
 
 
 def test_write_with_header_single_sheet_pandas_with_sheet_name(tmp_excel_file):
