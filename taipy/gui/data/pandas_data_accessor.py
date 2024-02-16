@@ -31,7 +31,7 @@ if util.find_spec("pyarrow"):
 
 
 class _PandasDataAccessor(_DataAccessor):
-    __types = (pd.DataFrame,)
+    __types = (pd.DataFrame, pd.Series)
 
     __INDEX_COL = "_tp_index"
 
@@ -200,7 +200,9 @@ class _PandasDataAccessor(_DataAccessor):
         return ret
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
-        if isinstance(value, _PandasDataAccessor.__types):  # type: ignore
+        if isinstance(value, pd.Series):
+            value = value.to_frame()
+        if isinstance(value, pd.DataFrame):  # type: ignore
             return {str(k): v for k, v in value.dtypes.apply(lambda x: x.name.lower()).items()}
         elif isinstance(value, list):
             ret_dict: t.Dict[str, str] = {}
@@ -213,7 +215,7 @@ class _PandasDataAccessor(_DataAccessor):
         self,
         gui: Gui,
         var_name: str,
-        value: pd.DataFrame,
+        value: t.Union[pd.DataFrame, pd.Series],
         payload: t.Dict[str, t.Any],
         data_format: _DataFormat,
         col_prefix: t.Optional[str] = "",
@@ -225,6 +227,8 @@ class _PandasDataAccessor(_DataAccessor):
         paged = not payload.get("alldata", False)
         is_copied = False
 
+        if isinstance(value, pd.Series):
+            value = value.to_frame()
         # add index if not chart
         if paged:
             if _PandasDataAccessor.__INDEX_COL not in value.columns:
@@ -244,7 +248,7 @@ class _PandasDataAccessor(_DataAccessor):
                 val = fd.get("value")
                 action = fd.get("action")
                 if isinstance(val, str):
-                    if self.__is_date_column(value, col):
+                    if self.__is_date_column(t.cast(pd.DataFrame, value), col):
                         val = datetime.fromisoformat(val[:-1])
                     vars.append(val)
                 val = f"@vars[{len(vars) - 1}]" if isinstance(val, (str, datetime)) else val
@@ -271,7 +275,7 @@ class _PandasDataAccessor(_DataAccessor):
                     if col not in applies_with_fn.keys():
                         applies_with_fn[col] = "first"
                 try:
-                    value = value.groupby(aggregates).agg(applies_with_fn)
+                    value = t.cast(pd.DataFrame, value).groupby(aggregates).agg(applies_with_fn)
                 except Exception:
                     _warn(f"Cannot aggregate {var_name} with groupby {aggregates} and aggregates {applies}.")
             inf = payload.get("infinite")
@@ -305,7 +309,7 @@ class _PandasDataAccessor(_DataAccessor):
                 try:
                     if value.columns.dtype.name == "int64":
                         order_by = int(order_by)
-                    new_indexes = value[order_by].values.argsort(axis=0)
+                    new_indexes = t.cast(pd.DataFrame, value)[order_by].values.argsort(axis=0)
                     if payload.get("sort") == "desc":
                         # reverse order
                         new_indexes = new_indexes[::-1]
@@ -318,7 +322,7 @@ class _PandasDataAccessor(_DataAccessor):
             value = self.__build_transferred_cols(
                 gui,
                 columns,
-                value,
+                t.cast(pd.DataFrame, value),
                 styles=payload.get("styles"),
                 tooltips=payload.get("tooltips"),
                 is_copied=is_copied,
@@ -370,7 +374,7 @@ class _PandasDataAccessor(_DataAccessor):
                             gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(value))
                         except Exception as e:
                             _warn(f"Limit rows error with {decimator} for Dataframe", e)
-            value = self.__build_transferred_cols(gui, columns, value, is_copied=is_copied)
+            value = self.__build_transferred_cols(gui, columns, t.cast(pd.DataFrame, value), is_copied=is_copied)
             dictret = self.__format_data(value, data_format, "list", data_extraction=True)
         ret_payload["value"] = dictret
         return ret_payload
@@ -390,7 +394,7 @@ class _PandasDataAccessor(_DataAccessor):
                 for i, v in enumerate(value):
                     ret = (
                         self.__get_data(gui, var_name, v, payload, data_format, f"{i}/")
-                        if isinstance(v, pd.DataFrame)
+                        if isinstance(v, _PandasDataAccessor.__types)
                         else {}
                     )
                     ret_val = ret.get("value", {})
