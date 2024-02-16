@@ -33,17 +33,6 @@ def cleanup(tmp_excel_file):
     if os.path.exists(tmp_excel_file):
         os.remove(tmp_excel_file)
 
-@pytest.fixture(scope="function")
-def tmp_excel_file_2():
-    return os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp2.xlsx")
-
-
-@pytest.fixture(scope="function", autouse=True)
-def cleanup_2(tmp_excel_file_2):
-    yield
-    if os.path.exists(tmp_excel_file_2):
-        os.remove(tmp_excel_file_2)
-
 
 @dataclasses.dataclass
 class MyCustomObject:
@@ -172,44 +161,18 @@ def test_write_with_header_multiple_sheet_numpy_without_sheet_name(tmp_excel_fil
         assert np.array_equal(excel_dn_data[sheet_name], sheet_data[sheet_name])
 
 
-def read(excel_dn: ExcelDataNode):
-    from openpyxl.reader.excel import load_workbook
-    try:
-        excel_file = load_workbook(excel_dn._path)
-        work_books = dict()
-        exposed_type = excel_dn.exposed_type
-        provided_sheet_names = excel_dn.sheet_name
-        for _, sheet_name in enumerate(provided_sheet_names):
-            work_sheet = excel_file[sheet_name]
-            res = list()
-            for row in work_sheet.rows:
-                res.append([col.value for col in row])
-            header = res.pop(0)
-            for i, row in enumerate(res):
-                from typing import Dict
-                params: Dict[str, str] = {h: r for h, r in zip(header, row)}
-                res[i] = exposed_type(**params)
-            work_books[sheet_name] = res
-    finally:
-        excel_file.close()
-    if len(provided_sheet_names) == 1:
-        return work_books[provided_sheet_names[0]]
-    return work_books
-
-
-def test_write_with_header_multiple_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file_2):
+def test_write_with_header_multiple_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode(
         "foo",
         Scope.SCENARIO,
-        properties={"path": tmp_excel_file_2, "sheet_name": sheet_names, "exposed_type": MyCustomObject},
+        properties={"path": tmp_excel_file, "sheet_name": sheet_names, "exposed_type": MyCustomObject},
     )
     row_1 = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
     row_2 = [MyCustomObject(0, 4, "hello"), MyCustomObject(1, 5, "abc"), MyCustomObject(2, 6, ".")]
     sheet_data = {"Sheet1": row_1, "Sheet2": row_2}
 
     excel_dn.write(sheet_data)
-    # excel_dn_data = excel_dn.read()
-    excel_dn_data = read(excel_dn)
+    excel_dn_data = excel_dn.read()
     assert len(excel_dn_data) == len(sheet_data) == 2
     for sheet_name in sheet_data.keys():
         assert all(actual == expected for actual, expected in zip(excel_dn_data[sheet_name], sheet_data[sheet_name]))
