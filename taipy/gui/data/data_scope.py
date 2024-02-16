@@ -25,7 +25,7 @@ class _DataScopes:
     def __init__(self) -> None:
         self.__scopes: t.Dict[str, SimpleNamespace] = {_DataScopes._GLOBAL_ID: SimpleNamespace()}
         # { scope_name: { metadata: value } }
-        self.__scopes_metadata: t.Dict[str, t.Dict[str, str]] = {_DataScopes._GLOBAL_ID: _DataScopes._DEFAULT_METADATA.copy()}
+        self.__scopes_metadata: t.Dict[str, t.Dict[str, t.Any]] = {_DataScopes._GLOBAL_ID: _DataScopes._DEFAULT_METADATA.copy()}
         self.__single_client = True
 
     def set_single_client(self, value: bool) -> None:

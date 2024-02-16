@@ -508,7 +508,7 @@ class Gui:
     def _get_data_scope(self) -> SimpleNamespace:
         return self.__bindings._get_data_scope()
 
-    def _get_data_scope_metadata(self) -> t.Dict[str, str]:
+    def _get_data_scope_metadata(self) -> t.Dict[str, t.Any]:
         return self.__bindings._get_data_scope_metadata()
 
     def _get_all_data_scopes(self) -> t.Dict[str, SimpleNamespace]:
