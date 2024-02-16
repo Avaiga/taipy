@@ -69,7 +69,7 @@ def test_fail():
         break
     for row in work_sheet.rows:
         for h, r in zip(header, row):
-            logger.warning(f"{str(h)}: {str(r)}")
+            logger.warning(f"{str(h)}: {r.value}")
     excel_file.close()
 
     if os.path.exists(path):
