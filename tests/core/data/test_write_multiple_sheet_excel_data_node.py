@@ -172,6 +172,33 @@ def test_write_with_header_multiple_sheet_numpy_without_sheet_name(tmp_excel_fil
         assert np.array_equal(excel_dn_data[sheet_name], sheet_data[sheet_name])
 
 
+def read(excel_dn: ExcelDataNode):
+    from openpyxl.reader.excel import load_workbook
+    from typing import List, Set, Tuple
+    try:
+        excel_file = load_workbook(excel_dn._path)
+        work_books = dict()
+        exposed_type = excel_dn.exposed_type
+        provided_sheet_names = excel_dn.sheet_name
+        for _, sheet_name in enumerate(provided_sheet_names):
+            work_sheet = excel_file[sheet_name]
+            res = list()
+            for row in work_sheet.rows:
+                res.append([col.value for col in row])
+
+            header = res.pop(0)
+            for i, row in enumerate(res):
+                res[i] = exposed_type(**dict([[h, r] for h, r in zip(header, row)]))
+            work_books[sheet_name] = res
+    finally:
+        excel_file.close()
+
+    if len(provided_sheet_names) == 1:
+        return work_books[provided_sheet_names[0]]
+
+    return work_books
+
+
 def test_write_with_header_multiple_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file_2):
     excel_dn = ExcelDataNode(
         "foo",
@@ -183,10 +210,11 @@ def test_write_with_header_multiple_sheet_custom_exposed_type_with_sheet_name(tm
     sheet_data = {"Sheet1": row_1, "Sheet2": row_2}
 
     excel_dn.write(sheet_data)
-    excel_dn.read()
-    # assert len(excel_dn_data) == len(sheet_data) == 2
-    # for sheet_name in sheet_data.keys():
-    #     assert all(actual == expected for actual, expected in zip(excel_dn_data[sheet_name], sheet_data[sheet_name]))
+    # excel_dn_data = excel_dn.read()
+    excel_dn_data = read(excel_dn)
+    assert len(excel_dn_data) == len(sheet_data) == 2
+    for sheet_name in sheet_data.keys():
+        assert all(actual == expected for actual, expected in zip(excel_dn_data[sheet_name], sheet_data[sheet_name]))
 
 
 def test_write_with_header_multiple_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file):
