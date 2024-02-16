@@ -52,10 +52,9 @@ class MyCustomObject:
 
 
 def test_fail():
-    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp2.xlsx")
+    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample", "temp2.xlsx")
 
     from openpyxl.reader.excel import load_workbook
-
     from taipy.logger._taipy_logger import _TaipyLogger
     logger = _TaipyLogger._get_logger()
 
@@ -63,13 +62,8 @@ def test_fail():
     logger.warning(f"Reading from {path}")
     excel_file = load_workbook(path)
     work_sheet = excel_file["Sheet1"]
-
     for row in work_sheet.rows:
-        header = [str(col.value) for col in row]
-        break
-    for row in work_sheet.rows:
-        for h, r in zip(header, row):
-            logger.warning(f"{str(h)}: {r.value}")
+        logger.warning(f"row: {row}")
     excel_file.close()
 
     if os.path.exists(path):
@@ -77,8 +71,6 @@ def test_fail():
         os.remove(path)
         logger.warning(f"{path} has been deleted.")
     logger.warning("-----------------------------------------------------------------")
-
-    # assert all(actual == expected for actual, expected in zip(actual_data, expected_data))
 
 
 def test_write_with_header_single_sheet_pandas_with_sheet_name(tmp_excel_file):
