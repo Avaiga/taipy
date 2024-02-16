@@ -26,7 +26,7 @@ Taipy is a Python library for creating Business Applications. More information o
 [website](https://www.taipy.io). Taipy is split into multiple repositories including _taipy-config_ to let users
 install the minimum they need.
 
-Taipy config is dedicated to helping the user configure a Taipy application.
+Taipy config is a package designed to help users configure their Taipy application.
 
 More in-depth documentation of taipy can be found [here](https://docs.taipy.io).
 
@@ -50,10 +50,10 @@ Want to be part of the _Taipy config_ community? Check out our [`CODE_OF_CONDUCT
     - `_serializer/`: Internal package for serializing and deserializing configurations.
     - `checker/`: Configuration checker and issue collector implementation.
     - `common/`: Shared data structures, types, and functions.
-    - `exceptions/`: _taipy-config_ exceptions.
-    - `global_app/`: GlobalAppConfig implementation.
-    - `stubs/`: Helper functions to create the _config.pyi_ file.
-    - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy-config_.
+    - `exceptions/`: *taipy-config* exceptions.
+    - `global_app/`: `GlobalAppConfig` implementation.
+    - `stubs/`: Helper functions to create the `config.pyi` file.
+    - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of *taipy-config*.
     - `CONTRIBUTING.md`: Instructions to contribute to _taipy-config_.
     - `INSTALLATION.md`: Instructions to install _taipy-config_.
     - `LICENSE`: The Apache 2.0 License.

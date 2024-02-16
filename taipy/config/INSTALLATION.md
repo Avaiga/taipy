@@ -1,13 +1,13 @@
 # Installation
 
-The latest stable version of _taipy-config_ is available through _pip_:
+The latest stable version of *taipy-config* can be installed using `pip`:
 ```bash
 $ pip install taipy-config
 ```
 
 ## Development version
 
-You can install the development version of _taipy-config_ with _pip_ and _git_ via the taipy repository:
+You can install the development version of *taipy-config* with `pip` and `git` directly from the Taipy repository:
 ```bash
 $ pip install git+https://git@github.com/Avaiga/taipy
 ```
@@ -36,7 +36,7 @@ $ pip install pipenv
 $ pipenv install --dev
 ```
 
-Then you can run _taipy-config_ tests with the following command:
+Then you can run *taipy-config* tests with the following command:
 
 ```bash
 $ pipenv run pytest tests/config
