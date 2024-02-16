@@ -174,7 +174,6 @@ def test_write_with_header_multiple_sheet_numpy_without_sheet_name(tmp_excel_fil
 
 def read(excel_dn: ExcelDataNode):
     from openpyxl.reader.excel import load_workbook
-    from typing import List, Set, Tuple
     try:
         excel_file = load_workbook(excel_dn._path)
         work_books = dict()
@@ -185,10 +184,9 @@ def read(excel_dn: ExcelDataNode):
             res = list()
             for row in work_sheet.rows:
                 res.append([col.value for col in row])
-
             header = res.pop(0)
             for i, row in enumerate(res):
-                res[i] = exposed_type(**dict([[h, r] for h, r in zip(header, row)]))
+                res[i] = exposed_type(**dict([(h, r) for h, r in zip(header, row)]))
             work_books[sheet_name] = res
     finally:
         excel_file.close()
