@@ -16,7 +16,7 @@ and limitations under the License.
   - [Taipy](#taipy)
   - [License](#license)
   - [Usage](#usage)
-  - [What is Taipy](#what-is-taipy)
+  - [What is Taipy templates](#what-is-taipy-templates)
   - [Contributing](#contributing)
   - [Code of conduct](#code-of-conduct)
   - [Directory Structure](#directory-structure)
@@ -33,11 +33,11 @@ A more in depth documentation of taipy can be found [here](https://docs.taipy.io
 
 To create a Taipy application using this template, first you need to install Taipy (> 2.2).
 Then from a terminal, run the following command.
-```
+```bash
 $ taipy create
 ```
 or
-```
+```bash
 $ taipy create --template "default"
 ```
 
@@ -55,9 +55,16 @@ Want to be part of the _Taipy_ community? Check out our
 
 ## Directory Structure
 
-- `taipy/templates/`: Contains each template in a dedicated sub-folder with the
-    following structure:
-- `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy_.
-- `CONTRIBUTING.md`: Instructions to contribute to _taipy_.
-- `LICENSE`: The Apache 2.0 License.
-- `README.md`: Current file.
+- `taipy/`:
+  - `templates/`: Contains templates, each in a dedicated sub-folder with the following structure:
+    - `<template-name>/`: Internal package for Taipy data backup mechanism.
+      - `{{cookiecutter.__root_folder_name}}/`: The root folder of the application created using this template.
+      - `hooks/`: Contains hooks to be executed before and after the application is created.
+      - `cookiecutter.json`: The configuration file for the template.
+    - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy-templates_.
+    - `CONTRIBUTING.md`: Instructions to contribute to _taipy-templates_.
+    - `LICENSE`: The Apache 2.0 License.
+    - `README.md`: Current file.
+    - `setup.py`: The setup script managing building, distributing, and installing _taipy-templates_.
+- `tests/`:
+  - `templates/`: Unit tests following the `taipy/templates/` structure.

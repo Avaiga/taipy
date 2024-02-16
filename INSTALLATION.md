@@ -13,12 +13,12 @@ The easiest way to install Taipy is from the
 [Pypi software repository](https://pypi.org/project/taipy/).
 
 Run the command:
-```console
+```bash
 $ pip install taipy
 ```
 
 If you are running in a virtual environment, you will have to issue the command:
-```console
+```bash
 $ pipenv install taipy
 ```
 
@@ -32,7 +32,7 @@ contributors whom we praise for their input.
 
 The development version of Taipy can be installed using *pip* and *git*:
 
-```console
+```bash
 $ pip install git+https://git@github.com/Avaiga/taipy
 ```
 
@@ -41,7 +41,7 @@ $ pip install git+https://git@github.com/Avaiga/taipy
 If you need the source code for Taipy on your system so you can see how things are done or maybe
 participate in the improvement of the packages, you can clone the GitHub repository:
 
-```console
+```bash
 $ git clone https://github.com/Avaiga/taipy.git
 ```
 
@@ -72,7 +72,7 @@ The build process is described in the [Taipy GUI front-end](frontend/taipy-gui/R
 
 Here is the sequence of commands that can be issued to build both sets of files:
 
-```console
+```bash
 # Current directory is the repository's root directory
 #
 # Build the Taipy GUI bundle
@@ -96,7 +96,7 @@ root directory of the taipy repository.
 
 If you plan to modify the front-end code and need to debug the TypeScript
 code, you must use the following:
-```
+```bash
 $ npm run build:dev
 ```
 
@@ -124,12 +124,17 @@ TypeScript code from your debugger.
 
 ## Running the tests
 
-To run the tests on the package, you need to create a virtual
-environment and install the development packages:
+To run the tests on the package, you need to install the required development packages.
+We recommend using [Pipenv](https://pipenv.pypa.io/en/latest/) to create a virtual environment
+and install the development packages.
 
-Here are the commands to issue:
+```bash
+$ pip install pipenv
+$ pipenv install --dev
+```
 
-```console
-pipenv install --dev
-pipenv run pytest
+Then you can run the tests with the following command:
+
+```bash
+$ pipenv run pytest
 ```
