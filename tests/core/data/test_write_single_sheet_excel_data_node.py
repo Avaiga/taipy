@@ -75,13 +75,13 @@ def test_fail():
     from taipy.logger._taipy_logger import _TaipyLogger
     logger = _TaipyLogger._get_logger()
 
-    logger.warning("------------------------ WRITE ----------------------------------")
-    # excel_dn.write(expected_data)
-    logger.warning(f"Writing to {path}")
-    expected_data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
-    df = pd.DataFrame.from_records([row.__dict__ for row in expected_data])
-    df.to_excel(path, index=False, header=True, sheet_name="Sheet1")
-    logger.warning("-----------------------------------------------------------------")
+    # logger.warning("------------------------ WRITE ----------------------------------")
+    # #excel_dn.write(expected_data)
+    # logger.warning(f"Writing to {path}")
+    # expected_data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
+    # df = pd.DataFrame.from_records([row.__dict__ for row in expected_data])
+    # df.to_excel(path, index=False, header=True, sheet_name="Sheet1")
+    # logger.warning("-----------------------------------------------------------------")
 
     logger.warning("------------------------ READ -----------------------------------")
     # actual_data = excel_dn.read()
