@@ -21,9 +21,6 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         pipfile-version: ['min']
     runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        working-directory: ${{ matrix.os }}/${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
 
@@ -60,9 +57,6 @@ jobs:
         orchestrator: ['orchestrator_dispatcher', 'standalone']
         pipfile-version: ['min', 'max']
     runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        working-directory: ${{ matrix.os }}/${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
