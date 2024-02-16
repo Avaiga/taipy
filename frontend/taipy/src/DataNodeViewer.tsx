@@ -902,6 +902,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                                 {dtType == "date"
                                                                     ? dataValue &&
                                                                       format(dataValue as Date, "yyyy/MM/dd HH:mm:ss")
+                                                                    : dtType == "float" && dtValue === null
+                                                                    ? "NaN"
                                                                     : dtValue}
                                                             </Typography>
                                                         )}
