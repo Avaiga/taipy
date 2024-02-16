@@ -187,7 +187,7 @@ def read(excel_dn: ExcelDataNode):
             header = res.pop(0)
             for i, row in enumerate(res):
                 from typing import Dict
-                params: Dict[str, str] = dict([(h, r) for h, r in zip(header, row)])
+                params: Dict[str, str] = {h: r for h, r in zip(header, row)}
                 res[i] = exposed_type(**params)
             work_books[sheet_name] = res
     finally:
