@@ -186,7 +186,8 @@ def read(excel_dn: ExcelDataNode):
                 res.append([col.value for col in row])
             header = res.pop(0)
             for i, row in enumerate(res):
-                res[i] = exposed_type(**dict([(h, r) for h, r in zip(header, row)]))
+                params = dict([ [h, r] for h, r in zip(header, row) ])
+                res[i] = exposed_type(**params)
             work_books[sheet_name] = res
     finally:
         excel_file.close()
