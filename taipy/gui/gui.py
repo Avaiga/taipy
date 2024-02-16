@@ -508,6 +508,9 @@ class Gui:
     def _get_data_scope(self) -> SimpleNamespace:
         return self.__bindings._get_data_scope()
 
+    def _get_data_scope_metadata(self) -> t.Dict[str, t.Any]:
+        return self.__bindings._get_data_scope_metadata()
+
     def _get_all_data_scopes(self) -> t.Dict[str, SimpleNamespace]:
         return self.__bindings._get_all_scopes()
 
@@ -1943,6 +1946,9 @@ class Gui:
     def __pre_render_pages(self) -> None:
         """Pre-render all pages to have a proper initialization of all variables"""
         self.__set_client_id_in_context()
+        scope_metadata = self._get_data_scope_metadata()
+        if scope_metadata[_DataScopes._META_PRE_RENDER]:
+            return
         for page in self._config.pages:
             if page is not None:
                 with contextlib.suppress(Exception):
@@ -1950,6 +1956,7 @@ class Gui:
                         self._bind_custom_page_variables(page._renderer, self._get_client_id())
                     else:
                         page.render(self, silent=True)
+        scope_metadata[_DataScopes._META_PRE_RENDER] = True
 
     def _get_navigated_page(self, page_name: str) -> t.Any:
         nav_page = page_name
