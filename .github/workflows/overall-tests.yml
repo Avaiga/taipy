@@ -23,7 +23,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        working-directory: ./app/${{ matrix.os }}/${{ matrix.python-version }}
+        working-directory: ${{ matrix.os }}/${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
 
@@ -62,7 +62,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        working-directory: ./app/${{ matrix.os }}/${{ matrix.python-version }}
+        working-directory: ${{ matrix.os }}/${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
