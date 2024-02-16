@@ -85,6 +85,7 @@ def is_file_deletable(file_path):
 
 def read(excel_dn: ExcelDataNode):
     from openpyxl.reader.excel import load_workbook
+
     from taipy.logger._taipy_logger import _TaipyLogger
     logger = _TaipyLogger._get_logger()
     try:
@@ -325,7 +326,7 @@ def test_write_with_header_single_sheet_custom_exposed_type_with_sheet_name(tmp_
     excel_dn.write(expected_data)
     actual_data = read(excel_dn)
 
-    # assert all(actual == expected for actual, expected in zip(actual_data, expected_data))
+    assert all(actual == expected for actual, expected in zip(actual_data, expected_data))
     #
     # excel_dn.write(None)
     # actual_data = read(excel_dn)
