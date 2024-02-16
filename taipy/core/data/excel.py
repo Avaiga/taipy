@@ -246,8 +246,9 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
                     for i, row in enumerate(res):
                         res[i] = sheet_exposed_type(*row)
                 work_books[sheet_name] = res
-        finally:
             excel_file.close()
+        finally:
+            pass
 
         if len(provided_sheet_names) == 1:
             return work_books[provided_sheet_names[0]]
