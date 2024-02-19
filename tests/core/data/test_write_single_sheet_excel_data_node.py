@@ -59,7 +59,6 @@ def test_fail():
     logger = _TaipyLogger._get_logger()
 
     excel_file = load_workbook(path)
-    work_sheet = excel_file["Sheet1"]
     excel_file.close()
 
     if os.path.exists(path):
