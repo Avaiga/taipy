@@ -8,7 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+import contextlib
 import dataclasses
 import os
 import pathlib
@@ -51,19 +51,32 @@ class MyCustomObject:
                 setattr(self, field.name, field.type(value))
 
 
+@contextlib.contextmanager
+def load_worksheet_with_close(filename, *args, **kwargs):
+    '''
+    Open an openpyxl worksheet and automatically close it when finished.
+    '''
+    import tempfile
+
+    import openpyxl
+
+    wb = openpyxl.load_workbook(filename, *args, **kwargs)
+    yield wb
+    # Create path in temporary directory and write workbook there to force
+    # it to close
+    path = os.path.join(tempfile.gettempdir(), os.path.basename(filename))
+    wb.save(path)
+    os.remove(path)
+
+
 def test_fail():
     path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample", "temp2.xlsx")
-    import openpyxl
 
     from taipy.logger._taipy_logger import _TaipyLogger
     logger = _TaipyLogger._get_logger()
 
-    if openpyxl and openpyxl.__version__:
-        logger.warning(f"openpyxl version: {openpyxl.__version__}")
-
-    excel_file = openpyxl.reader.excel.load_workbook(path)
-    excel_file._archive.close()
-    excel_file.close()
+    with load_worksheet_with_close(path):
+        pass
 
     if os.path.exists(path):
         logger.warning(f"trying to delete {path}.")
