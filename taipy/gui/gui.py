@@ -15,6 +15,7 @@ import contextlib
 import importlib
 import inspect
 import json
+import math
 import os
 import pathlib
 import re
@@ -986,6 +987,9 @@ class Gui:
                     newvalue = newvalue.get()
                 if isinstance(newvalue, (dict, _MapDict)):
                     continue  # this var has no transformer
+                if isinstance(newvalue, float) and math.isnan(newvalue):
+                    # do not let NaN go through json, it is not handle well (dies silently through websocket)
+                    newvalue = None
                 debug_warnings: t.List[warnings.WarningMessage] = []
                 with warnings.catch_warnings(record=True) as warns:
                     warnings.resetwarnings()

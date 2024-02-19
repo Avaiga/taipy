@@ -33,7 +33,7 @@ def _default(o):
     if isinstance(o, Path):
         return str(o)
     try:
-        raise TypeError(f"Object of type {o.__class__.__name__} is not JSON serializable")
+        raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
     except Exception as e:
         _warn("Exception in JSONEncoder", e)
         return None
