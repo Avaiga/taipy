@@ -55,6 +55,7 @@ def test_fail():
     path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample", "temp2.xlsx")
 
     from openpyxl.reader.excel import load_workbook
+
     from taipy.logger._taipy_logger import _TaipyLogger
     logger = _TaipyLogger._get_logger()
 
