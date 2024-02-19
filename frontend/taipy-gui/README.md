@@ -20,13 +20,13 @@ run the following commands:
 #   [taipy-dir]/frontend/taipy-gui
 #
 # Install the DOM dependencies (once and for all)
-$ cd dom
-$ npm i
-$ cd ..
+cd dom
+npm i
+cd ..
 # Install the web app dependencies
-$ npm i --omit=optional
+npm i --omit=optional
 # Build the web app and all elements
-$ npm run build
+npm run build
 ```
 
 

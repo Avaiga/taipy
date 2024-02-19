@@ -22,7 +22,7 @@ The easiest way to install Taipy GUI is using pip
 
 Run the command:
 ```bash
-$ pip install taipy-gui
+pip install taipy-gui
 ```
 
 ## Installing the development version
@@ -36,7 +36,7 @@ You should also install this version if you want to contribute to the developmen
 
 Clone the Taipy repository using the following command:
 ```bash
-$ git clone https://github.com/Avaiga/taipy.git
+git clone https://github.com/Avaiga/taipy.git
 ```
 
 This creates the 'taipy' directory holding all the package's source code, and the 'taipy-gui'
@@ -62,18 +62,18 @@ Open a new terminal and run the following commands:
 
 - Install the DOM dependencies
 ```bash
-$ cd gui
-$ cd dom
-$ npm i
+cd gui
+cd dom
+npm i
 ```
 - Install the web app dependencies
 ```bash
-$ cd ..
-$ npm i --omit=optional
+cd ..
+npm i --omit=optional
 ```
 - Build the web app
 ```bash
-$ npm run build
+npm run build
 ```
 
 After a few minutes, this creates the directory `taipy/gui/webapp` in the root directory of the repository
@@ -83,7 +83,7 @@ where the front-end code for Taipy GUI is split into a set of JavaScript bundles
 
 In a terminal, **at the root of the repository**, run:
 ```bash
-$ pip install -e . --user
+pip install -e . --user
 ```
 
 This should install the dev version of Taipy GUI as editable. You are now ready to use it.
@@ -93,7 +93,7 @@ This should install the dev version of Taipy GUI as editable. You are now ready 
 If you plan to modify the front-end code and need to debug the TypeScript
 code, you must use the following:
 ```bash
-$ npm run build:dev
+npm run build:dev
 ```
 
 instead of the *standard* build option.
@@ -125,12 +125,12 @@ We recommend using [Pipenv](https://pipenv.pypa.io/en/latest/) to create a virtu
 and install the development packages.
 
 ```bash
-$ pip install pipenv
-$ pipenv install --dev
+pip install pipenv
+pipenv install --dev
 ```
 
 Then you can run _taipy-gui_ tests with the following command:
 
 ```bash
-$ pipenv run pytest tests/gui
+pipenv run pytest tests/gui
 ```

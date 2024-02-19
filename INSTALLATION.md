@@ -14,12 +14,12 @@ The easiest way to install Taipy is from the
 
 Run the command:
 ```bash
-$ pip install taipy
+pip install taipy
 ```
 
 If you are running in a virtual environment, you will have to issue the command:
 ```bash
-$ pipenv install taipy
+pipenv install taipy
 ```
 
 These commands install the `taipy` package in the Python environment with all its
@@ -33,7 +33,7 @@ contributors whom we praise for their input.
 The development version of Taipy can be installed using *pip* and *git*:
 
 ```bash
-$ pip install git+https://git@github.com/Avaiga/taipy
+pip install git+https://git@github.com/Avaiga/taipy
 ```
 
 ## Installing for development
@@ -42,7 +42,7 @@ If you need the source code for Taipy on your system so you can see how things a
 participate in the improvement of the packages, you can clone the GitHub repository:
 
 ```bash
-$ git clone https://github.com/Avaiga/taipy.git
+git clone https://github.com/Avaiga/taipy.git
 ```
 
 This creates the 'taipy' directory holding all the package's source code.
@@ -76,17 +76,17 @@ Here is the sequence of commands that can be issued to build both sets of files:
 # Current directory is the repository's root directory
 #
 # Build the Taipy GUI bundle
-$ cd frontend/taipy-gui
-$ cd dom
-$ npm i
-$ cd ..
-$ npm i --omit=optional
-$ npm run build
+cd frontend/taipy-gui
+cd dom
+npm i
+cd ..
+npm i --omit=optional
+npm run build
 #
 # Build the Taipy front-end bundle
-$ cd ../taipy # Current directory is [taipy-dir]/frontend/taipy
-$ npm i
-$ npm run build
+cd ../taipy # Current directory is [taipy-dir]/frontend/taipy
+npm i
+npm run build
 ```
 
 These commands should create the directories `taipy/gui/webapp` and `taipy/gui_core/lib` in the
@@ -97,7 +97,7 @@ root directory of the taipy repository.
 If you plan to modify the front-end code and need to debug the TypeScript
 code, you must use the following:
 ```bash
-$ npm run build:dev
+npm run build:dev
 ```
 
 instead of the *standard* build option.
@@ -129,12 +129,12 @@ We recommend using [Pipenv](https://pipenv.pypa.io/en/latest/) to create a virtu
 and install the development packages.
 
 ```bash
-$ pip install pipenv
-$ pipenv install --dev
+pip install pipenv
+pipenv install --dev
 ```
 
 Then you can run the tests with the following command:
 
 ```bash
-$ pipenv run pytest
+pipenv run pytest
 ```

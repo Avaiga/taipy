@@ -60,7 +60,7 @@ Taipy is designed for data scientists and machine learning engineers to build fu
 ## ⚙️ Quickstart
 To install Taipy stable release run:
 ```bash
-$ pip install taipy
+pip install taipy
 ```
 
 To install Taipy on a Conda Environment or from source, please refer to the [Installation Guide](https://docs.taipy.io/en/latest/installation/).<br />

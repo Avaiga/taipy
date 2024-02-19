@@ -34,11 +34,11 @@ A more in depth documentation of taipy can be found [here](https://docs.taipy.io
 To create a Taipy application using this template, first you need to install Taipy (> 2.2).
 Then from a terminal, run the following command.
 ```bash
-$ taipy create
+taipy create
 ```
 or
 ```bash
-$ taipy create --template "default"
+taipy create --template "default"
 ```
 
 After providing necessary information, your new application is created in the current

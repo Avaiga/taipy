@@ -98,8 +98,8 @@ working on it.
    code format or Python typing.
    You can install and setup it up by doing:
    ```bash
-   $ pipenv install pre-commit
-   $ pipenv run python -m pre-commit install
+   pipenv install pre-commit
+   pipenv run python -m pre-commit install
    ```
 
 4. Make the changes.<br/>

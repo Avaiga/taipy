@@ -17,9 +17,9 @@ run the following commands:
 # Current directory is the directory where this README file is located:
 #   [taipy-dir]/frontend/taipy
 #
-$ npm i
+npm i
 # Build the Taipy front-end bundle
-$ npm run build
+npm run build
 ```
 
 After these commands are successfully executed, a new directory will be created in

@@ -9,7 +9,7 @@ pip install taipy-rest
 
 You can install the development version of _taipy-rest_ with _pip_ and _git_ via the taipy repository:
 ```bash
-$ pip install git+https://git@github.com/Avaiga/taipy
+pip install git+https://git@github.com/Avaiga/taipy
 ```
 
 This command installs the development version of _taipy_ package in the Python environment with all
@@ -19,7 +19,7 @@ If you need the source code for _taipy-rest_ on your system so you can see how t
 maybe participate in the improvement of the packages, you can clone the GitHub repository:
 
 ```bash
-$ git clone https://github.com/Avaiga/taipy.git
+git clone https://github.com/Avaiga/taipy.git
 ```
 
 This creates the 'taipy' directory holding all the package's source code, and the 'taipy-rest'
@@ -42,18 +42,18 @@ We recommend using [Pipenv](https://pipenv.pypa.io/en/latest/) to create a virtu
 and install the development packages.
 
 ```bash
-$ pip install pipenv
-$ pipenv install --dev
+pip install pipenv
+pipenv install --dev
 ```
 
 To run the application you can either run locally with:
 ```bash
-$ flask run
+flask run
 ```
 
 or it can be run inside Docker with:
 ```bash
-$ docker-compose up
+docker-compose up
 ```
 
 You can also run with a Gunicorn or wsgi server.
@@ -65,9 +65,9 @@ This project provide a simple wsgi entry point to run gunicorn or uwsgi for exam
 For gunicorn you only need to run the following commands
 
 ```bash
-$ pip install gunicorn
+pip install gunicorn
 
-$ gunicorn myapi.wsgi:app
+gunicorn myapi.wsgi:app
 ```
 And that's it ! Gunicorn is running on port 8000
 
@@ -78,8 +78,8 @@ If you chose gunicorn as your wsgi server, the proper commands should be in your
 Pretty much the same as gunicorn here
 
 ```bash
-$ pip install uwsgi
-$ uwsgi --http 127.0.0.1:5000 --module myapi.wsgi:app
+pip install uwsgi
+uwsgi --http 127.0.0.1:5000 --module myapi.wsgi:app
 ```
 
 And that's it ! Uwsgi is running on port 5000
@@ -93,22 +93,22 @@ Make sure you have a working Docker installation (e.g. docker ps) and that youâ€
 Log in to Container Registry:
 
 ```bash
-$ heroku container:login
+heroku container:login
 ```
 
 Create a heroku app
 ```bash
-$ heroku create
+heroku create
 ```
 
 Build the image and push to Container Registry:
 ```bash
-$ heroku container:push web
+heroku container:push web
 ```
 
 Then release the image:
 ```bash
-$ heroku container:release web
+heroku container:release web
 ```
 
 You can now access **taipy rest** on the URL that was returned on the `heroku create` command.
