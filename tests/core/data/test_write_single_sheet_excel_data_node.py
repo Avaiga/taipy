@@ -53,13 +53,15 @@ class MyCustomObject:
 
 def test_fail():
     path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample", "temp2.xlsx")
-
-    from openpyxl.reader.excel import load_workbook
+    import openpyxl
 
     from taipy.logger._taipy_logger import _TaipyLogger
     logger = _TaipyLogger._get_logger()
 
-    excel_file = load_workbook(path)
+    if openpyxl and openpyxl.__version__:
+        logger.warning(f"openpyxl version: {openpyxl.__version__}")
+
+    excel_file = openpyxl.reader.excel.load_workbook(path)
     excel_file.close()
 
     if os.path.exists(path):
