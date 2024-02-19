@@ -31,9 +31,13 @@ jobs:
         run: |
           python tools/release/check_releases.py dist ${{ github.event.inputs.version }}
 
-  publish-to-pypi:
+  publish-subpackages-to-pypi:
     needs: [test-package]
     timeout-minutes: 20
+    strategy:
+      matrix:
+        package: [ config, core, gui, rest, templates ]
+      max-parallel: 1
     environment: publish
     runs-on: ubuntu-latest
     steps:
@@ -41,7 +45,7 @@ jobs:
 
       - name: Download assets from tag
         run: |
-          gh release download ${{ github.event.inputs.version }} --dir dist
+          gh release download ${{ github.event.inputs.version }}-${{ matrix.package }} --dir dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -49,10 +53,10 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          password: ${{ secrets[format('PYPI_API_TOKEN_{0}', matrix.package )] }}
 
   test-published-package:
-    needs: [publish-to-pypi]
+    needs: [publish-subpackages-to-pypi]
     timeout-minutes: 30
     strategy:
       matrix:
