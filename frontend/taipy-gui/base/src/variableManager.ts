@@ -22,10 +22,30 @@ export class VariableManager {
     constructor(variableModuleData: VariableModuleData) {
         this._data = {};
         this._variables = {};
-        this.resetInitData(variableModuleData);
+        this.init(variableModuleData);
     }
 
-    resetInitData(variableModuleData: VariableModuleData) {
+    init(variableModuleData: VariableModuleData) {
+        // Identify changes between the new and old data
+        const changes: VariableModuleData = {};
+        for (const context in this._variables) {
+            if (!(context in variableModuleData)) {
+                changes[context] = this._variables[context];
+                continue;
+            }
+            for (const variable in this._variables[context]) {
+                if (!(variable in variableModuleData[context])) {
+                    if (!(context in changes)) {
+                        changes[context] = {};
+                    }
+                    changes[context][variable] = this._variables[context][variable];
+                }
+            }
+        }
+        if (changes) {
+            console.error("Unmatched data tree! Removed changes: ", changes);
+        }
+        // Reset the initial data
         this._variables = variableModuleData;
         this._data = {};
         for (const context in this._variables) {
