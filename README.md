@@ -8,11 +8,11 @@
 </div>
 
 <h1 align="center">
-Data and AI algorithms into production-ready web apps
+Build scalable data and AI apps, go beyond Streamlit 
 </h1>
 
 <div align="center">
-Taipy is an open-source Python library for easy, end-to-end application development,<br />featuring what-if analyses, smart pipeline execution, built-in scheduling, and deployment tools.
+Python library for building large-scale production-ready apps,<br />including other libraries missing features such as Caching, Version management, and GUI editor.
 </div>
 
   <p align="center">
@@ -26,14 +26,36 @@ Taipy is an open-source Python library for easy, end-to-end application developm
 
 &nbsp;
 
-## ⭐️ What's Taipy?
+## ⭐️ What makes Taipy different?
 
 Taipy is designed for data scientists and machine learning engineers to build full-stack apps.
 &nbsp;
 
-⭐️ Enables building production-ready web applications.<br />
-⭐️ No need to learn new languages or full-stack frameworks.<br />
-⭐️ Concentrate on Data and AI algorithms without development and deployment complexities.
+<br />
+
+⭐️ **Caching** - Taipy adds caching control of the graphical events. It does not render all the graphical components on every interaction.  <br /> *[Read more about it here.](https://docs.taipy.io/en/latest/knowledge_base/tips/the_on_change_callback/)* 
+  <p>
+    <source media="(prefers-color-scheme: dark)" >
+    <img alt="Maps" src="readme_img/animated.gif" width="500" />
+  </p>
+
+<br />
+
+⭐️ **Big data support** - Taipy adds a decimator for charts that reduces the number of data points displayed in charts while retaining the overall shape. This saves time and memory, especially with large datasets. <br /> Taipy also supports out-of-the-bix pagination to work with large data sets.
+  <p>
+    <source media="(prefers-color-scheme: dark)" >
+    <img alt="1M" src="readme_img/1M_points.gif" width="500" />
+  </p>
+
+<br />
+  
+⭐️ **GUI for pipelines** - Taipy introduces the GUI editor for configuring the backend pipelines: **Taipy Studio**
+  <p>
+    <source media="(prefers-color-scheme: dark)" >
+    <img alt="Studio" src="readme_img/taipy_studio.gif" width="700" />
+  </p>
+
+<br />
 
 &nbsp;
 
@@ -43,17 +65,17 @@ Taipy is designed for data scientists and machine learning engineers to build fu
 
 &nbsp;
 
-## ✨ Features
-- **Python-Based UI Framework:** Taipy is designed for Python users, particularly those working in AI and data science. It allows them to create full stack applications without needing to learn additional skills like HTML, CSS, or JavaScript.
+## ✨ Additional Features
+- **Task Scheduling:** Run your workflow’s pipelines at a scheduled time.  
 
 
-- **Pre-Built Components for Data Pipelines:** Taipy includes pre-built components that allow users to interact with data pipelines, including visualization and management tools.
+- **Application Version Management:** Saving different versions of your application so you can roll back to previous versions.<br />You can create, manage, and migrate different versions of your applications effortlessly, eliminating the complexities of version control that often pose challenges.
 
 
-- **Scenario and Data Management Features:** Taipy offers features for managing different business scenarios and data, which can be useful for applications like demand forecasting or production planning.
+- **Data Broadcasting:** Application variable updates can be broadcasted to every connected user so that all of them visualize the same information. <br />This is specifically relevant when monitoring live global data.
 
 
-- **Version Management and Pipeline Orchestration:** It includes tools for managing application versions, pipeline versions, and data versions, which are beneficial for multi-user environments.
+- **Python API for UI:** The all-new Page Builder API takes Taipy’s user interface creation to a higher level. <br />You can create interactive and customizable interfaces using Python or Markdown, taking front-end development to a whole new level of simplicity.
 
 &nbsp;
 
