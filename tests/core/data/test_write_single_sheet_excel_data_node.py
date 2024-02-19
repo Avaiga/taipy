@@ -247,11 +247,11 @@ def test_write_without_header_single_sheet_numpy_without_sheet_name(tmp_excel_fi
     assert excel_dn.read()["Sheet1"].size == 0
 
 
-def test_write_with_header_single_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file_2):
+def test_write_with_header_single_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode(
         "foo",
         Scope.SCENARIO,
-        properties={"path": tmp_excel_file_2, "sheet_name": "Sheet1", "exposed_type": MyCustomObject},
+        properties={"path": tmp_excel_file, "sheet_name": "Sheet1", "exposed_type": MyCustomObject},
     )
     expected_data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
 
