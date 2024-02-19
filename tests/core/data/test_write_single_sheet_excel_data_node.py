@@ -58,19 +58,14 @@ def test_fail():
     from taipy.logger._taipy_logger import _TaipyLogger
     logger = _TaipyLogger._get_logger()
 
-    logger.warning("------------------------ READ -----------------------------------")
-    logger.warning(f"Reading from {path}")
     excel_file = load_workbook(path)
     work_sheet = excel_file["Sheet1"]
-    for row in work_sheet.rows:
-        logger.warning(f"row: {row}")
     excel_file.close()
 
     if os.path.exists(path):
         logger.warning(f"trying to delete {path}.")
         os.remove(path)
         logger.warning(f"{path} has been deleted.")
-    logger.warning("-----------------------------------------------------------------")
 
 
 def test_write_with_header_single_sheet_pandas_with_sheet_name(tmp_excel_file):
