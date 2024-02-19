@@ -32,7 +32,12 @@ def tmp_excel_file():
 def cleanup(tmp_excel_file):
     yield
     if os.path.exists(tmp_excel_file):
-        os.remove(tmp_excel_file)
+        try:
+            os.remove(tmp_excel_file)
+        except Exception as e:
+            from taipy.logger._taipy_logger import _TaipyLogger
+            logger = _TaipyLogger._get_logger()
+            logger.error(f"Failed to delete {tmp_excel_file}. {e}")
 
 
 @dataclasses.dataclass
@@ -49,43 +54,6 @@ class MyCustomObject:
             value = getattr(self, field.name)
             if not isinstance(value, field.type):
                 setattr(self, field.name, field.type(value))
-
-
-@contextlib.contextmanager
-def load_worksheet_with_close(filename, *args, **kwargs):
-    '''
-    Open an openpyxl worksheet and automatically close it when finished.
-    '''
-    import tempfile
-
-    import openpyxl
-
-    wb = openpyxl.load_workbook(filename, *args, **kwargs)
-    yield wb
-    # Create path in temporary directory and write workbook there to force
-    # it to close
-    path = os.path.join(tempfile.gettempdir(), os.path.basename(filename))
-    wb.save(path)
-    os.remove(path)
-
-
-def test_fail():
-    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample", "temp2.xlsx")
-
-    from taipy.logger._taipy_logger import _TaipyLogger
-    logger = _TaipyLogger._get_logger()
-
-    import openpyxl
-    file = openpyxl.load_workbook(path)
-    file.close()
-
-    if os.path.exists(path):
-        logger.warning(f"trying to delete {path}.")
-        try:
-            os.remove(path)
-            logger.warning(f"{path} has been deleted.")
-        except Exception as e:
-            logger.error(f"Failed to delete {path}. {e}")
 
 
 def test_write_with_header_single_sheet_pandas_with_sheet_name(tmp_excel_file):
@@ -279,69 +247,69 @@ def test_write_without_header_single_sheet_numpy_without_sheet_name(tmp_excel_fi
     assert excel_dn.read()["Sheet1"].size == 0
 
 
-# def test_write_with_header_single_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file_2):
-#     excel_dn = ExcelDataNode(
-#         "foo",
-#         Scope.SCENARIO,
-#         properties={"path": tmp_excel_file_2, "sheet_name": "Sheet1", "exposed_type": MyCustomObject},
-#     )
-#     expected_data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
-#
-#     excel_dn.write(expected_data)
-#     actual_data = excel_dn.read()
-#
-#     assert all(actual == expected for actual, expected in zip(actual_data, expected_data))
-#
-#     excel_dn.write(None)
-#     actual_data = excel_dn.read()
-#     assert actual_data == []
-#
-#
-# def test_write_with_header_single_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file):
-#     excel_dn = ExcelDataNode("foo", Scope.SCENARIO,
-#     properties={"path": tmp_excel_file, "exposed_type": MyCustomObject})
-#
-#     data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
-#     excel_dn.write(data)
-#     assert all(actual == expected for actual, expected in zip(excel_dn.read(), data))
-#
-#     excel_dn.write(None)
-#     assert excel_dn.read() == []
-#
-#
-# def test_write_without_header_single_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file):
-#     excel_dn = ExcelDataNode(
-#         "foo",
-#         Scope.SCENARIO,
-#         properties={
-#             "path": tmp_excel_file,
-#             "sheet_name": "Sheet1",
-#             "exposed_type": MyCustomObject,
-#             "has_header": False,
-#         },
-#     )
-#
-#     data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
-#     excel_dn.write(data)
-#     assert all(actual == expected for actual, expected in zip(excel_dn.read(), data))
-#
-#     excel_dn.write(None)
-#     assert excel_dn.read() == []
-#
-#
-# def test_write_without_header_single_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file):
-#     excel_dn = ExcelDataNode(
-#         "foo", Scope.SCENARIO,
-#         properties={"path": tmp_excel_file, "exposed_type": MyCustomObject, "has_header": False}
-#     )
-#
-#     data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
-#     excel_dn.write(data)
-#     assert all(actual == expected for actual, expected in zip(excel_dn.read(), data))
-#
-#     excel_dn.write(None)
-#     assert excel_dn.read() == []
-#
+def test_write_with_header_single_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file_2):
+    excel_dn = ExcelDataNode(
+        "foo",
+        Scope.SCENARIO,
+        properties={"path": tmp_excel_file_2, "sheet_name": "Sheet1", "exposed_type": MyCustomObject},
+    )
+    expected_data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
+
+    excel_dn.write(expected_data)
+    actual_data = excel_dn.read()
+
+    assert all(actual == expected for actual, expected in zip(actual_data, expected_data))
+
+    excel_dn.write(None)
+    actual_data = excel_dn.read()
+    assert actual_data == []
+
+
+def test_write_with_header_single_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file):
+    excel_dn = ExcelDataNode("foo", Scope.SCENARIO,
+    properties={"path": tmp_excel_file, "exposed_type": MyCustomObject})
+
+    data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
+    excel_dn.write(data)
+    assert all(actual == expected for actual, expected in zip(excel_dn.read(), data))
+
+    excel_dn.write(None)
+    assert excel_dn.read() == []
+
+
+def test_write_without_header_single_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file):
+    excel_dn = ExcelDataNode(
+        "foo",
+        Scope.SCENARIO,
+        properties={
+            "path": tmp_excel_file,
+            "sheet_name": "Sheet1",
+            "exposed_type": MyCustomObject,
+            "has_header": False,
+        },
+    )
+
+    data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
+    excel_dn.write(data)
+    assert all(actual == expected for actual, expected in zip(excel_dn.read(), data))
+
+    excel_dn.write(None)
+    assert excel_dn.read() == []
+
+
+def test_write_without_header_single_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file):
+    excel_dn = ExcelDataNode(
+        "foo", Scope.SCENARIO,
+        properties={"path": tmp_excel_file, "exposed_type": MyCustomObject, "has_header": False}
+    )
+
+    data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
+    excel_dn.write(data)
+    assert all(actual == expected for actual, expected in zip(excel_dn.read(), data))
+
+    excel_dn.write(None)
+    assert excel_dn.read() == []
+
 
 def test_raise_write_with_sheet_name_length_mismatch(excel_file_with_sheet_name):
     excel_dn = ExcelDataNode(
