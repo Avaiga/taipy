@@ -32,6 +32,12 @@ from tests.core.utils import assert_true_after_time
 # ################################  USER FUNCTIONS  ##################################
 
 
+@pytest.fixture(scope="function", autouse=True)
+def retry_read_entity():
+    Config.configure_core(read_entity_retry=2)
+    yield
+
+
 def multiply(nb1: float, nb2: float):
     sleep(0.1)
     return nb1 * nb2
