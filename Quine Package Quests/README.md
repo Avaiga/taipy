@@ -1,8 +1,8 @@
-# Welcome to 🏆Hackathons🏆
+# Welcome to 🏆Quine Package Quest🏆
 
-Here you will find everything about the past, present and future of **hackathons** with Taipy.
+Here you will find everything about the past, present and future of **Quine Package Quests** with Taipy.
 
-## Kickstart Your Hackathon Journey 🚀
+## Kickstart Your Taipy Journey 🚀
 Taipy is an open-source Python library for easy, end-to-end application development, featuring what-if analyses, smart pipeline execution, built-in scheduling, and deployment tools.
 - Main repository: [Avaiga/taipy](https://github.com/Avaiga/taipy)
 - Documentation: [Start Learning](https://docs.taipy.io/en/latest/)
