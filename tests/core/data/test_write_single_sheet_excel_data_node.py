@@ -62,6 +62,7 @@ def test_fail():
         logger.warning(f"openpyxl version: {openpyxl.__version__}")
 
     excel_file = openpyxl.reader.excel.load_workbook(path)
+    excel_file._archive.close()
     excel_file.close()
 
     if os.path.exists(path):
