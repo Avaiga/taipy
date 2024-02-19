@@ -75,13 +75,17 @@ def test_fail():
     from taipy.logger._taipy_logger import _TaipyLogger
     logger = _TaipyLogger._get_logger()
 
-    with load_worksheet_with_close(path):
-        pass
+    import openpyxl
+    file = openpyxl.load_workbook(path)
+    file.close()
 
     if os.path.exists(path):
         logger.warning(f"trying to delete {path}.")
-        os.remove(path)
-        logger.warning(f"{path} has been deleted.")
+        try:
+            os.remove(path)
+            logger.warning(f"{path} has been deleted.")
+        except Exception as e:
+            logger.error(f"Failed to delete {path}. {e}")
 
 
 def test_write_with_header_single_sheet_pandas_with_sheet_name(tmp_excel_file):
