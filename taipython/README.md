@@ -25,9 +25,10 @@ Congratulations to all the winners and participants.
 
 | 🐍 Taipython  | 🥇 Winners | 🏆 Prize |
 | --------  | -------- | -------- |
-| | | 
+|2024-01-28 | [Rahul Yadav](https://www.linkedin.com/in/rahul-yadav-50276723b/) & [Sahil Pradhan](https://www.linkedin.com/in/sahil-pradhan-46a0a31b7/) | Ipad 🍎|
 
 ## Taipython Gallery 🖼️
 Check out some of our favorite applications 🤩
+- Wander Wizard: https://wwizard.taipy.cloud/
 
 We can't wait to see what you'll create. Happy coding! 
