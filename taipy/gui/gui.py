@@ -619,6 +619,8 @@ class Gui:
                         self.__handle_ws_get_module_context(payload)
                     elif msg_type == _WsType.GET_VARIABLES.value:
                         self.__handle_ws_get_variables()
+                    elif msg_type == _WsType.APP_ID.value:
+                        self.__handle_ws_app_id(message)
                 self.__send_ack(message.get("ack_id"))
         except Exception as e:  # pragma: no cover
             _warn(f"Decoding Message has failed: {message}", e)
@@ -1093,6 +1095,21 @@ class Gui:
             {
                 "type": _WsType.GET_VARIABLES.value,
                 "payload": {"data": variable_tree},
+            }
+        )
+
+    def __handle_ws_app_id(self, message: t.Any):
+        if not isinstance(message, dict):
+            return
+        name = message.get("name", "")
+        payload = message.get("payload", "")
+        app_id = id(self)
+        if payload == app_id:
+            return
+        self.__send_ws(
+            {
+                "type": _WsType.APP_ID.value,
+                "payload": {"name": name, "id": app_id},
             }
         )
 

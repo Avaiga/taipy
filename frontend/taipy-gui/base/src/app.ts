@@ -1,4 +1,5 @@
-import { sendWsMessage } from "../../src/context/wsUtils";
+import { getLocalStorageValue } from "../../src/context/utils";
+import { sendWsMessage, TAIPY_CLIENT_ID } from "../../src/context/wsUtils";
 import { uploadFile } from "../../src/workers/fileupload";
 
 import { Socket, io } from "socket.io-client";
@@ -13,6 +14,7 @@ export class TaipyApp {
     _onInit: OnInitHandler | undefined;
     _onChange: OnChangeHandler | undefined;
     variableManager: VariableManager | undefined;
+    appId: string;
     clientId: string;
     context: string;
     path: string | undefined;
@@ -29,6 +31,7 @@ export class TaipyApp {
         this.variableManager = undefined;
         this.clientId = "";
         this.context = "";
+        this.appId = "";
         this.path = path;
         this.socket = socket;
         initSocket(socket, this);
@@ -55,6 +58,20 @@ export class TaipyApp {
         this._onChange = handler;
     }
 
+    // Utility methods
+    init() {
+        this.clientId = "";
+        this.context = "";
+        this.appId = "";
+        const id = getLocalStorageValue(TAIPY_CLIENT_ID, "");
+        sendWsMessage(this.socket, "ID", TAIPY_CLIENT_ID, id, id, undefined, false);
+        sendWsMessage(this.socket, "AID", "connect", "", id, undefined, false);
+        if (id !== "") {
+            this.clientId = id;
+            this.updateContext(this.path);
+        }
+    }
+
     // Public methods
     getEncodedName(varName: string, module: string) {
         return this.variableManager?.getEncodedName(varName, module);
@@ -64,8 +81,8 @@ export class TaipyApp {
         return this.variableManager?.getName(encodedName);
     }
 
-    get(varName: string) {
-        return this.variableManager?.get(varName);
+    get(encodedName: string) {
+        return this.variableManager?.get(encodedName);
     }
 
     getInfo(encodedName: string) {
