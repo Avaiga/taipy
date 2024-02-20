@@ -8,7 +8,6 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
 import dataclasses
 import os
 import pathlib
@@ -32,7 +31,12 @@ def tmp_excel_file():
 def cleanup(tmp_excel_file):
     yield
     if os.path.exists(tmp_excel_file):
-        os.remove(tmp_excel_file)
+        try:
+            os.remove(tmp_excel_file)
+        except Exception as e:
+            from taipy.logger._taipy_logger import _TaipyLogger
+            logger = _TaipyLogger._get_logger()
+            logger.error(f"Failed to delete {tmp_excel_file}. {e}")
 
 
 @dataclasses.dataclass
@@ -248,17 +252,21 @@ def test_write_with_header_single_sheet_custom_exposed_type_with_sheet_name(tmp_
         Scope.SCENARIO,
         properties={"path": tmp_excel_file, "sheet_name": "Sheet1", "exposed_type": MyCustomObject},
     )
+    expected_data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
 
-    data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
-    excel_dn.write(data)
-    assert all(actual == expected for actual, expected in zip(excel_dn.read(), data))
+    excel_dn.write(expected_data)
+    actual_data = excel_dn.read()
+
+    assert all(actual == expected for actual, expected in zip(actual_data, expected_data))
 
     excel_dn.write(None)
-    assert excel_dn.read() == []
+    actual_data = excel_dn.read()
+    assert actual_data == []
 
 
 def test_write_with_header_single_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file):
-    excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": MyCustomObject})
+    excel_dn = ExcelDataNode("foo", Scope.SCENARIO,
+    properties={"path": tmp_excel_file, "exposed_type": MyCustomObject})
 
     data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
     excel_dn.write(data)
@@ -290,7 +298,8 @@ def test_write_without_header_single_sheet_custom_exposed_type_with_sheet_name(t
 
 def test_write_without_header_single_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode(
-        "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": MyCustomObject, "has_header": False}
+        "foo", Scope.SCENARIO,
+        properties={"path": tmp_excel_file, "exposed_type": MyCustomObject, "has_header": False}
     )
 
     data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]

@@ -8,7 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+import typing
 from importlib import util
 from typing import Optional, Type
 
@@ -27,7 +27,7 @@ class _OrchestratorFactory:
     _TAIPY_ENTERPRISE_CORE_DISPATCHER_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core._orchestrator._dispatcher"
     __TAIPY_ENTERPRISE_BUILD_DISPATCHER_METHOD = "_build_dispatcher"
 
-    _orchestrator: Optional[_Orchestrator] = None
+    _orchestrator: Optional[_AbstractOrchestrator] = None
     _dispatcher: Optional[_JobDispatcher] = None
 
     @classmethod
@@ -80,20 +80,20 @@ class _OrchestratorFactory:
                 cls._TAIPY_ENTERPRISE_CORE_DISPATCHER_MODULE, cls.__TAIPY_ENTERPRISE_BUILD_DISPATCHER_METHOD
             )(cls._orchestrator)
         else:
-            cls._dispatcher = _StandaloneJobDispatcher(cls._orchestrator)  # type: ignore
+            cls._dispatcher = _StandaloneJobDispatcher(typing.cast(_AbstractOrchestrator, cls._orchestrator))
         cls._dispatcher.start()  # type: ignore
 
     @classmethod
     def __build_development_job_dispatcher(cls):
         if isinstance(cls._dispatcher, _StandaloneJobDispatcher):
             cls._dispatcher.stop()
-        cls._dispatcher = _DevelopmentJobDispatcher(cls._orchestrator)  # type: ignore
+        cls._dispatcher = _DevelopmentJobDispatcher(typing.cast(_AbstractOrchestrator, cls._orchestrator))
 
     @classmethod
     def __build_enterprise_job_dispatcher(cls, force_restart=False):
         cls._dispatcher = _load_fct(
             cls._TAIPY_ENTERPRISE_CORE_DISPATCHER_MODULE, cls.__TAIPY_ENTERPRISE_BUILD_DISPATCHER_METHOD
-        )(cls._orchestrator, force_restart)
+        )(typing.cast(_AbstractOrchestrator, cls._orchestrator), force_restart)
         if cls._dispatcher:
             cls._dispatcher.start()
         else:
