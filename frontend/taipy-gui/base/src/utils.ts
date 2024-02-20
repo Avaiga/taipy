@@ -9,6 +9,8 @@ interface MultipleUpdatePayload {
     payload: { value: unknown };
 }
 
+const initWsMessageTypes = ["ID", "AID", "GMC"];
+
 export const initSocket = (socket: Socket, appManager: TaipyApp) => {
     socket.on("connect", () => {
         if (appManager.clientId === "" || appManager.appId === "") {
@@ -81,7 +83,7 @@ const processWsMessage = (message: WsMessage, appManager: TaipyApp) => {
 const postWsMessageProcessing = (message: WsMessage, appManager: TaipyApp) => {
     // perform data population only when all necessary metadata is ready
     if (
-        ["ID", "AID", "GMC"].includes(message.type) &&
+        initWsMessageTypes.includes(message.type) &&
         appManager.clientId !== "" &&
         appManager.appId !== "" &&
         appManager.context !== ""

@@ -42,7 +42,7 @@ export class VariableManager {
                 }
             }
         }
-        if (changes) {
+        if (Object.keys(changes).length === 0) {
             console.error("Unmatched data tree! Removed changes: ", changes);
         }
         // Reset the initial data
