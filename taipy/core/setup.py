@@ -28,11 +28,9 @@ with open(version_path) as version_file:
         version_string = f"{version_string}.{vext}"
 
 requirements = [
-    "pyarrow>=14.0.2,<15.0",
     "networkx>=2.6,<3.0",
     "openpyxl>=3.1.2,<3.2",
     "pandas>=1.3.5,<3.0",
-    "pymongo[srv]>=4.2.0,<5.0",
     "sqlalchemy>=2.0.16,<2.1",
     "toml>=0.10,<0.11",
     "taipy-config@git+https://git@github.com/Avaiga/taipy-config.git@develop",
@@ -41,11 +39,10 @@ requirements = [
 test_requirements = ["pytest>=3.8"]
 
 extras_require = {
-    "fastparquet": ["fastparquet==2022.11.0"],
     "mssql": ["pyodbc>=4,<4.1"],
     "mysql": ["pymysql>1,<1.1"],
     "postgresql": ["psycopg2>2.9,<2.10"],
-    "parquet": ["fastparquet==2022.11.0"],
+    "parquet": ["fastparquet==2022.11.0", "pyarrow>=14.0.2,<15.0"],
     "s3": ["boto3==1.29.1"],
     "mongo": ["pymongo[srv]>=4.2.0,<5.0"],
 }

@@ -15,6 +15,7 @@ import contextlib
 import importlib
 import inspect
 import json
+import math
 import os
 import pathlib
 import re
@@ -508,6 +509,9 @@ class Gui:
     def _get_data_scope(self) -> SimpleNamespace:
         return self.__bindings._get_data_scope()
 
+    def _get_data_scope_metadata(self) -> t.Dict[str, t.Any]:
+        return self.__bindings._get_data_scope_metadata()
+
     def _get_all_data_scopes(self) -> t.Dict[str, SimpleNamespace]:
         return self.__bindings._get_all_scopes()
 
@@ -981,6 +985,9 @@ class Gui:
                     newvalue = newvalue.get()
                 if isinstance(newvalue, (dict, _MapDict)):
                     continue  # this var has no transformer
+                if isinstance(newvalue, float) and math.isnan(newvalue):
+                    # do not let NaN go through json, it is not handle well (dies silently through websocket)
+                    newvalue = None
                 debug_warnings: t.List[warnings.WarningMessage] = []
                 with warnings.catch_warnings(record=True) as warns:
                     warnings.resetwarnings()
@@ -1943,6 +1950,9 @@ class Gui:
     def __pre_render_pages(self) -> None:
         """Pre-render all pages to have a proper initialization of all variables"""
         self.__set_client_id_in_context()
+        scope_metadata = self._get_data_scope_metadata()
+        if scope_metadata[_DataScopes._META_PRE_RENDER]:
+            return
         for page in self._config.pages:
             if page is not None:
                 with contextlib.suppress(Exception):
@@ -1950,6 +1960,7 @@ class Gui:
                         self._bind_custom_page_variables(page._renderer, self._get_client_id())
                     else:
                         page.render(self, silent=True)
+        scope_metadata[_DataScopes._META_PRE_RENDER] = True
 
     def _get_navigated_page(self, page_name: str) -> t.Any:
         nav_page = page_name

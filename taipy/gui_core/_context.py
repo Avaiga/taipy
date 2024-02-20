@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import json
+import math
 import typing as t
 from collections import defaultdict
 from numbers import Number
@@ -715,6 +716,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return sorted(res, key=lambda r: r[0], reverse=True)
         return _DoNotUpdate()
 
+    @staticmethod
+    def __is_tabular_data(datanode: DataNode, value: t.Any):
+        if isinstance(datanode, _AbstractTabularDataNode):
+            return True
+        if datanode.is_ready_for_reading:
+            return isinstance(value, (pd.DataFrame, pd.Series))
+        return False
+
     def get_data_node_data(self, datanode: DataNode, id: str):
         if (
             id
@@ -728,15 +737,21 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     return (None, None, True, None)
                 try:
                     value = dn.read()
-                    if isinstance(value, (pd.DataFrame, pd.Series)):
+                    if _GuiCoreContext.__is_tabular_data(dn, value):
                         return (None, None, True, None)
-                    return (
-                        value,
+                    val_type = (
                         "date"
                         if "date" in type(value).__name__
                         else type(value).__name__
                         if isinstance(value, Number)
-                        else None,
+                        else None
+                    )
+                    if isinstance(value, float):
+                        if math.isnan(value):
+                            value = None
+                    return (
+                        value,
+                        val_type,
                         None,
                         None,
                     )
@@ -826,7 +841,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
             and dn.is_ready_for_reading
         ):
             try:
-                return self.__read_tabular_data(dn)
+                value = self.__read_tabular_data(dn)
+                if _GuiCoreContext.__is_tabular_data(dn, value):
+                    return value
             except Exception:
                 return None
         return None
@@ -842,9 +859,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
             and dn.is_ready_for_reading
         ):
             try:
-                return self.gui._tbl_cols(
-                    True, True, "{}", json.dumps({"data": "tabular_data"}), tabular_data=self.__read_tabular_data(dn)
-                )
+                value = self.__read_tabular_data(dn)
+                if _GuiCoreContext.__is_tabular_data(dn, value):
+                    return self.gui._tbl_cols(
+                        True, True, "{}", json.dumps({"data": "tabular_data"}), tabular_data=value
+                    )
             except Exception:
                 return None
         return None

@@ -11,7 +11,7 @@
 
 from datetime import timedelta
 from time import sleep
-from typing import Union
+from typing import Union, cast
 from unittest import mock
 from unittest.mock import MagicMock
 
@@ -20,6 +20,7 @@ import pytest
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.core import JobId, TaskId
+from taipy.core._orchestrator._abstract_orchestrator import _AbstractOrchestrator
 from taipy.core._orchestrator._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
 from taipy.core._orchestrator._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
@@ -317,8 +318,8 @@ def _dispatch(task: Task, job: Job, mode=JobConfig._DEVELOPMENT_MODE):
     _TaskManager._set(task)
     _JobManager._set(job)
     dispatcher: Union[_StandaloneJobDispatcher, _DevelopmentJobDispatcher] = _StandaloneJobDispatcher(
-        _OrchestratorFactory._orchestrator
+        cast(_AbstractOrchestrator, _OrchestratorFactory._orchestrator)
     )
     if mode == JobConfig._DEVELOPMENT_MODE:
-        dispatcher = _DevelopmentJobDispatcher(_OrchestratorFactory._orchestrator)
+        dispatcher = _DevelopmentJobDispatcher(cast(_AbstractOrchestrator, _OrchestratorFactory._orchestrator))
     dispatcher._dispatch(job)

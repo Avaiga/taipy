@@ -28,7 +28,7 @@ import { isValid } from "date-fns";
 
 import { FormatConfig } from "../../context/taipyReducers";
 import { dateToString, getDateTime, getDateTimeString, getNumberString, getTimeZonedDate } from "../../utils/index";
-import { TaipyActiveProps, TaipyMultiSelectProps } from "./utils";
+import { TaipyActiveProps, TaipyMultiSelectProps, getSuffixedClassNames } from "./utils";
 
 /**
  * A column description as received by the backend.
@@ -380,7 +380,13 @@ export const EditableCell = (props: EditableCellProps) => {
     }, [onValidation]);
 
     return (
-        <TableCell {...getCellProps(colDesc, tableCellProps)} className={className} title={tooltip}>
+        <TableCell
+            {...getCellProps(colDesc, tableCellProps)}
+            className={
+                onValidation ? getSuffixedClassNames(className || "tpc", edit ? "-editing" : "-editable") : className
+            }
+            title={tooltip}
+        >
             {edit ? (
                 colDesc.type?.startsWith("bool") ? (
                     <Box sx={cellBoxSx}>
