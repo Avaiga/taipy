@@ -27,8 +27,7 @@ from taipy.core.scenario.scenario import Scenario
 from taipy.core.submission._submission_manager import _SubmissionManager
 from taipy.core.submission.submission_status import SubmissionStatus
 from taipy.core.task.task import Task
-from tests.core.utils import assert_true_after_time, assert_submission_status
-
+from tests.core.utils import assert_submission_status, assert_true_after_time
 
 # ################################  USER FUNCTIONS  ##################################
 
