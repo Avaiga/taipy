@@ -57,7 +57,7 @@ def test_submit_task_multithreading_multiple_task():
     task_1 = _create_task(partial(lock_multiply, lock_1))
     task_2 = _create_task(partial(lock_multiply, lock_2))
 
-    _OrchestratorFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher(force_restart=True)
 
     with lock_1:
         with lock_2:
@@ -104,7 +104,7 @@ def test_submit_submittable_multithreading_multiple_task():
 
     scenario = Scenario("scenario_config", [task_1, task_2], {})
 
-    _OrchestratorFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher(force_restart=True)
 
     with lock_1:
         with lock_2:
@@ -146,7 +146,7 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
     task_1 = _create_task(partial(lock_multiply, lock_1))
     task_2 = _create_task(partial(lock_multiply, lock_2))
 
-    _OrchestratorFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher(force_restart=True)
 
     with lock_0:
         submission_0 = _Orchestrator.submit_task(task_0)
@@ -215,7 +215,7 @@ def test_blocked_task():
     bar_cfg = Config.configure_data_node("bar")
     baz_cfg = Config.configure_data_node("baz")
 
-    _OrchestratorFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher(force_restart=True)
 
     dns = _DataManager._bulk_get_or_create([foo_cfg, bar_cfg, baz_cfg])
     foo = dns[foo_cfg]
@@ -273,7 +273,7 @@ def test_blocked_submittable():
     bar_cfg = Config.configure_data_node("bar")
     baz_cfg = Config.configure_data_node("baz")
 
-    _OrchestratorFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher(force_restart=True)
 
     dns = _DataManager._bulk_get_or_create([foo_cfg, bar_cfg, baz_cfg])
     foo = dns[foo_cfg]

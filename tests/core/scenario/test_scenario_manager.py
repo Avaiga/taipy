@@ -20,11 +20,9 @@ from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.core import Job
 from taipy.core._orchestrator._orchestrator import _Orchestrator
-from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core.common import _utils
 from taipy.core.common._utils import _Subscriber
-from taipy.core.config.job_config import JobConfig
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
@@ -52,9 +50,6 @@ from tests.core.utils.NotifyMock import NotifyMock
 
 
 def test_set_and_get_scenario(cycle):
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _OrchestratorFactory._build_dispatcher()
-
     scenario_id_1 = ScenarioId("scenario_id_1")
     scenario_1 = Scenario("scenario_name_1", [], {}, [], scenario_id_1)
 
@@ -278,15 +273,11 @@ def test_get_all_on_multiple_versions_environment():
 
 
 def test_create_scenario_does_not_modify_config():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     creation_date_1 = datetime.now()
     name_1 = "name_1"
     scenario_config = Config.configure_scenario("sc", None, None, Frequency.DAILY)
     assert scenario_config.properties.get("name") is None
     assert len(scenario_config.properties) == 0
-
-    _OrchestratorFactory._build_dispatcher()
 
     scenario = _ScenarioManager._create(scenario_config, creation_date=creation_date_1, name=name_1)
     assert len(scenario_config.properties) == 0
@@ -307,8 +298,6 @@ def test_create_scenario_does_not_modify_config():
 
 
 def test_create_and_delete_scenario():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     creation_date_1 = datetime.now()
     creation_date_2 = creation_date_1 + timedelta(minutes=10)
 
@@ -318,8 +307,6 @@ def test_create_and_delete_scenario():
     assert len(_ScenarioManager._get_all()) == 0
 
     scenario_config = Config.configure_scenario("sc", None, None, Frequency.DAILY)
-
-    _OrchestratorFactory._build_dispatcher()
 
     scenario_1 = _ScenarioManager._create(scenario_config, creation_date=creation_date_1, name=name_1)
     assert scenario_1.config_id == "sc"
@@ -531,8 +518,6 @@ def mult_by_4(nb: int):
 
 
 def test_scenario_manager_only_creates_data_node_once():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     # dn_1 ---> mult_by_2 ---> dn_2 ---> mult_by_3 ---> dn_6
     # dn_1 ---> mult_by_4 ---> dn_4
 
@@ -549,8 +534,6 @@ def test_scenario_manager_only_creates_data_node_once():
     scenario_config.add_sequences(
         {"by_6": [task_mult_by_2_config, task_mult_by_3_config], "by_4": [task_mult_by_4_config]}
     )
-
-    _OrchestratorFactory._build_dispatcher()
 
     assert len(_DataManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 0
@@ -588,8 +571,6 @@ def test_scenario_manager_only_creates_data_node_once():
 
 
 def test_notification_subscribe(mocker):
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     mocker.patch("taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
 
     scenario_config = Config.configure_scenario(
@@ -603,8 +584,6 @@ def test_notification_subscribe(mocker):
             )
         ],
     )
-
-    _OrchestratorFactory._build_dispatcher()
 
     scenario = _ScenarioManager._create(scenario_config)
 
@@ -639,8 +618,6 @@ class Notify:
 
 
 def test_notification_subscribe_multiple_params(mocker):
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     mocker.patch("taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
 
     scenario_config = Config.configure_scenario(
@@ -655,8 +632,6 @@ def test_notification_subscribe_multiple_params(mocker):
         ],
     )
     notify = mocker.Mock()
-
-    _OrchestratorFactory._build_dispatcher()
 
     scenario = _ScenarioManager._create(scenario_config)
     _ScenarioManager._subscribe(callback=notify, params=["foobar", 123, 1.2], scenario=scenario)
@@ -680,8 +655,6 @@ def notify2(*args, **kwargs):
 
 
 def test_notification_unsubscribe(mocker):
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     mocker.patch("taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
 
     scenario_config = Config.configure_scenario(
@@ -695,8 +668,6 @@ def test_notification_unsubscribe(mocker):
             )
         ],
     )
-
-    _OrchestratorFactory._build_dispatcher()
 
     scenario = _ScenarioManager._create(scenario_config)
 
@@ -715,8 +686,6 @@ def test_notification_unsubscribe(mocker):
 
 
 def test_notification_unsubscribe_multi_param():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     scenario_config = Config.configure_scenario(
         "awesome_scenario",
         [
@@ -728,8 +697,6 @@ def test_notification_unsubscribe_multi_param():
             )
         ],
     )
-
-    _OrchestratorFactory._build_dispatcher()
 
     scenario = _ScenarioManager._create(scenario_config)
 
@@ -756,8 +723,6 @@ def test_notification_unsubscribe_multi_param():
 
 
 def test_scenario_notification_subscribe_all():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     scenario_config = Config.configure_scenario(
         "awesome_scenario",
         [
@@ -780,7 +745,7 @@ def test_scenario_notification_subscribe_all():
             )
         ],
     )
-    _OrchestratorFactory._build_dispatcher()
+
     scenario = _ScenarioManager._create(scenario_config)
     other_scenario = _ScenarioManager._create(other_scenario_config)
     notify_1 = NotifyMock(scenario)
@@ -816,9 +781,6 @@ def test_is_promotable_to_primary_scenario():
 
 
 def test_get_set_primary_scenario():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _OrchestratorFactory._build_dispatcher()
-
     cycle_1 = _CycleManager._create(Frequency.DAILY, name="foo")
 
     scenario_1 = Scenario("sc_1", [], {}, ScenarioId("sc_1"), is_primary=False, cycle=cycle_1)
@@ -852,15 +814,11 @@ def test_get_set_primary_scenario():
 
 
 def test_hard_delete_one_single_scenario_with_scenario_data_nodes():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     scenario_config = Config.configure_scenario("scenario_config", [task_config])
     scenario_config.add_sequences({"sequence_config": [task_config]})
-
-    _OrchestratorFactory._build_dispatcher()
 
     scenario = _ScenarioManager._create(scenario_config)
     _ScenarioManager._submit(scenario.id)
@@ -879,15 +837,11 @@ def test_hard_delete_one_single_scenario_with_scenario_data_nodes():
 
 
 def test_hard_delete_one_scenario_among_two_with_scenario_data_nodes():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     scenario_config = Config.configure_scenario("scenario_config", [task_config])
     scenario_config.add_sequences({"sequence_config": [task_config]})
-
-    _OrchestratorFactory._build_dispatcher()
 
     scenario_1 = _ScenarioManager._create(scenario_config)
     scenario_2 = _ScenarioManager._create(scenario_config)
@@ -909,15 +863,11 @@ def test_hard_delete_one_scenario_among_two_with_scenario_data_nodes():
 
 
 def test_hard_delete_one_scenario_among_two_with_cycle_data_nodes():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.CYCLE, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.CYCLE)
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     scenario_config = Config.configure_scenario("scenario_config", [task_config])
     scenario_config.add_sequences({"sequence_config": [task_config]})
-
-    _OrchestratorFactory._build_dispatcher()
 
     scenario_1 = _ScenarioManager._create(scenario_config)
     scenario_2 = _ScenarioManager._create(scenario_config)
@@ -939,8 +889,6 @@ def test_hard_delete_one_scenario_among_two_with_cycle_data_nodes():
 
 
 def test_hard_delete_shared_entities():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     dn_config_1 = Config.configure_data_node("my_input_1", "in_memory", scope=Scope.CYCLE, default_data="testing")
     dn_config_2 = Config.configure_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_config_3 = Config.configure_data_node("my_input_3", "in_memory", scope=Scope.GLOBAL, default_data="testing")
@@ -962,8 +910,6 @@ def test_hard_delete_shared_entities():
             "sequence_config_4": [task_config_4],
         }
     )
-
-    _OrchestratorFactory._build_dispatcher()
 
     scenario_1 = _ScenarioManager._create(scenario_config_1)
     scenario_2 = _ScenarioManager._create(scenario_config_1)
@@ -1008,9 +954,6 @@ def test_is_submittable():
 
 
 def test_submit():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _OrchestratorFactory._build_dispatcher()
-
     data_node_1 = InMemoryDataNode("foo", Scope.SCENARIO, "s1")
     data_node_2 = InMemoryDataNode("bar", Scope.SCENARIO, "s2")
     data_node_3 = InMemoryDataNode("baz", Scope.SCENARIO, "s3")
@@ -1179,8 +1122,6 @@ def test_scenarios_comparison():
         comparators={"bar": [subtraction], "foo": [subtraction, addition]},
     )
 
-    _OrchestratorFactory._build_dispatcher()
-
     assert scenario_config.comparators is not None
     scenario_1 = _ScenarioManager._create(scenario_config)
     scenario_2 = _ScenarioManager._create(scenario_config)
@@ -1213,9 +1154,6 @@ def test_scenarios_comparison():
 
 
 def test_tags():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _OrchestratorFactory._build_dispatcher()
-
     cycle_1 = _CycleManager._create(Frequency.DAILY, name="today", creation_date=datetime.now())
     cycle_2 = _CycleManager._create(
         Frequency.DAILY,
@@ -1353,12 +1291,8 @@ def test_tags():
 
 
 def test_authorized_tags():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     scenario = Scenario("scenario_1", [], {"authorized_tags": ["foo", "bar"]}, [], ScenarioId("scenario_1"))
     scenario_2_cfg = Config.configure_scenario("scenario_2", [], [], Frequency.DAILY, authorized_tags=["foo", "bar"])
-
-    _OrchestratorFactory._build_dispatcher()
 
     scenario_2 = _ScenarioManager._create(scenario_2_cfg)
     _ScenarioManager._set(scenario)

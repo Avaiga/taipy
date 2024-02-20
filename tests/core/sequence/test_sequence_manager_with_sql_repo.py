@@ -13,9 +13,7 @@ import pytest
 
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core._version._version_manager import _VersionManager
-from taipy.core.config.job_config import JobConfig
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.exceptions import SequenceAlreadyExists
@@ -29,12 +27,7 @@ from taipy.core.task.task import Task
 from taipy.core.task.task_id import TaskId
 
 
-def test_set_and_get_sequence(init_sql_repo, init_managers):
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    init_managers()
-    _OrchestratorFactory._build_dispatcher()
-
+def test_set_and_get_sequence(init_sql_repo):
     input_dn = InMemoryDataNode("foo", Scope.SCENARIO)
     output_dn = InMemoryDataNode("foo", Scope.SCENARIO)
     task = Task("task", {}, print, [input_dn], [output_dn], TaskId("task_id"))
@@ -89,9 +82,7 @@ def test_set_and_get_sequence(init_sql_repo, init_managers):
     assert len(_SequenceManager._get(sequence_2).tasks) == 1
 
 
-def test_get_all_on_multiple_versions_environment(init_sql_repo, init_managers):
-    init_managers()
-
+def test_get_all_on_multiple_versions_environment(init_sql_repo):
     # Create 5 sequences from Scenario with 2 versions each
     for version in range(1, 3):
         for i in range(5):
@@ -152,12 +143,8 @@ def mult_by_3(nb: int):
     return nb * 3
 
 
-def test_get_or_create_data(init_sql_repo, init_managers):
+def test_get_or_create_data(init_sql_repo):
     # only create intermediate data node once
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    init_managers()
-
     dn_config_1 = Config.configure_data_node("foo", "in_memory", Scope.SCENARIO, default_data=1)
     dn_config_2 = Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0)
     dn_config_6 = Config.configure_data_node("baz", "in_memory", Scope.SCENARIO, default_data=0)
@@ -166,8 +153,6 @@ def test_get_or_create_data(init_sql_repo, init_managers):
     task_config_mult_by_3 = Config.configure_task("mult_by_3", mult_by_3, [dn_config_2], dn_config_6)
     # dn_1 ---> mult_by_two ---> dn_2 ---> mult_by_3 ---> dn_6
     scenario_config = Config.configure_scenario("scenario", [task_config_mult_by_two, task_config_mult_by_3])
-
-    _OrchestratorFactory._build_dispatcher()
 
     assert len(_DataManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 0
@@ -206,16 +191,10 @@ def test_get_or_create_data(init_sql_repo, init_managers):
         sequence.WRONG.write(7)
 
 
-def test_hard_delete_one_single_sequence_with_scenario_data_nodes(init_sql_repo, init_managers):
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    init_managers()
-
+def test_hard_delete_one_single_sequence_with_scenario_data_nodes(init_sql_repo):
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
-
-    _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create([task_config])
     scenario = Scenario("scenario", set(tasks), {}, sequences={"sequence": {"tasks": tasks}})
@@ -237,16 +216,10 @@ def test_hard_delete_one_single_sequence_with_scenario_data_nodes(init_sql_repo,
     assert len(_JobManager._get_all()) == 1
 
 
-def test_hard_delete_one_single_sequence_with_cycle_data_nodes(init_sql_repo, init_managers):
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    init_managers()
-
+def test_hard_delete_one_single_sequence_with_cycle_data_nodes(init_sql_repo):
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.CYCLE, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.CYCLE)
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
-
-    _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create([task_config])
     scenario = Scenario("scenario", tasks, {}, sequences={"sequence": {"tasks": tasks}})
@@ -268,18 +241,12 @@ def test_hard_delete_one_single_sequence_with_cycle_data_nodes(init_sql_repo, in
     assert len(_JobManager._get_all()) == 1
 
 
-def test_hard_delete_shared_entities(init_sql_repo, init_managers):
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    init_managers()
-
+def test_hard_delete_shared_entities(init_sql_repo):
     input_dn = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     intermediate_dn = Config.configure_data_node("my_inter", "in_memory", scope=Scope.GLOBAL, default_data="testing")
     output_dn = Config.configure_data_node("my_output", "in_memory", scope=Scope.GLOBAL, default_data="testing")
     task_1 = Config.configure_task("task_1", print, input_dn, intermediate_dn)
     task_2 = Config.configure_task("task_2", print, intermediate_dn, output_dn)
-
-    _OrchestratorFactory._build_dispatcher()
 
     tasks_scenario_1 = _TaskManager._bulk_get_or_create([task_1, task_2], scenario_id="scenario_id_1")
     tasks_scenario_2 = _TaskManager._bulk_get_or_create([task_1, task_2], scenario_id="scenario_id_2")

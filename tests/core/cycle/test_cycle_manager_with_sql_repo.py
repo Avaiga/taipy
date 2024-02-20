@@ -14,8 +14,6 @@ from datetime import datetime
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from taipy.core.config.job_config import JobConfig
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from taipy.core.cycle.cycle import Cycle
@@ -199,7 +197,6 @@ def test_get_cycle_start_date_and_end_date(init_sql_repo):
 
 
 def test_hard_delete_shared_entities(init_sql_repo):
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _ScenarioManager._repository = _ScenarioManagerFactory._build_repository()
 
     dn_config_1 = Config.configure_data_node("my_input_1", "in_memory", scope=Scope.SCENARIO, default_data="testing")
@@ -227,8 +224,6 @@ def test_hard_delete_shared_entities(init_sql_repo):
         "scenario_config_2", [task_config_2, task_config_3]
     )  # No Frequency so cycle attached to scenarios
     scenario_config_2.add_sequences({"sequence_3": [task_config_3]})
-
-    _OrchestratorFactory._build_dispatcher()
 
     scenario_1 = _ScenarioManager._create(scenario_config_1)
     scenario_2 = _ScenarioManager._create(scenario_config_1)
