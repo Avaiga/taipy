@@ -32,6 +32,8 @@ jobs:
           python tools/release/check_releases.py dist ${{ github.event.inputs.version }}
 
   publish-subpackages-to-pypi:
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     needs: [test-package]
     timeout-minutes: 20
     strategy:
@@ -42,6 +44,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          sparse-checkout: taipy/${{ matrix.package }}
+          sparse-checkout-cone-mode: false
 
       - name: Download assets from tag
         run: |
@@ -49,11 +54,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Test token
+        run: echo ${{ secrets[format('PYPI_API_TOKEN_{0}', matrix.package )] }}
+
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          user: __token__
-          password: ${{ secrets[format('PYPI_API_TOKEN_{0}', matrix.package )] }}
+          verbose: true
 
   test-published-package:
     needs: [publish-subpackages-to-pypi]
