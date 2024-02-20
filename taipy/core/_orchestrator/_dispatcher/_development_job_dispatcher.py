@@ -8,6 +8,9 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
+from typing import Optional
+
 from ...job.job import Job
 from .._abstract_orchestrator import _AbstractOrchestrator
 from ._job_dispatcher import _JobDispatcher
@@ -26,7 +29,7 @@ class _DevelopmentJobDispatcher(_JobDispatcher):
     def is_running(self) -> bool:
         return True
 
-    def stop(self):
+    def stop(self, wait: bool = True, timeout: Optional[float] = None):
         raise NotImplementedError
 
     def run(self):

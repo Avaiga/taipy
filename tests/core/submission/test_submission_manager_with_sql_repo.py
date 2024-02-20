@@ -22,14 +22,7 @@ from taipy.core.submission.submission import Submission
 from taipy.core.submission.submission_status import SubmissionStatus
 
 
-def init_managers():
-    _VersionManagerFactory._build_manager()._delete_all()
-    _SubmissionManagerFactory._build_manager()._delete_all()
-
-
 def test_create_submission(scenario, init_sql_repo):
-    init_managers()
-
     submission_1 = _SubmissionManagerFactory._build_manager()._create(
         scenario.id, scenario._ID_PREFIX, scenario.config_id, debug=True, log="log_file", retry_note=5
     )
@@ -44,8 +37,6 @@ def test_create_submission(scenario, init_sql_repo):
 
 
 def test_get_submission(init_sql_repo):
-    init_managers()
-
     submission_manager = _SubmissionManagerFactory._build_manager()
 
     submission_1 = submission_manager._create(
@@ -63,8 +54,6 @@ def test_get_submission(init_sql_repo):
 
 
 def test_get_all_submission(init_sql_repo):
-    init_managers()
-
     submission_manager = _SubmissionManagerFactory._build_manager()
     version_manager = _VersionManagerFactory._build_manager()
 
@@ -86,8 +75,6 @@ def test_get_all_submission(init_sql_repo):
 
 
 def test_get_latest_submission(init_sql_repo):
-    init_managers()
-
     task_1 = Task("task_config_1", {}, print, id="task_id_1")
     task_2 = Task("task_config_2", {}, print, id="task_id_2")
 
@@ -113,8 +100,6 @@ def test_get_latest_submission(init_sql_repo):
 
 
 def test_delete_submission(init_sql_repo):
-    init_managers()
-
     submission_manager = _SubmissionManagerFactory._build_manager()
 
     submission = Submission("entity_id", "submission_id", "entity_config_id")
@@ -140,8 +125,6 @@ def test_delete_submission(init_sql_repo):
 
 
 def test_is_deletable(init_sql_repo):
-    init_managers()
-
     submission_manager = _SubmissionManagerFactory._build_manager()
 
     submission = Submission("entity_id", "submission_id", "entity_config_id")

@@ -19,25 +19,14 @@ from taipy.config.config import Config
 from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core.data._data_manager import _DataManager
-from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.exceptions.exceptions import ModelNotFound, NonExistingTask
-from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.task._task_manager import _TaskManager
-from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
 from taipy.core.task.task_id import TaskId
 
 
-def init_managers():
-    _JobManagerFactory._build_manager()._delete_all()
-    _TaskManagerFactory._build_manager()._delete_all()
-    _DataManagerFactory._build_manager()._delete_all()
-
-
 def test_create_and_save(init_sql_repo):
-    init_managers()
-
     input_configs = [Config.configure_data_node("my_input", "in_memory")]
     output_configs = Config.configure_data_node("my_output", "in_memory")
     task_config = Config.configure_task("foo", print, input_configs, output_configs)
@@ -66,8 +55,6 @@ def test_create_and_save(init_sql_repo):
 
 
 def test_do_not_recreate_existing_data_node(init_sql_repo):
-    init_managers()
-
     input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO)
     output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
 
@@ -80,7 +67,6 @@ def test_do_not_recreate_existing_data_node(init_sql_repo):
 
 
 def test_do_not_recreate_existing_task(init_sql_repo):
-    init_managers()
     assert len(_TaskManager._get_all()) == 0
 
     input_config_scope_scenario = Config.configure_data_node("my_input_1", "in_memory", Scope.SCENARIO)
@@ -166,8 +152,6 @@ def test_do_not_recreate_existing_task(init_sql_repo):
 
 
 def test_set_and_get_task(init_sql_repo):
-    init_managers()
-
     task_id_1 = TaskId("id1")
     first_task = Task("name_1", {}, print, [], [], task_id_1)
     task_id_2 = TaskId("id2")
@@ -218,9 +202,6 @@ def test_set_and_get_task(init_sql_repo):
 
 
 def test_get_all_on_multiple_versions_environment(init_sql_repo):
-    Config.configure_global_app(repository_type="sql")
-    init_managers()
-
     # Create 5 tasks with 2 versions each
     # Only version 1.0 has the task with config_id = "config_id_1"
     # Only version 2.0 has the task with config_id = "config_id_6"
@@ -254,8 +235,6 @@ def test_get_all_on_multiple_versions_environment(init_sql_repo):
 
 
 def test_ensure_conservation_of_order_of_data_nodes_on_task_creation(init_sql_repo):
-    init_managers()
-
     embedded_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.SCENARIO)
     embedded_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.SCENARIO)
     embedded_3 = Config.configure_data_node("a_dn_3", "in_memory", scope=Scope.SCENARIO)
@@ -278,8 +257,6 @@ def test_ensure_conservation_of_order_of_data_nodes_on_task_creation(init_sql_re
 
 
 def test_delete_raise_exception(init_sql_repo):
-    init_managers()
-
     dn_input_config_1 = Config.configure_data_node(
         "my_input_1", "in_memory", scope=Scope.SCENARIO, default_data="testing"
     )
@@ -293,8 +270,6 @@ def test_delete_raise_exception(init_sql_repo):
 
 
 def test_hard_delete(init_sql_repo):
-    init_managers()
-
     dn_input_config_1 = Config.configure_data_node(
         "my_input_1", "in_memory", scope=Scope.SCENARIO, default_data="testing"
     )
@@ -354,8 +329,6 @@ def test_submit_task():
 
 
 def test_get_tasks_by_config_id(init_sql_repo):
-    init_managers()
-
     dn_config = Config.configure_data_node("dn", scope=Scope.SCENARIO)
     task_config_1 = Config.configure_task("t1", print, dn_config)
     task_config_2 = Config.configure_task("t2", print, dn_config)
@@ -387,8 +360,6 @@ def test_get_tasks_by_config_id(init_sql_repo):
 
 
 def test_get_scenarios_by_config_id_in_multiple_versions_environment(init_sql_repo):
-    init_managers()
-
     dn_config = Config.configure_data_node("dn", scope=Scope.SCENARIO)
     task_config_1 = Config.configure_task("t1", print, dn_config)
     task_config_2 = Config.configure_task("t2", print, dn_config)
