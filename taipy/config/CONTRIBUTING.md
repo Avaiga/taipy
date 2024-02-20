@@ -95,11 +95,11 @@ working on it.
 
 3. For convention help, we provide a [pre-commit](https://pre-commit.com/hooks.html) file.
    This tool will run before each commit and will automatically reformat code or raise warnings and errors based on the
-   code format or Python typing.
+   code format or Python typing.<br/>
    You can install and setup it up by doing:
-   ```
-     pipenv install pre-commit
-     pipenv run python -m pre-commit install
+   ```bash
+   pipenv install pre-commit
+   pipenv run python -m pre-commit install
    ```
 
 4. Make the changes.<br/>
