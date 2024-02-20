@@ -12,7 +12,7 @@
 import threading
 from abc import abstractmethod
 from queue import Empty
-from typing import Dict, Optional
+from typing import Dict
 
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -32,7 +32,7 @@ class _JobDispatcher(threading.Thread):
     _logger = _TaipyLogger._get_logger()
     _nb_available_workers: int = 1
 
-    def __init__(self, orchestrator: Optional[_AbstractOrchestrator]):
+    def __init__(self, orchestrator: _AbstractOrchestrator):
         threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
         self.daemon = True
         self.orchestrator = orchestrator
@@ -66,9 +66,7 @@ class _JobDispatcher(threading.Thread):
             except Exception as e:
                 _TaipyLogger._get_logger().exception(e)
                 pass
-
-        # The dispatcher is now shutting down, let's shutdown its executor.
-        self._executor.shutdown(wait=True)
+        self._logger.info("Job dispatcher stopped.")
 
     def _can_execute(self) -> bool:
         """Returns True if the dispatcher have resources to execute a new job."""

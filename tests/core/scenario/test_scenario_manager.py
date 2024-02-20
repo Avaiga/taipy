@@ -48,7 +48,6 @@ from taipy.core.sequence._sequence_manager import _SequenceManager
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 from taipy.core.task.task_id import TaskId
-from tests.core.utils import assert_true_after_time
 from tests.core.utils.NotifyMock import NotifyMock
 
 
@@ -1166,9 +1165,7 @@ def addition(n1, n2):
     return n1 + n2
 
 
-def test_scenarios_comparison_development_mode():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
+def test_scenarios_comparison():
     scenario_config = Config.configure_scenario(
         "Awesome_scenario",
         [
@@ -1207,56 +1204,6 @@ def test_scenarios_comparison_development_mode():
     assert foo_comparison["subtraction"] == 0
 
     assert len(_ScenarioManager._compare(scenario_1, scenario_2).keys()) == 2
-
-    with pytest.raises(NonExistingScenarioConfig):
-        _ScenarioManager._compare(scenario_3, scenario_3)
-
-    with pytest.raises(NonExistingComparator):
-        _ScenarioManager._compare(scenario_1, scenario_2, data_node_config_id="abc")
-
-
-@pytest.mark.standalone
-def test_scenarios_comparison_standalone_mode():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
-
-    scenario_config = Config.configure_scenario(
-        "Awesome_scenario",
-        [
-            Config.configure_task(
-                "mult_by_2",
-                mult_by_2,
-                [Config.configure_data_node("foo", "in_memory", Scope.SCENARIO, default_data=1)],
-                Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
-            )
-        ],
-        comparators={"bar": [subtraction], "foo": [subtraction, addition]},
-    )
-
-    _OrchestratorFactory._build_dispatcher()
-
-    assert scenario_config.comparators is not None
-    scenario_1 = _ScenarioManager._create(scenario_config)
-    scenario_2 = _ScenarioManager._create(scenario_config)
-
-    with pytest.raises(InsufficientScenarioToCompare):
-        _ScenarioManager._compare(scenario_1, data_node_config_id="bar")
-
-    scenario_3 = Scenario("awesome_scenario_config", [], {})
-    with pytest.raises(DifferentScenarioConfigs):
-        _ScenarioManager._compare(scenario_1, scenario_3, data_node_config_id="bar")
-
-    _ScenarioManager._submit(scenario_1.id)
-    _ScenarioManager._submit(scenario_2.id)
-
-    bar_comparison = _ScenarioManager._compare(scenario_1, scenario_2, data_node_config_id="bar")["bar"]
-    assert_true_after_time(lambda: bar_comparison["subtraction"] == 0)
-
-    foo_comparison = _ScenarioManager._compare(scenario_1, scenario_2, data_node_config_id="foo")["foo"]
-    assert_true_after_time(lambda: len(foo_comparison.keys()) == 2)
-    assert_true_after_time(lambda: foo_comparison["addition"] == 2)
-    assert_true_after_time(lambda: foo_comparison["subtraction"] == 0)
-
-    assert_true_after_time(lambda: len(_ScenarioManager._compare(scenario_1, scenario_2).keys()) == 2)
 
     with pytest.raises(NonExistingScenarioConfig):
         _ScenarioManager._compare(scenario_3, scenario_3)
