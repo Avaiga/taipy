@@ -411,12 +411,10 @@ def test_cancel_subsequent_jobs():
     assert_true_after_time(job_4.is_canceled)
     assert_true_after_time(job_5.is_abandoned)
     assert_true_after_time(job_6.is_abandoned)
-    assert_true_after_time(
-        lambda: all(
-            not _OrchestratorFactory._orchestrator._is_blocked(job)
-            for job in [job_1, job_2, job_3, job_4, job_5, job_6]
-        )
-    )
+    assert_true_after_time(lambda: all(
+        not _OrchestratorFactory._orchestrator._is_blocked(job)
+        for job in [job_1, job_2, job_3, job_4, job_5, job_6]
+    ))
     assert_true_after_time(lambda: _OrchestratorFactory._orchestrator.jobs_to_run.qsize() == 0)
 
 
