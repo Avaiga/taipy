@@ -32,13 +32,21 @@ const Navigate = ({ to, params, tab, force }: NavigateProps) => {
         if (to) {
             const tos = to === "/" ? to : "/" + to;
             const searchParams = new URLSearchParams(params || "");
+            // Handle Resource Handler Id
+            let tprh: string | null = null;
+            if (searchParams.has("tprh")) {
+                tprh = searchParams.get("tprh");
+                searchParams.delete("tprh");
+            }
             if (Object.keys(state.locations || {}).some((route) => tos === route)) {
                 const searchParamsLocation = new URLSearchParams(location.search);
                 if (force && location.pathname === tos && searchParamsLocation.toString() === searchParams.toString()) {
                     navigate(0);
                 } else {
                     navigate({ pathname: to, search: `?${searchParams.toString()}` });
-                    if (searchParams.has("tprh")) {
+                    if (tprh !== null) {
+                        // Add a session cookie for the resource handler id
+                        document.cookie = `tprh=${tprh};path=/;`;
                         navigate(0);
                     }
                 }
