@@ -62,9 +62,9 @@ const processWsMessage = (message: WsMessage, appManager: TaipyApp) => {
             window.localStorage.setItem("ModuleContext", mc);
             appManager.context = mc;
         } else if (message.type === "GDT") {
-            const payload = message.payload as Record<string, unknown>;
-            const variableData = payload.variable as ModuleData;
-            const functionData = payload.function as ModuleData;
+            const payload = message.payload as Record<string, ModuleData>;
+            const variableData = payload.variable;
+            const functionData = payload.function;
             if (appManager.variableData && appManager.functionData) {
                 appManager.variableData.init(variableData);
                 appManager.functionData.init(functionData);

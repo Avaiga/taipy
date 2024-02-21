@@ -3,7 +3,7 @@ import { sendWsMessage, TAIPY_CLIENT_ID } from "../../src/context/wsUtils";
 import { uploadFile } from "../../src/workers/fileupload";
 
 import { Socket, io } from "socket.io-client";
-import { DataManager, ModuleData } from "./dataManager";
+import { DataManager } from "./dataManager";
 import { initSocket } from "./utils";
 
 export type OnInitHandler = (appManager: TaipyApp) => void;
@@ -101,7 +101,7 @@ export class TaipyApp {
 
     getFunctionList() {
         const functionData = this.functionData?.getDataTree()[this.context];
-        return functionData ? Object.keys(functionData) : [];
+        return Object.keys(functionData || {});
     }
 
     // This update will only send the request to Taipy Gui backend

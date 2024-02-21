@@ -1,10 +1,6 @@
-export interface ModuleData {
-    [key: string]: VarName;
-}
+export type ModuleData = Record<string, VarName>;
 
-interface VarName {
-    [key: string]: VarData;
-}
+export type VarName = Record<string, VarData>;
 
 interface VarData {
     type: string;
