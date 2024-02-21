@@ -19,16 +19,19 @@ export const initSocket = (socket: Socket, appManager: TaipyApp) => {
     });
     // Send a request to get App ID to verify that the app has not been reloaded
     socket.io.on("reconnect", () => {
+        console.log("WebSocket reconnected")
         sendWsMessage(socket, "AID", "reconnect", appManager.appId, appManager.clientId, appManager.context);
     });
     // try to reconnect on connect_error
-    socket.on("connect_error", () => {
+    socket.on("connect_error", (err) => {
+        console.log("WebSocket connect_error: ", err);
         setTimeout(() => {
             socket && socket.connect();
         }, 500);
     });
     // try to reconnect on server disconnection
-    socket.on("disconnect", (reason) => {
+    socket.on("disconnect", (reason, details) => {
+        console.log("WebSocket disconnected due to: ", reason, details);
         if (reason === "io server disconnect") {
             socket && socket.connect();
         }
