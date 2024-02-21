@@ -617,8 +617,8 @@ class Gui:
                         self.__request_var_update(message.get("payload"))
                     elif msg_type == _WsType.GET_MODULE_CONTEXT.value:
                         self.__handle_ws_get_module_context(payload)
-                    elif msg_type == _WsType.GET_VARIABLES.value:
-                        self.__handle_ws_get_variables()
+                    elif msg_type == _WsType.GET_DATA_TREE.value:
+                        self.__handle_ws_get_data_tree()
                     elif msg_type == _WsType.APP_ID.value:
                         self.__handle_ws_app_id(message)
                 self.__send_ack(message.get("ack_id"))
@@ -1064,20 +1064,9 @@ class Gui:
                     }
                 )
 
-    def __handle_ws_get_variables(self):
-        # Get Variables
-        self.__pre_render_pages()
+    def __get_variable_tree(self, data: t.Dict[str, t.Any]):
         # Module Context -> Variable -> Variable data (name, type, initial_value)
         variable_tree: t.Dict[str, t.Dict[str, t.Dict[str, t.Any]]] = {}
-        data = vars(self._bindings()._get_data_scope())
-        data = {
-            k: v
-            for k, v in data.items()
-            if not k.startswith("_")
-            and not callable(v)
-            and "TpExPr" not in k
-            and not isinstance(v, (ModuleType, FunctionType, LambdaType, type, Page))
-        }
         for k, v in data.items():
             if isinstance(v, _TaipyBase):
                 data[k] = v.get()
@@ -1091,10 +1080,31 @@ class Gui:
                 "value": data[k],
                 "encoded_name": k,
             }
+        return variable_tree
+
+    def __handle_ws_get_data_tree(self):
+        # Get Variables
+        self.__pre_render_pages()
+        data = {
+            k: v
+            for k, v in vars(self._get_data_scope()).items()
+            if not k.startswith("_")
+            and not callable(v)
+            and "TpExPr" not in k
+            and not isinstance(v, (ModuleType, FunctionType, LambdaType, type, Page))
+        }
+        function_data = {
+            k: v
+            for k, v in vars(self._get_data_scope()).items()
+            if not k.startswith("_") and "TpExPr" not in k and isinstance(v, (FunctionType, LambdaType))
+        }
         self.__send_ws(
             {
-                "type": _WsType.GET_VARIABLES.value,
-                "payload": {"data": variable_tree},
+                "type": _WsType.GET_DATA_TREE.value,
+                "payload": {
+                    "variable": self.__get_variable_tree(data),
+                    "function": self.__get_variable_tree(function_data),
+                },
             }
         )
 

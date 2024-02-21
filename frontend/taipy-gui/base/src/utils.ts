@@ -2,7 +2,7 @@ import { Socket } from "socket.io-client";
 import { IdMessage, storeClientId } from "../../src/context/utils";
 import { WsMessage, sendWsMessage } from "../../src/context/wsUtils";
 import { TaipyApp } from "./app";
-import { VariableManager, VariableModuleData } from "./variableManager";
+import { DataManager, ModuleData } from "./dataManager";
 
 interface MultipleUpdatePayload {
     name: string;
@@ -49,7 +49,7 @@ const processWsMessage = (message: WsMessage, appManager: TaipyApp) => {
             for (const muPayload of message.payload as [MultipleUpdatePayload]) {
                 const encodedName = muPayload.name;
                 const { value } = muPayload.payload;
-                appManager.variableManager?.update(encodedName, value);
+                appManager.variableData?.update(encodedName, value);
                 appManager.onChange && appManager.onChange(appManager, encodedName, value);
             }
         } else if (message.type === "ID") {
@@ -61,12 +61,16 @@ const processWsMessage = (message: WsMessage, appManager: TaipyApp) => {
             const mc = (message.payload as Record<string, unknown>).data as string;
             window.localStorage.setItem("ModuleContext", mc);
             appManager.context = mc;
-        } else if (message.type === "GVS") {
-            const variableData = (message.payload as Record<string, unknown>).data as VariableModuleData;
-            if (appManager.variableManager) {
-                appManager.variableManager.init(variableData);
+        } else if (message.type === "GDT") {
+            const payload = message.payload as Record<string, ModuleData>;
+            const variableData = payload.variable;
+            const functionData = payload.function;
+            if (appManager.variableData && appManager.functionData) {
+                appManager.variableData.init(variableData);
+                appManager.functionData.init(functionData);
             } else {
-                appManager.variableManager = new VariableManager(variableData);
+                appManager.variableData = new DataManager(variableData);
+                appManager.functionData = new DataManager(functionData);
                 appManager.onInit && appManager.onInit(appManager);
             }
         } else if (message.type === "AID") {
@@ -88,6 +92,6 @@ const postWsMessageProcessing = (message: WsMessage, appManager: TaipyApp) => {
         appManager.appId !== "" &&
         appManager.context !== ""
     ) {
-        sendWsMessage(appManager.socket, "GVS", "get_variables", {}, appManager.clientId, appManager.context);
+        sendWsMessage(appManager.socket, "GDT", "get_data_tree", {}, appManager.clientId, appManager.context);
     }
 };
