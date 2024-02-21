@@ -48,7 +48,7 @@ class _WsType(Enum):
     PARTIAL = "PR"
     ACKNOWLEDGEMENT = "ACK"
     GET_MODULE_CONTEXT = "GMC"
-    GET_VARIABLES = "GVS"
+    GET_DATA_TREE = "GDT"
 
 
 NumberTypes = {"int", "int64", "float", "float64"}

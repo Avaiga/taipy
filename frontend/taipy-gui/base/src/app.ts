@@ -3,7 +3,7 @@ import { sendWsMessage, TAIPY_CLIENT_ID } from "../../src/context/wsUtils";
 import { uploadFile } from "../../src/workers/fileupload";
 
 import { Socket, io } from "socket.io-client";
-import { VariableManager } from "./variableManager";
+import { DataManager, ModuleData } from "./dataManager";
 import { initSocket } from "./utils";
 
 export type OnInitHandler = (appManager: TaipyApp) => void;
@@ -13,7 +13,8 @@ export class TaipyApp {
     socket: Socket;
     _onInit: OnInitHandler | undefined;
     _onChange: OnChangeHandler | undefined;
-    variableManager: VariableManager | undefined;
+    variableData: DataManager | undefined;
+    functionData: DataManager | undefined;
     appId: string;
     clientId: string;
     context: string;
@@ -28,7 +29,8 @@ export class TaipyApp {
         socket = socket || io("/", { autoConnect: false });
         this.onInit = onInit;
         this.onChange = onChange;
-        this.variableManager = undefined;
+        this.variableData = undefined;
+        this.functionData = undefined;
         this.clientId = "";
         this.context = "";
         this.appId = "";
@@ -74,27 +76,32 @@ export class TaipyApp {
 
     // Public methods
     getEncodedName(varName: string, module: string) {
-        return this.variableManager?.getEncodedName(varName, module);
+        return this.variableData?.getEncodedName(varName, module);
     }
 
     getName(encodedName: string) {
-        return this.variableManager?.getName(encodedName);
+        return this.variableData?.getName(encodedName);
     }
 
     get(encodedName: string) {
-        return this.variableManager?.get(encodedName);
+        return this.variableData?.get(encodedName);
     }
 
     getInfo(encodedName: string) {
-        return this.variableManager?.getInfo(encodedName);
+        return this.variableData?.getInfo(encodedName);
     }
 
     getDataTree() {
-        return this.variableManager?.getDataTree();
+        return this.variableData?.getDataTree();
     }
 
     getAllData() {
-        return this.variableManager?.getAllData();
+        return this.variableData?.getAllData();
+    }
+
+    getFunctionList() {
+        const functionData = this.functionData?.getDataTree()[this.context];
+        return functionData ? Object.keys(functionData) : [];
     }
 
     // This update will only send the request to Taipy Gui backend

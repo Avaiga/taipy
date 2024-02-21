@@ -13,6 +13,7 @@ from __future__ import annotations
 from datetime import date, datetime, time
 from json import JSONEncoder
 from pathlib import Path
+from types import FunctionType
 
 from flask.json.provider import DefaultJSONProvider
 
@@ -32,6 +33,8 @@ def _default(o):
         return _date_to_string(o)
     if isinstance(o, Path):
         return str(o)
+    if isinstance(o, FunctionType):
+        return o.__name__
     try:
         raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
     except Exception as e:

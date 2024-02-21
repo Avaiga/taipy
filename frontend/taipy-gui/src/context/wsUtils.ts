@@ -18,7 +18,7 @@ export type WsMessageType =
     | "PR"
     | "ACK"
     | "GMC"
-    | "GVS"
+    | "GDT"
     | "AID";
 
 export interface WsMessage {

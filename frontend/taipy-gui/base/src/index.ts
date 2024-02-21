@@ -1,6 +1,6 @@
 import { TaipyApp, createApp, OnChangeHandler, OnInitHandler } from "./app";
-import { VariableModuleData } from "./variableManager";
+import { ModuleData } from "./dataManager";
 
 export default TaipyApp;
 export { TaipyApp, createApp };
-export type { OnChangeHandler, OnInitHandler, VariableModuleData };
+export type { OnChangeHandler, OnInitHandler, ModuleData };
