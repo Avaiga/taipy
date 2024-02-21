@@ -128,6 +128,6 @@ def test_run():
     with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher._execute_job") as mck:
         dispatcher = _StandaloneJobDispatcher(orchestrator)
         dispatcher.start()
-        assert_true_after_time(lambda: mck.call_count == 4, msg="The 4 jobs were not dequeued.", time=5)
+        assert_true_after_time(lambda: mck.call_count == 4, time=5, msg="The 4 jobs were not dequeued.")
         dispatcher.stop()
         mck.assert_has_calls([call(job_1), call(job_2), call(job_3), call(job_4)])
