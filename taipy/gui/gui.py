@@ -2017,7 +2017,7 @@ class Gui:
 
     def _bind_custom_page_variables(self, page: CustomPage, client_id: t.Optional[str]):
         """Handle the bindings of custom page variables"""
-        with self.get_flask_app().app_context() if has_app_context() else contextlib.nullcontext():
+        with self.get_flask_app().app_context() if has_app_context() else contextlib.nullcontext(): # type: ignore[attr-defined]
             self.__set_client_id_in_context(client_id)
             with self._set_locals_context(page._get_module_name()):
                 for k in self._get_locals_bind().keys():
