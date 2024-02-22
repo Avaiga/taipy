@@ -78,6 +78,8 @@ export interface ColumnDesc {
     widthHint?: number;
     /** The list of values that can be used on edit. */
     lov?: string[];
+    /** If true the user can enter any value besides the lov values. */
+    freeLov?: boolean;
 }
 
 export const DEFAULT_SIZE = "small";
@@ -266,14 +268,6 @@ const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerS
 const filter = createFilterOptions<string>();
 const getOptionKey = (option: string) => (Array.isArray(option) ? option[0] : option)
 const getOptionLabel = (option: string) => (Array.isArray(option) ? option[1] : option)
-const filterOptions = (options: string[], params: FilterOptionsState<string>) => {
-    const filtered = filter(options, params);
-    const {inputValue} = params;
-    if (inputValue && !options.some(option => inputValue == (Array.isArray(option) ? option[1] : option))) {
-        filtered.push(inputValue);
-    }
-    return filtered;
-}
 
 export const EditableCell = (props: EditableCellProps) => {
     const {
@@ -401,6 +395,17 @@ export const EditableCell = (props: EditableCellProps) => {
         [onSelection, rowIndex, colDesc.dfid]
     );
 
+    const filterOptions = useCallback((options: string[], params: FilterOptionsState<string>) => {
+        const filtered = filter(options, params);
+        if (colDesc.freeLov) {
+            const {inputValue} = params;
+            if (inputValue && !options.some(option => inputValue == (Array.isArray(option) ? option[1] : option))) {
+                filtered.push(inputValue);
+            }
+        }
+        return filtered;
+    }, [colDesc.freeLov]);
+
     useEffect(() => {
         !onValidation && setEdit(false);
     }, [onValidation]);
@@ -466,14 +471,14 @@ export const EditableCell = (props: EditableCellProps) => {
                         <Autocomplete
                             autoComplete={true}
                             fullWidth
-                            selectOnFocus
-                            clearOnBlur
-                            handleHomeEndKeys
+                            selectOnFocus={!!colDesc.freeLov}
+                            clearOnBlur={!!colDesc.freeLov}
+                            handleHomeEndKeys={!!colDesc.freeLov}
                             options={colDesc.lov}
                             getOptionKey={getOptionKey}
                             getOptionLabel={getOptionLabel}
                             filterOptions={filterOptions}
-                            freeSolo={true}
+                            freeSolo={!!colDesc.freeLov}
                             value={val as string}
                             onChange={onCompleteChange}
                             renderInput={(params) => (
@@ -481,7 +486,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                     {...params}
                                     fullWidth
                                     inputRef={setInputFocus}
-                                    onChange={onChange}
+                                    onChange={colDesc.freeLov ? onChange : undefined}
                                     margin="dense"
                                     variant="standard"
                                     sx={tableFontSx}

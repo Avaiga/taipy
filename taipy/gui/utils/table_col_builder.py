@@ -121,6 +121,10 @@ def _enhance_columns(  # noqa: C901
                     _warn(f"{elt_name}: lov[{k}] should be a list.")
                     value = None
                 if value is not None:
+                    new_value = list(filter(lambda i: i is not None, value))
+                    if len(new_value) < len(value):
+                        col_desc["freeLov"] = True
+                        value = new_value
                     col_desc["lov"] = value
             else:
                 _warn(f"{elt_name}: lov[{k}] is not in the list of displayed columns.")
