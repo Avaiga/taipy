@@ -31,6 +31,7 @@ with open(os.path.join("taipy", "version.json")) as version_file:
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
+
 def get_requirements():
     # get requirements from the different setups in tools/packages (removing taipy packages)
     reqs = set()
