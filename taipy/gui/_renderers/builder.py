@@ -69,6 +69,7 @@ class _Builder:
         "apply",
         "style",
         "tooltip",
+        "lov"
     ]
 
     def __init__(
