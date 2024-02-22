@@ -91,6 +91,10 @@ jobs:
             ${{needs.fetch-versions.outputs.templates_VERSION}} \
             ${{ github.event.inputs.publish_on_pypi }}
 
+      - name: Copy tools
+        run: |
+          cp -r tools ${{ steps.set-variables.outputs.package_dir }}
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -98,7 +102,8 @@ jobs:
 
       - name: Build package
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
-        run: python setup.py build_py && python -m build
+        run: |
+          python setup.py build_py && python -m build
 
       - name: Create tag and release
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
@@ -113,12 +118,8 @@ jobs:
           pip install ${{ steps.set-variables.outputs.tar_path }}
 
       - name: Publish to PyPI
-        if: ${{ github.event.inputs.publish_on_pypi == 'true' }}
-        working-directory: ${{ steps.set-variables.outputs.package_dir }}
+        if: github.event.inputs.publish_on_pypi == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets[format('PYPI_API_TOKEN_{0}', ${{ matrix.package }} )] }}
 
   build-and-release-taipy-dev:
     runs-on: ubuntu-latest
@@ -173,11 +174,8 @@ jobs:
           python tools/validate_taipy_install.py
 
       - name: Publish to PyPI
-        if: ${{ github.event.inputs.publish_on_pypi == 'true' }}
+        if: github.event.inputs.publish_on_pypi == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
 
       - name: Download packages
         run: |
