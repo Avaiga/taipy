@@ -1113,6 +1113,11 @@
             "type": "dynamic(bool)",
             "default_value": "False",
             "doc": "If set to True, this allows to dynamically refresh the  columns."
+          },
+          {
+            "name": "lov[<i>column_name</i>]",
+            "type": "list[str]|str",
+            "doc": "The list of values of the indicated column."
           }
         ]
       }
