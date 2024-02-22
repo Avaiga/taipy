@@ -266,8 +266,8 @@ const setInputFocus = (input: HTMLInputElement) => input && input.focus();
 const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotsComponentsProps<Date>;
 
 const filter = createFilterOptions<string>();
-const getOptionKey = (option: string) => (Array.isArray(option) ? option[0] : option)
-const getOptionLabel = (option: string) => (Array.isArray(option) ? option[1] : option)
+const getOptionKey = (option: string) => (Array.isArray(option) ? option[0] : option);
+const getOptionLabel = (option: string) => (Array.isArray(option) ? option[1] : option);
 
 export const EditableCell = (props: EditableCellProps) => {
     const {
@@ -395,16 +395,22 @@ export const EditableCell = (props: EditableCellProps) => {
         [onSelection, rowIndex, colDesc.dfid]
     );
 
-    const filterOptions = useCallback((options: string[], params: FilterOptionsState<string>) => {
-        const filtered = filter(options, params);
-        if (colDesc.freeLov) {
-            const {inputValue} = params;
-            if (inputValue && !options.some(option => inputValue == (Array.isArray(option) ? option[1] : option))) {
-                filtered.push(inputValue);
+    const filterOptions = useCallback(
+        (options: string[], params: FilterOptionsState<string>) => {
+            const filtered = filter(options, params);
+            if (colDesc.freeLov) {
+                const { inputValue } = params;
+                if (
+                    inputValue &&
+                    !options.some((option) => inputValue == (Array.isArray(option) ? option[1] : option))
+                ) {
+                    filtered.push(inputValue);
+                }
             }
-        }
-        return filtered;
-    }, [colDesc.freeLov]);
+            return filtered;
+        },
+        [colDesc.freeLov]
+    );
 
     useEffect(() => {
         !onValidation && setEdit(false);
