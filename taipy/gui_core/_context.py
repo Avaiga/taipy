@@ -805,7 +805,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         if isinstance(datanode, DataNode):
             try:
                 idx = t.cast(int, payload.get("index"))
-                col = payload.get("col")
+                col = t.cast(str, payload.get("col"))
                 tz = payload.get("tz")
                 val = (
                     parser.parse(str(payload.get("value"))).astimezone(zoneinfo.ZoneInfo(tz)).replace(tzinfo=None)
@@ -814,37 +814,47 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 )
                 # user_value = payload.get("user_value")
                 data = self.__read_tabular_data(datanode)
-                if hasattr(data, "at"):
-                    data.at[idx, col] = val
-                    datanode.write(data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
-                    state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
+                new_data: t.Any = None
+                if isinstance(data, (pd.DataFrame, pd.Series)):
+                    if isinstance(data, pd.DataFrame):
+                        data.at[idx, col] = val
+                    elif isinstance(data, pd.Series):
+                        data.at[idx] = val
+                    new_data = data
                 else:
+                    data_tuple = False
+                    if isinstance(data, tuple):
+                        data_tuple = True
+                        data = list(data)
                     if isinstance(data, list):
-                        old_val = data[idx]
-                        if col == "0" and (isinstance(old_val, (str, Number)) or "date" in type(old_val).__name__):
+                        row = data[idx]
+                        row_tuple = False
+                        if isinstance(row, tuple):
+                            row = list(row)
+                            row_tuple = True
+                        if isinstance(row, list):
+                            row[int(col)] = val
+                            if row_tuple:
+                                data[idx] = tuple(row)
+                            new_data = data
+                        elif col == "0" and (isinstance(row, (str, Number)) or "date" in type(row).__name__):
                             data[idx] = val
-                            datanode.write(data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
-                            state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
+                            new_data = data
                         else:
                             state.assign(
                                 _GuiCoreContext._DATANODE_VIZ_ERROR_VAR,
                                 "Error updating Datanode: cannot handle multi-column list value.",
                             )
-                    elif isinstance(data, tuple):
-                        if col == "0" and (isinstance(old_val, (str, Number)) or "date" in type(old_val).__name__):
-                            data = tuple(val if i == idx else x for i, x in enumerate(data))
-                            datanode.write(data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
-                            state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
-                        else:
-                            state.assign(
-                                _GuiCoreContext._DATANODE_VIZ_ERROR_VAR,
-                                "Error updating Datanode: cannot handle multi-column tuple value.",
-                            )
+                        if data_tuple and new_data is not None:
+                            new_data = tuple(new_data)
                     else:
                         state.assign(
                             _GuiCoreContext._DATANODE_VIZ_ERROR_VAR,
                             "Error updating Datanode tabular value: type does not support at[] indexer.",
                         )
+                if new_data is not None:
+                    datanode.write(new_data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
+                    state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
             except Exception as e:
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode tabular value. {e}")
         setattr(state, _GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, dn_id)
