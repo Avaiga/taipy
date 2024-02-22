@@ -26,6 +26,8 @@ from .db._sql_connection import _SQLConnection
 
 
 class _SQLRepository(_AbstractRepository[ModelType, Entity]):
+    __EXCEPTIONS_TO_RETRY = (ModelNotFound,)
+
     def __init__(self, model_type: Type[ModelType], converter: Type[Converter]):
         """
         Holds common methods to be used and extended when the need for saving
@@ -58,7 +60,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         query = self.table.select().filter_by(id=entity_id)
         return bool(self.db.execute(str(query), [entity_id]).fetchone())
 
-    @_retry_read_entity(ModelNotFound)
+    @_retry_read_entity(__EXCEPTIONS_TO_RETRY)
     def _load(self, entity_id: str) -> Entity:
         query = self.table.select().filter_by(id=entity_id)
 
