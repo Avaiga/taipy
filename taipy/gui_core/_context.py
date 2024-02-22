@@ -721,7 +721,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         if isinstance(datanode, _AbstractTabularDataNode):
             return True
         if datanode.is_ready_for_reading:
-            return isinstance(value, (pd.DataFrame, pd.Series))
+            return isinstance(value, (pd.DataFrame, pd.Series, list, tuple, dict))
         return False
 
     def get_data_node_data(self, datanode: DataNode, id: str):
@@ -804,7 +804,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         datanode = core_get(dn_id) if dn_id else None
         if isinstance(datanode, DataNode):
             try:
-                idx = payload.get("index")
+                idx = t.cast(int, payload.get("index"))
                 col = payload.get("col")
                 tz = payload.get("tz")
                 val = (
@@ -819,10 +819,32 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     datanode.write(data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
                     state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
                 else:
-                    state.assign(
-                        _GuiCoreContext._DATANODE_VIZ_ERROR_VAR,
-                        "Error updating Datanode tabular value: type does not support at[] indexer.",
-                    )
+                    if isinstance(data, list):
+                        old_val = data[idx]
+                        if col == "0" and (isinstance(old_val, (str, Number)) or "date" in type(old_val).__name__):
+                            data[idx] = val
+                            datanode.write(data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
+                            state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
+                        else:
+                            state.assign(
+                                _GuiCoreContext._DATANODE_VIZ_ERROR_VAR,
+                                "Error updating Datanode: cannot handle multi-column list value.",
+                            )
+                    elif isinstance(data, tuple):
+                        if col == "0" and (isinstance(old_val, (str, Number)) or "date" in type(old_val).__name__):
+                            data = tuple(val if i == idx else x for i, x in enumerate(data))
+                            datanode.write(data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
+                            state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
+                        else:
+                            state.assign(
+                                _GuiCoreContext._DATANODE_VIZ_ERROR_VAR,
+                                "Error updating Datanode: cannot handle multi-column tuple value.",
+                            )
+                    else:
+                        state.assign(
+                            _GuiCoreContext._DATANODE_VIZ_ERROR_VAR,
+                            "Error updating Datanode tabular value: type does not support at[] indexer.",
+                        )
             except Exception as e:
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode tabular value. {e}")
         setattr(state, _GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, dn_id)
