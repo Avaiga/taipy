@@ -24,7 +24,7 @@ export const initSocket = (socket: Socket, appManager: TaipyApp) => {
     });
     // try to reconnect on connect_error
     socket.on("connect_error", (err) => {
-        console.log("WebSocket connect_error: ", err);
+        console.log("Error connecting WebSocket: ", err);
         setTimeout(() => {
             socket && socket.connect();
         }, 500);
