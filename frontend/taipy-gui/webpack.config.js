@@ -74,9 +74,6 @@ module.exports = (env, options) => {
                 },
                 publicPath: "",
             },
-            optimization: {
-                minimize: false
-            },
             dependencies: [reactBundleName],
             devtool: options.mode === "development" && "inline-source-map",
             resolve: {
