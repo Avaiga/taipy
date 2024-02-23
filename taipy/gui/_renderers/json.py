@@ -15,7 +15,6 @@ from abc import ABC, abstractmethod
 from datetime import date, datetime, time
 from json import JSONEncoder
 from pathlib import Path
-from types import FunctionType, LambdaType
 
 from flask.json.provider import DefaultJSONProvider
 
