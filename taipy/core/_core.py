@@ -33,6 +33,9 @@ class Core:
     _is_running = False
     __lock_is_running = Lock()
 
+    _version_is_initialized = False
+    __lock_version_is_initialized = Lock()
+
     __logger = _TaipyLogger._get_logger()
 
     _orchestrator: Optional[_Orchestrator] = None
@@ -58,8 +61,7 @@ class Core:
             self.__class__._is_running = True
 
         self.__update_core_section()
-        self.__manage_version()
-        self.__check_and_block_config()
+        self.__class__._manage_version_and_block_config()
 
         if self._orchestrator is None:
             self._orchestrator = _OrchestratorFactory._build_orchestrator()
@@ -84,13 +86,27 @@ class Core:
         with self.__class__.__lock_is_running:
             self.__class__._is_running = False
 
-    @staticmethod
-    def __update_core_section():
+    @classmethod
+    def _manage_version_and_block_config(cls):
+        """
+        Manage the application's version and block the Config for update.
+        """
+        if cls._version_is_initialized:
+            return
+
+        with cls.__lock_version_is_initialized:
+            cls._version_is_initialized = True
+
+        cls.__manage_version()
+        cls.__check_and_block_config()
+
+    @classmethod
+    def __update_core_section(cls):
         _CoreCLI.create_parser()
         Config._applied_config._unique_sections[CoreSection.name]._update(_CoreCLI.parse_arguments())
 
-    @staticmethod
-    def __manage_version():
+    @classmethod
+    def __manage_version(cls):
         _VersionManagerFactory._build_manager()._manage_version()
         Config._applied_config._unique_sections[CoreSection.name]._update(
             {"version_number": _VersionManagerFactory._build_manager()._get_latest_version()}

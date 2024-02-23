@@ -644,6 +644,7 @@ class TestTaipy:
         dn = tp.create_global_data_node(dn_cfg)
         assert dn.scope == Scope.GLOBAL
         assert dn.config_id == dn_cfg.id
+        assert _VersionManager._get(dn.version) is not None
 
         # Create a global data node from the same configuration should return the same data node
         dn_2 = tp.create_global_data_node(dn_cfg)
