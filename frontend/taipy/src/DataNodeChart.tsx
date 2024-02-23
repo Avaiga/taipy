@@ -237,19 +237,24 @@ const DataNodeChart = (props: DataNodeChartProps) => {
 
     const [config, setConfig] = useState<ChartConfig | undefined>(undefined);
     useEffect(() => {
+        let localConf;
         const localItem = localStorage && localStorage.getItem(`${configId}-chart-config`);
         if (localItem) {
             try {
-                const conf = JSON.parse(localItem);
-                conf.cumulative && addCumulative(conf);
-                setConfig(conf);
-                return;
+                localConf = JSON.parse(localItem) as ChartConfig;
             } catch {
                 // do nothing
             }
         }
         const conf = getBaseConfig(defaultConfig, chartConfigs, configId);
-        if (conf) {
+        if (localConf && localConf.traces) {
+            if (conf && conf.columns && localConf.traces.some((tr) => tr.some((id) => (conf.columns || {})[id] === undefined))) {
+                setConfig(conf);
+            } else {
+                localConf.cumulative && addCumulative(localConf);
+                setConfig(localConf);
+            }
+        } else if (conf) {
             setConfig(conf);
         }
     }, [defaultConfig, configId, chartConfigs]);
