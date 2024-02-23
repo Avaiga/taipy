@@ -16,7 +16,7 @@ import pytest
 
 from taipy.config.config import Config
 from taipy.core import Core
-from taipy.core.scenario._scenario_manager import _ScenarioManager
+from taipy.core import taipy as tp
 from tests.core.utils import assert_true_after_time
 
 
@@ -49,9 +49,9 @@ def test_standalone_sql(tmp_sqlite):
     Config.configure_job_executions(mode="standalone", max_nb_of_workers=2)
     core = Core()
     core.run(force_restart=True)
-    scenario = _ScenarioManager._create(scenario_config)
+    scenario = tp.create_scenario(scenario_config)
 
-    jobs = _ScenarioManager._submit(scenario).jobs
+    jobs = tp.submit(scenario).jobs
     assert_true_after_time(lambda: all(job.is_finished() for job in jobs), time=2)
     core.stop()
     assert_true_after_time(lambda: core._dispatcher is None, time=2)

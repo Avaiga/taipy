@@ -322,6 +322,9 @@ def tmp_sqlite(tmpdir_factory):
 @pytest.fixture(scope="function", autouse=True)
 def clean_repository(init_config, init_managers, init_orchestrator, init_notifier):
     close_all_sessions()
+    if _SQLConnection._connection:
+        _SQLConnection._connection.close()
+    _SQLConnection._connection = None
     init_config()
     init_orchestrator()
     init_managers()
@@ -398,7 +401,6 @@ def init_sql_repo(tmp_sqlite):
     # Clean SQLite database
     if _SQLConnection._connection:
         _SQLConnection._connection.close()
-        _SQLConnection._connection = None
-    _SQLConnection.init_db()
+    _SQLConnection._connection = None
 
     return tmp_sqlite
