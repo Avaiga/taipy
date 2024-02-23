@@ -12,6 +12,7 @@
  */
 
 import React, {
+    Fragment,
     useState,
     useCallback,
     useContext,
@@ -285,7 +286,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                 );
             }
             if (!dn || isNewDn) {
-                setTabValue(TabValues.Data);
+                setTabValue(showData ? TabValues.Data : TabValues.Properties);
             }
             if (!dn) {
                 return invalidDatanode;
@@ -322,7 +323,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
             return dn;
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.dataNode, props.defaultDataNode, id, dispatch, module, props.onLock, props.onIdSelect]);
+    }, [props.dataNode, props.defaultDataNode, showData, id, dispatch, module, props.onLock, props.onIdSelect]);
 
     // clean lock on unmount
     useEffect(
@@ -507,7 +508,6 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             <Grid item>
                                 <Typography fontSize="smaller">{dnType}</Typography>
                             </Grid>
-                            <Grid item>{}</Grid>
                         </Grid>
                     </AccordionSummary>
                     <AccordionDetails>
@@ -716,13 +716,13 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             {historyRequested && Array.isArray(props.history) ? (
                                 <Grid container spacing={1}>
                                     {props.history.map((edit, idx) => (
-                                        <>
+                                        <Fragment key={`edit-${idx}`}>
                                             {idx != 0 ? (
                                                 <Grid item xs={12}>
                                                     <Divider />
                                                 </Grid>
                                             ) : null}
-                                            <Grid item container key={`edit-${idx}`}>
+                                            <Grid item container>
                                                 <Grid item xs={0.4} sx={editSx}>
                                                     <Box>{(props.history || []).length - idx}</Box>
                                                 </Grid>
@@ -747,7 +747,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                     ) : null}
                                                 </Grid>
                                             </Grid>
-                                        </>
+                                        </Fragment>
                                     ))}
                                 </Grid>
                             ) : (
