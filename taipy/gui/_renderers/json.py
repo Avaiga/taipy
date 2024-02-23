@@ -25,17 +25,17 @@ from ..utils import _date_to_string, _MapDict, _TaipyBase
 from ..utils.singleton import _Singleton
 
 
-class JsonResolver(ABC):
+class JsonAdapter(ABC):
     def register(self):
-        _TaipyJsonResolver().register(self)
+        _TaipyJsonAdapter().register(self)
 
     @abstractmethod
-    def resolve(self, o) -> t.Union[t.Any, None]:
+    def parse(self, o) -> t.Union[t.Any, None]:
         return None
 
 
-class _DefaultJsonResolver(JsonResolver):
-    def resolve(self, o):
+class _DefaultJsonAdapter(JsonAdapter):
+    def parse(self, o):
         if isinstance(o, Icon):
             return o._to_dict()
         if isinstance(o, _MapDict):
@@ -46,24 +46,20 @@ class _DefaultJsonResolver(JsonResolver):
             return _date_to_string(o)
         if isinstance(o, Path):
             return str(o)
-        if isinstance(o, FunctionType):
-            return o.__name__
-        if isinstance(o, LambdaType):
-            return str(o)
 
 
-class _TaipyJsonResolver(object, metaclass=_Singleton):
+class _TaipyJsonAdapter(object, metaclass=_Singleton):
     def __init__(self):
-        self._resolver: t.List[JsonResolver] = []
-        self.register(_DefaultJsonResolver())
+        self._adapters: t.List[JsonAdapter] = []
+        self.register(_DefaultJsonAdapter())
 
-    def register(self, resolver: JsonResolver):
-        self._resolver.append(resolver)
+    def register(self, adapter: JsonAdapter):
+        self._adapters.append(adapter)
 
-    def resolve(self, o):
+    def parse(self, o):
         try:
-            for resolver in self._resolver:
-                if (output := resolver.resolve(o)) is not None:
+            for adapter in reversed(self._adapters):
+                if (output := adapter.parse(o)) is not None:
                     return output
             raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
         except Exception as e:
@@ -73,9 +69,9 @@ class _TaipyJsonResolver(object, metaclass=_Singleton):
 
 class _TaipyJsonEncoder(JSONEncoder):
     def default(self, o):
-        return _TaipyJsonResolver().resolve(o)
+        return _TaipyJsonAdapter().parse(o)
 
 
 class _TaipyJsonProvider(DefaultJSONProvider):
-    default = staticmethod(_TaipyJsonResolver().resolve)  # type: ignore
+    default = staticmethod(_TaipyJsonAdapter().parse)  # type: ignore
     sort_keys = False
