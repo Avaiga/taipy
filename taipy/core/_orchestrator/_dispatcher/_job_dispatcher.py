@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import threading
+import time
 from abc import abstractmethod
 from queue import Empty
 from typing import Dict, Optional
@@ -69,6 +70,8 @@ class _JobDispatcher(threading.Thread):
                             break
                         job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
                     self._execute_job(job)
+                else:
+                    time.sleep(0.1)  # We need to sleep to avoid busy waiting.
             except Empty:  # In case the last job of the queue has been removed.
                 pass
             except Exception as e:
