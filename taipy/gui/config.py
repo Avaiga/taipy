@@ -283,7 +283,7 @@ class _Config(object):
 
         if app_config["use_reloader"] and not app_config["debug"]:
             app_config["debug"] = True
-            self.__log_outside_reloader(logger, "application is running in 'debug' mode")
+            self.__log_outside_reloader(logger, "Application is running in 'debug' mode")
 
         if app_config["debug"] and not app_config["allow_unsafe_werkzeug"]:
             app_config["allow_unsafe_werkzeug"] = True
