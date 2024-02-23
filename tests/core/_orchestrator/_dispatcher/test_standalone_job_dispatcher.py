@@ -40,7 +40,6 @@ def test_init_default():
     job_dispatcher = _StandaloneJobDispatcher(orchestrator)
 
     assert job_dispatcher.orchestrator == orchestrator
-    assert job_dispatcher.lock == orchestrator.lock
     assert job_dispatcher._nb_available_workers == 1
     assert isinstance(job_dispatcher._executor, ProcessPoolExecutor)
 

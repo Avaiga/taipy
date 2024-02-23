@@ -37,7 +37,6 @@ class _JobDispatcher(threading.Thread):
         threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
         self.daemon = True
         self.orchestrator = orchestrator
-        self.lock = self.orchestrator.lock  # type: ignore
         Config.block_update()
 
     def start(self):
@@ -64,10 +63,9 @@ class _JobDispatcher(threading.Thread):
         while not self._STOP_FLAG:
             try:
                 if self._can_execute():
-                    with self.lock:
-                        if self._STOP_FLAG:
-                            break
-                        job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
+                    if self._STOP_FLAG:
+                        break
+                    job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
                     self._execute_job(job)
                 else:
                     time.sleep(0.1)  # We need to sleep to avoid busy waiting.
@@ -99,11 +97,10 @@ class _JobDispatcher(threading.Thread):
 
     def _execute_jobs_synchronously(self):
         while not self.orchestrator.jobs_to_run.empty():
-            with self.lock:
-                try:
-                    job = self.orchestrator.jobs_to_run.get()
-                except Exception:  # In case the last job of the queue has been removed.
-                    self._logger.warning(f"{job.id} is no longer in the list of jobs to run.")
+            try:
+                job = self.orchestrator.jobs_to_run.get()
+            except Empty:
+                pass
             self._execute_job(job)
 
     @staticmethod
