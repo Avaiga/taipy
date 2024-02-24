@@ -40,7 +40,7 @@ class _ConfigBlocker:
                         " modifying the Configuration. For more information, please refer to:"
                         " https://docs.taipy.io/en/latest/manuals/running_services/#running-core."
                     )
-                    cls.__logger.error("ConfigurationUpdateBlocked: " + error_message)
+                    cls.__logger.error(f"ConfigurationUpdateBlocked: {error_message}")
                     raise ConfigurationUpdateBlocked(error_message)
 
                 return f(*args, **kwargs)

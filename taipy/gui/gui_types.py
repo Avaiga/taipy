@@ -42,12 +42,13 @@ class _WsType(Enum):
     BLOCK = "BL"
     NAVIGATE = "NA"
     CLIENT_ID = "ID"
+    APP_ID = "AID"
     MULTIPLE_MESSAGE = "MS"
     DOWNLOAD_FILE = "DF"
     PARTIAL = "PR"
     ACKNOWLEDGEMENT = "ACK"
     GET_MODULE_CONTEXT = "GMC"
-    GET_VARIABLES = "GVS"
+    GET_DATA_TREE = "GDT"
 
 
 NumberTypes = {"int", "int64", "float", "float64"}

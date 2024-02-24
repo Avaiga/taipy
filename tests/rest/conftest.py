@@ -318,3 +318,8 @@ def cleanup_files(reset_configuration_singleton, inject_core_sections):
         shutil.rmtree(".data", ignore_errors=True)
     if os.path.exists(".my_data"):
         shutil.rmtree(".my_data", ignore_errors=True)
+
+    yield
+    for path in [".data", ".my_data", "user_data", ".taipy"]:
+        if os.path.exists(path):
+            shutil.rmtree(path, ignore_errors=True)

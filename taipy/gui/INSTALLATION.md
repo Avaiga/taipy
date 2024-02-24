@@ -32,12 +32,15 @@ Taipy R&D and external contributors that we praise for their input.
 
 You should also install this version if you want to contribute to the development of Taipy GUI. Here are the steps to follow:
 
-### 1 - Clone the repository
+### 1 - Clone the Taipy repository
 
-Clone the repository using the following command:
+Clone the Taipy repository using the following command:
 ```bash
-git clone https://github.com/Avaiga/taipy-gui.git
+git clone https://github.com/Avaiga/taipy.git
 ```
+
+This creates the 'taipy' directory holding all the package's source code, and the 'taipy-gui'
+source code is in the 'taipy/gui' directory.
 
 ### 2 - Install Node.js
 
@@ -89,8 +92,8 @@ This should install the dev version of Taipy GUI as editable. You are now ready 
 
 If you plan to modify the front-end code and need to debug the TypeScript
 code, you must use the following:
-```
-$ npm run build:dev
+```bash
+npm run build:dev
 ```
 
 instead of the *standard* build option.
@@ -117,12 +120,17 @@ TypeScript code from your debugger.
 
 ## Running the tests
 
-To run the tests on the package, you need to create a virtual
-environment and install the development packages:
+To run the tests on the package, you need to install the required development packages.
+We recommend using [Pipenv](https://pipenv.pypa.io/en/latest/) to create a virtual environment
+and install the development packages.
 
-Here are the commands to issue:
-
-```console
+```bash
+pip install pipenv
 pipenv install --dev
-pipenv run pytest
+```
+
+Then you can run _taipy-gui_ tests with the following command:
+
+```bash
+pipenv run pytest tests/gui
 ```

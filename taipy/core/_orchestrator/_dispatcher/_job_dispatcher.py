@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import threading
+import time
 from abc import abstractmethod
 from queue import Empty
 from typing import Dict, Optional
@@ -32,7 +33,7 @@ class _JobDispatcher(threading.Thread):
     _logger = _TaipyLogger._get_logger()
     _nb_available_workers: int = 1
 
-    def __init__(self, orchestrator: Optional[_AbstractOrchestrator]):
+    def __init__(self, orchestrator: _AbstractOrchestrator):
         threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
         self.daemon = True
         self.orchestrator = orchestrator
@@ -47,12 +48,20 @@ class _JobDispatcher(threading.Thread):
         """Return True if the dispatcher is running"""
         return self.is_alive()
 
-    def stop(self):
-        """Stop the dispatcher"""
+    def stop(self, wait: bool = True, timeout: Optional[float] = None):
+        """Stop the dispatcher.
+
+        Parameters:
+            wait (bool): If True, the method will wait for the dispatcher to stop.
+            timeout (Optional[float]): The maximum time to wait. If None, the method will wait indefinitely.
+        """
         self._STOP_FLAG = True
+        if wait and self.is_alive():
+            self._logger.debug("Waiting for the dispatcher thread to stop...")
+            self.join(timeout=timeout)
 
     def run(self):
-        _TaipyLogger._get_logger().info("Start job dispatcher...")
+        self._logger.info("Start job dispatcher...")
         while not self._STOP_FLAG:
             try:
                 if self._can_execute():
@@ -61,14 +70,14 @@ class _JobDispatcher(threading.Thread):
                             break
                         job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
                     self._execute_job(job)
+                else:
+                    time.sleep(0.1)  # We need to sleep to avoid busy waiting.
             except Empty:  # In case the last job of the queue has been removed.
                 pass
             except Exception as e:
-                _TaipyLogger._get_logger().exception(e)
+                self._logger.exception(e)
                 pass
-
-        # The dispatcher is now shutting down, let's shutdown its executor.
-        self._executor.shutdown(wait=True)
+        self._logger.info("Job dispatcher stopped.")
 
     def _can_execute(self) -> bool:
         """Returns True if the dispatcher have resources to execute a new job."""

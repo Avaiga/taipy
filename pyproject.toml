@@ -7,7 +7,6 @@ exclude = [
     "dist",
     "releases",
     ".venv",
-    ".tox",
     ".mypy_cache",
     ".pytest_cache",
     ".vscode",
