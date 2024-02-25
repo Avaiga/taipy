@@ -13,6 +13,7 @@ from queue import SimpleQueue
 
 from taipy.config import Config, Frequency
 from taipy.core import taipy as tp
+from taipy.core._version._version_manager_factory import _VersionManagerFactory
 from taipy.core.notification import EventEntityType, EventOperation
 from taipy.core.notification._topic import _Topic
 from taipy.core.notification.event import Event
@@ -801,7 +802,7 @@ def test_publish_deletion_event():
     while registration_queue.qsize() != 0:
         registration_queue.get()
 
-    tp.clean_all_entities_by_version()
+    tp.clean_all_entities(_VersionManagerFactory._build_manager()._get_latest_version())
     assert registration_queue.qsize() == 6
 
     published_events = []

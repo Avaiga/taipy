@@ -346,6 +346,7 @@ def init_config(reset_configuration_singleton, inject_core_sections):
 
         Config.configure_core(read_entity_retry=0)
         Core._is_running = False
+        Core._version_is_initialized = False
 
     return _init_config
 

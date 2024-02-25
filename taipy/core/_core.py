@@ -61,7 +61,7 @@ class Core:
             self.__class__._is_running = True
 
         self.__update_core_section()
-        self.__class__._manage_version_and_block_config()
+        self._manage_version_and_block_config()
 
         if self._orchestrator is None:
             self._orchestrator = _OrchestratorFactory._build_orchestrator()

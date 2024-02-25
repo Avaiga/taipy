@@ -29,7 +29,7 @@ from .common._check_instance import (
     _is_submission,
     _is_task,
 )
-from .common._warnings import _warn_no_core_service
+from .common._warnings import _warn_no_core_service, _warn_deprecated
 from .config.data_node_config import DataNodeConfig
 from .config.scenario_config import ScenarioConfig
 from .cycle._cycle_manager_factory import _CycleManagerFactory
@@ -874,6 +874,12 @@ def create_global_data_node(config: DataNodeConfig) -> DataNode:
     if dns := _DataManagerFactory._build_manager()._get_by_config_id(config.id):
         return dns[0]
     return _DataManagerFactory._build_manager()._create_and_set(config, None, None)
+
+
+def clean_all_entities_by_version(version_number=None) -> bool:
+    """Deprecated. Use `clean_all_entities` function instead."""
+    _warn_deprecated("'clean_all_entities_by_version'", suggest="the 'clean_all_entities' function")
+    return clean_all_entities(version_number)
 
 
 def clean_all_entities(version_number: str) -> bool:
