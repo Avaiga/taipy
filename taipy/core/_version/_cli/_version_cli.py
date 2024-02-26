@@ -21,7 +21,7 @@ from ...exceptions.exceptions import VersionIsNotProductionVersion
 from ...job._job_manager_factory import _JobManagerFactory
 from ...scenario._scenario_manager_factory import _ScenarioManagerFactory
 from ...sequence._sequence_manager_factory import _SequenceManagerFactory
-from ...taipy import clean_all_entities, clean_all_entities_by_version
+from ...taipy import clean_all_entities
 from ...task._task_manager_factory import _TaskManagerFactory
 from .._version_manager_factory import _VersionManagerFactory
 from ._bcolor import _Bcolors

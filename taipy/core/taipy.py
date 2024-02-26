@@ -29,7 +29,7 @@ from .common._check_instance import (
     _is_submission,
     _is_task,
 )
-from .common._warnings import _warn_no_core_service, _warn_deprecated
+from .common._warnings import _warn_deprecated, _warn_no_core_service
 from .config.data_node_config import DataNodeConfig
 from .config.scenario_config import ScenarioConfig
 from .cycle._cycle_manager_factory import _CycleManagerFactory
@@ -883,9 +883,7 @@ def clean_all_entities_by_version(version_number=None) -> bool:
 
 
 def clean_all_entities(version_number: str) -> bool:
-    """Delete a version and its related entities.
-
-    This function deletes all entities associated with the specified version.
+    """Deletes all entities associated with the specified version.
 
     Parameters:
         version_number (str): The version number of the entities to be deleted.
@@ -904,9 +902,7 @@ def clean_all_entities(version_number: str) -> bool:
     try:
         version_number = version_manager._replace_version_number(version_number)
     except NonExistingVersion as e:
-        __logger.warning(
-            f"{e.message} Abort cleaning the entities of version '{version_number}'. The version does not exist."
-        )
+        __logger.warning(f"{e.message} Abort cleaning the entities of version '{version_number}'.")
         return False
 
     if version_number in version_manager._get_production_versions():
