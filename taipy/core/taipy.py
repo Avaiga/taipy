@@ -836,7 +836,7 @@ def create_scenario(
 ) -> Scenario:
     """Create and return a new scenario based on a scenario configuration.
 
-    This function checks and lock the configuration, manages application's version,
+    This function checks and locks the configuration, manages application's version,
     and creates a new scenario from the scenario configuration provided.
 
     If the scenario belongs to a cycle, the cycle (corresponding to the _creation_date_
@@ -863,7 +863,7 @@ def create_scenario(
 def create_global_data_node(config: DataNodeConfig) -> DataNode:
     """Create and return a new GLOBAL data node from a data node configuration.
 
-    This function checks and lock the configuration, manages application's version,
+    This function checks and locks the configuration, manages application's version,
     and creates the new data node from the data node configuration provided.
 
     Parameters:

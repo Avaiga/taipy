@@ -51,7 +51,7 @@ class Core:
         """
         Start a Core service.
 
-        This function checks and lock the configuration, manages application's version,
+        This function checks and locks the configuration, manages application's version,
         and starts a job dispatcher.
         """
         if self.__class__._is_running:
