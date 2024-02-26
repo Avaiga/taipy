@@ -11,7 +11,7 @@
 
 import itertools
 from datetime import datetime
-from multiprocessing import Lock
+from threading import Lock
 from queue import Queue
 from time import sleep
 from typing import Callable, Iterable, List, Optional, Set, Union
