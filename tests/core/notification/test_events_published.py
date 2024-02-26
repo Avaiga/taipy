@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from queue import SimpleQueue
+from unittest.mock import patch
 
 from taipy.config import Config, Frequency
 from taipy.core import taipy as tp
@@ -102,141 +103,145 @@ def test_events_published_for_scenario_creation():
 
 
 def test_no_event_published_for_getting_scenario():
-    input_config = Config.configure_data_node("the_input")
-    output_config = Config.configure_data_node("the_output")
-    task_config = Config.configure_task("the_task", identity, input=input_config, output=output_config)
-    sc_config = Config.configure_scenario(
-        "the_scenario", task_configs=[task_config], frequency=Frequency.DAILY, sequences={"the_seq": [task_config]}
-    )
-    scenario = tp.create_scenario(sc_config)
+    with patch("sys.argv", ["prog"]):
+        input_config = Config.configure_data_node("the_input")
+        output_config = Config.configure_data_node("the_output")
+        task_config = Config.configure_task("the_task", identity, input=input_config, output=output_config)
+        sc_config = Config.configure_scenario(
+            "the_scenario", task_configs=[task_config], frequency=Frequency.DAILY, sequences={"the_seq": [task_config]}
+        )
+        scenario = tp.create_scenario(sc_config)
 
-    register_id_0, register_queue_0 = Notifier.register()
-    all_evts = RecordingConsumer(register_id_0, register_queue_0)
-    all_evts.start()
-    # Get all scenarios does not trigger any event
-    tp.get_scenarios()
-    snapshot = all_evts.capture()
+        register_id_0, register_queue_0 = Notifier.register()
+        all_evts = RecordingConsumer(register_id_0, register_queue_0)
+        all_evts.start()
+        # Get all scenarios does not trigger any event
+        tp.get_scenarios()
+        snapshot = all_evts.capture()
 
-    assert len(snapshot.collected_events) == 0
+        assert len(snapshot.collected_events) == 0
 
-    # Get one scenario does not trigger any event
-    tp.get(scenario.id)
-    snapshot = all_evts.capture()
-    assert len(snapshot.collected_events) == 0
+        # Get one scenario does not trigger any event
+        tp.get(scenario.id)
+        snapshot = all_evts.capture()
+        assert len(snapshot.collected_events) == 0
 
-    all_evts.stop()
+        all_evts.stop()
 
 
 def test_events_published_for_writing_dn():
-    input_config = Config.configure_data_node("the_input")
-    output_config = Config.configure_data_node("the_output")
-    task_config = Config.configure_task("the_task", identity, input=input_config, output=output_config)
-    sc_config = Config.configure_scenario(
-        "the_scenario", task_configs=[task_config], frequency=Frequency.DAILY, sequences={"the_seq": [task_config]}
-    )
-    scenario = tp.create_scenario(sc_config)
-    register_id_0, register_queue_0 = Notifier.register()
-    all_evts = RecordingConsumer(register_id_0, register_queue_0)
-    all_evts.start()
+    with patch("sys.argv", ["prog"]):
+        input_config = Config.configure_data_node("the_input")
+        output_config = Config.configure_data_node("the_output")
+        task_config = Config.configure_task("the_task", identity, input=input_config, output=output_config)
+        sc_config = Config.configure_scenario(
+            "the_scenario", task_configs=[task_config], frequency=Frequency.DAILY, sequences={"the_seq": [task_config]}
+        )
+        scenario = tp.create_scenario(sc_config)
+        register_id_0, register_queue_0 = Notifier.register()
+        all_evts = RecordingConsumer(register_id_0, register_queue_0)
+        all_evts.start()
 
-    # Write input manually trigger 4 data node update events
-    # for last_edit_date, editor_id, editor_expiration_date and edit_in_progress
-    scenario.the_input.write("test")
-    snapshot = all_evts.capture()
-    assert len(snapshot.collected_events) == 4
-    assert snapshot.entity_type_collected.get(EventEntityType.CYCLE, 0) == 0
-    assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 4
-    assert snapshot.entity_type_collected.get(EventEntityType.TASK, 0) == 0
-    assert snapshot.entity_type_collected.get(EventEntityType.SEQUENCE, 0) == 0
-    assert snapshot.entity_type_collected.get(EventEntityType.SCENARIO, 0) == 0
-    assert snapshot.operation_collected.get(EventOperation.CREATION, 0) == 0
-    assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 4
-    all_evts.stop()
+        # Write input manually trigger 4 data node update events
+        # for last_edit_date, editor_id, editor_expiration_date and edit_in_progress
+        scenario.the_input.write("test")
+        snapshot = all_evts.capture()
+        assert len(snapshot.collected_events) == 4
+        assert snapshot.entity_type_collected.get(EventEntityType.CYCLE, 0) == 0
+        assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 4
+        assert snapshot.entity_type_collected.get(EventEntityType.TASK, 0) == 0
+        assert snapshot.entity_type_collected.get(EventEntityType.SEQUENCE, 0) == 0
+        assert snapshot.entity_type_collected.get(EventEntityType.SCENARIO, 0) == 0
+        assert snapshot.operation_collected.get(EventOperation.CREATION, 0) == 0
+        assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 4
+        all_evts.stop()
 
 
 def test_events_published_for_scenario_submission():
-    input_config = Config.configure_data_node("the_input")
-    output_config = Config.configure_data_node("the_output")
-    task_config = Config.configure_task("the_task", identity, input=input_config, output=output_config)
-    sc_config = Config.configure_scenario(
-        "the_scenario", task_configs=[task_config], frequency=Frequency.DAILY, sequences={"the_seq": [task_config]}
-    )
-    scenario = tp.create_scenario(sc_config)
-    scenario.the_input.write("test")
-    register_id_0, register_queue_0 = Notifier.register()
-    all_evts = RecordingConsumer(register_id_0, register_queue_0)
-    all_evts.start()
-    # Submit a scenario triggers:
-    # 1 scenario submission event
-    # 7 dn update events (for last_edit_date, editor_id(x2), editor_expiration_date(x2) and edit_in_progress(x2))
-    # 1 job creation event
-    # 3 job update events (for status: PENDING, RUNNING and COMPLETED)
-    # 1 submission creation event
-    # 1 submission update event for jobs
-    # 3 submission update events (for status: PENDING, RUNNING and COMPLETED)
-    # 1 submission update event for is_completed
-    scenario.submit()
-    snapshot = all_evts.capture()
-    assert len(snapshot.collected_events) == 17
-    assert snapshot.entity_type_collected.get(EventEntityType.CYCLE, 0) == 0
-    assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 7
-    assert snapshot.entity_type_collected.get(EventEntityType.TASK, 0) == 0
-    assert snapshot.entity_type_collected.get(EventEntityType.SEQUENCE, 0) == 0
-    assert snapshot.entity_type_collected.get(EventEntityType.SCENARIO, 0) == 1
-    assert snapshot.entity_type_collected.get(EventEntityType.JOB, 0) == 4
-    assert snapshot.entity_type_collected.get(EventEntityType.SUBMISSION, 0) == 5
-    assert snapshot.operation_collected.get(EventOperation.CREATION, 0) == 2
-    assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 14
-    assert snapshot.operation_collected.get(EventOperation.SUBMISSION, 0) == 1
+    with patch("sys.argv", ["prog"]):
+        input_config = Config.configure_data_node("the_input")
+        output_config = Config.configure_data_node("the_output")
+        task_config = Config.configure_task("the_task", identity, input=input_config, output=output_config)
+        sc_config = Config.configure_scenario(
+            "the_scenario", task_configs=[task_config], frequency=Frequency.DAILY, sequences={"the_seq": [task_config]}
+        )
+        scenario = tp.create_scenario(sc_config)
+        scenario.the_input.write("test")
+        register_id_0, register_queue_0 = Notifier.register()
+        all_evts = RecordingConsumer(register_id_0, register_queue_0)
+        all_evts.start()
+        # Submit a scenario triggers:
+        # 1 scenario submission event
+        # 7 dn update events (for last_edit_date, editor_id(x2), editor_expiration_date(x2) and edit_in_progress(x2))
+        # 1 job creation event
+        # 3 job update events (for status: PENDING, RUNNING and COMPLETED)
+        # 1 submission creation event
+        # 1 submission update event for jobs
+        # 3 submission update events (for status: PENDING, RUNNING and COMPLETED)
+        # 1 submission update event for is_completed
+        scenario.submit()
+        snapshot = all_evts.capture()
+        assert len(snapshot.collected_events) == 17
+        assert snapshot.entity_type_collected.get(EventEntityType.CYCLE, 0) == 0
+        assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 7
+        assert snapshot.entity_type_collected.get(EventEntityType.TASK, 0) == 0
+        assert snapshot.entity_type_collected.get(EventEntityType.SEQUENCE, 0) == 0
+        assert snapshot.entity_type_collected.get(EventEntityType.SCENARIO, 0) == 1
+        assert snapshot.entity_type_collected.get(EventEntityType.JOB, 0) == 4
+        assert snapshot.entity_type_collected.get(EventEntityType.SUBMISSION, 0) == 5
+        assert snapshot.operation_collected.get(EventOperation.CREATION, 0) == 2
+        assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 14
+        assert snapshot.operation_collected.get(EventOperation.SUBMISSION, 0) == 1
 
-    assert snapshot.attr_name_collected["last_edit_date"] == 1
-    assert snapshot.attr_name_collected["editor_id"] == 2
-    assert snapshot.attr_name_collected["editor_expiration_date"] == 2
-    assert snapshot.attr_name_collected["edit_in_progress"] == 2
-    assert snapshot.attr_name_collected["status"] == 3
-    assert snapshot.attr_name_collected["jobs"] == 1
-    assert snapshot.attr_name_collected["submission_status"] == 3
+        assert snapshot.attr_name_collected["last_edit_date"] == 1
+        assert snapshot.attr_name_collected["editor_id"] == 2
+        assert snapshot.attr_name_collected["editor_expiration_date"] == 2
+        assert snapshot.attr_name_collected["edit_in_progress"] == 2
+        assert snapshot.attr_name_collected["status"] == 3
+        assert snapshot.attr_name_collected["jobs"] == 1
+        assert snapshot.attr_name_collected["submission_status"] == 3
 
-    all_evts.stop()
+        all_evts.stop()
 
 
 def test_events_published_for_scenario_deletion():
-    input_config = Config.configure_data_node("the_input")
-    output_config = Config.configure_data_node("the_output")
-    task_config = Config.configure_task("the_task", identity, input=input_config, output=output_config)
-    sc_config = Config.configure_scenario(
-        "the_scenario", task_configs=[task_config], frequency=Frequency.DAILY, sequences={"the_seq": [task_config]}
-    )
-    scenario = tp.create_scenario(sc_config)
-    scenario.the_input.write("test")
-    scenario.submit()
-    register_id_0, register_queue_0 = Notifier.register()
-    all_evts = RecordingConsumer(register_id_0, register_queue_0)
-    all_evts.start()
-    # Delete a scenario trigger 8 deletion events
-    # 1 scenario deletion event
-    # 1 cycle deletion event
-    # 2 dn deletion events (for input and output)
-    # 1 task deletion event
-    # 1 sequence deletion event
-    # 1 job deletion event
-    # 1 submission deletion event
-    tp.delete(scenario.id)
-    snapshot = all_evts.capture()
+    with patch("sys.argv", ["prog"]):
+        input_config = Config.configure_data_node("the_input")
+        output_config = Config.configure_data_node("the_output")
+        task_config = Config.configure_task("the_task", identity, input=input_config, output=output_config)
+        sc_config = Config.configure_scenario(
+            "the_scenario", task_configs=[task_config], frequency=Frequency.DAILY, sequences={"the_seq": [task_config]}
+        )
+        scenario = tp.create_scenario(sc_config)
+        scenario.the_input.write("test")
+        scenario.submit()
+        register_id_0, register_queue_0 = Notifier.register()
+        all_evts = RecordingConsumer(register_id_0, register_queue_0)
+        all_evts.start()
+        # Delete a scenario trigger 8 deletion events
+        # 1 scenario deletion event
+        # 1 cycle deletion event
+        # 2 dn deletion events (for input and output)
+        # 1 task deletion event
+        # 1 sequence deletion event
+        # 1 job deletion event
+        # 1 submission deletion event
+        tp.delete(scenario.id)
+        snapshot = all_evts.capture()
 
-    assert len(snapshot.collected_events) == 8
-    assert snapshot.entity_type_collected.get(EventEntityType.CYCLE, 0) == 1
-    assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 2
-    assert snapshot.entity_type_collected.get(EventEntityType.TASK, 0) == 1
-    assert snapshot.entity_type_collected.get(EventEntityType.SEQUENCE, 0) == 1
-    assert snapshot.entity_type_collected.get(EventEntityType.SCENARIO, 0) == 1
-    assert snapshot.entity_type_collected.get(EventEntityType.SUBMISSION, 0) == 1
-    assert snapshot.entity_type_collected.get(EventEntityType.JOB, 0) == 1
-    assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 0
-    assert snapshot.operation_collected.get(EventOperation.SUBMISSION, 0) == 0
-    assert snapshot.operation_collected.get(EventOperation.DELETION, 0) == 8
+        assert len(snapshot.collected_events) == 8
+        assert snapshot.entity_type_collected.get(EventEntityType.CYCLE, 0) == 1
+        assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 2
+        assert snapshot.entity_type_collected.get(EventEntityType.TASK, 0) == 1
+        assert snapshot.entity_type_collected.get(EventEntityType.SEQUENCE, 0) == 1
+        assert snapshot.entity_type_collected.get(EventEntityType.SCENARIO, 0) == 1
+        assert snapshot.entity_type_collected.get(EventEntityType.SUBMISSION, 0) == 1
+        assert snapshot.entity_type_collected.get(EventEntityType.JOB, 0) == 1
+        assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 0
+        assert snapshot.operation_collected.get(EventOperation.SUBMISSION, 0) == 0
+        assert snapshot.operation_collected.get(EventOperation.DELETION, 0) == 8
 
-    all_evts.stop()
+        all_evts.stop()
 
 
 def test_job_events():
@@ -285,39 +290,40 @@ def test_job_events():
 
 
 def test_scenario_events():
-    input_config = Config.configure_data_node("the_input")
-    output_config = Config.configure_data_node("the_output")
-    task_config = Config.configure_task("the_task", identity, input=input_config, output=output_config)
-    sc_config = Config.configure_scenario(
-        "the_scenario", task_configs=[task_config], frequency=Frequency.DAILY, sequences={"the_seq": [task_config]}
-    )
-    register_id, register_queue = Notifier.register(entity_type=EventEntityType.SCENARIO)
-    consumer = RecordingConsumer(register_id, register_queue)
-    consumer.start()
-    scenario = tp.create_scenario(sc_config)
+    with patch("sys.argv", ["prog"]):
+        input_config = Config.configure_data_node("the_input")
+        output_config = Config.configure_data_node("the_output")
+        task_config = Config.configure_task("the_task", identity, input=input_config, output=output_config)
+        sc_config = Config.configure_scenario(
+            "the_scenario", task_configs=[task_config], frequency=Frequency.DAILY, sequences={"the_seq": [task_config]}
+        )
+        register_id, register_queue = Notifier.register(entity_type=EventEntityType.SCENARIO)
+        consumer = RecordingConsumer(register_id, register_queue)
+        consumer.start()
+        scenario = tp.create_scenario(sc_config)
 
-    snapshot = consumer.capture()
-    assert len(snapshot.collected_events) == 1
-    assert snapshot.collected_events[0].operation == EventOperation.CREATION
-    assert snapshot.collected_events[0].entity_type == EventEntityType.SCENARIO
-    assert snapshot.collected_events[0].metadata.get("config_id") == scenario.config_id
+        snapshot = consumer.capture()
+        assert len(snapshot.collected_events) == 1
+        assert snapshot.collected_events[0].operation == EventOperation.CREATION
+        assert snapshot.collected_events[0].entity_type == EventEntityType.SCENARIO
+        assert snapshot.collected_events[0].metadata.get("config_id") == scenario.config_id
 
-    scenario.submit()
-    snapshot = consumer.capture()
-    assert len(snapshot.collected_events) == 1
-    assert snapshot.collected_events[0].operation == EventOperation.SUBMISSION
-    assert snapshot.collected_events[0].entity_type == EventEntityType.SCENARIO
-    assert snapshot.collected_events[0].metadata.get("config_id") == scenario.config_id
+        scenario.submit()
+        snapshot = consumer.capture()
+        assert len(snapshot.collected_events) == 1
+        assert snapshot.collected_events[0].operation == EventOperation.SUBMISSION
+        assert snapshot.collected_events[0].entity_type == EventEntityType.SCENARIO
+        assert snapshot.collected_events[0].metadata.get("config_id") == scenario.config_id
 
-    # Delete scenario
-    tp.delete(scenario.id)
-    snapshot = consumer.capture()
-    assert len(snapshot.collected_events) == 1
+        # Delete scenario
+        tp.delete(scenario.id)
+        snapshot = consumer.capture()
+        assert len(snapshot.collected_events) == 1
 
-    assert snapshot.collected_events[0].operation == EventOperation.DELETION
-    assert snapshot.collected_events[0].entity_type == EventEntityType.SCENARIO
+        assert snapshot.collected_events[0].operation == EventOperation.DELETION
+        assert snapshot.collected_events[0].entity_type == EventEntityType.SCENARIO
 
-    consumer.stop()
+        consumer.stop()
 
 
 def test_data_node_events():

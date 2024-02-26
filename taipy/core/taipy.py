@@ -836,10 +836,11 @@ def create_scenario(
 ) -> Scenario:
     """Create and return a new scenario based on a scenario configuration.
 
-    If the scenario belongs to a cycle, a cycle (corresponding to the _creation_date_
-    and the configuration frequency attribute) is created if it does not exist yet.
+    This function checks and lock the configuration, manages application's version,
+    and creates a new scenario from the scenario configuration provided.
 
-    By creating the scenario entity, updating the Configuration is blocked.
+    If the scenario belongs to a cycle, the cycle (corresponding to the _creation_date_
+    and the configuration frequency attribute) is created if it does not exist yet.
 
     Parameters:
         config (ScenarioConfig^): The scenario configuration used to create a new scenario.
@@ -849,6 +850,10 @@ def create_scenario(
 
     Returns:
         The new scenario.
+
+    Raises:
+        SystemExit: If the configuration check returns some errors.
+
     """
     Core._manage_version_and_block_config()
 
@@ -858,7 +863,8 @@ def create_scenario(
 def create_global_data_node(config: DataNodeConfig) -> DataNode:
     """Create and return a new GLOBAL data node from a data node configuration.
 
-    By creating the data node entity, updating the Configuration is blocked.
+    This function checks and lock the configuration, manages application's version,
+    and creates the new data node from the data node configuration provided.
 
     Parameters:
         config (DataNodeConfig^): The data node configuration. It must have a `GLOBAL` scope.
@@ -868,6 +874,7 @@ def create_global_data_node(config: DataNodeConfig) -> DataNode:
 
     Raises:
         DataNodeConfigIsNotGlobal^: If the data node configuration does not have GLOBAL scope.
+        SystemExit: If the configuration check returns some errors.
     """
     # Check if the data node config has GLOBAL scope
     if config.scope is not Scope.GLOBAL:

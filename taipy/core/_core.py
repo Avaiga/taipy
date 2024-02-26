@@ -51,8 +51,8 @@ class Core:
         """
         Start a Core service.
 
-        This function checks the configuration, manages application's version,
-        and starts a dispatcher and lock the Config.
+        This function checks and lock the configuration, manages application's version,
+        and starts a job dispatcher.
         """
         if self.__class__._is_running:
             raise CoreServiceIsAlreadyRunning
@@ -61,10 +61,6 @@ class Core:
             self.__class__._is_running = True
 
         self._manage_version_and_block_config()
-
-        if self._orchestrator is None:
-            self._orchestrator = _OrchestratorFactory._build_orchestrator()
-
         self.__start_dispatcher(force_restart)
 
     def stop(self, wait: bool = True, timeout: Optional[float] = None):
@@ -91,7 +87,7 @@ class Core:
     @classmethod
     def _manage_version_and_block_config(cls):
         """
-        Manage the application's version and block the Config for update.
+        Manage the application's version and block the Config from updates.
         """
         if cls._version_is_initialized:
             return
@@ -122,6 +118,9 @@ class Core:
         _init_backup_file_with_storage_folder()
 
     def __start_dispatcher(self, force_restart):
+        if self._orchestrator is None:
+            self._orchestrator = _OrchestratorFactory._build_orchestrator()
+
         if dispatcher := _OrchestratorFactory._build_dispatcher(force_restart=force_restart):
             self._dispatcher = dispatcher
 

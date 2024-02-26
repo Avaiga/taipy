@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 import os
 import pathlib
+from unittest.mock import patch
 
 import pytest
 
@@ -514,72 +515,75 @@ class TestDataManager:
         assert not file_exists(generated_pickle_dn_3.path)
 
     def test_create_dn_from_loaded_config_no_scope(self):
-        file_config = NamedTemporaryFile(
-            """
-            [TAIPY]
+        with patch("sys.argv", ["prog"]):
+            file_config = NamedTemporaryFile(
+                """
+                [TAIPY]
 
-            [DATA_NODE.a]
-            default_data = "4:int"
+                [DATA_NODE.a]
+                default_data = "4:int"
 
-            [DATA_NODE.b]
+                [DATA_NODE.b]
 
-            [TASK.t]
-            function = "math.sqrt:function"
-            inputs = [ "a:SECTION",]
-            outputs = [ "b:SECTION",]
-            skippable = "False:bool"
+                [TASK.t]
+                function = "math.sqrt:function"
+                inputs = [ "a:SECTION",]
+                outputs = [ "b:SECTION",]
+                skippable = "False:bool"
 
-            [SCENARIO.s]
-            tasks = [ "t:SECTION",]
-            sequences.s_sequence = [ "t:SECTION",]
+                [SCENARIO.s]
+                tasks = [ "t:SECTION",]
+                sequences.s_sequence = [ "t:SECTION",]
 
-            [SCENARIO.s.comparators]
-            """
-        )
-        from taipy import core as tp
+                [SCENARIO.s.comparators]
+                """
+            )
+            from taipy import core as tp
 
-        Config.override(file_config.filename)
-        tp.create_scenario(Config.scenarios["s"])
-        tp.create_scenario(Config.scenarios["s"])
+            Config.override(file_config.filename)
+            tp.create_scenario(Config.scenarios["s"])
+            tp.create_scenario(Config.scenarios["s"])
 
-        assert len(tp.get_data_nodes()) == 4
+            assert len(tp.get_data_nodes()) == 4
 
     def test_create_dn_from_loaded_config_no_storage_type(self):
-        file_config = NamedTemporaryFile(
-            """
-            [TAIPY]
+        with patch("sys.argv", ["prog"]):
+            file_config = NamedTemporaryFile(
+                """
+                [TAIPY]
 
-            [DATA_NODE.input_dn]
-            scope = "SCENARIO:SCOPE"
-            default_data = "21:int"
+                [DATA_NODE.input_dn]
+                scope = "SCENARIO:SCOPE"
+                default_data = "21:int"
 
-            [DATA_NODE.output_dn]
-            storage_type = "in_memory"
-            scope = "SCENARIO:SCOPE"
+                [DATA_NODE.output_dn]
+                storage_type = "in_memory"
+                scope = "SCENARIO:SCOPE"
 
-            [TASK.double]
-            inputs = [ "input_dn:SECTION",]
-            function = "math.sqrt:function"
-            outputs = [ "output_dn:SECTION",]
-            skippable = "False:bool"
+                [TASK.double]
+                inputs = [ "input_dn:SECTION",]
+                function = "math.sqrt:function"
+                outputs = [ "output_dn:SECTION",]
+                skippable = "False:bool"
 
-            [SCENARIO.my_scenario]
-            tasks = [ "double:SECTION",]
-            sequences.my_sequence = [ "double:SECTION",]
+                [SCENARIO.my_scenario]
+                tasks = [ "double:SECTION",]
+                sequences.my_sequence = [ "double:SECTION",]
 
-            [SCENARIO.my_scenario.comparators]
-            """
-        )
-        from taipy import core as tp
+                [SCENARIO.my_scenario.comparators]
+                """
+            )
+            from taipy import core as tp
 
-        Config.override(file_config.filename)
-        scenario = tp.create_scenario(Config.scenarios["my_scenario"])
+            Config.override(file_config.filename)
+            scenario = tp.create_scenario(Config.scenarios["my_scenario"])
 
-        assert isinstance(scenario.input_dn, PickleDataNode)
-        assert isinstance(scenario.output_dn, InMemoryDataNode)
+            assert isinstance(scenario.input_dn, PickleDataNode)
+            assert isinstance(scenario.output_dn, InMemoryDataNode)
 
     def test_create_dn_from_loaded_config_modified_default_config(self):
-        file_config = NamedTemporaryFile(
+        with patch("sys.argv", ["prog"]):
+            file_config = NamedTemporaryFile(
             """
             [TAIPY]
 
@@ -604,14 +608,14 @@ class TestDataManager:
             [SCENARIO.my_scenario.comparators]
             """
         )
-        from taipy import core as tp
+            from taipy import core as tp
 
-        Config.set_default_data_node_configuration(storage_type="csv")
-        Config.override(file_config.filename)
-        scenario = tp.create_scenario(Config.scenarios["my_scenario"])
+            Config.set_default_data_node_configuration(storage_type="csv")
+            Config.override(file_config.filename)
+            scenario = tp.create_scenario(Config.scenarios["my_scenario"])
 
-        assert isinstance(scenario.input_dn, CSVDataNode)
-        assert isinstance(scenario.output_dn, InMemoryDataNode)
+            assert isinstance(scenario.input_dn, CSVDataNode)
+            assert isinstance(scenario.output_dn, InMemoryDataNode)
 
     def test_get_tasks_by_config_id(self):
         dn_config_1 = Config.configure_data_node("dn_1", scope=Scope.SCENARIO)

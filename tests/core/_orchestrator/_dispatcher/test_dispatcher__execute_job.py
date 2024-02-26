@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from unittest import mock
+from unittest.mock import patch
 
 import taipy
 from taipy.config.config import Config
@@ -46,58 +47,61 @@ def test_can_execute():
 
 
 def test_execute_job():
-    scenario = create_scenario()
-    scenario.t1.skippable = True  # make the job skippable
-    scenario.dn.lock_edit()  # lock output edit
-    job = Job(JobId("id"), scenario.t1, "submit_id", TaskId("id"))
-    _JobManagerFactory._build_manager()._set(job)
-    with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher._dispatch") as mck_1:
-        with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher._needs_to_run") as mck_2:
-            mck_2.return_value = True
-            dispatcher = _JobDispatcher(_OrchestratorFactory._build_orchestrator())
-            dispatcher._execute_job(job)
+    with patch("sys.argv", ["prog"]):
+        scenario = create_scenario()
+        scenario.t1.skippable = True  # make the job skippable
+        scenario.dn.lock_edit()  # lock output edit
+        job = Job(JobId("id"), scenario.t1, "submit_id", TaskId("id"))
+        _JobManagerFactory._build_manager()._set(job)
+        with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher._dispatch") as mck_1:
+            with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher._needs_to_run") as mck_2:
+                mck_2.return_value = True
+                dispatcher = _JobDispatcher(_OrchestratorFactory._build_orchestrator())
+                dispatcher._execute_job(job)
 
-            mck_2.assert_called_once_with(job.task)  # This should be called to check if job needs to run
-            mck_1.assert_called_once_with(job)
-            assert job.is_running()  # The job is not executed since the dispatch is mocked
-            assert scenario.dn.edit_in_progress  # outputs must NOT have been unlocked because the disptach is mocked
+                mck_2.assert_called_once_with(job.task)  # This should be called to check if job needs to run
+                mck_1.assert_called_once_with(job)
+                assert job.is_running()  # The job is not executed since the dispatch is mocked
+                assert scenario.dn.edit_in_progress  # outputs must NOT have been unlocked because the disptach is mocked
 
 
 def test_execute_job_to_skip():
-    scenario = create_scenario()
-    scenario.t1.skippable = True  # make the job skippable
-    scenario.dn.lock_edit()  # lock output edit
-    job = Job(JobId("id"), scenario.t1, "submit_id", TaskId("id"))
-    _JobManagerFactory._build_manager()._set(job)
+    with patch("sys.argv", ["prog"]):
+        scenario = create_scenario()
+        scenario.t1.skippable = True  # make the job skippable
+        scenario.dn.lock_edit()  # lock output edit
+        job = Job(JobId("id"), scenario.t1, "submit_id", TaskId("id"))
+        _JobManagerFactory._build_manager()._set(job)
 
-    with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher._dispatch") as mck_1:
-        with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher._needs_to_run") as mck_2:
-            mck_2.return_value = False
-            _JobDispatcher(_OrchestratorFactory._build_orchestrator())._execute_job(job)
+        with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher._dispatch") as mck_1:
+            with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher._needs_to_run") as mck_2:
+                mck_2.return_value = False
+                _JobDispatcher(_OrchestratorFactory._build_orchestrator())._execute_job(job)
 
-            assert job.is_skipped()
-            mck_1.assert_not_called()  # The job is expecting to be skipped, so it must not be dispatched
-            mck_2.assert_called_once_with(job.task)  # this must be called to check if the job needs to run
-            assert not scenario.dn.edit_in_progress  # outputs must have been unlocked
+                assert job.is_skipped()
+                mck_1.assert_not_called()  # The job is expecting to be skipped, so it must not be dispatched
+                mck_2.assert_called_once_with(job.task)  # this must be called to check if the job needs to run
+                assert not scenario.dn.edit_in_progress  # outputs must have been unlocked
 
 
 def test_execute_job_skippable_with_force():
-    scenario = create_scenario()
-    scenario.t1.skippable = True  # make the job skippable
-    scenario.dn.lock_edit()  # lock output edit
-    job = Job(JobId("id"), scenario.t1, "submit_id", TaskId("id"), force=True)
-    _JobManagerFactory._build_manager()._set(job)
+    with patch("sys.argv", ["prog"]):
+        scenario = create_scenario()
+        scenario.t1.skippable = True  # make the job skippable
+        scenario.dn.lock_edit()  # lock output edit
+        job = Job(JobId("id"), scenario.t1, "submit_id", TaskId("id"), force=True)
+        _JobManagerFactory._build_manager()._set(job)
 
-    with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher._dispatch") as mck_1:
-        with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher._needs_to_run") as mck_2:
-            mck_2.return_value = False
-            dispatcher = _JobDispatcher(_OrchestratorFactory._orchestrator)
-            dispatcher._execute_job(job)
+        with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher._dispatch") as mck_1:
+            with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher._needs_to_run") as mck_2:
+                mck_2.return_value = False
+                dispatcher = _JobDispatcher(_OrchestratorFactory._orchestrator)
+                dispatcher._execute_job(job)
 
-            mck_1.assert_called_once_with(job)  # This should be called to dispatch the job
-            mck_2.assert_not_called()  # This should NOT be called since we force the execution anyway
-            assert job.is_running()  # The job is not executed since the dispatch is mocked
-            assert scenario.dn.edit_in_progress  # outputs must NOT have been unlocked because the disptach is mocked
+                mck_1.assert_called_once_with(job)  # This should be called to dispatch the job
+                mck_2.assert_not_called()  # This should NOT be called since we force the execution anyway
+                assert job.is_running()  # The job is not executed since the dispatch is mocked
+                assert scenario.dn.edit_in_progress  # outputs must NOT have been unlocked because the disptach is mocked
 
 
 def test_execute_jobs_synchronously():
