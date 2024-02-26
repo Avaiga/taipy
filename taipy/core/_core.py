@@ -86,6 +86,9 @@ class Core:
         with self.__class__.__lock_is_running:
             self.__class__._is_running = False
 
+        with self.__class__.__lock_version_is_initialized:
+            self.__class__._version_is_initialized = False
+
     @classmethod
     def _manage_version_and_block_config(cls):
         """
@@ -112,8 +115,8 @@ class Core:
             {"version_number": _VersionManagerFactory._build_manager()._get_latest_version()}
         )
 
-    @staticmethod
-    def __check_and_block_config():
+    @classmethod
+    def __check_and_block_config(cls):
         Config.check()
         Config.block_update()
         _init_backup_file_with_storage_folder()
