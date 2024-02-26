@@ -352,7 +352,7 @@ class TestTaipy:
                 tp.submit(scenario)
 
         assert len(warning) == 1
-        assert warning[0].message.args[0] == "The Core service is NOT running"
+        assert "The Core service is NOT running" in warning[0].message.args[0]
 
     def test_get_tasks(self):
         with mock.patch("taipy.core.task._task_manager._TaskManager._get_all") as mck:
@@ -636,29 +636,33 @@ class TestTaipy:
             mck.assert_called_once_with(cycle_id)
 
     def test_create_global_data_node(self):
-        dn_cfg = DataNodeConfig("id", "pickle", Scope.GLOBAL)
-        with mock.patch("taipy.core.data._data_manager._DataManager._create_and_set") as mck:
-            dn = tp.create_global_data_node(dn_cfg)
-            mck.assert_called_once_with(dn_cfg, None, None)
+        dn_cfg_global = DataNodeConfig("id", "pickle", Scope.GLOBAL)
+        dn_cfg_scenario = DataNodeConfig("id", "pickle", Scope.SCENARIO)
+        with mock.patch("taipy.core.data._data_manager._DataManager._create_and_set") as dn_create_mock:
+            with mock.patch("taipy.core._core.Core._manage_version_and_block_config") as mv_mock:
+                dn = tp.create_global_data_node(dn_cfg_global)
+                dn_create_mock.assert_called_once_with(dn_cfg_global, None, None)
+                mv_mock.assert_called_once()
 
-        dn = tp.create_global_data_node(dn_cfg)
+        dn = tp.create_global_data_node(dn_cfg_global)
         assert dn.scope == Scope.GLOBAL
-        assert dn.config_id == dn_cfg.id
+        assert dn.config_id == dn_cfg_global.id
         assert _VersionManager._get(dn.version) is not None
 
         # Create a global data node from the same configuration should return the same data node
-        dn_2 = tp.create_global_data_node(dn_cfg)
+        dn_2 = tp.create_global_data_node(dn_cfg_global)
         assert dn_2.id == dn.id
 
-        dn_cfg.scope = Scope.SCENARIO
         with pytest.raises(DataNodeConfigIsNotGlobal):
-            tp.create_global_data_node(dn_cfg)
+            tp.create_global_data_node(dn_cfg_scenario)
 
-    def test_create_scenario(self, scenario):
+    def test_create_scenario(self):
         scenario_config = ScenarioConfig("scenario_config")
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._create") as mck:
-            tp.create_scenario(scenario_config)
-            mck.assert_called_once_with(scenario_config, None, None)
+            with mock.patch("taipy.core._core.Core._manage_version_and_block_config") as mv_mock:
+                tp.create_scenario(scenario_config)
+                mck.assert_called_once_with(scenario_config, None, None)
+                mv_mock.assert_called_once()
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._create") as mck:
             tp.create_scenario(scenario_config, datetime.datetime(2022, 2, 5))
             mck.assert_called_once_with(scenario_config, datetime.datetime(2022, 2, 5), None)

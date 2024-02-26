@@ -18,6 +18,7 @@ from taipy.core.notification import EventEntityType, EventOperation
 from taipy.core.notification._topic import _Topic
 from taipy.core.notification.event import Event
 from taipy.core.notification.notifier import Notifier
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 
 
 def test_register():
@@ -318,7 +319,7 @@ def test_publish_creation_event():
 
     # Test CREATION Event
 
-    scenario = tp.create_scenario(scenario_config)
+    scenario = _ScenarioManagerFactory._build_manager()._create(scenario_config)
     cycle = scenario.cycle
     task = scenario.tasks[task_config.id]
     dn = scenario.data_nodes[dn_config.id]
@@ -358,7 +359,7 @@ def test_publish_update_event():
     )
     scenario_config.add_sequences({"sequence_config": [task_config]})
 
-    scenario = tp.create_scenario(scenario_config)
+    scenario = _ScenarioManagerFactory._build_manager()._create(scenario_config)
     cycle = scenario.cycle
     task = scenario.tasks[task_config.id]
     dn = scenario.data_nodes[dn_config.id]
@@ -555,7 +556,7 @@ def test_publish_update_event_in_context_manager():
     )
     scenario_config.add_sequences({"sequence_config": [task_config]})
 
-    scenario = tp.create_scenario(scenario_config)
+    scenario = _ScenarioManagerFactory._build_manager()._create(scenario_config)
     cycle = scenario.cycle
     task = scenario.tasks[task_config.id]
     dn = scenario.data_nodes[dn_config.id]
@@ -700,7 +701,7 @@ def test_publish_submission_event():
         "scenario_config", [task_config], frequency=Frequency.DAILY, flag="test"
     )
     scenario_config.add_sequences({"sequence_config": [task_config]})
-    scenario = tp.create_scenario(scenario_config)
+    scenario = _ScenarioManagerFactory._build_manager()._create(scenario_config)
 
     assert registration_queue.qsize() == 5
     while registration_queue.qsize() > 0:
@@ -752,7 +753,7 @@ def test_publish_deletion_event():
         "scenario_config", [task_config], frequency=Frequency.DAILY, flag="test"
     )
     scenario_config.add_sequences({"sequence_config": [task_config]})
-    scenario = tp.create_scenario(scenario_config)
+    scenario = _ScenarioManagerFactory._build_manager()._create(scenario_config)
     cycle = scenario.cycle
     task = scenario.tasks[task_config.id]
     dn = scenario.data_nodes[dn_config.id]
@@ -794,7 +795,7 @@ def test_publish_deletion_event():
         for i, event in enumerate(published_events)
     )
 
-    scenario = tp.create_scenario(scenario_config)
+    scenario = _ScenarioManagerFactory._build_manager()._create(scenario_config)
     cycle = scenario.cycle
     assert registration_queue.qsize() == 5
 

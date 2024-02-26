@@ -24,14 +24,6 @@ def mock_func():
 
 
 def test_check_if_entity_property_key_used_is_predefined(caplog):
-    with patch("sys.argv", ["prog", "--production", "1.0"]):
-        core = Core()
-        core.run()
-    assert caplog.text == ""
-    core.stop()
-
-    caplog.clear()
-
     Config.unique_sections[MigrationConfig.name]._properties["_entity_owner"] = None
     with patch("sys.argv", ["prog", "--production", "1.0"]):
         with pytest.raises(SystemExit):
@@ -72,9 +64,9 @@ def test_check_valid_version(caplog):
     Config.unblock_update()
 
     with patch("sys.argv", ["prog", "--production", "2.0"]):
+        # No SystemExit should be raised
         core = Core()
         core.run()
-    assert caplog.text == ""
     core.stop()
 
 

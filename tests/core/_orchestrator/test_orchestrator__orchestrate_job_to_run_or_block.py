@@ -50,9 +50,9 @@ def test_orchestrate_job_to_run_or_block_single_pending_job():
 
 
 def test_orchestrate_job_to_run_or_block_multiple_jobs():
-    input = Config.configure_data_node("input", default_data=1)  # Has default data
+    input = Config.configure_data_node("input_dn", default_data=1)  # Has default data
     intermediate = Config.configure_data_node("intermediate")  # Has default data
-    output = Config.configure_data_node("output")  # Has default data
+    output = Config.configure_data_node("output_dn")  # Has default data
     t1 = Config.configure_task("my_task_1", nothing, [input], [])
     t2 = Config.configure_task("my_task_2", nothing, [], [intermediate])
     t3 = Config.configure_task("my_task_3", nothing, [intermediate], [output])
