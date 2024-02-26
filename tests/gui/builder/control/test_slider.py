@@ -39,7 +39,7 @@ def test_slider_with_min_max_builder(gui: Gui, test_client, helpers):
 def test_slider_with_step_builder(gui: Gui, test_client, helpers):
     gui._bind_var_val("x", 0)
     with tgb.Page(frame=None) as page:
-        tgb.slider(value="{x}", min=-10, max=10, step=2)
+        tgb.slider(value="{x}", min=-10, max=10, step=2)  # type: ignore[attr-defined]
     expected_list = [
         "<Slider",
         "min={-10.0}",
