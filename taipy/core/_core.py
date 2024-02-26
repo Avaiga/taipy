@@ -60,7 +60,6 @@ class Core:
         with self.__class__.__lock_is_running:
             self.__class__._is_running = True
 
-        self.__update_core_section()
         self._manage_version_and_block_config()
 
         if self._orchestrator is None:
@@ -100,6 +99,7 @@ class Core:
         with cls.__lock_version_is_initialized:
             cls._version_is_initialized = True
 
+        cls.__update_core_section()
         cls.__manage_version()
         cls.__check_and_block_config()
 
