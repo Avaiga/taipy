@@ -14,8 +14,11 @@
 """The setup script."""
 import json
 import os
+from pathlib import Path
 
 from setuptools import find_namespace_packages, find_packages, setup
+
+root_folder = Path(__file__).parent
 
 with open("README.md") as readme_file:
     readme = readme_file.read()
@@ -27,14 +30,18 @@ with open(version_path) as version_file:
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
-requirements = [
-    "networkx>=2.6,<3.0",
-    "openpyxl>=3.1.2,<3.2",
-    "pandas>=1.3.5,<3.0",
-    "sqlalchemy>=2.0.16,<2.1",
-    "toml>=0.10,<0.11",
-    "taipy-config@git+https://git@github.com/Avaiga/taipy-config.git@develop",
-]
+
+
+def get_requirements():
+    # get requirements from the different setups in tools/packages (removing taipy packages)
+    reqs = set()
+    for pkg in (root_folder / "tools" / "packages").iterdir():
+        requirements_file = pkg / "setup.requirements.txt"
+        if requirements_file.exists():
+            reqs.update(requirements_file.read_text("UTF-8").splitlines())
+
+    return [r for r in reqs if r and not r.startswith("taipy")]
+
 
 test_requirements = ["pytest>=3.8"]
 
@@ -63,7 +70,7 @@ setup(
         "Programming Language :: Python :: 3.12",
     ],
     description="A Python library to build powerful and customized data-driven back-end applications.",
-    install_requires=requirements,
+    install_requires=get_requirements(),
     long_description=readme,
     long_description_content_type="text/markdown",
     license="Apache License 2.0",

@@ -29,30 +29,78 @@ jobs:
 
       - name: Verify if all releases exist
         run: |
-          python tools/release/check_releases.py
+          python tools/release/check_releases.py dist ${{ github.event.inputs.version }}
 
-  publish-to-pypi:
+  publish-subpackages-to-pypi:
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     needs: [test-package]
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        package: [ config, core, gui, rest, templates ]
+      max-parallel: 1
+    environment: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          sparse-checkout: taipy/${{ matrix.package }}
+          sparse-checkout-cone-mode: false
+
+      - name: Checks if package is already on on Pypi
+        id: check-version
+        run: |
+          if curl https://pypi.org/simple/taipy-${{ matrix.package }} | grep -o ">taipy-${{ matrix.package }}-${{ github.event.inputs.version }}\.tar\.gz<"; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download assets from tag
+        if: steps.check-version.outputs.exists == 'false'
+        run: |
+          gh release download ${{ github.event.inputs.version }}-${{ matrix.package }} --dir dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to PyPI
+        if: steps.check-version.outputs.exists == 'false'
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish-main-package-to-pypi:
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+    needs: [ test-package ]
     timeout-minutes: 20
     environment: publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
+      - name: Checks if package is already on on Pypi
+        id: check-version
+        run: |
+          if curl https://pypi.org/simple/taipy | grep -o ">taipy-${{ github.event.inputs.version }}\.tar\.gz<"; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Download assets from tag
+        if: steps.check-version.outputs.exists == 'false'
         run: |
           gh release download ${{ github.event.inputs.version }} --dir dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to PyPI
+        if: steps.check-version.outputs.exists == 'false'
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+
 
   test-published-package:
-    needs: [publish-to-pypi]
+    needs: [publish-main-package-to-pypi]
     timeout-minutes: 30
     strategy:
       matrix:
