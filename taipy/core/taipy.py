@@ -839,6 +839,8 @@ def create_scenario(
     If the scenario belongs to a cycle, a cycle (corresponding to the _creation_date_
     and the configuration frequency attribute) is created if it does not exist yet.
 
+    By creating the scenario entity, updating the Configuration is blocked.
+
     Parameters:
         config (ScenarioConfig^): The scenario configuration used to create a new scenario.
         creation_date (Optional[datetime.datetime]): The creation date of the scenario.
@@ -855,6 +857,8 @@ def create_scenario(
 
 def create_global_data_node(config: DataNodeConfig) -> DataNode:
     """Create and return a new GLOBAL data node from a data node configuration.
+
+    By creating the data node entity, updating the Configuration is blocked.
 
     Parameters:
         config (DataNodeConfig^): The data node configuration. It must have a `GLOBAL` scope.
