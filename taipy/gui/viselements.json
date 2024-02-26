@@ -151,6 +151,12 @@
             "doc": "The maximum value.<br/>This is ignored when <i>lov</i> is defined."
           },
           {
+            "name": "step",
+            "type": "int|float",
+            "default_value": "1",
+            "doc": "The step value: the gap between two consecutive values the slider set. It is a good practice to have (<i>max</i>-<i>min</i>) being divisible by <i>step</i>.<br/>This property is ignored when <i>lov</i> is defined."
+          },
+          {
             "name": "text_anchor",
             "type": "str",
             "default_value": "\"bottom\"",
