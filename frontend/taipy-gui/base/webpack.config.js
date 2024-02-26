@@ -1,14 +1,17 @@
 const path = require("path");
 const webpack = require("webpack");
+const resolveApp = relativePath => path.resolve(__dirname, relativePath);
 
 const moduleName = "TaipyGuiBase";
+const basePath = "../../../taipy/gui/webapp";
+const webAppPath = resolveApp(basePath);
 
 module.exports = {
     target: "web",
     entry: "./base/src/index.ts",
     output: {
         filename: "taipy-gui-base.js",
-        path: path.resolve(__dirname, "dist"),
+        path: webAppPath,
         globalObject: "this",
         library: {
             name: moduleName,

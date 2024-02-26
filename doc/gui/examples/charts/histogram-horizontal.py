@@ -18,7 +18,7 @@ import random
 from taipy.gui import Gui
 
 # Random data set
-data = {"Count": [random.random() for i in range(100)]}
+data = {"Count": [random.random() for _ in range(100)]}
 
 page = """
 # Histograms - Horizontal

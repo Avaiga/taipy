@@ -126,6 +126,9 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             **properties,
         )
         _AbstractTabularDataNode.__init__(self, **properties)
+        if self._path and ".data" in self._path:
+            self._path = self._migrate_path(self.storage_type(), self._path)
+
         if not self._path:
             self._path = self._build_path(self.storage_type())
             properties[self.__PATH_KEY] = self._path
@@ -192,58 +195,59 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         return self._read_as()
 
     def _read_as(self):
-        excel_file = load_workbook(self._path)
-        exposed_type = self.properties[self._EXPOSED_TYPE_PROPERTY]
-        work_books = dict()
-        sheet_names = excel_file.sheetnames
+        try:
+            excel_file = load_workbook(self._path)
+            exposed_type = self.properties[self._EXPOSED_TYPE_PROPERTY]
+            work_books = dict()
+            sheet_names = excel_file.sheetnames
 
-        user_provided_sheet_names = self.properties.get(self.__SHEET_NAME_PROPERTY) or []
-        if not isinstance(user_provided_sheet_names, (List, Set, Tuple)):
-            user_provided_sheet_names = [user_provided_sheet_names]
+            user_provided_sheet_names = self.properties.get(self.__SHEET_NAME_PROPERTY) or []
+            if not isinstance(user_provided_sheet_names, (List, Set, Tuple)):
+                user_provided_sheet_names = [user_provided_sheet_names]
 
-        provided_sheet_names = user_provided_sheet_names or sheet_names
+            provided_sheet_names = user_provided_sheet_names or sheet_names
 
-        for sheet_name in provided_sheet_names:
-            if sheet_name not in sheet_names:
-                raise NonExistingExcelSheet(sheet_name, self._path)
+            for sheet_name in provided_sheet_names:
+                if sheet_name not in sheet_names:
+                    raise NonExistingExcelSheet(sheet_name, self._path)
 
-        if isinstance(exposed_type, List):
-            if len(provided_sheet_names) != len(self.properties[self._EXPOSED_TYPE_PROPERTY]):
-                raise ExposedTypeLengthMismatch(
-                    f"Expected {len(provided_sheet_names)} exposed types, got "
-                    f"{len(self.properties[self._EXPOSED_TYPE_PROPERTY])}"
-                )
+            if isinstance(exposed_type, List):
+                if len(provided_sheet_names) != len(self.properties[self._EXPOSED_TYPE_PROPERTY]):
+                    raise ExposedTypeLengthMismatch(
+                        f"Expected {len(provided_sheet_names)} exposed types, got "
+                        f"{len(self.properties[self._EXPOSED_TYPE_PROPERTY])}"
+                    )
 
-        for i, sheet_name in enumerate(provided_sheet_names):
-            work_sheet = excel_file[sheet_name]
-            sheet_exposed_type = exposed_type
+            for i, sheet_name in enumerate(provided_sheet_names):
+                work_sheet = excel_file[sheet_name]
+                sheet_exposed_type = exposed_type
 
-            if not isinstance(sheet_exposed_type, str):
-                if isinstance(exposed_type, dict):
-                    sheet_exposed_type = exposed_type.get(sheet_name, self._EXPOSED_TYPE_PANDAS)
-                elif isinstance(exposed_type, List):
-                    sheet_exposed_type = exposed_type[i]
+                if not isinstance(sheet_exposed_type, str):
+                    if isinstance(exposed_type, dict):
+                        sheet_exposed_type = exposed_type.get(sheet_name, self._EXPOSED_TYPE_PANDAS)
+                    elif isinstance(exposed_type, List):
+                        sheet_exposed_type = exposed_type[i]
 
-                if isinstance(sheet_exposed_type, str):
-                    if sheet_exposed_type == self._EXPOSED_TYPE_NUMPY:
-                        work_books[sheet_name] = self._read_as_pandas_dataframe(sheet_name).to_numpy()
-                    elif sheet_exposed_type == self._EXPOSED_TYPE_PANDAS:
-                        work_books[sheet_name] = self._read_as_pandas_dataframe(sheet_name)
-                    continue
+                    if isinstance(sheet_exposed_type, str):
+                        if sheet_exposed_type == self._EXPOSED_TYPE_NUMPY:
+                            work_books[sheet_name] = self._read_as_pandas_dataframe(sheet_name).to_numpy()
+                        elif sheet_exposed_type == self._EXPOSED_TYPE_PANDAS:
+                            work_books[sheet_name] = self._read_as_pandas_dataframe(sheet_name)
+                        continue
 
-            res = list()
-            for row in work_sheet.rows:
-                res.append([col.value for col in row])
-            if self.properties[self._HAS_HEADER_PROPERTY] and res:
-                header = res.pop(0)
-                for i, row in enumerate(res):
-                    res[i] = sheet_exposed_type(**dict([[h, r] for h, r in zip(header, row)]))
-            else:
-                for i, row in enumerate(res):
-                    res[i] = sheet_exposed_type(*row)
-            work_books[sheet_name] = res
-
-        excel_file.close()
+                res = list()
+                for row in work_sheet.rows:
+                    res.append([col.value for col in row])
+                if self.properties[self._HAS_HEADER_PROPERTY] and res:
+                    header = res.pop(0)
+                    for i, row in enumerate(res):
+                        res[i] = sheet_exposed_type(**dict([[h, r] for h, r in zip(header, row)]))
+                else:
+                    for i, row in enumerate(res):
+                        res[i] = sheet_exposed_type(*row)
+                work_books[sheet_name] = res
+        finally:
+            excel_file.close()
 
         if len(provided_sheet_names) == 1:
             return work_books[provided_sheet_names[0]]

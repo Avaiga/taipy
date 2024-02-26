@@ -20,6 +20,8 @@ from pathlib import Path
 from setuptools import find_namespace_packages, find_packages, setup
 from setuptools.command.build_py import build_py
 
+root_folder = Path(__file__).parent
+
 readme = Path("README.md").read_text()
 
 version_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "version.json")
@@ -29,24 +31,17 @@ with open(version_path) as version_file:
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
-requirements = [
-    "flask>=3.0.0,<3.1",
-    "flask-cors>=4.0.0,<5.0",
-    "flask-socketio>=5.3.6,<6.0",
-    "markdown>=3.4.4,<4.0",
-    "pandas>=1.3.5,<3.0",
-    "python-dotenv>=1.0.0,<1.1",
-    "pytz>=2021.3,<2022.2",
-    "tzlocal>=3.0,<5.0",
-    "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",
-    "gevent>=23.7.0,<24.0",
-    "gevent-websocket>=0.10.1,<0.11",
-    "kthread>=0.2.3,<0.3",
-    "taipy-config@git+https://git@github.com/Avaiga/taipy-config.git@develop",
-    "gitignore-parser>=0.1,<0.2",
-    "simple-websocket>=0.10.1,<1.0",
-    "twisted>=23.8.0,<24.0",
-]
+
+def get_requirements():
+    # get requirements from the different setups in tools/packages (removing taipy packages)
+    reqs = set()
+    for pkg in (root_folder / "tools" / "packages").iterdir():
+        requirements_file = pkg / "setup.requirements.txt"
+        if requirements_file.exists():
+            reqs.update(requirements_file.read_text("UTF-8").splitlines())
+
+    return [r for r in reqs if r and not r.startswith("taipy")]
+
 
 test_requirements = ["pytest>=3.8"]
 
@@ -91,7 +86,7 @@ setup(
     description="Low-code library to create graphical user interfaces on the Web for your Python applications.",
     long_description=readme,
     long_description_content_type="text/markdown",
-    install_requires=requirements,
+    install_requires=get_requirements(),
     license="Apache License 2.0",
     include_package_data=True,
     keywords="taipy-gui",

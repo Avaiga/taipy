@@ -13,13 +13,13 @@ The easiest way to install Taipy is from the
 [Pypi software repository](https://pypi.org/project/taipy/).
 
 Run the command:
-```console
-$ pip install taipy
+```bash
+pip install taipy
 ```
 
 If you are running in a virtual environment, you will have to issue the command:
-```console
-$ pipenv install taipy
+```bash
+pipenv install taipy
 ```
 
 These commands install the `taipy` package in the Python environment with all its
@@ -32,8 +32,8 @@ contributors whom we praise for their input.
 
 The development version of Taipy can be installed using *pip* and *git*:
 
-```console
-$ pip install git+https://git@github.com/Avaiga/taipy
+```bash
+pip install git+https://git@github.com/Avaiga/taipy
 ```
 
 ## Installing for development
@@ -41,8 +41,8 @@ $ pip install git+https://git@github.com/Avaiga/taipy
 If you need the source code for Taipy on your system so you can see how things are done or maybe
 participate in the improvement of the packages, you can clone the GitHub repository:
 
-```console
-$ git clone https://github.com/Avaiga/taipy.git
+```bash
+git clone https://github.com/Avaiga/taipy.git
 ```
 
 This creates the 'taipy' directory holding all the package's source code.
@@ -72,21 +72,21 @@ The build process is described in the [Taipy GUI front-end](frontend/taipy-gui/R
 
 Here is the sequence of commands that can be issued to build both sets of files:
 
-```console
+```bash
 # Current directory is the repository's root directory
 #
 # Build the Taipy GUI bundle
-$ cd frontend/taipy-gui
-$ cd dom
-$ npm i
-$ cd ..
-$ npm i --omit=optional
-$ npm run build
+cd frontend/taipy-gui
+cd dom
+npm i
+cd ..
+npm i --omit=optional
+npm run build
 #
 # Build the Taipy front-end bundle
-$ cd ../taipy # Current directory is [taipy-dir]/frontend/taipy
-$ npm i
-$ npm run build
+cd ../taipy # Current directory is [taipy-dir]/frontend/taipy
+npm i
+npm run build
 ```
 
 These commands should create the directories `taipy/gui/webapp` and `taipy/gui_core/lib` in the
@@ -96,8 +96,8 @@ root directory of the taipy repository.
 
 If you plan to modify the front-end code and need to debug the TypeScript
 code, you must use the following:
-```
-$ npm run build:dev
+```bash
+npm run build:dev
 ```
 
 instead of the *standard* build option.
@@ -124,12 +124,17 @@ TypeScript code from your debugger.
 
 ## Running the tests
 
-To run the tests on the package, you need to create a virtual
-environment and install the development packages:
+To run the tests on the package, you need to install the required development packages.
+We recommend using [Pipenv](https://pipenv.pypa.io/en/latest/) to create a virtual environment
+and install the development packages.
 
-Here are the commands to issue:
-
-```console
+```bash
+pip install pipenv
 pipenv install --dev
+```
+
+Then you can run the tests with the following command:
+
+```bash
 pipenv run pytest
 ```

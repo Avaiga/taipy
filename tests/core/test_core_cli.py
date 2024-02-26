@@ -458,7 +458,7 @@ def test_force_override_production_version():
 
 
 @pytest.mark.standalone
-def test_modify_job_configuration_dont_stop_application(caplog, init_config):
+def test_modified_job_configuration_dont_block_application_run(caplog, init_config):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
@@ -485,7 +485,7 @@ def test_modify_job_configuration_dont_stop_application(caplog, init_config):
 
 
 @pytest.mark.standalone
-def test_modify_config_properties_without_force(caplog, init_config):
+def test_modified_config_properties_without_force(caplog, init_config):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):

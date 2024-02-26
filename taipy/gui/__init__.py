@@ -72,6 +72,7 @@ from importlib.util import find_spec
 
 from ._init import *
 from ._renderers import Html, Markdown
+from ._renderers.json import JsonAdapter
 from .gui_actions import (
     broadcast_callback,
     download,

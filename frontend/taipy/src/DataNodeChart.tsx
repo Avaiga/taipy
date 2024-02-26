@@ -13,7 +13,12 @@
 
 import React, { useEffect, useState, useCallback, useMemo, MouseEvent, Fragment, ChangeEvent } from "react";
 
-import { DeleteOutline, Add, RefreshOutlined, TableChartOutlined, BarChartOutlined } from "@mui/icons-material";
+import Add from "@mui/icons-material/Add";
+import BarChartOutlined from "@mui/icons-material/BarChartOutlined";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import RefreshOutlined from "@mui/icons-material/RefreshOutlined";
+import TableChartOutlined from "@mui/icons-material/TableChartOutlined";
+
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
@@ -46,6 +51,8 @@ interface DataNodeChartProps {
     chartConfigs?: string;
     onViewTypeChange: (e: MouseEvent, value?: string) => void;
 }
+
+const TraceSx = { pl: 2 };
 
 const DefaultAxis = ["x", "y"];
 
@@ -237,19 +244,28 @@ const DataNodeChart = (props: DataNodeChartProps) => {
 
     const [config, setConfig] = useState<ChartConfig | undefined>(undefined);
     useEffect(() => {
+        let localConf: ChartConfig | undefined = undefined;
         const localItem = localStorage && localStorage.getItem(`${configId}-chart-config`);
         if (localItem) {
             try {
-                const conf = JSON.parse(localItem);
-                conf.cumulative && addCumulative(conf);
-                setConfig(conf);
-                return;
+                localConf = JSON.parse(localItem);
             } catch {
                 // do nothing
             }
         }
         const conf = getBaseConfig(defaultConfig, chartConfigs, configId);
-        if (conf) {
+        if (localConf && localConf.traces) {
+            if (
+                conf &&
+                conf.columns &&
+                localConf.traces.some((tr) => tr.some((id) => (conf.columns || {})[id] === undefined))
+            ) {
+                setConfig(conf);
+            } else {
+                localConf.cumulative && addCumulative(localConf);
+                setConfig(localConf);
+            }
+        } else if (conf) {
             setConfig(conf);
         }
     }, [defaultConfig, configId, chartConfigs]);
@@ -375,8 +391,14 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                     />
                 </Grid>
                 <Grid item>
-                    <Button onClick={resetConfig} variant="text" color="primary" className="taipy-button">
-                        <RefreshOutlined /> Reset View
+                    <Button
+                        onClick={resetConfig}
+                        variant="text"
+                        color="primary"
+                        className="taipy-button"
+                        startIcon={<RefreshOutlined />}
+                    >
+                        Reset View
                     </Button>
                 </Grid>
             </Grid>
@@ -387,7 +409,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                               const baseLabelId = `${uniqid}-trace${idx}-"`;
                               return (
                                   <Fragment key={idx}>
-                                      <Grid item xs={2}>
+                                      <Grid item xs={2} sx={TraceSx}>
                                           Trace {idx + 1}
                                       </Grid>
                                       <Grid item xs={3}>
@@ -436,8 +458,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                           })
                         : null}
                     <Grid item xs={12}>
-                        <Button onClick={onAddTrace}>
-                            <Add color="primary" />
+                        <Button onClick={onAddTrace} startIcon={<Add color="primary" />}>
                             Add trace
                         </Button>
                     </Grid>

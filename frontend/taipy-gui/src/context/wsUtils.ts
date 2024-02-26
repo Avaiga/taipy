@@ -3,7 +3,23 @@ import { v4 as uuidv4 } from "uuid";
 
 export const TAIPY_CLIENT_ID = "TaipyClientId";
 
-export type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID" | "MS" | "DF" | "PR" | "ACK" | "GMC" | "GVS";
+export type WsMessageType =
+    | "A"
+    | "U"
+    | "DU"
+    | "MU"
+    | "RU"
+    | "AL"
+    | "BL"
+    | "NA"
+    | "ID"
+    | "MS"
+    | "DF"
+    | "PR"
+    | "ACK"
+    | "GMC"
+    | "GDT"
+    | "AID";
 
 export interface WsMessage {
     type: WsMessageType;

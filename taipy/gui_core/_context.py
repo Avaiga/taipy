@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import json
+import math
 import typing as t
 from collections import defaultdict
 from numbers import Number
@@ -715,6 +716,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return sorted(res, key=lambda r: r[0], reverse=True)
         return _DoNotUpdate()
 
+    @staticmethod
+    def __is_tabular_data(datanode: DataNode, value: t.Any):
+        if isinstance(datanode, _AbstractTabularDataNode):
+            return True
+        if datanode.is_ready_for_reading:
+            return isinstance(value, (pd.DataFrame, pd.Series, list, tuple, dict))
+        return False
+
     def get_data_node_data(self, datanode: DataNode, id: str):
         if (
             id
@@ -728,15 +737,21 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     return (None, None, True, None)
                 try:
                     value = dn.read()
-                    if isinstance(value, (pd.DataFrame, pd.Series)):
+                    if _GuiCoreContext.__is_tabular_data(dn, value):
                         return (None, None, True, None)
-                    return (
-                        value,
+                    val_type = (
                         "date"
                         if "date" in type(value).__name__
                         else type(value).__name__
                         if isinstance(value, Number)
-                        else None,
+                        else None
+                    )
+                    if isinstance(value, float):
+                        if math.isnan(value):
+                            value = None
+                    return (
+                        value,
+                        val_type,
                         None,
                         None,
                     )
@@ -789,8 +804,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
         datanode = core_get(dn_id) if dn_id else None
         if isinstance(datanode, DataNode):
             try:
-                idx = payload.get("index")
-                col = payload.get("col")
+                idx = t.cast(int, payload.get("index"))
+                col = t.cast(str, payload.get("col"))
                 tz = payload.get("tz")
                 val = (
                     parser.parse(str(payload.get("value"))).astimezone(zoneinfo.ZoneInfo(tz)).replace(tzinfo=None)
@@ -799,15 +814,47 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 )
                 # user_value = payload.get("user_value")
                 data = self.__read_tabular_data(datanode)
-                if hasattr(data, "at"):
-                    data.at[idx, col] = val
-                    datanode.write(data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
-                    state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
+                new_data: t.Any = None
+                if isinstance(data, (pd.DataFrame, pd.Series)):
+                    if isinstance(data, pd.DataFrame):
+                        data.at[idx, col] = val
+                    elif isinstance(data, pd.Series):
+                        data.at[idx] = val
+                    new_data = data
                 else:
-                    state.assign(
-                        _GuiCoreContext._DATANODE_VIZ_ERROR_VAR,
-                        "Error updating Datanode tabular value: type does not support at[] indexer.",
-                    )
+                    data_tuple = False
+                    if isinstance(data, tuple):
+                        data_tuple = True
+                        data = list(data)
+                    if isinstance(data, list):
+                        row = data[idx]
+                        row_tuple = False
+                        if isinstance(row, tuple):
+                            row = list(row)
+                            row_tuple = True
+                        if isinstance(row, list):
+                            row[int(col)] = val
+                            if row_tuple:
+                                data[idx] = tuple(row)
+                            new_data = data
+                        elif col == "0" and (isinstance(row, (str, Number)) or "date" in type(row).__name__):
+                            data[idx] = val
+                            new_data = data
+                        else:
+                            state.assign(
+                                _GuiCoreContext._DATANODE_VIZ_ERROR_VAR,
+                                "Error updating Datanode: cannot handle multi-column list value.",
+                            )
+                        if data_tuple and new_data is not None:
+                            new_data = tuple(new_data)
+                    else:
+                        state.assign(
+                            _GuiCoreContext._DATANODE_VIZ_ERROR_VAR,
+                            "Error updating Datanode tabular value: type does not support at[] indexer.",
+                        )
+                if new_data is not None:
+                    datanode.write(new_data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
+                    state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
             except Exception as e:
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode tabular value. {e}")
         setattr(state, _GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, dn_id)
@@ -826,7 +873,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
             and dn.is_ready_for_reading
         ):
             try:
-                return self.__read_tabular_data(dn)
+                value = self.__read_tabular_data(dn)
+                if _GuiCoreContext.__is_tabular_data(dn, value):
+                    return value
             except Exception:
                 return None
         return None
@@ -842,9 +891,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
             and dn.is_ready_for_reading
         ):
             try:
-                return self.gui._tbl_cols(
-                    True, True, "{}", json.dumps({"data": "tabular_data"}), tabular_data=self.__read_tabular_data(dn)
-                )
+                value = self.__read_tabular_data(dn)
+                if _GuiCoreContext.__is_tabular_data(dn, value):
+                    return self.gui._tbl_cols(
+                        True, True, "{}", json.dumps({"data": "tabular_data"}), tabular_data=value
+                    )
             except Exception:
                 return None
         return None

@@ -154,3 +154,16 @@ class TestCSVDataNode:
         dn.write(pd.DataFrame([7, 8, 9]))
         assert new_edit_date < dn.last_edit_date
         os.unlink(temp_file_path)
+
+    def test_migrate_to_new_path(self, tmp_path):
+        _base_path = os.path.join(tmp_path, ".data")
+        path = os.path.join(_base_path, "test.csv")
+        # create a file on old path
+        os.mkdir(_base_path)
+        with open(path, "w"):
+            pass
+
+        dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+
+        assert ".data" not in dn.path.name
+        assert os.path.exists(dn.path)

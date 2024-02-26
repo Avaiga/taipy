@@ -533,3 +533,16 @@ class TestParquetDataNode:
         path = "data/node/path"
         dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": path})
         assert dn.read_with_kwargs() is None
+
+    def test_migrate_to_new_path(self, tmp_path):
+        _base_path = os.path.join(tmp_path, ".data")
+        path = os.path.join(_base_path, "test.parquet")
+        # create a file on old path
+        os.mkdir(_base_path)
+        with open(path, "w"):
+            pass
+
+        dn = ParquetDataNode("foo_bar", Scope.SCENARIO, properties={"path": path, "name": "super name"})
+
+        assert ".data" not in dn.path.name
+        assert os.path.exists(dn.path)
