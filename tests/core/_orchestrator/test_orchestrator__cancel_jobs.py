@@ -8,7 +8,6 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-from unittest.mock import patch
 
 from taipy import Job, JobId, Status
 from taipy.config import Config
@@ -57,83 +56,80 @@ def test_cancel_job_no_subsequent_jobs():
 
 
 def test_cancel_job_with_subsequent_blocked_jobs():
-    with patch("sys.argv", ["prog"]):
-        scenario = create_scenario()
-        orchestrator = _OrchestratorFactory._build_orchestrator()
-        job1 = orchestrator._lock_dn_output_and_create_job(scenario.t1, "s_id", "e_id")
-        job2 = orchestrator._lock_dn_output_and_create_job(scenario.t2, "s_id", "e_id")
-        job3 = orchestrator._lock_dn_output_and_create_job(scenario.t3, "s_id", "e_id")
-        job2bis = orchestrator._lock_dn_output_and_create_job(scenario.t2bis, "s_id", "e_id")
-        job1.pending()
-        job2.blocked()
-        job3.blocked()
-        job2bis.blocked()
-        orchestrator.blocked_jobs = [job2, job3, job2bis]
+    scenario = create_scenario()
+    orchestrator = _OrchestratorFactory._build_orchestrator()
+    job1 = orchestrator._lock_dn_output_and_create_job(scenario.t1, "s_id", "e_id")
+    job2 = orchestrator._lock_dn_output_and_create_job(scenario.t2, "s_id", "e_id")
+    job3 = orchestrator._lock_dn_output_and_create_job(scenario.t3, "s_id", "e_id")
+    job2bis = orchestrator._lock_dn_output_and_create_job(scenario.t2bis, "s_id", "e_id")
+    job1.pending()
+    job2.blocked()
+    job3.blocked()
+    job2bis.blocked()
+    orchestrator.blocked_jobs = [job2, job3, job2bis]
 
-        orchestrator.cancel_job(job1)
+    orchestrator.cancel_job(job1)
 
-        assert job1.is_canceled()
-        assert job2.is_abandoned()
-        assert job3.is_abandoned()
-        assert job2bis.is_abandoned()
-        assert not scenario.dn_0.edit_in_progress
-        assert not scenario.dn_1.edit_in_progress
-        assert not scenario.dn_2.edit_in_progress
-        assert not scenario.dn_3.edit_in_progress
-        assert orchestrator.blocked_jobs == []
+    assert job1.is_canceled()
+    assert job2.is_abandoned()
+    assert job3.is_abandoned()
+    assert job2bis.is_abandoned()
+    assert not scenario.dn_0.edit_in_progress
+    assert not scenario.dn_1.edit_in_progress
+    assert not scenario.dn_2.edit_in_progress
+    assert not scenario.dn_3.edit_in_progress
+    assert orchestrator.blocked_jobs == []
 
 
 def test_cancel_job_with_subsequent_jobs_and_parallel_jobs():
-    with patch("sys.argv", ["prog"]):
-        scenario = create_scenario()
-        orchestrator = _OrchestratorFactory._build_orchestrator()
-        job1 = orchestrator._lock_dn_output_and_create_job(scenario.t1, "s_id", "e_id")
-        job2 = orchestrator._lock_dn_output_and_create_job(scenario.t2, "s_id", "e_id")
-        job3 = orchestrator._lock_dn_output_and_create_job(scenario.t3, "s_id", "e_id")
-        job2bis = orchestrator._lock_dn_output_and_create_job(scenario.t2bis, "s_id", "e_id")
-        job1.completed()
+    scenario = create_scenario()
+    orchestrator = _OrchestratorFactory._build_orchestrator()
+    job1 = orchestrator._lock_dn_output_and_create_job(scenario.t1, "s_id", "e_id")
+    job2 = orchestrator._lock_dn_output_and_create_job(scenario.t2, "s_id", "e_id")
+    job3 = orchestrator._lock_dn_output_and_create_job(scenario.t3, "s_id", "e_id")
+    job2bis = orchestrator._lock_dn_output_and_create_job(scenario.t2bis, "s_id", "e_id")
+    job1.completed()
 
-        job2.running()
-        job3.blocked()
-        job2bis.pending()
-        orchestrator.blocked_jobs = [job3]
+    job2.running()
+    job3.blocked()
+    job2bis.pending()
+    orchestrator.blocked_jobs = [job3]
 
-        orchestrator.cancel_job(job2)
+    orchestrator.cancel_job(job2)
 
-        assert job1.is_completed()
-        assert job2.is_canceled()
-        assert job3.is_abandoned()
-        assert job2bis.is_pending()
-        assert not scenario.dn_2.edit_in_progress
-        assert not scenario.dn_3.edit_in_progress
-        assert orchestrator.blocked_jobs == []
+    assert job1.is_completed()
+    assert job2.is_canceled()
+    assert job3.is_abandoned()
+    assert job2bis.is_pending()
+    assert not scenario.dn_2.edit_in_progress
+    assert not scenario.dn_3.edit_in_progress
+    assert orchestrator.blocked_jobs == []
 
 
 def test_cancel_blocked_job_with_subsequent_blocked_jobs():
-    with patch("sys.argv", ["prog"]):
-        scenario = create_scenario()
-        orchestrator = _OrchestratorFactory._build_orchestrator()
-        job1 = orchestrator._lock_dn_output_and_create_job(scenario.t1, "s_id", "e_id")
-        job2 = orchestrator._lock_dn_output_and_create_job(scenario.t2, "s_id", "e_id")
-        job3 = orchestrator._lock_dn_output_and_create_job(scenario.t3, "s_id", "e_id")
-        job2bis = orchestrator._lock_dn_output_and_create_job(scenario.t2bis, "s_id", "e_id")
-        job1.blocked()
-        job2.blocked()
-        job3.blocked()
-        job2bis.blocked()
-        orchestrator.blocked_jobs = [job2, job3, job2bis]
+    scenario = create_scenario()
+    orchestrator = _OrchestratorFactory._build_orchestrator()
+    job1 = orchestrator._lock_dn_output_and_create_job(scenario.t1, "s_id", "e_id")
+    job2 = orchestrator._lock_dn_output_and_create_job(scenario.t2, "s_id", "e_id")
+    job3 = orchestrator._lock_dn_output_and_create_job(scenario.t3, "s_id", "e_id")
+    job2bis = orchestrator._lock_dn_output_and_create_job(scenario.t2bis, "s_id", "e_id")
+    job1.blocked()
+    job2.blocked()
+    job3.blocked()
+    job2bis.blocked()
+    orchestrator.blocked_jobs = [job2, job3, job2bis]
 
-        orchestrator.cancel_job(job1)
+    orchestrator.cancel_job(job1)
 
-        assert job1.is_canceled()
-        assert job2.is_abandoned()
-        assert job3.is_abandoned()
-        assert job2bis.is_abandoned()
-        assert not scenario.dn_0.edit_in_progress
-        assert not scenario.dn_1.edit_in_progress
-        assert not scenario.dn_2.edit_in_progress
-        assert not scenario.dn_3.edit_in_progress
-        assert orchestrator.blocked_jobs == []
+    assert job1.is_canceled()
+    assert job2.is_abandoned()
+    assert job3.is_abandoned()
+    assert job2bis.is_abandoned()
+    assert not scenario.dn_0.edit_in_progress
+    assert not scenario.dn_1.edit_in_progress
+    assert not scenario.dn_2.edit_in_progress
+    assert not scenario.dn_3.edit_in_progress
+    assert orchestrator.blocked_jobs == []
 
 
 def test_cancel_failed_job():

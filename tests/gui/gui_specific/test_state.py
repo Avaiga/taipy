@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-from unittest.mock import patch
 
 import pytest
 
@@ -23,8 +22,7 @@ def test_state(gui: Gui):
     a = 10  # noqa: F841
     gui._set_frame(inspect.currentframe())
     gui.add_page("page1", md_page1)
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False, single_client=True)
+    gui.run(run_server=False, single_client=True)
     state = gui._Gui__state  # type: ignore[attr-defined]
     with gui.get_flask_app().app_context():
         assert state.a == 10

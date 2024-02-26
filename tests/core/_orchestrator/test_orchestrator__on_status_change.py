@@ -9,7 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 from unittest import mock
-from unittest.mock import patch
 
 import taipy
 from taipy import Job, JobId, Status
@@ -142,25 +141,24 @@ def test_on_status_change_on_skipped_job():
 
 
 def test_on_status_change_on_failed_job():
-    with patch("sys.argv", ["prog"]):
-        orchestrator = _OrchestratorFactory._build_orchestrator()
-        scenario = create_scenario()
-        j1 = create_job_from_task("j1", scenario.t1)
-        j1.status = Status.FAILED
-        j2 = create_job_from_task("j2", scenario.t2)
-        j2.status = Status.BLOCKED
-        j3 = create_job_from_task("j3", scenario.t3)
-        j3.status = Status.BLOCKED
-        orchestrator.blocked_jobs.append(j2)
-        orchestrator.blocked_jobs.append(j3)
+    orchestrator = _OrchestratorFactory._build_orchestrator()
+    scenario = create_scenario()
+    j1 = create_job_from_task("j1", scenario.t1)
+    j1.status = Status.FAILED
+    j2 = create_job_from_task("j2", scenario.t2)
+    j2.status = Status.BLOCKED
+    j3 = create_job_from_task("j3", scenario.t3)
+    j3.status = Status.BLOCKED
+    orchestrator.blocked_jobs.append(j2)
+    orchestrator.blocked_jobs.append(j3)
 
-        orchestrator._on_status_change(j1)
+    orchestrator._on_status_change(j1)
 
-        # Assert that when the status is skipped, the unblock jobs mechanism is executed
-        assert j1.is_failed()
-        assert j2 not in orchestrator.blocked_jobs
-        assert j2.is_abandoned()
-        assert j3 in orchestrator.blocked_jobs
-        assert j3.is_blocked()
-        assert len(orchestrator.blocked_jobs) == 1
-        assert orchestrator.jobs_to_run.qsize() == 0
+    # Assert that when the status is skipped, the unblock jobs mechanism is executed
+    assert j1.is_failed()
+    assert j2 not in orchestrator.blocked_jobs
+    assert j2.is_abandoned()
+    assert j3 in orchestrator.blocked_jobs
+    assert j3.is_blocked()
+    assert len(orchestrator.blocked_jobs) == 1
+    assert orchestrator.jobs_to_run.qsize() == 0

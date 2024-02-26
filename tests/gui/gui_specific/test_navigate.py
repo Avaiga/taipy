@@ -11,7 +11,6 @@
 
 import inspect
 import warnings
-from unittest.mock import patch
 
 from taipy.gui import Gui, Markdown, State, navigate
 
@@ -23,8 +22,7 @@ def test_navigate(gui: Gui, helpers):
     with warnings.catch_warnings(record=True):
         gui._set_frame(inspect.currentframe())
         gui.add_page("test", Markdown("#This is a page"))
-        with patch("sys.argv", ["prog"]):
-            gui.run(run_server=False)
+        gui.run(run_server=False)
         client = gui._server.test_client()
         # WS client and emit
         ws_client = gui._server._ws.test_client(gui._server.get_flask())
@@ -43,8 +41,7 @@ def test_navigate_to_no_route(gui: Gui, helpers):
     with warnings.catch_warnings(record=True):
         gui._set_frame(inspect.currentframe())
         gui.add_page("test", Markdown("#This is a page"))
-        with patch("sys.argv", ["prog"]):
-            gui.run(run_server=False)
+        gui.run(run_server=False)
         client = gui._server.test_client()
         # WS client and emit
         ws_client = gui._server._ws.test_client(gui._server.get_flask())
@@ -63,8 +60,7 @@ def test_on_navigate_to_inexistant(gui: Gui, helpers):
     with warnings.catch_warnings(record=True) as records:
         gui._set_frame(inspect.currentframe())
         gui.add_page("test", Markdown("#This is a page"))
-        with patch("sys.argv", ["prog"]):
-            gui.run(run_server=False)
+        gui.run(run_server=False)
         client = gui._server.test_client()
         # Get the jsx once so that the page will be evaluated -> variable will be registered
         sid = helpers.create_scope_and_get_sid(gui)
@@ -83,8 +79,7 @@ def test_on_navigate_to_existant(gui: Gui, helpers):
         gui._set_frame(inspect.currentframe())
         gui.add_page("test1", Markdown("#This is a page test1"))
         gui.add_page("test2", Markdown("#This is a page test2"))
-        with patch("sys.argv", ["prog"]):
-            gui.run(run_server=False)
+        gui.run(run_server=False)
         client = gui._server.test_client()
         # Get the jsx once so that the page will be evaluated -> variable will be registered
         sid = helpers.create_scope_and_get_sid(gui)

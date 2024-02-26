@@ -13,7 +13,6 @@ import os
 from datetime import datetime, timedelta
 from time import sleep
 from unittest import mock
-from unittest.mock import patch
 
 import pytest
 
@@ -248,140 +247,137 @@ class TestDataNode:
         assert dn.is_valid is False
 
     def test_is_up_to_date(self, current_datetime):
-        with patch("sys.argv", ["prog"]):
-            dn_confg_1 = Config.configure_in_memory_data_node("dn_1")
-            dn_confg_2 = Config.configure_in_memory_data_node("dn_2")
-            dn_confg_3 = Config.configure_in_memory_data_node("dn_3", scope=Scope.GLOBAL)
-            task_config_1 = Config.configure_task("t1", print, [dn_confg_1], [dn_confg_2])
-            task_config_2 = Config.configure_task("t2", print, [dn_confg_2], [dn_confg_3])
-            scenario_config = Config.configure_scenario("sc", [task_config_1, task_config_2])
+        dn_confg_1 = Config.configure_in_memory_data_node("dn_1")
+        dn_confg_2 = Config.configure_in_memory_data_node("dn_2")
+        dn_confg_3 = Config.configure_in_memory_data_node("dn_3", scope=Scope.GLOBAL)
+        task_config_1 = Config.configure_task("t1", print, [dn_confg_1], [dn_confg_2])
+        task_config_2 = Config.configure_task("t2", print, [dn_confg_2], [dn_confg_3])
+        scenario_config = Config.configure_scenario("sc", [task_config_1, task_config_2])
 
-            scenario_1 = tp.create_scenario(scenario_config)
-            assert len(_DataManager._get_all()) == 3
+        scenario_1 = tp.create_scenario(scenario_config)
+        assert len(_DataManager._get_all()) == 3
 
-            dn_1_1 = scenario_1.data_nodes["dn_1"]
-            dn_2_1 = scenario_1.data_nodes["dn_2"]
-            dn_3_1 = scenario_1.data_nodes["dn_3"]
+        dn_1_1 = scenario_1.data_nodes["dn_1"]
+        dn_2_1 = scenario_1.data_nodes["dn_2"]
+        dn_3_1 = scenario_1.data_nodes["dn_3"]
 
-            assert dn_1_1.last_edit_date is None
-            assert dn_2_1.last_edit_date is None
-            assert dn_3_1.last_edit_date is None
+        assert dn_1_1.last_edit_date is None
+        assert dn_2_1.last_edit_date is None
+        assert dn_3_1.last_edit_date is None
 
-            dn_1_1.last_edit_date = current_datetime + timedelta(1)
-            dn_2_1.last_edit_date = current_datetime + timedelta(2)
-            dn_3_1.last_edit_date = current_datetime + timedelta(3)
-            assert dn_1_1.is_up_to_date
-            assert dn_2_1.is_up_to_date
-            assert dn_3_1.is_up_to_date
+        dn_1_1.last_edit_date = current_datetime + timedelta(1)
+        dn_2_1.last_edit_date = current_datetime + timedelta(2)
+        dn_3_1.last_edit_date = current_datetime + timedelta(3)
+        assert dn_1_1.is_up_to_date
+        assert dn_2_1.is_up_to_date
+        assert dn_3_1.is_up_to_date
 
-            dn_2_1.last_edit_date = current_datetime + timedelta(4)
-            assert dn_1_1.is_up_to_date
-            assert dn_2_1.is_up_to_date
-            assert not dn_3_1.is_up_to_date
+        dn_2_1.last_edit_date = current_datetime + timedelta(4)
+        assert dn_1_1.is_up_to_date
+        assert dn_2_1.is_up_to_date
+        assert not dn_3_1.is_up_to_date
 
-            dn_1_1.last_edit_date = current_datetime + timedelta(5)
-            assert dn_1_1.is_up_to_date
-            assert not dn_2_1.is_up_to_date
-            assert not dn_3_1.is_up_to_date
+        dn_1_1.last_edit_date = current_datetime + timedelta(5)
+        assert dn_1_1.is_up_to_date
+        assert not dn_2_1.is_up_to_date
+        assert not dn_3_1.is_up_to_date
 
-            dn_1_1.last_edit_date = current_datetime + timedelta(1)
-            dn_2_1.last_edit_date = current_datetime + timedelta(2)
-            dn_3_1.last_edit_date = current_datetime + timedelta(3)
+        dn_1_1.last_edit_date = current_datetime + timedelta(1)
+        dn_2_1.last_edit_date = current_datetime + timedelta(2)
+        dn_3_1.last_edit_date = current_datetime + timedelta(3)
 
     def test_is_up_to_date_across_scenarios(self, current_datetime):
-        with patch("sys.argv", ["prog"]):
-            dn_confg_1 = Config.configure_in_memory_data_node("dn_1", scope=Scope.SCENARIO)
-            dn_confg_2 = Config.configure_in_memory_data_node("dn_2", scope=Scope.SCENARIO)
-            dn_confg_3 = Config.configure_in_memory_data_node("dn_3", scope=Scope.GLOBAL)
-            task_config_1 = Config.configure_task("t1", print, [dn_confg_1], [dn_confg_2])
-            task_config_2 = Config.configure_task("t2", print, [dn_confg_2], [dn_confg_3])
-            scenario_config = Config.configure_scenario("sc", [task_config_1, task_config_2])
+        dn_confg_1 = Config.configure_in_memory_data_node("dn_1", scope=Scope.SCENARIO)
+        dn_confg_2 = Config.configure_in_memory_data_node("dn_2", scope=Scope.SCENARIO)
+        dn_confg_3 = Config.configure_in_memory_data_node("dn_3", scope=Scope.GLOBAL)
+        task_config_1 = Config.configure_task("t1", print, [dn_confg_1], [dn_confg_2])
+        task_config_2 = Config.configure_task("t2", print, [dn_confg_2], [dn_confg_3])
+        scenario_config = Config.configure_scenario("sc", [task_config_1, task_config_2])
 
-            scenario_1 = tp.create_scenario(scenario_config)
-            scenario_2 = tp.create_scenario(scenario_config)
-            assert len(_DataManager._get_all()) == 5
+        scenario_1 = tp.create_scenario(scenario_config)
+        scenario_2 = tp.create_scenario(scenario_config)
+        assert len(_DataManager._get_all()) == 5
 
-            dn_1_1 = scenario_1.data_nodes["dn_1"]
-            dn_2_1 = scenario_1.data_nodes["dn_2"]
-            dn_1_2 = scenario_2.data_nodes["dn_1"]
-            dn_2_2 = scenario_2.data_nodes["dn_2"]
-            dn_3 = scenario_1.data_nodes["dn_3"]
-            assert dn_3 == scenario_2.data_nodes["dn_3"]
+        dn_1_1 = scenario_1.data_nodes["dn_1"]
+        dn_2_1 = scenario_1.data_nodes["dn_2"]
+        dn_1_2 = scenario_2.data_nodes["dn_1"]
+        dn_2_2 = scenario_2.data_nodes["dn_2"]
+        dn_3 = scenario_1.data_nodes["dn_3"]
+        assert dn_3 == scenario_2.data_nodes["dn_3"]
 
-            assert dn_1_1.last_edit_date is None
-            assert dn_2_1.last_edit_date is None
-            assert dn_1_2.last_edit_date is None
-            assert dn_2_2.last_edit_date is None
-            assert dn_3.last_edit_date is None
+        assert dn_1_1.last_edit_date is None
+        assert dn_2_1.last_edit_date is None
+        assert dn_1_2.last_edit_date is None
+        assert dn_2_2.last_edit_date is None
+        assert dn_3.last_edit_date is None
 
-            dn_1_1.last_edit_date = current_datetime + timedelta(1)
-            dn_2_1.last_edit_date = current_datetime + timedelta(2)
-            dn_1_2.last_edit_date = current_datetime + timedelta(3)
-            dn_2_2.last_edit_date = current_datetime + timedelta(4)
-            dn_3.last_edit_date = current_datetime + timedelta(5)
-            assert dn_1_1.is_up_to_date
-            assert dn_2_1.is_up_to_date
-            assert dn_1_2.is_up_to_date
-            assert dn_2_2.is_up_to_date
-            assert dn_3.is_up_to_date
+        dn_1_1.last_edit_date = current_datetime + timedelta(1)
+        dn_2_1.last_edit_date = current_datetime + timedelta(2)
+        dn_1_2.last_edit_date = current_datetime + timedelta(3)
+        dn_2_2.last_edit_date = current_datetime + timedelta(4)
+        dn_3.last_edit_date = current_datetime + timedelta(5)
+        assert dn_1_1.is_up_to_date
+        assert dn_2_1.is_up_to_date
+        assert dn_1_2.is_up_to_date
+        assert dn_2_2.is_up_to_date
+        assert dn_3.is_up_to_date
 
-            dn_2_1.last_edit_date = current_datetime + timedelta(6)
-            assert dn_1_1.is_up_to_date
-            assert dn_2_1.is_up_to_date
-            assert dn_1_2.is_up_to_date
-            assert dn_2_2.is_up_to_date
-            assert not dn_3.is_up_to_date
+        dn_2_1.last_edit_date = current_datetime + timedelta(6)
+        assert dn_1_1.is_up_to_date
+        assert dn_2_1.is_up_to_date
+        assert dn_1_2.is_up_to_date
+        assert dn_2_2.is_up_to_date
+        assert not dn_3.is_up_to_date
 
-            dn_2_1.last_edit_date = current_datetime + timedelta(2)
-            dn_2_2.last_edit_date = current_datetime + timedelta(6)
-            assert dn_1_1.is_up_to_date
-            assert dn_2_1.is_up_to_date
-            assert dn_1_2.is_up_to_date
-            assert dn_2_2.is_up_to_date
-            assert not dn_3.is_up_to_date
+        dn_2_1.last_edit_date = current_datetime + timedelta(2)
+        dn_2_2.last_edit_date = current_datetime + timedelta(6)
+        assert dn_1_1.is_up_to_date
+        assert dn_2_1.is_up_to_date
+        assert dn_1_2.is_up_to_date
+        assert dn_2_2.is_up_to_date
+        assert not dn_3.is_up_to_date
 
-            dn_2_2.last_edit_date = current_datetime + timedelta(4)
-            dn_1_1.last_edit_date = current_datetime + timedelta(6)
-            assert dn_1_1.is_up_to_date
-            assert not dn_2_1.is_up_to_date
-            assert dn_1_2.is_up_to_date
-            assert dn_2_2.is_up_to_date
-            assert not dn_3.is_up_to_date
+        dn_2_2.last_edit_date = current_datetime + timedelta(4)
+        dn_1_1.last_edit_date = current_datetime + timedelta(6)
+        assert dn_1_1.is_up_to_date
+        assert not dn_2_1.is_up_to_date
+        assert dn_1_2.is_up_to_date
+        assert dn_2_2.is_up_to_date
+        assert not dn_3.is_up_to_date
 
-            dn_1_2.last_edit_date = current_datetime + timedelta(6)
-            assert dn_1_1.is_up_to_date
-            assert not dn_2_1.is_up_to_date
-            assert dn_1_2.is_up_to_date
-            assert not dn_2_2.is_up_to_date
-            assert not dn_3.is_up_to_date
+        dn_1_2.last_edit_date = current_datetime + timedelta(6)
+        assert dn_1_1.is_up_to_date
+        assert not dn_2_1.is_up_to_date
+        assert dn_1_2.is_up_to_date
+        assert not dn_2_2.is_up_to_date
+        assert not dn_3.is_up_to_date
 
     def test_do_not_recompute_data_node_valid_but_continue_sequence_execution(self):
-        with patch("sys.argv", ["prog"]):
-            a = Config.configure_data_node("A", "pickle", default_data="A")
-            b = Config.configure_data_node("B", "pickle")
-            c = Config.configure_data_node("C", "pickle")
-            d = Config.configure_data_node("D", "pickle")
+        a = Config.configure_data_node("A", "pickle", default_data="A")
+        b = Config.configure_data_node("B", "pickle")
+        c = Config.configure_data_node("C", "pickle")
+        d = Config.configure_data_node("D", "pickle")
 
-            task_a_b = Config.configure_task("task_a_b", funct_a_b, input=a, output=b, skippable=True)
-            task_b_c = Config.configure_task("task_b_c", funct_b_c, input=b, output=c)
-            task_b_d = Config.configure_task("task_b_d", funct_b_d, input=b, output=d)
-            scenario_cfg = Config.configure_scenario("scenario", [task_a_b, task_b_c, task_b_d])
+        task_a_b = Config.configure_task("task_a_b", funct_a_b, input=a, output=b, skippable=True)
+        task_b_c = Config.configure_task("task_b_c", funct_b_c, input=b, output=c)
+        task_b_d = Config.configure_task("task_b_d", funct_b_d, input=b, output=d)
+        scenario_cfg = Config.configure_scenario("scenario", [task_a_b, task_b_c, task_b_d])
 
-            scenario = tp.create_scenario(scenario_cfg)
-            scenario.submit()
-            assert scenario.A.read() == "A"
-            assert scenario.B.read() == "B"
-            assert scenario.C.read() == "C"
-            assert scenario.D.read() == "D"
+        scenario = tp.create_scenario(scenario_cfg)
+        scenario.submit()
+        assert scenario.A.read() == "A"
+        assert scenario.B.read() == "B"
+        assert scenario.C.read() == "C"
+        assert scenario.D.read() == "D"
 
-            scenario.submit()
+        scenario.submit()
 
-            assert len(tp.get_jobs()) == 6
-            jobs_and_status = [(job.task.config_id, job.status) for job in tp.get_jobs()]
-            assert ("task_a_b", tp.Status.COMPLETED) in jobs_and_status
-            assert ("task_a_b", tp.Status.SKIPPED) in jobs_and_status
-            assert ("task_b_c", tp.Status.COMPLETED) in jobs_and_status
-            assert ("task_b_d", tp.Status.COMPLETED) in jobs_and_status
+        assert len(tp.get_jobs()) == 6
+        jobs_and_status = [(job.task.config_id, job.status) for job in tp.get_jobs()]
+        assert ("task_a_b", tp.Status.COMPLETED) in jobs_and_status
+        assert ("task_a_b", tp.Status.SKIPPED) in jobs_and_status
+        assert ("task_b_c", tp.Status.COMPLETED) in jobs_and_status
+        assert ("task_b_d", tp.Status.COMPLETED) in jobs_and_status
 
     def test_data_node_update_after_writing(self):
         dn = FakeDataNode("foo")
@@ -720,13 +716,12 @@ class TestDataNode:
         assert dn.get_simple_label() == "a label"
 
     def test_change_data_node_name(self):
-        with patch("sys.argv", ["prog"]):
-            cgf = Config.configure_data_node("foo", scope=Scope.GLOBAL)
-            dn = tp.create_global_data_node(cgf)
+        cgf = Config.configure_data_node("foo", scope=Scope.GLOBAL)
+        dn = tp.create_global_data_node(cgf)
 
-            dn.name = "bar"
-            assert dn.name == "bar"
+        dn.name = "bar"
+        assert dn.name == "bar"
 
-            # This new syntax will be the only one allowed: https://github.com/Avaiga/taipy-core/issues/806
-            dn.properties["name"] = "baz"
-            assert dn.name == "baz"
+        # This new syntax will be the only one allowed: https://github.com/Avaiga/taipy-core/issues/806
+        dn.properties["name"] = "baz"
+        assert dn.name == "baz"
