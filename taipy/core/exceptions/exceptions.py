@@ -186,7 +186,7 @@ class InvalidSequence(Exception):
 class NonExistingSequence(Exception):
     """Raised if a requested Sequence is not known by the Sequence Manager."""
 
-    def __init__(self, sequence_id: str, scenario_id: str=None):
+    def __init__(self, sequence_id: str, scenario_id: str = None):
         if scenario_id:
             self.message = f"Sequence: {sequence_id} does not exist in scenario {scenario_id}."
         else:
@@ -370,6 +370,10 @@ class InvalidEventOperation(Exception):
 
 class FileCannotBeRead(Exception):
     """Raised when a file cannot be read."""
+
+
+class SQLQueryCannotBeExecuted(Exception):
+    """Raised when an SQL Query cannot be executed."""
 
 
 class _SuspiciousFileOperation(Exception):

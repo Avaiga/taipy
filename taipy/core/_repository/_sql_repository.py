@@ -21,12 +21,12 @@ from sqlalchemy.exc import NoResultFound
 from .._repository._abstract_repository import _AbstractRepository
 from ..common._utils import _retry_read_entity
 from ..common.typing import Converter, Entity, ModelType
-from ..exceptions import ModelNotFound
+from ..exceptions import ModelNotFound, SQLQueryCannotBeExecuted
 from .db._sql_connection import _SQLConnection
 
 
 class _SQLRepository(_AbstractRepository[ModelType, Entity]):
-    __EXCEPTIONS_TO_RETRY = (ModelNotFound,)
+    __EXCEPTIONS_TO_RETRY = (SQLQueryCannotBeExecuted,)
 
     def __init__(self, model_type: Type[ModelType], converter: Type[Converter]):
         """
