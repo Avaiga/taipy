@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-from unittest.mock import patch
 
 from taipy.gui import Gui, Markdown
 
@@ -27,8 +26,7 @@ def test_default_on_change(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
 
     gui.add_page("test", Markdown("<|{x}|input|>"))
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False)
+    gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server.get_flask())
@@ -56,8 +54,7 @@ def test_specific_on_change(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
 
     gui.add_page("test", Markdown("<|{x}|input|on_change=on_input_change|>"))
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False)
+    gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server.get_flask())

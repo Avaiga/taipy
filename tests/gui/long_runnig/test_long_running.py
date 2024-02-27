@@ -11,7 +11,6 @@
 
 import inspect
 from time import sleep
-from unittest.mock import patch
 
 from taipy.gui import Gui, State, invoke_long_callback
 
@@ -33,8 +32,7 @@ def test_long_callback(gui: Gui):
         state.status = -1
 
     gui._set_frame(inspect.currentframe())
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False, single_client=True)
+    gui.run(run_server=False, single_client=True)
     state = gui._Gui__state  # type: ignore[attr-defined]
 
     with gui.get_flask_app().app_context():

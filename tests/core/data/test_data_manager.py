@@ -549,18 +549,18 @@ class TestDataManager:
             """
             [TAIPY]
 
-            [DATA_NODE.input]
+            [DATA_NODE.input_dn]
             scope = "SCENARIO:SCOPE"
             default_data = "21:int"
 
-            [DATA_NODE.output]
+            [DATA_NODE.output_dn]
             storage_type = "in_memory"
             scope = "SCENARIO:SCOPE"
 
             [TASK.double]
-            inputs = [ "input:SECTION",]
+            inputs = [ "input_dn:SECTION",]
             function = "math.sqrt:function"
-            outputs = [ "output:SECTION",]
+            outputs = [ "output_dn:SECTION",]
             skippable = "False:bool"
 
             [SCENARIO.my_scenario]
@@ -575,26 +575,26 @@ class TestDataManager:
         Config.override(file_config.filename)
         scenario = tp.create_scenario(Config.scenarios["my_scenario"])
 
-        assert isinstance(scenario.input, PickleDataNode)
-        assert isinstance(scenario.output, InMemoryDataNode)
+        assert isinstance(scenario.input_dn, PickleDataNode)
+        assert isinstance(scenario.output_dn, InMemoryDataNode)
 
     def test_create_dn_from_loaded_config_modified_default_config(self):
         file_config = NamedTemporaryFile(
             """
             [TAIPY]
 
-            [DATA_NODE.input]
+            [DATA_NODE.input_dn]
             scope = "SCENARIO:SCOPE"
             default_path="fake/path.csv"
 
-            [DATA_NODE.output]
+            [DATA_NODE.output_dn]
             storage_type = "in_memory"
             scope = "SCENARIO:SCOPE"
 
             [TASK.double]
-            inputs = [ "input:SECTION",]
+            inputs = [ "input_dn:SECTION",]
             function = "math.sqrt:function"
-            outputs = [ "output:SECTION",]
+            outputs = [ "output_dn:SECTION",]
             skippable = "False:bool"
 
             [SCENARIO.my_scenario]
@@ -610,8 +610,8 @@ class TestDataManager:
         Config.override(file_config.filename)
         scenario = tp.create_scenario(Config.scenarios["my_scenario"])
 
-        assert isinstance(scenario.input, CSVDataNode)
-        assert isinstance(scenario.output, InMemoryDataNode)
+        assert isinstance(scenario.input_dn, CSVDataNode)
+        assert isinstance(scenario.output_dn, InMemoryDataNode)
 
     def test_get_tasks_by_config_id(self):
         dn_config_1 = Config.configure_data_node("dn_1", scope=Scope.SCENARIO)
