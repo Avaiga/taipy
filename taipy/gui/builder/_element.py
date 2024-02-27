@@ -47,7 +47,7 @@ class _Element(ABC):
         self.__locals = {
             key: value
             for key, value in t.cast(FrameType, source_frame.frame).f_locals.items()
-            if not key.startswith("__")
+            if not key.startswith("_")
         }
         # Manage properties
         self._properties: t.Dict[str, t.Any] = {}
