@@ -195,7 +195,7 @@ jobs:
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          file_pattern: '*.json'
+          file_pattern: '*/version.json'
           commit_message: Update version to ${{ needs.fetch-versions.outputs.NEW_VERSION }}
 
       - name: Reset changes
