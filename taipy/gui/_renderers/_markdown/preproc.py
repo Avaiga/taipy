@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -74,7 +74,7 @@ class _Preprocessor(MdPreprocessor):
 
     def run(self, lines: List[str]) -> List[str]:
         new_lines = []
-        tag_queue = []
+        tag_stack = []
         for line_count, line in enumerate(lines, start=1):
             new_line = ""
             last_index = 0
@@ -86,7 +86,7 @@ class _Preprocessor(MdPreprocessor):
                 if m.group(2):
                     tag, properties = self._process_control(m.group(2), line_count, tag)
                 if tag in _MarkdownFactory._TAIPY_BLOCK_TAGS:
-                    tag_queue.append((tag, line_count, m.group(1) or None))
+                    tag_stack.append((tag, line_count, m.group(1) or None))
                     new_line_delimeter = "\n" if line.startswith("<|") else "\n\n"
                     line = (
                         line[: m.start()]
@@ -125,8 +125,8 @@ class _Preprocessor(MdPreprocessor):
             # Look for a closing tag
             m = _Preprocessor.__CLOSING_TAG_RE.search(new_line)
             if m is not None:
-                if len(tag_queue):
-                    open_tag, open_tag_line_count, open_tag_identifier = tag_queue.pop()
+                if len(tag_stack):
+                    open_tag, open_tag_line_count, open_tag_identifier = tag_stack.pop()
                     close_tag_identifier = m.group(1)
                     if close_tag_identifier and not open_tag_identifier:
                         _warn(
@@ -163,7 +163,7 @@ class _Preprocessor(MdPreprocessor):
         if new_lines and new_lines[0] != "":
             new_lines.insert(0, "")
         # Check for tags left unclosed (but close them anyway)
-        for tag, line_no, _ in tag_queue:
+        for tag, line_no, _ in tag_stack:
             new_lines.append(
                 _MarkdownFactory._TAIPY_START + tag + _MarkdownFactory._END_SUFFIX + _MarkdownFactory._TAIPY_END
             )

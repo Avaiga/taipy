@@ -1,4 +1,0 @@
-recursive-include taipy/gui/webapp *
-include taipy/gui/version.json
-include taipy/gui/viselements.json
-include taipy/gui/*.pyi

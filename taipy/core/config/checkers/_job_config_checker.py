@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from typing import Dict
+from typing import Dict, cast
 
 from taipy.config._config import _Config
 from taipy.config.checker._checkers._config_checker import _ConfigChecker
@@ -26,7 +26,10 @@ class _JobConfigChecker(_ConfigChecker):
     def _check(self) -> IssueCollector:
         if job_config := self._config._unique_sections.get(JobConfig.name):
             data_node_configs = self._config._sections[DataNodeConfig.name]
-            self._check_multiprocess_mode(job_config, data_node_configs)
+            self._check_multiprocess_mode(
+                cast(JobConfig, job_config),
+                cast(Dict[str, DataNodeConfig], data_node_configs),
+            )
         return self._collector
 
     def _check_multiprocess_mode(self, job_config: JobConfig, data_node_configs: Dict[str, DataNodeConfig]):

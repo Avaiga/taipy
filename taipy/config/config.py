@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -178,11 +178,10 @@ class Config:
                 cls._default_config._unique_sections[default_section.name]._update(default_section._to_dict())
             else:
                 cls._default_config._unique_sections[default_section.name] = default_section
-        else:
-            if def_sections := cls._default_config._sections.get(default_section.name, None):
+        elif def_sections := cls._default_config._sections.get(default_section.name, None):
                 def_sections[default_section.id] = default_section
-            else:
-                cls._default_config._sections[default_section.name] = {default_section.id: default_section}
+        else:
+            cls._default_config._sections[default_section.name] = {default_section.id: default_section}
         cls._serializer._section_class[default_section.name] = default_section.__class__  # type: ignore
         cls.__json_serializer._section_class[default_section.name] = default_section.__class__  # type: ignore
         cls._compile_configs()
@@ -195,14 +194,13 @@ class Config:
                 cls._python_config._unique_sections[section.name]._update(section._to_dict())
             else:
                 cls._python_config._unique_sections[section.name] = section
-        else:
-            if sections := cls._python_config._sections.get(section.name, None):
-                if sections.get(section.id, None):
-                    sections[section.id]._update(section._to_dict())
-                else:
-                    sections[section.id] = section
+        elif sections := cls._python_config._sections.get(section.name, None):
+            if sections.get(section.id, None):
+                sections[section.id]._update(section._to_dict())
             else:
-                cls._python_config._sections[section.name] = {section.id: section}
+                sections[section.id] = section
+        else:
+            cls._python_config._sections[section.name] = {section.id: section}
         cls._serializer._section_class[section.name] = section.__class__
         cls.__json_serializer._section_class[section.name] = section.__class__
         cls._compile_configs()

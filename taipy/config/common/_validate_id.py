@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -17,11 +17,11 @@ __INVALID_TAIPY_ID_TERMS = ["CYCLE", "SCENARIO", "SEQUENCE", "TASK", "DATANODE"]
 
 
 def _validate_id(name: str):
-    for invalid_taipy_id_term in __INVALID_TAIPY_ID_TERMS:
-        if invalid_taipy_id_term in name:
-            raise InvalidConfigurationId(f"{name} is not a valid identifier. {invalid_taipy_id_term} is restricted.")
+    for invalid__id_term in __INVALID_TAIPY_ID_TERMS:
+        if invalid__id_term in name:
+            raise InvalidConfigurationId(f"'{name}' is not a valid identifier. '{invalid__id_term}' is restricted.")
 
     if name.isidentifier() and not keyword.iskeyword(name):
         return name
 
-    raise InvalidConfigurationId(f"{name} is not a valid identifier.")
+    raise InvalidConfigurationId(f"'{name}' is not a valid identifier.")

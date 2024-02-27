@@ -1,0 +1,14 @@
+name: Prefix (baseURL) Test
+runs:
+  using: "composite"
+  steps:
+    - name: Build the Docker image
+      shell: bash
+      working-directory: ./tools/gui/docker/nginx-prefix
+      run: docker build . --file Dockerfile --tag taipy-nginx-proxy
+    - name: run nginx reverse proxy docker container
+      shell: bash
+      run: docker run -d -p 4000:4000 taipy-nginx-proxy
+    - name: run pytest with prefix configuration
+      shell: bash
+      run: pipenv run pytest -m "teste2e" tests/gui/e2e --e2e-base-url="/prefix/" --e2e-port="4000"

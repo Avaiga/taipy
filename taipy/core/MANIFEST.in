@@ -1,2 +1,0 @@
-include taipy/core/*.json
-include taipy/core/config/*.json

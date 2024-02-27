@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -10,14 +10,15 @@
 # specific language governing permissions and limitations under the License.
 
 from __future__ import annotations
-import ast
 
+import ast
 import copy
 import inspect
-from types import FrameType
+import re
 import typing as t
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
+from types import FrameType
 
 from ._context_manager import _BuilderContextManager
 from ._factory import _BuilderFactory
@@ -31,6 +32,7 @@ class _Element(ABC):
 
     _ELEMENT_NAME = ""
     _DEFAULT_PROPERTY = ""
+    __RE_INDEXED_PROPERTY = re.compile(r"^(.*?)__([\w\d]+)$")
 
     def __new__(cls, *args, **kwargs):
         obj = super(_Element, cls).__new__(cls)
@@ -40,64 +42,80 @@ class _Element(ABC):
         return obj
 
     def __init__(self, *args, **kwargs):
+        # Frame resolution to get the local variables
         source_frame = inspect.stack()[3]
         self.__locals = {
             key: value
             for key, value in t.cast(FrameType, source_frame.frame).f_locals.items()
             if not key.startswith("__")
         }
-        # Analyze the source code of the object creation to get the original args and kwargs
-        self.__code_arguments = arguments = {}
-        code_context = source_frame.code_context or []
+        # Manage properties
+        self._properties: t.Dict[str, t.Any] = {}
+        if args and self._DEFAULT_PROPERTY != "":
+            self._properties = {self._DEFAULT_PROPERTY: args[0]}
+        self._properties.update(kwargs)
+        self._parse_properties(code_arguments=self.__get_code_arguments(source_frame))
+
+    def __get_code_arguments(self, frame: inspect.FrameInfo):
+        """
+        Analyze the source code of the object creation to get the original args and kwargs
+        code_arguments: {kwarg_name: kwarg_value}
+        """
+        code_arguments = {}
+        code_context = frame.code_context or []
         for c in code_context:
             parsed_ast = ast.parse(c.strip())
             for node in ast.walk(parsed_ast):
                 if isinstance(node, ast.Call):
                     if len(node.args) > 0 and self._DEFAULT_PROPERTY != "":
                         arg = node.args[0]
-                        value = ast.literal_eval(arg) if not isinstance(arg, ast.Name) else arg.id
-                        arguments[self._DEFAULT_PROPERTY] = value
+                        value = arg.id if isinstance(arg, ast.Name) else ast.literal_eval(arg)
+                        code_arguments[self._DEFAULT_PROPERTY] = value
                     for kw in node.keywords:
-                        value = ast.literal_eval(kw.value) if not isinstance(kw.value, ast.Name) else kw.value.id
-                        arguments[kw.arg] = value
-        # Manage properties
-        self._properties: t.Dict[str, t.Any] = {}
-        self.__parsed_properties = set()
-        if args and self._DEFAULT_PROPERTY != "":
-            self._properties = {self._DEFAULT_PROPERTY: args[0]}
-        self._properties.update(kwargs)
-        self.parse_properties()
+                        value = kw.value.id if isinstance(kw.value, ast.Name) else ast.literal_eval(kw.value)
+                        code_arguments[kw.arg] = value
+        return code_arguments
 
-    def update(self, **kwargs):
+    def update(self, *args, **kwargs):
+        if args:
+            kwargs[self._DEFAULT_PROPERTY] = args[0]
         self._properties.update(kwargs)
-        self.parse_properties(kwargs.keys(), True)
+        update_source_frame = inspect.stack()[1]
+        self._parse_properties(kwargs.keys(), self.__get_code_arguments(update_source_frame))
 
     # Convert property value to string
-    def parse_properties(self, updated_properties: t.Optional[t.Iterable] = None, force: bool = False):
-        updated_properties = updated_properties if updated_properties is not None else self._properties.keys()
-        for p in updated_properties:
-            if p not in self._properties:
-                continue
-            self._properties[p] = self._parse_property(p, self._properties[p], force)
+    def _parse_properties(self, updated_property_list: t.Optional[t.Iterable] = None, code_arguments: t.Dict[str, t.Any] = {}):
+        updated_property_list = updated_property_list if updated_property_list is not None else self._properties.keys()
+        for k in list(updated_property_list):
+            v = self._properties[k]
+            # Handle indexed property, remove the original key, use the new parsed key
+            if k != self._parse_property_key(k):
+                del self._properties[k]
+                k = self._parse_property_key(k)
+            self._properties[k] = self._parse_property(k, v, code_arguments)
 
-    # Get a deepcopy version of the properties
-    def _deepcopy_properties(self):
-        return copy.deepcopy(self._properties)
+    def _parse_property_key(self, key: str) -> str:
+        if match := _Element.__RE_INDEXED_PROPERTY.match(key):
+            return f"{match.group(1)}[{match.group(2)}]"
+        return key
 
-    def _parse_property(self, key: str, value: t.Any, force: bool = False) -> t.Any:
-        # Only evaluate once if it is not forced to parse
-        if key in self.__parsed_properties and not force:
-            return value
-        self.__parsed_properties.add(key)
+    def _parse_property(self, key: str, value: t.Any, code_arguments: t.Dict[str, t.Any]) -> t.Any:
+        # Return object that has __name__ attribute (e.g. enum, class, function, etc.)
         if hasattr(value, "__name__"):
             return str(getattr(value, "__name__"))
         # Handle variable as keyword argument value
         for k, v in self.__locals.items():
-            if v is value and str(self.__code_arguments[key]).strip() == k.strip():
+            if v is value and key in code_arguments and str(code_arguments[key]).strip() == k.strip():
                 return "{" + k + "}"
+        # Cases that requires no modification
         if isinstance(value, (str, dict, Iterable)):
             return value
+        # Default cases: stringify the value
         return str(value)
+
+    # Get a deepcopy version of the properties
+    def _get_properties_deepcopy(self):
+        return copy.deepcopy(self._properties)
 
     @abstractmethod
     def _render(self, gui: "Gui") -> str:
@@ -125,7 +143,7 @@ class _Block(_Element):
         _BuilderContextManager().pop()
 
     def _render(self, gui: "Gui") -> str:
-        el = _BuilderFactory.create_element(gui, self._ELEMENT_NAME, self._deepcopy_properties())
+        el = _BuilderFactory.create_element(gui, self._ELEMENT_NAME, self._get_properties_deepcopy())
         return f"{el[0]}{self._render_children(gui)}</{el[1]}>"
 
     def _render_children(self, gui: "Gui") -> str:
@@ -204,7 +222,7 @@ class _Control(_Element):
         super().__init__(*args, **kwargs)
 
     def _render(self, gui: "Gui") -> str:
-        el = _BuilderFactory.create_element(gui, self._ELEMENT_NAME, self._deepcopy_properties())
+        el = _BuilderFactory.create_element(gui, self._ELEMENT_NAME, self._get_properties_deepcopy())
         return (
             f"<div>{el[0]}</{el[1]}></div>"
             if f"<{el[1]}" in el[0] and f"</{el[1]}" not in el[0]

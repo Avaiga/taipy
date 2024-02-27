@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -19,9 +19,15 @@ from .._warnings import _warn
 
 class _DataScopes:
     _GLOBAL_ID = "global"
+    _META_PRE_RENDER = "pre_render"
+    _DEFAULT_METADATA = {_META_PRE_RENDER: False}
 
     def __init__(self) -> None:
         self.__scopes: t.Dict[str, SimpleNamespace] = {_DataScopes._GLOBAL_ID: SimpleNamespace()}
+        # { scope_name: { metadata: value } }
+        self.__scopes_metadata: t.Dict[str, t.Dict[str, t.Any]] = {
+            _DataScopes._GLOBAL_ID: _DataScopes._DEFAULT_METADATA.copy()
+        }
         self.__single_client = True
 
     def set_single_client(self, value: bool) -> None:
@@ -30,20 +36,20 @@ class _DataScopes:
     def is_single_client(self) -> bool:
         return self.__single_client
 
-    def get_scope(self, client_id: t.Optional[str]) -> SimpleNamespace:
+    def get_scope(self, client_id: t.Optional[str]) -> t.Tuple[SimpleNamespace, t.Dict[str, str]]:
         if self.__single_client:
-            return self.__scopes[_DataScopes._GLOBAL_ID]
+            return self.__scopes[_DataScopes._GLOBAL_ID], self.__scopes_metadata[_DataScopes._GLOBAL_ID]
         # global context in case request is not registered or client_id is not
         # available (such as in the context of running tests)
         if not client_id:
             _warn("Empty session id, using global scope instead.")
-            return self.__scopes[_DataScopes._GLOBAL_ID]
+            return self.__scopes[_DataScopes._GLOBAL_ID], self.__scopes_metadata[_DataScopes._GLOBAL_ID]
         if client_id not in self.__scopes:
             _warn(
                 f"Session id {client_id} not found in data scope. Taipy will automatically create a scope for this session id but you may have to reload your page."  # noqa: E501
             )
             self.create_scope(client_id)
-        return self.__scopes[client_id]
+        return self.__scopes[client_id], self.__scopes_metadata[client_id]
 
     def get_all_scopes(self) -> t.Dict[str, SimpleNamespace]:
         return self.__scopes
@@ -56,6 +62,7 @@ class _DataScopes:
             return
         if id not in self.__scopes:
             self.__scopes[id] = SimpleNamespace()
+            self.__scopes_metadata[id] = _DataScopes._DEFAULT_METADATA.copy()
 
     def delete_scope(self, id: str) -> None:  # pragma: no cover
         if self.__single_client:
@@ -65,3 +72,4 @@ class _DataScopes:
             return
         if id in self.__scopes:
             del self.__scopes[id]
+            del self.__scopes_metadata[id]

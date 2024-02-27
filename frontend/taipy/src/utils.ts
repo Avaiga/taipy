@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Avaiga Private Limited
+ * Copyright 2021-2024 Avaiga Private Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -24,7 +24,8 @@ export type ScenarioFull = [
     string,     // label
     string[],   // tags
     Array<[string, string]>,    // properties
-    Array<[string, string, boolean, boolean]>,   // sequences
+    Array<[string, string[], boolean, boolean]>,   // sequences (label, task ids, submittable, editable)
+    Record<string, string>, // tasks (id: label)
     string[],   // authorized_tags
     boolean,    // deletable
     boolean,    // promotable
@@ -43,6 +44,7 @@ export enum ScFProps {
     tags,
     properties,
     sequences,
+    tasks,
     authorized_tags,
     deletable,
     promotable,
@@ -211,3 +213,6 @@ export const MenuProps = {
     },
 };
 export const selectSx = { m: 1, width: 300 };
+
+export const DeleteIconSx = { height: 50, width: 50, p: 0 };
+

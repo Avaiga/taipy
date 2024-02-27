@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -10,7 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 import threading
+import time
 from abc import abstractmethod
+from queue import Empty
 from typing import Dict, Optional
 
 from taipy.config.config import Config
@@ -28,10 +30,10 @@ class _JobDispatcher(threading.Thread):
 
     _STOP_FLAG = False
     _dispatched_processes: Dict = {}
-    __logger = _TaipyLogger._get_logger()
+    _logger = _TaipyLogger._get_logger()
     _nb_available_workers: int = 1
 
-    def __init__(self, orchestrator: Optional[_AbstractOrchestrator]):
+    def __init__(self, orchestrator: _AbstractOrchestrator):
         threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
         self.daemon = True
         self.orchestrator = orchestrator
@@ -46,20 +48,36 @@ class _JobDispatcher(threading.Thread):
         """Return True if the dispatcher is running"""
         return self.is_alive()
 
-    def stop(self):
-        """Stop the dispatcher"""
+    def stop(self, wait: bool = True, timeout: Optional[float] = None):
+        """Stop the dispatcher.
+
+        Parameters:
+            wait (bool): If True, the method will wait for the dispatcher to stop.
+            timeout (Optional[float]): The maximum time to wait. If None, the method will wait indefinitely.
+        """
         self._STOP_FLAG = True
+        if wait and self.is_alive():
+            self._logger.debug("Waiting for the dispatcher thread to stop...")
+            self.join(timeout=timeout)
 
     def run(self):
-        _TaipyLogger._get_logger().info("Start job dispatcher...")
+        self._logger.info("Start job dispatcher...")
         while not self._STOP_FLAG:
             try:
                 if self._can_execute():
                     with self.lock:
+                        if self._STOP_FLAG:
+                            break
                         job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
                     self._execute_job(job)
-            except Exception:  # In case the last job of the queue has been removed.
+                else:
+                    time.sleep(0.1)  # We need to sleep to avoid busy waiting.
+            except Empty:  # In case the last job of the queue has been removed.
                 pass
+            except Exception as e:
+                self._logger.exception(e)
+                pass
+        self._logger.info("Job dispatcher stopped.")
 
     def _can_execute(self) -> bool:
         """Returns True if the dispatcher have resources to execute a new job."""
@@ -68,13 +86,13 @@ class _JobDispatcher(threading.Thread):
     def _execute_job(self, job: Job):
         if job.force or self._needs_to_run(job.task):
             if job.force:
-                self.__logger.info(f"job {job.id} is forced to be executed.")
+                self._logger.info(f"job {job.id} is forced to be executed.")
             job.running()
             self._dispatch(job)
         else:
             job._unlock_edit_on_outputs()
             job.skipped()
-            self.__logger.info(f"job {job.id} is skipped.")
+            self._logger.info(f"job {job.id} is skipped.")
 
     def _execute_jobs_synchronously(self):
         while not self.orchestrator.jobs_to_run.empty():
@@ -82,7 +100,7 @@ class _JobDispatcher(threading.Thread):
                 try:
                     job = self.orchestrator.jobs_to_run.get()
                 except Exception:  # In case the last job of the queue has been removed.
-                    self.__logger.warning(f"{job.id} is no longer in the list of jobs to run.")
+                    self._logger.warning(f"{job.id} is no longer in the list of jobs to run.")
             self._execute_job(job)
 
     @staticmethod

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -22,6 +22,8 @@ from .scenario.scenario import Scenario
 from .scenario.scenario_id import ScenarioId
 from .sequence.sequence import Sequence
 from .sequence.sequence_id import SequenceId
+from .submission.submission import Submission
+from .submission.submission_id import SubmissionId
 from .taipy import (
     cancel_job,
     clean_all_entities_by_version,
@@ -40,11 +42,13 @@ from .taipy import (
     get_entities_by_config_id,
     get_jobs,
     get_latest_job,
+    get_latest_submission,
     get_parents,
     get_primary,
     get_primary_scenarios,
     get_scenarios,
     get_sequences,
+    get_submissions,
     get_tasks,
     is_deletable,
     is_editable,

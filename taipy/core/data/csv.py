@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -15,7 +15,6 @@ from datetime import datetime, timedelta
 from os.path import isfile
 from typing import Any, Dict, List, Optional, Set
 
-import modin.pandas as modin_pd
 import numpy as np
 import pandas as pd
 
@@ -66,16 +65,10 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
     """
 
     __STORAGE_TYPE = "csv"
-    __EXPOSED_TYPE_PROPERTY = "exposed_type"
-    __EXPOSED_TYPE_NUMPY = "numpy"
-    __EXPOSED_TYPE_PANDAS = "pandas"
-    __EXPOSED_TYPE_MODIN = "modin"
-    __VALID_STRING_EXPOSED_TYPES = [__EXPOSED_TYPE_PANDAS, __EXPOSED_TYPE_MODIN, __EXPOSED_TYPE_NUMPY]
     __PATH_KEY = "path"
     __DEFAULT_PATH_KEY = "default_path"
     __ENCODING_KEY = "encoding"
     __DEFAULT_DATA_KEY = "default_data"
-    __HAS_HEADER_PROPERTY = "has_header"
     _REQUIRED_PROPERTIES: List[str] = []
 
     def __init__(
@@ -102,14 +95,18 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         if self.__ENCODING_KEY not in properties.keys():
             properties[self.__ENCODING_KEY] = "utf-8"
 
-        if self.__HAS_HEADER_PROPERTY not in properties.keys():
-            properties[self.__HAS_HEADER_PROPERTY] = True
+        if self._HAS_HEADER_PROPERTY not in properties.keys():
+            properties[self._HAS_HEADER_PROPERTY] = True
 
-        if self.__EXPOSED_TYPE_PROPERTY not in properties.keys():
-            properties[self.__EXPOSED_TYPE_PROPERTY] = self.__EXPOSED_TYPE_PANDAS
-        self._check_exposed_type(properties[self.__EXPOSED_TYPE_PROPERTY], self.__VALID_STRING_EXPOSED_TYPES)
+        if self._EXPOSED_TYPE_PROPERTY not in properties.keys():
+            properties[self._EXPOSED_TYPE_PROPERTY] = self._EXPOSED_TYPE_PANDAS
+        elif properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_MODIN:
+            # Deprecated in favor of pandas since 3.1.0
+            properties[self._EXPOSED_TYPE_PROPERTY] = self._EXPOSED_TYPE_PANDAS
+        self._check_exposed_type(properties[self._EXPOSED_TYPE_PROPERTY])
 
-        super().__init__(
+        DataNode.__init__(
+            self,
             config_id,
             scope,
             id,
@@ -124,13 +121,16 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             editor_expiration_date,
             **properties,
         )
+        _AbstractTabularDataNode.__init__(self, **properties)
+
         self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
+        if self._path and ".data" in self._path:
+            self._path = self._migrate_path(self.storage_type(), self._path)
+
         if not self._path:
             self._path = self._build_path(self.storage_type())
         properties[self.__PATH_KEY] = self._path
 
-        if not self._last_edit_date and isfile(self._path):
-            self._last_edit_date = datetime.now()
         if default_value is not None and not os.path.exists(self._path):
             self._write(default_value)
             self._last_edit_date = datetime.now()
@@ -143,15 +143,17 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
                     }
                 )
             )
+        if not self._last_edit_date and isfile(self._path):
+            self._last_edit_date = datetime.now()
 
         self._TAIPY_PROPERTIES.update(
             {
-                self.__EXPOSED_TYPE_PROPERTY,
+                self._EXPOSED_TYPE_PROPERTY,
                 self.__PATH_KEY,
                 self.__DEFAULT_PATH_KEY,
                 self.__ENCODING_KEY,
                 self.__DEFAULT_DATA_KEY,
-                self.__HAS_HEADER_PROPERTY,
+                self._HAS_HEADER_PROPERTY,
             }
         )
 
@@ -172,28 +174,23 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         _replace_in_backup_file(old_file_path=tmp_old_path, new_file_path=self._path)
 
     def _read(self):
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
             return self._read_as_pandas_dataframe()
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_MODIN:
-            return self._read_as_modin_dataframe()
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy()
         return self._read_as()
 
     def _read_as(self):
-        custom_class = self.properties[self.__EXPOSED_TYPE_PROPERTY]
         with open(self._path, encoding=self.properties[self.__ENCODING_KEY]) as csvFile:
             res = list()
-            if self.properties[self.__HAS_HEADER_PROPERTY]:
+            if self.properties[self._HAS_HEADER_PROPERTY]:
                 reader = csv.DictReader(csvFile)
                 for line in reader:
-                    res.append(custom_class(**line))
+                    res.append(self._decoder(line))
             else:
-                reader = csv.reader(
-                    csvFile,
-                )
+                reader = csv.reader(csvFile)
                 for line in reader:
-                    res.append(custom_class(*line))
+                    res.append(self._decoder(line))
             return res
 
     def _read_as_numpy(self) -> np.ndarray:
@@ -203,7 +200,7 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         self, usecols: Optional[List[int]] = None, column_names: Optional[List[str]] = None
     ) -> pd.DataFrame:
         try:
-            if self.properties[self.__HAS_HEADER_PROPERTY]:
+            if self.properties[self._HAS_HEADER_PROPERTY]:
                 if column_names:
                     return pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY])[column_names]
                 return pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY])
@@ -216,25 +213,8 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 
-    def _read_as_modin_dataframe(
-        self, usecols: Optional[List[int]] = None, column_names: Optional[List[str]] = None
-    ) -> modin_pd.DataFrame:
-        try:
-            if self.properties[self.__HAS_HEADER_PROPERTY]:
-                if column_names:
-                    return modin_pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY])[column_names]
-                return modin_pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY])
-            else:
-                if usecols:
-                    return modin_pd.read_csv(
-                        self._path, header=None, usecols=usecols, encoding=self.properties[self.__ENCODING_KEY]
-                    )
-                return modin_pd.read_csv(self._path, header=None, encoding=self.properties[self.__ENCODING_KEY])
-        except pd.errors.EmptyDataError:
-            return modin_pd.DataFrame()
-
     def _append(self, data: Any):
-        if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
+        if isinstance(data, pd.DataFrame):
             data.to_csv(self._path, mode="a", index=False, encoding=self.properties[self.__ENCODING_KEY], header=False)
         else:
             pd.DataFrame(data).to_csv(
@@ -242,10 +222,15 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             )
 
     def _write(self, data: Any):
-        if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
-            data.to_csv(self._path, index=False, encoding=self.properties[self.__ENCODING_KEY])
+        exposed_type = self.properties[self._EXPOSED_TYPE_PROPERTY]
+        if self.properties[self._HAS_HEADER_PROPERTY]:
+            self._convert_data_to_dataframe(exposed_type, data).to_csv(
+                self._path, index=False, encoding=self.properties[self.__ENCODING_KEY]
+            )
         else:
-            pd.DataFrame(data).to_csv(self._path, index=False, encoding=self.properties[self.__ENCODING_KEY])
+            self._convert_data_to_dataframe(exposed_type, data).to_csv(
+                self._path, index=False, encoding=self.properties[self.__ENCODING_KEY], header=None
+            )
 
     def write_with_column_names(self, data: Any, columns: Optional[List[str]] = None, job_id: Optional[JobId] = None):
         """Write a selection of columns.
@@ -255,9 +240,8 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             columns (Optional[List[str]]): The list of column names to write.
             job_id (JobId^): An optional identifier of the writer.
         """
-        if not columns:
-            df = pd.DataFrame(data)
-        else:
-            df = pd.DataFrame(data, columns=columns)
+        df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
+        if columns and isinstance(df, pd.DataFrame):
+            df.columns = columns
         df.to_csv(self._path, index=False, encoding=self.properties[self.__ENCODING_KEY])
         self.track_edit(timestamp=datetime.now(), job_id=job_id)

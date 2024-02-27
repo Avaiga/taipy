@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -8,7 +8,6 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
 from __future__ import annotations
 
 import pathlib
@@ -37,11 +36,13 @@ from ..exceptions.exceptions import (
     NonExistingDataNode,
     NonExistingSequence,
     NonExistingTask,
+    SequenceAlreadyExists,
     SequenceTaskDoesNotExistInScenario,
 )
 from ..job.job import Job
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
 from ..sequence.sequence import Sequence
+from ..submission.submission import Submission
 from ..task.task import Task
 from ..task.task_id import TaskId
 from .scenario_id import ScenarioId
@@ -108,10 +109,10 @@ class Scenario(_Entity, Submittable, _Labeled):
         self._properties = _Properties(self, **properties)
         self._sequences: Dict[str, Dict] = sequences or {}
 
-        _scenario_task_ids = set([task.id if isinstance(task, Task) else task for task in self._tasks])
+        _scenario_task_ids = set(task.id if isinstance(task, Task) else task for task in self._tasks)
         for sequence_name, sequence_data in self._sequences.items():
             sequence_task_ids = set(
-                [task.id if isinstance(task, Task) else task for task in sequence_data.get("tasks", [])]
+                task.id if isinstance(task, Task) else task for task in sequence_data.get("tasks", [])
             )
             self.__check_sequence_tasks_exist_in_scenario_tasks(
                 sequence_name, sequence_task_ids, self.id, _scenario_task_ids
@@ -193,11 +194,54 @@ class Scenario(_Entity, Submittable, _Labeled):
 
         Raises:
             SequenceTaskDoesNotExistInScenario^: If a task in the sequence does not exist in the scenario.
+            SequenceAlreadyExists^: If a sequence with the same name already exists in the scenario.
         """
+        if name in self.sequences:
+            raise SequenceAlreadyExists(name, self.id)
+        seq = self._set_sequence(name, tasks, properties, subscribers)
+        Notifier.publish(_make_event(seq, EventOperation.CREATION))
+
+    def update_sequence(
+        self,
+        name: str,
+        tasks: Union[List[Task], List[TaskId]],
+        properties: Optional[Dict] = None,
+        subscribers: Optional[List[_Subscriber]] = None,
+    ):
+        """Update an existing sequence.
+
+        Parameters:
+            name (str): The name of the sequence to update.
+            tasks (Union[List[Task], List[TaskId]]): The new list of scenario's tasks.
+            properties (Optional[Dict]): The new properties of the sequence.
+            subscribers (Optional[List[_Subscriber]]): The new list of callbacks to be called on `Job^`'s status change.
+
+        Raises:
+            SequenceTaskDoesNotExistInScenario^: If a task in the list does not exist in the scenario.
+            SequenceAlreadyExists^: If a sequence with the same name already exists in the scenario.
+        """
+        if name not in self.sequences:
+            raise NonExistingSequence(name, self.id)
+        seq = self._set_sequence(name, tasks, properties, subscribers)
+        Notifier.publish(_make_event(seq, EventOperation.UPDATE))
+
+    def _set_sequence(
+        self,
+        name: str,
+        tasks: Union[List[Task], List[TaskId]],
+        properties: Optional[Dict] = None,
+        subscribers: Optional[List[_Subscriber]] = None,
+    ) -> Sequence:
         _scenario = _Reloader()._reload(self._MANAGER_NAME, self)
-        _scenario_task_ids = set([task.id if isinstance(task, Task) else task for task in _scenario._tasks])
-        _sequence_task_ids: Set[TaskId] = set([task.id if isinstance(task, Task) else task for task in tasks])
+        _scenario_task_ids = set(task.id if isinstance(task, Task) else task for task in _scenario._tasks)
+        _sequence_task_ids: Set[TaskId] = set(task.id if isinstance(task, Task) else task for task in tasks)
         self.__check_sequence_tasks_exist_in_scenario_tasks(name, _sequence_task_ids, self.id, _scenario_task_ids)
+        from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
+        seq_manager = _SequenceManagerFactory._build_manager()
+        seq = seq_manager._create(name, tasks, subscribers or [], properties or {}, self.id, self.version)
+        if not seq._is_consistent():
+            raise InvalidSequence(name)
+
         _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
         _sequences.update(
             {
@@ -209,9 +253,7 @@ class Scenario(_Entity, Submittable, _Labeled):
             }
         )
         self.sequences = _sequences  # type: ignore
-        if not self.sequences[name]._is_consistent():
-            raise InvalidSequence(name)
-        Notifier.publish(_make_event(self.sequences[name], EventOperation.CREATION))
+        return seq
 
     def add_sequences(self, sequences: Dict[str, Union[List[Task], List[TaskId]]]):
         """Add multiple sequences to the scenario.
@@ -228,9 +270,9 @@ class Scenario(_Entity, Submittable, _Labeled):
             SequenceTaskDoesNotExistInScenario^: If a task in the sequence does not exist in the scenario.
         """
         _scenario = _Reloader()._reload(self._MANAGER_NAME, self)
-        _sc_task_ids = set([task.id if isinstance(task, Task) else task for task in _scenario._tasks])
+        _sc_task_ids = set(task.id if isinstance(task, Task) else task for task in _scenario._tasks)
         for name, tasks in sequences.items():
-            _seq_task_ids: Set[TaskId] = set([task.id if isinstance(task, Task) else task for task in tasks])
+            _seq_task_ids: Set[TaskId] = set(task.id if isinstance(task, Task) else task for task in tasks)
             self.__check_sequence_tasks_exist_in_scenario_tasks(name, _seq_task_ids, self.id, _sc_task_ids)
         # Need to parse twice the sequences to avoid adding some sequences and not others in case of exception
         for name, tasks in sequences.items():
@@ -268,6 +310,29 @@ class Scenario(_Entity, Submittable, _Labeled):
             )
         self.sequences = _sequences  # type: ignore
 
+    def rename_sequence(self, old_name, new_name):
+        """Rename a sequence of the scenario.
+
+        Parameters:
+            old_name (str): The current name of the sequence to rename.
+            new_name (str): The new name of the sequence.
+
+        Raises:
+            SequenceAlreadyExists^: If a sequence with the same name already exists in the scenario.
+        """
+        if old_name == new_name:
+            return
+        if new_name in self.sequences:
+            raise SequenceAlreadyExists(new_name, self.id)
+        self._sequences[new_name] = self._sequences[old_name]
+        del self._sequences[old_name]
+        self.sequences = self._sequences  # type: ignore
+        Notifier.publish(Event(EventEntityType.SCENARIO,
+                               EventOperation.UPDATE,
+                               entity_id=self.id,
+                               attribute_name="sequences",
+                               attribute_value=self._sequences))
+
     @staticmethod
     def __check_sequence_tasks_exist_in_scenario_tasks(
         sequence_name: str, sequence_task_ids: Set[TaskId], scenario_id: ScenarioId, scenario_task_ids: Set[TaskId]
@@ -298,7 +363,7 @@ class Scenario(_Entity, Submittable, _Labeled):
                 self.version,
             )
             if not isinstance(p, Sequence):
-                raise NonExistingSequence(sequence_name)
+                raise NonExistingSequence(sequence_name, self.id)
             _sequences[sequence_name] = p
         return _sequences
 
@@ -492,7 +557,8 @@ class Scenario(_Entity, Submittable, _Labeled):
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
-    ) -> List[Job]:
+        **properties,
+    ) -> Submission:
         """Submit this scenario for execution.
 
         All the `Task^`s of the scenario will be submitted for execution.
@@ -505,13 +571,13 @@ class Scenario(_Entity, Submittable, _Labeled):
                 asynchronous mode.
             timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
                 before returning.
-
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
-            A list of created `Job^`s.
+            A `Submission^` containing the information of the submission.
         """
         from ._scenario_manager_factory import _ScenarioManagerFactory
 
-        return _ScenarioManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
+        return _ScenarioManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout, **properties)
 
     def export(
         self,

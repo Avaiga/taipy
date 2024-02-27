@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -17,6 +17,7 @@ from flask import request
 from flask_restful import Resource
 
 from taipy.config.config import Config
+from taipy.core import DataNode
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.operator import Operator
 from taipy.core.exceptions.exceptions import NonExistingDataNode, NonExistingDataNodeConfig
@@ -53,7 +54,7 @@ ds_schema_map = {
 REPOSITORY = "data"
 
 
-def _get_or_raise(data_node_id: str) -> None:
+def _get_or_raise(data_node_id: str) -> DataNode:
     manager = _DataManagerFactory._build_manager()
     data_node = manager._get(data_node_id)
     if not data_node:

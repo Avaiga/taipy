@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Avaiga Private Limited
+ * Copyright 2021-2024 Avaiga Private Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -54,6 +54,7 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     template_Dark_?: string;
     template_Light_?: string;
     //[key: `selected_${number}`]: number[];
+    figure?: Array<Record<string, unknown>>;
 }
 
 interface ChartConfig {
@@ -156,9 +157,9 @@ const getDecimatorsPayload = (
 
 const selectedPropRe = /selected(\d+)/;
 
-const MARKER_TO_COL = ["color", "size", "symbol", "opacity"];
+const MARKER_TO_COL = ["color", "size", "symbol", "opacity", "colors"];
 
-const isOnClick = (types: string[]) => (types?.length ? types.every(t => t === "pie") : false);
+const isOnClick = (types: string[]) => (types?.length ? types.every((t) => t === "pie") : false);
 
 interface WithpointNumbers {
     pointNumbers: number[];
@@ -166,10 +167,11 @@ interface WithpointNumbers {
 const getPlotIndex = (pt: PlotDatum) =>
     pt.pointIndex === undefined
         ? pt.pointNumber === undefined
-        ? (pt as unknown as WithpointNumbers).pointNumbers?.length
-            ? (pt as unknown as WithpointNumbers).pointNumbers[0]
-            : 0
-        : pt.pointNumber : pt.pointIndex;
+            ? (pt as unknown as WithpointNumbers).pointNumbers?.length
+                ? (pt as unknown as WithpointNumbers).pointNumbers[0]
+                : 0
+            : pt.pointNumber
+        : pt.pointIndex;
 
 const defaultConfig = {
     columns: {} as Record<string, ColumnDesc>,
@@ -191,6 +193,9 @@ const defaultConfig = {
     addIndex: [],
 } as ChartConfig;
 
+const emptyLayout = {} as Record<string, Record<string, unknown>>;
+const emptyData = {} as Record<string, TraceValueType>;
+
 const Chart = (props: ChartProp) => {
     const {
         title = "",
@@ -199,7 +204,7 @@ const Chart = (props: ChartProp) => {
         updateVarName,
         updateVars,
         id,
-        data = {},
+        data = emptyData,
         onRangeChange,
         propagate = true,
     } = props;
@@ -216,14 +221,13 @@ const Chart = (props: ChartProp) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
-    const baseLayout = useDynamicJsonProperty(
-        props.layout,
-        props.defaultLayout || "",
-        {} as Record<string, Record<string, unknown>>
-    );
+    const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
 
     // get props.selected[i] values
     useEffect(() => {
+        if (props.figure) {
+            return;
+        }
         setSelected((sel) => {
             Object.keys(props).forEach((key) => {
                 const res = selectedPropRe.exec(key);
@@ -260,7 +264,7 @@ const Chart = (props: ChartProp) => {
     const config = useDynamicJsonProperty(props.config, props.defaultConfig, defaultConfig);
 
     useEffect(() => {
-        if (refresh || !data[dataKey]) {
+        if (updateVarName && (refresh || !data[dataKey])) {
             const backCols = Object.values(config.columns).map((col) => col.dfid);
             const dtKey = backCols.join("-") + (config.decimators ? `--${config.decimators.join("")}` : "");
             setDataKey(dtKey);
@@ -305,6 +309,14 @@ const Chart = (props: ChartProp) => {
         if (template) {
             baseLayout.template = template;
         }
+        if (props.figure) {
+            return {
+                ...(props.figure[0].layout as Partial<Layout>),
+                ...baseLayout,
+                title: title || baseLayout.title || (props.figure[0].layout as Partial<Layout>).title,
+                clickmode: "event+select",
+            } as Layout;
+        }
         return {
             ...baseLayout,
             title: title || baseLayout.title,
@@ -333,6 +345,7 @@ const Chart = (props: ChartProp) => {
         props.template,
         props.template_Dark_,
         props.template_Light_,
+        props.figure,
     ]);
 
     const style = useMemo(
@@ -345,6 +358,9 @@ const Chart = (props: ChartProp) => {
     const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
 
     const dataPl = useMemo(() => {
+        if (props.figure) {
+            return lastDataPl.current;
+        }
         if (typeof data === "number" && lastDataPl.current) {
             return lastDataPl.current;
         }
@@ -362,7 +378,7 @@ const Chart = (props: ChartProp) => {
                   ret.marker = getArrayValue(config.markers, idx, ret.marker || {});
                   MARKER_TO_COL.forEach((prop) => {
                       const val = (ret.marker as Record<string, unknown>)[prop];
-                      if (val !== undefined && typeof val === "string") {
+                      if (typeof val === "string") {
                           const arr = getValueFromCol(datum, val as string);
                           if (arr.length) {
                               (ret.marker as Record<string, unknown>)[prop] = arr;
@@ -426,7 +442,7 @@ const Chart = (props: ChartProp) => {
               })
             : [];
         return lastDataPl.current;
-    }, [data, config, selected, dataKey]);
+    }, [props.figure, selected, data, config, dataKey]);
 
     const plotConfig = useMemo(() => {
         let plconf = {};
@@ -505,11 +521,13 @@ const Chart = (props: ChartProp) => {
     const getRealIndex = useCallback(
         (index?: number) =>
             typeof index === "number"
-                ? data[dataKey].tp_index
+                ? props.figure
+                    ? index
+                    : data[dataKey].tp_index
                     ? (data[dataKey].tp_index[index] as number)
                     : index
                 : 0,
-        [data, dataKey]
+        [data, dataKey, props.figure]
     );
 
     const onSelect = useCallback(
@@ -542,17 +560,30 @@ const Chart = (props: ChartProp) => {
         <Box id={id} key="div" data-testid={props.testId} className={className} ref={plotRef}>
             <Tooltip title={hover || ""}>
                 <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
-                    <Plot
-                        data={dataPl}
-                        layout={layout}
-                        style={style}
-                        onRelayout={onRelayout}
-                        onAfterPlot={onAfterPlot}
-                        onSelected={isOnClick(config.types) ? undefined : onSelect}
-                        onDeselect={isOnClick(config.types) ? undefined : onSelect}
-                        onClick={isOnClick(config.types) ? onSelect : undefined}
-                        config={plotConfig}
-                    />
+                    {Array.isArray(props.figure) && props.figure.length && props.figure[0].data !== undefined ? (
+                        <Plot
+                            data={props.figure[0].data as Data[]}
+                            layout={layout}
+                            style={style}
+                            onRelayout={onRelayout}
+                            onAfterPlot={onAfterPlot}
+                            onSelected={onSelect}
+                            onDeselect={onSelect}
+                            config={plotConfig}
+                        />
+                    ) : (
+                        <Plot
+                            data={dataPl}
+                            layout={layout}
+                            style={style}
+                            onRelayout={onRelayout}
+                            onAfterPlot={onAfterPlot}
+                            onSelected={isOnClick(config.types) ? undefined : onSelect}
+                            onDeselect={isOnClick(config.types) ? undefined : onSelect}
+                            onClick={isOnClick(config.types) ? onSelect : undefined}
+                            config={plotConfig}
+                        />
+                    )}
                 </Suspense>
             </Tooltip>
         </Box>

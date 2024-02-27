@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -70,7 +70,7 @@ def _inject_section(
         raise TypeError
 
     if add_to_unconflicted_sections:
-        Config._comparator._add_unconflicted_section(section_clazz.name)  # type: ignore
+        Config._comparator._add_unconflicted_section(section_clazz.name)  # type: ignore[attr-defined]
 
     for exposed_configuration_method, configuration_method in configuration_methods:
         setattr(Config, exposed_configuration_method, configuration_method)

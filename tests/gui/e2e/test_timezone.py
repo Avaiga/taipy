@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -67,6 +67,7 @@ def _timezone_test_template(page: "Page", gui: Gui, helpers, time_zone, texts):
     assert text1.inner_text() in texts
 
 
+@pytest.mark.teste2e
 def test_date_only(page: "Page", gui: Gui, helpers):
     page_md = """
 <|{t}|id=text1|>

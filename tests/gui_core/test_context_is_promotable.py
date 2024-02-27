@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -11,17 +11,15 @@
 
 from unittest.mock import Mock, patch
 
-import pytest
-
 from taipy.config.common.scope import Scope
-from taipy.core import Job, Scenario, Task
+from taipy.core import Job, JobId, Scenario, Task
 from taipy.core.data.pickle import PickleDataNode
 from taipy.gui_core._context import _GuiCoreContext
 
-a_scenario = Scenario("scenario_config_id", [], {}, sequences={"sequence": {}})
+a_scenario = Scenario("scenario_config_id", None, {}, sequences={"sequence": {}})
 a_task = Task("task_config_id", {}, print)
-a_job = Job("JOB_job_id", a_task, "submit_id", a_scenario.id)
-a_job.isfinished = lambda s: True
+a_job = Job(JobId("JOB_job_id"), a_task, "submit_id", a_scenario.id)
+a_job.isfinished = lambda s: True  # type: ignore[attr-defined]
 a_datanode = PickleDataNode("data_node_config_id", Scope.SCENARIO)
 
 

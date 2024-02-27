@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -10,9 +10,11 @@
 # specific language governing permissions and limitations under the License.
 
 from abc import abstractmethod
-from typing import Callable, Iterable, List, Optional, Union
+from typing import Callable, Iterable, Optional, Union
 
+from .._entity.submittable import Submittable
 from ..job.job import Job
+from ..submission.submission import Submission
 from ..task.task import Task
 
 
@@ -28,12 +30,13 @@ class _AbstractOrchestrator:
     @abstractmethod
     def submit(
         cls,
-        sequence,
+        submittable: Submittable,
         callbacks: Optional[Iterable[Callable]],
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
-    ) -> List[Job]:
+        **properties,
+    ) -> Submission:
         raise NotImplementedError
 
     @classmethod
@@ -45,10 +48,11 @@ class _AbstractOrchestrator:
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
-    ) -> Job:
+        **properties,
+    ) -> Submission:
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def cancel_job(cls, job):
+    def cancel_job(cls, job: Job):
         raise NotImplementedError

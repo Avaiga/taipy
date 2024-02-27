@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -14,7 +14,6 @@ import pickle
 from datetime import datetime, timedelta
 from typing import Any, List, Optional, Set
 
-import modin.pandas as pd
 from taipy.config.common.scope import Scope
 
 from .._backup._backup import _replace_in_backup_file
@@ -103,10 +102,12 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
             editor_expiration_date,
             **properties,
         )
+        if self._path and ".data" in self._path:
+            self._path = self._migrate_path(self.storage_type(), self._path)
+
         if self._path is None:
             self._path = self._build_path(self.storage_type())
-        if not self._last_edit_date and os.path.exists(self._path):
-            self._last_edit_date = datetime.now()
+
         if default_value is not None and not os.path.exists(self._path):
             self._write(default_value)
             self._last_edit_date = datetime.now()
@@ -119,6 +120,8 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
                     }
                 )
             )
+        if not self._last_edit_date and os.path.exists(self._path):
+            self._last_edit_date = datetime.now()
 
         self._TAIPY_PROPERTIES.update(
             {
@@ -152,12 +155,9 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
         return self._is_generated
 
     def _read(self):
-        os.environ["MODIN_PERSISTENT_PICKLE"] = "True"
         with open(self._path, "rb") as pf:
             return pickle.load(pf)
 
     def _write(self, data):
-        if isinstance(data, (pd.DataFrame, pd.Series)):
-            os.environ["MODIN_PERSISTENT_PICKLE"] = "True"
         with open(self._path, "wb") as pf:
             pickle.dump(data, pf)

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -91,7 +91,7 @@ class DataNode(_Entity, _Labeled):
     def __init__(
         self,
         config_id,
-        scope: Scope = Scope(Scope.SCENARIO),
+        scope: Scope = Scope(Scope.SCENARIO),  # noqa: B008
         id: Optional[DataNodeId] = None,
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
@@ -109,7 +109,7 @@ class DataNode(_Entity, _Labeled):
         self._owner_id = owner_id
         self._parent_ids = parent_ids or set()
         self._scope = scope
-        self._last_edit_date = last_edit_date
+        self._last_edit_date: Optional[datetime] = last_edit_date
         self._edit_in_progress = edit_in_progress
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
         self._validity_period = validity_period
@@ -463,7 +463,6 @@ class DataNode(_Entity, _Labeled):
     def _read(self):
         raise NotImplementedError
 
-    @abstractmethod
     def _append(self, data):
         raise NotImplementedError
 

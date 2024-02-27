@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -40,9 +40,9 @@ class _GuiSection(UniqueSection):
     def _from_dict(cls, as_dict: t.Dict[str, t.Any], *_):
         return _GuiSection(property_list=list(default_config), **as_dict)
 
-    def _update(self, as_dict: t.Dict[str, t.Any]):
+    def _update(self, config_as_dict: t.Dict[str, t.Any], default_section=None):
         if self._property_list:
-            as_dict = {k: v for k, v in as_dict.items() if k in self._property_list}
+            as_dict = {k: v for k, v in config_as_dict.items() if k in self._property_list}
         self._properties.update(as_dict)
 
     @staticmethod

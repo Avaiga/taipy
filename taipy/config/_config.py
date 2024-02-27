@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -68,11 +68,9 @@ class _Config:
                 entity_config[self.DEFAULT_KEY] = other_entity_configs[self.DEFAULT_KEY]
         for cfg_id, sub_config in other_entity_configs.items():
             if cfg_id != self.DEFAULT_KEY:
-                if cfg_id in entity_config:
-                    entity_config[cfg_id]._update(sub_config._to_dict(), entity_config.get(self.DEFAULT_KEY))
-                else:
+                if cfg_id not in entity_config:
                     entity_config[cfg_id] = copy(sub_config)
-                    entity_config[cfg_id]._update(sub_config._to_dict(), entity_config.get(self.DEFAULT_KEY))
+                entity_config[cfg_id]._update(sub_config._to_dict(), entity_config.get(self.DEFAULT_KEY))
             self.__point_nested_section_to_self(sub_config)
 
     def __point_nested_section_to_self(self, section):

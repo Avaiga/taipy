@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -10,13 +10,18 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime, timedelta
+from importlib import util
 from inspect import isclass
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._mongo_connector import _connect_mongodb
+from ..common._check_dependencies import _check_dependency_is_installed
+
+if util.find_spec("pymongo"):
+    from ..common._mongo_connector import _connect_mongodb
+
 from ..data.operator import JoinOperator, Operator
 from ..exceptions.exceptions import InvalidCustomDocument, MissingRequiredProperty
 from .data_node import DataNode
@@ -99,6 +104,7 @@ class MongoCollectionDataNode(DataNode):
         editor_expiration_date: Optional[datetime] = None,
         properties: Dict = None,
     ):
+        _check_dependency_is_installed("Mongo Data Node", "pymongo")
         if properties is None:
             properties = {}
         required = self._REQUIRED_PROPERTIES
@@ -149,7 +155,7 @@ class MongoCollectionDataNode(DataNode):
         if callable(custom_encoder):
             self._encoder = custom_encoder
 
-        if not self._last_edit_date:
+        if not self._last_edit_date:  # type: ignore
             self._last_edit_date = datetime.now()
 
         self._TAIPY_PROPERTIES.update(
@@ -178,11 +184,11 @@ class MongoCollectionDataNode(DataNode):
 
     def filter(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
         cursor = self._read_by_query(operators, join_operator)
-        return list(map(lambda row: self._decoder(row), cursor))
+        return [self._decoder(row) for row in cursor]
 
     def _read(self):
         cursor = self._read_by_query()
-        return list(map(lambda row: self._decoder(row), cursor))
+        return [self._decoder(row) for row in cursor]
 
     def _read_by_query(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
         """Query from a Mongo collection, exclude the _id field"""

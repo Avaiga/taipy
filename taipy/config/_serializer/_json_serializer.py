@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -32,7 +32,7 @@ class _JsonSerializer(_BaseSerializer):
             return cls._from_dict(config_as_dict)
         except json.JSONDecodeError as e:
             error_msg = f"Can not load configuration {e}"
-            raise LoadingError(error_msg)
+            raise LoadingError(error_msg) from None
 
     @classmethod
     def _serialize(cls, configuration: _Config) -> str:

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -339,13 +339,11 @@ def test_publish_creation_event():
     expected_event_entity_id = [cycle.id, dn.id, task.id, sequence.id, scenario.id]
 
     assert all(
-        [
-            event.entity_type == expected_event_types[i]
-            and event.entity_id == expected_event_entity_id[i]
-            and event.operation == EventOperation.CREATION
-            and event.attribute_name is None
-            for i, event in enumerate(published_events)
-        ]
+        event.entity_type == expected_event_types[i]
+        and event.entity_id == expected_event_entity_id[i]
+        and event.operation == EventOperation.CREATION
+        and event.attribute_name is None
+        for i, event in enumerate(published_events)
     )
 
 
@@ -538,13 +536,11 @@ def test_publish_update_event():
     expected_event_operation_type = [EventOperation.UPDATE] * len(expected_event_types)
 
     assert all(
-        [
-            event.entity_type == expected_event_types[i]
-            and event.entity_id == expected_event_entity_id[i]
-            and event.operation == expected_event_operation_type[i]
-            and event.attribute_name == expected_attribute_names[i]
-            for i, event in enumerate(published_events)
-        ]
+        event.entity_type == expected_event_types[i]
+        and event.entity_id == expected_event_entity_id[i]
+        and event.operation == expected_event_operation_type[i]
+        and event.attribute_name == expected_attribute_names[i]
+        for i, event in enumerate(published_events)
     )
 
 
@@ -686,13 +682,11 @@ def test_publish_update_event_in_context_manager():
     ]
 
     assert all(
-        [
-            event.entity_type == expected_event_types[i]
-            and event.entity_id == expected_event_entity_id[i]
-            and event.operation == EventOperation.UPDATE
-            and event.attribute_name == expected_attribute_names[i]
-            for i, event in enumerate(published_events)
-        ]
+        event.entity_type == expected_event_types[i]
+        and event.entity_id == expected_event_entity_id[i]
+        and event.operation == EventOperation.UPDATE
+        and event.attribute_name == expected_attribute_names[i]
+        for i, event in enumerate(published_events)
     )
 
 
@@ -713,7 +707,8 @@ def test_publish_submission_event():
 
     # Test SUBMISSION Event
 
-    job = scenario.submit()[0]
+    submission = scenario.submit()
+    job = submission.jobs[0]
 
     assert registration_queue.qsize() == 6
     published_events = []
@@ -737,15 +732,13 @@ def test_publish_submission_event():
         EventEntityType.SUBMISSION,
         EventEntityType.SCENARIO,
     ]
-    expected_event_entity_id = [job.submit_id, job.id, job.submit_id, job.id, job.submit_id, scenario.id]
+    expected_event_entity_id = [submission.id, job.id, submission.id, job.id, submission.id, scenario.id]
     assert all(
-        [
-            event.entity_type == expected_event_types[i]
-            and event.entity_id == expected_event_entity_id[i]
-            and event.operation == expected_operations[i]
-            and event.attribute_name == expected_attribute_names[i]
-            for i, event in enumerate(published_events)
-        ]
+        event.entity_type == expected_event_types[i]
+        and event.entity_id == expected_event_entity_id[i]
+        and event.operation == expected_operations[i]
+        and event.attribute_name == expected_attribute_names[i]
+        for i, event in enumerate(published_events)
     )
 
 
@@ -763,7 +756,8 @@ def test_publish_deletion_event():
     task = scenario.tasks[task_config.id]
     dn = scenario.data_nodes[dn_config.id]
     sequence = scenario.sequences["sequence_config"]
-    job = scenario.submit()[0]
+    submission = scenario.submit()
+    job = submission.jobs[0]
 
     assert registration_queue.qsize() == 11
     while registration_queue.qsize() > 0:
@@ -788,17 +782,15 @@ def test_publish_deletion_event():
         EventEntityType.SUBMISSION,
     ]
 
-    expected_event_entity_id = [cycle.id, sequence.id, scenario.id, task.id, job.id, dn.id, job.submit_id]
+    expected_event_entity_id = [cycle.id, sequence.id, scenario.id, task.id, job.id, dn.id, submission.id]
     expected_event_operation_type = [EventOperation.DELETION] * len(expected_event_types)
 
     assert all(
-        [
-            event.entity_type == expected_event_types[i]
-            and event.entity_id == expected_event_entity_id[i]
-            and event.operation == expected_event_operation_type[i]
-            and event.attribute_name is None
-            for i, event in enumerate(published_events)
-        ]
+        event.entity_type == expected_event_types[i]
+        and event.entity_id == expected_event_entity_id[i]
+        and event.operation == expected_event_operation_type[i]
+        and event.attribute_name is None
+        for i, event in enumerate(published_events)
     )
 
     scenario = tp.create_scenario(scenario_config)
@@ -810,7 +802,7 @@ def test_publish_deletion_event():
         registration_queue.get()
 
     tp.clean_all_entities_by_version()
-    assert registration_queue.qsize() == 5
+    assert registration_queue.qsize() == 6
 
     published_events = []
     while registration_queue.qsize() != 0:
@@ -818,19 +810,18 @@ def test_publish_deletion_event():
 
     expected_event_types = [
         EventEntityType.JOB,
+        EventEntityType.SUBMISSION,
         EventEntityType.CYCLE,
         EventEntityType.SCENARIO,
         EventEntityType.TASK,
         EventEntityType.DATA_NODE,
     ]
-    expected_event_entity_id = [None, cycle.id, scenario.id, None, None]
+    expected_event_entity_id = [None, None, cycle.id, scenario.id, None, None]
 
     assert all(
-        [
-            event.entity_type == expected_event_types[i]
-            and event.entity_id == expected_event_entity_id[i]
-            and event.operation == EventOperation.DELETION
-            and event.attribute_name is None
-            for i, event in enumerate(published_events)
-        ]
+        event.entity_type == expected_event_types[i]
+        and event.entity_id == expected_event_entity_id[i]
+        and event.operation == EventOperation.DELETION
+        and event.attribute_name is None
+        for i, event in enumerate(published_events)
     )

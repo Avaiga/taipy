@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -52,7 +52,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
     @property
     def _storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.core.storage_folder)
+        return pathlib.Path(Config.core.taipy_storage_folder)
 
     ###############################
     # ##   Inherited methods   ## #
@@ -75,7 +75,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         try:
             file_content = self.__read_file(path)
         except (FileNotFoundError, FileCannotBeRead):
-            raise ModelNotFound(str(self.dir_path), entity_id)
+            raise ModelNotFound(str(self.dir_path), entity_id) from None
 
         return self.__file_content_to_entity(file_content)
 
@@ -93,7 +93,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         try:
             self.__get_path(entity_id).unlink()
         except FileNotFoundError:
-            raise ModelNotFound(str(self.dir_path), entity_id)
+            raise ModelNotFound(str(self.dir_path), entity_id) from None
 
     def _delete_all(self):
         shutil.rmtree(self.dir_path, ignore_errors=True)
@@ -189,10 +189,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     ):
         try:
             files = filter(lambda f: config_id in f.name, self.dir_path.iterdir())
-            entities = map(
-                lambda f: self.__file_content_to_entity(self.__filter_by(f, filters)),
-                files,
-            )
+            entities = (self.__file_content_to_entity(self.__filter_by(f, filters)) for f in files)
             corresponding_entities = filter(
                 lambda e: e is not None and e.config_id == config_id and e.owner_id == owner_id,  # type: ignore
                 entities,
@@ -258,4 +255,4 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
                 file_content = f.read()
             return file_content
         except Exception:
-            raise FileCannotBeRead(str(filepath))
+            raise FileCannotBeRead(str(filepath)) from None

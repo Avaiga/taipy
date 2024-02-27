@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Avaiga Private Limited
+ * Copyright 2021-2024 Avaiga Private Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -11,16 +11,26 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useCallback, useEffect, useMemo, CSSProperties, MouseEvent } from "react";
-import TableCell, { TableCellProps } from "@mui/material/TableCell";
+import React, {
+    useState,
+    useCallback,
+    useEffect,
+    useMemo,
+    CSSProperties,
+    MouseEvent,
+    ChangeEvent,
+    SyntheticEvent,
+} from "react";
+import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import Input from "@mui/material/Input";
+import TableCell, { TableCellProps } from "@mui/material/TableCell";
+import Switch from "@mui/material/Switch";
 import IconButton from "@mui/material/IconButton";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import Switch from "@mui/material/Switch";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { BaseDateTimePickerSlotsComponentsProps } from "@mui/x-date-pickers/DateTimePicker/shared";
@@ -28,7 +38,8 @@ import { isValid } from "date-fns";
 
 import { FormatConfig } from "../../context/taipyReducers";
 import { dateToString, getDateTime, getDateTimeString, getNumberString, getTimeZonedDate } from "../../utils/index";
-import { TaipyActiveProps, TaipyMultiSelectProps } from "./utils";
+import { TaipyActiveProps, TaipyMultiSelectProps, getSuffixedClassNames } from "./utils";
+import { FilterOptionsState, TextField } from "@mui/material";
 
 /**
  * A column description as received by the backend.
@@ -65,6 +76,10 @@ export interface ColumnDesc {
     /** The flag that allows the user to aggregate the column. */
     groupBy?: boolean;
     widthHint?: number;
+    /** The list of values that can be used on edit. */
+    lov?: string[];
+    /** If true the user can enter any value besides the lov values. */
+    freeLov?: boolean;
 }
 
 export const DEFAULT_SIZE = "small";
@@ -250,6 +265,10 @@ const setInputFocus = (input: HTMLInputElement) => input && input.focus();
 
 const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotsComponentsProps<Date>;
 
+const filter = createFilterOptions<string>();
+const getOptionKey = (option: string) => (Array.isArray(option) ? option[0] : option);
+const getOptionLabel = (option: string) => (Array.isArray(option) ? option[1] : option);
+
 export const EditableCell = (props: EditableCellProps) => {
     const {
         onValidation,
@@ -268,8 +287,9 @@ export const EditableCell = (props: EditableCellProps) => {
     const [edit, setEdit] = useState(false);
     const [deletion, setDeletion] = useState(false);
 
-    const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setVal(e.target.value), []);
-    const onBoolChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setVal(e.target.checked), []);
+    const onChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setVal(e.target.value), []);
+    const onCompleteChange = useCallback((e: SyntheticEvent, value: string | null) => setVal(value), []);
+    const onBoolChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setVal(e.target.checked), []);
     const onDateChange = useCallback((date: Date | null) => setVal(date), []);
 
     const withTime = useMemo(() => !!colDesc.format && colDesc.format.toLowerCase().includes("h"), [colDesc.format]);
@@ -327,7 +347,7 @@ export const EditableCell = (props: EditableCellProps) => {
     );
 
     const onKeyDown = useCallback(
-        (e: React.KeyboardEvent<HTMLInputElement>) => {
+        (e: React.KeyboardEvent<HTMLElement>) => {
             switch (e.key) {
                 case "Enter":
                     onCheckClick();
@@ -375,12 +395,35 @@ export const EditableCell = (props: EditableCellProps) => {
         [onSelection, rowIndex, colDesc.dfid]
     );
 
+    const filterOptions = useCallback(
+        (options: string[], params: FilterOptionsState<string>) => {
+            const filtered = filter(options, params);
+            if (colDesc.freeLov) {
+                const { inputValue } = params;
+                if (
+                    inputValue &&
+                    !options.some((option) => inputValue == (Array.isArray(option) ? option[1] : option))
+                ) {
+                    filtered.push(inputValue);
+                }
+            }
+            return filtered;
+        },
+        [colDesc.freeLov]
+    );
+
     useEffect(() => {
         !onValidation && setEdit(false);
     }, [onValidation]);
 
     return (
-        <TableCell {...getCellProps(colDesc, tableCellProps)} className={className} title={tooltip}>
+        <TableCell
+            {...getCellProps(colDesc, tableCellProps)}
+            className={
+                onValidation ? getSuffixedClassNames(className || "tpc", edit ? "-editing" : "-editable") : className
+            }
+            title={tooltip}
+        >
             {edit ? (
                 colDesc.type?.startsWith("bool") ? (
                     <Box sx={cellBoxSx}>
@@ -420,6 +463,42 @@ export const EditableCell = (props: EditableCellProps) => {
                                 sx={tableFontSx}
                             />
                         )}
+                        <Box sx={iconsWrapperSx}>
+                            <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
+                                <CheckIcon fontSize="inherit" />
+                            </IconButton>
+                            <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
+                                <ClearIcon fontSize="inherit" />
+                            </IconButton>
+                        </Box>
+                    </Box>
+                ) : colDesc.lov ? (
+                    <Box sx={cellBoxSx}>
+                        <Autocomplete
+                            autoComplete={true}
+                            fullWidth
+                            selectOnFocus={!!colDesc.freeLov}
+                            clearOnBlur={!!colDesc.freeLov}
+                            handleHomeEndKeys={!!colDesc.freeLov}
+                            options={colDesc.lov}
+                            getOptionKey={getOptionKey}
+                            getOptionLabel={getOptionLabel}
+                            filterOptions={filterOptions}
+                            freeSolo={!!colDesc.freeLov}
+                            value={val as string}
+                            onChange={onCompleteChange}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    fullWidth
+                                    inputRef={setInputFocus}
+                                    onChange={colDesc.freeLov ? onChange : undefined}
+                                    margin="dense"
+                                    variant="standard"
+                                    sx={tableFontSx}
+                                />
+                            )}
+                        />
                         <Box sx={iconsWrapperSx}>
                             <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
                                 <CheckIcon fontSize="inherit" />

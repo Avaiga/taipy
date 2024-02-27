@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -53,9 +53,9 @@ builder_py_file = "./taipy/gui/builder/__init__.py"
 builder_pyi_file = builder_py_file + "i"
 with open("./taipy/gui/viselements.json", "r") as file:
     viselements = json.load(file)
-with open("./tools/builder/block.txt", "r") as file:
+with open("./tools/gui/builder/block.txt", "r") as file:
     block_template = file.read()
-with open("./tools/builder/control.txt", "r") as file:
+with open("./tools/gui/builder/control.txt", "r") as file:
     control_template = file.read()
 
 os.system(f"pipenv run stubgen {builder_py_file} --no-import --parse-only --export-less -o ./")

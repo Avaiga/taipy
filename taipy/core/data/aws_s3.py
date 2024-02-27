@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -9,15 +9,19 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import boto3
 from datetime import datetime, timedelta
-from inspect import isclass
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from importlib import util
+from typing import Any, Dict, List, Optional, Set
+
+from ..common._check_dependencies import _check_dependency_is_installed
+
+if util.find_spec("boto3"):
+    import boto3
 
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..exceptions.exceptions import InvalidCustomDocument, MissingRequiredProperty
+from ..exceptions.exceptions import MissingRequiredProperty
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
@@ -94,6 +98,7 @@ class S3ObjectDataNode(DataNode):
         editor_expiration_date: Optional[datetime] = None,
         properties: Optional[Dict] = None,
     ):
+        _check_dependency_is_installed("S3 Data Node", "boto3")
         if properties is None:
             properties = {}
         required = self._REQUIRED_PROPERTIES
@@ -123,7 +128,7 @@ class S3ObjectDataNode(DataNode):
             aws_secret_access_key=properties.get(self.__AWS_SECRET_ACCESS_KEY),
         )
 
-        if not self._last_edit_date:
+        if not self._last_edit_date:  # type: ignore
             self._last_edit_date = datetime.now()
 
         self._TAIPY_PROPERTIES.update(

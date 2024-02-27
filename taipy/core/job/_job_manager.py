@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -50,21 +50,23 @@ class _JobManager(_Manager[Job], _VersionMixin):
             force=force,
             version=version,
         )
-        cls._set(job)
-        Notifier.publish(_make_event(job, EventOperation.CREATION))
         job._on_status_change(*callbacks)
+        cls._set(job)
+
+        Notifier.publish(_make_event(job, EventOperation.CREATION))
+
         return job
 
     @classmethod
     def _delete(cls, job: Job, force=False):
-        if job.is_finished() or force:
+        if cls._is_deletable(job) or force:
             super()._delete(job.id)
             from .._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
 
             _JobDispatcher._pop_dispatched_process(job.id)
         else:
             err = JobNotDeletedException(job.id)
-            cls._logger.warning(err)
+            cls._logger.error(err)
             raise err
 
     @classmethod
@@ -89,6 +91,6 @@ class _JobManager(_Manager[Job], _VersionMixin):
     def _is_deletable(cls, job: Union[Job, JobId]) -> bool:
         if isinstance(job, str):
             job = cls._get(job)
-        if job.is_finished():
-            return True
-        return False
+        if not job.is_finished():
+            return False
+        return True

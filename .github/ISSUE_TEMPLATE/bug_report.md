@@ -13,12 +13,12 @@ A complete and clear description of the problem.
 **How to reproduce**
 
 - A code fragment
-    ```
+    ```python
     from taipy import ...
     ```
 
 - And/or configuration files or code:
-    ```
+    ```python
     from taipy import Config;
 
 
@@ -44,4 +44,3 @@ and any other relevant information.
 **Acceptance Criteria**
 - [ ] Ensure new code is unit tested, and check code coverage is at least 90%
 - [ ] Create related issue in taipy-doc for documentation and Release Notes if relevant
-

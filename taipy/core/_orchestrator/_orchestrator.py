@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -24,8 +24,8 @@ from ..data._data_manager_factory import _DataManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..job.job_id import JobId
-from ..scenario.scenario import Scenario
 from ..submission._submission_manager_factory import _SubmissionManagerFactory
+from ..submission.submission import Submission
 from ..task.task import Task
 from ._abstract_orchestrator import _AbstractOrchestrator
 
@@ -52,7 +52,8 @@ class _Orchestrator(_AbstractOrchestrator):
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
-    ) -> List[Job]:
+        **properties,
+    ) -> Submission:
         """Submit the given `Scenario^` or `Sequence^` for an execution.
 
         Parameters:
@@ -64,15 +65,17 @@ class _Orchestrator(_AbstractOrchestrator):
                 finished in asynchronous mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
                 before returning.
+             **properties (dict[str, any]): A keyworded variable length list of user additional arguments
+                that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
         Returns:
-            The created Jobs.
+            The created `Submission^` containing the information about the submission.
         """
         submission = _SubmissionManagerFactory._build_manager()._create(
             submittable.id,  # type: ignore
             submittable._ID_PREFIX,  # type: ignore
             getattr(submittable, "config_id", None),
+            **properties,
         )
-
         jobs = []
         tasks = submittable._get_sorted_tasks()
         with cls.lock:
@@ -83,22 +86,18 @@ class _Orchestrator(_AbstractOrchestrator):
                             task,
                             submission.id,
                             submission.entity_id,
-                            callbacks=itertools.chain([submission._update_submission_status], callbacks or []),
+                            callbacks=itertools.chain([cls._update_submission_status], callbacks or []),
                             force=force,  # type: ignore
                         )
                     )
-
         submission.jobs = jobs  # type: ignore
-
         cls._orchestrate_job_to_run_or_block(jobs)
-
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         else:
             if wait:
-                cls.__wait_until_job_finished(jobs, timeout=timeout)
-
-        return jobs
+                cls._wait_until_job_finished(jobs, timeout=timeout or 0)
+        return submission
 
     @classmethod
     def submit_task(
@@ -108,44 +107,44 @@ class _Orchestrator(_AbstractOrchestrator):
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
-    ) -> Job:
+        **properties,
+    ) -> Submission:
         """Submit the given `Task^` for an execution.
 
         Parameters:
              task (Task^): The task to submit for execution.
-             submit_id (str): The optional id to differentiate each submission.
              callbacks: The optional list of functions that should be executed on job status change.
              force (bool): Enforce execution of the task even if its output data nodes are cached.
              wait (bool): Wait for the orchestrated job created from the task submission to be finished
                 in asynchronous mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the job
                 to be finished before returning.
+             **properties (dict[str, any]): A keyworded variable length list of user additional arguments
+                that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
         Returns:
-            The created `Job^`.
+            The created `Submission^` containing the information about the submission.
         """
-        submission = _SubmissionManagerFactory._build_manager()._create(task.id, task._ID_PREFIX, task.config_id)
+        submission = _SubmissionManagerFactory._build_manager()._create(
+            task.id, task._ID_PREFIX, task.config_id, **properties
+        )
         submit_id = submission.id
         with cls.lock:
             job = cls._lock_dn_output_and_create_job(
                 task,
                 submit_id,
                 submission.entity_id,
-                itertools.chain([submission._update_submission_status], callbacks or []),
+                itertools.chain([cls._update_submission_status], callbacks or []),
                 force,
             )
-
         jobs = [job]
         submission.jobs = jobs  # type: ignore
-
         cls._orchestrate_job_to_run_or_block(jobs)
-
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         else:
             if wait:
-                cls.__wait_until_job_finished(job, timeout=timeout)
-
-        return job
+                cls._wait_until_job_finished(job, timeout=timeout or 0)
+        return submission
 
     @classmethod
     def _lock_dn_output_and_create_job(
@@ -165,6 +164,10 @@ class _Orchestrator(_AbstractOrchestrator):
         return job
 
     @classmethod
+    def _update_submission_status(cls, job: Job):
+        _SubmissionManagerFactory._build_manager()._get(job.submit_id)._update_submission_status(job)
+
+    @classmethod
     def _orchestrate_job_to_run_or_block(cls, jobs: List[Job]):
         blocked_jobs = []
         pending_jobs = []
@@ -182,23 +185,20 @@ class _Orchestrator(_AbstractOrchestrator):
             cls.jobs_to_run.put(job)
 
     @classmethod
-    def __wait_until_job_finished(cls, jobs: Union[List[Job], Job], timeout: Optional[Union[float, int]] = None):
-        def __check_if_timeout(start, timeout):
-            if timeout:
-                return (datetime.now() - start).seconds < timeout
-            return True
+    def _wait_until_job_finished(cls, jobs: Union[List[Job], Job], timeout: float = 0):
+        #  Note: this method should be prefixed by two underscores, but it has only one, so it can be mocked in tests.
+        def __check_if_timeout(st, to):
+            return (datetime.now() - st).seconds < to
 
         start = datetime.now()
-        jobs = jobs if isinstance(jobs, Iterable) else [jobs]
+        jobs = list(jobs) if isinstance(jobs, Iterable) else [jobs]
         index = 0
-
         while __check_if_timeout(start, timeout) and index < len(jobs):
             try:
                 if jobs[index]._is_finished():
                     index = index + 1
                 else:
                     sleep(0.5)  # Limit CPU usage
-
             except Exception:
                 pass
 
@@ -284,7 +284,7 @@ class _Orchestrator(_AbstractOrchestrator):
 
     @classmethod
     def __remove_jobs_to_run(cls, jobs):
-        new_jobs_to_run: Queue = Queue()
+        new_jobs_to_run = Queue()
         while not cls.jobs_to_run.empty():
             current_job = cls.jobs_to_run.get()
             if current_job not in jobs:

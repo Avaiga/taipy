@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -19,8 +19,6 @@ import pandas as pd
 import taipy.core.taipy as tp
 from taipy.config import Config
 from taipy.core import Core, Status
-from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from taipy.core.config.job_config import JobConfig
 
 # ################################  USER FUNCTIONS  ##################################
 
@@ -71,8 +69,6 @@ def return_a_number_with_sleep():
 
 
 def test_skipped_jobs():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _OrchestratorFactory._build_orchestrator()
     input_config = Config.configure_data_node("input_dn")
     intermediate_config = Config.configure_data_node("intermediate")
     output_config = Config.configure_data_node("output_dn")
@@ -115,9 +111,6 @@ def test_complex():
     # |      |
     # |      |
     # t4     d4
-
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _OrchestratorFactory._build_orchestrator()
 
     csv_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
     excel_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")

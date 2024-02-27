@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Avaiga Private Limited
+ * Copyright 2021-2024 Avaiga Private Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -16,17 +16,21 @@ import { DefaultNodeModel, DefaultNodeModelOptions, DefaultPortModel, DefaultPor
 import { IN_PORT_NAME, OUT_PORT_NAME } from "../utils/diagram";
 import { getChildType } from "../utils/childtype";
 import { DataNode, Task } from "../utils/names";
+import { TaskStatus } from "../utils/types";
 
 export class TaipyDiagramModel extends DiagramModel {}
 
 export interface TaipyNodeModelOptions extends DefaultNodeModelOptions {
     subtype?: string;
+    status?: TaskStatus;
 }
 export class TaipyNodeModel extends DefaultNodeModel {
     subtype: string | undefined;
+    status: TaskStatus | undefined;
     constructor(options?: TaipyNodeModelOptions) {
         super(options);
         this.subtype = options?.subtype;
+        this.status = options?.status
     }
 }
 

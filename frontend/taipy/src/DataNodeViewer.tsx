@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Avaiga Private Limited
+ * Copyright 2021-2024 Avaiga Private Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,6 +12,7 @@
  */
 
 import React, {
+    Fragment,
     useState,
     useCallback,
     useContext,
@@ -185,6 +186,12 @@ const getValidDataNode = (datanode: DataNodeFull | DataNodeFull[]) =>
 
 const invalidDatanode: DataNodeFull = ["", "", "", "", "", "", "", "", -1, [], false, "", false, false];
 
+enum TabValues {
+    Data,
+    Properties,
+    History,
+}
+
 const DataNodeViewer = (props: DataNodeViewerProps) => {
     const {
         id = "",
@@ -225,18 +232,18 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     ] = datanode;
 
     // Tabs
-    const [tabValue, setTabValue] = useState(0);
+    const [tabValue, setTabValue] = useState<TabValues>(TabValues.Data);
     const handleTabChange = useCallback(
         (_: SyntheticEvent, newValue: number) => {
             if (valid) {
-                if (newValue == 1) {
+                if (newValue == TabValues.History) {
                     setHistoryRequested(
                         (req) =>
                             req ||
                             dispatch(createSendActionNameAction(id, module, props.onIdSelect, { history_id: dnId })) ||
                             true
                     );
-                } else if (newValue == 2) {
+                } else if (newValue == TabValues.Data) {
                     setDataRequested(
                         (req) =>
                             req ||
@@ -267,7 +274,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
             if (oldDn === dn) {
                 return oldDn;
             }
-            const isNewDn = oldDn[DataNodeFullProps.id] !== (dn || invalidDatanode)[DataNodeFullProps.id];
+            const newDnId = (dn || invalidDatanode)[DataNodeFullProps.id];
+            const isNewDn = oldDn[DataNodeFullProps.id] !== newDnId;
             // clean lock on change
             if (oldDn[DataNodeFullProps.id] && isNewDn && editLock.current) {
                 dispatch(
@@ -278,17 +286,17 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                 );
             }
             if (!dn || isNewDn) {
-                setTabValue(0);
+                setTabValue(showData ? TabValues.Data : TabValues.Properties);
             }
             if (!dn) {
                 return invalidDatanode;
             }
             editLock.current = dn[DataNodeFullProps.editInProgress];
             setHistoryRequested((req) => {
-                if (req && !isNewDn && tabValue == 1) {
+                if (req && !isNewDn && tabValue == TabValues.History) {
                     dispatch(
                         createSendActionNameAction(id, module, props.onIdSelect, {
-                            history_id: oldDn[DataNodeFullProps.id],
+                            history_id: newDnId,
                         })
                     );
                     return true;
@@ -296,10 +304,13 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                 return false;
             });
             setDataRequested((req) => {
-                if (req && !isNewDn && tabValue == 2) {
+                if (!isNewDn) {
+                    return req;
+                }
+                if (req && tabValue == TabValues.Data) {
                     dispatch(
                         createSendActionNameAction(id, module, props.onIdSelect, {
-                            data_id: oldDn[DataNodeFullProps.id],
+                            data_id: newDnId,
                         })
                     );
                     return true;
@@ -311,7 +322,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
             }
             return dn;
         });
-    }, [props.dataNode, props.defaultDataNode, id, dispatch, module, props.onLock, tabValue, props.onIdSelect]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.dataNode, props.defaultDataNode, showData, id, dispatch, module, props.onLock, props.onIdSelect]);
 
     // clean lock on unmount
     useEffect(
@@ -400,16 +412,15 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     useEffect(() => {
         setLabel(dnLabel);
         setUserExpanded(expanded && valid);
-        setTabValue(0);
         setHistoryRequested(false);
-        setDataRequested(false);
+        setDataRequested(true);
         setViewType(TableViewType);
         setComment("");
     }, [dnId, dnLabel, valid, expanded]);
 
     // Datanode data
-    const dtValue = (props.data && props.data[DatanodeDataProps.value]) ?? undefined;
     const dtType = props.data && props.data[DatanodeDataProps.type];
+    const dtValue = (props.data && props.data[DatanodeDataProps.value]) ?? dtType == "float" ? null : undefined;
     const dtTabular = (props.data && props.data[DatanodeDataProps.tabular]) ?? false;
     const dtError = props.data && props.data[DatanodeDataProps.error];
     const [dataValue, setDataValue] = useState<RowValue | Date>();
@@ -497,23 +508,11 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             <Grid item>
                                 <Typography fontSize="smaller">{dnType}</Typography>
                             </Grid>
-                            <Grid item>{}</Grid>
                         </Grid>
                     </AccordionSummary>
                     <AccordionDetails>
                         <Box sx={tabBoxSx}>
                             <Tabs value={tabValue} onChange={handleTabChange}>
-                                <Tab
-                                    label="Properties"
-                                    id={`${uniqid}-properties`}
-                                    aria-controls={`${uniqid}-dn-tabpanel-properties`}
-                                />
-                                <Tab
-                                    label="History"
-                                    id={`${uniqid}-history`}
-                                    aria-controls={`${uniqid}-dn-tabpanel-history`}
-                                    style={showHistory ? undefined : noDisplay}
-                                />
                                 <Tab
                                     label={
                                         <Grid container alignItems="center">
@@ -536,11 +535,22 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     aria-controls={`${uniqid}-dn-tabpanel-data`}
                                     style={showData ? undefined : noDisplay}
                                 />
+                                <Tab
+                                    label="Properties"
+                                    id={`${uniqid}-properties`}
+                                    aria-controls={`${uniqid}-dn-tabpanel-properties`}
+                                />
+                                <Tab
+                                    label="History"
+                                    id={`${uniqid}-history`}
+                                    aria-controls={`${uniqid}-dn-tabpanel-history`}
+                                    style={showHistory ? undefined : noDisplay}
+                                />
                             </Tabs>
                         </Box>
                         <div
                             role="tabpanel"
-                            hidden={tabValue !== 0}
+                            hidden={tabValue !== TabValues.Properties}
                             id={`${uniqid}-dn-tabpanel-properties`}
                             aria-labelledby={`${uniqid}-properties`}
                         >
@@ -699,20 +709,20 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         </div>
                         <div
                             role="tabpanel"
-                            hidden={tabValue !== 1}
+                            hidden={tabValue !== TabValues.History}
                             id={`${uniqid}-dn-tabpanel-history`}
                             aria-labelledby={`${uniqid}-history`}
                         >
                             {historyRequested && Array.isArray(props.history) ? (
                                 <Grid container spacing={1}>
                                     {props.history.map((edit, idx) => (
-                                        <>
+                                        <Fragment key={`edit-${idx}`}>
                                             {idx != 0 ? (
                                                 <Grid item xs={12}>
                                                     <Divider />
                                                 </Grid>
                                             ) : null}
-                                            <Grid item container key={`edit-${idx}`}>
+                                            <Grid item container>
                                                 <Grid item xs={0.4} sx={editSx}>
                                                     <Box>{(props.history || []).length - idx}</Box>
                                                 </Grid>
@@ -737,7 +747,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                     ) : null}
                                                 </Grid>
                                             </Grid>
-                                        </>
+                                        </Fragment>
                                     ))}
                                 </Grid>
                             ) : (
@@ -746,7 +756,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         </div>
                         <div
                             role="tabpanel"
-                            hidden={tabValue !== 2}
+                            hidden={tabValue !== TabValues.Data}
                             id={`${uniqid}-dn-tabpanel-data`}
                             aria-labelledby={`${uniqid}-data`}
                         >
@@ -835,7 +845,13 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                             sx={FieldNoMaxWidth}
                                                             value={dataValue || ""}
                                                             onChange={onDataValueChange}
-                                                            type={typeof dtValue == "number" ? "number" : undefined}
+                                                            type={
+                                                                typeof dtValue == "number"
+                                                                    ? "number"
+                                                                    : dtType == "float" && dtValue === null
+                                                                    ? "number"
+                                                                    : undefined
+                                                            }
                                                             InputProps={{
                                                                 endAdornment: (
                                                                     <InputAdornment position="end">
@@ -886,6 +902,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                                 {dtType == "date"
                                                                     ? dataValue &&
                                                                       format(dataValue as Date, "yyyy/MM/dd HH:mm:ss")
+                                                                    : dtType == "float" && dtValue === null
+                                                                    ? "NaN"
                                                                     : dtValue}
                                                             </Typography>
                                                         )}

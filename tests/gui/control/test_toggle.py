@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -14,7 +14,7 @@ from taipy.gui import Gui
 
 def test_toggle_md(gui: Gui, helpers):
     md_string = "<|toggle|theme|>"
-    expected_list = ["<Toggle", 'kind="theme"', 'unselectedValue=""']
+    expected_list = ["<Toggle", 'mode="theme"', 'unselectedValue=""']
     helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -44,7 +44,7 @@ def test_toggle_lov_md(gui: Gui, test_client, helpers):
 
 def test_toggle_html_1(gui: Gui, helpers):
     html_string = '<taipy:toggle theme="True" />'
-    expected_list = ["<Toggle", 'kind="theme"', 'unselectedValue=""']
+    expected_list = ["<Toggle", 'mode="theme"', 'unselectedValue=""']
     helpers.test_control_html(gui, html_string, expected_list)
 
 
@@ -64,3 +64,19 @@ def test_toggle_html_2(gui: Gui, test_client, helpers):
         "value={_TpLv_tpec_TpExPr_x_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
+
+def test_toggle_switch_md(gui: Gui, test_client, helpers):
+    gui._bind_var_val("x", True)
+    md_string = "<|{x}|toggle|label=Label|>"
+    expected_list = [
+        "<Toggle",
+        'isSwitch={true}',
+        'defaultValue={true}',
+        'libClassName="taipy-toggle"',
+        'updateVarName="_TpB_tpec_TpExPr_x_TPMDL_0"',
+        'value={_TpB_tpec_TpExPr_x_TPMDL_0}',
+        'label="Label"',
+    ]
+    helpers.test_control_md(gui, md_string, expected_list)
+
+

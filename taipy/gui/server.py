@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -23,17 +23,19 @@ import webbrowser
 from importlib import util
 from random import randint
 
-import __main__
-from flask import Blueprint, Flask, json, jsonify, render_template, send_from_directory
+from flask import Blueprint, Flask, json, jsonify, render_template, request, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from gitignore_parser import parse_gitignore
 from kthread import KThread
-from taipy.logger._taipy_logger import _TaipyLogger
 from werkzeug.serving import is_running_from_reloader
+
+import __main__
+from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._renderers.json import _TaipyJsonProvider
 from .config import ServerConfig
+from .custom._page import _ExternalResourceHandlerManager
 from .utils import _is_in_notebook, _is_port_open, _RuntimeManager
 
 if t.TYPE_CHECKING:
@@ -45,6 +47,7 @@ class _Server:
     __RE_CLOSING_CURLY = re.compile(r"(\})([^\"])")
     __OPENING_CURLY = r"\1&#x7B;"
     __CLOSING_CURLY = r"&#x7D;\2"
+    _RESOURCE_HANDLER_ARG = "tprh"
 
     def __init__(
         self,
@@ -144,6 +147,15 @@ class _Server:
         @taipy_bp.route("/", defaults={"path": ""})
         @taipy_bp.route("/<path:path>")
         def my_index(path):
+            resource_handler_id = request.cookies.get(_Server._RESOURCE_HANDLER_ARG, None)
+            if resource_handler_id is not None:
+                resource_handler = _ExternalResourceHandlerManager().get(resource_handler_id)
+                if resource_handler is None:
+                    return (f"Invalid value for query {_Server._RESOURCE_HANDLER_ARG}", 404)
+                try:
+                    return resource_handler.get_resources(path, static_folder)
+                except Exception as e:
+                    raise RuntimeError("Can't get resources from custom resource handler") from e
             if path == "" or path == "index.html" or "." not in path:
                 try:
                     return render_template(
@@ -159,10 +171,10 @@ class _Server:
                         css_vars=css_vars,
                         base_url=base_url,
                     )
-                except Exception:  # pragma: no cover
+                except Exception:
                     raise RuntimeError(
                         "Something is wrong with the taipy-gui front-end installation. Check that the js bundle has been properly built (is Node.js installed?)."  # noqa: E501
-                    )
+                    ) from None
 
             if path == "taipy.status.json":
                 return self._direct_render_json(self._gui._serve_status(pathlib.Path(template_folder) / path))

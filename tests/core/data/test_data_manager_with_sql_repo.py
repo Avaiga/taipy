@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -19,7 +19,6 @@ from taipy.config.config import Config
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.data._data_manager import _DataManager
-from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.in_memory import InMemoryDataNode
@@ -30,14 +29,8 @@ def file_exists(file_path: str) -> bool:
     return os.path.exists(file_path)
 
 
-def init_managers():
-    _DataManagerFactory._build_manager()._delete_all()
-
-
 class TestDataManager:
     def test_create_data_node_and_modify_properties_does_not_modify_config(self, init_sql_repo):
-        init_managers()
-
         dn_config = Config.configure_data_node(id="name", foo="bar")
         dn = _DataManager._create_and_set(dn_config, None, None)
         assert dn_config.properties.get("foo") == "bar"
@@ -51,23 +44,17 @@ class TestDataManager:
         assert dn.properties.get("baz") == "qux"
 
     def test_create_raises_exception_with_wrong_type(self, init_sql_repo):
-        init_managers()
-
         wrong_type_dn_config = DataNodeConfig(id="foo", storage_type="bar", scope=DataNodeConfig._DEFAULT_SCOPE)
         with pytest.raises(InvalidDataNodeType):
             _DataManager._create_and_set(wrong_type_dn_config, None, None)
 
     def test_create_from_same_config_generates_new_data_node_and_new_id(self, init_sql_repo):
-        init_managers()
-
         dn_config = Config.configure_data_node(id="foo", storage_type="in_memory")
         dn = _DataManager._create_and_set(dn_config, None, None)
         dn_2 = _DataManager._create_and_set(dn_config, None, None)
         assert dn_2.id != dn.id
 
     def test_create_uses_overridden_attributes_in_config_file(self, init_sql_repo):
-        init_managers()
-
         Config.override(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/config.toml"))
 
         csv_dn_cfg = Config.configure_data_node(id="foo", storage_type="csv", path="bar", has_header=True)
@@ -85,14 +72,10 @@ class TestDataManager:
         assert csv_dn.has_header
 
     def test_get_if_not_exists(self, init_sql_repo):
-        init_managers()
-
         with pytest.raises(ModelNotFound):
             _DataManager._repository._load("test_data_node_2")
 
     def test_get_all(self, init_sql_repo):
-        init_managers()
-
         _DataManager._delete_all()
         assert len(_DataManager._get_all()) == 0
         dn_config_1 = Config.configure_data_node(id="foo", storage_type="in_memory")
@@ -106,8 +89,6 @@ class TestDataManager:
         assert len([dn for dn in _DataManager._get_all() if dn.config_id == "baz"]) == 2
 
     def test_get_all_on_multiple_versions_environment(self, init_sql_repo):
-        init_managers()
-
         # Create 5 data nodes with 2 versions each
         # Only version 1.0 has the data node with config_id = "config_id_1"
         # Only version 2.0 has the data node with config_id = "config_id_6"
@@ -143,8 +124,6 @@ class TestDataManager:
         assert len(_DataManager._get_all_by(filters=[{"version": "2.0", "config_id": "config_id_6"}])) == 1
 
     def test_set(self, init_sql_repo):
-        init_managers()
-
         dn = InMemoryDataNode(
             "config_id",
             Scope.SCENARIO,
@@ -171,7 +150,6 @@ class TestDataManager:
         assert _DataManager._get(dn.id).config_id == "foo"
 
     def test_delete(self, init_sql_repo):
-        init_managers()
         _DataManager._delete_all()
 
         dn_1 = InMemoryDataNode("config_id", Scope.SCENARIO, id="id_1")
@@ -197,8 +175,6 @@ class TestDataManager:
     def test_get_or_create(self, init_sql_repo):
         def _get_or_create_dn(config, *args):
             return _DataManager._bulk_get_or_create([config], *args)[config]
-
-        init_managers()
 
         global_dn_config = Config.configure_data_node(
             id="test_data_node", storage_type="in_memory", scope=Scope.GLOBAL, data="In memory Data Node"
@@ -259,8 +235,6 @@ class TestDataManager:
         assert cycle_dn_4.id == cycle_dn_5.id
 
     def test_get_data_nodes_by_config_id(self, init_sql_repo):
-        init_managers()
-
         dn_config_1 = Config.configure_data_node("dn_1", scope=Scope.SCENARIO)
         dn_config_2 = Config.configure_data_node("dn_2", scope=Scope.SCENARIO)
         dn_config_3 = Config.configure_data_node("dn_3", scope=Scope.SCENARIO)
@@ -290,8 +264,6 @@ class TestDataManager:
         assert sorted([dn_3_1.id]) == sorted([sequence.id for sequence in dn_3_datanodes])
 
     def test_get_data_nodes_by_config_id_in_multiple_versions_environment(self, init_sql_repo):
-        init_managers()
-
         dn_config_1 = Config.configure_data_node("dn_1", scope=Scope.SCENARIO)
         dn_config_2 = Config.configure_data_node("dn_2", scope=Scope.SCENARIO)
 

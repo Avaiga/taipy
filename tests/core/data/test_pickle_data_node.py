@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -14,7 +14,6 @@ import pathlib
 from datetime import datetime
 from time import sleep
 
-import modin.pandas as modin_pd
 import pandas as pd
 import pytest
 
@@ -41,7 +40,6 @@ class TestPickleDataNodeEntity:
         import glob
 
         for f in glob.glob("*.p"):
-            print(f"deleting file {f}")
             os.remove(f)
 
     def test_create(self):
@@ -124,38 +122,6 @@ class TestPickleDataNodeEntity:
         assert isinstance(pickle_dict.read(), dict)
         assert pickle_dict.read() == {"bar": 12, "baz": "qux", "quux": [13]}
 
-        default_pandas = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
-        new_pandas_df = pd.DataFrame({"c": [7, 8, 9], "d": [10, 11, 12]})
-
-        default_modin = modin_pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
-        new_modin_df = modin_pd.DataFrame({"c": [7, 8, 9], "d": [10, 11, 12]})
-
-        pickle_pandas = PickleDataNode("foo", Scope.SCENARIO, properties={"default_data": default_pandas})
-        assert isinstance(pickle_pandas.read(), pd.DataFrame)
-        assert default_pandas.equals(pickle_pandas.read())
-        pickle_pandas.write(new_pandas_df)
-        assert new_pandas_df.equals(pickle_pandas.read())
-        assert isinstance(pickle_pandas.read(), pd.DataFrame)
-        pickle_pandas.write(new_modin_df)
-        assert new_modin_df.equals(pickle_pandas.read())
-        assert isinstance(pickle_pandas.read(), modin_pd.DataFrame)
-        pickle_pandas.write(1998)
-        assert pickle_pandas.read() == 1998
-        assert isinstance(pickle_pandas.read(), int)
-
-        pickle_modin = PickleDataNode("foo", Scope.SCENARIO, properties={"default_data": default_modin})
-        assert isinstance(pickle_modin.read(), modin_pd.DataFrame)
-        assert default_modin.equals(pickle_modin.read())
-        pickle_modin.write(new_modin_df)
-        assert new_modin_df.equals(pickle_modin.read())
-        assert isinstance(pickle_modin.read(), modin_pd.DataFrame)
-        pickle_modin.write(new_pandas_df)
-        assert new_pandas_df.equals(pickle_modin.read())
-        assert isinstance(pickle_modin.read(), pd.DataFrame)
-        pickle_modin.write(1998)
-        assert pickle_modin.read() == 1998
-        assert isinstance(pickle_modin.read(), int)
-
     def test_path_overrides_default_path(self):
         dn = PickleDataNode(
             "foo",
@@ -213,3 +179,16 @@ class TestPickleDataNodeEntity:
         dn.write(pd.DataFrame([7, 8, 9]))
         assert new_edit_date < dn.last_edit_date
         os.unlink(temp_file_path)
+
+    def test_migrate_to_new_path(self, tmp_path):
+        _base_path = os.path.join(tmp_path, ".data")
+        path = os.path.join(_base_path, "test.p")
+        # create a file on old path
+        os.mkdir(_base_path)
+        with open(path, "w"):
+            pass
+
+        dn = PickleDataNode("foo", Scope.SCENARIO, properties={"default_data": "bar", "path": path})
+
+        assert ".data" not in dn.path.name
+        assert os.path.exists(dn.path)

@@ -26,7 +26,7 @@ The Extension API is located by the 'taipy-gui' module.
 
 In order to import items from this module, you have to install it, using `npm`.
 The most simple way to install the Taipy GUI Extension module is:
-```
+```bash
 npm i <TAIPY_DIR>/taipy/gui/webapp
 ```
 
@@ -34,7 +34,7 @@ Where *<TAIPY_DIR>* represents the directory where, in the development machine's
 filesystem, the Taipy GUI Python package has been installed.
 
 When the package is installed, your JavaScript code can import items from it:
-```
+```javascript
 import { ... } from "taipy-gui";
 ```
 
@@ -61,11 +61,10 @@ In order for the front-end to notify the backend of a change or query data, an `
 must be created (using the `create*Action()` functions) and dispatched to the React
 context:
 
-```
+```javascript
 const dispatch = useDispatch();
 ...
 const action = create*Action(...);
 ...
 dispatch(action);
 ```
-

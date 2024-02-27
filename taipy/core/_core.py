@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -66,16 +66,19 @@ class Core:
 
         self.__start_dispatcher(force_restart)
 
-    def stop(self):
+    def stop(self, wait: bool = True, timeout: Optional[float] = None):
         """
         Stop the Core service.
-
         This function stops the dispatcher and unblock the Config for update.
+
+        Parameters:
+            wait (bool): If True, the method will wait for the dispatcher to stop.
+            timeout (Optional[float]): The maximum time to wait. If None, the method will wait indefinitely.
         """
         Config.unblock_update()
 
         if self._dispatcher:
-            self._dispatcher = _OrchestratorFactory._remove_dispatcher()
+            self._dispatcher = _OrchestratorFactory._remove_dispatcher(wait, timeout)
             self.__logger.info("Core service has been stopped.")
 
         with self.__class__.__lock_is_running:

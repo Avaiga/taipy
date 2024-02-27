@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -12,9 +12,20 @@
 import typing as t
 from enum import Enum
 
-from taipy.core import Cycle, DataNode, Job, Scenario, Sequence, Task
+from taipy.core import (
+    Cycle,
+    DataNode,
+    Job,
+    Scenario,
+    Sequence,
+    Task,
+    is_deletable,
+    is_editable,
+    is_promotable,
+    is_readable,
+    is_submittable,
+)
 from taipy.core import get as core_get
-from taipy.core import is_deletable, is_editable, is_promotable, is_readable, is_submittable
 from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
 from taipy.gui.utils import _TaipyBase
@@ -66,11 +77,19 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                         if scenario.properties
                         else [],
                         [
-                            (p.id, p.get_simple_label(), is_submittable(p), is_editable(p))
-                            for p in scenario.sequences.values()
+                            (
+                                s.get_simple_label(),
+                                [t.id for t in s.tasks.values()] if hasattr(s, "tasks") else [],
+                                is_submittable(s),
+                                is_editable(s),
+                            )
+                            for s in scenario.sequences.values()
                         ]
                         if hasattr(scenario, "sequences") and scenario.sequences
                         else [],
+                        {t.id: t.get_simple_label() for t in scenario.tasks.values()}
+                        if hasattr(scenario, "tasks")
+                        else {},
                         list(scenario.properties.get("authorized_tags", [])) if scenario.properties else [],
                         is_deletable(scenario),
                         is_promotable(scenario),
@@ -132,6 +151,12 @@ class _GuiCoreScenarioDagAdapter(_TaipyBase):
     @staticmethod
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "ScG"
+
+
+class _GuiCoreScenarioNoUpdate(_TaipyBase, _DoNotUpdate):
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "ScN"
 
 
 class _GuiCoreDatanodeAdapter(_TaipyBase):

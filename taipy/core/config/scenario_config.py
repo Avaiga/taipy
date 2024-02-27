@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -61,15 +61,14 @@ class ScenarioConfig(Section):
         sequences: Optional[Dict[str, List[TaskConfig]]] = None,
         **properties,
     ):
-
         if tasks:
-            self._tasks = list(tasks) if isinstance(tasks, TaskConfig) else copy(tasks)
+            self._tasks = [tasks] if isinstance(tasks, TaskConfig) else copy(tasks)
         else:
             self._tasks = []
 
         if additional_data_nodes:
             self._additional_data_nodes = (
-                list(additional_data_nodes)
+                [additional_data_nodes]
                 if isinstance(additional_data_nodes, DataNodeConfig)
                 else copy(additional_data_nodes)
             )
@@ -159,9 +158,7 @@ class ScenarioConfig(Section):
         }
 
     @classmethod
-    def _from_dict(
-        cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config] = None
-    ) -> "ScenarioConfig":  # type: ignore
+    def _from_dict(cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config] = None) -> "ScenarioConfig":  # type: ignore
         as_dict.pop(cls._ID_KEY, id)
 
         tasks = cls.__get_task_configs(as_dict.pop(cls._TASKS_KEY, list()), config)

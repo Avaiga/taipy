@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -12,39 +12,36 @@
 from datetime import datetime
 from time import sleep
 
+import pytest
+
 from taipy.core import Task
-from taipy.core._repository.db._sql_connection import _SQLConnection
 from taipy.core._version._version_manager_factory import _VersionManagerFactory
+from taipy.core.exceptions.exceptions import SubmissionNotDeletedException
 from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from taipy.core.submission.submission import Submission
 from taipy.core.submission.submission_status import SubmissionStatus
 
 
-def init_managers():
-    _VersionManagerFactory._build_manager()._delete_all()
-    _SubmissionManagerFactory._build_manager()._delete_all()
-
-
 def test_create_submission(scenario, init_sql_repo):
-    init_managers()
-
     submission_1 = _SubmissionManagerFactory._build_manager()._create(
-        scenario.id, scenario._ID_PREFIX, scenario.config_id
+        scenario.id, scenario._ID_PREFIX, scenario.config_id, debug=True, log="log_file", retry_note=5
     )
 
+    assert isinstance(submission_1, Submission)
     assert submission_1.id is not None
     assert submission_1.entity_id == scenario.id
     assert submission_1.jobs == []
+    assert submission_1.properties == {"debug": True, "log": "log_file", "retry_note": 5}
     assert isinstance(submission_1.creation_date, datetime)
     assert submission_1._submission_status == SubmissionStatus.SUBMITTED
 
 
 def test_get_submission(init_sql_repo):
-    init_managers()
-
     submission_manager = _SubmissionManagerFactory._build_manager()
 
-    submission_1 = submission_manager._create("entity_id", "ENTITY_TYPE", "entity_config_id")
+    submission_1 = submission_manager._create(
+        "entity_id", "ENTITY_TYPE", "entity_config_id", debug=True, log="log_file", retry_note=5
+    )
     submission_2 = submission_manager._get(submission_1.id)
 
     assert submission_1.id == submission_2.id
@@ -52,11 +49,11 @@ def test_get_submission(init_sql_repo):
     assert submission_1.jobs == submission_2.jobs
     assert submission_1.creation_date == submission_2.creation_date
     assert submission_1.submission_status == submission_2.submission_status
+    assert submission_1.properties == {"debug": True, "log": "log_file", "retry_note": 5}
+    assert submission_1.properties == submission_2.properties
 
 
 def test_get_all_submission(init_sql_repo):
-    init_managers()
-
     submission_manager = _SubmissionManagerFactory._build_manager()
     version_manager = _VersionManagerFactory._build_manager()
 
@@ -78,8 +75,6 @@ def test_get_all_submission(init_sql_repo):
 
 
 def test_get_latest_submission(init_sql_repo):
-    init_managers()
-
     task_1 = Task("task_config_1", {}, print, id="task_id_1")
     task_2 = Task("task_config_2", {}, print, id="task_id_2")
 
@@ -105,12 +100,15 @@ def test_get_latest_submission(init_sql_repo):
 
 
 def test_delete_submission(init_sql_repo):
-    init_managers()
-
     submission_manager = _SubmissionManagerFactory._build_manager()
 
     submission = Submission("entity_id", "submission_id", "entity_config_id")
     submission_manager._set(submission)
+
+    with pytest.raises(SubmissionNotDeletedException):
+        submission_manager._delete(submission.id)
+
+    submission.submission_status = SubmissionStatus.COMPLETED
 
     for i in range(10):
         submission_manager._set(Submission("entity_id", f"submission_{i}", "entity_config_id"))
@@ -124,3 +122,59 @@ def test_delete_submission(init_sql_repo):
 
     submission_manager._delete_all()
     assert len(submission_manager._get_all()) == 0
+
+
+def test_is_deletable(init_sql_repo):
+    submission_manager = _SubmissionManagerFactory._build_manager()
+
+    submission = Submission("entity_id", "submission_id", "entity_config_id")
+    submission_manager._set(submission)
+
+    assert len(submission_manager._get_all()) == 1
+
+    assert submission._submission_status == SubmissionStatus.SUBMITTED
+    assert not submission.is_deletable()
+    assert not submission_manager._is_deletable(submission)
+    assert not submission_manager._is_deletable(submission.id)
+
+    submission.submission_status = SubmissionStatus.UNDEFINED
+    assert submission.submission_status == SubmissionStatus.UNDEFINED
+    assert submission.is_deletable()
+    assert submission_manager._is_deletable(submission)
+    assert submission_manager._is_deletable(submission.id)
+
+    submission.submission_status = SubmissionStatus.CANCELED
+    assert submission.submission_status == SubmissionStatus.CANCELED
+    assert submission.is_deletable()
+    assert submission_manager._is_deletable(submission)
+    assert submission_manager._is_deletable(submission.id)
+
+    submission.submission_status = SubmissionStatus.FAILED
+    assert submission.submission_status == SubmissionStatus.FAILED
+    assert submission.is_deletable()
+    assert submission_manager._is_deletable(submission)
+    assert submission_manager._is_deletable(submission.id)
+
+    submission.submission_status = SubmissionStatus.BLOCKED
+    assert submission.submission_status == SubmissionStatus.BLOCKED
+    assert not submission.is_deletable()
+    assert not submission_manager._is_deletable(submission)
+    assert not submission_manager._is_deletable(submission.id)
+
+    submission.submission_status = SubmissionStatus.RUNNING
+    assert submission.submission_status == SubmissionStatus.RUNNING
+    assert not submission.is_deletable()
+    assert not submission_manager._is_deletable(submission)
+    assert not submission_manager._is_deletable(submission.id)
+
+    submission.submission_status = SubmissionStatus.PENDING
+    assert submission.submission_status == SubmissionStatus.PENDING
+    assert not submission.is_deletable()
+    assert not submission_manager._is_deletable(submission)
+    assert not submission_manager._is_deletable(submission.id)
+
+    submission.submission_status = SubmissionStatus.COMPLETED
+    assert submission.submission_status == SubmissionStatus.COMPLETED
+    assert submission.is_deletable()
+    assert submission_manager._is_deletable(submission)
+    assert submission_manager._is_deletable(submission.id)

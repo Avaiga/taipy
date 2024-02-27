@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -18,7 +18,7 @@ from types import FrameType
 from .utils import _filter_locals, _get_module_name_from_frame
 
 if t.TYPE_CHECKING:
-    from ._renderers import _Element
+    from ._renderers import _Element  # noqa: F401
 
 
 class Page:
@@ -34,6 +34,8 @@ class Page:
     """
 
     def __init__(self, **kwargs) -> None:
+        from .custom import Page as CustomPage
+
         self._class_module_name = ""
         self._class_locals: t.Dict[str, t.Any] = {}
         self._frame: t.Optional[FrameType] = None
@@ -42,6 +44,8 @@ class Page:
             self._frame = kwargs.get("frame")
         elif self._renderer:
             self._frame = self._renderer._frame
+        elif isinstance(self, CustomPage):
+            self._frame = t.cast(FrameType, t.cast(FrameType, inspect.stack()[2].frame))
         elif len(inspect.stack()) < 4:
             raise RuntimeError(f"Can't resolve module. Page '{type(self).__name__}' is not registered.")
         else:

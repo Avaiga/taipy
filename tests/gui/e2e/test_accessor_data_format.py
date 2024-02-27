@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -26,7 +26,7 @@ def test_accessor_json(page: "Page", gui: Gui, csvdata, helpers):
     gui._set_frame(inspect.currentframe())
     gui.add_page(
         name="test",
-        page="<|{table_data}|table|columns=Day;Entity;Code;Daily hospital occupancy|date_format=eee dd MMM yyyy|id=table1|>",
+        page="<|{table_data}|table|columns=Day;Entity;Code;Daily hospital occupancy|date_format=eee dd MMM yyyy|id=table1|>",  # noqa: E501
     )
     helpers.run_e2e(gui, use_arrow=False)
     page.goto("./test")
@@ -42,7 +42,7 @@ def test_accessor_arrow(page: "Page", gui: Gui, csvdata, helpers):
         gui._set_frame(inspect.currentframe())
         gui.add_page(
             name="test",
-            page="<|{table_data}|table|columns=Day;Entity;Code;Daily hospital occupancy|date_format=eee dd MMM yyyy|id=table1|>",
+            page="<|{table_data}|table|columns=Day;Entity;Code;Daily hospital occupancy|date_format=eee dd MMM yyyy|id=table1|>",  # noqa: E501
         )
         helpers.run_e2e(gui, use_arrow=True)
         page.goto("./test")

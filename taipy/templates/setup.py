@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -19,7 +19,8 @@ from setuptools import find_namespace_packages, find_packages, setup
 with open("README.md", "rb") as readme_file:
     readme = readme_file.read().decode("UTF-8")
 
-with open(f"src{os.sep}taipy{os.sep}templates{os.sep}version.json") as version_file:
+version_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "version.json")
+with open(version_path) as version_file:
     version = json.load(version_file)
     version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
     if vext := version.get("ext"):
@@ -40,6 +41,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     description="An open-source package holding Taipy application templates.",
     license="Apache License 2.0",
@@ -47,8 +49,7 @@ setup(
     long_description_content_type="text/markdown",
     keywords="taipy-templates",
     name="taipy-templates",
-    package_dir={"": "src"},
-    packages=find_namespace_packages(where="src") + find_packages(include=["taipy"]),
+    packages=find_namespace_packages(where=".") + find_packages(include=["taipy"]),
     include_package_data=True,
     test_suite="tests",
     url="https://github.com/avaiga/taipy-templates",

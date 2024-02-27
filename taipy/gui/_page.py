@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -29,14 +29,14 @@ class _Page(object):
         self._route: t.Optional[str] = None
         self._head: t.Optional[list] = None
 
-    def render(self, gui: Gui):
+    def render(self, gui: Gui, silent: t.Optional[bool] = False):
         if self._renderer is None:
             raise RuntimeError(f"Can't render page {self._route}: no renderer found")
         with warnings.catch_warnings(record=True) as w:
             warnings.resetwarnings()
             with gui._set_locals_context(self._renderer._get_module_name()):
                 self._rendered_jsx = self._renderer.render(gui)
-            if w:
+            if not silent and w:
                 s = "\033[1;31m\n"
                 s += (
                     message := f"--- {len(w)} warning(s) were found for page '{'/' if self._route == gui._get_root_page_name() else self._route}' {self._renderer._get_content_detail(gui)} ---\n"  # noqa: E501

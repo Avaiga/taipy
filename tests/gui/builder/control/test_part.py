@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -15,7 +15,7 @@ from taipy.gui import Gui
 
 def test_part_builder_1(gui: Gui, helpers):
     with tgb.Page(frame=None) as page:
-        with tgb.part(class_name="class1"):
-            tgb.text(value="This is a part")
+        with tgb.part(class_name="class1"):  # type: ignore[attr-defined]
+            tgb.text(value="This is a part")  # type: ignore[attr-defined]
     expected_list = ["<Part", "This is a part"]
     helpers.test_control_builder(gui, page, expected_list)

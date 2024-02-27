@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -56,11 +56,11 @@ from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactor
 from taipy.core.sequence.sequence import Sequence
 from taipy.core.sequence.sequence_id import SequenceId
 from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
+from taipy.core.submission.submission import Submission
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
 
 current_time = datetime.now()
-_OrchestratorFactory._build_orchestrator()
 
 
 @pytest.fixture(scope="function")
@@ -181,6 +181,10 @@ def cleanup_files():
 
     if os.path.exists(".data"):
         shutil.rmtree(".data", ignore_errors=True)
+    if os.path.exists("user_data"):
+        shutil.rmtree("user_data", ignore_errors=True)
+    if os.path.exists(".taipy"):
+        shutil.rmtree(".taipy", ignore_errors=True)
     if os.path.exists(".my_data"):
         shutil.rmtree(".my_data", ignore_errors=True)
 
@@ -286,6 +290,11 @@ def job(task):
 
 
 @pytest.fixture(scope="function")
+def submission(task):
+    return Submission(task.id, task._ID_PREFIX, task.config_id, properties={})
+
+
+@pytest.fixture(scope="function")
 def _version():
     return _Version(id="foo", config=Config._applied_config)
 
@@ -359,9 +368,11 @@ def init_managers():
 @pytest.fixture
 def init_orchestrator():
     def _init_orchestrator():
+        _OrchestratorFactory._remove_dispatcher()
+
         if _OrchestratorFactory._orchestrator is None:
             _OrchestratorFactory._build_orchestrator()
-        _OrchestratorFactory._build_dispatcher()
+        _OrchestratorFactory._build_dispatcher(force_restart=True)
         _OrchestratorFactory._orchestrator.jobs_to_run = Queue()
         _OrchestratorFactory._orchestrator.blocked_jobs = []
 
@@ -382,7 +393,7 @@ def sql_engine():
 
 
 @pytest.fixture
-def init_sql_repo(tmp_sqlite):
+def init_sql_repo(tmp_sqlite, init_managers):
     Config.configure_core(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
 
     # Clean SQLite database
@@ -390,5 +401,7 @@ def init_sql_repo(tmp_sqlite):
         _SQLConnection._connection.close()
         _SQLConnection._connection = None
     _SQLConnection.init_db()
+
+    init_managers()
 
     return tmp_sqlite

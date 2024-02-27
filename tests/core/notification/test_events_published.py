@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -9,19 +9,14 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from dataclasses import dataclass, field
-from math import exp
 from queue import SimpleQueue
 
-from colorama import init
 from taipy.config import Config, Frequency
 from taipy.core import taipy as tp
-from taipy.core.config import scenario_config
 from taipy.core.job.status import Status
 from taipy.core.notification.core_event_consumer import CoreEventConsumerBase
 from taipy.core.notification.event import Event, EventEntityType, EventOperation
 from taipy.core.notification.notifier import Notifier
-from tests.core.utils import assert_true_after_time
 
 
 class Snapshot:
@@ -64,7 +59,7 @@ class RecordingConsumer(CoreEventConsumerBase):
         return snapshot
 
     def process_event(self, event: Event):
-        # Nothing todo
+        # Nothing to do
         pass
 
     def start(self):
@@ -177,6 +172,7 @@ def test_events_published_for_scenario_submission():
     # 1 submission creation event
     # 1 submission update event for jobs
     # 3 submission update events (for status: PENDING, RUNNING and COMPLETED)
+    # 1 submission update event for is_completed
     scenario.submit()
     snapshot = all_evts.capture()
     assert len(snapshot.collected_events) == 17

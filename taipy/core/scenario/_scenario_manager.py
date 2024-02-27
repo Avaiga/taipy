@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -41,6 +41,7 @@ from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
 from ..submission._submission_manager_factory import _SubmissionManagerFactory
+from ..submission.submission import Submission
 from ..task._task_manager_factory import _TaskManagerFactory
 from .scenario import Scenario
 from .scenario_id import ScenarioId
@@ -205,7 +206,8 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
         check_inputs_are_ready: bool = True,
-    ) -> List[Job]:
+        **properties,
+    ) -> Submission:
         scenario_id = scenario.id if isinstance(scenario, Scenario) else scenario
         scenario = cls._get(scenario_id)
         if scenario is None:
@@ -215,13 +217,20 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         if check_inputs_are_ready:
             _warn_if_inputs_not_ready(scenario.get_inputs())
 
-        jobs = (
+        submission = (
             _TaskManagerFactory._build_manager()
             ._orchestrator()
-            .submit(scenario, callbacks=scenario_subscription_callback, force=force, wait=wait, timeout=timeout)
+            .submit(
+                scenario,
+                callbacks=scenario_subscription_callback,
+                force=force,
+                wait=wait,
+                timeout=timeout,
+                **properties,
+            )
         )
         Notifier.publish(_make_event(scenario, EventOperation.SUBMISSION))
-        return jobs
+        return submission
 
     @classmethod
     def __get_status_notifier_callbacks(cls, scenario: Scenario) -> List:

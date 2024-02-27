@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -302,7 +302,7 @@ def default_job():
 def create_job_list():
     jobs = []
     manager = _JobManager
-    for i in range(10):
+    for _ in range(10):
         c = __create_job()
         manager._set(c)
     return jobs
@@ -318,3 +318,8 @@ def cleanup_files(reset_configuration_singleton, inject_core_sections):
         shutil.rmtree(".data", ignore_errors=True)
     if os.path.exists(".my_data"):
         shutil.rmtree(".my_data", ignore_errors=True)
+
+    yield
+    for path in [".data", ".my_data", "user_data", ".taipy"]:
+        if os.path.exists(path):
+            shutil.rmtree(path, ignore_errors=True)
