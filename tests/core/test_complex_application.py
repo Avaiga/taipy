@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -12,15 +12,12 @@
 import os
 import pathlib
 from time import sleep
-from unittest.mock import patch
 
 import pandas as pd
 
 import taipy.core.taipy as tp
 from taipy.config import Config
 from taipy.core import Core, Status
-from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from taipy.core.config.job_config import JobConfig
 
 # ################################  USER FUNCTIONS  ##################################
 
@@ -71,8 +68,6 @@ def return_a_number_with_sleep():
 
 
 def test_skipped_jobs():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _OrchestratorFactory._build_orchestrator()
     input_config = Config.configure_data_node("input_dn")
     intermediate_config = Config.configure_data_node("intermediate")
     output_config = Config.configure_data_node("output_dn")
@@ -80,25 +75,24 @@ def test_skipped_jobs():
     task_config_2 = Config.configure_task("second", mult_by_2, intermediate_config, output_config, skippable=True)
     scenario_config = Config.configure_scenario("scenario", [task_config_1, task_config_2])
 
-    with patch("sys.argv", ["prog"]):
-        core = Core()
-        core.run()
+    core = Core()
+    core.run()
 
-        scenario = tp.create_scenario(scenario_config)
-        scenario.input_dn.write(2)
-        scenario.submit()
-        assert len(tp.get_jobs()) == 2
-        for job in tp.get_jobs():
-            assert job.status == Status.COMPLETED
-        scenario.submit()
-        assert len(tp.get_jobs()) == 4
-        skipped = []
-        for job in tp.get_jobs():
-            if job.status != Status.COMPLETED:
-                assert job.status == Status.SKIPPED
-                skipped.append(job)
-        assert len(skipped) == 2
-        core.stop()
+    scenario = tp.create_scenario(scenario_config)
+    scenario.input_dn.write(2)
+    scenario.submit()
+    assert len(tp.get_jobs()) == 2
+    for job in tp.get_jobs():
+        assert job.status == Status.COMPLETED
+    scenario.submit()
+    assert len(tp.get_jobs()) == 4
+    skipped = []
+    for job in tp.get_jobs():
+        if job.status != Status.COMPLETED:
+            assert job.status == Status.SKIPPED
+            skipped.append(job)
+    assert len(skipped) == 2
+    core.stop()
 
 
 def test_complex():
@@ -115,9 +109,6 @@ def test_complex():
     # |      |
     # |      |
     # t4     d4
-
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _OrchestratorFactory._build_orchestrator()
 
     csv_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
     excel_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
@@ -180,12 +171,11 @@ def test_complex():
         ],
     )
 
-    with patch("sys.argv", ["prog"]):
-        core = Core()
-        core.run()
-        scenario = tp.create_scenario(scenario_config)
-        tp.submit(scenario)
-        core.stop()
+    core = Core()
+    core.run()
+    scenario = tp.create_scenario(scenario_config)
+    tp.submit(scenario)
+    core.stop()
 
     csv_sum_res = pd.read_csv(csv_path_sum)
     excel_sum_res = pd.read_excel(excel_path_sum)

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -33,6 +33,9 @@ class Core:
     _is_running = False
     __lock_is_running = Lock()
 
+    _version_is_initialized = False
+    __lock_version_is_initialized = Lock()
+
     __logger = _TaipyLogger._get_logger()
 
     _orchestrator: Optional[_Orchestrator] = None
@@ -48,8 +51,8 @@ class Core:
         """
         Start a Core service.
 
-        This function checks the configuration, manages application's version,
-        and starts a dispatcher and lock the Config.
+        This function checks and locks the configuration, manages application's version,
+        and starts a job dispatcher.
         """
         if self.__class__._is_running:
             raise CoreServiceIsAlreadyRunning
@@ -57,49 +60,67 @@ class Core:
         with self.__class__.__lock_is_running:
             self.__class__._is_running = True
 
-        self.__update_core_section()
-        self.__manage_version()
-        self.__check_and_block_config()
-
-        if self._orchestrator is None:
-            self._orchestrator = _OrchestratorFactory._build_orchestrator()
-
+        self._manage_version_and_block_config()
         self.__start_dispatcher(force_restart)
 
-    def stop(self):
+    def stop(self, wait: bool = True, timeout: Optional[float] = None):
         """
         Stop the Core service.
-
         This function stops the dispatcher and unblock the Config for update.
+
+        Parameters:
+            wait (bool): If True, the method will wait for the dispatcher to stop.
+            timeout (Optional[float]): The maximum time to wait. If None, the method will wait indefinitely.
         """
         Config.unblock_update()
 
         if self._dispatcher:
-            self._dispatcher = _OrchestratorFactory._remove_dispatcher()
+            self._dispatcher = _OrchestratorFactory._remove_dispatcher(wait, timeout)
             self.__logger.info("Core service has been stopped.")
 
         with self.__class__.__lock_is_running:
             self.__class__._is_running = False
 
-    @staticmethod
-    def __update_core_section():
+        with self.__class__.__lock_version_is_initialized:
+            self.__class__._version_is_initialized = False
+
+    @classmethod
+    def _manage_version_and_block_config(cls):
+        """
+        Manage the application's version and block the Config from updates.
+        """
+        if cls._version_is_initialized:
+            return
+
+        with cls.__lock_version_is_initialized:
+            cls._version_is_initialized = True
+
+        cls.__update_core_section()
+        cls.__manage_version()
+        cls.__check_and_block_config()
+
+    @classmethod
+    def __update_core_section(cls):
         _CoreCLI.create_parser()
         Config._applied_config._unique_sections[CoreSection.name]._update(_CoreCLI.parse_arguments())
 
-    @staticmethod
-    def __manage_version():
+    @classmethod
+    def __manage_version(cls):
         _VersionManagerFactory._build_manager()._manage_version()
         Config._applied_config._unique_sections[CoreSection.name]._update(
             {"version_number": _VersionManagerFactory._build_manager()._get_latest_version()}
         )
 
-    @staticmethod
-    def __check_and_block_config():
+    @classmethod
+    def __check_and_block_config(cls):
         Config.check()
         Config.block_update()
         _init_backup_file_with_storage_folder()
 
     def __start_dispatcher(self, force_restart):
+        if self._orchestrator is None:
+            self._orchestrator = _OrchestratorFactory._build_orchestrator()
+
         if dispatcher := _OrchestratorFactory._build_dispatcher(force_restart=force_restart):
             self._dispatcher = dispatcher
 

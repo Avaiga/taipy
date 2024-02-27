@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -111,6 +111,9 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
             **properties,
         )
         self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
+        if self._path and ".data" in self._path:
+            self._path = self._migrate_path(self.storage_type(), self._path)
+
         if not self._path:
             self._path = self._build_path(self.storage_type())
         properties[self.__PATH_KEY] = self._path
@@ -224,7 +227,7 @@ class _DefaultJSONEncoder(json.JSONEncoder):
 
 class _DefaultJSONDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
-        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
+        json.JSONDecoder.__init__(self, *args, **kwargs, object_hook=self.object_hook)
 
     def object_hook(self, source):
         if _type := source.get("__type__"):

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -17,9 +17,19 @@ from typing import Any, Callable, Dict, List, Optional, Set, Union, overload
 from taipy.config.common.scope import Scope
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from ._core import Core
 from ._entity._entity import _Entity
 from ._version._version_manager_factory import _VersionManagerFactory
-from .common._warnings import _warn_no_core_service
+from .common._check_instance import (
+    _is_cycle,
+    _is_data_node,
+    _is_job,
+    _is_scenario,
+    _is_sequence,
+    _is_submission,
+    _is_task,
+)
+from .common._warnings import _warn_deprecated, _warn_no_core_service
 from .config.data_node_config import DataNodeConfig
 from .config.scenario_config import ScenarioConfig
 from .cycle._cycle_manager_factory import _CycleManagerFactory
@@ -44,7 +54,7 @@ from .sequence._sequence_manager_factory import _SequenceManagerFactory
 from .sequence.sequence import Sequence
 from .sequence.sequence_id import SequenceId
 from .submission._submission_manager_factory import _SubmissionManagerFactory
-from .submission.submission import Submission
+from .submission.submission import Submission, SubmissionId
 from .task._task_manager_factory import _TaskManagerFactory
 from .task.task import Task
 from .task.task_id import TaskId
@@ -58,7 +68,7 @@ def set(entity: Union[DataNode, Task, Sequence, Scenario, Cycle]):
     This function allows you to save or update an entity in Taipy.
 
     Parameters:
-        entity (Union[DataNode^, Task^, Sequence^, Scenario^, Cycle^]): The
+        entity (Union[DataNode^, Task^, Sequence^, Scenario^, Cycle^, Submission^]): The
             entity to save or update.
     """
     if isinstance(entity, Cycle):
@@ -71,9 +81,11 @@ def set(entity: Union[DataNode, Task, Sequence, Scenario, Cycle]):
         return _TaskManagerFactory._build_manager()._set(entity)
     if isinstance(entity, DataNode):
         return _DataManagerFactory._build_manager()._set(entity)
+    if isinstance(entity, Submission):
+        return _SubmissionManagerFactory._build_manager()._set(entity)
 
 
-def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Task, TaskId]) -> bool:
+def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Task, TaskId, str]) -> bool:
     """Indicate if an entity can be submitted.
 
     This function checks if the given entity can be submitted for execution.
@@ -81,19 +93,38 @@ def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Tas
     Returns:
         True if the given entity can be submitted. False otherwise.
     """
-    if isinstance(entity, Scenario) or (isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX)):
-        return _ScenarioManagerFactory._build_manager()._is_submittable(entity)  # type: ignore
-    if isinstance(entity, Sequence) or (isinstance(entity, str) and entity.startswith(Sequence._ID_PREFIX)):
-        return _SequenceManagerFactory._build_manager()._is_submittable(entity)  # type: ignore
-    if isinstance(entity, Task) or (isinstance(entity, str) and entity.startswith(Task._ID_PREFIX)):
-        return _TaskManagerFactory._build_manager()._is_submittable(entity)  # type: ignore
+    if isinstance(entity, Scenario):
+        return _ScenarioManagerFactory._build_manager()._is_submittable(entity)
+    if isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX):
+        return _ScenarioManagerFactory._build_manager()._is_submittable(ScenarioId(entity))
+    if isinstance(entity, Sequence):
+        return _SequenceManagerFactory._build_manager()._is_submittable(entity)
+    if isinstance(entity, str) and entity.startswith(Sequence._ID_PREFIX):
+        return _SequenceManagerFactory._build_manager()._is_submittable(SequenceId(entity))
+    if isinstance(entity, Task):
+        return _TaskManagerFactory._build_manager()._is_submittable(entity)
+    if isinstance(entity, str) and entity.startswith(Task._ID_PREFIX):
+        return _TaskManagerFactory._build_manager()._is_submittable(TaskId(entity))
     return False
 
 
 def is_editable(
     entity: Union[
-        DataNode, Task, Job, Sequence, Scenario, Cycle, DataNodeId, TaskId, JobId, SequenceId, ScenarioId, CycleId
-    ]
+        DataNode,
+        Task,
+        Job,
+        Sequence,
+        Scenario,
+        Cycle,
+        Submission,
+        DataNodeId,
+        TaskId,
+        JobId,
+        SequenceId,
+        ScenarioId,
+        CycleId,
+        SubmissionId,
+    ],
 ) -> bool:
     """Indicate if an entity can be edited.
 
@@ -102,25 +133,54 @@ def is_editable(
     Returns:
         True if the given entity can be edited. False otherwise.
     """
-    if isinstance(entity, Cycle) or (isinstance(entity, str) and entity.startswith(Cycle._ID_PREFIX)):
-        return _CycleManagerFactory._build_manager()._is_editable(entity)  # type: ignore
-    if isinstance(entity, Scenario) or (isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX)):
-        return _ScenarioManagerFactory._build_manager()._is_editable(entity)  # type: ignore
-    if isinstance(entity, Sequence) or (isinstance(entity, str) and entity.startswith(Sequence._ID_PREFIX)):
-        return _SequenceManagerFactory._build_manager()._is_editable(entity)  # type: ignore
-    if isinstance(entity, Task) or (isinstance(entity, str) and entity.startswith(Task._ID_PREFIX)):
-        return _TaskManagerFactory._build_manager()._is_editable(entity)  # type: ignore
-    if isinstance(entity, Job) or (isinstance(entity, str) and entity.startswith(Job._ID_PREFIX)):
-        return _JobManagerFactory._build_manager()._is_editable(entity)  # type: ignore
-    if isinstance(entity, DataNode) or (isinstance(entity, str) and entity.startswith(DataNode._ID_PREFIX)):
-        return _DataManagerFactory._build_manager()._is_editable(entity)  # type: ignore
+    if isinstance(entity, Cycle):
+        return _CycleManagerFactory._build_manager()._is_editable(entity)
+    if isinstance(entity, str) and entity.startswith(Cycle._ID_PREFIX):
+        return _CycleManagerFactory._build_manager()._is_editable(CycleId(entity))
+    if isinstance(entity, Scenario):
+        return _ScenarioManagerFactory._build_manager()._is_editable(entity)
+    if isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX):
+        return _ScenarioManagerFactory._build_manager()._is_editable(ScenarioId(entity))
+    if isinstance(entity, Sequence):
+        return _SequenceManagerFactory._build_manager()._is_editable(entity)
+    if isinstance(entity, str) and entity.startswith(Sequence._ID_PREFIX):
+        return _SequenceManagerFactory._build_manager()._is_editable(SequenceId(entity))
+    if isinstance(entity, Task):
+        return _TaskManagerFactory._build_manager()._is_editable(entity)
+    if isinstance(entity, str) and entity.startswith(Task._ID_PREFIX):
+        return _TaskManagerFactory._build_manager()._is_editable(TaskId(entity))
+    if isinstance(entity, Job):
+        return _JobManagerFactory._build_manager()._is_editable(entity)
+    if isinstance(entity, str) and entity.startswith(Job._ID_PREFIX):
+        return _JobManagerFactory._build_manager()._is_editable(JobId(entity))
+    if isinstance(entity, DataNode):
+        return _DataManagerFactory._build_manager()._is_editable(entity)
+    if isinstance(entity, str) and entity.startswith(DataNode._ID_PREFIX):
+        return _DataManagerFactory._build_manager()._is_editable(DataNodeId(entity))
+    if isinstance(entity, Submission):
+        return _SubmissionManagerFactory._build_manager()._is_editable(entity)
+    if isinstance(entity, str) and entity.startswith(Submission._ID_PREFIX):
+        return _SubmissionManagerFactory._build_manager()._is_editable(SequenceId(entity))
     return False
 
 
 def is_readable(
     entity: Union[
-        DataNode, Task, Job, Sequence, Scenario, Cycle, DataNodeId, TaskId, JobId, SequenceId, ScenarioId, CycleId
-    ]
+        DataNode,
+        Task,
+        Job,
+        Sequence,
+        Scenario,
+        Cycle,
+        Submission,
+        DataNodeId,
+        TaskId,
+        JobId,
+        SequenceId,
+        ScenarioId,
+        CycleId,
+        SubmissionId,
+    ],
 ) -> bool:
     """Indicate if an entity can be read.
 
@@ -129,28 +189,45 @@ def is_readable(
     Returns:
         True if the given entity can be read. False otherwise.
     """
-    if isinstance(entity, Cycle) or (isinstance(entity, str) and entity.startswith(Cycle._ID_PREFIX)):
-        return _CycleManagerFactory._build_manager()._is_readable(entity)  # type: ignore
-    if isinstance(entity, Scenario) or (isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX)):
-        return _ScenarioManagerFactory._build_manager()._is_readable(entity)  # type: ignore
-    if isinstance(entity, Sequence) or (isinstance(entity, str) and entity.startswith(Sequence._ID_PREFIX)):
-        return _SequenceManagerFactory._build_manager()._is_readable(entity)  # type: ignore
-    if isinstance(entity, Task) or (isinstance(entity, str) and entity.startswith(Task._ID_PREFIX)):
-        return _TaskManagerFactory._build_manager()._is_readable(entity)  # type: ignore
-    if isinstance(entity, Job) or (isinstance(entity, str) and entity.startswith(Job._ID_PREFIX)):
-        return _JobManagerFactory._build_manager()._is_readable(entity)  # type: ignore
-    if isinstance(entity, DataNode) or (isinstance(entity, str) and entity.startswith(DataNode._ID_PREFIX)):
-        return _DataManagerFactory._build_manager()._is_readable(entity)  # type: ignore
+    if isinstance(entity, Cycle):
+        return _CycleManagerFactory._build_manager()._is_readable(entity)
+    if isinstance(entity, str) and entity.startswith(Cycle._ID_PREFIX):
+        return _CycleManagerFactory._build_manager()._is_readable(CycleId(entity))
+    if isinstance(entity, Scenario):
+        return _ScenarioManagerFactory._build_manager()._is_readable(entity)
+    if isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX):
+        return _ScenarioManagerFactory._build_manager()._is_readable(ScenarioId(entity))
+    if isinstance(entity, Sequence):
+        return _SequenceManagerFactory._build_manager()._is_readable(entity)
+    if isinstance(entity, str) and entity.startswith(Sequence._ID_PREFIX):
+        return _SequenceManagerFactory._build_manager()._is_readable(SequenceId(entity))
+    if isinstance(entity, Task):
+        return _TaskManagerFactory._build_manager()._is_readable(entity)
+    if isinstance(entity, str) and entity.startswith(Task._ID_PREFIX):
+        return _TaskManagerFactory._build_manager()._is_readable(TaskId(entity))
+    if isinstance(entity, Job):
+        return _JobManagerFactory._build_manager()._is_readable(entity)
+    if isinstance(entity, str) and entity.startswith(Job._ID_PREFIX):
+        return _JobManagerFactory._build_manager()._is_readable(JobId(entity))
+    if isinstance(entity, DataNode):
+        return _DataManagerFactory._build_manager()._is_readable(entity)
+    if isinstance(entity, str) and entity.startswith(DataNode._ID_PREFIX):
+        return _DataManagerFactory._build_manager()._is_readable(DataNodeId(entity))
+    if isinstance(entity, Submission):
+        return _SubmissionManagerFactory._build_manager()._is_readable(entity)
+    if isinstance(entity, str) and entity.startswith(Submission._ID_PREFIX):
+        return _SubmissionManagerFactory._build_manager()._is_readable(SequenceId(entity))
     return False
 
 
-@_warn_no_core_service()
+@_warn_no_core_service("The submitted entity will not be executed until the Core service is running.")
 def submit(
     entity: Union[Scenario, Sequence, Task],
     force: bool = False,
     wait: bool = False,
     timeout: Optional[Union[float, int]] = None,
-) -> Union[Job, List[Job]]:
+    **properties,
+) -> Submission:
     """Submit a scenario, sequence or task entity for execution.
 
     This function submits the given entity for execution and returns the created job(s).
@@ -165,19 +242,25 @@ def submit(
             in asynchronous mode.
         timeout (Union[float, int]): The optional maximum number of seconds to wait
             for the jobs to be finished before returning.
+        **properties (dict[str, any]): A keyworded variable length list of user additional arguments
+            that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
 
     Returns:
-        The created `Job^` or a collection of the created `Job^` depends on the submitted entity.
-
-            - If a `Scenario^` or a `Sequence^` is provided, it will return a list of `Job^`.
-            - If a `Task^` is provided, it will return the created `Job^`.
+        The created `Submission^` containing the information about the submission.
     """
     if isinstance(entity, Scenario):
-        return _ScenarioManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)
+        return _ScenarioManagerFactory._build_manager()._submit(
+            entity, force=force, wait=wait, timeout=timeout, **properties
+        )
     if isinstance(entity, Sequence):
-        return _SequenceManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)
+        return _SequenceManagerFactory._build_manager()._submit(
+            entity, force=force, wait=wait, timeout=timeout, **properties
+        )
     if isinstance(entity, Task):
-        return _TaskManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)
+        return _TaskManagerFactory._build_manager()._submit(
+            entity, force=force, wait=wait, timeout=timeout, **properties
+        )
+    return None
 
 
 @overload
@@ -211,20 +294,25 @@ def exists(entity_id: JobId) -> bool:
 
 
 @overload
+def exists(entity_id: SubmissionId) -> bool:
+    ...
+
+
+@overload
 def exists(entity_id: str) -> bool:
     ...
 
 
-def exists(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId, str]) -> bool:
+def exists(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId, SubmissionId, str]) -> bool:
     """Check if an entity with the specified identifier exists.
 
     This function checks if an entity with the given identifier exists.
     It supports various types of entity identifiers, including `TaskId^`,
-    `DataNodeId^`, `SequenceId^`, `ScenarioId^`, `JobId^`, `CycleId^`, and string
+    `DataNodeId^`, `SequenceId^`, `ScenarioId^`, `JobId^`, `CycleId^`, `SubmissionId^`, and string
     representations.
 
     Parameters:
-        entity_id (Union[DataNodeId^, TaskId^, SequenceId^, ScenarioId^, JobId^, CycleId^]): The
+        entity_id (Union[DataNodeId^, TaskId^, SequenceId^, ScenarioId^, JobId^, CycleId^, SubmissionId^, str]): The
             identifier of the entity to check for existence.
 
     Returns:
@@ -235,21 +323,23 @@ def exists(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, C
 
     Note:
         The function performs checks for various entity types
-        (`Job^`, `Cycle^`, `Scenario^`, `Sequence^`, `Task^`, `DataNode^`)
+        (`Job^`, `Cycle^`, `Scenario^`, `Sequence^`, `Task^`, `DataNode^`, `Submission^`)
         based on their respective identifier prefixes.
     """
-    if entity_id.startswith(Job._ID_PREFIX):
+    if _is_job(entity_id):
         return _JobManagerFactory._build_manager()._exists(JobId(entity_id))
-    if entity_id.startswith(Cycle._ID_PREFIX):
+    if _is_cycle(entity_id):
         return _CycleManagerFactory._build_manager()._exists(CycleId(entity_id))
-    if entity_id.startswith(Scenario._ID_PREFIX):
+    if _is_scenario(entity_id):
         return _ScenarioManagerFactory._build_manager()._exists(ScenarioId(entity_id))
-    if entity_id.startswith(Sequence._ID_PREFIX):
+    if _is_sequence(entity_id):
         return _SequenceManagerFactory._build_manager()._exists(SequenceId(entity_id))
-    if entity_id.startswith(Task._ID_PREFIX):
+    if _is_task(entity_id):
         return _TaskManagerFactory._build_manager()._exists(TaskId(entity_id))
-    if entity_id.startswith(DataNode._ID_PREFIX):
+    if _is_data_node(entity_id):
         return _DataManagerFactory._build_manager()._exists(DataNodeId(entity_id))
+    if _is_submission(entity_id):
+        return _SubmissionManagerFactory._build_manager()._exists(SubmissionId(entity_id))
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 
@@ -284,18 +374,23 @@ def get(entity_id: JobId) -> Job:
 
 
 @overload
-def get(entity_id: str) -> Union[Task, DataNode, Sequence, Scenario, Job, Cycle]:
+def get(entity_id: SubmissionId) -> Submission:
+    ...
+
+
+@overload
+def get(entity_id: str) -> Union[Task, DataNode, Sequence, Scenario, Job, Cycle, Submission]:
     ...
 
 
 def get(
-    entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId, str]
-) -> Union[Task, DataNode, Sequence, Scenario, Job, Cycle]:
+    entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId, SubmissionId, str],
+) -> Union[Task, DataNode, Sequence, Scenario, Job, Cycle, Submission]:
     """Retrieve an entity by its unique identifier.
 
     This function allows you to retrieve an entity by specifying its identifier.
     The identifier must match the pattern of one of the supported entity types:
-    Task^, DataNode^, Sequence^, Job^, Cycle^, or Scenario^.
+    Task^, DataNode^, Sequence^, Job^, Cycle^, Submission^, or Scenario^.
 
 
     Parameters:
@@ -310,18 +405,21 @@ def get(
     Raises:
         ModelNotFound^: If the provided *entity_id* does not match any known entity pattern.
     """
-    if entity_id.startswith(Job._ID_PREFIX):
+    if _is_job(entity_id):
         return _JobManagerFactory._build_manager()._get(JobId(entity_id))
-    if entity_id.startswith(Cycle._ID_PREFIX):
+    if _is_cycle(entity_id):
         return _CycleManagerFactory._build_manager()._get(CycleId(entity_id))
-    if entity_id.startswith(Scenario._ID_PREFIX):
+    if _is_scenario(entity_id):
         return _ScenarioManagerFactory._build_manager()._get(ScenarioId(entity_id))
-    if entity_id.startswith(Sequence._ID_PREFIX):
+    if _is_sequence(entity_id):
         return _SequenceManagerFactory._build_manager()._get(SequenceId(entity_id))
-    if entity_id.startswith(Task._ID_PREFIX):
+    if _is_task(entity_id):
         return _TaskManagerFactory._build_manager()._get(TaskId(entity_id))
-    if entity_id.startswith(DataNode._ID_PREFIX):
+    if _is_data_node(entity_id):
         return _DataManagerFactory._build_manager()._get(DataNodeId(entity_id))
+    if _is_submission(entity_id):
+        return _SubmissionManagerFactory._build_manager()._get(SubmissionId(entity_id))
+
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 
@@ -336,59 +434,74 @@ def get_tasks() -> List[Task]:
     return _TaskManagerFactory._build_manager()._get_all()
 
 
-def is_deletable(entity: Union[Scenario, Job, ScenarioId, JobId]) -> bool:
-    """Check if a `Scenario^` or a `Job^` can be deleted.
+def is_deletable(entity: Union[Scenario, Job, Submission, ScenarioId, JobId, SubmissionId]) -> bool:
+    """Check if a `Scenario^`, a `Job^` or a `Submission^` can be deleted.
 
     This function determines whether a scenario or a job can be safely
     deleted without causing conflicts or issues.
 
     Parameters:
-        entity (Union[Scenario, Job, ScenarioId, JobId]): The scenario or job to check.
+        entity (Union[Scenario, Job, Submission, ScenarioId, JobId, SubmissionId]): The scenario,
+        job or submission to check.
 
     Returns:
-        True if the given scenario or job can be deleted. False otherwise.
+        True if the given scenario, job or submission can be deleted. False otherwise.
     """
-    if isinstance(entity, str) and entity.startswith(Job._ID_PREFIX) or isinstance(entity, Job):
-        return _JobManagerFactory._build_manager()._is_deletable(entity)  # type: ignore
-    if isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX) or isinstance(entity, Scenario):
-        return _ScenarioManagerFactory._build_manager()._is_deletable(entity)  # type: ignore
+    if isinstance(entity, Job):
+        return _JobManagerFactory._build_manager()._is_deletable(entity)
+    if isinstance(entity, str) and entity.startswith(Job._ID_PREFIX):
+        return _JobManagerFactory._build_manager()._is_deletable(JobId(entity))
+    if isinstance(entity, Scenario):
+        return _ScenarioManagerFactory._build_manager()._is_deletable(entity)
+    if isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX):
+        return _ScenarioManagerFactory._build_manager()._is_deletable(ScenarioId(entity))
+    if isinstance(entity, Submission):
+        return _SubmissionManagerFactory._build_manager()._is_deletable(entity)
+    if isinstance(entity, str) and entity.startswith(Submission._ID_PREFIX):
+        return _SubmissionManagerFactory._build_manager()._is_deletable(SubmissionId(entity))
     return True
 
 
-def delete(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId]):
+def delete(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId, SubmissionId]):
     """Delete an entity and its nested entities.
 
     This function deletes the specified entity and recursively deletes all its nested entities.
     The behavior varies depending on the type of entity provided:
 
     - If a `CycleId` is provided, the nested scenarios, tasks, data nodes, and jobs are deleted.
-    - If a `ScenarioId` is provided, the nested tasks, data nodes, and jobs are deleted.
+    - If a `ScenarioId` is provided, the nested sequences, tasks, data nodes, submissions and jobs are deleted.
       If the scenario is primary, it can only be deleted if it is the only scenario in the cycle.
       In that case, its cycle is also deleted. Use the `is_deletable()^` function to check if
       the scenario can be deleted.
     - If a `SequenceId` is provided, the related jobs are deleted.
     - If a `TaskId` is provided, the related data nodes, and jobs are deleted.
+    - If a `DataNodeId` is provided, the data node is deleted.
+    - If a `SubmissionId^` is provided, the related jobs are deleted.
+      The submission can only be deleted if the execution has been finished.
+    - If a `JobId^` is provided, the job entity can only be deleted if the execution has been finished.
 
     Parameters:
-        entity_id (Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId]):
+        entity_id (Union[TaskId, DataNodeId, SequenceId, ScenarioId, SubmissionId, JobId, CycleId]):
             The identifier of the entity to delete.
 
     Raises:
         ModelNotFound: No entity corresponds to the specified *entity_id*.
     """
-    if entity_id.startswith(Job._ID_PREFIX):
+    if _is_job(entity_id):
         job_manager = _JobManagerFactory._build_manager()
-        return job_manager._delete(job_manager._get(JobId(entity_id)))  # type: ignore
-    if entity_id.startswith(Cycle._ID_PREFIX):
+        return job_manager._delete(job_manager._get(JobId(entity_id)))
+    if _is_cycle(entity_id):
         return _CycleManagerFactory._build_manager()._hard_delete(CycleId(entity_id))
-    if entity_id.startswith(Scenario._ID_PREFIX):
+    if _is_scenario(entity_id):
         return _ScenarioManagerFactory._build_manager()._hard_delete(ScenarioId(entity_id))
-    if entity_id.startswith(Sequence._ID_PREFIX):
+    if _is_sequence(entity_id):
         return _SequenceManagerFactory._build_manager()._hard_delete(SequenceId(entity_id))
-    if entity_id.startswith(Task._ID_PREFIX):
+    if _is_task(entity_id):
         return _TaskManagerFactory._build_manager()._hard_delete(TaskId(entity_id))
-    if entity_id.startswith(DataNode._ID_PREFIX):
+    if _is_data_node(entity_id):
         return _DataManagerFactory._build_manager()._delete(DataNodeId(entity_id))
+    if _is_submission(entity_id):
+        return _SubmissionManagerFactory._build_manager()._hard_delete(SubmissionId(entity_id))
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 
@@ -408,14 +521,15 @@ def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> L
         The list of scenarios filtered by cycle or tag. If no filtering criteria
             are provided, this method returns all existing scenarios.
     """
+    scenario_manager = _ScenarioManagerFactory._build_manager()
     if not cycle and not tag:
-        return _ScenarioManagerFactory._build_manager()._get_all()
+        return scenario_manager._get_all()
     if cycle and not tag:
-        return _ScenarioManagerFactory._build_manager()._get_all_by_cycle(cycle)
+        return scenario_manager._get_all_by_cycle(cycle)
     if not cycle and tag:
-        return _ScenarioManagerFactory._build_manager()._get_all_by_tag(tag)
+        return scenario_manager._get_all_by_tag(tag)
     if cycle and tag:
-        cycles_scenarios = _ScenarioManagerFactory._build_manager()()._get_all_by_cycle(cycle)
+        cycles_scenarios = scenario_manager._get_all_by_cycle(cycle)
         return [scenario for scenario in cycles_scenarios if scenario.has_tag(tag)]
     return []
 
@@ -625,6 +739,15 @@ def get_jobs() -> List[Job]:
     return _JobManagerFactory._build_manager()._get_all()
 
 
+def get_submissions() -> List[Submission]:
+    """Return all the existing submissions.
+
+    Returns:
+        The list of all submissions.
+    """
+    return _SubmissionManagerFactory._build_manager()._get_all()
+
+
 def delete_job(job: Job, force: Optional[bool] = False):
     """Delete a job.
 
@@ -635,6 +758,7 @@ def delete_job(job: Job, force: Optional[bool] = False):
         job (Job^): The job to delete.
         force (Optional[bool]): If True, forces the deletion of _job_, even
             if it is not completed yet.
+
     Raises:
         JobNotDeletedException^: If the job is not finished.
     """
@@ -664,6 +788,7 @@ def get_latest_job(task: Task) -> Optional[Job]:
 
     Parameters:
         task (Task^): The task to retrieve the latest job from.
+
     Returns:
         The latest job created from _task_, or None if no job has been created from _task_.
     """
@@ -678,6 +803,7 @@ def get_latest_submission(entity: Union[Scenario, Sequence, Task]) -> Optional[S
     Parameters:
         entity (Union[Scenario^, Sequence^, Task^]): The scenario, sequence or task to
         retrieve the latest submission from.
+
     Returns:
         The latest submission created from _scenario_, _sequence_ and _task_, or None
         if no submission has been created from _scenario_, _sequence_ and _task_.
@@ -710,7 +836,10 @@ def create_scenario(
 ) -> Scenario:
     """Create and return a new scenario based on a scenario configuration.
 
-    If the scenario belongs to a cycle, a cycle (corresponding to the _creation_date_
+    This function checks and locks the configuration, manages application's version,
+    and creates a new scenario from the scenario configuration provided.
+
+    If the scenario belongs to a cycle, the cycle (corresponding to the _creation_date_
     and the configuration frequency attribute) is created if it does not exist yet.
 
     Parameters:
@@ -718,14 +847,24 @@ def create_scenario(
         creation_date (Optional[datetime.datetime]): The creation date of the scenario.
             If None, the current date time is used.
         name (Optional[str]): The displayable name of the scenario.
+
     Returns:
         The new scenario.
+
+    Raises:
+        SystemExit: If the configuration check returns some errors.
+
     """
+    Core._manage_version_and_block_config()
+
     return _ScenarioManagerFactory._build_manager()._create(config, creation_date, name)
 
 
 def create_global_data_node(config: DataNodeConfig) -> DataNode:
     """Create and return a new GLOBAL data node from a data node configuration.
+
+    This function checks and locks the configuration, manages application's version,
+    and creates the new data node from the data node configuration provided.
 
     Parameters:
         config (DataNodeConfig^): The data node configuration. It must have a `GLOBAL` scope.
@@ -735,32 +874,40 @@ def create_global_data_node(config: DataNodeConfig) -> DataNode:
 
     Raises:
         DataNodeConfigIsNotGlobal^: If the data node configuration does not have GLOBAL scope.
+        SystemExit: If the configuration check returns some errors.
     """
     # Check if the data node config has GLOBAL scope
     if config.scope is not Scope.GLOBAL:
-        raise DataNodeConfigIsNotGlobal(config.id)  # type: ignore
+        raise DataNodeConfigIsNotGlobal(config.id)
 
-    if dns := _DataManagerFactory._build_manager()._get_by_config_id(config.id):  # type: ignore
+    Core._manage_version_and_block_config()
+
+    if dns := _DataManagerFactory._build_manager()._get_by_config_id(config.id):
         return dns[0]
     return _DataManagerFactory._build_manager()._create_and_set(config, None, None)
 
 
 def clean_all_entities_by_version(version_number=None) -> bool:
-    """Delete all entities of a specific version.
+    """Deprecated. Use `clean_all_entities` function instead."""
+    _warn_deprecated("'clean_all_entities_by_version'", suggest="the 'clean_all_entities' function")
+    return clean_all_entities(version_number)
 
-    This function deletes all entities associated with the specified version.
+
+def clean_all_entities(version_number: str) -> bool:
+    """Deletes all entities associated with the specified version.
 
     Parameters:
-        version_number (optional[str]): The version number of the entities to be deleted.
-            If None, the default behavior may apply.
+        version_number (str): The version number of the entities to be deleted.
+            The version_number should not be a production version.
 
     Returns:
         True if the operation succeeded, False otherwise.
 
     Notes:
         - If the specified version does not exist, the operation will be aborted, and False will be returned.
-        - This function cleans all entities, including jobs, scenarios, sequences, tasks, and data nodes.
-        - The production version of the specified version is also deleted if it exists.
+        - If the specified version is a production version, the operation will be aborted, and False will be returned.
+        - This function cleans all entities, including jobs, submissions, scenarios, cycles, sequences, tasks,
+            and data nodes.
     """
     version_manager = _VersionManagerFactory._build_manager()
     try:
@@ -769,13 +916,21 @@ def clean_all_entities_by_version(version_number=None) -> bool:
         __logger.warning(f"{e.message} Abort cleaning the entities of version '{version_number}'.")
         return False
 
+    if version_number in version_manager._get_production_versions():
+        __logger.warning(
+            f"Abort cleaning the entities of version '{version_number}'. A production version can not be deleted."
+        )
+        return False
+
     _JobManagerFactory._build_manager()._delete_by_version(version_number)
+    _SubmissionManagerFactory._build_manager()._delete_by_version(version_number)
     _ScenarioManagerFactory._build_manager()._delete_by_version(version_number)
     _SequenceManagerFactory._build_manager()._delete_by_version(version_number)
     _TaskManagerFactory._build_manager()._delete_by_version(version_number)
     _DataManagerFactory._build_manager()._delete_by_version(version_number)
 
     version_manager._delete(version_number)
+
     try:
         version_manager._delete_production_version(version_number)
     except VersionIsNotProductionVersion:
@@ -800,7 +955,7 @@ def export_scenario(
 
     manager = _ScenarioManagerFactory._build_manager()
     scenario = manager._get(scenario_id)
-    entity_ids = manager._get_children_entity_ids(scenario)  # type: ignore
+    entity_ids = manager._get_children_entity_ids(scenario)
     entity_ids.scenario_ids = {scenario_id}
     entity_ids.cycle_ids = {scenario.cycle.id}
 
@@ -850,7 +1005,7 @@ def get_parents(
                 parent_dict[k] = value
 
     if isinstance(entity, str):
-        entity = get(entity)  # type: ignore
+        entity = get(entity)
 
     parent_dict = parent_dict or dict()
 

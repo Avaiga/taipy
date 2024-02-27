@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -15,12 +15,11 @@ from time import sleep
 from unittest import mock
 
 import pytest
+
 import taipy.core as tp
 from taipy.config import Config
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
-from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from taipy.core.config.job_config import JobConfig
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.data_node_id import DataNodeId
@@ -32,17 +31,17 @@ from .utils import FakeDataNode
 
 
 def funct_a_b(input: str):
-    print("task_a_b")
+    print("task_a_b")  # noqa: T201
     return "B"
 
 
 def funct_b_c(input: str):
-    print("task_b_c")
+    print("task_b_c")  # noqa: T201
     return "C"
 
 
 def funct_b_d(input: str):
-    print("task_b_d")
+    print("task_b_d")  # noqa: T201
     return "D"
 
 
@@ -354,8 +353,6 @@ class TestDataNode:
         assert not dn_3.is_up_to_date
 
     def test_do_not_recompute_data_node_valid_but_continue_sequence_execution(self):
-        Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
         a = Config.configure_data_node("A", "pickle", default_data="A")
         b = Config.configure_data_node("B", "pickle")
         c = Config.configure_data_node("C", "pickle")
@@ -365,8 +362,6 @@ class TestDataNode:
         task_b_c = Config.configure_task("task_b_c", funct_b_c, input=b, output=c)
         task_b_d = Config.configure_task("task_b_d", funct_b_d, input=b, output=d)
         scenario_cfg = Config.configure_scenario("scenario", [task_a_b, task_b_c, task_b_d])
-
-        _OrchestratorFactory._build_dispatcher()
 
         scenario = tp.create_scenario(scenario_cfg)
         scenario.submit()
@@ -398,7 +393,7 @@ class TestDataNode:
         dn = FakeDataNode("foo")
 
         with pytest.raises(NoData):
-            dn.expiration_date
+            _ = dn.expiration_date
 
     def test_validity_null_if_never_write(self):
         dn = FakeDataNode("foo")
@@ -497,6 +492,57 @@ class TestDataNode:
         assert dn_1.validity_period == time_period_2
         assert dn_2.validity_period == time_period_2
 
+        dn_1.last_edit_date = new_datetime
+
+        assert len(dn_1.job_ids) == 1
+        assert len(dn_2.job_ids) == 1
+
+        with dn_1 as dn:
+            assert dn.config_id == "foo"
+            assert dn.owner_id is None
+            assert dn.scope == Scope.SCENARIO
+            assert dn.last_edit_date == new_datetime
+            assert dn.name == "def"
+            assert dn.edit_in_progress
+            assert dn.validity_period == time_period_2
+            assert len(dn.job_ids) == 1
+            assert dn._is_in_context
+
+            new_datetime_2 = new_datetime + timedelta(5)
+
+            dn.scope = Scope.CYCLE
+            dn.last_edit_date = new_datetime_2
+            dn.name = "abc"
+            dn.edit_in_progress = False
+            dn.validity_period = None
+
+            assert dn.config_id == "foo"
+            assert dn.owner_id is None
+            assert dn.scope == Scope.SCENARIO
+            assert dn.last_edit_date == new_datetime
+            assert dn.name == "def"
+            assert dn.edit_in_progress
+            assert dn.validity_period == time_period_2
+            assert len(dn.job_ids) == 1
+
+        assert dn_1.config_id == "foo"
+        assert dn_1.owner_id is None
+        assert dn_1.scope == Scope.CYCLE
+        assert dn_1.last_edit_date == new_datetime_2
+        assert dn_1.name == "abc"
+        assert not dn_1.edit_in_progress
+        assert dn_1.validity_period is None
+        assert not dn_1._is_in_context
+        assert len(dn_1.job_ids) == 1
+
+    def test_auto_set_and_reload_properties(self):
+        dn_1 = InMemoryDataNode("foo", scope=Scope.GLOBAL, properties={"name": "def"})
+
+        dm = _DataManager()
+        dm._set(dn_1)
+
+        dn_2 = dm._get(dn_1)
+
         # auto set & reload on properties attribute
         assert dn_1.properties == {"name": "def"}
         assert dn_2.properties == {"name": "def"}
@@ -518,100 +564,37 @@ class TestDataNode:
             "temp_key_1": "temp_value_1",
             "temp_key_2": "temp_value_2",
         }
-        assert dn_2.properties == {
-            "name": "def",
-            "qux": 5,
-            "temp_key_1": "temp_value_1",
-            "temp_key_2": "temp_value_2",
-        }
+        assert dn_2.properties == {"name": "def", "qux": 5, "temp_key_1": "temp_value_1", "temp_key_2": "temp_value_2"}
         dn_1.properties.pop("temp_key_1")
         assert "temp_key_1" not in dn_1.properties.keys()
         assert "temp_key_1" not in dn_1.properties.keys()
-        assert dn_1.properties == {
-            "name": "def",
-            "qux": 5,
-            "temp_key_2": "temp_value_2",
-        }
-        assert dn_2.properties == {
-            "name": "def",
-            "qux": 5,
-            "temp_key_2": "temp_value_2",
-        }
+        assert dn_1.properties == {"name": "def", "qux": 5, "temp_key_2": "temp_value_2"}
+        assert dn_2.properties == {"name": "def", "qux": 5, "temp_key_2": "temp_value_2"}
         dn_2.properties.pop("temp_key_2")
-        assert dn_1.properties == {
-            "qux": 5,
-            "name": "def",
-        }
-        assert dn_2.properties == {
-            "qux": 5,
-            "name": "def",
-        }
+        assert dn_1.properties == {"qux": 5, "name": "def"}
+        assert dn_2.properties == {"qux": 5, "name": "def"}
         assert "temp_key_2" not in dn_1.properties.keys()
         assert "temp_key_2" not in dn_2.properties.keys()
 
         dn_1.properties["temp_key_3"] = 0
-        assert dn_1.properties == {
-            "qux": 5,
-            "temp_key_3": 0,
-            "name": "def",
-        }
-        assert dn_2.properties == {
-            "qux": 5,
-            "temp_key_3": 0,
-            "name": "def",
-        }
+        assert dn_1.properties == {"qux": 5, "temp_key_3": 0, "name": "def"}
+        assert dn_2.properties == {"qux": 5, "temp_key_3": 0, "name": "def"}
         dn_1.properties.update({"temp_key_3": 1})
-        assert dn_1.properties == {
-            "qux": 5,
-            "temp_key_3": 1,
-            "name": "def",
-        }
-        assert dn_2.properties == {
-            "qux": 5,
-            "temp_key_3": 1,
-            "name": "def",
-        }
+        assert dn_1.properties == {"qux": 5, "temp_key_3": 1, "name": "def"}
+        assert dn_2.properties == {"qux": 5, "temp_key_3": 1, "name": "def"}
         dn_1.properties.update(dict())
-        assert dn_1.properties == {
-            "qux": 5,
-            "temp_key_3": 1,
-            "name": "def",
-        }
-        assert dn_2.properties == {
-            "qux": 5,
-            "temp_key_3": 1,
-            "name": "def",
-        }
+        assert dn_1.properties == {"qux": 5, "temp_key_3": 1, "name": "def"}
+        assert dn_2.properties == {"qux": 5, "temp_key_3": 1, "name": "def"}
         dn_1.properties["temp_key_4"] = 0
         dn_1.properties["temp_key_5"] = 0
 
-        dn_1.last_edit_date = new_datetime
-
-        assert len(dn_1.job_ids) == 1
-        assert len(dn_2.job_ids) == 1
-
         with dn_1 as dn:
-            assert dn.config_id == "foo"
-            assert dn.owner_id is None
-            assert dn.scope == Scope.SCENARIO
-            assert dn.last_edit_date == new_datetime
-            assert dn.name == "def"
-            assert dn.edit_in_progress
-            assert dn.validity_period == time_period_2
-            assert len(dn.job_ids) == 1
             assert dn._is_in_context
             assert dn.properties["qux"] == 5
             assert dn.properties["temp_key_3"] == 1
             assert dn.properties["temp_key_4"] == 0
             assert dn.properties["temp_key_5"] == 0
 
-            new_datetime_2 = new_datetime + timedelta(5)
-
-            dn.scope = Scope.CYCLE
-            dn.last_edit_date = new_datetime_2
-            dn.name = "abc"
-            dn.edit_in_progress = False
-            dn.validity_period = None
             dn.properties["qux"] = 9
             dn.properties.pop("temp_key_3")
             dn.properties.pop("temp_key_4")
@@ -620,28 +603,12 @@ class TestDataNode:
             dn.properties.pop("temp_key_5")
             dn.properties.update(dict())
 
-            assert dn.config_id == "foo"
-            assert dn.owner_id is None
-            assert dn.scope == Scope.SCENARIO
-            assert dn.last_edit_date == new_datetime
-            assert dn.name == "def"
-            assert dn.edit_in_progress
-            assert dn.validity_period == time_period_2
-            assert len(dn.job_ids) == 1
             assert dn.properties["qux"] == 5
             assert dn.properties["temp_key_3"] == 1
             assert dn.properties["temp_key_4"] == 0
             assert dn.properties["temp_key_5"] == 0
 
-        assert dn_1.config_id == "foo"
-        assert dn_1.owner_id is None
-        assert dn_1.scope == Scope.CYCLE
-        assert dn_1.last_edit_date == new_datetime_2
-        assert dn_1.name == "abc"
-        assert not dn_1.edit_in_progress
-        assert dn_1.validity_period is None
         assert not dn_1._is_in_context
-        assert len(dn_1.job_ids) == 1
         assert dn_1.properties["qux"] == 9
         assert "temp_key_3" not in dn_1.properties.keys()
         assert dn_1.properties["temp_key_4"] == 1
@@ -655,13 +622,13 @@ class TestDataNode:
     def test_cacheable_deprecated_false(self):
         dn = FakeDataNode("foo")
         with pytest.warns(DeprecationWarning):
-            dn.cacheable
+            _ = dn.cacheable
         assert dn.cacheable is False
 
     def test_cacheable_deprecated_true(self):
         dn = FakeDataNode("foo", properties={"cacheable": True})
         with pytest.warns(DeprecationWarning):
-            dn.cacheable
+            _ = dn.cacheable
         assert dn.cacheable is True
 
     def test_data_node_with_env_variable_value_not_stored(self):

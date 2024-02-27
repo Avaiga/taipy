@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -18,6 +18,7 @@ from testbook import testbook
 
 
 @pytest.mark.filterwarnings("ignore::RuntimeWarning")
+@pytest.mark.teste2e
 @testbook("tests/gui/notebook/simple_gui.ipynb")
 def test_notebook_simple_gui(tb, helpers):
     tb.execute_cell("import")

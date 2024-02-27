@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -21,7 +21,7 @@ from ...exceptions.exceptions import VersionIsNotProductionVersion
 from ...job._job_manager_factory import _JobManagerFactory
 from ...scenario._scenario_manager_factory import _ScenarioManagerFactory
 from ...sequence._sequence_manager_factory import _SequenceManagerFactory
-from ...taipy import clean_all_entities_by_version
+from ...taipy import clean_all_entities
 from ...task._task_manager_factory import _TaskManagerFactory
 from .._version_manager_factory import _VersionManagerFactory
 from ._bcolor import _Bcolors
@@ -71,7 +71,7 @@ class _VersionCLI:
             return
 
         if args.list:
-            print(cls.__list_versions())
+            print(cls.__list_versions())  # noqa: T201
             sys.exit(0)
 
         if args.rename:
@@ -99,10 +99,10 @@ class _VersionCLI:
                 )
                 sys.exit(0)
             except VersionIsNotProductionVersion as e:
-                raise SystemExit(e)
+                raise SystemExit(e) from None
 
         if args.delete:
-            if clean_all_entities_by_version(args.delete):
+            if clean_all_entities(args.delete):
                 cls.__logger.info(f"Successfully delete version {args.delete}.")
             else:
                 sys.exit(1)
@@ -216,7 +216,7 @@ class _VersionCLI:
             cls.__logger.error(f"Version '{version_2}' does not exist.")
             sys.exit(1)
 
-        Config._comparator._compare(
+        Config._comparator._compare(  # type: ignore[attr-defined]
             version_entity_1.config,
             version_entity_2.config,
             version_1,

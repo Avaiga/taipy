@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -72,5 +72,9 @@ class Partial(_Page):
         if isinstance(content, Page):
             new_partial._renderer = content
         else:
-            new_partial._renderer = type(self._renderer)(content=content) if self._renderer is not None else None
+            new_partial._renderer = (
+                type(self._renderer)(content=content, frame=self._renderer._get_frame())
+                if self._renderer is not None
+                else None
+            )
         return new_partial

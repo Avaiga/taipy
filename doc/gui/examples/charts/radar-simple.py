@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -13,10 +13,12 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
+from typing import Dict, List
+
 from taipy.gui import Gui
 
 # Source: www.statista.com (Most used programming languages in 2022)
-data = {
+data: Dict[str, List] = {
     # List of programming languages
     "Language": ["JavaScript", "HTML/CSS", "SQL", "Python", "Typescript", "Java", "Bash/Shell"],
     # Percentage of usage, per language

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-from unittest.mock import patch
 
 from taipy.gui import Gui, Html
 
@@ -20,8 +19,7 @@ def test_simple_html(gui: Gui, helpers):
     html_string = "<html><head></head><body><h1>test</h1></body></html>"
     gui._set_frame(inspect.currentframe())
     gui.add_page("test", Html(html_string))
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False)
+    gui.run(run_server=False)
     client = gui._server.test_client()
     jsx = client.get("/taipy-jsx/test").json["jsx"]
     assert jsx == "<h1>test</h1>"

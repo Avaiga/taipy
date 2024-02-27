@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import json
-from unittest.mock import patch
 
 from taipy.gui.gui import Gui
 
@@ -18,9 +17,8 @@ from taipy.gui.gui import Gui
 def test_multiple_instance():
     gui1 = Gui("<|gui1|>")
     gui2 = Gui("<|gui2|>")
-    with patch("sys.argv", ["prog"]):
-        gui1.run(run_server=False)
-        gui2.run(run_server=False)
+    gui1.run(run_server=False)
+    gui2.run(run_server=False)
     client1 = gui1._server.test_client()
     client2 = gui2._server.test_client()
     assert_multiple_instance(client1, 'value="gui1"')

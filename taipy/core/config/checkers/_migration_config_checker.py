@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -27,7 +27,7 @@ class _MigrationConfigChecker(_ConfigChecker):
 
             migration_fcts = migration_config.migration_fcts
 
-            for target_version, migration_functions in migration_config.migration_fcts.items():
+            for target_version, migration_functions in migration_config.migration_fcts.items():  # type: ignore[union-attr]
                 for config_id, migration_function in migration_functions.items():
                     self._check_callable(target_version, config_id, migration_function)
 

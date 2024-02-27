@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -15,7 +15,6 @@ import socket
 import time
 import typing as t
 import warnings
-from unittest.mock import patch
 
 from taipy.gui import Gui, Html, Markdown
 from taipy.gui._renderers.builder import _Builder
@@ -48,8 +47,7 @@ class Helpers:
 
     @staticmethod
     def _test_control(gui: Gui, expected_values: t.Union[str, t.List]):
-        with patch("sys.argv", ["prog"]):
-            gui.run(run_server=False, single_client=True, stylekit=False)
+        gui.run(run_server=False, single_client=True, stylekit=False)
         client = gui._server.test_client()
         response = client.get("/taipy-jsx/test")
         assert response.status_code == 200, f"response.status_code {response.status_code} != 200"
@@ -138,16 +136,14 @@ class Helpers:
         kwargs["run_browser"] = False
         kwargs["stylekit"] = kwargs.get("stylekit", False)
         with warnings.catch_warnings(record=True):
-            with patch("sys.argv", ["prog"]):
-                gui.run(**kwargs)
+            gui.run(**kwargs)
         while not Helpers.port_check():
             time.sleep(0.1)
 
     @staticmethod
     def run_e2e_multi_client(gui: Gui):
         with warnings.catch_warnings(record=True):
-            with patch("sys.argv", ["prog"]):
-                gui.run(run_server=False, run_browser=False, single_client=False, stylekit=False)
+            gui.run(run_server=False, run_browser=False, single_client=False, stylekit=False)
             gui._server.run(
                 host=gui._get_config("host", "127.0.0.1"),
                 port=gui._get_config("port", 5000),

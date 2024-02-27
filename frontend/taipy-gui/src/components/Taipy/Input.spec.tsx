@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Avaiga Private Limited
+ * Copyright 2021-2024 Avaiga Private Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -88,6 +88,25 @@ describe("Input Component", () => {
             name: "",
             payload: { action: "on_action", args: ["Enter", "varname", "Valdata"] },
             type: "SEND_ACTION_ACTION",
+        });
+    });
+    it("dispatch a well formed update message with change_delay=-1", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByDisplayValue } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <Input value="Val" type="text" updateVarName="varname" changeDelay={-1} />
+            </TaipyContext.Provider>
+        );
+        const elt = getByDisplayValue("Val");
+        await userEvent.click(elt);
+        await userEvent.keyboard("data{Enter}");
+        await waitFor(() => expect(dispatch).toHaveBeenCalled());
+        expect(dispatch).toHaveBeenLastCalledWith({
+            name: "varname",
+            payload: { value: "Valdata" },
+            propagate: true,
+            type: "SEND_UPDATE_ACTION",
         });
     });
     it("dispatch a no action message on unsupported key", async () => {

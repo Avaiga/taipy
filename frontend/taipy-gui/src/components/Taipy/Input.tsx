@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Avaiga Private Limited
+ * Copyright 2021-2024 Avaiga Private Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -48,10 +48,10 @@ const Input = (props: TaipyInputProps) => {
     const [value, setValue] = useState(defaultValue);
     const dispatch = useDispatch();
     const delayCall = useRef(-1);
-    const [actionKeys] = useState(() => (onAction ? getActionKeys(props.actionKeys) : []));
+    const [actionKeys] = useState(() => getActionKeys(props.actionKeys));
     const module = useModule();
 
-    const changeDelay = typeof props.changeDelay === "number" && props.changeDelay >= 0 ? props.changeDelay : 300;
+    const changeDelay = typeof props.changeDelay === "number" ? (props.changeDelay >= 0 ? props.changeDelay : -1) : 300;
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
@@ -60,7 +60,11 @@ const Input = (props: TaipyInputProps) => {
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const val = e.target.value;
             setValue(val);
-            if (changeDelay) {
+            if (changeDelay === 0) {
+                dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
+                return;
+            }
+            if (changeDelay > 0) {
                 if (delayCall.current > 0) {
                     clearTimeout(delayCall.current);
                 }
@@ -68,8 +72,6 @@ const Input = (props: TaipyInputProps) => {
                     delayCall.current = -1;
                     dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
                 }, changeDelay);
-            } else {
-                dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
             }
         },
         [updateVarName, dispatch, propagate, onChange, changeDelay, module]
@@ -77,14 +79,16 @@ const Input = (props: TaipyInputProps) => {
 
     const handleAction = useCallback(
         (evt: KeyboardEvent<HTMLDivElement>) => {
-            if (onAction && !evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
+            if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
                 const val = evt.currentTarget.querySelector("input")?.value;
-                if (changeDelay && delayCall.current > 0) {
+                if (changeDelay > 0 && delayCall.current > 0) {
                     clearTimeout(delayCall.current);
                     delayCall.current = -1;
                     dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
+                } else if (changeDelay === -1) {
+                    dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
                 }
-                dispatch(createSendActionNameAction(id, module, onAction, evt.key, updateVarName, val));
+                onAction && dispatch(createSendActionNameAction(id, module, onAction, evt.key, updateVarName, val));
                 evt.preventDefault();
             }
         },
@@ -109,7 +113,7 @@ const Input = (props: TaipyInputProps) => {
                 label={props.label}
                 onChange={handleInput}
                 disabled={!active}
-                onKeyDown={onAction ? handleAction : undefined}
+                onKeyDown={handleAction}
                 multiline={multiline}
                 minRows={linesShown}
             />

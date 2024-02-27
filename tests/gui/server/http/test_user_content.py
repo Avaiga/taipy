@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-from unittest.mock import patch
 
 import pytest
 
@@ -18,8 +17,7 @@ from taipy.gui import Gui
 
 
 def test_user_content_without_callback(gui: Gui, helpers):
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False, single_client=True)
+    gui.run(run_server=False, single_client=True)
     flask_client = gui._server.test_client()
     with pytest.warns(UserWarning):
         ret = flask_client.get(gui._get_user_content_url("path"))
@@ -30,10 +28,9 @@ def test_user_content_with_wrong_callback(gui: Gui, helpers):
     def on_user_content_cb(state, path, args):
         return None
 
-    on_user_content = on_user_content_cb
+    on_user_content = on_user_content_cb  # noqa: F841
     gui._set_frame(inspect.currentframe())
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False, single_client=True)
+    gui.run(run_server=False, single_client=True)
     flask_client = gui._server.test_client()
     with pytest.warns(UserWarning):
         ret = flask_client.get(gui._get_user_content_url("path", {"a": "b"}))
@@ -44,10 +41,9 @@ def test_user_content_with_callback(gui: Gui, helpers):
     def on_user_content_cb(state, path, args):
         return ""
 
-    on_user_content = on_user_content_cb
+    on_user_content = on_user_content_cb  # noqa: F841
     gui._set_frame(inspect.currentframe())
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False, single_client=True)
+    gui.run(run_server=False, single_client=True)
     flask_client = gui._server.test_client()
     ret = flask_client.get(gui._get_user_content_url("path"))
     assert ret.status_code == 200

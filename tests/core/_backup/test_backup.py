@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import os
-from unittest.mock import patch
 
 import pytest
 
@@ -47,9 +46,8 @@ backup_file_path = ".taipy_backups"
 
 
 def test_backup_storage_folder_when_core_run():
-    with patch("sys.argv", ["prog"]):
-        core = Core()
-        core.run()
+    core = Core()
+    core.run()
     backup_files = read_backup_file(backup_file_path)
     assert backup_files == [f"{Config.core.storage_folder}\n"]
     core.stop()

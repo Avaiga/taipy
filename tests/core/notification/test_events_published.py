@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -9,19 +9,15 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from dataclasses import dataclass, field
-from math import exp
 from queue import SimpleQueue
 
-from colorama import init
 from taipy.config import Config, Frequency
 from taipy.core import taipy as tp
-from taipy.core.config import scenario_config
 from taipy.core.job.status import Status
 from taipy.core.notification.core_event_consumer import CoreEventConsumerBase
 from taipy.core.notification.event import Event, EventEntityType, EventOperation
 from taipy.core.notification.notifier import Notifier
-from tests.core.utils import assert_true_after_time
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 
 
 class Snapshot:
@@ -64,7 +60,7 @@ class RecordingConsumer(CoreEventConsumerBase):
         return snapshot
 
     def process_event(self, event: Event):
-        # Nothing todo
+        # Nothing to do
         pass
 
     def start(self):
@@ -90,8 +86,9 @@ def test_events_published_for_scenario_creation():
     register_id_0, register_queue_0 = Notifier.register()
     all_evts = RecordingConsumer(register_id_0, register_queue_0)
     all_evts.start()
-    # Create a scenario only trigger 6 creation events (for cycle, data node(x2), task, sequence and scenario)
-    tp.create_scenario(sc_config)
+    # Create a scenario via the manager
+    # should only trigger 6 creation events (for cycle, data node(x2), task, sequence and scenario)
+    _ScenarioManagerFactory._build_manager()._create(sc_config)
     snapshot = all_evts.capture()
 
     assert len(snapshot.collected_events) == 6
@@ -177,6 +174,7 @@ def test_events_published_for_scenario_submission():
     # 1 submission creation event
     # 1 submission update event for jobs
     # 3 submission update events (for status: PENDING, RUNNING and COMPLETED)
+    # 1 submission update event for is_completed
     scenario.submit()
     snapshot = all_evts.capture()
     assert len(snapshot.collected_events) == 17
@@ -253,7 +251,7 @@ def test_job_events():
     consumer.start()
 
     # Create scenario
-    scenario = tp.create_scenario(sc_config)
+    scenario = _ScenarioManagerFactory._build_manager()._create(sc_config)
     snapshot = consumer.capture()
     assert len(snapshot.collected_events) == 0
 
@@ -333,7 +331,7 @@ def test_data_node_events():
     consumer = RecordingConsumer(register_id, register_queue)
     consumer.start()
 
-    scenario = tp.create_scenario(sc_config)
+    scenario = _ScenarioManagerFactory._build_manager()._create(sc_config)
 
     snapshot = consumer.capture()
     # We expect two creation events since we have two data nodes:

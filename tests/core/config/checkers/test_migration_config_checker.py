@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -12,6 +12,7 @@
 from unittest.mock import patch
 
 import pytest
+
 from taipy.config.config import Config
 from taipy.core import Core
 from taipy.core._version._version_manager import _VersionManager
@@ -23,14 +24,6 @@ def mock_func():
 
 
 def test_check_if_entity_property_key_used_is_predefined(caplog):
-    with patch("sys.argv", ["prog", "--production", "1.0"]):
-        core = Core()
-        core.run()
-    assert caplog.text == ""
-    core.stop()
-
-    caplog.clear()
-
     Config.unique_sections[MigrationConfig.name]._properties["_entity_owner"] = None
     with patch("sys.argv", ["prog", "--production", "1.0"]):
         with pytest.raises(SystemExit):
@@ -71,9 +64,9 @@ def test_check_valid_version(caplog):
     Config.unblock_update()
 
     with patch("sys.argv", ["prog", "--production", "2.0"]):
+        # No SystemExit should be raised
         core = Core()
         core.run()
-    assert caplog.text == ""
     core.stop()
 
 

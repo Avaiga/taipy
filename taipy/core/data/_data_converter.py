@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -39,7 +39,7 @@ class _DataNodeConverter(_AbstractConverter):
     # While in practice, each data nodes might have different exposed type possibilities.
     # The previous implementation used tabular datanode but it's no longer suitable so
     # new proposal is needed.
-    _VALID_STRING_EXPOSED_TYPES = ["numpy", "pandas", "modin"]
+    _VALID_STRING_EXPOSED_TYPES = ["numpy", "pandas", "modin"]  # Modin is deprecated in favor of pandas since 3.1.0
 
     @classmethod
     def __serialize_generic_dn_properties(cls, datanode_properties: dict):

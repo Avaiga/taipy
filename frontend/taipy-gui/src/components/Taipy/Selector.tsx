@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Avaiga Private Limited
+ * Copyright 2021-2024 Avaiga Private Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -11,26 +11,31 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useCallback, useEffect, useMemo, CSSProperties, MouseEvent } from "react";
+import React, { useState, useCallback, useEffect, useMemo, CSSProperties, MouseEvent, ChangeEvent } from "react";
+import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Checkbox from "@mui/material/Checkbox";
+import Chip from "@mui/material/Chip";
+import FormControl from "@mui/material/FormControl";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormGroup from "@mui/material/FormGroup";
+import FormLabel from "@mui/material/FormLabel";
 import InputLabel from "@mui/material/InputLabel";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
-import Paper from "@mui/material/Paper";
-import OutlinedInput from "@mui/material/OutlinedInput";
-import Avatar from "@mui/material/Avatar";
 import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import Paper from "@mui/material/Paper";
 import Tooltip from "@mui/material/Tooltip";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import Chip from "@mui/material/Chip";
 import { Theme, useTheme } from "@mui/material";
 
-import { doNotPropagateEvent, getUpdateVar } from "./utils";
+import { doNotPropagateEvent, getSuffixedClassNames, getUpdateVar } from "./utils";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import { ItemProps, LovImage, paperBaseSx, SelTreeProps, showItem, SingleItem, useLovListMemo } from "./lovUtils";
 import {
@@ -48,7 +53,7 @@ const MultipleItem = ({ value, clickHandler, selectedValue, item, disabled }: It
             <Checkbox
                 disabled={disabled}
                 edge="start"
-                checked={selectedValue.indexOf(value) !== -1}
+                checked={selectedValue.includes(value)}
                 tabIndex={-1}
                 disableRipple
             />
@@ -92,14 +97,13 @@ const Selector = (props: SelTreeProps) => {
         updateVarName = "",
         defaultLov = "",
         filter = false,
-        multiple = false,
-        dropdown = false,
         propagate = true,
         lov,
         updateVars = "",
         width = "100%",
         height,
         valueById,
+        mode = "",
     } = props;
     const [searchValue, setSearchValue] = useState("");
     const [selectedValue, setSelectedValue] = useState<string[]>([]);
@@ -112,6 +116,11 @@ const Selector = (props: SelTreeProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars, updateVarName);
+
+    const isRadio = mode && mode.toLocaleLowerCase() == "radio";
+    const isCheck = mode && mode.toLocaleLowerCase() == "check";
+    const dropdown = isRadio || isCheck || props.dropdown === undefined ? false : props.dropdown;
+    const multiple = isCheck ? true : isRadio || props.multiple === undefined ? false : props.multiple;
 
     const lovList = useLovListMemo(lov, defaultLov);
     const listSx = useMemo(
@@ -149,47 +158,64 @@ const Selector = (props: SelTreeProps) => {
         }
     }, [defaultValue, value]);
 
+    const selectHandler = useCallback(
+        (key: string) => {
+            setSelectedValue((keys) => {
+                if (multiple) {
+                    const newKeys = [...keys];
+                    const p = newKeys.indexOf(key);
+                    if (p === -1) {
+                        newKeys.push(key);
+                    } else {
+                        newKeys.splice(p, 1);
+                    }
+                    dispatch(
+                        createSendUpdateAction(
+                            updateVarName,
+                            newKeys,
+                            module,
+                            props.onChange,
+                            propagate,
+                            valueById ? undefined : getUpdateVar(updateVars, "lov")
+                        )
+                    );
+                    return newKeys;
+                } else {
+                    dispatch(
+                        createSendUpdateAction(
+                            updateVarName,
+                            key,
+                            module,
+                            props.onChange,
+                            propagate,
+                            valueById ? undefined : getUpdateVar(updateVars, "lov")
+                        )
+                    );
+                    return [key];
+                }
+            });
+        },
+        [updateVarName, dispatch, multiple, propagate, updateVars, valueById, props.onChange, module]
+    );
+
     const clickHandler = useCallback(
         (evt: MouseEvent<HTMLElement>) => {
             if (active) {
                 const { id: key = "" } = evt.currentTarget.dataset;
-                setSelectedValue((keys) => {
-                    if (multiple) {
-                        const newKeys = [...keys];
-                        const p = newKeys.indexOf(key);
-                        if (p === -1) {
-                            newKeys.push(key);
-                        } else {
-                            newKeys.splice(p, 1);
-                        }
-                        dispatch(
-                            createSendUpdateAction(
-                                updateVarName,
-                                newKeys,
-                                module,
-                                props.onChange,
-                                propagate,
-                                valueById ? undefined : getUpdateVar(updateVars, "lov")
-                            )
-                        );
-                        return newKeys;
-                    } else {
-                        dispatch(
-                            createSendUpdateAction(
-                                updateVarName,
-                                key,
-                                module,
-                                props.onChange,
-                                propagate,
-                                valueById ? undefined : getUpdateVar(updateVars, "lov")
-                            )
-                        );
-                        return [key];
-                    }
-                });
+                selectHandler(key);
             }
         },
-        [active, updateVarName, dispatch, multiple, propagate, updateVars, valueById, props.onChange, module]
+        [active, selectHandler]
+    );
+
+    const changeHandler = useCallback(
+        (evt: ChangeEvent<HTMLInputElement>) => {
+            if (active) {
+                const { id: key = "" } = (evt.currentTarget as HTMLElement).parentElement?.dataset || {};
+                selectHandler(key);
+            }
+        },
+        [active, selectHandler]
     );
 
     const handleChange = useCallback(
@@ -236,18 +262,61 @@ const Selector = (props: SelTreeProps) => {
 
     const handleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value), []);
 
-    const dropdownValue = (dropdown &&
+    const dropdownValue = ((dropdown || isRadio) &&
         (multiple ? selectedValue : selectedValue.length > 0 ? selectedValue[0] : "")) as string[];
 
     return (
         <FormControl sx={controlSx} className={className}>
             {props.label ? (
-                <InputLabel disableAnimation className={!dropdown ? "static-label" : undefined}>
-                    {props.label}
-                </InputLabel>
+                isRadio || isCheck ? (
+                    <FormLabel>{props.label}</FormLabel>
+                ) : (
+                    <InputLabel disableAnimation className={!dropdown ? "static-label" : undefined}>
+                        {props.label}
+                    </InputLabel>
+                )
             ) : null}
-            <Tooltip title={hover || ""} placement={dropdown ? "top": undefined} >
-                {dropdown ? (
+            <Tooltip title={hover || ""} placement={dropdown ? "top" : undefined}>
+                {isRadio ? (
+                    <RadioGroup
+                        value={dropdownValue}
+                        onChange={handleChange}
+                        className={getSuffixedClassNames(className, "-radio-group")}
+                    >
+                        {lovList.map((item) => (
+                            <FormControlLabel
+                                key={item.id}
+                                value={item.id}
+                                control={<Radio />}
+                                label={
+                                    typeof item.item === "string" ? item.item : <LovImage item={item.item as Icon} />
+                                }
+                                style={getStyles(item.id, selectedValue, theme)}
+                                disabled={!active}
+                            />
+                        ))}
+                    </RadioGroup>
+                ) : isCheck ? (
+                    <FormGroup className={getSuffixedClassNames(className, "-check-group")}>
+                        {lovList.map((item) => (
+                            <FormControlLabel
+                                key={item.id}
+                                control={
+                                    <Checkbox
+                                        data-id={item.id}
+                                        checked={selectedValue.includes(item.id)}
+                                        onChange={changeHandler}
+                                    />
+                                }
+                                label={
+                                    typeof item.item === "string" ? item.item : <LovImage item={item.item as Icon} />
+                                }
+                                style={getStyles(item.id, selectedValue, theme)}
+                                disabled={!active}
+                            ></FormControlLabel>
+                        ))}
+                    </FormGroup>
+                ) : dropdown ? (
                     <Select
                         id={id}
                         multiple={multiple}

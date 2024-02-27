@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Avaiga Private Limited
+ * Copyright 2021-2024 Avaiga Private Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -30,6 +30,7 @@ interface SliderProps extends LovProps<number | string | number[] | string[], nu
     height?: string;
     min?: number;
     max?: number;
+    step?: number;
     textAnchor?: string;
     continuous?: boolean;
     labels?: string | boolean;
@@ -51,6 +52,7 @@ const Slider = (props: SliderProps) => {
         width = "300px",
         updateVars = "",
         valueById,
+        step = 1,
     } = props;
     const [value, setValue] = useState<number|number[]>(0);
     const dispatch = useDispatch();
@@ -282,7 +284,7 @@ const Slider = (props: SliderProps) => {
                         valueLabelDisplay="auto"
                         min={min}
                         max={max}
-                        step={1}
+                        step={step}
                         marks={marks}
                         valueLabelFormat={getLabel}
                         orientation={horizontalOrientation ? undefined : "vertical"}
@@ -299,7 +301,7 @@ const Slider = (props: SliderProps) => {
                         valueLabelDisplay="auto"
                         min={min}
                         max={max}
-                        step={1}
+                        step={step}
                         marks={marks}
                         valueLabelFormat={getLabel}
                         orientation={horizontalOrientation ? undefined : "vertical"}

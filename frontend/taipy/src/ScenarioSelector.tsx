@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Avaiga Private Limited
+ * Copyright 2021-2024 Avaiga Private Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -84,6 +84,7 @@ interface ScenarioSelectorProps {
     className?: string;
     dynamicClassName?: string;
     showPins?: boolean;
+    showDialog?: boolean;
 }
 
 interface ScenarioEditDialogProps {
@@ -277,7 +278,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                                         <DatePicker
                                             label="Date"
                                             value={new Date(form.values.date)}
-                                            onChange={(date) => form.setFieldValue("date", date?.toISOString())}
+                                            onChange={(date?:Date|null) => form.setFieldValue("date", date?.toISOString())}
                                             disabled={actionEdit}
                                         />
                                     </LocalizationProvider>
@@ -410,7 +411,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
 };
 
 const ScenarioSelector = (props: ScenarioSelectorProps) => {
-    const { showAddButton = true, propagate = true, showPins = false } = props;
+    const { showAddButton = true, propagate = true, showPins = false, showDialog = true } = props;
     const [open, setOpen] = useState(false);
     const [actionEdit, setActionEdit] = useState<boolean>(false);
 
@@ -419,32 +420,9 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     const dispatch = useDispatch();
     const module = useModule();
 
-    const onDialogOpen = useCallback(() => {
-        setOpen(true);
-        setActionEdit(false);
-    }, []);
-
-    const onDialogClose = useCallback(() => {
-        setOpen(false);
-        setActionEdit(false);
-    }, []);
-
-    const openEditDialog = useCallback(
-        (e: React.MouseEvent<HTMLElement>) => {
-            e.stopPropagation();
-            const { id: scenId } = e.currentTarget?.dataset || {};
-            scenId &&
-                props.onScenarioSelect &&
-                dispatch(createSendActionNameAction(props.id, module, props.onScenarioSelect, scenId));
-            setOpen(true);
-            setActionEdit(true);
-        },
-        [props.onScenarioSelect, props.id, dispatch, module]
-    );
-
     const onSubmit = useCallback(
         (...values: unknown[]) => {
-            dispatch(createSendActionNameAction(props.id, module, props.onScenarioCrud, ...values, props.onCreation));
+            dispatch(createSendActionNameAction(props.id, module, props.onScenarioCrud, props.onCreation, ...values));
             if (values.length > 1 && values[1]) {
                 // delete requested => unselect current node
                 const lovVar = getUpdateVar(props.updateVars, "scenarios");
@@ -464,6 +442,33 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             props.updateVars,
             props.onCreation,
         ]
+    );
+
+    const onDialogOpen = useCallback(() => {
+        if (showDialog) {
+            setOpen(true);
+            setActionEdit(false);
+        } else {
+            onSubmit(false, false, {}, false);
+        }
+    }, [showDialog, onSubmit]);
+
+    const onDialogClose = useCallback(() => {
+        setOpen(false);
+        setActionEdit(false);
+    }, []);
+
+    const openEditDialog = useCallback(
+        (e: React.MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            const { id: scenId } = e.currentTarget?.dataset || {};
+            scenId &&
+                props.onScenarioSelect &&
+                dispatch(createSendActionNameAction(props.id, module, props.onScenarioSelect, scenId));
+            setOpen(true);
+            setActionEdit(true);
+        },
+        [props.onScenarioSelect, props.id, dispatch, module]
     );
 
     const EditScenario = useCallback(

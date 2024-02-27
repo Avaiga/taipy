@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -70,7 +70,10 @@ class _Bindings:
         self.__scopes = _DataScopes()
 
     def _get_data_scope(self):
-        return self.__scopes.get_scope(self.__gui._get_client_id())
+        return self.__scopes.get_scope(self.__gui._get_client_id())[0]
+
+    def _get_data_scope_metadata(self):
+        return self.__scopes.get_scope(self.__gui._get_client_id())[1]
 
     def _get_all_scopes(self):
         return self.__scopes.get_all_scopes()

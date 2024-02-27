@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Avaiga Private Limited
+ * Copyright 2021-2024 Avaiga Private Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -31,13 +31,24 @@ const Navigate = ({ to, params, tab, force }: NavigateProps) => {
     useEffect(() => {
         if (to) {
             const tos = to === "/" ? to : "/" + to;
-            const searchParams = new URLSearchParams(params);
+            const searchParams = new URLSearchParams(params || "");
+            // Handle Resource Handler Id
+            let tprh: string | null = null;
+            if (searchParams.has("tprh")) {
+                tprh = searchParams.get("tprh");
+                searchParams.delete("tprh");
+            }
             if (Object.keys(state.locations || {}).some((route) => tos === route)) {
                 const searchParamsLocation = new URLSearchParams(location.search);
                 if (force && location.pathname === tos && searchParamsLocation.toString() === searchParams.toString()) {
                     navigate(0);
                 } else {
                     navigate({ pathname: to, search: `?${searchParams.toString()}` });
+                    if (tprh !== null) {
+                        // Add a session cookie for the resource handler id
+                        document.cookie = `tprh=${tprh};path=/;`;
+                        navigate(0);
+                    }
                 }
             } else {
                 window.open(`${to}?${searchParams.toString()}`, tab || "_blank")?.focus();

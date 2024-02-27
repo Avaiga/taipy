@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -52,18 +52,18 @@ class _VersionManager(_Manager[_Version]):
     @classmethod
     def _get_or_create(cls, id: str, force: bool) -> _Version:
         if version := cls._get(id):
-            comparator_result = Config._comparator._find_conflict_config(version.config, Config._applied_config, id)
+            comparator_result = Config._comparator._find_conflict_config(version.config, Config._applied_config, id)  # type: ignore[attr-defined]
             if comparator_result.get(_ComparatorResult.CONFLICTED_SECTION_KEY):
                 if force:
                     cls.__logger.warning(
                         f"Option --force is detected, overriding the configuration of version {id} ..."
                     )
-                    version.config = Config._applied_config
+                    version.config = Config._applied_config  # type: ignore[attr-defined]
                 else:
                     raise ConflictedConfigurationError()
 
         else:
-            version = _Version(id=id, config=Config._applied_config)
+            version = _Version(id=id, config=Config._applied_config)  # type: ignore[attr-defined]
 
         cls._set(version)
         return version
@@ -112,7 +112,7 @@ class _VersionManager(_Manager[_Version]):
             raise SystemExit(
                 f"Please add a new experiment version or run your application with --force option to"
                 f" override the Config of experiment {version_number}."
-            )
+            ) from None
         cls._repository._set_latest_version(version_number)
         return version_number
 
@@ -137,7 +137,7 @@ class _VersionManager(_Manager[_Version]):
                 f"Please add a new production version with migration functions.\n"
                 f"If old entities remain compatible with the new configuration, you can also run your application with"
                 f" --force option to override the production configuration of version {version_number}."
-            )
+            ) from None
         cls._repository._set_production_version(version_number)
         return version_number
 
@@ -182,12 +182,12 @@ class _VersionManager(_Manager[_Version]):
 
     @classmethod
     def _manage_version(cls):
-        from ..taipy import clean_all_entities_by_version
+        from ..taipy import clean_all_entities
 
         if Config.core.mode == "development":
             current_version_number = cls._get_development_version()
             cls.__logger.info(f"Development mode: Clean all entities of version {current_version_number}")
-            clean_all_entities_by_version(current_version_number)
+            clean_all_entities(current_version_number)
             cls._set_development_version(current_version_number)
 
         elif Config.core.mode in ["experiment", "production"]:

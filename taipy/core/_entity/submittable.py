@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -19,6 +19,7 @@ from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
 from ..data.data_node import DataNode
 from ..job.job import Job
+from ..submission.submission import Submission
 from ..task.task import Task
 from ._dag import _DAG
 
@@ -42,7 +43,7 @@ class Submittable:
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
-    ):
+    ) -> Submission:
         raise NotImplementedError
 
     def get_inputs(self) -> Set[DataNode]:
@@ -129,7 +130,7 @@ class Submittable:
         dag = self._build_dag()
         remove = [node for node, degree in dict(dag.in_degree).items() if degree == 0 and isinstance(node, DataNode)]
         dag.remove_nodes_from(remove)
-        return list(nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes)))
+        return [nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes))]
 
     def _add_subscriber(self, callback: Callable, params: Optional[List[Any]] = None):
         params = [] if params is None else params

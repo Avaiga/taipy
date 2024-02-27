@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -11,8 +11,6 @@
 
 import os
 import shutil
-
-import taipy
 
 
 def handle_services(use_rest, use_core):
@@ -149,9 +147,6 @@ def generate_main_file():
         app_main_file.write("\n\n")
         app_main_file.write(main_lines)
 
-
-with open(os.path.join(os.getcwd(), "requirements.txt"), "a") as requirement_file:
-    requirement_file.write(f"taipy=={taipy.version._get_version()}\n")
 
 use_core = "{{ cookiecutter.__core }}".upper()
 use_rest = "{{ cookiecutter.__rest }}".upper()

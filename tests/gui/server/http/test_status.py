@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -10,16 +10,13 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-from unittest.mock import patch
-
-from flask import g
+from os import path
 
 from taipy.gui import Gui
 
 
 def test_get_status(gui: Gui):
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False)
+    gui.run(run_server=False)
     flask_client = gui._server.test_client()
     ret = flask_client.get("/taipy.status.json")
     assert ret.status_code == 200, f"status_code => {ret.status_code} != 200"
@@ -33,21 +30,21 @@ def test_get_status(gui: Gui):
 
 
 def test_get_extended_status(gui: Gui):
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False, extended_status=True)
+    gui.run(run_server=False, extended_status=True)
     flask_client = gui._server.test_client()
     ret = flask_client.get("/taipy.status.json")
     assert ret.status_code == 200, f"status_code => {ret.status_code} != 200"
     assert ret.mimetype == "application/json", f"mimetype => {ret.mimetype} != application/json"
     assert ret.json, "json is not defined"
-    gui = ret.json.get("gui")
-    assert "backend_version" in gui, "json.gui has no key backend_version"
-    assert "flask_version" in gui, "json.gui has no key flask_version"
-    assert "frontend_version" in gui, "json.gui has no key frontend_version"
-    assert "host" in gui, "json.gui has no key host"
-    assert "python_version" in gui, "json.gui has no key python_version"
-    assert "user_status" in gui, "json.gui has no key user_status"
-    assert gui.get("user_status") == "", "json.gui.user_status is not empty"
+    gui_json = ret.json.get("gui")
+    assert "backend_version" in gui_json, "json.gui has no key backend_version"
+    assert "flask_version" in gui_json, "json.gui has no key flask_version"
+    if path.exists(gui._get_webapp_path()):
+        assert "frontend_version" in gui_json, "json.gui has no key frontend_version"
+    assert "host" in gui_json, "json.gui has no key host"
+    assert "python_version" in gui_json, "json.gui has no key python_version"
+    assert "user_status" in gui_json, "json.gui has no key user_status"
+    assert gui_json.get("user_status") == "", "json.gui.user_status is not empty"
 
 
 def test_get_status_with_user_status(gui: Gui):
@@ -58,12 +55,12 @@ def test_get_status_with_user_status(gui: Gui):
 
     gui._set_frame(inspect.currentframe())
 
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False)
+    gui.run(run_server=False)
     flask_client = gui._server.test_client()
     ret = flask_client.get("/taipy.status.json")
     assert ret.status_code == 200, f"status_code => {ret.status_code} != 200"
     assert ret.json, "json is not defined"
-    gui = ret.json.get("gui")
-    assert "user_status" in gui, "json.gui has no key user_status"
-    assert gui.get("user_status") == user_status, f'json.gui.user_status => {gui.get("user_status")} != {user_status}'
+    gui_ret = ret.json.get("gui")
+    assert "user_status" in gui_ret, "json.gui has no key user_status"
+    assert gui_ret.get("user_status") == user_status
+    assert f'json.gui.user_status => {gui_ret.get("user_status")} != {user_status}'

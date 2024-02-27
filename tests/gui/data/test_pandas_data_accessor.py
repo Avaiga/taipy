@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -12,7 +12,6 @@
 import inspect
 from datetime import datetime
 from importlib import util
-from unittest.mock import patch
 
 import pandas  # type: ignore
 from flask import g
@@ -203,7 +202,7 @@ def test_filter_by_date(gui: Gui, helpers, small_dataframe):
 
 
 def test_decimator(gui: Gui, helpers, small_dataframe):
-    a_decimator = ScatterDecimator()
+    a_decimator = ScatterDecimator()  # noqa: F841
 
     accessor = _PandasDataAccessor()
     pd = pandas.DataFrame(data=small_dataframe)
@@ -212,8 +211,7 @@ def test_decimator(gui: Gui, helpers, small_dataframe):
     gui._set_frame(inspect.currentframe())
 
     gui.add_page("test", "<|Hello {a_decimator}|button|id={btn_id}|>")
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False)
+    gui.run(run_server=False)
     flask_client = gui._server.test_client()
 
     cid = helpers.create_scope_and_get_sid(gui)

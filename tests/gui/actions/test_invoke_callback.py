@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-from unittest.mock import patch
 
 from flask import g
 
@@ -30,8 +29,7 @@ def test_invoke_callback(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
 
     gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>\n<|{val}|>"))
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False, single_client=True)
+    gui.run(run_server=False, single_client=True)
     flask_client = gui._server.test_client()
     # client id
     cid = helpers.create_scope_and_get_sid(gui)
@@ -40,4 +38,4 @@ def test_invoke_callback(gui: Gui, helpers):
     with gui.get_flask_app().app_context():
         g.client_id = cid
         invoke_callback(gui, cid, user_callback, [])
-        assert gui._Gui__state.val == 10
+        assert gui._Gui__state.val == 10  # type: ignore[attr-defined]

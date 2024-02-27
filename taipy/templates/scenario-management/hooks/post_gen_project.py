@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -10,12 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import os
-
-import taipy
-
-# Add taipy version to requirements.txt
-with open(os.path.join(os.getcwd(), "requirements.txt"), "a") as requirement_file:
-    requirement_file.write(f"taipy=={taipy.version._get_version()}\n")
 
 # Use TOML config file or not
 use_toml_config = "{{ cookiecutter.__use_toml_config }}".upper()

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -24,14 +24,14 @@ def _warn_deprecated(deprecated: str, suggest: Optional[str] = None, stacklevel:
     warnings.warn(message=message, category=category, stacklevel=stacklevel)
 
 
-def _warn_no_core_service(stacklevel: int = 3):
+def _warn_no_core_service(specific_message, stacklevel: int = 3):
     def inner(f):
         @functools.wraps(f)
         def _check_if_core_service_is_running(*args, **kwargs):
             from .._orchestrator._orchestrator_factory import _OrchestratorFactory
 
             if not _OrchestratorFactory._dispatcher:
-                message = "The Core service is NOT running"
+                message = f"The Core service is NOT running. {specific_message}"
                 warnings.warn(message=message, category=ResourceWarning, stacklevel=stacklevel)
 
             return f(*args, **kwargs)

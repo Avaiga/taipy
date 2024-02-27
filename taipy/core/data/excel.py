@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -10,15 +10,14 @@
 # specific language governing permissions and limitations under the License.
 
 import os
-from collections import defaultdict
 from datetime import datetime, timedelta
 from os.path import isfile
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-import modin.pandas as modin_pd
 import numpy as np
 import pandas as pd
 from openpyxl import load_workbook
+
 from taipy.config.common.scope import Scope
 
 from .._backup._backup import _replace_in_backup_file
@@ -70,15 +69,9 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
     """
 
     __STORAGE_TYPE = "excel"
-    __EXPOSED_TYPE_PROPERTY = "exposed_type"
-    __EXPOSED_TYPE_NUMPY = "numpy"
-    __EXPOSED_TYPE_PANDAS = "pandas"
-    __EXPOSED_TYPE_MODIN = "modin"
-    __VALID_STRING_EXPOSED_TYPES = [__EXPOSED_TYPE_PANDAS, __EXPOSED_TYPE_MODIN, __EXPOSED_TYPE_NUMPY]
     __PATH_KEY = "path"
     __DEFAULT_DATA_KEY = "default_data"
     __DEFAULT_PATH_KEY = "default_path"
-    __HAS_HEADER_PROPERTY = "has_header"
     __SHEET_NAME_PROPERTY = "sheet_name"
     _REQUIRED_PROPERTIES: List[str] = []
 
@@ -107,13 +100,17 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
 
         if self.__SHEET_NAME_PROPERTY not in properties.keys():
             properties[self.__SHEET_NAME_PROPERTY] = None
-        if self.__HAS_HEADER_PROPERTY not in properties.keys():
-            properties[self.__HAS_HEADER_PROPERTY] = True
-        if self.__EXPOSED_TYPE_PROPERTY not in properties.keys():
-            properties[self.__EXPOSED_TYPE_PROPERTY] = self.__EXPOSED_TYPE_PANDAS
-        self._check_exposed_type(properties[self.__EXPOSED_TYPE_PROPERTY], self.__VALID_STRING_EXPOSED_TYPES)
+        if self._HAS_HEADER_PROPERTY not in properties.keys():
+            properties[self._HAS_HEADER_PROPERTY] = True
+        if self._EXPOSED_TYPE_PROPERTY not in properties.keys():
+            properties[self._EXPOSED_TYPE_PROPERTY] = self._EXPOSED_TYPE_PANDAS
+        elif properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_MODIN:
+            # Deprecated in favor of pandas since 3.1.0
+            properties[self._EXPOSED_TYPE_PROPERTY] = self._EXPOSED_TYPE_PANDAS
+        self._check_exposed_type(properties[self._EXPOSED_TYPE_PROPERTY])
 
-        super().__init__(
+        DataNode.__init__(
+            self,
             config_id,
             scope,
             id,
@@ -128,6 +125,10 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             editor_expiration_date,
             **properties,
         )
+        _AbstractTabularDataNode.__init__(self, **properties)
+        if self._path and ".data" in self._path:
+            self._path = self._migrate_path(self.storage_type(), self._path)
+
         if not self._path:
             self._path = self._build_path(self.storage_type())
             properties[self.__PATH_KEY] = self._path
@@ -150,11 +151,11 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
 
         self._TAIPY_PROPERTIES.update(
             {
-                self.__EXPOSED_TYPE_PROPERTY,
+                self._EXPOSED_TYPE_PROPERTY,
                 self.__PATH_KEY,
                 self.__DEFAULT_PATH_KEY,
                 self.__DEFAULT_DATA_KEY,
-                self.__HAS_HEADER_PROPERTY,
+                self._HAS_HEADER_PROPERTY,
                 self.__SHEET_NAME_PROPERTY,
             }
         )
@@ -176,85 +177,81 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         return cls.__STORAGE_TYPE
 
     @staticmethod
-    def _check_exposed_type(exposed_type, valid_string_exposed_types):
+    def _check_exposed_type(exposed_type):
         if isinstance(exposed_type, str):
-            _AbstractTabularDataNode._check_exposed_type(exposed_type, valid_string_exposed_types)
+            _AbstractTabularDataNode._check_exposed_type(exposed_type)
         elif isinstance(exposed_type, list):
             for t in exposed_type:
-                _AbstractTabularDataNode._check_exposed_type(t, valid_string_exposed_types)
+                _AbstractTabularDataNode._check_exposed_type(t)
         elif isinstance(exposed_type, dict):
             for t in exposed_type.values():
-                _AbstractTabularDataNode._check_exposed_type(t, valid_string_exposed_types)
+                _AbstractTabularDataNode._check_exposed_type(t)
 
     def _read(self):
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
             return self._read_as_pandas_dataframe()
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_MODIN:
-            return self._read_as_modin_dataframe()
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy()
         return self._read_as()
 
-    def __sheet_name_to_list(self, properties):
-        if properties[self.__SHEET_NAME_PROPERTY]:
-            sheet_names = properties[self.__SHEET_NAME_PROPERTY]
-        else:
-            excel_file = load_workbook(properties[self.__PATH_KEY])
-            sheet_names = excel_file.sheetnames
-            excel_file.close()
-        return sheet_names if isinstance(sheet_names, (List, Set, Tuple)) else [sheet_names]
-
     def _read_as(self):
-        excel_file = load_workbook(self._path)
-        exposed_type = self.properties[self.__EXPOSED_TYPE_PROPERTY]
-        work_books = defaultdict()
-        sheet_names = excel_file.sheetnames
-        provided_sheet_names = self.__sheet_name_to_list(self.properties)
+        try:
+            excel_file = load_workbook(self._path)
+            exposed_type = self.properties[self._EXPOSED_TYPE_PROPERTY]
+            work_books = dict()
+            sheet_names = excel_file.sheetnames
 
-        for sheet_name in provided_sheet_names:
-            if sheet_name not in sheet_names:
-                raise NonExistingExcelSheet(sheet_name, self._path)
+            user_provided_sheet_names = self.properties.get(self.__SHEET_NAME_PROPERTY) or []
+            if not isinstance(user_provided_sheet_names, (List, Set, Tuple)):
+                user_provided_sheet_names = [user_provided_sheet_names]
 
-        if isinstance(exposed_type, List):
-            if len(provided_sheet_names) != len(self.properties[self.__EXPOSED_TYPE_PROPERTY]):
-                raise ExposedTypeLengthMismatch(
-                    f"Expected {len(provided_sheet_names)} exposed types, got "
-                    f"{len(self.properties[self.__EXPOSED_TYPE_PROPERTY])}"
-                )
+            provided_sheet_names = user_provided_sheet_names or sheet_names
 
-        for i, sheet_name in enumerate(provided_sheet_names):
-            work_sheet = excel_file[sheet_name]
-            sheet_exposed_type = exposed_type
+            for sheet_name in provided_sheet_names:
+                if sheet_name not in sheet_names:
+                    raise NonExistingExcelSheet(sheet_name, self._path)
 
-            if not isinstance(sheet_exposed_type, str):
-                if isinstance(exposed_type, dict):
-                    sheet_exposed_type = exposed_type.get(sheet_name, self.__EXPOSED_TYPE_PANDAS)
-                elif isinstance(exposed_type, List):
-                    sheet_exposed_type = exposed_type[i]
+            if isinstance(exposed_type, List):
+                if len(provided_sheet_names) != len(self.properties[self._EXPOSED_TYPE_PROPERTY]):
+                    raise ExposedTypeLengthMismatch(
+                        f"Expected {len(provided_sheet_names)} exposed types, got "
+                        f"{len(self.properties[self._EXPOSED_TYPE_PROPERTY])}"
+                    )
 
-                if isinstance(sheet_exposed_type, str):
-                    if sheet_exposed_type == self.__EXPOSED_TYPE_NUMPY:
-                        work_books[sheet_name] = self._read_as_pandas_dataframe(sheet_name).to_numpy()
-                    elif sheet_exposed_type == self.__EXPOSED_TYPE_PANDAS:
-                        work_books[sheet_name] = self._read_as_pandas_dataframe(sheet_name)
-                    continue
+            for i, sheet_name in enumerate(provided_sheet_names):
+                work_sheet = excel_file[sheet_name]
+                sheet_exposed_type = exposed_type
 
-            res = list()
-            for row in work_sheet.rows:
-                res.append([col.value for col in row])
-            if self.properties[self.__HAS_HEADER_PROPERTY] and res:
-                header = res.pop(0)
-                for i, row in enumerate(res):
-                    res[i] = sheet_exposed_type(**dict([[h, r] for h, r in zip(header, row)]))
-            else:
-                for i, row in enumerate(res):
-                    res[i] = sheet_exposed_type(*row)
-            work_books[sheet_name] = res
+                if not isinstance(sheet_exposed_type, str):
+                    if isinstance(exposed_type, dict):
+                        sheet_exposed_type = exposed_type.get(sheet_name, self._EXPOSED_TYPE_PANDAS)
+                    elif isinstance(exposed_type, List):
+                        sheet_exposed_type = exposed_type[i]
 
-        excel_file.close()
+                    if isinstance(sheet_exposed_type, str):
+                        if sheet_exposed_type == self._EXPOSED_TYPE_NUMPY:
+                            work_books[sheet_name] = self._read_as_pandas_dataframe(sheet_name).to_numpy()
+                        elif sheet_exposed_type == self._EXPOSED_TYPE_PANDAS:
+                            work_books[sheet_name] = self._read_as_pandas_dataframe(sheet_name)
+                        continue
+
+                res = list()
+                for row in work_sheet.rows:
+                    res.append([col.value for col in row])
+                if self.properties[self._HAS_HEADER_PROPERTY] and res:
+                    header = res.pop(0)
+                    for i, row in enumerate(res):
+                        res[i] = sheet_exposed_type(**dict([[h, r] for h, r in zip(header, row)]))
+                else:
+                    for i, row in enumerate(res):
+                        res[i] = sheet_exposed_type(*row)
+                work_books[sheet_name] = res
+        finally:
+            excel_file.close()
 
         if len(provided_sheet_names) == 1:
             return work_books[provided_sheet_names[0]]
+
         return work_books
 
     def _read_as_numpy(self):
@@ -263,52 +260,23 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             return {sheet_name: df.to_numpy() for sheet_name, df in sheets.items()}
         return sheets.to_numpy()
 
-    def _do_read_excel(self, engine, sheet_names, kwargs) -> pd.DataFrame:
-        df = pd.read_excel(
-            self._path,
-            sheet_name=sheet_names,
-            **kwargs,
-        )
-        # We are using pandas to load modin dataframes because of a modin issue
-        # https://github.com/modin-project/modin/issues/4924
-        if engine == "modin":
-            if isinstance(df, dict):  # Check if it s a multiple sheet Excel file
-                for key, value in df.items():
-                    df[key] = modin_pd.DataFrame(value)
-                return df
-            return modin_pd.DataFrame(df)
-        return df
+    def _do_read_excel(self, sheet_names, kwargs) -> Union[Dict[Union[int, str], pd.DataFrame], pd.DataFrame]:
+        return pd.read_excel(self._path, sheet_name=sheet_names, **kwargs)
 
     def __get_sheet_names_and_header(self, sheet_names):
-        kwargs: Dict[str, Any] = {}
+        kwargs = {}
         if sheet_names is None:
             sheet_names = self.properties[self.__SHEET_NAME_PROPERTY]
-        if not self.properties[self.__HAS_HEADER_PROPERTY]:
+        if not self.properties[self._HAS_HEADER_PROPERTY]:
             kwargs["header"] = None
         return sheet_names, kwargs
 
     def _read_as_pandas_dataframe(self, sheet_names=None) -> Union[Dict[Union[int, str], pd.DataFrame], pd.DataFrame]:
         sheet_names, kwargs = self.__get_sheet_names_and_header(sheet_names)
         try:
-            return self._do_read_excel("pandas", sheet_names, kwargs)
+            return self._do_read_excel(sheet_names, kwargs)
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
-
-    def _read_as_modin_dataframe(
-        self, sheet_names=None
-    ) -> Union[Dict[Union[int, str], modin_pd.DataFrame], modin_pd.DataFrame]:
-        sheet_names, kwargs = self.__get_sheet_names_and_header(sheet_names)
-        try:
-            if kwargs.get("header", None):
-                return modin_pd.read_excel(
-                    self._path,
-                    sheet_name=sheet_names,
-                    **kwargs,
-                )
-            else:
-                return self._do_read_excel("modin", sheet_names, kwargs)
-        except pd.errors.EmptyDataError:
-            return modin_pd.DataFrame()
 
     def __append_excel_with_single_sheet(self, append_excel_fct, *args, **kwargs):
         sheet_name = self.properties.get(self.__SHEET_NAME_PROPERTY)
@@ -341,11 +309,14 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
                 )
 
     def _append(self, data: Any):
-        if isinstance(data, Dict) and all(
-            [isinstance(x, (pd.DataFrame, modin_pd.DataFrame, np.ndarray)) for x in data.values()]
-        ):
+        from importlib.metadata import version
+
+        if version("pandas") < "1.4":
+            raise ImportError("The append method is only available for pandas version 1.4 or higher.")
+
+        if isinstance(data, Dict) and all(isinstance(x, (pd.DataFrame, np.ndarray)) for x in data.values()):
             self.__append_excel_with_multiple_sheets(data)
-        elif isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
+        elif isinstance(data, pd.DataFrame):
             self.__append_excel_with_single_sheet(data.to_excel, index=False, header=False)
         else:
             self.__append_excel_with_single_sheet(pd.DataFrame(data).to_excel, index=False, header=False)
@@ -366,25 +337,21 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         with pd.ExcelWriter(self._path) as writer:
             # Each key stands for a sheet name
             for key in data.keys():
-                if isinstance(data[key], np.ndarray):
-                    df = pd.DataFrame(data[key])
-                else:
-                    df = data[key]
+                df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data[key])
 
                 if columns:
                     data[key].columns = columns
 
-                df.to_excel(writer, key, index=False)
+                df.to_excel(writer, key, index=False, header=self.properties[self._HAS_HEADER_PROPERTY] or None)
 
     def _write(self, data: Any):
-        if isinstance(data, Dict) and all(
-            [isinstance(x, (pd.DataFrame, modin_pd.DataFrame, np.ndarray)) for x in data.values()]
-        ):
-            self.__write_excel_with_multiple_sheets(data)
-        elif isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
-            self.__write_excel_with_single_sheet(data.to_excel, self._path, index=False)
+        if isinstance(data, Dict):
+            return self.__write_excel_with_multiple_sheets(data)
         else:
-            self.__write_excel_with_single_sheet(pd.DataFrame(data).to_excel, self._path, index=False)
+            data = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
+            self.__write_excel_with_single_sheet(
+                data.to_excel, self._path, index=False, header=self.properties[self._HAS_HEADER_PROPERTY] or None
+            )
 
     def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None):
         """Write a set of columns.
@@ -394,13 +361,11 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             columns (List[str]): The list of column names to write.
             job_id (JobId^): An optional identifier of the writer.
         """
-        if isinstance(data, Dict) and all(
-            [isinstance(x, (pd.DataFrame, modin_pd.DataFrame, np.ndarray)) for x in data.values()]
-        ):
+        if isinstance(data, Dict) and all(isinstance(x, (pd.DataFrame, np.ndarray)) for x in data.values()):
             self.__write_excel_with_multiple_sheets(data, columns=columns)
         else:
             df = pd.DataFrame(data)
             if columns:
-                df.columns = columns
+                df.columns = pd.Index(columns, dtype="object")
             self.__write_excel_with_single_sheet(df.to_excel, self.path, index=False)
         self.track_edit(timestamp=datetime.now(), job_id=job_id)

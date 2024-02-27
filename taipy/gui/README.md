@@ -1,14 +1,7 @@
-# 🚧 Under construction 🚧
-
-WARNING: The Taipy team is performing a repository restructuration. This current repository taipy-gui is about to be
-merged into the main repository: taipy. Once the merge is done, the current code base will be in the
-[taipy repository](https://github.com/Avaiga/taipy). The migration should take a maximum of a few days.
-<be>
-
 # Taipy GUI
 
 ## License
-Copyright 2023 Avaiga Private Limited
+Copyright 2021-2024 Avaiga Private Limited
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 the License. You may obtain a copy of the License at
@@ -33,7 +26,7 @@ Taipy is a Python library for creating Business Applications. More information o
 [website](https://www.taipy.io). Taipy is split into multiple repositories including `taipy-gui` to let users
 install the minimum they need.
 
-[Taipy GUI](https://github.com/Avaiga/taipy-gui) provides Python classes that make it easy to create powerful web apps in minutes.
+Taipy GUI provides Python classes that make it easy to create powerful web apps in minutes.
 
 A more in depth documentation of Taipy can be found [here](https://docs.taipy.io/).
 
@@ -53,17 +46,11 @@ Want to be part of the *Taipy GUI* community? Check out our [`CODE_OF_CONDUCT.md
 
 - `frontend/taipy-gui`: Graphical user interface related files;
 - `taipy/gui`: Python source files;
-- `tests/taipy/gui`: Unit tests;
+- `tests/gui`: Unit tests;
 - `tools`: Files used to document `taipy-gui`;
 - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of `taipy-gui`;
 - `CONTRIBUTING.md`: Instructions to contribute to `taipy-gui`;
 - `INSTALLATION.md`: Instructions to build and install `taipy-gui`;
 - `LICENSE`: The Apache 2.0 License;
-- `MANIFEST.in`: Build configuration file;
-- `mypy.ini`: [mypy](http://mypy-lang.org/) linter configuration file;
-- `Pipfile`: File used by the Pipenv virtual environment to manage project dependencies;
-- `pyproject.toml`: Python build configuration file use for linters here;
-- `pytest.ini`: [pytest](https://pytest.org/) configuration file;
 - `README.md`: Current file;
 - `setup.py`: The setup script managing building, distributing, and installing `taipy-gui`;
-- `tox.ini`: Contains test scenarios to be run.

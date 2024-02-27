@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -14,6 +14,7 @@
 #     python <script>
 # -----------------------------------------------------------------------------------------
 import pandas
+
 from taipy.gui import Gui
 
 dates = pandas.date_range("2023-01-01", periods=365, freq="D")

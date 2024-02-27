@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -14,8 +14,6 @@ from datetime import datetime
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from taipy.core.config.job_config import JobConfig
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.cycle.cycle_id import CycleId
@@ -190,18 +188,17 @@ def test_get_cycle_start_date_and_end_date():
 
 
 def test_hard_delete_shared_entities():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    dn_config_1 = Config.configure_data_node("my_input_1", "in_memory", scope=Scope.SCENARIO, default_data="testing")
-    dn_config_2 = Config.configure_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
-    dn_config_3 = Config.configure_data_node("my_input_3", "in_memory", scope=Scope.CYCLE, default_data="testing")
-    dn_config_4 = Config.configure_data_node("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
+    dn_config_1 = Config.configure_data_node("my_input_1", "pickle", scope=Scope.SCENARIO, default_data="testing")
+    dn_config_2 = Config.configure_data_node("my_input_2", "pickle", scope=Scope.SCENARIO, default_data="testing")
+    dn_config_3 = Config.configure_data_node("my_input_3", "pickle", scope=Scope.CYCLE, default_data="testing")
+    dn_config_4 = Config.configure_data_node("my_input_4", "pickle", scope=Scope.GLOBAL, default_data="testing")
     task_config_1 = Config.configure_task("task_config_1", print, dn_config_1, dn_config_2)
     task_config_2 = Config.configure_task("task_config_2", print, dn_config_2, dn_config_3)
     task_config_3 = Config.configure_task("task_config_3", print, dn_config_3, dn_config_4)  # scope = global
     creation_date = datetime.now()
+    # Daily frequency so cycle attached to scenarios
     scenario_config_1 = Config.configure_scenario(
-        "scenario_config_1",
+        "scenario_1",
         [task_config_1, task_config_2, task_config_3],
         creation_date=creation_date,
         frequency=Frequency.DAILY,
@@ -213,12 +210,10 @@ def test_hard_delete_shared_entities():
             "sequence_3": [task_config_3],
         }
     )
-    scenario_config_2 = Config.configure_scenario(
-        "scenario_config_2", [task_config_2, task_config_3]
-    )  # No Frequency so cycle attached to scenarios
-    scenario_config_2.add_sequences({"sequence_3": [task_config_3]})
 
-    _OrchestratorFactory._build_dispatcher()
+    # No Frequency so no cycle attached to scenarios
+    scenario_config_2 = Config.configure_scenario("scenario_config_2", [task_config_2, task_config_3])
+    scenario_config_2.add_sequences({"sequence_3": [task_config_3]})
 
     scenario_1 = _ScenarioManager._create(scenario_config_1)
     scenario_2 = _ScenarioManager._create(scenario_config_1)

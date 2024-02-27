@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -37,7 +37,7 @@ from ..utils import (
 )
 from ..utils.chart_config_builder import _CHART_NAMES, _build_chart_config
 from ..utils.table_col_builder import _enhance_columns, _get_name_indexed_property
-from ..utils.types import _TaipyBase, _TaipyData
+from ..utils.types import _TaipyBase, _TaipyData, _TaipyToJson
 from .json import _TaipyJsonEncoder
 from .utils import _add_to_dict_and_get, _get_columns_dict, _get_tuple_val
 
@@ -69,6 +69,7 @@ class _Builder:
         "apply",
         "style",
         "tooltip",
+        "lov"
     ]
 
     def __init__(
@@ -77,12 +78,15 @@ class _Builder:
         control_type: str,
         element_name: str,
         attributes: t.Optional[t.Dict[str, t.Any]],
-        hash_names: t.Dict[str, str] = {},
+        hash_names: t.Dict[str, str] = None,
         default_value="<Empty>",
         lib_name: str = "taipy",
     ):
         from ..gui import Gui
         from .factory import _Factory
+
+        if hash_names is None:
+            hash_names = {}
 
         self.el = etree.Element(element_name)
 
@@ -142,8 +146,10 @@ class _Builder:
 
     @staticmethod
     def _get_variable_hash_names(
-        gui: "Gui", attributes: t.Dict[str, t.Any], hash_names: t.Dict[str, str] = {}
+        gui: "Gui", attributes: t.Dict[str, t.Any], hash_names: t.Dict[str, str] = None
     ) -> t.Dict[str, str]:
+        if hash_names is None:
+            hash_names = {}
         hashes = {}
         # Bind potential function and expressions in self.attributes
         for k, v in attributes.items():
@@ -294,7 +300,7 @@ class _Builder:
             try:
                 val = float(value)
             except ValueError:
-                raise ValueError(f"Property {name} expects a number for control {self.__control_type}")
+                raise ValueError(f"Property {name} expects a number for control {self.__control_type}") from None
         elif isinstance(value, numbers.Number):
             val = value  # type: ignore
         else:
@@ -564,10 +570,14 @@ class _Builder:
     def _set_chart_selected(self, max=0):
         name = "selected"
         default_sel = self.__attributes.get(name)
+        if not isinstance(default_sel, list) and name in self.__attributes:
+            default_sel = []
         idx = 1
         name_idx = f"{name}[{idx}]"
         sel = self.__attributes.get(name_idx)
-        while idx <= max:
+        if not isinstance(sel, list) and name_idx in self.__attributes:
+            sel = []
+        while idx <= max or name_idx in self.__attributes:
             if sel is not None or default_sel is not None:
                 self.__update_vars.extend(
                     self.__set_list_attribute(
@@ -580,6 +590,8 @@ class _Builder:
             idx += 1
             name_idx = f"{name}[{idx}]"
             sel = self.__attributes.get(name_idx)
+            if not isinstance(sel, list) and name_idx in self.__attributes:
+                sel = []
 
     def _get_list_attribute(self, name: str, list_type: PropertyType):
         varname = self.__hashes.get(name)
@@ -728,10 +740,14 @@ class _Builder:
             default_val (optional(Any)): the default value.
         """
         var_name = self.__default_property_name if var_name is None else var_name
-        if var_type == PropertyType.slider_value:
+        if var_type == PropertyType.slider_value or var_type == PropertyType.toggle_value:
             if self.__attributes.get("lov"):
                 var_type = PropertyType.lov_value
                 native_type = False
+            elif var_type == PropertyType.toggle_value:
+                self.__set_react_attribute(_to_camel_case("is_switch"), True)
+                var_type = PropertyType.dynamic_boolean
+                native_type = True
             else:
                 var_type = (
                     PropertyType.dynamic_lo_numbers
@@ -799,7 +815,9 @@ class _Builder:
             self.set_attribute("updateVars", ";".join(self.__update_vars))
         return self
 
-    def _set_table_pagesize_options(self, default_size=[50, 100, 500]):
+    def _set_table_pagesize_options(self, default_size=None):
+        if default_size is None:
+            default_size = [50, 100, 500]
         page_size_options = self.__attributes.get("page_size_options", default_size)
         if isinstance(page_size_options, str):
             try:
@@ -819,7 +837,7 @@ class _Builder:
 
     def _set_kind(self):
         if self.__attributes.get("theme", False):
-            self.set_attribute("kind", "theme")
+            self.set_attribute("mode", "theme")
         return self
 
     def __get_typed_hash_name(self, hash_name: str, var_type: t.Optional[PropertyType]) -> str:
@@ -886,6 +904,8 @@ class _Builder:
             if not isinstance(attr, tuple):
                 attr = (attr,)
             var_type = _get_tuple_val(attr, 1, PropertyType.string)
+            if var_type == PropertyType.to_json:
+                var_type = _TaipyToJson
             if var_type == PropertyType.boolean:
                 def_val = _get_tuple_val(attr, 2, False)
                 val = self.__get_boolean_attribute(attr[0], def_val)

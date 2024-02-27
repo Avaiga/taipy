@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -20,7 +20,7 @@ class LTTB(Decimator):
     """A decimator using the LTTB algorithm.
 
     The LTTB algorithm is an high performance algorithm that significantly reduces the number of
-    data points. It can work very well with time-series data to show trends using by using only
+    data points. It can work very well with time-series data to show trends using only
     a few data points.
 
     This class can only be used with line charts.

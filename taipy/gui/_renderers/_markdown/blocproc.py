@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -36,24 +36,24 @@ class _StartBlockProcessor(BlockProcessor):
     def run(self, parent, blocks):
         original_block = blocks[0]
         original_match = re.search(_StartBlockProcessor.__RE_FENCE_START, original_block)
-        blocks[0] = re.sub(_StartBlockProcessor.__RE_FENCE_START, "", blocks[0], 1)
+        blocks[0] = re.sub(_StartBlockProcessor.__RE_FENCE_START, "", blocks[0], count=1)
         tag = original_match.group(1)
-        queue = [tag]
+        stack = [tag]
         # Find block with ending fence
         for block_num, block in enumerate(blocks):
             matches = re.findall(_StartBlockProcessor.__RE_OTHER_FENCE, block)
             for match in matches:
-                if queue[-1] == match[0] and match[1] == "end":
-                    queue.pop()
+                if stack[-1] == match[0] and match[1] == "end":
+                    stack.pop()
                 elif match[1] == "start":
-                    queue.append(match[0])
-            if not queue:
+                    stack.append(match[0])
+            if not stack:
                 # remove end fence
                 blocks[block_num] = re.sub(
                     _MarkdownFactory._TAIPY_START + tag + r"\.end(.*?)" + _MarkdownFactory._TAIPY_END,
                     "",
                     block,
-                    1,
+                    count=1,
                 )
                 # render fenced area inside a new div
                 e = _MarkdownFactory.create_element(self._gui, original_match.group(1), original_match.group(2))

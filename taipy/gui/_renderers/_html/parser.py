@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -30,11 +30,11 @@ class _TaipyHTMLParser(HTMLParser):
         self.is_body = True
         self.head_tag = None
         self._line_count = 0
-        self._tag_queue = []
+        self._tag_stack = []
 
     # @override
     def handle_starttag(self, tag, props) -> None:
-        self._tag_queue.append((tag, self._line_count))
+        self._tag_stack.append((tag, self._line_count))
         if tag == "html":
             return
         if self.head_tag is not None:
@@ -66,10 +66,10 @@ class _TaipyHTMLParser(HTMLParser):
 
     # @override
     def handle_endtag(self, tag) -> None:
-        if not self._tag_queue:
+        if not self._tag_stack:
             _warn(f"Closing '{tag}' at line {self._line_count} is missing an opening tag.")
         else:
-            opening_tag, opening_tag_line = self._tag_queue.pop()
+            opening_tag, opening_tag_line = self._tag_stack.pop()
             if opening_tag != tag:
                 _warn(
                     f"Opening tag '{opening_tag}' at line {opening_tag_line} has no matching closing tag '{tag}' at line {self._line_count}."  # noqa: E501
@@ -104,8 +104,8 @@ class _TaipyHTMLParser(HTMLParser):
         for line, data_line in enumerate(data_lines):
             self._line_count = line + 1
             self.feed(data_line)
-        while self._tag_queue:
-            opening_tag, opening_tag_line = self._tag_queue.pop()
+        while self._tag_stack:
+            opening_tag, opening_tag_line = self._tag_stack.pop()
             _warn(f"Opening tag '{opening_tag}' at line {opening_tag_line} has no matching closing tag.")
 
 

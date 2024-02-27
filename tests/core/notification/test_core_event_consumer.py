@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -16,6 +16,7 @@ from taipy.core import taipy as tp
 from taipy.core.notification.core_event_consumer import CoreEventConsumerBase
 from taipy.core.notification.event import Event, EventEntityType, EventOperation
 from taipy.core.notification.notifier import Notifier
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from tests.core.utils import assert_true_after_time
 
 
@@ -79,7 +80,7 @@ def test_core_event_consumer():
     )
 
     # Create a scenario trigger 5 creation events
-    scenario = tp.create_scenario(scenario_config)
+    scenario = _ScenarioManagerFactory._build_manager()._create(scenario_config)
     assert_true_after_time(lambda: all_evt_csumer_0.event_collected == 5, time=10)
     assert_true_after_time(lambda: len(all_evt_csumer_0.event_entity_type_collected) == 5, time=10)
     assert_true_after_time(lambda: all_evt_csumer_0.event_operation_collected[EventOperation.CREATION] == 5, time=10)

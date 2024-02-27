@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import json
+import math
 import typing as t
 from collections import defaultdict
 from numbers import Number
@@ -29,18 +30,15 @@ from taipy.core import (
     DataNode,
     DataNodeId,
     Job,
-    JobId,
     Scenario,
     ScenarioId,
     Sequence,
     SequenceId,
+    Submission,
+    SubmissionId,
     cancel_job,
     create_scenario,
-)
-from taipy.core import delete as core_delete
-from taipy.core import delete_job
-from taipy.core import get as core_get
-from taipy.core import (
+    delete_job,
     get_cycles_scenarios,
     get_data_nodes,
     get_jobs,
@@ -51,37 +49,19 @@ from taipy.core import (
     is_submittable,
     set_primary,
 )
+from taipy.core import delete as core_delete
+from taipy.core import get as core_get
 from taipy.core import submit as core_submit
 from taipy.core.data._abstract_tabular import _AbstractTabularDataNode
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event, EventOperation
 from taipy.core.notification.notifier import Notifier
-from taipy.core.submission.submission import Submission
-from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from taipy.core.submission.submission_status import SubmissionStatus
 from taipy.gui import Gui, State
 from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
 
 from ._adapters import _EntityType
-
-
-class _SubmissionDetails:
-    def __init__(
-        self,
-        client_id: str,
-        module_context: str,
-        callback: t.Callable,
-        submission: Submission,
-    ) -> None:
-        self.client_id = client_id
-        self.module_context = module_context
-        self.callback = callback
-        self.submission = submission
-
-    def set_submission(self, submission: Submission):
-        self.submission = submission
-        return self
 
 
 class _GuiCoreContext(CoreEventConsumerBase):
@@ -105,6 +85,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
     _DATANODE_VIZ_DATA_ID_VAR = "gui_core_dv_data_id"
     _DATANODE_VIZ_DATA_CHART_ID_VAR = "gui_core_dv_data_chart_id"
     _DATANODE_VIZ_DATA_NODE_PROP = "data_node"
+    _DATANODE_SEL_SCENARIO_PROP = "scenario"
 
     def __init__(self, gui: Gui) -> None:
         self.gui = gui
@@ -112,7 +93,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         self.data_nodes_by_owner: t.Optional[t.Dict[t.Optional[str], DataNode]] = None
         self.scenario_configs: t.Optional[t.List[t.Tuple[str, str]]] = None
         self.jobs_list: t.Optional[t.List[Job]] = None
-        self.client_submission: t.Dict[str, _SubmissionDetails] = dict()
+        self.client_submission: t.Dict[str, SubmissionStatus] = dict()
         # register to taipy core notification
         reg_id, reg_queue = Notifier.register()
         # locks
@@ -124,33 +105,34 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def process_event(self, event: Event):
         if event.entity_type == EventEntityType.SCENARIO:
-            if event.operation == EventOperation.SUBMISSION:
-                self.scenario_status_callback(event.attribute_name)
-                return
-            self.scenario_refresh(
-                event.entity_id
-                if event.operation != EventOperation.DELETION and is_readable(t.cast(ScenarioId, event.entity_id))
-                else None
-            )
+            with self.gui._get_autorization(system=True):
+                self.scenario_refresh(
+                    event.entity_id
+                    if event.operation != EventOperation.DELETION and is_readable(t.cast(ScenarioId, event.entity_id))
+                    else None
+                )
         elif event.entity_type == EventEntityType.SEQUENCE and event.entity_id:
             sequence = None
             try:
-                sequence = (
-                    core_get(event.entity_id)
-                    if event.operation != EventOperation.DELETION and is_readable(t.cast(SequenceId, event.entity_id))
-                    else None
-                )
-                if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:
-                    self.gui._broadcast(
-                        _GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in sequence.parent_ids]}
+                with self.gui._get_autorization(system=True):
+                    sequence = (
+                        core_get(event.entity_id)
+                        if event.operation != EventOperation.DELETION
+                        and is_readable(t.cast(SequenceId, event.entity_id))
+                        else None
                     )
+                    if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:  # type: ignore
+                        self.gui._broadcast(
+                            _GuiCoreContext._CORE_CHANGED_NAME,
+                            {"scenario": [x for x in sequence.parent_ids]},  # type: ignore
+                        )
             except Exception as e:
                 _warn(f"Access to sequence {event.entity_id} failed", e)
         elif event.entity_type == EventEntityType.JOB:
             with self.lock:
                 self.jobs_list = None
         elif event.entity_type == EventEntityType.SUBMISSION:
-            self.scenario_status_callback(event.entity_id)
+            self.submission_status_callback(event.entity_id)
         elif event.entity_type == EventEntityType.DATA_NODE:
             with self.lock:
                 self.data_nodes_by_owner = None
@@ -168,31 +150,46 @@ class _GuiCoreContext(CoreEventConsumerBase):
             {"scenario": scenario_id or True},
         )
 
-    def scenario_status_callback(self, submission_id: t.Optional[str]):
-        if not submission_id or not is_readable_submission(submission_id):
+    def submission_status_callback(self, submission_id: t.Optional[str]):
+        if not submission_id or not is_readable(t.cast(SubmissionId, submission_id)):
             return
         try:
-            sub_details: t.Optional[_SubmissionDetails] = self.client_submission.get(submission_id)
-            if not sub_details:
+            last_status = self.client_submission.get(submission_id)
+            if not last_status:
                 return
 
-            submission = core_get_submission(submission_id)
+            submission = t.cast(Submission, core_get(submission_id))
             if not submission or not submission.entity_id:
                 return
 
-            entity = core_get(submission.entity_id)
-            if not entity:
-                return
-
             new_status = submission.submission_status
-            if sub_details.submission.submission_status != new_status:
-                # callback
-                self.gui._call_user_callback(
-                    sub_details.client_id,
-                    sub_details.callback,
-                    [entity, {"submission_status": new_status.name}],
-                    sub_details.module_context,
-                )
+
+            client_id = submission.properties.get("client_id")
+            if client_id:
+                running_tasks = {}
+                with self.gui._get_autorization(client_id):
+                    for job in submission.jobs:
+                        job = job if isinstance(job, Job) else core_get(job)
+                        running_tasks[job.task.id] = (
+                            SubmissionStatus.RUNNING.value
+                            if job.is_running()
+                            else SubmissionStatus.PENDING.value
+                            if job.is_pending()
+                            else None
+                        )
+                    self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"tasks": running_tasks}, client_id)
+
+                    if last_status != new_status:
+                        # callback
+                        submission_name = submission.properties.get("on_submission")
+                        if submission_name:
+                            self.gui._call_user_callback(
+                                client_id,
+                                submission_name,
+                                [core_get(submission.entity_id), {"submission_status": new_status.name}],
+                                submission.properties.get("module_context"),
+                            )
+
             with self.submissions_lock:
                 if new_status in (
                     SubmissionStatus.COMPLETED,
@@ -201,7 +198,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 ):
                     self.client_submission.pop(submission_id, None)
                 else:
-                    self.client_submission[submission_id] = sub_details.set_submission(submission)
+                    self.client_submission[submission_id] = new_status
 
         except Exception as e:
             _warn(f"Submission ({submission_id}) is not available", e)
@@ -220,7 +217,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     return (
                         scenario_or_cycle.id,
                         scenario_or_cycle.get_simple_label(),
-                        self.scenario_by_cycle.get(scenario_or_cycle),
+                        sorted(
+                            self.scenario_by_cycle.get(scenario_or_cycle, []), key=_GuiCoreContext.sort_by_creation_date
+                        ),
                         _EntityType.CYCLE.value,
                         False,
                     )
@@ -251,7 +250,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     cycles_scenarios.extend(scenarios)
                 else:
                     cycles_scenarios.append(cycle)
-        return cycles_scenarios
+        return sorted(cycles_scenarios, key=_GuiCoreContext.sort_by_creation_date)
 
     def select_scenario(self, state: State, id: str, payload: t.Dict[str, str]):
         args = payload.get("args")
@@ -280,15 +279,16 @@ class _GuiCoreContext(CoreEventConsumerBase):
         if (
             args is None
             or not isinstance(args, list)
-            or len(args) < 3
-            or not isinstance(args[0], bool)
+            or len(args) < 4
             or not isinstance(args[1], bool)
-            or not isinstance(args[2], dict)
+            or not isinstance(args[2], bool)
+            or not isinstance(args[3], dict)
         ):
             return
-        update = args[0]
-        delete = args[1]
-        data = args[2]
+        update = args[1]
+        delete = args[2]
+        data = args[3]
+        with_dialog = True if len(args) < 5 else bool(args[4])
         scenario = None
 
         name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
@@ -311,21 +311,27 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     return
                 scenario = core_get(scenario_id)
         else:
-            config_id = data.get(_GuiCoreContext.__PROP_CONFIG_ID)
-            scenario_config = Config.scenarios.get(config_id)
-            if scenario_config is None:
-                state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Invalid configuration id ({config_id})")
-                return
-            date_str = data.get(_GuiCoreContext.__PROP_DATE)
-            try:
-                date = parser.parse(date_str) if isinstance(date_str, str) else None
-            except Exception as e:
-                state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Invalid date ({date_str}).{e}")
-                return
+            if with_dialog:
+                config_id = data.get(_GuiCoreContext.__PROP_CONFIG_ID)
+                scenario_config = Config.scenarios.get(config_id)
+                if with_dialog and scenario_config is None:
+                    state.assign(
+                        _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Invalid configuration id ({config_id})"
+                    )
+                    return
+                date_str = data.get(_GuiCoreContext.__PROP_DATE)
+                try:
+                    date = parser.parse(date_str) if isinstance(date_str, str) else None
+                except Exception as e:
+                    state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Invalid date ({date_str}).{e}")
+                    return
+            else:
+                scenario_config = None
+                date = None
             scenario_id = None
             try:
                 gui: Gui = state._gui
-                on_creation = args[3] if len(args) > 3 and isinstance(args[3], str) else None
+                on_creation = args[0] if isinstance(args[0], str) else None
                 on_creation_function = gui._get_user_function(on_creation) if on_creation else None
                 if callable(on_creation_function):
                     try:
@@ -363,6 +369,17 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         return
                 elif on_creation is not None:
                     _warn(f"on_creation(): '{on_creation}' is not a function.")
+                elif not with_dialog:
+                    if len(Config.scenarios) == 2:
+                        scenario_config = [sc for k, sc in Config.scenarios.items() if k != "default"][0]
+                    else:
+                        state.assign(
+                            _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR,
+                            "Error creating Scenario: only one scenario config needed "
+                            + f"({len(Config.scenarios) - 1}) found.",
+                        )
+                        return
+
                 scenario = create_scenario(scenario_config, date, name)
                 scenario_id = scenario.id
             except Exception as e:
@@ -397,62 +414,81 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return
         data = args[0]
         entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
-        if not self.__check_readable_editable(
-            state, entity_id, data.get("type", "Scenario"), _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR
-        ):
+        sequence = data.get("sequence")
+        if not self.__check_readable_editable(state, entity_id, "Scenario", _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR):
             return
-        entity: t.Union[Scenario, Sequence] = core_get(entity_id)
-        if entity:
+        scenario: Scenario = core_get(entity_id)
+        if scenario:
             try:
-                if isinstance(entity, Scenario):
-                    primary = data.get(_GuiCoreContext.__PROP_SCENARIO_PRIMARY)
-                    if primary is True:
-                        if not is_promotable(entity):
+                if not sequence:
+                    if isinstance(sequence, str) and (name := data.get(_GuiCoreContext.__PROP_ENTITY_NAME)):
+                        scenario.add_sequence(name, data.get("task_ids"))
+                    else:
+                        primary = data.get(_GuiCoreContext.__PROP_SCENARIO_PRIMARY)
+                        if primary is True:
+                            if not is_promotable(scenario):
+                                state.assign(
+                                    _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Scenario {entity_id} is not promotable."
+                                )
+                                return
+                            set_primary(scenario)
+                        self.__edit_properties(scenario, data)
+                else:
+                    if data.get("del", False):
+                        scenario.remove_sequence(sequence)
+                    else:
+                        name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
+                        if sequence != name:
+                            scenario.rename_sequence(sequence, name)
+                        if seqEntity := scenario.sequences.get(name):
+                            seqEntity.tasks = data.get("task_ids")
+                            self.__edit_properties(seqEntity, data)
+                        else:
                             state.assign(
-                                _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Scenario {entity_id} is not promotable."
+                                _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR,
+                                f"Sequence {name} is not available in Scenario {entity_id}.",
                             )
                             return
-                        set_primary(entity)
-                self.__edit_properties(entity, data)
+
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
             except Exception as e:
-                state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error updating Scenario. {e}")
+                state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error updating {type(scenario).__name__}. {e}")
 
     def submit_entity(self, state: State, id: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
         data = args[0]
-        entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
-        if not is_submittable(entity_id):
-            state.assign(
-                _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR,
-                f"{data.get('type', 'Scenario')} {entity_id} is not submittable.",
-            )
-            return
-        entity = core_get(entity_id)
-        if entity:
-            try:
-                jobs = core_submit(entity)
-                submission_entity = core_get_submission(jobs[0].submit_id if isinstance(jobs, list) else jobs.submit_id)
-                if submission_cb := data.get("on_submission_change"):
-                    submission_fn = self.gui._get_user_function(submission_cb)
-                    if callable(submission_fn):
-                        client_id = self.gui._get_client_id()
-                        module_context = self.gui._get_locals_context()
+        try:
+            scenario_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
+            entity = core_get(scenario_id)
+            if sequence := data.get("sequence"):
+                entity = entity.sequences.get(sequence)
+
+            if not is_submittable(entity):
+                state.assign(
+                    _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR,
+                    f"{'Sequence' if sequence else 'Scenario'} {sequence or scenario_id} is not submittable.",
+                )
+                return
+            if entity:
+                on_submission = data.get("on_submission_change")
+                submission_entity = core_submit(
+                    entity,
+                    on_submission=on_submission,
+                    client_id=self.gui._get_client_id(),
+                    module_context=self.gui._get_locals_context(),
+                )
+                if on_submission:
+                    with self.submissions_lock:
+                        self.client_submission[submission_entity.id] = submission_entity.submission_status
+                    if Config.core.mode == "development":
                         with self.submissions_lock:
-                            self.client_submission[submission_entity.id] = _SubmissionDetails(
-                                client_id,
-                                module_context,
-                                submission_fn,
-                                submission_entity,
-                            )
-                    else:
-                        _warn(f"on_submission_change(): '{submission_cb}' is not a valid function.")
-                self.scenario_status_callback(submission_entity.id)
+                            self.client_submission[submission_entity.id] = SubmissionStatus.SUBMITTED
+                        self.submission_status_callback(submission_entity.id)
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
-            except Exception as e:
-                state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
+        except Exception as e:
+            state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
 
     def __do_datanodes_tree(self):
         if self.data_nodes_by_owner is None:
@@ -460,10 +496,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
             for dn in get_data_nodes():
                 self.data_nodes_by_owner[dn.owner_id].append(dn)
 
-    def get_datanodes_tree(self):
+    def get_datanodes_tree(self, scenario: t.Optional[Scenario]):
         with self.lock:
             self.__do_datanodes_tree()
-        return self.data_nodes_by_owner.get(None, []) + self.get_scenarios()
+        return (
+            self.data_nodes_by_owner.get(scenario.id if scenario else None, []) if self.data_nodes_by_owner else []
+        ) + (self.get_scenarios() if not scenario else [])
 
     def data_node_adapter(self, data):
         try:
@@ -614,7 +652,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     ent.tags = {t for t in tags}
             name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
             if isinstance(name, str):
-                ent.properties[_GuiCoreContext.__PROP_ENTITY_NAME] = name
+                if hasattr(ent, _GuiCoreContext.__PROP_ENTITY_NAME):
+                    setattr(ent, _GuiCoreContext.__PROP_ENTITY_NAME, name)
+                else:
+                    ent.properties[_GuiCoreContext.__PROP_ENTITY_NAME] = name
             props = data.get("properties")
             if isinstance(props, (list, tuple)):
                 for prop in props:
@@ -627,6 +668,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     key = prop.get("key")
                     if key and key not in _GuiCoreContext.__ENTITY_PROPS:
                         ent.properties.pop(key, None)
+
+    @staticmethod
+    def sort_by_creation_date(entity: t.Union[Scenario, Cycle]):
+        return entity.creation_date
 
     def get_scenarios_for_owner(self, owner_id: str):
         cycles_scenarios: t.List[t.Union[Scenario, Cycle]] = []
@@ -646,7 +691,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         cycles_scenarios.extend(scenarios_cycle)
                     elif isinstance(entity, Scenario):
                         cycles_scenarios.append(entity)
-        return cycles_scenarios
+        return sorted(cycles_scenarios, key=_GuiCoreContext.sort_by_creation_date)
 
     def get_data_node_history(self, datanode: DataNode, id: str):
         if (
@@ -674,8 +719,16 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         else e.get("comment", ""),
                     )
                 )
-            return list(reversed(sorted(res, key=lambda r: r[0])))
+            return sorted(res, key=lambda r: r[0], reverse=True)
         return _DoNotUpdate()
+
+    @staticmethod
+    def __is_tabular_data(datanode: DataNode, value: t.Any):
+        if isinstance(datanode, _AbstractTabularDataNode):
+            return True
+        if datanode.is_ready_for_reading:
+            return isinstance(value, (pd.DataFrame, pd.Series, list, tuple, dict))
+        return False
 
     def get_data_node_data(self, datanode: DataNode, id: str):
         if (
@@ -690,15 +743,21 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     return (None, None, True, None)
                 try:
                     value = dn.read()
-                    if isinstance(value, (pd.DataFrame, pd.Series)):
+                    if _GuiCoreContext.__is_tabular_data(dn, value):
                         return (None, None, True, None)
-                    return (
-                        value,
+                    val_type = (
                         "date"
                         if "date" in type(value).__name__
                         else type(value).__name__
                         if isinstance(value, Number)
-                        else None,
+                        else None
+                    )
+                    if isinstance(value, float):
+                        if math.isnan(value):
+                            value = None
+                    return (
+                        value,
+                        val_type,
                         None,
                         None,
                     )
@@ -707,12 +766,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return (None, None, None, f"Data unavailable for {dn.get_simple_label()}")
         return _DoNotUpdate()
 
-    def __check_readable_editable(self, state: State, id: str, type: str, var: str):
-        if not is_readable(t.cast(DataNodeId, id)):
-            state.assign(var, f"{type} {id} is not readable.")
+    def __check_readable_editable(self, state: State, id: str, ent_type: str, var: str):
+        if not is_readable(t.cast(ScenarioId, id)):
+            state.assign(var, f"{ent_type} {id} is not readable.")
             return False
-        if not is_editable(t.cast(DataNodeId, id)):
-            state.assign(var, f"{type} {id} is not editable.")
+        if not is_editable(t.cast(ScenarioId, id)):
+            state.assign(var, f"{ent_type} {id} is not editable.")
             return False
         return True
 
@@ -751,8 +810,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
         datanode = core_get(dn_id) if dn_id else None
         if isinstance(datanode, DataNode):
             try:
-                idx = payload.get("index")
-                col = payload.get("col")
+                idx = t.cast(int, payload.get("index"))
+                col = t.cast(str, payload.get("col"))
                 tz = payload.get("tz")
                 val = (
                     parser.parse(str(payload.get("value"))).astimezone(zoneinfo.ZoneInfo(tz)).replace(tzinfo=None)
@@ -761,15 +820,47 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 )
                 # user_value = payload.get("user_value")
                 data = self.__read_tabular_data(datanode)
-                if hasattr(data, "at"):
-                    data.at[idx, col] = val
-                    datanode.write(data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
-                    state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
+                new_data: t.Any = None
+                if isinstance(data, (pd.DataFrame, pd.Series)):
+                    if isinstance(data, pd.DataFrame):
+                        data.at[idx, col] = val
+                    elif isinstance(data, pd.Series):
+                        data.at[idx] = val
+                    new_data = data
                 else:
-                    state.assign(
-                        _GuiCoreContext._DATANODE_VIZ_ERROR_VAR,
-                        "Error updating Datanode tabular value: type does not support at[] indexer.",
-                    )
+                    data_tuple = False
+                    if isinstance(data, tuple):
+                        data_tuple = True
+                        data = list(data)
+                    if isinstance(data, list):
+                        row = data[idx]
+                        row_tuple = False
+                        if isinstance(row, tuple):
+                            row = list(row)
+                            row_tuple = True
+                        if isinstance(row, list):
+                            row[int(col)] = val
+                            if row_tuple:
+                                data[idx] = tuple(row)
+                            new_data = data
+                        elif col == "0" and (isinstance(row, (str, Number)) or "date" in type(row).__name__):
+                            data[idx] = val
+                            new_data = data
+                        else:
+                            state.assign(
+                                _GuiCoreContext._DATANODE_VIZ_ERROR_VAR,
+                                "Error updating Datanode: cannot handle multi-column list value.",
+                            )
+                        if data_tuple and new_data is not None:
+                            new_data = tuple(new_data)
+                    else:
+                        state.assign(
+                            _GuiCoreContext._DATANODE_VIZ_ERROR_VAR,
+                            "Error updating Datanode tabular value: type does not support at[] indexer.",
+                        )
+                if new_data is not None:
+                    datanode.write(new_data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
+                    state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
             except Exception as e:
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode tabular value. {e}")
         setattr(state, _GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, dn_id)
@@ -788,7 +879,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
             and dn.is_ready_for_reading
         ):
             try:
-                return self.__read_tabular_data(dn)
+                value = self.__read_tabular_data(dn)
+                if _GuiCoreContext.__is_tabular_data(dn, value):
+                    return value
             except Exception:
                 return None
         return None
@@ -804,9 +897,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
             and dn.is_ready_for_reading
         ):
             try:
-                return self.gui._tbl_cols(
-                    True, True, "{}", json.dumps({"data": "tabular_data"}), tabular_data=self.__read_tabular_data(dn)
-                )
+                value = self.__read_tabular_data(dn)
+                if _GuiCoreContext.__is_tabular_data(dn, value):
+                    return self.gui._tbl_cols(
+                        True, True, "{}", json.dumps({"data": "tabular_data"}), tabular_data=value
+                    )
             except Exception:
                 return None
         return None
@@ -842,12 +937,3 @@ class _GuiCoreContext(CoreEventConsumerBase):
             state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, data_id)
         elif chart_id := data.get("chart_id"):
             state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_CHART_ID_VAR, chart_id)
-
-
-# TODO remove when Submission is supported by Core API
-def is_readable_submission(id: str):
-    return _SubmissionManagerFactory._build_manager()._is_readable(t.cast(Submission, id))
-
-
-def core_get_submission(id: str):
-    return _SubmissionManagerFactory._build_manager()._get(id)

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -15,6 +15,7 @@ import contextlib
 import importlib
 import inspect
 import json
+import math
 import os
 import pathlib
 import re
@@ -25,15 +26,16 @@ import typing as t
 import warnings
 from importlib import metadata, util
 from importlib.util import find_spec
-from types import FrameType, SimpleNamespace
+from types import FrameType, FunctionType, LambdaType, ModuleType, SimpleNamespace
 from urllib.parse import unquote, urlencode, urlparse
 
-import __main__
 import markdown as md_lib
 import tzlocal
-from flask import Blueprint, Flask, g, jsonify, request, send_file, send_from_directory
-from taipy.logger._taipy_logger import _TaipyLogger
+from flask import Blueprint, Flask, g, has_app_context, jsonify, request, send_file, send_from_directory
 from werkzeug.utils import secure_filename
+
+import __main__  # noqa: F401
+from taipy.logger._taipy_logger import _TaipyLogger
 
 if util.find_spec("pyngrok"):
     from pyngrok import ngrok
@@ -48,6 +50,7 @@ from ._renderers.utils import _get_columns_dict
 from ._warnings import TaipyGuiWarning, _warn
 from .builder import _ElementApiGenerator
 from .config import Config, ConfigParameter, _Config
+from .custom import Page as CustomPage
 from .data.content_accessor import _ContentAccessor
 from .data.data_accessor import _DataAccessor, _DataAccessors
 from .data.data_format import _DataFormat
@@ -83,6 +86,7 @@ from .utils import (
     _TaipyData,
     _TaipyLov,
     _TaipyLovValue,
+    _TaipyToJson,
     _to_camel_case,
     _variable_decode,
     is_debugging,
@@ -209,6 +213,7 @@ class Gui:
     __DO_NOT_UPDATE_VALUE = _DoNotUpdate()
     _HTML_CONTENT_KEY = "__taipy_html_content"
     __USER_CONTENT_CB = "custom_user_content_cb"
+    __ROBOTO_FONT = "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
 
     __RE_HTML = re.compile(r"(.*?)\.html$")
     __RE_MD = re.compile(r"(.*?)\.md$")
@@ -237,7 +242,7 @@ class Gui:
         page: t.Optional[t.Union[str, Page]] = None,
         pages: t.Optional[dict] = None,
         css_file: t.Optional[str] = None,
-        path_mapping: t.Optional[dict] = {},
+        path_mapping: t.Optional[dict] = None,
         env_filename: t.Optional[str] = None,
         libraries: t.Optional[t.List[ElementLibrary]] = None,
         flask: t.Optional[Flask] = None,
@@ -292,6 +297,8 @@ class Gui:
         self._set_css_file(css_file)
 
         # Preserve server config for server initialization
+        if path_mapping is None:
+            path_mapping = {}
         self._path_mapping = path_mapping
         self._flask = flask
 
@@ -502,6 +509,9 @@ class Gui:
     def _get_data_scope(self) -> SimpleNamespace:
         return self.__bindings._get_data_scope()
 
+    def _get_data_scope_metadata(self) -> t.Dict[str, t.Any]:
+        return self.__bindings._get_data_scope_metadata()
+
     def _get_all_data_scopes(self) -> t.Dict[str, SimpleNamespace]:
         return self.__bindings._get_all_scopes()
 
@@ -537,6 +547,8 @@ class Gui:
     def __set_client_id_in_context(self, client_id: t.Optional[str] = None, force=False):
         if not client_id and request:
             client_id = request.args.get(Gui.__ARG_CLIENT_ID, "")
+        if not client_id and (ws_client_id := getattr(g, "ws_client_id", None)):
+            client_id = ws_client_id
         if not client_id and force:
             res = self._bindings()._get_or_create_scope("")
             client_id = res[0] if res[1] else None
@@ -552,7 +564,7 @@ class Gui:
     def __is_var_modified_in_context(self, var_name: str, derived_vars: t.Set[str]) -> bool:
         modified_vars: t.Optional[t.Set[str]] = getattr(g, "modified_vars", None)
         der_vars: t.Optional[t.Set[str]] = getattr(g, "derived_vars", None)
-        setattr(g, "update_count", getattr(g, "update_count", 0) + 1)
+        setattr(g, "update_count", getattr(g, "update_count", 0) + 1)  # noqa: B010
         if modified_vars is None:
             modified_vars = set()
             g.modified_vars = modified_vars
@@ -574,7 +586,7 @@ class Gui:
             delattr(g, "derived_vars")
             return derived_vars
         else:
-            setattr(g, "update_count", update_count)
+            setattr(g, "update_count", update_count)  # noqa: B010
             return None
 
     def _manage_message(self, msg_type: _WsType, message: dict) -> None:
@@ -583,24 +595,33 @@ class Gui:
             if msg_type == _WsType.CLIENT_ID.value:
                 res = self._bindings()._get_or_create_scope(message.get("payload", ""))
                 client_id = res[0] if res[1] else None
-            self.__set_client_id_in_context(client_id or message.get(Gui.__ARG_CLIENT_ID))
+            expected_client_id = client_id or message.get(Gui.__ARG_CLIENT_ID)
+            self.__set_client_id_in_context(expected_client_id)
+            g.ws_client_id = expected_client_id
             with self._set_locals_context(message.get("module_context") or None):
-                if msg_type == _WsType.UPDATE.value:
+                with self._get_autorization():
                     payload = message.get("payload", {})
-                    self.__front_end_update(
-                        str(message.get("name")),
-                        payload.get("value"),
-                        message.get("propagate", True),
-                        payload.get("relvar"),
-                        payload.get("on_change"),
-                    )
-                elif msg_type == _WsType.ACTION.value:
-                    self.__on_action(message.get("name"), message.get("payload"))
-                elif msg_type == _WsType.DATA_UPDATE.value:
-                    self.__request_data_update(str(message.get("name")), message.get("payload"))
-                elif msg_type == _WsType.REQUEST_UPDATE.value:
-                    self.__request_var_update(message.get("payload"))
-            self.__send_ack(message.get("ack_id"))
+                    if msg_type == _WsType.UPDATE.value:
+                        self.__front_end_update(
+                            str(message.get("name")),
+                            payload.get("value"),
+                            message.get("propagate", True),
+                            payload.get("relvar"),
+                            payload.get("on_change"),
+                        )
+                    elif msg_type == _WsType.ACTION.value:
+                        self.__on_action(message.get("name"), message.get("payload"))
+                    elif msg_type == _WsType.DATA_UPDATE.value:
+                        self.__request_data_update(str(message.get("name")), message.get("payload"))
+                    elif msg_type == _WsType.REQUEST_UPDATE.value:
+                        self.__request_var_update(message.get("payload"))
+                    elif msg_type == _WsType.GET_MODULE_CONTEXT.value:
+                        self.__handle_ws_get_module_context(payload)
+                    elif msg_type == _WsType.GET_DATA_TREE.value:
+                        self.__handle_ws_get_data_tree()
+                    elif msg_type == _WsType.APP_ID.value:
+                        self.__handle_ws_app_id(message)
+                self.__send_ack(message.get("ack_id"))
         except Exception as e:  # pragma: no cover
             _warn(f"Decoding Message has failed: {message}", e)
 
@@ -962,8 +983,13 @@ class Gui:
                         ]
                     else:
                         newvalue = self.__adapter._run_for_var(newvalue.get_name(), newvalue.get(), id_only=True)
+                elif isinstance(newvalue, _TaipyToJson):
+                    newvalue = newvalue.get()
                 if isinstance(newvalue, (dict, _MapDict)):
                     continue  # this var has no transformer
+                if isinstance(newvalue, float) and math.isnan(newvalue):
+                    # do not let NaN go through json, it is not handle well (dies silently through websocket)
+                    newvalue = None
                 debug_warnings: t.List[warnings.WarningMessage] = []
                 with warnings.catch_warnings(record=True) as warns:
                     warnings.resetwarnings()
@@ -980,7 +1006,7 @@ class Gui:
                             # do not send data that is not serializable
                             continue
                 for w in debug_warnings:
-                    warnings.warn(w.message, w.category)
+                    warnings.warn(w.message, w.category)  # noqa: B028
             ws_dict[_var] = newvalue
         # TODO: What if value == newvalue?
         self.__send_ws_update_with_dict(ws_dict)
@@ -1024,6 +1050,79 @@ class Gui:
                     )
             self.__send_var_list_update(payload["names"])
 
+    def __handle_ws_get_module_context(self, payload: t.Any):
+        if isinstance(payload, dict):
+            # Get Module Context
+            if mc := self._get_page_context(str(payload.get("path"))):
+                self._bind_custom_page_variables(
+                    self._get_page(str(payload.get("path")))._renderer, self._get_client_id()
+                )
+                self.__send_ws(
+                    {
+                        "type": _WsType.GET_MODULE_CONTEXT.value,
+                        "payload": {"data": mc},
+                    }
+                )
+
+    def __get_variable_tree(self, data: t.Dict[str, t.Any]):
+        # Module Context -> Variable -> Variable data (name, type, initial_value)
+        variable_tree: t.Dict[str, t.Dict[str, t.Dict[str, t.Any]]] = {}
+        for k, v in data.items():
+            if isinstance(v, _TaipyBase):
+                data[k] = v.get()
+            var_name, var_module_name = _variable_decode(k)
+            if var_module_name == "" or var_module_name is None:
+                var_module_name = "__main__"
+            if var_module_name not in variable_tree:
+                variable_tree[var_module_name] = {}
+            variable_tree[var_module_name][var_name] = {
+                "type": type(v).__name__,
+                "value": data[k],
+                "encoded_name": k,
+            }
+        return variable_tree
+
+    def __handle_ws_get_data_tree(self):
+        # Get Variables
+        self.__pre_render_pages()
+        data = {
+            k: v
+            for k, v in vars(self._get_data_scope()).items()
+            if not k.startswith("_")
+            and not callable(v)
+            and "TpExPr" not in k
+            and not isinstance(v, (ModuleType, FunctionType, LambdaType, type, Page))
+        }
+        function_data = {
+            k: v
+            for k, v in vars(self._get_data_scope()).items()
+            if not k.startswith("_") and "TpExPr" not in k and isinstance(v, (FunctionType, LambdaType))
+        }
+        self.__send_ws(
+            {
+                "type": _WsType.GET_DATA_TREE.value,
+                "payload": {
+                    "variable": self.__get_variable_tree(data),
+                    "function": self.__get_variable_tree(function_data),
+                },
+            }
+        )
+
+    def __handle_ws_app_id(self, message: t.Any):
+        if not isinstance(message, dict):
+            return
+        name = message.get("name", "")
+        payload = message.get("payload", "")
+        app_id = id(self)
+        if payload == app_id:
+            return
+        self.__send_ws(
+            {
+                "type": _WsType.APP_ID.value,
+                "payload": {"name": name, "id": app_id},
+            }
+        )
+
     def __send_ws(self, payload: dict, allow_grouping=True) -> None:
         grouping_message = self.__get_message_grouping() if allow_grouping else None
         if grouping_message is None:
@@ -1039,12 +1138,10 @@ class Gui:
         else:
             grouping_message.append(payload)
 
-    def __broadcast_ws(self, payload: dict):
+    def __broadcast_ws(self, payload: dict, client_id: t.Optional[str] = None):
         try:
-            self._server._ws.emit(
-                "message",
-                payload,
-            )
+            to = list(self.__get_sids(client_id)) if client_id else []
+            self._server._ws.emit("message", payload, to=to if to else None)
             time.sleep(0.001)
         except Exception as e:  # pragma: no cover
             _warn(f"Exception raised in WebSocket communication in '{self.__frame.f_code.co_name}'", e)
@@ -1125,19 +1222,23 @@ class Gui:
         else:
             self.__send_ws({"type": _WsType.MULTIPLE_UPDATE.value, "payload": payload})
 
-    def __send_ws_broadcast(self, var_name: str, var_value: t.Any):
+    def __send_ws_broadcast(self, var_name: str, var_value: t.Any, client_id: t.Optional[str] = None):
         self.__broadcast_ws(
-            {"type": _WsType.UPDATE.value, "name": _get_broadcast_var_name(var_name), "payload": {"value": var_value}}
+            {"type": _WsType.UPDATE.value, "name": _get_broadcast_var_name(var_name), "payload": {"value": var_value}},
+            client_id,
         )
 
     def __get_ws_receiver(self) -> t.Union[t.List[str], t.Any, None]:
         if self._bindings()._is_single_client():
             return None
         sid = getattr(request, "sid", None) if request else None
-        sids = self.__client_id_2_sid.get(self._get_client_id(), set())
+        sids = self.__get_sids(self._get_client_id())
         if sid:
             sids.add(sid)
         return list(sids)
+
+    def __get_sids(self, client_id: str) -> t.Set[str]:
+        return self.__client_id_2_sid.get(client_id, set())
 
     def __get_message_grouping(self):
         return (
@@ -1243,16 +1344,29 @@ class Gui:
         return self._set_locals_context(module_context) if module_context is not None else contextlib.nullcontext()
 
     def _call_user_callback(
-        self, state_id: t.Optional[str], user_callback: t.Callable, args: t.List[t.Any], module_context: t.Optional[str]
+        self,
+        state_id: t.Optional[str],
+        user_callback: t.Union[t.Callable, str],
+        args: t.List[t.Any],
+        module_context: t.Optional[str],
     ) -> t.Any:
         try:
             with self.get_flask_app().app_context():
                 self.__set_client_id_in_context(state_id)
                 with self._set_module_context(module_context):
+                    if not callable(user_callback):
+                        user_callback = self._get_user_function(user_callback)
+                    if not callable(user_callback):
+                        _warn(f"invoke_callback(): {user_callback} is not callable.")
+                        return None
                     return self._call_function_with_state(user_callback, args)
         except Exception as e:  # pragma: no cover
-            if not self._call_on_exception(user_callback.__name__, e):
-                _warn(f"invoke_callback(): Exception raised in '{user_callback.__name__}()'", e)
+            if not self._call_on_exception(user_callback.__name__ if callable(user_callback) else user_callback, e):
+                _warn(
+                    "invoke_callback(): Exception raised in "
+                    + f"'{user_callback.__name__ if callable(user_callback) else user_callback}()'",
+                    e,
+                )
         return None
 
     def _call_broadcast_callback(
@@ -1722,15 +1836,16 @@ class Gui:
     def load_config(self, config: Config) -> None:
         self._config._load(config)
 
-    def _broadcast(self, name: str, value: t.Any):
-        """NOT UNDOCUMENTED
+    def _broadcast(self, name: str, value: t.Any, client_id: t.Optional[str] = None):
+        """NOT DOCUMENTED
         Send the new value of a variable to all connected clients.
 
         Arguments:
             name: The name of the variable to update or create.
             value: The value (must be serializable to the JSON format).
+            client_id: The client id (broadcast to all client if None)
         """
-        self.__send_ws_broadcast(name, value)
+        self.__send_ws_broadcast(name, value, client_id)
 
     def _broadcast_all_clients(self, name: str, value: t.Any):
         try:
@@ -1862,13 +1977,19 @@ class Gui:
     def __pre_render_pages(self) -> None:
         """Pre-render all pages to have a proper initialization of all variables"""
         self.__set_client_id_in_context()
+        scope_metadata = self._get_data_scope_metadata()
+        if scope_metadata[_DataScopes._META_PRE_RENDER]:
+            return
         for page in self._config.pages:
             if page is not None:
                 with contextlib.suppress(Exception):
-                    page.render(self)
+                    if isinstance(page._renderer, CustomPage):
+                        self._bind_custom_page_variables(page._renderer, self._get_client_id())
+                    else:
+                        page.render(self, silent=True)
+        scope_metadata[_DataScopes._META_PRE_RENDER] = True
 
-    def __render_page(self, page_name: str) -> t.Any:
-        self.__set_client_id_in_context()
+    def _get_navigated_page(self, page_name: str) -> t.Any:
         nav_page = page_name
         if hasattr(self, "on_navigate") and callable(self.on_navigate):
             try:
@@ -1889,8 +2010,26 @@ class Gui:
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception("on_navigate", e):
                     _warn("Exception raised in on_navigate()", e)
-        page = next((page_i for page_i in self._config.pages if page_i._route == nav_page), None)
+        return nav_page
 
+    def _get_page(self, page_name: str):
+        return next((page_i for page_i in self._config.pages if page_i._route == page_name), None)
+
+    def _bind_custom_page_variables(self, page: CustomPage, client_id: t.Optional[str]):
+        """Handle the bindings of custom page variables"""
+        with self.get_flask_app().app_context() if has_app_context() else contextlib.nullcontext(): # type: ignore[attr-defined]
+            self.__set_client_id_in_context(client_id)
+            with self._set_locals_context(page._get_module_name()):
+                for k in self._get_locals_bind().keys():
+                    if (not page._binding_variables or k in page._binding_variables) and not k.startswith("_"):
+                        self._bind_var(k)
+
+    def __render_page(self, page_name: str) -> t.Any:
+        self.__set_client_id_in_context()
+        nav_page = self._get_navigated_page(page_name)
+        if not isinstance(nav_page, str):
+            return nav_page
+        page = self._get_page(nav_page)
         # Try partials
         if page is None:
             page = self._get_partial(nav_page)
@@ -1901,6 +2040,19 @@ class Gui:
                 400,
                 {"Content-Type": "application/json; charset=utf-8"},
             )
+        # Handle custom pages
+        if (pr := page._renderer) is not None and isinstance(pr, CustomPage):
+            if self._navigate(
+                to=page_name,
+                params={
+                    _Server._RESOURCE_HANDLER_ARG: pr._resource_handler.get_id(),
+                },
+            ):
+                # Proactively handle the bindings of custom page variables
+                self._bind_custom_page_variables(pr, self._get_client_id())
+                return ("Successfully redirect to custom resource handler", 200)
+            return ("Failed to navigate to custom resource handler", 500)
+        # Handle page rendering
         context = page.render(self)
         if (
             nav_page == Gui.__root_page_name
@@ -1941,7 +2093,7 @@ class Gui:
             return self._server.get_flask()
         raise RuntimeError("get_flask_app() cannot be invoked before run() has been called.")
 
-    def _set_frame(self, frame: FrameType):
+    def _set_frame(self, frame: t.Optional[FrameType]):
         if not isinstance(frame, FrameType):  # pragma: no cover
             raise RuntimeError("frame must be a FrameType where Gui can collect the local variables.")
         self.__frame = frame
@@ -1959,6 +2111,21 @@ class Gui:
     def _set_state(self, state: State):
         if isinstance(state, State):
             self.__state = state
+
+    def _get_webapp_path(self):
+        _conf_webapp_path = (
+            pathlib.Path(self._get_config("webapp_path", None)) if self._get_config("webapp_path", None) else None
+        )
+        _webapp_path = str((pathlib.Path(__file__).parent / "webapp").resolve())
+        if _conf_webapp_path:
+            if _conf_webapp_path.is_dir():
+                _webapp_path = str(_conf_webapp_path.resolve())
+                _warn(f"Using webapp_path: '{_conf_webapp_path}'.")
+            else:  # pragma: no cover
+                _warn(
+                    f"webapp_path: '{_conf_webapp_path}' is not a valid directory. Falling back to '{_webapp_path}'."  # noqa: E501
+                )
+        return _webapp_path
 
     def __get_client_config(self) -> t.Dict[str, t.Any]:
         config = {
@@ -2081,24 +2248,13 @@ class Gui:
         if self._get_config("stylekit", True):
             styles.append("stylekit/stylekit.css")
         else:
-            styles.append("https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap")
+            styles.append(Gui.__ROBOTO_FONT)
         if self.__css_file:
             styles.append(f"/{self.__css_file}")
 
         self._flask_blueprint.append(extension_bp)
 
-        _conf_webapp_path = (
-            pathlib.Path(self._get_config("webapp_path", None)) if self._get_config("webapp_path", None) else None
-        )
-        _webapp_path = str((pathlib.Path(__file__).parent / "webapp").resolve())
-        if _conf_webapp_path:
-            if _conf_webapp_path.is_dir():
-                _webapp_path = str(_conf_webapp_path.resolve())
-                _warn(f"Using webapp_path: '{_conf_webapp_path}'.")
-            else:  # pragma: no cover
-                _warn(
-                    f"webapp_path: '{_conf_webapp_path}' is not a valid directory path. Falling back to '{_webapp_path}'."  # noqa: E501
-                )
+        _webapp_path = self._get_webapp_path()
 
         self._flask_blueprint.append(
             self._server._get_default_blueprint(
@@ -2312,3 +2468,6 @@ class Gui:
         if hasattr(self, "_server") and hasattr(self._server, "_thread") and self._server._is_running:
             self._server.stop_thread()
             _TaipyLogger._get_logger().info("Gui server has been stopped.")
+
+    def _get_autorization(self, client_id: t.Optional[str] = None, system: t.Optional[bool] = False):
+        return contextlib.nullcontext()

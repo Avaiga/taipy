@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -11,7 +11,6 @@
 
 import inspect
 import warnings
-from unittest.mock import patch
 
 from flask import g
 
@@ -20,8 +19,7 @@ from taipy.gui.utils.types import _TaipyNumber
 
 
 def test_unbind_variable_in_expression(gui: Gui, helpers):
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False, single_client=True)
+    gui.run(run_server=False, single_client=True)
     with warnings.catch_warnings(record=True) as records:
         with gui.get_flask_app().app_context():
             gui._evaluate_expr("{x}")
@@ -36,8 +34,7 @@ def test_unbind_variable_in_expression(gui: Gui, helpers):
 def test_evaluate_same_expression_multiple_times(gui: Gui):
     x = 10  # noqa: F841
     gui._set_frame(inspect.currentframe())
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False, single_client=True)
+    gui.run(run_server=False, single_client=True)
     with gui.get_flask_app().app_context():
         s1 = gui._evaluate_expr("x + 10 = {x + 10}")
         s2 = gui._evaluate_expr("x + 10 = {x + 10}")
@@ -47,8 +44,7 @@ def test_evaluate_same_expression_multiple_times(gui: Gui):
 def test_evaluate_expressions_same_variable(gui: Gui):
     x = 10  # noqa: F841
     gui._set_frame(inspect.currentframe())
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False, single_client=True)
+    gui.run(run_server=False, single_client=True)
     with gui.get_flask_app().app_context():
         s1 = gui._evaluate_expr("x + 10 = {x + 10}")
         s2 = gui._evaluate_expr("x = {x}")
@@ -58,8 +54,7 @@ def test_evaluate_expressions_same_variable(gui: Gui):
 def test_evaluate_holder(gui: Gui):
     x = 10  # noqa: F841
     gui._set_frame(inspect.currentframe())
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False, single_client=True)
+    gui.run(run_server=False, single_client=True)
     with warnings.catch_warnings(record=True):
         with gui.get_flask_app().app_context():
             gui._evaluate_expr("{x + 10}")
@@ -74,8 +69,7 @@ def test_evaluate_holder(gui: Gui):
 
 
 def test_evaluate_not_expression_type(gui: Gui):
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False)
+    gui.run(run_server=False)
     with gui.get_flask_app().app_context():
         assert "x + 10" == gui._evaluate_expr("x + 10")
 
@@ -84,8 +78,7 @@ def test_evaluate_expression_2_clients(gui: Gui):
     x = 10  # noqa: F841
     y = 20  # noqa: F841
     gui._set_frame(inspect.currentframe())
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False)
+    gui.run(run_server=False)
     with gui.get_flask_app().app_context():
         gui._bindings()._get_or_create_scope("A")
         gui._bindings()._get_or_create_scope("B")

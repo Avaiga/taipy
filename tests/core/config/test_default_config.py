@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -31,7 +31,8 @@ def _test_default_core_section(core_section: CoreSection):
     assert core_section.version_number == ""
     assert not core_section.force
     assert core_section.root_folder == "./taipy/"
-    assert core_section.storage_folder == ".data/"
+    assert core_section.storage_folder == "user_data/"
+    assert core_section.taipy_storage_folder == ".taipy/"
     assert core_section.repository_type == "filesystem"
     assert core_section.repository_properties == {}
     assert len(core_section.properties) == 0

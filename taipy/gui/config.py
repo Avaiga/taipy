@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -17,8 +17,9 @@ from importlib.util import find_spec
 import pytz
 import tzlocal
 from dotenv import dotenv_values
-from taipy.logger._taipy_logger import _TaipyLogger
 from werkzeug.serving import is_running_from_reloader
+
+from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._gui_cli import _GuiCLI
 from ._page import _Page
@@ -282,7 +283,7 @@ class _Config(object):
 
         if app_config["use_reloader"] and not app_config["debug"]:
             app_config["debug"] = True
-            self.__log_outside_reloader(logger, "application is running in 'debug' mode")
+            self.__log_outside_reloader(logger, "Application is running in 'debug' mode")
 
         if app_config["debug"] and not app_config["allow_unsafe_werkzeug"]:
             app_config["allow_unsafe_werkzeug"] = True

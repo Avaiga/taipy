@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -63,7 +63,7 @@ def _get_columns_dict(  # noqa: C901
     if isinstance(columns, str):
         col_dict = _get_columns_dict_from_list([s.strip() for s in columns.split(";")], col_types_keys, value)
     elif isinstance(columns, (list, tuple)):
-        col_dict = _get_columns_dict_from_list(columns, col_types_keys, value)
+        col_dict = _get_columns_dict_from_list(columns, col_types_keys, value) # type: ignore[arg-type]
     elif isinstance(columns, _MapDict):
         col_dict = columns._dict.copy()
     elif isinstance(columns, dict):

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -28,7 +28,7 @@ class _BaseModel:
             yield attr, value
 
     def to_dict(self) -> Dict[str, Any]:
-        model_dict = {**dataclasses.asdict(self)}
+        model_dict = {**dataclasses.asdict(self)}  # type: ignore[call-overload]
 
         for k, v in model_dict.items():
             if isinstance(v, enum.Enum):

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Avaiga Private Limited
+ * Copyright 2021-2024 Avaiga Private Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -27,6 +27,7 @@ const taipyBundle = "taipy-gui"
 
 const reactBundleName = "TaipyGuiDependencies"
 const taipyBundleName = "TaipyGui"
+const taipyGuiBaseBundleName = "TaipyGuiBase"
 
 const basePath = "../../taipy/gui/webapp";
 const webAppPath = resolveApp(basePath);
@@ -167,5 +168,43 @@ module.exports = (env, options) => {
                     hash: true
                 }]),
             ],
+    },
+    {
+        mode: options.mode,
+        entry: ["./base/src/index.ts"],
+        output: {
+            filename: "taipy-gui-base.js",
+            path: webAppPath,
+            globalObject: "this",
+            library: {
+                name: taipyGuiBaseBundleName,
+                type: "umd",
+            },
+        },
+        plugins: [
+            new webpack.optimize.LimitChunkCountPlugin({
+                maxChunks: 1,
+            }),
+        ],
+        module: {
+            rules: [
+                {
+                    test: /\.tsx?$/,
+                    use: "ts-loader",
+                    exclude: /node_modules/,
+                },
+            ],
+        },
+        resolve: {
+            extensions: [".tsx", ".ts", ".js", ".tsx"],
+        },
+        // externals: {
+        //     "socket.io-client": {
+        //         commonjs: "socket.io-client",
+        //         commonjs2: "socket.io-client",
+        //         amd: "socket.io-client",
+        //         root: "_",
+        //     },
+        // },
     }];
 };

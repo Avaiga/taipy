@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -31,7 +31,8 @@ max_nb_of_workers = "2:int"
 
 [CORE]
 root_folder = "./taipy/"
-storage_folder = ".data/"
+storage_folder = "user_data/"
+taipy_storage_folder = ".taipy/"
 repository_type = "filesystem"
 read_entity_retry = "0:int"
 mode = "development"

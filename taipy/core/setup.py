@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -14,36 +14,44 @@
 """The setup script."""
 import json
 import os
+from pathlib import Path
 
 from setuptools import find_namespace_packages, find_packages, setup
+
+root_folder = Path(__file__).parent
 
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
-with open(f"src{os.sep}taipy{os.sep}core{os.sep}version.json") as version_file:
+version_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "version.json")
+with open(version_path) as version_file:
     version = json.load(version_file)
     version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
-requirements = [
-    "pyarrow>=10.0.1,<11.0",
-    "networkx>=2.6,<3.0",
-    "openpyxl>=3.1.2,<3.2",
-    "modin[dask]>=0.23.0,<1.0",
-    "pymongo[srv]>=4.2.0,<5.0",
-    "sqlalchemy>=2.0.16,<2.1",
-    "toml>=0.10,<0.11",
-    "taipy-config@git+https://git@github.com/Avaiga/taipy-config.git@develop",
-]
+
+
+def get_requirements():
+    # get requirements from the different setups in tools/packages (removing taipy packages)
+    reqs = set()
+    for pkg in (root_folder / "tools" / "packages").iterdir():
+        requirements_file = pkg / "setup.requirements.txt"
+        if requirements_file.exists():
+            reqs.update(requirements_file.read_text("UTF-8").splitlines())
+
+    return [r for r in reqs if r and not r.startswith("taipy")]
+
 
 test_requirements = ["pytest>=3.8"]
 
 extras_require = {
-    "fastparquet": ["fastparquet==2022.11.0"],
     "mssql": ["pyodbc>=4,<4.1"],
     "mysql": ["pymysql>1,<1.1"],
     "postgresql": ["psycopg2>2.9,<2.10"],
+    "parquet": ["fastparquet==2022.11.0", "pyarrow>=14.0.2,<15.0"],
+    "s3": ["boto3==1.29.1"],
+    "mongo": ["pymongo[srv]>=4.2.0,<5.0"],
 }
 
 setup(
@@ -59,16 +67,16 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     description="A Python library to build powerful and customized data-driven back-end applications.",
-    install_requires=requirements,
+    install_requires=get_requirements(),
     long_description=readme,
     long_description_content_type="text/markdown",
     license="Apache License 2.0",
     keywords="taipy-core",
     name="taipy-core",
-    package_dir={"": "src"},
-    packages=find_namespace_packages(where="src") + find_packages(include=["taipy", "taipy.core", "taipy.core.*"]),
+    packages=find_namespace_packages(where=".") + find_packages(include=["taipy", "taipy.core", "taipy.core.*"]),
     include_package_data=True,
     test_suite="tests",
     tests_require=test_requirements,

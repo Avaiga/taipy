@@ -1,11 +1,8 @@
 # Taipy Core
 
-[![Python](https://img.shields.io/pypi/pyversions/taipy-core)](https://pypi.org/project/taipy-core)
-[![PyPI](https://img.shields.io/pypi/v/taipy-core.svg?label=pip&logo=PyPI&logoColor=white)](https://pypi.org/project/taipy-core)
-
 ## License
 
-Copyright 2023 Avaiga Private Limited
+Copyright 2021-2024 Avaiga Private Limited
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
 except in compliance with the License. You may obtain a copy of the License at
@@ -33,7 +30,7 @@ Taipy is a Python library for creating Business Applications. More information o
 [website](https://www.taipy.io). Taipy is split into multiple repositories including
 _taipy-core_ to let users install the minimum they need.
 
-[Taipy Core](https://github.com/Avaiga/taipy-core) mostly includes business-oriented
+Taipy Core mostly includes business-oriented
 features. It helps users create and manage business applications and improve analyses
 capability through time, conditions and hypothesis.
 
@@ -54,29 +51,31 @@ Want to be part of the _Taipy Core_ community? Check out our
 
 ## Directory Structure
 
-- `src/`:
-  - `taipy/core/`:
-    - `_manager`: Internal package for entity manager.
-    - `_repository`: Internal package for data storage.
-    - `_orchestrator`: Internal package for task orchestrating and execution.
-    - `_version`: Internal package for managing Taipy Core application version.
-    - `common`: Shared data structures, types, and functions.
-    - `config`: Configuration definition, management and implementation.
-    - `cycle`: Work cycle definition, management and implementation.
-    - `data`: Data Node definition, management and implementation.
-    - `exceptions`: _taipy-core_ exceptions.
-    - `job`: Job definition, management and implementation.
-    - `sequence`: Sequence definition, management and implementation.
-    - `scenario`: Scenario definition, management and implementation.
-    - `task`: Task definition, management and implementation.
-    - `taipy`: Main entrypoint for _taipy-core_ runtime features.
-- `tests`: Unit tests following the `taipy/core/` structure.
-- `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy-core_.
-- `CONTRIBUTING.md`: Instructions to contribute to _taipy-core_.
-- `INSTALLATION.md`: Instructions to install _taipy-core_.
-- `LICENSE`: The Apache 2.0 License.
-- `Pipfile`: File used by the Pipenv virtual environment to manage project dependencies.
-- `README.md`: Current file.
-- `contributors.txt`: The list of contributors.
-- `setup.py`: The setup script managing building, distributing, and installing _taipy-core_.
-- `tox.ini`: Contains test scenarios to be run.
+- `taipy/`:
+  - `core/`:
+    - `_backup/`: Internal package for Taipy data backup mechanism.
+    - `_entity/`: Internal package for abstract entity definition and entity's properties management.
+    - `_manager/`: Internal package for entity manager.
+    - `_orchestrator/`: Internal package for task orchestrating and execution.
+    - `_repository/`: Internal package for data storage.
+    - `_version/`: Internal package for managing Taipy Core application version.
+    - `common/`: Shared data structures, types, and functions.
+    - `config/`: Configuration definition, management and implementation.
+    - `cycle/`: Work cycle definition, management and implementation.
+    - `data/`: Data Node definition, management and implementation.
+    - `exceptions/`: _taipy-core_ exceptions.
+    - `job/`: Job definition, management and implementation.
+    - `notification/`: Notification management system implementation.
+    - `scenario/`: Scenario definition, management and implementation.
+    - `sequence/`: Sequence definition, management and implementation.
+    - `submission/`: Submission definition, management and implementation.
+    - `task/`: Task definition, management and implementation.
+    - `taipy.py`: Main entrypoint for _taipy-core_ runtime features.
+    - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy-core_.
+    - `CONTRIBUTING.md`: Instructions to contribute to _taipy-core_.
+    - `INSTALLATION.md`: Instructions to install _taipy-core_.
+    - `LICENSE`: The Apache 2.0 License.
+    - `README.md`: Current file.
+    - `setup.py`: The setup script managing building, distributing, and installing _taipy-core_.
+- `tests/`:
+  - `core/`: Unit tests following the `taipy/core/` structure.

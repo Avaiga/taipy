@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -11,6 +11,7 @@
 
 import os
 from pathlib import Path
+from unittest.mock import patch
 
 import pandas as pd  # type: ignore
 import pytest
@@ -60,3 +61,9 @@ def test_client():
         with flask_app.app_context():
             g.client_id = "test client id"
             yield testing_client  # this is where the testing happens!
+
+
+@pytest.fixture(scope="function", autouse=True)
+def patch_cli_args():
+    with patch("sys.argv", ["prog"]):
+        yield

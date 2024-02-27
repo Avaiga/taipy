@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -151,6 +151,16 @@ class NonExistingJob(RuntimeError):
         self.message = f"Job: {job_id} does not exist."
 
 
+class SubmissionNotDeletedException(RuntimeError):
+    """Raised if there is an attempt to delete a submission that cannot be deleted.
+
+    This exception can be raised by `taipy.delete()^`.
+    """
+
+    def __init__(self, submission_id: str):
+        self.message = f"Submission: {submission_id} cannot be deleted."
+
+
 class DataNodeWritingError(RuntimeError):
     """Raised if an error happens during the writing in a data node."""
 
@@ -176,8 +186,18 @@ class InvalidSequence(Exception):
 class NonExistingSequence(Exception):
     """Raised if a requested Sequence is not known by the Sequence Manager."""
 
-    def __init__(self, sequence_id: str):
-        self.message = f"Sequence: {sequence_id} does not exist."
+    def __init__(self, sequence_id: str, scenario_id: str=None):
+        if scenario_id:
+            self.message = f"Sequence: {sequence_id} does not exist in scenario {scenario_id}."
+        else:
+            self.message = f"Sequence: {sequence_id} does not exist."
+
+
+class SequenceAlreadyExists(Exception):
+    """Raised if a Sequence already exists."""
+
+    def __init__(self, sequence_name: str, scenario_id: str):
+        self.message = f"Sequence: {sequence_name} already exists in scenario {scenario_id}."
 
 
 class SequenceBelongsToNonExistingScenario(Exception):

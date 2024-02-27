@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -11,7 +11,6 @@
 
 import inspect
 import warnings
-from unittest.mock import patch
 
 from taipy.gui import Gui
 
@@ -19,8 +18,7 @@ from taipy.gui import Gui
 def test_ignore_file_found(gui: Gui):
     with warnings.catch_warnings(record=True):
         gui._set_frame(inspect.currentframe())
-        with patch("sys.argv", ["prog"]):
-            gui.run(run_server=False)
+        gui.run(run_server=False)
         client = gui._server.test_client()
         response = client.get("/resource.txt")
         assert (
@@ -31,8 +29,7 @@ def test_ignore_file_found(gui: Gui):
 def test_ignore_file_not_found(gui: Gui):
     with warnings.catch_warnings(record=True):
         gui._set_frame(inspect.currentframe())
-        with patch("sys.argv", ["prog"]):
-            gui.run(run_server=False)
+        gui.run(run_server=False)
         client = gui._server.test_client()
         response = client.get("/resource2.txt")
         assert (

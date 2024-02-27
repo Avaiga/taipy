@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -16,7 +16,7 @@ import pytest
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.core import Core
+from taipy.core import Core, taipy
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core._version._version_manager_factory import _VersionManagerFactory
 from taipy.core.common._utils import _load_fct
@@ -107,7 +107,7 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
         core = Core()
         core.run()
         scenario = _ScenarioManager._create(scenario_config)
-        _ScenarioManager._submit(scenario)
+        taipy.submit(scenario)
         core.stop()
 
     # Initial assertion
@@ -123,7 +123,7 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
         core = Core()
         core.run()
         scenario = _ScenarioManager._create(scenario_config)
-        _ScenarioManager._submit(scenario)
+        taipy.submit(scenario)
         core.stop()
 
     # Assert number of entities in 2nd version
@@ -131,9 +131,8 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
     assert len(_TaskManager._get_all(version_number="all")) == 2
     assert len(_SequenceManager._get_all(version_number="all")) == 2
     assert len(_ScenarioManager._get_all(version_number="all")) == 2
-    assert (
-        len(_CycleManager._get_all(version_number="all")) == 1
-    )  # No new cycle is created since old dev version use the same cycle
+    # No new cycle is created since old dev version use the same cycle
+    assert len(_CycleManager._get_all(version_number="all")) == 1
     assert len(_JobManager._get_all(version_number="all")) == 2
 
     # Run development mode again
@@ -151,7 +150,7 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
 
         # Submit new dev version
         scenario = _ScenarioManager._create(scenario_config)
-        _ScenarioManager._submit(scenario)
+        taipy.submit(scenario)
         core.stop()
 
         # Assert number of entities with 1 dev version and 1 exp version
@@ -206,7 +205,7 @@ def test_dev_mode_clean_all_entities_when_config_is_alternated():
         core = Core()
         core.run()
         scenario = _ScenarioManager._create(scenario_config)
-        _ScenarioManager._submit(scenario)
+        taipy.submit(scenario)
         core.stop()
 
     # Delete the twice_doppelganger function
@@ -220,7 +219,7 @@ def test_dev_mode_clean_all_entities_when_config_is_alternated():
         core = Core()
         core.run()
         scenario = _ScenarioManager._create(scenario_config)
-        _ScenarioManager._submit(scenario)
+        taipy.submit(scenario)
         core.stop()
 
 
@@ -309,7 +308,7 @@ def test_production_mode_load_all_entities_from_previous_production_version():
         core = Core()
         core.run()
         scenario = _ScenarioManager._create(scenario_config)
-        _ScenarioManager._submit(scenario)
+        taipy.submit(scenario)
         core.stop()
 
     with patch("sys.argv", ["prog", "--production", "1.0"]):
@@ -322,7 +321,7 @@ def test_production_mode_load_all_entities_from_previous_production_version():
         assert len(_VersionManager._get_all()) == 2
 
         scenario = _ScenarioManager._create(scenario_config)
-        _ScenarioManager._submit(scenario)
+        taipy.submit(scenario)
 
         assert len(_DataManager._get_all()) == 2
         assert len(_TaskManager._get_all()) == 1
@@ -341,7 +340,7 @@ def test_production_mode_load_all_entities_from_previous_production_version():
 
         # All entities from previous production version should be saved
         scenario = _ScenarioManager._create(scenario_config)
-        _ScenarioManager._submit(scenario)
+        taipy.submit(scenario)
 
         assert len(_DataManager._get_all()) == 4
         assert len(_TaskManager._get_all()) == 2
@@ -364,7 +363,7 @@ def test_force_override_experiment_version():
         assert len(_VersionManager._get_all()) == 2  # 2 version include 1 experiment 1 development
 
         scenario = _ScenarioManager._create(scenario_config)
-        _ScenarioManager._submit(scenario)
+        taipy.submit(scenario)
 
         assert len(_DataManager._get_all()) == 2
         assert len(_TaskManager._get_all()) == 1
@@ -393,7 +392,7 @@ def test_force_override_experiment_version():
 
         # All entities from previous submit should be saved
         scenario = _ScenarioManager._create(scenario_config)
-        _ScenarioManager._submit(scenario)
+        taipy.submit(scenario)
 
         assert len(_DataManager._get_all()) == 4
         assert len(_TaskManager._get_all()) == 2
@@ -418,7 +417,7 @@ def test_force_override_production_version():
         assert len(_VersionManager._get_all()) == 2  # 2 version include 1 production 1 development
 
         scenario = _ScenarioManager._create(scenario_config)
-        _ScenarioManager._submit(scenario)
+        taipy.submit(scenario)
 
         assert len(_DataManager._get_all()) == 2
         assert len(_TaskManager._get_all()) == 1
@@ -447,7 +446,7 @@ def test_force_override_production_version():
 
         # All entities from previous submit should be saved
         scenario = _ScenarioManager._create(scenario_config)
-        _ScenarioManager._submit(scenario)
+        taipy.submit(scenario)
 
         assert len(_DataManager._get_all()) == 4
         assert len(_TaskManager._get_all()) == 2
@@ -458,7 +457,8 @@ def test_force_override_production_version():
         core.stop()
 
 
-def test_modify_job_configuration_dont_stop_application(caplog, init_config):
+@pytest.mark.standalone
+def test_modified_job_configuration_dont_block_application_run(caplog, init_config):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
@@ -466,20 +466,17 @@ def test_modify_job_configuration_dont_stop_application(caplog, init_config):
         Config.configure_job_executions(mode="development")
         core.run(force_restart=True)
         scenario = _ScenarioManager._create(scenario_config)
-        jobs = _ScenarioManager._submit(scenario)
-        assert all([job.is_finished() for job in jobs])
+        jobs = taipy.submit(scenario).jobs
+        assert all(job.is_finished() for job in jobs)
         core.stop()
-
     init_config()
     scenario_config = config_scenario()
-
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
         core = Core()
         Config.configure_job_executions(mode="standalone", max_nb_of_workers=5)
         core.run(force_restart=True)
         scenario = _ScenarioManager._create(scenario_config)
-
-        jobs = _ScenarioManager._submit(scenario)
+        jobs = taipy.submit(scenario).jobs
         assert_true_after_time(lambda: all(job.is_finished() for job in jobs))
         error_message = str(caplog.text)
         assert 'JOB "mode" was modified' in error_message
@@ -487,14 +484,15 @@ def test_modify_job_configuration_dont_stop_application(caplog, init_config):
         core.stop()
 
 
-def test_modify_config_properties_without_force(caplog, init_config):
+@pytest.mark.standalone
+def test_modified_config_properties_without_force(caplog, init_config):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
         core = Core()
         core.run()
         scenario = _ScenarioManager._create(scenario_config)
-        _ScenarioManager._submit(scenario)
+        taipy.submit(scenario)
         core.stop()
 
     init_config()
@@ -506,7 +504,7 @@ def test_modify_config_properties_without_force(caplog, init_config):
             core = Core()
             core.run()
             scenario = _ScenarioManager._create(scenario_config_2)
-            _ScenarioManager._submit(scenario)
+            taipy.submit(scenario)
     core.stop()
     error_message = str(caplog.text)
 

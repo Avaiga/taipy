@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -74,7 +74,7 @@ class MyCustomEncoder(json.JSONEncoder):
 
 class MyCustomDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
-        super().__init__(object_hook=self.object_hook, *args, **kwargs)
+        super().__init__(*args, **kwargs, object_hook=self.object_hook)
 
     def object_hook(self, o):
         if o.get("__type__") == "MyCustomObject":
@@ -355,3 +355,16 @@ class TestJSONDataNode:
         dn.write([1, 2, 3])
         assert new_edit_date < dn.last_edit_date
         os.unlink(temp_file_path)
+
+    def test_migrate_to_new_path(self, tmp_path):
+        _base_path = os.path.join(tmp_path, ".data")
+        path = os.path.join(_base_path, "test.json")
+        # create a file on old path
+        os.mkdir(_base_path)
+        with open(path, "w"):
+            pass
+
+        dn = JSONDataNode("foo", Scope.SCENARIO, properties={"path": path})
+
+        assert ".data" not in dn.path.name
+        assert os.path.exists(dn.path)

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -32,6 +32,8 @@ from taipy.core import (
     ScenarioId,
     Sequence,
     SequenceId,
+    Submission,
+    SubmissionId,
     Task,
     TaskId,
 )
@@ -47,11 +49,16 @@ from taipy.core.exceptions.exceptions import DataNodeConfigIsNotGlobal, InvalidE
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job
 from taipy.core.scenario._scenario_manager import _ScenarioManager
+from taipy.core.submission._submission_manager import _SubmissionManager
 from taipy.core.task._task_manager import _TaskManager
 
 
+def cb(s, j):
+    print()  # noqa: T201
+
+
 class TestTaipy:
-    def test_set(self, scenario, cycle, sequence, data_node, task):
+    def test_set(self, scenario, cycle, sequence, data_node, task, submission):
         with mock.patch("taipy.core.data._data_manager._DataManager._set") as mck:
             tp.set(data_node)
             mck.assert_called_once_with(data_node)
@@ -67,6 +74,9 @@ class TestTaipy:
         with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._set") as mck:
             tp.set(cycle)
             mck.assert_called_once_with(cycle)
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._set") as mck:
+            tp.set(submission)
+            mck.assert_called_once_with(submission)
 
     def test_is_editable_is_called(self, cycle, job, data_node):
         with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._is_editable") as mck:
@@ -126,6 +136,16 @@ class TestTaipy:
             tp.is_editable(data_node)
             mck.assert_called_once_with(data_node)
 
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._is_editable") as mck:
+            submission = Submission(scenario.id, scenario._ID_PREFIX, scenario.config_id, "submission_id")
+            tp.is_editable(submission)
+            mck.assert_called_once_with(submission)
+
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._is_editable") as mck:
+            submission_id = SubmissionId("SUBMISSION_id")
+            tp.is_editable(submission_id)
+            mck.assert_called_once_with(submission_id)
+
     def test_is_editable(self):
         a_date = datetime.datetime.now()
         cycle = Cycle(Frequency.DAILY, {}, a_date, a_date, a_date)
@@ -133,11 +153,13 @@ class TestTaipy:
         task = Task("task_config_id", {}, print)
         job = Job(JobId("job_id"), task, "submit_id", scenario.id)
         dn = PickleDataNode(config_id="data_node_config_id", scope=Scope.SCENARIO)
+        submission = Submission(scenario.id, scenario._ID_PREFIX, scenario.config_id, "submission_id")
         _CycleManager._set(cycle)
         _ScenarioManager._set(scenario)
         _TaskManager._set(task)
         _JobManager._set(job)
         _DataManager._set(dn)
+        _SubmissionManager._set(submission)
         sequence = scenario.sequences["sequence"]
 
         assert tp.is_editable(scenario)
@@ -145,6 +167,7 @@ class TestTaipy:
         assert tp.is_editable(task)
         assert tp.is_editable(cycle)
         assert tp.is_editable(job)
+        assert tp.is_editable(submission)
         assert tp.is_editable(dn)
 
     def test_is_readable_is_called(self, cycle, job, data_node):
@@ -205,6 +228,16 @@ class TestTaipy:
             tp.is_readable(data_node)
             mck.assert_called_once_with(data_node)
 
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._is_readable") as mck:
+            submission = Submission(scenario.id, scenario._ID_PREFIX, scenario.config_id, "submission_id")
+            tp.is_readable(submission)
+            mck.assert_called_once_with(submission)
+
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._is_readable") as mck:
+            submission_id = SubmissionId("SUBMISSION_id")
+            tp.is_readable(submission_id)
+            mck.assert_called_once_with(submission_id)
+
     def test_is_readable(self):
         a_date = datetime.datetime.now()
         cycle = Cycle(Frequency.DAILY, {}, a_date, a_date, a_date)
@@ -212,11 +245,13 @@ class TestTaipy:
         task = Task("task_config_id", {}, print)
         job = Job(JobId("a_job_id"), task, "submit_id", scenario.id)
         dn = PickleDataNode(config_id="a_data_node_config_id", scope=Scope.SCENARIO)
+        submission = Submission(scenario.id, scenario._ID_PREFIX, scenario.config_id, "submission_id")
         _CycleManager._set(cycle)
         _ScenarioManager._set(scenario)
         _TaskManager._set(task)
         _JobManager._set(job)
         _DataManager._set(dn)
+        _SubmissionManager._set(submission)
         sequence = scenario.sequences["sequence"]
 
         assert tp.is_readable(scenario)
@@ -225,6 +260,7 @@ class TestTaipy:
         assert tp.is_readable(cycle)
         assert tp.is_readable(job)
         assert tp.is_readable(dn)
+        assert tp.is_readable(submission)
 
     def test_is_submittable_is_called(self):
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._is_submittable") as mck:
@@ -316,7 +352,7 @@ class TestTaipy:
                 tp.submit(scenario)
 
         assert len(warning) == 1
-        assert warning[0].message.args[0] == "The Core service is NOT running"
+        assert "The Core service is NOT running" in warning[0].message.args[0]
 
     def test_get_tasks(self):
         with mock.patch("taipy.core.task._task_manager._TaskManager._get_all") as mck:
@@ -355,6 +391,16 @@ class TestTaipy:
             job = Job(JobId("job_id"), task, "submit_id", task.id)
             tp.is_deletable(job)
             mck.assert_called_once_with(job)
+
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._is_deletable") as mck:
+            submission = Submission(scenario.id, scenario._ID_PREFIX, scenario.config_id, "submission_id")
+            tp.is_deletable(submission)
+            mck.assert_called_once_with(submission)
+
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._is_deletable") as mck:
+            submission_id = SubmissionId("SUBMISSION_id")
+            tp.is_deletable(submission_id)
+            mck.assert_called_once_with(submission_id)
 
     def test_is_promotable(self):
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._is_promotable_to_primary") as mck:
@@ -431,9 +477,6 @@ class TestTaipy:
             mck.assert_called_once_with(scenario, scenario, data_node_config_id="dn")
 
     def test_subscribe_scenario(self, scenario):
-        def cb(s, j):
-            print()
-
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._subscribe") as mck:
             tp.subscribe_scenario(cb)
             mck.assert_called_once_with(cb, [], None)
@@ -442,9 +485,6 @@ class TestTaipy:
             mck.assert_called_once_with(cb, [], scenario)
 
     def test_unsubscribe_scenario(self, scenario):
-        def cb(s, j):
-            print()
-
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._unsubscribe") as mck:
             tp.unsubscribe_scenario(cb)
             mck.assert_called_once_with(cb, None, None)
@@ -453,9 +493,6 @@ class TestTaipy:
             mck.assert_called_once_with(cb, None, scenario)
 
     def test_subscribe_sequence(self, sequence):
-        def cb(s, j):
-            print()
-
         with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._subscribe") as mck:
             tp.subscribe_sequence(cb)
             mck.assert_called_once_with(cb, None, None)
@@ -464,9 +501,6 @@ class TestTaipy:
             mck.assert_called_once_with(cb, None, sequence)
 
     def test_unsubscribe_sequence(self, sequence):
-        def cb(s, j):
-            print()
-
         with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._unsubscribe") as mck:
             tp.unsubscribe_sequence(callback=cb)
             mck.assert_called_once_with(cb, None, None)
@@ -538,15 +572,26 @@ class TestTaipy:
             tp.get_latest_job(task)
             mck.assert_called_once_with(task)
 
-    def test_get_latest_submission(self, task):
-        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._get_latest") as mck:
-            tp.get_latest_submission(task)
-            mck.assert_called_once_with(task)
-
     def test_cancel_job(self):
         with mock.patch("taipy.core.job._job_manager._JobManager._cancel") as mck:
             tp.cancel_job("job_id")
             mck.assert_called_once_with("job_id")
+
+    def test_get_submissions(self):
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._get_all") as mck:
+            tp.get_submissions()
+            mck.assert_called_once_with()
+
+    def test_get_submission(self, task):
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._get") as mck:
+            submission_id = SubmissionId("SUBMISSION_id")
+            tp.get(submission_id)
+            mck.assert_called_once_with(submission_id)
+
+    def test_get_latest_submission(self, task):
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._get_latest") as mck:
+            tp.get_latest_submission(task)
+            mck.assert_called_once_with(task)
 
     def test_block_config_when_core_is_running(self):
         Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
@@ -591,28 +636,33 @@ class TestTaipy:
             mck.assert_called_once_with(cycle_id)
 
     def test_create_global_data_node(self):
-        dn_cfg = DataNodeConfig("id", "pickle", Scope.GLOBAL)
-        with mock.patch("taipy.core.data._data_manager._DataManager._create_and_set") as mck:
-            dn = tp.create_global_data_node(dn_cfg)
-            mck.assert_called_once_with(dn_cfg, None, None)
+        dn_cfg_global = DataNodeConfig("id", "pickle", Scope.GLOBAL)
+        dn_cfg_scenario = DataNodeConfig("id", "pickle", Scope.SCENARIO)
+        with mock.patch("taipy.core.data._data_manager._DataManager._create_and_set") as dn_create_mock:
+            with mock.patch("taipy.core._core.Core._manage_version_and_block_config") as mv_mock:
+                dn = tp.create_global_data_node(dn_cfg_global)
+                dn_create_mock.assert_called_once_with(dn_cfg_global, None, None)
+                mv_mock.assert_called_once()
 
-        dn = tp.create_global_data_node(dn_cfg)
+        dn = tp.create_global_data_node(dn_cfg_global)
         assert dn.scope == Scope.GLOBAL
-        assert dn.config_id == dn_cfg.id
+        assert dn.config_id == dn_cfg_global.id
+        assert _VersionManager._get(dn.version) is not None
 
         # Create a global data node from the same configuration should return the same data node
-        dn_2 = tp.create_global_data_node(dn_cfg)
+        dn_2 = tp.create_global_data_node(dn_cfg_global)
         assert dn_2.id == dn.id
 
-        dn_cfg.scope = Scope.SCENARIO
         with pytest.raises(DataNodeConfigIsNotGlobal):
-            tp.create_global_data_node(dn_cfg)
+            tp.create_global_data_node(dn_cfg_scenario)
 
-    def test_create_scenario(self, scenario):
+    def test_create_scenario(self):
         scenario_config = ScenarioConfig("scenario_config")
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._create") as mck:
-            tp.create_scenario(scenario_config)
-            mck.assert_called_once_with(scenario_config, None, None)
+            with mock.patch("taipy.core._core.Core._manage_version_and_block_config") as mv_mock:
+                tp.create_scenario(scenario_config)
+                mck.assert_called_once_with(scenario_config, None, None)
+                mv_mock.assert_called_once()
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._create") as mck:
             tp.create_scenario(scenario_config, datetime.datetime(2022, 2, 5))
             mck.assert_called_once_with(scenario_config, datetime.datetime(2022, 2, 5), None)
@@ -634,7 +684,7 @@ class TestTaipy:
         scenario_cfg_2 = Config.configure_scenario("s2", [task_cfg_2], [], Frequency.DAILY)
 
         scenario_1 = tp.create_scenario(scenario_cfg_1)
-        job_1 = tp.submit(scenario_1)[0]
+        job_1 = tp.submit(scenario_1).jobs[0]
 
         # Export scenario 1
         tp.export_scenario(scenario_1.id, "./tmp/exp_scenario_1")
@@ -647,7 +697,7 @@ class TestTaipy:
         assert sorted(os.listdir("./tmp/exp_scenario_1/cycles")) == sorted([f"{scenario_1.cycle.id}.json"])
 
         scenario_2 = tp.create_scenario(scenario_cfg_2)
-        job_2 = tp.submit(scenario_2)[0]
+        job_2 = tp.submit(scenario_2).jobs[0]
 
         # Export scenario 2
         scenario_2.export(pathlib.Path.cwd() / "./tmp/exp_scenario_2")
@@ -668,7 +718,7 @@ class TestTaipy:
         assert sorted(os.listdir("./tmp/exp_scenario_1/cycles")) == sorted([f"{scenario_2.cycle.id}.json"])
 
         with pytest.raises(InvalidExportPath):
-            tp.export_scenario(scenario_2.id, Config.core.storage_folder)
+            tp.export_scenario(scenario_2.id, Config.core.taipy_storage_folder)
 
         shutil.rmtree("./tmp", ignore_errors=True)
 
@@ -677,7 +727,7 @@ class TestTaipy:
             for key, items in expected_parents.items():
                 assert len(parents[key]) == len(expected_parents[key])
                 parent_ids = [parent.id for parent in parents[key]]
-                assert all([item.id in parent_ids for item in items])
+                assert all(item.id in parent_ids for item in items)
 
         dn_config_1 = Config.configure_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
         dn_config_2 = Config.configure_data_node(id="d2", storage_type="in_memory", scope=Scope.SCENARIO)
