@@ -182,12 +182,12 @@ class _VersionManager(_Manager[_Version]):
 
     @classmethod
     def _manage_version(cls):
-        from ..taipy import clean_all_entities_by_version
+        from ..taipy import clean_all_entities
 
         if Config.core.mode == "development":
             current_version_number = cls._get_development_version()
             cls.__logger.info(f"Development mode: Clean all entities of version {current_version_number}")
-            clean_all_entities_by_version(current_version_number)
+            clean_all_entities(current_version_number)
             cls._set_development_version(current_version_number)
 
         elif Config.core.mode in ["experiment", "production"]:

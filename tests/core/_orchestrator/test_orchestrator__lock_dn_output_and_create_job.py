@@ -63,14 +63,14 @@ def test_lock_dn_and_create_job_with_callback_and_force():
 
 
 def test_lock_dn_and_create_job_one_output():
-    dn = Config.configure_data_node("output")
+    dn = Config.configure_data_node("output_dn")
     t = Config.configure_task("one_output", nothing, [], [dn])
     sc_conf = Config.configure_scenario("scenario", [t])
     scenario = taipy.create_scenario(sc_conf)
     orchestrator = _OrchestratorFactory._build_orchestrator()
     orchestrator._lock_dn_output_and_create_job(scenario.one_output, "submit_id", "scenario_id")
 
-    assert scenario.output.edit_in_progress
+    assert scenario.output_dn.edit_in_progress
 
 
 def test_lock_dn_and_create_job_multiple_outputs_one_input():

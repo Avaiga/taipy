@@ -13,7 +13,6 @@ import inspect
 import io
 import pathlib
 import tempfile
-from unittest.mock import patch
 
 import pytest
 
@@ -23,8 +22,7 @@ from taipy.gui.utils import _get_non_existent_file_path
 
 
 def test_file_upload_no_varname(gui: Gui, helpers):
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False)
+    gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = helpers.create_scope_and_get_sid(gui)
@@ -34,8 +32,7 @@ def test_file_upload_no_varname(gui: Gui, helpers):
 
 
 def test_file_upload_no_blob(gui: Gui, helpers):
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False)
+    gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = helpers.create_scope_and_get_sid(gui)
@@ -45,8 +42,7 @@ def test_file_upload_no_blob(gui: Gui, helpers):
 
 
 def test_file_upload_no_filename(gui: Gui, helpers):
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False)
+    gui.run(run_server=False)
     flask_client = gui._server.test_client()
     file = (io.BytesIO(b"abcdef"), "")
     # Get the jsx once so that the page will be evaluated -> variable will be registered
@@ -57,8 +53,7 @@ def test_file_upload_no_filename(gui: Gui, helpers):
 
 
 def test_file_upload_simple(gui: Gui, helpers):
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False)
+    gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = helpers.create_scope_and_get_sid(gui)
@@ -77,8 +72,7 @@ def test_file_upload_simple(gui: Gui, helpers):
 
 
 def test_file_upload_multi_part(gui: Gui, helpers):
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False)
+    gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = helpers.create_scope_and_get_sid(gui)
@@ -110,8 +104,7 @@ def test_file_upload_multi_part(gui: Gui, helpers):
 def test_file_upload_multiple(gui: Gui, helpers):
     var_name = "varname"
     gui._set_frame(inspect.currentframe())
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False, single_client=True)
+    gui.run(run_server=False, single_client=True)
     flask_client = gui._server.test_client()
     with gui.get_flask_app().app_context():
         gui._bind_var_val(var_name, None)

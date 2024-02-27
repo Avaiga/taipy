@@ -17,6 +17,7 @@ from taipy.core.job.status import Status
 from taipy.core.notification.core_event_consumer import CoreEventConsumerBase
 from taipy.core.notification.event import Event, EventEntityType, EventOperation
 from taipy.core.notification.notifier import Notifier
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 
 
 class Snapshot:
@@ -85,8 +86,9 @@ def test_events_published_for_scenario_creation():
     register_id_0, register_queue_0 = Notifier.register()
     all_evts = RecordingConsumer(register_id_0, register_queue_0)
     all_evts.start()
-    # Create a scenario only trigger 6 creation events (for cycle, data node(x2), task, sequence and scenario)
-    tp.create_scenario(sc_config)
+    # Create a scenario via the manager
+    # should only trigger 6 creation events (for cycle, data node(x2), task, sequence and scenario)
+    _ScenarioManagerFactory._build_manager()._create(sc_config)
     snapshot = all_evts.capture()
 
     assert len(snapshot.collected_events) == 6
@@ -249,7 +251,7 @@ def test_job_events():
     consumer.start()
 
     # Create scenario
-    scenario = tp.create_scenario(sc_config)
+    scenario = _ScenarioManagerFactory._build_manager()._create(sc_config)
     snapshot = consumer.capture()
     assert len(snapshot.collected_events) == 0
 
@@ -329,7 +331,7 @@ def test_data_node_events():
     consumer = RecordingConsumer(register_id, register_queue)
     consumer.start()
 
-    scenario = tp.create_scenario(sc_config)
+    scenario = _ScenarioManagerFactory._build_manager()._create(sc_config)
 
     snapshot = consumer.capture()
     # We expect two creation events since we have two data nodes:

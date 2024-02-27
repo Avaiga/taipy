@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-from unittest.mock import patch
 
 from taipy.gui import Gui, Markdown
 
@@ -24,8 +23,7 @@ def ws_u_assert_template(gui: Gui, helpers, value_before_update, value_after_upd
 
     # Bind a page so that the variable will be evaluated as expression
     gui.add_page("test", Markdown("<|{var}|>"))
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False)
+    gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server.get_flask())

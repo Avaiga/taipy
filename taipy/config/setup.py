@@ -57,6 +57,7 @@ setup(
     packages=find_namespace_packages(where=".")
     + find_packages(include=["taipy", "taipy.config", "taipy.config.*", "taipy.logger", "taipy.logger.*"]),
     include_package_data=True,
+    data_files=[('version', ['version.json'])],
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-config",
