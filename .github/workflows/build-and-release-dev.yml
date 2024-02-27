@@ -193,11 +193,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          file_pattern: '*.json'
+          commit_message: Update version to ${{ needs.fetch-versions.outputs.NEW_VERSION }}
+
       - name: Reset changes
         run: |
           git reset --hard HEAD
           git clean -fdx
-
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Update version to ${{ needs.fetch-versions.outputs.NEW_VERSION }}
