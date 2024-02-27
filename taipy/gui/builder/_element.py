@@ -114,8 +114,8 @@ class _Element(ABC):
         return str(value)
 
     # Get a deepcopy version of the properties
-    def _get_properties_deepcopy(self):
-        return copy.deepcopy(self._properties)
+    def get_properties(self, deepcopy: bool = True) -> t.Dict[str, t.Any]:
+        return copy.deepcopy(self._properties) if deepcopy else self._properties
 
     @abstractmethod
     def _render(self, gui: "Gui") -> str:
@@ -143,7 +143,7 @@ class _Block(_Element):
         _BuilderContextManager().pop()
 
     def _render(self, gui: "Gui") -> str:
-        el = _BuilderFactory.create_element(gui, self._ELEMENT_NAME, self._get_properties_deepcopy())
+        el = _BuilderFactory.create_element(gui, self._ELEMENT_NAME, self.get_properties())
         return f"{el[0]}{self._render_children(gui)}</{el[1]}>"
 
     def _render_children(self, gui: "Gui") -> str:
@@ -222,7 +222,7 @@ class _Control(_Element):
         super().__init__(*args, **kwargs)
 
     def _render(self, gui: "Gui") -> str:
-        el = _BuilderFactory.create_element(gui, self._ELEMENT_NAME, self._get_properties_deepcopy())
+        el = _BuilderFactory.create_element(gui, self._ELEMENT_NAME, self.get_properties())
         return (
             f"<div>{el[0]}</{el[1]}></div>"
             if f"<{el[1]}" in el[0] and f"</{el[1]}" not in el[0]
