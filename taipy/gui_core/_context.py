@@ -218,7 +218,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         scenario_or_cycle.id,
                         scenario_or_cycle.get_simple_label(),
                         sorted(
-                            self.scenario_by_cycle.get(scenario_or_cycle, []), key=_GuiCoreContext.get_entity_creation_date_iso
+                            self.scenario_by_cycle.get(scenario_or_cycle, []),
+                            key=_GuiCoreContext.get_entity_creation_date_iso,
                         ),
                         _EntityType.CYCLE.value,
                         False,
