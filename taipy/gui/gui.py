@@ -633,7 +633,7 @@ class Gui:
                     if var_name.startswith("TpExPr_"):
                         var_name = var_name[7:]
                     _warn(
-                        f"A problem occured while resolving variable '{var_name}'"
+                        f"A problem occurred while resolving variable '{var_name}'"
                         + (f" in module '{var_context}'." if var_context else ".")
                     )
                 except Exception as e1:
