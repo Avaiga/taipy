@@ -14,6 +14,7 @@ import pickle
 import shutil
 from datetime import datetime
 from queue import Queue
+from threading import Lock
 from unittest.mock import patch
 
 import pandas as pd
@@ -378,6 +379,7 @@ def init_orchestrator():
         _OrchestratorFactory._build_dispatcher(force_restart=True)
         _OrchestratorFactory._orchestrator.jobs_to_run = Queue()
         _OrchestratorFactory._orchestrator.blocked_jobs = []
+        _OrchestratorFactory._orchestrator.lock = Lock()
 
     return _init_orchestrator
 
