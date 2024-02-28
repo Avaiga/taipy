@@ -671,7 +671,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     @staticmethod
     def sort_by_creation_date(entity: t.Union[Scenario, Cycle]):
-        return entity.creation_date
+        # we might be comparing naive and aware datetime ISO
+        return entity.creation_date.isoformat()
 
     def get_scenarios_for_owner(self, owner_id: str):
         cycles_scenarios: t.List[t.Union[Scenario, Cycle]] = []
