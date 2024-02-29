@@ -48,6 +48,7 @@ class _LocalsContext:
 
     @contextlib.contextmanager
     def set_locals_context(self, context: t.Optional[str]) -> t.Iterator[None]:
+        stack_count = len(self._lc_stack)
         try:
             if context in self._locals_map:
                 if hasattr(g, _LocalsContext.__ctx_g_name):
@@ -55,7 +56,8 @@ class _LocalsContext:
                 setattr(g, _LocalsContext.__ctx_g_name, context)
             yield
         finally:
-            if hasattr(g, _LocalsContext.__ctx_g_name):
+            # Only reset the stack if `stack_count` has been changed, meaning the context has been set above in the try statement
+            if hasattr(g, _LocalsContext.__ctx_g_name) and stack_count == (len(self._lc_stack) - 1):
                 if len(self._lc_stack) > 0:
                     setattr(g, _LocalsContext.__ctx_g_name, self._lc_stack.pop())
                 else:
