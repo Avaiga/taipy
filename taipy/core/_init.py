@@ -24,6 +24,7 @@ from .sequence.sequence import Sequence
 from .sequence.sequence_id import SequenceId
 from .submission.submission import Submission
 from .submission.submission_id import SubmissionId
+from .submission.submission_status import SubmissionStatus
 from .taipy import (
     cancel_job,
     clean_all_entities,
