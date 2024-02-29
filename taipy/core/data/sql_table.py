@@ -122,15 +122,6 @@ class SQLTableDataNode(_AbstractSQLDataNode):
         self.__insert_data(data, engine, connection, delete_table=True)
 
     def __insert_data(self, data, engine, connection, delete_table: bool = False) -> None:
-        """
-        Insert data into a SQL table.
-
-        Parameters:
-            data (List[Dict]): a list of dictionaries, where each dictionary represents a row of the table.
-            table: a SQLAlchemy object that represents a table.
-            connection: a SQLAlchemy connection to write the data.
-            delete_table (bool): indicates if the table should be deleted before inserting the data.
-        """
         table = self._create_table(engine)
         if isinstance(data, pd.DataFrame):
             self.__insert_dataframe(data, table, connection, delete_table)
