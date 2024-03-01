@@ -1,4 +1,0 @@
-recursive-include tools *
-
-# Package taipy-rest
-include *.json

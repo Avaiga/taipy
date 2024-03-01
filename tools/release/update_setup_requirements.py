@@ -20,7 +20,9 @@ def __build_taipy_package_line(line: str, version: str, publish_on_py_pi: bool) 
     _line = line.strip()
     if publish_on_py_pi:
         return f"{_line}=={version}\n"
-    return f"{_line} @ https://github.com/Avaiga/taipy/releases/download/{version}/{version}.tar.gz\n"
+    tag = f"{version}-{_line.split('-')[1]}"
+    tar_name = f"{_line}-{version}"
+    return f"{_line} @ https://github.com/Avaiga/taipy/releases/download/{tag}/{tar_name}.tar.gz\n"
 
 
 def update_setup_requirements(package: str, versions: Dict, publish_on_py_pi: bool) -> None:

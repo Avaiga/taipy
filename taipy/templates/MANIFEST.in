@@ -1,4 +1,0 @@
-recursive-include tools *
-
-# Package taipy-templates
-recursive-include .

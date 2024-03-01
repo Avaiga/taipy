@@ -1,7 +1,0 @@
-recursive-include tools *
-
-# Package taipy-gui
-recursive-include taipy/gui/webapp *
-include version.json
-include viselements.json
-include *.pyi

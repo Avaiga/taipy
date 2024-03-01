@@ -24,6 +24,8 @@ if __name__ == "__main__":
     Path(_package_path).mkdir(parents=True, exist_ok=True)
 
     for file_name in os.listdir("."):
-        if file_name.lower().endswith((".md", ".json")) or file_name in __SKIP:
+        if file_name.lower().endswith(".md") or file_name in __SKIP:
             continue
         shutil.move(file_name, _package_path)
+
+    shutil.copy("../__init__.py", "./taipy/__init__.py")

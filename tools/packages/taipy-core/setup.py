@@ -22,13 +22,17 @@ root_folder = Path(__file__).parent
 
 readme = Path(root_folder / "README.md").read_text("UTF-8")
 
-with open(root_folder / "taipy" / "core" / "version.json") as version_file:
+version_path = "taipy/core/version.json"
+
+setup_requirements = Path("taipy/core/setup.requirements.txt")
+
+with open(version_path) as version_file:
     version = json.load(version_file)
     version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
-requirements = [r for r in (root_folder / "setup.requirements.txt").read_text("UTF-8").splitlines() if r]
+requirements = [r for r in (setup_requirements).read_text("UTF-8").splitlines() if r]
 
 test_requirements = ["pytest>=3.8"]
 
