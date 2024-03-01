@@ -27,8 +27,3 @@ if __name__ == "__main__":
         if file_name.lower().endswith((".md", ".json")) or file_name in __SKIP:
             continue
         shutil.move(file_name, _package_path)
-
-    for file_name in os.listdir("../"):
-        if os.path.isdir(file_name):
-            continue
-        shutil.move(file_name, ".")

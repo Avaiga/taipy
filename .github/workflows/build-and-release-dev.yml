@@ -110,11 +110,15 @@ jobs:
         run: |
           cp tools/gui/generate_pyi.py pyi_temp.py && pipenv run python pyi_temp.py && rm pyi_temp.py
 
+      - name: Build frontends
+        if: matrix.package == 'gui'
+        run: |
+          python tools/frontend/bundle_build.py
+
       - name: Build Package Structure
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
         run: |
           python tools/release/build_package_structure.py ${{ matrix.package }}
-          ls -lah
 
       - name: Build package
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
@@ -138,8 +142,6 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
 
   build-and-release-taipy-dev:
-    permissions:
-      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     runs-on: ubuntu-latest
     needs: [ build-and-release-taipy-dev-packages, fetch-versions ]
     timeout-minutes: 20
@@ -168,6 +170,11 @@ jobs:
             ${{needs.fetch-versions.outputs.rest_VERSION}} \
             ${{needs.fetch-versions.outputs.templates_VERSION}} \
             ${{ github.event.inputs.publish_on_pypi }}
+
+      - name: Replace setup.py
+        run: |
+          mv setup.py setup.old.py
+          cp tools/packages/taipy/setup.py .
 
       - name: Install dependencies
         run: |
