@@ -114,6 +114,7 @@ class Core:
     @classmethod
     def __check_and_block_config(cls):
         Config.check()
+        cls.__logger.info("Blocking configuration update.")
         Config.block_update()
         _init_backup_file_with_storage_folder()
 
