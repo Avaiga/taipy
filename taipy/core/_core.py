@@ -72,6 +72,7 @@ class Core:
             wait (bool): If True, the method will wait for the dispatcher to stop.
             timeout (Optional[float]): The maximum time to wait. If None, the method will wait indefinitely.
         """
+        self.__logger.info("Unblocking configuration update.")
         Config.unblock_update()
 
         if self._dispatcher:
