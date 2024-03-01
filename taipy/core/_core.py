@@ -72,6 +72,7 @@ class Core:
             wait (bool): If True, the method will wait for the dispatcher to stop.
             timeout (Optional[float]): The maximum time to wait. If None, the method will wait indefinitely.
         """
+        self.__logger.info("Unblocking configuration update.")
         Config.unblock_update()
 
         if self._dispatcher:
@@ -114,6 +115,7 @@ class Core:
     @classmethod
     def __check_and_block_config(cls):
         Config.check()
+        cls.__logger.info("Blocking configuration update.")
         Config.block_update()
         _init_backup_file_with_storage_folder()
 
