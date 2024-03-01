@@ -66,12 +66,9 @@ const Login = (props: LoginProps) => {
 
     const handleAction = useCallback(
         (evt: MouseEvent<HTMLElement>) => {
-            if (!user || !password) {
-                return;
-            }
             const { close } = evt?.currentTarget.dataset || {};
             const args = close
-                ? ["", "", document.location.pathname.substring(1)]
+                ? [null, null, document.location.pathname.substring(1)]
                 : [user, password, document.location.pathname.substring(1)];
             setShowProgress(true);
             dispatch(createSendActionNameAction(id, module, onAction, ...args));
@@ -112,7 +109,7 @@ const Login = (props: LoginProps) => {
     }, []);
 
     return onlyOne ? (
-        <Dialog id={id} onClose={handleAction} open={true} className={className}>
+        <Dialog id={id} open={true} className={className}>
             <DialogTitle sx={titleSx}>
                 {title}
                 <IconButton aria-label="close" onClick={handleAction} sx={closeSx} title="close" data-close>
