@@ -420,9 +420,6 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
 
     // Datanode data
     const dtType = props.data && props.data[DatanodeDataProps.type];
-    //3.0 const dtValue = (props.data && props.data[DatanodeDataProps.value]) ?? null : undefined;
-    const fleDtValue = props.data && props.data[DatanodeDataProps.value];
-    console.log(fleDtValue)
     const dtValue = (props.data && props.data[DatanodeDataProps.value]) ?? ((dtType == "float") ? null : undefined);
     const dtTabular = (props.data && props.data[DatanodeDataProps.tabular]) ?? false;
     const dtError = props.data && props.data[DatanodeDataProps.error];
