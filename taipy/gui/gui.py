@@ -56,7 +56,7 @@ from .data.data_accessor import _DataAccessor, _DataAccessors
 from .data.data_format import _DataFormat
 from .data.data_scope import _DataScopes
 from .extension.library import Element, ElementLibrary
-from .gui_types import _WsType
+from .types import _WsType
 from .page import Page
 from .partial import Partial
 from .server import _Server

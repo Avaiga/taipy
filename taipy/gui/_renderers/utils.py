@@ -12,7 +12,7 @@
 import typing as t
 
 from .._warnings import _warn
-from ..gui_types import NumberTypes
+from ..types import NumberTypes
 from ..utils import _RE_PD_TYPE, _get_date_col_str_name, _MapDict
 
 
