@@ -13,8 +13,6 @@
 
 """The setup script."""
 
-import sys
-sys.path.append(sys.path.pop(0))
 import json
 import os
 from pathlib import Path
