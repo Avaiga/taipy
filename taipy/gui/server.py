@@ -23,7 +23,6 @@ import webbrowser
 from importlib import util
 from random import randint
 
-import __main__
 from flask import Blueprint, Flask, json, jsonify, render_template, request, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
@@ -31,6 +30,7 @@ from gitignore_parser import parse_gitignore
 from kthread import KThread
 from werkzeug.serving import is_running_from_reloader
 
+import __main__
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._renderers.json import _TaipyJsonProvider

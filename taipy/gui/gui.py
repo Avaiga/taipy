@@ -29,12 +29,12 @@ from importlib.util import find_spec
 from types import FrameType, FunctionType, LambdaType, ModuleType, SimpleNamespace
 from urllib.parse import unquote, urlencode, urlparse
 
-import __main__  # noqa: F401
 import markdown as md_lib
 import tzlocal
 from flask import Blueprint, Flask, g, has_app_context, jsonify, request, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 
+import __main__  # noqa: F401
 from taipy.logger._taipy_logger import _TaipyLogger
 
 if util.find_spec("pyngrok"):
