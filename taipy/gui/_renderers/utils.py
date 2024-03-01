@@ -12,7 +12,7 @@
 import typing as t
 
 from .._warnings import _warn
-from ..gui_types import NumberTypes
+from ..types import NumberTypes
 from ..utils import _RE_PD_TYPE, _get_date_col_str_name, _MapDict
 
 
@@ -57,7 +57,7 @@ def _get_columns_dict(  # noqa: C901
     if isinstance(columns, str):
         col_dict = _get_columns_dict_from_list([s.strip() for s in columns.split(";")], col_types_keys, value)
     elif isinstance(columns, (list, tuple)):
-        col_dict = _get_columns_dict_from_list(columns, col_types_keys, value) # type: ignore[arg-type]
+        col_dict = _get_columns_dict_from_list(columns, col_types_keys, value)  # type: ignore[arg-type]
     elif isinstance(columns, _MapDict):
         col_dict = columns._dict.copy()
     elif isinstance(columns, dict):

@@ -14,6 +14,7 @@ import pickle
 import shutil
 from datetime import datetime
 from queue import Queue
+from unittest.mock import patch
 
 import pandas as pd
 import pytest
@@ -327,7 +328,8 @@ def clean_repository(init_config, init_managers, init_orchestrator, init_notifie
     init_config()
     init_notifier()
 
-    yield
+    with patch("sys.argv", ["prog"]):
+        yield
 
 
 @pytest.fixture
@@ -346,6 +348,7 @@ def init_config(reset_configuration_singleton, inject_core_sections):
 
         Config.configure_core(read_entity_retry=0)
         Core._is_running = False
+        Core._version_is_initialized = False
 
     return _init_config
 

@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-from unittest.mock import patch
 
 import pytest
 
@@ -112,8 +111,7 @@ def test_map_dict_set(gui: Gui, test_client):
     # set gui frame
     gui._set_frame(inspect.currentframe())
 
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False, single_client=True)
+    gui.run(run_server=False, single_client=True)
     with gui.get_flask_app().app_context():
         assert isinstance(gui._Gui__state.d, _MapDict)  # type: ignore[attr-defined]
         gui._Gui__state.d = {"b": 2}  # type: ignore[attr-defined]

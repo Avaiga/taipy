@@ -56,11 +56,11 @@ from .data.data_accessor import _DataAccessor, _DataAccessors
 from .data.data_format import _DataFormat
 from .data.data_scope import _DataScopes
 from .extension.library import Element, ElementLibrary
-from .gui_types import _WsType
 from .page import Page
 from .partial import Partial
 from .server import _Server
 from .state import State
+from .types import _WsType
 from .utils import (
     _delscopeattr,
     _filter_locals,
@@ -623,7 +623,23 @@ class Gui:
                         self.__handle_ws_app_id(message)
                 self.__send_ack(message.get("ack_id"))
         except Exception as e:  # pragma: no cover
-            _warn(f"Decoding Message has failed: {message}", e)
+            if isinstance(e, AttributeError) and (name := message.get("name")):
+                try:
+                    names = self._get_real_var_name(name)
+                    var_name = names[0] if isinstance(names, tuple) else names
+                    var_context = names[1] if isinstance(names, tuple) else None
+                    if var_name.startswith("tpec_"):
+                        var_name = var_name[5:]
+                    if var_name.startswith("TpExPr_"):
+                        var_name = var_name[7:]
+                    _warn(
+                        f"A problem occurred while resolving variable '{var_name}'"
+                        + (f" in module '{var_context}'." if var_context else ".")
+                    )
+                except Exception as e1:
+                    _warn(f"Resolving  name '{name}' failed", e1)
+            else:
+                _warn(f"Decoding Message has failed: {message}", e)
 
     def __front_end_update(
         self,
@@ -1213,7 +1229,7 @@ class Gui:
 
     def __send_ws_update_with_dict(self, modified_values: dict) -> None:
         payload = [
-            {"name": _get_client_var_name(k), "payload": (v if isinstance(v, dict) and "value" in v else {"value": v})}
+            {"name": _get_client_var_name(k), "payload": v if isinstance(v, dict) and "value" in v else {"value": v}}
             for k, v in modified_values.items()
         ]
         if self._is_broadcasting():
@@ -2017,7 +2033,7 @@ class Gui:
 
     def _bind_custom_page_variables(self, page: CustomPage, client_id: t.Optional[str]):
         """Handle the bindings of custom page variables"""
-        with self.get_flask_app().app_context() if has_app_context() else contextlib.nullcontext(): # type: ignore[attr-defined]
+        with self.get_flask_app().app_context() if has_app_context() else contextlib.nullcontext():  # type: ignore[attr-defined]
             self.__set_client_id_in_context(client_id)
             with self._set_locals_context(page._get_module_name()):
                 for k in self._get_locals_bind().keys():

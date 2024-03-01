@@ -72,5 +72,9 @@ class Partial(_Page):
         if isinstance(content, Page):
             new_partial._renderer = content
         else:
-            new_partial._renderer = type(self._renderer)(content=content) if self._renderer is not None else None
+            new_partial._renderer = (
+                type(self._renderer)(content=content, frame=self._renderer._get_frame())
+                if self._renderer is not None
+                else None
+            )
         return new_partial

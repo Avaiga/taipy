@@ -47,6 +47,7 @@ setup(
     author_email="dev@taipy.io",
     packages=find_namespace_packages(where=".") + find_packages(include=["taipy", "taipy.rest"]),
     include_package_data=True,
+    data_files=[('version', ['version.json'])],
     long_description=readme,
     long_description_content_type="text/markdown",
     description="Library to expose taipy-core REST APIs.",

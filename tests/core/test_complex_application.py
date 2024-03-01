@@ -12,7 +12,6 @@
 import os
 import pathlib
 from time import sleep
-from unittest.mock import patch
 
 import pandas as pd
 
@@ -76,25 +75,24 @@ def test_skipped_jobs():
     task_config_2 = Config.configure_task("second", mult_by_2, intermediate_config, output_config, skippable=True)
     scenario_config = Config.configure_scenario("scenario", [task_config_1, task_config_2])
 
-    with patch("sys.argv", ["prog"]):
-        core = Core()
-        core.run()
+    core = Core()
+    core.run()
 
-        scenario = tp.create_scenario(scenario_config)
-        scenario.input_dn.write(2)
-        scenario.submit()
-        assert len(tp.get_jobs()) == 2
-        for job in tp.get_jobs():
-            assert job.status == Status.COMPLETED
-        scenario.submit()
-        assert len(tp.get_jobs()) == 4
-        skipped = []
-        for job in tp.get_jobs():
-            if job.status != Status.COMPLETED:
-                assert job.status == Status.SKIPPED
-                skipped.append(job)
-        assert len(skipped) == 2
-        core.stop()
+    scenario = tp.create_scenario(scenario_config)
+    scenario.input_dn.write(2)
+    scenario.submit()
+    assert len(tp.get_jobs()) == 2
+    for job in tp.get_jobs():
+        assert job.status == Status.COMPLETED
+    scenario.submit()
+    assert len(tp.get_jobs()) == 4
+    skipped = []
+    for job in tp.get_jobs():
+        if job.status != Status.COMPLETED:
+            assert job.status == Status.SKIPPED
+            skipped.append(job)
+    assert len(skipped) == 2
+    core.stop()
 
 
 def test_complex():
@@ -173,12 +171,11 @@ def test_complex():
         ],
     )
 
-    with patch("sys.argv", ["prog"]):
-        core = Core()
-        core.run()
-        scenario = tp.create_scenario(scenario_config)
-        tp.submit(scenario)
-        core.stop()
+    core = Core()
+    core.run()
+    scenario = tp.create_scenario(scenario_config)
+    tp.submit(scenario)
+    core.stop()
 
     csv_sum_res = pd.read_csv(csv_path_sum)
     excel_sum_res = pd.read_excel(excel_path_sum)

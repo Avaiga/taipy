@@ -13,7 +13,7 @@ import re
 import typing as t
 from datetime import datetime
 
-from ..gui_types import PropertyType
+from ..types import PropertyType
 from .builder import _Builder
 
 if t.TYPE_CHECKING:

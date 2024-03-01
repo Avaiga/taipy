@@ -16,7 +16,7 @@ import { Data, Layout, PlotDatum, PlotMarker, PlotRelayoutEvent, PlotSelectionEv
 import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
-import { useTheme } from "@mui/system";
+import { useTheme } from "@mui/material";
 
 import { getArrayValue, getUpdateVar, TaipyActiveProps, TaipyChangeProps } from "./utils";
 import {
@@ -293,6 +293,7 @@ const Chart = (props: ChartProp) => {
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
 
     const layout = useMemo(() => {
+        const layout = {...baseLayout};
         let template = undefined;
         try {
             const tpl = props.template && JSON.parse(props.template);
@@ -307,32 +308,32 @@ const Chart = (props: ChartProp) => {
             console.info(`Error while parsing Chart.template\n${(e as Error).message || e}`);
         }
         if (template) {
-            baseLayout.template = template;
+            layout.template = template;
         }
         if (props.figure) {
             return {
                 ...(props.figure[0].layout as Partial<Layout>),
-                ...baseLayout,
-                title: title || baseLayout.title || (props.figure[0].layout as Partial<Layout>).title,
+                ...layout,
+                title: title || layout.title || (props.figure[0].layout as Partial<Layout>).title,
                 clickmode: "event+select",
             } as Layout;
         }
         return {
-            ...baseLayout,
-            title: title || baseLayout.title,
+            ...layout,
+            title: title || layout.title,
             xaxis: {
                 title:
                     config.traces.length && config.traces[0].length && config.traces[0][0]
                         ? getColNameFromIndexed(config.columns[config.traces[0][0]].dfid)
                         : undefined,
-                ...baseLayout.xaxis,
+                ...layout.xaxis,
             },
             yaxis: {
                 title:
                     config.traces.length == 1 && config.traces[0].length > 1 && config.columns[config.traces[0][1]]
                         ? getColNameFromIndexed(config.columns[config.traces[0][1]].dfid)
                         : undefined,
-                ...baseLayout.yaxis,
+                ...layout.yaxis,
             },
             clickmode: "event+select",
         } as Layout;

@@ -122,6 +122,8 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
 
   build-and-release-taipy-dev:
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     runs-on: ubuntu-latest
     needs: [ build-and-release-taipy-dev-packages, fetch-versions ]
     timeout-minutes: 20
@@ -193,11 +195,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          file_pattern: '*/version.json'
+          commit_message: Update version to ${{ needs.fetch-versions.outputs.NEW_VERSION }}
+
       - name: Reset changes
         run: |
           git reset --hard HEAD
           git clean -fdx
-
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Update version to ${{ needs.fetch-versions.outputs.NEW_VERSION }}

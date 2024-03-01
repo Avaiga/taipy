@@ -218,7 +218,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         scenario_or_cycle.id,
                         scenario_or_cycle.get_simple_label(),
                         sorted(
-                            self.scenario_by_cycle.get(scenario_or_cycle, []), key=_GuiCoreContext.sort_by_creation_date
+                            self.scenario_by_cycle.get(scenario_or_cycle, []),
+                            key=_GuiCoreContext.get_entity_creation_date_iso,
                         ),
                         _EntityType.CYCLE.value,
                         False,
@@ -250,7 +251,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     cycles_scenarios.extend(scenarios)
                 else:
                     cycles_scenarios.append(cycle)
-        return sorted(cycles_scenarios, key=_GuiCoreContext.sort_by_creation_date)
+        return sorted(cycles_scenarios, key=_GuiCoreContext.get_entity_creation_date_iso)
 
     def select_scenario(self, state: State, id: str, payload: t.Dict[str, str]):
         args = payload.get("args")
@@ -670,8 +671,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         ent.properties.pop(key, None)
 
     @staticmethod
-    def sort_by_creation_date(entity: t.Union[Scenario, Cycle]):
-        return entity.creation_date
+    def get_entity_creation_date_iso(entity: t.Union[Scenario, Cycle]):
+        # we might be comparing naive and aware datetime ISO
+        return entity.creation_date.isoformat()
 
     def get_scenarios_for_owner(self, owner_id: str):
         cycles_scenarios: t.List[t.Union[Scenario, Cycle]] = []
@@ -691,7 +693,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         cycles_scenarios.extend(scenarios_cycle)
                     elif isinstance(entity, Scenario):
                         cycles_scenarios.append(entity)
-        return sorted(cycles_scenarios, key=_GuiCoreContext.sort_by_creation_date)
+        return sorted(cycles_scenarios, key=_GuiCoreContext.get_entity_creation_date_iso)
 
     def get_data_node_history(self, datanode: DataNode, id: str):
         if (
