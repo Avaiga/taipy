@@ -89,7 +89,7 @@ setup(
     install_requires=get_requirements(),
     license="Apache License 2.0",
     include_package_data=True,
-    data_files=[('version', ['version.json'])],
+    data_files=[("version", ["version.json"])],
     keywords="taipy-gui",
     name="taipy-gui",
     packages=find_namespace_packages(where=".") + find_packages(include=["taipy", "taipy.gui", "taipy.gui.*"]),
