@@ -36,7 +36,7 @@ def get_requirements():
     # get requirements from the different setups in tools/packages (removing taipy packages)
     reqs = set()
     for pkg in (root_folder / "tools" / "packages").iterdir():
-        if "taipy-core" not in pkg:
+        if "taipy-core" not in str(pkg):
             continue
         requirements_file = pkg / "setup.requirements.txt"
         if requirements_file.exists():

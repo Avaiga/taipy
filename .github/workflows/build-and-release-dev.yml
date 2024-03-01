@@ -110,6 +110,12 @@ jobs:
         run: |
           cp tools/gui/generate_pyi.py pyi_temp.py && pipenv run python pyi_temp.py && rm pyi_temp.py
 
+      - name: Build Package Structure
+        working-directory: ${{ steps.set-variables.outputs.package_dir }}
+        run: |
+          python tools/release/build_package_structure.py ${{ matrix.package }}
+          ls -lah
+
       - name: Build package
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
         run: |
