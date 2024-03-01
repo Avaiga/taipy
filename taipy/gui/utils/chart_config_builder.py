@@ -250,11 +250,11 @@ def _build_chart_config(gui: "Gui", attributes: t.Dict[str, t.Any], col_types: t
             "orientations": [tr[_Chart_iprops.orientation.value] for tr in traces],
             "names": [tr[_Chart_iprops._name.value] for tr in traces],
             "lines": [
-                tr[_Chart_iprops.line.value]
-                if isinstance(tr[_Chart_iprops.line.value], (dict, _MapDict))
-                else {"dash": tr[_Chart_iprops.line.value]}
-                if tr[_Chart_iprops.line.value]
-                else None
+                (
+                    tr[_Chart_iprops.line.value]
+                    if isinstance(tr[_Chart_iprops.line.value], (dict, _MapDict))
+                    else {"dash": tr[_Chart_iprops.line.value]} if tr[_Chart_iprops.line.value] else None
+                )
                 for tr in traces
             ],
             "textAnchors": [tr[_Chart_iprops.text_anchor.value] for tr in traces],

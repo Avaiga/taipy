@@ -20,8 +20,8 @@ from inspect import isclass
 from urllib.parse import quote
 
 from .._warnings import _warn
-from ..types import PropertyType, _get_taipy_type
 from ..partial import Partial
+from ..types import PropertyType, _get_taipy_type
 from ..utils import (
     _date_to_string,
     _get_broadcast_var_name,
@@ -69,7 +69,7 @@ class _Builder:
         "apply",
         "style",
         "tooltip",
-        "lov"
+        "lov",
     ]
 
     def __init__(

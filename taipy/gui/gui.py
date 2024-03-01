@@ -29,12 +29,12 @@ from importlib.util import find_spec
 from types import FrameType, FunctionType, LambdaType, ModuleType, SimpleNamespace
 from urllib.parse import unquote, urlencode, urlparse
 
+import __main__  # noqa: F401
 import markdown as md_lib
 import tzlocal
 from flask import Blueprint, Flask, g, has_app_context, jsonify, request, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 
-import __main__  # noqa: F401
 from taipy.logger._taipy_logger import _TaipyLogger
 
 if util.find_spec("pyngrok"):
@@ -56,11 +56,11 @@ from .data.data_accessor import _DataAccessor, _DataAccessors
 from .data.data_format import _DataFormat
 from .data.data_scope import _DataScopes
 from .extension.library import Element, ElementLibrary
-from .types import _WsType
 from .page import Page
 from .partial import Partial
 from .server import _Server
 from .state import State
+from .types import _WsType
 from .utils import (
     _delscopeattr,
     _filter_locals,
@@ -1229,7 +1229,7 @@ class Gui:
 
     def __send_ws_update_with_dict(self, modified_values: dict) -> None:
         payload = [
-            {"name": _get_client_var_name(k), "payload": (v if isinstance(v, dict) and "value" in v else {"value": v})}
+            {"name": _get_client_var_name(k), "payload": v if isinstance(v, dict) and "value" in v else {"value": v}}
             for k, v in modified_values.items()
         ]
         if self._is_broadcasting():
