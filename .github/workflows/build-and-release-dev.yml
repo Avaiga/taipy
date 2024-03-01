@@ -98,7 +98,17 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install build wheel
+          pip install build wheel pipenv mypy black isort
+
+      - name: Install GUI dependencies
+        if: matrix.package == 'gui'
+        run: |
+          pipenv install --dev --verbose
+
+      - name: Generate GUI pyi file
+        if: matrix.package == 'gui'
+        run: |
+          cp tools/gui/generate_pyi.py pyi_temp.py && pipenv run python pyi_temp.py && rm pyi_temp.py
 
       - name: Build package
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
