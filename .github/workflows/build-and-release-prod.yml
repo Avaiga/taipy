@@ -2,6 +2,10 @@ name: Build a prod version for all packages and release them
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "The tag of the package to publish on Pypi (ex: 1.0.0, 1.0.0.dev0)"
+        required: true
 
 jobs:
   fetch-versions:
@@ -16,12 +20,20 @@ jobs:
         NEW_VERSION: ${{ steps.version-setup.outputs.NEW_VERSION }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
+
       - name: Setup Dev Version
         id: version-setup
         run: |
-          python tools/release/setup_version.py ALL production >> $GITHUB_OUTPUT
+          python tools/release/setup_version.py ALL production ${{ github.event.inputs.version }} ${{ steps.extract_branch.outputs.branch }} >> $GITHUB_OUTPUT
 
   build-and-release-taipy-packages:
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     needs: [fetch-versions]
     timeout-minutes: 20
     runs-on: ubuntu-latest
@@ -84,7 +96,11 @@ jobs:
             ${{needs.fetch-versions.outputs.gui_VERSION}} \
             ${{needs.fetch-versions.outputs.rest_VERSION}} \
             ${{needs.fetch-versions.outputs.templates_VERSION}} \
-            dev
+            true
+
+      - name: Copy tools
+        run: |
+          cp -r tools ${{ steps.set-variables.outputs.package_dir }}
 
       - name: Install dependencies
         run: |
@@ -107,7 +123,14 @@ jobs:
         run: |
           pip install ${{ steps.set-variables.outputs.tar_path }}
 
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: ${{ steps.set-variables.outputs.package_dir }}/dist
+
   build-and-release-taipy:
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     runs-on: ubuntu-latest
     needs: [ build-and-release-taipy-dev-packages, fetch-versions ]
     timeout-minutes: 20
@@ -126,6 +149,16 @@ jobs:
           echo "package_version=${{needs.fetch-versions.outputs.VERSION}}" >> $GITHUB_OUTPUT
           echo "release_name=${{needs.fetch-versions.outputs.VERSION}}" >> $GITHUB_OUTPUT
           echo "tar_path=./dist/${{ github.event.repository.name }}-${{needs.fetch-versions.outputs.VERSION}}.tar.gz" >> $GITHUB_OUTPUT
+
+      - name: Update setup.requirements.txt
+        run: |
+          python tools/release/update_setup_requirements.py taipy \
+            ${{needs.fetch-versions.outputs.config_VERSION}} \
+            ${{needs.fetch-versions.outputs.core_VERSION}} \
+            ${{needs.fetch-versions.outputs.gui_VERSION}} \
+            ${{needs.fetch-versions.outputs.rest_VERSION}} \
+            ${{needs.fetch-versions.outputs.templates_VERSION}} \
+            true
 
       - name: Install dependencies
         run: |
@@ -148,6 +181,9 @@ jobs:
       - name: Check Taipy Installation
         run: |
           python tools/validate_taipy_install.py
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
 
       - name: Download packages
         run: |

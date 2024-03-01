@@ -27,6 +27,8 @@ jobs:
           python tools/release/setup_version.py ALL dev >> $GITHUB_OUTPUT
 
   build-and-release-taipy-dev-packages:
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     needs: [fetch-versions]
     timeout-minutes: 20
     runs-on: ubuntu-latest
