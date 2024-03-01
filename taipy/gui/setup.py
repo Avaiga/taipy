@@ -13,6 +13,8 @@
 
 """The setup script."""
 
+import sys
+sys.path.append(sys.path.pop(0))
 import json
 import os
 from pathlib import Path
@@ -56,10 +58,10 @@ extras_require = {
 
 
 def _build_webapp():
-    already_exists = Path("./taipy/gui/webapp/index.html").exists()
+    already_exists = Path("./webapp/index.html").exists()
     if not already_exists:
-        os.system("cd ../../../frontend/taipy-gui/dom && npm ci")
-        os.system("cd ../../../frontend/taipy-gui && npm ci --omit=optional && npm run build")
+        os.system("cd ../../frontend/taipy-gui/dom && npm ci")
+        os.system("cd ../../frontend/taipy-gui && npm ci --omit=optional && npm run build")
 
 
 class NPMInstall(build_py):
