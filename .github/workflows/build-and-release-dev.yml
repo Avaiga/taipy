@@ -103,7 +103,7 @@ jobs:
       - name: Install GUI dependencies
         if: matrix.package == 'gui'
         run: |
-          pipenv install --dev --verbose
+          pipenv install --dev
 
       - name: Generate GUI pyi file
         if: matrix.package == 'gui'

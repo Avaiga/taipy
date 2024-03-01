@@ -1,0 +1,5 @@
+recursive-include tools *
+
+# Package taipy-config
+include *.pyi
+include *.json

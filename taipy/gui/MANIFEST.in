@@ -1,3 +1,5 @@
+recursive-include tools *
+
 # Package taipy-gui
 recursive-include webapp *
 include version.json
