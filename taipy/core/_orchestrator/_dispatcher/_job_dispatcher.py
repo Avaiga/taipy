@@ -61,7 +61,7 @@ class _JobDispatcher(threading.Thread):
             self.join(timeout=timeout)
 
     def run(self):
-        self._logger.info("Start job dispatcher...")
+        self._logger.info("Core service started...")
         while not self._STOP_FLAG:
             try:
                 if self._can_execute():
