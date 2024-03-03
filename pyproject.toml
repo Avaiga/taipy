@@ -27,7 +27,6 @@ select = [
     "I001", # isort import order
 ]
 ignore = [      # TODO: to be removed
-    "C401",  # Unnecessary generator (rewrite as a `set` comprehension)
     "C405",  # Unnecessary list literal - rewrite as a literal
     "C408",  # Unnecessary dict call - rewrite as a literal
     "C409",  # Unnecessary list passed to tuple() - rewrite as a tuple literal
