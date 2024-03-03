@@ -31,7 +31,6 @@ ignore = [      # TODO: to be removed
     "C405",  # Unnecessary list literal - rewrite as a literal
     "C408",  # Unnecessary dict call - rewrite as a literal
     "C409",  # Unnecessary list passed to tuple() - rewrite as a tuple literal
-    "C416",  # Unnecessary `set` comprehension (rewrite using `set()`)
 ]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
