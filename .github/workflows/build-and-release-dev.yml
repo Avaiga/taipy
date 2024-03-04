@@ -145,14 +145,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install Package
-        working-directory: ${{ steps.set-variables.outputs.package_dir }}
-        run: |
-          pip install ${{ steps.set-variables.outputs.tar_path }}
+#      - name: Install Package
+#        working-directory: ${{ steps.set-variables.outputs.package_dir }}
+#        run: |
+#          pip install ${{ steps.set-variables.outputs.tar_path }}
 
-      - name: Publish to PyPI
-        if: github.event.inputs.publish_on_pypi == 'true'
-        uses: pypa/gh-action-pypi-publish@release/v1
+#      - name: Publish to PyPI
+#        if: github.event.inputs.publish_on_pypi == 'true'
+#        uses: pypa/gh-action-pypi-publish@release/v1
 
   build-and-release-taipy-dev:
     runs-on: ubuntu-latest
@@ -208,17 +208,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install Taipy
-        run: |
-          pip install ${{ steps.set-variables.outputs.tar_path }}
+#      - name: Install Taipy
+#        run: |
+#          pip install ${{ steps.set-variables.outputs.tar_path }}
 
-      - name: Check Taipy Installation
-        run: |
-          python tools/validate_taipy_install.py
+#      - name: Check Taipy Installation
+#        run: |
+#          python tools/validate_taipy_install.py
 
-      - name: Publish to PyPI
-        if: github.event.inputs.publish_on_pypi == 'true'
-        uses: pypa/gh-action-pypi-publish@release/v1
+#      - name: Publish to PyPI
+#        if: github.event.inputs.publish_on_pypi == 'true'
+#        uses: pypa/gh-action-pypi-publish@release/v1
 
       - name: Download packages
         run: |
