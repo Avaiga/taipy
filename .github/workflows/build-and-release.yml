@@ -1,4 +1,4 @@
-name: Build a dev version for all packages and release them
+name: Build all taipy packages and release them
 
 on:
   workflow_dispatch:
