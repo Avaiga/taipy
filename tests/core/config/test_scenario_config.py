@@ -150,7 +150,7 @@ def test_scenario_getitem():
 
     assert scenario.tasks == [task_config_1, task_config_2]
     assert scenario.additional_data_node_configs == [dn_config_4]
-    assert set(scenario.data_nodes) == set([dn_config_4, dn_config_1, dn_config_2, dn_config_3])
+    assert set(scenario.data_nodes) == {dn_config_4, dn_config_1, dn_config_2, dn_config_3}
 
     assert Config.scenarios[scenario_id].properties == scenario.properties
 

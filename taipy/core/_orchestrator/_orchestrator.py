@@ -255,7 +255,7 @@ class _Orchestrator(_AbstractOrchestrator):
             cls.__logger.info(f"{job.id} has already failed and cannot be canceled.")
         else:
             with cls.lock:
-                to_cancel_or_abandon_jobs = set([job])
+                to_cancel_or_abandon_jobs = {job}
                 to_cancel_or_abandon_jobs.update(cls.__find_subsequent_jobs(job.submit_id, set(job.task.output.keys())))
                 cls.__remove_blocked_jobs(to_cancel_or_abandon_jobs)
                 cls.__remove_jobs_to_run(to_cancel_or_abandon_jobs)
