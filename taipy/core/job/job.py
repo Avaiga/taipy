@@ -323,7 +323,7 @@ class Job(_Entity, _Labeled):
                 self.__logger.error(st)
         else:
             self.completed()
-            self.__logger.info(f"job {self.id} is completed.")
+            # self.__logger.info(f"job {self.id} is completed.")
 
     def __hash__(self):
         return hash(self.id)
