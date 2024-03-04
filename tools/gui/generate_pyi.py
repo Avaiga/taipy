@@ -38,9 +38,9 @@ replaced_content = ""
 with open(gui_pyi_file, "r") as file:
     for line in file:
         if "def run(" in line:
-            line = line.replace(
-                ", run_server: bool = ..., run_in_thread: bool = ..., async_mode: str = ..., **kwargs", gui_config
-            )
+            replace_str = line[line.index(", run_server") : (line.index("**kwargs") + len("**kwargs"))]
+            # ", run_server: bool = ..., run_in_thread: bool = ..., async_mode: str = ..., **kwargs"
+            line = line.replace(replace_str, gui_config)
         replaced_content = replaced_content + line
 
 with open(gui_pyi_file, "w") as write_file:
