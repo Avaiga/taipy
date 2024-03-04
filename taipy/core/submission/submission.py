@@ -200,7 +200,7 @@ class Submission(_Entity, _Labeled):
     def _update_submission_status(self, job: Job):
         from ._submission_manager_factory import _SubmissionManagerFactory
         with self.lock:
-            self.__logger.info(f"        -> Acquiring lock for {job.id} status update.")
+            self.__logger.info(f"        -> Acquiring lock {str(self.lock)} for {self.id}. {job.id=} status update.")
             submission_manager = _SubmissionManagerFactory._build_manager()
             submission = submission_manager._get(self)
             if submission._submission_status == SubmissionStatus.FAILED:
@@ -255,7 +255,7 @@ class Submission(_Entity, _Labeled):
                 submission.submission_status = SubmissionStatus.UNDEFINED  # type: ignore
             self.__logger.info(f"{job.id} status is {job_status}. Submission status set to "
                                f"{submission._submission_status}")
-            self.__logger.info(f"        -> Releasing lock for {job.id} status update.")
+            self.__logger.info(f"        -> Releasing lock {str(self.lock)} for {self.id}. {job.id=} status update.")
 
     def is_finished(self) -> bool:
         """Indicate if the submission is finished.
