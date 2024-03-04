@@ -145,7 +145,12 @@ jobs:
       - name: Create tag and release
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
         run: |
-          gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --prerelease --title ${{ steps.set-variables.outputs.release_name }} --notes "Release Draft ${{ steps.set-variables.outputs.release_name }}"
+           if [ "${{ github.event.inputs.release_type }}" == "dev" ]; then
+            gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --prerelease --title ${{ steps.set-variables.outputs.release_name }} --notes "Release Draft ${{ steps.set-variables.outputs.release_name }}"
+           else
+            gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --title ${{ steps.set-variables.outputs.release_name }} --notes "Release ${{ steps.set-variables.outputs.release_name }}"
+           fi
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -199,7 +204,12 @@ jobs:
 
       - name: Create tag and release Taipy
         run: |
-          gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --prerelease --title ${{ steps.set-variables.outputs.release_name }} --notes "Release Draft ${{ steps.set-variables.outputs.release_name }}"
+          if [ "${{ github.event.inputs.release_type }}" == "dev" ]; then
+            gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --prerelease --title ${{ steps.set-variables.outputs.release_name }} --notes "Release Draft ${{ steps.set-variables.outputs.release_name }}"
+          else
+            gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --title ${{ steps.set-variables.outputs.release_name }} --notes "Release ${{ steps.set-variables.outputs.release_name }}"
+          fi
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
