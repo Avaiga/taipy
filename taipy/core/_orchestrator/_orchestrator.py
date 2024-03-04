@@ -224,7 +224,6 @@ class _Orchestrator(_AbstractOrchestrator):
 
     @classmethod
     def _on_status_change(cls, job: Job):
-        cls.__logger.info(f"{job.id} status has changed to {job.status}.")
         if job.is_completed() or job.is_skipped():
             cls.__unblock_jobs()
         elif job.is_failed():
