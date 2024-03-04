@@ -28,7 +28,7 @@ jobs:
       - name: Setup Version
         id: version-setup
         run: |
-          python tools/release/setup_version.py ALL ${{ github.event.inputs.release_type }} >> $GITHUB_OUTPUT
+          python tools/release/setup_version.py ALL ${{ github.event.inputs.release_type }} ${{ github.event.inputs.version }} ${{ steps.extract_branch.outputs.branch }} >> $GITHUB_OUTPUT
 
   build-and-release-taipy-packages:
     needs: [fetch-versions]
