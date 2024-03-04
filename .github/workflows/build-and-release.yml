@@ -11,6 +11,9 @@ on:
         description: "The type of release to be made (dev or production)"
         default: "dev"
         required: true
+      target_version:
+        description: "The version of the package to be released"
+        required: true
 
 jobs:
   fetch-versions:
@@ -25,6 +28,11 @@ jobs:
         NEW_VERSION: ${{ steps.version-setup.outputs.NEW_VERSION }}
     steps:
       - uses: actions/checkout@v4
+      - name: Extract commit hash
+        shell: bash
+        run: echo "HASH=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        id: extract_hash
+
       - name: Setup Version
         id: version-setup
         run: |
