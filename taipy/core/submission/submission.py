@@ -253,6 +253,7 @@ class Submission(_Entity, _Labeled):
                 submission.submission_status = SubmissionStatus.UNDEFINED  # type: ignore
             self.__logger.info(f"{job.id} status is {job_status}. Submission status set to "
                                f"{submission._submission_status}")
+
     def is_finished(self) -> bool:
         """Indicate if the submission is finished.
 
