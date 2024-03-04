@@ -1,3 +1,14 @@
+# Copyright 2021-2024 Avaiga Private Limited
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations under the License.
+
 import json
 import os
 import re
@@ -11,7 +22,7 @@ class Version:
     major: str
     minor: str
     patch: str
-    ext: str
+    ext: Optional[str] = None
 
     def bump_ext_version(self) -> None:
         if not self.ext:
@@ -62,9 +73,7 @@ def extract_version(base_path: str) -> Version:
     return __load_version_from_path(base_path)
 
 
-def __setup_dev_version(
-    version: Version, _base_path: str, name: Optional[str] = None, bump_dev_version: bool = False
-) -> None:
+def __setup_dev_version(version: Version, _base_path: str, name: Optional[str] = None) -> None:
     version.validate_suffix()
 
     name = f"{name}_VERSION" if name else "VERSION"

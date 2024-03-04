@@ -11,7 +11,7 @@
 
 from datetime import timedelta
 from time import sleep
-from typing import Union
+from typing import Union, cast
 from unittest import mock
 from unittest.mock import MagicMock
 
@@ -20,6 +20,7 @@ import pytest
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.core import JobId, TaskId
+from taipy.core._orchestrator._abstract_orchestrator import _AbstractOrchestrator
 from taipy.core._orchestrator._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
 from taipy.core._orchestrator._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
@@ -304,22 +305,21 @@ def test_auto_set_and_reload(current_datetime, job_id):
     assert not job_1._is_in_context
 
 
-def _dispatch(task: Task, job: Job, mode=JobConfig._DEVELOPMENT_MODE):
-    Config.configure_job_executions(mode=mode)
-    _OrchestratorFactory._build_dispatcher()
-    _TaskManager._set(task)
-    _JobManager._set(job)
-    dispatcher: Union[_StandaloneJobDispatcher, _DevelopmentJobDispatcher] = _StandaloneJobDispatcher(
-        _OrchestratorFactory._orchestrator
-    )
-    if mode == JobConfig._DEVELOPMENT_MODE:
-        dispatcher = _DevelopmentJobDispatcher(_OrchestratorFactory._orchestrator)
-    dispatcher._dispatch(job)
-
-
 def test_is_deletable():
     with mock.patch("taipy.core.job._job_manager._JobManager._is_deletable") as mock_submit:
         task = Task(config_id="name_1", properties={}, function=_foo, id=TaskId("task_1"))
         job = Job(job_id, task, "submit_id_1", "scenario_entity_id")
         job.is_deletable()
         mock_submit.assert_called_once_with(job)
+
+
+def _dispatch(task: Task, job: Job, mode=JobConfig._DEVELOPMENT_MODE):
+    Config.configure_job_executions(mode=mode)
+    _TaskManager._set(task)
+    _JobManager._set(job)
+    dispatcher: Union[_StandaloneJobDispatcher, _DevelopmentJobDispatcher] = _StandaloneJobDispatcher(
+        cast(_AbstractOrchestrator, _OrchestratorFactory._orchestrator)
+    )
+    if mode == JobConfig._DEVELOPMENT_MODE:
+        dispatcher = _DevelopmentJobDispatcher(cast(_AbstractOrchestrator, _OrchestratorFactory._orchestrator))
+    dispatcher._dispatch(job)

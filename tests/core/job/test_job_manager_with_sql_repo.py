@@ -28,11 +28,9 @@ from taipy.core.data._data_manager import _DataManager
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.exceptions.exceptions import JobNotDeletedException
 from taipy.core.job._job_manager import _JobManager
-from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.job.job_id import JobId
 from taipy.core.job.status import Status
 from taipy.core.task._task_manager import _TaskManager
-from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from tests.core.utils import assert_true_after_time
 
 
@@ -45,19 +43,10 @@ def lock_multiply(lock, nb1: float, nb2: float):
         return multiply(nb1 or 1, nb2 or 2)
 
 
-def init_managers():
-    _TaskManagerFactory._build_manager()._delete_all()
-    _DataManagerFactory._build_manager()._delete_all()
-    _JobManagerFactory._build_manager()._delete_all()
-
-
 def test_create_jobs(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    init_managers()
 
     task = _create_task(multiply, name="get_job")
-
-    _OrchestratorFactory._build_dispatcher()
 
     job_1 = _JobManager._create(task, [print], "submit_id", "secnario_id", True)
     assert _JobManager._get(job_1.id) == job_1
@@ -80,11 +69,8 @@ def test_create_jobs(init_sql_repo):
 
 def test_get_job(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    init_managers()
 
     task = _create_task(multiply, name="get_job")
-
-    _OrchestratorFactory._build_dispatcher()
 
     job_1 = _OrchestratorFactory._orchestrator.submit_task(task).jobs[0]
     assert _JobManager._get(job_1.id) == job_1
@@ -99,12 +85,9 @@ def test_get_job(init_sql_repo):
 
 def test_get_latest_job(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    init_managers()
 
     task = _create_task(multiply, name="get_latest_job")
     task_2 = _create_task(multiply, name="get_latest_job_2")
-
-    _OrchestratorFactory._build_dispatcher()
 
     job_1 = _OrchestratorFactory._orchestrator.submit_task(task).jobs[0]
     assert _JobManager._get_latest(task) == job_1
@@ -122,17 +105,13 @@ def test_get_latest_job(init_sql_repo):
 
 
 def test_get_job_unknown(init_sql_repo):
-    init_managers()
     assert _JobManager._get(JobId("Unknown")) is None
 
 
 def test_get_jobs(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    init_managers()
 
     task = _create_task(multiply, name="get_all_jobs")
-
-    _OrchestratorFactory._build_dispatcher()
 
     job_1 = _OrchestratorFactory._orchestrator.submit_task(task).jobs[0]
     job_2 = _OrchestratorFactory._orchestrator.submit_task(task).jobs[0]
@@ -143,11 +122,7 @@ def test_get_jobs(init_sql_repo):
 def test_delete_job(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
-    init_managers()
-
     task = _create_task(multiply, name="delete_job")
-
-    _OrchestratorFactory._build_dispatcher()
 
     job_1 = _OrchestratorFactory._orchestrator.submit_task(task).jobs[0]
     job_2 = _OrchestratorFactory._orchestrator.submit_task(task).jobs[0]
@@ -160,7 +135,6 @@ def test_delete_job(init_sql_repo):
 
 def test_raise_when_trying_to_delete_unfinished_job(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    init_managers()
 
     m = multiprocessing.Manager()
     lock = m.Lock()
@@ -189,7 +163,6 @@ def test_raise_when_trying_to_delete_unfinished_job(init_sql_repo):
 
 def test_force_deleting_unfinished_job(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    init_managers()
 
     m = multiprocessing.Manager()
     lock = m.Lock()
@@ -217,8 +190,6 @@ def test_force_deleting_unfinished_job(init_sql_repo):
 
 
 def test_is_deletable(init_sql_repo):
-    init_managers()
-
     assert len(_JobManager._get_all()) == 0
     task = _create_task(print, 0, "task")
     job = _OrchestratorFactory._orchestrator.submit_task(task).jobs[0]

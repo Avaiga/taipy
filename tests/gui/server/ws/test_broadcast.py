@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-from unittest.mock import patch
 
 from taipy.gui import Gui, Markdown
 
@@ -27,8 +26,7 @@ def test_broadcast(gui: Gui, helpers):
         "test",
         Markdown("<|{selected_val}|selector|multiple|>"),
     )
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False)
+    gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server.get_flask())

@@ -17,6 +17,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Union, overload
 from taipy.config.common.scope import Scope
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from ._core import Core
 from ._entity._entity import _Entity
 from ._version._version_manager_factory import _VersionManagerFactory
 from .common._check_instance import (
@@ -28,7 +29,7 @@ from .common._check_instance import (
     _is_submission,
     _is_task,
 )
-from .common._warnings import _warn_no_core_service
+from .common._warnings import _warn_deprecated, _warn_no_core_service
 from .config.data_node_config import DataNodeConfig
 from .config.scenario_config import ScenarioConfig
 from .cycle._cycle_manager_factory import _CycleManagerFactory
@@ -219,7 +220,7 @@ def is_readable(
     return False
 
 
-@_warn_no_core_service()
+@_warn_no_core_service("The submitted entity will not be executed until the Core service is running.")
 def submit(
     entity: Union[Scenario, Sequence, Task],
     force: bool = False,
@@ -441,7 +442,7 @@ def is_deletable(entity: Union[Scenario, Job, Submission, ScenarioId, JobId, Sub
 
     Parameters:
         entity (Union[Scenario, Job, Submission, ScenarioId, JobId, SubmissionId]): The scenario,
-        job or submission to check.
+            job or submission to check.
 
     Returns:
         True if the given scenario, job or submission can be deleted. False otherwise.
@@ -801,7 +802,7 @@ def get_latest_submission(entity: Union[Scenario, Sequence, Task]) -> Optional[S
 
     Parameters:
         entity (Union[Scenario^, Sequence^, Task^]): The scenario, sequence or task to
-        retrieve the latest submission from.
+            retrieve the latest submission from.
 
     Returns:
         The latest submission created from _scenario_, _sequence_ and _task_, or None
@@ -835,7 +836,10 @@ def create_scenario(
 ) -> Scenario:
     """Create and return a new scenario based on a scenario configuration.
 
-    If the scenario belongs to a cycle, a cycle (corresponding to the _creation_date_
+    This function checks and locks the configuration, manages application's version,
+    and creates a new scenario from the scenario configuration provided.
+
+    If the scenario belongs to a cycle, the cycle (corresponding to the _creation_date_
     and the configuration frequency attribute) is created if it does not exist yet.
 
     Parameters:
@@ -846,12 +850,21 @@ def create_scenario(
 
     Returns:
         The new scenario.
+
+    Raises:
+        SystemExit: If the configuration check returns some errors.
+
     """
+    Core._manage_version_and_block_config()
+
     return _ScenarioManagerFactory._build_manager()._create(config, creation_date, name)
 
 
 def create_global_data_node(config: DataNodeConfig) -> DataNode:
     """Create and return a new GLOBAL data node from a data node configuration.
+
+    This function checks and locks the configuration, manages application's version,
+    and creates the new data node from the data node configuration provided.
 
     Parameters:
         config (DataNodeConfig^): The data node configuration. It must have a `GLOBAL` scope.
@@ -861,10 +874,13 @@ def create_global_data_node(config: DataNodeConfig) -> DataNode:
 
     Raises:
         DataNodeConfigIsNotGlobal^: If the data node configuration does not have GLOBAL scope.
+        SystemExit: If the configuration check returns some errors.
     """
     # Check if the data node config has GLOBAL scope
     if config.scope is not Scope.GLOBAL:
         raise DataNodeConfigIsNotGlobal(config.id)
+
+    Core._manage_version_and_block_config()
 
     if dns := _DataManagerFactory._build_manager()._get_by_config_id(config.id):
         return dns[0]
@@ -872,27 +888,38 @@ def create_global_data_node(config: DataNodeConfig) -> DataNode:
 
 
 def clean_all_entities_by_version(version_number=None) -> bool:
-    """Delete all entities of a specific version.
+    """Deprecated. Use `clean_all_entities` function instead."""
+    _warn_deprecated("'clean_all_entities_by_version'", suggest="the 'clean_all_entities' function")
+    return clean_all_entities(version_number)
 
-    This function deletes all entities associated with the specified version.
+
+def clean_all_entities(version_number: str) -> bool:
+    """Deletes all entities associated with the specified version.
 
     Parameters:
-        version_number (optional[str]): The version number of the entities to be deleted.
-            If None, the default behavior may apply.
+        version_number (str): The version number of the entities to be deleted.
+            The version_number should not be a production version.
 
     Returns:
         True if the operation succeeded, False otherwise.
 
     Notes:
         - If the specified version does not exist, the operation will be aborted, and False will be returned.
-        - This function cleans all entities, including jobs, scenarios, sequences, tasks, and data nodes.
-        - The production version of the specified version is also deleted if it exists.
+        - If the specified version is a production version, the operation will be aborted, and False will be returned.
+        - This function cleans all entities, including jobs, submissions, scenarios, cycles, sequences, tasks,
+            and data nodes.
     """
     version_manager = _VersionManagerFactory._build_manager()
     try:
         version_number = version_manager._replace_version_number(version_number)
     except NonExistingVersion as e:
         __logger.warning(f"{e.message} Abort cleaning the entities of version '{version_number}'.")
+        return False
+
+    if version_number in version_manager._get_production_versions():
+        __logger.warning(
+            f"Abort cleaning the entities of version '{version_number}'. A production version can not be deleted."
+        )
         return False
 
     _JobManagerFactory._build_manager()._delete_by_version(version_number)
@@ -903,6 +930,7 @@ def clean_all_entities_by_version(version_number=None) -> bool:
     _DataManagerFactory._build_manager()._delete_by_version(version_number)
 
     version_manager._delete(version_number)
+
     try:
         version_manager._delete_production_version(version_number)
     except VersionIsNotProductionVersion:

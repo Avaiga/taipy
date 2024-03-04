@@ -9,17 +9,23 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import inspect
 import os
+import shutil
+import sys
 from pathlib import Path
 
-from taipy.gui import Gui
+__SKIP = ["LICENSE", "MANIFEST.in", "taipy", "setup.py", "tools"]
 
 
-def test_folder_pages_binding(gui: Gui):
-    folder_path = f"{Path(Path(__file__).parent.resolve())}{os.path.sep}sample_assets"
-    gui._set_frame(inspect.currentframe())
-    gui.add_pages(folder_path)
-    gui.run(run_server=False)
-    assert len(gui._config.routes) == 3  # 2 files -> 2 routes + 1 default route
-    assert len(gui._config.pages) == 3  # 2 files -> 2 pages + 1 default page
+if __name__ == "__main__":
+    _package = sys.argv[1]
+    _package_path = f"taipy/{_package}"
+
+    Path(_package_path).mkdir(parents=True, exist_ok=True)
+
+    for file_name in os.listdir("."):
+        if file_name.lower().endswith(".md") or file_name in __SKIP:
+            continue
+        shutil.move(file_name, _package_path)
+
+    shutil.copy("../__init__.py", "./taipy/__init__.py")

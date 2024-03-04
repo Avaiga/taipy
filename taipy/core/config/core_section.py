@@ -334,6 +334,7 @@ class CoreSection(UniqueSection):
     def _configure(
         root_folder: Optional[str] = None,
         storage_folder: Optional[str] = None,
+        taipy_storage_folder: Optional[str] = None,
         repository_type: Optional[str] = None,
         repository_properties: Optional[Dict[str, Union[str, int]]] = None,
         read_entity_retry: Optional[int] = None,
@@ -373,6 +374,7 @@ class CoreSection(UniqueSection):
         section = CoreSection(
             root_folder=root_folder,
             storage_folder=storage_folder,
+            taipy_storage_folder=taipy_storage_folder,
             repository_type=repository_type,
             repository_properties=repository_properties,
             read_entity_retry=read_entity_retry,

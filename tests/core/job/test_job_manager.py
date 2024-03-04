@@ -50,8 +50,6 @@ def test_create_jobs():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     task = _create_task(multiply, name="get_job")
 
-    _OrchestratorFactory._build_dispatcher()
-
     job_1 = _JobManager._create(task, [print], "submit_id", "secnario_id", True)
     assert _JobManager._get(job_1.id) == job_1
     assert job_1.is_submitted()
@@ -78,8 +76,6 @@ def test_get_job():
 
     task = _create_task(multiply, name="get_job")
 
-    _OrchestratorFactory._build_dispatcher()
-
     job_1 = _OrchestratorFactory._orchestrator.submit_task(task).jobs[0]
     assert _JobManager._get(job_1.id) == job_1
     assert _JobManager._get(job_1.id).submit_entity_id == task.id
@@ -96,8 +92,6 @@ def test_get_latest_job():
 
     task = _create_task(multiply, name="get_latest_job")
     task_2 = _create_task(multiply, name="get_latest_job_2")
-
-    _OrchestratorFactory._build_dispatcher()
 
     job_1 = _OrchestratorFactory._orchestrator.submit_task(task).jobs[0]
     assert _JobManager._get_latest(task) == job_1
@@ -123,8 +117,6 @@ def test_get_jobs():
 
     task = _create_task(multiply, name="get_all_jobs")
 
-    _OrchestratorFactory._build_dispatcher()
-
     job_1 = _OrchestratorFactory._orchestrator.submit_task(task).jobs[0]
     job_2 = _OrchestratorFactory._orchestrator.submit_task(task).jobs[0]
 
@@ -135,8 +127,6 @@ def test_delete_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
     task = _create_task(multiply, name="delete_job")
-
-    _OrchestratorFactory._build_dispatcher()
 
     job_1 = _OrchestratorFactory._orchestrator.submit_task(task).jobs[0]
     job_2 = _OrchestratorFactory._orchestrator.submit_task(task).jobs[0]
@@ -421,12 +411,10 @@ def test_cancel_subsequent_jobs():
     assert_true_after_time(job_4.is_canceled)
     assert_true_after_time(job_5.is_abandoned)
     assert_true_after_time(job_6.is_abandoned)
-    assert_true_after_time(
-        lambda: all(
-            not _OrchestratorFactory._orchestrator._is_blocked(job)
-            for job in [job_1, job_2, job_3, job_4, job_5, job_6]
-        )
-    )
+    assert_true_after_time(lambda: all(
+        not _OrchestratorFactory._orchestrator._is_blocked(job)
+        for job in [job_1, job_2, job_3, job_4, job_5, job_6]
+    ))
     assert_true_after_time(lambda: _OrchestratorFactory._orchestrator.jobs_to_run.qsize() == 0)
 
 
@@ -478,6 +466,7 @@ def test_is_deletable():
     assert job.is_submitted()
     assert not _JobManager._is_deletable(job)
     assert not _JobManager._is_deletable(job.id)
+
 
 def _create_task(function, nb_outputs=1, name=None):
     input1_dn_config = Config.configure_data_node("input1", "pickle", Scope.SCENARIO, default_data=21)

@@ -36,6 +36,20 @@ def test_slider_with_min_max_builder(gui: Gui, test_client, helpers):
     helpers.test_control_builder(gui, page, expected_list)
 
 
+def test_slider_with_step_builder(gui: Gui, test_client, helpers):
+    gui._bind_var_val("x", 0)
+    with tgb.Page(frame=None) as page:
+        tgb.slider(value="{x}", min=-10, max=10, step=2)  # type: ignore[attr-defined]
+    expected_list = [
+        "<Slider",
+        "min={-10.0}",
+        "max={10.0}",
+        "step={2.0}",
+        "defaultValue={0}",
+    ]
+    helpers.test_control_builder(gui, page, expected_list)
+
+
 def test_slider_with_dict_labels_builder(gui: Gui, helpers):
     sel = "Item 1"  # noqa: F841
     labels = {"Item 1": "Label Start", "Item 3": "Label End"}  # noqa: F841

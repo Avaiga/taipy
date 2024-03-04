@@ -12,7 +12,6 @@
 import inspect
 from datetime import datetime
 from importlib import util
-from unittest.mock import patch
 
 import pandas  # type: ignore
 from flask import g
@@ -212,8 +211,7 @@ def test_decimator(gui: Gui, helpers, small_dataframe):
     gui._set_frame(inspect.currentframe())
 
     gui.add_page("test", "<|Hello {a_decimator}|button|id={btn_id}|>")
-    with patch("sys.argv", ["prog"]):
-        gui.run(run_server=False)
+    gui.run(run_server=False)
     flask_client = gui._server.test_client()
 
     cid = helpers.create_scope_and_get_sid(gui)

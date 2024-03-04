@@ -13,7 +13,10 @@
 
 import React, { useEffect, useState, useCallback, useMemo, MouseEvent, ChangeEvent, MutableRefObject } from "react";
 
-import { TableChartOutlined, BarChartOutlined, RefreshOutlined } from "@mui/icons-material";
+import BarChartOutlined from "@mui/icons-material/BarChartOutlined";
+import RefreshOutlined from "@mui/icons-material/RefreshOutlined";
+import TableChartOutlined from "@mui/icons-material/TableChartOutlined";
+
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
@@ -162,8 +165,14 @@ const DataNodeTable = (props: DataNodeTableProps) => {
                     </FormControl>
                 </Grid>
                 <Grid item>
-                    <Button onClick={resetCols} variant="text" color="primary" className="taipy-button">
-                        <RefreshOutlined /> Reset View
+                    <Button
+                        onClick={resetCols}
+                        variant="text"
+                        color="primary"
+                        className="taipy-button"
+                        startIcon={<RefreshOutlined />}
+                    >
+                        Reset View
                     </Button>
                 </Grid>
                 {tableEdit ? (

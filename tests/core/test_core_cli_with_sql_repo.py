@@ -98,9 +98,8 @@ def test_core_cli_production_mode(init_sql_repo):
         core.stop()
 
 
-def test_dev_mode_clean_all_entities_of_the_latest_version(init_sql_repo, init_managers):
+def test_dev_mode_clean_all_entities_of_the_latest_version(init_sql_repo):
     scenario_config = config_scenario()
-    init_managers()
 
     # Create a scenario in development mode
     with patch("sys.argv", ["prog"]):
@@ -302,9 +301,8 @@ def test_version_number_when_switching_mode(init_sql_repo):
         core.stop()
 
 
-def test_production_mode_load_all_entities_from_previous_production_version(init_sql_repo, init_managers):
+def test_production_mode_load_all_entities_from_previous_production_version(init_sql_repo):
     scenario_config = config_scenario()
-    init_managers()
 
     with patch("sys.argv", ["prog", "--development"]):
         core = Core()
@@ -353,9 +351,8 @@ def test_production_mode_load_all_entities_from_previous_production_version(init
         core.stop()
 
 
-def test_force_override_experiment_version(init_sql_repo, init_managers):
+def test_force_override_experiment_version(init_sql_repo):
     scenario_config = config_scenario()
-    init_managers()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
         core = Core()
@@ -406,9 +403,8 @@ def test_force_override_experiment_version(init_sql_repo, init_managers):
     assert len(_JobManager._get_all()) == 2
 
 
-def test_force_override_production_version(init_sql_repo, init_managers):
+def test_force_override_production_version(init_sql_repo):
     scenario_config = config_scenario()
-    init_managers()
 
     with patch("sys.argv", ["prog", "--production", "1.0"]):
         core = Core()
@@ -461,9 +457,8 @@ def test_force_override_production_version(init_sql_repo, init_managers):
         core.stop()
 
 
-def test_modify_config_properties_without_force(caplog, init_sql_repo, init_config, init_managers):
+def test_modify_config_properties_without_force(caplog, init_sql_repo, init_config):
     scenario_config = config_scenario()
-    init_managers()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
         core = Core()
@@ -504,9 +499,8 @@ def test_modify_config_properties_without_force(caplog, init_sql_repo, init_conf
     assert 'DATA_NODE "d2" has attribute "exposed_type" modified' in error_message
 
 
-def test_modify_job_configuration_dont_stop_application(caplog, init_sql_repo, init_config, init_managers):
+def test_modify_job_configuration_dont_stop_application(caplog, init_sql_repo, init_config):
     scenario_config = config_scenario()
-    init_managers()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
         Config.configure_job_executions(mode="development")

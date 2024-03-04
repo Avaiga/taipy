@@ -38,16 +38,16 @@ class _StartBlockProcessor(BlockProcessor):
         original_match = re.search(_StartBlockProcessor.__RE_FENCE_START, original_block)
         blocks[0] = re.sub(_StartBlockProcessor.__RE_FENCE_START, "", blocks[0], count=1)
         tag = original_match.group(1)
-        queue = [tag]
+        stack = [tag]
         # Find block with ending fence
         for block_num, block in enumerate(blocks):
             matches = re.findall(_StartBlockProcessor.__RE_OTHER_FENCE, block)
             for match in matches:
-                if queue[-1] == match[0] and match[1] == "end":
-                    queue.pop()
+                if stack[-1] == match[0] and match[1] == "end":
+                    stack.pop()
                 elif match[1] == "start":
-                    queue.append(match[0])
-            if not queue:
+                    stack.append(match[0])
+            if not stack:
                 # remove end fence
                 blocks[block_num] = re.sub(
                     _MarkdownFactory._TAIPY_START + tag + r"\.end(.*?)" + _MarkdownFactory._TAIPY_END,

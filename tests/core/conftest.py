@@ -14,6 +14,7 @@ import pickle
 import shutil
 from datetime import datetime
 from queue import Queue
+from unittest.mock import patch
 
 import pandas as pd
 import pytest
@@ -61,7 +62,6 @@ from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
 
 current_time = datetime.now()
-_OrchestratorFactory._build_orchestrator()
 
 
 @pytest.fixture(scope="function")
@@ -328,7 +328,8 @@ def clean_repository(init_config, init_managers, init_orchestrator, init_notifie
     init_config()
     init_notifier()
 
-    yield
+    with patch("sys.argv", ["prog"]):
+        yield
 
 
 @pytest.fixture
@@ -347,6 +348,7 @@ def init_config(reset_configuration_singleton, inject_core_sections):
 
         Config.configure_core(read_entity_retry=0)
         Core._is_running = False
+        Core._version_is_initialized = False
 
     return _init_config
 
@@ -369,9 +371,11 @@ def init_managers():
 @pytest.fixture
 def init_orchestrator():
     def _init_orchestrator():
+        _OrchestratorFactory._remove_dispatcher()
+
         if _OrchestratorFactory._orchestrator is None:
             _OrchestratorFactory._build_orchestrator()
-        _OrchestratorFactory._build_dispatcher()
+        _OrchestratorFactory._build_dispatcher(force_restart=True)
         _OrchestratorFactory._orchestrator.jobs_to_run = Queue()
         _OrchestratorFactory._orchestrator.blocked_jobs = []
 
@@ -392,7 +396,7 @@ def sql_engine():
 
 
 @pytest.fixture
-def init_sql_repo(tmp_sqlite):
+def init_sql_repo(tmp_sqlite, init_managers):
     Config.configure_core(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
 
     # Clean SQLite database
@@ -400,5 +404,7 @@ def init_sql_repo(tmp_sqlite):
         _SQLConnection._connection.close()
         _SQLConnection._connection = None
     _SQLConnection.init_db()
+
+    init_managers()
 
     return tmp_sqlite

@@ -22,7 +22,6 @@ import typing as t
 import webbrowser
 from importlib import util
 from random import randint
-from urllib.parse import parse_qsl, urlparse
 
 from flask import Blueprint, Flask, json, jsonify, render_template, request, send_from_directory
 from flask_cors import CORS
@@ -148,10 +147,7 @@ class _Server:
         @taipy_bp.route("/", defaults={"path": ""})
         @taipy_bp.route("/<path:path>")
         def my_index(path):
-            resource_handler_id = dict(parse_qsl(urlparse(request.referrer or "").query)).get(
-                _Server._RESOURCE_HANDLER_ARG
-            )
-            resource_handler_id = resource_handler_id or request.args.get(_Server._RESOURCE_HANDLER_ARG, None)
+            resource_handler_id = request.cookies.get(_Server._RESOURCE_HANDLER_ARG, None)
             if resource_handler_id is not None:
                 resource_handler = _ExternalResourceHandlerManager().get(resource_handler_id)
                 if resource_handler is None:

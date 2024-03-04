@@ -15,6 +15,7 @@ import contextlib
 import importlib
 import inspect
 import json
+import math
 import os
 import pathlib
 import re
@@ -55,11 +56,11 @@ from .data.data_accessor import _DataAccessor, _DataAccessors
 from .data.data_format import _DataFormat
 from .data.data_scope import _DataScopes
 from .extension.library import Element, ElementLibrary
-from .gui_types import _WsType
 from .page import Page
 from .partial import Partial
 from .server import _Server
 from .state import State
+from .types import _WsType
 from .utils import (
     _delscopeattr,
     _filter_locals,
@@ -508,6 +509,9 @@ class Gui:
     def _get_data_scope(self) -> SimpleNamespace:
         return self.__bindings._get_data_scope()
 
+    def _get_data_scope_metadata(self) -> t.Dict[str, t.Any]:
+        return self.__bindings._get_data_scope_metadata()
+
     def _get_all_data_scopes(self) -> t.Dict[str, SimpleNamespace]:
         return self.__bindings._get_all_scopes()
 
@@ -613,11 +617,29 @@ class Gui:
                         self.__request_var_update(message.get("payload"))
                     elif msg_type == _WsType.GET_MODULE_CONTEXT.value:
                         self.__handle_ws_get_module_context(payload)
-                    elif msg_type == _WsType.GET_VARIABLES.value:
-                        self.__handle_ws_get_variables()
+                    elif msg_type == _WsType.GET_DATA_TREE.value:
+                        self.__handle_ws_get_data_tree()
+                    elif msg_type == _WsType.APP_ID.value:
+                        self.__handle_ws_app_id(message)
                 self.__send_ack(message.get("ack_id"))
         except Exception as e:  # pragma: no cover
-            _warn(f"Decoding Message has failed: {message}", e)
+            if isinstance(e, AttributeError) and (name := message.get("name")):
+                try:
+                    names = self._get_real_var_name(name)
+                    var_name = names[0] if isinstance(names, tuple) else names
+                    var_context = names[1] if isinstance(names, tuple) else None
+                    if var_name.startswith("tpec_"):
+                        var_name = var_name[5:]
+                    if var_name.startswith("TpExPr_"):
+                        var_name = var_name[7:]
+                    _warn(
+                        f"A problem occurred while resolving variable '{var_name}'"
+                        + (f" in module '{var_context}'." if var_context else ".")
+                    )
+                except Exception as e1:
+                    _warn(f"Resolving  name '{name}' failed", e1)
+            else:
+                _warn(f"Decoding Message has failed: {message}", e)
 
     def __front_end_update(
         self,
@@ -981,6 +1003,9 @@ class Gui:
                     newvalue = newvalue.get()
                 if isinstance(newvalue, (dict, _MapDict)):
                     continue  # this var has no transformer
+                if isinstance(newvalue, float) and math.isnan(newvalue):
+                    # do not let NaN go through json, it is not handle well (dies silently through websocket)
+                    newvalue = None
                 debug_warnings: t.List[warnings.WarningMessage] = []
                 with warnings.catch_warnings(record=True) as warns:
                     warnings.resetwarnings()
@@ -1055,20 +1080,9 @@ class Gui:
                     }
                 )
 
-    def __handle_ws_get_variables(self):
-        # Get Variables
-        self.__pre_render_pages()
+    def __get_variable_tree(self, data: t.Dict[str, t.Any]):
         # Module Context -> Variable -> Variable data (name, type, initial_value)
         variable_tree: t.Dict[str, t.Dict[str, t.Dict[str, t.Any]]] = {}
-        data = vars(self._bindings()._get_data_scope())
-        data = {
-            k: v
-            for k, v in data.items()
-            if not k.startswith("_")
-            and not callable(v)
-            and "TpExPr" not in k
-            and not isinstance(v, (ModuleType, FunctionType, LambdaType, type, Page))
-        }
         for k, v in data.items():
             if isinstance(v, _TaipyBase):
                 data[k] = v.get()
@@ -1082,10 +1096,46 @@ class Gui:
                 "value": data[k],
                 "encoded_name": k,
             }
+        return variable_tree
+
+    def __handle_ws_get_data_tree(self):
+        # Get Variables
+        self.__pre_render_pages()
+        data = {
+            k: v
+            for k, v in vars(self._get_data_scope()).items()
+            if not k.startswith("_")
+            and not callable(v)
+            and "TpExPr" not in k
+            and not isinstance(v, (ModuleType, FunctionType, LambdaType, type, Page))
+        }
+        function_data = {
+            k: v
+            for k, v in vars(self._get_data_scope()).items()
+            if not k.startswith("_") and "TpExPr" not in k and isinstance(v, (FunctionType, LambdaType))
+        }
         self.__send_ws(
             {
-                "type": _WsType.GET_VARIABLES.value,
-                "payload": {"data": variable_tree},
+                "type": _WsType.GET_DATA_TREE.value,
+                "payload": {
+                    "variable": self.__get_variable_tree(data),
+                    "function": self.__get_variable_tree(function_data),
+                },
+            }
+        )
+
+    def __handle_ws_app_id(self, message: t.Any):
+        if not isinstance(message, dict):
+            return
+        name = message.get("name", "")
+        payload = message.get("payload", "")
+        app_id = id(self)
+        if payload == app_id:
+            return
+        self.__send_ws(
+            {
+                "type": _WsType.APP_ID.value,
+                "payload": {"name": name, "id": app_id},
             }
         )
 
@@ -1179,7 +1229,7 @@ class Gui:
 
     def __send_ws_update_with_dict(self, modified_values: dict) -> None:
         payload = [
-            {"name": _get_client_var_name(k), "payload": (v if isinstance(v, dict) and "value" in v else {"value": v})}
+            {"name": _get_client_var_name(k), "payload": v if isinstance(v, dict) and "value" in v else {"value": v}}
             for k, v in modified_values.items()
         ]
         if self._is_broadcasting():
@@ -1943,6 +1993,9 @@ class Gui:
     def __pre_render_pages(self) -> None:
         """Pre-render all pages to have a proper initialization of all variables"""
         self.__set_client_id_in_context()
+        scope_metadata = self._get_data_scope_metadata()
+        if scope_metadata[_DataScopes._META_PRE_RENDER]:
+            return
         for page in self._config.pages:
             if page is not None:
                 with contextlib.suppress(Exception):
@@ -1950,6 +2003,7 @@ class Gui:
                         self._bind_custom_page_variables(page._renderer, self._get_client_id())
                     else:
                         page.render(self, silent=True)
+        scope_metadata[_DataScopes._META_PRE_RENDER] = True
 
     def _get_navigated_page(self, page_name: str) -> t.Any:
         nav_page = page_name
@@ -1979,7 +2033,7 @@ class Gui:
 
     def _bind_custom_page_variables(self, page: CustomPage, client_id: t.Optional[str]):
         """Handle the bindings of custom page variables"""
-        with self.get_flask_app().app_context() if has_app_context() else contextlib.nullcontext():
+        with self.get_flask_app().app_context() if has_app_context() else contextlib.nullcontext():  # type: ignore[attr-defined]
             self.__set_client_id_in_context(client_id)
             with self._set_locals_context(page._get_module_name()):
                 for k in self._get_locals_bind().keys():

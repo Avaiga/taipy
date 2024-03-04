@@ -1,7 +1,4 @@
 # Taipy-REST
-[![Python](https://img.shields.io/pypi/pyversions/taipy-rest)](https://pypi.org/project/taipy-rest)
-[![PyPI](https://img.shields.io/pypi/v/taipy-rest.svg?label=pip&logo=PyPI&logoColor=white)](https://pypi.org/project/taipy-rest)
-
 
 ## License
 Copyright 2021-2024 Avaiga Private Limited
@@ -32,11 +29,11 @@ Taipy is a Python library for creating Business Applications. More information o
 [website](https://www.taipy.io). Taipy is split into multiple repositories including
 _taipy-core_ and _taipy-rest_ to let users install the minimum they need.
 
-[Taipy Core](https://github.com/Avaiga/taipy-core) mostly includes business-oriented
+Taipy Core mostly includes business-oriented
 features. It helps users create and manage business applications and improve analyses
 capability through time, conditions and hypothesis.
 
-[Taipy REST](https://github.com/Avaiga/taipy-rest) is a set of APIs built on top of the
+Taipy REST is a set of APIs built on top of the
 _taipy-core_ library developed by Avaiga. This project is meant to be used as a complement
 for **taipy** and its goal is to enable automation through rest APIs of processes built
 on taipy.
@@ -66,23 +63,22 @@ Want to be part of the _Taipy REST_ community? Check out our
 
 ## Directory Structure
 
-- `taipy/rest`: Main source code folder.
-    - `api`: Endpoints and schema definitions.
-      - `resources`: Implementation of all endpoints related to taipy.
-      - `schemas`: Schemas related to taipy objects. Used for marshalling and unmarshalling data.
-      - `views`: Mapping of resources to urls
-    - `commons`: Common files shared throughout the application
-      - `templates`: Swagger and redoc templates for generating the documentation
+- `taipy/`:
+  - `rest/`:
+    - `api/`: Endpoints and schema definitions.
+      - `resources/`: Implementation of all endpoints related to taipy.
+      - `schemas/`: Schemas related to taipy objects. Used for marshalling and unmarshalling data.
+      - `views.py`: Mapping of resources to urls
+    - `commons/`: Common files shared throughout the application
+      - `templates/`: Swagger and redoc templates for generating the documentation
     - `app.py`: Flask app configuration and creation
     - `extensions.py`: Singletons used on the application factory
     - `rest.py`: Main python entrypoint for running _taipy-rest_ application.
-- `tests`: Unit tests.
-- `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy-rest_.
-- `CONTRIBUTING.md`: Instructions to contribute to _taipy-rest_.
-- `INSTALLATION.md`: Instructions to install _taipy-rest_.
-- `LICENSE`: The Apache 2.0 License.
-- `Pipfile`: File used by the Pipenv virtual environment to manage project dependencies.
-- `README.md`: Current file.
-- `contributors.txt`: The list of contributors
-- `setup.py`: The setup script managing building, distributing, and installing _taipy-rest_.
-- `tox.ini`: Contains test scenarios to be run.
+    - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy-rest_.
+    - `CONTRIBUTING.md`: Instructions to contribute to _taipy-rest_.
+    - `INSTALLATION.md`: Instructions to install _taipy-rest_.
+    - `LICENSE`: The Apache 2.0 License.
+    - `README.md`: Current file.
+    - `setup.py`: The setup script managing building, distributing, and installing _taipy-rest_.
+- `tests/`:
+  - `rest/`: Unit tests following the `taipy/rest/` structure.

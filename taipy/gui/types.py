@@ -42,12 +42,13 @@ class _WsType(Enum):
     BLOCK = "BL"
     NAVIGATE = "NA"
     CLIENT_ID = "ID"
+    APP_ID = "AID"
     MULTIPLE_MESSAGE = "MS"
     DOWNLOAD_FILE = "DF"
     PARTIAL = "PR"
     ACKNOWLEDGEMENT = "ACK"
     GET_MODULE_CONTEXT = "GMC"
-    GET_VARIABLES = "GVS"
+    GET_DATA_TREE = "GDT"
 
 
 NumberTypes = {"int", "int64", "float", "float64"}
@@ -143,8 +144,7 @@ class PropertyType(Enum):
 
 
 @t.overload  # noqa: F811
-def _get_taipy_type(a_type: None) -> None:
-    ...
+def _get_taipy_type(a_type: None) -> None: ...
 
 
 @t.overload
@@ -160,8 +160,7 @@ def _get_taipy_type(a_type: PropertyType) -> t.Type[_TaipyBase]:  # noqa: F811
 @t.overload
 def _get_taipy_type(  # noqa: F811
     a_type: t.Optional[t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType]]
-) -> t.Optional[t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType]]:
-    ...
+) -> t.Optional[t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType]]: ...
 
 
 def _get_taipy_type(  # noqa: F811

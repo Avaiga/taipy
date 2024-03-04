@@ -13,7 +13,7 @@ import re
 import typing as t
 from datetime import datetime
 
-from ..gui_types import PropertyType
+from ..types import PropertyType
 from .builder import _Builder
 
 if t.TYPE_CHECKING:
@@ -437,6 +437,7 @@ class _Factory:
                 ("value_by_id", PropertyType.boolean),
                 ("max", PropertyType.number, 100),
                 ("min", PropertyType.number, 0),
+                ("step", PropertyType.number, 1),
                 ("orientation"),
                 ("width", PropertyType.string, "300px"),
                 ("on_change", PropertyType.function),

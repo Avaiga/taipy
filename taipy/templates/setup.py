@@ -51,6 +51,7 @@ setup(
     name="taipy-templates",
     packages=find_namespace_packages(where=".") + find_packages(include=["taipy"]),
     include_package_data=True,
+    data_files=[('version', ['version.json'])],
     test_suite="tests",
     url="https://github.com/avaiga/taipy-templates",
     version=version_string,

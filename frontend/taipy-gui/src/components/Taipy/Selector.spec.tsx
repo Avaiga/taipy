@@ -187,7 +187,22 @@ describe("Selector Component", () => {
             const { getByTestId } = render(<Selector lov={lov} defaultValue="id1" dropdown={true} multiple={true} />);
             getByTestId("CancelIcon");
         });
-        it("opens a dropdown on click", async () => {
+        it("is disabled", async () => {
+            const { getByText } = render(<Selector lov={lov} defaultValue="id1" active={false} dropdown={true} />);
+            const elt = getByText("Item 1");
+            expect(elt.parentElement).toHaveClass("Mui-disabled");
+        });
+        it("is enabled by default", async () => {
+            const { getByText } = render(<Selector lov={lov} defaultValue="id1" dropdown={true} />);
+            const elt = getByText("Item 1");
+            expect(elt.parentElement).not.toHaveClass("Mui-disabled");
+        });
+        it("is enabled by active", async () => {
+            const { getByText } = render(<Selector defaultValue="id1" lov={lov} active={true} dropdown={true} />);
+            const elt = getByText("Item 1");
+            expect(elt.parentElement).not.toHaveClass("Mui-disabled");
+        });
+            it("opens a dropdown on click", async () => {
             const { getByText, getByRole, queryAllByRole } = render(<Selector lov={lov} dropdown={true} />);
             const butElt = getByRole("combobox");
             expect(butElt).toBeInTheDocument()

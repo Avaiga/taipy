@@ -323,6 +323,7 @@ const Selector = (props: SelTreeProps) => {
                         value={dropdownValue}
                         onChange={handleChange}
                         input={<OutlinedInput label={props.label} />}
+                        disabled={!active}
                         renderValue={(selected) => (
                             <Box sx={renderBoxSx}>
                                 {lovList
@@ -345,6 +346,7 @@ const Selector = (props: SelTreeProps) => {
                                                     onDelete={handleDelete}
                                                     data-id={item.id}
                                                     onMouseDown={doNotPropagateEvent}
+                                                    disabled={!active}
                                                 />
                                             );
                                         } else if (idx === 0) {
@@ -362,7 +364,7 @@ const Selector = (props: SelTreeProps) => {
                         MenuProps={getMenuProps(height)}
                     >
                         {lovList.map((item) => (
-                            <MenuItem key={item.id} value={item.id} style={getStyles(item.id, selectedValue, theme)}>
+                            <MenuItem key={item.id} value={item.id} style={getStyles(item.id, selectedValue, theme)} disabled={item.id === null}>
                                 {typeof item.item === "string" ? item.item : <LovImage item={item.item as Icon} />}
                             </MenuItem>
                         ))}
