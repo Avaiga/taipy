@@ -14,6 +14,8 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Union
 
+from taipy.logger._taipy_logger import _TaipyLogger
+
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
@@ -43,6 +45,7 @@ class Submission(_Entity, _Labeled):
     _MANAGER_NAME = "submission"
     __SEPARATOR = "_"
     lock = threading.Lock()
+    __logger = _TaipyLogger._get_logger()
 
     def __init__(
         self,
@@ -206,6 +209,8 @@ class Submission(_Entity, _Labeled):
             if job_status == Status.FAILED:
                 submission._submission_status = SubmissionStatus.FAILED
                 _SubmissionManagerFactory._build_manager()._set(submission)
+                self.__logger.info(f"{job.id} status is {job_status}. Submission status set to "
+                                   f"{submission._submission_status}")
                 return
             if job_status == Status.CANCELED:
                 submission._is_canceled = True
@@ -246,7 +251,8 @@ class Submission(_Entity, _Labeled):
                 submission.submission_status = SubmissionStatus.COMPLETED  # type: ignore
             else:
                 submission.submission_status = SubmissionStatus.UNDEFINED  # type: ignore
-
+            self.__logger.info(f"{job.id} status is {job_status}. Submission status set to "
+                               f"{submission._submission_status}")
     def is_finished(self) -> bool:
         """Indicate if the submission is finished.
 
