@@ -28,10 +28,10 @@ jobs:
         NEW_VERSION: ${{ steps.version-setup.outputs.NEW_VERSION }}
     steps:
       - uses: actions/checkout@v4
-      - name: Extract commit hash
+      - name: Extract branch name
         shell: bash
-        run: echo "HASH=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-        id: extract_hash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
 
       - name: Setup Version
         id: version-setup
