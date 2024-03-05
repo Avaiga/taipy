@@ -1002,7 +1002,7 @@ class Gui:
                 elif isinstance(newvalue, _TaipyToJson):
                     newvalue = newvalue.get()
                 if isinstance(newvalue, (dict, _MapDict)):
-                    # Skip in taipy-gui, avaialble in custom frontend
+                    # Skip in taipy-gui, available in custom frontend
                     if request.cookies.get(_Server._RESOURCE_HANDLER_ARG, None) is None:
                         continue  # this var has no transformer
                 if isinstance(newvalue, float) and math.isnan(newvalue):
