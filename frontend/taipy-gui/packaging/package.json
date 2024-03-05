@@ -1,6 +1,6 @@
 {
   "name": "taipy-gui",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "private": true,
   "main": "./taipy-gui.js",
   "types": "./taipy-gui.d.ts"
