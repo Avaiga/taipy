@@ -18,6 +18,7 @@ from taipy.core import (
     Job,
     Scenario,
     Sequence,
+    Submission,
     Task,
     is_deletable,
     is_editable,
@@ -43,6 +44,7 @@ DataNode.__bases__ += (_GCDoNotUpdate,)
 Cycle.__bases__ += (_GCDoNotUpdate,)
 Job.__bases__ += (_GCDoNotUpdate,)
 Task.__bases__ += (_GCDoNotUpdate,)
+Submission.__bases__ += (_GCDoNotUpdate,)
 
 
 class _EntityType(Enum):

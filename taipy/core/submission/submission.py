@@ -196,6 +196,7 @@ class Submission(_Entity, _Labeled):
 
     def _update_submission_status(self, job: Job):
         from ._submission_manager_factory import _SubmissionManagerFactory
+
         with self.lock:
             submission_manager = _SubmissionManagerFactory._build_manager()
             submission = submission_manager._get(self)
@@ -205,7 +206,7 @@ class Submission(_Entity, _Labeled):
             job_status = job.status
             if job_status == Status.FAILED:
                 submission._submission_status = SubmissionStatus.FAILED
-                _SubmissionManagerFactory._build_manager()._set(submission)
+                submission_manager._set(submission)
                 return
             if job_status == Status.CANCELED:
                 submission._is_canceled = True

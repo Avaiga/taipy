@@ -75,10 +75,7 @@ class _JobDispatcher(threading.Thread):
                 pass
             except Exception as e:
                 self._logger.exception(e)
-                pass
-        if self.stop_wait:
-            self._logger.debug("Waiting for the dispatcher thread to stop...")
-            self.join(timeout=self.stop_timeout)
+
         self._logger.debug("Job dispatcher stopped.")
 
     @abstractmethod
