@@ -61,7 +61,7 @@ class Core:
             self.__class__._is_running = True
 
         self._manage_version_and_block_config()
-        self.__logger.info("Core service started...")
+        self.__logger.info("Core service started.")
         self.__start_dispatcher(force_restart)
 
     def stop(self, wait: bool = True, timeout: Optional[float] = None):
