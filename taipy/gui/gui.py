@@ -31,7 +31,17 @@ from urllib.parse import unquote, urlencode, urlparse
 
 import markdown as md_lib
 import tzlocal
-from flask import Blueprint, Flask, g, has_app_context, has_request_context, jsonify, request, send_file, send_from_directory
+from flask import (
+    Blueprint,
+    Flask,
+    g,
+    has_app_context,
+    has_request_context,
+    jsonify,
+    request,
+    send_file,
+    send_from_directory,
+)
 from werkzeug.utils import secure_filename
 
 import __main__  # noqa: F401
