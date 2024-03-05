@@ -71,7 +71,7 @@ jobs:
   publish-main-package-to-pypi:
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
-    needs: [ test-package ]
+    needs: [publish-subpackages-to-pypi, test-package ]
     timeout-minutes: 20
     environment: publish
     runs-on: ubuntu-latest
