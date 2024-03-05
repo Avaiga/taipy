@@ -1,11 +1,18 @@
-name: Build a dev version for all packages and release them
+name: Build all taipy packages and release them
 
 on:
   workflow_dispatch:
     inputs:
-      publish_on_pypi:
-        description: "Should the packages be published on Pypi?"
+      internal_dep_on_pypi:
+        description: "Point taipy internal dependencies to Pypi? If false it will point to the github .tar.gz release file"
         default: "false"
+        required: true
+      release_type:
+        description: "The type of release to be made (dev or production)"
+        default: "dev"
+        required: true
+      target_version:
+        description: "The version of the package to be released"
         required: true
 
 jobs:
@@ -21,12 +28,17 @@ jobs:
         NEW_VERSION: ${{ steps.version-setup.outputs.NEW_VERSION }}
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Dev Version
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
+
+      - name: Setup Version
         id: version-setup
         run: |
-          python tools/release/setup_version.py ALL dev >> $GITHUB_OUTPUT
+          python tools/release/setup_version.py ALL ${{ github.event.inputs.release_type }} ${{ github.event.inputs.target_version }} ${{ steps.extract_branch.outputs.branch }} >> $GITHUB_OUTPUT
 
-  build-and-release-taipy-dev-packages:
+  build-and-release-taipy-packages:
     needs: [fetch-versions]
     timeout-minutes: 20
     runs-on: ubuntu-latest
@@ -89,7 +101,7 @@ jobs:
             ${{needs.fetch-versions.outputs.gui_VERSION}} \
             ${{needs.fetch-versions.outputs.rest_VERSION}} \
             ${{needs.fetch-versions.outputs.templates_VERSION}} \
-            ${{ github.event.inputs.publish_on_pypi }}
+            ${{ github.event.inputs.internal_dep_on_pypi }}
 
       - name: Copy tools
         run: |
@@ -98,7 +110,40 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install build wheel
+          pip install build wheel pipenv mypy black isort
+
+      - name: Install GUI dependencies
+        if: matrix.package == 'gui'
+        run: |
+          pipenv install --dev
+
+      - name: Generate GUI pyi file
+        if: matrix.package == 'gui'
+        run: |
+          cp tools/gui/generate_pyi.py pyi_temp.py && pipenv run python pyi_temp.py && rm pyi_temp.py
+
+      - name: Build frontends
+        if: matrix.package == 'gui'
+        run: |
+          python tools/frontend/bundle_build.py
+
+      - name: Copy files from tools
+        run: |
+          cp -r tools/packages/taipy-${{matrix.package}}/. ${{ steps.set-variables.outputs.package_dir }}
+
+      - name: Build Package Structure
+        working-directory: ${{ steps.set-variables.outputs.package_dir }}
+        run: |
+          python tools/release/build_package_structure.py ${{ matrix.package }}
+
+      - name: Copy Taipy Logger
+        if: matrix.package == 'config'
+        run: |
+          cp -r taipy/logger/. ${{ steps.set-variables.outputs.package_dir }}/taipy/logger
+
+      - name: Copy _cli folder
+        run: |
+          cp -r taipy/_cli/. ${{ steps.set-variables.outputs.package_dir }}/taipy/_cli
 
       - name: Build package
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
@@ -108,24 +153,18 @@ jobs:
       - name: Create tag and release
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
         run: |
-          gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --prerelease --title ${{ steps.set-variables.outputs.release_name }} --notes "Release Draft ${{ steps.set-variables.outputs.release_name }}"
+           if [ "${{ github.event.inputs.release_type }}" == "dev" ]; then
+            gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --prerelease --title ${{ steps.set-variables.outputs.release_name }} --notes "Release Draft ${{ steps.set-variables.outputs.release_name }}"
+           else
+            gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --title ${{ steps.set-variables.outputs.release_name }} --notes "Release ${{ steps.set-variables.outputs.release_name }}"
+           fi
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install Package
-        working-directory: ${{ steps.set-variables.outputs.package_dir }}
-        run: |
-          pip install ${{ steps.set-variables.outputs.tar_path }}
-
-      - name: Publish to PyPI
-        if: github.event.inputs.publish_on_pypi == 'true'
-        uses: pypa/gh-action-pypi-publish@release/v1
-
-  build-and-release-taipy-dev:
-    permissions:
-      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+  build-and-release-taipy:
     runs-on: ubuntu-latest
-    needs: [ build-and-release-taipy-dev-packages, fetch-versions ]
+    needs: [build-and-release-taipy-packages, fetch-versions ]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -151,33 +190,36 @@ jobs:
             ${{needs.fetch-versions.outputs.gui_VERSION}} \
             ${{needs.fetch-versions.outputs.rest_VERSION}} \
             ${{needs.fetch-versions.outputs.templates_VERSION}} \
-            ${{ github.event.inputs.publish_on_pypi }}
+            ${{ github.event.inputs.internal_dep_on_pypi }}
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install build wheel
 
+
+      - name: Backup setup.py
+        run: |
+          mv setup.py setup.old.py
+
+      - name: Copy files from tools
+        run: |
+          cp -r tools/packages/taipy/. .
+
       - name: Build Taipy package
-        run: python setup.py build_py && python -m build
+        run: |
+          python setup.py build_py && python -m build
 
       - name: Create tag and release Taipy
         run: |
-          gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --prerelease --title ${{ steps.set-variables.outputs.release_name }} --notes "Release Draft ${{ steps.set-variables.outputs.release_name }}"
+          if [ "${{ github.event.inputs.release_type }}" == "dev" ]; then
+            gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --prerelease --title ${{ steps.set-variables.outputs.release_name }} --notes "Release Draft ${{ steps.set-variables.outputs.release_name }}"
+          else
+            gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --title ${{ steps.set-variables.outputs.release_name }} --notes "Release ${{ steps.set-variables.outputs.release_name }}"
+          fi
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install Taipy
-        run: |
-          pip install ${{ steps.set-variables.outputs.tar_path }}
-
-      - name: Check Taipy Installation
-        run: |
-          python tools/validate_taipy_install.py
-
-      - name: Publish to PyPI
-        if: github.event.inputs.publish_on_pypi == 'true'
-        uses: pypa/gh-action-pypi-publish@release/v1
 
       - name: Download packages
         run: |
