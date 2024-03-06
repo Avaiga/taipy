@@ -118,7 +118,7 @@ def _df_relayout(
     if chart_mode not in ["lines+markers", "markers"]:
         return dataframe, is_copied
     # if chart data is invalid
-    if x0 is None or x1 is None or y0 is None or y1 is None:
+    if x0 is None and x1 is None and y0 is None and y1 is None:
         return dataframe, is_copied
     df = dataframe.copy() if not is_copied else dataframe
     is_copied = True
@@ -132,13 +132,20 @@ def _df_relayout(
         df[x_column] = df.index
         has_x_col = False
 
-    # if chart_mode is empty
-    if chart_mode == "lines+markers":
-        # only filter by x column
-        df = df.loc[(df[x_column] > x0) & (df[x_column] < x1)]
-    else:
-        # filter by both x and y columns
-        df = df.loc[(df[x_column] > x0) & (df[x_column] < x1) & (df[y_column] > y0) & (df[y_column] < y1)]  # noqa
+    df_filter_conditions = []
+    # filter by x column by default
+    if x0 is not None:
+        df_filter_conditions.append(df[x_column] > x0)
+    if x1 is not None:
+        df_filter_conditions.append(df[x_column] < x1)
+    # y column will be filtered only if chart_mode is not lines+markers (eg. markers)
+    if chart_mode != "lines+markers":
+        if y0 is not None:
+            df_filter_conditions.append(df[y_column] > y0)
+        if y1 is not None:
+            df_filter_conditions.append(df[y_column] < y1)
+    if df_filter_conditions:
+            df = df.loc[np.bitwise_and.reduce(df_filter_conditions)]
     if not has_x_col:
         df.drop(x_column, axis=1, inplace=True)
     return df, is_copied
