@@ -939,3 +939,22 @@ class _GuiCoreContext(CoreEventConsumerBase):
             state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, data_id)
         elif chart_id := data.get("chart_id"):
             state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_CHART_ID_VAR, chart_id)
+
+    def on_dag_select(self, state: State, id: str, payload: t.Dict[str, str]):
+        args = payload.get("args")
+        if args is None or not isinstance(args, list) or len(args) < 2:
+            return
+        on_action_function = self.gui._get_user_function(args[1]) if args[1] else None
+        if callable(on_action_function):
+            try:
+                entity = core_get(args[0]) if is_readable(args[0]) else f"unredable({args[0]})"
+                self.gui._call_function_with_state(
+                    on_action_function,
+                    [entity],
+                )
+            except Exception as e:
+                if not self.gui._call_on_exception(args[1], e):
+                    _warn(f"dag.on_action(): Exception raised in '{args[1]}()' with '{args[0]}'", e)
+        elif args[1]:
+            _warn(f"dag.on_action(): Invalid function '{args[1]}()'.")
+
