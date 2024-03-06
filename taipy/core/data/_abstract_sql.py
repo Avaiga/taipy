@@ -117,6 +117,7 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
             editor_expiration_date,
             **properties,
         )
+        _AbstractTabularDataNode.__init__(self, **properties)
         self._engine = None
         if not self._last_edit_date:  # type: ignore
             self._last_edit_date = datetime.now()
