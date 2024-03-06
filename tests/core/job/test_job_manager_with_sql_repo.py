@@ -20,7 +20,6 @@ import pytest
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.core import Task
-from taipy.core._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.config.job_config import JobConfig
 from taipy.core.data import InMemoryDataNode
