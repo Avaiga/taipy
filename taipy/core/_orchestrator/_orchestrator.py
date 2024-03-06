@@ -311,7 +311,7 @@ class _Orchestrator(_AbstractOrchestrator):
         from ._orchestrator_factory import _OrchestratorFactory
 
         for job in jobs:
-            if _OrchestratorFactory._dispatcher._is_dispatched(job.id):
+            if _OrchestratorFactory._dispatcher._is_dispatched(job.id):  # type: ignore
                 cls.__logger.info(f"{job.id} is running and cannot be canceled.")
             elif job.is_completed():
                 cls.__logger.info(f"{job.id} has already been completed and cannot be canceled.")
