@@ -46,11 +46,11 @@ def read_fct_modify_data_node_name(data_node_id: DataNodeId, name: str):
 
 
 def reset_data():
-    TestGenericDataNode.data = [i for i in range(10)]
+    TestGenericDataNode.data = list(range(10))
 
 
 class TestGenericDataNode:
-    data = [i for i in range(10)]
+    data = list(range(10))
 
     def test_create(self):
         dn = GenericDataNode(

@@ -207,6 +207,12 @@
                         "type": "str",
                         "default_value": "\"100%\"",
                         "doc": "The maximum width, in CSS units, of the control."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "The name of the function that is triggered when a a node is selected.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>entity (DataNode | Task): the entity (DataNode or Task) that was selected.</li>\n</ul>",
+                        "signature": [["state", "State"], ["entity", "Task | DataNode"]]
                     }
                 ]
             }

@@ -244,7 +244,7 @@ def test_filter_by_get_item(default_data_frame):
     filtered_custom_dn = custom_dn["a"]
     assert isinstance(filtered_custom_dn, List)
     assert len(filtered_custom_dn) == 10
-    assert filtered_custom_dn == [i for i in range(10)]
+    assert filtered_custom_dn == list(range(10))
 
     filtered_custom_dn = custom_dn[0:5]
     assert isinstance(filtered_custom_dn, List)
