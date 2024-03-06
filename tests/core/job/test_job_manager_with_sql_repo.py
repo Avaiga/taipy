@@ -245,7 +245,7 @@ def _create_task(function, nb_outputs=1, name=None):
     output_dn_configs = [
         Config.configure_data_node(f"output{i}", scope=Scope.SCENARIO, default_data=0) for i in range(nb_outputs)
     ]
-    _DataManager._bulk_get_or_create(dict(output_dn_configs))
+    _DataManager._bulk_get_or_create(output_dn_configs)
     name = name or "".join(random.choice(string.ascii_lowercase) for _ in range(10))
     task_config = Config.configure_task(
         id=name,
