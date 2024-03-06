@@ -6,7 +6,7 @@
 #        http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
-# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+# an "AS IS" BASIS, WITHOUT WARRANTIES OR df_filter_conditions OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
 from __future__ import annotations
@@ -63,7 +63,7 @@ class Decimator(ABC):
     def decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
         """Decimate function.
 
-        This method is executed when the appropriate conditions specified in the
+        This method is executed when the appropriate df_filter_conditions specified in the
         constructor are met. This function implements the algorithm that determines
         which data points are kept or dropped.
 
@@ -118,7 +118,7 @@ def _df_relayout(
     if chart_mode not in ["lines+markers", "markers"]:
         return dataframe, is_copied
     # if chart data is invalid
-    if x0 is None or x1 is None or y0 is None or y1 is None:
+    if x0 is None and x1 is None and y0 is None and y1 is None:
         return dataframe, is_copied
     df = dataframe.copy() if not is_copied else dataframe
     is_copied = True
@@ -132,13 +132,20 @@ def _df_relayout(
         df[x_column] = df.index
         has_x_col = False
 
-    # if chart_mode is empty
-    if chart_mode == "lines+markers":
-        # only filter by x column
-        df = df.loc[(df[x_column] > x0) & (df[x_column] < x1)]
-    else:
-        # filter by both x and y columns
-        df = df.loc[(df[x_column] > x0) & (df[x_column] < x1) & (df[y_column] > y0) & (df[y_column] < y1)]  # noqa
+    df_filter_conditions = []
+    # filter by x columns by default
+    if x0 is not None:
+        df_filter_conditions.append(df[x_column] > x0)
+    if x1 is not None:
+        df_filter_conditions.append(df[x_column] < x1)
+    # y columns will be filtered only if chart_mode is not lines+markers (eg. markers)
+    if chart_mode != "lines+markers":
+        if y0 is not None:
+            df_filter_conditions.append(df[y_column] > y0)
+        if y1 is not None:
+            df_filter_conditions.append(df[y_column] < y1)
+    if df_filter_conditions:
+            df = df.loc[np.bitwise_and.reduce(df_filter_conditions)]
     if not has_x_col:
         df.drop(x_column, axis=1, inplace=True)
     return df, is_copied
