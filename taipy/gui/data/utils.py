@@ -63,7 +63,7 @@ class Decimator(ABC):
     def decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
         """Decimate function.
 
-        This method is executed when the appropriate df_filter_conditions specified in the
+        This method is executed when the appropriate conditions specified in the
         constructor are met. This function implements the algorithm that determines
         which data points are kept or dropped.
 
