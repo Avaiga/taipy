@@ -8,7 +8,10 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+import os
+import signal
+import threading
+import time
 from concurrent.futures import Executor, ProcessPoolExecutor
 from functools import partial
 from typing import Callable, Optional
@@ -22,6 +25,20 @@ from ._job_dispatcher import _JobDispatcher
 from ._task_function_wrapper import _TaskFunctionWrapper
 
 
+def start_thread_to_terminate_when_parent_process_dies(ppid):
+    pid = os.getpid()
+    def f():
+        while True:
+            try:
+                os.kill(ppid, 0)
+            except OSError:
+                os.kill(pid, signal.SIGTERM)
+            time.sleep(1)
+
+    thread = threading.Thread(target=f, daemon=True)
+    thread.start()
+
+
 class _StandaloneJobDispatcher(_JobDispatcher):
     """Manages job dispatching (instances of `Job^` class) in an asynchronous way using a ProcessPoolExecutor."""
 
@@ -30,7 +47,8 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         max_workers = Config.job_config.max_nb_of_workers or 1
         self._executor: Executor = ProcessPoolExecutor(
             max_workers=max_workers,
-            initializer=subproc_initializer,
+            initializer=start_thread_to_terminate_when_parent_process_dies,
+            initargs=(os.getpid(),)
         )  # type: ignore
         self._nb_available_workers = self._executor._max_workers  # type: ignore
 
