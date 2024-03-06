@@ -27,3 +27,7 @@ export enum TaskStatus {
 }
 
 export type TaskStatuses = Record<string, TaskStatus>;
+
+export interface OnClick {
+    (id: string): void;
+}

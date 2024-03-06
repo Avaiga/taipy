@@ -26,7 +26,7 @@ import { getNodeColor } from "./config";
 import { TaipyDiagramModel, TaipyNodeModel } from "../projectstorm/models";
 import { TaipyNodeFactory, TaipyPortFactory } from "../projectstorm/factories";
 import { nodeTypes } from "./config";
-import { DisplayModel, TaskStatus, TaskStatuses } from "./types";
+import { DisplayModel, OnClick, TaskStatus, TaskStatuses } from "./types";
 
 export const createDagreEngine = () =>
     new DagreEngine({
@@ -59,7 +59,7 @@ export const getLinkId = (link: LinkModel) =>
     )}`;
 export const getNodeId = (node: DefaultNodeModel) => `${node.getType()}.${node.getID()}`;
 
-export const createNode = (nodeType: string, id: string, name: string, subtype: string, status?: TaskStatus) =>
+export const createNode = (nodeType: string, id: string, name: string, subtype: string, status?: TaskStatus, onClick?: OnClick) =>
     new TaipyNodeModel({
         id: id,
         type: nodeType,
@@ -67,6 +67,7 @@ export const createNode = (nodeType: string, id: string, name: string, subtype: 
         color: getNodeColor(nodeType),
         subtype: subtype,
         status: status,
+        onClick: onClick,
     });
 
 export const createLink = (outPort: DefaultPortModel, inPort: DefaultPortModel) =>
@@ -147,7 +148,7 @@ export const populateModel = (displayModel: DisplayModel, model: TaipyDiagramMod
     displayModel[1] &&
         Object.entries(displayModel[1]).forEach(([nodeType, n]) => {
             Object.entries(n).forEach(([id, detail]) => {
-                const node = createNode(nodeType, id, detail.name, detail.type, detail.status);
+                const node = createNode(nodeType, id, detail.name, detail.type, detail.status, model.onClick);
                 nodeModels[nodeType] = nodeModels[nodeType] || {};
                 nodeModels[nodeType][id] = node;
             });

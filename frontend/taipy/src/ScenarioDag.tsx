@@ -14,6 +14,7 @@ import { DisplayModel, TaskStatuses } from "./utils/types";
 import { addStatusToDisplayModel, createDagreEngine, initDiagram, populateModel, relayoutDiagram } from "./utils/diagram";
 import {
     createRequestUpdateAction,
+    createSendActionNameAction,
     createSendUpdateAction,
     getUpdateVar,
     useDispatch,
@@ -38,6 +39,8 @@ interface ScenarioDagProps {
     libClassName?: string;
     className?: string;
     dynamicClassName?: string;
+    onAction?: string;
+    onSelect?: string;
 }
 
 const titleSx = { ml: 2, flex: 1 };
@@ -67,7 +70,7 @@ const getValidScenario = (scenar: DisplayModel | DisplayModel[]) =>
         : undefined;
 
 const ScenarioDag = (props: ScenarioDagProps) => {
-    const { showToolbar = true } = props;
+    const { showToolbar = true, onSelect, onAction } = props;
     const [scenarioId, setScenarioId] = useState("");
     const [engine] = useState(createEngine);
     const [dagreEngine] = useState(createDagreEngine);
@@ -121,8 +124,10 @@ const ScenarioDag = (props: ScenarioDagProps) => {
 
     const zoomToFit = useCallback(() => engine.zoomToFit(), [engine]);
 
+    const onClick = useCallback((id: string) => onAction && dispatch(createSendActionNameAction(props.id, module, onSelect, id, onAction)), [props.id, onAction, onSelect, module, dispatch]);
+
     useEffect(() => {
-        const model = new TaipyDiagramModel();
+        const model = new TaipyDiagramModel(onClick);
         initDiagram(engine);
         let doLayout = false;
         if (displayModel) {
@@ -135,7 +140,7 @@ const ScenarioDag = (props: ScenarioDagProps) => {
         //engine.getActionEventBus().registerAction(new DeleteItemsAction({ keyCodes: [1] }));
         model.setLocked(true);
         doLayout && setTimeout(relayout, 500);
-    }, [displayModel, engine, relayout]);
+    }, [displayModel, engine, relayout, onClick]);
 
     useEffect(() => {
         const showVar = getUpdateVar(props.updateVars, "show");
