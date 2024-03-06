@@ -37,14 +37,19 @@ jobs:
           pipfile-version: ${{ matrix.pipfile-version }}
 
       - name: Pytest
-        run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone and not teste2e" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
-
-      - name: Coverage
+        run: |
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ] && ["${{ matrix.python-version }}" == "3.11"] && ["${{ matrix.pipfile-version }}" == "min"]; then
+            pipenv run pytest -m "not orchestrator_dispatcher and not standalone and not teste2e" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
+          else:
+            pipenv run pytest -m "not orchestrator_dispatcher and not standalone and not teste2e" tests
+          fi
+        shell: bash
+      - name: Upload coverage artifact
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' && matrix.pipfile-version == 'min'
-        uses: MishaKav/pytest-coverage-comment@main
+        uses: actions/upload-artifact@v2
         with:
-          pytest-xml-coverage-path: ./overall-coverage.xml
-          title: Taipy Overall Coverage Report
+          name: overall-coverage
+          path: overall-coverage.xml
 
   intermittent-tests:
     needs: [partial-tests]
@@ -73,3 +78,25 @@ jobs:
 
       - name: Pytest Core orchestrator_dispatcher
         run: pipenv run pytest -m "${{ matrix.orchestrator }}" tests/core
+
+  coverage:
+    needs: [overall-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: overall-coverage
+          path: overall-coverage.xml
+
+      - name: Get coverage
+        uses: orgoro/coverage@v3.1
+        with:
+          coverageFile: overall-coverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
