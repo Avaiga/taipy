@@ -124,7 +124,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:  # type: ignore
                         self.gui._broadcast(
                             _GuiCoreContext._CORE_CHANGED_NAME,
-                            {"scenario": [x for x in sequence.parent_ids]},  # type: ignore
+                            {"scenario": list(sequence.parent_ids)},  # type: ignore
                         )
             except Exception as e:
                 _warn(f"Access to sequence {event.entity_id} failed", e)
@@ -650,7 +650,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if isinstance(ent, Scenario):
                 tags = data.get(_GuiCoreContext.__PROP_SCENARIO_TAGS)
                 if isinstance(tags, (list, tuple)):
-                    ent.tags = {t for t in tags}
+                    ent.tags = dict(tags)
             name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
             if isinstance(name, str):
                 if hasattr(ent, _GuiCoreContext.__PROP_ENTITY_NAME):
