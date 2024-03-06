@@ -86,6 +86,7 @@ namespace S {
 interface NodeProps {
     node: TaipyNodeModel;
     engine: DiagramEngine;
+    onAction?: string;
 }
 
 const getStatusLabel = (status?: TaskStatus) => status == TaskStatus.Running ? "Running" : status == TaskStatus.Pending ? "Pending" : undefined
@@ -110,6 +111,8 @@ const NodeWidget = ({ node, engine }: NodeProps) => {
         [engine]
     );
 
+    const onClick = useCallback(() => node.onClick && node.onClick(node.getID()), [node]);
+
     return (
         <S.Node
             data-default-node-name={node.getOptions().name}
@@ -117,6 +120,7 @@ const NodeWidget = ({ node, engine }: NodeProps) => {
             background={node.getOptions().color}
             title={getStatusLabel(node.status)}
             $status={node.status}
+            onClick={onClick}
         >
             <S.Title>
                 <S.TitleIcon className="icon" title={node.getType()}>
