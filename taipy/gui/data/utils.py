@@ -133,12 +133,12 @@ def _df_relayout(
         has_x_col = False
 
     df_filter_conditions = []
-    # filter by x columns by default
+    # filter by x column by default
     if x0 is not None:
         df_filter_conditions.append(df[x_column] > x0)
     if x1 is not None:
         df_filter_conditions.append(df[x_column] < x1)
-    # y columns will be filtered only if chart_mode is not lines+markers (eg. markers)
+    # y column will be filtered only if chart_mode is not lines+markers (eg. markers)
     if chart_mode != "lines+markers":
         if y0 is not None:
             df_filter_conditions.append(df[y_column] > y0)
