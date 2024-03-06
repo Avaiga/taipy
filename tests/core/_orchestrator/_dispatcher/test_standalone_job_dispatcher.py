@@ -84,6 +84,18 @@ def test_dispatch_job():
     assert dispatcher.update_job_status_from_future_calls[0][1] == dispatcher._executor.f[0]
 
 
+def test_can_execute():
+    dispatcher = _StandaloneJobDispatcher(_OrchestratorFactory._orchestrator)
+    assert dispatcher._nb_available_workers == 1
+    assert dispatcher._can_execute()
+    dispatcher._nb_available_workers = 0
+    assert not dispatcher._can_execute()
+    dispatcher._nb_available_workers = -1
+    assert not dispatcher._can_execute()
+    dispatcher._nb_available_workers = 1
+    assert dispatcher._can_execute()
+
+
 def test_release_worker():
     dispatcher = _StandaloneJobDispatcher(_OrchestratorFactory._orchestrator)
 

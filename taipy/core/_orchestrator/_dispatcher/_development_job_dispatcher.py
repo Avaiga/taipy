@@ -23,6 +23,9 @@ class _DevelopmentJobDispatcher(_JobDispatcher):
     def __init__(self, orchestrator: _AbstractOrchestrator):
         super().__init__(orchestrator)
 
+    def _can_execute(self) -> bool:
+        return True
+
     def start(self):
         raise NotImplementedError
 
@@ -43,3 +46,9 @@ class _DevelopmentJobDispatcher(_JobDispatcher):
         """
         rs = _TaskFunctionWrapper(job.id, job.task).execute()
         self._update_job_status(job, rs)
+
+    def _is_dispatched(self, job_id: str) -> bool:
+        return False
+
+    def _remove_job(self, job_id: str):
+        pass

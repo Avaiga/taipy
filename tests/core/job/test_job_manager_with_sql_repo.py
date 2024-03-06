@@ -134,10 +134,8 @@ def test_delete_job(init_sql_repo):
 
 
 def test_raise_when_trying_to_delete_unfinished_job(init_sql_repo):
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=3)
 
-    m = multiprocessing.Manager()
-    lock = m.Lock()
     dnm = _DataManagerFactory._build_manager()
     dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
     dnm._set(dn_1)
@@ -145,13 +143,14 @@ def test_raise_when_trying_to_delete_unfinished_job(init_sql_repo):
     dnm._set(dn_2)
     dn_3 = InMemoryDataNode("dn_config_3", Scope.SCENARIO)
     dnm._set(dn_3)
+    proc_manager = multiprocessing.Manager()
+    lock = proc_manager.Lock()
     task = Task("task_cfg", {}, partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="raise_when_delete_unfinished")
-    _OrchestratorFactory._build_dispatcher()
+    dispatcher = _OrchestratorFactory._build_dispatcher()
 
     with lock:
         job = _OrchestratorFactory._orchestrator.submit_task(task)._jobs[0]
-
-        assert_true_after_time(lambda: len(_JobDispatcher._dispatched_processes) == 1)
+        assert_true_after_time(lambda: len(dispatcher._dispatched_processes) == 1)
         assert_true_after_time(job.is_running)
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job)
@@ -178,7 +177,6 @@ def test_force_deleting_unfinished_job(init_sql_repo):
     )
     reference_last_edit_date = dn_3.last_edit_date
     _OrchestratorFactory._build_dispatcher()
-
     with lock:
         job = _OrchestratorFactory._orchestrator.submit_task(task_1)._jobs[0]
         assert_true_after_time(job.is_running)

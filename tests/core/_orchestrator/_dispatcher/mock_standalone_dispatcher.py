@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from concurrent.futures import Executor, Future
-from typing import List
+from typing import Dict, List
 
 from taipy.core import Job
 from taipy.core._orchestrator._abstract_orchestrator import _AbstractOrchestrator
@@ -38,6 +38,9 @@ class MockStandaloneDispatcher(_StandaloneJobDispatcher):
     def __init__(self, orchestrator: _AbstractOrchestrator):
         super(_StandaloneJobDispatcher, self).__init__(orchestrator)
         self._executor: Executor = MockProcessPoolExecutor()
+        self._dispatched_processes: Dict = {}
+        self._nb_available_workers = 1
+
         self.dispatch_calls: List = []
         self.release_worker_calls: List = []
         self.set_dispatch_processes_calls: List = []

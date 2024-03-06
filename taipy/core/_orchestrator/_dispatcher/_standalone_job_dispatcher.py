@@ -11,7 +11,7 @@
 
 from concurrent.futures import Executor, ProcessPoolExecutor
 from functools import partial
-from typing import Callable, Optional
+from typing import Any, Callable, Dict, Optional
 
 from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.config import Config
@@ -32,7 +32,12 @@ class _StandaloneJobDispatcher(_JobDispatcher):
             max_workers=max_workers,
             initializer=subproc_initializer,
         )  # type: ignore
+        self._dispatched_processes: Dict[str, Any] = {}
         self._nb_available_workers = self._executor._max_workers  # type: ignore
+
+    def _can_execute(self) -> bool:
+        """Returns True if the dispatcher have resources to dispatch a job."""
+        return self._nb_available_workers > 0
 
     def run(self):
         with self._executor:
@@ -55,9 +60,21 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         # so that the worker is available for another job as soon as possible.
         future.add_done_callback(partial(self._update_job_status_from_future, job))
 
+    def _set_dispatched_processes(self, job_id, process):
+        self._dispatched_processes[job_id] = process
+
     def _release_worker(self, _):
         self._nb_available_workers += 1
 
     def _update_job_status_from_future(self, job: Job, ft):
         self._pop_dispatched_process(job.id)  # type: ignore
         self._update_job_status(job, ft.result())
+
+    def _pop_dispatched_process(self, job_id: str, default=None):
+        return self._dispatched_processes.pop(job_id, default)
+
+    def _is_dispatched(self, job_id: str) -> bool:
+        return job_id in self._dispatched_processes.keys()
+
+    def _remove_job(self, job_id: str):
+        self._pop_dispatched_process(job_id)

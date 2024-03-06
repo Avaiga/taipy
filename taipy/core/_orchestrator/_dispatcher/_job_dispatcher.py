@@ -13,7 +13,7 @@ import threading
 import time
 from abc import abstractmethod
 from queue import Empty
-from typing import Dict, Optional
+from typing import Optional
 
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -29,9 +29,7 @@ class _JobDispatcher(threading.Thread):
     """Manages job dispatching (instances of `Job^` class) on executors."""
 
     _STOP_FLAG = False
-    _dispatched_processes: Dict = {}
     _logger = _TaipyLogger._get_logger()
-    _nb_available_workers: int = 1
 
     def __init__(self, orchestrator: _AbstractOrchestrator):
         threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
@@ -79,9 +77,10 @@ class _JobDispatcher(threading.Thread):
                 pass
         self._logger.info("Job dispatcher stopped.")
 
+    @abstractmethod
     def _can_execute(self) -> bool:
-        """Returns True if the dispatcher have resources to execute a new job."""
-        return self._nb_available_workers > 0
+        """Returns True if the dispatcher have resources to dispatch a new job."""
+        raise NotImplementedError
 
     def _execute_job(self, job: Job):
         if job.force or self._needs_to_run(job.task):
@@ -142,10 +141,10 @@ class _JobDispatcher(threading.Thread):
         job.update_status(exceptions)
         _JobManagerFactory._build_manager()._set(job)
 
-    @classmethod
-    def _set_dispatched_processes(cls, job_id, process):
-        cls._dispatched_processes[job_id] = process
+    @abstractmethod
+    def _is_dispatched(self, job_id: str) -> bool:
+        raise NotImplementedError
 
-    @classmethod
-    def _pop_dispatched_process(cls, job_id, default=None):
-        return cls._dispatched_processes.pop(job_id, default)  # type: ignore
+    @abstractmethod
+    def _remove_job(self, job_id: str):
+        raise NotImplementedError
