@@ -15,11 +15,7 @@ from enum import Enum
 from taipy.core import (
     Cycle,
     DataNode,
-    Job,
     Scenario,
-    Sequence,
-    Submission,
-    Task,
     is_deletable,
     is_editable,
     is_promotable,
@@ -38,13 +34,13 @@ class _GCDoNotUpdate(_DoNotUpdate):
         return self.get_label() if hasattr(self, "get_label") else super().__repr__()
 
 
-Scenario.__bases__ += (_GCDoNotUpdate,)
-Sequence.__bases__ += (_GCDoNotUpdate,)
-DataNode.__bases__ += (_GCDoNotUpdate,)
-Cycle.__bases__ += (_GCDoNotUpdate,)
-Job.__bases__ += (_GCDoNotUpdate,)
-Task.__bases__ += (_GCDoNotUpdate,)
-Submission.__bases__ += (_GCDoNotUpdate,)
+# Scenario.__bases__ += (_GCDoNotUpdate,)
+# Sequence.__bases__ += (_GCDoNotUpdate,)
+# DataNode.__bases__ += (_GCDoNotUpdate,)
+# Cycle.__bases__ += (_GCDoNotUpdate,)
+# Job.__bases__ += (_GCDoNotUpdate,)
+# Task.__bases__ += (_GCDoNotUpdate,)
+# Submission.__bases__ += (_GCDoNotUpdate,)
 
 
 class _EntityType(Enum):
