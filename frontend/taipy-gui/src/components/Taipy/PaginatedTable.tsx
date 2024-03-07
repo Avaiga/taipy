@@ -39,6 +39,7 @@ import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/Add";
 import DataSaverOn from "@mui/icons-material/DataSaverOn";
 import DataSaverOff from "@mui/icons-material/DataSaverOff";
+import Download from "@mui/icons-material/Download";
 
 import { createRequestTableUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
 import {
@@ -67,6 +68,7 @@ import {
     getRowIndex,
     getTooltip,
     OnRowClick,
+    DownloadAction,
 } from "./tableUtils";
 import {
     useClassNames,
@@ -102,6 +104,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         width = "100%",
         size = DEFAULT_SIZE,
         userData,
+        downloadable = false,
     } = props;
     const pageSize = props.pageSize === undefined || props.pageSize < 1 ? 100 : Math.round(props.pageSize);
     const [value, setValue] = useState<Record<string, unknown>>({});
@@ -142,7 +145,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                         col.tooltip = props.tooltip;
                     }
                 });
-                addDeleteColumn((active && (onAdd || onDelete) ? 1 : 0) + (active && filter ? 1 : 0), baseColumns);
+                addDeleteColumn((active && (onAdd || onDelete) ? 1 : 0) + (active && filter ? 1 : 0) + (active && downloadable ? 1 : 0), baseColumns);
                 const colsOrder = Object.keys(baseColumns).sort(getsortByIndex(baseColumns));
                 const styTt = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
                     if (baseColumns[col].style) {
@@ -173,7 +176,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             hNan,
             false,
         ];
-    }, [active, editable, onAdd, onDelete, baseColumns, props.lineStyle, props.tooltip, props.nanValue, props.filter]);
+    }, [active, editable, onAdd, onDelete, baseColumns, props.lineStyle, props.tooltip, props.nanValue, props.filter, downloadable]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
 
@@ -311,6 +314,17 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         [startIndex, dispatch, updateVarName, onAdd, module, userData]
     );
 
+    const onDownload = useCallback(
+        () =>
+            dispatch(
+                createSendActionNameAction(updateVarName, module, {
+                    action: DownloadAction,
+                    user_data: userData,
+                })
+            ),
+        [dispatch, updateVarName, module, userData]
+    );
+
     const tableContainerSx = useMemo(() => ({ maxHeight: height }), [height]);
 
     const pso = useMemo(() => {
@@ -440,6 +454,17 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                             appliedFilters={appliedFilters}
                                                             className={className}
                                                         />
+                                                    ) : null,
+                                                    active && downloadable ? (
+                                                        <Tooltip title="Download as CSV" key="downloadCsv">
+                                                            <IconButton
+                                                                onClick={onDownload}
+                                                                size="small"
+                                                                sx={iconInRowSx}
+                                                            >
+                                                                <Download fontSize="inherit" />
+                                                            </IconButton>
+                                                        </Tooltip>
                                                     ) : null,
                                                 ]
                                             ) : (

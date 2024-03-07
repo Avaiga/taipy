@@ -490,6 +490,7 @@ class _Factory:
                 ("filter", PropertyType.boolean),
                 ("hover_text", PropertyType.dynamic_string),
                 ("size",),
+                ("downloadable", PropertyType.boolean),
             ]
         )
         ._set_propagate()

@@ -1124,6 +1124,11 @@
             "name": "lov[<i>column_name</i>]",
             "type": "list[str]|str",
             "doc": "The list of values of the indicated column."
+          },
+          {
+            "name": "downloadable",
+            "type": "boolean",
+            "doc": "The indicator that would show the icon to allow the user to download the data as a csv file if True."
           }
         ]
       }
