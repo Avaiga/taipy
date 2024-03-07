@@ -17,3 +17,26 @@ def bar_graph(district):
     }
 
     return filtered_data, layout
+
+
+def bubble_chart(district_name):
+    df = dataset
+    # Filter data for the specified district
+    district_data = df[df['District'] == district_name]
+
+    bubble_size = district_data['Total population'] * 0.001
+
+    data = {
+        "Total Male": district_data['Total Male'].to_list(),
+        "Total Female": district_data['Total Female'].to_list(),
+        "Texts": district_data['Local Level Name'].to_list()
+    }
+
+    marker = {
+        "size": bubble_size.to_list(),  # Scale bubble size
+        "color": district_data.index,
+        "colorscale": 'viridis'
+    }
+
+    # Show the bubble chart
+    return data, marker

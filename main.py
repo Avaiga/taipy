@@ -1,5 +1,5 @@
 from taipy.gui import Gui
-from graphs import bar_graph
+from graphs import bar_graph, bubble_chart
 
 district = """
 # **District**{: .color-primary} Statistics
@@ -36,9 +36,12 @@ district = """
 
 # Visualization in **Graphs**{: .color-primary} 
 
-<|layout|columns=1 1|
+<|layout|columns=1 1|gap=100px|
 
 <|{bargraph_data}|chart|type=bar|x=Local Level Name|y[1]=Total Male|y[2]=Total Female|layout={bargraph_layout}|>
+
+<|{bubble_chart_data}|chart|mode=markers|x=Total Male|y=Total Female|marker={bubble_chart_marker}|text=Texts|>
+
 |>
 """
 
@@ -46,6 +49,8 @@ district_list = ['KTM', 'PKR']
 selected_district = 'KTM'
 
 bargraph_data, bargraph_layout = bar_graph('Taplejung')
+bubble_chart_data, bubble_chart_marker = bubble_chart(
+    'Taplejung')
 
 
 pages = {
