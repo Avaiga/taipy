@@ -1324,18 +1324,19 @@ class Gui:
         return cls if isinstance(cls, class_type) else class_name
 
     def __download_csv(self, state: State, var_name: str, payload: dict):
+        holder_name = t.cast(str, payload.get("var_name"))
         ret = self._accessors._get_data(
             self,
-            payload.get("var_name"),
-            _getscopeattr(self, payload.get("var_name"), None),
+            holder_name,
+            _getscopeattr(self, holder_name, None),
             {"alldata": True, "csv": True},
         )
         if isinstance(ret, dict):
             df = ret.get("df")
             try:
-                fd, temp_path = mkstemp(".csv", "data", text=True)
+                fd, temp_path = mkstemp(".csv", var_name, text=True)
                 with os.fdopen(fd, "wt", newline="") as csv_file:
-                    df.to_csv(csv_file, index=False) # type:ignore
+                    df.to_csv(csv_file, index=False)  # type:ignore
                 self._download(temp_path, "data.csv", Gui.__DOWNLOAD_DELETE_ACTION)
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception("download_csv", e):
