@@ -11,7 +11,7 @@
 
 from concurrent.futures import Executor, ProcessPoolExecutor
 from functools import partial
-from typing import Any, Callable, Dict, Optional
+from typing import Callable, Optional
 
 from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.config import Config
