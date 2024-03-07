@@ -31,7 +31,17 @@ from urllib.parse import unquote, urlencode, urlparse
 
 import markdown as md_lib
 import tzlocal
-from flask import Blueprint, Flask, g, has_app_context, jsonify, request, send_file, send_from_directory
+from flask import (
+    Blueprint,
+    Flask,
+    g,
+    has_app_context,
+    has_request_context,
+    jsonify,
+    request,
+    send_file,
+    send_from_directory,
+)
 from werkzeug.utils import secure_filename
 
 import __main__  # noqa: F401
@@ -1002,7 +1012,13 @@ class Gui:
                 elif isinstance(newvalue, _TaipyToJson):
                     newvalue = newvalue.get()
                 if isinstance(newvalue, (dict, _MapDict)):
-                    continue  # this var has no transformer
+                    # Skip in taipy-gui, available in custom frontend
+                    resource_handler_id = None
+                    with contextlib.suppress(Exception):
+                        if has_request_context():
+                            resource_handler_id = request.cookies.get(_Server._RESOURCE_HANDLER_ARG, None)
+                    if resource_handler_id is None:
+                        continue  # this var has no transformer
                 if isinstance(newvalue, float) and math.isnan(newvalue):
                     # do not let NaN go through json, it is not handle well (dies silently through websocket)
                     newvalue = None

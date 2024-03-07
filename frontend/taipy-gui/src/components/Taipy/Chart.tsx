@@ -11,8 +11,27 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { CSSProperties, useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
-import { Data, Layout, PlotDatum, PlotMarker, PlotRelayoutEvent, PlotSelectionEvent, ScatterLine } from "plotly.js";
+import React, {
+    CSSProperties,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    lazy,
+    Suspense,
+} from "react";
+import {
+    Config,
+    Data,
+    Layout,
+    ModeBarButtonAny,
+    PlotDatum,
+    PlotMarker,
+    PlotRelayoutEvent,
+    PlotSelectionEvent,
+    ScatterLine,
+} from "plotly.js";
 import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
@@ -196,6 +215,29 @@ const defaultConfig = {
 const emptyLayout = {} as Record<string, Record<string, unknown>>;
 const emptyData = {} as Record<string, TraceValueType>;
 
+const TaipyPlotlyButtons: ModeBarButtonAny[] = [
+    {
+        name: "Full screen",
+        title: "Full screen",
+        icon: {
+            height: 24,
+            width: 24,
+            path: "M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z",
+        },
+        click: function (gd: HTMLElement, evt: Event) {
+            const title = gd.classList.toggle("full-screen") ? "Exit Full screen" : "Full screen";
+            (evt.currentTarget as HTMLElement).setAttribute("data-title", title);
+            const {height} = gd.dataset;
+            if (height) {
+                gd.attributeStyleMap.set("height", height);
+            } else {
+                gd.setAttribute("data-height", getComputedStyle(gd.querySelector(".svg-container") || gd).height)
+            }
+            window.dispatchEvent(new Event('resize'));
+        },
+    },
+];
+
 const Chart = (props: ChartProp) => {
     const {
         title = "",
@@ -293,7 +335,7 @@ const Chart = (props: ChartProp) => {
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
 
     const layout = useMemo(() => {
-        const layout = {...baseLayout};
+        const layout = { ...baseLayout };
         let template = undefined;
         try {
             const tpl = props.template && JSON.parse(props.template);
@@ -320,6 +362,7 @@ const Chart = (props: ChartProp) => {
         }
         return {
             ...layout,
+            autosize: true,
             title: title || layout.title,
             xaxis: {
                 title:
@@ -446,7 +489,7 @@ const Chart = (props: ChartProp) => {
     }, [props.figure, selected, data, config, dataKey]);
 
     const plotConfig = useMemo(() => {
-        let plconf = {};
+        let plconf: Partial<Config> = {};
         if (props.plotConfig) {
             try {
                 plconf = JSON.parse(props.plotConfig);
@@ -458,47 +501,46 @@ const Chart = (props: ChartProp) => {
                 plconf = {};
             }
         }
-        if (active) {
-            return plconf;
-        } else {
-            return { ...plconf, staticPlot: true };
+        plconf.modeBarButtonsToAdd = TaipyPlotlyButtons;
+        plconf.responsive = true;
+        plconf.autosizable = true;
+        if (!active) {
+            plconf.staticPlot = true;
         }
+        return plconf;
     }, [active, props.plotConfig]);
 
     const onRelayout = useCallback(
         (eventData: PlotRelayoutEvent) => {
-            if (Object.keys(eventData).some((k) => k.startsWith("xaxis."))) {
-                onRangeChange &&
-                    dispatch(createSendActionNameAction(id, module, { action: onRangeChange, ...eventData }));
-                if (config.decimators && !config.types.includes("scatter3d")) {
-                    const backCols = Object.values(config.columns).map((col) => col.dfid);
-                    const eventDataKey = Object.entries(eventData)
-                        .map(([k, v]) => `${k}=${v}`)
-                        .join("-");
-                    const dtKey =
-                        backCols.join("-") +
-                        (config.decimators ? `--${config.decimators.join("")}` : "") +
-                        "--" +
-                        eventDataKey;
-                    setDataKey(dtKey);
-                    dispatch(
-                        createRequestChartUpdateAction(
-                            updateVarName,
-                            id,
-                            module,
-                            backCols,
-                            dtKey,
-                            getDecimatorsPayload(
-                                config.decimators,
-                                plotRef.current,
-                                config.modes,
-                                config.columns,
-                                config.traces,
-                                eventData
-                            )
+            onRangeChange && dispatch(createSendActionNameAction(id, module, { action: onRangeChange, ...eventData }));
+            if (config.decimators && !config.types.includes("scatter3d")) {
+                const backCols = Object.values(config.columns).map((col) => col.dfid);
+                const eventDataKey = Object.entries(eventData)
+                    .map(([k, v]) => `${k}=${v}`)
+                    .join("-");
+                const dtKey =
+                    backCols.join("-") +
+                    (config.decimators ? `--${config.decimators.join("")}` : "") +
+                    "--" +
+                    eventDataKey;
+                setDataKey(dtKey);
+                dispatch(
+                    createRequestChartUpdateAction(
+                        updateVarName,
+                        id,
+                        module,
+                        backCols,
+                        dtKey,
+                        getDecimatorsPayload(
+                            config.decimators,
+                            plotRef.current,
+                            config.modes,
+                            config.columns,
+                            config.traces,
+                            eventData
                         )
-                    );
-                }
+                    )
+                );
             }
         },
         [
@@ -558,7 +600,7 @@ const Chart = (props: ChartProp) => {
     );
 
     return render ? (
-        <Box id={id} key="div" data-testid={props.testId} className={className} ref={plotRef}>
+        <Box id={id} data-testid={props.testId} className={className} ref={plotRef}>
             <Tooltip title={hover || ""}>
                 <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
                     {Array.isArray(props.figure) && props.figure.length && props.figure[0].data !== undefined ? (
@@ -571,6 +613,7 @@ const Chart = (props: ChartProp) => {
                             onSelected={onSelect}
                             onDeselect={onSelect}
                             config={plotConfig}
+                            useResizeHandler
                         />
                     ) : (
                         <Plot
@@ -583,6 +626,7 @@ const Chart = (props: ChartProp) => {
                             onDeselect={isOnClick(config.types) ? undefined : onSelect}
                             onClick={isOnClick(config.types) ? onSelect : undefined}
                             config={plotConfig}
+                            useResizeHandler
                         />
                     )}
                 </Suspense>

@@ -411,10 +411,12 @@ def test_cancel_subsequent_jobs():
     assert_true_after_time(job_4.is_canceled)
     assert_true_after_time(job_5.is_abandoned)
     assert_true_after_time(job_6.is_abandoned)
-    assert_true_after_time(lambda: all(
-        not _OrchestratorFactory._orchestrator._is_blocked(job)
-        for job in [job_1, job_2, job_3, job_4, job_5, job_6]
-    ))
+    assert_true_after_time(
+        lambda: all(
+            not _OrchestratorFactory._orchestrator._is_blocked(job)
+            for job in [job_1, job_2, job_3, job_4, job_5, job_6]
+        )
+    )
     assert_true_after_time(lambda: _OrchestratorFactory._orchestrator.jobs_to_run.qsize() == 0)
 
 
@@ -474,7 +476,7 @@ def _create_task(function, nb_outputs=1, name=None):
     output_dn_configs = [
         Config.configure_data_node(f"output{i}", "pickle", Scope.SCENARIO, default_data=0) for i in range(nb_outputs)
     ]
-    _DataManager._bulk_get_or_create({cfg for cfg in output_dn_configs})
+    _DataManager._bulk_get_or_create(output_dn_configs)
     name = name or "".join(random.choice(string.ascii_lowercase) for _ in range(10))
     task_config = Config.configure_task(
         id=name,
