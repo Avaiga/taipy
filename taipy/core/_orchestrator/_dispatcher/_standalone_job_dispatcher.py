@@ -42,7 +42,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
     def run(self):
         with self._executor:
             super().run()
-        self._logger.info("Standalone job dispatcher: Pool executor shut down")
+        self._logger.debug("Standalone job dispatcher: Pool executor shut down")
 
     def _dispatch(self, job: Job):
         """Dispatches the given `Job^` on an available worker for execution.

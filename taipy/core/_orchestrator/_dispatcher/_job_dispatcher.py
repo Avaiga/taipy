@@ -29,6 +29,8 @@ class _JobDispatcher(threading.Thread):
     """Manages job dispatching (instances of `Job^` class) on executors."""
 
     _STOP_FLAG = False
+    stop_wait = True
+    stop_timeout = None
     _logger = _TaipyLogger._get_logger()
 
     def __init__(self, orchestrator: _AbstractOrchestrator):
@@ -53,10 +55,9 @@ class _JobDispatcher(threading.Thread):
             wait (bool): If True, the method will wait for the dispatcher to stop.
             timeout (Optional[float]): The maximum time to wait. If None, the method will wait indefinitely.
         """
+        self.stop_wait = wait
+        self.stop_timeout = timeout
         self._STOP_FLAG = True
-        if wait and self.is_alive():
-            self._logger.debug("Waiting for the dispatcher thread to stop...")
-            self.join(timeout=timeout)
 
     def run(self):
         self._logger.debug("Job dispatcher started.")
@@ -75,6 +76,9 @@ class _JobDispatcher(threading.Thread):
             except Exception as e:
                 self._logger.exception(e)
                 pass
+        if self.stop_wait:
+            self._logger.debug("Waiting for the dispatcher thread to stop...")
+            self.join(timeout=self.stop_timeout)
         self._logger.debug("Job dispatcher stopped.")
 
     @abstractmethod
