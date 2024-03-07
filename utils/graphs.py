@@ -49,10 +49,10 @@ def overlayed_chart(district_name):
 
     data = {
         "Local Level Name": district_data['Local Level Name'],
-        "Total Male": district_data['Total Male'],
-        "Total Female": district_data['Total Female'],
-        "Total Family Member": district_data['Total family number'],
-        "Total Household Number": district_data['Total household number'],
+        "Total Male": district_data['Total Male'].to_list(),
+        "Total Female": district_data['Total Female'].to_list(),
+        "Total Family Member": district_data['Total family number'].to_list(),
+        "Total Household Number": district_data['Total household number'].to_list(),
     }
 
     return data, ['Total Male', "Total Female", "Total Family Member", "Total Household Number"], {"stackgroup": "first_group"}
