@@ -1,4 +1,5 @@
 from taipy.gui import Gui
+from graphs import bar_graph
 
 district = """
 # **District**{: .color-primary} Statistics
@@ -33,11 +34,19 @@ district = """
 
 <br/>
 
-<|Graph goes here|text|class_name=h1|>
+# Visualization in **Graphs**{: .color-primary} 
+
+<|layout|columns=1 1|
+
+<|{bargraph_data}|chart|type=bar|x=Local Level Name|y[1]=Total Male|y[2]=Total Female|layout={bargraph_layout}|>
+|>
 """
 
 district_list = ['KTM', 'PKR']
 selected_district = 'KTM'
+
+bargraph_data, bargraph_layout = bar_graph('Taplejung')
+
 
 pages = {
     "/": "<center><|toggle|theme|><|navbar|></center>",
