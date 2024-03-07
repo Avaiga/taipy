@@ -8,6 +8,19 @@ def on_change_district(state):
         state.selected_district)
     state.bubble_chart_data, state.bubble_chart_marker = bubble_chart(
         state.selected_district)
+    state.total_population, state.total_male_population, state.total_female_population = getDistrictStats(
+        state.selected_district)
+
+
+def getDistrictStats(district: str):
+    district_data = dataset[dataset['District'] == district]
+
+    # Calculate total population, male population, and female population
+    total_population = str(district_data['Total population'].sum())
+    total_male_population = str(district_data['Total Male'].sum())
+    total_female_population = str(district_data['Total Female'].sum())
+
+    return total_population, total_male_population, total_female_population
 
 
 district = """
@@ -26,17 +39,17 @@ district = """
 
 <|card|
 **Total Population**{:.color-primary}
-<|50000|text|class_name=h2|>
+<|{total_population}|text|class_name=h2|>
 |>
 
 <|card|
 **Total Population**{:.color-primary}
-<|50000|text|class_name=h2|>
+<|{total_male_population}|text|class_name=h2|>
 |>
 
 <|card|
 **Total Population**{:.color-primary}
-<|50000|text|class_name=h2|>
+<|{total_female_population}|text|class_name=h2|>
 |>
 
 |>
@@ -57,9 +70,13 @@ district = """
 district_list = dataset['District'].unique().tolist()
 selected_district = district_list[0]
 
-bargraph_data, bargraph_layout = bar_graph('Taplejung')
+
+total_population, total_male_population, total_female_population = getDistrictStats(
+    selected_district)
+
+bargraph_data, bargraph_layout = bar_graph(selected_district)
 bubble_chart_data, bubble_chart_marker = bubble_chart(
-    'Taplejung')
+    selected_district)
 
 
 pages = {
