@@ -1,4 +1,5 @@
 from taipy.gui import Gui
+from data.data import data as dataset
 
 from utils.graphs import bubble_chart_whole
 
@@ -40,8 +41,16 @@ nepal = """
 |>
 """
 
-total_population, total_male_population, total_female_population = (
-    1000, 1000, 1000)
+
+def getNepalStats():
+    total_population = str(dataset['Total population'].sum())
+    total_male_population = str(dataset['Total Male'].sum())
+    total_female_population = str(dataset['Total Female'].sum())
+
+    return total_population, total_male_population, total_female_population
+
+
+total_population, total_male_population, total_female_population = getNepalStats()
 
 bubble_chart_whole_data, bubble_chart_whole_marker, bubble_chart_whole_layout = bubble_chart_whole()
 
