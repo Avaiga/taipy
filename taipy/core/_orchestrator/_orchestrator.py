@@ -329,6 +329,3 @@ class _Orchestrator(_AbstractOrchestrator):
 
         if dispatcher := _OrchestratorFactory._dispatcher:
             dispatcher._execute_jobs_synchronously()
-
-    def is_dispatched(self, job_id: JobId) -> bool:
-        raise NotImplementedError

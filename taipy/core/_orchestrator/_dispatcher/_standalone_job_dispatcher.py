@@ -76,5 +76,5 @@ class _StandaloneJobDispatcher(_JobDispatcher):
     def _is_dispatched(self, job_id: str) -> bool:
         return job_id in self._dispatched_processes.keys()
 
-    def _remove_job(self, job_id: str):
+    def _remove_dispatched_job(self, job_id: str):
         self._pop_dispatched_process(job_id)

@@ -50,5 +50,5 @@ class _DevelopmentJobDispatcher(_JobDispatcher):
     def _is_dispatched(self, job_id: str) -> bool:
         return False
 
-    def _remove_job(self, job_id: str):
+    def _remove_dispatched_job(self, job_id: str):
         pass

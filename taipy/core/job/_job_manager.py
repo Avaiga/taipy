@@ -63,7 +63,7 @@ class _JobManager(_Manager[Job], _VersionMixin):
             super()._delete(job.id)
             from .._orchestrator._orchestrator_factory import _OrchestratorFactory
 
-            _OrchestratorFactory._dispatcher._remove_job(job.id)  # type: ignore
+            _OrchestratorFactory._dispatcher._remove_dispatched_job(job.id)  # type: ignore
         else:
             err = JobNotDeletedException(job.id)
             cls._logger.error(err)

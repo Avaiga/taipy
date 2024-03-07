@@ -146,5 +146,5 @@ class _JobDispatcher(threading.Thread):
         raise NotImplementedError
 
     @abstractmethod
-    def _remove_job(self, job_id: str):
+    def _remove_dispatched_job(self, job_id: str):
         raise NotImplementedError
