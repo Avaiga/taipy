@@ -1,12 +1,21 @@
-from taipy.gui import Gui
+from taipy.gui import Gui, notify
 from graphs import bar_graph, bubble_chart
+from data.data import data as dataset
+
+
+def on_change_district(state):
+    state.bargraph_data, state.bargraph_layout = bar_graph(
+        state.selected_district)
+    state.bubble_chart_data, state.bubble_chart_marker = bubble_chart(
+        state.selected_district)
+
 
 district = """
 # **District**{: .color-primary} Statistics
 
 <|layout|columns=1 1 1|
 
-<|{selected_district}|selector|lov={district_list}|dropdown|>
+<|{selected_district}|selector|lov={district_list}|on_change=on_change_district|dropdown|>
 
 |>
 
@@ -45,8 +54,8 @@ district = """
 |>
 """
 
-district_list = ['KTM', 'PKR']
-selected_district = 'KTM'
+district_list = dataset['District'].unique().tolist()
+selected_district = district_list[0]
 
 bargraph_data, bargraph_layout = bar_graph('Taplejung')
 bubble_chart_data, bubble_chart_marker = bubble_chart(
