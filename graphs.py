@@ -56,3 +56,51 @@ def overlayed_chart(district_name):
     }
 
     return data, ['Total Male', "Total Female", "Total Family Member", "Total Household Number"], {"stackgroup": "first_group"}
+
+
+def radar_chart(district_name):
+    df = dataset
+    # Filter data for the specified district
+    district_data = df[df['District'] == district_name]
+
+    # Sum up the values for the specified columns
+    total_family_number = district_data['Total family number'].sum()
+    total_household_number = district_data['Total household number'].sum()
+    total_male = district_data['Total Male'].sum()
+    total_female = district_data['Total Female'].sum()
+
+    # Categories and values for the radar chart
+    categories = [
+        'Total family number',
+        'Total household number',
+        'Total Male',
+        'Total Female'
+    ]
+    values = [
+        total_family_number,
+        total_household_number,
+        total_male,
+        total_female
+    ]
+
+    data = {
+        "r": values + [values[0]],
+        "theta": categories + [categories[0]],
+
+    }
+
+    print(data)
+    options = {"fill": "toself", "name": district_name}
+
+    layout = {
+        "polar": {
+            "radialaxis": dict(
+                visible=False,
+                range=[0, max(values) + 1000]  # Adjust the range as needed
+            )
+        },
+        "showlegend": True,
+        "title": f'Radar Chart for {district_name}'
+    }
+
+    return data, options, layout
