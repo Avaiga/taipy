@@ -21,7 +21,7 @@ fibonacci = [0, 1]
 for i in range(2, n_numbers):
     fibonacci.append(fibonacci[i - 1] + fibonacci[i - 2])
 
-data = {"index": [i for i in range(1, n_numbers + 1)], "fibonacci": fibonacci}
+data = {"index": list(range(1, n_numbers + 1)), "fibonacci": fibonacci}
 
 page = """
 # TreeMap - Simple

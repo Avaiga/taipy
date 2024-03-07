@@ -512,38 +512,35 @@ const Chart = (props: ChartProp) => {
 
     const onRelayout = useCallback(
         (eventData: PlotRelayoutEvent) => {
-            if (Object.keys(eventData).some((k) => k.startsWith("xaxis."))) {
-                onRangeChange &&
-                    dispatch(createSendActionNameAction(id, module, { action: onRangeChange, ...eventData }));
-                if (config.decimators && !config.types.includes("scatter3d")) {
-                    const backCols = Object.values(config.columns).map((col) => col.dfid);
-                    const eventDataKey = Object.entries(eventData)
-                        .map(([k, v]) => `${k}=${v}`)
-                        .join("-");
-                    const dtKey =
-                        backCols.join("-") +
-                        (config.decimators ? `--${config.decimators.join("")}` : "") +
-                        "--" +
-                        eventDataKey;
-                    setDataKey(dtKey);
-                    dispatch(
-                        createRequestChartUpdateAction(
-                            updateVarName,
-                            id,
-                            module,
-                            backCols,
-                            dtKey,
-                            getDecimatorsPayload(
-                                config.decimators,
-                                plotRef.current,
-                                config.modes,
-                                config.columns,
-                                config.traces,
-                                eventData
-                            )
+            onRangeChange && dispatch(createSendActionNameAction(id, module, { action: onRangeChange, ...eventData }));
+            if (config.decimators && !config.types.includes("scatter3d")) {
+                const backCols = Object.values(config.columns).map((col) => col.dfid);
+                const eventDataKey = Object.entries(eventData)
+                    .map(([k, v]) => `${k}=${v}`)
+                    .join("-");
+                const dtKey =
+                    backCols.join("-") +
+                    (config.decimators ? `--${config.decimators.join("")}` : "") +
+                    "--" +
+                    eventDataKey;
+                setDataKey(dtKey);
+                dispatch(
+                    createRequestChartUpdateAction(
+                        updateVarName,
+                        id,
+                        module,
+                        backCols,
+                        dtKey,
+                        getDecimatorsPayload(
+                            config.decimators,
+                            plotRef.current,
+                            config.modes,
+                            config.columns,
+                            config.traces,
+                            eventData
                         )
-                    );
-                }
+                    )
+                );
             }
         },
         [

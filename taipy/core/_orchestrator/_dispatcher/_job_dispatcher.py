@@ -59,7 +59,7 @@ class _JobDispatcher(threading.Thread):
             self.join(timeout=timeout)
 
     def run(self):
-        self._logger.info("Start job dispatcher...")
+        self._logger.debug("Job dispatcher started.")
         while not self._STOP_FLAG:
             try:
                 if self._can_execute():
@@ -75,7 +75,7 @@ class _JobDispatcher(threading.Thread):
             except Exception as e:
                 self._logger.exception(e)
                 pass
-        self._logger.info("Job dispatcher stopped.")
+        self._logger.debug("Job dispatcher stopped.")
 
     @abstractmethod
     def _can_execute(self) -> bool:
