@@ -35,12 +35,15 @@ nepal = """
 
 <|layout|columns=1 1|class_name=m2|
 
+<|{bubble_chart_whole_data}|chart|mode=markers|x=Total Male|y=Total Female|marker={bubble_chart_whole_marker}|text=Texts|>
 
 |>
 """
 
 total_population, total_male_population, total_female_population = (
     1000, 1000, 1000)
+
+bubble_chart_whole_data, bubble_chart_whole_marker, bubble_chart_whole_layout = bubble_chart_whole()
 
 pages = {
     "/": root_md,

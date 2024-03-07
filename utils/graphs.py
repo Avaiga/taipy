@@ -104,3 +104,38 @@ def radar_chart(district_name):
     }
 
     return data, options, layout
+
+
+def bubble_chart_whole():
+    df = dataset
+
+    aggregated_data = df.groupby('District').agg({
+        'Total Male': 'sum',
+        'Total Female': 'sum',
+        'Total population': 'sum'
+    }).reset_index()
+
+    # Scale the bubble size for better visualization
+    scale_factor = 0.0001
+    bubble_size = aggregated_data['Total population'] * scale_factor
+
+    data = {
+        "Total Male": aggregated_data['Total Male'].to_list(),
+        "Total Female": aggregated_data['Total Female'].to_list(),
+        "Texts": aggregated_data['District'].to_list(),
+    }
+
+    marker = {
+        "size": bubble_size.to_list(),
+        "color": aggregated_data.index.to_list(),
+        "colorscale": "viridis",
+    }
+
+    # Customize the layout
+    layout = {
+        "title": 'Bubble Chart: Aggregated Male vs Female Population by District',
+        "xaxis": dict(title='Total Male Population'),
+        "yaxis": dict(title='Total Female Population'),
+        "legend": dict(title='District')
+    }
+    return data, marker, layout
