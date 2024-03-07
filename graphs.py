@@ -40,3 +40,19 @@ def bubble_chart(district_name):
 
     # Show the bubble chart
     return data, marker
+
+
+def overlayed_chart(district_name):
+    df = dataset
+    # Filter data for the specified district
+    district_data = df[df['District'] == district_name]
+
+    data = {
+        "Local Level Name": district_data['Local Level Name'],
+        "Total Male": district_data['Total Male'],
+        "Total Female": district_data['Total Female'],
+        "Total Family Member": district_data['Total family number'],
+        "Total Household Number": district_data['Total household number'],
+    }
+
+    return data, ['Total Male', "Total Female", "Total Family Member", "Total Household Number"], {"stackgroup": "first_group"}

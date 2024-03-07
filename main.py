@@ -1,5 +1,5 @@
 from taipy.gui import Gui, notify
-from graphs import bar_graph, bubble_chart
+from graphs import bar_graph, bubble_chart, overlayed_chart
 from data.data import data as dataset
 
 
@@ -9,6 +9,8 @@ def on_change_district(state):
     state.bubble_chart_data, state.bubble_chart_marker = bubble_chart(
         state.selected_district)
     state.total_population, state.total_male_population, state.total_female_population = getDistrictStats(
+        state.selected_district)
+    state.overlay_data, state.y_labels, state.options = overlayed_chart(
         state.selected_district)
 
 
@@ -58,15 +60,22 @@ district = """
 
 # Visualization in **Graphs**{: .color-primary} 
 
-<|layout|columns=1 1|gap=100px|
+<|layout|columns=1 1|gap=100px|class_name=m2|
 
 <|{bargraph_data}|chart|type=bar|x=Local Level Name|y[1]=Total Male|y[2]=Total Female|layout={bargraph_layout}|>
 
 <|{bubble_chart_data}|chart|mode=markers|x=Total Male|y=Total Female|marker={bubble_chart_marker}|text=Texts|>
 
 |>
-"""
 
+<br/>
+
+<|layout|columns=1 1|gap=100px|class_name=m2|
+
+<|{overlay_data}|chart|mode=none|x=Local Level Name|y={y_labels}|options={options}|>
+
+|>
+"""
 district_list = dataset['District'].unique().tolist()
 selected_district = district_list[0]
 
@@ -78,6 +87,7 @@ bargraph_data, bargraph_layout = bar_graph(selected_district)
 bubble_chart_data, bubble_chart_marker = bubble_chart(
     selected_district)
 
+overlay_data, y_labels, options = overlayed_chart(selected_district)
 
 pages = {
     "/": "<center><|toggle|theme|><|navbar|></center>",
