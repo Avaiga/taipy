@@ -144,11 +144,3 @@ class _JobDispatcher(threading.Thread):
     def _update_job_status(job: Job, exceptions):
         job.update_status(exceptions)
         _JobManagerFactory._build_manager()._set(job)
-
-    @abstractmethod
-    def _is_dispatched(self, job_id: str) -> bool:
-        raise NotImplementedError
-
-    @abstractmethod
-    def _remove_dispatched_job(self, job_id: str):
-        raise NotImplementedError

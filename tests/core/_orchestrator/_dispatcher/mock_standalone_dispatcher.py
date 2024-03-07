@@ -38,13 +38,10 @@ class MockStandaloneDispatcher(_StandaloneJobDispatcher):
     def __init__(self, orchestrator: _AbstractOrchestrator):
         super(_StandaloneJobDispatcher, self).__init__(orchestrator)
         self._executor: Executor = MockProcessPoolExecutor()
-        self._dispatched_processes: Dict = {}
         self._nb_available_workers = 1
 
         self.dispatch_calls: List = []
         self.release_worker_calls: List = []
-        self.set_dispatch_processes_calls: List = []
-        self.pop_dispatch_processes_calls: List = []
         self.update_job_status_from_future_calls: List = []
 
     def mock_exception_for_job(self, task_id, e: Exception):
@@ -53,14 +50,6 @@ class MockStandaloneDispatcher(_StandaloneJobDispatcher):
     def _dispatch(self, job: Job):
         self.dispatch_calls.append(job)
         super()._dispatch(job)
-
-    def _set_dispatched_processes(self, job_id, future):
-        self.set_dispatch_processes_calls.append((job_id, future))
-        super()._set_dispatched_processes(job_id, future)
-
-    def _pop_dispatched_process(self, job_id, default=None):
-        self.pop_dispatch_processes_calls.append(job_id)
-        return super()._pop_dispatched_process(job_id, default)
 
     def _release_worker(self, _):
         self.release_worker_calls.append(None)

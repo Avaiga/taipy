@@ -70,11 +70,6 @@ def test_dispatch_job():
     assert submit_first_call[1] == ()
     assert submit_first_call[2]["config_as_string"] == _TomlSerializer()._serialize(Config._applied_config)
 
-    # test that the proc of the job is added to the list of dispatched jobs
-    assert len(dispatcher.set_dispatch_processes_calls) == 1
-    assert dispatcher.set_dispatch_processes_calls[0][0] == job.id
-    assert dispatcher.set_dispatch_processes_calls[0][1] == dispatcher._executor.f[0]
-
     # test that the worker is released after the job is done
     assert len(dispatcher.release_worker_calls) == 1
 
@@ -113,11 +108,7 @@ def test_update_job_status_from_future():
     dispatcher = _StandaloneJobDispatcher(orchestrator)
     ft = Future()
     ft.set_result(None)
-    dispatcher._set_dispatched_processes(job.id, ft)  # the job is dispatched to a process
-
     dispatcher._update_job_status_from_future(job, ft)
-
-    assert len(dispatcher._dispatched_processes) == 0  # the job process is not stored anymore
     assert job.is_completed()
 
 

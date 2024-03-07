@@ -32,7 +32,6 @@ class _StandaloneJobDispatcher(_JobDispatcher):
             max_workers=max_workers,
             initializer=subproc_initializer,
         )  # type: ignore
-        self._dispatched_processes: Dict[str, Any] = {}
         self._nb_available_workers = self._executor._max_workers  # type: ignore
 
     def _can_execute(self) -> bool:
@@ -55,26 +54,12 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         config_as_string = _TomlSerializer()._serialize(Config._applied_config)  # type: ignore[attr-defined]
         future = self._executor.submit(_TaskFunctionWrapper(job.id, job.task), config_as_string=config_as_string)
 
-        self._set_dispatched_processes(job.id, future)  # type: ignore
         future.add_done_callback(self._release_worker)  # We must release the worker before updating the job status
         # so that the worker is available for another job as soon as possible.
         future.add_done_callback(partial(self._update_job_status_from_future, job))
-
-    def _set_dispatched_processes(self, job_id, process):
-        self._dispatched_processes[job_id] = process
 
     def _release_worker(self, _):
         self._nb_available_workers += 1
 
     def _update_job_status_from_future(self, job: Job, ft):
-        self._pop_dispatched_process(job.id)  # type: ignore
         self._update_job_status(job, ft.result())
-
-    def _pop_dispatched_process(self, job_id: str, default=None):
-        return self._dispatched_processes.pop(job_id, default)
-
-    def _is_dispatched(self, job_id: str) -> bool:
-        return job_id in self._dispatched_processes.keys()
-
-    def _remove_dispatched_job(self, job_id: str):
-        self._pop_dispatched_process(job_id)

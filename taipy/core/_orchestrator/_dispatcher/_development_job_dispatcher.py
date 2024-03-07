@@ -46,9 +46,3 @@ class _DevelopmentJobDispatcher(_JobDispatcher):
         """
         rs = _TaskFunctionWrapper(job.id, job.task).execute()
         self._update_job_status(job, rs)
-
-    def _is_dispatched(self, job_id: str) -> bool:
-        return False
-
-    def _remove_dispatched_job(self, job_id: str):
-        pass

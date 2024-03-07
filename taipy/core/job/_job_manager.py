@@ -61,9 +61,6 @@ class _JobManager(_Manager[Job], _VersionMixin):
     def _delete(cls, job: Job, force=False):
         if cls._is_deletable(job) or force:
             super()._delete(job.id)
-            from .._orchestrator._orchestrator_factory import _OrchestratorFactory
-
-            _OrchestratorFactory._dispatcher._remove_dispatched_job(job.id)  # type: ignore
         else:
             err = JobNotDeletedException(job.id)
             cls._logger.error(err)
