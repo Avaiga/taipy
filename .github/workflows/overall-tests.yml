@@ -11,8 +11,35 @@ jobs:
   partial-tests:
     uses: ./.github/workflows/partial-tests.yml
 
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        id: install-dependencies
+        uses: ./.github/actions/install
+        with:
+          python-version: '3.11'
+          os: 'ubuntu-latest'
+          pipfile-version: 'min'
+
+      - name: Pytest
+        run: |
+          pipenv run pytest --cov=taipy --cov-report="xml:overall-coverage.xml" tests
+
+      - name: Coverage
+        uses: orgoro/coverage@v3.1
+        with:
+          coverageFile: overall-coverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+
   overall-tests:
-    needs: [partial-tests]
+    needs: [coverage, partial-tests]
     timeout-minutes: 50
     strategy:
       fail-fast: false
@@ -37,17 +64,11 @@ jobs:
           pipfile-version: ${{ matrix.pipfile-version }}
 
       - name: Pytest
-        run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone and not teste2e" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
-
-      - name: Coverage
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' && matrix.pipfile-version == 'min'
-        uses: MishaKav/pytest-coverage-comment@main
-        with:
-          pytest-xml-coverage-path: ./overall-coverage.xml
-          title: Taipy Overall Coverage Report
+        run: |
+          pipenv run pytest -m "not orchestrator_dispatcher and not standalone and not teste2e" tests
 
   intermittent-tests:
-    needs: [partial-tests]
+    needs: [coverage, partial-tests]
     timeout-minutes: 40
     strategy:
       fail-fast: false
