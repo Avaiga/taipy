@@ -139,3 +139,27 @@ def bubble_chart_whole():
         "legend": dict(title='District')
     }
     return data, marker, layout
+
+
+def treemap_whole():
+    df = dataset
+    # Group data by District name and calculate total population for each district
+    district_population = df.groupby(
+        'District')['Total population'].sum().reset_index()
+
+    # Aggregate population for each district
+    aggregated_data = district_population.groupby(
+        'District')['Total population'].sum().reset_index()
+
+    # Sort by total population in descending order
+    aggregated_data = aggregated_data.sort_values(
+        by='Total population', ascending=False)
+
+    data = {"label": aggregated_data['District'].to_list(),
+            "parents": ['']*len(aggregated_data),
+            "values": aggregated_data['Total population'].to_list()}
+    # Update layout for the Treemap
+
+    layout = {"title": "Treemap of Districts in Nepal by Total Population"}
+    # Show the Treemap
+    return data

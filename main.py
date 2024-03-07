@@ -1,7 +1,7 @@
 from taipy.gui import Gui
 from data.data import data as dataset
 
-from utils.graphs import bubble_chart_whole
+from utils.graphs import bubble_chart_whole, treemap_whole
 
 from pages.root import root_md
 from pages.district.district import district_md
@@ -38,6 +38,8 @@ nepal = """
 
 <|{bubble_chart_whole_data}|chart|mode=markers|x=Total Male|y=Total Female|marker={bubble_chart_whole_marker}|text=Texts|>
 
+<|{treemaps_data}|chart|type=treemap|labels=label|values=values|>
+
 |>
 """
 
@@ -54,6 +56,7 @@ total_population, total_male_population, total_female_population = getNepalStats
 
 bubble_chart_whole_data, bubble_chart_whole_marker, bubble_chart_whole_layout = bubble_chart_whole()
 
+treemaps_data = treemap_whole()
 pages = {
     "/": root_md,
     "district": district_md,
