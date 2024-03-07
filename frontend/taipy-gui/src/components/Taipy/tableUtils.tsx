@@ -128,7 +128,10 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     size?: "small" | "medium";
     defaultKey?: string; // for testing purposes only
     userData?: unknown;
+    downloadable?: boolean;
 }
+
+export const DownloadAction = "__Taipy__download_csv";
 
 export type PageSizeOptionsType = (
     | number

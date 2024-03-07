@@ -375,7 +375,11 @@ class _PandasDataAccessor(_DataAccessor):
                         except Exception as e:
                             _warn(f"Limit rows error with {decimator} for Dataframe", e)
             value = self.__build_transferred_cols(gui, columns, t.cast(pd.DataFrame, value), is_copied=is_copied)
-            dictret = self.__format_data(value, data_format, "list", data_extraction=True)
+            if payload.get("csv") is True:
+                ret_payload["df"] = value
+                dictret = None
+            else:
+                dictret = self.__format_data(value, data_format, "list", data_extraction=True)
         ret_payload["value"] = dictret
         return ret_payload
 

@@ -17,7 +17,6 @@ import inspect
 import json
 import math
 import os
-import pathlib
 import re
 import sys
 import tempfile
@@ -26,6 +25,8 @@ import typing as t
 import warnings
 from importlib import metadata, util
 from importlib.util import find_spec
+from pathlib import Path
+from tempfile import mkstemp
 from types import FrameType, FunctionType, LambdaType, ModuleType, SimpleNamespace
 from urllib.parse import unquote, urlencode, urlparse
 
@@ -224,6 +225,8 @@ class Gui:
     _HTML_CONTENT_KEY = "__taipy_html_content"
     __USER_CONTENT_CB = "custom_user_content_cb"
     __ROBOTO_FONT = "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+    __DOWNLOAD_ACTION = "__Taipy__download_csv"
+    __DOWNLOAD_DELETE_ACTION = "__Taipy__download_delete_csv"
 
     __RE_HTML = re.compile(r"(.*?)\.html$")
     __RE_MD = re.compile(r"(.*?)\.md$")
@@ -342,7 +345,7 @@ class Gui:
 
         # get taipy version
         try:
-            gui_file = pathlib.Path(__file__ or ".").resolve()
+            gui_file = Path(__file__ or ".").resolve()
             with open(gui_file.parent / "version.json") as version_file:
                 self.__version = json.load(version_file)
         except Exception as e:  # pragma: no cover
@@ -898,7 +901,7 @@ class Gui:
                     elts.append(elt_dict)
         status.update({"libraries": libraries})
 
-    def _serve_status(self, template: pathlib.Path) -> t.Dict[str, t.Dict[str, str]]:
+    def _serve_status(self, template: Path) -> t.Dict[str, t.Dict[str, str]]:
         base_json: t.Dict[str, t.Any] = {"user_status": str(self.__call_on_status() or "")}
         if self._get_config("extended_status", False):
             base_json.update(
@@ -942,7 +945,7 @@ class Gui:
                 suffix = f".part.{part}"
                 complete = part == total - 1
         if file:  # and allowed_file(file.filename)
-            upload_path = pathlib.Path(self._get_config("upload_folder", tempfile.gettempdir())).resolve()
+            upload_path = Path(self._get_config("upload_folder", tempfile.gettempdir())).resolve()
             file_path = _get_non_existent_file_path(upload_path, secure_filename(file.filename))
             file.save(str(upload_path / (file_path.name + suffix)))
             if complete:
@@ -1320,6 +1323,30 @@ class Gui:
             cls = self.__locals_context.get_default().get(class_name)
         return cls if isinstance(cls, class_type) else class_name
 
+    def __download_csv(self, state: State, var_name: str, payload: dict):
+        ret = self._accessors._get_data(
+            self,
+            payload.get("var_name"),
+            _getscopeattr(self, payload.get("var_name"), None),
+            {"alldata": True, "csv": True},
+        )
+        if isinstance(ret, dict):
+            df = ret.get("df")
+            try:
+                fd, temp_path = mkstemp(".csv", "data", text=True)
+                with os.fdopen(fd, "wt", newline="") as csv_file:
+                    df.to_csv(csv_file, index=False) # type:ignore
+                self._download(temp_path, "data.csv", Gui.__DOWNLOAD_DELETE_ACTION)
+            except Exception as e:  # pragma: no cover
+                if not self._call_on_exception("download_csv", e):
+                    _warn("download_csv(): Exception raised", e)
+
+    def __delete_csv(self, state: State, var_name: str, payload: dict):
+        try:
+            (Path(tempfile.gettempdir()) / t.cast(str, payload.get("args", [])[-1]).split("/")[-1]).unlink(True)
+        except Exception:
+            pass
+
     def __on_action(self, id: t.Optional[str], payload: t.Any) -> None:
         if isinstance(payload, dict):
             action = payload.get("action")
@@ -1327,7 +1354,15 @@ class Gui:
             action = str(payload)
             payload = {"action": action}
         if action:
-            if self.__call_function_with_args(action_function=self._get_user_function(action), id=id, payload=payload):
+            action_fn: t.Union[t.Callable, str]
+            if Gui.__DOWNLOAD_ACTION == action:
+                action_fn = self.__download_csv
+                payload["var_name"] = id
+            elif Gui.__DOWNLOAD_DELETE_ACTION == action:
+                action_fn = self.__delete_csv
+            else:
+                action_fn = self._get_user_function(action)
+            if self.__call_function_with_args(action_function=action_fn, id=id, payload=payload):
                 return
             else:  # pragma: no cover
                 _warn(f"on_action(): '{action}' is not a valid function.")
@@ -1911,7 +1946,7 @@ class Gui:
             else:
                 _warn("download() on_action is invalid.")
         content_str = self._get_content("Gui.download", content, False)
-        self.__send_ws_download(content_str, str(name), str(on_action))
+        self.__send_ws_download(content_str, str(name), str(on_action) if on_action is not None else "")
 
     def _notify(
         self,
@@ -2133,7 +2168,7 @@ class Gui:
 
     def _set_css_file(self, css_file: t.Optional[str] = None):
         if css_file is None:
-            script_file = pathlib.Path(self.__frame.f_code.co_filename or ".").resolve()
+            script_file = Path(self.__frame.f_code.co_filename or ".").resolve()
             if script_file.with_suffix(".css").exists():
                 css_file = f"{script_file.stem}.css"
             elif script_file.is_dir() and (script_file / "taipy.css").exists():
@@ -2146,9 +2181,9 @@ class Gui:
 
     def _get_webapp_path(self):
         _conf_webapp_path = (
-            pathlib.Path(self._get_config("webapp_path", None)) if self._get_config("webapp_path", None) else None
+            Path(self._get_config("webapp_path", None)) if self._get_config("webapp_path", None) else None
         )
-        _webapp_path = str((pathlib.Path(__file__).parent / "webapp").resolve())
+        _webapp_path = str((Path(__file__).parent / "webapp").resolve())
         if _conf_webapp_path:
             if _conf_webapp_path.is_dir():
                 _webapp_path = str(_conf_webapp_path.resolve())

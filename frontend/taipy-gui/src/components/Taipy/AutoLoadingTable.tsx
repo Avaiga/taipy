@@ -30,6 +30,7 @@ import Tooltip from "@mui/material/Tooltip";
 import AddIcon from "@mui/icons-material/Add";
 import DataSaverOn from "@mui/icons-material/DataSaverOn";
 import DataSaverOff from "@mui/icons-material/DataSaverOff";
+import Download from "@mui/icons-material/Download";
 
 import {
     createRequestInfiniteTableUpdateAction,
@@ -61,6 +62,7 @@ import {
     getTooltip,
     defaultColumns,
     OnRowClick,
+    DownloadAction,
 } from "./tableUtils";
 import {
     useClassNames,
@@ -181,6 +183,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         onAction = "",
         size = DEFAULT_SIZE,
         userData,
+        downloadable = false,
     } = props;
     const [rows, setRows] = useState<RowType[]>([]);
     const [rowCount, setRowCount] = useState(1000); // need something > 0 to bootstrap the infinite loader
@@ -274,7 +277,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         col.tooltip = props.tooltip;
                     }
                 });
-                addDeleteColumn((active && (onAdd || onDelete) ? 1 : 0) + (active && filter ? 1 : 0), baseColumns);
+                addDeleteColumn((active && (onAdd || onDelete) ? 1 : 0) + (active && filter ? 1 : 0) + (active && downloadable ? 1 : 0), baseColumns);
                 const colsOrder = Object.keys(baseColumns).sort(getsortByIndex(baseColumns));
                 const styTt = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
                     if (baseColumns[col].style) {
@@ -305,7 +308,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             hNan,
             false,
         ];
-    }, [active, editable, onAdd, onDelete, baseColumns, props.lineStyle, props.tooltip, props.nanValue, props.filter]);
+    }, [active, editable, onAdd, onDelete, baseColumns, props.lineStyle, props.tooltip, props.nanValue, props.filter, downloadable]);
 
     const boxBodySx = useMemo(() => ({ height: height }), [height]);
 
@@ -403,6 +406,17 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 })
             ),
         [visibleStartIndex, dispatch, updateVarName, onAdd, module, userData]
+    );
+
+    const onDownload = useCallback(
+        () =>
+            dispatch(
+                createSendActionNameAction(updateVarName, module, {
+                    action: DownloadAction,
+                    user_data: userData,
+                })
+            ),
+        [dispatch, updateVarName, module, userData]
     );
 
     const isItemLoaded = useCallback((index: number) => index < rows.length && !!rows[index], [rows]);
@@ -549,6 +563,17 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                                             appliedFilters={appliedFilters}
                                                             className={className}
                                                         />
+                                                    ) : null,
+                                                    active && downloadable ? (
+                                                        <Tooltip title="Download as CSV" key="downloadCsv">
+                                                            <IconButton
+                                                                onClick={onDownload}
+                                                                size="small"
+                                                                sx={iconInRowSx}
+                                                            >
+                                                                <Download fontSize="inherit" />
+                                                            </IconButton>
+                                                        </Tooltip>
                                                     ) : null,
                                                 ]
                                             ) : (
