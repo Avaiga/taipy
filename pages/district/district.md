@@ -16,12 +16,12 @@
 |>
 
 <|card|
-**Total Population**{:.color-primary}
+**Total Male Population**{:.color-primary}
 <|{total_male_population}|text|class_name=h2|>
 |>
 
 <|card|
-**Total Population**{:.color-primary}
+**Total Female Population**{:.color-primary}
 <|{total_female_population}|text|class_name=h2|>
 |>
 
@@ -35,7 +35,7 @@
 
 <|{bargraph_data}|chart|type=bar|x=Local Level Name|y[1]=Total Male|y[2]=Total Female|layout={bargraph_layout}|>
 
-<|{bubble_chart_data}|chart|mode=markers|x=Total Male|y=Total Female|marker={bubble_chart_marker}|text=Texts|>
+<|{pie_chart_data}|chart|type=pie|values=values|labels=labels|>
 
 |>
 

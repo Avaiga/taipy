@@ -1,4 +1,4 @@
-from utils.graphs import bar_graph, bubble_chart, overlayed_chart, radar_chart
+from utils.graphs import bar_graph, overlayed_chart, radar_chart, pie_chart
 
 from data.data import data as dataset
 
@@ -8,7 +8,7 @@ from taipy.gui import Markdown
 def on_change_district(state):
     state.bargraph_data, state.bargraph_layout = bar_graph(
         state.selected_district)
-    state.bubble_chart_data, state.bubble_chart_marker = bubble_chart(
+    state.pie_chart_data = pie_chart(
         state.selected_district)
     state.total_population, state.total_male_population, state.total_female_population = getDistrictStats(
         state.selected_district)
@@ -37,9 +37,9 @@ total_population, total_male_population, total_female_population = getDistrictSt
     selected_district)
 
 bargraph_data, bargraph_layout = bar_graph(selected_district)
-bubble_chart_data, bubble_chart_marker = bubble_chart(selected_district)
 overlay_data, y_labels, options = overlayed_chart(selected_district)
 radar_data, radar_options, radar_layout = radar_chart(selected_district)
+pie_chart_data = pie_chart(selected_district)
 
 
 district_md = Markdown("pages/district/district.md")

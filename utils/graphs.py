@@ -1,4 +1,5 @@
 from data.data import data as dataset
+import random
 
 
 def bar_graph(district):
@@ -17,29 +18,6 @@ def bar_graph(district):
     }
 
     return filtered_data, layout
-
-
-def bubble_chart(district_name):
-    df = dataset
-    # Filter data for the specified district
-    district_data = df[df['District'] == district_name]
-
-    bubble_size = district_data['Total population'] * 0.001
-
-    data = {
-        "Total Male": district_data['Total Male'].to_list(),
-        "Total Female": district_data['Total Female'].to_list(),
-        "Texts": district_data['Local Level Name'].to_list()
-    }
-
-    marker = {
-        "size": bubble_size.to_list(),  # Scale bubble size
-        "color": district_data.index,
-        "colorscale": 'viridis'
-    }
-
-    # Show the bubble chart
-    return data, marker
 
 
 def overlayed_chart(district_name):
@@ -89,7 +67,6 @@ def radar_chart(district_name):
 
     }
 
-    print(data)
     options = {"fill": "toself", "name": district_name}
 
     layout = {
@@ -104,6 +81,21 @@ def radar_chart(district_name):
     }
 
     return data, options, layout
+
+
+def pie_chart(district_name):
+    df = dataset
+    district_data = df[df['District'] == district_name]
+
+    # Group data by Local Level Name and calculate total population for each local level
+    local_level_population = district_data.groupby(
+        'Local Level Name')['Total population'].sum().reset_index()
+
+    data = {
+        "values": local_level_population['Total population'].to_list(),
+        "labels": local_level_population['Local Level Name'].to_list()
+    }
+    return data
 
 
 def bubble_chart_whole():
@@ -163,3 +155,39 @@ def treemap_whole():
     layout = {"title": "Treemap of Districts in Nepal by Total Population"}
     # Show the Treemap
     return data
+
+
+def bar_graph_whole():
+    df = dataset
+
+    # Group by district and sum the Male and Female populations
+    grouped_data = df.groupby('District', as_index=False).agg({
+        'Total Male': 'sum',
+        'Total Female': 'sum'
+    })
+
+    layout = {
+        "title": 'Total Male and Female Population of Nepal',
+        "xaxis": dict(title='District'),
+        "yaxis": dict(title='Population'),
+        "barmode": 'group'
+    }
+
+    return grouped_data, layout
+
+
+def overlayed_chart_whole():
+    df = dataset
+
+    grouped_data = df.groupby('District', as_index=False).agg({
+        'Total Male': 'sum',
+        'Total Female': 'sum',
+    })
+
+    data = {
+        "District": grouped_data['District'].to_list(),
+        "Total Male": grouped_data['Total Male'].to_list(),
+        "Total Female": grouped_data['Total Female'].to_list(),
+    }
+
+    return data, ['Total Male', "Total Female"], {"stackgroup": "first_group"}
