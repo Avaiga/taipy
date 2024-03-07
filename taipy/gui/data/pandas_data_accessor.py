@@ -262,6 +262,7 @@ class _PandasDataAccessor(_DataAccessor):
             except Exception as e:
                 _warn(f"Dataframe filtering: invalid query '{query}' on {value.head()}", e)
 
+        dictret: t.Optional[t.Dict[str, t.Any]]
         if paged:
             aggregates = payload.get("aggregates")
             applies = payload.get("applies")
