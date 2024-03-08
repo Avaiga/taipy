@@ -308,30 +308,30 @@ export const EditableCell = (props: EditableCellProps) => {
     const onCheckClick = useCallback(
         (evt?: MouseEvent<HTMLElement>) => {
             evt && evt.stopPropagation();
-            let castedVal = val;
+            let castVal = val;
             switch (colDesc.type) {
                 case "bool":
-                    castedVal = isBooleanTrue(val as RowValue);
+                    castVal = isBooleanTrue(val as RowValue);
                     break;
                 case "int":
                     try {
-                        castedVal = parseInt(val as string, 10);
+                        castVal = parseInt(val as string, 10);
                     } catch (e) {
                         // ignore
                     }
                     break;
                 case "float":
                     try {
-                        castedVal = parseFloat(val as string);
+                        castVal = parseFloat(val as string);
                     } catch (e) {
                         // ignore
                     }
                     break;
                 case "datetime":
                     if (val === null) {
-                        castedVal = val;
+                        castVal = val;
                     } else if (isValid(val)) {
-                        castedVal = dateToString(
+                        castVal = dateToString(
                             getTimeZonedDate(val as Date, formatConfig.timeZone, withTime),
                             withTime
                         );
@@ -342,7 +342,7 @@ export const EditableCell = (props: EditableCellProps) => {
             }
             onValidation &&
                 onValidation(
-                    castedVal as RowValue,
+                    castVal as RowValue,
                     rowIndex,
                     colDesc.dfid,
                     val as string,
