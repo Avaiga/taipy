@@ -13,7 +13,7 @@ import threading
 import time
 from abc import abstractmethod
 from queue import Empty
-from typing import Dict, Optional
+from typing import Optional
 
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -29,9 +29,9 @@ class _JobDispatcher(threading.Thread):
     """Manages job dispatching (instances of `Job^` class) on executors."""
 
     _STOP_FLAG = False
-    _dispatched_processes: Dict = {}
+    stop_wait = True
+    stop_timeout = None
     _logger = _TaipyLogger._get_logger()
-    _nb_available_workers: int = 1
 
     def __init__(self, orchestrator: _AbstractOrchestrator):
         threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
@@ -55,10 +55,9 @@ class _JobDispatcher(threading.Thread):
             wait (bool): If True, the method will wait for the dispatcher to stop.
             timeout (Optional[float]): The maximum time to wait. If None, the method will wait indefinitely.
         """
+        self.stop_wait = wait
+        self.stop_timeout = timeout
         self._STOP_FLAG = True
-        if wait and self.is_alive():
-            self._logger.debug("Waiting for the dispatcher thread to stop...")
-            self.join(timeout=timeout)
 
     def run(self):
         self._logger.debug("Job dispatcher started.")
@@ -77,11 +76,15 @@ class _JobDispatcher(threading.Thread):
             except Exception as e:
                 self._logger.exception(e)
                 pass
+        if self.stop_wait:
+            self._logger.debug("Waiting for the dispatcher thread to stop...")
+            self.join(timeout=self.stop_timeout)
         self._logger.debug("Job dispatcher stopped.")
 
+    @abstractmethod
     def _can_execute(self) -> bool:
-        """Returns True if the dispatcher have resources to execute a new job."""
-        return self._nb_available_workers > 0
+        """Returns True if the dispatcher have resources to dispatch a new job."""
+        raise NotImplementedError
 
     def _execute_job(self, job: Job):
         if job.force or self._needs_to_run(job.task):
@@ -141,11 +144,3 @@ class _JobDispatcher(threading.Thread):
     def _update_job_status(job: Job, exceptions):
         job.update_status(exceptions)
         _JobManagerFactory._build_manager()._set(job)
-
-    @classmethod
-    def _set_dispatched_processes(cls, job_id, process):
-        cls._dispatched_processes[job_id] = process
-
-    @classmethod
-    def _pop_dispatched_process(cls, job_id, default=None):
-        return cls._dispatched_processes.pop(job_id, default)  # type: ignore

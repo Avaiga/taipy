@@ -23,6 +23,9 @@ class _DevelopmentJobDispatcher(_JobDispatcher):
     def __init__(self, orchestrator: _AbstractOrchestrator):
         super().__init__(orchestrator)
 
+    def _can_execute(self) -> bool:
+        return True
+
     def start(self):
         raise NotImplementedError
 

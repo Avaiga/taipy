@@ -37,6 +37,7 @@ class _Orchestrator(_AbstractOrchestrator):
 
     jobs_to_run: Queue = Queue()
     blocked_jobs: List = []
+
     lock = Lock()
     __logger = _TaipyLogger._get_logger()
 
@@ -255,7 +256,7 @@ class _Orchestrator(_AbstractOrchestrator):
             cls.__logger.info(f"{job.id} has already failed and cannot be canceled.")
         else:
             with cls.lock:
-                to_cancel_or_abandon_jobs = set([job])
+                to_cancel_or_abandon_jobs = {job}
                 to_cancel_or_abandon_jobs.update(cls.__find_subsequent_jobs(job.submit_id, set(job.task.output.keys())))
                 cls.__remove_blocked_jobs(to_cancel_or_abandon_jobs)
                 cls.__remove_jobs_to_run(to_cancel_or_abandon_jobs)
@@ -307,10 +308,9 @@ class _Orchestrator(_AbstractOrchestrator):
 
     @classmethod
     def _cancel_jobs(cls, job_id_to_cancel: JobId, jobs: Set[Job]):
-        from ._orchestrator_factory import _OrchestratorFactory
 
         for job in jobs:
-            if job.id in _OrchestratorFactory._dispatcher._dispatched_processes.keys():  # type: ignore
+            if job.is_running():
                 cls.__logger.info(f"{job.id} is running and cannot be canceled.")
             elif job.is_completed():
                 cls.__logger.info(f"{job.id} has already been completed and cannot be canceled.")

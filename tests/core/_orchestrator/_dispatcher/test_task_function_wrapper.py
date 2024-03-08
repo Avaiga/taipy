@@ -17,7 +17,6 @@ from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions import ConfigurationUpdateBlocked
 from taipy.core._orchestrator._dispatcher._task_function_wrapper import _TaskFunctionWrapper
-from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.task.task import Task
 
@@ -84,9 +83,7 @@ def test_execute_task_that_returns_single_iterable_output():
     _TaskFunctionWrapper("job_id_list", task_with_list).execute()
 
     assert task_with_tuple.output[f"{task_with_tuple.config_id}_output0"].read() == (42, 21)
-    assert len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0
     assert task_with_list.output[f"{task_with_list.config_id}_output0"].read() == [42, 21]
-    assert len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0
 
 
 def test_data_node_not_written_due_to_wrong_result_nb():
