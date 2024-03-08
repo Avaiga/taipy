@@ -91,8 +91,8 @@ class _Orchestrator(_AbstractOrchestrator):
                             force=force,  # type: ignore
                         )
                     )
-        submission.jobs = jobs  # type: ignore
-        cls._orchestrate_job_to_run_or_block(jobs)
+            submission.jobs = jobs  # type: ignore
+            cls._orchestrate_job_to_run_or_block(jobs)
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         else:
@@ -137,9 +137,9 @@ class _Orchestrator(_AbstractOrchestrator):
                 itertools.chain([cls._update_submission_status], callbacks or []),
                 force,
             )
-        jobs = [job]
-        submission.jobs = jobs  # type: ignore
-        cls._orchestrate_job_to_run_or_block(jobs)
+            jobs = [job]
+            submission.jobs = jobs  # type: ignore
+            cls._orchestrate_job_to_run_or_block(jobs)
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         else:
@@ -232,9 +232,9 @@ class _Orchestrator(_AbstractOrchestrator):
 
     @classmethod
     def __unblock_jobs(cls):
-        for job in cls.blocked_jobs:
-            if not cls._is_blocked(job):
-                with cls.lock:
+        with cls.lock:
+            for job in cls.blocked_jobs:
+                if not cls._is_blocked(job):
                     job.pending()
                     cls.__remove_blocked_job(job)
                     cls.jobs_to_run.put(job)
