@@ -89,7 +89,7 @@ const FileSelector = (props: FileSelectorProps) => {
                 );
             }
         },
-        [state.id, id, onAction, updateVarName, dispatch, module]
+        [state.id, id, onAction, notify, updateVarName, dispatch, module]
     );
 
     const handleChange = useCallback(
