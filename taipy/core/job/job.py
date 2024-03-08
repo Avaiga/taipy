@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 def _run_callbacks(fn):
     def __run_callbacks(job):
         fn(job)
-        _TaipyLogger._get_logger().info(f"{job.id} status has changed to {job.status}.")
+        _TaipyLogger._get_logger().debug(f"{job.id} status has changed to {job.status}.")
         for fct in job._subscribers:
             fct(job)
 
@@ -201,6 +201,7 @@ class Job(_Entity, _Labeled):
     def completed(self):
         """Set the status to _completed_ and notify subscribers."""
         self.status = Status.COMPLETED
+        self.__logger.info(f"job {self.id} is completed.")
 
     @_run_callbacks
     def skipped(self):
@@ -323,7 +324,6 @@ class Job(_Entity, _Labeled):
                 self.__logger.error(st)
         else:
             self.completed()
-            # self.__logger.info(f"job {self.id} is completed.")
 
     def __hash__(self):
         return hash(self.id)
