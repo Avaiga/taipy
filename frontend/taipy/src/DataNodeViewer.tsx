@@ -417,7 +417,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
 
     // Datanode data
     const dtType = props.data && props.data[DatanodeDataProps.type];
-    const dtValue = (props.data && props.data[DatanodeDataProps.value]) ?? ((dtType == "float") ? null : undefined);
+    const dtValue = (props.data && props.data[DatanodeDataProps.value]) ?? (dtType == "float" ? null : undefined);
     const dtTabular = (props.data && props.data[DatanodeDataProps.tabular]) ?? false;
     const dtError = props.data && props.data[DatanodeDataProps.error];
     const [dataValue, setDataValue] = useState<RowValue | Date>();
