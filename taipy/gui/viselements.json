@@ -667,6 +667,12 @@
             "type": "str",
             "default_value": "\"Drop here to Upload\"",
             "doc": "The message that is displayed when the user drags a file above the button."
+          },
+          {
+            "name": "notify",
+            "type": "bool",
+            "default_value": "True",
+            "doc": "If set to False, the user won't be notified of upload finish."
           }
         ]
       }
@@ -1128,7 +1134,7 @@
           {
             "name": "downloadable",
             "type": "boolean",
-            "doc": "The indicator that would show the icon to allow the user to download the data as a csv file if True."
+            "doc": "If True, a clickable icon is shown so the user can download the data as CSV."
           }
         ]
       }

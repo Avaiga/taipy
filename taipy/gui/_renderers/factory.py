@@ -225,6 +225,7 @@ class _Factory:
                 ("extensions",),
                 ("drop_message",),
                 ("hover_text", PropertyType.dynamic_string),
+                ("notify", PropertyType.boolean, True),
             ]
         ),
         "image": lambda gui, control_type, attrs: _Builder(
