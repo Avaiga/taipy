@@ -110,7 +110,7 @@ const Row = ({
         onRowSelection,
         onRowClick,
         lineStyle,
-        nanValue,
+        nanValue
     },
 }: {
     index: number;
@@ -450,12 +450,14 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     );
 
     const onRowSelection: OnRowSelection = useCallback(
-        (rowIndex: number, colName?: string) =>
+        (rowIndex: number, colName?: string, value?: string) =>
             dispatch(
                 createSendActionNameAction(updateVarName, module, {
                     action: onAction,
                     index: getRowIndex(rows[rowIndex], rowIndex),
                     col: colName === undefined ? null : colName,
+                    value,
+                    reason: value === undefined ? "click": "button",
                     user_data: userData,
                 })
             ),
@@ -502,7 +504,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             onRowSelection: active && onAction ? onRowSelection : undefined,
             onRowClick: active && onAction ? onRowClick : undefined,
             lineStyle: props.lineStyle,
-            nanValue: props.nanValue,
+            nanValue: props.nanValue
         }),
         [
             rows,
@@ -521,7 +523,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             onRowClick,
             props.lineStyle,
             props.nanValue,
-            size,
+            size
         ]
     );
 

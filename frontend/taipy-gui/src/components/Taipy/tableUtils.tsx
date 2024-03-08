@@ -39,7 +39,7 @@ import { isValid } from "date-fns";
 import { FormatConfig } from "../../context/taipyReducers";
 import { dateToString, getDateTime, getDateTimeString, getNumberString, getTimeZonedDate } from "../../utils/index";
 import { TaipyActiveProps, TaipyMultiSelectProps, getSuffixedClassNames } from "./utils";
-import { FilterOptionsState, TextField } from "@mui/material";
+import { Button, FilterOptionsState, TextField } from "@mui/material";
 
 /**
  * A column description as received by the backend.
@@ -155,7 +155,7 @@ export const iconInRowSx = { fontSize: "body2.fontSize" };
 export const iconsWrapperSx = { gridColumnStart: 2, display: "flex", alignItems: "center" } as CSSProperties;
 const cellBoxSx = { display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center" } as CSSProperties;
 const tableFontSx = { fontSize: "body2.fontSize" };
-
+const ButtonSx = { minHeight: "unset", mb: "unset", padding: "unset", lineHeight: "unset" };
 export interface OnCellValidation {
     (value: RowValue, rowIndex: number, colName: string, userValue: string, tz?: string): void;
 }
@@ -165,7 +165,7 @@ export interface OnRowDeletion {
 }
 
 export interface OnRowSelection {
-    (rowIndex: number, colName?: string): void;
+    (rowIndex: number, colName?: string, value?: string): void;
 }
 
 export interface OnRowClick {
@@ -220,13 +220,6 @@ const isBooleanTrue = (val: RowValue) =>
 const defaultCursor = { cursor: "default" };
 const defaultCursorIcon = { ...iconInRowSx, "& .MuiSwitch-input": defaultCursor };
 
-const renderCellValue = (val: RowValue | boolean, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string) => {
-    if (val !== null && val !== undefined && col.type && col.type.startsWith("bool")) {
-        return <Switch checked={val as boolean} size="small" title={val ? "True" : "False"} sx={defaultCursorIcon} />;
-    }
-    return <span style={defaultCursor}>{formatValue(val as RowValue, col, formatConf, nanValue)}</span>;
-};
-
 const getCellProps = (col: ColumnDesc, base: Partial<TableCellProps> = {}): Partial<TableCellProps> => {
     switch (col.type) {
         case "bool":
@@ -272,6 +265,8 @@ const filter = createFilterOptions<string>();
 const getOptionKey = (option: string) => (Array.isArray(option) ? option[0] : option);
 const getOptionLabel = (option: string) => (Array.isArray(option) ? option[1] : option);
 
+const onCompleteClose = (evt: SyntheticEvent) => evt.stopPropagation();
+
 export const EditableCell = (props: EditableCellProps) => {
     const {
         onValidation,
@@ -291,55 +286,75 @@ export const EditableCell = (props: EditableCellProps) => {
     const [deletion, setDeletion] = useState(false);
 
     const onChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setVal(e.target.value), []);
-    const onCompleteChange = useCallback((e: SyntheticEvent, value: string | null) => setVal(value), []);
+    const onCompleteChange = useCallback((e: SyntheticEvent, value: string | null) => {
+        e.stopPropagation();
+        setVal(value);
+    }, []);
     const onBoolChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setVal(e.target.checked), []);
     const onDateChange = useCallback((date: Date | null) => setVal(date), []);
 
     const withTime = useMemo(() => !!colDesc.format && colDesc.format.toLowerCase().includes("h"), [colDesc.format]);
 
-    const onCheckClick = useCallback(() => {
-        let castedVal = val;
-        switch (colDesc.type) {
-            case "bool":
-                castedVal = isBooleanTrue(val as RowValue);
-                break;
-            case "int":
-                try {
-                    castedVal = parseInt(val as string, 10);
-                } catch (e) {
-                    // ignore
-                }
-                break;
-            case "float":
-                try {
-                    castedVal = parseFloat(val as string);
-                } catch (e) {
-                    // ignore
-                }
-                break;
-            case "datetime":
-                if (val === null) {
-                    castedVal = val;
-                } else if (isValid(val)) {
-                    castedVal = dateToString(getTimeZonedDate(val as Date, formatConfig.timeZone, withTime), withTime);
-                } else {
-                    return;
-                }
-                break;
+    const button = useMemo(() => {
+        if (onSelection && typeof value == "string" && value.startsWith("[") && value.endsWith(")")) {
+            const parts = value.slice(1, -1).split("](");
+            if (parts.length == 2) {
+                return parts as [string, string];
+            }
         }
-        onValidation &&
-            onValidation(
-                castedVal as RowValue,
-                rowIndex,
-                colDesc.dfid,
-                val as string,
-                colDesc.type == "datetime" ? formatConfig.timeZone : undefined
-            );
-        setEdit((e) => !e);
-    }, [onValidation, val, rowIndex, colDesc.dfid, colDesc.type, formatConfig.timeZone, withTime]);
+        return undefined;
+    }, [value, onSelection]);
+
+    const onCheckClick = useCallback(
+        (evt?: MouseEvent<HTMLElement>) => {
+            evt && evt.stopPropagation();
+            let castedVal = val;
+            switch (colDesc.type) {
+                case "bool":
+                    castedVal = isBooleanTrue(val as RowValue);
+                    break;
+                case "int":
+                    try {
+                        castedVal = parseInt(val as string, 10);
+                    } catch (e) {
+                        // ignore
+                    }
+                    break;
+                case "float":
+                    try {
+                        castedVal = parseFloat(val as string);
+                    } catch (e) {
+                        // ignore
+                    }
+                    break;
+                case "datetime":
+                    if (val === null) {
+                        castedVal = val;
+                    } else if (isValid(val)) {
+                        castedVal = dateToString(
+                            getTimeZonedDate(val as Date, formatConfig.timeZone, withTime),
+                            withTime
+                        );
+                    } else {
+                        return;
+                    }
+                    break;
+            }
+            onValidation &&
+                onValidation(
+                    castedVal as RowValue,
+                    rowIndex,
+                    colDesc.dfid,
+                    val as string,
+                    colDesc.type == "datetime" ? formatConfig.timeZone : undefined
+                );
+            setEdit((e) => !e);
+        },
+        [onValidation, val, rowIndex, colDesc.dfid, colDesc.type, formatConfig.timeZone, withTime]
+    );
 
     const onEditClick = useCallback(
-        (evt?: MouseEvent) => {
+        (evt?: MouseEvent<HTMLElement>) => {
             evt && evt.stopPropagation();
             colDesc.type?.startsWith("date")
                 ? setVal(getDateTime(value as string, formatConfig.timeZone, withTime))
@@ -363,10 +378,14 @@ export const EditableCell = (props: EditableCellProps) => {
         [onCheckClick, onEditClick]
     );
 
-    const onDeleteCheckClick = useCallback(() => {
-        onDeletion && onDeletion(rowIndex);
-        setDeletion((d) => !d);
-    }, [onDeletion, rowIndex]);
+    const onDeleteCheckClick = useCallback(
+        (evt?: MouseEvent<HTMLElement>) => {
+            evt && evt.stopPropagation();
+            onDeletion && onDeletion(rowIndex);
+            setDeletion((d) => !d);
+        },
+        [onDeletion, rowIndex]
+    );
 
     const onDeleteClick = useCallback(
         (evt?: MouseEvent) => {
@@ -391,11 +410,11 @@ export const EditableCell = (props: EditableCellProps) => {
     );
 
     const onSelect = useCallback(
-        (e: MouseEvent<HTMLDivElement>) => {
+        (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            onSelection && onSelection(rowIndex, colDesc.dfid);
+            onSelection && onSelection(rowIndex, colDesc.dfid, button && button[1]);
         },
-        [onSelection, rowIndex, colDesc.dfid]
+        [onSelection, rowIndex, colDesc.dfid, button]
     );
 
     const filterOptions = useCallback(
@@ -490,6 +509,7 @@ export const EditableCell = (props: EditableCellProps) => {
                             freeSolo={!!colDesc.freeLov}
                             value={val as string}
                             onChange={onCompleteChange}
+                            onOpen={onCompleteClose}
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
@@ -501,6 +521,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                     sx={tableFontSx}
                                 />
                             )}
+                            disableClearable={!colDesc.freeLov}
                         />
                         <Box sx={iconsWrapperSx}>
                             <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
@@ -558,8 +579,23 @@ export const EditableCell = (props: EditableCellProps) => {
                 ) : null
             ) : (
                 <Box sx={cellBoxSx} onClick={onSelect}>
-                    {renderCellValue(value, colDesc, formatConfig, nanValue)}
-                    {onValidation ? (
+                    {button ? (
+                        <Button size="small" onClick={onSelect} sx={ButtonSx}>
+                            {formatValue(button[0] as RowValue, colDesc, formatConfig, nanValue)}
+                        </Button>
+                    ) : val !== null && val !== undefined && colDesc.type && colDesc.type.startsWith("bool") ? (
+                        <Switch
+                            checked={val as boolean}
+                            size="small"
+                            title={val ? "True" : "False"}
+                            sx={defaultCursorIcon}
+                        />
+                    ) : (
+                        <span style={defaultCursor}>
+                            {formatValue(val as RowValue, colDesc, formatConfig, nanValue)}
+                        </span>
+                    )}
+                    {onValidation && !button ? (
                         <Box sx={iconsWrapperSx}>
                             <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
                                 <EditIcon fontSize="inherit" />
