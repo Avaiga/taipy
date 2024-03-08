@@ -30,6 +30,7 @@ interface FileSelectorProps extends TaipyActiveProps {
     multiple?: boolean;
     extensions?: string;
     dropMessage?: string;
+    notify?: boolean;
 }
 
 const handleDragOver = (evt: DragEvent) => {
@@ -50,6 +51,7 @@ const FileSelector = (props: FileSelectorProps) => {
         extensions = ".csv,.xlsx",
         dropMessage = "Drop here to Upload",
         label,
+        notify = true,
     } = props;
     const [dropLabel, setDropLabel] = useState("");
     const [dropSx, setDropSx] = useState(defaultSx);
@@ -74,13 +76,13 @@ const FileSelector = (props: FileSelectorProps) => {
                     (value) => {
                         setUpload(false);
                         onAction && dispatch(createSendActionNameAction(id, module, onAction));
-                        dispatch(
+                        notify && dispatch(
                             createAlertAction({ atype: "success", message: value, system: false, duration: 3000 })
                         );
                     },
                     (reason) => {
                         setUpload(false);
-                        dispatch(
+                        notify && dispatch(
                             createAlertAction({ atype: "error", message: reason, system: false, duration: 3000 })
                         );
                     }
