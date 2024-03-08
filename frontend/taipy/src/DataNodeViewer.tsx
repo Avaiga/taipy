@@ -303,11 +303,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                 }
                 return false;
             });
-            setDataRequested((req) => {
-                if (!isNewDn) {
-                    return req;
-                }
-                if (req && tabValue == TabValues.Data) {
+            setDataRequested(() => {
+                if (tabValue == TabValues.Data) {
                     dispatch(
                         createSendActionNameAction(id, module, props.onIdSelect, {
                             data_id: newDnId,
