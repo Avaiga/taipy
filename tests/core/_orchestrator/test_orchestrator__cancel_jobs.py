@@ -8,10 +8,12 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+from typing import cast
 
 from taipy import Job, JobId, Status
 from taipy.config import Config
 from taipy.core import taipy
+from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
@@ -89,11 +91,10 @@ def test_cancel_job_with_subsequent_jobs_and_parallel_jobs():
     job3 = orchestrator._lock_dn_output_and_create_job(scenario.t3, "s_id", "e_id")
     job2bis = orchestrator._lock_dn_output_and_create_job(scenario.t2bis, "s_id", "e_id")
     job1.completed()
-
-    job2.running()
+    job2.pending()
     job3.blocked()
     job2bis.pending()
-    orchestrator.blocked_jobs = [job3]
+    cast(_Orchestrator, orchestrator).blocked_jobs = [job3]
 
     orchestrator.cancel_job(job2)
 

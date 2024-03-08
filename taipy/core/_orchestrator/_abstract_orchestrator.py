@@ -21,6 +21,16 @@ from ..task.task import Task
 class _AbstractOrchestrator:
     """Creates, enqueues, and orchestrates jobs as instances of `Job^` class."""
 
+    @property
+    @abstractmethod
+    def jobs_to_run(self):
+        pass
+
+    @property
+    @abstractmethod
+    def blocked_jobs(self):
+        pass
+
     @classmethod
     @abstractmethod
     def initialize(cls):

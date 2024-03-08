@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Sync issue states
-        uses: dasmerlon/project-issue-state-sync@v2
+        uses: dasmerlon/project-issue-state-sync@v2.0.1
         with:
           # The secrets.PROJECT_ISSUE_SYNC_TOKEN is a fine-grained PAT with the following permissions:
           #   - Repo

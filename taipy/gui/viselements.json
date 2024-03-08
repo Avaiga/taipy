@@ -667,6 +667,12 @@
             "type": "str",
             "default_value": "\"Drop here to Upload\"",
             "doc": "The message that is displayed when the user drags a file above the button."
+          },
+          {
+            "name": "notify",
+            "type": "bool",
+            "default_value": "True",
+            "doc": "If set to False, the user won't be notified of upload finish."
           }
         ]
       }
@@ -1124,6 +1130,11 @@
             "name": "lov[<i>column_name</i>]",
             "type": "list[str]|str",
             "doc": "The list of values of the indicated column."
+          },
+          {
+            "name": "downloadable",
+            "type": "boolean",
+            "doc": "If True, a clickable icon is shown so the user can download the data as CSV."
           }
         ]
       }
