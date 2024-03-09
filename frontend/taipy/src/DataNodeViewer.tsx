@@ -303,11 +303,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                 }
                 return false;
             });
-            setDataRequested((req) => {
-                if (!isNewDn) {
-                    return req;
-                }
-                if (req && tabValue == TabValues.Data) {
+            setDataRequested(() => {
+                if (tabValue == TabValues.Data) {
                     dispatch(
                         createSendActionNameAction(id, module, props.onIdSelect, {
                             data_id: newDnId,
@@ -420,7 +417,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
 
     // Datanode data
     const dtType = props.data && props.data[DatanodeDataProps.type];
-    const dtValue = (props.data && props.data[DatanodeDataProps.value]) ?? ((dtType == "float") ? null : undefined);
+    const dtValue = (props.data && props.data[DatanodeDataProps.value]) ?? (dtType == "float" ? null : undefined);
     const dtTabular = (props.data && props.data[DatanodeDataProps.tabular]) ?? false;
     const dtError = props.data && props.data[DatanodeDataProps.error];
     const [dataValue, setDataValue] = useState<RowValue | Date>();
