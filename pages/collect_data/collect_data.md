@@ -51,7 +51,7 @@
 
 ## **Family**{: .color-primary} Member
 
-<|{household_member}|input|label=Total Family Member|>
+<|{family_member}|input|label=Total Family Member|>
 |family>
 
 |>
