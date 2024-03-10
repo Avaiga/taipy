@@ -36,6 +36,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
 
     def _can_execute(self) -> bool:
         """Returns True if the dispatcher have resources to dispatch a job."""
+        self._logger.info(f"self._nb_available_workers: {self._nb_available_workers}")
         return self._nb_available_workers > 0
 
     def run(self):

@@ -63,17 +63,24 @@ class _JobDispatcher(threading.Thread):
         self._logger.debug("Job dispatcher started.")
         while not self._STOP_FLAG:
             try:
+                self._logger.info("Check if can execute before getting from queue")
                 if self._can_execute():
+                    self._logger.info(f"run() TRY TO acquired the {self.lock}")
                     with self.lock:
+                        self._logger.info(f"run() acquired the {self.lock}")
                         if self._STOP_FLAG:
                             break
+                        self._logger.info(f"Getting job from {self.orchestrator.jobs_to_run}")
                         job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
                     self._execute_job(job)
+                    self._logger.info(f"run() release the {self.lock}")
                 else:
                     time.sleep(0.1)  # We need to sleep to avoid busy waiting.
             except Empty:  # In case the last job of the queue has been removed.
+                self._logger.info(f"run() release the {self.lock} because of Empty")
                 pass
             except Exception as e:
+                self._logger.info(f"run() release the {self.lock} because of {e}")
                 self._logger.exception(e)
 
         if self.stop_wait:
