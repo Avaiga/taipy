@@ -238,7 +238,7 @@ class _Orchestrator(_AbstractOrchestrator):
     def __unblock_jobs(cls):
         cls.__logger.error("    Entering __unblock_jobs.")
         with cls.lock:
-            cls.__logger.error(f"-------------------------> Acquired lock to unblock jobs.")
+            cls.__logger.error("-------------------------> Acquired lock to unblock jobs.")
             for job in cls.blocked_jobs:
                 cls.__logger.error(f"        Unblocking {job.id} ?")
                 if not cls._is_blocked(job):
@@ -248,7 +248,7 @@ class _Orchestrator(_AbstractOrchestrator):
                     cls.__remove_blocked_job(job)
                     cls.__logger.error(f"        Adding {job.id} to the list of jobs to run.")
                     cls.jobs_to_run.put(job)
-            cls.__logger.error(f"-------------------------> Released lock after unblocking jobs.")
+            cls.__logger.error("-------------------------> Released lock after unblocking jobs.")
         cls.__logger.error("    Exiting __unblock_jobs.")
 
     @classmethod
