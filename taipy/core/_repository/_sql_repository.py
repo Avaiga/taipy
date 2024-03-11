@@ -22,9 +22,13 @@ from .._repository._abstract_repository import _AbstractRepository
 from ..common.typing import Converter, Entity, ModelType
 from ..exceptions import ModelNotFound
 from .db._sql_connection import _SQLConnection
+from ...logger._taipy_logger import _TaipyLogger
 
 
 class _SQLRepository(_AbstractRepository[ModelType, Entity]):
+
+    _logger = _TaipyLogger._get_logger()
+
     def __init__(self, model_type: Type[ModelType], converter: Type[Converter]):
         """
         Holds common methods to be used and extended when the need for saving
@@ -53,6 +57,8 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
                 self._update_entry(obj)
                 return
             except DatabaseError as e:
+                self._logger.error(f"Error while updating {entity.id} in {self.table.name}. Retry nb: {4-retry}.")
+                self._logger.error(f"Error : {e}")
                 if retry > 0:
                     sleep(0.1)
                     self._save(entity, retry - 1)
@@ -61,6 +67,8 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         try:
             self.__insert_model(obj)
         except DatabaseError as e:
+            self._logger.error(f"Error while inserting {entity.id} into {self.table.name}. Retry nb: {4 - retry}.")
+            self._logger.error(f"Error : {e}")
             if retry > 0:
                 sleep(0.1)
                 self._save(entity, retry - 1)
