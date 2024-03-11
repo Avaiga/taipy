@@ -18,11 +18,11 @@ from typing import Any, Dict, Iterable, List, Optional, Type, Union
 from sqlalchemy.dialects import sqlite
 from sqlalchemy.exc import NoResultFound
 
+from ...logger._taipy_logger import _TaipyLogger
 from .._repository._abstract_repository import _AbstractRepository
 from ..common.typing import Converter, Entity, ModelType
 from ..exceptions import ModelNotFound
 from .db._sql_connection import _SQLConnection
-from ...logger._taipy_logger import _TaipyLogger
 
 
 class _SQLRepository(_AbstractRepository[ModelType, Entity]):
