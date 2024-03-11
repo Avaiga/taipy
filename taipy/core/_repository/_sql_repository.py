@@ -11,6 +11,8 @@
 
 import json
 import pathlib
+from sqlite3 import DatabaseError
+from time import sleep
 from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
 from sqlalchemy.dialects import sqlite
@@ -44,12 +46,26 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     ###############################
     # ##   Inherited methods   ## #
     ###############################
-    def _save(self, entity: Entity):
+    def _save(self, entity: Entity, retry: int = 3):
         obj = self.converter._entity_to_model(entity)
         if self._exists(entity.id):  # type: ignore
-            self._update_entry(obj)
-            return
-        self.__insert_model(obj)
+            try:
+                self._update_entry(obj)
+                return
+            except DatabaseError as e:
+                if retry > 0:
+                    sleep(0.1)
+                    self._save(entity, retry - 1)
+                else:
+                    raise e
+        try:
+            self.__insert_model(obj)
+        except DatabaseError as e:
+            if retry > 0:
+                sleep(0.1)
+                self._save(entity, retry - 1)
+            else:
+                raise e
 
     def _exists(self, entity_id: str):
         query = self.table.select().filter_by(id=entity_id)
@@ -190,7 +206,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
 
         if versions:
             table_name = self.table.name
-            query = query + f" AND {table_name}.version IN ({','.join(['?']*len(versions))})"
+            query = query + f" AND {table_name}.version IN ({','.join(['?'] * len(versions))})"
             parameters.extend(versions)
 
         if entry := self.db.execute(query, parameters).fetchone():
