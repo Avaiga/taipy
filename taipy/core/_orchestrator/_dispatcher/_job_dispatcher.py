@@ -83,9 +83,9 @@ class _JobDispatcher(threading.Thread):
                 self._logger.info(f"run() release the {self.lock} because of {e}")
                 self._logger.exception(e)
 
-        if self.stop_wait:
-            self._logger.debug("Waiting for the dispatcher thread to stop...")
-            self.join(timeout=self.stop_timeout)
+        # if self.stop_wait:
+        #     self._logger.debug("Waiting for the dispatcher thread to stop...")
+        #     self.join(timeout=self.stop_timeout)
 
         self._logger.debug("Job dispatcher stopped.")
 
