@@ -94,8 +94,7 @@ class _Orchestrator(_AbstractOrchestrator):
                     )
             submission.jobs = jobs  # type: ignore
             cls._orchestrate_job_to_run_or_block(jobs)
-            cls.__logger.error(f"-------------------------> Released lock after submitting "
-                               f"{submittable.id}.")  # type: ignore
+            cls.__logger.error(f"-------------------------> Released lock after submitting {submission.id}.")
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         else:
