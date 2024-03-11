@@ -58,7 +58,7 @@ class _Orchestrator(_AbstractOrchestrator):
         """Submit the given `Scenario^` or `Sequence^` for an execution.
 
         Parameters:
-             submittable (Union[SCenario^, Sequence^]): The scenario or sequence to submit for execution.
+             submittable (Union[Scenario^, Sequence^]): The scenario or sequence to submit for execution.
              callbacks: The optional list of functions that should be executed on jobs status change.
              force (bool) : Enforce execution of the scenario's or sequence's tasks even if their output data
                 nodes are cached.
@@ -66,7 +66,7 @@ class _Orchestrator(_AbstractOrchestrator):
                 finished in asynchronous mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
                 before returning.
-             **properties (dict[str, any]): A keyworded variable length list of user additional arguments
+             **properties (dict[str, any]): A key worded variable length list of user additional arguments
                 that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
         Returns:
             The created `Submission^` containing the information about the submission.
@@ -120,7 +120,7 @@ class _Orchestrator(_AbstractOrchestrator):
                 in asynchronous mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the job
                 to be finished before returning.
-             **properties (dict[str, any]): A keyworded variable length list of user additional arguments
+             **properties (dict[str, any]): A key worded variable length list of user additional arguments
                 that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
         Returns:
             The created `Submission^` containing the information about the submission.
@@ -225,25 +225,25 @@ class _Orchestrator(_AbstractOrchestrator):
     @classmethod
     def _on_status_change(cls, job: Job):
         if job.is_completed() or job.is_skipped():
-            cls.__logger.info(f"{job.id} has been completed or skipped. Unblocking jobs.")
+            cls.__logger.error(f"{job.id} has been completed or skipped. Unblocking jobs.")
             cls.__unblock_jobs()
         elif job.is_failed():
             cls._fail_subsequent_jobs(job)
 
     @classmethod
     def __unblock_jobs(cls):
-        cls.__logger.info("Entering __unblock_jobs.")
+        cls.__logger.error("    Entering __unblock_jobs.")
         with cls.lock:
             for job in cls.blocked_jobs:
-                cls.__logger.info(f"Unblocking {job.id} ?")
+                cls.__logger.error(f"        Unblocking {job.id} ?")
                 if not cls._is_blocked(job):
-                    cls.__logger.info(f"Unblocking {job.id} !")
+                    cls.__logger.error(f"        Unblocking {job.id} !")
                     job.pending()
-                    cls.__logger.info(f"Removing {job.id} from the blocked list.")
+                    cls.__logger.error(f"        Removing {job.id} from the blocked list.")
                     cls.__remove_blocked_job(job)
-                    cls.__logger.info(f"Adding {job.id} to the list of jobs to run.")
+                    cls.__logger.error(f"        Adding {job.id} to the list of jobs to run.")
                     cls.jobs_to_run.put(job)
-        cls.__logger.info("Exiting __unblock_jobs.")
+        cls.__logger.error("    Exiting __unblock_jobs.")
 
     @classmethod
     def __remove_blocked_job(cls, job):
@@ -314,7 +314,6 @@ class _Orchestrator(_AbstractOrchestrator):
 
     @classmethod
     def _cancel_jobs(cls, job_id_to_cancel: JobId, jobs: Set[Job]):
-
         for job in jobs:
             if job.is_running():
                 cls.__logger.info(f"{job.id} is running and cannot be canceled.")

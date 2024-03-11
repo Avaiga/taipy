@@ -289,7 +289,7 @@ class Job(_Entity, _Labeled):
         return self.is_completed() or self.is_failed() or self.is_canceled() or self.is_skipped() or self.is_abandoned()
 
     def _is_finished(self) -> bool:
-        """Indicate if the job is finished. This function will not triggered the persistency feature like is_finished().
+        """Indicate if the job is finished. This function will not trigger the persistence feature like is_finished().
 
         Returns:
             True if the job is finished.
