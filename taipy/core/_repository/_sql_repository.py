@@ -57,7 +57,8 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
                 self._update_entry(obj)
                 return
             except DatabaseError as e:
-                self._logger.error(f"Error while updating {entity.id} in {self.table.name}. Retry nb: {4-retry}.")
+                self._logger.error(f"Error while updating {entity.id} in {self.table.name}. "  # type: ignore
+                                   f"Retry nb: {4-retry}.")
                 self._logger.error(f"Error : {e}")
                 if retry > 0:
                     sleep(0.1)
@@ -67,7 +68,8 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         try:
             self.__insert_model(obj)
         except DatabaseError as e:
-            self._logger.error(f"Error while inserting {entity.id} into {self.table.name}. Retry nb: {4 - retry}.")
+            self._logger.error(f"Error while inserting {entity.id} into {self.table.name}. "  # type: ignore
+                               f"Retry nb: {4 - retry}.")
             self._logger.error(f"Error : {e}")
             if retry > 0:
                 sleep(0.1)
