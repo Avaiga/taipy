@@ -256,6 +256,7 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
         else:
             df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
 
+        # Ensure that the columns are strings, otherwise writing will fail with pandas 1.3.5
         df.columns = df.columns.astype(str)
         df.to_parquet(self._path, **kwargs)
         self.track_edit(timestamp=datetime.now(), job_id=job_id)

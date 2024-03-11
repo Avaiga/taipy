@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set
 
 import pandas as pd
 from sqlalchemy import MetaData, Table
@@ -148,19 +148,6 @@ class SQLTableDataNode(_AbstractSQLDataNode):
     @classmethod
     def __insert_dataframe(cls, df: pd.DataFrame, table: Any, connection: Any, delete_table: bool) -> None:
         cls.__insert_dicts(df.to_dict(orient="records"), table, connection, delete_table)
-
-    @classmethod
-    def __insert_tuples(cls, data: List[Union[Tuple, List]], table: Any, connection: Any, delete_table: bool) -> None:
-        """
-        This method will look up the length of the first object of the list and build the insert through
-        creation of a string of '?' equivalent to the length of the element. The '?' character is used as
-        placeholder for a tuple of same size.
-        """
-        cls.__delete_all_rows(table, connection, delete_table)
-        markers = ",".join("?" * len(data[0]))
-        ins = "INSERT INTO {tablename} VALUES ({markers})"
-        ins = ins.format(tablename=table.name, markers=markers)
-        connection.execute(ins, data)
 
     @classmethod
     def __delete_all_rows(cls, table: Any, connection: Any, delete_table: bool) -> None:
