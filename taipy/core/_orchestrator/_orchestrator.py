@@ -161,7 +161,6 @@ class _Orchestrator(_AbstractOrchestrator):
         job = _JobManagerFactory._build_manager()._create(
             task, itertools.chain([cls._on_status_change], callbacks or []), submit_id, submit_entity_id, force=force
         )
-
         return job
 
     @classmethod
@@ -226,18 +225,25 @@ class _Orchestrator(_AbstractOrchestrator):
     @classmethod
     def _on_status_change(cls, job: Job):
         if job.is_completed() or job.is_skipped():
+            cls.__logger.info(f"{job.id} has been completed or skipped. Unblocking jobs.")
             cls.__unblock_jobs()
         elif job.is_failed():
             cls._fail_subsequent_jobs(job)
 
     @classmethod
     def __unblock_jobs(cls):
+        cls.__logger.info("Entering __unblock_jobs.")
         with cls.lock:
             for job in cls.blocked_jobs:
+                cls.__logger.info(f"Unblocking {job.id} ?")
                 if not cls._is_blocked(job):
+                    cls.__logger.info(f"Unblocking {job.id} !")
                     job.pending()
+                    cls.__logger.info(f"Removing {job.id} from the blocked list.")
                     cls.__remove_blocked_job(job)
+                    cls.__logger.info(f"Adding {job.id} to the list of jobs to run.")
                     cls.jobs_to_run.put(job)
+        cls.__logger.info("Exiting __unblock_jobs.")
 
     @classmethod
     def __remove_blocked_job(cls, job):

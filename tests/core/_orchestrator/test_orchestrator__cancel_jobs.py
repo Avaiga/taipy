@@ -59,7 +59,7 @@ def test_cancel_job_no_subsequent_jobs():
 
 def test_cancel_job_with_subsequent_blocked_jobs():
     scenario = create_scenario()
-    orchestrator = _OrchestratorFactory._build_orchestrator()
+    orchestrator = cast(_Orchestrator, _OrchestratorFactory._build_orchestrator())
     job1 = orchestrator._lock_dn_output_and_create_job(scenario.t1, "s_id", "e_id")
     job2 = orchestrator._lock_dn_output_and_create_job(scenario.t2, "s_id", "e_id")
     job3 = orchestrator._lock_dn_output_and_create_job(scenario.t3, "s_id", "e_id")

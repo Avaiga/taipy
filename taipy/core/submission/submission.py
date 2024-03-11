@@ -209,7 +209,7 @@ class Submission(_Entity, _Labeled):
             if job_status == Status.FAILED:
                 submission._submission_status = SubmissionStatus.FAILED
                 _SubmissionManagerFactory._build_manager()._set(submission)
-                self.__logger.info(f"{job.id} status is {job_status}. Submission status set to "
+                self.__logger.debug(f"{job.id} status is {job_status}. Submission status set to "
                                     f"{submission._submission_status}")
                 return
             if job_status == Status.CANCELED:
@@ -251,7 +251,7 @@ class Submission(_Entity, _Labeled):
                 submission.submission_status = SubmissionStatus.COMPLETED  # type: ignore
             else:
                 submission.submission_status = SubmissionStatus.UNDEFINED  # type: ignore
-            self.__logger.info(f"{job.id} status is {job_status}. Submission status set to "
+            self.__logger.debug(f"{job.id} status is {job_status}. Submission status set to "
                                 f"{submission._submission_status}")
 
     def is_finished(self) -> bool:
