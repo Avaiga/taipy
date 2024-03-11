@@ -776,7 +776,7 @@ class _Builder:
                     self.__set_default_value(var_name, var_type=var_type)
         else:
             if var_type == PropertyType.data:
-                _warn(f"{self.__control_type}.data property should be binded.")
+                _warn(f"{self.__control_type}.data property should be bound.")
             value = self.__attributes.get(var_name)
             if value is not None:
                 if native_type:

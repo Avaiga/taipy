@@ -421,8 +421,7 @@ const Chart = (props: ChartProp) => {
                           getArrayValue(config.names, idx) ||
                           (config.columns[trace[1]] ? getColNameFromIndexed(config.columns[trace[1]].dfid) : undefined),
                   } as Record<string, unknown>;
-                  const theMarker = getArrayValue(config.markers, idx, ret.marker || {});
-                  ret.marker = theMarker ? {...theMarker}: theMarker;
+                  ret.marker = {...getArrayValue(config.markers, idx, ret.marker || {})};
                   MARKER_TO_COL.forEach((prop) => {
                       const val = (ret.marker as Record<string, unknown>)[prop];
                       if (typeof val === "string") {
