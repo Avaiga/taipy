@@ -46,7 +46,7 @@ Explore Nepal's 2021 housing and household data with the **Census** project! ðŸŒ
 
 ## Demo
 
-Coming soon...
+https://github.com/SusheelThapa/from_taipy_census/assets/83917129/a5c7d3fb-38b0-4d38-b04c-4772696a7943
 
 ## Installation
 
