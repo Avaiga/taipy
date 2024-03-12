@@ -54,7 +54,7 @@ class _DAG:
         return self._edges
 
     def __compute_size(self) -> Tuple[int, int]:
-        return len(self._sorted_nodes), max([len(i) for i in self._sorted_nodes])
+        return len(self._sorted_nodes), max(len(i) for i in self._sorted_nodes)
 
     def __compute_grid_size(self) -> Tuple[int, int]:
         if self._width == 1:
@@ -65,8 +65,7 @@ class _DAG:
 
     def __compute_nodes(self) -> Dict[str, _Node]:
         nodes = {}
-        x = 0
-        for same_lvl_nodes in self._sorted_nodes:
+        for x, same_lvl_nodes in enumerate(self._sorted_nodes):
             lcl_wdt = len(same_lvl_nodes)
             is_max = lcl_wdt != self.width
             if self.width != 1:
@@ -81,10 +80,7 @@ class _DAG:
         return nodes
 
     def __compute_edges(self, dag) -> List[_Edge]:
-        edges = []
-        for edge in dag.edges():
-            edges.append(_Edge(self.nodes[edge[0].id], self.nodes[edge[1].id]))
-        return edges
+        return [_Edge(self.nodes[edge[0].id], self.nodes[edge[1].id]) for edge in dag.edges()]
 
     @staticmethod
     def __lcm(*integers) -> int:
