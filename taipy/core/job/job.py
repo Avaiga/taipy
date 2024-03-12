@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 def _run_callbacks(fn):
     def __run_callbacks(job):
         fn(job)
-        _TaipyLogger._get_logger().error(f"{job.id} status has changed to {job.status}.")
+        _TaipyLogger._get_logger().debug(f"{job.id} status has changed to {job.status}.")
         for fct in job._subscribers:
             fct(job)
 
