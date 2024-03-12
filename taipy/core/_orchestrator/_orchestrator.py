@@ -80,7 +80,6 @@ class _Orchestrator(_AbstractOrchestrator):
         jobs = []
         tasks = submittable._get_sorted_tasks()
         with cls.lock:
-            cls.__logger.error(f"-------------------------> Acquired lock to submit {submittable.id}.")  # type: ignore
             for ts in tasks:
                 for task in ts:
                     jobs.append(
@@ -94,7 +93,6 @@ class _Orchestrator(_AbstractOrchestrator):
                     )
             submission.jobs = jobs  # type: ignore
             cls._orchestrate_job_to_run_or_block(jobs)
-            cls.__logger.error(f"-------------------------> Released lock after submitting {submission.id}.")
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         else:
@@ -132,7 +130,6 @@ class _Orchestrator(_AbstractOrchestrator):
         )
         submit_id = submission.id
         with cls.lock:
-            cls.__logger.error("-------------------------> Acquired lock to submit task.")
             job = cls._lock_dn_output_and_create_job(
                 task,
                 submit_id,
@@ -143,7 +140,6 @@ class _Orchestrator(_AbstractOrchestrator):
             jobs = [job]
             submission.jobs = jobs  # type: ignore
             cls._orchestrate_job_to_run_or_block(jobs)
-            cls.__logger.error(f"-------------------------> Released lock after submitting task {task.id}.")
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         else:
@@ -229,27 +225,18 @@ class _Orchestrator(_AbstractOrchestrator):
     @classmethod
     def _on_status_change(cls, job: Job):
         if job.is_completed() or job.is_skipped():
-            cls.__logger.error(f"{job.id} has been completed or skipped. Unblocking jobs.")
             cls.__unblock_jobs()
         elif job.is_failed():
             cls._fail_subsequent_jobs(job)
 
     @classmethod
     def __unblock_jobs(cls):
-        cls.__logger.error("    Entering __unblock_jobs.")
         with cls.lock:
-            cls.__logger.error("-------------------------> Acquired lock to unblock jobs.")
             for job in cls.blocked_jobs:
-                cls.__logger.error(f"        Unblocking {job.id} ?")
                 if not cls._is_blocked(job):
-                    cls.__logger.error(f"        Unblocking {job.id} !")
                     job.pending()
-                    cls.__logger.error(f"        Removing {job.id} from the blocked list.")
                     cls.__remove_blocked_job(job)
-                    cls.__logger.error(f"        Adding {job.id} to the list of jobs to run.")
                     cls.jobs_to_run.put(job)
-            cls.__logger.error("-------------------------> Released lock after unblocking jobs.")
-        cls.__logger.error("    Exiting __unblock_jobs.")
 
     @classmethod
     def __remove_blocked_job(cls, job):
@@ -268,14 +255,12 @@ class _Orchestrator(_AbstractOrchestrator):
             cls.__logger.info(f"{job.id} has already failed and cannot be canceled.")
         else:
             with cls.lock:
-                cls.__logger.error(f"-------------------------> Acquired lock to cancel job {job.id}.")
                 to_cancel_or_abandon_jobs = {job}
                 to_cancel_or_abandon_jobs.update(cls.__find_subsequent_jobs(job.submit_id, set(job.task.output.keys())))
                 cls.__remove_blocked_jobs(to_cancel_or_abandon_jobs)
                 cls.__remove_jobs_to_run(to_cancel_or_abandon_jobs)
                 cls._cancel_jobs(job.id, to_cancel_or_abandon_jobs)
                 cls._unlock_edit_on_jobs_outputs(to_cancel_or_abandon_jobs)
-                cls.__logger.error(f"-------------------------> Released lock after canceling {job.id}.")
 
     @classmethod
     def __find_subsequent_jobs(cls, submit_id, output_dn_config_ids: Set) -> Set[Job]:
@@ -309,7 +294,6 @@ class _Orchestrator(_AbstractOrchestrator):
     @classmethod
     def _fail_subsequent_jobs(cls, failed_job: Job):
         with cls.lock:
-            cls.__logger.error("-------------------------> Acquired lock to fail subsequent jobs.")
             to_fail_or_abandon_jobs = set()
             to_fail_or_abandon_jobs.update(
                 cls.__find_subsequent_jobs(failed_job.submit_id, set(failed_job.task.output.keys()))

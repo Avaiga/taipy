@@ -66,15 +66,12 @@ class _JobDispatcher(threading.Thread):
                 time.sleep(0.1)  # We need to sleep to avoid busy waiting.
                 continue
             with self.lock:
-                self._logger.error("-------------------------> Acquired lock to execute job.")
                 job = None
                 try:
                     job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
                 except Empty:  # In case the last job of the queue has been removed.
                     pass
-            self._logger.error("-------------------------> Released lock to execute job.")
             if job:
-                self._logger.error(f"-------------------------> Got job to execute {job.id}.")
                 try:
                     self._execute_job(job)
                 except Exception as e:
