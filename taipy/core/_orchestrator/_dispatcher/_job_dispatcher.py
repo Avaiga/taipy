@@ -62,23 +62,24 @@ class _JobDispatcher(threading.Thread):
     def run(self):
         self._logger.debug("Job dispatcher started.")
         while not self._STOP_FLAG:
-            if self._can_execute():
-                with self.lock:
-                    self._logger.error("-------------------------> Acquired lock to execute job.")
-                    job = None
-                    try:
-                        job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
-                    except Empty:  # In case the last job of the queue has been removed.
-                        pass
-                    except Exception as e:
-                        self._logger.exception(e)
-                        pass
-                self._logger.error("-------------------------> Released lock to execute job.")
-                if job:
-                    self._logger.error(f"-------------------------> Got job to execute {job.id}.")
-                    self._execute_job(job)
-            else:
+            if not self._can_execute():
                 time.sleep(0.1)  # We need to sleep to avoid busy waiting.
+                continue
+            with self.lock:
+                self._logger.error("-------------------------> Acquired lock to execute job.")
+                job = None
+                try:
+                    job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
+                except Empty:  # In case the last job of the queue has been removed.
+                    pass
+            self._logger.error("-------------------------> Released lock to execute job.")
+            if job:
+                self._logger.error(f"-------------------------> Got job to execute {job.id}.")
+                try:
+                    self._execute_job(job)
+                except Exception as e:
+                    self._logger.exception(e)
+
         if self.stop_wait:
             self._logger.debug("Waiting for the dispatcher thread to stop...")
             self.join(timeout=self.stop_timeout)
