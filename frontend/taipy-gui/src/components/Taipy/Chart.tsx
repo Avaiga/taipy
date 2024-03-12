@@ -85,9 +85,11 @@ const defaultStyle = { position: "relative", display: "inline-block" };
 const indexedData = /^(\d+)\/(.*)/;
 
 const getColNameFromIndexed = (colName: string): string => {
-    const reRes = indexedData.exec(colName);
-    if (reRes && reRes.length > 2) {
-        return reRes[2] || colName;
+    if (colName) {
+        const reRes = indexedData.exec(colName);
+        if (reRes && reRes.length > 2) {
+            return reRes[2] || colName;
+        }
     }
     return colName;
 };
@@ -324,14 +326,14 @@ const Chart = (props: ChartProp) => {
             xaxis: {
                 title:
                     config.traces.length && config.traces[0].length && config.traces[0][0]
-                        ? getColNameFromIndexed(config.columns[config.traces[0][0]].dfid)
+                        ? getColNameFromIndexed(config.columns[config.traces[0][0]]?.dfid)
                         : undefined,
                 ...layout.xaxis,
             },
             yaxis: {
                 title:
                     config.traces.length == 1 && config.traces[0].length > 1 && config.columns[config.traces[0][1]]
-                        ? getColNameFromIndexed(config.columns[config.traces[0][1]].dfid)
+                        ? getColNameFromIndexed(config.columns[config.traces[0][1]]?.dfid)
                         : undefined,
                 ...layout.yaxis,
             },
@@ -376,7 +378,7 @@ const Chart = (props: ChartProp) => {
                           getArrayValue(config.names, idx) ||
                           (config.columns[trace[1]] ? getColNameFromIndexed(config.columns[trace[1]].dfid) : undefined),
                   } as Record<string, unknown>;
-                  ret.marker = getArrayValue(config.markers, idx, ret.marker || {});
+                  ret.marker = {...getArrayValue(config.markers, idx, ret.marker || {})};
                   MARKER_TO_COL.forEach((prop) => {
                       const val = (ret.marker as Record<string, unknown>)[prop];
                       if (typeof val === "string") {
