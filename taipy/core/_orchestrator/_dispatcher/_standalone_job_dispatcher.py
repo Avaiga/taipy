@@ -11,6 +11,7 @@
 
 from concurrent.futures import Executor, ProcessPoolExecutor
 from functools import partial
+from threading import Lock
 from typing import Callable, Optional
 
 from taipy.config._serializer._toml_serializer import _TomlSerializer
@@ -32,10 +33,12 @@ class _StandaloneJobDispatcher(_JobDispatcher):
             max_workers=max_workers,
             initializer=subproc_initializer,
         )  # type: ignore
+        self.nb_available_lock = Lock()
         self._nb_available_workers = self._executor._max_workers  # type: ignore
 
     def _can_execute(self) -> bool:
         """Returns True if the dispatcher have resources to dispatch a job."""
+        self._logger.error(f"can execute a job ? {self._nb_available_workers}")
         return self._nb_available_workers > 0
 
     def run(self):
@@ -49,17 +52,15 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         Parameters:
             job (Job^): The job to submit on an executor with an available worker.
         """
-
-        self._nb_available_workers -= 1
+        with self.nb_available_lock:
+            self._nb_available_workers -= 1
+            self._logger.error(f"Changing nb_available_workers to {self._nb_available_workers} from dispatch")
         config_as_string = _TomlSerializer()._serialize(Config._applied_config)  # type: ignore[attr-defined]
         future = self._executor.submit(_TaskFunctionWrapper(job.id, job.task), config_as_string=config_as_string)
-
-        future.add_done_callback(self._release_worker)  # We must release the worker before updating the job status
-        # so that the worker is available for another job as soon as possible.
         future.add_done_callback(partial(self._update_job_status_from_future, job))
 
-    def _release_worker(self, _):
-        self._nb_available_workers += 1
-
     def _update_job_status_from_future(self, job: Job, ft):
+        with self.nb_available_lock:
+            self._nb_available_workers += 1
+            self._logger.error(f"Changing nb_available_workers to {self._nb_available_workers} from callback")
         self._update_job_status(job, ft.result())
