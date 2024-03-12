@@ -1,0 +1,185 @@
+{
+    "version": {
+        "data": {
+            "latest_version": "version_v1",
+            "development_version": "version_v1",
+            "production_version": []
+        },
+        "path": ".data/version.json"
+    },
+    "TASK_1": {
+        "data": {
+            "id": "TASK_1",
+            "owner_id": "SCENARIO_1",
+            "parent_ids": [
+                "PIPELINE_1"
+            ],
+            "config_id": "task_print_csv",
+            "input_ids": [
+                "DATANODE_2"
+            ],
+            "function_name": "print",
+            "function_module": "builtins",
+            "output_ids": [],
+            "version": "version_v1",
+            "skippable": false,
+            "properties": {}
+        },
+        "path": ".data/tasks/TASK_1.json"
+    },
+    "TASK_2": {
+        "data": {
+            "id": "TASK_2",
+            "owner_id": "SCENARIO_1",
+            "parent_ids": [
+                "PIPELINE_1"
+            ],
+            "config_id": "task_print_excel",
+            "input_ids": [
+                "DATANODE_1"
+            ],
+            "function_name": "print",
+            "function_module": "builtins",
+            "output_ids": [],
+            "version": "version_v1",
+            "skippable": false,
+            "properties": {}
+        },
+        "path": ".data/tasks/TASK_2.json"
+    },
+    "PIPELINE_1": {
+        "data": {
+            "id": "PIPELINE_1",
+            "owner_id": "SCENARIO_1",
+            "parent_ids": [
+                "SCENARIO_1"
+            ],
+            "config_id": "pipeline",
+            "properties": {},
+            "tasks": [
+                "TASK_1",
+                "TASK_2"
+            ],
+            "subscribers": [],
+            "version": "version_v1"
+        },
+        "path": ".data/pipelines/PIPELINE_1.json"
+    },
+    "JOB_1": {
+        "data": {
+            "id": "JOB_1",
+            "task_id": "TASK_2",
+            "status": "<Status.COMPLETED: 7>",
+            "force": false,
+            "submit_id": "SUBMISSION_09ce8479-d865-4719-bf12-37664a2fe71a",
+            "creation_date": "2024-03-10T22:20:15.017468",
+            "subscribers": [
+                {
+                    "fct_name": "_Orchestrator._on_status_change",
+                    "fct_params": [],
+                    "fct_module": "src.taipy.core._orchestrator._orchestrator"
+                }
+            ],
+            "stacktrace": [],
+            "version": "version_v1"
+        },
+        "path": ".data/jobs/JOB_1.json"
+    },
+    "JOB_2": {
+        "data": {
+            "id": "JOB_2",
+            "task_id": "TASK_1",
+            "status": "<Status.COMPLETED: 7>",
+            "force": false,
+            "submit_id": "SUBMISSION_09ce8479-d865-4719-bf12-37664a2fe71a",
+            "creation_date": "2024-03-10T22:20:15.029492",
+            "subscribers": [
+                {
+                    "fct_name": "_Orchestrator._on_status_change",
+                    "fct_params": [],
+                    "fct_module": "src.taipy.core._orchestrator._orchestrator"
+                }
+            ],
+            "stacktrace": [],
+            "version": "version_v1"
+        },
+        "path": ".data/jobs/JOB_2.json"
+    },
+    "DATANODE_1": {
+        "data": {
+            "id": "DATANODE_1",
+            "config_id": "dn_excel_in_1",
+            "scope": "<Scope.SCENARIO: 2>",
+            "storage_type": "excel",
+            "name": null,
+            "owner_id": "SCENARIO_1",
+            "parent_ids": [
+                "TASK_2"
+            ],
+            "last_edit_date": "2024-03-10T22:20:14.935397",
+            "edits": [],
+            "version": "version_v1",
+            "validity_days": null,
+            "validity_seconds": null,
+            "edit_in_progress": false,
+            "data_node_properties": {
+                "default_path": "tests/data_sample/example.xlsx",
+                "sheet_name": "Sheet1",
+                "has_header": true,
+                "exposed_type": "pandas",
+                "path": "tests/data_sample/example.xlsx"
+            }
+        },
+        "path": ".data/data_nodes/DATANODE_1.json"
+    },
+    "DATANODE_2": {
+        "data": {
+            "id": "DATANODE_2",
+            "config_id": "dn_csv_in_1",
+            "scope": "<Scope.SCENARIO: 2>",
+            "storage_type": "csv",
+            "name": null,
+            "owner_id": "SCENARIO_1",
+            "parent_ids": [
+                "TASK_1"
+            ],
+            "last_edit_date": "2024-03-10T22:20:14.936613",
+            "edits": [],
+            "version": "version_v1",
+            "validity_days": null,
+            "validity_seconds": null,
+            "edit_in_progress": false,
+            "data_node_properties": {
+                "default_path": "tests/data_sample/example.csv",
+                "has_header": true,
+                "exposed_type": "pandas"
+            }
+        },
+        "path": ".data/data_nodes/DATANODE_2.json"
+    },
+    "SCENARIO_1": {
+        "data": {
+            "id": "SCENARIO_1",
+            "config_id": "scenario",
+            "pipelines": [
+                "PIPELINE_1"
+            ],
+            "properties": {},
+            "creation_date": "2024-03-10T22:20:14.977089",
+            "primary_scenario": false,
+            "subscribers": [],
+            "tags": [],
+            "version": "version_v1",
+            "cycle": null
+        },
+        "path": ".data/scenarios/SCENARIO_1.json"
+    },
+    "VERSION_version_v1": {
+        "data": {
+            "id": "version_v1",
+            "config": "{\n\"TAIPY\": {\n\"root_folder\": \"./taipy/\",\n\"storage_folder\": \".data/\",\n\"clean_entities_enabled\": \"ENV[TAIPY_CLEAN_ENTITIES_ENABLED]\",\n\"repository_type\": \"filesystem\"\n},\n\"JOB\": {\n\"mode\": \"development\",\n\"max_nb_of_workers\": \"1:int\"\n},\n\"CORE\": {\n\"mode\": \"development\",\n\"version_number\": \"\",\n\"force\": \"False:bool\",\n\"clean_entities\": \"False:bool\"\n},\n\"DATA_NODE\": {\n\"default\": {\n\"storage_type\": \"pickle\",\n\"scope\": \"SCENARIO:SCOPE\"\n},\n\"dn_csv_in_1\": {\n\"storage_type\": \"csv\",\n\"scope\": \"SCENARIO:SCOPE\",\n\"default_path\": \"tests/data_sample/example.csv\",\n\"has_header\": \"True:bool\",\n\"exposed_type\": \"pandas\"\n},\n\"dn_csv_in_2\": {\n\"storage_type\": \"csv\",\n\"scope\": \"SCENARIO:SCOPE\",\n\"default_path\": \"tests/data_sample/example.csv\",\n\"has_header\": \"True:bool\",\n\"exposed_type\": \"pandas\"\n},\n\"dn_excel_in_1\": {\n\"storage_type\": \"excel\",\n\"scope\": \"SCENARIO:SCOPE\",\n\"default_path\": \"tests/data_sample/example.xlsx\",\n\"sheet_name\": \"Sheet1\",\n\"has_header\": \"True:bool\",\n\"exposed_type\": \"pandas\"\n},\n\"dn_excel_in_2\": {\n\"storage_type\": \"excel\",\n\"scope\": \"SCENARIO:SCOPE\",\n\"default_path\": \"tests/data_sample/example.xlsx\",\n\"sheet_name\": \"Sheet1\",\n\"has_header\": \"True:bool\",\n\"exposed_type\": \"pandas\"\n},\n\"dn_placeholder\": {\n\"storage_type\": \"pickle\",\n\"scope\": \"SCENARIO:SCOPE\",\n\"default_data\": \"10:int\"\n},\n\"dn_sum_csv\": {\n\"storage_type\": \"csv\",\n\"scope\": \"SCENARIO:SCOPE\",\n\"default_path\": \"tests/data_sample/sum.csv\",\n\"has_header\": \"True:bool\",\n\"exposed_type\": \"pandas\"\n},\n\"dn_sum_excel\": {\n\"storage_type\": \"excel\",\n\"scope\": \"SCENARIO:SCOPE\",\n\"default_path\": \"tests/data_sample/sum.xlsx\",\n\"sheet_name\": \"Sheet1\",\n\"has_header\": \"True:bool\",\n\"exposed_type\": \"pandas\"\n},\n\"dn_subtract_csv_excel\": {\n\"storage_type\": \"pickle\",\n\"scope\": \"SCENARIO:SCOPE\"\n},\n\"dn_mult\": {\n\"storage_type\": \"pickle\",\n\"scope\": \"SCENARIO:SCOPE\"\n},\n\"dn_div\": {\n\"storage_type\": \"pickle\",\n\"scope\": \"SCENARIO:SCOPE\"\n},\n\"csv_out\": {\n\"storage_type\": \"csv\",\n\"scope\": \"SCENARIO:SCOPE\",\n\"default_path\": \"tests/data_sample/res.csv\",\n\"has_header\": \"True:bool\",\n\"exposed_type\": \"pandas\"\n},\n\"excel_out\": {\n\"storage_type\": \"excel\",\n\"scope\": \"SCENARIO:SCOPE\",\n\"default_path\": \"tests/data_sample/res.xlsx\",\n\"has_header\": \"True:bool\",\n\"exposed_type\": \"pandas\"\n}\n},\n\"TASK\": {\n\"default\": {\n\"function\": null,\n\"inputs\": [],\n\"outputs\": [],\n\"skippable\": \"False:bool\"\n},\n\"task_print_csv\": {\n\"function\": \"builtins.print:function\",\n\"inputs\": [\n\"dn_csv_in_1:SECTION\"\n],\n\"outputs\": [],\n\"skippable\": \"False:bool\"\n},\n\"task_print_excel\": {\n\"function\": \"builtins.print:function\",\n\"inputs\": [\n\"dn_excel_in_1:SECTION\"\n],\n\"outputs\": [],\n\"skippable\": \"False:bool\"\n},\n\"task_sum_csv\": {\n\"function\": \"tests.test_complex_application.sum:function\",\n\"inputs\": [\n\"dn_csv_in_2:SECTION\",\n\"dn_csv_in_1:SECTION\"\n],\n\"outputs\": [\n\"dn_sum_csv:SECTION\"\n],\n\"skippable\": \"False:bool\"\n},\n\"task_sum_excel\": {\n\"function\": \"tests.test_complex_application.sum:function\",\n\"inputs\": [\n\"dn_excel_in_2:SECTION\",\n\"dn_excel_in_1:SECTION\"\n],\n\"outputs\": [\n\"dn_sum_excel:SECTION\"\n],\n\"skippable\": \"False:bool\"\n},\n\"task_subtract_csv_excel\": {\n\"function\": \"tests.test_complex_application.subtract:function\",\n\"inputs\": [\n\"dn_sum_csv:SECTION\",\n\"dn_sum_excel:SECTION\"\n],\n\"outputs\": [\n\"dn_subtract_csv_excel:SECTION\"\n],\n\"skippable\": \"False:bool\"\n},\n\"task_insert_placeholder\": {\n\"function\": \"tests.test_complex_application.return_a_number:function\",\n\"inputs\": [],\n\"outputs\": [\n\"dn_placeholder:SECTION\"\n],\n\"skippable\": \"False:bool\"\n},\n\"task_mult_by_placeholder\": {\n\"function\": \"tests.test_complex_application.mult:function\",\n\"inputs\": [\n\"dn_subtract_csv_excel:SECTION\",\n\"dn_placeholder:SECTION\"\n],\n\"outputs\": [\n\"dn_mult:SECTION\"\n],\n\"skippable\": \"False:bool\"\n},\n\"task_div_by_placeholder\": {\n\"function\": \"tests.test_complex_application.divide:function\",\n\"inputs\": [\n\"dn_mult:SECTION\",\n\"dn_placeholder:SECTION\"\n],\n\"outputs\": [\n\"dn_div:SECTION\"\n],\n\"skippable\": \"False:bool\"\n},\n\"task_avg_div\": {\n\"function\": \"tests.test_complex_application.average:function\",\n\"inputs\": [\n\"dn_div:SECTION\"\n],\n\"outputs\": [\n\"csv_out:SECTION\"\n],\n\"skippable\": \"False:bool\"\n},\n\"task_avg_mult\": {\n\"function\": \"tests.test_complex_application.average:function\",\n\"inputs\": [\n\"dn_mult:SECTION\"\n],\n\"outputs\": [\n\"excel_out:SECTION\"\n],\n\"skippable\": \"False:bool\"\n}\n},\n\"PIPELINE\": {\n\"default\": {\n\"tasks\": []\n},\n\"pipeline\": {\n\"tasks\": [\n\"task_print_csv:SECTION\",\n\"task_print_excel:SECTION\",\n\"task_sum_csv:SECTION\",\n\"task_sum_excel:SECTION\",\n\"task_subtract_csv_excel:SECTION\",\n\"task_insert_placeholder:SECTION\",\n\"task_mult_by_placeholder:SECTION\",\n\"task_div_by_placeholder:SECTION\",\n\"task_avg_div:SECTION\",\n\"task_avg_mult:SECTION\"\n]\n}\n},\n\"SCENARIO\": {\n\"default\": {\n\"comparators\": {},\n\"pipelines\": [],\n\"frequency\": null\n},\n\"scenario\": {\n\"comparators\": {},\n\"pipelines\": [\n\"pipeline:SECTION\"\n],\n\"frequency\": null\n}\n}\n}",
+            "creation_date": "2024-03-10T22:20:14.928958"
+        },
+        "path": ".data/version/version_v1.json"
+    }
+}

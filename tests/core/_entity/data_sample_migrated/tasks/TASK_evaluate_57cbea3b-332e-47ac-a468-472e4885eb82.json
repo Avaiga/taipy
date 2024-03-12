@@ -2,7 +2,7 @@
 "id": "TASK_evaluate_57cbea3b-332e-47ac-a468-472e4885eb82",
 "owner_id": "SCENARIO_scenario_62d29866-610e-4173-bd22-6a0555e80ff4",
 "parent_ids": [
-"PIPELINE_baseline_08c57938-83e8-4848-aca5-c98a4ca21e58"
+"SCENARIO_scenario_62d29866-610e-4173-bd22-6a0555e80ff4"
 ],
 "config_id": "evaluate",
 "input_ids": [
