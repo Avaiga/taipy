@@ -12,7 +12,6 @@
 import json
 import pathlib
 from sqlite3 import DatabaseError
-from time import sleep
 from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
 from sqlalchemy.dialects import sqlite
@@ -26,7 +25,6 @@ from .db._sql_connection import _SQLConnection
 
 
 class _SQLRepository(_AbstractRepository[ModelType, Entity]):
-
     _logger = _TaipyLogger._get_logger()
 
     def __init__(self, model_type: Type[ModelType], converter: Type[Converter]):
