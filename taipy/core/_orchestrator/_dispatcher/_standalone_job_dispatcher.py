@@ -33,7 +33,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
             max_workers=max_workers,
             initializer=subproc_initializer,
         )  # type: ignore
-        self.nb_available_lock = Lock()
+        self._nb_available_workers_lock = Lock()
         self._nb_available_workers = self._executor._max_workers  # type: ignore
 
     def _can_execute(self) -> bool:
@@ -52,7 +52,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         Parameters:
             job (Job^): The job to submit on an executor with an available worker.
         """
-        with self.nb_available_lock:
+        with self._nb_available_workers_lock:
             self._nb_available_workers -= 1
             self._logger.error(f"Changing nb_available_workers to {self._nb_available_workers} from dispatch")
         config_as_string = _TomlSerializer()._serialize(Config._applied_config)  # type: ignore[attr-defined]
@@ -60,7 +60,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         future.add_done_callback(partial(self._update_job_status_from_future, job))
 
     def _update_job_status_from_future(self, job: Job, ft):
-        with self.nb_available_lock:
+        with self._nb_available_workers_lock:
             self._nb_available_workers += 1
             self._logger.error(f"Changing nb_available_workers to {self._nb_available_workers} from callback")
         self._update_job_status(job, ft.result())

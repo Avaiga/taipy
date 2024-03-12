@@ -70,9 +70,6 @@ def test_dispatch_job():
     assert submit_first_call[1] == ()
     assert submit_first_call[2]["config_as_string"] == _TomlSerializer()._serialize(Config._applied_config)
 
-    # test that the worker is released after the job is done
-    assert len(dispatcher.release_worker_calls) == 1
-
     # test that the job status is updated after execution on future
     assert len(dispatcher.update_job_status_from_future_calls) == 1
     assert dispatcher.update_job_status_from_future_calls[0][0] == job
@@ -90,17 +87,6 @@ def test_can_execute():
     dispatcher._nb_available_workers = 1
     assert dispatcher._can_execute()
 
-
-def test_release_worker():
-    dispatcher = _StandaloneJobDispatcher(_OrchestratorFactory._orchestrator)
-
-    assert dispatcher._nb_available_workers == 1
-    dispatcher._release_worker(None)
-    assert dispatcher._nb_available_workers == 2
-    dispatcher._release_worker(None)
-    assert dispatcher._nb_available_workers == 3
-
-
 def test_update_job_status_from_future():
     task = create_task()
     job = Job(JobId("job"), task, "s_id", task.id)
@@ -108,7 +94,9 @@ def test_update_job_status_from_future():
     dispatcher = _StandaloneJobDispatcher(orchestrator)
     ft = Future()
     ft.set_result(None)
+    assert dispatcher._nb_available_workers == 1
     dispatcher._update_job_status_from_future(job, ft)
+    assert dispatcher._nb_available_workers == 2
     assert job.is_completed()
 
 
