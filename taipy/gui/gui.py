@@ -2069,6 +2069,7 @@ class Gui:
                 to=page_name,
                 params={
                     _Server._RESOURCE_HANDLER_ARG: pr._resource_handler.get_id(),
+                    _Server._CUSTOM_PAGE_META_ARG: json.dumps(pr._metadata, cls=_TaipyJsonEncoder)
                 },
             ):
                 # Proactively handle the bindings of custom page variables

@@ -141,6 +141,10 @@ export class TaipyApp {
     upload(encodedName: string, files: FileList, progressCallback: (val: number) => void) {
         return uploadFile(encodedName, files, progressCallback, this.clientId);
     }
+
+    getPageMetadata() {
+        return JSON.parse(localStorage.getItem("tp_cp_meta") || "{}");
+    }
 }
 
 export const createApp = (onInit?: OnInitHandler, onChange?: OnChangeHandler, path?: string, socket?: Socket) => {
