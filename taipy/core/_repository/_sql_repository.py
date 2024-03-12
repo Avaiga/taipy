@@ -50,32 +50,22 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     ###############################
     # ##   Inherited methods   ## #
     ###############################
-    def _save(self, entity: Entity, retry: int = 3):
+    def _save(self, entity: Entity):
         obj = self.converter._entity_to_model(entity)
         if self._exists(entity.id):  # type: ignore
             try:
                 self._update_entry(obj)
                 return
             except DatabaseError as e:
-                self._logger.error(f"Error while updating {entity.id} in {self.table.name}. "  # type: ignore
-                                   f"Retry nb: {4-retry}.")
+                self._logger.error(f"Error while updating {entity.id} in {self.table.name}. ")  # type: ignore
                 self._logger.error(f"Error : {e}")
-                if retry > 0:
-                    sleep(0.1)
-                    self._save(entity, retry - 1)
-                else:
-                    raise e
+                raise e
         try:
             self.__insert_model(obj)
         except DatabaseError as e:
-            self._logger.error(f"Error while inserting {entity.id} into {self.table.name}. "  # type: ignore
-                               f"Retry nb: {4 - retry}.")
+            self._logger.error(f"Error while inserting {entity.id} into {self.table.name}. ")  # type: ignore
             self._logger.error(f"Error : {e}")
-            if retry > 0:
-                sleep(0.1)
-                self._save(entity, retry - 1)
-            else:
-                raise e
+            raise e
 
     def _exists(self, entity_id: str):
         query = self.table.select().filter_by(id=entity_id)
