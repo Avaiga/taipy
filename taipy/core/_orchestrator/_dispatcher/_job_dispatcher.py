@@ -68,12 +68,16 @@ class _JobDispatcher(threading.Thread):
             with self.lock:
                 job = None
                 try:
-                    job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
+                    if not self._STOP_FLAG:
+                        job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
                 except Empty:  # In case the last job of the queue has been removed.
                     pass
             if job:
                 try:
-                    self._execute_job(job)
+                    if not self._STOP_FLAG:
+                        self._execute_job(job)
+                    else:
+                        self.orchestrator.jobs_to_run.put(job)
                 except Exception as e:
                     self._logger.exception(e)
 
