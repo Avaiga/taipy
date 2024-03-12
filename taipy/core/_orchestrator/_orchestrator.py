@@ -231,9 +231,9 @@ class _Orchestrator(_AbstractOrchestrator):
 
     @classmethod
     def __unblock_jobs(cls):
-        with cls.lock:
-            for job in cls.blocked_jobs:
-                if not cls._is_blocked(job):
+        for job in cls.blocked_jobs:
+            if not cls._is_blocked(job):
+                with cls.lock:
                     job.pending()
                     cls.__remove_blocked_job(job)
                     cls.jobs_to_run.put(job)
