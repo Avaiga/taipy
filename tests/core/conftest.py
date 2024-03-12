@@ -331,6 +331,12 @@ def clean_repository(init_config, init_managers, init_orchestrator, init_notifie
     with patch("sys.argv", ["prog"]):
         yield
 
+    close_all_sessions()
+    init_orchestrator()
+    init_managers()
+    init_config()
+    init_notifier()
+
 
 @pytest.fixture
 def init_config(reset_configuration_singleton, inject_core_sections):
