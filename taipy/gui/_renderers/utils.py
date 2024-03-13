@@ -10,11 +10,13 @@
 # specific language governing permissions and limitations under the License.
 
 import datetime
-from pathlib import Path
 import typing as t
+from pathlib import Path
 
 import pandas as pd
 from watchdog.events import FileSystemEventHandler
+
+from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._warnings import _warn
 from ..types import NumberTypes
@@ -137,4 +139,6 @@ class FileWatchdogHandler(FileSystemEventHandler):
         self._last_modified = datetime.datetime.now()
         if Path(event.src_path).resolve() == Path(self._file_path).resolve():
             self._renderer.set_content(self._file_path)
-            print(f"File '{self._file_path}' has been modified. Reload your page to see the changes.")
+            _TaipyLogger._get_logger().info(
+                f"File '{self._file_path}' has been modified. Reload your page to see the changes."
+            )
