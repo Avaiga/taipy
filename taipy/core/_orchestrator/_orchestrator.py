@@ -77,7 +77,7 @@ class _Orchestrator(_AbstractOrchestrator):
             getattr(submittable, "config_id", None),
             **properties,
         )
-        jobs = []
+        jobs: List[Job] = []
         tasks = submittable._get_sorted_tasks()
         with cls.lock:
             for ts in tasks:
