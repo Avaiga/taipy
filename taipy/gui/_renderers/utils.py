@@ -53,7 +53,7 @@ def _get_columns_dict_from_list(
 
             if cols and (col not in cols):
                 _warn(
-                    f'Error column "{col}" is not present. Available columns: {cols}.'  # noqa: E501
+                    f'Column "{col}" is not present. Available columns: {cols}.'  # noqa: E501
                 )
             else:
                 _warn("The 'value' argument is of an unsupported type. Expected DataFrame, dict, list, or tuple.")
