@@ -136,6 +136,5 @@ class FileWatchdogHandler(FileSystemEventHandler):
             return
         self._last_modified = datetime.datetime.now()
         if Path(event.src_path).resolve() == Path(self._file_path).resolve():
-            self._renderer._content = ""
             self._renderer.set_content(self._file_path)
             print(f"File '{self._file_path}' has been modified. Reload your page to see the changes.")
