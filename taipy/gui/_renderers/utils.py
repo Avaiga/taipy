@@ -56,7 +56,7 @@ def _get_columns_dict_from_list(
                     f'Column "{col}" is not present. Available columns: {cols}.'  # noqa: E501
                 )
             else:
-                _warn("The 'value' argument is of an unsupported type. Expected DataFrame, dict, list, or tuple.")
+                _warn("The 'data' property value is of an unsupported type. Only DataFrame, dict, list, or tuple are supported.")
     return col_dict
 
 
