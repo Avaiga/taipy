@@ -48,6 +48,7 @@ class _Server:
     __OPENING_CURLY = r"\1&#x7B;"
     __CLOSING_CURLY = r"&#x7D;\2"
     _RESOURCE_HANDLER_ARG = "tprh"
+    _CUSTOM_PAGE_META_ARG = "tp_cp_meta"
 
     def __init__(
         self,
