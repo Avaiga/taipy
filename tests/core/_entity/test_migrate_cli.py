@@ -26,6 +26,8 @@ from taipy.core._entity._migrate_cli import _MigrateCLI
 def clean_data_folder():
     if os.path.exists("tests/core/_entity/.data"):
         shutil.rmtree("tests/core/_entity/.data")
+    if os.path.exists("tests/core/_entity/.taipy"):
+        shutil.rmtree("tests/core/_entity/.taipy")
     yield
 
 

@@ -109,11 +109,9 @@ class Scenario(_Entity, Submittable, _Labeled):
         self._properties = _Properties(self, **properties)
         self._sequences: Dict[str, Dict] = sequences or {}
 
-        _scenario_task_ids = set(task.id if isinstance(task, Task) else task for task in self._tasks)
+        _scenario_task_ids = {task.id if isinstance(task, Task) else task for task in self._tasks}
         for sequence_name, sequence_data in self._sequences.items():
-            sequence_task_ids = set(
-                task.id if isinstance(task, Task) else task for task in sequence_data.get("tasks", [])
-            )
+            sequence_task_ids = {task.id if isinstance(task, Task) else task for task in sequence_data.get("tasks", [])}
             self.__check_sequence_tasks_exist_in_scenario_tasks(
                 sequence_name, sequence_task_ids, self.id, _scenario_task_ids
             )
@@ -233,10 +231,11 @@ class Scenario(_Entity, Submittable, _Labeled):
         subscribers: Optional[List[_Subscriber]] = None,
     ) -> Sequence:
         _scenario = _Reloader()._reload(self._MANAGER_NAME, self)
-        _scenario_task_ids = set(task.id if isinstance(task, Task) else task for task in _scenario._tasks)
-        _sequence_task_ids: Set[TaskId] = set(task.id if isinstance(task, Task) else task for task in tasks)
+        _scenario_task_ids = {task.id if isinstance(task, Task) else task for task in _scenario._tasks}
+        _sequence_task_ids: Set[TaskId] = {task.id if isinstance(task, Task) else task for task in tasks}
         self.__check_sequence_tasks_exist_in_scenario_tasks(name, _sequence_task_ids, self.id, _scenario_task_ids)
         from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
+
         seq_manager = _SequenceManagerFactory._build_manager()
         seq = seq_manager._create(name, tasks, subscribers or [], properties or {}, self.id, self.version)
         if not seq._is_consistent():
@@ -270,9 +269,9 @@ class Scenario(_Entity, Submittable, _Labeled):
             SequenceTaskDoesNotExistInScenario^: If a task in the sequence does not exist in the scenario.
         """
         _scenario = _Reloader()._reload(self._MANAGER_NAME, self)
-        _sc_task_ids = set(task.id if isinstance(task, Task) else task for task in _scenario._tasks)
+        _sc_task_ids = {task.id if isinstance(task, Task) else task for task in _scenario._tasks}
         for name, tasks in sequences.items():
-            _seq_task_ids: Set[TaskId] = set(task.id if isinstance(task, Task) else task for task in tasks)
+            _seq_task_ids: Set[TaskId] = {task.id if isinstance(task, Task) else task for task in tasks}
             self.__check_sequence_tasks_exist_in_scenario_tasks(name, _seq_task_ids, self.id, _sc_task_ids)
         # Need to parse twice the sequences to avoid adding some sequences and not others in case of exception
         for name, tasks in sequences.items():
@@ -327,11 +326,15 @@ class Scenario(_Entity, Submittable, _Labeled):
         self._sequences[new_name] = self._sequences[old_name]
         del self._sequences[old_name]
         self.sequences = self._sequences  # type: ignore
-        Notifier.publish(Event(EventEntityType.SCENARIO,
-                               EventOperation.UPDATE,
-                               entity_id=self.id,
-                               attribute_name="sequences",
-                               attribute_value=self._sequences))
+        Notifier.publish(
+            Event(
+                EventEntityType.SCENARIO,
+                EventOperation.UPDATE,
+                entity_id=self.id,
+                attribute_name="sequences",
+                attribute_value=self._sequences,
+            )
+        )
 
     @staticmethod
     def __check_sequence_tasks_exist_in_scenario_tasks(

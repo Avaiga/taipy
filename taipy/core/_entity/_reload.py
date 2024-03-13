@@ -22,10 +22,10 @@ class _Reloader:
 
     _no_reload_context = False
 
-    def __new__(class_, *args, **kwargs):
-        if not isinstance(class_._instance, class_):
-            class_._instance = object.__new__(class_, *args, **kwargs)
-        return class_._instance
+    def __new__(cls, *args, **kwargs):
+        if not isinstance(cls._instance, cls):
+            cls._instance = object.__new__(cls, *args, **kwargs)
+        return cls._instance
 
     def _reload(self, manager: str, obj):
         if self._no_reload_context:
@@ -66,10 +66,7 @@ def _self_setter(manager):
         def _do_set_entity(self, *args, **kwargs):
             fct(self, *args, **kwargs)
             entity_manager = _get_manager(manager)
-            if len(args) == 1:
-                value = args[0]
-            else:
-                value = args
+            value = args[0] if len(args) == 1 else args
             event = _make_event(
                 self,
                 EventOperation.UPDATE,

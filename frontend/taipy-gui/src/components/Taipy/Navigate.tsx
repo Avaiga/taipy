@@ -34,9 +34,14 @@ const Navigate = ({ to, params, tab, force }: NavigateProps) => {
             const searchParams = new URLSearchParams(params || "");
             // Handle Resource Handler Id
             let tprh: string | null = null;
+            let meta: string | null = null;
             if (searchParams.has("tprh")) {
                 tprh = searchParams.get("tprh");
                 searchParams.delete("tprh");
+                if (searchParams.has("tp_cp_meta")) {
+                    meta = searchParams.get("tp_cp_meta");
+                    searchParams.delete("tp_cp_meta");
+                }
             }
             if (Object.keys(state.locations || {}).some((route) => tos === route)) {
                 const searchParamsLocation = new URLSearchParams(location.search);
@@ -47,6 +52,9 @@ const Navigate = ({ to, params, tab, force }: NavigateProps) => {
                     if (tprh !== null) {
                         // Add a session cookie for the resource handler id
                         document.cookie = `tprh=${tprh};path=/;`;
+                        if (meta !== null) {
+                            localStorage.setItem("tp_cp_meta", meta);
+                        }
                         navigate(0);
                     }
                 }

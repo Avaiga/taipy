@@ -13,6 +13,7 @@ import traceback
 from unittest.mock import patch
 
 from taipy.core import JobId
+from taipy.core._orchestrator._dispatcher import _DevelopmentJobDispatcher
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.job.job import Job
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
@@ -61,3 +62,8 @@ def test_dispatch_executes_the_function_with_exceptions():
     assert job.stacktrace[1] == "".join(traceback.format_exception(type(e_2), value=e_2, tb=e_2.__traceback__))
     assert job.stacktrace[0] == "".join(traceback.format_exception(type(e_1), value=e_1, tb=e_1.__traceback__))
     assert job.is_failed()
+
+
+def test_can_execute():
+    dispatcher = _DevelopmentJobDispatcher(_OrchestratorFactory._orchestrator)
+    assert dispatcher._can_execute()

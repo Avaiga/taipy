@@ -12,10 +12,11 @@ from __future__ import annotations
 
 import typing as t
 from abc import ABC, abstractmethod
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from json import JSONEncoder
 from pathlib import Path
 
+import pandas
 from flask.json.provider import DefaultJSONProvider
 
 from .._warnings import _warn
@@ -44,6 +45,8 @@ class _DefaultJsonAdapter(JsonAdapter):
         if isinstance(o, (datetime, date, time)):
             return _date_to_string(o)
         if isinstance(o, Path):
+            return str(o)
+        if isinstance(o, (timedelta, pandas.Timedelta)):
             return str(o)
 
 

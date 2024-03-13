@@ -117,6 +117,7 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
             editor_expiration_date,
             **properties,
         )
+        _AbstractTabularDataNode.__init__(self, **properties)
         self._engine = None
         if not self._last_edit_date:  # type: ignore
             self._last_edit_date = datetime.now()
@@ -230,7 +231,7 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
 
             # On pandas 1.3.5 there's a bug that makes that the dataframe from sqlalchemy query is
             # created without headers
-            keys = [col for col in result.keys()]
+            keys = list(result.keys())
             if columns:
                 return pd.DataFrame(result, columns=keys)[columns]
             return pd.DataFrame(result, columns=keys)
