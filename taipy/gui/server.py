@@ -283,7 +283,7 @@ class _Server:
             runtime_manager.add_gui(self._gui, port)
         if debug and not is_running_from_reloader() and _is_port_open(host_value, port):
             raise ConnectionError(
-                f"Port {port} is already opened on {host_value}. You have another server application running on the same port."  # noqa: E501
+                f"Port {port} is already opened on {host_value}. You have another server application running on the same port.\nYou can set port='auto' for automatic port assignment."  # noqa: E501
             )
         if not flask_log:
             log = logging.getLogger("werkzeug")
