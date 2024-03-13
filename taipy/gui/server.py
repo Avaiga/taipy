@@ -250,11 +250,11 @@ class _Server:
 
     def _apply_patch(self):
         if self._get_async_mode() == "gevent" and util.find_spec("gevent"):
+            warnings.filterwarnings("ignore", module="gevent.monkey")
             from gevent import monkey
 
             if not monkey.is_module_patched("time"):
                 monkey.patch_time()
-            warnings.filterwarnings("ignore", module="gevent.monkey")
         if self._get_async_mode() == "eventlet" and util.find_spec("eventlet"):
             from eventlet import monkey_patch, patcher
 
