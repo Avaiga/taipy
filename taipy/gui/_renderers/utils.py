@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import typing as t
+import pandas as pd
 
 from .._warnings import _warn
 from ..types import NumberTypes
@@ -31,14 +32,19 @@ def _get_columns_dict_from_list(
 ):
     col_dict = {}
     idx = 0
+    cols = str(list(value.columns) if isinstance(value, pd.DataFrame) else list(value.keys()) if isinstance(value, (dict, _MapDict)) else value if isinstance(value, (list, tuple)) else value)
+
     for col in col_list:
         if col in col_types_keys:
             col_dict[col] = {"index": idx}
             idx += 1
         elif col:
-            _warn(
-                f'Error column "{col}" is not present in the Dataframe "{value.head(0) if hasattr(value, "head") else value}".'  # noqa: E501
-            )
+            if col not in cols:
+                _warn(
+                    f'Error column "{col}" is not present. Available columns/keys: {cols}.'  # noqa: E501
+                )
+            else:
+                _warn("The 'value' argument is of an unsupported type. Expected DataFrame, dict, list, or tuple.")
     return col_dict
 
 
