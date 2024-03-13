@@ -13,12 +13,15 @@ import typing as t
 from abc import ABC, abstractmethod
 from os import path
 
+from watchdog.observers import Observer
+
+from taipy.gui._renderers.utils import FileWatchdogHandler
+
 from ..page import Page
 from ..utils import _is_in_notebook, _varname_from_content
 from ._html import _TaipyHTMLParser
 
 if t.TYPE_CHECKING:
-    from ..builder._element import _Element
     from ..gui import Gui
 
 
@@ -41,6 +44,7 @@ class _Renderer(Page, ABC):
         self._content = ""
         self._base_element: t.Optional[_Element] = None
         self._filepath = ""
+        self._observer = Observer()
         if isinstance(content, str):
             self.__process_content(content)
         elif isinstance(content, _Element):
@@ -52,7 +56,13 @@ class _Renderer(Page, ABC):
 
     def __process_content(self, content: str) -> None:
         if path.exists(content) and path.isfile(content):
-            return self.__parse_file_content(content)
+            self.__parse_file_content(content)
+            # Watchdog observer: watch for file changes
+            if _is_in_notebook() and not self._observer.is_alive():
+                file_path = path.abspath(content)
+                self._observer.schedule(FileWatchdogHandler(file_path, self), path.dirname(file_path), recursive=False)
+                self._observer.start()
+            return
         if self._frame is not None:
             frame_dir_path = path.dirname(path.abspath(self._frame.f_code.co_filename))
             content_path = path.join(frame_dir_path, content)
