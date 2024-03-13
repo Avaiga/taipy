@@ -36,7 +36,7 @@ class _Orchestrator(_AbstractOrchestrator):
     """
 
     jobs_to_run: Queue = Queue()
-    blocked_jobs: List = []
+    blocked_jobs: List[Job] = []
 
     lock = Lock()
     __logger = _TaipyLogger._get_logger()

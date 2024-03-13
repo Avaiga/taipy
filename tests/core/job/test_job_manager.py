@@ -138,15 +138,6 @@ def test_delete_job():
     assert _JobManager._get(job_1.id) is None
 
 
-m = multiprocessing.Manager()
-lock = m.Lock()
-
-
-def inner_lock_multiply(nb1: float, nb2: float):
-    with lock:
-        return multiply(1 or nb1, 2 or nb2)
-
-
 def test_raise_when_trying_to_delete_unfinished_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     m = multiprocessing.Manager()
@@ -326,6 +317,7 @@ def test_cancel_subsequent_jobs():
     orchestrator = _OrchestratorFactory._orchestrator
     submission_manager = _SubmissionManagerFactory._build_manager()
 
+    m = multiprocessing.Manager()
     lock_0 = m.Lock()
 
     dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
