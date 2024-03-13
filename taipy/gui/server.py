@@ -268,6 +268,8 @@ class _Server:
     def run(self, host, port, debug, use_reloader, flask_log, run_in_thread, allow_unsafe_werkzeug, notebook_proxy):
         host_value = host if host != "0.0.0.0" else "localhost"
         self._host = host
+        if port == "auto":
+            port = self._get_random_port()
         self._port = port
         if _is_in_notebook() and notebook_proxy:  # pragma: no cover
             from .utils.proxy import NotebookProxy
