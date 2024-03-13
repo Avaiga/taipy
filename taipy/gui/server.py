@@ -19,6 +19,7 @@ import re
 import sys
 import time
 import typing as t
+import warnings
 import webbrowser
 from importlib import util
 from random import randint
@@ -253,6 +254,7 @@ class _Server:
 
             if not monkey.is_module_patched("time"):
                 monkey.patch_time()
+            warnings.filterwarnings("ignore", module="gevent.monkey")
         if self._get_async_mode() == "eventlet" and util.find_spec("eventlet"):
             from eventlet import monkey_patch, patcher
 
