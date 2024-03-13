@@ -34,10 +34,14 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         )  # type: ignore
         self._nb_available_workers = self._executor._max_workers  # type: ignore
 
+    def _can_execute(self) -> bool:
+        """Returns True if the dispatcher have resources to dispatch a job."""
+        return self._nb_available_workers > 0
+
     def run(self):
         with self._executor:
             super().run()
-        self._logger.info("Standalone job dispatcher: Pool executor shut down")
+        self._logger.debug("Standalone job dispatcher: Pool executor shut down")
 
     def _dispatch(self, job: Job):
         """Dispatches the given `Job^` on an available worker for execution.
@@ -50,7 +54,6 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         config_as_string = _TomlSerializer()._serialize(Config._applied_config)  # type: ignore[attr-defined]
         future = self._executor.submit(_TaskFunctionWrapper(job.id, job.task), config_as_string=config_as_string)
 
-        self._set_dispatched_processes(job.id, future)  # type: ignore
         future.add_done_callback(self._release_worker)  # We must release the worker before updating the job status
         # so that the worker is available for another job as soon as possible.
         future.add_done_callback(partial(self._update_job_status_from_future, job))
@@ -59,5 +62,4 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         self._nb_available_workers += 1
 
     def _update_job_status_from_future(self, job: Job, ft):
-        self._pop_dispatched_process(job.id)  # type: ignore
         self._update_job_status(job, ft.result())

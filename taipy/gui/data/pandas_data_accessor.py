@@ -18,7 +18,7 @@ import pandas as pd
 
 from .._warnings import _warn
 from ..gui import Gui
-from ..gui_types import PropertyType
+from ..types import PropertyType
 from ..utils import _RE_PD_TYPE, _get_date_col_str_name
 from .data_accessor import _DataAccessor
 from .data_format import _DataFormat
@@ -262,6 +262,7 @@ class _PandasDataAccessor(_DataAccessor):
             except Exception as e:
                 _warn(f"Dataframe filtering: invalid query '{query}' on {value.head()}", e)
 
+        dictret: t.Optional[t.Dict[str, t.Any]]
         if paged:
             aggregates = payload.get("aggregates")
             applies = payload.get("applies")
@@ -375,7 +376,11 @@ class _PandasDataAccessor(_DataAccessor):
                         except Exception as e:
                             _warn(f"Limit rows error with {decimator} for Dataframe", e)
             value = self.__build_transferred_cols(gui, columns, t.cast(pd.DataFrame, value), is_copied=is_copied)
-            dictret = self.__format_data(value, data_format, "list", data_extraction=True)
+            if payload.get("csv") is True:
+                ret_payload["df"] = value
+                dictret = None
+            else:
+                dictret = self.__format_data(value, data_format, "list", data_extraction=True)
         ret_payload["value"] = dictret
         return ret_payload
 

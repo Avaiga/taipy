@@ -78,7 +78,7 @@ class _MigrateCLI:
         if args.remove_backup:
             cls.__handle_remove_backup(repository_type, repository_args)
 
-        do_backup = False if args.skip_backup else True
+        do_backup =  not args.skip_backup
         cls.__migrate_entities(repository_type, repository_args, do_backup)
         sys.exit(0)
 

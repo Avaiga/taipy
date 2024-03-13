@@ -113,6 +113,5 @@ class _CoreCLI:
     @classmethod
     def __add_taipy_prefix(cls, key: str):
         if key.startswith("--no-"):
-            return key[:5] + "taipy-" + key[5:]
-
-        return key[:2] + "taipy-" + key[2:]
+            return f"{key[:5]}taipy-{key[5:]}"
+        return f"{key[:2]}taipy-{key[2:]}"

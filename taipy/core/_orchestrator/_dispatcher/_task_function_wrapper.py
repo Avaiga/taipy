@@ -38,8 +38,7 @@ class _TaskFunctionWrapper:
     def execute(self, **kwargs):
         """Execute the wrapped function. If `config_as_string` is given, then it will be reapplied to the config."""
         try:
-            config_as_string = kwargs.pop("config_as_string", None)
-            if config_as_string:
+            if config_as_string := kwargs.pop("config_as_string", None):
                 Config._applied_config._update(_TomlSerializer()._deserialize(config_as_string))
                 Config.block_update()
 
@@ -67,7 +66,6 @@ class _TaskFunctionWrapper:
                     try:
                         data_node = data_manager._get(dn.id)
                         data_node.write(res, job_id=job_id)
-                        data_manager._set(data_node)
                     except Exception as e:
                         logger.error("Error during write", exc_info=1)
                         exceptions.append(DataNodeWritingError(f"Error writing in datanode id {dn.id}: {e}"))

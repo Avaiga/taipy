@@ -9,7 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import multiprocessing
 from unittest.mock import patch
 
 import pytest
@@ -19,8 +18,6 @@ from taipy.core import Core, taipy
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from tests.core.utils import assert_true_after_time
-
-m = multiprocessing.Manager()
 
 
 def twice(a):

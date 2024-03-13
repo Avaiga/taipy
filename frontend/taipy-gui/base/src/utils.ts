@@ -9,6 +9,11 @@ interface MultipleUpdatePayload {
     payload: { value: unknown };
 }
 
+interface AlertMessage extends WsMessage {
+    atype: string;
+    message: string;
+}
+
 const initWsMessageTypes = ["ID", "AID", "GMC"];
 
 export const initSocket = (socket: Socket, appManager: TaipyApp) => {
@@ -82,6 +87,9 @@ const processWsMessage = (message: WsMessage, appManager: TaipyApp) => {
                 return appManager.init();
             }
             appManager.appId = payload.id as string;
+        } else if (message.type === "AL" && appManager.onNotify) {
+            const payload = message as AlertMessage;
+            appManager.onNotify(appManager, payload.atype, payload.message);
         }
         postWsMessageProcessing(message, appManager);
     }

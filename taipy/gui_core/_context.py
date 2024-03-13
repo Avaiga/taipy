@@ -124,7 +124,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:  # type: ignore
                         self.gui._broadcast(
                             _GuiCoreContext._CORE_CHANGED_NAME,
-                            {"scenario": [x for x in sequence.parent_ids]},  # type: ignore
+                            {"scenario": list(sequence.parent_ids)},  # type: ignore
                         )
             except Exception as e:
                 _warn(f"Access to sequence {event.entity_id} failed", e)
@@ -218,7 +218,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         scenario_or_cycle.id,
                         scenario_or_cycle.get_simple_label(),
                         sorted(
-                            self.scenario_by_cycle.get(scenario_or_cycle, []), key=_GuiCoreContext.sort_by_creation_date
+                            self.scenario_by_cycle.get(scenario_or_cycle, []),
+                            key=_GuiCoreContext.get_entity_creation_date_iso,
                         ),
                         _EntityType.CYCLE.value,
                         False,
@@ -250,7 +251,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     cycles_scenarios.extend(scenarios)
                 else:
                     cycles_scenarios.append(cycle)
-        return sorted(cycles_scenarios, key=_GuiCoreContext.sort_by_creation_date)
+        return sorted(cycles_scenarios, key=_GuiCoreContext.get_entity_creation_date_iso)
 
     def select_scenario(self, state: State, id: str, payload: t.Dict[str, str]):
         args = payload.get("args")
@@ -649,7 +650,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if isinstance(ent, Scenario):
                 tags = data.get(_GuiCoreContext.__PROP_SCENARIO_TAGS)
                 if isinstance(tags, (list, tuple)):
-                    ent.tags = {t for t in tags}
+                    ent.tags = dict(tags)
             name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
             if isinstance(name, str):
                 if hasattr(ent, _GuiCoreContext.__PROP_ENTITY_NAME):
@@ -670,8 +671,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         ent.properties.pop(key, None)
 
     @staticmethod
-    def sort_by_creation_date(entity: t.Union[Scenario, Cycle]):
-        return entity.creation_date
+    def get_entity_creation_date_iso(entity: t.Union[Scenario, Cycle]):
+        # we might be comparing naive and aware datetime ISO
+        return entity.creation_date.isoformat()
 
     def get_scenarios_for_owner(self, owner_id: str):
         cycles_scenarios: t.List[t.Union[Scenario, Cycle]] = []
@@ -691,7 +693,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         cycles_scenarios.extend(scenarios_cycle)
                     elif isinstance(entity, Scenario):
                         cycles_scenarios.append(entity)
-        return sorted(cycles_scenarios, key=_GuiCoreContext.sort_by_creation_date)
+        return sorted(cycles_scenarios, key=_GuiCoreContext.get_entity_creation_date_iso)
 
     def get_data_node_history(self, datanode: DataNode, id: str):
         if (
@@ -937,3 +939,22 @@ class _GuiCoreContext(CoreEventConsumerBase):
             state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, data_id)
         elif chart_id := data.get("chart_id"):
             state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_CHART_ID_VAR, chart_id)
+
+    def on_dag_select(self, state: State, id: str, payload: t.Dict[str, str]):
+        args = payload.get("args")
+        if args is None or not isinstance(args, list) or len(args) < 2:
+            return
+        on_action_function = self.gui._get_user_function(args[1]) if args[1] else None
+        if callable(on_action_function):
+            try:
+                entity = core_get(args[0]) if is_readable(args[0]) else f"unredable({args[0]})"
+                self.gui._call_function_with_state(
+                    on_action_function,
+                    [entity],
+                )
+            except Exception as e:
+                if not self.gui._call_on_exception(args[1], e):
+                    _warn(f"dag.on_action(): Exception raised in '{args[1]}()' with '{args[0]}'", e)
+        elif args[1]:
+            _warn(f"dag.on_action(): Invalid function '{args[1]}()'.")
+

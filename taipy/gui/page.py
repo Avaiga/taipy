@@ -46,6 +46,9 @@ class Page:
             self._frame = self._renderer._frame
         elif isinstance(self, CustomPage):
             self._frame = t.cast(FrameType, t.cast(FrameType, inspect.stack()[2].frame))
+            # Allow CustomPage class to be inherited
+            if len(inspect.stack()) > 3 and inspect.stack()[2].function != "<module>":
+                self._frame = t.cast(FrameType, t.cast(FrameType, inspect.stack()[3].frame))
         elif len(inspect.stack()) < 4:
             raise RuntimeError(f"Can't resolve module. Page '{type(self).__name__}' is not registered.")
         else:
@@ -85,9 +88,7 @@ class Page:
         return (
             self._class_locals
             if self._is_class_module()
-            else None
-            if (frame := self._get_frame()) is None
-            else _filter_locals(frame.f_locals)
+            else None if (frame := self._get_frame()) is None else _filter_locals(frame.f_locals)
         )
 
     def _is_class_module(self):

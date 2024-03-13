@@ -8,11 +8,13 @@ import { initSocket } from "./utils";
 
 export type OnInitHandler = (appManager: TaipyApp) => void;
 export type OnChangeHandler = (appManager: TaipyApp, encodedName: string, value: unknown) => void;
+export type OnNotifyHandler = (appManager: TaipyApp, type: string, message: string) => void;
 
 export class TaipyApp {
     socket: Socket;
     _onInit: OnInitHandler | undefined;
     _onChange: OnChangeHandler | undefined;
+    _onNotify: OnNotifyHandler | undefined;
     variableData: DataManager | undefined;
     functionData: DataManager | undefined;
     appId: string;
@@ -58,6 +60,16 @@ export class TaipyApp {
             throw new Error("onChange() requires three parameters");
         }
         this._onChange = handler;
+    }
+
+    get onNotify() {
+        return this._onNotify;
+    }
+    set onNotify(handler: OnNotifyHandler | undefined) {
+        if (handler !== undefined && handler?.length !== 3) {
+            throw new Error("onNotify() requires three parameters");
+        }
+        this._onNotify = handler;
     }
 
     // Utility methods
@@ -128,6 +140,10 @@ export class TaipyApp {
 
     upload(encodedName: string, files: FileList, progressCallback: (val: number) => void) {
         return uploadFile(encodedName, files, progressCallback, this.clientId);
+    }
+
+    getPageMetadata() {
+        return JSON.parse(localStorage.getItem("tp_cp_meta") || "{}");
     }
 }
 

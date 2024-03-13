@@ -20,8 +20,8 @@ from inspect import isclass
 from urllib.parse import quote
 
 from .._warnings import _warn
-from ..gui_types import PropertyType, _get_taipy_type
 from ..partial import Partial
+from ..types import PropertyType, _get_taipy_type
 from ..utils import (
     _date_to_string,
     _get_broadcast_var_name,
@@ -69,7 +69,7 @@ class _Builder:
         "apply",
         "style",
         "tooltip",
-        "lov"
+        "lov",
     ]
 
     def __init__(
@@ -775,6 +775,8 @@ class _Builder:
                 else:
                     self.__set_default_value(var_name, var_type=var_type)
         else:
+            if var_type == PropertyType.data:
+                _warn(f"{self.__control_type}.data property should be bound.")
             value = self.__attributes.get(var_name)
             if value is not None:
                 if native_type:

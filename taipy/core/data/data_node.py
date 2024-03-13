@@ -566,7 +566,7 @@ class DataNode(_Entity, _Labeled):
 
 
 @_make_event.register(DataNode)
-def make_event_for_datanode(
+def _make_event_for_datanode(
     data_node: DataNode,
     operation: EventOperation,
     /,

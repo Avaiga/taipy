@@ -1,1 +1,3 @@
 recursive-include taipy/templates *
+include *.json
+include taipy/templates/setup.requirements.txt

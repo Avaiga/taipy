@@ -24,13 +24,13 @@ class _ConfigBlocker:
     @classmethod
     def _block(cls):
         if not cls.__block_config_update:
-            cls.__logger.info("Blocking configuration update.")
+            cls.__logger.debug("Blocking configuration update.")
             cls.__block_config_update = True
 
     @classmethod
     def _unblock(cls):
         if cls.__block_config_update:
-            cls.__logger.info("Unblocking configuration update.")
+            cls.__logger.debug("Unblocking configuration update.")
             cls.__block_config_update = False
 
     @classmethod

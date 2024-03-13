@@ -9,21 +9,23 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import typing as t
+import os
+import shutil
+import sys
+from pathlib import Path
+
+__SKIP = ["LICENSE", "MANIFEST.in", "taipy", "setup.py", "tools"]
 
 
-def _is_boolean_true(s: t.Union[bool, str]) -> bool:
-    return (
-        s
-        if isinstance(s, bool)
-        else s.lower() in ["true", "1", "t", "y", "yes", "yeah", "sure"] if isinstance(s, str) else False
-    )
+if __name__ == "__main__":
+    _package = sys.argv[1]
+    _package_path = f"taipy/{_package}"
 
+    Path(_package_path).mkdir(parents=True, exist_ok=True)
 
-def _is_boolean(s: t.Any) -> bool:
-    if isinstance(s, bool):
-        return True
-    elif isinstance(s, str):
-        return s.lower() in ["true", "1", "t", "y", "yes", "yeah", "sure", "false", "0", "f", "no"]
-    else:
-        return False
+    for file_name in os.listdir("."):
+        if file_name.lower().endswith(".md") or file_name in __SKIP:
+            continue
+        shutil.move(file_name, _package_path)
+
+    shutil.copy("../__init__.py", "./taipy/__init__.py")

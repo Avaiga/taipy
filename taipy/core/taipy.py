@@ -442,7 +442,7 @@ def is_deletable(entity: Union[Scenario, Job, Submission, ScenarioId, JobId, Sub
 
     Parameters:
         entity (Union[Scenario, Job, Submission, ScenarioId, JobId, SubmissionId]): The scenario,
-        job or submission to check.
+            job or submission to check.
 
     Returns:
         True if the given scenario, job or submission can be deleted. False otherwise.
@@ -802,7 +802,7 @@ def get_latest_submission(entity: Union[Scenario, Sequence, Task]) -> Optional[S
 
     Parameters:
         entity (Union[Scenario^, Sequence^, Task^]): The scenario, sequence or task to
-        retrieve the latest submission from.
+            retrieve the latest submission from.
 
     Returns:
         The latest submission created from _scenario_, _sequence_ and _task_, or None
