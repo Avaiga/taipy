@@ -11,6 +11,8 @@
 
 import typing as t
 
+import pandas as pd
+
 from .._warnings import _warn
 from ..types import NumberTypes
 from ..utils import _RE_PD_TYPE, _get_date_col_str_name, _MapDict
@@ -31,14 +33,33 @@ def _get_columns_dict_from_list(
 ):
     col_dict = {}
     idx = 0
+    cols = None
+
     for col in col_list:
         if col in col_types_keys:
             col_dict[col] = {"index": idx}
             idx += 1
         elif col:
-            _warn(
-                f'Error column "{col}" is not present in the Dataframe "{value.head(0) if hasattr(value, "head") else value}".'  # noqa: E501
-            )
+            if cols is None:
+                cols = (
+                    list(value.columns)
+                    if isinstance(value, pd.DataFrame)
+                    else list(value.keys())
+                    if isinstance(value, (dict, _MapDict))
+                    else value
+                    if isinstance(value, (list, tuple))
+                    else []
+                )
+
+            if cols and (col not in cols):
+                _warn(
+                    f'Column "{col}" is not present. Available columns: {cols}.'  # noqa: E501
+                )
+            else:
+                _warn(
+                    "The 'data' property value is of an unsupported type."
+                    + " Only DataFrame, dict, list, or tuple are supported."
+                )
     return col_dict
 
 

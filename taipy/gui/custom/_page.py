@@ -23,13 +23,20 @@ class Page(BasePage):
     A custom page for external application that can be added to Taipy GUI"""
 
     def __init__(
-        self, resource_handler: ResourceHandler, binding_variables: t.Optional[t.List[str]] = None, **kwargs
+        self,
+        resource_handler: ResourceHandler,
+        binding_variables: t.Optional[t.List[str]] = None,
+        metadata: t.Optional[t.Dict[str, t.Any]] = None,
+        **kwargs,
     ) -> None:
         if binding_variables is None:
             binding_variables = []
+        if metadata is None:
+            metadata = {}
         super().__init__(**kwargs)
         self._resource_handler = resource_handler
         self._binding_variables = binding_variables
+        self._metadata: t.Dict[str, t.Any] = metadata
 
 
 class ResourceHandler(ABC):
