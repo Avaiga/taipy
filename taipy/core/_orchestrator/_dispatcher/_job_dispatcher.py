@@ -55,37 +55,29 @@ class _JobDispatcher(threading.Thread):
             wait (bool): If True, the method will wait for the dispatcher to stop.
             timeout (Optional[float]): The maximum time to wait. If None, the method will wait indefinitely.
         """
-        self.stop_wait = wait
-        self.stop_timeout = timeout
         self._STOP_FLAG = True
+
+        if wait and self.is_alive():
+            self._logger.debug("Waiting for the dispatcher thread to stop...")
+            self.join(timeout=timeout)
 
     def run(self):
         self._logger.debug("Job dispatcher started.")
         while not self._STOP_FLAG:
             try:
-                self._logger.info("Check if can execute before getting from queue")
                 if self._can_execute():
-                    self._logger.info(f"run() TRY TO acquired the {self.lock}")
                     with self.lock:
-                        self._logger.info(f"run() acquired the {self.lock}")
                         if self._STOP_FLAG:
                             break
-                        self._logger.info(f"Getting job from {self.orchestrator.jobs_to_run}")
+                        self._logger.info(f"{self.orchestrator.jobs_to_run.qsize()=}")
                         job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
                     self._execute_job(job)
-                    self._logger.info(f"run() release the {self.lock}")
                 else:
                     time.sleep(0.1)  # We need to sleep to avoid busy waiting.
             except Empty:  # In case the last job of the queue has been removed.
-                self._logger.info(f"run() release the {self.lock} because of Empty")
                 pass
             except Exception as e:
-                self._logger.info(f"run() release the {self.lock} because of {e}")
                 self._logger.exception(e)
-
-        # if self.stop_wait:
-        #     self._logger.debug("Waiting for the dispatcher thread to stop...")
-        #     self.join(timeout=self.stop_timeout)
 
         self._logger.debug("Job dispatcher stopped.")
 
