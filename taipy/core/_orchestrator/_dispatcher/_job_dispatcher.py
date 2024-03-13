@@ -55,9 +55,10 @@ class _JobDispatcher(threading.Thread):
             wait (bool): If True, the method will wait for the dispatcher to stop.
             timeout (Optional[float]): The maximum time to wait. If None, the method will wait indefinitely.
         """
-        self.stop_wait = wait
-        self.stop_timeout = timeout
         self._STOP_FLAG = True
+        if wait and self.is_alive():
+            self._logger.debug("Waiting for the dispatcher thread to stop...")
+            self.join(timeout=timeout)
 
     def run(self):
         self._logger.debug("Job dispatcher started.")
@@ -65,13 +66,15 @@ class _JobDispatcher(threading.Thread):
             if not self._can_execute():
                 time.sleep(0.1)  # We need to sleep to avoid busy waiting.
                 continue
+
             with self.lock:
                 job = None
                 try:
                     if not self._STOP_FLAG:
                         job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
                 except Empty:  # In case the last job of the queue has been removed.
-                    pass
+                    continue
+
             if job:
                 try:
                     if not self._STOP_FLAG:
@@ -81,9 +84,6 @@ class _JobDispatcher(threading.Thread):
                 except Exception as e:
                     self._logger.exception(e)
 
-        if self.stop_wait:
-            self._logger.debug("Waiting for the dispatcher thread to stop...")
-            self.join(timeout=self.stop_timeout)
         self._logger.debug("Job dispatcher stopped.")
 
     @abstractmethod
