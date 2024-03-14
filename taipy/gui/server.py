@@ -268,6 +268,8 @@ class _Server:
     def run(self, host, port, debug, use_reloader, flask_log, run_in_thread, allow_unsafe_werkzeug, notebook_proxy):
         host_value = host if host != "0.0.0.0" else "localhost"
         self._host = host
+        if port == "auto":
+            port = self._get_random_port()
         self._port = port
         if _is_in_notebook() and notebook_proxy:  # pragma: no cover
             from .utils.proxy import NotebookProxy
@@ -281,7 +283,7 @@ class _Server:
             runtime_manager.add_gui(self._gui, port)
         if debug and not is_running_from_reloader() and _is_port_open(host_value, port):
             raise ConnectionError(
-                f"Port {port} is already opened on {host_value}. You have another server application running on the same port."  # noqa: E501
+                "Port {port} is already opened on {host} because another application is running on the same port. Please pick another port number and rerun with the 'port=<new_port>' option. You can also let Taipy choose a port number for you by running with the 'port=\"auto\"' option."  # noqa: E501
             )
         if not flask_log:
             log = logging.getLogger("werkzeug")
