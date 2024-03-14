@@ -80,3 +80,4 @@ version = "==4.2.13"
 "apispec" = {version="==6.4.0", extras=["yaml"]}
 "apispec-webframeworks" = {version="==1.0.0"}
 "watchdog" = {version="==4.0.0"}
+"charset-normalizer" = {version="==3.3.2"}

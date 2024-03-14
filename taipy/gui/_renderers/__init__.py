@@ -13,6 +13,10 @@ import typing as t
 from abc import ABC, abstractmethod
 from os import path
 
+from charset_normalizer import detect
+
+from taipy.logger._taipy_logger import _TaipyLogger
+
 from ..page import Page
 from ..utils import _is_in_notebook, _varname_from_content
 from ._html import _TaipyHTMLParser
@@ -64,11 +68,6 @@ class _Renderer(Page, ABC):
             if _is_in_notebook() and self._observer is None:
                 self.__observe_file_change(content)
             return
-        if self._frame is not None:
-            frame_dir_path = path.dirname(path.abspath(self._frame.f_code.co_filename))
-            content_path = path.join(frame_dir_path, content)
-            if path.exists(content_path) and path.isfile(content_path):
-                return self.__parse_file_content(content_path)
         self._content = content
 
     def __observe_file_change(self, file_path: str):
@@ -82,8 +81,13 @@ class _Renderer(Page, ABC):
         self._observer.start()
 
     def __parse_file_content(self, content):
-        with open(t.cast(str, content), "r") as f:
-            self._content = f.read()
+        with open(t.cast(str, content), "rb") as f:
+            file_content = f.read()
+            encoding = "utf-8"
+            if (detected_encoding := detect(file_content)["encoding"]) is not None:
+                encoding = detected_encoding
+                _TaipyLogger._get_logger().info(f"Detected '{encoding}' encoding for file '{content}'.")
+            self._content = file_content.decode(encoding)
             # Save file path for error handling
             self._filepath = content
 
