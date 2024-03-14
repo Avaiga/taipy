@@ -140,5 +140,5 @@ class FileWatchdogHandler(FileSystemEventHandler):
         if Path(event.src_path).resolve() == Path(self._file_path).resolve():
             self._renderer.set_content(self._file_path)
             _TaipyLogger._get_logger().info(
-                f"File '{self._file_path}' has been modified. Reload your page to see the changes."
+                f"File '{self._file_path}' has been modified. Page will be reloaded automatically."
             )
