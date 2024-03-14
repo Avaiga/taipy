@@ -16,7 +16,6 @@ from taipy.config._config import _Config
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
-from .._backup._backup import _append_to_backup_file, _remove_from_backup_file
 from .._manager._manager import _Manager
 from .._version._version_mixin import _VersionMixin
 from ..config.data_node_config import DataNodeConfig
@@ -25,7 +24,6 @@ from ..exceptions.exceptions import InvalidDataNodeType
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
-from ._abstract_file import _AbstractFileDataNode
 from ._data_fs_repository import _DataFSRepository
 from .data_node import DataNode
 from .data_node_id import DataNodeId
@@ -74,8 +72,6 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
     ) -> DataNode:
         data_node = cls.__create(data_node_config, owner_id, parent_ids)
         cls._set(data_node)
-        if isinstance(data_node, _AbstractFileDataNode):
-            _append_to_backup_file(new_file_path=data_node._path)
         Notifier.publish(_make_event(data_node, EventOperation.CREATION))
         return data_node
 
@@ -125,21 +121,10 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
             cls._clean_pickle_file(data_node)
 
     @classmethod
-    def _remove_dn_file_path_in_backup_file(cls, data_node: DataNode):
-        if isinstance(data_node, _AbstractFileDataNode):
-            _remove_from_backup_file(to_remove_file_path=data_node.path)
-
-    @classmethod
-    def _remove_dn_file_paths_in_backup_file(cls, data_nodes: Iterable[DataNode]):
-        for data_node in data_nodes:
-            cls._remove_dn_file_path_in_backup_file(data_node)
-
-    @classmethod
     def _delete(cls, data_node_id: DataNodeId):
         data_node = cls._get(data_node_id, None)
         if data_node:
             cls._clean_pickle_file(data_node)
-            cls._remove_dn_file_path_in_backup_file(data_node)
         super()._delete(data_node_id)
 
     @classmethod
@@ -149,21 +134,18 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
             if data_node := cls._get(data_node_id):
                 data_nodes.append(data_node)
         cls._clean_pickle_files(data_nodes)
-        cls._remove_dn_file_paths_in_backup_file(data_nodes)
         super()._delete_many(data_node_ids)
 
     @classmethod
     def _delete_all(cls):
         data_nodes = cls._get_all()
         cls._clean_pickle_files(data_nodes)
-        cls._remove_dn_file_paths_in_backup_file(data_nodes)
         super()._delete_all()
 
     @classmethod
     def _delete_by_version(cls, version_number: str):
         data_nodes = cls._get_all(version_number)
         cls._clean_pickle_files(data_nodes)
-        cls._remove_dn_file_paths_in_backup_file(data_nodes)
         cls._repository._delete_by(attribute="version", value=version_number)
         Notifier.publish(
             Event(EventEntityType.DATA_NODE, EventOperation.DELETION, metadata={"delete_by_version": version_number})
