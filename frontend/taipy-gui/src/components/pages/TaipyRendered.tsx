@@ -77,7 +77,8 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
 
     const baseURL = getBaseURL();
     const pathname = baseURL == "/" ? location.pathname : location.pathname.replace(baseURL, "/");
-    const path = props.path || (state.locations && pathname in state.locations && state.locations[pathname]) || pathname;
+    const path =
+        props.path || (state.locations && pathname in state.locations && state.locations[pathname]) || pathname;
 
     useEffect(() => {
         // Fetch JSX Flask Backend Render
@@ -93,7 +94,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                 .then((result) => {
                     // set rendered JSX and CSS style from fetch result
                     if (typeof result.data.jsx === "string") {
-                        setPageState({module: result.data.context, jsx: result.data.jsx });
+                        setPageState({ module: result.data.context, jsx: result.data.jsx });
                     }
                     if (!fromBlock) {
                         setStyle("Taipy_style", result.data.style || "");
@@ -104,7 +105,9 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                     setPageState({
                         jsx: `<h1>${
                             error.response?.data ||
-                            `No data fetched from backend from ${path === "/TaiPy_root_page" ? baseURL : baseURL + path}`
+                            `No data fetched from backend from ${
+                                path === "/TaiPy_root_page" ? baseURL : baseURL + path
+                            }`
                         }</h1><br></br>${error}`,
                     })
                 );
@@ -115,7 +118,9 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             {head.length ? (
-                <Helmet>{head.map((v,i) => React.createElement(v.tag, {key: `head${i}`, ...v.props}, v.content))}</Helmet>
+                <Helmet>
+                    {head.map((v, i) => React.createElement(v.tag, { key: `head${i}`, ...v.props }, v.content))}
+                </Helmet>
             ) : null}
             <PageContext.Provider value={pageState}>
                 <JsxParser
