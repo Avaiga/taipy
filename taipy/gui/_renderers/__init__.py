@@ -18,7 +18,8 @@ from ..utils import _is_in_notebook, _varname_from_content
 from ._html import _TaipyHTMLParser
 
 if t.TYPE_CHECKING:
-    from ..builder._element import _Element
+    from watchdog.observers import BaseObserverSubclassCallable
+
     from ..gui import Gui
 
 
@@ -41,6 +42,7 @@ class _Renderer(Page, ABC):
         self._content = ""
         self._base_element: t.Optional[_Element] = None
         self._filepath = ""
+        self._observer: t.Optional["BaseObserverSubclassCallable"] = None
         if isinstance(content, str):
             self.__process_content(content)
         elif isinstance(content, _Element):
@@ -52,13 +54,27 @@ class _Renderer(Page, ABC):
 
     def __process_content(self, content: str) -> None:
         if path.exists(content) and path.isfile(content):
-            return self.__parse_file_content(content)
+            self.__parse_file_content(content)
+            # Watchdog observer: watch for file changes
+            if _is_in_notebook() and self._observer is None:
+                self.__observe_file_change(content)
+            return
         if self._frame is not None:
             frame_dir_path = path.dirname(path.abspath(self._frame.f_code.co_filename))
             content_path = path.join(frame_dir_path, content)
             if path.exists(content_path) and path.isfile(content_path):
                 return self.__parse_file_content(content_path)
         self._content = content
+
+    def __observe_file_change(self, file_path: str):
+        from watchdog.observers import Observer
+
+        from .utils import FileWatchdogHandler
+
+        self._observer = Observer()
+        file_path = path.abspath(file_path)
+        self._observer.schedule(FileWatchdogHandler(file_path, self), path.dirname(file_path), recursive=False)
+        self._observer.start()
 
     def __parse_file_content(self, content):
         with open(t.cast(str, content), "r") as f:

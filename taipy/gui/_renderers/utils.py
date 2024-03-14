@@ -9,13 +9,21 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import datetime
 import typing as t
+from pathlib import Path
 
 import pandas as pd
+from watchdog.events import FileSystemEventHandler
+
+from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._warnings import _warn
 from ..types import NumberTypes
 from ..utils import _RE_PD_TYPE, _get_date_col_str_name, _MapDict
+
+if t.TYPE_CHECKING:
+    from . import _Renderer
 
 
 def _add_to_dict_and_get(dico: t.Dict[str, t.Any], key: str, value: t.Any) -> t.Any:
@@ -117,3 +125,20 @@ def _get_columns_dict(  # noqa: C901
             elif number_format and ctype in NumberTypes:
                 _add_to_dict_and_get(col_dict[col], "format", number_format)
     return col_dict
+
+
+class FileWatchdogHandler(FileSystemEventHandler):
+    def __init__(self, file_path: str, renderer: "_Renderer") -> None:
+        self._file_path = file_path
+        self._renderer = renderer
+        self._last_modified = datetime.datetime.now()
+
+    def on_modified(self, event):
+        if datetime.datetime.now() - self._last_modified < datetime.timedelta(seconds=1):
+            return
+        self._last_modified = datetime.datetime.now()
+        if Path(event.src_path).resolve() == Path(self._file_path).resolve():
+            self._renderer.set_content(self._file_path)
+            _TaipyLogger._get_logger().info(
+                f"File '{self._file_path}' has been modified. Reload your page to see the changes."
+            )
