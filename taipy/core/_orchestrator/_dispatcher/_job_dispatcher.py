@@ -69,7 +69,6 @@ class _JobDispatcher(threading.Thread):
                     with self.lock:
                         if self._STOP_FLAG:
                             break
-                        self._logger.info(f"{self.orchestrator.jobs_to_run.qsize()=}")
                         job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
                     self._execute_job(job)
                 else:
