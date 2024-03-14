@@ -115,7 +115,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             {head.length ? (
-                <Helmet>{head.map((v) => React.createElement(v.tag, v.props, v.content))}</Helmet>
+                <Helmet>{head.map((v,i) => React.createElement(v.tag, {key: `head${i}`, ...v.props}, v.content))}</Helmet>
             ) : null}
             <PageContext.Provider value={pageState}>
                 <JsxParser
