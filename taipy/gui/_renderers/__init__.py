@@ -53,7 +53,10 @@ class _Renderer(Page, ABC):
             )
 
     def __process_content(self, content: str) -> None:
-        if path.exists(content) and path.isfile(content):
+        relative_file_path = path.join(path.dirname(self._frame.f_code.co_filename), content)
+        if path.exists(relative_file_path) and path.isfile(relative_file_path):
+            content = relative_file_path
+        if content == relative_file_path or (path.exists(content) and path.isfile(content)):
             self.__parse_file_content(content)
             # Watchdog observer: watch for file changes
             if _is_in_notebook() and self._observer is None:
