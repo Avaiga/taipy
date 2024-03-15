@@ -33,7 +33,7 @@ const Navigate = ({ to, params, tab, force }: NavigateProps) => {
         if (to) {
             const tos = to === "/" ? to : "/" + to;
             const filteredParams = params
-                ? Object.keys(params || {}).reduce((acc, key) => {
+                ? Object.keys(params).reduce((acc, key) => {
                       if (!SPECIAL_PARAMS.includes(key)) {
                           acc[key] = params[key];
                       }
@@ -53,18 +53,19 @@ const Navigate = ({ to, params, tab, force }: NavigateProps) => {
                 }
                 return;
             }
-            // Handle Resource Handler Id
-            const tprh = params?.tprh;
-            const meta = params?.tp_cp_meta;
+            // Regular navigate cases
             if (Object.keys(state.locations || {}).some((route) => tos === route)) {
                 const searchParamsLocation = new URLSearchParams(location.search);
                 if (force && location.pathname === tos && searchParamsLocation.toString() === searchParams.toString()) {
                     navigate(0);
                 } else {
                     navigate({ pathname: to, search: `?${searchParams.toString()}` });
+                    // Handle Resource Handler Id
+                    const tprh = params?.tprh;
                     if (tprh !== undefined) {
                         // Add a session cookie for the resource handler id
                         document.cookie = `tprh=${tprh};path=/;`;
+                        const meta = params?.tp_cp_meta;
                         if (meta !== undefined) {
                             localStorage.setItem("tp_cp_meta", meta);
                         }
