@@ -110,6 +110,11 @@ class _Renderer(Page, ABC):
         if not _is_in_notebook():
             raise RuntimeError("'set_content()' must be used in an IPython notebook context")
         self.__process_content(content)
+        if self._notebook_gui is not None and self._notebook_page is not None:
+            if self._notebook_gui._config.root_page is self._notebook_page:
+                self._notebook_gui._navigate("/", {"tp_reload_all": "true"})
+                return
+            self._notebook_gui._navigate(self._notebook_page._route, {"tp_reload_same_route_only": "true"})
 
     def _get_content_detail(self, gui: "Gui") -> str:
         if self._filepath:
