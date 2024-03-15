@@ -83,6 +83,13 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
                     element_name, f"{library_name}.{element_name}", element.default_attribute
                 ),
             )
+            # Allow element to be accessed from the root module
+            if hasattr(self.__module, element_name):
+                _TaipyLogger()._get_logger().info(
+                    f"Can't add element `{element_name}` of library `{library_name}` to the root of Builder API as it has already existed."  # noqa: E501
+                )
+                continue
+            setattr(self.__module, element_name, getattr(library_module, element_name))
 
     @staticmethod
     def create_block_api(
