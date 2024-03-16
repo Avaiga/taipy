@@ -1716,6 +1716,10 @@ class Gui:
         # Update variable directory
         if not page._is_class_module():
             self.__var_dir.add_frame(page._frame)
+        # Special case needed for page to access gui to trigger reload in notebook
+        if _is_in_notebook():
+            page._notebook_gui = self
+            page._notebook_page = new_page
 
     def add_pages(self, pages: t.Optional[t.Union[t.Mapping[str, t.Union[str, Page]], str]] = None) -> None:
         """Add several pages to the Graphical User Interface.

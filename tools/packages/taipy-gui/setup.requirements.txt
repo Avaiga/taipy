@@ -14,3 +14,5 @@ simple-websocket>=0.10.1,<=1.0.0
 taipy-config
 twisted>=23.8.0,<=23.10.0
 tzlocal>=3.0,<=5.2
+watchdog>=4.0.0,<=4.0.0
+charset-normalizer>=3.3.2,<=3.3.2

@@ -18,7 +18,8 @@ from types import FrameType
 from .utils import _filter_locals, _get_module_name_from_frame
 
 if t.TYPE_CHECKING:
-    from ._renderers import _Element  # noqa: F401
+    from ._page import _Page
+    from .gui import Gui
 
 
 class Page:
@@ -68,6 +69,9 @@ class Page:
                     cls_locals[f] = func.__func__
             self._class_module_name = cls.__name__
             self._class_locals = cls_locals
+        # Special variables only use for page reloading in notebook context
+        self._notebook_gui: t.Optional["Gui"] = None
+        self._notebook_page: t.Optional["_Page"] = None
 
     def create_page(self) -> t.Optional[Page]:
         """Create the page content for page modules.
@@ -88,7 +92,9 @@ class Page:
         return (
             self._class_locals
             if self._is_class_module()
-            else None if (frame := self._get_frame()) is None else _filter_locals(frame.f_locals)
+            else None
+            if (frame := self._get_frame()) is None
+            else _filter_locals(frame.f_locals)
         )
 
     def _is_class_module(self):
