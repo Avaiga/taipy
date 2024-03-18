@@ -275,7 +275,7 @@ def sequence():
         [],
         SequenceId("sequence_id"),
         owner_id="owner_id",
-        parent_ids=set(["parent_id_1", "parent_id_2"]),
+        parent_ids={"parent_id_1", "parent_id_2"},
         version="random_version_number",
     )
 
