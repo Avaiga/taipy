@@ -1,0 +1,37 @@
+{
+  "name": "front-end",
+  "version": "1.0.0",
+  "author": "KorieDrakeChaney",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "@types/chess.js": "^0.13.7",
+    "@types/react": "^18.0.15",
+    "@typescript-eslint/eslint-plugin": "^5.30.7",
+    "@typescript-eslint/parser": "^5.30.7",
+    "child_process": "^1.0.2",
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.10.0",
+    "dotenv": "^16.0.3",
+    "eslint": "^8.20.0",
+    "eslint-plugin-react": "^7.30.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-webpack-plugin": "^3.2.0",
+    "style-loader": "^3.3.4",
+    "ts-loader": "^9.3.1",
+    "typescript": "^4.7.4",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0"
+  },
+  "dependencies": {
+    "chess.js": "^1.0.0-beta.8",
+    "react": "^18.2.0",
+    "taipy-gui": "file:../../../../../../anaconda3/Lib/site-packages/taipy/gui/webapp"
+  },
+  "scripts": {
+    "postinstall": "node scripts/install.js",
+    "build:dev": "webpack --mode development",
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development --watch"
+  }
+}
