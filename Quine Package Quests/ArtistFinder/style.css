@@ -1,0 +1,113 @@
+* {
+  font-family: Lato;
+}
+body {
+  background-color: #000;
+}
+.top-content {
+  margin-top: 68px;
+}
+h4 {
+  color: #fff;
+  background-color: #666;
+}
+.box {
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 10px;
+  color: #fff;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+.box .list-group li {
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.box-img {
+  margin-bottom: 10px;
+}
+.box .list-group li .genre-right {
+  word-wrap: break-word;
+  text-align: right;
+  overflow-wrap: break-word;
+}
+.search {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 20px 10px 5px;
+  border-radius: 4px;
+  color: #fff;
+  margin-bottom: 20px;
+}
+.inputWrap input {
+  width: 100%;
+  background: transparent;
+  box-sizing: border-box;
+  box-shadow: none;
+  outline: none;
+  border: none;
+  border-bottom: 2px solid #666;
+}
+.search .inputWrap {
+  position: relative;
+}
+.search .inputWrap label {
+  position: absolute;
+  top: 15;
+  left: 0;
+  color: #666;
+  transition: 0.5s;
+  pointer-events: none;
+}
+.inputWrap input:focus ~ label, .inputWrap input:valid ~ label {
+  top: -15px;
+  color: #fff;
+  transform: scale(0.75);
+  left: -12px;
+}
+.search .inputWrap .border {
+  position: absolute;
+  top: 22px;
+  left: 0;
+  height: 2px;
+  width: 0%;
+  background: rgb(255, 255, 255);
+  transition: 0.5s;
+  /* box-sizing: border-box */
+  box-shadow: 1px 1px 4px 0 rgba(255, 255, 255, 1);
+}
+.inputWrap input:focus ~ .border, .inputWrap input:valid ~ .border {
+  width: 100%;
+}
+.search button {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+}
+.genre-right .badge {
+  margin-left: 2px;
+  z-index: -1;
+}
+.users,
+.genres,
+.love {
+  font-family: FontAwesome;
+  color: #fff;
+}
+.users::before {
+  content: '\f0c0';
+}
+.genres::before {
+  content: '\f001';
+}
+.love::before {
+  content: '\f004';
+}
+.track-box {
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 10px;
+  color: #fff;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  height: 300px;
+}
