@@ -36,7 +36,7 @@ class _Orchestrator(_AbstractOrchestrator):
     """
 
     jobs_to_run: Queue = Queue()
-    blocked_jobs: List = []
+    blocked_jobs: List[Job] = []
 
     lock = Lock()
     __logger = _TaipyLogger._get_logger()
@@ -77,7 +77,7 @@ class _Orchestrator(_AbstractOrchestrator):
             getattr(submittable, "config_id", None),
             **properties,
         )
-        jobs = []
+        jobs: List[Job] = []
         tasks = submittable._get_sorted_tasks()
         with cls.lock:
             cls.__logger.error(f"-------------------------> Acquired lock to submit {submittable.id}.")  # type: ignore
