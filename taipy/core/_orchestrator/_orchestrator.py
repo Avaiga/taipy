@@ -158,13 +158,8 @@ class _Orchestrator(_AbstractOrchestrator):
         for dn in task.output.values():
             dn.lock_edit()
         return _JobManagerFactory._build_manager()._create(
-            task,
-            itertools.chain([cls._on_status_change], callbacks or []),
-            submit_id,
-            submit_entity_id,
-            force=force
+            task, itertools.chain([cls._on_status_change], callbacks or []), submit_id, submit_entity_id, force=force
         )
-
 
     @classmethod
     def _update_submission_status(cls, job: Job):

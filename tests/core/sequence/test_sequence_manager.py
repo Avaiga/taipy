@@ -74,7 +74,7 @@ def __init():
     input_dn = InMemoryDataNode("foo", Scope.SCENARIO)
     output_dn = InMemoryDataNode("foo", Scope.SCENARIO)
     task = Task("task", {}, print, [input_dn], [output_dn], TaskId("task_id"))
-    scenario = Scenario("scenario", set([task]), {}, set())
+    scenario = Scenario("scenario", {task}, {}, set())
     _ScenarioManager._set(scenario)
     return scenario, task
 
@@ -122,7 +122,7 @@ def test_set_and_get():
 
     # We save the first sequence again. We expect an exception and nothing to change
     with pytest.raises(SequenceAlreadyExists):
-       scenario.add_sequence(sequence_name_1, [])
+        scenario.add_sequence(sequence_name_1, [])
     sequence_1 = scenario.sequences[sequence_name_1]
     assert _SequenceManager._get(sequence_id_1).id == sequence_1.id
     assert len(_SequenceManager._get(sequence_id_1).tasks) == 0
@@ -191,7 +191,7 @@ def test_get_all_on_multiple_versions_environment():
 def test_is_submittable():
     dn = InMemoryDataNode("dn", Scope.SCENARIO, properties={"default_data": 10})
     task = Task("task", {}, print, [dn])
-    scenario = Scenario("scenario", set([task]), {}, set())
+    scenario = Scenario("scenario", {task}, {}, set())
     _ScenarioManager._set(scenario)
 
     scenario.add_sequences({"sequence": [task]})
@@ -724,7 +724,7 @@ def test_export(tmpdir_factory):
     task = Task("task", {}, print, id=TaskId("task_id"))
     scenario = Scenario(
         "scenario",
-        set([task]),
+        {task},
         {},
         set(),
         version="1.0",
