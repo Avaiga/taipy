@@ -213,6 +213,8 @@ class _Config(object):
             config["webapp_path"] = os.environ.get("TAIPY_GUI_WEBAPP_PATH")
         if args.taipy_upload_folder:
             config["upload_folder"] = args.taipy_upload_folder
+        elif os.environ.get("TAIPY_GUI_UPLOAD_FOLDER"):
+            config["webapp_path"] = os.environ.get("TAIPY_GUI_UPLOAD_FOLDER")
 
     def _build_config(self, root_dir, env_filename, kwargs):  # pragma: no cover
         config = self.config
