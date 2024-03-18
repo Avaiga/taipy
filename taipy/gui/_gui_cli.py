@@ -50,6 +50,14 @@ class _GuiCLI:
             "const": "",
             "help": "The path to the web app to be used. The default is the webapp directory under gui in the Taipy GUI package directory.",  # noqa: E501
         },
+        ("--upload-folder",): {
+            "dest": "taipy_upload_folder",
+            "metavar": "UPLOAD_FOLDER",
+            "nargs": "?",
+            "default": "",
+            "const": "",
+            "help": "The path to the folder where uploaded files from Taipy GUI will be stored.",
+        },
     }
 
     __DEBUG_ARGS: Dict[str, Dict] = {
