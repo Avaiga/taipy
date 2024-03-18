@@ -1,0 +1,10 @@
+taipy==3.1.0
+pandas
+tensorflow
+scikit-learn
+openai
+<<<<<<< HEAD
+plotly
+=======
+plotly
+>>>>>>> 7523de9d8b99530fc4fb0251b15324dc6a6f70bc
