@@ -191,11 +191,11 @@ module.exports = (env, options) => {
                 type: "umd",
             },
         },
-        plugins: [
-            new webpack.optimize.LimitChunkCountPlugin({
-                maxChunks: 1,
-            }),
-        ],
+        optimization: {
+            splitChunks: {
+                chunks: 'all',
+            },
+        },
         module: {
             rules: [
                 {
