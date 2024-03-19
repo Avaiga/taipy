@@ -255,7 +255,7 @@ def __migrate_global_config(config: Dict):
     except KeyError:
         pass
 
-    if "core_version" not in config["CORE"]:
+    if "core_version" not in config["CORE"] or config["CORE"]["core_version"] != version("taipy-core"):
         config["CORE"]["core_version"] = version("taipy-core")
 
     return config
