@@ -80,7 +80,7 @@ class _Orchestrator(_AbstractOrchestrator):
         jobs: List[Job] = []
         tasks = submittable._get_sorted_tasks()
         with cls.lock:
-            # cls.__logger.debug(f"------------------------->Acquired lock to submit {submittable.id}.")  # type: ignore
+            # cls.__logger.debug(f"-------------------------> Acquired lock to submit {submittable.id}.")  # type: ignore
             for ts in tasks:
                 jobs.extend(
                     cls._lock_dn_output_and_create_job(
