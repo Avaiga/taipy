@@ -115,8 +115,8 @@ class _GuiCoreScenarioDagAdapter(_TaipyBase):
         data = super().get()
         if isinstance(data, Scenario):
             try:
-                if core_get(data.id):
-                    dag = data._get_dag()
+                if scenario := core_get(data.id):
+                    dag = scenario._get_dag()
                     nodes = dict()
                     for id, node in dag.nodes.items():
                         entityType = _GuiCoreScenarioDagAdapter.get_entity_type(node)
