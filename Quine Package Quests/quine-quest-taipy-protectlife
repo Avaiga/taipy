@@ -1,0 +1,53 @@
+repo link: https://github.com/Amarnath-Rao/q6-quine-taipy-protectlife
+
+
+
+# ProtectLife
+A wildfire data dashboard for BC made with Taipy and Python <br/>
+## Usage
+- [Usage](#usage)
+- [ProtectLife](#what-is-ProtectLife)
+- [Directory Structure](#directory-structure)
+- [License](#license)
+- [Installation](#installation)
+
+## Future Plans
+
+#### To implement dashboards for avalanche, cyclones and tsunami
+
+## What is ProtectLife
+
+[ProtectLife](https://github.com/Amarnath-Rao/q6-quine-taipy-protectlife) is a multi-page application showing how Taipy can build a minimalist but useful application.
+This app visualizes BC Wildfire Services active fires. Pages shows active fires in different formats - as a table, a dashboard and on a map.
+
+### Demo Type
+- **Topic**: Taipy-GUI
+- **Components/Controls**: 
+  - Taipy GUI: table, map, dashboard, toggle, multi-pages
+
+## How to run
+
+- This app works with a Python version 3.11.5. 
+- run `git clone https://github.com/Amarnath-Rao/q6-quine-taipy-protectlife.git` from your editor
+- run `pip install -r requirements.txt`
+- run the *main.py* in the `root/` folder with `python main.py`
+
+### Table
+
+The table page show a list of all active wildfires in BC. the list can be filtered with a control at the top left by applying multiple filters for any column.
+
+
+### Map
+
+A map can be found on this page to explore the data. Colors and sizes are dependent on the Stage of Control and incident size(Ha) in each location.
+
+### Dashboard
+
+The dashboard page shows wildfire status on a specific location. The location can be changed. It will update the cards provided on this page.
+
+### Video
+
+https://github.com/Amarnath-Rao/q6-quine-taipy-protectlife/assets/96937608/c5ed0fac-042f-4aca-96a8-97f4e48b857f
+
+
+
