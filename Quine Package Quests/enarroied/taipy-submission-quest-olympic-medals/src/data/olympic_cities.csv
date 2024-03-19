@@ -1,0 +1,55 @@
+Olympiad,Olympic_city,Olympic_year,Olympic_season,total_medals,total_medals_gold,total_medals_silver,total_medals_bronze,number_committees,number_disciplines,number_events,Country,Continent,ISO_code_mapping,Latitude,Longitude
+Athina 1896,Athens,1896,summer,122,43,43,36,11,10,43,Greece,Europe,GRC,37.9755648,23.7348324
+Paris 1900,Paris,1900,summer,287,96,94,97,19,22,89,France,Europe,FRA,48.8534951,2.3483915
+St. Louis 1904,St. Louis,1904,summer,280,97,92,91,8,18,94,United States,North America,USA,38.6280278,-90.1910154
+London 1908,London,1908,summer,324,110,107,107,19,24,104,United Kingdom,Europe,GBR,51.4893335,-0.14405508452768728
+Stockholm 1912,Stockholm,1912,summer,317,106,107,104,19,19,103,Sweden,Europe,SWE,59.3251172,18.0710935
+Antwerpen 1920,Antwerp,1920,summer,449,158,152,139,22,29,143,Belgium,Europe,BEL,51.2211097,4.3997081
+Chamonix 1924,Chamonix,1924,winter,50,17,16,17,11,10,17,France,Europe,FRA,45.9246705,6.8727506
+Paris 1924,Paris,1924,summer,392,129,132,131,31,23,121,France,Europe,FRA,48.8534951,2.3483915
+Amsterdam 1928,Amsterdam,1928,summer,356,119,118,119,34,20,110,Netherlands,Europe,NLD,52.3730796,4.8924534
+Sankt Moritz 1928,St. Moritz,1928,winter,41,14,12,15,12,8,13,Switzerland,Europe,CHE,46.4978958,9.8392428
+Lake Placid 1932,Lake Placid,1932,winter,42,14,14,14,10,7,14,United States,North America,USA,44.279621,-73.979874
+Los Angeles 1932,Los Angeles,1932,summer,370,125,125,120,28,21,117,United States,North America,USA,34.0536909,-118.242766
+Berlin 1936,Berlin,1936,summer,422,141,140,141,32,28,133,Germany,Europe,DEU,52.5170365,13.3888599
+Garmisch-Partenkirchen 1936,Garmisch-Partenkirchen,1936,winter,51,17,17,17,11,8,17,Germany,Europe,DEU,47.4923741,11.0962815
+Sankt Moritz 1948,St. Moritz,1948,winter,68,22,24,22,13,9,22,Switzerland,Europe,CHE,46.4978958,9.8392428
+London 1948,London,1948,summer,443,146,146,151,38,24,137,United Kingdom,Europe,GBR,51.4893335,-0.14405508452768728
+Helsinki 1952,Helsinki,1952,summer,459,149,152,158,43,23,139,Finland,Europe,FIN,60.1674881,24.9427473
+Oslo 1952,Oslo,1952,winter,67,22,22,23,13,8,22,Norway,Europe,NOR,59.9133301,10.7389701
+Cortina d'Ampezzo 1956,Cortina d'Ampezzo,1956,winter,72,25,23,24,13,8,24,Italy,Europe,ITA,46.5383332,12.1373506
+Melbourne 1956,Melbourne,1956,summer,451,147,147,157,37,20,139,Australia,Oceania,AUS,-37.8142454,144.9631732
+Stockholm 1956,Stockholm,1956,summer,18,6,6,6,7,3,4,Sweden,Europe,SWE,59.3251172,18.0710935
+Roma 1960,Rome,1960,summer,461,152,149,160,44,22,141,Italy,Europe,ITA,41.8933203,12.4829321
+Squaw Valley 1960,Squaw Valley,1960,winter,81,28,26,27,14,8,27,United States,North America,USA,36.7402261,-119.246785
+Tokyo 1964,Tokyo,1964,summer,504,163,167,174,41,24,150,Japan,Asia,JPN,35.6821936,139.762221
+Innsbruck 1964,Innsbruck,1964,winter,104,34,39,31,14,10,32,Austria,Europe,AUT,47.2654296,11.3927685
+Grenoble 1968,Grenoble,1968,winter,106,35,39,32,15,10,33,France,Europe,FRA,45.1875602,5.7357819
+Ciudad de México 1968,Mexico City,1968,summer,527,174,170,183,44,23,162,Mexico,North America,MEX,19.4326296,-99.1331785
+Sapporo 1972,Sapporo,1972,winter,105,36,34,35,17,10,33,Japan,Asia,JPN,43.061936,141.3542924
+München 1972,Munich,1972,summer,600,195,195,210,48,27,178,Germany,Europe,DEU,48.1371079,11.5753822
+Innsbruck 1976,Innsbruck,1976,winter,111,37,37,37,16,10,35,Austria,Europe,AUT,47.2654296,11.3927685
+Montréal 1976,Montreal,1976,summer,613,198,199,216,41,26,183,Canada,North America,CAN,45.5031824,-73.5698065
+Lake Placid 1980,Lake Placid,1980,winter,115,38,39,38,19,10,36,United States,North America,USA,44.279621,-73.979874
+Moskva 1980,Moscow,1980,summer,631,204,204,223,36,26,189,Russia,Europe,RUS,55.7505412,37.6174782
+Sarajevo 1984,Sarajevo,1984,winter,117,39,39,39,17,10,37,Bosnia and Herzegovina,Europe,BIH,43.8519774,18.3866868
+Los Angeles 1984,Los Angeles,1984,summer,688,226,219,243,47,28,205,United States,North America,USA,34.0536909,-118.242766
+Seoul 1988,Seoul,1988,summer,739,241,234,264,52,30,216,South Korea,Asia,KOR,37.5666791,126.9782914
+Calgary 1988,Calgary,1988,winter,138,46,46,46,17,10,44,Canada,North America,CAN,51.0456064,-114.057541
+Albertville 1992,Albertville,1992,winter,171,57,58,56,20,12,52,France,Europe,FRA,45.6754622,6.3925417
+Barcelona 1992,Barcelona,1992,summer,815,260,257,298,64,33,232,Spain,Europe,ESP,41.3828939,2.1774322
+Lillehammer 1994,Lillehammer,1994,winter,183,61,61,61,22,12,54,Norway,Europe,NOR,61.1145451,10.4670073
+Atlanta 1996,Atlanta,1996,summer,842,271,273,298,79,36,246,United States,North America,USA,33.7489924,-84.3902644
+Nagano 1998,Nagano,1998,winter,205,69,68,68,24,14,59,Japan,Asia,JPN,36.1143945,138.0319015
+Sydney 2000,Sydney,2000,summer,927,300,300,327,80,39,262,Australia,Oceania,AUS,-33.8698439,151.2082848
+Salt Lake City 2002,Salt Lake City,2002,winter,234,80,76,78,24,15,68,United States,North America,USA,40.7596198,-111.886797
+Athina 2004,Athens,2004,summer,926,301,300,325,74,39,263,Greece,Europe,GRC,37.9755648,23.7348324
+Torino 2006,Turin,2006,winter,252,84,84,84,26,15,75,Italy,Europe,ITA,45.0677551,7.6824892
+Beijing 2008,Beijing,2008,summer,958,302,303,353,87,41,264,China,Asia,CHN,39.9057136,116.3912972
+Vancouver 2010,Vancouver,2010,winter,258,86,87,85,26,15,78,Canada,North America,CAN,49.2608724,-123.113952
+London 2012,London,2012,summer,960,303,304,353,86,39,261,United Kingdom,Europe,GBR,51.4893335,-0.14405508452768728
+Sochi 2014,Sochi,2014,winter,294,98,97,99,26,15,86,Russia,Europe,RUS,43.5854823,39.723109
+Rio de Janeiro 2016,Rio de Janeiro,2016,summer,972,306,307,359,86,41,263,Brazil,South America,BRA,-22.9110137,-43.2093727
+PyeongChang 2018,PyeongChang,2018,winter,307,103,102,102,30,15,89,South Korea,Asia,KOR,37.3705,128.3903
+Tokyo 2020,Tokyo,2020,summer,1080,340,338,402,93,49,290,Japan,Asia,JPN,35.6821936,139.762221
+Beijing 2022,Beijing,2022,winter,328,109,109,110,29,15,94,China,Asia,CHN,39.9057136,116.3912972
