@@ -1,0 +1,7 @@
+taipy
+openai
+youtube-transcript-api
+langchain
+langchain-openai 
+tiktoken 
+chromadb
