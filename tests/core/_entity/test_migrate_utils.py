@@ -14,8 +14,8 @@ import json
 from taipy.core._entity._migrate._utils import _migrate
 
 
-# @pytest.mark.parametrize("migrate_fct,data")
-def test_migrate_entities_before_version_3():
+def test_migrate_entities_from_version_2(mocker):
+    mocker.patch("taipy.core._entity._migrate._utils.version", return_value="3.1.0")
     with open("tests/core/_entity/data_to_migrate.json") as file:
         data = json.load(file)
 

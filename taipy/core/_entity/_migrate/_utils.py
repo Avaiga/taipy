@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import json
+from importlib.metadata import version
 from typing import Dict, List, Optional, Tuple
 
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -253,6 +254,9 @@ def __migrate_global_config(config: Dict):
                 del config["TAIPY"][field]
     except KeyError:
         pass
+
+    if "core_version" not in config["CORE"]:
+        config["CORE"]["core_version"] = version("taipy-core")
 
     return config
 
