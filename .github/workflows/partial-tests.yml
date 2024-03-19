@@ -9,14 +9,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: ricardochaves/python-lint@v1.4.0
+      - uses: jpetrucciani/mypy-check@master
         with:
-          use-black: false
-          use-flake8: false
-          use-isort: false
-          use-pycodestyle: false
-          use-pylint: false
-          extra-mypy-options: "--ignore-missing-imports --implicit-optional --no-namespace-packages --exclude (taipy/templates/|generate_pyi.py|tools) --follow-imports skip"
+          mypy_flags:  "--ignore-missing-imports --implicit-optional --no-namespace-packages --exclude (taipy/templates/|generate_pyi.py|tools) --follow-imports skip --disable-error-code import-untyped"
 
       - uses: chartboost/ruff-action@v1
   tests:
