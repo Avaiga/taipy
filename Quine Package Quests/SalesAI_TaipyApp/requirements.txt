@@ -1,0 +1,6 @@
+taipy==3.1.0
+taipy-config==3.1.0
+taipy-core==3.1.0
+taipy-gui==3.1.0
+taipy-rest==3.1.0
+taipy-templates==3.1.0
