@@ -11,7 +11,7 @@
 
 from concurrent.futures import Executor, ProcessPoolExecutor
 from functools import partial
-from threading import Lock
+from threading import RLock
 from typing import Callable, Optional
 
 from taipy.config._serializer._toml_serializer import _TomlSerializer
@@ -26,7 +26,7 @@ from ._task_function_wrapper import _TaskFunctionWrapper
 class _StandaloneJobDispatcher(_JobDispatcher):
     """Manages job dispatching (instances of `Job^` class) in an asynchronous way using a ProcessPoolExecutor."""
 
-    _nb_available_workers_lock = Lock()
+    _nb_available_workers_lock = RLock()
 
     def __init__(self, orchestrator: _AbstractOrchestrator, subproc_initializer: Optional[Callable] = None):
         super().__init__(orchestrator)

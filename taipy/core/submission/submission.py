@@ -44,7 +44,7 @@ class Submission(_Entity, _Labeled):
     _ID_PREFIX = "SUBMISSION"
     _MANAGER_NAME = "submission"
     __SEPARATOR = "_"
-    lock = threading.Lock()
+    lock = threading.RLock()
     __logger = _TaipyLogger._get_logger()
 
     def __init__(
