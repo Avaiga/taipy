@@ -148,7 +148,7 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
 
         if missing := set(required) - set(properties.keys()):
             raise MissingRequiredProperty(
-                f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required."
+                f"The following properties {', '.join(missing)} were not informed and are required."
             )
 
     def _get_engine(self):

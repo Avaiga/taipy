@@ -70,11 +70,10 @@ class _TaskConfigChecker(_ConfigChecker):
                 task_config.function,
                 f"{task_config._FUNCTION} field of TaskConfig `{task_config_id}` is empty.",
             )
-        else:
-            if not callable(task_config.function):
-                self._error(
-                    task_config._FUNCTION,
-                    task_config.function,
-                    f"{task_config._FUNCTION} field of TaskConfig `{task_config_id}` must be"
-                    f" populated with Callable value.",
-                )
+        elif not callable(task_config.function):
+            self._error(
+                task_config._FUNCTION,
+                task_config.function,
+                f"{task_config._FUNCTION} field of TaskConfig `{task_config_id}` must be"
+                f" populated with Callable value.",
+            )

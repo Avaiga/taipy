@@ -123,13 +123,8 @@ class Submission(_Entity, _Labeled):
     def jobs(self) -> List[Job]:
         from ..job._job_manager_factory import _JobManagerFactory
 
-        jobs = []
         job_manager = _JobManagerFactory._build_manager()
-
-        for job in self._jobs:
-            jobs.append(job_manager._get(job))
-
-        return jobs
+        return [job_manager._get(job) for job in self._jobs]
 
     @jobs.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
@@ -196,6 +191,7 @@ class Submission(_Entity, _Labeled):
 
     def _update_submission_status(self, job: Job):
         from ._submission_manager_factory import _SubmissionManagerFactory
+
         with self.lock:
             submission_manager = _SubmissionManagerFactory._build_manager()
             submission = submission_manager._get(self)

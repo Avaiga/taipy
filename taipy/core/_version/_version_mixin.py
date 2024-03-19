@@ -15,7 +15,6 @@ from .._version._version_manager_factory import _VersionManagerFactory
 
 
 class _VersionMixin:
-
     _version_manager = _VersionManagerFactory._build_manager()
 
     @classmethod
@@ -28,10 +27,11 @@ class _VersionMixin:
 
     @classmethod
     def _build_filters_with_version(cls, version_number) -> List[Dict]:
-        filters = []
-        if versions := cls.__fetch_version_number(version_number):
-            filters = [{"version": version} for version in versions]
-        return filters
+        return (
+            [{"version": version} for version in versions]
+            if (versions := cls.__fetch_version_number(version_number))
+            else []
+        )
 
     @classmethod
     def _get_latest_version(cls):

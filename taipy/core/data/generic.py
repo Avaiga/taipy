@@ -81,14 +81,14 @@ class GenericDataNode(DataNode):
             properties = {}
         if missing := set(self._REQUIRED_PROPERTIES) - set(properties.keys()):
             raise MissingRequiredProperty(
-                f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required."
+                f"The following properties {', '.join(missing)} were not informed and are required."
             )
 
         missing_optional_fcts = set(self._REQUIRED_AT_LEAST_ONE_PROPERTY) - set(properties.keys())
         if len(missing_optional_fcts) == len(self._REQUIRED_AT_LEAST_ONE_PROPERTY):
             raise MissingRequiredProperty(
-                f"None of the following properties "
-                f"{', '.join(x for x in missing)} were informed and at least one must be populated."
+                f"None of the following properties {', '.join(missing)} were informed"
+                "and at least one must be populated."
             )
         for missing_optional_fct in missing_optional_fcts:
             properties[missing_optional_fct] = None

@@ -151,13 +151,12 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         task_manager = _TaskManagerFactory._build_manager()
         _tasks: List[Task] = []
         for task in tasks:
-            if not isinstance(task, Task):
-                if _task := task_manager._get(task):
-                    _tasks.append(_task)
-                else:
-                    raise NonExistingTask(task)
-            else:
+            if isinstance(task, Task):
                 _tasks.append(task)
+            elif _task := task_manager._get(task):
+                _tasks.append(_task)
+            else:
+                raise NonExistingTask(task)
 
         properties = properties if properties else {}
         properties["name"] = sequence_name

@@ -165,8 +165,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         configs_and_owner_ids = set(configs_and_owner_ids)
 
         for config, owner in configs_and_owner_ids:
-            entry = self.__get_entities_by_config_and_owner(config.id, owner, filters)
-            if entry:
+            if entry := self.__get_entities_by_config_and_owner(config.id, owner, filters):
                 entity = self.converter._model_to_entity(entry)
                 key = config, owner
                 res[key] = entity
@@ -190,7 +189,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
 
         if versions:
             table_name = self.table.name
-            query = query + f" AND {table_name}.version IN ({','.join(['?']*len(versions))})"
+            query += f" AND {table_name}.version IN ({','.join(['?'] * len(versions))})"
             parameters.extend(versions)
 
         if entry := self.db.execute(query, parameters).fetchone():

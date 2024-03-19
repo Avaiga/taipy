@@ -235,9 +235,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
                             work_books[sheet_name] = self._read_as_pandas_dataframe(sheet_name)
                         continue
 
-                res = list()
-                for row in work_sheet.rows:
-                    res.append([col.value for col in row])
+                res = [[col.value for col in row] for row in work_sheet.rows]
                 if self.properties[self._HAS_HEADER_PROPERTY] and res:
                     header = res.pop(0)
                     for i, row in enumerate(res):
@@ -322,8 +320,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             self.__append_excel_with_single_sheet(pd.DataFrame(data).to_excel, index=False, header=False)
 
     def __write_excel_with_single_sheet(self, write_excel_fct, *args, **kwargs):
-        sheet_name = self.properties.get(self.__SHEET_NAME_PROPERTY)
-        if sheet_name:
+        if sheet_name := self.properties.get(self.__SHEET_NAME_PROPERTY):
             if not isinstance(sheet_name, str):
                 if len(sheet_name) > 1:
                     raise SheetNameLengthMismatch

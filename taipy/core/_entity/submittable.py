@@ -34,7 +34,7 @@ class Submittable:
     """
 
     def __init__(self, subscribers: Optional[List[_Subscriber]] = None):
-        self._subscribers = _ListAttributes(self, subscribers or list())
+        self._subscribers = _ListAttributes(self, subscribers or [])
 
     @abc.abstractmethod
     def submit(

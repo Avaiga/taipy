@@ -509,35 +509,35 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if hasattr(data, "id") and is_readable(data.id) and core_get(data.id) is not None:
                 if isinstance(data, DataNode):
                     return (data.id, data.get_simple_label(), None, _EntityType.DATANODE.value, False)
-                else:
-                    with self.lock:
-                        self.__do_datanodes_tree()
-                        if self.data_nodes_by_owner:
-                            if isinstance(data, Cycle):
+
+                with self.lock:
+                    self.__do_datanodes_tree()
+                    if self.data_nodes_by_owner:
+                        if isinstance(data, Cycle):
+                            return (
+                                data.id,
+                                data.get_simple_label(),
+                                self.data_nodes_by_owner[data.id] + self.scenario_by_cycle.get(data, []),
+                                _EntityType.CYCLE.value,
+                                False,
+                            )
+                        elif isinstance(data, Scenario):
+                            return (
+                                data.id,
+                                data.get_simple_label(),
+                                self.data_nodes_by_owner[data.id] + list(data.sequences.values()),
+                                _EntityType.SCENARIO.value,
+                                data.is_primary,
+                            )
+                        elif isinstance(data, Sequence):
+                            if datanodes := self.data_nodes_by_owner.get(data.id):
                                 return (
                                     data.id,
                                     data.get_simple_label(),
-                                    self.data_nodes_by_owner[data.id] + self.scenario_by_cycle.get(data, []),
-                                    _EntityType.CYCLE.value,
+                                    datanodes,
+                                    _EntityType.SEQUENCE.value,
                                     False,
                                 )
-                            elif isinstance(data, Scenario):
-                                return (
-                                    data.id,
-                                    data.get_simple_label(),
-                                    self.data_nodes_by_owner[data.id] + list(data.sequences.values()),
-                                    _EntityType.SCENARIO.value,
-                                    data.is_primary,
-                                )
-                            elif isinstance(data, Sequence):
-                                if datanodes := self.data_nodes_by_owner.get(data.id):
-                                    return (
-                                        data.id,
-                                        data.get_simple_label(),
-                                        datanodes,
-                                        _EntityType.SEQUENCE.value,
-                                        False,
-                                    )
         except Exception as e:
             _warn(
                 f"Access to {type(data)} ({data.id if hasattr(data, 'id') else 'No_id'}) failed",
@@ -957,4 +957,3 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     _warn(f"dag.on_action(): Exception raised in '{args[1]}()' with '{args[0]}'", e)
         elif args[1]:
             _warn(f"dag.on_action(): Invalid function '{args[1]}()'.")
-

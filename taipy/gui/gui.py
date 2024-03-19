@@ -2031,7 +2031,7 @@ class Gui:
     def _call_on_exception(self, function_name: str, exception: Exception) -> bool:
         if hasattr(self, "on_exception") and callable(self.on_exception):
             try:
-                self.on_exception(self.__get_state(), str(function_name), exception)
+                self.on_exception(self.__get_state(), function_name, exception)
             except Exception as e:  # pragma: no cover
                 _warn("Exception raised in on_exception()", e)
             return True
@@ -2118,7 +2118,7 @@ class Gui:
                 to=page_name,
                 params={
                     _Server._RESOURCE_HANDLER_ARG: pr._resource_handler.get_id(),
-                    _Server._CUSTOM_PAGE_META_ARG: json.dumps(pr._metadata, cls=_TaipyJsonEncoder)
+                    _Server._CUSTOM_PAGE_META_ARG: json.dumps(pr._metadata, cls=_TaipyJsonEncoder),
                 },
             ):
                 # Proactively handle the bindings of custom page variables

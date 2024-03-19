@@ -182,16 +182,12 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
 
     def _read_as(self):
         with open(self._path, encoding=self.properties[self.__ENCODING_KEY]) as csvFile:
-            res = list()
             if self.properties[self._HAS_HEADER_PROPERTY]:
                 reader = csv.DictReader(csvFile)
-                for line in reader:
-                    res.append(self._decoder(line))
             else:
                 reader = csv.reader(csvFile)
-                for line in reader:
-                    res.append(self._decoder(line))
-            return res
+
+            return [self._decoder(line) for line in reader]
 
     def _read_as_numpy(self) -> np.ndarray:
         return self._read_as_pandas_dataframe().to_numpy()

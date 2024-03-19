@@ -165,8 +165,7 @@ class Task(_Entity, _Labeled):
                 either no input or no output.
         """
         data_nodes = list(self.__input.values()) + list(self.__output.values())
-        scope = Scope(min(dn.scope for dn in data_nodes)) if len(data_nodes) != 0 else Scope.GLOBAL
-        return scope
+        return Scope(min(dn.scope for dn in data_nodes)) if len(data_nodes) != 0 else Scope.GLOBAL
 
     @property
     def version(self):

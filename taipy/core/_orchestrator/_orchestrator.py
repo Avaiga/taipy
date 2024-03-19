@@ -269,7 +269,7 @@ class _Orchestrator(_AbstractOrchestrator):
             if job.submit_id == submit_id and len(output_dn_config_ids.intersection(job_input_dn_config_ids)) > 0:
                 next_output_dn_config_ids.update(job.task.output.keys())
                 subsequent_jobs.update([job])
-        if len(next_output_dn_config_ids) > 0:
+        if next_output_dn_config_ids:
             subsequent_jobs.update(
                 cls.__find_subsequent_jobs(submit_id, output_dn_config_ids=next_output_dn_config_ids)
             )

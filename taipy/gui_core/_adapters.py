@@ -59,8 +59,7 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
         data = super().get()
         if isinstance(data, Scenario):
             try:
-                scenario = core_get(data.id)
-                if scenario:
+                if scenario := core_get(data.id):
                     return [
                         scenario.id,
                         scenario.is_primary,
@@ -116,8 +115,7 @@ class _GuiCoreScenarioDagAdapter(_TaipyBase):
         data = super().get()
         if isinstance(data, Scenario):
             try:
-                scenario = core_get(data.id)
-                if scenario:
+                if core_get(data.id):
                     dag = data._get_dag()
                     nodes = dict()
                     for id, node in dag.nodes.items():
@@ -166,8 +164,7 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
         data = super().get()
         if isinstance(data, DataNode):
             try:
-                datanode = core_get(data.id)
-                if datanode:
+                if datanode := core_get(data.id):
                     owner = core_get(datanode.owner_id) if datanode.owner_id else None
                     return [
                         datanode.id,

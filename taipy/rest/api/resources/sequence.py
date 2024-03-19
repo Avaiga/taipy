@@ -25,11 +25,10 @@ from ..schemas import SequenceResponseSchema
 
 
 def _get_or_raise(sequence_id: str) -> Sequence:
-    manager = _SequenceManagerFactory._build_manager()
-    sequence = manager._get(sequence_id)
-    if sequence is None:
-        raise NonExistingSequence(sequence_id)
-    return sequence
+    if sequence := _SequenceManagerFactory._build_manager()._get(sequence_id):
+        return sequence
+
+    raise NonExistingSequence(sequence_id)
 
 
 REPOSITORY = "sequence"

@@ -66,8 +66,7 @@ class JobConfig(UniqueSection):
     @classmethod
     def _from_dict(cls, config_as_dict: Dict[str, Any], id=None, config: Optional[_Config] = None):
         mode = config_as_dict.pop(cls._MODE_KEY, None)
-        job_config = JobConfig(mode, **config_as_dict)
-        return job_config
+        return JobConfig(mode, **config_as_dict)
 
     def _update(self, as_dict: Dict[str, Any], default_section=None):
         mode = _tpl._replace_templates(as_dict.pop(self._MODE_KEY, self.mode))
