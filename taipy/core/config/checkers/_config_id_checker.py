@@ -24,7 +24,7 @@ class _ConfigIdChecker(_ConfigChecker):
         existing_config_ids: Dict[str, List[str]] = dict()
         for entity_type, section_dictionary in self._config._sections.items():
             for config_id in section_dictionary.keys():
-                if config_id in existing_config_ids.keys():
+                if config_id in existing_config_ids:
                     existing_config_ids[config_id].append(entity_type)
                 else:
                     existing_config_ids[config_id] = [entity_type]

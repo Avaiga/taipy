@@ -118,10 +118,9 @@ class _ScenarioConfigChecker(_ConfigChecker):
     def _check_tasks_in_sequences_exist_in_scenario_tasks(
         self, scenario_config_id: str, scenario_config: ScenarioConfig
     ):
-        scenario_task_ids = set()
-        for task_config in scenario_config.tasks:
-            if isinstance(task_config, TaskConfig):
-                scenario_task_ids.add(task_config.id)
+        scenario_task_ids = {
+            task_config.id for task_config in scenario_config.tasks if isinstance(task_config, TaskConfig)
+        }
         for sequence_tasks in scenario_config.sequences.values():
             self._check_children(
                 ScenarioConfig,

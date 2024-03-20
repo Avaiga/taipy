@@ -27,11 +27,10 @@ REPOSITORY = "cycle"
 
 
 def _get_or_raise(cycle_id: str) -> Cycle:
-    manager = _CycleManagerFactory._build_manager()
-    cycle = manager._get(cycle_id)
-    if not cycle:
-        raise NonExistingCycle(cycle_id)
-    return cycle
+    if cycle := _CycleManagerFactory._build_manager()._get(cycle_id):
+        return cycle
+
+    raise NonExistingCycle(cycle_id)
 
 
 class CycleResource(Resource):

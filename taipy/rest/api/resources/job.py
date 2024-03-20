@@ -27,11 +27,10 @@ from ..schemas import JobSchema
 
 
 def _get_or_raise(job_id: str) -> Job:
-    manager = _JobManagerFactory._build_manager()
-    job = manager._get(job_id)
-    if job is None:
-        raise NonExistingJob(job_id)
-    return job
+    if job := _JobManagerFactory._build_manager()._get(job_id):
+        return job
+
+    raise NonExistingJob(job_id)
 
 
 class JobResource(Resource):
@@ -198,10 +197,10 @@ class JobList(Resource):
         self.logger = kwargs.get("logger")
 
     def fetch_config(self, config_id):
-        config = Config.tasks.get(config_id)
-        if not config:
-            raise NonExistingTaskConfig(config_id)
-        return config
+        if config := Config.tasks.get(config_id):
+            return config
+
+        raise NonExistingTaskConfig(config_id)
 
     @_middleware
     def get(self):

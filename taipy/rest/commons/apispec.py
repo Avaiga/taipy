@@ -35,8 +35,7 @@ class FlaskRestfulPlugin(FlaskPlugin):
             raise APISpecError("Could not find endpoint for view {0}".format(view))
 
         # WARNING: Assume 1 rule per view function for now
-        rule = app.url_map._rules_by_endpoint[endpoint][0]
-        return rule
+        return app.url_map._rules_by_endpoint[endpoint][0]
 
 
 class APISpecExt:
@@ -63,7 +62,7 @@ class APISpecExt:
             version=app.config["APISPEC_VERSION"],
             openapi_version=app.config["OPENAPI_VERSION"],
             plugins=[MarshmallowPlugin(), FlaskRestfulPlugin()],
-            **kwargs
+            **kwargs,
         )
 
         blueprint = Blueprint(

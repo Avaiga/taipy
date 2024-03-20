@@ -55,11 +55,10 @@ REPOSITORY = "data"
 
 
 def _get_or_raise(data_node_id: str) -> DataNode:
-    manager = _DataManagerFactory._build_manager()
-    data_node = manager._get(data_node_id)
-    if not data_node:
-        raise NonExistingDataNode(data_node_id)
-    return data_node
+    if data_node := _DataManagerFactory._build_manager()._get(data_node_id):
+        return data_node
+
+    raise NonExistingDataNode(data_node_id)
 
 
 class DataNodeResource(Resource):
@@ -459,10 +458,10 @@ class DataNodeList(Resource):
         self.logger = kwargs.get("logger")
 
     def fetch_config(self, config_id):
-        config = Config.data_nodes.get(config_id)
-        if not config:
-            raise NonExistingDataNodeConfig(config_id)
-        return config
+        if config := Config.data_nodes.get(config_id):
+            return config
+
+        raise NonExistingDataNodeConfig(config_id)
 
     @_middleware
     def get(self):
