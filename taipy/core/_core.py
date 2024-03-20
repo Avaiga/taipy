@@ -15,7 +15,6 @@ from typing import Optional
 from taipy.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from ._backup._backup import _init_backup_file_with_storage_folder
 from ._core_cli import _CoreCLI
 from ._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
 from ._orchestrator._orchestrator import _Orchestrator
@@ -120,7 +119,6 @@ class Core:
         Config.check()
         cls.__logger.info("Blocking configuration update...")
         Config.block_update()
-        _init_backup_file_with_storage_folder()
 
     def __start_dispatcher(self, force_restart):
         self.__logger.info("Starting job dispatcher...")

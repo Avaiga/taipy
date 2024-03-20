@@ -88,6 +88,4 @@ class _JobManager(_Manager[Job], _VersionMixin):
     def _is_deletable(cls, job: Union[Job, JobId]) -> bool:
         if isinstance(job, str):
             job = cls._get(job)
-        if not job.is_finished():
-            return False
-        return True
+        return job.is_finished()

@@ -54,13 +54,11 @@ class _VersionManager(_Manager[_Version]):
         if version := cls._get(id):
             comparator_result = Config._comparator._find_conflict_config(version.config, Config._applied_config, id)  # type: ignore[attr-defined]
             if comparator_result.get(_ComparatorResult.CONFLICTED_SECTION_KEY):
-                if force:
-                    cls.__logger.warning(
-                        f"Option --force is detected, overriding the configuration of version {id} ..."
-                    )
-                    version.config = Config._applied_config  # type: ignore[attr-defined]
-                else:
+                if not force:
                     raise ConflictedConfigurationError()
+
+                cls.__logger.warning(f"Option --force is detected, overriding the configuration of version {id} ...")
+                version.config = Config._applied_config  # type: ignore[attr-defined]
 
         else:
             version = _Version(id=id, config=Config._applied_config)  # type: ignore[attr-defined]
@@ -212,16 +210,16 @@ class _VersionManager(_Manager[_Version]):
             raise SystemExit(f"Undefined execution mode: {Config.core.mode}.")
 
     @classmethod
-    def __check_production_migration_config(self):
+    def __check_production_migration_config(cls):
         from ..config.checkers._migration_config_checker import _MigrationConfigChecker
 
         collector = _MigrationConfigChecker(Config._applied_config, IssueCollector())._check()
         for issue in collector._warnings:
-            self.__logger.warning(str(issue))
+            cls.__logger.warning(str(issue))
         for issue in collector._infos:
-            self.__logger.info(str(issue))
+            cls.__logger.info(str(issue))
         for issue in collector._errors:
-            self.__logger.error(str(issue))
+            cls.__logger.error(str(issue))
         if len(collector._errors) != 0:
             raise SystemExit("Configuration errors found. Please check the error log for more information.")
 

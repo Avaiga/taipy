@@ -43,8 +43,7 @@ def __get_migration_fcts_to_latest(source_version: str, config_id: str) -> List[
     versions_to_migrate = production_versions[start_index:]
 
     for version in versions_to_migrate:
-        migration_fct = Config.unique_sections[MigrationConfig.name].migration_fcts.get(version, {}).get(config_id)
-        if migration_fct:
+        if migration_fct := Config.unique_sections[MigrationConfig.name].migration_fcts.get(version, {}).get(config_id):
             migration_fcts_to_latest.append(migration_fct)
 
     return migration_fcts_to_latest

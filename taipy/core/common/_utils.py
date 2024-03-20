@@ -54,8 +54,7 @@ def _retry_read_entity(exceptions: Tuple, sleep_time: float = 0.2):
 def _get_fct_name(f) -> Optional[str]:
     # Mock function does not have __qualname__ attribute -> return __name__
     # Partial or anonymous function does not have __name__ or __qualname__ attribute -> return None
-    name = getattr(f, "__qualname__", getattr(f, "__name__", None))
-    return name
+    return getattr(f, "__qualname__", getattr(f, "__name__", None))
 
 
 def _fct_to_dict(obj):
@@ -66,14 +65,14 @@ def _fct_to_dict(obj):
         callback = obj.callback
         params = obj.params
 
-    fct_name = _get_fct_name(callback)
-    if not fct_name:
-        return None
-    return {
-        "fct_name": fct_name,
-        "fct_params": params,
-        "fct_module": callback.__module__,
-    }
+    if fct_name := _get_fct_name(callback):
+        return {
+            "fct_name": fct_name,
+            "fct_params": params,
+            "fct_module": callback.__module__,
+        }
+
+    return None
 
 
 def _fcts_to_dict(objs):

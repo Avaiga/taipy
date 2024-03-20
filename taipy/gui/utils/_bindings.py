@@ -39,7 +39,9 @@ class _Bindings:
 
     def __get_property(self, name):
         def __setter(ud: _Bindings, value: t.Any):
-            if isinstance(value, dict):
+            if isinstance(value, _MapDict):
+                value._update_var = None
+            elif isinstance(value, dict):
                 value = _MapDict(value, None)
             ud.__gui._update_var(name, value)
 
