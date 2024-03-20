@@ -39,7 +39,8 @@ def test_migrate_fs_default(caplog):
     assert "Starting entity migration from '.taipy/' folder" in caplog.text
 
 
-def test_migrate_fs_specified_folder(caplog):
+def test_migrate_fs_specified_folder(caplog, mocker):
+    mocker.patch("taipy.core._entity._migrate._utils.version", return_value="3.1.0")
     _MigrateCLI.create_parser()
 
     # Copy data_sample to .data folder for testing
@@ -55,12 +56,14 @@ def test_migrate_fs_specified_folder(caplog):
 
     # Compare migrated .data folder with data_sample_migrated
     dircmp_result = filecmp.dircmp(data_path, "tests/core/_entity/data_sample_migrated")
+
     assert not dircmp_result.diff_files and not dircmp_result.left_only and not dircmp_result.right_only
     for subdir in dircmp_result.subdirs.values():
         assert not subdir.diff_files and not subdir.left_only and not subdir.right_only
 
 
-def test_migrate_fs_backup_and_remove(caplog):
+def test_migrate_fs_backup_and_remove(caplog, mocker):
+    mocker.patch("taipy.core._entity._migrate._utils.version", return_value="3.1.0")
     _MigrateCLI.create_parser()
 
     # Copy data_sample to .data folder for testing
@@ -93,7 +96,8 @@ def test_migrate_fs_backup_and_remove(caplog):
     assert not os.path.exists(backup_path)
 
 
-def test_migrate_fs_backup_and_restore(caplog):
+def test_migrate_fs_backup_and_restore(caplog, mocker):
+    mocker.patch("taipy.core._entity._migrate._utils.version", return_value="3.1.0")
     _MigrateCLI.create_parser()
 
     # Copy data_sample to .data folder for testing
