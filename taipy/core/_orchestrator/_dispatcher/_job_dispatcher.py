@@ -75,7 +75,7 @@ class _JobDispatcher(threading.Thread):
                         job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
                 except Empty:  # In case the last job of the queue has been removed.
                     pass
-            self._logger.debug(f"Releasing lock after checking jobs to run.")
+            self._logger.debug("Releasing lock after checking jobs to run.")
             if job:
                 self._logger.debug(f"Got a job to execute {job.id}.")
                 try:
