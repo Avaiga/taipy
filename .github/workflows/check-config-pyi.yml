@@ -1,0 +1,25 @@
+name: Update config.pyi
+
+on:
+  pull_request:
+    branches: [ develop, release/* ]
+
+jobs:
+  generate-pyi:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Update config.pyi
+        with:
+          python-version: '3.11'
+        run: python taipy/config/stubs/generate_pyi.py
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Update config.pyi"
