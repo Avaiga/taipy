@@ -1,0 +1,3 @@
+pandas==2.1.4
+plotly==5.19.0
+taipy==3.1.0
