@@ -47,7 +47,7 @@ def _get_file_ast(filename: str):
     return ast.parse(_tree)
 
 
-def _build_base_config_pyi(filename, base_pyi):
+def _build_base_config_pyi(filename, base_pyi) -> str:
     lines = _get_file_lines(filename)
     tree = _get_file_ast(filename)
 
@@ -73,7 +73,7 @@ def __add_docstring(base_pyi, lines, end_line):
     return base_pyi
 
 
-def _build_entity_config_pyi(base_pyi, filename, entity_map):
+def _build_entity_config_pyi(base_pyi, filename, entity_map) -> str:
     lines = _get_file_lines(filename)
     tree = _get_file_ast(filename)
     functions = {}
@@ -123,7 +123,7 @@ def _generate_entity_and_property_maps(filename):
     return entities_map, property_map
 
 
-def _generate_acessors(base_pyi, property_map):
+def _generate_acessors(base_pyi, property_map) -> str:
     for property, cls in property_map.items():
         return_template = f"Dict[str, {cls}]" if property != "job_config" else f"{cls}"
         template = ("\t@_Classproperty\n" + f'\tdef {property}(cls) -> {return_template}:\n\t\t""""""\n').replace(
@@ -133,22 +133,22 @@ def _generate_acessors(base_pyi, property_map):
     return base_pyi
 
 
-def _build_header(filename):
+def _build_header(filename) -> str:
     _file = Path(filename)
-    return _file.read_text() + "\n\n"
+    return _file.read_text() + "\n"
 
 
 if __name__ == "__main__":
-    header_file = "stubs/pyi_header.py"
-    config_init = Path("taipy-core/taipy/core/config/__init__.py")
+    header_file = "taipy/config/stubs/pyi_header.py"
+    config_init = Path("taipy/core/config/__init__.py")
     base_config = "taipy/config/config.py"
 
-    dn_filename = "taipy-core/taipy/core/config/data_node_config.py"
-    job_filename = "taipy-core/taipy/core/config/job_config.py"
-    scenario_filename = "taipy-core/taipy/core/config/scenario_config.py"
-    task_filename = "taipy-core/taipy/core/config/task_config.py"
-    migration_filename = "taipy-core/taipy/core/config/migration_config.py"
-    core_filename = "taipy-core/taipy/core/config/core_section.py"
+    dn_filename = "taipy/core/config/data_node_config.py"
+    job_filename = "taipy/core/config/job_config.py"
+    scenario_filename = "taipy/core/config/scenario_config.py"
+    task_filename = "taipy/core/config/task_config.py"
+    migration_filename = "taipy/core/config/migration_config.py"
+    core_filename = "taipy/core/config/core_section.py"
 
     entities_map, property_map = _generate_entity_and_property_maps(config_init)
     pyi = _build_header(header_file)
@@ -160,6 +160,9 @@ if __name__ == "__main__":
     pyi = _build_entity_config_pyi(pyi, job_filename, entities_map["JobConfig"])
     pyi = _build_entity_config_pyi(pyi, migration_filename, entities_map["MigrationConfig"])
     pyi = _build_entity_config_pyi(pyi, core_filename, entities_map["CoreSection"])
+
+    # Remove the final redundant \n
+    pyi = pyi[:-1]
 
     with open("taipy/config/config.pyi", "w") as f:
         f.writelines(pyi)

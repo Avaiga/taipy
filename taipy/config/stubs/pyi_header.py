@@ -13,6 +13,7 @@ import json
 from datetime import timedelta
 from typing import Any, Callable, Dict, List, Optional, Union
 
+from taipy.config._config import _Config
 from taipy.core.config import CoreSection, DataNodeConfig, JobConfig, MigrationConfig, ScenarioConfig, TaskConfig
 
 from .checker.issue_collector import IssueCollector
