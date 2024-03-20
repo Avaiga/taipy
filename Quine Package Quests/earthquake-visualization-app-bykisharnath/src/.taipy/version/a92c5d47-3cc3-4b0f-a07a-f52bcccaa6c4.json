@@ -1,0 +1,5 @@
+{
+"id": "a92c5d47-3cc3-4b0f-a07a-f52bcccaa6c4",
+"config": "{\n\"TAIPY\": {},\n\"gui\": {},\n\"JOB\": {\n\"mode\": \"development\",\n\"max_nb_of_workers\": \"1:int\"\n},\n\"VERSION_MIGRATION\": {\n\"migration_fcts\": {}\n},\n\"CORE\": {\n\"root_folder\": \"./taipy/\",\n\"storage_folder\": \"user_data/\",\n\"taipy_storage_folder\": \".taipy/\",\n\"repository_type\": \"filesystem\",\n\"read_entity_retry\": \"1:int\",\n\"mode\": \"development\",\n\"version_number\": \"\",\n\"force\": \"False:bool\",\n\"core_version\": \"3.1.0\"\n},\n\"DATA_NODE\": {\n\"default\": {\n\"storage_type\": \"pickle\",\n\"scope\": \"SCENARIO:SCOPE\"\n}\n},\n\"TASK\": {\n\"default\": {\n\"function\": null,\n\"inputs\": [],\n\"outputs\": [],\n\"skippable\": \"False:bool\"\n}\n},\n\"SCENARIO\": {\n\"default\": {\n\"comparators\": {},\n\"tasks\": [],\n\"additional_data_nodes\": [],\n\"frequency\": null,\n\"sequences\": {}\n}\n}\n}",
+"creation_date": "2024-03-18T20:00:08.952253"
+}

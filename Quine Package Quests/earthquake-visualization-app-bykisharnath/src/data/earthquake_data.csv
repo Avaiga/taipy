@@ -1,0 +1,783 @@
+title,magnitude,date_time,cdi,mmi,alert,tsunami,sig,net,nst,dmin,gap,magType,depth,latitude,longitude,location,continent,country
+"M 7.0 - 18 km SW of Malango, Solomon Islands",7,22-11-2022 02:03,8,7,green,1,768,us,117,0.509,17,mww,14,-9.7963,159.596,"Malango, Solomon Islands",Oceania,Solomon Islands
+"M 6.9 - 204 km SW of Bengkulu, Indonesia",6.9,18-11-2022 13:37,4,4,green,0,735,us,99,2.229,34,mww,25,-4.9559,100.738,"Bengkulu, Indonesia",,
+M 7.0 - ,7,12-11-2022 07:09,3,3,green,1,755,us,147,3.125,18,mww,579,-20.0508,-178.346,,Oceania,Fiji
+"M 7.3 - 205 km ESE of Neiafu, Tonga",7.3,11-11-2022 10:48,5,5,green,1,833,us,149,1.865,21,mww,37,-19.2918,-172.129,"Neiafu, Tonga",,
+M 6.6 - ,6.6,09-11-2022 10:14,0,2,green,1,670,us,131,4.998,27,mww,624.464,-25.5948,178.278,,,
+M 7.0 - south of the Fiji Islands,7,09-11-2022 09:51,4,3,green,1,755,us,142,4.578,26,mwb,660,-26.0442,178.381,the Fiji Islands,,
+M 6.8 - south of the Fiji Islands,6.8,09-11-2022 09:38,1,3,green,1,711,us,136,4.678,22,mww,630.379,-25.9678,178.363,the Fiji Islands,,
+"M 6.7 - 60 km SSW of Boca Chica, Panama",6.7,20-10-2022 11:57,7,6,green,1,797,us,145,1.151,37,mww,20,7.6712,-82.3396,"Boca Chica, Panama",,Panama
+"M 6.8 - 55 km SSW of Aguililla, Mexico",6.8,22-09-2022 06:16,8,7,yellow,1,1179,us,175,2.137,92,mww,20,18.33,-102.913,"Aguililla, Mexico",North America,Mexico
+"M 7.6 - 35 km SSW of Aguililla, Mexico",7.6,19-09-2022 18:05,9,8,yellow,1,1799,us,271,1.153,69,mww,26.943,18.3667,-103.252,"Aguililla, Mexico",North America,Mexico
+"M 6.9 - 90 km E of Yujing, Taiwan",6.9,18-09-2022 06:44,9,9,yellow,1,887,us,215,0.401,34,mww,10,23.1444,121.307,"Yujing, Taiwan",Asia,Taiwan
+"M 6.5 - 96 km SE of Lugu, Taiwan",6.5,17-09-2022 13:41,7,7,green,1,756,us,178,0.43,54,mww,10,23.029,121.348,"Lugu, Taiwan",Asia,Taiwan
+"M 7.0 - 209 km SSE of Isangel, Vanuatu",7,14-09-2022 11:04,7,5,green,1,761,us,192,2.977,45,mww,137,-21.2077,170.239,"Isangel, Vanuatu",,
+"M 7.6 - 70 km E of Kainantu, Papua New Guinea",7.6,10-09-2022 23:47,8,8,yellow,1,965,us,272,3.158,12,mww,116,-6.2237,146.471,"Kainantu, Papua New Guinea",Oceania,Papua New Guinea
+"M 6.6 - 44 km SE of Kangding, China",6.6,05-09-2022 04:52,9,8,orange,0,1043,us,141,8.454,34,mww,12,29.7263,102.279,"Kangding, China",Asia,People's Republic of China
+M 6.6 - south of the Kermadec Islands,6.6,14-08-2022 13:44,7,6,green,1,672,us,68,5.293,34,mww,30,-32.6922,-178.959,the Kermadec Islands,,
+"M 7.0 - 11 km NE of Bantay, Philippines",7,27-07-2022 00:43,9,8,yellow,1,1351,us,152,5.276,22,mww,33.729,17.5978,120.809,"Bantay, Philippines",Asia,Philippines
+"M 6.5 - 107 km SSW of Tarauacá, Brazil",6.5,08-06-2022 00:55,3,2,green,0,653,us,236,1.999,31,mww,622.73,-9.0618,-71.1647,"Tarauacá, Brazil",South America,Brazil
+"M 7.2 - 10 km W of Azángaro, Peru",7.2,26-05-2022 12:02,7,5,green,1,876,us,144,2.494,40,mww,236,-14.8628,-70.3081,"Azángaro, Peru",South America,Peru
+M 6.9 - ,6.9,19-05-2022 10:13,2,5,green,1,733,us,127,0.371,45,mww,10,-54.1325,159.027,,,
+"M 6.8 - 86 km NNW of San Antonio de los Cobres, Argentina",6.8,10-05-2022 23:06,6,5,green,1,762,us,162,1.505,30,mww,220,-23.6141,-66.7236,"San Antonio de los Cobres, Argentina",South America,Argentina
+"M 6.6 - 55 km WSW of Masachapa, Nicaragua",6.6,21-04-2022 07:42,6,5,green,1,762,us,0,0.914,94,mww,27,11.5538,-86.9919,"Masachapa, Nicaragua",,
+M 7.0 - southeast of the Loyalty Islands,7,31-03-2022 05:44,6,4,green,1,763,us,0,2.705,26,mww,10,-22.5732,170.349,the Loyalty Islands,,
+"M 6.9 - 284 km ESE of Tadine, New Caledonia",6.9,30-03-2022 20:56,6,4,green,1,738,us,0,2.697,42,mww,10,-22.72,170.277,"Tadine, New Caledonia",,
+"M 6.7 - 65 km S of Hualien City, Taiwan",6.7,22-03-2022 17:41,8,7,green,1,806,us,0,0.289,32,mww,24,23.3421,121.636,"Hualien City, Taiwan",Asia,Taiwan
+"M 7.3 - 57 km ENE of Namie, Japan",7.3,16-03-2022 14:36,9,8,red,1,2397,us,0,2.936,29,mww,41,37.7015,141.587,"Namie, Japan",,
+"M 6.7 - 166 km W of Pariaman, Indonesia",6.7,13-03-2022 21:09,9,6,green,0,708,us,0,2.188,43,mww,28,-0.6831,98.6034,"Pariaman, Indonesia",Asia,Indonesia
+"M 6.6 - Kermadec Islands, New Zealand",6.6,02-03-2022 12:52,2,7,green,1,670,us,0,0.827,46,mww,24,-30.0528,-177.74,"Kermadec Islands, New Zealand",,
+M 6.8 - south of the Fiji Islands,6.8,16-02-2022 20:21,2,3,green,1,712,us,0,5.78,12,mww,535,-23.7852,-179.968,the Fiji Islands,,
+"M 6.5 - 49 km NW of Barranca, Peru",6.5,03-02-2022 15:58,8,6,green,0,690,us,0,3.026,22,mww,110,-4.455,-76.9395,"Barranca, Peru",South America,Peru
+M 6.5 - Kermadec Islands region,6.5,29-01-2022 02:46,7,4,green,1,651,us,0,1.088,57,mww,8,-29.535,-176.729,Kermadec Islands region,,
+"M 6.6 - 80 km SW of Labuan, Indonesia",6.6,14-01-2022 09:05,8,6,green,0,785,us,0,2.418,22,mww,33,-6.9291,105.251,"Labuan, Indonesia",,Indonesia
+"M 6.5 - 71 km SE of Nikolski, Alaska",6.5,11-01-2022 12:39,0,3,,1,650,at,97,1.61607,108,Mi,37,52.502,-168.08,"Nikolski, Alaska",,
+"M 6.5 - 71 km SE of Nikolski, Alaska",6.5,11-01-2022 12:39,0,3,,1,650,pt,23,0,208.8,Mi,37,52.502,-168.08,"Nikolski, Alaska",,
+"M 6.6 - 53 km SE of Nikolski, Alaska",6.6,11-01-2022 12:39,8,5,green,1,674,us,0,0.507,49,mww,19,52.6252,-168.15,"Nikolski, Alaska",,
+"M 6.7 - 91 km SE of Nikolski, Alaska",6.7,11-01-2022 11:35,0,4,,1,691,at,50,0.936943,126,Mi,33,52.48,-167.736,"Nikolski, Alaska",,
+"M 6.7 - 91 km SE of Nikolski, Alaska",6.7,11-01-2022 11:35,0,4,,1,691,pt,20,0,205.2,Mi,33,52.48,-167.736,"Nikolski, Alaska",,
+"M 6.8 - 100 km SE of Nikolski, Alaska",6.8,11-01-2022 11:35,7,6,green,1,730,us,0,0.92,61,mww,20,52.6563,-167.917,"Nikolski, Alaska",,
+"M 6.6 - 48 km WNW of Pólis, Cyprus",6.6,11-01-2022 01:07,6,6,green,0,976,us,0,1.168,21,mww,21,35.1456,31.9095,"Pólis, Cyprus",Asia,
+"M 6.6 - northern Qinghai, China",6.6,07-01-2022 17:45,9,8,orange,0,1012,us,0,2.685,13,mww,13,37.8167,101.299,"northern Qinghai, China",Asia,People's Republic of China
+"M 7.3 - 125 km NNE of Lospalos, Timor Leste",7.3,29-12-2021 18:25,8,7,green,0,921,us,0,3.713,19,mww,165.49,-7.5924,127.581,"Lospalos, Timor Leste",,Indonesia
+M 7.3 - Flores Sea,7.3,14-12-2021 03:20,9,5,green,1,854,us,0,1.025,32,mww,14.27,-7.6033,122.2,Flores Sea,Asia,Indonesia
+"M 7.5 - 43 km NNW of Barranca, Peru",7.5,28-11-2021 10:52,8,8,yellow,1,1094,us,0,4.951,40,mww,126,-4.4898,-76.8461,"Barranca, Peru",South America,Peru
+"M 6.6 - 177 km SE of Hirara, Japan",6.6,10-11-2021 15:45,7,4,green,1,688,us,0,3.259,15,mww,12,23.5414,126.48,"Hirara, Japan",,
+"M 6.9 - 112 km E of Chignik, Alaska",6.9,11-10-2021 09:10,8,6,green,1,995,ak,0,0,0,mww,51.6,56.2581,-156.492,"Chignik, Alaska",North America,United States of America
+M 6.9 - Vanuatu region,6.9,09-10-2021 10:58,4,3,green,1,740,us,0,4.778,31,mww,535,-21.1704,174.54,Vanuatu region,,
+M 7.3 - Vanuatu region,7.3,02-10-2021 06:29,4,4,green,1,826,us,0,4.493,32,mww,527,-21.1036,174.895,Vanuatu region,,
+"M 6.5 - 80 km SW of Jiquilillo, Nicaragua",6.5,22-09-2021 09:57,7,5,green,1,684,us,0,0.993,114,mww,21,12.1598,-87.8542,"Jiquilillo, Nicaragua",,
+"M 7.0 - Acapulco, Mexico",7,08-09-2021 01:47,8,8,red,1,2504,us,0,0.07,43,mww,20,16.9502,-99.7877,"Acapulco, Mexico",North America,Mexico
+M 7.1 - South Sandwich Islands region,7.1,22-08-2021 21:33,1,4,green,1,776,us,0,9.799,32,mww,6,-60.3026,-24.9992,South Sandwich Islands region,,Antarctica
+M 6.6 - South Sandwich Islands region,6.6,22-08-2021 00:45,1,3,green,1,670,us,0,8.865,19,mww,7,-60.1023,-24.4608,South Sandwich Islands region,,Antarctica
+"M 6.9 - 17 km N of Port-Olry, Vanuatu",6.9,18-08-2021 10:10,8,7,green,1,741,us,0,0.579,54,mww,93,-14.892,167.085,"Port-Olry, Vanuatu",Oceania,Vanuatu
+M 6.9 - South Sandwich Islands region,6.9,16-08-2021 11:10,6,4,green,1,734,us,0,8.363,48,mww,16.7,-58.3814,-23.3318,South Sandwich Islands region,,
+"M 7.2 - Nippes, Haiti",7.2,14-08-2021 12:29,9,8,red,1,2331,us,0,1.178,23,mww,10,18.3521,-73.4804,"Nippes, Haiti",North America,Haiti
+"M 6.9 - 136 km SE of Perryville, Alaska",6.9,14-08-2021 11:57,5,4,green,1,738,ak,0,0,0,mww,33.3,55.2364,-157.707,"Perryville, Alaska",,
+"M 6.9 - 125 km SE of Perryville, Alaska",6.9,14-08-2021 11:57,5,4,green,1,738,us,0,1.173,36,mww,20.74,55.2657,-157.68,"Perryville, Alaska",,
+M 8.1 - South Sandwich Islands region,8.1,12-08-2021 18:35,0,7,green,0,1009,us,0,7.463,78,mww,22.79,-58.4157,-25.3206,South Sandwich Islands region,,
+M 7.5 - South Sandwich Islands region,7.5,12-08-2021 18:32,9,6,green,1,868,us,0,7.227,38,mww,47.23,-57.5959,-25.1874,South Sandwich Islands region,,
+"M 7.1 - 60 km ENE of Pondaguitan, Philippines",7.1,11-08-2021 17:46,9,7,green,1,846,us,0,1.273,25,mww,55.14,6.4547,126.742,"Pondaguitan, Philippines",,
+"M 8.2 - 91 km ESE of Perryville, Alaska",8.2,29-07-2021 06:15,8,6,green,1,1237,us,0,0.875,66,mww,46.66,55.4742,-157.917,"Perryville, Alaska",,
+"M 8.2 - 99 km SE of Perryville, Alaska",8.2,29-07-2021 06:15,8,7,yellow,1,1252,ak,0,0,0,mww,35,55.3154,-157.829,"Perryville, Alaska",,
+"M 6.7 - 15 km S of Hukay, Philippines",6.7,23-07-2021 20:48,8,5,green,1,935,us,0,8.139,12,mww,110,13.6989,120.713,"Hukay, Philippines",Asia,Philippines
+"M 6.7 - 71 km S of Burica, Panama",6.7,21-07-2021 21:15,6,6,green,1,830,us,0,1.395,61,mww,10,7.5904,-82.8813,"Burica, Panama",,
+"M 6.5 - Kermadec Islands, New Zealand",6.5,20-06-2021 17:05,0,4,green,1,650,us,0,7.994,24,mww,25,-30.2144,-177.773,"Kermadec Islands, New Zealand",,
+"M 6.5 - 265 km SSE of Alo, Wallis and Futuna",6.5,21-05-2021 22:13,5,7,green,1,652,us,0,4.518,44,mww,10,-16.4796,-177.356,"Alo, Wallis and Futuna",,
+"M 7.3 - Southern Qinghai, China",7.3,21-05-2021 18:04,9,9,orange,0,1025,us,0,4.655,9,mww,10,34.5861,98.2551,"Southern Qinghai, China",Asia,People's Republic of China
+"M 6.7 - 260 km S of Sinabang, Indonesia",6.7,14-05-2021 06:33,8,4,green,0,698,us,0,1.487,37,mww,11,0.1684,96.6475,"Sinabang, Indonesia",,
+M 6.7 - Mauritius - Reunion region,6.7,12-05-2021 14:05,9,3,green,0,694,us,0,10.669,45,mww,10,-17.2495,66.3745,Mauritius - Reunion region,,
+M 6.9 - ,6.9,01-05-2021 01:27,7,6,green,1,919,us,0,2.619,35,mww,43,38.2296,141.665,,Asia,Japan
+"M 6.5 - 207 km WSW of Haveluloto, Tonga",6.5,25-04-2021 22:28,4,4,green,0,651,us,0,5.931,20,mww,246,-21.6857,-177.064,"Haveluloto, Tonga",,
+"M 6.5 - 225 km WNW of Pangai, Tonga",6.5,24-04-2021 00:23,6,4,green,0,652,us,0,10.405,19,mww,301,-18.9204,-176.235,"Pangai, Tonga",,
+"M 7.0 - 30 km E of Ishinomaki, Japan",7,20-03-2021 09:09,7,7,yellow,1,1052,us,0,2.378,35,mww,43,38.4752,141.607,"Ishinomaki, Japan",Asia,Japan
+"M 6.6 - 171 km SSE of Ust’-Kamchatsk Staryy, Russia",6.6,16-03-2021 18:38,5,5,green,1,672,us,0,3.183,18,mww,13.23,54.7018,163.208,"Ust’-Kamchatsk Staryy, Russia",,
+M 6.5 - Kermadec Islands region,6.5,04-03-2021 23:12,0,4,green,0,650,us,0,11.764,25,mwb,24,-28.4792,-176.619,Kermadec Islands region,,
+"M 8.1 - Kermadec Islands, New Zealand",8.1,04-03-2021 19:28,9,8,green,1,1021,us,0,0.739,21,mww,28.93,-29.7466,-177.224,"Kermadec Islands, New Zealand",,
+"M 7.4 - Kermadec Islands, New Zealand",7.4,04-03-2021 17:41,3,7,green,1,843,us,0,0.437,30,mww,43,-29.6131,-177.842,"Kermadec Islands, New Zealand",,
+"M 7.3 - 182 km NE of Gisborne, New Zealand",7.3,04-03-2021 13:27,7,6,green,1,932,us,0,0.918,24,mww,10,-37.596,179.544,"Gisborne, New Zealand",,
+"M 7.1 - 73 km ENE of Namie, Japan",7.1,13-02-2021 14:07,9,8,orange,1,1612,us,0,3.085,11,mww,43.98,37.6856,141.992,"Namie, Japan",,
+M 7.7 - southeast of the Loyalty Islands,7.7,10-02-2021 13:19,9,4,green,1,918,us,0,7.989,15,mww,10,-23.2787,171.489,the Loyalty Islands,,
+M 6.9 - South Shetland Islands,6.9,23-01-2021 23:36,9,5,green,1,739,us,0,1.55,16,mww,15,-61.8484,-55.559,South Shetland Islands,,Antarctica
+"M 7.0 - 211 km SE of Pondaguitan, Philippines",7,21-01-2021 12:23,7,5,green,1,802,us,0,2.821,15,mww,80,5.0074,127.517,"Pondaguitan, Philippines",,
+"M 6.7 - 29 km SSW of Turt, Mongolia",6.7,11-01-2021 21:32,8,8,green,0,776,us,0,2.043,22,mww,10,51.2407,100.443,"Turt, Mongolia",Asia,Mongolia
+"M 6.7 - 146 km WNW of Corral, Chile",6.7,27-12-2020 21:39,5,5,green,1,776,us,0,1.319,19,mww,10,-39.3264,-74.9067,"Corral, Chile",,
+"M 7.0 - 13 km NNE of Néon Karlovásion, Greece",7,30-10-2020 11:51,8,7,orange,0,1527,us,0,1.518,18,mww,21,37.8973,26.7953,"Néon Karlovásion, Greece",Europe,Greece
+"M 7.6 - 99 km SE of Sand Point, Alaska",7.6,19-10-2020 20:54,9,7,yellow,1,1165,us,0,0.23,36,mww,28.37,54.662,-159.675,"Sand Point, Alaska",North America,United States of America
+M 6.9 - central Mid-Atlantic Ridge,6.9,18-09-2020 21:43,0,3,green,1,732,us,0,11.255,16,mww,10,0.9604,-26.8332,central Mid-Atlantic Ridge,,
+"M 6.5 - 94 km NW of Vallenar, Chile",6.5,01-09-2020 21:09,6,6,green,0,674,us,0,0.388,49,mww,16,-27.9285,-71.3937,"Vallenar, Chile",,
+"M 6.8 - 86 km NW of Vallenar, Chile",6.8,01-09-2020 04:09,6,7,green,1,824,us,0,0.312,69,mww,21,-28.013,-71.1958,"Vallenar, Chile",,Chile
+M 6.5 - central Mid-Atlantic Ridge,6.5,30-08-2020 21:20,4,5,green,0,651,us,0,15.394,31,mww,10,0.8696,-29.7046,central Mid-Atlantic Ridge,,
+"M 6.9 - 222 km SSE of Katabu, Indonesia",6.9,21-08-2020 04:09,4,3,green,0,749,us,0,2.267,20,mww,624,-6.6704,123.493,"Katabu, Indonesia",,Indonesia
+"M 6.9 - 122 km WSW of Bengkulu, Indonesia",6.9,18-08-2020 22:29,4,4,green,0,735,us,0,1.716,25,mww,26,-4.2791,101.215,"Bengkulu, Indonesia",,Indonesia
+"M 6.8 - 138 km WSW of Bengkulu, Indonesia",6.8,18-08-2020 22:23,5,4,green,0,716,us,0,1.816,34,mww,22,-4.3724,101.095,"Bengkulu, Indonesia",,Indonesia
+"M 6.6 - 13 km E of San Pedro, Philippines",6.6,18-08-2020 00:03,9,8,yellow,1,784,us,0,5.128,14,mww,10,12.0065,124.13,"San Pedro, Philippines",,Philippines
+"M 7.8 - 99 km SSE of Perryville, Alaska",7.8,22-07-2020 06:12,9,7,green,1,1111,us,0,0.621,60,mww,28,55.1079,-158.477,"Perryville, Alaska",,
+"M 7.0 - 114 km NNW of Popondetta, Papua New Guinea",7,17-07-2020 02:50,6,7,green,1,820,us,0,1.671,18,mww,73,-7.847,147.755,"Popondetta, Papua New Guinea",,Papua New Guinea
+"M 6.6 - 97 km N of Batang, Indonesia",6.6,06-07-2020 22:54,4,2,green,0,684,us,0,1.458,14,mww,533.76,-5.6368,110.678,"Batang, Indonesia",,Indonesia
+"M 7.4 - 9 km SE of Santa María Xadani, Mexico",7.4,23-06-2020 15:29,8,8,orange,1,1494,us,0,0.151,30,mww,20,15.9163,-95.9533,"Santa María Xadani, Mexico",North America,Mexico
+M 7.4 - south of the Kermadec Islands,7.4,18-06-2020 12:49,7,7,green,1,873,us,0,4.035,23,mww,10,-33.2938,-177.838,the Kermadec Islands,,
+"M 6.6 - 130 km WNW of Naze, Japan",6.6,13-06-2020 15:51,5,4,green,1,734,us,0,2.015,18,mww,165,28.9386,128.262,"Naze, Japan",,
+"M 6.8 - 48 km SW of San Pedro de Atacama, Chile",6.8,03-06-2020 07:35,6,6,green,1,835,us,0,1.164,21,mww,112,-23.2966,-68.4204,"San Pedro de Atacama, Chile",South America,Chile
+"M 6.5 - Monte Cristo Range, NV Earthquake",6.5,15-05-2020 11:03,7,8,green,0,1320,nn,27,0.357,55.79,ml,2.7,38.1689,-117.85,"Monte Cristo Range, NV Earthquake",North America,United States of America
+"M 6.6 - 175 km SSE of Lata, Solomon Islands",6.6,12-05-2020 22:41,4,6,green,1,671,us,0,3.403,12,mww,107,-12.0662,166.648,"Lata, Solomon Islands",,
+M 6.8 - Banda Sea,6.8,06-05-2020 13:53,4,6,green,0,738,us,0,1.921,16,mww,96,-6.7762,129.785,Banda Sea,,Indonesia
+"M 6.5 - 91 km S of Néa Anatolí, Greece",6.5,02-05-2020 12:51,7,6,green,0,678,us,0,1.293,19,mww,10,34.1818,25.7101,"Néa Anatolí, Greece",,
+"M 6.5 - Stanley, Idaho",6.5,31-03-2020 23:52,8,8,green,0,1410,us,0,0.885,31,mww,12.06,44.4646,-115.118,"Stanley, Idaho",North America,United States of America
+"M 7.5 - 221 km SSE of Severo-Kuril’sk, Russia",7.5,25-03-2020 02:49,6,5,green,1,879,us,0,4.109,12,mww,57.8,48.9638,157.695,"Severo-Kuril’sk, Russia",,
+"M 7.0 - 95 km ENE of Kuril’sk, Russia",7,13-02-2020 10:33,5,6,yellow,1,770,us,0,4.501,25,mww,143,45.6161,148.959,"Kuril’sk, Russia",Asia,Russia
+"M 7.7 - 123 km NNW of Lucea, Jamaica",7.7,28-01-2020 19:10,9,6,yellow,1,1812,us,0,1.657,26,mww,14.86,19.4193,-78.756,"Lucea, Jamaica",,
+"M 6.7 - 13 km N of Do?anyol, Turkey",6.7,24-01-2020 17:55,8,9,orange,0,1247,us,0,0.87,49,mww,10,38.4312,39.0609,"Do?anyol, Turkey",Asia,Turkey
+"M 6.8 - 7 km S of Magsaysay, Philippines",6.8,15-12-2019 06:11,9,7,yellow,1,825,us,0,0.546,39,mww,18,6.6969,125.174,"Magsaysay, Philippines",,Philippines
+"M 7.1 - 138km E of Bitung, Indonesia",7.1,14-11-2019 16:17,6,6,green,1,799,us,0,1.271,11,mww,33,1.6213,126.416,"Bitung, Indonesia",,Indonesia
+"M 6.5 - 166km SSW of Ndoi Island, Fiji",6.5,08-11-2019 10:44,0,2,green,0,650,us,0,4.765,25,mww,577,-21.9449,-179.511,"Ndoi Island, Fiji",,
+"M 6.6 - 136 km W of Neiafu, Tonga",6.6,04-11-2019 22:43,4,4,green,1,673,us,0,5.086,48,mww,10,-18.5747,-175.272,"Neiafu, Tonga",,
+"M 6.5 - 2km ESE of Kisante, Philippines",6.5,31-10-2019 01:11,9,7,green,1,733,us,0,0.428,19,mww,10,6.9098,125.178,"Kisante, Philippines",,Philippines
+"M 6.6 - 10 km NE of Columbio, Philippines",6.6,29-10-2019 01:04,9,7,yellow,1,780,us,0,0.646,24,mww,15,6.7567,125.008,"Columbio, Philippines",,Philippines
+"M 6.7 - 70 km WSW of Constitución, Chile",6.7,29-09-2019 15:57,7,6,green,1,844,us,0,1.269,98,mww,11,-35.4758,-73.163,"Constitución, Chile",,
+"M 6.5 - 11km S of Kairatu, Indonesia",6.5,25-09-2019 23:46,7,7,yellow,1,656,us,0,3.909,15,mww,12.26,-3.4528,128.37,"Kairatu, Indonesia",,Indonesia
+"M 6.6 - 34km NNE of Ndoi Island, Fiji",6.6,01-09-2019 15:54,2,3,,1,671,us,0,4.121,19,mww,591,-20.3641,-178.57,"Ndoi Island, Fiji",,Fiji
+"M 6.6 - 131km S of Bristol Island, South Sandwich Islands",6.6,27-08-2019 23:55,0,4,green,1,670,us,0,12.896,19,mww,16,-60.2152,-26.5801,"Bristol Island, South Sandwich Islands",,United Kingdom of Great Britain and Northern Ireland (the)
+"M 6.9 - 152 km SW of Labuan, Indonesia",6.9,02-08-2019 12:03,4,6,green,0,875,us,0,2.839,23,mww,49,-7.2822,104.791,"Labuan, Indonesia",,
+"M 6.8 - 96 km SW of San Antonio, Chile",6.8,01-08-2019 18:28,6,6,green,1,947,us,0,0.817,35,mww,25,-34.2364,-72.3102,"San Antonio, Chile",,
+"M 6.6 - 62km E of Lakatoro, Vanuatu",6.6,31-07-2019 15:02,0,4,green,1,670,us,0,6.024,30,mww,181,-16.1985,167.998,"Lakatoro, Vanuatu",,Vanuatu
+"M 7.2 - 93km NNE of Laiwui, Indonesia",7.2,14-07-2019 09:10,7,7,green,1,809,us,0,1.504,38,mww,18.98,-0.5858,128.034,"Laiwui, Indonesia",,Indonesia
+"M 6.6 - 200km W of Broome, Australia",6.6,14-07-2019 05:39,5,5,green,0,791,us,0,2.978,32,mww,10,-18.2242,120.358,"Broome, Australia",,
+"M 6.9 - 134km WSW of Kota Ternate, Indonesia",6.9,07-07-2019 15:08,7,5,green,0,747,us,0,1.205,21,mww,35,0.5126,126.189,"Kota Ternate, Indonesia",,Indonesia
+"M 7.1 - 18km W of Searles Valley, CA",7.1,06-07-2019 03:19,9,9,yellow,0,1646,ci,77,0.04616,43,mw,8,35.7695,-117.599,"Searles Valley, CA",North America,United States of America
+"M 7.3 - 292km NW of Saumlaki, Indonesia",7.3,24-06-2019 02:53,4,6,green,1,952,us,0,2.629,16,mww,212,-6.4078,129.169,"Saumlaki, Indonesia",,Indonesia
+"M 7.3 - 116km NE of L'Esperance Rock, New Zealand",7.3,15-06-2019 22:55,8,6,green,1,830,us,0,1.402,11,mww,46,-30.6441,-178.1,"L'Esperance Rock, New Zealand",,
+"M 6.6 - 32 km S of La Libertad, El Salvador",6.6,30-05-2019 09:03,7,6,yellow,1,886,us,0,1.193,22,mww,57.92,13.1994,-89.3056,"La Libertad, El Salvador",,
+"M 8.0 - 78 km NE of Navarro, Peru",8,26-05-2019 07:41,9,8,orange,1,1890,us,0,3.18,17,mww,122.57,-5.8119,-75.2697,"Navarro, Peru",South America,Peru
+"M 7.6 - 46km SSE of Namatanai, Papua New Guinea",7.6,14-05-2019 12:58,7,7,green,1,929,us,0,0.453,16,mww,10,-4.051,152.597,"Namatanai, Papua New Guinea",,Papua New Guinea
+"M 7.1 - 33km NW of Bulolo, Papua New Guinea",7.1,06-05-2019 21:19,7,6,yellow,1,826,us,0,2.514,16,mww,146,-6.9746,146.449,"Bulolo, Papua New Guinea",,Papua New Guinea
+"M 6.8 - 98km SSW of Luwuk, Indonesia",6.8,12-04-2019 11:40,5,6,green,1,717,us,0,0.791,28,mww,15.46,-1.8146,122.58,"Luwuk, Indonesia",,Indonesia
+"M 6.5 - 83km ENE of Bristol Island, South Sandwich Islands",6.5,09-04-2019 17:53,0,5,green,1,650,us,0,7.568,18,mww,38,-58.6262,-25.304,"Bristol Island, South Sandwich Islands",,
+"M 7.0 - 22 km NNE of Azángaro, Peru",7,01-03-2019 08:50,7,4,green,1,869,us,0,2.501,42,mww,267,-14.7131,-70.1546,"Azángaro, Peru",South America,Peru
+"M 7.5 - 111km ESE of Palora, Ecuador",7.5,22-02-2019 10:17,7,7,yellow,1,1145,us,0,2.045,15,mww,145,-2.1862,-77.0505,"Palora, Ecuador",South America,Ecuador
+"M 6.7 - 5 km SW of Puerto Madero, Mexico",6.7,01-02-2019 16:14,6,6,yellow,1,909,us,0,0.289,43,mww,66,14.6802,-92.4527,"Puerto Madero, Mexico",,Mexico
+M 6.7 - Prince Edward Islands region,6.7,22-01-2019 19:01,0,3,green,0,691,us,0,7.527,17,mww,13,-43.1219,42.3568,Prince Edward Islands region,,
+"M 6.7 - 10 km SSW of Coquimbo, Chile",6.7,20-01-2019 01:32,8,8,orange,1,1600,us,0,0.173,22,mww,63,-30.0404,-71.3815,"Coquimbo, Chile",South America,Chile
+"M 6.6 - 94 km NW of Sola, Vanuatu",6.6,15-01-2019 18:06,5,4,green,1,671,us,0,7.818,18,mww,35,-13.336,166.875,"Sola, Vanuatu",,Vanuatu
+M 6.6 - Molucca Sea,6.6,06-01-2019 17:27,2,4,green,1,672,us,0,1.596,33,mww,43.21,2.258,126.758,Molucca Sea,,Indonesia
+"M 6.8 - 90km W of Tarauaca, Brazil",6.8,05-01-2019 19:25,3,3,green,0,715,us,0,1.181,16,mww,570.41,-8.144,-71.587,"Tarauaca, Brazil",South America,Brazil
+"M 7.0 - 96 km ESE of Pondaguitan, Philippines",7,29-12-2018 03:39,5,5,green,1,803,us,0,1.769,21,mww,60.21,5.8983,126.921,"Pondaguitan, Philippines",,
+"M 7.3 - 187 km SE of Ust’-Kamchatsk Staryy, Russia",7.3,20-12-2018 17:01,3,7,green,1,822,us,0,4.126,23,mww,16.56,55.0999,164.699,"Ust’-Kamchatsk Staryy, Russia",,
+M 7.1 - South Sandwich Islands region,7.1,11-12-2018 02:26,0,5,green,1,776,us,0,7.043,20,mww,133,-58.5446,-26.3856,South Sandwich Islands region,,South Georgia and the South Sandwich Islands
+"M 6.6 - 199 km ESE of Tadine, New Caledonia",6.6,05-12-2018 06:43,0,4,green,1,670,us,0,2.679,31,mww,10,-22.0629,169.733,"Tadine, New Caledonia",,
+"M 7.5 - 166 km ESE of Tadine, New Caledonia",7.5,05-12-2018 04:18,3,6,green,1,871,us,0,2.405,18,mww,10,-21.9496,169.427,"Tadine, New Caledonia",,
+"M 7.1 - 1 km SE of Point MacKenzie, Alaska",7.1,30-11-2018 17:29,8,8,orange,1,1790,ak,0,0,0,mw,46.7,61.3464,-149.955,"Point MacKenzie, Alaska",North America,United States of America
+"M 6.8 - 187 km E of Levuka, Fiji",6.8,18-11-2018 20:25,0,3,green,1,711,us,0,2.879,39,mww,540,-17.8735,-178.927,"Levuka, Fiji",,Fiji
+"M 6.7 - 120 km NW of Olonkinbyen, Svalbard and Jan Mayen",6.7,09-11-2018 01:49,3,4,green,1,693,us,0,7.853,19,mww,10,71.6312,-11.2431,"Olonkinbyen, Svalbard and Jan Mayen",,
+"M 6.8 - 32 km SW of Lithakiá, Greece",6.8,25-10-2018 22:54,8,7,yellow,0,954,us,0,2.268,15,mww,14,37.5203,20.5565,"Lithakiá, Greece",Europe,
+"M 6.5 - 237 km SW of Port McNeill, Canada",6.5,22-10-2018 06:22,2,4,green,0,655,us,0,1.692,68,mww,10,49.297,-129.724,"Port McNeill, Canada",,
+"M 6.8 - 210 km SW of Port McNeill, Canada",6.8,22-10-2018 06:16,4,4,green,1,776,us,0,1.505,36,mww,10,49.3346,-129.289,"Port McNeill, Canada",,
+"M 6.5 - 223 km SW of Port McNeill, Canada",6.5,22-10-2018 05:39,3,4,green,1,669,us,0,1.611,63,mww,10,49.2586,-129.412,"Port McNeill, Canada",,
+"M 6.5 - 171 km E of Tadine, New Caledonia",6.5,16-10-2018 01:03,0,4,green,1,650,us,0,2.109,22,mww,17,-21.7427,169.522,"Tadine, New Caledonia",,
+"M 6.7 - 269 km WNW of Ozernovskiy, Russia",6.7,13-10-2018 11:10,0,3,green,1,691,us,0,2.705,17,mww,461,52.8549,153.243,"Ozernovskiy, Russia",,
+"M 6.5 - 154 km S of Severo-Kuril’sk, Russia",6.5,10-10-2018 23:16,0,4,green,1,650,us,0,3.923,14,mww,20,49.2902,156.297,"Severo-Kuril’sk, Russia",,
+"M 7.0 - 119 km E of Kimbe, Papua New Guinea",7,10-10-2018 20:48,6,6,green,1,758,us,0,1.778,18,mww,39,-5.7012,151.205,"Kimbe, Papua New Guinea",,Papua New Guinea
+"M 6.7 - 279 km E of Levuka, Fiji",6.7,30-09-2018 10:52,2,3,green,1,691,us,0,3.745,23,mww,550,-18.3604,-178.063,"Levuka, Fiji",,Fiji
+"M 7.5 - 72 km N of Palu, Indonesia",7.5,28-09-2018 10:02,8,8,red,0,2026,us,0,1.649,13,mww,20,-0.2559,119.846,"Palu, Indonesia",,Indonesia
+M 6.5 - south of the Fiji Islands,6.5,16-09-2018 21:11,4,1,green,0,651,us,0,5.139,18,mww,576,-25.415,178.199,the Fiji Islands,,
+M 6.9 - Kermadec Islands region,6.9,10-09-2018 04:19,3,4,green,0,735,us,0,2.785,18,mww,115,-31.7447,-179.373,Kermadec Islands region,,
+"M 6.5 - 66 km NW of Kirakira, Solomon Islands",6.5,09-09-2018 19:31,3,6,green,1,651,us,0,1.638,25,mww,68,-10.0207,161.503,"Kirakira, Solomon Islands",,Solomon Islands
+"M 7.9 - 45 km S of Levuka, Fiji",7.9,06-09-2018 15:49,7,4,green,1,979,us,0,1.431,12,mww,670.81,-18.4743,179.35,"Levuka, Fiji",,Fiji
+"M 6.6 - 27 km ESE of Chitose, Japan",6.6,05-09-2018 18:07,8,9,orange,1,1075,us,0,1.13,32,mww,35,42.6861,141.929,"Chitose, Japan",Asia,Japan
+"M 7.1 - 238 km ESE of Tadine, New Caledonia",7.1,29-08-2018 03:51,2,5,green,1,776,us,0,2.548,23,mww,21.43,-22.0295,170.126,"Tadine, New Caledonia",,
+"M 7.1 - 136 km W of Iñapari, Peru",7.1,24-08-2018 09:04,0,3,green,0,776,us,0,3.77,12,mww,630,-11.0355,-70.8284,"Iñapari, Peru",South America,Peru
+"M 6.5 - 78 km E of Lakatoro, Vanuatu",6.5,21-08-2018 22:32,6,7,green,1,652,us,0,4.797,10,mww,9,-16.0315,168.143,"Lakatoro, Vanuatu",,Vanuatu
+"M 7.3 - 40 km ENE of Carúpano, Venezuela",7.3,21-08-2018 21:31,8,6,yellow,1,1570,us,0,1.822,15,mww,146.82,10.7731,-62.9019,"Carúpano, Venezuela",,Venezuela
+"M 6.9 - 20 km NNW of Labuan Lombok, Indonesia",6.9,19-08-2018 14:56,7,7,green,0,1206,us,0,2.453,31,mww,21,-8.319,116.627,"Labuan Lombok, Indonesia",,Indonesia
+"M 8.2 - 267 km E of Levuka, Fiji",8.2,19-08-2018 00:19,5,4,green,1,1050,us,0,3.63,13,mww,600,-18.1125,-178.153,"Levuka, Fiji",,Fiji
+"M 6.5 - 124 km N of Labuan Bajo, Indonesia",6.5,17-08-2018 15:35,5,3,green,0,743,us,0,2.719,23,mww,529,-7.3718,119.802,"Labuan Bajo, Indonesia",,Indonesia
+"M 6.5 - 108 km WSW of Adak, Alaska",6.5,15-08-2018 21:56,6,6,green,1,655,us,0,0.576,22,mww,33.93,51.4234,-178.026,"Adak, Alaska",North America,United States of America
+"M 6.9 - 36 km NW of Labuan Lombok, Indonesia",6.9,05-08-2018 11:46,9,8,orange,0,1704,us,0,2.271,15,mww,34,-8.2581,116.438,"Labuan Lombok, Indonesia",,Indonesia
+"M 6.9 - 18 km SSW of Leilani Estates, Hawaii",6.9,04-05-2018 22:32,7,8,yellow,1,1392,hv,63,0.11,210,mw,5.81,19.3182,-155,"Leilani Estates, Hawaii",,United States of America
+"M 6.8 - 38 km SE of Boyuibe, Bolivia",6.8,02-04-2018 13:40,5,3,green,0,733,us,0,5.32,16,mww,559,-20.6588,-63.0058,"Boyuibe, Bolivia",South America,Bolivia
+"M 6.9 - 150 km E of Kimbe, Papua New Guinea",6.9,29-03-2018 21:25,9,6,green,1,741,us,0,1.487,18,mww,35,-5.5321,151.5,"Kimbe, Papua New Guinea",,Papua New Guinea
+"M 6.7 - 140 km E of Kimbe, Papua New Guinea",6.7,26-03-2018 09:51,5,6,green,1,696,us,0,1.507,15,mww,40,-5.5024,151.402,"Kimbe, Papua New Guinea",,Papua New Guinea
+"M 6.8 - 103 km E of Kokopo, Papua New Guinea",6.8,08-03-2018 17:39,6,6,green,1,719,us,0,1.049,16,mww,22.86,-4.3762,153.2,"Kokopo, Papua New Guinea",,Papua New Guinea
+"M 6.7 - 62 km SW of Tari, Papua New Guinea",6.7,06-03-2018 14:13,8,7,green,1,697,us,0,5.457,19,mww,20.49,-6.3043,142.612,"Tari, Papua New Guinea",,Papua New Guinea
+"M 7.5 - 32 km SW of Tari, Papua New Guinea",7.5,25-02-2018 17:44,9,8,yellow,1,943,us,0,5.48,17,mww,25.21,-6.0699,142.754,"Tari, Papua New Guinea",,Papua New Guinea
+"M 7.2 - 4 km S of Pinotepa de Don Luis, Mexico",7.2,16-02-2018 23:39,7,7,yellow,1,1384,us,0,0.142,82,mww,22,16.3855,-97.9787,"Pinotepa de Don Luis, Mexico",North America,Mexico
+"M 7.9 - 261 km SE of Chiniak, Alaska",7.9,23-01-2018 09:31,9,4,green,1,1870,us,0,2.585,30,mww,14.06,56.0039,-149.166,"Chiniak, Alaska",,
+"M 7.1 - 37 km W of Atiquipa, Peru",7.1,14-01-2018 09:18,9,7,green,1,1075,us,0,4.29,23,mww,39,-15.7675,-74.7092,"Atiquipa, Peru",,Peru
+"M 7.5 - 203 km NNE of Barra Patuca, Honduras",7.5,10-01-2018 02:51,8,5,green,1,1623,us,0,4.581,12,mww,19,17.4825,-83.52,"Barra Patuca, Honduras",,
+"M 6.5 - 12 km SSW of Kawalu, Indonesia",6.5,15-12-2017 16:47,8,7,green,0,998,us,0,2.365,28,mww,90,-7.4921,108.174,"Kawalu, Indonesia",,Indonesia
+M 6.5 - Bouvet Island region,6.5,13-12-2017 18:03,1,5,green,1,651,us,0,17.654,23,mww,17,-54.2189,2.1628,Bouvet Island region,,
+"M 7.0 - 85 km ENE of Tadine, New Caledonia",7,19-11-2017 22:43,4,6,green,1,771,us,0,0.617,14,mww,10,-21.3246,168.671,"Tadine, New Caledonia",,
+"M 6.6 - 74 km E of Tadine, New Caledonia",6.6,19-11-2017 15:09,4,5,green,1,676,us,0,0.529,21,mww,13,-21.5027,168.598,"Tadine, New Caledonia",,
+"M 6.5 - 18 km W of Parrita, Costa Rica",6.5,13-11-2017 02:28,8,8,yellow,1,1153,us,0,0.225,37,mww,19.36,9.5147,-84.4865,"Parrita, Costa Rica",,Costa Rica
+"M 7.3 - 29 km S of ?alabja, Iraq",7.3,12-11-2017 18:18,8,9,red,0,2790,us,0,0.284,33,mww,19,34.9109,45.9592,"?alabja, Iraq",Asia,Iran
+"M 6.5 - 67 km WSW of Angoram, Papua New Guinea",6.5,07-11-2017 21:26,6,5,green,1,661,us,0,4.449,10,mww,110.57,-4.2433,143.485,"Angoram, Papua New Guinea",,Papua New Guinea
+"M 6.8 - 97 km NE of Hihifo, Tonga",6.8,04-11-2017 09:00,5,5,green,1,727,us,0,4.852,21,mww,10,-15.3197,-173.168,"Hihifo, Tonga",,
+"M 6.6 - 101 km E of Tadine, New Caledonia",6.6,01-11-2017 02:23,3,5,green,1,674,us,0,0.788,29,mww,22,-21.6484,168.859,"Tadine, New Caledonia",,
+"M 6.7 - 132 km E of Tadine, New Caledonia",6.7,31-10-2017 00:42,3,4,green,1,691,us,0,1.062,55,mww,24,-21.6971,169.148,"Tadine, New Caledonia",,
+"M 6.7 - 181 km NNE of Maumere, Indonesia",6.7,24-10-2017 10:47,3,3,green,0,694,us,0,1.634,16,mww,553.81,-7.2168,123.074,"Maumere, Indonesia",,Indonesia
+"M 6.5 - 247 km ESE of Attu Station, Alaska",6.5,08-10-2017 22:34,3,5,green,1,651,us,0,1.154,11,mww,119,52.3909,176.769,"Attu Station, Alaska",North America,
+"M 7.1 - 1 km S of Matzaco, Mexico",7.1,19-09-2017 18:14,9,8,,0,1686,us,0,0.984,23,mww,48,18.5499,-98.4887,"Matzaco, Mexico",North America,Mexico
+"M 8.2 - near the coast of Chiapas, Mexico",8.2,08-09-2017 04:49,9,7,red,1,2910,us,0,0.944,22,mww,47.39,15.0222,-93.8993,"Chiapas, Mexico",,
+"M 6.5 - 168 km SW of Mawu, China",6.5,08-08-2017 13:19,5,7,yellow,0,707,us,0,11.411,22,mww,9,33.1926,103.855,"Mawu, China",Asia,People's Republic of China
+"M 6.6 - 11 km ENE of Kos, Greece",6.6,20-07-2017 22:31,7,7,yellow,0,1064,us,0,0.913,16,mww,7,36.9293,27.4139,"Kos, Greece",Asia,Turkey
+"M 7.7 - Komandorskiye Ostrova, Russia region",7.7,17-07-2017 23:34,8,7,green,1,918,us,0,3.564,13,mww,10,54.4434,168.857,"Komandorskiye Ostrova, Russia region",,
+"M 6.6 - Auckland Islands, New Zealand region",6.6,11-07-2017 07:00,5,4,green,1,704,us,0,3.773,37,mww,10,-49.4837,164.016,"Auckland Islands, New Zealand region",,
+"M 6.5 - 2 km S of Lim-oo, Philippines",6.5,06-07-2017 08:03,9,8,yellow,1,740,us,0,4.139,30,mww,9,11.1269,124.629,"Lim-oo, Philippines",,Philippines
+"M 6.8 - 28 km SW of Puerto San José, Guatemala",6.8,22-06-2017 12:31,6,6,yellow,1,1034,us,0,1.065,38,mww,38.12,13.7174,-90.9718,"Puerto San José, Guatemala",,
+"M 6.9 - 2 km SSW of San Pablo, Guatemala",6.9,14-06-2017 07:29,8,6,yellow,1,1188,us,0,0.247,35,mww,93,14.9091,-92.0092,"San Pablo, Guatemala",,Guatemala
+"M 6.8 - 200 km NW of Attu Station, Alaska",6.8,02-06-2017 22:24,0,4,green,1,711,us,0,2.308,12,mww,5,54.0312,170.92,"Attu Station, Alaska",,
+"M 6.6 - 37 km WNW of Poso, Indonesia",6.6,29-05-2017 14:35,7,7,green,0,678,us,0,2.353,18,mww,12,-1.2923,120.431,"Poso, Indonesia",,Indonesia
+M 6.5 - South Sandwich Islands region,6.5,10-05-2017 23:23,0,4,green,1,650,us,0,6.489,17,mww,15,-56.414,-25.7432,South Sandwich Islands region,,
+"M 6.8 - 59 km NNE of Port-Olry, Vanuatu",6.8,09-05-2017 13:52,6,5,green,1,713,us,0,7.495,19,mww,169,-14.5884,167.377,"Port-Olry, Vanuatu",,Vanuatu
+"M 6.9 - 31 km SW of Burias, Philippines",6.9,28-04-2017 20:23,9,6,green,1,814,us,0,1.636,14,mww,26,5.5043,125.066,"Burias, Philippines",,Philippines
+"M 6.9 - 40 km W of Valparaíso, Chile",6.9,24-04-2017 21:38,9,7,yellow,1,1642,us,0,0.356,39,mww,28,-33.0375,-72.0617,"Valparaíso, Chile",,
+"M 6.5 - 132 km WSW of Moijabana, Botswana",6.5,03-04-2017 17:40,7,8,green,0,1297,us,0,2.36,15,mww,29,-22.6784,25.1558,"Moijabana, Botswana",Africa,Botswana
+"M 6.6 - 81 km NNE of Ust’-Kamchatsk Staryy, Russia",6.6,29-03-2017 04:09,6,7,yellow,1,671,us,0,4.591,14,mww,17,56.9401,162.786,"Ust’-Kamchatsk Staryy, Russia",Asia,Russia
+M 6.9 - south of the Fiji Islands,6.9,24-02-2017 17:28,2,3,green,1,733,us,0,6.012,19,mww,414.5,-23.2593,-178.804,the Fiji Islands,,
+"M 6.5 - 41 km E of Padilla, Bolivia",6.5,21-02-2017 14:09,3,3,green,0,653,us,0,4.242,14,mww,595.98,-19.2814,-63.9047,"Padilla, Bolivia",South America,Bolivia
+"M 6.5 - 11 km N of Mabua, Philippines",6.5,10-02-2017 14:03,8,7,yellow,1,718,us,0,2.822,36,mww,15,9.9071,125.452,"Mabua, Philippines",,Philippines
+"M 7.9 - 35 km WNW of Panguna, Papua New Guinea",7.9,22-01-2017 04:30,9,7,yellow,1,987,us,0,3.625,9,mww,135,-6.2464,155.172,"Panguna, Papua New Guinea",,Papua New Guinea
+"M 6.5 - 65 km W of Kirakira, Solomon Islands",6.5,19-01-2017 23:04,6,6,green,1,654,us,0,1.64,21,mww,36,-10.3506,161.335,"Kirakira, Solomon Islands",,Solomon Islands
+"M 7.3 - 189 km SSE of Tabiauan, Philippines",7.3,10-01-2017 06:13,6,3,green,1,849,us,0,3.813,18,mww,627.17,4.4782,122.617,"Tabiauan, Philippines",,
+"M 6.9 - 225 km SW of Nadi, Fiji",6.9,03-01-2017 21:52,6,4,green,1,742,us,0,2.495,13,mww,12,-19.3733,176.052,"Nadi, Fiji",,
+"M 7.6 - 41 km SW of Quellón, Chile",7.6,25-12-2016 14:22,9,8,yellow,1,1152,us,0,0.355,29,mww,38,-43.4064,-73.9413,"Quellón, Chile",South America,Chile
+"M 6.7 - 151 km NE of Lospalos, Timor Leste",6.7,21-12-2016 00:17,5,5,green,0,726,us,0,3.38,17,mww,152,-7.5082,127.921,"Lospalos, Timor Leste",,Indonesia
+"M 7.9 - 140 km E of Kokopo, Papua New Guinea",7.9,17-12-2016 10:51,9,7,yellow,1,972,us,0,1.389,13,mww,94.54,-4.5049,153.522,"Kokopo, Papua New Guinea",,Papua New Guinea
+"M 6.9 - 92 km WSW of Kirakira, Solomon Islands",6.9,09-12-2016 19:10,8,6,green,1,737,us,0,1.747,26,mww,19.73,-10.749,161.132,"Kirakira, Solomon Islands",,
+"M 6.5 - 79 km WSW of Kirakira, Solomon Islands",6.5,08-12-2016 21:56,0,5,green,0,650,us,0,1.937,18,mww,12.26,-10.8416,161.314,"Kirakira, Solomon Islands",,
+"M 7.8 - 69 km WSW of Kirakira, Solomon Islands",7.8,08-12-2016 17:38,9,8,green,1,961,us,0,1.836,13,mww,40,-10.6812,161.327,"Kirakira, Solomon Islands",,Solomon Islands
+"M 6.6 - 164 km W of Ferndale, California",6.6,08-12-2016 14:49,5,4,green,1,1120,us,0,1.405,55,mww,8.45,40.4535,-126.194,"Ferndale, California",,
+"M 6.5 - 14 km WNW of Reuleuet, Indonesia",6.5,06-12-2016 22:03,9,8,yellow,0,731,us,0,0.778,27,mww,13,5.2834,96.1678,"Reuleuet, Indonesia",,Indonesia
+"M 6.6 - 122 km N of Murghob, Tajikistan",6.6,25-11-2016 14:24,8,7,green,0,693,us,0,1.697,20,mww,17,39.2732,73.9776,"Murghob, Tajikistan",Asia,People's Republic of China
+"M 6.9 - 156 km SSW of Puerto El Triunfo, El Salvador",6.9,24-11-2016 18:43,5,4,green,1,855,us,0,1.796,20,mww,10,11.9097,-88.8968,"Puerto El Triunfo, El Salvador",,
+"M 6.9 - 35 km ESE of Namie, Japan",6.9,21-11-2016 20:59,9,6,green,1,1144,us,0,0.671,10,mww,9,37.3931,141.387,"Namie, Japan",Asia,
+"M 6.5 - 74 km NE of Amberley, New Zealand",6.5,14-11-2016 00:34,7,7,yellow,1,664,us,0,0.283,56,mww,9,-42.6058,173.254,"Amberley, New Zealand",,New Zealand
+"M 6.5 - 92 km SSW of Blenheim, New Zealand",6.5,13-11-2016 11:32,6,7,yellow,1,656,us,0,0.135,58,mww,10,-42.3205,173.669,"Blenheim, New Zealand",,New Zealand
+"M 7.8 - 53 km NNE of Amberley, New Zealand",7.8,13-11-2016 11:02,9,9,orange,1,1545,us,0,0.481,21,mww,15.11,-42.7373,173.054,"Amberley, New Zealand",,New Zealand
+"M 6.6 - 5 km ESE of Preci, Italy",6.6,30-10-2016 06:40,9,8,red,0,2840,us,0,0.174,25,mww,8,42.8621,13.0961,"Preci, Italy",Europe,Italy
+"M 6.6 - 161 km NNE of Pamanukan, Indonesia",6.6,19-10-2016 00:26,3,3,green,0,677,us,0,2.022,16,mww,614,-4.8626,108.163,"Pamanukan, Indonesia",,Indonesia
+"M 6.8 - 76 km WNW of Kandrian, Papua New Guinea",6.8,17-10-2016 06:14,3,6,green,1,716,us,0,3.727,11,mww,42,-6.0033,148.887,"Kandrian, Papua New Guinea",,Papua New Guinea
+M 6.9 - Fiji region,6.9,24-09-2016 21:28,2,3,green,1,733,us,0,4.051,9,mww,596.4,-19.7819,-178.244,Fiji region,,Fiji
+"M 7.0 - 175 km NE of Gisborne, New Zealand",7,01-09-2016 16:37,5,6,green,1,897,us,0,0.698,21,mww,19,-37.3586,179.146,"Gisborne, New Zealand",,
+"M 6.8 - 90 km NE of Rabaul, Papua New Guinea",6.8,31-08-2016 03:11,4,3,green,1,713,us,0,0.803,12,mww,476,-3.6849,152.792,"Rabaul, Papua New Guinea",,Papua New Guinea
+"M 6.8 - 26 km W of Chauk, Myanmar",6.8,24-08-2016 10:34,6,6,yellow,0,981,us,0,1.802,17,mww,82,20.9228,94.569,"Chauk, Myanmar",Asia,Myanmar
+M 7.2 - southeast of the Loyalty Islands,7.2,12-08-2016 01:26,6,5,green,1,799,us,0,4.823,14,mww,16.37,-22.4765,173.117,the Loyalty Islands,,
+"M 7.7 - Pagan region, Northern Mariana Islands",7.7,29-07-2016 21:18,5,6,green,1,971,us,0,3.294,14,mww,196,18.5429,145.507,"Pagan region, Northern Mariana Islands",,
+"M 6.6 - 80 km W of Sungai Penuh, Indonesia",6.6,01-06-2016 22:56,4,6,green,0,671,us,0,2.435,16,mww,50,-2.0967,100.665,"Sungai Penuh, Indonesia",,Indonesia
+M 7.2 - South Sandwich Islands region,7.2,28-05-2016 09:46,1,6,green,1,798,us,0,5.803,24,mww,78,-56.2409,-26.9353,South Sandwich Islands region,,
+M 6.9 - ,6.9,28-05-2016 05:38,3,3,green,1,733,us,0,5.485,19,mww,405.69,-21.9724,-178.204,,,
+"M 6.9 - 24 km NW of Rosa Zarate, Ecuador",6.9,18-05-2016 16:46,8,7,green,1,780,us,0,1.192,17,mww,29.95,0.4947,-79.616,"Rosa Zarate, Ecuador",South America,Ecuador
+"M 6.7 - 32 km SE of Muisne, Ecuador",6.7,18-05-2016 07:57,5,7,green,1,744,us,0,1.352,21,mww,16,0.4261,-79.7899,"Muisne, Ecuador",South America,Ecuador
+"M 7.0 - 3 km NW of Norsup, Vanuatu",7,28-04-2016 19:33,7,7,green,1,755,us,0,0.616,14,mww,24,-16.0429,167.379,"Norsup, Vanuatu",,Vanuatu
+"M 7.8 - 27 km SSE of Muisne, Ecuador",7.8,16-04-2016 23:58,9,9,orange,1,1163,us,0,1.44,15,mww,20.59,0.3819,-79.9218,"Muisne, Ecuador",South America,Ecuador
+"M 7.0 - 6 km ESE of Kumamoto, Japan",7,15-04-2016 16:25,9,9,red,1,2074,us,0,0.349,32,mww,10,32.7906,130.754,"Kumamoto, Japan",Asia,Japan
+"M 6.9 - 76 km SE of Mawlaik, Myanmar",6.9,13-04-2016 13:55,6,6,yellow,0,903,us,0,3.001,14,mww,136,23.0944,94.8654,"Mawlaik, Myanmar",Asia,Myanmar
+"M 6.6 - 42 km WSW of Ashk?sham, Afghanistan",6.6,10-04-2016 10:28,6,4,green,0,738,us,0,0.789,17,mww,212,36.4725,71.1311,"Ashk?sham, Afghanistan",Asia,Afghanistan
+"M 6.7 - 104 km W of Sola, Vanuatu",6.7,07-04-2016 03:32,7,5,green,1,692,us,0,6.787,25,mww,27.59,-13.9805,166.594,"Sola, Vanuatu",,Vanuatu
+"M 6.7 - 102 km WSW of Sola, Vanuatu",6.7,06-04-2016 06:58,7,6,green,1,691,us,0,6.697,19,mww,24,-14.0683,166.624,"Sola, Vanuatu",,Vanuatu
+"M 6.9 - 82 km NNW of Port-Olry, Vanuatu",6.9,03-04-2016 08:23,7,6,green,1,734,us,0,1.166,25,mww,26,-14.3235,166.855,"Port-Olry, Vanuatu",,Vanuatu
+"M 7.8 - southwest of Sumatra, Indonesia",7.8,02-03-2016 12:49,4,3,green,0,948,us,0,7.009,20,mww,24,-4.9521,94.3299,"Sumatra, Indonesia",,
+"M 7.2 - 80 km S of Mil’kovo, Russia",7.2,30-01-2016 03:25,3,7,green,1,799,us,0,0.958,17,mww,177,53.9776,158.546,"Mil’kovo, Russia",Asia,Russia
+"M 7.1 - 47 km ESE of Pedro Bay, Alaska",7.1,24-01-2016 10:30,7,7,green,1,1496,ak,0,0,0,mw,125.6,59.6204,-153.339,"Pedro Bay, Alaska",North America,United States of America
+"M 6.6 - 203 km SW of La Cruz de Loreto, Mexico",6.6,21-01-2016 18:06,3,4,green,1,673,us,0,2.413,74,mww,10,18.8239,-106.934,"La Cruz de Loreto, Mexico",,
+"M 6.7 - 52 km SE of Shizunai-furukawach?, Japan",6.7,14-01-2016 03:25,5,6,green,1,717,us,0,0.281,22,mww,46,41.9723,142.781,"Shizunai-furukawach?, Japan",Asia,Japan
+"M 6.5 - 227 km SE of Sarangani, Philippines",6.5,11-01-2016 16:38,3,6,green,1,651,us,0,3.144,22,mww,13,3.8965,126.862,"Sarangani, Philippines",,Indonesia
+"M 6.7 - 29 km W of Imph?l, India",6.7,03-01-2016 23:05,8,7,orange,0,1515,us,0,1.794,16,mww,55,24.8036,93.6505,"Imph?l, India",Asia,India
+"M 6.6 - 4 km W of Manuel Ávila Camacho (Ponte Duro), Mexico",6.6,17-12-2015 19:49,8,6,green,1,765,us,0,0.41,35,mww,85,15.8015,-93.633,"Manuel Ávila Camacho (Ponte Duro), Mexico",,Mexico
+"M 6.9 - 107 km SE of Amahai, Indonesia",6.9,09-12-2015 10:21,8,5,green,0,738,us,0,2.979,14,mww,21,-4.1064,129.508,"Amahai, Indonesia",,Indonesia
+"M 7.2 - 104 km W of Murghob, Tajikistan",7.2,07-12-2015 07:50,4,7,green,0,827,us,0,1.116,18,mww,22,38.2107,72.7797,"Murghob, Tajikistan",Asia,Tajikistan
+"M 6.7 - 125 km SSW of Tarauacá, Brazil",6.7,26-11-2015 05:45,2,3,green,0,691,us,0,2.033,19,mww,602.75,-9.1825,-71.2574,"Tarauacá, Brazil",South America,Brazil
+"M 7.6 - 185 km WNW of Iñapari, Peru",7.6,24-11-2015 22:50,5,4,green,0,896,us,0,2.852,10,mww,620.56,-10.0598,-71.0184,"Iñapari, Peru",South America,Peru
+"M 7.6 - 155 km WNW of Iñapari, Peru",7.6,24-11-2015 22:45,6,5,green,1,957,us,0,3.287,10,mww,606.21,-10.5372,-70.9437,"Iñapari, Peru",South America,Peru
+"M 6.8 - 153 km WSW of Buala, Solomon Islands",6.8,18-11-2015 18:31,5,6,green,1,715,us,0,1.599,19,mww,12.59,-8.8994,158.422,"Buala, Solomon Islands",,Solomon Islands
+"M 6.5 - 19 km SSW of Lefkáda, Greece",6.5,17-11-2015 07:10,7,7,orange,0,1018,us,0,0,0,mww,11,38.67,20.6,"Lefkáda, Greece",Europe,Greece
+"M 6.7 - 140 km WSW of Makurazaki, Japan",6.7,13-11-2015 20:51,5,4,green,0,702,us,0,1.444,17,mww,12,31.0009,128.873,"Makurazaki, Japan",,
+"M 6.9 - 85 km NW of Coquimbo, Chile",6.9,11-11-2015 02:46,5,6,green,0,744,us,0,0.821,43,mww,10,-29.5097,-72.0585,"Coquimbo, Chile",,
+"M 6.9 - 81 km NW of Coquimbo, Chile",6.9,11-11-2015 01:54,6,6,green,1,761,us,0,0.784,32,mww,12,-29.5067,-72.0068,"Coquimbo, Chile",,
+"M 6.6 - Nicobar Islands, India region",6.6,08-11-2015 16:47,7,4,green,0,675,us,0,2.792,31,mww,10,6.8431,94.648,"Nicobar Islands, India region",,
+"M 6.8 - 39 km SW of Ovalle, Chile",6.8,07-11-2015 07:31,7,7,green,1,841,us,0,0.258,41,mww,46,-30.8796,-71.4519,"Ovalle, Chile",South America,Chile
+"M 6.5 - 47 km NW of Maubara, Timor Leste",6.5,04-11-2015 03:44,5,7,green,0,657,us,0,1.53,21,mww,20,-8.3381,124.875,"Maubara, Timor Leste",,Indonesia
+"M 7.5 - Hindu Kush region, Afghanistan",7.5,26-10-2015 09:09,8,7,orange,0,1448,us,0,0.622,18,mww,231,36.5244,70.3676,"Hindu Kush region, Afghanistan",Asia,Afghanistan
+"M 7.1 - 31 km NE of Port-Olry, Vanuatu",7.1,20-10-2015 21:52,6,6,green,1,780,us,0,0.592,11,mww,135,-14.8595,167.303,"Port-Olry, Vanuatu",,Vanuatu
+"M 6.6 - 28 km N of Sorong, Indonesia",6.6,24-09-2015 15:53,7,7,green,0,671,us,0,2.486,13,mww,18,-0.6212,131.262,"Sorong, Indonesia",,Indonesia
+"M 6.6 - 22 km WSW of Illapel, Chile",6.6,21-09-2015 17:40,5,7,green,1,820,us,0,1.064,14,mww,35,-31.7275,-71.3792,"Illapel, Chile",South America,Chile
+"M 6.7 - 61 km WNW of Illapel, Chile",6.7,17-09-2015 04:10,5,7,green,0,718,us,0,0.853,35,mww,23,-31.5173,-71.804,"Illapel, Chile",,Chile
+"M 6.5 - 54 km WNW of Illapel, Chile",6.5,17-09-2015 03:55,6,7,green,0,657,us,0,0.749,62,mww,27,-31.4244,-71.6876,"Illapel, Chile",,Chile
+"M 7.0 - 25 km WNW of Illapel, Chile",7,16-09-2015 23:18,8,7,green,0,799,us,0,0.903,13,mww,28.41,-31.5622,-71.4262,"Illapel, Chile",South America,Chile
+"M 8.3 - 48 km W of Illapel, Chile",8.3,16-09-2015 22:54,9,8,orange,1,1960,us,0,0.684,19,mww,22.44,-31.5729,-71.6744,"Illapel, Chile",,Chile
+"M 6.7 - 95 km SW of Topolobampo, Mexico",6.7,13-09-2015 08:14,5,5,green,1,708,us,0,1.256,123,mww,10,24.913,-109.623,"Topolobampo, Mexico",,
+"M 6.5 - 177 km SE of Gizo, Solomon Islands",6.5,12-08-2015 18:49,0,5,green,1,650,us,0,2.045,16,mww,6.43,-9.3293,157.877,"Gizo, Solomon Islands",,
+"M 6.6 - 186 km WNW of Malango, Solomon Islands",6.6,10-08-2015 04:12,3,5,green,1,671,us,0,1.872,20,mww,22,-9.3438,158.053,"Malango, Solomon Islands",,
+"M 7.0 - 234 km W of Abepura, Indonesia",7,27-07-2015 21:41,9,7,green,1,762,us,0,6.278,12,mww,48,-2.6286,138.528,"Abepura, Indonesia",,Indonesia
+"M 6.9 - Fox Islands, Aleutian Islands, Alaska",6.9,27-07-2015 04:49,4,7,green,1,734,us,0,0.444,39,mww,29,52.376,-169.446,"Fox Islands, Aleutian Islands, Alaska",,
+"M 7.0 - 80 km WNW of Lata, Solomon Islands",7,18-07-2015 02:27,8,6,green,1,759,us,0,5.205,22,mww,11,-10.4012,165.141,"Lata, Solomon Islands",,
+"M 6.5 - 128 km NE of Bathsheba, Barbados",6.5,16-07-2015 15:16,4,4,green,1,686,us,0,1.218,20,mww,20,13.8672,-58.5479,"Bathsheba, Barbados",,
+"M 6.7 - 150 km WNW of Malango, Solomon Islands",6.7,10-07-2015 04:12,4,5,green,1,691,us,0,1.529,11,mww,12,-9.307,158.403,"Malango, Solomon Islands",,Solomon Islands
+"M 6.5 - Bonin Islands, Japan region",6.5,23-06-2015 12:18,3,4,green,0,652,us,0,2.277,11,mww,460,27.7375,139.725,"Bonin Islands, Japan region",,
+"M 7.8 - Bonin Islands, Japan region",7.8,30-05-2015 11:23,6,3,green,1,1151,us,0,1.675,12,mww,664,27.8386,140.493,"Bonin Islands, Japan region",,
+"M 6.8 - 117 km SSE of Ugashik, Alaska",6.8,29-05-2015 07:00,5,6,green,1,762,ak,0,0,0,mw,72.6,56.594,-156.43,"Ugashik, Alaska",,
+"M 6.8 - 159 km ESE of Kirakira, Solomon Islands",6.8,22-05-2015 23:59,1,5,green,1,711,us,0,3.619,18,mww,10,-11.1093,163.215,"Kirakira, Solomon Islands",,
+"M 6.9 - 205 km ESE of Kirakira, Solomon Islands",6.9,22-05-2015 21:45,1,4,green,1,732,us,0,4.024,22,mww,11.19,-11.0559,163.696,"Kirakira, Solomon Islands",,
+"M 6.8 - 178 km W of Lata, Solomon Islands",6.8,20-05-2015 22:48,1,4,green,1,711,us,0,4.395,15,mww,11,-10.8759,164.169,"Lata, Solomon Islands",,
+"M 6.8 - 32 km SE of ?funato, Japan",6.8,12-05-2015 21:12,8,6,green,1,831,us,0,1.422,8,mww,35,38.9056,142.032,"?funato, Japan",Asia,Japan
+M 7.3 - Nepal,7.3,12-05-2015 07:05,8,7,orange,0,1563,us,0,0.677,11,mww,15,27.8087,86.0655,Nepal,Asia,Nepal
+"M 7.1 - 143 km SW of Panguna, Papua New Guinea",7.1,07-05-2015 07:10,1,6,green,1,776,us,0,3.835,11,mww,10,-7.2175,154.557,"Panguna, Papua New Guinea",,
+"M 7.5 - 131 km SSW of Kokopo, Papua New Guinea",7.5,05-05-2015 01:44,7,8,green,1,869,us,0,1.295,22,mww,55,-5.4624,151.875,"Kokopo, Papua New Guinea",,Papua New Guinea
+"M 6.8 - 109 km SSW of Kokopo, Papua New Guinea",6.8,01-05-2015 08:06,5,6,green,1,714,us,0,1.074,23,mww,44,-5.2005,151.777,"Kokopo, Papua New Guinea",,Papua New Guinea
+"M 6.7 - 126 km SSW of Kokopo, Papua New Guinea",6.7,30-04-2015 10:45,5,6,green,1,692,us,0,1.239,12,mww,31,-5.375,151.771,"Kokopo, Papua New Guinea",,Papua New Guinea
+"M 6.7 - 21 km SSE of Kod?ri??, Nepal",6.7,26-04-2015 07:09,7,7,yellow,0,1016,us,0,0.727,13,mww,22.91,27.7711,86.0173,"Kod?ri??, Nepal",Asia,Nepal
+"M 6.6 - 71 km NNE of Bharatpur, Nepal",6.6,25-04-2015 06:45,8,7,yellow,0,733,us,0,1.778,16,mww,10,28.2244,84.8216,"Bharatpur, Nepal",Asia,Nepal
+"M 7.8 - 67 km NNE of Bharatpur, Nepal",7.8,25-04-2015 06:11,8,9,red,0,2820,us,0,1.857,12,mww,8.22,28.2305,84.7314,"Bharatpur, Nepal",Asia,Nepal
+"M 6.5 - 181 km SSW of Alo, Wallis and Futuna",6.5,17-04-2015 15:52,0,5,green,1,650,us,0,3.702,42,mww,10,-15.8815,-178.6,"Alo, Wallis and Futuna",,
+"M 6.5 - 96 km ENE of Hihifo, Tonga",6.5,30-03-2015 08:48,2,5,green,1,650,us,0,4.629,36,mww,11,-15.4994,-173.029,"Hihifo, Tonga",,
+"M 7.5 - 53 km SE of Kokopo, Papua New Guinea",7.5,29-03-2015 23:48,6,7,green,1,872,us,0,0.666,19,mww,41,-4.7294,152.562,"Kokopo, Papua New Guinea",,Papua New Guinea
+"M 7.0 - 150 km NNE of Maumere, Indonesia",7,27-02-2015 13:45,4,6,green,0,760,us,0,1.362,12,mww,552.06,-7.2968,122.535,"Maumere, Indonesia",,Indonesia
+"M 6.7 - 83 km ENE of Miyako, Japan",6.7,16-02-2015 23:06,5,5,green,1,714,us,0,1.925,20,mww,23,39.8558,142.881,"Miyako, Japan",,
+"M 6.7 - 103 km W of El Aguilar, Argentina",6.7,11-02-2015 18:57,4,6,green,1,700,us,0,2.11,16,mww,223,-23.1125,-66.688,"El Aguilar, Argentina",South America,Argentina
+"M 6.8 - 81 km NNE of Port-Vila, Vanuatu",6.8,23-01-2015 03:47,1,4,green,1,711,us,0,2.019,13,mww,219.96,-17.0309,168.52,"Port-Vila, Vanuatu",,Vanuatu
+"M 6.5 - 236 km S of Punta de Burica, Panama",6.5,07-01-2015 05:07,1,4,green,1,650,us,0,4.318,61,mww,8,5.9045,-82.6576,"Punta de Burica, Panama",,
+"M 6.6 - 22 km ESE of Punta de Burica, Panama",6.6,08-12-2014 08:54,7,6,green,1,709,us,0,2.485,43,mww,20,7.9401,-82.6865,"Punta de Burica, Panama",,Panama
+"M 6.6 - 115 km W of Panguna, Papua New Guinea",6.6,07-12-2014 01:22,1,5,green,1,670,us,0,3.246,12,mww,23,-6.5108,154.46,"Panguna, Papua New Guinea",,
+"M 6.6 - 106 km WSW of Sangay, Philippines",6.6,02-12-2014 05:11,1,3,green,0,670,us,0,2.6,9,mww,614,6.1572,123.126,"Sangay, Philippines",,Philippines
+"M 6.8 - 157 km NW of Ternate, Indonesia",6.8,26-11-2014 14:33,6,5,green,1,713,us,0,1.421,19,mww,39,1.9604,126.575,"Ternate, Indonesia",,Indonesia
+"M 6.5 - 123 km WNW of Tobelo, Indonesia",6.5,21-11-2014 10:10,5,5,green,1,652,us,0,1.549,9,mww,35,2.2999,127.056,"Tobelo, Indonesia",,Indonesia
+"M 6.7 - 183 km NE of Gisborne, New Zealand",6.7,16-11-2014 22:33,7,4,green,1,698,us,0,1.079,25,mww,22,-37.6478,179.662,"Gisborne, New Zealand",,
+"M 7.1 - 155 km NW of Ternate, Indonesia",7.1,15-11-2014 02:31,4,6,green,1,779,us,0,1.397,18,mww,45,1.8929,126.522,"Ternate, Indonesia",,Indonesia
+"M 6.6 - 76 km NE of Finschhafen, Papua New Guinea",6.6,07-11-2014 03:33,2,6,green,1,671,us,0,3.557,13,mww,53.19,-5.9873,148.232,"Finschhafen, Papua New Guinea",,Papua New Guinea
+M 7.1 - Fiji region,7.1,01-11-2014 18:57,3,6,green,1,776,us,0,4.415,13,mww,434,-19.6903,-177.759,Fiji region,,
+"M 7.3 - 74 km S of Intipucá, El Salvador",7.3,14-10-2014 03:51,8,6,yellow,1,982,us,0,1.078,18,mww,40,12.5262,-88.1225,"Intipucá, El Salvador",,
+"M 6.7 - 43 km NW of Piti Village, Guam",6.7,17-09-2014 06:14,5,5,green,1,724,us,0,0.46,11,mww,130,13.7641,144.429,"Piti Village, Guam",,
+"M 6.8 - 38 km NW of Aniso, Peru",6.8,24-08-2014 23:21,6,6,green,1,741,us,0,4.107,18,mww,101,-14.598,-73.5714,"Aniso, Peru",South America,Peru
+M 6.9 - Federated States of Micronesia region,6.9,03-08-2014 00:22,0,4,green,1,732,us,0,6.393,12,mww,13,0.8295,146.169,Micronesia region,,
+M 6.9 - Fiji region,6.9,21-07-2014 14:54,0,6,green,1,732,us,0,3.934,15,mww,615.42,-19.8015,-178.4,Fiji region,,Fiji
+"M 6.5 - 139 km ESE of Namie, Japan",6.5,11-07-2014 19:22,5,4,green,1,706,us,0,2.421,9,mww,20,37.0052,142.452,"Namie, Japan",,
+"M 6.9 - 4 km W of Puerto Madero, Mexico",6.9,07-07-2014 11:23,8,7,orange,1,1079,us,0,0.263,51,mww,53,14.724,-92.4614,"Puerto Madero, Mexico",,Mexico
+"M 6.5 - 217 km SSE of Kokopo, Papua New Guinea",6.5,04-07-2014 15:00,0,4,green,1,650,us,0,2.124,15,mww,20,-6.2304,152.807,"Kokopo, Papua New Guinea",,
+"M 6.7 - 201 km SSE of Mata-Utu, Wallis and Futuna",6.7,29-06-2014 17:15,0,5,green,1,691,us,0,6.713,45,mww,18,-14.9831,-175.51,"Mata-Utu, Wallis and Futuna",,
+M 6.9 - South Sandwich Islands region,6.9,29-06-2014 07:52,0,5,green,1,732,us,0,4.838,25,mww,8,-55.4703,-28.3669,South Sandwich Islands region,,
+"M 7.9 - Rat Islands, Aleutian Islands, Alaska",7.9,23-06-2014 20:53,6,8,green,1,963,us,0,0.133,22,mww,109,51.8486,178.735,"Rat Islands, Aleutian Islands, Alaska",North America,United States of America
+"M 6.7 - Kermadec Islands, New Zealand",6.7,23-06-2014 20:06,0,5,green,0,691,us,0,0.748,43,mwc,26.59,-29.9414,-177.607,"Kermadec Islands, New Zealand",,
+"M 6.5 - Kermadec Islands, New Zealand",6.5,23-06-2014 19:21,0,5,green,0,650,us,0,0.778,30,mwc,10,-29.9379,-177.516,"Kermadec Islands, New Zealand",,
+"M 6.9 - Kermadec Islands, New Zealand",6.9,23-06-2014 19:19,0,5,green,1,732,us,0,0.751,35,mww,20,-29.9772,-177.725,"Kermadec Islands, New Zealand",,
+"M 6.9 - 21 km SSW of Kamariótissa, Greece",6.9,24-05-2014 09:25,9,7,green,0,951,us,0,0.402,25,mww,6.43,40.2893,25.3889,"Kamariótissa, Greece",Europe,Greece
+"M 6.5 - 110 km SE of Punta de Burica, Panama",6.5,13-05-2014 06:35,7,5,green,1,694,us,0,3.121,33,mww,10,7.2096,-82.3045,"Punta de Burica, Panama",,
+"M 6.6 - 239 km SSE of Isangel, Vanuatu",6.6,01-05-2014 06:36,0,5,green,1,670,us,0,3.34,10,mww,106,-21.4542,170.355,"Isangel, Vanuatu",,
+"M 6.5 - 107 km WSW of Vernon, Canada",6.5,24-04-2014 03:10,4,6,green,1,838,us,0,0,0,mww,10,49.6388,-127.732,"Vernon, Canada",,
+"M 7.5 - 70 km SW of Panguna, Papua New Guinea",7.5,19-04-2014 13:28,0,6,green,1,865,us,0,3.82,16,mww,43.37,-6.7547,155.024,"Panguna, Papua New Guinea",,
+"M 6.6 - 57 km SW of Panguna, Papua New Guinea",6.6,19-04-2014 01:04,0,6,green,1,670,us,0,3.803,11,mww,29,-6.6558,155.087,"Panguna, Papua New Guinea",,Papua New Guinea
+"M 7.2 - 9 km ENE of Coyuquilla Norte, Mexico",7.2,18-04-2014 14:27,8,7,yellow,1,1017,us,0,2.25,46,mww,24,17.397,-100.972,"Coyuquilla Norte, Mexico",North America,Mexico
+"M 6.6 - 75 km S of Kirakira, Solomon Islands",6.6,13-04-2014 13:24,0,6,green,0,670,us,0,2.666,22,mww,10,-11.1284,162.052,"Kirakira, Solomon Islands",,
+"M 7.4 - 112 km S of Kirakira, Solomon Islands",7.4,13-04-2014 12:36,0,6,green,1,842,us,0,2.885,17,mww,39,-11.4633,162.051,"Kirakira, Solomon Islands",,
+"M 7.6 - 93 km SSE of Kirakira, Solomon Islands",7.6,12-04-2014 20:14,0,7,green,1,889,us,0,2.828,13,mww,22.56,-11.2701,162.148,"Kirakira, Solomon Islands",,
+"M 6.6 - 15 km N of Belén, Nicaragua",6.6,11-04-2014 20:29,6,5,green,1,677,us,0,0.761,20,mww,135,11.642,-85.8779,"Belén, Nicaragua",,Nicaragua
+"M 6.5 - 78 km SW of Panguna, Papua New Guinea",6.5,11-04-2014 08:16,0,6,green,1,650,us,0,3.787,16,mww,20,-6.7878,154.95,"Panguna, Papua New Guinea",,
+"M 7.1 - 56 km WSW of Panguna, Papua New Guinea",7.1,11-04-2014 07:07,0,7,green,1,776,us,0,3.729,21,mww,60.53,-6.5858,155.048,"Panguna, Papua New Guinea",,Papua New Guinea
+"M 7.7 - 53 km SW of Iquique, Chile",7.7,03-04-2014 02:43,8,9,yellow,1,1057,us,0,1.029,44,mww,22.4,-20.5709,-70.4931,"Iquique, Chile",,
+"M 6.5 - 45 km WSW of Iquique, Chile",6.5,03-04-2014 01:58,7,7,green,0,670,us,0,0.828,82,mww,24.07,-20.3113,-70.5756,"Iquique, Chile",,
+"M 6.9 - 90 km WNW of Iquique, Chile",6.9,01-04-2014 23:57,0,5,green,0,732,us,0,0.828,119,mww,28.42,-19.8927,-70.9455,"Iquique, Chile",,
+"M 8.2 - 93 km NW of Iquique, Chile",8.2,01-04-2014 23:46,9,8,yellow,1,1332,us,0,0.609,23,mww,25,-19.6097,-70.7691,"Iquique, Chile",,
+"M 6.7 - 63 km WNW of Iquique, Chile",6.7,16-03-2014 21:16,7,7,green,1,718,us,0,1.008,44,mww,20,-19.9807,-70.7022,"Iquique, Chile",,
+"M 6.8 - 77 km WNW of Indianola, California",6.8,10-03-2014 05:18,5,5,green,1,1211,nc,112,0.6568,229,mw,16.441,40.8287,-125.134,"Indianola, California",,
+"M 6.5 - 109 km NW of Nago, Japan",6.5,02-03-2014 20:11,4,5,green,1,668,us,0,1.001,17,mww,119,27.4312,127.367,"Nago, Japan",,
+"M 6.5 - 171 km NNE of Greenland, Barbados",6.5,18-02-2014 09:27,5,4,green,1,681,us,0,1.635,30,mww,14.83,14.6682,-58.9272,"Greenland, Barbados",,
+"M 6.9 - 272 km ESE of Hotan, China",6.9,12-02-2014 09:19,3,8,yellow,0,733,us,0,7.496,18,mww,10,35.9053,82.5864,"Hotan, China",Asia,People's Republic of China
+"M 6.5 - 32 km E of Port-Olry, Vanuatu",6.5,07-02-2014 08:40,0,5,green,1,650,us,0,0.409,20,mww,122,-15.0691,167.372,"Port-Olry, Vanuatu",,Vanuatu
+M 6.5 - south of the Kermadec Islands,6.5,02-02-2014 09:26,0,3,green,1,650,us,0,3.651,22,mww,44.26,-32.9076,-177.881,the Kermadec Islands,,
+"M 6.5 - 32 km W of Sola, Vanuatu",6.5,01-01-2014 16:03,0,4,green,1,650,us,0,3.997,14,mww,187,-13.8633,167.249,"Sola, Vanuatu",,Vanuatu
+M 6.5 - Fiji region,6.5,23-11-2013 07:48,3,4,green,0,651,us,0,5.194,22,mww,371,-17.1171,-176.545,Fiji region,,
+M 7.7 - Scotia Sea,7.7,17-11-2013 09:04,1,8,green,1,912,us,0,8.05,23,mww,10,-60.2738,-46.4011,Scotia Sea,,United Kingdom of Great Britain and Northern Ireland (the)
+M 6.9 - Scotia Sea,6.9,16-11-2013 03:34,0,5,green,1,732,us,0,8.284,17,mww,9.97,-60.2627,-47.0621,Scotia Sea,,United Kingdom of Great Britain and Northern Ireland (the)
+"M 6.6 - 41 km SSW of Coquimbo, Chile",6.6,31-10-2013 23:03,6,7,green,1,723,us,0,0.636,31,mww,27,-30.2921,-71.5215,"Coquimbo, Chile",South America,Chile
+"M 7.1 - off the east coast of Honshu, Japan",7.1,25-10-2013 17:10,6,4,green,1,872,us,0,3.968,10,mww,35,37.1557,144.661,"off the east coast of Honshu, Japan",,
+"M 6.6 - 98 km SW of Etchoropo, Mexico",6.6,19-10-2013 17:54,8,5,green,1,692,us,0,1.98,44,mww,9.45,26.0913,-110.321,"Etchoropo, Mexico",,
+"M 6.8 - 62 km WSW of Panguna, Papua New Guinea",6.8,16-10-2013 10:30,0,6,green,1,711,us,0,5.79,9,mww,35,-6.4456,154.931,"Panguna, Papua New Guinea",,Papua New Guinea
+"M 7.1 - 4 km SE of Sagbayan, Philippines",7.1,15-10-2013 00:12,9,8,orange,1,1092,us,0,3.144,12,mww,19.04,9.8796,124.117,"Sagbayan, Philippines",,Philippines
+"M 6.6 - 36 km W of Kíssamos, Greece",6.6,12-10-2013 13:11,5,6,yellow,0,691,us,0,1.984,40,mww,40,35.5142,23.2523,"Kíssamos, Greece",Europe,
+M 6.7 - Sea of Okhotsk,6.7,01-10-2013 03:38,0,3,green,0,691,us,0,2.958,11,mww,573,53.1995,152.786,Okhotsk,,
+"M 6.5 - Kermadec Islands, New Zealand",6.5,30-09-2013 05:55,0,4,green,1,650,us,0,1.709,21,mww,41.54,-30.9255,-178.323,"Kermadec Islands, New Zealand",,
+"M 6.8 - 129 km WSW of Khuzdar, Pakistan",6.8,28-09-2013 07:34,7,7,orange,0,1005,us,0,7.359,17,mww,12,27.1825,65.5052,"Khuzdar, Pakistan",Asia,Pakistan
+"M 7.1 - 16 km WSW of Atiquipa, Peru",7.1,25-09-2013 16:42,8,7,green,1,843,us,0,4.446,17,mww,40,-15.8385,-74.5112,"Atiquipa, Peru",,Peru
+"M 7.7 - 113 km NW of Bela, Pakistan",7.7,24-09-2013 11:29,5,8,red,0,2015,us,0,7.241,17,mww,15,26.951,65.5009,"Bela, Pakistan",Asia,Pakistan
+"M 6.5 - 81 km SSW of Atka, Alaska",6.5,04-09-2013 02:32,0,6,green,1,650,us,0,0.735,24,mww,20,51.5573,-174.767,"Atka, Alaska",,
+"M 6.5 - Izu Islands, Japan region",6.5,04-09-2013 00:18,5,3,green,0,739,us,0,3.276,26,mww,402,29.9377,138.833,"Izu Islands, Japan region",,
+"M 6.5 - 180 km NE of Lospalos, Timor Leste",6.5,01-09-2013 11:52,4,5,green,0,668,us,0,3.097,11,mww,112,-7.44,128.221,"Lospalos, Timor Leste",,Indonesia
+"M 7.0 - 101 km SW of Atka, Alaska",7,30-08-2013 16:25,5,6,green,0,758,us,0,0.624,53,mww,29,51.537,-175.23,"Atka, Alaska",,
+"M 6.5 - 29 km SE of Blenheim, New Zealand",6.5,16-08-2013 02:31,9,7,yellow,1,690,us,0,0,0,mww,8.2,-41.734,174.152,"Blenheim, New Zealand",,New Zealand
+"M 6.7 - 101 km WSW of Bahía Solano, Colombia",6.7,13-08-2013 15:43,4,5,green,1,715,us,0,3.741,22,mww,12,5.7732,-78.1999,"Bahía Solano, Colombia",,
+"M 6.5 - 38 km ESE of Blenheim, New Zealand",6.5,21-07-2013 05:09,6,7,yellow,1,693,us,229,0,20,mww,17,-41.704,174.337,"Blenheim, New Zealand",,New Zealand
+M 7.3 - South Sandwich Islands region,7.3,15-07-2013 14:03,0,6,green,1,820,us,398,0,43,mww,11,-60.857,-25.07,South Sandwich Islands region,,United Kingdom of Great Britain and Northern Ireland (the)
+"M 6.6 - 26 km NE of Kandrian, Papua New Guinea",6.6,07-07-2013 20:30,4,6,green,0,674,us,139,0,14,mww,56,-6.029,149.706,"Kandrian, Papua New Guinea",,Papua New Guinea
+"M 7.3 - 190 km ENE of Kokopo, Papua New Guinea",7.3,07-07-2013 18:35,0,4,green,1,820,us,117,0,24,mww,385.5,-3.917,153.927,"Kokopo, Papua New Guinea",,Papua New Guinea
+M 6.6 - northern Mid-Atlantic Ridge,6.6,24-06-2013 22:04,0,7,green,1,670,us,111,0,16,mww,10,10.701,-42.594,northern Mid-Atlantic Ridge,,
+"M 6.5 - 44 km W of Masachapa, Nicaragua",6.5,15-06-2013 17:34,5,6,green,1,679,us,698,0,27,mww,30,11.763,-86.926,"Masachapa, Nicaragua",,
+"M 6.7 - south of Java, Indonesia",6.7,13-06-2013 16:47,5,4,green,0,710,us,515,0,24,mww,9,-10.004,107.236,"Java, Indonesia",,
+M 6.7 - Sea of Okhotsk,6.7,24-05-2013 14:56,0,3,green,1,691,us,217,0,25.2,mwb,624,52.235,151.444,Okhotsk,,
+M 8.3 - Sea of Okhotsk,8.3,24-05-2013 05:44,5,5,green,1,1115,us,385,0,10,mww,598.1,54.892,153.221,Okhotsk,,
+"M 7.4 - 292 km SW of Vaini, Tonga",7.4,23-05-2013 17:19,0,6,green,1,842,us,626,0,16,mww,173.7,-23.009,-177.232,"Vaini, Tonga",,
+"M 6.8 - Pagan region, Northern Mariana Islands",6.8,14-05-2013 00:32,0,3,green,0,711,us,131,0,18,mww,602.2,18.728,145.288,"Pagan region, Northern Mariana Islands",,
+"M 6.5 - 33 km N of Rabaul, Papua New Guinea",6.5,23-04-2013 23:14,0,6,green,1,650,us,264,0,16.6,mww,10,-3.898,152.127,"Rabaul, Papua New Guinea",,Papua New Guinea
+"M 6.6 - 56 km WSW of Linqiong, China",6.6,20-04-2013 00:02,8,8,red,0,2083,us,548,0,12.6,mww,14,30.308,102.888,"Linqiong, China",Asia,People's Republic of China
+"M 7.2 - 252 km ENE of Kuril’sk, Russia",7.2,19-04-2013 03:05,5,7,green,1,804,us,770,0,10.1,mww,110,46.221,150.788,"Kuril’sk, Russia",Asia,Russia
+"M 6.6 - 23 km ESE of Aitape, Papua New Guinea",6.6,16-04-2013 22:55,7,7,green,1,672,us,445,0,11,mww,13,-3.214,142.542,"Aitape, Papua New Guinea",,Papua New Guinea
+"M 7.7 - 79 km ESE of Kh?sh, Iran",7.7,16-04-2013 10:44,8,8,yellow,0,1421,us,506,0,26.6,mww,80,28.033,61.996,"Kh?sh, Iran",Asia,Iran
+"M 6.6 - 98 km W of Panguna, Papua New Guinea",6.6,14-04-2013 01:32,0,5,green,1,670,us,491,0,11.5,mww,31,-6.475,154.607,"Panguna, Papua New Guinea",,
+"M 7.0 - 260 km WSW of Abepura, Indonesia",7,06-04-2013 04:42,3,7,green,1,755,us,640,0,11.4,mww,66,-3.517,138.476,"Abepura, Indonesia",,Indonesia
+"M 6.5 - 36 km E of Finschhafen, Papua New Guinea",6.5,10-03-2013 22:51,0,6,green,1,650,us,317,0,14.2,mww,28,-6.598,148.174,"Finschhafen, Papua New Guinea",,Papua New Guinea
+"M 6.5 - 87 km SE of Ozernovskiy, Russia",6.5,01-03-2013 13:20,3,6,green,0,651,us,480,0,20.7,mww,29,50.958,157.408,"Ozernovskiy, Russia",Asia,
+"M 6.9 - 81 km SE of Ozernovskiy, Russia",6.9,28-02-2013 14:05,5,6,green,1,736,us,531,0,20.7,mww,41,50.954,157.283,"Ozernovskiy, Russia",Asia,
+"M 6.6 - 183 km SW of Belaya Gora, Russia",6.6,14-02-2013 13:13,0,7,green,1,670,us,697,0,15.3,mww,11,67.631,142.508,"Belaya Gora, Russia",Asia,Russia
+"M 6.6 - 30 km SSW of Lata, Solomon Islands",6.6,09-02-2013 21:02,0,6,green,1,670,us,421,0,16.6,mww,18,-10.994,165.741,"Lata, Solomon Islands",,Solomon Islands
+"M 6.9 - 2 km NNE of Yacuanquer, Colombia",6.9,09-02-2013 14:16,5,5,green,1,904,us,562,0,23.7,mww,145,1.135,-77.393,"Yacuanquer, Colombia",South America,Colombia
+"M 7.1 - 32 km SE of Lata, Solomon Islands",7.1,08-02-2013 15:26,9,6,green,1,780,us,334,0,16.5,mww,21,-10.928,166.018,"Lata, Solomon Islands",,Solomon Islands
+"M 6.8 - 22 km ESE of Lata, Solomon Islands",6.8,08-02-2013 11:12,0,7,green,1,711,us,400,0,17.5,mww,12,-10.838,165.969,"Lata, Solomon Islands",,Solomon Islands
+"M 6.7 - 33 km SSW of Lata, Solomon Islands",6.7,07-02-2013 18:59,0,6,green,1,691,us,387,0,26.5,mww,11,-10.997,165.655,"Lata, Solomon Islands",,Solomon Islands
+"M 7.0 - 33 km NW of Lata, Solomon Islands",7,06-02-2013 01:54,0,6,green,0,754,us,445,0,17.5,mww,8.8,-10.499,165.588,"Lata, Solomon Islands",,Solomon Islands
+"M 7.1 - 112 km WSW of Lata, Solomon Islands",7.1,06-02-2013 01:23,0,5,green,0,776,us,550,0,18.4,mww,10,-11.183,164.882,"Lata, Solomon Islands",,
+"M 8.0 - 75 km W of Lata, Solomon Islands",8,06-02-2013 01:12,8,7,green,1,993,us,460,0,20.9,mww,24,-10.799,165.114,"Lata, Solomon Islands",,
+"M 6.9 - 18 km SSW of Obihiro, Japan",6.9,02-02-2013 14:17,6,7,yellow,0,814,us,686,0,28,mww,107,42.77,143.092,"Obihiro, Japan",Asia,Japan
+"M 6.8 - 54 km N of Vallenar, Chile",6.8,30-01-2013 20:15,6,7,green,0,771,us,596,0,19.3,mww,45,-28.094,-70.653,"Vallenar, Chile",South America,Chile
+"M 7.5 - 110 km SW of Edna Bay, Alaska",7.5,05-01-2013 08:58,6,6,,0,1425,ak,0,0,0,mw,8.7,55.228,-134.859,"Edna Bay, Alaska",,
+"M 6.7 - 59 km SSW of Sola, Vanuatu",6.7,21-12-2012 22:28,0,4,,0,691,us,521,0,13.7,mww,200.7,-14.344,167.286,"Sola, Vanuatu",,Vanuatu
+M 7.1 - Banda Sea,7.1,10-12-2012 16:53,5,5,,0,843,us,517,0,8.7,mww,155,-6.533,129.825,Banda Sea,,Indonesia
+"M 7.3 - 234 km SE of ?funato, Japan",7.3,07-12-2012 08:18,6,5,,0,1014,us,918,0,14.8,mww,31,37.89,143.949,"?funato, Japan",,
+"M 6.5 - 32 km SW of Champerico, Guatemala",6.5,11-11-2012 22:14,4,5,,0,708,us,598,0,57.3,mww,20,14.129,-92.164,"Champerico, Guatemala",,
+"M 6.8 - 51 km NNE of Shwebo, Myanmar",6.8,11-11-2012 01:12,7,6,,0,795,us,391,0,13.7,mww,13.7,23.005,95.885,"Shwebo, Myanmar",Asia,Myanmar
+"M 7.4 - 33 km S of Champerico, Guatemala",7.4,07-11-2012 16:35,8,7,yellow,0,1455,us,751,0,25.5,mww,24,13.988,-91.895,"Champerico, Guatemala",,
+"M 7.8 - 206 km SW of Prince Rupert, Canada",7.8,28-10-2012 03:04,8,7,,0,1726,us,807,0,42.7,mww,14,52.788,-132.101,"Prince Rupert, Canada",North America,Canada
+M 6.5 - Costa Rica,6.5,24-10-2012 00:45,6,6,,0,745,us,691,0,34.4,mww,17,10.086,-85.298,Costa Rica,,Costa Rica
+"M 6.6 - 163 km ENE of Tual, Indonesia",6.6,12-10-2012 00:31,3,5,,0,675,us,291,0,17.7,mww,13,-4.892,134.03,"Tual, Indonesia",,Indonesia
+"M 7.3 - 11 km WNW of San Agustín, Colombia",7.3,30-09-2012 16:31,7,6,,0,1221,us,934,0,15.5,mww,170,1.929,-76.362,"San Agustín, Colombia",South America,Colombia
+"M 7.6 - 11 km ENE of Hojancha, Costa Rica",7.6,05-09-2012 14:42,8,7,,0,1555,us,703,0,34.3,mww,35,10.085,-85.315,"Hojancha, Costa Rica",,Costa Rica
+"M 7.6 - 89 km E of Sulangan, Philippines",7.6,31-08-2012 12:47,8,5,,0,1115,us,682,0,10.2,mww,28,10.811,126.638,"Sulangan, Philippines",,
+"M 7.3 - 126 km S of Puerto El Triunfo, El Salvador",7.3,27-08-2012 04:37,5,5,,0,994,us,417,0,37,mww,28,12.139,-88.59,"Puerto El Triunfo, El Salvador",,
+"M 6.6 - 140 km WNW of Tobelo, Indonesia",6.6,26-08-2012 15:05,4,5,,0,678,us,497,0,14.6,mww,91.1,2.19,126.837,"Tobelo, Indonesia",,Indonesia
+"M 7.7 - 156 km ENE of Poronaysk, Russia",7.7,14-08-2012 02:59,7,4,,0,941,us,862,0,13.8,mww,583.2,49.8,145.064,"Poronaysk, Russia",,
+"M 6.5 - 105 km ESE of Kokopo, Papua New Guinea",6.5,28-07-2012 20:03,5,6,,0,653,us,576,0,11.7,mww,41,-4.651,153.173,"Kokopo, Papua New Guinea",,Papua New Guinea
+"M 6.6 - 76 km W of Neiafu, Tonga",6.6,28-04-2012 10:08,4,5,,0,675,us,529,0,15.7,mww,134.7,-18.685,-174.705,"Neiafu, Tonga",,Tonga
+"M 6.7 - 86 km SSE of Manokwari, Indonesia",6.7,21-04-2012 01:16,0,7,,0,691,us,370,0,15.4,mww,16,-1.617,134.276,"Manokwari, Indonesia",,Indonesia
+"M 6.8 - 140 km N of Lae, Papua New Guinea",6.8,17-04-2012 07:13,6,5,,0,732,us,597,0,12.6,mww,198,-5.462,147.117,"Lae, Papua New Guinea",,Papua New Guinea
+"M 6.7 - 22 km NW of Hacienda La Calera, Chile",6.7,17-04-2012 03:50,0,7,,0,691,us,518,0,26.9,mww,29,-32.625,-71.365,"Hacienda La Calera, Chile",South America,Chile
+"M 7.0 - 69 km ENE of San Luis, Mexico",7,12-04-2012 07:15,7,7,,0,1000,us,474,0,95.9,mww,13,28.696,-113.104,"San Luis, Mexico",North America,Mexico
+"M 6.5 - 41 km NW of El Habillal, Mexico",6.5,11-04-2012 22:55,7,6,,0,1171,us,599,0,54.1,mwb,20,18.229,-102.689,"El Habillal, Mexico",North America,Mexico
+M 8.2 - off the west coast of northern Sumatra,8.2,11-04-2012 10:43,9,6,green,0,1213,us,341,0,14.9,mwc,25.1,0.802,92.463,off the west coast of northern Sumatra,,
+M 8.6 - off the west coast of northern Sumatra,8.6,11-04-2012 08:38,9,7,yellow,0,2048,official,499,0,16.6,mw,20,2.327,93.063,off the west coast of northern Sumatra,,
+"M 7.1 - 23 km NE of Constitución, Chile",7.1,25-03-2012 22:37,7,7,,0,1496,us,553,0,15.2,mww,40.7,-35.2,-72.217,"Constitución, Chile",South America,Chile
+"M 6.6 - 11 km ENE of Kainantu, Papua New Guinea",6.6,21-03-2012 22:15,6,6,,0,709,us,640,0,10.1,mww,118,-6.242,145.955,"Kainantu, Papua New Guinea",,Papua New Guinea
+"M 7.4 - 6 km E of Santiago Llano Grande, Mexico",7.4,20-03-2012 18:02,9,8,,0,1752,us,672,0,37.9,mww,20,16.493,-98.231,"Santiago Llano Grande, Mexico",North America,Mexico
+"M 6.7 - 38 km NE of Saryg-Sep, Russia",6.7,26-02-2012 06:17,7,7,,0,833,us,596,0,13.4,mww,12,51.708,95.991,"Saryg-Sep, Russia",Asia,Russia
+"M 6.7 - 2 km NNE of Jimalalud, Philippines",6.7,06-02-2012 03:49,9,7,,0,1551,us,572,0,11.1,mww,11,9.999,123.206,"Jimalalud, Philippines",,Philippines
+"M 7.1 - 125 km W of Port-Vila, Vanuatu",7.1,02-02-2012 13:34,5,5,,0,793,us,573,0,12,mww,23,-17.827,167.133,"Port-Vila, Vanuatu",,
+M 7.2 - off the west coast of northern Sumatra,7.2,10-01-2012 18:36,4,4,,0,838,us,443,0,17,mww,19,2.433,93.21,off the west coast of northern Sumatra,,
+"M 6.6 - 45 km NNE of Saryg-Sep, Russia",6.6,27-12-2011 15:21,0,7,,0,670,us,545,0,17.6,mww,15,51.842,95.911,"Saryg-Sep, Russia",Asia,Russia
+"M 7.1 - 25 km SSE of Wau, Papua New Guinea",7.1,14-12-2011 05:04,6,6,,0,834,us,485,0,10.6,mww,135,-7.551,146.809,"Wau, Papua New Guinea",,Papua New Guinea
+"M 6.5 - 6 km SSW of Nuevo Balsas, Mexico",6.5,11-12-2011 01:47,8,7,,0,1400,us,578,0,38.6,mww,59,17.986,-99.789,"Nuevo Balsas, Mexico",North America,Mexico
+"M 6.9 - 39 km SW of Santiago, Peru",6.9,28-10-2011 18:54,6,7,,0,847,us,474,0,46.5,mww,24,-14.438,-75.966,"Santiago, Peru",South America,Peru
+"M 7.1 - 27 km NNE of Van, Turkey",7.1,23-10-2011 10:41,9,9,,0,1096,us,693,0,19.7,mww,18,38.721,43.508,"Van, Turkey",Asia,Turkey
+"M 6.5 - 4 km ESE of Finschhafen, Papua New Guinea",6.5,14-10-2011 03:35,3,6,,0,655,us,423,0,12.6,mww,37,-6.57,147.881,"Finschhafen, Papua New Guinea",,Papua New Guinea
+"M 6.9 - 43 km NW of Mangan, India",6.9,18-09-2011 12:40,8,8,,0,1562,us,383,0,13,mww,50,27.73,88.155,"Mangan, India",Asia,India
+"M 6.7 - 99 km NE of Miyako, Japan",6.7,16-09-2011 19:26,5,5,,0,712,us,667,0,10.9,mwc,30,40.273,142.779,"Miyako, Japan",,
+"M 6.7 - 68 km WSW of Kabanjahe, Indonesia",6.7,05-09-2011 17:55,5,6,,0,915,us,447,0,15.3,mww,91,2.965,97.893,"Kabanjahe, Indonesia",,Indonesia
+"M 7.0 - 133 km SSE of Isangel, Vanuatu",7,03-09-2011 22:55,7,5,,0,761,us,406,0,15.3,mww,185.1,-20.671,169.716,"Isangel, Vanuatu",,
+"M 7.0 - 64 km ESE of Contamana, Peru",7,24-08-2011 17:46,6,6,,0,913,us,471,0,26.9,mww,147,-7.641,-74.525,"Contamana, Peru",South America,Peru
+"M 7.1 - 64 km S of Port-Vila, Vanuatu",7.1,20-08-2011 18:19,5,6,,0,787,us,564,0,12.3,mww,28,-18.311,168.218,"Port-Vila, Vanuatu",,
+"M 6.5 - 65 km SSW of Port-Vila, Vanuatu",6.5,20-08-2011 17:13,0,5,,0,650,us,322,0,15,mwc,35,-18.308,168.156,"Port-Vila, Vanuatu",,
+"M 7.2 - 71 km SSW of Port-Vila, Vanuatu",7.2,20-08-2011 16:55,8,6,,0,813,us,280,0,18.4,mww,32,-18.365,168.143,"Port-Vila, Vanuatu",,
+"M 6.6 - 103 km NE of Angoram, Papua New Guinea",6.6,31-07-2011 23:38,3,6,,0,674,us,229,0,16.6,mww,10,-3.518,144.828,"Angoram, Papua New Guinea",,Papua New Guinea
+M 7.6 - Kermadec Islands region,7.6,06-07-2011 19:03,3,7,,0,893,us,567,0,33.5,mww,17,-29.539,-176.34,Kermadec Islands region,,
+"M 6.7 - 41 km NNE of Miyako, Japan",6.7,22-06-2011 21:50,6,6,,0,749,us,592,0,24.9,mww,33,39.955,142.205,"Miyako, Japan",Asia,Japan
+"M 6.8 - 124 km NE of Wé, New Caledonia",6.8,10-05-2011 08:55,4,5,,0,734,us,519,0,12.5,mww,11,-20.244,168.226,"Wé, New Caledonia",,
+"M 6.8 - 79 km W of Kirakira, Solomon Islands",6.8,23-04-2011 04:16,5,6,,0,719,us,445,0,13,mww,79,-10.375,161.2,"Kirakira, Solomon Islands",,Solomon Islands
+"M 6.6 - 17 km SSW of Ishikawa, Japan",6.6,11-04-2011 08:16,7,7,,0,822,us,586,0,10.1,mww,11,37.001,140.401,"Ishikawa, Japan",Asia,Japan
+"M 7.1 - 29 km ESE of Ishinomaki, Japan",7.1,07-04-2011 14:32,8,8,,0,1114,us,446,0,17.7,mww,42,38.276,141.588,"Ishinomaki, Japan",Asia,Japan
+"M 6.6 - 7 km SW of Helio García Alfaro, Mexico",6.6,07-04-2011 13:11,7,6,,0,897,us,518,0,37.2,mww,166.2,17.208,-94.338,"Helio García Alfaro, Mexico",,Mexico
+"M 6.9 - 27 km NNW of Tachilek, Myanmar",6.9,24-03-2011 13:55,7,9,,0,1154,us,335,0,18.2,mww,8,20.687,99.822,"Tachilek, Myanmar",Asia,Myanmar
+"M 6.6 - 50 km ESE of ?tsuchi, Japan",6.6,11-03-2011 11:36,6,5,,0,673,us,668,0,9.5,ms,25.7,39.241,142.463,"?tsuchi, Japan",,
+"M 6.5 - 81 km NE of Hasaki, Japan",6.5,11-03-2011 08:19,0,4,,0,650,us,369,0,18.7,mb,6.8,36.166,141.562,"Hasaki, Japan",,
+"M 7.7 - 272 km ESE of Kamaishi, Japan",7.7,11-03-2011 06:25,7,4,,0,931,us,507,0,10.8,mwc,18.6,38.058,144.59,"Kamaishi, Japan",,
+"M 7.9 - 47 km E of ?arai, Japan",7.9,11-03-2011 06:15,8,7,,0,1140,us,163,0,48.4,mwc,42.6,36.281,141.111,"?arai, Japan",,
+"M 9.1 - 2011 Great Tohoku Earthquake, Japan",9.1,11-03-2011 05:46,9,8,,0,2184,official,541,0,9.5,mww,29,38.297,142.373,"2011 Great Tohoku Earthquake, Japan",,
+"M 7.3 - 120 km SE of ?funato, Japan",7.3,09-03-2011 02:45,5,5,,0,972,us,550,0,17.4,mww,32,38.435,142.842,"?funato, Japan",,
+"M 6.7 - 38 km W of Constitución, Chile",6.7,14-02-2011 03:40,5,6,,0,731,us,358,0,33.9,mww,21,-35.38,-72.834,"Constitución, Chile",,
+"M 6.9 - 21 km N of Tomé, Chile",6.9,11-02-2011 20:05,7,7,,0,988,us,382,0,34.7,mww,26,-36.422,-72.96,"Tomé, Chile",South America,Chile
+"M 7.2 - 46 km WSW of Dalbandin, Pakistan",7.2,18-01-2011 20:23,7,7,,0,1449,us,372,0,25.3,mww,68,28.777,63.951,"Dalbandin, Pakistan",Asia,Pakistan
+"M 7.0 - 118 km NNE of Tadine, New Caledonia",7,13-01-2011 16:16,2,5,,0,755,us,578,0,13.3,mww,9,-20.628,168.471,"Tadine, New Caledonia",,
+"M 7.2 - 42 km NNW of Carahue, Chile",7.2,02-01-2011 20:20,8,7,,0,1054,us,397,0,30.1,mww,24,-38.355,-73.326,"Carahue, Chile",South America,Chile
+"M 7.3 - 141 km W of Isangel, Vanuatu",7.3,25-12-2010 13:16,0,5,,0,820,us,409,0,12,mwc,16,-19.702,167.947,"Isangel, Vanuatu",,
+"M 6.7 - 111 km SE of Bam, Iran",6.7,20-12-2010 18:41,3,7,,0,708,us,279,0,24.3,mwc,12,28.412,59.18,"Bam, Iran",Asia,Iran
+"M 6.6 - 52 km ENE of Kandrian, Papua New Guinea",6.6,02-12-2010 03:12,0,6,,0,670,us,306,0,18.5,mwb,33,-6.001,149.977,"Kandrian, Papua New Guinea",,Papua New Guinea
+"M 7.8 - 215 km SW of Sungai Penuh, Indonesia",7.8,25-10-2010 14:42,4,7,,0,946,us,379,0,23,mwc,20.1,-3.487,100.082,"Sungai Penuh, Indonesia",,
+"M 6.7 - 97 km SSW of El Huitusi, Mexico",6.7,21-10-2010 17:53,5,5,,0,776,us,352,0,50.3,mwc,13,24.696,-109.156,"El Huitusi, Mexico",,
+"M 7.0 - Near the south coast of Papua, Indonesia",7,29-09-2010 17:11,8,5,,0,772,us,271,0,15.1,mwc,26,-4.963,133.76,"Papua, Indonesia",,Indonesia
+"M 7.0 - 19 km NE of Methven, New Zealand",7,03-09-2010 16:35,8,8,,0,1245,us,365,0,15.8,mwc,12,-43.522,171.83,"Methven, New Zealand",,New Zealand
+M 7.1 - Ecuador,7.1,12-08-2010 11:54,6,5,,0,945,us,672,0,12.4,mwc,206.7,-1.266,-77.306,Ecuador,South America,Ecuador
+"M 7.3 - 33 km NW of Port-Vila, Vanuatu",7.3,10-08-2010 05:23,7,7,,0,850,us,405,0,20.2,mwc,25,-17.541,168.069,"Port-Vila, Vanuatu",,Vanuatu
+"M 7.0 - 72 km ESE of Kimbe, Papua New Guinea",7,04-08-2010 22:01,4,6,,0,757,us,396,0,12.7,mww,44,-5.746,150.765,"Kimbe, Papua New Guinea",,Papua New Guinea
+"M 6.5 - 118 km ESE of Madang, Papua New Guinea",6.5,04-08-2010 07:15,5,4,,0,659,us,403,0,11.1,mwc,220,-5.486,146.822,"Madang, Papua New Guinea",,Papua New Guinea
+"M 7.6 - 61 km W of Bantogon, Philippines",7.6,23-07-2010 22:51,5,3,,0,902,us,340,0,15.1,mwc,578,6.497,123.48,"Bantogon, Philippines",,Philippines
+"M 7.3 - New Britain region, Papua New Guinea",7.3,18-07-2010 13:34,8,7,,0,831,us,397,0,18.2,mwc,35,-5.931,150.59,"New Britain region, Papua New Guinea",,Papua New Guinea
+"M 6.9 - 56 km SE of Kimbe, Papua New Guinea",6.9,18-07-2010 13:04,4,7,,0,737,us,456,0,15.7,mwc,28,-5.966,150.428,"Kimbe, Papua New Guinea",,Papua New Guinea
+"M 6.6 - 30 km SSE of Cañete, Chile",6.6,14-07-2010 08:32,6,7,,0,753,us,295,0,52.8,mwc,22,-38.067,-73.31,"Cañete, Chile",South America,Chile
+"M 6.7 - 55 km WSW of Kirakira, Solomon Islands",6.7,26-06-2010 05:30,5,6,,0,696,us,392,0,18.7,mwc,35,-10.627,161.447,"Kirakira, Solomon Islands",,Solomon Islands
+"M 6.6 - 135 km SSE of Biak, Indonesia",6.6,16-06-2010 03:58,0,7,,0,670,us,309,0,25,mwc,10.5,-2.329,136.484,"Biak, Indonesia",,Indonesia
+"M 7.0 - 121 km SSE of Biak, Indonesia",7,16-06-2010 03:16,3,7,,0,755,us,307,0,18.1,mwc,18,-2.174,136.543,"Biak, Indonesia",,Indonesia
+"M 7.5 - Nicobar Islands, India region",7.5,12-06-2010 19:26,6,5,,0,1144,us,514,0,18.6,mwc,35,7.881,91.936,"Nicobar Islands, India region",,
+"M 7.2 - 100 km WNW of Sola, Vanuatu",7.2,27-05-2010 17:14,5,6,,0,804,us,327,0,11.7,mwc,31,-13.698,166.643,"Sola, Vanuatu",,Vanuatu
+"M 7.2 - 45 km SSW of Meulaboh, Indonesia",7.2,09-05-2010 05:59,5,6,,0,918,us,611,0,20.6,mwc,38,3.748,96.018,"Meulaboh, Indonesia",,Indonesia
+"M 6.9 - 233 km NNW of Qamdo, China",6.9,13-04-2010 23:49,6,9,,0,773,us,410,0,14.9,mwc,17,33.165,96.548,"Qamdo, China",Asia,People's Republic of China
+"M 6.9 - 99 km WSW of Kirakira, Solomon Islands",6.9,11-04-2010 09:40,4,5,,0,740,us,399,0,12.1,mwc,21,-10.878,161.116,"Kirakira, Solomon Islands",,
+"M 7.8 - 75 km E of Sinabang, Indonesia",7.8,06-04-2010 22:15,0,7,,0,936,us,352,0,19.2,mwc,31,2.383,97.048,"Sinabang, Indonesia",,Indonesia
+"M 7.2 - 12km SW of Delta, B.C., MX",7.2,04-04-2010 22:40,9,9,red,0,2910,ci,10,0.5137,239,mw,9.987,32.2862,-115.295,"Delta, B.C., MX",North America,Mexico
+"M 6.6 - 217 km N of Bamboo Flat, India",6.6,30-03-2010 16:54,5,6,,0,701,us,413,0,16.7,mwc,34,13.667,92.831,"Bamboo Flat, India",,India
+"M 6.7 - 52 km NNW of Tomé, Chile",6.7,16-03-2010 02:21,5,6,,0,856,us,312,0,34.7,mwc,18,-36.217,-73.257,"Tomé, Chile",,
+"M 6.5 - 59 km ENE of Namie, Japan",6.5,14-03-2010 08:08,6,5,,0,810,us,491,0,27,mwc,32,37.745,141.59,"Namie, Japan",,
+"M 7.0 - 52 km NW of Santa Cruz, Chile",7,11-03-2010 14:55,7,7,,0,874,us,403,0,17.1,mwc,18,-34.326,-71.799,"Santa Cruz, Chile",South America,Chile
+"M 6.9 - 61 km NW of Santa Cruz, Chile",6.9,11-03-2010 14:39,7,7,,0,1280,us,415,0,12.5,mwc,11,-34.29,-71.891,"Santa Cruz, Chile",South America,Chile
+"M 6.8 - 141 km W of Bengkulu, Indonesia",6.8,05-03-2010 16:07,4,6,,0,717,us,401,0,23.2,mwc,26,-3.762,100.991,"Bengkulu, Indonesia",,Indonesia
+"M 6.6 - 23 km WNW of Talcahuano, Chile",6.6,05-03-2010 11:47,7,7,,0,736,us,255,0,27.8,mwb,18,-36.665,-73.374,"Talcahuano, Chile",,Chile
+"M 6.5 - 48 km NW of Sola, Vanuatu",6.5,04-03-2010 14:02,0,4,,0,650,us,426,0,18.7,mwb,176,-13.571,167.227,"Sola, Vanuatu",,Vanuatu
+"M 7.4 - 124 km W of Lebu, Chile",7.4,27-02-2010 08:01,0,5,,0,842,us,409,0,17.6,mwc,35,-37.773,-75.048,"Lebu, Chile",,
+"M 8.8 - 36 km WNW of Quirihue, Chile",8.8,27-02-2010 06:34,8,8,,0,1991,official,454,0,17.8,mww,22.9,-36.122,-72.898,"Quirihue, Chile",South America,Chile
+"M 7.0 - 70 km SE of Katsuren-haebaru, Japan",7,26-02-2010 20:31,6,6,,0,1180,us,487,0,15.7,mwc,25,25.93,128.425,"Katsuren-haebaru, Japan",,
+"M 7.0 - 10 km SE of Léogâne, Haiti",7,12-01-2010 21:53,9,9,,0,1623,us,500,0,22.7,mwc,13,18.443,-72.571,"Léogâne, Haiti",,Haiti
+"M 6.5 - 37 km WNW of Ferndale, California",6.5,10-01-2010 00:27,7,7,,0,1360,nc,51,0.3225,220,mw,28.737,40.652,-124.692,"Ferndale, California",North America,
+"M 6.8 - 127 km SE of Gizo, Solomon Islands",6.8,05-01-2010 12:15,3,6,,0,713,us,338,0,15,mwc,15.4,-9.019,157.551,"Gizo, Solomon Islands",,
+"M 7.1 - 94 km SE of Gizo, Solomon Islands",7.1,03-01-2010 22:36,5,7,,0,780,us,377,0,15,mwc,10,-8.783,157.354,"Gizo, Solomon Islands",,Solomon Islands
+"M 6.6 - 98 km SE of Gizo, Solomon Islands",6.6,03-01-2010 21:48,5,7,,0,672,us,282,0,16.6,mwc,10,-8.726,157.487,"Gizo, Solomon Islands",,Solomon Islands
+"M 6.5 - 92 km N of Iquique, Chile",6.5,13-11-2009 03:05,6,7,,0,698,us,390,0,17.7,mwc,27,-19.394,-70.321,"Iquique, Chile",South America,Chile
+"M 7.3 - 77 km ENE of Ba, Fiji",7.3,09-11-2009 10:44,0,4,,0,820,us,430,0,15,mwc,595,-17.239,178.331,"Ba, Fiji",,Fiji
+"M 6.6 - 29 km NNW of Bima, Indonesia",6.6,08-11-2009 19:41,7,6,,0,677,us,305,0,20.4,mwc,18,-8.207,118.631,"Bima, Indonesia",,Indonesia
+"M 6.8 - 98 km NNE of Naze, Japan",6.8,30-10-2009 07:03,0,6,,0,711,us,424,0,21.4,mwc,34,29.218,129.782,"Naze, Japan",,
+"M 6.9 - 268 km WSW of Tual, Indonesia",6.9,24-10-2009 14:40,4,6,,0,972,us,397,0,11,mwc,130,-6.133,130.385,"Tual, Indonesia",,Indonesia
+"M 6.8 - 188 km WNW of Sola, Vanuatu",6.8,08-10-2009 08:28,0,5,,0,711,us,174,0,30.2,mwc,35,-13.298,165.91,"Sola, Vanuatu",,
+"M 7.4 - 143 km NW of Sola, Vanuatu",7.4,07-10-2009 23:13,0,7,,0,842,us,314,0,20.2,mwc,31.1,-13.093,166.497,"Sola, Vanuatu",,Vanuatu
+"M 7.8 - 196 km NW of Sola, Vanuatu",7.8,07-10-2009 22:18,0,6,,0,936,us,195,0,20.3,mwc,35,-12.517,166.382,"Sola, Vanuatu",,
+"M 7.7 - 148 km NW of Sola, Vanuatu",7.7,07-10-2009 22:03,4,7,,0,916,us,283,0,23.2,mww,45,-13.006,166.51,"Sola, Vanuatu",,Vanuatu
+"M 6.6 - 49 km SSE of Sungai Penuh, Indonesia",6.6,01-10-2009 01:52,7,7,,0,787,us,417,0,30.1,mwc,9,-2.482,101.524,"Sungai Penuh, Indonesia",,Indonesia
+"M 7.6 - 30 km WSW of Pariaman, Indonesia",7.6,30-09-2009 10:16,8,8,,0,1639,us,498,0,14,mwc,81,-0.72,99.867,"Pariaman, Indonesia",,Indonesia
+"M 8.1 - 168 km SSW of Matavai, Samoa",8.1,29-09-2009 17:48,7,6,,0,1055,us,520,0,20.8,mwc,18,-15.489,-172.095,"Matavai, Samoa",,
+"M 7.0 - 66 km SSW of Banjar, Indonesia",7,02-09-2009 07:55,7,7,,0,1175,us,312,0,16.3,mwc,46,-7.782,107.297,"Banjar, Indonesia",,Indonesia
+"M 6.7 - 112 km WSW of Padang, Indonesia",6.7,16-08-2009 07:38,5,6,,0,753,us,369,0,14.9,mwc,20,-1.479,99.49,"Padang, Indonesia",,Indonesia
+"M 6.6 - 244 km SSE of Tateyama, Japan",6.6,12-08-2009 22:48,4,5,,0,703,us,336,0,14.1,mwc,53,32.821,140.395,"Tateyama, Japan",,
+"M 7.5 - 266 km N of Bamboo Flat, India",7.5,10-08-2009 19:55,7,6,,0,1248,us,303,0,18.2,mwc,24,14.099,92.902,"Bamboo Flat, India",,
+"M 7.1 - 161 km S of ?yama, Japan",7.1,09-08-2009 10:55,5,4,,0,1005,us,447,0,14.2,mwc,292,33.167,137.944,"?yama, Japan",,
+"M 6.9 - 96 km WNW of Bahía de Kino, Mexico",6.9,03-08-2009 17:59,5,7,,0,1202,us,243,0,35,mwc,10,29.039,-112.903,"Bahía de Kino, Mexico",North America,Mexico
+"M 7.8 - 97 km WSW of Te Anau, New Zealand",7.8,15-07-2009 09:22,6,8,,0,1165,us,434,0,16.8,mwc,12,-45.762,166.562,"Te Anau, New Zealand",,New Zealand
+"M 6.7 - 190 km ESE of Kokopo, Papua New Guinea",6.7,23-06-2009 14:19,5,5,,0,693,us,269,0,13.8,mwc,64,-5.157,153.782,"Kokopo, Papua New Guinea",,Papua New Guinea
+"M 7.3 - 46 km NW of Guanaja, Honduras",7.3,28-05-2009 08:24,7,8,,0,1560,us,464,0,27.2,mwc,19,16.731,-86.217,"Guanaja, Honduras",,
+"M 7.6 - 191 km S of ‘Ohonua, Tonga",7.6,19-03-2009 18:17,7,5,,0,916,us,504,0,14,mwc,31,-23.043,-174.66,"‘Ohonua, Tonga",,
+"M 7.2 - 196 km SSE of Sarangani, Philippines",7.2,11-02-2009 17:34,3,7,,0,802,us,432,0,18.6,mwc,20,3.886,126.387,"Sarangani, Philippines",,Indonesia
+"M 7.4 - 86 km WNW of Manokwari, Indonesia",7.4,03-01-2009 22:33,7,7,,0,846,us,314,0,21.1,mwc,23,-0.691,133.305,"Manokwari, Indonesia",,Indonesia
+"M 6.6 - 50 km S of Jurm, Afghanistan",6.6,03-01-2009 20:23,5,4,,0,765,us,344,0,22.6,mwc,204.8,36.419,70.743,"Jurm, Afghanistan",Asia,Afghanistan
+"M 7.7 - 140 km WNW of Manokwari, Indonesia",7.7,03-01-2009 19:43,5,7,,0,918,us,288,0,29.8,mwc,17,-0.414,132.885,"Manokwari, Indonesia",,Indonesia
+"M 7.4 - 135 km NW of Gorontalo, Indonesia",7.4,16-11-2008 17:02,9,7,,0,848,us,365,0,33.7,mww,30,1.271,122.091,"Gorontalo, Indonesia",,Indonesia
+"M 6.7 - 19 km SW of Brisas Barra de Suchiate, Mexico",6.7,16-10-2008 19:41,5,6,,0,731,us,481,0,28.6,mwc,24,14.423,-92.364,"Brisas Barra de Suchiate, Mexico",,Mexico
+"M 6.7 - 131 km SE of Nookat, Kyrgyzstan",6.7,05-10-2008 15:52,0,6,,0,691,us,529,0,22.3,mwc,27.4,39.533,73.824,"Nookat, Kyrgyzstan",Asia,Kyrgyzstan
+"M 6.8 - 122 km SSE of Obihiro, Japan",6.8,11-09-2008 00:20,0,6,,0,711,us,500,0,22.2,mwc,25,41.892,143.754,"Obihiro, Japan",,
+"M 6.6 - 73 km WNW of Tobelo, Indonesia",6.6,11-09-2008 00:00,0,6,,0,670,us,463,0,14.1,mwc,96,1.885,127.363,"Tobelo, Indonesia",,Indonesia
+"M 6.9 - 75 km WNW of Sola, Vanuatu",6.9,08-09-2008 18:52,0,6,,0,732,us,531,0,14.9,mwc,110,-13.501,166.967,"Sola, Vanuatu",,Vanuatu
+"M 6.7 - 221 km NE of Jumla, Nepal",6.7,25-08-2008 13:21,4,7,,0,692,us,325,0,28,mwc,12,30.901,83.52,"Jumla, Nepal",Asia,People's Republic of China
+"M 6.8 - 29 km ENE of Morioka, Japan",6.8,23-07-2008 15:26,8,7,,0,1046,us,633,0,20.2,mwc,108,39.802,141.464,"Morioka, Japan",Asia,Japan
+"M 7.0 - 107 km E of Namie, Japan",7,19-07-2008 02:39,5,5,,0,840,us,577,0,18.2,mwc,22,37.552,142.214,"Namie, Japan",,
+"M 6.9 - 151 km E of Namie, Japan",6.9,19-07-2008 02:39,5,5,,0,825,duputel,0,0,0,mww,25.5,37.55,142.714,"Namie, Japan",,
+"M 6.6 - 124 km SW of Bamboo Flat, India",6.6,27-06-2008 11:40,4,5,,0,680,us,630,0,18.4,mwc,17,11.005,91.824,"Bamboo Flat, India",,
+"M 6.9 - 24 km WSW of Mizusawa, Japan",6.9,13-06-2008 23:43,7,8,,0,888,us,654,0,17.1,mwc,7.8,39.03,140.881,"Mizusawa, Japan",Asia,Japan
+"M 7.9 - 58 km W of Tianpeng, China",7.9,12-05-2008 06:28,9,9,,0,1870,us,774,0,11.3,mwc,19,31.002,103.322,"Tianpeng, China",Asia,People's Republic of China
+"M 6.9 - 78 km NE of Hasaki, Japan",6.9,07-05-2008 16:45,5,5,,0,910,us,519,0,21.1,mwc,27,36.164,141.526,"Hasaki, Japan",,
+"M 7.3 - 71 km SW of Isangel, Vanuatu",7.3,09-04-2008 12:46,0,6,,0,820,us,486,0,13.4,mwc,33,-20.071,168.892,"Isangel, Vanuatu",,
+"M 7.2 - 226 km SE of Hotan, China",7.2,20-03-2008 22:32,0,7,,0,798,us,532,0,25.9,mwc,10,35.49,81.467,"Hotan, China",Asia,People's Republic of China
+M 6.9 - Philippine Islands region,6.9,03-03-2008 14:11,4,5,,0,740,us,544,0,25.9,mwc,24,13.351,125.63,Philippine Islands region,,
+"M 6.7 - 155 km SSW of Padang, Indonesia",6.7,25-02-2008 21:02,5,6,,0,696,us,543,0,15.1,mwc,25,-2.245,99.808,"Padang, Indonesia",,Indonesia
+"M 6.6 - 161 km SSW of Padang, Indonesia",6.6,25-02-2008 18:06,4,6,,0,674,us,421,0,17.7,mwc,25,-2.332,99.891,"Padang, Indonesia",,Indonesia
+"M 7.2 - 164 km WSW of Sungai Penuh, Indonesia",7.2,25-02-2008 08:36,4,7,,0,832,us,505,0,18.4,mwc,25,-2.486,99.972,"Sungai Penuh, Indonesia",,Indonesia
+"M 6.5 - 166 km WSW of Sungai Penuh, Indonesia",6.5,24-02-2008 14:46,4,6,,0,654,us,429,0,28.3,mwc,22,-2.405,99.931,"Sungai Penuh, Indonesia",,Indonesia
+"M 7.4 - 56 km NW of Sinabang, Indonesia",7.4,20-02-2008 08:08,5,7,,0,914,us,607,0,16.4,mwc,26,2.768,95.964,"Sinabang, Indonesia",,Indonesia
+"M 6.5 - 50 km S of Koróni, Greece",6.5,14-02-2008 12:08,8,5,,0,692,us,650,0,30.7,mwc,28,36.345,21.863,"Koróni, Greece",Europe,
+"M 6.9 - 35 km S of Methóni, Greece",6.9,14-02-2008 10:09,6,6,,0,941,us,645,0,30.6,mwc,29,36.501,21.67,"Methóni, Greece",Europe,
+"M 6.5 - 9 km SSW of General Pascual Fentes, Mexico",6.5,12-02-2008 12:50,7,6,,0,723,us,521,0,27.6,mwc,83,16.357,-94.304,"General Pascual Fentes, Mexico",,Mexico
+"M 6.6 - 46 km SSE of Gisborne, New Zealand",6.6,20-12-2007 07:55,7,6,,0,808,us,461,0,18.8,mwc,20,-39.011,178.291,"Gisborne, New Zealand",,
+"M 6.7 - 80 km NNE of Antofagasta, Chile",6.7,16-12-2007 08:09,5,7,,0,704,us,481,0,30.3,mwb,45,-22.954,-70.182,Ant,South America,Chile
+"M 7.4 - 18 km WNW of Basse-Pointe, Martinique",7.4,29-11-2007 19:00,7,7,,0,1542,us,663,0,13.4,mwb,156,14.944,-61.274,"Basse-Pointe, Martinique",,Martinique
+"M 6.6 - 60 km SSE of Kirakira, Solomon Islands",6.6,27-11-2007 11:49,3,6,,0,672,us,280,0,26.9,mwc,16,-10.95,162.149,"Kirakira, Solomon Islands",,Solomon Islands
+"M 6.5 - 34 km N of Dompu, Indonesia",6.5,25-11-2007 19:53,5,7,,0,653,us,272,0,27.6,mwc,18,-8.224,118.467,"Dompu, Indonesia",,Indonesia
+"M 6.5 - 28 km NNW of Dompu, Indonesia",6.5,25-11-2007 16:02,7,7,,0,657,us,353,0,27.5,mwc,20,-8.292,118.37,"Dompu, Indonesia",,Indonesia
+"M 6.8 - 107 km N of Lae, Papua New Guinea",6.8,22-11-2007 08:48,6,6,,0,722,us,341,0,15.9,mwc,53,-5.757,147.098,"Lae, Papua New Guinea",,Papua New Guinea
+"M 6.8 - 30 km E of Macas, Ecuador",6.8,16-11-2007 03:13,7,6,,0,790,us,649,0,27,mwc,122.9,-2.312,-77.838,"Macas, Ecuador",South America,Ecuador
+"M 6.8 - 82 km NNE of Antofagasta, Chile",6.8,15-11-2007 15:05,6,7,,0,716,us,285,0,40.1,mwc,26,-22.925,-70.237,Ant,South America,Chile
+"M 7.7 - 36 km ESE of Tocopilla, Chile",7.7,14-11-2007 15:40,8,7,,0,995,us,610,0,22.4,mwc,40,-22.247,-69.89,"Tocopilla, Chile",South America,Chile
+"M 6.8 - 138 km W of Bengkulu, Indonesia",6.8,24-10-2007 21:02,3,5,,0,713,us,494,0,23.9,mwc,21,-3.899,101.02,"Bengkulu, Indonesia",,Indonesia
+"M 6.8 - 70 km N of Te Anau, New Zealand",6.8,15-10-2007 12:29,4,7,,0,744,us,338,0,19,mwc,18,-44.796,167.553,"Te Anau, New Zealand",,New Zealand
+"M 6.8 - 154 km ESE of Kokopo, Papua New Guinea",6.8,26-09-2007 12:36,4,5,,0,713,us,348,0,15.5,mwc,40,-4.99,153.5,"Kokopo, Papua New Guinea",,Papua New Guinea
+"M 6.7 - 118 km SSW of Padang, Indonesia",6.7,20-09-2007 08:31,3,5,,0,696,us,503,0,26.9,mwc,30,-1.999,100.141,"Padang, Indonesia",,Indonesia
+"M 7.0 - 153 km SSW of Padang, Indonesia",7,13-09-2007 03:35,4,7,,0,768,us,537,0,23.1,mwc,22,-2.13,99.627,"Padang, Indonesia",,Indonesia
+"M 6.5 - Kepulauan Mentawai region, Indonesia",6.5,13-09-2007 02:30,0,5,,0,650,us,409,0,26.2,mwc,28.9,-1.689,99.668,"Kepulauan Mentawai region, Indonesia",,Indonesia
+"M 7.9 - 87 km SW of Sungai Penuh, Indonesia",7.9,12-09-2007 23:49,8,7,,0,1133,us,446,0,29.1,mwc,35,-2.625,100.841,"Sungai Penuh, Indonesia",,Indonesia
+"M 7.8 - 148 km WSW of Sungai Penuh, Indonesia",7.8,12-09-2007 23:49,7,8,,0,1152,duputel,0,0,0,mww,40.5,-2.52,100.139,"Sungai Penuh, Indonesia",Asia,Indonesia
+"M 8.4 - 122 km SW of Bengkulu, Indonesia",8.4,12-09-2007 11:10,0,6,,0,1086,official,411,0,32.3,mww,34,-4.438,101.367,"Bengkulu, Indonesia",,Indonesia
+"M 6.8 - 39 km WNW of Timbiquí, Colombia",6.8,10-09-2007 01:49,5,6,,0,747,us,653,0,17.6,mwc,15,2.966,-77.963,"Timbiquí, Colombia",,Colombia
+"M 7.2 - 97 km S of Lata, Solomon Islands",7.2,02-09-2007 01:05,0,5,,0,798,us,312,0,21.3,mwc,35,-11.61,165.762,"Lata, Solomon Islands",,
+"M 6.5 - 31 km WSW of Malango, Solomon Islands",6.5,16-08-2007 08:39,5,6,,0,675,us,382,0,12.8,mwc,15,-9.834,159.465,"Malango, Solomon Islands",,
+"M 8.0 - 41 km SW of San Vicente de Cañete, Peru",8,15-08-2007 23:40,9,8,,0,1385,us,625,0,25.7,mwc,39,-13.386,-76.603,"San Vicente de Cañete, Peru",,Peru
+"M 7.5 - 35 km NNE of Rengasdengklok, Indonesia",7.5,08-08-2007 17:05,0,5,,0,865,us,228,0,30.7,mwc,280,-5.859,107.419,"Rengasdengklok, Indonesia",,Indonesia
+"M 7.2 - 56 km E of Luganville, Vanuatu",7.2,01-08-2007 17:08,7,7,,0,803,us,494,0,20.4,mwb,120,-15.595,167.68,"Luganville, Vanuatu",,Vanuatu
+"M 6.9 - 140 km NNW of Tobelo, Indonesia",6.9,26-07-2007 05:40,3,5,,0,734,us,374,0,24.1,mwb,25,2.872,127.464,"Tobelo, Indonesia",,Indonesia
+"M 6.8 - 133 km WNW of Mikuni, Japan",6.8,16-07-2007 14:17,5,4,,0,779,us,664,0,18.2,mwb,350.4,36.808,134.85,"Mikuni, Japan",,
+"M 6.6 - 20 km NNW of Kashiwazaki, Japan",6.6,16-07-2007 01:13,8,8,,0,831,us,782,0,16.7,mwc,12,37.535,138.446,"Kashiwazaki, Japan",Asia,Japan
+"M 6.7 - 43 km SSE of Iztapa, Guatemala",6.7,13-06-2007 19:29,6,6,,0,972,us,468,0,37.7,mwc,23,13.554,-90.618,"Iztapa, Guatemala",,
+"M 6.9 - 113 km SSE of Panguna, Papua New Guinea",6.9,01-04-2007 21:11,0,7,,0,732,us,305,0,15.3,mwc,10,-7.306,155.741,"Panguna, Papua New Guinea",,Solomon Islands
+"M 6.6 - 99 km SSE of Panguna, Papua New Guinea",6.6,01-04-2007 20:47,0,7,,0,670,us,251,0,16,mb,10,-7.169,155.777,"Panguna, Papua New Guinea",,Solomon Islands
+"M 8.1 - 45 km SSE of Gizo, Solomon Islands",8.1,01-04-2007 20:39,9,8,,0,1025,us,439,0,14.7,mwc,24,-8.466,157.043,"Gizo, Solomon Islands",,Solomon Islands
+"M 6.7 - 46 km NW of Nanao, Japan",6.7,25-03-2007 00:41,7,8,,0,782,us,493,0,23.9,mwc,8,37.336,136.588,"Nanao, Japan",Asia,Japan
+"M 7.1 - 119 km S of Isangel, Vanuatu",7.1,25-03-2007 00:40,3,6,,0,779,us,426,0,25.3,mwb,34,-20.617,169.357,"Isangel, Vanuatu",,
+"M 6.7 - 206 km SSW of Sofifi, Indonesia",6.7,20-02-2007 08:04,0,6,,0,691,us,253,0,40.3,mwc,12,-1.034,126.976,S,,Indonesia
+"M 7.5 - 126 km WNW of Ternate, Indonesia",7.5,21-01-2007 11:27,6,5,,0,874,us,570,0,21.6,mwc,22,1.065,126.282,"Ternate, Indonesia",,Indonesia
+M 8.1 - east of the Kuril Islands,8.1,13-01-2007 04:23,4,5,,0,1034,us,606,0,14,mwc,10,46.243,154.524,the Kuril Islands,,
+"M 6.9 - 26 km W of Hengchun, Taiwan",6.9,26-12-2006 12:34,6,7,,0,798,us,466,0,31.6,mwc,10,21.974,120.493,"Hengchun, Taiwan",Asia,Taiwan
+"M 7.1 - 30 km SW of Hengchun, Taiwan",7.1,26-12-2006 12:26,8,7,,0,1023,us,744,0,29.1,mwb,10,21.799,120.547,"Hengchun, Taiwan",Asia,Taiwan
+M 8.3 - Kuril Islands,8.3,15-11-2006 11:14,4,7,,0,1064,us,576,0,20.9,mwc,10,46.592,153.266,Kuril Islands,,
+"M 6.6 - 155 km SE of Kimbe, Papua New Guinea",6.6,07-11-2006 17:38,0,6,,0,670,us,352,0,18.6,mwc,11,-6.482,151.195,"Kimbe, Papua New Guinea",,
+"M 6.7 - 52 km SW of San Vicente de Cañete, Peru",6.7,20-10-2006 10:48,5,6,,0,732,us,444,0,53.4,mwc,23,-13.457,-76.677,"San Vicente de Cañete, Peru",,Peru
+"M 6.7 - 100 km ESE of Kimbe, Papua New Guinea",6.7,17-10-2006 01:25,5,6,,0,692,us,533,0,15.6,mwc,32,-5.881,150.982,"Kimbe, Papua New Guinea",,Papua New Guinea
+"M 6.7 - 14 km SW of Puako, Hawaii",6.7,15-10-2006 17:07,8,9,,0,1481,hv,43,0,124,md,38.182,19.877,-155.935,"Puako, Hawaii",,United States of America
+"M 6.9 - 201 km ESE of Hihifo, Tonga",6.9,28-09-2006 06:22,3,3,,0,737,us,702,0,20.9,mwc,28,-16.592,-172.033,"Hihifo, Tonga",,
+"M 6.8 - 49 km S of Panguna, Papua New Guinea",6.8,01-09-2006 10:18,0,6,,0,711,us,459,0,28.4,mwb,38,-6.759,155.512,"Panguna, Papua New Guinea",,Papua New Guinea
+"M 6.5 - 81 km ESE of Ozernovskiy, Russia",6.5,24-08-2006 21:50,0,6,,0,650,us,700,0,47.4,mwb,43,51.148,157.522,"Ozernovskiy, Russia",Asia,Russia
+"M 6.8 - 51 km NE of Norsup, Vanuatu",6.8,07-08-2006 22:18,5,5,,0,713,us,551,0,26.2,mwb,150,-15.798,167.789,"Norsup, Vanuatu",,Vanuatu
+"M 7.7 - 226 km SSW of Singaparna, Indonesia",7.7,17-07-2006 08:19,7,5,,0,947,us,357,0,36.8,mwc,20,-9.284,107.419,"Singaparna, Indonesia",,
+"M 6.5 - 111 km E of Kimbe, Papua New Guinea",6.5,28-05-2006 03:12,0,6,,0,650,us,477,0,20.3,mwc,34,-5.724,151.133,"Kimbe, Papua New Guinea",,Papua New Guinea
+"M 6.6 - 42 km NNW of Tilichiki, Russia",6.6,22-05-2006 11:12,0,7,,0,670,us,548,0,28,mwc,19,60.772,165.743,"Tilichiki, Russia",Asia,Russia
+"M 6.8 - 256 km SSW of Singkil, Indonesia",6.8,16-05-2006 15:28,4,5,,0,719,us,701,0,16.3,mwb,12,0.093,97.05,"Singkil, Indonesia",,
+"M 8.0 - 47 km SSE of Pangai, Tonga",8,03-05-2006 15:26,7,7,,0,1013,us,626,0,20.7,mwc,55,-20.187,-174.123,"Pangai, Tonga",,
+"M 8.0 - 50 km ESE of Pangai, Tonga",8,03-05-2006 15:26,8,9,,0,1026,duputel,0,0,0,mww,60.5,-19.99,-173.907,"Pangai, Tonga",,
+"M 6.5 - 73 km WNW of Copiapó, Chile",6.5,30-04-2006 21:40,7,7,,0,653,us,282,0,46.3,mwc,12,-27.211,-71.056,"Copiapó, Chile",,Chile
+"M 6.7 - 78 km WNW of Copiapó, Chile",6.7,30-04-2006 19:17,6,7,,0,696,us,277,0,25.6,mwb,12,-27.017,-71.022,"Copiapó, Chile",,Chile
+"M 6.6 - 80 km E of Tilichiki, Russia",6.6,29-04-2006 16:58,0,8,,0,670,us,645,0,28.4,mwc,11,60.491,167.516,"Tilichiki, Russia",Asia,Russia
+"M 7.6 - 80 km NE of Tilichiki, Russia",7.6,20-04-2006 23:25,0,8,,0,889,us,579,0,18.5,mwc,22,60.949,167.089,"Tilichiki, Russia",Asia,Russia
+"M 6.5 - 130 km NNW of Lautoka, Fiji",6.5,07-04-2006 08:30,3,5,,0,654,us,247,0,25.5,mwc,14,-16.527,176.989,"Lautoka, Fiji",,
+"M 6.7 - 108 km W of Ambon, Indonesia",6.7,14-03-2006 06:57,0,7,,0,691,us,306,0,21.3,mwb,30.1,-3.595,127.214,"Ambon, Indonesia",,Indonesia
+"M 7.0 - 160 km SE of Chipinge, Zimbabwe",7,22-02-2006 22:19,5,9,,0,891,us,412,0,23.2,mwb,11,-21.324,33.583,"Chipinge, Zimbabwe",Africa,Mozambique
+"M 6.7 - 26 km NE of Kýthira, Greece",6.7,08-01-2006 11:34,7,6,,0,934,us,769,0,19.7,mwb,66,36.311,23.212,"Kýthira, Greece",Europe,Greece
+"M 6.6 - 75 km SSW of Bahía de Kino, Mexico",6.6,04-01-2006 08:32,7,6,,0,703,us,323,0,48.2,mwc,14,28.164,-112.117,"Bahía de Kino, Mexico",,
+"M 6.5 - 53 km SW of Ashk?sham, Afghanistan",6.5,12-12-2005 21:47,6,5,,0,721,us,529,0,20.5,mwb,224.6,36.357,71.093,"Ashk?sham, Afghanistan",Asia,Afghanistan
+"M 6.8 - 76 km ESE of Kalemie, Democratic Republic of the Congo",6.8,05-12-2005 12:19,5,7,,0,744,us,561,0,20,mwc,22,-6.224,29.83,"Kalemie, Democratic Republic",Africa,Tanzania
+"M 6.5 - 80 km ESE of Ishinomaki, Japan",6.5,02-12-2005 13:13,4,5,,0,683,us,464,0,48.8,mwc,29,38.089,142.122,"Ishinomaki, Japan",,
+"M 6.5 - 57 km SE of Sinabang, Indonesia",6.5,19-11-2005 14:10,3,6,,0,651,us,358,0,20.7,mwb,21,2.164,96.786,"Sinabang, Indonesia",,Indonesia
+"M 6.8 - 68 km NNE of San Pedro de Atacama, Chile",6.8,17-11-2005 19:26,0,6,,0,711,us,509,0,30.1,mwb,147,-22.361,-67.895,"San Pedro de Atacama, Chile",South America,Bolivia
+"M 7.6 - 21 km NNE of Muzaffar?b?d, Pakistan",7.6,08-10-2005 03:50,9,9,,0,1267,us,724,0,21.1,mwc,26,34.539,73.588,"Muzaffar?b?d, Pakistan",Asia,Pakistan
+"M 6.6 - 129 km SSW of Kokopo, Papua New Guinea",6.6,29-09-2005 15:50,0,6,,0,670,us,402,0,17.7,mwc,25,-5.437,151.84,"Kokopo, Papua New Guinea",,Papua New Guinea
+"M 7.5 - 39 km NW of Yurimaguas, Peru",7.5,26-09-2005 01:55,8,7,,0,1018,us,696,0,26.2,mwb,115,-5.678,-76.398,"Yurimaguas, Peru",South America,Peru
+"M 7.6 - 135 km E of Kokopo, Papua New Guinea",7.6,09-09-2005 07:26,5,7,,0,891,us,502,0,20,mwc,90,-4.539,153.474,"Kokopo, Papua New Guinea",,Papua New Guinea
+"M 7.2 - 66 km ESE of Ishinomaki, Japan",7.2,16-08-2005 02:46,7,7,,0,1104,us,698,0,19.6,mwc,36,38.276,142.039,"Ishinomaki, Japan",,
+"M 7.2 - Nicobar Islands, India region",7.2,24-07-2005 15:42,4,5,,0,808,us,636,0,26.4,mwc,16,7.92,92.19,"Nicobar Islands, India region",,
+"M 6.7 - 94 km WSW of Singkil, Indonesia",6.7,05-07-2005 01:52,3,6,,0,693,us,398,0,22.3,mwc,21,1.819,97.082,"Singkil, Indonesia",,Indonesia
+"M 6.6 - 32 km W of San Juan del Sur, Nicaragua",6.6,02-07-2005 02:16,6,5,,0,719,us,446,0,21.1,mwc,27,11.245,-86.172,"San Juan del Sur, Nicaragua",,
+"M 7.2 - 153 km W of Big Lagoon, California",7.2,15-06-2005 02:50,5,4,,0,1318,us,420,0,31.4,mwc,16,41.292,-125.953,"Big Lagoon, California",,
+"M 7.8 - 102 km ENE of Iquique, Chile",7.8,13-06-2005 22:44,8,7,,0,1020,us,714,0,16.1,mwb,115.6,-19.987,-69.197,"Iquique, Chile",South America,Chile
+"M 6.9 - 89 km WSW of Singkil, Indonesia",6.9,19-05-2005 01:54,5,7,,0,740,us,635,0,26,mwc,30,1.989,97.041,"Singkil, Indonesia",,Indonesia
+"M 6.7 - 125 km SW of Padangsidempuan, Indonesia",6.7,14-05-2005 05:05,6,5,,0,731,us,695,0,20.9,mwb,34,0.587,98.459,"Padangsidempuan, Indonesia",,Indonesia
+"M 6.5 - 106 km SW of Padang, Indonesia",6.5,10-04-2005 11:14,3,6,,0,657,us,478,0,21.2,mwc,30,-1.714,99.779,"Padang, Indonesia",,Indonesia
+"M 6.7 - 113 km SW of Padang, Indonesia",6.7,10-04-2005 10:29,5,6,,0,717,us,656,0,21.2,mwc,19,-1.644,99.607,"Padang, Indonesia",,Indonesia
+"M 8.6 - 78 km WSW of Singkil, Indonesia",8.6,28-03-2005 16:09,0,8,,0,1138,official,510,0,22.1,mww,30,2.085,97.108,"Singkil, Indonesia",,Indonesia
+"M 6.6 - 28 km NNW of Maebaru-ch??, Japan",6.6,20-03-2005 01:53,8,7,,0,805,us,401,0,22.9,mwc,10,33.807,130.131,"Maebaru-ch??, Japan",Asia,Japan
+M 7.1 - Banda Sea,7.1,02-03-2005 10:42,0,5,,0,776,us,569,0,18.1,mwb,201.7,-6.527,129.933,Banda Sea,,Indonesia
+"M 6.8 - 99 km WNW of Sinabang, Indonesia",6.8,26-02-2005 12:56,0,6,,0,711,us,444,0,33.8,mwb,36,2.908,95.592,"Sinabang, Indonesia",,Indonesia
+"M 6.5 - 81 km SSW of Katabu, Indonesia",6.5,19-02-2005 00:04,0,7,,0,650,us,371,0,31.8,mwb,10,-5.562,122.129,"Katabu, Indonesia",,Indonesia
+"M 6.5 - Pulau-Pulau Talaud, Indonesia",6.5,15-02-2005 14:42,3,5,,0,652,us,286,0,47.3,mwc,39.7,4.756,126.421,"Pulau-Pulau Talaud, Indonesia",,Indonesia
+"M 6.7 - 52 km SW of Sola, Vanuatu",6.7,08-02-2005 14:48,0,4,,0,691,us,457,0,30.2,mwb,206.3,-14.252,167.259,"Sola, Vanuatu",,Vanuatu
+"M 7.1 - 138 km SW of Palimbang, Philippines",7.1,05-02-2005 12:23,7,3,,0,782,us,640,0,26.4,mwc,525,5.293,123.337,"Palimbang, Philippines",,
+"M 6.6 - 161 km SE of Katsuura, Japan",6.6,19-01-2005 06:11,6,4,,0,676,us,225,0,78.5,mwc,27.8,34.064,141.491,"Katsuura, Japan",,
+"M 6.6 - Nicobar Islands, India region",6.6,26-12-2004 09:20,0,5,,0,670,us,353,0,31.9,mwc,16.1,8.879,92.375,"Nicobar Islands, India region",,
+"M 7.2 - 284 km WNW of Sabang, Indonesia",7.2,26-12-2004 04:21,5,6,,0,802,us,385,0,27.9,mwc,39.2,6.91,92.958,"Sabang, Indonesia",,
+M 9.1 - 2004 Sumatra - Andaman Islands Earthquake,9.1,26-12-2004 00:58,0,8,,0,1274,official,601,0,22,mw,30,3.295,95.982,2004 Sumatra - Andaman Islands Earthquake,,Indonesia
+M 8.1 - north of Macquarie Island,8.1,23-12-2004 14:59,0,5,,0,1009,us,331,0,59.3,mwc,10,-49.312,161.345,Macquarie Island,,
+"M 6.8 - 36 km S of George Town, Cayman Islands",6.8,14-12-2004 23:20,5,6,,0,858,us,639,0,21.8,mwb,10,18.958,-81.409,"George Town, Cayman Islands",,
+"M 6.8 - 54 km SSW of Nemuro, Japan",6.8,06-12-2004 14:15,4,7,,0,724,us,759,0,23.6,mwb,35,42.9,145.228,"Nemuro, Japan",Asia,Japan
+"M 7.0 - 51 km SW of Nemuro, Japan",7,28-11-2004 18:32,4,7,,0,771,us,929,0,23.9,mwb,39,43.006,145.119,"Nemuro, Japan",Asia,Japan
+"M 7.1 - 29 km SSW of Nabire, Indonesia",7.1,26-11-2004 02:25,0,7,,0,776,us,439,0,28.8,mwc,10,-3.609,135.404,"Nabire, Indonesia",,Indonesia
+"M 7.1 - 255 km W of Riverton, New Zealand",7.1,22-11-2004 20:26,5,5,,0,782,us,585,0,14.7,mwc,10,-46.676,164.721,"Riverton, New Zealand",,
+"M 7.2 - 32 km SSW of Pizarro, Colombia",7.2,15-11-2004 09:06,8,8,,0,820,us,708,0,50.2,mwb,15,4.695,-77.508,"Pizarro, Colombia",,Colombia
+"M 7.5 - 63 km NW of Maubara, Timor Leste",7.5,11-11-2004 21:26,5,7,,0,870,us,301,0,33.8,mwc,10,-8.152,124.868,"Maubara, Timor Leste",,Indonesia
+"M 6.7 - 80 km SSE of Kirakira, Solomon Islands",6.7,11-11-2004 17:34,0,6,,0,691,us,233,0,21.5,mwb,10,-11.128,162.208,"Kirakira, Solomon Islands",,
+"M 6.7 - 189 km SW of Port McNeill, Canada",6.7,02-11-2004 10:02,7,4,,0,703,us,459,0,37.3,mwb,10,49.277,-128.772,"Port McNeill, Canada",,
+"M 6.6 - 8 km SSW of Ojiya, Japan",6.6,23-10-2004 08:56,0,8,,0,670,us,782,0,37,mwc,16,37.226,138.779,"Ojiya, Japan",Asia,Japan
+"M 6.7 - 31 km WNW of Yonakuni, Japan",6.7,15-10-2004 04:08,5,6,,0,705,us,698,0,24.7,mwb,94,24.53,122.694,"Yonakuni, Japan",,
+"M 7.0 - 43 km SSW of Masachapa, Nicaragua",7,09-10-2004 21:26,0,6,,0,754,us,441,0,32.2,mwc,35,11.422,-86.665,"Masachapa, Nicaragua",,
+"M 6.5 - 9 km W of Talisay, Philippines",6.5,08-10-2004 14:36,5,5,,0,665,us,526,0,18.3,mwb,105,13.925,120.534,"Talisay, Philippines",,Philippines
+"M 6.8 - 60 km SSE of Kirakira, Solomon Islands",6.8,08-10-2004 08:27,0,6,,0,711,us,545,0,15.7,mwb,36,-10.951,162.161,"Kirakira, Solomon Islands",,Solomon Islands
+"M 6.6 - 129 km ESE of Shing?, Japan",6.6,06-09-2004 23:29,0,4,,0,670,us,478,0,29.8,mwc,10,33.205,137.227,"Shing?, Japan",,
+"M 7.4 - 118 km ESE of Shing?, Japan",7.4,05-09-2004 14:57,0,5,,0,842,us,594,0,27.5,mwb,10,33.184,137.071,"Shing?, Japan",,
+"M 7.2 - 94 km SE of Shing?, Japan",7.2,05-09-2004 10:07,0,5,,0,798,us,643,0,28.4,mwc,14,33.07,136.618,"Shing?, Japan",,
+"M 6.5 - 67 km ESE of Teno, Chile",6.5,28-08-2004 13:41,0,7,,0,650,us,349,0,30.1,mwb,5,-35.173,-70.525,"Teno, Chile",South America,Chile
+"M 6.5 - 117 km WNW of Manokwari, Indonesia",6.5,28-07-2004 03:56,0,7,,0,650,us,305,0,39,mwc,13.4,-0.443,133.091,"Manokwari, Indonesia",,Indonesia
+"M 6.9 - 24 km ENE of Atlasovo, Russia",6.9,10-06-2004 15:19,0,5,,0,732,us,798,0,31.2,mwb,188.6,55.682,160.003,"Atlasovo, Russia",Asia,Russia
+"M 6.6 - 11 km N of Cañete, Chile",6.6,03-05-2004 04:36,0,7,,0,670,us,282,0,46.9,mwb,21,-37.695,-73.406,"Cañete, Chile",South America,Chile
+"M 6.7 - 105 km WNW of Naisano Dua, Indonesia",6.7,23-04-2004 01:50,0,5,,0,691,us,386,0,27.6,mwb,65.8,-9.362,122.839,"Naisano Dua, Indonesia",,Indonesia
+"M 6.5 - 86 km NNW of Sola, Vanuatu",6.5,09-04-2004 15:23,0,4,,0,650,us,424,0,29.9,mwb,228.4,-13.174,167.198,"Sola, Vanuatu",,Vanuatu
+M 6.6 - Afghanistan-Tajikistan-Pakistan region,6.6,05-04-2004 21:24,0,4,,0,670,us,728,0,18.3,mwb,187.1,36.512,71.029,Afghanistan-Tajikistan-Pakistan region,Asia,Afghanistan
+"M 6.7 - 38 km SSW of Nabire, Indonesia",6.7,08-02-2004 08:58,0,7,,0,691,us,256,0,33.3,mwc,25.7,-3.665,135.339,"Nabire, Indonesia",,Indonesia
+"M 7.3 - Near the south coast of Papua, Indonesia",7.3,07-02-2004 02:42,0,7,,0,820,us,390,0,23,mwb,10,-4.003,135.023,"Papua, Indonesia",,Indonesia
+"M 7.0 - 28 km S of Nabire, Indonesia",7,05-02-2004 21:05,0,7,,0,754,us,367,0,33,mwc,16.6,-3.615,135.538,"Nabire, Indonesia",,Indonesia
+"M 6.7 - 107 km NW of Ambon, Indonesia",6.7,28-01-2004 22:15,0,6,,0,691,us,243,0,42.5,mwb,17.4,-3.12,127.4,"Ambon, Indonesia",,Indonesia
+"M 7.3 - 201 km ESE of Tadine, New Caledonia",7.3,27-12-2003 16:00,0,4,,0,820,us,235,0,46.6,mwc,10,-22.015,169.766,"Tadine, New Caledonia",,
+"M 6.6 - 13 km SSW of Bam, Iran",6.6,26-12-2003 01:56,0,9,,0,670,us,552,0,44.8,mwc,10,28.995,58.311,"Bam, Iran",Asia,Iran
+"M 6.5 - 3 km SSE of Progreso, Panama",6.5,25-12-2003 07:11,0,6,,0,650,us,405,0,48.4,mwb,33,8.416,-82.824,"Progreso, Panama",,Panama
+"M 6.5 - 10 km NE of San Simeon, California",6.5,22-12-2003 19:15,7,9,,0,1390,nc,65,0.04685,71,mw,8.382,35.7005,-121.101,"San Simeon, California",North America,United States of America
+"M 6.8 - 92 km E of Yujing, Taiwan",6.8,10-12-2003 04:38,0,7,,0,711,us,447,0,27.7,mwb,10,23.039,121.362,"Yujing, Taiwan",Asia,Taiwan
+"M 6.6 - 82 km E of Kimbe, Papua New Guinea",6.6,25-11-2003 20:19,0,6,,0,670,us,384,0,25.1,mwb,35,-5.581,150.88,"Kimbe, Papua New Guinea",,Papua New Guinea
+"M 6.5 - 4 km NW of Can-Avid, Philippines",6.5,18-11-2003 17:14,0,6,,0,650,us,487,0,45.9,mwb,35,12.025,125.416,"Can-Avid, Philippines",,Philippines
+"M 6.6 - 51 km NW of Isangel, Vanuatu",6.6,06-11-2003 10:38,0,5,,0,670,us,475,0,26.2,mwb,113.7,-19.262,168.892,"Isangel, Vanuatu",,
+"M 7.0 - 133 km ESE of Ishinomaki, Japan",7,31-10-2003 01:06,0,5,,0,754,us,568,0,61.2,mwb,10,37.812,142.619,"Ishinomaki, Japan",,
+"M 6.7 - 39 km SSE of Kushiro, Japan",6.7,08-10-2003 09:06,0,6,,0,691,us,556,0,55.4,mwc,32,42.648,144.57,"Kushiro, Japan",Asia,
+"M 6.7 - 9 km S of Aktash, Russia",6.7,01-10-2003 01:03,0,7,,0,691,us,643,0,24.5,mwb,10,50.211,87.721,"Aktash, Russia",Asia,Russia
+"M 6.5 - 58 km S of Kushiro, Japan",6.5,29-09-2003 02:36,0,5,,0,650,us,586,0,71.3,mwc,25,42.45,144.38,"Kushiro, Japan",,
+"M 7.3 - 29 km S of Aktash, Russia",7.3,27-09-2003 11:33,0,7,,0,820,us,667,0,24.5,mwb,16,50.038,87.813,"Aktash, Russia",Asia,Russia
+"M 7.4 - 119 km ESE of Shizunai-furukawach?, Japan",7.4,25-09-2003 21:08,0,7,,0,842,us,514,0,78.8,mwc,33,41.774,143.593,"Shizunai-furukawach?, Japan",Asia,
+"M 8.2 - 134 km SSW of Kushiro, Japan",8.16,25-09-2003 19:50,0,9,,0,1024,official,0,0,0,mww,27,41.815,143.91,"Kushiro, Japan",,
+"M 6.6 - 16 km SE of Taungdwingyi, Myanmar",6.6,21-09-2003 18:16,0,7,,0,670,us,518,0,24.7,mwb,10,19.917,95.672,"Taungdwingyi, Myanmar",Asia,Myanmar
+"M 7.2 - 56 km NW of Te Anau, New Zealand",7.2,21-08-2003 12:12,0,7,,0,798,us,428,0,17.5,mwc,28,-45.104,167.144,"Te Anau, New Zealand",,New Zealand
+M 7.6 - Scotia Sea,7.6,04-08-2003 04:37,0,6,,0,889,us,315,0,25.2,mwc,10,-60.532,-43.411,Scotia Sea,,United Kingdom of Great Britain and Northern Ireland (the)
+"M 6.5 - 41 km N of Rabaul, Papua New Guinea",6.5,15-07-2003 18:46,0,6,,0,650,us,156,0,31.4,mwb,33,-3.828,152.174,"Rabaul, Papua New Guinea",,Papua New Guinea
+"M 6.8 - 42 km W of Ovalle, Chile",6.8,20-06-2003 13:30,0,7,,0,711,us,398,0,39.1,mwc,33,-30.608,-71.637,"Ovalle, Chile",South America,Chile
+"M 6.9 - 25 km ESE of Atlasovo, Russia",6.9,16-06-2003 22:08,0,5,,0,732,us,733,0,26.7,mwb,174.8,55.492,159.999,"Atlasovo, Russia",Asia,Russia
+"M 6.6 - 87 km SSE of Kokopo, Papua New Guinea",6.6,07-06-2003 00:32,0,6,,0,670,us,419,0,27.8,mwc,33,-5.095,152.502,"Kokopo, Papua New Guinea",,Papua New Guinea
+"M 7.0 - 116 km NE of Tobelo, Indonesia",7,26-05-2003 19:23,0,6,,0,754,us,473,0,30.3,mwc,31,2.354,128.855,"Tobelo, Indonesia",,Indonesia
+"M 7.0 - 27 km SSW of ?funato, Japan",7,26-05-2003 09:24,0,7,,0,754,us,690,0,19.1,mwb,68,38.849,141.568,"?funato, Japan",Asia,Japan
+"M 6.8 - 25 km WNW of Dellys, Algeria",6.8,21-05-2003 18:44,0,9,,0,711,us,534,0,19.4,mwc,12,36.964,3.634,"Dellys, Algeria",,Algeria
+"M 6.5 - 46 km NE of Ruteng, Indonesia",6.5,25-03-2003 02:53,0,7,,0,650,us,247,0,28.7,mwc,33,-8.294,120.743,"Ruteng, Indonesia",,Indonesia
+"M 6.8 - 114 km ESE of Kokopo, Papua New Guinea",6.8,11-03-2003 07:27,0,7,,0,711,us,431,0,38.4,mwc,40.2,-4.694,153.238,"Kokopo, Papua New Guinea",,Papua New Guinea
+"M 7.6 - 16 km SSW of Cuyutlán, Mexico",7.6,22-01-2003 02:06,0,7,,0,889,us,551,0,0,mwb,24,18.77,-104.104,"Cuyutlán, Mexico",North America,Mexico
+"M 6.5 - 33 km S of Puerto San José, Guatemala",6.5,21-01-2003 02:46,0,6,,0,650,us,316,0,0,mwc,24,13.626,-90.774,"Puerto San José, Guatemala",,
+"M 7.3 - 126 km W of Kirakira, Solomon Islands",7.3,20-01-2003 08:43,0,6,,0,820,us,457,0,0,mwc,33,-10.491,160.77,"Kirakira, Solomon Islands",,
+"M 6.7 - 191 km SE of Kokopo, Papua New Guinea",6.7,10-01-2003 13:11,0,5,,0,691,us,323,0,0,mwb,71.9,-5.311,153.701,"Kokopo, Papua New Guinea",,
+"M 6.7 - New Ireland region, Papua New Guinea",6.7,12-12-2002 08:30,0,6,,0,691,us,453,0,0,mwb,34,-4.786,153.275,"New Ireland region, Papua New Guinea",,Papua New Guinea
+"M 7.9 - 75 km E of Cantwell, Alaska",7.9,03-11-2002 22:12,8,9,,0,1750,ak,0,0,0,mw,4.2,63.5141,-147.453,"Cantwell, Alaska",North America,United States of America
+"M 7.4 - 50 km NW of Sinabang, Indonesia",7.4,02-11-2002 01:26,0,7,,0,842,us,418,0,0,mwb,30,2.824,96.085,"Sinabang, Indonesia",,Indonesia
+"M 6.6 - 53 km ENE of Cantwell, Alaska",6.6,23-10-2002 11:27,0,7,,0,670,ak,0,0,0,mw,4.2,63.5144,-147.912,"Cantwell, Alaska",North America,United States of America
+"M 6.7 - 72 km S of Manokwari, Indonesia",6.7,10-10-2002 12:28,0,7,,0,691,us,250,0,0,ms,10,-1.511,133.973,"Manokwari, Indonesia",,Indonesia
+"M 7.6 - 102 km SSE of Manokwari, Indonesia",7.6,10-10-2002 10:50,0,7,,0,889,us,375,0,0,mwc,10,-1.757,134.297,"Manokwari, Indonesia",,Indonesia
+"M 6.5 - 152 km NNE of Bamboo Flat, India",6.5,13-09-2002 22:28,0,6,,0,650,us,646,0,0,mwc,21,13.036,93.068,"Bamboo Flat, India",,India
+"M 7.6 - 68 km ESE of Aitape, Papua New Guinea",7.6,08-09-2002 18:44,0,7,,0,889,us,428,0,0,mwc,13,-3.302,142.945,"Aitape, Papua New Guinea",,Papua New Guinea
+"M 6.5 - 114 km SSE of San Jose Village, Northern Mariana Islands",6.5,14-08-2002 13:57,0,4,,0,650,us,260,0,0,mwc,30,14.101,146.199,"San Jose Village, Northern Mariana Islands",,
+"M 6.5 - 14 km SE of Punta de Burica, Panama",6.5,31-07-2002 00:16,0,7,,0,650,us,533,0,0,mwc,10,7.929,-82.793,"Punta de Burica, Panama",,Panama
+"M 6.5 - 59 km SSW of Abhar, Iran",6.5,22-06-2002 02:58,0,8,,0,650,us,555,0,0,mwc,10,35.626,49.047,"Abhar, Iran",Asia,Iran
+"M 6.6 - 20 km SW of Monte Patria, Chile",6.6,18-06-2002 13:56,0,7,,0,670,us,420,0,0,mwb,54,-30.805,-71.124,"Monte Patria, Chile",South America,Chile
+"M 6.7 - 190 km NW of Sola, Vanuatu",6.7,17-06-2002 21:26,0,5,,0,691,us,272,0,0,mwc,33,-12.592,166.383,"Sola, Vanuatu",,
+"M 7.1 - 20 km SSW of Merizo Village, Guam",7.1,26-04-2002 16:06,0,7,,0,776,us,257,0,0,mwc,85.7,13.088,144.619,"Merizo Village, Guam",,United States of America
+"M 6.7 - 31 km SW of Copiapó, Chile",6.7,18-04-2002 16:08,0,7,,0,691,us,462,0,0,mwb,62,-27.535,-70.586,"Copiapó, Chile",South America,Chile
+"M 6.8 - 27 km SSW of Nuxco, Mexico",6.8,18-04-2002 05:02,0,6,,0,711,us,292,0,0,mwc,24.9,16.985,-100.865,"Nuxco, Mexico",North America,
+"M 7.1 - 67 km ENE of Hualien City, Taiwan",7.1,31-03-2002 06:52,0,6,,0,776,us,550,0,0,mwc,32.8,24.279,122.179,"Hualien City, Taiwan",Asia,
+"M 6.5 - 107 km NE of Calama, Chile",6.5,28-03-2002 04:56,0,5,,0,650,us,486,0,0,mwc,125.1,-21.663,-68.329,"Calama, Chile",South America,Chile
+"M 7.5 - Mindanao, Philippines",7.5,05-03-2002 21:16,0,7,,0,865,us,321,0,0,mwc,31,6.033,124.249,"Mindanao, Philippines",,Philippines
+"M 7.4 - 51 km SW of Jurm, Afghanistan",7.4,03-03-2002 12:08,0,5,,0,842,us,138,0,0,mwc,225.6,36.502,70.482,"Jurm, Afghanistan",Asia,Afghanistan
+"M 6.6 - 125 km E of Kimbe, Papua New Guinea",6.6,05-02-2002 13:27,0,6,,0,670,us,444,0,0,mwc,39,-5.345,151.248,"Kimbe, Papua New Guinea",,Papua New Guinea
+"M 6.5 - 5 km NE of Sultanda??, Turkey",6.5,03-02-2002 07:11,0,7,,0,650,us,482,0,0,mwc,5,38.573,31.271,"Sultanda??, Turkey",Asia,Turkey
+"M 6.7 - 11 km SE of Aitape, Papua New Guinea",6.7,10-01-2002 11:14,0,8,,0,691,us,333,0,0,mwc,11,-3.212,142.427,"Aitape, Papua New Guinea",,Papua New Guinea
+"M 6.6 - 33 km WNW of Port-Vila, Vanuatu",6.6,03-01-2002 10:17,0,6,,0,670,us,386,0,0,mwc,10,-17.664,168.004,"Port-Vila, Vanuatu",,Vanuatu
+"M 7.2 - 50 km WNW of Port-Vila, Vanuatu",7.2,02-01-2002 17:22,0,6,,0,798,us,427,0,0,mwc,21,-17.6,167.856,"Port-Vila, Vanuatu",,Vanuatu
+"M 6.8 - 22 km WNW of Malango, Solomon Islands",6.8,23-12-2001 22:52,0,7,,0,711,us,385,0,0,mwc,16,-9.613,159.53,"Malango, Solomon Islands",,Solomon Islands
+"M 6.8 - 62 km SSW of Yonakuni, Japan",6.8,18-12-2001 04:02,0,5,,0,711,us,499,0,0,mwc,14,23.954,122.734,"Yonakuni, Japan",,
+"M 6.5 - 3 km NW of Hanamaki, Japan",6.5,02-12-2001 13:01,0,5,,0,650,us,605,0,0,mwc,123.8,39.402,141.089,"Hanamaki, Japan",Asia,Japan
+"M 7.8 - Southern Qinghai, China",7.8,14-11-2001 09:26,0,9,,0,936,us,368,0,0,mwc,10,35.946,90.541,"Southern Qinghai, China",Asia,People's Republic of China
+"M 7.0 - 40 km S of Kimbe, Papua New Guinea",7,31-10-2001 09:10,0,7,,0,754,us,254,0,0,mwc,33,-5.912,150.196,"Kimbe, Papua New Guinea",,Papua New Guinea
+"M 7.5 - 155 km E of Kendari, Indonesia",7.5,19-10-2001 03:28,0,6,,0,865,us,234,0,0,mwc,33,-4.102,123.907,"Kendari, Indonesia",,Indonesia
+"M 7.0 - 69 km SSE of Inarajan Village, Guam",7,12-10-2001 15:02,0,6,,0,754,us,482,0,0,mwc,37,12.686,144.98,"Inarajan Village, Guam",,
+"M 6.5 - 108 km WNW of Manokwari, Indonesia",6.5,11-09-2001 14:56,0,6,,0,650,us,174,0,0,mwc,33,-0.578,133.13,"Manokwari, Indonesia",,Indonesia
+"M 6.6 - 74 km S of Kokhanok, Alaska",6.6,28-07-2001 07:32,6,6,,0,754,ak,0,0,0,mw,131.8,58.775,-154.701,"Kokhanok, Alaska",North America,United States of America
+"M 6.5 - 32 km WNW of Skýros, Greece",6.5,26-07-2001 00:21,0,8,,0,650,us,483,0,0,mwc,10,39.059,24.244,"Skýros, Greece",Europe,Greece
+"M 7.6 - 51 km SW of Punta de Bombón, Peru",7.6,07-07-2001 09:38,0,7,,0,889,us,398,0,0,mwc,33,-17.543,-72.077,"Punta de Bombón, Peru",,Peru
+"M 6.6 - 31 km S of Achanizo, Peru",6.6,05-07-2001 13:53,0,7,,0,670,us,324,0,0,mwc,62,-16.086,-73.987,"Achanizo, Peru",,Peru
+"M 6.7 - 34 km WSW of Pacocha, Peru",6.7,26-06-2001 04:18,0,6,,0,691,us,422,0,0,mwc,24,-17.745,-71.649,"Pacocha, Peru",,Peru
+"M 8.4 - 6 km SSW of Atico, Peru",8.4,23-06-2001 20:33,0,8,,0,1086,official,518,0,0,mww,33,-16.265,-73.641,"Atico, Peru",,Peru
+"M 6.7 - 128 km SSE of Panguna, Papua New Guinea",6.7,19-04-2001 21:43,0,6,,0,691,us,282,0,0,mwc,17,-7.41,155.865,"Panguna, Papua New Guinea",,Solomon Islands
+"M 6.8 - 16 km SSW of Kure, Japan",6.8,24-03-2001 06:27,0,7,,0,711,us,596,0,0,mwc,50,34.083,132.526,"Kure, Japan",Asia,Japan
+"M 6.5 - 41 km SSW of Ambon, Indonesia",6.5,19-03-2001 05:52,0,6,,0,650,us,206,0,0,mwc,33,-4.029,128.02,"Ambon, Indonesia",,Indonesia
+"M 6.8 - 7 km SSE of Longbranch, Washington",6.8,28-02-2001 18:54,7,7,,0,1441,uw,67,0,31,md,51.798,47.149,-122.727,"Longbranch, Washington",North America,United States of America
+"M 7.1 - 137 km WNW of Ternate, Indonesia",7.1,24-02-2001 07:23,0,7,,0,776,us,426,0,0,mwc,35,1.271,126.249,"Ternate, Indonesia",,Indonesia
+"M 7.4 - 102 km SSE of Bengkulu, Indonesia",7.4,13-02-2001 19:28,0,6,,0,842,us,221,0,0,mwc,36,-4.68,102.562,"Bengkulu, Indonesia",,Indonesia
+"M 6.6 - 5 km S of Cojutepeque, El Salvador",6.6,13-02-2001 14:22,0,8,,0,670,us,273,0,0,mwc,10,13.671,-88.938,"Cojutepeque, El Salvador",,El Salvador
+"M 7.7 - 17 km NW of Bhach?u, India",7.7,26-01-2001 03:16,0,9,,0,912,us,472,0,0,mwc,16,23.419,70.232,"Bhach?u, India",Asia,India
+"M 6.9 - 59 km WSW of Bengkulu, Indonesia",6.9,16-01-2001 13:25,0,6,,0,732,us,117,0,0,mwb,28,-4.022,101.776,"Bengkulu, Indonesia",,Indonesia
+"M 7.7 - 28 km SSW of Puerto El Triunfo, El Salvador",7.7,13-01-2001 17:33,0,8,,0,912,us,427,0,0,mwc,60,13.049,-88.66,"Puerto El Triunfo, El Salvador",,
+"M 6.9 - 47 km S of Old Harbor, Alaska",6.9,10-01-2001 16:02,5,7,,0,745,ak,0,0,0,mw,36.4,56.7744,-153.281,"Old Harbor, Alaska",North America,
+"M 7.1 - 16 km NE of Port-Olry, Vanuatu",7.1,09-01-2001 16:49,0,7,,0,776,us,372,0,0,mwb,103,-14.928,167.17,"Port-Olry, Vanuatu",,Vanuatu
+"M 6.8 - Mindanao, Philippines",6.8,01-01-2001 08:54,0,5,,0,711,us,64,0,0,mwc,33,6.631,126.899,"Mindanao, Philippines",,
+"M 7.5 - 21 km SE of Lukatan, Philippines",7.5,01-01-2001 06:57,0,7,,0,865,us,324,0,0,mwc,33,6.898,126.579,"Lukatan, Philippines",,Philippines
