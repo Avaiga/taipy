@@ -1,0 +1,10 @@
+.normal {
+  width: 100%;
+  height: 100%;
+}
+
+.checked {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, red, transparent);
+}
