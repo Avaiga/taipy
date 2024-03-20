@@ -68,16 +68,16 @@ class _JobDispatcher(threading.Thread):
                 continue
 
             with self.lock:
-                self._logger.debug("-------------------------> Acquired lock to execute job.")
+                self._logger.debug("Acquiring lock to check jobs to run.")
                 job = None
                 try:
                     if not self._STOP_FLAG:
                         job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
                 except Empty:  # In case the last job of the queue has been removed.
                     pass
-            self._logger.debug("-------------------------> Released lock to execute job.")
+            self._logger.debug(f"Releasing lock after checking jobs to run.")
             if job:
-                self._logger.debug(f"-------------------------> Got job to execute {job.id}.")
+                self._logger.debug(f"Got a job to execute {job.id}.")
                 try:
                     if not self._STOP_FLAG:
                         self._execute_job(job)
@@ -85,7 +85,7 @@ class _JobDispatcher(threading.Thread):
                         self.orchestrator.jobs_to_run.put(job)
                 except Exception as e:
                     self._logger.exception(e)
-
+        time.sleep(1)
         self._logger.debug("Job dispatcher stopped.")
 
     @abstractmethod

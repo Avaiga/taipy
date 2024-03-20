@@ -40,13 +40,13 @@ class _StandaloneJobDispatcher(_JobDispatcher):
     def _can_execute(self) -> bool:
         """Returns True if the dispatcher have resources to dispatch a job."""
         with self._nb_available_workers_lock:
-            self._logger.debug(f"can execute a job ? {self._nb_available_workers} available workers.")
+            self._logger.debug(f"Can execute a job ? {self._nb_available_workers} available workers.")
             return self._nb_available_workers > 0
 
     def run(self):
         with self._executor:
             super().run()
-        self._logger.debug("Standalone job dispatcher: Pool executor shut down")
+        self._logger.debug("Standalone job dispatcher: Pool executor shut down.")
 
     def _dispatch(self, job: Job):
         """Dispatches the given `Job^` on an available worker for execution.
@@ -56,7 +56,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         """
         with self._nb_available_workers_lock:
             self._nb_available_workers -= 1
-            self._logger.debug(f"Changing nb_available_workers to {self._nb_available_workers} from dispatch")
+            self._logger.debug(f"Changing nb_available_workers to {self._nb_available_workers} from dispatch method.")
         config_as_string = _TomlSerializer()._serialize(Config._applied_config)  # type: ignore[attr-defined]
         future = self._executor.submit(_TaskFunctionWrapper(job.id, job.task), config_as_string=config_as_string)
         future.add_done_callback(partial(self._update_job_status_from_future, job))
@@ -64,5 +64,5 @@ class _StandaloneJobDispatcher(_JobDispatcher):
     def _update_job_status_from_future(self, job: Job, ft):
         with self._nb_available_workers_lock:
             self._nb_available_workers += 1
-            self._logger.debug(f"Changing nb_available_workers to {self._nb_available_workers} from callback")
+            self._logger.debug(f"Changing nb_available_workers to {self._nb_available_workers} from callback method.")
         self._update_job_status(job, ft.result())
