@@ -17,8 +17,6 @@ jobs:
         with:
           python-version: '3.11'
       - name: Update config.pyi
-        with:
-          python-version: '3.11'
         run: python taipy/config/stubs/generate_pyi.py
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
