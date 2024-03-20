@@ -27,16 +27,18 @@ from .unique_section import UniqueSection
 
 class Config:
     """Configuration singleton."""
-
     @_Classproperty
     def unique_sections(cls) -> Dict[str, UniqueSection]:
         """Return all unique sections."""
+
     @_Classproperty
     def sections(cls) -> Dict[str, Dict[str, Section]]:
         """Return all non unique sections."""
+
     @_Classproperty
     def global_config(cls) -> GlobalAppConfig:
         """Return configuration values related to the global application as a `GlobalAppConfig^`."""
+
     @classmethod
     @_ConfigBlocker._check()
     def load(cls, filename):
@@ -47,6 +49,7 @@ class Config:
         Parameters:
             filename (Union[str, Path]): The path of the toml configuration file to load.
         """
+
     @classmethod
     def export(cls, filename):
         """Export a configuration.
@@ -60,6 +63,7 @@ class Config:
         Note:
             If *filename* already exists, it is overwritten.
         """
+
     @classmethod
     def backup(cls, filename):
         """Backup a configuration.
@@ -75,6 +79,7 @@ class Config:
         Note:
             If *filename* already exists, it is overwritten.
         """
+
     @classmethod
     @_ConfigBlocker._check()
     def restore(cls, filename):
@@ -83,6 +88,7 @@ class Config:
         Parameters:
             filename (Union[str, Path]): The path of the toml configuration file to load.
         """
+
     @classmethod
     @_ConfigBlocker._check()
     def override(cls, filename):
@@ -91,12 +97,15 @@ class Config:
         Parameters:
             filename (Union[str, Path]): The path of the toml configuration file to load.
         """
+
     @classmethod
     def block_update(cls):
         """Block update on the configuration signgleton."""
+
     @classmethod
     def unblock_update(cls):
         """Unblock update on the configuration signgleton."""
+
     @classmethod
     @_ConfigBlocker._check()
     def configure_global_app(cls, **properties) -> GlobalAppConfig:
@@ -107,6 +116,7 @@ class Config:
         Returns:
             The global application configuration.
         """
+
     @classmethod
     def check(cls) -> IssueCollector:
         """Check configuration.
@@ -116,44 +126,57 @@ class Config:
         Returns:
             Collector containing the info, warning and error issues.
         """
+
     @classmethod
     @_ConfigBlocker._check()
     def _register_default(cls, default_section: Section):
         """"""
+
     @classmethod
     @_ConfigBlocker._check()
     def _register(cls, section):
         """"""
+
     @classmethod
     def _override_env_file(cls):
         """"""
+
     @classmethod
     def _compile_configs(cls):
         """"""
+
     @classmethod
     def _to_json(cls, _config: _Config) -> str:
         """"""
+
     @classmethod
     def _from_json(cls, config_as_str: str) -> _Config:
         """"""
+
     @_Classproperty
     def job_config(cls) -> JobConfig:
         """"""
+
     @_Classproperty
     def data_nodes(cls) -> Dict[str, DataNodeConfig]:
         """"""
+
     @_Classproperty
     def tasks(cls) -> Dict[str, TaskConfig]:
         """"""
+
     @_Classproperty
     def scenarios(cls) -> Dict[str, ScenarioConfig]:
         """"""
+
     @_Classproperty
     def migration_functions(cls) -> Dict[str, MigrationConfig]:
         """"""
+
     @_Classproperty
     def core(cls) -> Dict[str, CoreSection]:
         """"""
+
     @staticmethod
     def configure_scenario(
         id: str,
@@ -190,6 +213,7 @@ class Config:
         Returns:
             The new scenario configuration.
         """
+
     @staticmethod
     def set_default_scenario_configuration(
         task_configs: Optional[List[TaskConfig]] = None,
@@ -227,6 +251,7 @@ class Config:
         Returns:
             The new default scenario configuration.
         """
+
     @staticmethod
     def set_default_data_node_configuration(
         storage_type: str, scope: Optional[Scope] = None, validity_period: Optional[timedelta] = None, **properties
@@ -240,8 +265,8 @@ class Config:
         Parameters:
             storage_type (str): The default storage type for all data node configurations.
                 The possible values are *"pickle"* (the default value), *"csv"*, *"excel"*,
-                *"sql"*, *"mongo_collection"*, *"in_memory"*, *"json"*, *"parquet"* or
-                *"generic"*.
+                *"sql"*, *"mongo_collection"*, *"in_memory"*, *"json"*, *"parquet"*, *"generic"*,
+                or *"s3_object"*.
             scope (Optional[Scope^]): The default scope for all data node configurations.<br/>
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
@@ -254,6 +279,7 @@ class Config:
         Returns:
             The default data node configuration.
         """
+
     @classmethod
     def configure_data_node_from(
         cls,
@@ -272,6 +298,7 @@ class Config:
         Returns:
             The new data node configuration.
         """
+
     @classmethod
     def configure_data_node(
         cls,
@@ -304,6 +331,7 @@ class Config:
         Returns:
             The new data node configuration.
         """
+
     @classmethod
     def configure_csv_data_node(
         cls,
@@ -337,6 +365,7 @@ class Config:
         Returns:
             The new CSV data node configuration.
         """
+
     @classmethod
     def configure_json_data_node(
         cls,
@@ -368,6 +397,7 @@ class Config:
         Returns:
             The new JSON data node configuration.
         """
+
     @classmethod
     def configure_parquet_data_node(
         cls,
@@ -412,6 +442,7 @@ class Config:
         Returns:
             The new Parquet data node configuration.
         """
+
     @classmethod
     def configure_excel_data_node(
         cls,
@@ -446,6 +477,7 @@ class Config:
         Returns:
             The new Excel data node configuration.
         """
+
     @classmethod
     def configure_generic_data_node(
         cls,
@@ -480,6 +512,7 @@ class Config:
         Returns:
             The new Generic data node configuration.
         """
+
     @classmethod
     def configure_in_memory_data_node(
         cls,
@@ -507,6 +540,7 @@ class Config:
         Returns:
             The new *in-memory* data node configuration.
         """
+
     @classmethod
     def configure_pickle_data_node(
         cls,
@@ -536,6 +570,7 @@ class Config:
         Returns:
             The new pickle data node configuration.
         """
+
     @classmethod
     def configure_sql_table_data_node(
         cls,
@@ -593,6 +628,7 @@ class Config:
         Returns:
             The new SQL data node configuration.
         """
+
     @classmethod
     def configure_sql_data_node(
         cls,
@@ -601,6 +637,7 @@ class Config:
         db_engine: str,
         read_query: str,
         write_query_builder: Callable,
+        append_query_builder: Optional[Callable] = None,
         db_username: Optional[str] = None,
         db_password: Optional[str] = None,
         db_host: Optional[str] = None,
@@ -623,7 +660,9 @@ class Config:
                 or *"postgresql"*.
             read_query (str): The SQL query string used to read the data from the database.
             write_query_builder (Callable): A callback function that takes the data as an input parameter
-                and returns a list of SQL queries.
+                and returns a list of SQL queries to be executed when writing data to the data node.
+            append_query_builder (Optional[Callable]): A callback function that takes the data as an input parameter
+                and returns a list of SQL queries to be executed when appending data to the data node.
             db_username (Optional[str]): The database username. Required by the *"mssql"*, *"mysql"*, and
                 *"postgresql"* engines.
             db_password (Optional[str]): The database password. Required by the *"mssql"*, *"mysql"*, and
@@ -652,6 +691,7 @@ class Config:
         Returns:
             The new SQL data node configuration.
         """
+
     @classmethod
     def configure_mongo_collection_data_node(
         cls,
@@ -701,6 +741,45 @@ class Config:
         Returns:
             The new Mongo collection data node configuration.
         """
+
+    @classmethod
+    def configure_s3_object_data_node(
+        cls,
+        id: str,
+        aws_access_key: str,
+        aws_secret_access_key: str,
+        aws_s3_bucket_name: str,
+        aws_s3_object_key: str,
+        aws_region: Optional[str] = None,
+        aws_s3_object_parameters: Optional[Dict[str, Any]] = None,
+        scope: Optional[Scope] = None,
+        validity_period: Optional[timedelta] = None,
+        **properties,
+    ) -> "DataNodeConfig":
+        """Configure a new S3 object data node configuration.
+
+        Parameters:
+            id (str): The unique identifier of the new S3 Object data node configuration.
+            aws_access_key (str): Amazon Web Services ID for to identify account.
+            aws_secret_access_key (str): Amazon Web Services access key to authenticate programmatic requests.
+            aws_s3_bucket_name (str): The bucket in S3 to read from and to write the data to.
+            aws_region (Optional[str]): Self-contained geographic area where Amazon Web Services (AWS)
+                infrastructure is located.
+            aws_s3_object_parameters (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
+                into AWS S3 bucket access string.
+            scope (Optional[Scope^]): The scope of the S3 Object data node configuration.<br/>
+                The default value is `Scope.SCENARIO`.
+            validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
+                considered up-to-date. Once the validity period has passed, the data node is considered stale and
+                relevant tasks will run even if they are skippable (see the
+                [Task configs page](../core/config/task-config.md) for more details).
+                If *validity_period* is set to None, the data node is always up-to-date.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
+        Returns:
+            The new S3 object data node configuration.
+        """
+
     @staticmethod
     def configure_task(
         id: str,
@@ -729,6 +808,7 @@ class Config:
         Returns:
             The new task configuration.
         """
+
     @staticmethod
     def set_default_task_configuration(
         function,
@@ -759,6 +839,7 @@ class Config:
         Returns:
             The default task configuration.
         """
+
     @staticmethod
     def configure_job_executions(
         mode: Optional[str] = None, max_nb_of_workers: Optional[Union[int, str]] = None, **properties
@@ -779,6 +860,7 @@ class Config:
         Returns:
             The new job execution configuration.
         """
+
     @staticmethod
     def add_migration_function(
         target_version: str,
@@ -797,10 +879,12 @@ class Config:
         Returns:
             `MigrationConfig^`: The Migration configuration.
         """
+
     @staticmethod
     def configure_core(
         root_folder: Optional[str] = None,
         storage_folder: Optional[str] = None,
+        taipy_storage_folder: Optional[str] = None,
         repository_type: Optional[str] = None,
         repository_properties: Optional[Dict[str, Union[str, int]]] = None,
         read_entity_retry: Optional[int] = None,
@@ -814,9 +898,12 @@ class Config:
         Parameters:
             root_folder (Optional[str]): Path of the base folder for the taipy application.
                 The default value is "./taipy/"
-            storage_folder (Optional[str]): Folder name used to store Taipy data. The default value is ".data/".
-                It is used in conjunction with the `root_folder` field. That means the storage path is
-                <root_folder><storage_folder> (The default path is "./taipy/.data/").
+            storage_folder (str): Folder name used to store user data. The default value is "user_data/". It is used in
+                conjunction with the *root_folder* attribute. That means the storage path is
+                <root_folder><storage_folder> (The default path is "./taipy/user_data/").
+            taipy_storage_folder (str): Folder name used to store Taipy data. The default value is ".taipy/". It is
+                used in conjunction with the *root_folder* attribute. That means the storage path is
+                <root_folder><storage_folder> (The default path is "./taipy/.taipy/").
             repository_type (Optional[str]): The type of the repository to be used to store Taipy data.
                 The default value is "filesystem".
             repository_properties (Optional[Dict[str, Union[str, int]]]): A dictionary of additional properties
