@@ -1,0 +1,4 @@
+pandas 
+taipy
+requests
+csv
