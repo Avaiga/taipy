@@ -1139,7 +1139,7 @@
           {
             "name": "on_compare",
             "type": "str",
-            "doc": "A data comparison function that would return a structure that identifies that differences between the different data passed as name. The default implementation compares the default data with the data[1] value.",
+            "doc": "A data comparison function that would return a structure that identifies the differences between the different data passed as name. The default implementation compares the default data with the data[1] value.",
             "signature": [["state", "State"], ["main_data_name", "str"], ["compare_data_names", "list[str]"]]
           }
         ]
