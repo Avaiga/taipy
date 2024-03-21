@@ -745,7 +745,8 @@ class Gui:
             return f"{var_name_decode}.{suffix_var_name}" if suffix_var_name else var_name_decode, module_name
         if module_name == current_context:
             var_name = var_name_decode
-        else:
+        # only strict checking for cross-context linked variable when the context has been properly set
+        elif self._has_set_context():
             if var_name not in self.__var_dir._var_head:
                 raise NameError(f"Can't find matching variable for {var_name} on context: {current_context}")
             _found = False
@@ -953,8 +954,11 @@ class Gui:
                     try:
                         with open(file_path, "wb") as grouped_file:
                             for nb in range(part + 1):
-                                with open(upload_path / f"{file_path.name}.part.{nb}", "rb") as part_file:
+                                part_file_path = upload_path / f"{file_path.name}.part.{nb}"
+                                with open(part_file_path, "rb") as part_file:
                                     grouped_file.write(part_file.read())
+                                # remove file_path after it is merged
+                                part_file_path.unlink()
                     except EnvironmentError as ee:  # pragma: no cover
                         _warn("Cannot group file after chunk upload", ee)
                         return
@@ -1619,6 +1623,9 @@ class Gui:
 
     def _set_locals_context(self, context: t.Optional[str]) -> t.ContextManager[None]:
         return self.__locals_context.set_locals_context(context)
+
+    def _has_set_context(self):
+        return self.__locals_context.get_context() is not None
 
     def _get_page_context(self, page_name: str) -> str | None:
         if page_name not in self._config.routes:

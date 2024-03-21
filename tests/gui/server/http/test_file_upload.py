@@ -87,16 +87,12 @@ def test_file_upload_multi_part(gui: Gui, helpers):
         content_type="multipart/form-data",
     )
     assert ret.status_code == 200
-    file0_path = upload_path / f"{file_name}.part.0"
-    assert file0_path.exists()
     ret = flask_client.post(
         f"/taipy-uploads?client_id={sid}",
         data={"var_name": "varname", "blob": file1, "total": "2", "part": "1"},
         content_type="multipart/form-data",
     )
     assert ret.status_code == 200
-    file1_path = upload_path / f"{file_name}.part.1"
-    assert file1_path.exists()
     file_path = upload_path / file_name
     assert file_path.exists()
 
