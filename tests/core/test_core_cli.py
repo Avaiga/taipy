@@ -473,14 +473,14 @@ def test_modified_job_configuration_dont_block_application_run(caplog, init_conf
     scenario_config = config_scenario()
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
         core = Core()
-        Config.configure_job_executions(mode="standalone", max_nb_of_workers=5)
+        Config.configure_job_executions(mode="standalone", max_nb_of_workers=3)
         core.run(force_restart=True)
         scenario = _ScenarioManager._create(scenario_config)
         jobs = taipy.submit(scenario).jobs
         assert_true_after_time(lambda: all(job.is_finished() for job in jobs))
         error_message = str(caplog.text)
         assert 'JOB "mode" was modified' in error_message
-        assert 'JOB "max_nb_of_workers" was modified' in error_message
+        assert 'JOB "max_nb_of_workers" was added' in error_message
         core.stop()
 
 
@@ -509,6 +509,7 @@ def test_modified_config_properties_without_force(caplog, init_config):
     error_message = str(caplog.text)
 
     assert 'DATA_NODE "d3" was added' in error_message
+    assert 'JOB "max_nb_of_workers" was added' in error_message
 
     assert 'DATA_NODE "d0" was removed' in error_message
 
@@ -516,7 +517,6 @@ def test_modified_config_properties_without_force(caplog, init_config):
     assert 'CORE "root_folder" was modified' in error_message
     assert 'CORE "repository_type" was modified' in error_message
     assert 'JOB "mode" was modified' in error_message
-    assert 'JOB "max_nb_of_workers" was modified' in error_message
     assert 'SCENARIO "my_scenario" has attribute "frequency" modified' in error_message
     assert 'SCENARIO "my_scenario" has attribute "tasks" modified' in error_message
     assert 'TASK "my_task" has attribute "inputs" modified' in error_message
@@ -557,7 +557,7 @@ def config_scenario_2():
         repository_type="bar",
         repository_properties={"foo": "bar"},
     )
-    Config.configure_job_executions(mode="standalone", max_nb_of_workers=5)
+    Config.configure_job_executions(mode="standalone", max_nb_of_workers=3)
     data_node_1_config = Config.configure_data_node(
         id="d1", storage_type="pickle", default_data="abc", scope=Scope.SCENARIO
     )
