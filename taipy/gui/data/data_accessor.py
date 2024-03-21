@@ -54,7 +54,7 @@ class _InvalidDataAccessor(_DataAccessor):
     def get_col_types(self, var_name: str, value: t.Any) -> t.Dict[str, str]:
         return {}
 
-    def _get_dataframe(self, value: t.Any) -> t.List[t.Any] | t.Any:
+    def _get_dataframe(self, value: t.Any) -> t.Union[t.List[t.Any], t.Any]:
         return None
 
 

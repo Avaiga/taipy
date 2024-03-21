@@ -38,7 +38,7 @@ class _PandasDataAccessor(_DataAccessor):
 
     __AGGREGATE_FUNCTIONS: t.List[str] = ["count", "sum", "mean", "median", "min", "max", "std", "first", "last"]
 
-    def _get_dataframe(self, value: t.Any) -> t.List[t.Any] | t.Any:
+    def _get_dataframe(self, value: t.Any) -> t.Any:
         return value
 
     @staticmethod
