@@ -105,11 +105,13 @@ def test_rebuild_standalone_dispatcher_and_force_restart():
 
 
 def test_build_unknown_dispatcher():
-    Config.configure_job_executions(mode="UNKNOWN")
+    with pytest.raises(ModeNotAvailable):
+        Config.configure_job_executions(mode="UNKNOWN")
+
+    Config.job_config.mode = "UNKNOWN"
     _OrchestratorFactory._build_orchestrator()
     with pytest.raises(ModeNotAvailable):
         _OrchestratorFactory._build_dispatcher()
-        assert _OrchestratorFactory._dispatcher is None
 
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _OrchestratorFactory._build_dispatcher()

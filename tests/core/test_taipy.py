@@ -40,7 +40,6 @@ from taipy.core import (
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core.config.data_node_config import DataNodeConfig
-from taipy.core.config.job_config import JobConfig
 from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data._data_manager import _DataManager
@@ -594,7 +593,6 @@ class TestTaipy:
             mck.assert_called_once_with(task)
 
     def test_block_config_when_core_is_running(self):
-        Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
         input_cfg_1 = Config.configure_data_node(id="i1", storage_type="pickle", scope=Scope.SCENARIO, default_data=1)
         output_cfg_1 = Config.configure_data_node(id="o1", storage_type="pickle", scope=Scope.SCENARIO)
         task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)

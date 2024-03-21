@@ -84,7 +84,8 @@ max_nb_of_workers = -1
 [SCENARIO.qux]
 """
     )
-    assert Config.job_config.max_nb_of_workers == 1
+    assert Config.job_config.mode == "development"
+    assert Config.job_config.max_nb_of_workers is None
     assert len(Config.data_nodes) == 1
     assert len(Config.tasks) == 1
     assert len(Config.scenarios) == 1
@@ -111,7 +112,8 @@ max_nb_of_workers = "ENV[FOO]:int"
 start_executor = "ENV[BAR]"
 """
     )
-    assert Config.job_config.max_nb_of_workers == 1
+    assert Config.job_config.mode == "development"
+    assert Config.job_config.max_nb_of_workers is None
     assert not Config.job_config.start_executor
 
     with mock.patch.dict(os.environ, {"FOO": "6", "BAR": "TRUe"}):
@@ -199,7 +201,8 @@ max_nb_of_workers = 10
     )
 
     # Default config is applied
-    assert Config.job_config.max_nb_of_workers == 1
+    assert Config.job_config.mode == "development"
+    assert Config.job_config.max_nb_of_workers is None
 
     # Code config is applied
     Config.configure_job_executions(max_nb_of_workers=-1)
@@ -230,7 +233,8 @@ max_nb_of_workers = 10
 
     with mock.patch.dict(os.environ, {"FOO": "/data/csv", "BAR": "/baz/data/csv"}):
         # Default config is applied
-        assert Config.job_config.max_nb_of_workers == 1
+        assert Config.job_config.mode == "development"
+        assert Config.job_config.max_nb_of_workers is None
 
         # Code config is applied
         Config.configure_job_executions(max_nb_of_workers=-1)

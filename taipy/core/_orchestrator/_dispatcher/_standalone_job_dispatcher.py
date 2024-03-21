@@ -27,10 +27,11 @@ class _StandaloneJobDispatcher(_JobDispatcher):
     """Manages job dispatching (instances of `Job^` class) in an asynchronous way using a ProcessPoolExecutor."""
 
     _nb_available_workers_lock = Lock()
+    _DEFAULT_MAX_NB_OF_WORKERS = 2
 
     def __init__(self, orchestrator: _AbstractOrchestrator, subproc_initializer: Optional[Callable] = None):
         super().__init__(orchestrator)
-        max_workers = Config.job_config.max_nb_of_workers or 1
+        max_workers = Config.job_config.max_nb_of_workers or self._DEFAULT_MAX_NB_OF_WORKERS
         self._executor: Executor = ProcessPoolExecutor(
             max_workers=max_workers,
             initializer=subproc_initializer,

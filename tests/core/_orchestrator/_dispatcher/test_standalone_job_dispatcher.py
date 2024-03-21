@@ -8,6 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 from concurrent.futures import Future, ProcessPoolExecutor
 from unittest import mock
 from unittest.mock import call
@@ -41,7 +42,7 @@ def test_init_default():
 
     assert job_dispatcher.orchestrator == orchestrator
     assert job_dispatcher.lock == orchestrator.lock
-    assert job_dispatcher._nb_available_workers == 1
+    assert job_dispatcher._nb_available_workers == 2
     assert isinstance(job_dispatcher._executor, ProcessPoolExecutor)
 
 
@@ -78,7 +79,7 @@ def test_dispatch_job():
 
 def test_can_execute():
     dispatcher = _StandaloneJobDispatcher(_OrchestratorFactory._orchestrator)
-    assert dispatcher._nb_available_workers == 1
+    assert dispatcher._nb_available_workers == 2
     assert dispatcher._can_execute()
     dispatcher._nb_available_workers = 0
     assert not dispatcher._can_execute()
@@ -87,6 +88,7 @@ def test_can_execute():
     dispatcher._nb_available_workers = 1
     assert dispatcher._can_execute()
 
+    
 def test_update_job_status_from_future():
     task = create_task()
     job = Job(JobId("job"), task, "s_id", task.id)
