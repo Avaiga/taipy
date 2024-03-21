@@ -92,7 +92,7 @@ export const useDispatchRequestUpdateOnFirstRender = (
     forceRefresh?: boolean
 ) => {
     useEffect(() => {
-        const updateArray = getUpdateVars(updateVars);
+        const updateArray = getUpdateVars(updateVars).filter(uv => !uv.includes(","));
         varName && updateArray.push(varName);
         updateArray.length && dispatch(createRequestUpdateAction(id, context, updateArray, forceRefresh));
     }, [updateVars, dispatch, id, context, varName, forceRefresh]);

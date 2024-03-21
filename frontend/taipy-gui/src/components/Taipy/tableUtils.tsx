@@ -21,12 +21,16 @@ import React, {
     ChangeEvent,
     SyntheticEvent,
 } from "react";
+import { FilterOptionsState } from "@mui/material";
 import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
+import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
-import Input from "@mui/material/Input";
-import TableCell, { TableCellProps } from "@mui/material/TableCell";
-import Switch from "@mui/material/Switch";
+import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
+import Input from "@mui/material/Input";
+import Switch from "@mui/material/Switch";
+import TableCell, { TableCellProps } from "@mui/material/TableCell";
+import TextField from "@mui/material/TextField";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import EditIcon from "@mui/icons-material/Edit";
@@ -39,7 +43,6 @@ import { isValid } from "date-fns";
 import { FormatConfig } from "../../context/taipyReducers";
 import { dateToString, getDateTime, getDateTimeString, getNumberString, getTimeZonedDate } from "../../utils/index";
 import { TaipyActiveProps, TaipyMultiSelectProps, getSuffixedClassNames } from "./utils";
-import { Button, FilterOptionsState, TextField } from "@mui/material";
 
 /**
  * A column description as received by the backend.
@@ -129,6 +132,8 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     defaultKey?: string; // for testing purposes only
     userData?: unknown;
     downloadable?: boolean;
+    onCompare?: string;
+    compare?: boolean;
 }
 
 export const DownloadAction = "__Taipy__download_csv";
@@ -184,6 +189,7 @@ interface EditableCellProps {
     className?: string;
     tooltip?: string;
     tableCellProps?: Partial<TableCellProps>;
+    comp?: RowValue;
 }
 
 export const defaultColumns = {} as Record<string, ColumnDesc>;
@@ -267,6 +273,8 @@ const getOptionLabel = (option: string) => (Array.isArray(option) ? option[1] : 
 
 const onCompleteClose = (evt: SyntheticEvent) => evt.stopPropagation();
 
+const emptyObject = {};
+
 export const EditableCell = (props: EditableCellProps) => {
     const {
         onValidation,
@@ -279,7 +287,8 @@ export const EditableCell = (props: EditableCellProps) => {
         nanValue,
         className,
         tooltip,
-        tableCellProps = {},
+        tableCellProps = emptyObject,
+        comp,
     } = props;
     const [val, setVal] = useState<RowValue | Date>(value);
     const [edit, setEdit] = useState(false);
@@ -444,8 +453,9 @@ export const EditableCell = (props: EditableCellProps) => {
             className={
                 onValidation ? getSuffixedClassNames(className || "tpc", edit ? "-editing" : "-editable") : className
             }
-            title={tooltip}
+            title={tooltip || comp ? `${tooltip ? tooltip : ""}${comp ? " " + formatValue(comp as RowValue, colDesc, formatConfig, nanValue) : ""}` : undefined}
         >
+            <Badge color="primary" variant="dot" invisible={comp === undefined || comp === null}>
             {edit ? (
                 colDesc.type?.startsWith("bool") ? (
                     <Box sx={cellBoxSx}>
@@ -604,6 +614,7 @@ export const EditableCell = (props: EditableCellProps) => {
                     ) : null}
                 </Box>
             )}
+            </Badge>
         </TableCell>
     );
 };

@@ -591,7 +591,9 @@ export const createRequestTableUpdateAction = (
     styles?: Record<string, string>,
     tooltips?: Record<string, string>,
     handleNan?: boolean,
-    filters?: Array<FilterDesc>
+    filters?: Array<FilterDesc>,
+    compare?: string,
+    compareDatas?: string
 ): TaipyAction =>
     createRequestDataUpdateAction(name, id, context, columns, pageKey, {
         start: start,
@@ -604,6 +606,8 @@ export const createRequestTableUpdateAction = (
         tooltips: tooltips,
         handlenan: handleNan,
         filters: filters,
+        compare: compare,
+        compare_datas: compareDatas,
     });
 
 export const createRequestInfiniteTableUpdateAction = (
@@ -621,7 +625,9 @@ export const createRequestInfiniteTableUpdateAction = (
     styles?: Record<string, string>,
     tooltips?: Record<string, string>,
     handleNan?: boolean,
-    filters?: Array<FilterDesc>
+    filters?: Array<FilterDesc>,
+    compare?: string,
+    compareDatas?: string
 ): TaipyAction =>
     createRequestDataUpdateAction(name, id, context, columns, pageKey, {
         infinite: true,
@@ -635,6 +641,8 @@ export const createRequestInfiniteTableUpdateAction = (
         tooltips: tooltips,
         handlenan: handleNan,
         filters: filters,
+        compare: compare,
+        compare_datas: compareDatas,
     });
 
 /**

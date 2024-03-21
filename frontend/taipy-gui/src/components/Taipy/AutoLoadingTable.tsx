@@ -74,7 +74,7 @@ import {
     useModule,
 } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
-import { getSuffixedClassNames } from "./utils";
+import { getSuffixedClassNames, getUpdateVar } from "./utils";
 
 interface RowData {
     colsOrder: string[];
@@ -91,6 +91,7 @@ interface RowData {
     onRowClick?: OnRowClick;
     lineStyle?: string;
     nanValue?: string;
+    compRows?: RowType[];
 }
 
 const Row = ({
@@ -110,7 +111,8 @@ const Row = ({
         onRowSelection,
         onRowClick,
         lineStyle,
-        nanValue
+        nanValue,
+        compRows,
     },
 }: {
     index: number;
@@ -143,6 +145,7 @@ const Row = ({
                     nanValue={columns[col].nanValue || nanValue}
                     tableCellProps={cellProps[cidx]}
                     tooltip={getTooltip(rows[index], columns[col].tooltip, col)}
+                    comp={compRows && compRows[index] && compRows[index][col]}
                 />
             ))}
         </TableRow>
@@ -184,9 +187,13 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         size = DEFAULT_SIZE,
         userData,
         downloadable = false,
+        compare = false,
+        onCompare = "",
     } = props;
     const [rows, setRows] = useState<RowType[]>([]);
+    const [compRows, setCompRows] = useState<RowType[]>([]);
     const [rowCount, setRowCount] = useState(1000); // need something > 0 to bootstrap the infinite loader
+    const [filteredCount, setFilteredCount] = useState(0);
     const dispatch = useDispatch();
     const page = useRef<key2Rows>({ key: defaultKey, promises: {} });
     const [orderBy, setOrderBy] = useState("");
@@ -212,9 +219,15 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             const newValue = props.data[page.current.key];
             const promise = page.current.promises[newValue.start];
             setRowCount(newValue.rowcount);
+            setFilteredCount(
+                newValue.fullrowcount && newValue.rowcount != newValue.fullrowcount
+                    ? newValue.fullrowcount - newValue.rowcount
+                    : 0
+            );
             const nr = newValue.data as RowType[];
             if (Array.isArray(nr) && nr.length > newValue.start) {
                 setRows(nr);
+                newValue.comp && setCompRows(newValue.comp as RowType[])
                 promise && promise.resolve();
             } else {
                 promise && promise.reject();
@@ -277,7 +290,12 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         col.tooltip = props.tooltip;
                     }
                 });
-                addDeleteColumn((active && (onAdd || onDelete) ? 1 : 0) + (active && filter ? 1 : 0) + (active && downloadable ? 1 : 0), baseColumns);
+                addDeleteColumn(
+                    (active && (onAdd || onDelete) ? 1 : 0) +
+                        (active && filter ? 1 : 0) +
+                        (active && downloadable ? 1 : 0),
+                    baseColumns
+                );
                 const colsOrder = Object.keys(baseColumns).sort(getsortByIndex(baseColumns));
                 const styTt = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
                     if (baseColumns[col].style) {
@@ -308,7 +326,18 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             hNan,
             false,
         ];
-    }, [active, editable, onAdd, onDelete, baseColumns, props.lineStyle, props.tooltip, props.nanValue, props.filter, downloadable]);
+    }, [
+        active,
+        editable,
+        onAdd,
+        onDelete,
+        baseColumns,
+        props.lineStyle,
+        props.tooltip,
+        props.nanValue,
+        props.filter,
+        downloadable,
+    ]);
 
     const boxBodySx = useMemo(() => ({ height: height }), [height]);
 
@@ -374,7 +403,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         styles,
                         tooltips,
                         handleNan,
-                        afs
+                        afs,
+                        compare ? onCompare : undefined,
+                        updateVars && getUpdateVar(updateVars, "comparedatas")
                     )
                 );
             });
@@ -384,6 +415,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             styles,
             tooltips,
             updateVarName,
+            updateVars,
             orderBy,
             order,
             id,
@@ -391,6 +423,8 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             columns,
             handleNan,
             appliedFilters,
+            compare,
+            onCompare,
             dispatch,
             module,
         ]
@@ -457,7 +491,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     index: getRowIndex(rows[rowIndex], rowIndex),
                     col: colName === undefined ? null : colName,
                     value,
-                    reason: value === undefined ? "click": "button",
+                    reason: value === undefined ? "click" : "button",
                     user_data: userData,
                 })
             ),
@@ -504,10 +538,12 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             onRowSelection: active && onAction ? onRowSelection : undefined,
             onRowClick: active && onAction ? onRowClick : undefined,
             lineStyle: props.lineStyle,
-            nanValue: props.nanValue
+            nanValue: props.nanValue,
+            compRows: compRows,
         }),
         [
             rows,
+            compRows,
             isItemLoaded,
             active,
             colsOrder,
@@ -523,7 +559,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             onRowClick,
             props.lineStyle,
             props.nanValue,
-            size
+            size,
         ]
     );
 
@@ -564,6 +600,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                                             onValidate={setAppliedFilters}
                                                             appliedFilters={appliedFilters}
                                                             className={className}
+                                                            filteredCount={filteredCount}
                                                         />
                                                     ) : null,
                                                     active && downloadable ? (

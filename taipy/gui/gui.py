@@ -1498,6 +1498,9 @@ class Gui:
         attributes.update({k: args_dict.get(v) for k, v in hashes.items()})
         return attributes, hashes
 
+    def _compare_data(self, *datas):
+        return datas[0]
+
     def _tbl_cols(
         self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs
     ) -> t.Union[str, _DoNotUpdate]:

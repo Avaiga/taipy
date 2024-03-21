@@ -238,8 +238,8 @@ describe("AutoLoadingTable Component", () => {
         const elts = getAllByText("Austria");
         elts.forEach((elt: HTMLElement, idx: number) =>
             selected.indexOf(idx) == -1
-                ? expect(elt.parentElement?.parentElement?.parentElement).not.toHaveClass("Mui-selected")
-                : expect(elt.parentElement?.parentElement?.parentElement).toHaveClass("Mui-selected")
+                ? expect(elt.parentElement?.parentElement?.parentElement?.parentElement).not.toHaveClass("Mui-selected")
+                : expect(elt.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("Mui-selected")
         );
         expect(document.querySelectorAll(".Mui-selected")).toHaveLength(selected.length);
     });

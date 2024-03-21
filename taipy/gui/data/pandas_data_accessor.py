@@ -20,6 +20,7 @@ from .._warnings import _warn
 from ..gui import Gui
 from ..types import PropertyType
 from ..utils import _RE_PD_TYPE, _get_date_col_str_name
+from .comparison import _compare_function
 from .data_accessor import _DataAccessor
 from .data_format import _DataFormat
 from .utils import _df_data_filter, _df_relayout
@@ -36,6 +37,9 @@ class _PandasDataAccessor(_DataAccessor):
     __INDEX_COL = "_tp_index"
 
     __AGGREGATE_FUNCTIONS: t.List[str] = ["count", "sum", "mean", "median", "min", "max", "std", "first", "last"]
+
+    def _get_dataframe(self, value: t.Any) -> t.List[t.Any] | t.Any:
+        return value
 
     @staticmethod
     def get_supported_classes() -> t.List[str]:
@@ -167,12 +171,15 @@ class _PandasDataAccessor(_DataAccessor):
         rowcount: t.Optional[int] = None,
         data_extraction: t.Optional[bool] = None,
         handle_nan: t.Optional[bool] = False,
+        fullrowcount: t.Optional[int] = None,
     ) -> t.Dict[str, t.Any]:
         ret: t.Dict[str, t.Any] = {
             "format": str(data_format.value),
         }
         if rowcount is not None:
             ret["rowcount"] = rowcount
+        if fullrowcount is not None and fullrowcount != rowcount:
+            ret["fullrowcount"] = fullrowcount
         if start is not None:
             ret["start"] = start
         if data_extraction is not None:
@@ -229,6 +236,7 @@ class _PandasDataAccessor(_DataAccessor):
 
         if isinstance(value, pd.Series):
             value = value.to_frame()
+        orig_df = value
         # add index if not chart
         if paged:
             if _PandasDataAccessor.__INDEX_COL not in value.columns:
@@ -238,6 +246,7 @@ class _PandasDataAccessor(_DataAccessor):
             if columns and _PandasDataAccessor.__INDEX_COL not in columns:
                 columns.append(_PandasDataAccessor.__INDEX_COL)
 
+        fullrowcount = len(value)
         # filtering
         filters = payload.get("filters")
         if isinstance(filters, list) and len(filters) > 0:
@@ -331,8 +340,31 @@ class _PandasDataAccessor(_DataAccessor):
                 handle_nan=payload.get("handlenan", False),
             )
             dictret = self.__format_data(
-                value, data_format, "records", start, rowcount, handle_nan=payload.get("handlenan", False)
+                value,
+                data_format,
+                "records",
+                start,
+                rowcount,
+                handle_nan=payload.get("handlenan", False),
+                fullrowcount=fullrowcount,
             )
+            compare = payload.get("compare")
+            if isinstance(compare, str):
+                comp_df = _compare_function(
+                    gui, compare, var_name, t.cast(pd.DataFrame, orig_df), payload.get("compare_datas", "")
+                )
+                if isinstance(comp_df, pd.DataFrame) and not comp_df.empty:
+                    try:
+                        if isinstance(comp_df.columns[0], tuple):
+                            cols: t.List[t.Hashable] = [c for c in comp_df.columns if c[1] == "other"]
+                            comp_df = t.cast(pd.DataFrame, comp_df.get(cols))
+                            comp_df.columns = t.cast(pd.Index, [t.cast(tuple, c)[0] for c in cols])
+                        comp_df.dropna(axis=1, how="all", inplace=True)
+                        comp_df = self.__build_transferred_cols(gui, columns, comp_df, new_indexes=new_indexes)
+                        dictret["comp"] = self.__format_data(comp_df, data_format, "records").get("data")
+                    except Exception as e:
+                        _warn("Pandas accessor compare raised an exception", e)
+
         else:
             ret_payload["alldata"] = True
             decimator_payload: t.Dict[str, t.Any] = payload.get("decimatorPayload", {})
@@ -358,13 +390,13 @@ class _PandasDataAccessor(_DataAccessor):
                         y1 = relayoutData.get("yaxis.range[1]")
 
                         value, is_copied = _df_relayout(
-                            value, x_column, y_column, chart_mode, x0, x1, y0, y1, is_copied
+                            t.cast(pd.DataFrame, value), x_column, y_column, chart_mode, x0, x1, y0, y1, is_copied
                         )
 
                     if nb_rows_max and decimator_instance._is_applicable(value, nb_rows_max, chart_mode):
                         try:
                             value, is_copied = _df_data_filter(
-                                value,
+                                t.cast(pd.DataFrame, value),
                                 x_column,
                                 y_column,
                                 z_column,
@@ -381,6 +413,7 @@ class _PandasDataAccessor(_DataAccessor):
                 dictret = None
             else:
                 dictret = self.__format_data(value, data_format, "list", data_extraction=True)
+
         ret_payload["value"] = dictret
         return ret_payload
 

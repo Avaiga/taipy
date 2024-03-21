@@ -36,6 +36,10 @@ class _DataAccessor(ABC):
     def get_col_types(self, var_name: str, value: t.Any) -> t.Dict[str, str]:
         pass
 
+    @abstractmethod
+    def _get_dataframe(self, value: t.Any) -> t.Union[t.List[t.Any], t.Any]:
+        pass
+
 
 class _InvalidDataAccessor(_DataAccessor):
     @staticmethod
@@ -49,6 +53,9 @@ class _InvalidDataAccessor(_DataAccessor):
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Dict[str, str]:
         return {}
+
+    def _get_dataframe(self, value: t.Any) -> t.List[t.Any] | t.Any:
+        return None
 
 
 class _DataAccessors(object):
@@ -91,7 +98,7 @@ class _DataAccessors(object):
                     self.__access_4_type[name] = inst  # type: ignore
 
     def __get_instance(self, value: _TaipyData) -> _DataAccessor:  # type: ignore
-        value = value.get()
+        value = value.get() if isinstance(value, _TaipyData) else value
         access = self.__access_4_type.get(type(value).__name__)
         if access is None:
             if value is not None:
@@ -109,3 +116,6 @@ class _DataAccessors(object):
 
     def _set_data_format(self, data_format: _DataFormat):
         self.__data_format = data_format
+
+    def _get_dataframe(self, value: t.Any):
+        return self.__get_instance(value)._get_dataframe(value)
