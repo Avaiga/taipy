@@ -12,7 +12,7 @@
 import itertools
 from datetime import datetime
 from queue import Queue
-from threading import RLock
+from threading import Lock
 from time import sleep
 from typing import Callable, Iterable, List, Optional, Set, Union
 
@@ -38,7 +38,7 @@ class _Orchestrator(_AbstractOrchestrator):
     jobs_to_run: Queue = Queue()
     blocked_jobs: List[Job] = []
 
-    lock = RLock()
+    lock = Lock()
     __logger = _TaipyLogger._get_logger()
 
     @classmethod

@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from concurrent.futures import Executor, Future
-from threading import RLock
+from threading import Lock
 from typing import List
 
 from taipy.core import Job
@@ -40,7 +40,7 @@ class MockStandaloneDispatcher(_StandaloneJobDispatcher):
         super(_StandaloneJobDispatcher, self).__init__(orchestrator)
         self._executor: Executor = MockProcessPoolExecutor()
         self._nb_available_workers = 1
-        self._nb_available_workers_lock = RLock()
+        self._nb_available_workers_lock = Lock()
 
         self.dispatch_calls: List = []
         self.update_job_status_from_future_calls: List = []
