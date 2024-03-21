@@ -8,6 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 from copy import copy
 from typing import Any, Dict, Optional, Union
 
@@ -35,6 +36,7 @@ class JobConfig(UniqueSection):
     _STANDALONE_MODE = "standalone"
     _DEVELOPMENT_MODE = "development"
     _DEFAULT_MODE = _DEVELOPMENT_MODE
+    _DEFAULT_MAX_NB_OF_WORKERS = 2
     _MODES = [_STANDALONE_MODE, _DEVELOPMENT_MODE]
 
     def __init__(self, mode: Optional[str] = None, **properties):
@@ -87,7 +89,7 @@ class JobConfig(UniqueSection):
                 Possible values are: *"standalone"* (the default value) or *"development"*.
             max_nb_of_workers (Optional[int, str]): Parameter used only in default *"standalone"* mode.
                 This indicates the maximum number of jobs able to run in parallel.<br/>
-                The default value is 1.<br/>
+                The default value is 2.<br/>
                 A string can be provided to dynamically set the value using an environment
                 variable. The string must follow the pattern: `ENV[&lt;env_var&gt;]` where
                 `&lt;env_var&gt;` is the name of an environment variable.
@@ -120,7 +122,7 @@ class JobConfig(UniqueSection):
     @classmethod
     def get_default_config(cls, mode: str) -> Dict[str, Any]:
         if cls.is_standalone:  # type: ignore
-            return {"max_nb_of_workers": 1}
+            return {"max_nb_of_workers": cls._DEFAULT_MAX_NB_OF_WORKERS}
         if cls.is_development:
             return {}
         raise ModeNotAvailable(mode)
