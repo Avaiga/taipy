@@ -80,7 +80,7 @@ import {
     useModule,
 } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
-import { getSuffixedClassNames } from "./utils";
+import { getSuffixedClassNames, getUpdateVar } from "./utils";
 
 const loadingStyle: CSSProperties = { width: "100%", height: "3em", textAlign: "right", verticalAlign: "center" };
 const skelSx = { width: "100%", height: "3em" };
@@ -105,6 +105,8 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         size = DEFAULT_SIZE,
         userData,
         downloadable = false,
+        compare = false,
+        onCompare = "",
     } = props;
     const pageSize = props.pageSize === undefined || props.pageSize < 1 ? 100 : Math.round(props.pageSize);
     const [value, setValue] = useState<Record<string, unknown>>({});
@@ -237,7 +239,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     styles,
                     tooltips,
                     handleNan,
-                    afs
+                    afs,
+                    compare ? onCompare : undefined,
+                    updateVars && getUpdateVar(updateVars, "comparedatas")
                 )
             );
         } else {
@@ -256,11 +260,14 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         order,
         orderBy,
         updateVarName,
+        updateVars,
         id,
         handleNan,
         appliedFilters,
         dispatch,
         module,
+        compare,
+        onCompare
     ]);
 
     const onSort = useCallback(
@@ -351,14 +358,20 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         return psOptions;
     }, [pageSizeOptions, allowAllRows, pageSize]);
 
-    const { rows, rowCount } = useMemo(() => {
-        const ret = { rows: [], rowCount: 0 } as { rows: RowType[]; rowCount: number };
+    const { rows, rowCount, filteredCount, compRows } = useMemo(() => {
+        const ret = { rows: [], rowCount: 0, filteredCount: 0, compRows: [] } as { rows: RowType[]; rowCount: number; filteredCount: number; compRows: RowType[] };
         if (value) {
             if (value.data) {
                 ret.rows = value.data as RowType[];
             }
             if (value.rowcount) {
                 ret.rowCount = value.rowcount as unknown as number;
+                if (value.fullrowcount && value.rowcount != value.fullrowcount) {
+                    ret.filteredCount = (value.fullrowcount as unknown as number - ret.rowCount);
+                }
+            }
+            if (value.comp) {
+                ret.compRows = value.comp as RowType[];
             }
         }
         return ret;
@@ -455,6 +468,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                             onValidate={setAppliedFilters}
                                                             appliedFilters={appliedFilters}
                                                             className={className}
+                                                            filteredCount={filteredCount}
                                                         />
                                                     ) : null,
                                                     active && downloadable ? (
@@ -551,6 +565,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     onSelection={active && onAction ? onRowSelection : undefined}
                                                     nanValue={columns[col].nanValue || props.nanValue}
                                                     tooltip={getTooltip(row, columns[col].tooltip, col)}
+                                                    comp={compRows && compRows[index] && compRows[index][col]}
                                                 />
                                             ))}
                                         </TableRow>

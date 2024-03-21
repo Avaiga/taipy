@@ -374,12 +374,6 @@ def invoke_long_callback(
         user_status_function_args = []
     if user_function_args is None:
         user_function_args = []
-        return
-
-    if user_status_function_args is None:
-        user_status_function_args = []
-    if user_function_args is None:
-        user_function_args = []
 
     state_id = get_state_id(state)
     module_context = get_module_context(state)
