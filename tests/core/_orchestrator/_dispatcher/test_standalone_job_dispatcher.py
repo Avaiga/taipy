@@ -96,9 +96,9 @@ def test_update_job_status_from_future():
     dispatcher = _StandaloneJobDispatcher(orchestrator)
     ft = Future()
     ft.set_result(None)
-    assert dispatcher._nb_available_workers == 1
-    dispatcher._update_job_status_from_future(job, ft)
     assert dispatcher._nb_available_workers == 2
+    dispatcher._update_job_status_from_future(job, ft)
+    assert dispatcher._nb_available_workers == 3
     assert job.is_completed()
 
 
