@@ -30,6 +30,7 @@ module.exports = {
     optimization: {
         splitChunks: {
             chunks: 'all',
+            name: "shared",
         },
     },
     module: {

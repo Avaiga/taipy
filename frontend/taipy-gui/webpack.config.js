@@ -194,6 +194,7 @@ module.exports = (env, options) => {
         optimization: {
             splitChunks: {
                 chunks: 'all',
+                name: "shared",
             },
         },
         module: {
