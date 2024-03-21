@@ -15,19 +15,19 @@ from taipy.config.config import Config
 def test_job_config():
     assert Config.job_config.mode == "development"
 
-    job_c = Config.configure_job_executions(mode="standalone", max_nb_of_workers=2)
+    job_c = Config.configure_job_executions(mode="standalone", max_nb_of_workers=3)
     assert job_c.mode == "standalone"
-    assert job_c.max_nb_of_workers == 2
+    assert job_c.max_nb_of_workers == 3
 
     assert Config.job_config.mode == "standalone"
-    assert Config.job_config.max_nb_of_workers == 2
+    assert Config.job_config.max_nb_of_workers == 3
 
     Config.configure_job_executions(foo="bar")
     assert Config.job_config.foo == "bar"
 
 
 def test_clean_config():
-    job_config = Config.configure_job_executions(mode="standalone", max_nb_of_workers=2, prop="foo")
+    job_config = Config.configure_job_executions(mode="standalone", max_nb_of_workers=3, prop="foo")
 
     assert Config.job_config is job_config
 
@@ -37,5 +37,5 @@ def test_clean_config():
     assert Config.job_config is job_config
 
     assert job_config.mode == "development"
-    assert job_config._config == {"max_nb_of_workers": 1}
+    assert job_config._config == {}
     assert job_config.properties == {}
