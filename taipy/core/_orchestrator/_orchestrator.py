@@ -237,13 +237,12 @@ class _Orchestrator(_AbstractOrchestrator):
         with cls.lock:
             cls.__logger.debug("Acquiring lock to unblock jobs.")
             for job in cls.blocked_jobs:
-                cls.__logger.debug(f"        Unblocking {job.id} ?")
                 if not cls._is_blocked(job):
-                    cls.__logger.debug(f"        Unblocking {job.id} !")
+                    cls.__logger.debug(f"Unblocking job: {job.id}.")
                     job.pending()
-                    cls.__logger.debug(f"        Removing {job.id} from the blocked list.")
+                    cls.__logger.debug(f"Removing job {job.id} from the blocked_job list.")
                     cls.__remove_blocked_job(job)
-                    cls.__logger.debug(f"        Adding {job.id} to the list of jobs to run.")
+                    cls.__logger.debug(f"Adding job {job.id} to the list of jobs to run.")
                     cls.jobs_to_run.put(job)
             cls.__logger.debug("Releasing lock after unblocking jobs.")
 
