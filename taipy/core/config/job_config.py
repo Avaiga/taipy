@@ -119,14 +119,12 @@ class JobConfig(UniqueSection):
         """True if the config is set to development mode"""
         return self.mode == self._DEVELOPMENT_MODE
 
-    @classmethod
-    def get_default_config(cls, mode: str) -> Dict[str, Any]:
-        if cls.is_standalone:  # type: ignore
-            return {"max_nb_of_workers": cls._DEFAULT_MAX_NB_OF_WORKERS}
-        if cls.is_development:
+    def get_default_config(self, mode: str) -> Dict[str, Any]:
+        if self.is_standalone:
+            return {"max_nb_of_workers": self._DEFAULT_MAX_NB_OF_WORKERS}
+        if self.is_development:
             return {}
         raise ModeNotAvailable(mode)
 
-    @classmethod
-    def _create_config(cls, mode, **properties):
-        return {**cls.get_default_config(mode), **properties}
+    def _create_config(self, mode, **properties):
+        return {**self.get_default_config(mode), **properties}
