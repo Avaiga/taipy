@@ -1,0 +1,7 @@
+flask==3.0.0
+taipy==3.1.0
+plotly==5.9.0
+pandas==2.0.3
+numpy==1.24.3
+nltk==3.8.1
+kaleido==0.2.1

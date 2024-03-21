@@ -1,0 +1,15 @@
+.taipy-card{
+    display: flex;
+    flex-direction:column;
+    justify-content: space-between;
+    min-height: 200px;
+}
+.taipy-button {
+    position:relative;
+    display: block;
+    margin: auto;
+    text-transform: none;
+    align-self: center;
+    margin-top: 10vh;
+    /* bottom:100vh; */
+}
