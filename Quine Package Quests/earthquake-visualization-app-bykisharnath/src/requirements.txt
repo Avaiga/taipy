@@ -1,0 +1,4 @@
+taipy
+geopy
+plotly
+flake8
