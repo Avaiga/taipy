@@ -94,7 +94,6 @@ class _Orchestrator(_AbstractOrchestrator):
                 )
             submission.jobs = jobs  # type: ignore
             cls._orchestrate_job_to_run_or_block(jobs)
-            cls.__logger.debug(f"Releasing lock after submitting {submission.entity_id}.")
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         elif wait:
@@ -142,7 +141,6 @@ class _Orchestrator(_AbstractOrchestrator):
             jobs = [job]
             submission.jobs = jobs  # type: ignore
             cls._orchestrate_job_to_run_or_block(jobs)
-            cls.__logger.debug(f"Releasing lock after submitting task {task.id}.")
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         else:
@@ -244,7 +242,6 @@ class _Orchestrator(_AbstractOrchestrator):
                     cls.__remove_blocked_job(job)
                     cls.__logger.debug(f"Adding job {job.id} to the list of jobs to run.")
                     cls.jobs_to_run.put(job)
-            cls.__logger.debug("Releasing lock after unblocking jobs.")
 
     @classmethod
     def __remove_blocked_job(cls, job):
@@ -270,7 +267,6 @@ class _Orchestrator(_AbstractOrchestrator):
                 cls.__remove_jobs_to_run(to_cancel_or_abandon_jobs)
                 cls._cancel_jobs(job.id, to_cancel_or_abandon_jobs)
                 cls._unlock_edit_on_jobs_outputs(to_cancel_or_abandon_jobs)
-                cls.__logger.debug(f"Releasing lock after canceling {job.id}.")
 
     @classmethod
     def __find_subsequent_jobs(cls, submit_id, output_dn_config_ids: Set) -> Set[Job]:
@@ -315,7 +311,6 @@ class _Orchestrator(_AbstractOrchestrator):
             cls.__remove_blocked_jobs(to_fail_or_abandon_jobs)
             cls.__remove_jobs_to_run(to_fail_or_abandon_jobs)
             cls._unlock_edit_on_jobs_outputs(to_fail_or_abandon_jobs)
-            cls.__logger.debug("Releasing lock after fail subsequent jobs.")
 
     @classmethod
     def _cancel_jobs(cls, job_id_to_cancel: JobId, jobs: Set[Job]):
