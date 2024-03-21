@@ -88,7 +88,7 @@ def test_can_execute():
     dispatcher._nb_available_workers = 1
     assert dispatcher._can_execute()
 
-    
+
 def test_update_job_status_from_future():
     task = create_task()
     job = Job(JobId("job"), task, "s_id", task.id)
