@@ -951,7 +951,7 @@
             "default_property": true,
             "required": true,
             "type": "dynamic(any)",
-            "doc": "The data to be represented in this table."
+            "doc": "The data to be represented in this table. This property can be indexed to define other data for comparison."
           },
           {
             "name": "page_size",
@@ -1135,6 +1135,12 @@
             "name": "downloadable",
             "type": "boolean",
             "doc": "If True, a clickable icon is shown so the user can download the data as CSV."
+          },
+          {
+            "name": "on_compare",
+            "type": "str",
+            "doc": "A data comparison function that would return a structure that identifies that differences between the different data passed as name. The default implementation compares the default data with the data[1] value.",
+            "signature": [["state", "State"], ["main_data_name", "str"], ["compare_data_names", "list[str]"]]
           }
         ]
       }
