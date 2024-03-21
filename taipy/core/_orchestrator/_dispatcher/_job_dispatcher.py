@@ -56,7 +56,7 @@ class _JobDispatcher(threading.Thread):
             timeout (Optional[float]): The maximum time to wait. If None, the method will wait indefinitely.
         """
         self._STOP_FLAG = True
-        if wait and self.is_alive():
+        if wait and self.is_running():
             self._logger.debug("Waiting for the dispatcher thread to stop...")
             self.join(timeout=timeout)
 
