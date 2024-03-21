@@ -851,7 +851,7 @@ class Config:
                 Possible values are: *"standalone"* (the default value) or *"development"*.
             max_nb_of_workers (Optional[int, str]): Parameter used only in default *"standalone"* mode.
                 This indicates the maximum number of jobs able to run in parallel.<br/>
-                The default value is 1.<br/>
+                The default value is 2.<br/>
                 A string can be provided to dynamically set the value using an environment
                 variable. The string must follow the pattern: `ENV[&lt;env_var&gt;]` where
                 `&lt;env_var&gt;` is the name of an environment variable.
