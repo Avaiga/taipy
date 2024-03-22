@@ -84,7 +84,6 @@ class _JobDispatcher(threading.Thread):
                         self.orchestrator.jobs_to_run.put(job)
                 except Exception as e:
                     self._logger.exception(e)
-        time.sleep(1)
         self._logger.debug("Job dispatcher stopped.")
 
     @abstractmethod
