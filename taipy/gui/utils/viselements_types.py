@@ -9,23 +9,26 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import os
-import sys
+import typing as t
 
-if __name__ == "__main__":
-    _path = sys.argv[1]
-    _version = sys.argv[2]
 
-    packages = [
-        f"taipy-{_version}.tar.gz",
-        f"taipy-config-{_version}.tar.gz",
-        f"taipy-core-{_version}.tar.gz",
-        f"taipy-rest-{_version}.tar.gz",
-        f"taipy-gui-{_version}.tar.gz",
-        f"taipy-templates-{_version}.tar.gz",
-    ]
+class VisElementProperties(t.TypedDict, total=False):
+    name: str
+    type: str
+    doc: str
+    default_value: t.Any
+    default_property: t.Any
 
-    for package in packages:
-        if not os.path.exists(os.path.join(_path, package)):
-            print(f"Package {package} does not exist")  # noqa: T201
-            sys.exit(1)
+
+class VisElementDetail(t.TypedDict, total=False):
+    inherits: t.List[str]
+    properties: t.List[VisElementProperties]
+
+
+VisElement: t.TypeAlias = t.Tuple[str, VisElementDetail]
+
+
+class VisElements(t.TypedDict):
+    blocks: t.List[VisElement]
+    controls: t.List[VisElement]
+    undocumented: t.List[VisElement]
