@@ -26,7 +26,7 @@ class VisElementDetail(t.TypedDict, total=False):
     properties: t.List[VisElementProperties]
 
 
-VisElement: t.TypeAlias = t.Tuple[str, VisElementDetail]
+VisElement = t.Tuple[str, VisElementDetail]
 
 
 class VisElements(t.TypedDict):
