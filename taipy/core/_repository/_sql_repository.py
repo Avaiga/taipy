@@ -11,11 +11,13 @@
 
 import json
 import pathlib
+from sqlite3 import DatabaseError
 from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
 from sqlalchemy.dialects import sqlite
 from sqlalchemy.exc import NoResultFound
 
+from ...logger._taipy_logger import _TaipyLogger
 from .._repository._abstract_repository import _AbstractRepository
 from ..common.typing import Converter, Entity, ModelType
 from ..exceptions import ModelNotFound
@@ -23,6 +25,8 @@ from .db._sql_connection import _SQLConnection
 
 
 class _SQLRepository(_AbstractRepository[ModelType, Entity]):
+    _logger = _TaipyLogger._get_logger()
+
     def __init__(self, model_type: Type[ModelType], converter: Type[Converter]):
         """
         Holds common methods to be used and extended when the need for saving
@@ -47,9 +51,19 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     def _save(self, entity: Entity):
         obj = self.converter._entity_to_model(entity)
         if self._exists(entity.id):  # type: ignore
-            self._update_entry(obj)
-            return
-        self.__insert_model(obj)
+            try:
+                self._update_entry(obj)
+                return
+            except DatabaseError as e:
+                self._logger.error(f"Error while updating {entity.id} in {self.table.name}. ")  # type: ignore
+                self._logger.error(f"Error : {e}")
+                raise e
+        try:
+            self.__insert_model(obj)
+        except DatabaseError as e:
+            self._logger.error(f"Error while inserting {entity.id} into {self.table.name}. ")  # type: ignore
+            self._logger.error(f"Error : {e}")
+            raise e
 
     def _exists(self, entity_id: str):
         query = self.table.select().filter_by(id=entity_id)

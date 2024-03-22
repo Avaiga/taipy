@@ -84,4 +84,4 @@ def _build_connection() -> Connection:
 
 @lru_cache
 def __build_connection(db_location: str):
-    return sqlite3.connect(db_location, check_same_thread=False)
+    return sqlite3.connect(db_location, check_same_thread=False, timeout=20)

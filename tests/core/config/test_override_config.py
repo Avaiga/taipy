@@ -60,12 +60,13 @@ def test_override_default_configuration_with_code_configuration():
 def test_override_default_config_with_code_config_including_env_variable_values():
     Config.configure_core()
     assert Config.core.repository_type == "filesystem"
-    Config.configure_core(repository_type="othertype")
-    assert Config.core.repository_type == "othertype"
 
     with mock.patch.dict(os.environ, {"REPOSITORY_TYPE": "foo"}):
         Config.configure_core(repository_type="ENV[REPOSITORY_TYPE]")
         assert Config.core.repository_type == "foo"
+
+    Config.configure_core(repository_type="othertype")
+    assert Config.core.repository_type == "othertype"
 
 
 def test_override_default_configuration_with_file_configuration():

@@ -180,14 +180,9 @@ def default_multi_sheet_data_frame():
 def cleanup_files():
     yield
 
-    if os.path.exists(".data"):
-        shutil.rmtree(".data", ignore_errors=True)
-    if os.path.exists("user_data"):
-        shutil.rmtree("user_data", ignore_errors=True)
-    if os.path.exists(".taipy"):
-        shutil.rmtree(".taipy", ignore_errors=True)
-    if os.path.exists(".my_data"):
-        shutil.rmtree(".my_data", ignore_errors=True)
+    for path in [".data", ".my_data", "user_data", ".taipy"]:
+        if os.path.exists(path):
+            shutil.rmtree(path, ignore_errors=True)
 
 
 @pytest.fixture(scope="function")
@@ -330,6 +325,12 @@ def clean_repository(init_config, init_managers, init_orchestrator, init_notifie
 
     with patch("sys.argv", ["prog"]):
         yield
+
+    close_all_sessions()
+    init_orchestrator()
+    init_managers()
+    init_config()
+    init_notifier()
 
 
 @pytest.fixture

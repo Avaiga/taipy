@@ -55,30 +55,35 @@ class _JobDispatcher(threading.Thread):
             wait (bool): If True, the method will wait for the dispatcher to stop.
             timeout (Optional[float]): The maximum time to wait. If None, the method will wait indefinitely.
         """
-        self.stop_wait = wait
-        self.stop_timeout = timeout
         self._STOP_FLAG = True
+        if wait and self.is_running():
+            self._logger.debug("Waiting for the dispatcher thread to stop...")
+            self.join(timeout=timeout)
 
     def run(self):
         self._logger.debug("Job dispatcher started.")
         while not self._STOP_FLAG:
-            try:
-                if self._can_execute():
-                    with self.lock:
-                        if self._STOP_FLAG:
-                            break
+            if not self._can_execute():
+                time.sleep(0.2)  # We need to sleep to avoid busy waiting.
+                continue
+
+            with self.lock:
+                self._logger.debug("Acquiring lock to check jobs to run.")
+                job = None
+                try:
+                    if not self._STOP_FLAG:
                         job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
-                    self._execute_job(job)
-                else:
-                    time.sleep(0.1)  # We need to sleep to avoid busy waiting.
-            except Empty:  # In case the last job of the queue has been removed.
-                pass
-            except Exception as e:
-                self._logger.exception(e)
-                pass
-        if self.stop_wait:
-            self._logger.debug("Waiting for the dispatcher thread to stop...")
-            self.join(timeout=self.stop_timeout)
+                except Empty:  # In case the last job of the queue has been removed.
+                    pass
+            if job:
+                self._logger.debug(f"Got a job to execute {job.id}.")
+                try:
+                    if not self._STOP_FLAG:
+                        self._execute_job(job)
+                    else:
+                        self.orchestrator.jobs_to_run.put(job)
+                except Exception as e:
+                    self._logger.exception(e)
         self._logger.debug("Job dispatcher stopped.")
 
     @abstractmethod
