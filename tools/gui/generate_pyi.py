@@ -89,10 +89,14 @@ def build_doc(element: t.Dict[str, t.Any]):
 
 for control_element in viselements["controls"]:
     name = control_element[0]
-    property_list = []
-    property_names = []
+    property_list: t.List[t.Dict[str, t.Any]] = []
+    property_names: t.List[str] = []
     for property in get_properties(control_element[1], viselements):
         if property["name"] not in property_names and "[" not in property["name"]:
+            if "default_value" in property and property["default_value"] is True:
+                property_list.insert(0, property)
+                property_names.insert(0, property["name"])
+                continue
             property_list.append(property)
             property_names.append(property["name"])
     properties = ", ".join([f"{p} = ..." for p in property_names])

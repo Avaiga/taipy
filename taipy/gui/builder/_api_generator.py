@@ -19,6 +19,7 @@ import typing as t
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ..utils.singleton import _Singleton
+from ..utils.viselements import VisElements, resolve_inherits
 from ._element import _Block, _Control
 
 if t.TYPE_CHECKING:
@@ -46,17 +47,18 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
         module_name = current_frame.f_back.f_globals["__name__"]
         self.__module = module = sys.modules[module_name]
         with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "viselements.json"))) as viselements:
-            data = json.load(viselements)
-            if "blocks" not in data or "controls" not in data:
+            viselements = json.load(viselements)
+            if "blocks" not in viselements or "controls" not in viselements:
                 raise RuntimeError(f"{error_message}: Invalid viselements.json file.")
-            for blockElement in data["blocks"]:
+            viselements = resolve_inherits(t.cast(VisElements, viselements))
+            for blockElement in viselements["blocks"]:
                 default_property = _ElementApiGenerator.find_default_property(blockElement[1]["properties"])
                 setattr(
                     module,
                     blockElement[0],
                     _ElementApiGenerator.create_block_api(blockElement[0], blockElement[0], default_property),
                 )
-            for controlElement in data["controls"]:
+            for controlElement in viselements["controls"]:
                 default_property = _ElementApiGenerator.find_default_property(controlElement[1]["properties"])
                 setattr(
                     module,
