@@ -16,6 +16,7 @@ from datetime import date, datetime, time, timedelta
 from json import JSONEncoder
 from pathlib import Path
 
+import numpy
 import pandas
 from flask.json.provider import DefaultJSONProvider
 
@@ -48,6 +49,8 @@ class _DefaultJsonAdapter(JsonAdapter):
             return str(o)
         if isinstance(o, (timedelta, pandas.Timedelta)):
             return str(o)
+        if isinstance(o, numpy.generic):
+            return getattr(o, "tolist", lambda: o)()
 
 
 class _TaipyJsonAdapter(object, metaclass=_Singleton):
