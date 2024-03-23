@@ -848,8 +848,8 @@ class Config:
 
         Parameters:
             mode (Optional[str]): The job execution mode.
-                Possible values are: *"standalone"* (the default value) or *"development"*.
-            max_nb_of_workers (Optional[int, str]): Parameter used only in default *"standalone"* mode.
+                Possible values are: *"standalone"* or *"development"*.
+            max_nb_of_workers (Optional[int, str]): Parameter used only in *"standalone"* mode.
                 This indicates the maximum number of jobs able to run in parallel.<br/>
                 The default value is 2.<br/>
                 A string can be provided to dynamically set the value using an environment
