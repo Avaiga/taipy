@@ -558,7 +558,7 @@
           {
             "name": "decimator",
             "type": "indexed(taipy.gui.data.Decimator)",
-            "doc": "A decimator instance for the indicated trace that will reduce the size of the data being sent back and forth.<br>If defined as indexed, it will impact only the indicated trace; if not, it will apply only the the first trace."
+            "doc": "A decimator instance for the indicated trace that will reduce the size of the data being sent back and forth.<br>If defined as indexed, it will impact only the indicated trace; if not, it will apply only the first trace."
           },
           {
             "name": "rebuild",
