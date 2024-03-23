@@ -34,6 +34,8 @@ class TestCoreSectionChecker:
         Config.check()
         assert len(Config._collector.warnings) == 0
 
+        Config.configure_core(repository_type="filesystem")
+
     def test_check_repository_type_value_wrong_str(self):
         Config.configure_core(repository_type="any")
         Config._collector = IssueCollector()
