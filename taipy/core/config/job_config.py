@@ -17,8 +17,6 @@ from taipy.config._config import _Config
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.unique_section import UniqueSection
 
-from ..exceptions.exceptions import ModeNotAvailable
-
 
 class JobConfig(UniqueSection):
     """
@@ -37,18 +35,19 @@ class JobConfig(UniqueSection):
     _DEVELOPMENT_MODE = "development"
     _DEFAULT_MODE = _DEVELOPMENT_MODE
     _DEFAULT_MAX_NB_OF_WORKERS = 2
-    _MODES = [_STANDALONE_MODE, _DEVELOPMENT_MODE]
+    _MODES = [_DEVELOPMENT_MODE, _STANDALONE_MODE]
 
     def __init__(self, mode: Optional[str] = None, **properties):
-        self.mode = mode or self._DEFAULT_MODE
-        self._config = self._create_config(self.mode, **properties)
+        self.mode = mode
         super().__init__(**properties)
+
+        self._update_default_max_nb_of_workers_properties()
 
     def __copy__(self):
         return JobConfig(self.mode, **copy(self._properties))
 
     def __getattr__(self, key: str) -> Optional[Any]:
-        return self._config.get(key, None)
+        return _tpl._replace_templates(self._properties.get(key))  # type: ignore[union-attr]
 
     @classmethod
     def default_config(cls):
@@ -56,13 +55,14 @@ class JobConfig(UniqueSection):
 
     def _clean(self):
         self.mode = self._DEFAULT_MODE
-        self._config = self._create_config(self.mode)
+        self._properties.clear()
+        self._update_default_max_nb_of_workers_properties()
 
     def _to_dict(self):
         as_dict = {}
         if self.mode is not None:
             as_dict[self._MODE_KEY] = self.mode
-        as_dict.update(self._config)
+        as_dict.update(self._properties)
         return as_dict
 
     @classmethod
@@ -74,9 +74,9 @@ class JobConfig(UniqueSection):
         mode = _tpl._replace_templates(as_dict.pop(self._MODE_KEY, self.mode))
         if self.mode != mode:
             self.mode = mode
-            self._config = self._create_config(self.mode, **as_dict)
-        if self._config is not None:
-            self._update_config(as_dict)
+            self._update_default_max_nb_of_workers_properties()
+
+        self._properties.update(as_dict)  # type: ignore[union-attr]
 
     @staticmethod
     def _configure(
@@ -86,8 +86,8 @@ class JobConfig(UniqueSection):
 
         Parameters:
             mode (Optional[str]): The job execution mode.
-                Possible values are: *"standalone"* (the default value) or *"development"*.
-            max_nb_of_workers (Optional[int, str]): Parameter used only in default *"standalone"* mode.
+                Possible values are: *"standalone"* or *"development"*.
+            max_nb_of_workers (Optional[int, str]): Parameter used only in *"standalone"* mode.
                 This indicates the maximum number of jobs able to run in parallel.<br/>
                 The default value is 2.<br/>
                 A string can be provided to dynamically set the value using an environment
@@ -98,16 +98,11 @@ class JobConfig(UniqueSection):
         Returns:
             The new job execution configuration.
         """
-        section = JobConfig(mode, max_nb_of_workers=max_nb_of_workers, **properties)
+        if max_nb_of_workers:
+            properties["max_nb_of_workers"] = max_nb_of_workers
+        section = JobConfig(mode=mode, **properties)
         Config._register(section)
         return Config.unique_sections[JobConfig.name]
-
-    def _update_config(self, config_as_dict: Dict[str, Any]):
-        for k, v in config_as_dict.items():
-            type_to_convert = type(self.get_default_config(self.mode).get(k, None)) or str
-            value = _tpl._replace_templates(v, type_to_convert)
-            if value is not None:
-                self._config[k] = value
 
     @property
     def is_standalone(self) -> bool:
@@ -119,12 +114,7 @@ class JobConfig(UniqueSection):
         """True if the config is set to development mode"""
         return self.mode == self._DEVELOPMENT_MODE
 
-    def get_default_config(self, mode: str) -> Dict[str, Any]:
-        if self.is_standalone:
-            return {"max_nb_of_workers": self._DEFAULT_MAX_NB_OF_WORKERS}
-        if self.is_development:
-            return {}
-        raise ModeNotAvailable(mode)
-
-    def _create_config(self, mode, **properties):
-        return {**self.get_default_config(mode), **properties}
+    def _update_default_max_nb_of_workers_properties(self):
+        """If the job execution mode is standalone, set the default value for the max_nb_of_workers property"""
+        if self.is_standalone and "max_nb_of_workers" not in self._properties:
+            self.properties.update({"max_nb_of_workers": self._DEFAULT_MAX_NB_OF_WORKERS})
