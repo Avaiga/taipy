@@ -46,11 +46,11 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
             raise RuntimeError(f"{error_message}: taipy-gui module not found.")
         module_name = current_frame.f_back.f_globals["__name__"]
         self.__module = module = sys.modules[module_name]
-        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "viselements.json"))) as viselements:
-            viselements = json.load(viselements)
-            if "blocks" not in viselements or "controls" not in viselements:
+        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "viselements.json"))) as f:
+            viselements_json = json.load(f)
+            if "blocks" not in viselements_json or "controls" not in viselements_json:
                 raise RuntimeError(f"{error_message}: Invalid viselements.json file.")
-            viselements = resolve_inherits(t.cast(VisElements, viselements))
+            viselements = resolve_inherits(t.cast(VisElements, viselements_json))
             for blockElement in viselements["blocks"]:
                 default_property = _ElementApiGenerator.find_default_property(blockElement[1]["properties"])
                 setattr(
