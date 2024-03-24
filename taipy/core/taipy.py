@@ -1007,7 +1007,7 @@ def get_parents(
     if isinstance(entity, str):
         entity = get(entity)
 
-    parent_dict = parent_dict or dict()
+    parent_dict = parent_dict or {}
 
     if isinstance(entity, (Scenario, Cycle)):
         return parent_dict
