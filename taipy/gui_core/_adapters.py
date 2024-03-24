@@ -117,12 +117,12 @@ class _GuiCoreScenarioDagAdapter(_TaipyBase):
             try:
                 if scenario := core_get(data.id):
                     dag = scenario._get_dag()
-                    nodes = dict()
+                    nodes = {}
                     for id, node in dag.nodes.items():
                         entityType = _GuiCoreScenarioDagAdapter.get_entity_type(node)
                         cat = nodes.get(entityType)
                         if cat is None:
-                            cat = dict()
+                            cat = {}
                             nodes[entityType] = cat
                         cat[id] = {
                             "name": node.entity.get_simple_label(),

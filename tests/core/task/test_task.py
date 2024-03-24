@@ -276,7 +276,7 @@ def test_auto_set_and_reload_properties():
     task_1.properties.update({"temp_key_3": 1})
     assert task_1.properties == {"qux": 5, "temp_key_3": 1}
     assert task_2.properties == {"qux": 5, "temp_key_3": 1}
-    task_1.properties.update(dict())
+    task_1.properties.update({})
     assert task_1.properties == {"qux": 5, "temp_key_3": 1}
     assert task_2.properties == {"qux": 5, "temp_key_3": 1}
     task_1.properties["temp_key_4"] = 0
@@ -295,7 +295,7 @@ def test_auto_set_and_reload_properties():
         task.properties.update({"temp_key_4": 1})
         task.properties.update({"temp_key_5": 2})
         task.properties.pop("temp_key_5")
-        task.properties.update(dict())
+        task.properties.update({})
 
         assert task._is_in_context
         assert task.properties["qux"] == 5
