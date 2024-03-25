@@ -15,7 +15,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { BaseDateTimePickerSlotsComponentsProps } from "@mui/x-date-pickers/DateTimePicker/shared";
+import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { isValid } from "date-fns";
 import { ErrorBoundary } from "react-error-boundary";
@@ -26,6 +26,7 @@ import { dateToString, getDateTime, getTimeZonedDate } from "../../utils";
 import { useClassNames, useDispatch, useDynamicProperty, useFormatConfig, useModule } from "../../utils/hooks";
 import Field from "./Field";
 import ErrorFallback from "../../utils/ErrorBoundary";
+import { DateValidationError, PickerChangeHandlerContext } from "@mui/x-date-pickers";
 
 interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
     withTime?: boolean;
@@ -38,7 +39,7 @@ interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
 }
 
 const boxSx = { display: "inline-block" };
-const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotsComponentsProps<Date>;
+const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotProps<Date>;
 
 const DateSelector = (props: DateSelectorProps) => {
     const { updateVarName, withTime = false, id, propagate = true } = props;
@@ -54,7 +55,7 @@ const DateSelector = (props: DateSelectorProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const handleChange = useCallback(
-        (v: Date | null) => {
+        (v: Date | null, context: unknown) => {
             setValue(v);
             if (v !== null && isValid(v)) {
                 const newDate = getTimeZonedDate(v, tz, withTime);

@@ -40,7 +40,7 @@ import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import { BaseDateTimePickerSlotsComponentsProps } from "@mui/x-date-pickers/DateTimePicker/shared";
+import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { format } from "date-fns";
@@ -91,7 +91,7 @@ const editSx = {
     fontSize: "smaller",
     "& > div": { writingMode: "vertical-rl", transform: "rotate(180deg)", paddingBottom: "1em" },
 };
-const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotsComponentsProps<Date>;
+const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotProps<Date>;
 
 type DataNodeFull = [
     string, // id
@@ -804,7 +804,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                                 </Tooltip>
                                                             </Grid>
                                                         </>
-                                                    ) : dtType == "date" ? (
+                                                    ) : dtType == "date" && (dataValue === null || dataValue instanceof Date)  ? (
                                                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                                                             <Grid item xs={10}>
                                                                 <DateTimePicker
@@ -897,7 +897,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                         ) : (
                                                             <Typography variant="subtitle2">
                                                                 {dtType == "date"
-                                                                    ? dataValue &&
+                                                                    ? (dataValue === null || dataValue instanceof Date) &&
                                                                       format(dataValue as Date, "yyyy/MM/dd HH:mm:ss")
                                                                     : dtType == "float" && dtValue === null
                                                                     ? "NaN"

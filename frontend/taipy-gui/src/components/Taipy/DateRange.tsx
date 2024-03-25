@@ -15,7 +15,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import { DatePicker, DatePickerProps } from "@mui/x-date-pickers/DatePicker";
-import { BaseDateTimePickerSlotsComponentsProps } from "@mui/x-date-pickers/DateTimePicker/shared";
+import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
 import { DateTimePicker, DateTimePickerProps } from "@mui/x-date-pickers/DateTimePicker";
 import { isValid } from "date-fns";
 import { ErrorBoundary } from "react-error-boundary";
@@ -39,7 +39,7 @@ interface DateRangeProps extends TaipyActiveProps, TaipyChangeProps {
 }
 
 const boxSx = { display: "inline-flex", alignItems: "center", gap: "0.5em" };
-const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotsComponentsProps<Date>;
+const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotProps<Date>;
 
 const getRangeDateTime = (
     json: string | string[] | undefined,
