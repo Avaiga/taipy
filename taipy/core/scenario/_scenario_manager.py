@@ -11,7 +11,7 @@
 
 import datetime
 from functools import partial
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, List, Literal, Optional, Union
 
 from taipy.config import Config
 
@@ -267,8 +267,16 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         return cls._get_all_by(filters)
 
     @classmethod
-    def _get_primary_scenarios(cls) -> List[Scenario]:
-        return [scenario for scenario in cls._get_all() if scenario.is_primary]
+    def _get_primary_scenarios(
+        cls, sorted: Optional[bool] = False, sort_key: Optional[Literal["name", "id", "creation_date", "tags"]] = "name"
+    ) -> List[Scenario]:
+        scenarios = [scenario for scenario in cls._get_all() if scenario.is_primary]
+        if sorted:
+            if sort_key in ["name", "id", "creation_date", "tags"]:
+                scenarios.sort(key=lambda x: getattr(x, sort_key))
+            else:
+                scenarios.sort(key=lambda x: x.name)
+        return scenarios
 
     @classmethod
     def _is_promotable_to_primary(cls, scenario: Union[Scenario, ScenarioId]) -> bool:
