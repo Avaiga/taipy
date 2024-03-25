@@ -136,15 +136,15 @@ class ScenarioConfig(Section):
 
     @classmethod
     def default_config(cls):
-        return ScenarioConfig(cls._DEFAULT_KEY, [], [], None, dict())
+        return ScenarioConfig(cls._DEFAULT_KEY, [], [], None, {})
 
     def _clean(self):
         self._tasks = []
         self._additional_data_nodes = []
         self.frequency = None
-        self.comparators = dict()
-        self.sequences = dict()
-        self._properties = dict()
+        self.comparators = {}
+        self.sequences = {}
+        self._properties = {}
 
     def _to_dict(self) -> Dict[str, Any]:
         return {
@@ -166,7 +166,7 @@ class ScenarioConfig(Section):
         additional_data_nodes = cls.__get_additional_data_node_configs(additional_data_node_ids, config)
 
         frequency = as_dict.pop(cls._FREQUENCY_KEY, None)
-        comparators = as_dict.pop(cls._COMPARATOR_KEY, dict())
+        comparators = as_dict.pop(cls._COMPARATOR_KEY, {})
         sequences = as_dict.pop(cls._SEQUENCES_KEY, {})
 
         for sequence_name, sequence_tasks in sequences.items():

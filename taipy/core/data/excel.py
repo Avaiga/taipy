@@ -195,7 +195,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         try:
             excel_file = load_workbook(self._path)
             exposed_type = self.properties[self._EXPOSED_TYPE_PROPERTY]
-            work_books = dict()
+            work_books = {}
             sheet_names = excel_file.sheetnames
 
             user_provided_sheet_names = self.properties.get(self.__SHEET_NAME_PROPERTY) or []
