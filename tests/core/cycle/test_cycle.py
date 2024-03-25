@@ -220,7 +220,7 @@ def test_auto_set_and_reload(current_datetime):
     cycle_1.properties.update({"temp_key_3": 1})
     assert cycle_1.properties == {"key": "value", "qux": 5, "temp_key_3": 1}
     assert cycle_2.properties == {"key": "value", "qux": 5, "temp_key_3": 1}
-    cycle_1.properties.update({})
+    cycle_1.properties.update(dict())
     assert cycle_1.properties == {"key": "value", "qux": 5, "temp_key_3": 1}
     assert cycle_2.properties == {"key": "value", "qux": 5, "temp_key_3": 1}
     cycle_1.properties.pop("key")
@@ -253,7 +253,7 @@ def test_auto_set_and_reload(current_datetime):
         cycle.properties.update({"temp_key_4": 1})
         cycle.properties.update({"temp_key_5": 2})
         cycle.properties.pop("temp_key_5")
-        cycle.properties.update({})
+        cycle.properties.update(dict())
 
         assert cycle.frequency == Frequency.MONTHLY
         assert cycle.creation_date == new_datetime_2

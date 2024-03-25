@@ -93,7 +93,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         self.data_nodes_by_owner: t.Optional[t.Dict[t.Optional[str], DataNode]] = None
         self.scenario_configs: t.Optional[t.List[t.Tuple[str, str]]] = None
         self.jobs_list: t.Optional[t.List[Job]] = None
-        self.client_submission: t.Dict[str, SubmissionStatus] = {}
+        self.client_submission: t.Dict[str, SubmissionStatus] = dict()
         # register to taipy core notification
         reg_id, reg_queue = Notifier.register()
         # locks
@@ -345,7 +345,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
                                     "config": scenario_config,
                                     "date": date,
                                     "label": name,
-                                    "properties": {v.get("key"): v.get("value") for v in data.get("properties", {})},
+                                    "properties": {
+                                        v.get("key"): v.get("value") for v in data.get("properties", dict())
+                                    },
                                 },
                             ],
                         )

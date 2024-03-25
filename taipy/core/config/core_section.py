@@ -63,7 +63,7 @@ class CoreSection(UniqueSection):
     _REPOSITORY_TYPE_KEY = "repository_type"
     _DEFAULT_REPOSITORY_TYPE = "filesystem"
     _REPOSITORY_PROPERTIES_KEY = "repository_properties"
-    _DEFAULT_REPOSITORY_PROPERTIES: Dict = {}
+    _DEFAULT_REPOSITORY_PROPERTIES: Dict = dict()
 
     _READ_ENTITY_RETRY_KEY = "read_entity_retry"
     _DEFAULT_READ_ENTITY_RETRY = 1

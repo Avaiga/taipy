@@ -377,7 +377,7 @@ def test_add_rename_and_remove_sequences():
     data_node_3 = InMemoryDataNode("qux", Scope.SCENARIO, "s3")
     data_node_4 = InMemoryDataNode("quux", Scope.SCENARIO, "s4")
     data_node_5 = InMemoryDataNode("quuz", Scope.SCENARIO, "s5")
-    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_3], TaskId("t1"))
+    task_1 = Task("grault",{}, print,[data_node_1, data_node_2],[data_node_3], TaskId("t1"))
     task_2 = Task("garply", {}, print, [data_node_3], id=TaskId("t2"))
     task_3 = Task("waldo", {}, print, [data_node_3], None, id=TaskId("t3"))
     task_4 = Task("fred", {}, print, [data_node_3], [data_node_4], TaskId("t4"))
@@ -431,7 +431,7 @@ def test_add_rename_and_remove_sequences():
 
 
 def test_update_sequence(data_node):
-    task_1 = Task("foo", {}, print, [data_node], [], TaskId("t1"))
+    task_1 = Task("foo",{}, print,[data_node],[], TaskId("t1"))
     task_2 = Task("bar", {}, print, [], [data_node], id=TaskId("t2"))
     scenario = Scenario("baz", {task_1, task_2}, {})
     scenario.add_sequence("seq_1", [task_1])
@@ -470,6 +470,7 @@ def test_add_rename_and_remove_sequences_within_context(data_node):
     with scenario as sc:
         sc.remove_sequence("seq name")
     assert len(scenario.sequences) == 0
+
 
 
 def test_add_property_to_scenario():
@@ -797,7 +798,7 @@ def test_auto_set_and_reload_properties():
     scenario_1.properties.update({"temp_key_3": 1})
     assert scenario_1.properties == {"name": "baz", "qux": 5, "temp_key_3": 1}
     assert scenario_2.properties == {"name": "baz", "qux": 5, "temp_key_3": 1}
-    scenario_1.properties.update({})
+    scenario_1.properties.update(dict())
     assert scenario_1.properties == {"name": "baz", "qux": 5, "temp_key_3": 1}
     assert scenario_2.properties == {"name": "baz", "qux": 5, "temp_key_3": 1}
     scenario_1.properties["temp_key_4"] = 0
@@ -815,7 +816,7 @@ def test_auto_set_and_reload_properties():
         scenario.properties.update({"temp_key_4": 1})
         scenario.properties.update({"temp_key_5": 2})
         scenario.properties.pop("temp_key_5")
-        scenario.properties.update({})
+        scenario.properties.update(dict())
 
         assert scenario._is_in_context
         assert scenario.properties["qux"] == 5
