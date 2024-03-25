@@ -101,10 +101,8 @@ class CoreSection(UniqueSection):
         self._storage_folder = storage_folder
         self._taipy_storage_folder = taipy_storage_folder
         self._repository_type = repository_type
-        self._repository_properties = repository_properties or {}
-        self._read_entity_retry = (
-            read_entity_retry if read_entity_retry is not None else self._DEFAULT_READ_ENTITY_RETRY
-        )
+        self._repository_properties = repository_properties
+        self._read_entity_retry = read_entity_retry
         self._mode = mode
         self._version_number = version_number
         self._force = force
@@ -298,7 +296,14 @@ class CoreSection(UniqueSection):
         self._storage_folder = as_dict.pop(self._STORAGE_FOLDER_KEY, self._storage_folder)
         self._taipy_storage_folder = as_dict.pop(self._STORAGE_FOLDER_TP_KEY, self._taipy_storage_folder)
         self._repository_type = as_dict.pop(self._REPOSITORY_TYPE_KEY, self._repository_type)
-        self._repository_properties.update(as_dict.pop(self._REPOSITORY_PROPERTIES_KEY, self._repository_properties))
+        if self._repository_properties is None:
+            self._repository_properties = as_dict.pop(
+                self._REPOSITORY_PROPERTIES_KEY, self._DEFAULT_REPOSITORY_PROPERTIES.copy()
+            )
+        else:
+            self._repository_properties.update(
+                as_dict.pop(self._REPOSITORY_PROPERTIES_KEY, self._repository_properties)
+            )
         self._read_entity_retry = as_dict.pop(self._READ_ENTITY_RETRY_KEY, self._read_entity_retry)
         self._mode = as_dict.pop(self._MODE_KEY, self.mode)
         self._version_number = as_dict.pop(self._VERSION_NUMBER_KEY, self.version_number)
