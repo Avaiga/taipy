@@ -20,8 +20,8 @@ import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import Switch from "@mui/material/Switch";
 import Tooltip from "@mui/material/Tooltip";
-import { ChevronRight, ExpandMore, FlagOutlined, PushPinOutlined } from "@mui/icons-material";
-import { TreeView } from "@mui/x-tree-view/TreeView";
+import { ChevronRight, FlagOutlined, PushPinOutlined } from "@mui/icons-material";
+import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
 import { TreeItem } from "@mui/x-tree-view/TreeItem";
 
 import {
@@ -54,6 +54,8 @@ import {
 export interface EditProps {
     id: string;
 }
+
+const treeSlots = {expandIcon: ChevronRight};
 
 type Entities = Cycles | Scenarios | DataNodes;
 type Entity = Cycle | Scenario | Sequence | DataNode;
@@ -129,7 +131,7 @@ const CoreItem = (props: {
     ) : isShown ? (
         <TreeItem
             key={id}
-            nodeId={id}
+            itemId={id}
             data-selectable={nodeType === props.leafType}
             label={
                 <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={1}>
@@ -254,7 +256,10 @@ const CoreSelector = (props: CoreSelectorProps) => {
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars, undefined, true);
 
     const onNodeSelect = useCallback(
-        (e: SyntheticEvent, nodeId: string) => {
+        (e: SyntheticEvent, nodeId: string, isSelected: boolean) => {
+            if (!isSelected) {
+                return;
+            }
             const { selectable = "false" } = e.currentTarget.parentElement?.dataset || {};
             const scenariosVar = getUpdateVar(updateVars, lovPropertyName);
             dispatch(
@@ -391,12 +396,11 @@ const CoreSelector = (props: CoreSelectorProps) => {
                     />
                 </Box>
             ) : null}
-            <TreeView
-                defaultCollapseIcon={<ExpandMore />}
-                defaultExpandIcon={<ChevronRight />}
+            <SimpleTreeView
+                slots={treeSlots}
                 sx={treeViewSx}
-                onNodeSelect={onNodeSelect}
-                selected={selected}
+                onItemSelectionToggle={onNodeSelect}
+                selectedItems={selected}
                 multiSelect={multiple && !multiple}
             >
                 {entities
@@ -414,7 +418,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                           />
                       ))
                     : null}
-            </TreeView>
+            </SimpleTreeView>
         </>
     );
 };

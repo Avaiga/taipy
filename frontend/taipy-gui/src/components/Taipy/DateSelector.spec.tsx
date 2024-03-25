@@ -153,7 +153,7 @@ describe("DateSelector Component", () => {
         const input = document.querySelector("input");
         expect(input).toBeInTheDocument();
         if (input) {
-            await userEvent.clear(input);
+            // await userEvent.clear(input);
             await userEvent.type(input, "{ArrowLeft}{ArrowLeft}{ArrowLeft}01012001", { delay: 1 });
             expect(dispatch).toHaveBeenLastCalledWith({
                 name: "",
@@ -242,7 +242,7 @@ describe("DateSelector with time Component", () => {
         const input = document.querySelector("input");
         expect(input).toBeInTheDocument();
         if (input) {
-            await userEvent.clear(input);
+            // await userEvent.clear(input);
             await userEvent.type(
                 input,
                 "{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}010120010101am",

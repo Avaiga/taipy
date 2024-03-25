@@ -186,9 +186,9 @@ describe("DateRange Component", () => {
         const input2 = document.querySelector(".taipy-date-range-picker-end input");
         expect(input2).toBeInTheDocument();
         if (input && input2) {
-            await userEvent.clear(input);
+            // await userEvent.clear(input);
             await userEvent.type(input, "{ArrowLeft}{ArrowLeft}{ArrowLeft}01012001", { delay: 1 });
-            await userEvent.clear(input2);
+            // await userEvent.clear(input2);
             await userEvent.type(input2, "{ArrowLeft}{ArrowLeft}{ArrowLeft}01312001", { delay: 1 });
             expect(dispatch).toHaveBeenLastCalledWith({
                 name: "",
@@ -318,13 +318,13 @@ describe("DateRange with time Component", () => {
         const input2 = document.querySelector(".tp-dt-picker-end input");
         expect(input2).toBeInTheDocument();
         if (input && input2) {
-            await userEvent.clear(input);
+            // await userEvent.clear(input);
             await userEvent.type(
                 input,
                 "{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}010120010101am",
                 { delay: 1 }
             );
-            await userEvent.clear(input2);
+            // await userEvent.clear(input2);
             await userEvent.type(
                 input2,
                 "{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}123120010101am",

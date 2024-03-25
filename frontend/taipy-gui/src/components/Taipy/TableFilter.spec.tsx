@@ -155,7 +155,6 @@ describe("Table Filter Component", () => {
         const validate = getByTestId("CheckIcon").parentElement;
         expect(validate).toBeDisabled();
         const input = getByPlaceholderText("YYYY/MM/DD");
-        await userEvent.click(input);
         await userEvent.type(input, "{ArrowLeft}{ArrowLeft}{ArrowLeft}2020/11/11", {delay: 1});
         expect(validate).not.toBeDisabled();
     });
