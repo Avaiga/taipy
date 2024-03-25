@@ -26,7 +26,6 @@ import { dateToString, getDateTime, getTimeZonedDate } from "../../utils";
 import { useClassNames, useDispatch, useDynamicProperty, useFormatConfig, useModule } from "../../utils/hooks";
 import Field from "./Field";
 import ErrorFallback from "../../utils/ErrorBoundary";
-import { DateValidationError, PickerChangeHandlerContext } from "@mui/x-date-pickers";
 
 interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
     withTime?: boolean;
@@ -55,7 +54,7 @@ const DateSelector = (props: DateSelectorProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const handleChange = useCallback(
-        (v: Date | null, context: unknown) => {
+        (v: Date | null) => {
             setValue(v);
             if (v !== null && isValid(v)) {
                 const newDate = getTimeZonedDate(v, tz, withTime);
