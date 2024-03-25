@@ -396,7 +396,7 @@ def test_auto_set_and_reload_properties():
     submission_1.properties.update({"temp_key_3": 1})
     assert submission_1.properties == {"qux": 5, "temp_key_3": 1}
     assert submission_2.properties == {"qux": 5, "temp_key_3": 1}
-    submission_1.properties.update(dict())
+    submission_1.properties.update({})
     assert submission_1.properties == {"qux": 5, "temp_key_3": 1}
     assert submission_2.properties == {"qux": 5, "temp_key_3": 1}
     submission_1.properties["temp_key_4"] = 0
@@ -414,7 +414,7 @@ def test_auto_set_and_reload_properties():
         submission.properties.update({"temp_key_4": 1})
         submission.properties.update({"temp_key_5": 2})
         submission.properties.pop("temp_key_5")
-        submission.properties.update(dict())
+        submission.properties.update({})
 
         assert submission.properties["qux"] == 5
         assert submission.properties["temp_key_3"] == 1

@@ -30,6 +30,7 @@ class _JobConfigChecker(_ConfigChecker):
                 cast(JobConfig, job_config),
                 cast(Dict[str, DataNodeConfig], data_node_configs),
             )
+            self._check_job_execution_mode(cast(JobConfig, job_config))
         return self._collector
 
     def _check_multiprocess_mode(self, job_config: JobConfig, data_node_configs: Dict[str, DataNodeConfig]):
@@ -42,3 +43,11 @@ class _JobConfigChecker(_ConfigChecker):
                         f"DataNode `{cfg_id}`: In-memory storage type can ONLY be used in "
                         f"{JobConfig._DEVELOPMENT_MODE} mode.",
                     )
+
+    def _check_job_execution_mode(self, job_config: JobConfig):
+        if job_config.mode not in JobConfig._MODES:
+            self._error(
+                job_config._MODE_KEY,
+                job_config.mode,
+                f"`Job execution mode must be either {', '.join(JobConfig._MODES)}.",
+            )

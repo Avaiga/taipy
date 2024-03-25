@@ -83,7 +83,7 @@ class _FilterDataNode:
         if _FilterDataNode.__is_list_of_dict(data):
             filtered_data = []
             for i, row in key.iterrows():
-                filtered_row = dict()
+                filtered_row = {}
                 for col in row.index:
                     filtered_row[col] = data[i][col] if row[col] else None
                 filtered_data.append(filtered_row)

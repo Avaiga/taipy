@@ -61,7 +61,7 @@ with open("./tools/gui/builder/control.txt", "r") as file:
 os.system(f"pipenv run stubgen {builder_py_file} --no-import --parse-only --export-less -o ./")
 
 with open(builder_pyi_file, "a") as file:
-    file.write("from ._element import _Element, _Block\n")
+    file.write("from ._element import _Element, _Block, _Control\n")
 
 
 def get_properties(element, viselements) -> t.List[t.Dict[str, t.Any]]:
@@ -89,10 +89,14 @@ def build_doc(element: t.Dict[str, t.Any]):
 
 for control_element in viselements["controls"]:
     name = control_element[0]
-    property_list = []
-    property_names = []
+    property_list: t.List[t.Dict[str, t.Any]] = []
+    property_names: t.List[str] = []
     for property in get_properties(control_element[1], viselements):
         if property["name"] not in property_names and "[" not in property["name"]:
+            if "default_property" in property and property["default_property"] is True:
+                property_list.insert(0, property)
+                property_names.insert(0, property["name"])
+                continue
             property_list.append(property)
             property_names.append(property["name"])
     properties = ", ".join([f"{p} = ..." for p in property_names])

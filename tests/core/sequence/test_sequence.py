@@ -657,7 +657,7 @@ def test_auto_set_and_reload_properties():
     sequence_1.properties.update({"temp_key_3": 1})
     assert sequence_1.properties == {"name": "foo", "qux": 5, "temp_key_3": 1}
     assert sequence_2.properties == {"name": "foo", "qux": 5, "temp_key_3": 1}
-    sequence_1.properties.update(dict())
+    sequence_1.properties.update({})
     assert sequence_1.properties == {"name": "foo", "qux": 5, "temp_key_3": 1}
     assert sequence_2.properties == {"name": "foo", "qux": 5, "temp_key_3": 1}
     sequence_1.properties["temp_key_4"] = 0
@@ -676,7 +676,7 @@ def test_auto_set_and_reload_properties():
         sequence.properties.update({"temp_key_4": 1})
         sequence.properties.update({"temp_key_5": 2})
         sequence.properties.pop("temp_key_5")
-        sequence.properties.update(dict())
+        sequence.properties.update({})
 
         assert sequence._is_in_context
         assert sequence.properties["qux"] == 5
