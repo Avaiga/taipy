@@ -37,4 +37,5 @@ def test_clean_config():
     assert Config.job_config is job_config
 
     assert job_config.mode == "development"
+    assert job_config._config == {}
     assert job_config.properties == {}

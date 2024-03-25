@@ -122,15 +122,12 @@ start_executor = "ENV[BAR]"
         assert Config.job_config.start_executor
 
     with mock.patch.dict(os.environ, {"FOO": "foo", "BAR": "true"}):
-        Config.override(tf.filename)
         with pytest.raises(InconsistentEnvVariableError):
-            _ = Config.job_config.max_nb_of_workers
+            Config.override(tf.filename)
 
     with mock.patch.dict(os.environ, {"FOO": "5"}):
-        Config.override(tf.filename)
-        assert Config.job_config.max_nb_of_workers == 5
         with pytest.raises(MissingEnvVariableError):
-            _ = Config.job_config.start_executor
+            Config.override(tf.filename)
 
 
 def test_code_configuration_do_not_override_file_configuration():
