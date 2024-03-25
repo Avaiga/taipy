@@ -139,4 +139,6 @@ class FileWatchdogHandler(FileSystemEventHandler):
         self._last_modified = datetime.datetime.now()
         if Path(event.src_path).resolve() == Path(self._file_path).resolve():
             self._renderer.set_content(self._file_path)
-            _TaipyLogger._get_logger().info(f"File '{self._file_path}' has been modified.")
+            _TaipyLogger._get_logger().info(
+                f"File '{self._file_path}' has been modified."
+            )

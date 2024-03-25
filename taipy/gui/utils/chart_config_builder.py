@@ -253,9 +253,7 @@ def _build_chart_config(gui: "Gui", attributes: t.Dict[str, t.Any], col_types: t
                 (
                     tr[_Chart_iprops.line.value]
                     if isinstance(tr[_Chart_iprops.line.value], (dict, _MapDict))
-                    else {"dash": tr[_Chart_iprops.line.value]}
-                    if tr[_Chart_iprops.line.value]
-                    else None
+                    else {"dash": tr[_Chart_iprops.line.value]} if tr[_Chart_iprops.line.value] else None
                 )
                 for tr in traces
             ],

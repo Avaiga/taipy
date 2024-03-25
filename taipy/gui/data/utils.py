@@ -145,7 +145,7 @@ def _df_relayout(
         if y1 is not None:
             df_filter_conditions.append(df[y_column] < y1)
     if df_filter_conditions:
-        df = df.loc[np.bitwise_and.reduce(df_filter_conditions)]
+            df = df.loc[np.bitwise_and.reduce(df_filter_conditions)]
     if not has_x_col:
         df.drop(x_column, axis=1, inplace=True)
     return df, is_copied

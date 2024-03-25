@@ -19,7 +19,6 @@ import typing as t
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ..utils.singleton import _Singleton
-from ..utils.viselements import VisElements, resolve_inherits
 from ._element import _Block, _Control
 
 if t.TYPE_CHECKING:
@@ -46,19 +45,18 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
             raise RuntimeError(f"{error_message}: taipy-gui module not found.")
         module_name = current_frame.f_back.f_globals["__name__"]
         self.__module = module = sys.modules[module_name]
-        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "viselements.json"))) as f:
-            viselements_json = json.load(f)
-            if "blocks" not in viselements_json or "controls" not in viselements_json:
+        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "viselements.json"))) as viselements:
+            data = json.load(viselements)
+            if "blocks" not in data or "controls" not in data:
                 raise RuntimeError(f"{error_message}: Invalid viselements.json file.")
-            viselements = resolve_inherits(t.cast(VisElements, viselements_json))
-            for blockElement in viselements["blocks"]:
+            for blockElement in data["blocks"]:
                 default_property = _ElementApiGenerator.find_default_property(blockElement[1]["properties"])
                 setattr(
                     module,
                     blockElement[0],
                     _ElementApiGenerator.create_block_api(blockElement[0], blockElement[0], default_property),
                 )
-            for controlElement in viselements["controls"]:
+            for controlElement in data["controls"]:
                 default_property = _ElementApiGenerator.find_default_property(controlElement[1]["properties"])
                 setattr(
                     module,

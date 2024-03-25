@@ -34,3 +34,4 @@ export const runXHR = (downloadLink: HTMLAnchorElement | undefined, url: string,
     request.send();
     return request;
 };
+

@@ -39,8 +39,7 @@ class _Page(object):
             if not silent and w:
                 s = "\033[1;31m\n"
                 s += (
-                    message
-                    := f"--- {len(w)} warning(s) were found for page '{'/' if self._route == gui._get_root_page_name() else self._route}' {self._renderer._get_content_detail(gui)} ---\n"  # noqa: E501
+                    message := f"--- {len(w)} warning(s) were found for page '{'/' if self._route == gui._get_root_page_name() else self._route}' {self._renderer._get_content_detail(gui)} ---\n"  # noqa: E501
                 )
                 for i, wm in enumerate(w):
                     s += f" - Warning {i + 1}: {wm.message}\n"
