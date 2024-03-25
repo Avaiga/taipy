@@ -804,7 +804,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                                 </Tooltip>
                                                             </Grid>
                                                         </>
-                                                    ) : dtType == "date" ? (
+                                                    ) : dtType == "date" && (dataValue === null || dataValue instanceof Date)  ? (
                                                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                                                             <Grid item xs={10}>
                                                                 <DateTimePicker
@@ -897,7 +897,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                         ) : (
                                                             <Typography variant="subtitle2">
                                                                 {dtType == "date"
-                                                                    ? dataValue &&
+                                                                    ? (dataValue === null || dataValue instanceof Date) &&
                                                                       format(dataValue as Date, "yyyy/MM/dd HH:mm:ss")
                                                                     : dtType == "float" && dtValue === null
                                                                     ? "NaN"
