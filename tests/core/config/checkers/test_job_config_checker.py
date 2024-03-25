@@ -40,8 +40,6 @@ class TestJobConfigChecker:
         expected_error_message = "Job execution mode must be either development, standalone."
         assert expected_error_message in caplog.text
 
-        Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     def test_check_standalone_mode(self, caplog):
         Config._collector = IssueCollector()
         Config.check()
