@@ -68,7 +68,7 @@ class TestDataNode:
             "a_scenario_id",
             {"a_parent_id"},
             a_date,
-            [dict(job_id="a_job_id")],
+            [{"job_id": "a_job_id"}],
             edit_in_progress=False,
             prop="erty",
             name="a name",
@@ -408,7 +408,7 @@ class TestDataNode:
             owner_id=None,
             parent_ids=None,
             last_edit_date=current_datetime,
-            edits=[dict(job_id="a_job_id")],
+            edits=[{"job_id": "a_job_id"}],
             edit_in_progress=False,
             validity_period=None,
             properties={
@@ -582,7 +582,7 @@ class TestDataNode:
         dn_1.properties.update({"temp_key_3": 1})
         assert dn_1.properties == {"qux": 5, "temp_key_3": 1, "name": "def"}
         assert dn_2.properties == {"qux": 5, "temp_key_3": 1, "name": "def"}
-        dn_1.properties.update(dict())
+        dn_1.properties.update({})
         assert dn_1.properties == {"qux": 5, "temp_key_3": 1, "name": "def"}
         assert dn_2.properties == {"qux": 5, "temp_key_3": 1, "name": "def"}
         dn_1.properties["temp_key_4"] = 0
@@ -601,7 +601,7 @@ class TestDataNode:
             dn.properties.update({"temp_key_4": 1})
             dn.properties.update({"temp_key_5": 2})
             dn.properties.pop("temp_key_5")
-            dn.properties.update(dict())
+            dn.properties.update({})
 
             assert dn.properties["qux"] == 5
             assert dn.properties["temp_key_3"] == 1
@@ -681,7 +681,7 @@ class TestDataNode:
             "a_scenario_id",
             {"a_parent_id"},
             a_date,
-            [dict(job_id="a_job_id")],
+            [{"job_id": "a_job_id"}],
             edit_in_progress=False,
             prop="erty",
             name="a name",
@@ -707,7 +707,7 @@ class TestDataNode:
             "a_scenario_id",
             {"a_parent_id"},
             a_date,
-            [dict(job_id="a_job_id")],
+            [{"job_id": "a_job_id"}],
             edit_in_progress=False,
             label="a label",
             name="a name",

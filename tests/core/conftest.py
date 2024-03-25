@@ -222,7 +222,7 @@ def data_node_model():
         "owner_id",
         list({"parent_id_1", "parent_id_2"}),
         datetime(1985, 10, 14, 2, 30, 0).isoformat(),
-        [dict(timestamp=datetime(1985, 10, 14, 2, 30, 0).isoformat(), job_id="job_id")],
+        [{"timestamp": datetime(1985, 10, 14, 2, 30, 0).isoformat(), "job_id": "job_id"}],
         "latest",
         None,
         None,

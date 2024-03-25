@@ -21,7 +21,7 @@ class MyLibrary(ElementLibrary):
         return "taipy_extension_example"
 
     def get_elements(self):
-        return dict()
+        return {}
 
 
 def test_extension_no_config(gui: Gui, helpers):
