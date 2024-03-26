@@ -1257,7 +1257,7 @@
         ],
         "properties": [
           {
-            "name": "value",
+            "name": "title",
             "default_property": true,
             "type": "dynamic(str)",
             "doc": "Title of this block element."
