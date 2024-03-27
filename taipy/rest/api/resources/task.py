@@ -24,11 +24,10 @@ from ..schemas import TaskSchema
 
 
 def _get_or_raise(task_id: str) -> Task:
-    manager = _TaskManagerFactory._build_manager()
-    task = manager._get(task_id)
-    if task is None:
-        raise NonExistingTask(task_id)
-    return task
+    if task := _TaskManagerFactory._build_manager()._get(task_id):
+        return task
+
+    raise NonExistingTask(task_id)
 
 
 REPOSITORY = "task"
@@ -196,10 +195,10 @@ class TaskList(Resource):
         self.logger = kwargs.get("logger")
 
     def fetch_config(self, config_id):
-        config = Config.tasks.get(config_id)
-        if not config:
-            raise NonExistingTaskConfig(config_id)
-        return config
+        if config := Config.tasks.get(config_id):
+            return config
+
+        raise NonExistingTaskConfig(config_id)
 
     @_middleware
     def get(self):

@@ -17,7 +17,6 @@ import inspect
 import json
 import math
 import os
-import pathlib
 import re
 import sys
 import tempfile
@@ -26,12 +25,24 @@ import typing as t
 import warnings
 from importlib import metadata, util
 from importlib.util import find_spec
+from pathlib import Path
+from tempfile import mkstemp
 from types import FrameType, FunctionType, LambdaType, ModuleType, SimpleNamespace
 from urllib.parse import unquote, urlencode, urlparse
 
 import markdown as md_lib
 import tzlocal
-from flask import Blueprint, Flask, g, has_app_context, jsonify, request, send_file, send_from_directory
+from flask import (
+    Blueprint,
+    Flask,
+    g,
+    has_app_context,
+    has_request_context,
+    jsonify,
+    request,
+    send_file,
+    send_from_directory,
+)
 from werkzeug.utils import secure_filename
 
 import __main__  # noqa: F401
@@ -56,11 +67,11 @@ from .data.data_accessor import _DataAccessor, _DataAccessors
 from .data.data_format import _DataFormat
 from .data.data_scope import _DataScopes
 from .extension.library import Element, ElementLibrary
-from .gui_types import _WsType
 from .page import Page
 from .partial import Partial
 from .server import _Server
 from .state import State
+from .types import _WsType
 from .utils import (
     _delscopeattr,
     _filter_locals,
@@ -214,6 +225,8 @@ class Gui:
     _HTML_CONTENT_KEY = "__taipy_html_content"
     __USER_CONTENT_CB = "custom_user_content_cb"
     __ROBOTO_FONT = "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+    __DOWNLOAD_ACTION = "__Taipy__download_csv"
+    __DOWNLOAD_DELETE_ACTION = "__Taipy__download_delete_csv"
 
     __RE_HTML = re.compile(r"(.*?)\.html$")
     __RE_MD = re.compile(r"(.*?)\.md$")
@@ -332,7 +345,7 @@ class Gui:
 
         # get taipy version
         try:
-            gui_file = pathlib.Path(__file__ or ".").resolve()
+            gui_file = Path(__file__ or ".").resolve()
             with open(gui_file.parent / "version.json") as version_file:
                 self.__version = json.load(version_file)
         except Exception as e:  # pragma: no cover
@@ -732,7 +745,8 @@ class Gui:
             return f"{var_name_decode}.{suffix_var_name}" if suffix_var_name else var_name_decode, module_name
         if module_name == current_context:
             var_name = var_name_decode
-        else:
+        # only strict checking for cross-context linked variable when the context has been properly set
+        elif self._has_set_context():
             if var_name not in self.__var_dir._var_head:
                 raise NameError(f"Can't find matching variable for {var_name} on context: {current_context}")
             _found = False
@@ -888,7 +902,7 @@ class Gui:
                     elts.append(elt_dict)
         status.update({"libraries": libraries})
 
-    def _serve_status(self, template: pathlib.Path) -> t.Dict[str, t.Dict[str, str]]:
+    def _serve_status(self, template: Path) -> t.Dict[str, t.Dict[str, str]]:
         base_json: t.Dict[str, t.Any] = {"user_status": str(self.__call_on_status() or "")}
         if self._get_config("extended_status", False):
             base_json.update(
@@ -932,7 +946,7 @@ class Gui:
                 suffix = f".part.{part}"
                 complete = part == total - 1
         if file:  # and allowed_file(file.filename)
-            upload_path = pathlib.Path(self._get_config("upload_folder", tempfile.gettempdir())).resolve()
+            upload_path = Path(self._get_config("upload_folder", tempfile.gettempdir())).resolve()
             file_path = _get_non_existent_file_path(upload_path, secure_filename(file.filename))
             file.save(str(upload_path / (file_path.name + suffix)))
             if complete:
@@ -940,8 +954,11 @@ class Gui:
                     try:
                         with open(file_path, "wb") as grouped_file:
                             for nb in range(part + 1):
-                                with open(upload_path / f"{file_path.name}.part.{nb}", "rb") as part_file:
+                                part_file_path = upload_path / f"{file_path.name}.part.{nb}"
+                                with open(part_file_path, "rb") as part_file:
                                     grouped_file.write(part_file.read())
+                                # remove file_path after it is merged
+                                part_file_path.unlink()
                     except EnvironmentError as ee:  # pragma: no cover
                         _warn("Cannot group file after chunk upload", ee)
                         return
@@ -1002,7 +1019,13 @@ class Gui:
                 elif isinstance(newvalue, _TaipyToJson):
                     newvalue = newvalue.get()
                 if isinstance(newvalue, (dict, _MapDict)):
-                    continue  # this var has no transformer
+                    # Skip in taipy-gui, available in custom frontend
+                    resource_handler_id = None
+                    with contextlib.suppress(Exception):
+                        if has_request_context():
+                            resource_handler_id = request.cookies.get(_Server._RESOURCE_HANDLER_ARG, None)
+                    if resource_handler_id is None:
+                        continue  # this var has no transformer
                 if isinstance(newvalue, float) and math.isnan(newvalue):
                     # do not let NaN go through json, it is not handle well (dies silently through websocket)
                     newvalue = None
@@ -1229,7 +1252,7 @@ class Gui:
 
     def __send_ws_update_with_dict(self, modified_values: dict) -> None:
         payload = [
-            {"name": _get_client_var_name(k), "payload": (v if isinstance(v, dict) and "value" in v else {"value": v})}
+            {"name": _get_client_var_name(k), "payload": v if isinstance(v, dict) and "value" in v else {"value": v}}
             for k, v in modified_values.items()
         ]
         if self._is_broadcasting():
@@ -1304,6 +1327,31 @@ class Gui:
             cls = self.__locals_context.get_default().get(class_name)
         return cls if isinstance(cls, class_type) else class_name
 
+    def __download_csv(self, state: State, var_name: str, payload: dict):
+        holder_name = t.cast(str, payload.get("var_name"))
+        ret = self._accessors._get_data(
+            self,
+            holder_name,
+            _getscopeattr(self, holder_name, None),
+            {"alldata": True, "csv": True},
+        )
+        if isinstance(ret, dict):
+            df = ret.get("df")
+            try:
+                fd, temp_path = mkstemp(".csv", var_name, text=True)
+                with os.fdopen(fd, "wt", newline="") as csv_file:
+                    df.to_csv(csv_file, index=False)  # type:ignore
+                self._download(temp_path, "data.csv", Gui.__DOWNLOAD_DELETE_ACTION)
+            except Exception as e:  # pragma: no cover
+                if not self._call_on_exception("download_csv", e):
+                    _warn("download_csv(): Exception raised", e)
+
+    def __delete_csv(self, state: State, var_name: str, payload: dict):
+        try:
+            (Path(tempfile.gettempdir()) / t.cast(str, payload.get("args", [])[-1]).split("/")[-1]).unlink(True)
+        except Exception:
+            pass
+
     def __on_action(self, id: t.Optional[str], payload: t.Any) -> None:
         if isinstance(payload, dict):
             action = payload.get("action")
@@ -1311,7 +1359,15 @@ class Gui:
             action = str(payload)
             payload = {"action": action}
         if action:
-            if self.__call_function_with_args(action_function=self._get_user_function(action), id=id, payload=payload):
+            action_fn: t.Union[t.Callable, str]
+            if Gui.__DOWNLOAD_ACTION == action:
+                action_fn = self.__download_csv
+                payload["var_name"] = id
+            elif Gui.__DOWNLOAD_DELETE_ACTION == action:
+                action_fn = self.__delete_csv
+            else:
+                action_fn = self._get_user_function(action)
+            if self.__call_function_with_args(action_function=action_fn, id=id, payload=payload):
                 return
             else:  # pragma: no cover
                 _warn(f"on_action(): '{action}' is not a valid function.")
@@ -1446,6 +1502,9 @@ class Gui:
         attributes.update({k: args_dict.get(v) for k, v in hashes.items()})
         return attributes, hashes
 
+    def _compare_data(self, *data):
+        return data[0]
+
     def _tbl_cols(
         self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs
     ) -> t.Union[str, _DoNotUpdate]:
@@ -1568,6 +1627,9 @@ class Gui:
     def _set_locals_context(self, context: t.Optional[str]) -> t.ContextManager[None]:
         return self.__locals_context.set_locals_context(context)
 
+    def _has_set_context(self):
+        return self.__locals_context.get_context() is not None
+
     def _get_page_context(self, page_name: str) -> str | None:
         if page_name not in self._config.routes:
             return None
@@ -1664,6 +1726,10 @@ class Gui:
         # Update variable directory
         if not page._is_class_module():
             self.__var_dir.add_frame(page._frame)
+        # Special case needed for page to access gui to trigger reload in notebook
+        if _is_in_notebook():
+            page._notebook_gui = self
+            page._notebook_page = new_page
 
     def add_pages(self, pages: t.Optional[t.Union[t.Mapping[str, t.Union[str, Page]], str]] = None) -> None:
         """Add several pages to the Graphical User Interface.
@@ -1895,7 +1961,7 @@ class Gui:
             else:
                 _warn("download() on_action is invalid.")
         content_str = self._get_content("Gui.download", content, False)
-        self.__send_ws_download(content_str, str(name), str(on_action))
+        self.__send_ws_download(content_str, str(name), str(on_action) if on_action is not None else "")
 
     def _notify(
         self,
@@ -1975,7 +2041,7 @@ class Gui:
     def _call_on_exception(self, function_name: str, exception: Exception) -> bool:
         if hasattr(self, "on_exception") and callable(self.on_exception):
             try:
-                self.on_exception(self.__get_state(), str(function_name), exception)
+                self.on_exception(self.__get_state(), function_name, exception)
             except Exception as e:  # pragma: no cover
                 _warn("Exception raised in on_exception()", e)
             return True
@@ -2062,6 +2128,7 @@ class Gui:
                 to=page_name,
                 params={
                     _Server._RESOURCE_HANDLER_ARG: pr._resource_handler.get_id(),
+                    _Server._CUSTOM_PAGE_META_ARG: json.dumps(pr._metadata, cls=_TaipyJsonEncoder),
                 },
             ):
                 # Proactively handle the bindings of custom page variables
@@ -2117,7 +2184,7 @@ class Gui:
 
     def _set_css_file(self, css_file: t.Optional[str] = None):
         if css_file is None:
-            script_file = pathlib.Path(self.__frame.f_code.co_filename or ".").resolve()
+            script_file = Path(self.__frame.f_code.co_filename or ".").resolve()
             if script_file.with_suffix(".css").exists():
                 css_file = f"{script_file.stem}.css"
             elif script_file.is_dir() and (script_file / "taipy.css").exists():
@@ -2130,9 +2197,9 @@ class Gui:
 
     def _get_webapp_path(self):
         _conf_webapp_path = (
-            pathlib.Path(self._get_config("webapp_path", None)) if self._get_config("webapp_path", None) else None
+            Path(self._get_config("webapp_path", None)) if self._get_config("webapp_path", None) else None
         )
-        _webapp_path = str((pathlib.Path(__file__).parent / "webapp").resolve())
+        _webapp_path = str((Path(__file__).parent / "webapp").resolve())
         if _conf_webapp_path:
             if _conf_webapp_path.is_dir():
                 _webapp_path = str(_conf_webapp_path.resolve())

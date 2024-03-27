@@ -109,7 +109,9 @@ def test_build_unknown_dispatcher():
     _OrchestratorFactory._build_orchestrator()
     with pytest.raises(ModeNotAvailable):
         _OrchestratorFactory._build_dispatcher()
-        assert _OrchestratorFactory._dispatcher is None
+
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _OrchestratorFactory._build_dispatcher()
 
 
 def test_remove_dispatcher_not_built():

@@ -33,18 +33,6 @@ def create_scenario():
     return taipy.create_scenario(sc_conf)
 
 
-def test_can_execute():
-    dispatcher = _JobDispatcher(_OrchestratorFactory._orchestrator)
-    assert dispatcher._nb_available_workers == 1
-    assert dispatcher._can_execute()
-    dispatcher._nb_available_workers = 0
-    assert not dispatcher._can_execute()
-    dispatcher._nb_available_workers = -1
-    assert not dispatcher._can_execute()
-    dispatcher._nb_available_workers = 1
-    assert dispatcher._can_execute()
-
-
 def test_execute_job():
     scenario = create_scenario()
     scenario.t1.skippable = True  # make the job skippable

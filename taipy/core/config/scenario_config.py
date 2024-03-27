@@ -89,7 +89,7 @@ class ScenarioConfig(Section):
 
     def __copy__(self):
         comp = None if self.comparators is None else self.comparators
-        scenario_config = ScenarioConfig(
+        return ScenarioConfig(
             self.id,
             copy(self._tasks),
             copy(self._additional_data_nodes),
@@ -98,7 +98,6 @@ class ScenarioConfig(Section):
             copy(self.sequences),
             **copy(self._properties),
         )
-        return scenario_config
 
     def __getattr__(self, item: str) -> Optional[Any]:
         return _tpl._replace_templates(self._properties.get(item))
@@ -137,15 +136,15 @@ class ScenarioConfig(Section):
 
     @classmethod
     def default_config(cls):
-        return ScenarioConfig(cls._DEFAULT_KEY, list(), list(), None, dict())
+        return ScenarioConfig(cls._DEFAULT_KEY, [], [], None, {})
 
     def _clean(self):
-        self._tasks = list()
-        self._additional_data_nodes = list()
+        self._tasks = []
+        self._additional_data_nodes = []
         self.frequency = None
-        self.comparators = dict()
-        self.sequences = dict()
-        self._properties = dict()
+        self.comparators = {}
+        self.sequences = {}
+        self._properties = {}
 
     def _to_dict(self) -> Dict[str, Any]:
         return {
@@ -161,19 +160,19 @@ class ScenarioConfig(Section):
     def _from_dict(cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config] = None) -> "ScenarioConfig":  # type: ignore
         as_dict.pop(cls._ID_KEY, id)
 
-        tasks = cls.__get_task_configs(as_dict.pop(cls._TASKS_KEY, list()), config)
+        tasks = cls.__get_task_configs(as_dict.pop(cls._TASKS_KEY, []), config)
 
-        additional_data_node_ids = as_dict.pop(cls._ADDITIONAL_DATA_NODES_KEY, list())
+        additional_data_node_ids = as_dict.pop(cls._ADDITIONAL_DATA_NODES_KEY, [])
         additional_data_nodes = cls.__get_additional_data_node_configs(additional_data_node_ids, config)
 
         frequency = as_dict.pop(cls._FREQUENCY_KEY, None)
-        comparators = as_dict.pop(cls._COMPARATOR_KEY, dict())
+        comparators = as_dict.pop(cls._COMPARATOR_KEY, {})
         sequences = as_dict.pop(cls._SEQUENCES_KEY, {})
 
         for sequence_name, sequence_tasks in sequences.items():
             sequences[sequence_name] = cls.__get_task_configs(sequence_tasks, config)
 
-        scenario_config = ScenarioConfig(
+        return ScenarioConfig(
             id=id,
             tasks=tasks,
             additional_data_nodes=additional_data_nodes,
@@ -182,8 +181,6 @@ class ScenarioConfig(Section):
             sequences=sequences,
             **as_dict,
         )
-
-        return scenario_config
 
     @staticmethod
     def __get_task_configs(task_config_ids: List[str], config: Optional[_Config]):

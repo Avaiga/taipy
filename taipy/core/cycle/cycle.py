@@ -141,11 +141,11 @@ class Cycle(_Entity, _Labeled):
             """
             Source: https://github.com/django/django/blob/main/django/utils/text.py
             """
-            s = str(name).strip().replace(" ", "_")
+            s = name.strip().replace(" ", "_")
             s = re.sub(r"(?u)[^-\w.]", "", s)
             if s in {"", ".", ".."}:
-                raise _SuspiciousFileOperation("Could not derive file name from '%s'" % name)
-            s = str(s).strip().replace(" ", "_")
+                raise _SuspiciousFileOperation(f"Could not derive file name from '{name}'")
+            s = s.strip().replace(" ", "_")
             return re.sub(r"(?u)[^-\w.]", "", s)
 
         return CycleId(_get_valid_filename(Cycle.__SEPARATOR.join([Cycle._ID_PREFIX, name, str(uuid.uuid4())])))

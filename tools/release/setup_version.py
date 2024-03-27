@@ -22,7 +22,7 @@ class Version:
     major: str
     minor: str
     patch: str
-    ext: str
+    ext: Optional[str] = None
 
     def bump_ext_version(self) -> None:
         if not self.ext:

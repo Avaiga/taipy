@@ -180,14 +180,9 @@ def default_multi_sheet_data_frame():
 def cleanup_files():
     yield
 
-    if os.path.exists(".data"):
-        shutil.rmtree(".data", ignore_errors=True)
-    if os.path.exists("user_data"):
-        shutil.rmtree("user_data", ignore_errors=True)
-    if os.path.exists(".taipy"):
-        shutil.rmtree(".taipy", ignore_errors=True)
-    if os.path.exists(".my_data"):
-        shutil.rmtree(".my_data", ignore_errors=True)
+    for path in [".data", ".my_data", "user_data", ".taipy"]:
+        if os.path.exists(path):
+            shutil.rmtree(path, ignore_errors=True)
 
 
 @pytest.fixture(scope="function")
@@ -227,7 +222,7 @@ def data_node_model():
         "owner_id",
         list({"parent_id_1", "parent_id_2"}),
         datetime(1985, 10, 14, 2, 30, 0).isoformat(),
-        [dict(timestamp=datetime(1985, 10, 14, 2, 30, 0).isoformat(), job_id="job_id")],
+        [{"timestamp": datetime(1985, 10, 14, 2, 30, 0).isoformat(), "job_id": "job_id"}],
         "latest",
         None,
         None,
@@ -280,7 +275,7 @@ def sequence():
         [],
         SequenceId("sequence_id"),
         owner_id="owner_id",
-        parent_ids=set(["parent_id_1", "parent_id_2"]),
+        parent_ids={"parent_id_1", "parent_id_2"},
         version="random_version_number",
     )
 
@@ -330,6 +325,12 @@ def clean_repository(init_config, init_managers, init_orchestrator, init_notifie
 
     with patch("sys.argv", ["prog"]):
         yield
+
+    close_all_sessions()
+    init_orchestrator()
+    init_managers()
+    init_config()
+    init_notifier()
 
 
 @pytest.fixture

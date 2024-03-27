@@ -559,7 +559,7 @@ def test_scenario_manager_only_creates_data_node_once():
     scenario_1_sorted_tasks = scenario_1._get_sorted_tasks()
     expected = [{task_mult_by_2_config.id, task_mult_by_4_config.id}, {task_mult_by_3_config.id}]
     for i, list_tasks_by_level in enumerate(scenario_1_sorted_tasks):
-        assert set(t.config_id for t in list_tasks_by_level) == expected[i]
+        assert {t.config_id for t in list_tasks_by_level} == expected[i]
     assert scenario_1.cycle.frequency == Frequency.DAILY
 
     _ScenarioManager._create(scenario_config)
@@ -936,7 +936,7 @@ def test_is_submittable():
 
     dn_config = Config.configure_in_memory_data_node("dn", 10)
     task_config = Config.configure_task("task", print, [dn_config])
-    scenario_config = Config.configure_scenario("sc", set([task_config]), set(), Frequency.DAILY)
+    scenario_config = Config.configure_scenario("sc", {task_config}, set(), Frequency.DAILY)
     scenario = _ScenarioManager._create(scenario_config)
 
     assert len(_ScenarioManager._get_all()) == 1

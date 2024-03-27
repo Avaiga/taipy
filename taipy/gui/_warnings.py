@@ -32,11 +32,13 @@ class TaipyGuiWarning(UserWarning):
 
 def _warn(message: str, e: t.Optional[BaseException] = None):
     warnings.warn(
-        f"{message}:\n{''.join(traceback.format_exception(type(e), e, e.__traceback__))}"
-        if e and TaipyGuiWarning._tp_debug_mode
-        else f"{message}:\n{e}"
-        if e
-        else message,
+        (
+            f"{message}:\n{''.join(traceback.format_exception(type(e), e, e.__traceback__))}"
+            if e and TaipyGuiWarning._tp_debug_mode
+            else f"{message}:\n{e}"
+            if e
+            else message
+        ),
         TaipyGuiWarning,
         stacklevel=2,
     )

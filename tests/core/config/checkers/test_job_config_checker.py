@@ -17,6 +17,31 @@ from taipy.core.config.job_config import JobConfig
 
 
 class TestJobConfigChecker:
+    def test_check_mode(self, caplog):
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+
+        Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+
+        Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+
+        Config.configure_job_executions(mode="foo", max_nb_of_workers=2)
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = "Job execution mode must be either development, standalone."
+        assert expected_error_message in caplog.text
+
+        Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+
     def test_check_standalone_mode(self, caplog):
         Config._collector = IssueCollector()
         Config.check()

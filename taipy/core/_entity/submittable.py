@@ -34,7 +34,7 @@ class Submittable:
     """
 
     def __init__(self, subscribers: Optional[List[_Subscriber]] = None):
-        self._subscribers = _ListAttributes(self, subscribers or list())
+        self._subscribers = _ListAttributes(self, subscribers or [])
 
     @abc.abstractmethod
     def submit(
@@ -139,8 +139,7 @@ class Submittable:
     def _remove_subscriber(self, callback: Callable, params: Optional[List[Any]] = None):
         if params is not None:
             self._subscribers.remove(_Subscriber(callback, params))
-        else:
-            elem = [x for x in self._subscribers if x.callback == callback]
-            if not elem:
-                raise ValueError
+        elif elem := [x for x in self._subscribers if x.callback == callback]:
             self._subscribers.remove(elem[0])
+        else:
+            raise ValueError

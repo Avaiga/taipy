@@ -10,9 +10,8 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set
 
-import numpy as np
 import pandas as pd
 from sqlalchemy import MetaData, Table
 
@@ -122,36 +121,13 @@ class SQLTableDataNode(_AbstractSQLDataNode):
         self.__insert_data(data, engine, connection, delete_table=True)
 
     def __insert_data(self, data, engine, connection, delete_table: bool = False) -> None:
-        """
-        Insert data into a SQL table.
-
-        Parameters:
-            data (List[Dict]): a list of dictionaries, where each dictionary represents a row of the table.
-            table: a SQLAlchemy object that represents a table.
-            connection: a SQLAlchemy connection to write the data.
-            delete_table (bool): indicates if the table should be deleted before inserting the data.
-        """
         table = self._create_table(engine)
-        if isinstance(data, pd.DataFrame):
-            self.__insert_dataframe(data, table, connection, delete_table)
-            return
-
-        if isinstance(data, np.ndarray):
-            data = data.tolist()
-        if not isinstance(data, list):
-            data = [data]
-
-        if len(data) == 0:
-            self.__delete_all_rows(table, connection, delete_table)
-            return
-
-        if isinstance(data[0], (tuple, list)):
-            self.__insert_tuples(data, table, connection, delete_table)
-        elif isinstance(data[0], dict):
-            self.__insert_dicts(data, table, connection, delete_table)
-        # If data is a primitive type, it will be inserted as a tuple of one element.
-        else:
-            self.__insert_tuples([(x,) for x in data], table, connection, delete_table)
+        self.__insert_dataframe(
+            self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data),
+            table,
+            connection,
+            delete_table,
+        )
 
     def _create_table(self, engine) -> Table:
         return Table(
@@ -170,23 +146,8 @@ class SQLTableDataNode(_AbstractSQLDataNode):
         connection.execute(table.insert(), data)
 
     @classmethod
-    def __insert_dataframe(
-        cls, df: pd.DataFrame, table: Any, connection: Any, delete_table: bool
-    ) -> None:
+    def __insert_dataframe(cls, df: pd.DataFrame, table: Any, connection: Any, delete_table: bool) -> None:
         cls.__insert_dicts(df.to_dict(orient="records"), table, connection, delete_table)
-
-    @classmethod
-    def __insert_tuples(cls, data: List[Union[Tuple, List]], table: Any, connection: Any, delete_table: bool) -> None:
-        """
-        This method will look up the length of the first object of the list and build the insert through
-        creation of a string of '?' equivalent to the length of the element. The '?' character is used as
-        placeholder for a tuple of same size.
-        """
-        cls.__delete_all_rows(table, connection, delete_table)
-        markers = ",".join("?" * len(data[0]))
-        ins = "INSERT INTO {tablename} VALUES ({markers})"
-        ins = ins.format(tablename=table.name, markers=markers)
-        connection.execute(ins, data)
 
     @classmethod
     def __delete_all_rows(cls, table: Any, connection: Any, delete_table: bool) -> None:

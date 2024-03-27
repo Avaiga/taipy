@@ -2,7 +2,7 @@
 "id": "TASK_predict_cf8b3c83-5ea7-40eb-b8af-d5240852ff5b",
 "owner_id": "SCENARIO_scenario_62d29866-610e-4173-bd22-6a0555e80ff4",
 "parent_ids": [
-"PIPELINE_baseline_08c57938-83e8-4848-aca5-c98a4ca21e58"
+"SCENARIO_scenario_62d29866-610e-4173-bd22-6a0555e80ff4"
 ],
 "config_id": "predict",
 "input_ids": [

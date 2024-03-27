@@ -20,7 +20,6 @@ import pandas as pd
 
 from taipy.config.common.scope import Scope
 
-from .._backup._backup import _replace_in_backup_file
 from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..job.job_id import JobId
@@ -168,10 +167,8 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
 
     @path.setter
     def path(self, value):
-        tmp_old_path = self._path
         self._path = value
         self.properties[self.__PATH_KEY] = value
-        _replace_in_backup_file(old_file_path=tmp_old_path, new_file_path=self._path)
 
     def _read(self):
         if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
@@ -182,16 +179,12 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
 
     def _read_as(self):
         with open(self._path, encoding=self.properties[self.__ENCODING_KEY]) as csvFile:
-            res = list()
             if self.properties[self._HAS_HEADER_PROPERTY]:
                 reader = csv.DictReader(csvFile)
-                for line in reader:
-                    res.append(self._decoder(line))
             else:
                 reader = csv.reader(csvFile)
-                for line in reader:
-                    res.append(self._decoder(line))
-            return res
+
+            return [self._decoder(line) for line in reader]
 
     def _read_as_numpy(self) -> np.ndarray:
         return self._read_as_pandas_dataframe().to_numpy()

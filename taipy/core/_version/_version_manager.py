@@ -16,6 +16,7 @@ from taipy.config import Config
 from taipy.config._config_comparator._comparator_result import _ComparatorResult
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.exceptions.exceptions import InconsistentEnvVariableError
+from taipy.core.exceptions.exceptions import ConfigCoreVersionMismatched
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._manager._manager import _Manager
@@ -54,13 +55,11 @@ class _VersionManager(_Manager[_Version]):
         if version := cls._get(id):
             comparator_result = Config._comparator._find_conflict_config(version.config, Config._applied_config, id)  # type: ignore[attr-defined]
             if comparator_result.get(_ComparatorResult.CONFLICTED_SECTION_KEY):
-                if force:
-                    cls.__logger.warning(
-                        f"Option --force is detected, overriding the configuration of version {id} ..."
-                    )
-                    version.config = Config._applied_config  # type: ignore[attr-defined]
-                else:
+                if not force:
                     raise ConflictedConfigurationError()
+
+                cls.__logger.warning(f"Option --force is detected, overriding the configuration of version {id} ...")
+                version.config = Config._applied_config  # type: ignore[attr-defined]
 
         else:
             version = _Version(id=id, config=Config._applied_config)  # type: ignore[attr-defined]
@@ -177,6 +176,9 @@ class _VersionManager(_Manager[_Version]):
                 return version.id
         except InconsistentEnvVariableError:  # The version exist but the Config is alternated
             return version_number
+        except ConfigCoreVersionMismatched as e:
+            cls._logger.error(e.message)
+            raise SystemExit() from e
 
         raise NonExistingVersion(version_number)
 
@@ -212,16 +214,16 @@ class _VersionManager(_Manager[_Version]):
             raise SystemExit(f"Undefined execution mode: {Config.core.mode}.")
 
     @classmethod
-    def __check_production_migration_config(self):
+    def __check_production_migration_config(cls):
         from ..config.checkers._migration_config_checker import _MigrationConfigChecker
 
         collector = _MigrationConfigChecker(Config._applied_config, IssueCollector())._check()
         for issue in collector._warnings:
-            self.__logger.warning(str(issue))
+            cls.__logger.warning(str(issue))
         for issue in collector._infos:
-            self.__logger.info(str(issue))
+            cls.__logger.info(str(issue))
         for issue in collector._errors:
-            self.__logger.error(str(issue))
+            cls.__logger.error(str(issue))
         if len(collector._errors) != 0:
             raise SystemExit("Configuration errors found. Please check the error log for more information.")
 

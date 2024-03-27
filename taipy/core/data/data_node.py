@@ -117,7 +117,7 @@ class DataNode(_Entity, _Labeled):
         self._editor_expiration_date: Optional[datetime] = editor_expiration_date
 
         # Track edits
-        self._edits = edits or list()
+        self._edits = edits or []
 
         self._properties = _Properties(self, **kwargs)
 
@@ -153,9 +153,7 @@ class DataNode(_Entity, _Labeled):
         Returns:
             None if there has been no `Edit^` on this data node.
         """
-        if self._edits:
-            return self._edits[-1]
-        return None
+        return self._edits[-1] if self._edits else None
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -380,10 +378,7 @@ class DataNode(_Entity, _Labeled):
             options (dict[str, any)): track `timestamp`, `comments`, `job_id`. The others are user-custom, users can
                 use options to attach any information to an external edit of a data node.
         """
-        edit = {}
-        for k, v in options.items():
-            if v is not None:
-                edit[k] = v
+        edit = {k: v for k, v in options.items() if v is not None}
         if "timestamp" not in edit:
             edit["timestamp"] = datetime.now()
         self.last_edit_date = edit.get("timestamp")
@@ -429,10 +424,10 @@ class DataNode(_Entity, _Labeled):
             and self.editor_expiration_date > datetime.now()
         ):
             raise DataNodeIsBeingEdited(self.id, self._editor_id)
-        else:
-            self.editor_id = None  # type: ignore
-            self.editor_expiration_date = None  # type: ignore
-            self.edit_in_progress = False  # type: ignore
+
+        self.editor_id = None
+        self.editor_expiration_date = None
+        self.edit_in_progress = False
 
     def filter(self, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
         """Read and filter the data referenced by this data node.
@@ -566,7 +561,7 @@ class DataNode(_Entity, _Labeled):
 
 
 @_make_event.register(DataNode)
-def make_event_for_datanode(
+def _make_event_for_datanode(
     data_node: DataNode,
     operation: EventOperation,
     /,

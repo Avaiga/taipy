@@ -38,8 +38,7 @@ class _TaskFunctionWrapper:
     def execute(self, **kwargs):
         """Execute the wrapped function. If `config_as_string` is given, then it will be reapplied to the config."""
         try:
-            config_as_string = kwargs.pop("config_as_string", None)
-            if config_as_string:
+            if config_as_string := kwargs.pop("config_as_string", None):
                 Config._applied_config._update(_TomlSerializer()._deserialize(config_as_string))
                 Config.block_update()
 

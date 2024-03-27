@@ -93,7 +93,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         self.data_nodes_by_owner: t.Optional[t.Dict[t.Optional[str], DataNode]] = None
         self.scenario_configs: t.Optional[t.List[t.Tuple[str, str]]] = None
         self.jobs_list: t.Optional[t.List[Job]] = None
-        self.client_submission: t.Dict[str, SubmissionStatus] = dict()
+        self.client_submission: t.Dict[str, SubmissionStatus] = {}
         # register to taipy core notification
         reg_id, reg_queue = Notifier.register()
         # locks
@@ -124,7 +124,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:  # type: ignore
                         self.gui._broadcast(
                             _GuiCoreContext._CORE_CHANGED_NAME,
-                            {"scenario": [x for x in sequence.parent_ids]},  # type: ignore
+                            {"scenario": list(sequence.parent_ids)},  # type: ignore
                         )
             except Exception as e:
                 _warn(f"Access to sequence {event.entity_id} failed", e)
@@ -345,9 +345,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                                     "config": scenario_config,
                                     "date": date,
                                     "label": name,
-                                    "properties": {
-                                        v.get("key"): v.get("value") for v in data.get("properties", dict())
-                                    },
+                                    "properties": {v.get("key"): v.get("value") for v in data.get("properties", {})},
                                 },
                             ],
                         )
@@ -509,35 +507,35 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if hasattr(data, "id") and is_readable(data.id) and core_get(data.id) is not None:
                 if isinstance(data, DataNode):
                     return (data.id, data.get_simple_label(), None, _EntityType.DATANODE.value, False)
-                else:
-                    with self.lock:
-                        self.__do_datanodes_tree()
-                        if self.data_nodes_by_owner:
-                            if isinstance(data, Cycle):
+
+                with self.lock:
+                    self.__do_datanodes_tree()
+                    if self.data_nodes_by_owner:
+                        if isinstance(data, Cycle):
+                            return (
+                                data.id,
+                                data.get_simple_label(),
+                                self.data_nodes_by_owner[data.id] + self.scenario_by_cycle.get(data, []),
+                                _EntityType.CYCLE.value,
+                                False,
+                            )
+                        elif isinstance(data, Scenario):
+                            return (
+                                data.id,
+                                data.get_simple_label(),
+                                self.data_nodes_by_owner[data.id] + list(data.sequences.values()),
+                                _EntityType.SCENARIO.value,
+                                data.is_primary,
+                            )
+                        elif isinstance(data, Sequence):
+                            if datanodes := self.data_nodes_by_owner.get(data.id):
                                 return (
                                     data.id,
                                     data.get_simple_label(),
-                                    self.data_nodes_by_owner[data.id] + self.scenario_by_cycle.get(data, []),
-                                    _EntityType.CYCLE.value,
+                                    datanodes,
+                                    _EntityType.SEQUENCE.value,
                                     False,
                                 )
-                            elif isinstance(data, Scenario):
-                                return (
-                                    data.id,
-                                    data.get_simple_label(),
-                                    self.data_nodes_by_owner[data.id] + list(data.sequences.values()),
-                                    _EntityType.SCENARIO.value,
-                                    data.is_primary,
-                                )
-                            elif isinstance(data, Sequence):
-                                if datanodes := self.data_nodes_by_owner.get(data.id):
-                                    return (
-                                        data.id,
-                                        data.get_simple_label(),
-                                        datanodes,
-                                        _EntityType.SEQUENCE.value,
-                                        False,
-                                    )
         except Exception as e:
             _warn(
                 f"Access to {type(data)} ({data.id if hasattr(data, 'id') else 'No_id'}) failed",
@@ -650,7 +648,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if isinstance(ent, Scenario):
                 tags = data.get(_GuiCoreContext.__PROP_SCENARIO_TAGS)
                 if isinstance(tags, (list, tuple)):
-                    ent.tags = {t for t in tags}
+                    ent.tags = dict(tags)
             name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
             if isinstance(name, str):
                 if hasattr(ent, _GuiCoreContext.__PROP_ENTITY_NAME):
@@ -939,3 +937,21 @@ class _GuiCoreContext(CoreEventConsumerBase):
             state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, data_id)
         elif chart_id := data.get("chart_id"):
             state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_CHART_ID_VAR, chart_id)
+
+    def on_dag_select(self, state: State, id: str, payload: t.Dict[str, str]):
+        args = payload.get("args")
+        if args is None or not isinstance(args, list) or len(args) < 2:
+            return
+        on_action_function = self.gui._get_user_function(args[1]) if args[1] else None
+        if callable(on_action_function):
+            try:
+                entity = core_get(args[0]) if is_readable(args[0]) else f"unredable({args[0]})"
+                self.gui._call_function_with_state(
+                    on_action_function,
+                    [entity],
+                )
+            except Exception as e:
+                if not self.gui._call_on_exception(args[1], e):
+                    _warn(f"dag.on_action(): Exception raised in '{args[1]}()' with '{args[0]}'", e)
+        elif args[1]:
+            _warn(f"dag.on_action(): Invalid function '{args[1]}()'.")

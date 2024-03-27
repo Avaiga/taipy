@@ -24,11 +24,10 @@ from ..schemas import ScenarioResponseSchema
 
 
 def _get_or_raise(scenario_id: str) -> Scenario:
-    manager = _ScenarioManagerFactory._build_manager()
-    scenario = manager._get(scenario_id)
-    if scenario is None:
-        raise NonExistingScenario(scenario_id)
-    return scenario
+    if scenario := _ScenarioManagerFactory._build_manager()._get(scenario_id):
+        return scenario
+
+    raise NonExistingScenario(scenario_id)
 
 
 REPOSITORY = "scenario"
@@ -415,10 +414,10 @@ class ScenarioList(Resource):
         self.logger = kwargs.get("logger")
 
     def fetch_config(self, config_id):
-        config = Config.scenarios.get(config_id)
-        if not config:
-            raise NonExistingScenarioConfig(config_id)
-        return config
+        if config := Config.scenarios.get(config_id):
+            return config
+
+        raise NonExistingScenarioConfig(config_id)
 
     @_middleware
     def get(self):

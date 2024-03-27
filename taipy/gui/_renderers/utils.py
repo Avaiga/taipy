@@ -9,11 +9,21 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import datetime
 import typing as t
+from pathlib import Path
+
+import pandas as pd
+from watchdog.events import FileSystemEventHandler
+
+from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._warnings import _warn
-from ..gui_types import NumberTypes
+from ..types import NumberTypes
 from ..utils import _RE_PD_TYPE, _get_date_col_str_name, _MapDict
+
+if t.TYPE_CHECKING:
+    from . import _Renderer
 
 
 def _add_to_dict_and_get(dico: t.Dict[str, t.Any], key: str, value: t.Any) -> t.Any:
@@ -31,14 +41,33 @@ def _get_columns_dict_from_list(
 ):
     col_dict = {}
     idx = 0
+    cols = None
+
     for col in col_list:
         if col in col_types_keys:
             col_dict[col] = {"index": idx}
             idx += 1
         elif col:
-            _warn(
-                f'Error column "{col}" is not present in the Dataframe "{value.head(0) if hasattr(value, "head") else value}".'  # noqa: E501
-            )
+            if cols is None:
+                cols = (
+                    list(value.columns)
+                    if isinstance(value, pd.DataFrame)
+                    else list(value.keys())
+                    if isinstance(value, (dict, _MapDict))
+                    else value
+                    if isinstance(value, (list, tuple))
+                    else []
+                )
+
+            if cols and (col not in cols):
+                _warn(
+                    f'Column "{col}" is not present. Available columns: {cols}.'  # noqa: E501
+                )
+            else:
+                _warn(
+                    "The 'data' property value is of an unsupported type."
+                    + " Only DataFrame, dict, list, or tuple are supported."
+                )
     return col_dict
 
 
@@ -57,7 +86,7 @@ def _get_columns_dict(  # noqa: C901
     if isinstance(columns, str):
         col_dict = _get_columns_dict_from_list([s.strip() for s in columns.split(";")], col_types_keys, value)
     elif isinstance(columns, (list, tuple)):
-        col_dict = _get_columns_dict_from_list(columns, col_types_keys, value) # type: ignore[arg-type]
+        col_dict = _get_columns_dict_from_list(columns, col_types_keys, value)  # type: ignore[arg-type]
     elif isinstance(columns, _MapDict):
         col_dict = columns._dict.copy()
     elif isinstance(columns, dict):
@@ -96,3 +125,18 @@ def _get_columns_dict(  # noqa: C901
             elif number_format and ctype in NumberTypes:
                 _add_to_dict_and_get(col_dict[col], "format", number_format)
     return col_dict
+
+
+class FileWatchdogHandler(FileSystemEventHandler):
+    def __init__(self, file_path: str, renderer: "_Renderer") -> None:
+        self._file_path = file_path
+        self._renderer = renderer
+        self._last_modified = datetime.datetime.now()
+
+    def on_modified(self, event):
+        if datetime.datetime.now() - self._last_modified < datetime.timedelta(seconds=1):
+            return
+        self._last_modified = datetime.datetime.now()
+        if Path(event.src_path).resolve() == Path(self._file_path).resolve():
+            self._renderer.set_content(self._file_path)
+            _TaipyLogger._get_logger().info(f"File '{self._file_path}' has been modified.")

@@ -33,6 +33,7 @@ if TYPE_CHECKING:
 def _run_callbacks(fn):
     def __run_callbacks(job):
         fn(job)
+        _TaipyLogger._get_logger().debug(f"{job.id} status has changed to {job.status}.")
         for fct in job._subscribers:
             fct(job)
 
@@ -200,6 +201,7 @@ class Job(_Entity, _Labeled):
     def completed(self):
         """Set the status to _completed_ and notify subscribers."""
         self.status = Status.COMPLETED
+        self.__logger.info(f"job {self.id} is completed.")
 
     @_run_callbacks
     def skipped(self):
@@ -287,7 +289,7 @@ class Job(_Entity, _Labeled):
         return self.is_completed() or self.is_failed() or self.is_canceled() or self.is_skipped() or self.is_abandoned()
 
     def _is_finished(self) -> bool:
-        """Indicate if the job is finished. This function will not triggered the persistency feature like is_finished().
+        """Indicate if the job is finished. This function will not trigger the persistence feature like is_finished().
 
         Returns:
             True if the job is finished.
@@ -322,7 +324,6 @@ class Job(_Entity, _Labeled):
                 self.__logger.error(st)
         else:
             self.completed()
-            self.__logger.info(f"job {self.id} is completed.")
 
     def __hash__(self):
         return hash(self.id)

@@ -20,7 +20,7 @@ from urllib.parse import urlencode
 
 from .._renderers.builder import _Builder
 from .._warnings import _warn
-from ..gui_types import PropertyType
+from ..types import PropertyType
 from ..utils import _get_broadcast_var_name, _TaipyBase, _to_camel_case
 
 if t.TYPE_CHECKING:
@@ -172,10 +172,7 @@ class Element:
             xhtml = self._render_xhtml(attributes)
             try:
                 xml_root = etree.fromstring(xhtml)
-                if is_html:
-                    return xhtml, name
-                else:
-                    return xml_root
+                return (xhtml, name) if is_html else xml_root
 
             except Exception as e:
                 _warn(f"{name}.render_xhtml() did not return a valid XHTML string", e)

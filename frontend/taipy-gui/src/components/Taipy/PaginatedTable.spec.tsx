@@ -122,6 +122,33 @@ const editableColumns = JSON.stringify({
     Code: { dfid: "Code", type: "str", index: 3 },
 });
 
+const buttonValue = {
+    "0--1-bool,int,float,Code--asc": {
+        data: [
+            {
+                bool: true,
+                int: 856,
+                float: 1.5,
+                Code: "[Button Label](button action)",
+            },
+            {
+                bool: false,
+                int: 823,
+                float: 2.5,
+                Code: "ZZZ",
+            },
+        ],
+        rowcount: 2,
+        start: 0,
+    },
+};
+const buttonColumns = JSON.stringify({
+    bool: { dfid: "bool", type: "bool", index: 0 },
+    int: { dfid: "int", type: "int", index: 1 },
+    float: { dfid: "float", type: "float", index: 2 },
+    Code: { dfid: "Code", type: "str", index: 3 },
+});
+
 describe("PaginatedTable Component", () => {
     it("renders", async () => {
         const { getByText } = render(<PaginatedTable data={undefined} defaultColumns={tableColumns} />);
@@ -299,8 +326,8 @@ describe("PaginatedTable Component", () => {
         const elts = await waitFor(() => findAllByText("Austria"));
         elts.forEach((elt: HTMLElement, idx: number) =>
             selected.indexOf(idx) == -1
-                ? expect(elt.parentElement?.parentElement?.parentElement).not.toHaveClass("Mui-selected")
-                : expect(elt.parentElement?.parentElement?.parentElement).toHaveClass("Mui-selected")
+                ? expect(elt.parentElement?.parentElement?.parentElement?.parentElement).not.toHaveClass("Mui-selected")
+                : expect(elt.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("Mui-selected")
         );
         expect(document.querySelectorAll(".Mui-selected")).toHaveLength(selected.length);
     });
@@ -539,6 +566,45 @@ describe("PaginatedTable Component", () => {
                 args: [],
                 col: "int",
                 index: 1,
+                reason: "click",
+                value: undefined
+            },
+            type: "SEND_ACTION_ACTION",
+        });
+    });
+    it("can click on button", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByText, rerender } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <PaginatedTable data={undefined} defaultColumns={editableColumns} showAll={true} onAction="onSelect" />
+            </TaipyContext.Provider>
+        );
+
+        rerender(
+            <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
+                <PaginatedTable
+                    data={buttonValue as TableValueType}
+                    defaultColumns={buttonColumns}
+                    showAll={true}
+                    onAction="onSelect"
+                />
+            </TaipyContext.Provider>
+        );
+
+        dispatch.mockClear();
+        const elt = getByText("Button Label");
+        expect(elt.tagName).toBe("BUTTON");
+        await userEvent.click(elt);
+        expect(dispatch).toHaveBeenCalledWith({
+            name: "",
+            payload: {
+                action: "onSelect",
+                args: [],
+                col: "Code",
+                index: 0,
+                reason: "button",
+                value: "button action"
             },
             type: "SEND_ACTION_ACTION",
         });

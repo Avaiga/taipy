@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from unittest.mock import patch
+from unittest import mock
 
 import pytest
 
@@ -24,18 +24,15 @@ _MOCK_CORE_VERSION = "3.1.1"
 
 @pytest.fixture(scope="function", autouse=True)
 def mock_core_version():
-    with patch("taipy.core.config.core_section._read_version") as mock_read_version:
+    with mock.patch("taipy.core.config.core_section._read_version") as mock_read_version:
         mock_read_version.return_value = _MOCK_CORE_VERSION
         CoreSection._CURRENT_CORE_VERSION = _MOCK_CORE_VERSION
         Config.unique_sections[CoreSection.name] = CoreSection.default_config()
         Config._default_config._unique_sections[CoreSection.name] = CoreSection.default_config()
+        Config._python_config._unique_sections[CoreSection.name] = CoreSection.default_config()
 
         yield
 
-
-@pytest.fixture(scope="session", autouse=True)
-def reset_core_version():
-    yield
     CoreSection._CURRENT_CORE_VERSION = _read_version()
 
 

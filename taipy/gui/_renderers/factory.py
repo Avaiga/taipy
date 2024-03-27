@@ -13,7 +13,7 @@ import re
 import typing as t
 from datetime import datetime
 
-from ..gui_types import PropertyType
+from ..types import PropertyType
 from .builder import _Builder
 
 if t.TYPE_CHECKING:
@@ -225,6 +225,7 @@ class _Factory:
                 ("extensions",),
                 ("drop_message",),
                 ("hover_text", PropertyType.dynamic_string),
+                ("notify", PropertyType.boolean, True),
             ]
         ),
         "image": lambda gui, control_type, attrs: _Builder(
@@ -490,6 +491,7 @@ class _Factory:
                 ("filter", PropertyType.boolean),
                 ("hover_text", PropertyType.dynamic_string),
                 ("size",),
+                ("downloadable", PropertyType.boolean),
             ]
         )
         ._set_propagate()
@@ -603,8 +605,7 @@ class _Factory:
             for lib in _Factory.__LIBRARIES.get(parts[0], []):
                 elts = lib.get_elements()
                 if isinstance(elts, dict):
-                    element = elts.get(element_name)
-                    if element:
+                    if element := elts.get(element_name):
                         return lib, element_name, element
         else:
             element_name = name
@@ -612,8 +613,7 @@ class _Factory:
                 for lib in libs:
                     elts = lib.get_elements()
                     if isinstance(elts, dict):
-                        element = elts.get(element_name)
-                        if element:
+                        if element := elts.get(element_name):
                             return lib, element_name, element
         return None, None, None
 

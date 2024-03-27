@@ -52,14 +52,10 @@ class _Labeled:
         return self.__LABEL_SEPARATOR.join(ls)
 
     def _get_explicit_label(self) -> Optional[str]:
-        if hasattr(self, "_properties"):
-            return getattr(self, "_properties").get("label")  # noqa: B009
-        return None
+        return getattr(self, "_properties").get("label") if hasattr(self, "_properties") else None  # noqa: B009
 
     def _get_owner_id(self) -> Optional[str]:
-        if hasattr(self, "owner_id"):
-            return getattr(self, "owner_id")  # noqa: B009
-        return None
+        return getattr(self, "owner_id") if hasattr(self, "owner_id") else None  # noqa: B009
 
     def _get_name(self) -> Optional[str]:
         if hasattr(self, "name"):
@@ -69,9 +65,7 @@ class _Labeled:
         return None
 
     def _get_config_id(self) -> Optional[str]:
-        if hasattr(self, "config_id"):
-            return getattr(self, "config_id")  # noqa: B009
-        return None
+        return getattr(self, "config_id") if hasattr(self, "config_id") else None  # noqa: B009
 
     def _generate_entity_label(self) -> str:
         if name := self._get_name():

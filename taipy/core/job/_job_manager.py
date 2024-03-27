@@ -61,9 +61,6 @@ class _JobManager(_Manager[Job], _VersionMixin):
     def _delete(cls, job: Job, force=False):
         if cls._is_deletable(job) or force:
             super()._delete(job.id)
-            from .._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
-
-            _JobDispatcher._pop_dispatched_process(job.id)
         else:
             err = JobNotDeletedException(job.id)
             cls._logger.error(err)
@@ -91,6 +88,4 @@ class _JobManager(_Manager[Job], _VersionMixin):
     def _is_deletable(cls, job: Union[Job, JobId]) -> bool:
         if isinstance(job, str):
             job = cls._get(job)
-        if not job.is_finished():
-            return False
-        return True
+        return job.is_finished()

@@ -558,7 +558,7 @@
           {
             "name": "decimator",
             "type": "indexed(taipy.gui.data.Decimator)",
-            "doc": "A decimator instance for the indicated trace that will reduce the size of the data being sent back and forth.<br>If defined as indexed, it will impact only the indicated trace; if not, it will apply only the the first trace."
+            "doc": "A decimator instance for the indicated trace that will reduce the size of the data being sent back and forth.<br>If defined as indexed, it will impact only the indicated trace; if not, it will apply only the first trace."
           },
           {
             "name": "rebuild",
@@ -667,6 +667,12 @@
             "type": "str",
             "default_value": "\"Drop here to Upload\"",
             "doc": "The message that is displayed when the user drags a file above the button."
+          },
+          {
+            "name": "notify",
+            "type": "bool",
+            "default_value": "True",
+            "doc": "If set to False, the user won't be notified of upload finish."
           }
         ]
       }
@@ -945,7 +951,7 @@
             "default_property": true,
             "required": true,
             "type": "dynamic(any)",
-            "doc": "The data to be represented in this table."
+            "doc": "The data to be represented in this table. This property can be indexed to define other data for comparison."
           },
           {
             "name": "page_size",
@@ -1105,7 +1111,7 @@
           {
             "name": "on_action",
             "type": "str",
-            "doc": "The name of a function that is triggered when the user selects a row.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li></ul></li></ul>.",
+            "doc": "The name of a function that is triggered when the user selects a row.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>reason (str): the origin of the action: \"click\", or \"button\" if the cell contains a Markdown link syntax.</li>\n<li>value (str): the *link value* indicated in the cell when using a Markdown link syntax (that is, <i>reason</i> is set to \"button\").</li></ul></li></ul>.",
             "signature": [["state", "State"], ["var_name", "str"], ["payload", "dict"]]
           },
           {
@@ -1124,6 +1130,17 @@
             "name": "lov[<i>column_name</i>]",
             "type": "list[str]|str",
             "doc": "The list of values of the indicated column."
+          },
+          {
+            "name": "downloadable",
+            "type": "boolean",
+            "doc": "If True, a clickable icon is shown so the user can download the data as CSV."
+          },
+          {
+            "name": "on_compare",
+            "type": "str",
+            "doc": "A data comparison function that would return a structure that identifies the differences between the different data passed as name. The default implementation compares the default data with the data[1] value.",
+            "signature": [["state", "State"], ["main_data_name", "str"], ["compare_data_names", "list[str]"]]
           }
         ]
       }
@@ -1257,7 +1274,7 @@
         ],
         "properties": [
           {
-            "name": "value",
+            "name": "title",
             "default_property": true,
             "type": "dynamic(str)",
             "doc": "Title of this block element."

@@ -18,7 +18,8 @@ from types import FrameType
 from .utils import _filter_locals, _get_module_name_from_frame
 
 if t.TYPE_CHECKING:
-    from ._renderers import _Element  # noqa: F401
+    from ._page import _Page
+    from .gui import Gui
 
 
 class Page:
@@ -46,6 +47,9 @@ class Page:
             self._frame = self._renderer._frame
         elif isinstance(self, CustomPage):
             self._frame = t.cast(FrameType, t.cast(FrameType, inspect.stack()[2].frame))
+            # Allow CustomPage class to be inherited
+            if len(inspect.stack()) > 3 and inspect.stack()[2].function != "<module>":
+                self._frame = t.cast(FrameType, t.cast(FrameType, inspect.stack()[3].frame))
         elif len(inspect.stack()) < 4:
             raise RuntimeError(f"Can't resolve module. Page '{type(self).__name__}' is not registered.")
         else:
@@ -65,6 +69,9 @@ class Page:
                     cls_locals[f] = func.__func__
             self._class_module_name = cls.__name__
             self._class_locals = cls_locals
+        # Special variables only use for page reloading in notebook context
+        self._notebook_gui: t.Optional["Gui"] = None
+        self._notebook_page: t.Optional["_Page"] = None
 
     def create_page(self) -> t.Optional[Page]:
         """Create the page content for page modules.

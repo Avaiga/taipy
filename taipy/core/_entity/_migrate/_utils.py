@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import json
+from importlib.metadata import version
 from typing import Dict, List, Optional, Tuple
 
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -20,9 +21,21 @@ __logger = _TaipyLogger._get_logger()
 def __update_parent_ids(entity: Dict, data: Dict) -> Dict:
     # parent_ids was not present in 2.0, need to be search for in tasks
     parent_ids = entity.get("parent_ids", [])
+    id = entity["id"]
+
     if not parent_ids:
         parent_ids = __search_parent_ids(entity["id"], data)
     entity["parent_ids"] = parent_ids
+
+    if "TASK" in id:
+        parents = []
+        for parent in entity.get("parent_ids", []):
+            if "PIPELINE" in parent:
+                continue
+            parents.append(parent)
+        if entity.get("owner_id") and entity.get("owner_id") not in parents:
+            parents.append(entity.get("owner_id"))
+        entity["parent_ids"] = parents
 
     return entity
 
@@ -60,8 +73,8 @@ def __search_parent_config(entity_id: str, config: Dict, entity_type: str) -> Li
     possible_parents = "TASK" if entity_type == "DATA_NODE" else "SCENARIO"
     data = config[possible_parents]
 
+    section_id = f"{entity_id}:SECTION"
     for _id, entity_data in data.items():
-        section_id = f"{entity_id}:SECTION"
         if entity_type == "DATANODE" and possible_parents == "TASK":
             if section_id in entity_data["input_ids"] or section_id in entity_data["output_ids"]:
                 parents.append(section_id)
@@ -91,14 +104,15 @@ def __migrate_subscriber(fct_module, fct_name):
 
 
 def __migrate_scenario(scenario: Dict, data: Dict) -> Dict:
-    # pipelines were replaced by tasks
-    scenario["tasks"] = __fetch_tasks_from_pipelines(scenario["pipelines"], data)
+    if "pipelines" in scenario:
+        # pipelines were replaced by tasks
+        scenario["tasks"] = scenario.get("tasks") or __fetch_tasks_from_pipelines(scenario["pipelines"], data)
 
-    # pipeline attribute not removed in 3.0
-    scenario["pipelines"] = None
+        # pipeline attribute not removed in 3.0
+        scenario["pipelines"] = None
 
     # additional_data_nodes attribute added
-    scenario["additional_data_nodes"] = []
+    scenario["additional_data_nodes"] = scenario.get("additional_data_nodes", [])
 
     return scenario
 
@@ -122,12 +136,12 @@ def __migrate_task(task: Dict, data: Dict, is_entity: bool = True) -> Dict:
     if is_entity:
         # parent_id has been renamed to owner_id
         try:
-            task["owner_id"] = task["parent_id"]
+            task["owner_id"] = task.get("owner_id", task["parent_id"])
             del task["parent_id"]
         except KeyError:
             pass
 
-        # properties was not present in 2.0
+        # properties attribute was not present in 2.0
         task["properties"] = task.get("properties", {})
 
     # skippable was not present in 2.0
@@ -182,7 +196,7 @@ def __migrate_datanode(datanode: Dict) -> Dict:
 
     # parent_id has been renamed to owner_id
     try:
-        datanode["owner_id"] = datanode["parent_id"]
+        datanode["owner_id"] = datanode.get("owner_id", datanode["parent_id"])
         del datanode["parent_id"]
     except KeyError:
         pass
@@ -241,6 +255,9 @@ def __migrate_global_config(config: Dict):
     except KeyError:
         pass
 
+    if "core_version" not in config["CORE"] or config["CORE"]["core_version"] != version("taipy-core"):
+        config["CORE"]["core_version"] = version("taipy-core")
+
     return config
 
 
@@ -255,22 +272,22 @@ def __migrate_version(version: Dict) -> Dict:
     config = __migrate_global_config(config)
 
     # replace pipelines for tasks
-    pipelines_section = config["PIPELINE"]
-    for id, content in config["SCENARIO"].items():
-        tasks = []
-        for _pipeline in content["pipelines"]:
-            pipeline_id = _pipeline.split(":")[0]
-            tasks = pipelines_section[pipeline_id]["tasks"]
-        config["SCENARIO"][id]["tasks"] = tasks
-        del config["SCENARIO"][id]["pipelines"]
+    if "PIPELINE" in config:
+        pipelines_section = config["PIPELINE"]
+        for id, content in config["SCENARIO"].items():
+            tasks = []
+            for _pipeline in content["pipelines"]:
+                pipeline_id = _pipeline.split(":")[0]
+                tasks = pipelines_section[pipeline_id]["tasks"]
+            config["SCENARIO"][id]["tasks"] = tasks
+            del config["SCENARIO"][id]["pipelines"]
+        del config["PIPELINE"]
 
     for id, content in config["TASK"].items():
         config["TASK"][id] = __migrate_task_config(content, config)
 
     for id, content in config["DATA_NODE"].items():
         config["DATA_NODE"][id] = __migrate_datanode_config(content)
-
-    del config["PIPELINE"]
 
     version["config"] = json.dumps(config, ensure_ascii=False, indent=0)
     return version
@@ -281,7 +298,7 @@ def __migrate_entities(entity_type: str, data: Dict) -> Dict:
     _entities = {k: data[k] for k in data if entity_type in k}
 
     for k, v in _entities.items():
-        if entity_type in ["JOB", "VERSION"]:
+        if entity_type in {"JOB", "VERSION"}:
             v["data"] = migration_fct(v["data"])  # type: ignore
         else:
             v["data"] = migration_fct(v["data"], data)  # type: ignore

@@ -99,9 +99,11 @@ class _GuiCore(ElementLibrary):
                 "width": ElementProperty(PropertyType.string),
                 "height": ElementProperty(PropertyType.string),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
+                "on_action": ElementProperty(PropertyType.function),
             },
             inner_properties={
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
+                "on_select": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.on_dag_select}}"),
             },
         ),
         "data_node_selector": Element(

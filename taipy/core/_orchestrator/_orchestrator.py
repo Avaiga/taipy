@@ -36,7 +36,8 @@ class _Orchestrator(_AbstractOrchestrator):
     """
 
     jobs_to_run: Queue = Queue()
-    blocked_jobs: List = []
+    blocked_jobs: List[Job] = []
+
     lock = Lock()
     __logger = _TaipyLogger._get_logger()
 
@@ -57,7 +58,7 @@ class _Orchestrator(_AbstractOrchestrator):
         """Submit the given `Scenario^` or `Sequence^` for an execution.
 
         Parameters:
-             submittable (Union[SCenario^, Sequence^]): The scenario or sequence to submit for execution.
+             submittable (Union[Scenario^, Sequence^]): The scenario or sequence to submit for execution.
              callbacks: The optional list of functions that should be executed on jobs status change.
              force (bool) : Enforce execution of the scenario's or sequence's tasks even if their output data
                 nodes are cached.
@@ -65,7 +66,7 @@ class _Orchestrator(_AbstractOrchestrator):
                 finished in asynchronous mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
                 before returning.
-             **properties (dict[str, any]): A keyworded variable length list of user additional arguments
+             **properties (dict[str, any]): A key worded variable length list of user additional arguments
                 that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
         Returns:
             The created `Submission^` containing the information about the submission.
@@ -76,27 +77,27 @@ class _Orchestrator(_AbstractOrchestrator):
             getattr(submittable, "config_id", None),
             **properties,
         )
-        jobs = []
+        jobs: List[Job] = []
         tasks = submittable._get_sorted_tasks()
         with cls.lock:
+            cls.__logger.debug(f"Acquiring lock to submit {submission.entity_id}.")
             for ts in tasks:
-                for task in ts:
-                    jobs.append(
-                        cls._lock_dn_output_and_create_job(
-                            task,
-                            submission.id,
-                            submission.entity_id,
-                            callbacks=itertools.chain([cls._update_submission_status], callbacks or []),
-                            force=force,  # type: ignore
-                        )
+                jobs.extend(
+                    cls._lock_dn_output_and_create_job(
+                        task,
+                        submission.id,
+                        submission.entity_id,
+                        callbacks=itertools.chain([cls._update_submission_status], callbacks or []),
+                        force=force,  # type: ignore
                     )
-        submission.jobs = jobs  # type: ignore
-        cls._orchestrate_job_to_run_or_block(jobs)
+                    for task in ts
+                )
+            submission.jobs = jobs  # type: ignore
+            cls._orchestrate_job_to_run_or_block(jobs)
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
-        else:
-            if wait:
-                cls._wait_until_job_finished(jobs, timeout=timeout or 0)
+        elif wait:
+            cls._wait_until_job_finished(jobs, timeout=timeout or 0)
         return submission
 
     @classmethod
@@ -119,7 +120,7 @@ class _Orchestrator(_AbstractOrchestrator):
                 in asynchronous mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the job
                 to be finished before returning.
-             **properties (dict[str, any]): A keyworded variable length list of user additional arguments
+             **properties (dict[str, any]): A key worded variable length list of user additional arguments
                 that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
         Returns:
             The created `Submission^` containing the information about the submission.
@@ -129,6 +130,7 @@ class _Orchestrator(_AbstractOrchestrator):
         )
         submit_id = submission.id
         with cls.lock:
+            cls.__logger.debug(f"Acquiring lock to submit task {task.id}.")
             job = cls._lock_dn_output_and_create_job(
                 task,
                 submit_id,
@@ -136,9 +138,9 @@ class _Orchestrator(_AbstractOrchestrator):
                 itertools.chain([cls._update_submission_status], callbacks or []),
                 force,
             )
-        jobs = [job]
-        submission.jobs = jobs  # type: ignore
-        cls._orchestrate_job_to_run_or_block(jobs)
+            jobs = [job]
+            submission.jobs = jobs  # type: ignore
+            cls._orchestrate_job_to_run_or_block(jobs)
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         else:
@@ -157,11 +159,9 @@ class _Orchestrator(_AbstractOrchestrator):
     ) -> Job:
         for dn in task.output.values():
             dn.lock_edit()
-        job = _JobManagerFactory._build_manager()._create(
+        return _JobManagerFactory._build_manager()._create(
             task, itertools.chain([cls._on_status_change], callbacks or []), submit_id, submit_entity_id, force=force
         )
-
-        return job
 
     @classmethod
     def _update_submission_status(cls, job: Job):
@@ -196,7 +196,7 @@ class _Orchestrator(_AbstractOrchestrator):
         while __check_if_timeout(start, timeout) and index < len(jobs):
             try:
                 if jobs[index]._is_finished():
-                    index = index + 1
+                    index += 1
                 else:
                     sleep(0.5)  # Limit CPU usage
             except Exception:
@@ -225,17 +225,22 @@ class _Orchestrator(_AbstractOrchestrator):
     @classmethod
     def _on_status_change(cls, job: Job):
         if job.is_completed() or job.is_skipped():
+            cls.__logger.debug(f"{job.id} has been completed or skipped. Unblocking jobs.")
             cls.__unblock_jobs()
         elif job.is_failed():
             cls._fail_subsequent_jobs(job)
 
     @classmethod
     def __unblock_jobs(cls):
-        for job in cls.blocked_jobs:
-            if not cls._is_blocked(job):
-                with cls.lock:
+        with cls.lock:
+            cls.__logger.debug("Acquiring lock to unblock jobs.")
+            for job in cls.blocked_jobs:
+                if not cls._is_blocked(job):
+                    cls.__logger.debug(f"Unblocking job: {job.id}.")
                     job.pending()
+                    cls.__logger.debug(f"Removing job {job.id} from the blocked_job list.")
                     cls.__remove_blocked_job(job)
+                    cls.__logger.debug(f"Adding job {job.id} to the list of jobs to run.")
                     cls.jobs_to_run.put(job)
 
     @classmethod
@@ -255,7 +260,8 @@ class _Orchestrator(_AbstractOrchestrator):
             cls.__logger.info(f"{job.id} has already failed and cannot be canceled.")
         else:
             with cls.lock:
-                to_cancel_or_abandon_jobs = set([job])
+                cls.__logger.debug(f"Acquiring lock to cancel job {job.id}.")
+                to_cancel_or_abandon_jobs = {job}
                 to_cancel_or_abandon_jobs.update(cls.__find_subsequent_jobs(job.submit_id, set(job.task.output.keys())))
                 cls.__remove_blocked_jobs(to_cancel_or_abandon_jobs)
                 cls.__remove_jobs_to_run(to_cancel_or_abandon_jobs)
@@ -271,7 +277,7 @@ class _Orchestrator(_AbstractOrchestrator):
             if job.submit_id == submit_id and len(output_dn_config_ids.intersection(job_input_dn_config_ids)) > 0:
                 next_output_dn_config_ids.update(job.task.output.keys())
                 subsequent_jobs.update([job])
-        if len(next_output_dn_config_ids) > 0:
+        if next_output_dn_config_ids:
             subsequent_jobs.update(
                 cls.__find_subsequent_jobs(submit_id, output_dn_config_ids=next_output_dn_config_ids)
             )
@@ -294,6 +300,7 @@ class _Orchestrator(_AbstractOrchestrator):
     @classmethod
     def _fail_subsequent_jobs(cls, failed_job: Job):
         with cls.lock:
+            cls.__logger.debug("Acquiring lock to fail subsequent jobs.")
             to_fail_or_abandon_jobs = set()
             to_fail_or_abandon_jobs.update(
                 cls.__find_subsequent_jobs(failed_job.submit_id, set(failed_job.task.output.keys()))
@@ -307,20 +314,17 @@ class _Orchestrator(_AbstractOrchestrator):
 
     @classmethod
     def _cancel_jobs(cls, job_id_to_cancel: JobId, jobs: Set[Job]):
-        from ._orchestrator_factory import _OrchestratorFactory
-
         for job in jobs:
-            if job.id in _OrchestratorFactory._dispatcher._dispatched_processes.keys():  # type: ignore
+            if job.is_running():
                 cls.__logger.info(f"{job.id} is running and cannot be canceled.")
             elif job.is_completed():
                 cls.__logger.info(f"{job.id} has already been completed and cannot be canceled.")
             elif job.is_skipped():
                 cls.__logger.info(f"{job.id} has already been skipped and cannot be canceled.")
+            elif job_id_to_cancel == job.id:
+                job.canceled()
             else:
-                if job_id_to_cancel == job.id:
-                    job.canceled()
-                else:
-                    job.abandoned()
+                job.abandoned()
 
     @staticmethod
     def _check_and_execute_jobs_if_development_mode():

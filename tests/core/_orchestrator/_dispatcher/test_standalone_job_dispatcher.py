@@ -8,6 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 from concurrent.futures import Future, ProcessPoolExecutor
 from unittest import mock
 from unittest.mock import call
@@ -41,7 +42,7 @@ def test_init_default():
 
     assert job_dispatcher.orchestrator == orchestrator
     assert job_dispatcher.lock == orchestrator.lock
-    assert job_dispatcher._nb_available_workers == 1
+    assert job_dispatcher._nb_available_workers == 2
     assert isinstance(job_dispatcher._executor, ProcessPoolExecutor)
 
 
@@ -70,28 +71,22 @@ def test_dispatch_job():
     assert submit_first_call[1] == ()
     assert submit_first_call[2]["config_as_string"] == _TomlSerializer()._serialize(Config._applied_config)
 
-    # test that the proc of the job is added to the list of dispatched jobs
-    assert len(dispatcher.set_dispatch_processes_calls) == 1
-    assert dispatcher.set_dispatch_processes_calls[0][0] == job.id
-    assert dispatcher.set_dispatch_processes_calls[0][1] == dispatcher._executor.f[0]
-
-    # test that the worker is released after the job is done
-    assert len(dispatcher.release_worker_calls) == 1
-
     # test that the job status is updated after execution on future
     assert len(dispatcher.update_job_status_from_future_calls) == 1
     assert dispatcher.update_job_status_from_future_calls[0][0] == job
     assert dispatcher.update_job_status_from_future_calls[0][1] == dispatcher._executor.f[0]
 
 
-def test_release_worker():
+def test_can_execute():
     dispatcher = _StandaloneJobDispatcher(_OrchestratorFactory._orchestrator)
-
-    assert dispatcher._nb_available_workers == 1
-    dispatcher._release_worker(None)
     assert dispatcher._nb_available_workers == 2
-    dispatcher._release_worker(None)
-    assert dispatcher._nb_available_workers == 3
+    assert dispatcher._can_execute()
+    dispatcher._nb_available_workers = 0
+    assert not dispatcher._can_execute()
+    dispatcher._nb_available_workers = -1
+    assert not dispatcher._can_execute()
+    dispatcher._nb_available_workers = 1
+    assert dispatcher._can_execute()
 
 
 def test_update_job_status_from_future():
@@ -101,11 +96,9 @@ def test_update_job_status_from_future():
     dispatcher = _StandaloneJobDispatcher(orchestrator)
     ft = Future()
     ft.set_result(None)
-    dispatcher._set_dispatched_processes(job.id, ft)  # the job is dispatched to a process
-
+    assert dispatcher._nb_available_workers == 2
     dispatcher._update_job_status_from_future(job, ft)
-
-    assert len(dispatcher._dispatched_processes) == 0  # the job process is not stored anymore
+    assert dispatcher._nb_available_workers == 3
     assert job.is_completed()
 
 

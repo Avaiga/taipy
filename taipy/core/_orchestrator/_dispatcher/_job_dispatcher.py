@@ -13,7 +13,7 @@ import threading
 import time
 from abc import abstractmethod
 from queue import Empty
-from typing import Dict, Optional
+from typing import Optional
 
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -29,9 +29,9 @@ class _JobDispatcher(threading.Thread):
     """Manages job dispatching (instances of `Job^` class) on executors."""
 
     _STOP_FLAG = False
-    _dispatched_processes: Dict = {}
+    stop_wait = True
+    stop_timeout = None
     _logger = _TaipyLogger._get_logger()
-    _nb_available_workers: int = 1
 
     def __init__(self, orchestrator: _AbstractOrchestrator):
         threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
@@ -61,27 +61,35 @@ class _JobDispatcher(threading.Thread):
             self.join(timeout=timeout)
 
     def run(self):
-        self._logger.info("Start job dispatcher...")
+        self._logger.debug("Job dispatcher started.")
         while not self._STOP_FLAG:
-            try:
-                if self._can_execute():
-                    with self.lock:
-                        if self._STOP_FLAG:
-                            break
-                        job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
-                    self._execute_job(job)
-                else:
-                    time.sleep(0.1)  # We need to sleep to avoid busy waiting.
-            except Empty:  # In case the last job of the queue has been removed.
-                pass
-            except Exception as e:
-                self._logger.exception(e)
-                pass
-        self._logger.info("Job dispatcher stopped.")
+            if not self._can_execute():
+                time.sleep(0.2)  # We need to sleep to avoid busy waiting.
+                continue
 
+            with self.lock:
+                self._logger.debug("Acquiring lock to check jobs to run.")
+                job = None
+                try:
+                    if not self._STOP_FLAG:
+                        job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
+                except Empty:  # In case the last job of the queue has been removed.
+                    pass
+            if job:
+                self._logger.debug(f"Got a job to execute {job.id}.")
+                try:
+                    if not self._STOP_FLAG:
+                        self._execute_job(job)
+                    else:
+                        self.orchestrator.jobs_to_run.put(job)
+                except Exception as e:
+                    self._logger.exception(e)
+        self._logger.debug("Job dispatcher stopped.")
+
+    @abstractmethod
     def _can_execute(self) -> bool:
-        """Returns True if the dispatcher have resources to execute a new job."""
-        return self._nb_available_workers > 0
+        """Returns True if the dispatcher have resources to dispatch a new job."""
+        raise NotImplementedError
 
     def _execute_job(self, job: Job):
         if job.force or self._needs_to_run(job.task):
@@ -141,11 +149,3 @@ class _JobDispatcher(threading.Thread):
     def _update_job_status(job: Job, exceptions):
         job.update_status(exceptions)
         _JobManagerFactory._build_manager()._set(job)
-
-    @classmethod
-    def _set_dispatched_processes(cls, job_id, process):
-        cls._dispatched_processes[job_id] = process
-
-    @classmethod
-    def _pop_dispatched_process(cls, job_id, default=None):
-        return cls._dispatched_processes.pop(job_id, default)  # type: ignore

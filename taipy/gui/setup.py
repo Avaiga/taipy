@@ -36,6 +36,8 @@ def get_requirements():
     # get requirements from the different setups in tools/packages (removing taipy packages)
     reqs = set()
     for pkg in (root_folder / "tools" / "packages").iterdir():
+        if "taipy-gui" not in str(pkg):
+            continue
         requirements_file = pkg / "setup.requirements.txt"
         if requirements_file.exists():
             reqs.update(requirements_file.read_text("UTF-8").splitlines())
@@ -58,8 +60,8 @@ extras_require = {
 def _build_webapp():
     already_exists = Path("./taipy/gui/webapp/index.html").exists()
     if not already_exists:
-        os.system("cd ../../../frontend/taipy-gui/dom && npm ci")
-        os.system("cd ../../../frontend/taipy-gui && npm ci --omit=optional && npm run build")
+        os.system("cd ../../frontend/taipy-gui/dom && npm ci")
+        os.system("cd ../../frontend/taipy-gui && npm ci --omit=optional && npm run build")
 
 
 class NPMInstall(build_py):
@@ -89,7 +91,7 @@ setup(
     install_requires=get_requirements(),
     license="Apache License 2.0",
     include_package_data=True,
-    data_files=[('version', ['version.json'])],
+    data_files=[("version", ["version.json"])],
     keywords="taipy-gui",
     name="taipy-gui",
     packages=find_namespace_packages(where=".") + find_packages(include=["taipy", "taipy.gui", "taipy.gui.*"]),

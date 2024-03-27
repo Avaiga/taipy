@@ -7,4 +7,5 @@ export type { OnChangeHandler, OnInitHandler, ModuleData };
 
 window.addEventListener("beforeunload", () => {
     document.cookie = "tprh=;path=/;Max-Age=-99999999;";
+    localStorage.removeItem("tp_cp_meta");
 });

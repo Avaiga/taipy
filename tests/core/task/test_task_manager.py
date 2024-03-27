@@ -82,7 +82,7 @@ def test_assign_task_as_parent_of_datanode():
 
     dns = {dn.config_id: dn for dn in _DataManager._get_all()}
     assert dns["dn_1"].parent_ids == {tasks[0].id}
-    assert dns["dn_2"].parent_ids == set([tasks[0].id, tasks[1].id])
+    assert dns["dn_2"].parent_ids == {tasks[0].id, tasks[1].id}
     assert dns["dn_3"].parent_ids == {tasks[1].id}
 
 

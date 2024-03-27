@@ -53,7 +53,6 @@ Want to be part of the _Taipy Core_ community? Check out our
 
 - `taipy/`:
   - `core/`:
-    - `_backup/`: Internal package for Taipy data backup mechanism.
     - `_entity/`: Internal package for abstract entity definition and entity's properties management.
     - `_manager/`: Internal package for entity manager.
     - `_orchestrator/`: Internal package for task orchestrating and execution.

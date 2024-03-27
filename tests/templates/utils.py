@@ -21,7 +21,7 @@ def _bytes_to_str(b: bytes):
 
 def _run_template(taipy_path, cwd, main_path, time_out=30):
     """Run the templates on a subprocess and get stdout after timeout"""
-    env = dict(PYTHONPATH=taipy_path)
+    env = {"PYTHONPATH": taipy_path}
     if platform.system() == "Windows":
         env.update(os.environ)
     with subprocess.Popen(

@@ -12,10 +12,12 @@ from __future__ import annotations
 
 import typing as t
 from abc import ABC, abstractmethod
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from json import JSONEncoder
 from pathlib import Path
 
+import numpy
+import pandas
 from flask.json.provider import DefaultJSONProvider
 
 from .._warnings import _warn
@@ -45,6 +47,10 @@ class _DefaultJsonAdapter(JsonAdapter):
             return _date_to_string(o)
         if isinstance(o, Path):
             return str(o)
+        if isinstance(o, (timedelta, pandas.Timedelta)):
+            return str(o)
+        if isinstance(o, numpy.generic):
+            return getattr(o, "tolist", lambda: o)()
 
 
 class _TaipyJsonAdapter(object, metaclass=_Singleton):

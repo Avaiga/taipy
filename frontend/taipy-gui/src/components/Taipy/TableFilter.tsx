@@ -45,6 +45,7 @@ interface TableFilterProps {
     onValidate: (data: Array<FilterDesc>) => void;
     appliedFilters?: Array<FilterDesc>;
     className?: string;
+    filteredCount: number;
 }
 
 interface FilterRowProps {
@@ -278,7 +279,7 @@ const FilterRow = (props: FilterRowProps) => {
 };
 
 const TableFilter = (props: TableFilterProps) => {
-    const { onValidate, appliedFilters, columns, colsOrder, className = "" } = props;
+    const { onValidate, appliedFilters, columns, colsOrder, className = "", filteredCount } = props;
 
     const [showFilter, setShowFilter] = useState(false);
     const filterRef = useRef<HTMLButtonElement | null>(null);
@@ -317,7 +318,12 @@ const TableFilter = (props: TableFilterProps) => {
 
     return (
         <>
-            <Tooltip title={`${filters.length} filter${filters.length > 1 ? "s" : ""} applied`}>
+            <Tooltip
+                title={
+                    `${filters.length} filter${filters.length > 1 ? "s" : ""} applied` +
+                    (filteredCount ? ` (${filteredCount} non visible rows)` : "")
+                }
+            >
                 <IconButton
                     onClick={onShowFilterClick}
                     size="small"
@@ -325,7 +331,18 @@ const TableFilter = (props: TableFilterProps) => {
                     sx={iconInRowSx}
                     className={getSuffixedClassNames(className, "-filter-icon")}
                 >
-                    <Badge badgeContent={filters.length} color="primary" sx={{"& .MuiBadge-badge":{height: "10px", minWidth: "10px", width: "10px", borderRadius: "5px"}}}>
+                    <Badge
+                        badgeContent={filters.length}
+                        color="primary"
+                        sx={{
+                            "& .MuiBadge-badge": {
+                                height: "10px",
+                                minWidth: "10px",
+                                width: "10px",
+                                borderRadius: "5px",
+                            },
+                        }}
+                    >
                         <FilterListIcon fontSize="inherit" />
                     </Badge>
                 </IconButton>

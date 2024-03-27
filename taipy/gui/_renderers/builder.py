@@ -20,8 +20,8 @@ from inspect import isclass
 from urllib.parse import quote
 
 from .._warnings import _warn
-from ..gui_types import PropertyType, _get_taipy_type
 from ..partial import Partial
+from ..types import PropertyType, _get_taipy_type
 from ..utils import (
     _date_to_string,
     _get_broadcast_var_name,
@@ -69,7 +69,7 @@ class _Builder:
         "apply",
         "style",
         "tooltip",
-        "lov"
+        "lov",
     ]
 
     def __init__(
@@ -78,7 +78,7 @@ class _Builder:
         control_type: str,
         element_name: str,
         attributes: t.Optional[t.Dict[str, t.Any]],
-        hash_names: t.Dict[str, str] = None,
+        hash_names: t.Optional[t.Dict[str, str]] = None,
         default_value="<Empty>",
         lib_name: str = "taipy",
     ):
@@ -146,7 +146,7 @@ class _Builder:
 
     @staticmethod
     def _get_variable_hash_names(
-        gui: "Gui", attributes: t.Dict[str, t.Any], hash_names: t.Dict[str, str] = None
+        gui: "Gui", attributes: t.Dict[str, t.Any], hash_names: t.Optional[t.Dict[str, str]] = None
     ) -> t.Dict[str, str]:
         if hash_names is None:
             hash_names = {}
@@ -446,7 +446,7 @@ class _Builder:
     def __filter_attribute_names(self, names: t.Iterable[str]):
         return [k for k in self.__attributes if k in names or any(k.startswith(n + "[") for n in names)]
 
-    def __get_holded_name(self, key: str):
+    def __get_held_name(self, key: str):
         name = self.__hashes.get(key)
         if name:
             v = self.__attributes.get(key)
@@ -459,7 +459,7 @@ class _Builder:
         attr_names = [k for k in keys if k not in hash_names]
         return (
             {k: v for k, v in self.__attributes.items() if k in attr_names},
-            {k: self.__get_holded_name(k) for k in self.__hashes if k in hash_names},
+            {k: self.__get_held_name(k) for k in self.__hashes if k in hash_names},
         )
 
     def __build_rebuild_fn(self, fn_name: str, attribute_names: t.Iterable[str]):
@@ -483,6 +483,23 @@ class _Builder:
         date_format = _add_to_dict_and_get(self.__attributes, "date_format", "MM/dd/yyyy")
         data = self.__attributes.get("data")
         data_hash = self.__hashes.get("data", "")
+        cmp_hash = ""
+        if data_hash:
+            cmp_idx = 1
+            cmp_datas = []
+            cmp_datas_hash = []
+            while cmp_data := self.__hashes.get(f"data[{cmp_idx}]"):
+                cmp_idx += 1
+                cmp_datas.append(self.__gui._get_real_var_name(cmp_data)[0])
+                cmp_datas_hash.append(cmp_data)
+            if cmp_datas:
+                cmp_hash = self.__gui._evaluate_expr(
+                    "{"
+                    + f'{self.__gui._get_rebuild_fn_name("_compare_data")}'
+                    + f'({self.__gui._get_real_var_name(data_hash)[0]},{",".join(cmp_datas)})'
+                    + "}"
+                )
+                self.__update_vars.append(f"comparedatas={','.join(cmp_datas_hash)}")
         col_types = self.__gui._accessors._get_col_types(data_hash, _TaipyData(data, data_hash))
         col_dict = _get_columns_dict(
             data, self.__attributes.get("columns", {}), col_types, date_format, self.__attributes.get("number_format")
@@ -496,6 +513,16 @@ class _Builder:
         if col_dict is not None:
             _enhance_columns(self.__attributes, self.__hashes, col_dict, self.__element_name)
             self.__set_json_attribute("defaultColumns", col_dict)
+        if cmp_hash:
+            hash_name = self.__get_typed_hash_name(cmp_hash, PropertyType.data)
+            self.__set_react_attribute(
+                _to_camel_case("data"),
+                _get_client_var_name(hash_name),
+            )
+            self.__set_update_var_name(hash_name)
+            self.set_boolean_attribute("compare", True)
+            self.__set_string_attribute("on_compare")
+
         if line_style := self.__attributes.get("style"):
             if callable(line_style):
                 value = self.__hashes.get("style")
@@ -775,6 +802,8 @@ class _Builder:
                 else:
                     self.__set_default_value(var_name, var_type=var_type)
         else:
+            if var_type == PropertyType.data:
+                _warn(f"{self.__control_type}.data property should be bound.")
             value = self.__attributes.get(var_name)
             if value is not None:
                 if native_type:

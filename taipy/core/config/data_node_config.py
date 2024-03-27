@@ -327,10 +327,7 @@ class DataNodeConfig(Section):
     def cacheable(self):
         _warn_deprecated("cacheable", suggest="the skippable feature")
         cacheable = self._properties.get("cacheable")
-        if cacheable is not None:
-            return _tpl._replace_templates(cacheable)
-        else:
-            return False
+        return _tpl._replace_templates(cacheable) if cacheable is not None else False
 
     @cacheable.setter  # type: ignore
     @_ConfigBlocker._check()

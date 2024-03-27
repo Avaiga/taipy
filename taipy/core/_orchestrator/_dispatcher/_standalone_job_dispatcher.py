@@ -11,6 +11,7 @@
 
 from concurrent.futures import Executor, ProcessPoolExecutor
 from functools import partial
+from threading import Lock
 from typing import Callable, Optional
 
 from taipy.config._serializer._toml_serializer import _TomlSerializer
@@ -25,19 +26,28 @@ from ._task_function_wrapper import _TaskFunctionWrapper
 class _StandaloneJobDispatcher(_JobDispatcher):
     """Manages job dispatching (instances of `Job^` class) in an asynchronous way using a ProcessPoolExecutor."""
 
+    _nb_available_workers_lock = Lock()
+    _DEFAULT_MAX_NB_OF_WORKERS = 2
+
     def __init__(self, orchestrator: _AbstractOrchestrator, subproc_initializer: Optional[Callable] = None):
         super().__init__(orchestrator)
-        max_workers = Config.job_config.max_nb_of_workers or 1
+        max_workers = Config.job_config.max_nb_of_workers or self._DEFAULT_MAX_NB_OF_WORKERS
         self._executor: Executor = ProcessPoolExecutor(
             max_workers=max_workers,
             initializer=subproc_initializer,
         )  # type: ignore
         self._nb_available_workers = self._executor._max_workers  # type: ignore
 
+    def _can_execute(self) -> bool:
+        """Returns True if the dispatcher have resources to dispatch a job."""
+        with self._nb_available_workers_lock:
+            self._logger.debug(f"{self._nb_available_workers=}")
+            return self._nb_available_workers > 0
+
     def run(self):
         with self._executor:
             super().run()
-        self._logger.info("Standalone job dispatcher: Pool executor shut down")
+        self._logger.debug("Standalone job dispatcher: Pool executor shut down.")
 
     def _dispatch(self, job: Job):
         """Dispatches the given `Job^` on an available worker for execution.
@@ -45,19 +55,16 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         Parameters:
             job (Job^): The job to submit on an executor with an available worker.
         """
-
-        self._nb_available_workers -= 1
+        with self._nb_available_workers_lock:
+            self._nb_available_workers -= 1
+            self._logger.debug(f"Setting nb_available_workers to {self._nb_available_workers} in the dispatch method.")
         config_as_string = _TomlSerializer()._serialize(Config._applied_config)  # type: ignore[attr-defined]
         future = self._executor.submit(_TaskFunctionWrapper(job.id, job.task), config_as_string=config_as_string)
-
-        self._set_dispatched_processes(job.id, future)  # type: ignore
-        # so that the worker is available for another job as soon as possible.
         future.add_done_callback(partial(self._update_job_status_from_future, job))
         future.add_done_callback(self._release_worker)  # We must release the worker before updating the job status
 
-    def _release_worker(self, _):
-        self._nb_available_workers += 1
-
     def _update_job_status_from_future(self, job: Job, ft):
-        self._pop_dispatched_process(job.id)  # type: ignore
+        with self._nb_available_workers_lock:
+            self._nb_available_workers += 1
+            self._logger.debug(f"Setting nb_available_workers to {self._nb_available_workers} in the callback method.")
         self._update_job_status(job, ft.result())
