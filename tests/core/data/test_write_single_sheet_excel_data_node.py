@@ -35,6 +35,7 @@ def cleanup(tmp_excel_file):
             os.remove(tmp_excel_file)
         except Exception as e:
             from taipy.logger._taipy_logger import _TaipyLogger
+
             logger = _TaipyLogger._get_logger()
             logger.error(f"Failed to delete {tmp_excel_file}. {e}")
 
@@ -265,15 +266,18 @@ def test_write_with_header_single_sheet_custom_exposed_type_with_sheet_name(tmp_
 
 
 def test_write_with_header_single_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file):
-    excel_dn = ExcelDataNode("foo", Scope.SCENARIO,
-    properties={"path": tmp_excel_file, "exposed_type": MyCustomObject})
+    excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": MyCustomObject})
 
     data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
     excel_dn.write(data)
-    assert all(actual == expected for actual, expected in zip(excel_dn.read(), data))
+    excel_data = excel_dn.read()
+    assert isinstance(excel_data, dict) and "Sheet1" in excel_data.keys()
+    assert all(actual == expected for actual, expected in zip(excel_data["Sheet1"], data))
 
     excel_dn.write(None)
-    assert excel_dn.read() == []
+    excel_data = excel_dn.read()
+    assert isinstance(excel_data, dict) and "Sheet1" in excel_data.keys()
+    assert excel_data["Sheet1"] == []
 
 
 def test_write_without_header_single_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file):
@@ -298,16 +302,19 @@ def test_write_without_header_single_sheet_custom_exposed_type_with_sheet_name(t
 
 def test_write_without_header_single_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode(
-        "foo", Scope.SCENARIO,
-        properties={"path": tmp_excel_file, "exposed_type": MyCustomObject, "has_header": False}
+        "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": MyCustomObject, "has_header": False}
     )
 
     data = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
     excel_dn.write(data)
-    assert all(actual == expected for actual, expected in zip(excel_dn.read(), data))
+    excel_data = excel_dn.read()
+    assert isinstance(excel_data, dict) and "Sheet1" in excel_data.keys()
+    assert all(actual == expected for actual, expected in zip(excel_data["Sheet1"], data))
 
     excel_dn.write(None)
-    assert excel_dn.read() == []
+    excel_data = excel_dn.read()
+    assert isinstance(excel_data, dict) and "Sheet1" in excel_data.keys()
+    assert excel_data["Sheet1"] == []
 
 
 def test_raise_write_with_sheet_name_length_mismatch(excel_file_with_sheet_name):
