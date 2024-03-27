@@ -229,15 +229,6 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         self.db.commit()
         cursor.close()
 
-    # def _update_entry(self, model):
-    #     start = datetime.now()
-    #     while (datetime.now() - start).seconds < 5:
-    #         try:
-    #             self.__update_entry(model)
-    #             break
-    #         except Exception:
-    #             sleep(1)
-
     @staticmethod
     def __serialize_filter_values(value):
         if isinstance(value, (dict, list)):
