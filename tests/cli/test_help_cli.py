@@ -9,13 +9,11 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import argparse
 import re
 from unittest.mock import patch
 
 import pytest
 
-from taipy._cli._base_cli import _CLI
 from taipy._entrypoint import _entrypoint
 
 
@@ -24,40 +22,13 @@ def preprocess_stdout(stdout):
     return re.sub(" +", " ", stdout)
 
 
-def remove_subparser(name: str):
-    """Remove a subparser from the _CLI class."""
-    _CLI._sub_taipyparsers.pop(name, None)
-
-    if _CLI._subparser_action:
-        _CLI._subparser_action._name_parser_map.pop(name, None)
-
-        for action in _CLI._subparser_action._choices_actions:
-            if action.dest == name:
-                _CLI._subparser_action._choices_actions.remove(action)
-
-
-@pytest.fixture(autouse=True, scope="function")
-def clean_argparser():
-    _CLI._parser = argparse.ArgumentParser(conflict_handler="resolve")
-    _CLI._subparser_action = None
-    _CLI._arg_groups = {}
-    subcommands = list(_CLI._sub_taipyparsers.keys())
-    for subcommand in subcommands:
-        remove_subparser(subcommand)
-
-    yield
-
-    _CLI._subparser_action = None
-    _CLI._sub_taipyparsers = {}
-
-
 expected_help = """{run,manage-versions,create,migrate,help} ...
 
 positional arguments:
   {run,manage-versions,create,migrate,help}
     run                 Run a Taipy application.
     manage-versions     Taipy version control system.
-    create              Create a new Taipy application.
+    create              Create a new Taipy application using pre-defined templates.
     migrate             Migrate entities created from old taipy versions to be compatible with the current taipy
     version. The entity migration should be performed only after updating taipy code to the current version.
     help                Show the Taipy help message.

@@ -90,7 +90,7 @@ def test_delete_version(caplog, init_sql_repo):
     _VersionCLI.create_parser()
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--delete", "1.0"]):
-            _VersionCLI.parse_arguments()
+            _VersionCLI.handle_command()
 
     assert "Successfully delete version 1.0." in caplog.text
     all_versions = [version.id for version in _VersionManager._get_all()]
@@ -100,13 +100,13 @@ def test_delete_version(caplog, init_sql_repo):
     # Test delete a non-existed version
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--delete", "non_exist_version"]):
-            _VersionCLI.parse_arguments()
+            _VersionCLI.handle_command()
     assert "Version 'non_exist_version' does not exist." in caplog.text
 
     # Test delete production version will change the version from production to experiment
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--delete-production", "1.1"]):
-            _VersionCLI.parse_arguments()
+            _VersionCLI.handle_command()
 
     assert "Successfully delete version 1.1 from the production version list." in caplog.text
     all_versions = [version.id for version in _VersionManager._get_all()]
@@ -117,7 +117,7 @@ def test_delete_version(caplog, init_sql_repo):
     # Test delete a non-existed production version
     with pytest.raises(SystemExit) as e:
         with patch("sys.argv", ["prog", "manage-versions", "--delete-production", "non_exist_version"]):
-            _VersionCLI.parse_arguments()
+            _VersionCLI.handle_command()
 
     assert str(e.value) == "Version 'non_exist_version' is not a production version."
 
@@ -163,7 +163,7 @@ def test_list_versions(capsys, init_sql_repo):
     _VersionCLI.create_parser()
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--list"]):
-            _VersionCLI.parse_arguments()
+            _VersionCLI.handle_command()
 
     out, _ = capsys.readouterr()
     version_list = str(out).strip().split("\n")
@@ -201,20 +201,20 @@ def test_rename_version(caplog, init_sql_repo):
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--rename", "non_exist_version", "1.1"]):
             # This should raise an exception since version "non_exist_version" does not exist
-            _VersionCLI.parse_arguments()
+            _VersionCLI.handle_command()
     assert "Version 'non_exist_version' does not exist." in caplog.text
 
     _VersionCLI.create_parser()
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--rename", "1.0", "2.0"]):
             # This should raise an exception since 2.0 already exists
-            _VersionCLI.parse_arguments()
+            _VersionCLI.handle_command()
     assert "Version name '2.0' is already used." in caplog.text
 
     _VersionCLI.create_parser()
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--rename", "1.0", "1.1"]):
-            _VersionCLI.parse_arguments()
+            _VersionCLI.handle_command()
     assert _VersionManager._get("1.0") is None
     assert [version.id for version in _VersionManager._get_all()].sort() == [dev_ver, "1.1", "2.0"].sort()
     # All entities are assigned to the new version
@@ -227,7 +227,7 @@ def test_rename_version(caplog, init_sql_repo):
     _VersionCLI.create_parser()
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--rename", "2.0", "2.1"]):
-            _VersionCLI.parse_arguments()
+            _VersionCLI.handle_command()
     assert _VersionManager._get("2.0") is None
     assert [version.id for version in _VersionManager._get_all()].sort() == [dev_ver, "1.1", "2.1"].sort()
     assert _VersionManager._get_production_versions() == ["2.1"]
@@ -269,23 +269,23 @@ def test_compare_version_config(caplog, init_sql_repo, init_config):
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--compare-config", "non_exist_version", "2.0"]):
             # This should raise an exception since version "non_exist_version" does not exist
-            _VersionCLI.parse_arguments()
+            _VersionCLI.handle_command()
     assert "Version 'non_exist_version' does not exist." in caplog.text
 
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--compare-config", "1.0", "non_exist_version"]):
             # This should raise an exception since 2.0 already exists
-            _VersionCLI.parse_arguments()
+            _VersionCLI.handle_command()
     assert "Version 'non_exist_version' does not exist." in caplog.text
 
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--compare-config", "1.0", "1.0"]):
-            _VersionCLI.parse_arguments()
+            _VersionCLI.handle_command()
     assert "There is no difference between version 1.0 Configuration and version 1.0 Configuration." in caplog.text
 
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--compare-config", "1.0", "2.0"]):
-            _VersionCLI.parse_arguments()
+            _VersionCLI.handle_command()
     expected_message = """Differences between version 1.0 Configuration and version 2.0 Configuration:
 \tDATA_NODE "d2" has attribute "default_path" modified: foo.csv -> bar.csv"""
     assert expected_message in caplog.text

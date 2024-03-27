@@ -8,3 +8,16 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
+from unittest.mock import patch
+
+import pytest
+
+from taipy._entrypoint import _entrypoint
+
+
+def test_create_cli_with_wrong_arguments(caplog):
+    with patch("sys.argv", ["prog", "create", "--teamplaet", "default"]):
+        with pytest.raises(SystemExit):
+            _entrypoint()
+        assert "Unknown arguments: --teamplaet. Did you mean: --template?" in caplog.text

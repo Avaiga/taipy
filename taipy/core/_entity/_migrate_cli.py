@@ -12,9 +12,9 @@
 import sys
 from typing import List
 
-from taipy._cli._base_cli import _CLI
+from taipy._cli._base_cli._abstract_cli import _AbstractCLI
+from taipy._cli._base_cli._taipy_parser import _TaipyParser
 from taipy.config.config import Config
-from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._migrate import (
     _migrate_fs_entities,
@@ -29,19 +29,19 @@ from ._migrate import (
 )
 
 
-class _MigrateCLI:
-    __logger = _TaipyLogger._get_logger()
+class _MigrateCLI(_AbstractCLI):
+    _COMMAND_NAME = "migrate"
+    _ARGUMENTS = ["--repository-type", "--skip-backup", "--restore", "--remove-backup"]
 
     @classmethod
     def create_parser(cls):
-        migrate_parser = _CLI._add_subparser(
-            "migrate",
+        migrate_parser = _TaipyParser._add_subparser(
+            cls._COMMAND_NAME,
             help="Migrate entities created from old taipy versions to be compatible with the current taipy version. "
             " The entity migration should be performed only after updating taipy code to the current version.",
         )
         migrate_parser.add_argument(
             "--repository-type",
-            required=True,
             nargs="+",
             help="The type of repository to migrate. If filesystem or sql, a path to the database folder/.sqlite file "
             "should be informed. In case of mongo host, port, user and password must be informed, if left empty it "
@@ -64,11 +64,15 @@ class _MigrateCLI:
         )
 
     @classmethod
-    def parse_arguments(cls):
-        args = _CLI._parse()
-
-        if getattr(args, "which", None) != "migrate":
+    def handle_command(cls):
+        args = cls._parse_arguments()
+        if not args:
             return
+
+        if not args.repository_type:
+            _TaipyParser._sub_taipyparsers.get(cls._COMMAND_NAME).print_help()
+            cls._logger.error("The following arguments are required: --repository-type")
+            sys.exit(1)
 
         repository_type = args.repository_type[0]
         repository_args = args.repository_type[1:] if len(args.repository_type) > 1 else [None]
@@ -78,7 +82,7 @@ class _MigrateCLI:
         if args.remove_backup:
             cls.__handle_remove_backup(repository_type, repository_args)
 
-        do_backup =  not args.skip_backup
+        do_backup = not args.skip_backup
         cls.__migrate_entities(repository_type, repository_args, do_backup)
         sys.exit(0)
 
@@ -95,7 +99,7 @@ class _MigrateCLI:
             if not _remove_backup_mongo_entities():
                 sys.exit(1)
         else:
-            cls.__logger.error(f"Unknown repository type {repository_type}")
+            cls._logger.error(f"Unknown repository type {repository_type}")
             sys.exit(1)
 
         sys.exit(0)
@@ -114,7 +118,7 @@ class _MigrateCLI:
             if not _restore_migrate_mongo_entities(*mongo_args):
                 sys.exit(1)
         else:
-            cls.__logger.error(f"Unknown repository type {repository_type}")
+            cls._logger.error(f"Unknown repository type {repository_type}")
             sys.exit(1)
         sys.exit(0)
 
@@ -134,5 +138,5 @@ class _MigrateCLI:
             _migrate_mongo_entities(*mongo_args, backup=do_backup)  # type: ignore
 
         else:
-            cls.__logger.error(f"Unknown repository type {repository_type}")
+            cls._logger.error(f"Unknown repository type {repository_type}")
             sys.exit(1)
