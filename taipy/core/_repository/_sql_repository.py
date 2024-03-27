@@ -17,18 +17,18 @@ from sqlite3 import DatabaseError
 from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
 from sqlalchemy.dialects import sqlite
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, OperationalError
 
 from ...logger._taipy_logger import _TaipyLogger
 from .._repository._abstract_repository import _AbstractRepository
 from ..common._utils import _retry_read_entity
 from ..common.typing import Converter, Entity, ModelType
-from ..exceptions import ModelNotFound, SQLQueryCannotBeExecuted
+from ..exceptions import ModelNotFound
 from .db._sql_connection import _SQLConnection
 
 
 class _SQLRepository(_AbstractRepository[ModelType, Entity]):
-    __EXCEPTIONS_TO_RETRY = (SQLQueryCannotBeExecuted,)
+    __EXCEPTIONS_TO_RETRY = (OperationalError,)
     _logger = _TaipyLogger._get_logger()
 
     def __init__(self, model_type: Type[ModelType], converter: Type[Converter]):
@@ -218,25 +218,27 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     #############################
     # ##   Private methods   ## #
     #############################
+    @_retry_read_entity(__EXCEPTIONS_TO_RETRY)
     def __insert_model(self, model: ModelType):
         query = self.table.insert()
         self.db.execute(str(query.compile(dialect=sqlite.dialect())), model.to_list())
         self.db.commit()
 
-    def __update_entry(self, model):
+    @_retry_read_entity(__EXCEPTIONS_TO_RETRY)
+    def _update_entry(self, model):
         query = self.table.update().filter_by(id=model.id)
         cursor = self.db.execute(str(query.compile(dialect=sqlite.dialect())), model.to_list() + [model.id])
         self.db.commit()
         cursor.close()
 
-    def _update_entry(self, model):
-        start = datetime.now()
-        while (datetime.now() - start).seconds < 5:
-            try:
-                self.__update_entry(model)
-                break
-            except Exception:
-                sleep(1)
+    # def _update_entry(self, model):
+    #     start = datetime.now()
+    #     while (datetime.now() - start).seconds < 5:
+    #         try:
+    #             self.__update_entry(model)
+    #             break
+    #         except Exception:
+    #             sleep(1)
 
     @staticmethod
     def __serialize_filter_values(value):
