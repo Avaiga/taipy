@@ -61,7 +61,6 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         config_as_string = _TomlSerializer()._serialize(Config._applied_config)  # type: ignore[attr-defined]
         future = self._executor.submit(_TaskFunctionWrapper(job.id, job.task), config_as_string=config_as_string)
         future.add_done_callback(partial(self._update_job_status_from_future, job))
-        future.add_done_callback(self._release_worker)  # We must release the worker before updating the job status
 
     def _update_job_status_from_future(self, job: Job, ft):
         with self._nb_available_workers_lock:
