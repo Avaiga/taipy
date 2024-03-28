@@ -21,3 +21,11 @@ def test_create_cli_with_wrong_arguments(caplog):
         with pytest.raises(SystemExit):
             _entrypoint()
         assert "Unknown arguments: --teamplaet. Did you mean: --template?" in caplog.text
+
+
+def test_create_cli_with_unsupported_template(capsys):
+    with patch("sys.argv", ["prog", "create", "--template", "not-a-template"]):
+        with pytest.raises(SystemExit):
+            _entrypoint()
+        _, err = capsys.readouterr()
+        assert "invalid choice: 'not-a-template'" in err
