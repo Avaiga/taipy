@@ -23,13 +23,13 @@ from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..exceptions.exceptions import UnknownCompressionAlgorithm, UnknownParquetEngine
 from ..job.job_id import JobId
-from ._abstract_file import _AbstractFileDataNode
-from ._abstract_tabular import _AbstractTabularDataNode
+from ._abstract_file import _AbstractFileDataNodeMixin
+from ._abstract_tabular import _AbstractTabularDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
+class ParquetDataNode(DataNode, _AbstractFileDataNodeMixin, _AbstractTabularDataNodeMixin):
     """Data Node stored as a Parquet file.
 
     Attributes:
@@ -134,11 +134,7 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
         if self.__WRITE_KWARGS_PROPERTY not in properties.keys():
             properties[self.__WRITE_KWARGS_PROPERTY] = {}
 
-        if self._EXPOSED_TYPE_PROPERTY not in properties.keys():
-            properties[self._EXPOSED_TYPE_PROPERTY] = self._EXPOSED_TYPE_PANDAS
-        elif properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_MODIN:
-            # Deprecated in favor of pandas since 3.1.0
-            properties[self._EXPOSED_TYPE_PROPERTY] = self._EXPOSED_TYPE_PANDAS
+        properties[self._EXPOSED_TYPE_PROPERTY] = _AbstractTabularDataNodeMixin._get_valid_exposed_type(properties)
         self._check_exposed_type(properties[self._EXPOSED_TYPE_PROPERTY])
 
         DataNode.__init__(
@@ -157,7 +153,7 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
             editor_expiration_date,
             **properties,
         )
-        _AbstractTabularDataNode.__init__(self, **properties)
+        _AbstractTabularDataNodeMixin.__init__(self, **properties)
 
         self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
 
