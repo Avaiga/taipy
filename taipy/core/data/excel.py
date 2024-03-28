@@ -24,13 +24,13 @@ from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..exceptions.exceptions import ExposedTypeLengthMismatch, NonExistingExcelSheet, SheetNameLengthMismatch
 from ..job.job_id import JobId
-from ._abstract_file import _AbstractFileDataNode
-from ._abstract_tabular import _AbstractTabularDataNode
+from ._abstract_file import _AbstractFileDataNodeMixin
+from ._abstract_tabular import _AbstractTabularDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
+class ExcelDataNode(DataNode, _AbstractFileDataNodeMixin, _AbstractTabularDataNodeMixin):
     """Data Node stored as an Excel file.
 
     The Excel file format is _xlsx_.
@@ -101,11 +101,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             properties[self.__SHEET_NAME_PROPERTY] = None
         if self._HAS_HEADER_PROPERTY not in properties.keys():
             properties[self._HAS_HEADER_PROPERTY] = True
-        if self._EXPOSED_TYPE_PROPERTY not in properties.keys():
-            properties[self._EXPOSED_TYPE_PROPERTY] = self._EXPOSED_TYPE_PANDAS
-        elif properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_MODIN:
-            # Deprecated in favor of pandas since 3.1.0
-            properties[self._EXPOSED_TYPE_PROPERTY] = self._EXPOSED_TYPE_PANDAS
+        properties[self._EXPOSED_TYPE_PROPERTY] = _AbstractTabularDataNodeMixin._get_valid_exposed_type(properties)
         self._check_exposed_type(properties[self._EXPOSED_TYPE_PROPERTY])
 
         DataNode.__init__(
@@ -124,7 +120,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             editor_expiration_date,
             **properties,
         )
-        _AbstractTabularDataNode.__init__(self, **properties)
+        _AbstractTabularDataNodeMixin.__init__(self, **properties)
         if self._path and ".data" in self._path:
             self._path = self._migrate_path(self.storage_type(), self._path)
 
@@ -176,13 +172,13 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
     @staticmethod
     def _check_exposed_type(exposed_type):
         if isinstance(exposed_type, str):
-            _AbstractTabularDataNode._check_exposed_type(exposed_type)
+            _AbstractTabularDataNodeMixin._check_exposed_type(exposed_type)
         elif isinstance(exposed_type, list):
             for t in exposed_type:
-                _AbstractTabularDataNode._check_exposed_type(t)
+                _AbstractTabularDataNodeMixin._check_exposed_type(t)
         elif isinstance(exposed_type, dict):
             for t in exposed_type.values():
-                _AbstractTabularDataNode._check_exposed_type(t)
+                _AbstractTabularDataNodeMixin._check_exposed_type(t)
 
     def _read(self):
         if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:

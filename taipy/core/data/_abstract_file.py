@@ -13,7 +13,7 @@ import pathlib
 import shutil
 
 
-class _AbstractFileDataNode(object):
+class _AbstractFileDataNodeMixin(object):
     """Abstract base class for data node implementations (CSVDataNode, ParquetDataNode, ExcelDataNode,
     PickleDataNode and JSONDataNode) that are file based."""
 
