@@ -12,14 +12,14 @@
 import pytest
 
 from taipy.config import Config
-from taipy.core.common._utils import _retry_read_entity
+from taipy.core.common._utils import _retry_repository_operation
 from taipy.core.exceptions import InvalidExposedType
 
 
 def test_retry_decorator(mocker):
     func = mocker.Mock(side_effect=InvalidExposedType())
 
-    @_retry_read_entity((InvalidExposedType,))
+    @_retry_repository_operation((InvalidExposedType,))
     def decorated_func():
         func()
 
@@ -43,7 +43,7 @@ def test_retry_decorator_exception_not_in_list(mocker):
     func = mocker.Mock(side_effect=KeyError())
     Config.core.read_entity_retry = 3
 
-    @_retry_read_entity((InvalidExposedType,))
+    @_retry_repository_operation((InvalidExposedType,))
     def decorated_func():
         func()
 
