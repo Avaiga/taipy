@@ -9,8 +9,11 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import argparse
+
 import pytest
 
+from taipy._cli._base_cli._taipy_parser import _TaipyParser
 from taipy.config import _inject_section
 from taipy.config._config import _Config
 from taipy.config._config_comparator._config_comparator import _ConfigComparator
@@ -34,6 +37,31 @@ def e2e_base_url(request):
 @pytest.fixture(scope="session")
 def e2e_port(request):
     return request.config.getoption("--e2e-port")
+
+
+def remove_subparser(name: str):
+    """Remove a subparser from argparse."""
+    _TaipyParser._sub_taipyparsers.pop(name, None)
+
+    if _TaipyParser._subparser_action:
+        _TaipyParser._subparser_action._name_parser_map.pop(name, None)
+
+        for action in _TaipyParser._subparser_action._choices_actions:
+            if action.dest == name:
+                _TaipyParser._subparser_action._choices_actions.remove(action)
+
+
+@pytest.fixture
+def clean_argparser():
+    def _clean_argparser():
+        _TaipyParser._parser = argparse.ArgumentParser(conflict_handler="resolve")
+        _TaipyParser._subparser_action = None
+        _TaipyParser._arg_groups = {}
+        subcommands = list(_TaipyParser._sub_taipyparsers.keys())
+        for subcommand in subcommands:
+            remove_subparser(subcommand)
+
+    return _clean_argparser
 
 
 @pytest.fixture

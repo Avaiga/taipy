@@ -13,7 +13,7 @@ import argparse
 from typing import Dict
 
 
-class _CLI:
+class _TaipyParser:
     """Argument parser for Taipy application."""
 
     # The conflict_handler is set to "resolve" to override conflict arguments
@@ -50,12 +50,6 @@ class _CLI:
         groupparser = cls._parser.add_argument_group(title=title, description=description)
         cls._arg_groups[title] = groupparser
         return groupparser
-
-    @classmethod
-    def _parse(cls):
-        """Parse and return only known arguments."""
-        args, _ = cls._parser.parse_known_args()
-        return args
 
     @classmethod
     def _remove_argument(cls, arg: str):

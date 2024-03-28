@@ -13,7 +13,7 @@ import os
 import sys
 from importlib.util import find_spec
 
-from taipy._cli._base_cli import _CLI
+from taipy._cli._base_cli._taipy_parser import _TaipyParser
 from taipy.core._core_cli import _CoreCLI
 from taipy.core._entity._migrate_cli import _MigrateCLI
 from taipy.core._version._cli._version_cli import _VersionCLI
@@ -29,7 +29,12 @@ def _entrypoint():
     # Add the current working directory to path to execute version command on FS repo
     sys.path.append(os.path.normpath(os.getcwd()))
 
-    _CLI._parser.add_argument("-v", "--version", action="store_true", help="Print the current Taipy version and exit.")
+    _TaipyParser._parser.add_argument(
+        "-v",
+        "--version",
+        action="store_true",
+        help="Print the current Taipy version and exit.",
+    )
 
     _RunCLI.create_parser()
     _GuiCLI.create_run_parser()
@@ -45,16 +50,16 @@ def _entrypoint():
 
         _enterprise_entrypoint()
 
-    args = _CLI._parse()
+    args, _ = _TaipyParser._parser.parse_known_args()
     if args.version:
         print(f"Taipy {_get_version()}")  # noqa: T201
         sys.exit(0)
 
-    _RunCLI.parse_arguments()
-    _HelpCLI.parse_arguments()
-    _VersionCLI.parse_arguments()
-    _MigrateCLI.parse_arguments()
-    _ScaffoldCLI.parse_arguments()
+    _RunCLI.handle_command()
+    _HelpCLI.handle_command()
+    _VersionCLI.handle_command()
+    _MigrateCLI.handle_command()
+    _ScaffoldCLI.handle_command()
 
-    _CLI._remove_argument("help")
-    _CLI._parser.print_help()
+    _TaipyParser._remove_argument("help")
+    _TaipyParser._parser.print_help()

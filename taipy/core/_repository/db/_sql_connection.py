@@ -44,27 +44,17 @@ class _SQLConnection:
         from ...submission._submission_model import _SubmissionModel
         from ...task._task_model import _TaskModel
 
-        cls._connection.execute(
-            str(CreateTable(_CycleModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect()))
-        )
-        cls._connection.execute(
-            str(CreateTable(_DataNodeModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect()))
-        )
-        cls._connection.execute(
-            str(CreateTable(_JobModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect()))
-        )
-        cls._connection.execute(
-            str(CreateTable(_ScenarioModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect()))
-        )
-        cls._connection.execute(
-            str(CreateTable(_TaskModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect()))
-        )
-        cls._connection.execute(
-            str(CreateTable(_VersionModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect()))
-        )
-        cls._connection.execute(
+        cursor = cls._connection.cursor()
+        cursor.execute(str(CreateTable(_CycleModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
+        cursor.execute(str(CreateTable(_DataNodeModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
+        cursor.execute(str(CreateTable(_JobModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
+        cursor.execute(str(CreateTable(_ScenarioModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
+        cursor.execute(str(CreateTable(_TaskModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
+        cursor.execute(str(CreateTable(_VersionModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
+        cursor.execute(
             str(CreateTable(_SubmissionModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect()))
         )
+        cursor.close()
 
         return cls._connection
 

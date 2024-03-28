@@ -15,16 +15,18 @@ from sqlite3 import DatabaseError
 from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
 from sqlalchemy.dialects import sqlite
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, OperationalError
 
 from ...logger._taipy_logger import _TaipyLogger
 from .._repository._abstract_repository import _AbstractRepository
+from ..common._utils import _retry_repository_operation
 from ..common.typing import Converter, Entity, ModelType
 from ..exceptions import ModelNotFound
 from .db._sql_connection import _SQLConnection
 
 
 class _SQLRepository(_AbstractRepository[ModelType, Entity]):
+    __EXCEPTIONS_TO_RETRY = (OperationalError,)
     _logger = _TaipyLogger._get_logger()
 
     def __init__(self, model_type: Type[ModelType], converter: Type[Converter]):
@@ -69,6 +71,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         query = self.table.select().filter_by(id=entity_id)
         return bool(self.db.execute(str(query), [entity_id]).fetchone())
 
+    @_retry_repository_operation(__EXCEPTIONS_TO_RETRY)
     def _load(self, entity_id: str) -> Entity:
         query = self.table.select().filter_by(id=entity_id)
 
@@ -213,15 +216,18 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     #############################
     # ##   Private methods   ## #
     #############################
+    @_retry_repository_operation(__EXCEPTIONS_TO_RETRY)
     def __insert_model(self, model: ModelType):
         query = self.table.insert()
         self.db.execute(str(query.compile(dialect=sqlite.dialect())), model.to_list())
         self.db.commit()
 
+    @_retry_repository_operation(__EXCEPTIONS_TO_RETRY)
     def _update_entry(self, model):
         query = self.table.update().filter_by(id=model.id)
-        self.db.execute(str(query.compile(dialect=sqlite.dialect())), model.to_list() + [model.id])
+        cursor = self.db.execute(str(query.compile(dialect=sqlite.dialect())), model.to_list() + [model.id])
         self.db.commit()
+        cursor.close()
 
     @staticmethod
     def __serialize_filter_values(value):

@@ -11,31 +11,36 @@
 
 import sys
 
-from taipy._cli._base_cli import _CLI
-from taipy.logger._taipy_logger import _TaipyLogger
+from ._base_cli._abstract_cli import _AbstractCLI
+from ._base_cli._taipy_parser import _TaipyParser
 
 
-class _HelpCLI:
-    __logger = _TaipyLogger._get_logger()
+class _HelpCLI(_AbstractCLI):
+    _COMMAND_NAME = "help"
 
     @classmethod
     def create_parser(cls):
-        create_parser = _CLI._add_subparser("help", help="Show the Taipy help message.", add_help=False)
+        create_parser = _TaipyParser._add_subparser(
+            cls._COMMAND_NAME,
+            help="Show the Taipy help message.",
+            add_help=False,
+        )
         create_parser.add_argument(
             "command", nargs="?", type=str, const="", default="", help="Show the help message of the command."
         )
 
     @classmethod
-    def parse_arguments(cls):
-        args = _CLI._parse()
+    def handle_command(cls):
+        args = cls._parse_arguments()
+        if not args:
+            return
 
-        if getattr(args, "which", None) == "help":
-            if args.command:
-                if args.command in _CLI._sub_taipyparsers.keys():
-                    _CLI._sub_taipyparsers.get(args.command).print_help()
-                else:
-                    cls.__logger.error(f"{args.command} is not a valid command.")
+        if args.command:
+            if args.command in _TaipyParser._sub_taipyparsers.keys():
+                _TaipyParser._sub_taipyparsers.get(args.command).print_help()
             else:
-                _CLI._parser.print_help()
+                cls._logger.error(f"{args.command} is not a valid command.")
+        else:
+            _TaipyParser._parser.print_help()
 
-            sys.exit(0)
+        sys.exit(0)
