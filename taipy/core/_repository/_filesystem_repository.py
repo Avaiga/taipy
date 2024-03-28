@@ -17,7 +17,7 @@ from typing import Any, Dict, Iterable, Iterator, List, Optional, Type, Union
 
 from taipy.config.config import Config
 
-from ..common._utils import _retry_read_entity
+from ..common._utils import _retry_repository_operation
 from ..common.typing import Converter, Entity, Json, ModelType
 from ..exceptions import FileCannotBeRead, InvalidExportPath, ModelNotFound
 from ._abstract_repository import _AbstractRepository
@@ -241,7 +241,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
                 return json.loads(file_content, cls=_Decoder)
         return None
 
-    @_retry_read_entity(__EXCEPTIONS_TO_RETRY)
+    @_retry_repository_operation(__EXCEPTIONS_TO_RETRY)
     def __read_file(self, filepath: pathlib.Path) -> str:
         if not filepath.is_file():
             raise FileNotFoundError
