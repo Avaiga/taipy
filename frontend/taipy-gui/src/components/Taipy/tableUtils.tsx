@@ -593,16 +593,16 @@ export const EditableCell = (props: EditableCellProps) => {
                         <Button size="small" onClick={onSelect} sx={ButtonSx}>
                             {formatValue(button[0] as RowValue, colDesc, formatConfig, nanValue)}
                         </Button>
-                    ) : val !== null && val !== undefined && colDesc.type && colDesc.type.startsWith("bool") ? (
+                    ) : value !== null && value !== undefined && colDesc.type && colDesc.type.startsWith("bool") ? (
                         <Switch
-                            checked={val as boolean}
+                            checked={value as boolean}
                             size="small"
-                            title={val ? "True" : "False"}
+                            title={value ? "True" : "False"}
                             sx={defaultCursorIcon}
                         />
                     ) : (
                         <span style={defaultCursor}>
-                            {formatValue(val as RowValue, colDesc, formatConfig, nanValue)}
+                            {formatValue(value as RowValue, colDesc, formatConfig, nanValue)}
                         </span>
                     )}
                     {onValidation && !button ? (
