@@ -11,6 +11,7 @@
 
 import threading
 import time
+import traceback
 from abc import abstractmethod
 from queue import Empty
 from typing import Optional
@@ -147,5 +148,14 @@ class _JobDispatcher(threading.Thread):
 
     @staticmethod
     def _update_job_status(job: Job, exceptions):
-        job.update_status(exceptions)
-        _JobManagerFactory._build_manager()._set(job)
+        """Update the job status based on the success or the failure of its execution."""
+        if exceptions:
+            job.failed()
+            _TaipyLogger._get_logger().error(f" {len(exceptions)} errors occurred during execution of job {job.id}")
+            for e in exceptions:
+                st = "".join(traceback.format_exception(type(e), value=e, tb=e.__traceback__))
+                job._stacktrace.append(st)
+                _TaipyLogger._get_logger().error(st)
+            _JobManagerFactory._build_manager()._set(job)
+        else:
+            job.completed()
