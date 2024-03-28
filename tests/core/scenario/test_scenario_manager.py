@@ -813,6 +813,37 @@ def test_get_set_primary_scenario():
     assert _ScenarioManager._get_primary(cycle_1) == scenario_2
 
 
+def test_get_primary_scenarios_sorted():
+    cycle_1 = _CycleManager._create(Frequency.DAILY, name="foo1")
+    cycle_2 = _CycleManager._create(Frequency.DAILY, name="foo2")
+
+    scenario_1_cfg = Config.configure_scenario(name="C_scenario", id="scenario_3", tags=["banana", "kiwi"])
+    scenario_2_cfg = Config.configure_scenario(name="B_scenario", id="scenario_1", tags=["apple", "banana"])
+
+    scenario_1 = _ScenarioManager._create(scenario_1_cfg)
+    scenario_2 = _ScenarioManager._create(scenario_2_cfg)
+
+    scenario_1.cycle = cycle_1
+    scenario_2.cycle = cycle_2
+
+    _ScenarioManager._set_primary(scenario_1)
+    _ScenarioManager._set_primary(scenario_2)
+
+    primary_scenarios_sorted_by_name = [scenario_2, scenario_1]
+    assert primary_scenarios_sorted_by_name == _ScenarioManager._get_primary_scenarios(sorted=True, sort_key="name")
+
+    primary_scenarios_sorted_by_id = [scenario_2, scenario_1]
+    assert primary_scenarios_sorted_by_id == _ScenarioManager._get_primary_scenarios(sorted=True, sort_key="id")
+
+    primary_scenarios_sorted_by_creation_date = [scenario_1, scenario_2]
+    assert primary_scenarios_sorted_by_creation_date == _ScenarioManager._get_primary_scenarios(
+        sorted=True, sort_key="creation_date"
+    )
+
+    primary_scenarios_sorted_by_tag = [scenario_2, scenario_1]
+    assert primary_scenarios_sorted_by_tag == _ScenarioManager._get_primary_scenarios(sorted=True, sort_key="tags")
+
+
 def test_hard_delete_one_single_scenario_with_scenario_data_nodes():
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
