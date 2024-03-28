@@ -94,6 +94,20 @@ const tableColumns = JSON.stringify({
     Entity: { dfid: "Entity" },
     "Daily hospital occupancy": { dfid: "Daily hospital occupancy", type: "int64" },
 });
+const changedValue = {
+    [valueKey]: {
+        data: [
+            {
+                Day_str: "2020-04-01T00:00:00.000000Z",
+                "Daily hospital occupancy": 856,
+                Entity: "Australia",
+                Code: "AUS",
+            },
+        ],
+        rowcount: 1,
+        start: 0,
+    },
+};
 
 const editableValue = {
     "0--1-bool,int,float,Code--asc": {
@@ -308,6 +322,30 @@ describe("PaginatedTable Component", () => {
         const elts = getAllByText("Austria");
         expect(elts.length).toBeGreaterThan(1);
         expect(elts[0].tagName).toBe("SPAN");
+    });
+    it("displays the refreshed data", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getAllByText, rerender, queryByText } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <PaginatedTable data={undefined} defaultColumns={tableColumns} />
+            </TaipyContext.Provider>
+        );
+
+        rerender(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <PaginatedTable data={tableValue as TableValueType} defaultColumns={tableColumns} />
+            </TaipyContext.Provider>
+        );
+        expect(getAllByText("Austria").length).toBeGreaterThan(1)
+
+        rerender(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <PaginatedTable data={changedValue as TableValueType} defaultColumns={tableColumns} />
+            </TaipyContext.Provider>
+        );
+        expect(queryByText("Austria")).toBeNull();
+        expect(getAllByText("Australia").length).toBe(1);
     });
     it("selects the rows", async () => {
         const dispatch = jest.fn();
