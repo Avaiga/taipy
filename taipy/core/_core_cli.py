@@ -11,12 +11,13 @@
 
 from typing import Dict
 
-from taipy._cli._base_cli import _CLI
+from taipy._cli._base_cli._abstract_cli import _AbstractCLI
+from taipy._cli._base_cli._taipy_parser import _TaipyParser
 
 from .config import CoreSection
 
 
-class _CoreCLI:
+class _CoreCLI(_AbstractCLI):
     """Command-line interface for Taipy Core application."""
 
     __MODE_ARGS: Dict[str, Dict] = {
@@ -69,7 +70,7 @@ class _CoreCLI:
 
     @classmethod
     def create_parser(cls):
-        core_parser = _CLI._add_groupparser("Taipy Core", "Optional arguments for Taipy Core service")
+        core_parser = _TaipyParser._add_groupparser("Taipy Core", "Optional arguments for Taipy Core service")
 
         mode_group = core_parser.add_mutually_exclusive_group()
         for mode_arg, mode_arg_dict in cls.__MODE_ARGS.items():
@@ -81,7 +82,7 @@ class _CoreCLI:
 
     @classmethod
     def create_run_parser(cls):
-        run_parser = _CLI._add_subparser("run", help="Run a Taipy application.")
+        run_parser = _TaipyParser._add_subparser("run", help="Run a Taipy application.")
         mode_group = run_parser.add_mutually_exclusive_group()
         for mode_arg, mode_arg_dict in cls.__MODE_ARGS.items():
             mode_group.add_argument(mode_arg, **mode_arg_dict)
@@ -91,8 +92,9 @@ class _CoreCLI:
             force_group.add_argument(force_arg, **force_arg_dict)
 
     @classmethod
-    def parse_arguments(cls):
-        args = _CLI._parse()
+    def handle_command(cls):
+        args, _ = _TaipyParser._parser.parse_known_args()
+
         as_dict = {}
         if args.taipy_development:
             as_dict[CoreSection._MODE_KEY] = CoreSection._DEVELOPMENT_MODE

@@ -12,13 +12,16 @@
 import subprocess
 import sys
 
-from taipy._cli._base_cli import _CLI
+from ._base_cli._abstract_cli import _AbstractCLI
+from ._base_cli._taipy_parser import _TaipyParser
 
 
-class _RunCLI:
+class _RunCLI(_AbstractCLI):
+    _COMMAND_NAME = "run"
+
     @classmethod
     def create_parser(cls):
-        run_parser = _CLI._add_subparser("run", help="Run a Taipy application.")
+        run_parser = _TaipyParser._add_subparser(cls._COMMAND_NAME, help="Run a Taipy application.")
         run_parser.add_argument(
             "application_main_file",
         )
@@ -33,27 +36,28 @@ class _RunCLI:
         )
 
     @classmethod
-    def parse_arguments(cls):
-        args = _CLI._parse()
+    def handle_command(cls):
+        args = cls._parse_arguments()
+        if not args:
+            return
 
-        if getattr(args, "which", None) == "run":
-            all_args = sys.argv[3:]  # First 3 args are always (1) Python executable, (2) run, (3) Python file
+        all_args = sys.argv[3:]  # First 3 args are always (1) Python executable, (2) run, (3) Python file
 
-            external_args = []
-            try:
-                external_args_index = all_args.index("external-args")
-            except ValueError:
-                pass
-            else:
-                external_args.extend(all_args[external_args_index + 1 :])
-                all_args = all_args[:external_args_index]
+        external_args = []
+        try:
+            external_args_index = all_args.index("external-args")
+        except ValueError:
+            pass
+        else:
+            external_args.extend(all_args[external_args_index + 1 :])
+            all_args = all_args[:external_args_index]
 
-            taipy_args = [f"--taipy-{arg[2:]}" if arg.startswith("--") else arg for arg in all_args]
+        taipy_args = [f"--taipy-{arg[2:]}" if arg.startswith("--") else arg for arg in all_args]
 
-            subprocess.run(
-                [sys.executable, args.application_main_file, *(external_args + taipy_args)],
-                stdout=sys.stdout,
-                stderr=sys.stdout,
-            )
+        subprocess.run(
+            [sys.executable, args.application_main_file, *(external_args + taipy_args)],
+            stdout=sys.stdout,
+            stderr=sys.stdout,
+        )
 
-            sys.exit(0)
+        sys.exit(0)

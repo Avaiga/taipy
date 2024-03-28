@@ -15,17 +15,24 @@ import sys
 from cookiecutter.main import cookiecutter
 
 import taipy
-from taipy._cli._base_cli import _CLI
+
+from ._base_cli._abstract_cli import _AbstractCLI
+from ._base_cli._taipy_parser import _TaipyParser
 
 
-class _ScaffoldCLI:
+class _ScaffoldCLI(_AbstractCLI):
     __TAIPY_PATH = pathlib.Path(taipy.__file__).parent.resolve() / "templates"
+    _TEMPLATE_MAP = {str(x.name): str(x) for x in __TAIPY_PATH.iterdir() if x.is_dir() and not x.name.startswith("_")}
 
-    _TEMPLATE_MAP = {str(x.name): str(x) for x in __TAIPY_PATH.iterdir() if x.is_dir()}
+    _COMMAND_NAME = "create"
+    _ARGUMENTS = ["--template"]
 
     @classmethod
     def create_parser(cls):
-        create_parser = _CLI._add_subparser("create", help="Create a new Taipy application.")
+        create_parser = _TaipyParser._add_subparser(
+            cls._COMMAND_NAME,
+            help="Create a new Taipy application using pre-defined templates.",
+        )
         create_parser.add_argument(
             "--template",
             choices=list(cls._TEMPLATE_MAP.keys()),
@@ -34,9 +41,10 @@ class _ScaffoldCLI:
         )
 
     @classmethod
-    def parse_arguments(cls):
-        args = _CLI._parse()
+    def handle_command(cls):
+        args = cls._parse_arguments()
+        if not args:
+            return
 
-        if getattr(args, "which", None) == "create":
-            cookiecutter(cls._TEMPLATE_MAP[args.template])
-            sys.exit(0)
+        cookiecutter(cls._TEMPLATE_MAP[args.template])
+        sys.exit(0)
