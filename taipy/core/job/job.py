@@ -11,7 +11,6 @@
 
 __all__ = ["Job"]
 
-import traceback
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Callable, List, Optional
 
