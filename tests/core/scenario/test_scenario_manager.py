@@ -814,34 +814,47 @@ def test_get_set_primary_scenario():
 
 
 def test_get_primary_scenarios_sorted():
-    cycle_1 = _CycleManager._create(Frequency.DAILY, name="foo1")
-    cycle_2 = _CycleManager._create(Frequency.DAILY, name="foo2")
+    scenario_1_cfg = Config.configure_scenario(id="scenario_1", frequency=Frequency.DAILY)
+    scenario_2_cfg = Config.configure_scenario(id="scenario_2", frequency=Frequency.DAILY)
 
-    scenario_1_cfg = Config.configure_scenario(name="C_scenario", id="scenario_3", tags=["banana", "kiwi"])
-    scenario_2_cfg = Config.configure_scenario(name="B_scenario", id="scenario_1", tags=["apple", "banana"])
-
-    scenario_1 = _ScenarioManager._create(scenario_1_cfg)
-    scenario_2 = _ScenarioManager._create(scenario_2_cfg)
-
-    scenario_1.cycle = cycle_1
-    scenario_2.cycle = cycle_2
+    scenario_1 = _ScenarioManager._create(scenario_1_cfg, name="B_scenario")
+    scenario_2 = _ScenarioManager._create(scenario_2_cfg, name="A_scenario", creation_date=datetime.now() + timedelta(days=2))
+    scenario_3 = _ScenarioManager._create(scenario_2_cfg, name="C_scenario", creation_date=datetime.now() + timedelta(days=4))
 
     _ScenarioManager._set_primary(scenario_1)
+    scenario_1.tags = ["banana", "kiwi"]
     _ScenarioManager._set_primary(scenario_2)
+    scenario_2.tags = ["apple", "banana"]
+    _ScenarioManager._set_primary(scenario_3)
+    scenario_3.tags = ["banana", "kiwi"]
 
-    primary_scenarios_sorted_by_name = [scenario_2, scenario_1]
-    assert primary_scenarios_sorted_by_name == _ScenarioManager._get_primary_scenarios(sorted=True, sort_key="name")
+    primary_scenarios = _ScenarioManager._get_primary_scenarios()
 
-    primary_scenarios_sorted_by_id = [scenario_2, scenario_1]
-    assert primary_scenarios_sorted_by_id == _ScenarioManager._get_primary_scenarios(sorted=True, sort_key="id")
+    primary_scenarios_sorted_by_name = [scenario_2, scenario_1, scenario_3]
+    assert primary_scenarios_sorted_by_name == _ScenarioManager._sort_scenarios(primary_scenarios, sort_key="name")
 
-    primary_scenarios_sorted_by_creation_date = [scenario_1, scenario_2]
-    assert primary_scenarios_sorted_by_creation_date == _ScenarioManager._get_primary_scenarios(
-        sorted=True, sort_key="creation_date"
+    scenarios_with_same_config_id = [scenario_2, scenario_3]
+    scenarios_with_same_config_id.sort(key=lambda x: x.id)
+    primary_scenarios_sorted_by_config_id = [scenario_1, scenarios_with_same_config_id[0], scenarios_with_same_config_id[1]]
+    assert primary_scenarios_sorted_by_config_id == _ScenarioManager._sort_scenarios(primary_scenarios, sort_key="config_id")
+
+    scenarios_sorted_by_id = [scenario_1, scenario_2, scenario_3]
+    scenarios_sorted_by_id.sort(key=lambda x: x.id)
+    assert scenarios_sorted_by_id == _ScenarioManager._sort_scenarios(primary_scenarios, sort_key="id")
+
+    primary_scenarios_sorted_by_creation_date = [scenario_1, scenario_2, scenario_3]
+    assert primary_scenarios_sorted_by_creation_date == _ScenarioManager._sort_scenarios(primary_scenarios, 
+                                                                                         sort_key="creation_date")
+
+    scenarios_with_same_tags = [scenario_1, scenario_3]
+    scenarios_with_same_tags.sort(key=lambda x: x.id)
+    primary_scenarios_sorted_by_tags = [scenario_2, scenarios_with_same_tags[0], scenarios_with_same_tags[1]]
+    assert primary_scenarios_sorted_by_tags == _ScenarioManager._sort_scenarios(primary_scenarios, sort_key="tags")
+
+    primary_scenarios_sorted_by_name_descending_order = [scenario_3, scenario_1, scenario_2]
+    assert primary_scenarios_sorted_by_name_descending_order == _ScenarioManager._sort_scenarios(
+        primary_scenarios, descending=True, sort_key="name"
     )
-
-    primary_scenarios_sorted_by_tag = [scenario_2, scenario_1]
-    assert primary_scenarios_sorted_by_tag == _ScenarioManager._get_primary_scenarios(sorted=True, sort_key="tags")
 
 
 def test_hard_delete_one_single_scenario_with_scenario_data_nodes():

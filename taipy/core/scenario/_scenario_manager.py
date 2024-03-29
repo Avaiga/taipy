@@ -267,15 +267,25 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         return cls._get_all_by(filters)
 
     @classmethod
-    def _get_primary_scenarios(
-        cls, sorted: Optional[bool] = False, sort_key: Optional[Literal["name", "id", "creation_date", "tags"]] = "name"
+    def _get_primary_scenarios(cls) -> List[Scenario]:
+        return [scenario for scenario in cls._get_all() if scenario.is_primary]
+
+    @classmethod
+    def _sort_scenarios(
+        cls,
+        scenarios: List[Scenario],
+        descending: Optional[bool] = False,
+        sort_key: Optional[Literal["name", "id", "config_id", "creation_date", "tags"]] = "name",
     ) -> List[Scenario]:
-        scenarios = [scenario for scenario in cls._get_all() if scenario.is_primary]
-        if sorted:
-            if sort_key in ["name", "id", "creation_date", "tags"]:
-                scenarios.sort(key=lambda x: getattr(x, sort_key))
+        if sort_key in ["name", "config_id", "creation_date", "tags"]:
+            if sort_key == "tags":
+                scenarios.sort(key=lambda x: (tuple(sorted(x.tags)), x.id), reverse=descending)
             else:
-                scenarios.sort(key=lambda x: x.name)
+                scenarios.sort(key=lambda x: (getattr(x, sort_key), x.id), reverse=descending)
+        elif sort_key == "id":
+            scenarios.sort(key=lambda x: x.id, reverse=descending)
+        else:
+            scenarios.sort(key=lambda x: (x.name, x.id), reverse=descending)
         return scenarios
 
     @classmethod
