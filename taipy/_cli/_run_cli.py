@@ -37,9 +37,7 @@ class _RunCLI(_AbstractCLI):
 
     @classmethod
     def handle_command(cls):
-        args = cls._parse_arguments()
-        if not args:
-            return
+        args, _ = _TaipyParser._parser.parse_known_args()
 
         all_args = sys.argv[3:]  # First 3 args are always (1) Python executable, (2) run, (3) Python file
 
