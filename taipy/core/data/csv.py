@@ -23,13 +23,13 @@ from taipy.config.common.scope import Scope
 from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..job.job_id import JobId
-from ._abstract_file import _AbstractFileDataNodeMixin
-from ._abstract_tabular import _AbstractTabularDataNodeMixin
+from ._abstract_file import _FileDataNodeMixin
+from ._abstract_tabular import _TabularDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class CSVDataNode(DataNode, _AbstractFileDataNodeMixin, _AbstractTabularDataNodeMixin):
+class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     """Data Node stored as a CSV file.
 
     Attributes:
@@ -97,7 +97,7 @@ class CSVDataNode(DataNode, _AbstractFileDataNodeMixin, _AbstractTabularDataNode
         if self._HAS_HEADER_PROPERTY not in properties.keys():
             properties[self._HAS_HEADER_PROPERTY] = True
 
-        properties[self._EXPOSED_TYPE_PROPERTY] = _AbstractTabularDataNodeMixin._get_valid_exposed_type(properties)
+        properties[self._EXPOSED_TYPE_PROPERTY] = _TabularDataNodeMixin._get_valid_exposed_type(properties)
         self._check_exposed_type(properties[self._EXPOSED_TYPE_PROPERTY])
 
         DataNode.__init__(
@@ -116,7 +116,7 @@ class CSVDataNode(DataNode, _AbstractFileDataNodeMixin, _AbstractTabularDataNode
             editor_expiration_date,
             **properties,
         )
-        _AbstractTabularDataNodeMixin.__init__(self, **properties)
+        _TabularDataNodeMixin.__init__(self, **properties)
 
         self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
         if self._path and ".data" in self._path:

@@ -24,13 +24,13 @@ from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..exceptions.exceptions import ExposedTypeLengthMismatch, NonExistingExcelSheet, SheetNameLengthMismatch
 from ..job.job_id import JobId
-from ._abstract_file import _AbstractFileDataNodeMixin
-from ._abstract_tabular import _AbstractTabularDataNodeMixin
+from ._abstract_file import _FileDataNodeMixin
+from ._abstract_tabular import _TabularDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class ExcelDataNode(DataNode, _AbstractFileDataNodeMixin, _AbstractTabularDataNodeMixin):
+class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     """Data Node stored as an Excel file.
 
     The Excel file format is _xlsx_.
@@ -101,7 +101,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNodeMixin, _AbstractTabularDataNo
             properties[self.__SHEET_NAME_PROPERTY] = None
         if self._HAS_HEADER_PROPERTY not in properties.keys():
             properties[self._HAS_HEADER_PROPERTY] = True
-        properties[self._EXPOSED_TYPE_PROPERTY] = _AbstractTabularDataNodeMixin._get_valid_exposed_type(properties)
+        properties[self._EXPOSED_TYPE_PROPERTY] = _TabularDataNodeMixin._get_valid_exposed_type(properties)
         self._check_exposed_type(properties[self._EXPOSED_TYPE_PROPERTY])
 
         DataNode.__init__(
@@ -120,7 +120,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNodeMixin, _AbstractTabularDataNo
             editor_expiration_date,
             **properties,
         )
-        _AbstractTabularDataNodeMixin.__init__(self, **properties)
+        _TabularDataNodeMixin.__init__(self, **properties)
         if self._path and ".data" in self._path:
             self._path = self._migrate_path(self.storage_type(), self._path)
 
@@ -172,13 +172,13 @@ class ExcelDataNode(DataNode, _AbstractFileDataNodeMixin, _AbstractTabularDataNo
     @staticmethod
     def _check_exposed_type(exposed_type):
         if isinstance(exposed_type, str):
-            _AbstractTabularDataNodeMixin._check_exposed_type(exposed_type)
+            _TabularDataNodeMixin._check_exposed_type(exposed_type)
         elif isinstance(exposed_type, list):
             for t in exposed_type:
-                _AbstractTabularDataNodeMixin._check_exposed_type(t)
+                _TabularDataNodeMixin._check_exposed_type(t)
         elif isinstance(exposed_type, dict):
             for t in exposed_type.values():
-                _AbstractTabularDataNodeMixin._check_exposed_type(t)
+                _TabularDataNodeMixin._check_exposed_type(t)
 
     def _read(self):
         if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:

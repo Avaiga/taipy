@@ -18,12 +18,12 @@ from taipy.config.common.scope import Scope
 
 from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
-from ._abstract_file import _AbstractFileDataNodeMixin
+from ._abstract_file import _FileDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class PickleDataNode(DataNode, _AbstractFileDataNodeMixin):
+class PickleDataNode(DataNode, _FileDataNodeMixin):
     """Data Node stored as a pickle file.
 
     Attributes:

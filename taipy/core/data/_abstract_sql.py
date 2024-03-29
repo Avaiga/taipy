@@ -25,12 +25,12 @@ from taipy.config.common.scope import Scope
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..data.operator import JoinOperator, Operator
 from ..exceptions.exceptions import MissingRequiredProperty, UnknownDatabaseEngine
-from ._abstract_tabular import _AbstractTabularDataNodeMixin
+from ._abstract_tabular import _TabularDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNodeMixin):
+class _AbstractSQLDataNode(DataNode, _TabularDataNodeMixin):
     """Abstract base class for data node implementations (SQLDataNode and SQLTableDataNode) that use SQL."""
 
     __STORAGE_TYPE = "NOT_IMPLEMENTED"
@@ -95,7 +95,7 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNodeMixin):
             properties = {}
         self._check_required_properties(properties)
 
-        properties[self._EXPOSED_TYPE_PROPERTY] = _AbstractTabularDataNodeMixin._get_valid_exposed_type(properties)
+        properties[self._EXPOSED_TYPE_PROPERTY] = _TabularDataNodeMixin._get_valid_exposed_type(properties)
         self._check_exposed_type(properties[self._EXPOSED_TYPE_PROPERTY])
 
         DataNode.__init__(
@@ -114,7 +114,7 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNodeMixin):
             editor_expiration_date,
             **properties,
         )
-        _AbstractTabularDataNodeMixin.__init__(self, **properties)
+        _TabularDataNodeMixin.__init__(self, **properties)
         self._engine = None
         if not self._last_edit_date:  # type: ignore
             self._last_edit_date = datetime.now()

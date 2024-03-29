@@ -13,9 +13,9 @@ import pathlib
 import shutil
 
 
-class _AbstractFileDataNodeMixin(object):
-    """Abstract base class for data node implementations (CSVDataNode, ParquetDataNode, ExcelDataNode,
-    PickleDataNode and JSONDataNode) that are file based."""
+class _FileDataNodeMixin(object):
+    """Mixin class designed to handle file-based data nodes
+    (CSVDataNode, ParquetDataNode, ExcelDataNode, PickleDataNode, JSONDataNode, etc.)."""
 
     __EXTENSION_MAP = {"csv": "csv", "excel": "xlsx", "parquet": "parquet", "pickle": "p", "json": "json"}
 

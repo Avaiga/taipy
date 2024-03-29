@@ -17,9 +17,9 @@ import pandas as pd
 from ..exceptions.exceptions import InvalidExposedType
 
 
-class _AbstractTabularDataNodeMixin(object):
-    """Abstract base class for tabular data node implementations (CSVDataNode, ParquetDataNode, ExcelDataNode,
-    SQLTableDataNode and SQLDataNode) that are tabular representable."""
+class _TabularDataNodeMixin(object):
+    """Mixin class designed to handle tabular representable data nodes
+    (CSVDataNode, ParquetDataNode, ExcelDataNode, SQLTableDataNode and SQLDataNode)."""
 
     _HAS_HEADER_PROPERTY = "has_header"
     _EXPOSED_TYPE_PROPERTY = "exposed_type"
