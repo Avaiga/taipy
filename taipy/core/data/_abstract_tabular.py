@@ -17,9 +17,9 @@ import pandas as pd
 from ..exceptions.exceptions import InvalidExposedType
 
 
-class _AbstractTabularDataNode(object):
-    """Abstract base class for tabular data node implementations (CSVDataNode, ParquetDataNode, ExcelDataNode,
-    SQLTableDataNode and SQLDataNode) that are tabular representable."""
+class _TabularDataNodeMixin(object):
+    """Mixin class designed to handle tabular representable data nodes
+    (CSVDataNode, ParquetDataNode, ExcelDataNode, SQLTableDataNode and SQLDataNode)."""
 
     _HAS_HEADER_PROPERTY = "has_header"
     _EXPOSED_TYPE_PROPERTY = "exposed_type"
@@ -53,9 +53,20 @@ class _AbstractTabularDataNode(object):
             return pd.DataFrame.from_records([self._encoder(row) for row in data])
         return pd.DataFrame(data)
 
-    @staticmethod
-    def _check_exposed_type(exposed_type):
-        valid_string_exposed_types = _AbstractTabularDataNode.__VALID_STRING_EXPOSED_TYPES
+    @classmethod
+    def _get_valid_exposed_type(cls, properties: Dict):
+        if (
+            cls._EXPOSED_TYPE_PROPERTY not in properties.keys()
+            or properties[cls._EXPOSED_TYPE_PROPERTY] == cls._EXPOSED_TYPE_MODIN
+        ):
+            # Default exposed type is pandas
+            # Deprecated modin exposed type in favor of pandas since 3.1.0
+            return cls._EXPOSED_TYPE_PANDAS
+        return properties[cls._EXPOSED_TYPE_PROPERTY]
+
+    @classmethod
+    def _check_exposed_type(cls, exposed_type):
+        valid_string_exposed_types = cls.__VALID_STRING_EXPOSED_TYPES
         if isinstance(exposed_type, str) and exposed_type not in valid_string_exposed_types:
             raise InvalidExposedType(
                 f"Invalid string exposed type {exposed_type}. Supported values are "
