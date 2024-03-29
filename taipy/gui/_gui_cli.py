@@ -11,10 +11,11 @@
 
 from typing import Dict, Tuple
 
-from taipy._cli._base_cli import _CLI
+from taipy._cli._base_cli._abstract_cli import _AbstractCLI
+from taipy._cli._base_cli._taipy_parser import _TaipyParser
 
 
-class _GuiCLI:
+class _GuiCLI(_AbstractCLI):
     """Command-line interface of GUI."""
 
     __GUI_ARGS: Dict[Tuple, Dict] = {
@@ -72,7 +73,7 @@ class _GuiCLI:
 
     @classmethod
     def create_parser(cls):
-        gui_parser = _CLI._add_groupparser("Taipy GUI", "Optional arguments for Taipy GUI service")
+        gui_parser = _TaipyParser._add_groupparser("Taipy GUI", "Optional arguments for Taipy GUI service")
 
         for args, arg_dict in cls.__GUI_ARGS.items():
             taipy_arg = (args[0], cls.__add_taipy_prefix(args[0]), *args[1:])
@@ -88,7 +89,7 @@ class _GuiCLI:
 
     @classmethod
     def create_run_parser(cls):
-        run_parser = _CLI._add_subparser("run", help="Run a Taipy application.")
+        run_parser = _TaipyParser._add_subparser("run", help="Run a Taipy application.")
         for args, arg_dict in cls.__GUI_ARGS.items():
             run_parser.add_argument(*args, **arg_dict)
 
@@ -101,8 +102,9 @@ class _GuiCLI:
             reloader_group.add_argument(reloader_arg, **reloader_arg_dict)
 
     @classmethod
-    def parse_arguments(cls):
-        return _CLI._parse()
+    def handle_command(cls):
+        args, _ = _TaipyParser._parser.parse_known_args()
+        return args
 
     @classmethod
     def __add_taipy_prefix(cls, key: str):

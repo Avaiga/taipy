@@ -315,7 +315,8 @@ def tmp_sqlite(tmpdir_factory):
 
 
 @pytest.fixture(scope="function", autouse=True)
-def clean_repository(init_config, init_managers, init_orchestrator, init_notifier):
+def clean_repository(init_config, init_managers, init_orchestrator, init_notifier, clean_argparser):
+    clean_argparser()
     close_all_sessions()
     init_config()
     init_orchestrator()
@@ -326,6 +327,7 @@ def clean_repository(init_config, init_managers, init_orchestrator, init_notifie
     with patch("sys.argv", ["prog"]):
         yield
 
+    clean_argparser()
     close_all_sessions()
     init_orchestrator()
     init_managers()
