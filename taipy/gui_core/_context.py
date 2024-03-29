@@ -52,7 +52,7 @@ from taipy.core import (
 from taipy.core import delete as core_delete
 from taipy.core import get as core_get
 from taipy.core import submit as core_submit
-from taipy.core.data._abstract_tabular import _AbstractTabularDataNode
+from taipy.core.data._abstract_tabular import _TabularDataNodeMixin
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event, EventOperation
 from taipy.core.notification.notifier import Notifier
@@ -724,7 +724,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     @staticmethod
     def __is_tabular_data(datanode: DataNode, value: t.Any):
-        if isinstance(datanode, _AbstractTabularDataNode):
+        if isinstance(datanode, _TabularDataNodeMixin):
             return True
         if datanode.is_ready_for_reading:
             return isinstance(value, (pd.DataFrame, pd.Series, list, tuple, dict))
@@ -739,7 +739,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             and isinstance(dn, DataNode)
         ):
             if dn._last_edit_date:
-                if isinstance(dn, _AbstractTabularDataNode):
+                if isinstance(dn, _TabularDataNodeMixin):
                     return (None, None, True, None)
                 try:
                     value = dn.read()
