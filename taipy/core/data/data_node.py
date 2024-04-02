@@ -83,7 +83,7 @@ class DataNode(_Entity, _Labeled):
     __logger = _TaipyLogger._get_logger()
     _REQUIRED_PROPERTIES: List[str] = []
     _MANAGER_NAME = "data"
-    __PATH_KEY = "path"
+    _PATH_KEY = "path"
     __EDIT_TIMEOUT = 30
 
     _TAIPY_PROPERTIES: Set[str] = set()
@@ -105,7 +105,7 @@ class DataNode(_Entity, _Labeled):
         **kwargs,
     ):
         self._config_id = _validate_id(config_id)
-        self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
+        self.id = id or self._new_id(self.config_id)
         self._owner_id = owner_id
         self._parent_ids = parent_ids or set()
         self._scope = scope
@@ -120,6 +120,13 @@ class DataNode(_Entity, _Labeled):
         self._edits = edits or []
 
         self._properties = _Properties(self, **kwargs)
+
+    @staticmethod
+    def _new_id(config_id: str) -> DataNodeId:
+        """Generate a unique datanode identifier."""
+        return DataNodeId(
+            DataNode.__ID_SEPARATOR.join([DataNode._ID_PREFIX, _validate_id(config_id), str(uuid.uuid4())])
+        )
 
     @property
     def config_id(self):
@@ -291,7 +298,7 @@ class DataNode(_Entity, _Labeled):
         raise AttributeError(f"{attribute_name} is not an attribute of data node {self.id}")
 
     def __get_last_modified_datetime(self) -> Optional[datetime]:
-        path = self._properties.get(self.__PATH_KEY, None)
+        path = self._properties.get(self._PATH_KEY, None)
         if path and os.path.isfile(path):
             return datetime.fromtimestamp(os.path.getmtime(path))
 

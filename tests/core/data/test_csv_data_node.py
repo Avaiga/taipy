@@ -11,6 +11,7 @@
 
 import os
 import pathlib
+import uuid
 from datetime import datetime
 from time import sleep
 
@@ -102,7 +103,8 @@ class TestCSVDataNode:
         ],
     )
     def test_create_with_default_data(self, properties, exists):
-        dn = CSVDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
+        dn = CSVDataNode("foo", Scope.SCENARIO, DataNodeId(f"dn_id_{uuid.uuid4()}"), properties=properties)
+        assert dn.path == Config.core.storage_folder + "csvs/" + dn.id + ".csv"
         assert os.path.exists(dn.path) is exists
 
     def test_set_path(self):
@@ -165,5 +167,5 @@ class TestCSVDataNode:
 
         dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
 
-        assert ".data" not in dn.path.name
+        assert ".data" not in dn.path
         assert os.path.exists(dn.path)

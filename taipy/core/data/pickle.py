@@ -9,7 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import os
 import pickle
 from datetime import datetime, timedelta
 from typing import Any, List, Optional, Set
@@ -56,10 +55,7 @@ class PickleDataNode(DataNode, _FileDataNodeMixin):
     """
 
     __STORAGE_TYPE = "pickle"
-    __PATH_KEY = "path"
-    __DEFAULT_PATH_KEY = "default_path"
-    __DEFAULT_DATA_KEY = "default_data"
-    __IS_GENERATED_KEY = "is_generated"
+
     _REQUIRED_PROPERTIES: List[str] = []
 
     def __init__(
@@ -78,18 +74,21 @@ class PickleDataNode(DataNode, _FileDataNodeMixin):
         editor_expiration_date: Optional[datetime] = None,
         properties=None,
     ):
+        self.id = id or self._new_id(config_id)
+
         if properties is None:
             properties = {}
-        default_value = properties.pop(self.__DEFAULT_DATA_KEY, None)
-        self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
-        if self._path is not None:
-            properties[self.__PATH_KEY] = self._path
-        self._is_generated = properties.get(self.__IS_GENERATED_KEY, self._path is None)
-        properties[self.__IS_GENERATED_KEY] = self._is_generated
-        super().__init__(
+
+        default_value = properties.pop(self._DEFAULT_DATA_KEY, None)
+        _FileDataNodeMixin.__init__(self, properties)
+        properties[self._IS_GENERATED_KEY] = self._is_generated
+        properties[self._PATH_KEY] = self._path
+
+        DataNode.__init__(
+            self,
             config_id,
             scope,
-            id,
+            self.id,
             owner_id,
             parent_ids,
             last_edit_date,
@@ -101,33 +100,15 @@ class PickleDataNode(DataNode, _FileDataNodeMixin):
             editor_expiration_date,
             **properties,
         )
-        if self._path and ".data" in self._path:
-            self._path = self._migrate_path(self.storage_type(), self._path)
 
-        if self._path is None:
-            self._path = self._build_path(self.storage_type())
-
-        if default_value is not None and not os.path.exists(self._path):
-            self._write(default_value)
-            self._last_edit_date = datetime.now()
-            self._edits.append(
-                Edit(
-                    {
-                        "timestamp": self._last_edit_date,
-                        "writer_identifier": "TAIPY",
-                        "comments": "Default data written.",
-                    }
-                )
-            )
-        if not self._last_edit_date and os.path.exists(self._path):
-            self._last_edit_date = datetime.now()
+        self._write_default_data(default_value)
 
         self._TAIPY_PROPERTIES.update(
             {
-                self.__PATH_KEY,
-                self.__DEFAULT_PATH_KEY,
-                self.__DEFAULT_DATA_KEY,
-                self.__IS_GENERATED_KEY,
+                self._PATH_KEY,
+                self._DEFAULT_PATH_KEY,
+                self._DEFAULT_DATA_KEY,
+                self._IS_GENERATED_KEY,
             }
         )
 
@@ -143,13 +124,8 @@ class PickleDataNode(DataNode, _FileDataNodeMixin):
     @path.setter
     def path(self, value):
         self._path = value
-        self.properties[self.__PATH_KEY] = value
-        self.properties[self.__IS_GENERATED_KEY] = False
-
-    @property  # type: ignore
-    @_self_reload(DataNode._MANAGER_NAME)
-    def is_generated(self) -> bool:
-        return self._is_generated
+        self.properties[self._PATH_KEY] = value
+        self.properties[self._IS_GENERATED_KEY] = False
 
     def _read(self):
         with open(self._path, "rb") as pf:
