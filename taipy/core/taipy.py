@@ -549,16 +549,7 @@ def get_scenarios(
         scenarios = []
 
     if is_sorted:
-        if sort_key in ["name", "config_id", "creation_date", "tags"]:
-            if sort_key == "tags":
-                scenarios.sort(key=lambda x: (tuple(sorted(x.tags)), x.id), reverse=descending)
-            else:
-                scenarios.sort(key=lambda x: (getattr(x, sort_key), x.id), reverse=descending)
-        elif sort_key == "id":
-            scenarios.sort(key=lambda x: x.id, reverse=descending)
-        else:
-            scenarios.sort(key=lambda x: (x.name, x.id), reverse=descending)
-
+        scenario_manager._sort_scenarios(scenarios, descending, sort_key)
     return scenarios
 
 
