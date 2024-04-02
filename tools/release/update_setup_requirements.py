@@ -18,8 +18,9 @@ BASE_PATH = "./tools/packages"
 
 def __build_taipy_package_line(line: str, version: str, publish_on_py_pi: bool) -> str:
     _line = line.strip()
+    max_version = f'{int(version.split(".")[0]) + 1}.0.0'
     if publish_on_py_pi:
-        return f"{_line}=={version}\n"
+        return f"{_line}>={version}, <={max_version}\n"
     tag = f"{version}-{_line.split('-')[1]}"
     tar_name = f"{_line}-{version}"
     return f"{_line} @ https://github.com/Avaiga/taipy/releases/download/{tag}/{tar_name}.tar.gz\n"
