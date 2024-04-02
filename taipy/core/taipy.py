@@ -530,10 +530,9 @@ def get_scenarios(
 
     Returns:
         The list of scenarios filtered by cycle or tag and optionally sorted by name, id, creation_date or tags.
-        If no filtering criteria are provided, this method returns all existing scenarios.
-        If is_sorted is set to true, but an incorrect or no sort_key is provided, then the scenarios are sorted by name.
-        If the attribute sort_key of some scenarios are equivalent, a second criteria is used. 
-        In this case, these scenarios are sorted by their unique id's.
+        If no filtering criterion is provided, this method returns all existing scenarios.
+        If is_sorted is set to true, the scenarios are sorted by sort_key. If an incorrect
+        or no sort_key is provided, the scenarios are sorted by name.
     """
     scenario_manager = _ScenarioManagerFactory._build_manager()
     if not cycle and not tag:
