@@ -817,6 +817,7 @@ def test_get_primary_scenarios_sorted():
     scenario_1_cfg = Config.configure_scenario(id="scenario_1", frequency=Frequency.DAILY)
     scenario_2_cfg = Config.configure_scenario(id="scenario_2", frequency=Frequency.DAILY)
 
+not_primary_scenario = _ScenarioManager._create(scenario_1_cfg, name="not_primary_scenario")
     scenario_1 = _ScenarioManager._create(scenario_1_cfg, name="B_scenario")
     scenario_2 = _ScenarioManager._create(scenario_2_cfg, name="A_scenario", creation_date=datetime.now() + timedelta(days=2))
     scenario_3 = _ScenarioManager._create(scenario_2_cfg, name="C_scenario", creation_date=datetime.now() + timedelta(days=4))
