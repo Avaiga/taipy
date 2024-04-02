@@ -576,7 +576,9 @@ def get_primary(cycle: Cycle) -> Optional[Scenario]:
 
 
 def get_primary_scenarios(
-    sorted: Optional[bool] = False, sort_key: Optional[Literal["name", "id", "creation_date", "tags"]] = "name"
+    is_sorted: Optional[bool] = False,
+    descending: Optional[bool] = False,
+    sort_key: Optional[Literal["name", "id", "config_id", "creation_date", "tags"]] = "name",
 ) -> List[Scenario]:
     """Retrieve a list of all primary scenarios.
 
