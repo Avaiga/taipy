@@ -10,9 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import csv
-import os
 from datetime import datetime, timedelta
-from os.path import isfile
 from typing import Any, Dict, List, Optional, Set
 
 import numpy as np
@@ -64,10 +62,8 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     """
 
     __STORAGE_TYPE = "csv"
-    __PATH_KEY = "path"
-    __DEFAULT_PATH_KEY = "default_path"
     __ENCODING_KEY = "encoding"
-    __DEFAULT_DATA_KEY = "default_data"
+
     _REQUIRED_PROPERTIES: List[str] = []
 
     def __init__(
@@ -86,10 +82,10 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         editor_expiration_date: Optional[datetime] = None,
         properties: Optional[Dict] = None,
     ):
+        self.id = id or self._new_id(config_id)
+
         if properties is None:
             properties = {}
-
-        default_value = properties.pop(self.__DEFAULT_DATA_KEY, None)
 
         if self.__ENCODING_KEY not in properties.keys():
             properties[self.__ENCODING_KEY] = "utf-8"
@@ -100,11 +96,17 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         properties[self._EXPOSED_TYPE_PROPERTY] = _TabularDataNodeMixin._get_valid_exposed_type(properties)
         self._check_exposed_type(properties[self._EXPOSED_TYPE_PROPERTY])
 
+        default_value = properties.pop(self._DEFAULT_DATA_KEY, None)
+        _FileDataNodeMixin.__init__(self, properties)
+        _TabularDataNodeMixin.__init__(self, **properties)
+        properties[self._IS_GENERATED_KEY] = self._is_generated
+        properties[self._PATH_KEY] = self._path
+
         DataNode.__init__(
             self,
             config_id,
             scope,
-            id,
+            self.id,
             owner_id,
             parent_ids,
             last_edit_date,
@@ -116,39 +118,18 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             editor_expiration_date,
             **properties,
         )
-        _TabularDataNodeMixin.__init__(self, **properties)
 
-        self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
-        if self._path and ".data" in self._path:
-            self._path = self._migrate_path(self.storage_type(), self._path)
-
-        if not self._path:
-            self._path = self._build_path(self.storage_type())
-        properties[self.__PATH_KEY] = self._path
-
-        if default_value is not None and not os.path.exists(self._path):
-            self._write(default_value)
-            self._last_edit_date = datetime.now()
-            self._edits.append(
-                Edit(
-                    {
-                        "timestamp": self._last_edit_date,
-                        "writer_identifier": "TAIPY",
-                        "comments": "Default data written.",
-                    }
-                )
-            )
-        if not self._last_edit_date and isfile(self._path):
-            self._last_edit_date = datetime.now()
+        self._write_default_data(default_value)
 
         self._TAIPY_PROPERTIES.update(
             {
-                self._EXPOSED_TYPE_PROPERTY,
-                self.__PATH_KEY,
-                self.__DEFAULT_PATH_KEY,
-                self.__ENCODING_KEY,
-                self.__DEFAULT_DATA_KEY,
+                self._PATH_KEY,
+                self._DEFAULT_PATH_KEY,
+                self._DEFAULT_DATA_KEY,
+                self._IS_GENERATED_KEY,
                 self._HAS_HEADER_PROPERTY,
+                self._EXPOSED_TYPE_PROPERTY,
+                self.__ENCODING_KEY,
             }
         )
 
@@ -164,7 +145,8 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     @path.setter
     def path(self, value):
         self._path = value
-        self.properties[self.__PATH_KEY] = value
+        self.properties[self._PATH_KEY] = value
+        self.properties[self._IS_GENERATED_KEY] = False
 
     def _read(self):
         if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:

@@ -190,5 +190,5 @@ class TestPickleDataNodeEntity:
 
         dn = PickleDataNode("foo", Scope.SCENARIO, properties={"default_data": "bar", "path": path})
 
-        assert ".data" not in dn.path.name
+        assert ".data" not in dn.path
         assert os.path.exists(dn.path)
