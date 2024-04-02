@@ -530,9 +530,9 @@ def get_scenarios(
 
     Returns:
         The list of scenarios filtered by cycle or tag and optionally sorted by name, id, creation_date or tags.
-        If no filtering criterion is provided, this method returns all existing scenarios.
-        If is_sorted is set to true, the scenarios are sorted by sort_key. If an incorrect
-        or no sort_key is provided, the scenarios are sorted by name.
+            If no filtering criterion is provided, this method returns all existing scenarios.
+            If is_sorted is set to true, the scenarios are sorted by sort_key. The scenarios
+            are sorted by name if an incorrect or no sort_key is provided.
     """
     scenario_manager = _ScenarioManagerFactory._build_manager()
     if not cycle and not tag:
@@ -573,15 +573,17 @@ def get_primary_scenarios(
     """Retrieve a list of all primary scenarios.
 
     Parameters:
-         sorted (Optional[bool]): The option to sort scenarios. The default sorting key is name.
-         sort_key (Optional[Literal["name", "id", "creation_date", "tags"]]): The optiononal sort_key to decide
-         upon what key scenarios are sorted.
+         is_sorted (Optional[bool]): The option to sort scenarios. The default sorting key is name.
+         descending (Optional[bool]): The option to sort scenarios on the sorting key in descending order.
+         sort_key (Optional[Literal["name", "id", "creation_date", "tags"]]): The optiononal sort_key to decide upon
+             what key scenarios are sorted. The sorting is in increasing order for dates, in alphabetical order 
+             for name and id, in lexographical order for tags.
 
     Returns:
         The list containing all primary scenarios, optionally sorted by name, id, creation_date or tags.
-        The sorting is in increasing order for dates, in alphabetical order for name and id
-        and in lexographical order for tags.
-        If sorted is set to true, but an incorrect or no sort_key is provided, then the scenarios are sorted by name.
+            The sorting is in increasing order for dates, in alphabetical order for name and 
+            id, and in lexicographical order for tags. If sorted is set to true, but if an
+            incorrect or no sort_key is provided, the scenarios are sorted by name.
     """
     scenario_manager = _ScenarioManagerFactory._build_manager()
     scenarios = scenario_manager._get_primary_scenarios()
