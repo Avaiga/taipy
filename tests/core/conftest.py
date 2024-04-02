@@ -176,15 +176,6 @@ def default_multi_sheet_data_frame():
     }
 
 
-@pytest.fixture(scope="session", autouse=True)
-def cleanup_files():
-    yield
-
-    for path in [".data", ".my_data", "user_data", ".taipy"]:
-        if os.path.exists(path):
-            shutil.rmtree(path, ignore_errors=True)
-
-
 @pytest.fixture(scope="function")
 def current_datetime():
     return current_time
@@ -312,6 +303,19 @@ def cycle_model():
 def tmp_sqlite(tmpdir_factory):
     fn = tmpdir_factory.mktemp("db")
     return os.path.join(fn.strpath, "test.db")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def cleanup_files():
+    for path in [".data", ".my_data", "user_data", ".taipy"]:
+        if os.path.exists(path):
+            shutil.rmtree(path, ignore_errors=True)
+
+    yield
+
+    for path in [".data", ".my_data", "user_data", ".taipy"]:
+        if os.path.exists(path):
+            shutil.rmtree(path, ignore_errors=True)
 
 
 @pytest.fixture(scope="function", autouse=True)
