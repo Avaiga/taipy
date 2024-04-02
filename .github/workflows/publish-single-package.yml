@@ -1,4 +1,4 @@
-name: Publish on Pypi
+name: Publish a taipy package on Pypi
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ on:
         description: "The tag of the package to publish on Pypi (ex: 1.0.0, 1.0.0.dev0)"
         required: true
       target_package:
-        description: "The package to be released"
+        description: "The package to be released (gui, config, core, rest, templates, taipy)"
         required: true
 
 jobs:

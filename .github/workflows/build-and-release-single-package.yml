@@ -1,4 +1,4 @@
-name: Build all taipy packages and release them
+name: Build and release one taipy sub-package
 
 on:
   workflow_dispatch:
@@ -15,7 +15,7 @@ on:
         description: "The version of the package to be released"
         required: true
       target_package:
-        description: "The package to be released"
+        description: "The package to be released (gui, config, core, rest, templates, taipy)"
         required: true
 
 jobs:
@@ -160,88 +160,3 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  build-and-release-taipy:
-    runs-on: ubuntu-latest
-    needs: [build-and-release-taipy-packages, fetch-versions ]
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ssh-key: ${{secrets.DEPLOY_KEY}}
-      - name: Extract commit hash
-        shell: bash
-        run: echo "HASH=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-        id: extract_hash
-
-      - name: Set Build Variables
-        id: set-variables
-        run: |
-          echo "package_version=${{needs.fetch-versions.outputs.VERSION}}" >> $GITHUB_OUTPUT
-          echo "release_name=${{needs.fetch-versions.outputs.VERSION}}" >> $GITHUB_OUTPUT
-          echo "tar_path=./dist/${{ github.event.repository.name }}-${{needs.fetch-versions.outputs.VERSION}}.tar.gz" >> $GITHUB_OUTPUT
-
-      - name: Update setup.requirements.txt
-        run: |
-          python tools/release/update_setup_requirements.py taipy \
-            ${{needs.fetch-versions.outputs.config_VERSION}} \
-            ${{needs.fetch-versions.outputs.core_VERSION}} \
-            ${{needs.fetch-versions.outputs.gui_VERSION}} \
-            ${{needs.fetch-versions.outputs.rest_VERSION}} \
-            ${{needs.fetch-versions.outputs.templates_VERSION}} \
-            ${{ github.event.inputs.internal_dep_on_pypi }}
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install build wheel
-
-
-      - name: Backup setup.py
-        run: |
-          mv setup.py setup.old.py
-
-      - name: Copy files from tools
-        run: |
-          cp -r tools/packages/taipy/. .
-
-      - name: Build Taipy package
-        run: |
-          python setup.py build_py && python -m build
-
-      - name: Create tag and release Taipy
-        run: |
-          if [ "${{ github.event.inputs.release_type }}" == "dev" ]; then
-            gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --prerelease --title ${{ steps.set-variables.outputs.release_name }} --notes "Release Draft ${{ steps.set-variables.outputs.release_name }}"
-          else
-            gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --title ${{ steps.set-variables.outputs.release_name }} --notes "Release ${{ steps.set-variables.outputs.release_name }}"
-          fi
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Download packages
-        run: |
-          gh release download ${{ needs.fetch-versions.outputs.config_VERSION }}-config --skip-existing --dir dist
-          gh release download ${{ needs.fetch-versions.outputs.core_VERSION }}-core --skip-existing --dir dist
-          gh release download ${{ needs.fetch-versions.outputs.gui_VERSION }}-gui --skip-existing --dir dist
-          gh release download ${{ needs.fetch-versions.outputs.rest_VERSION }}-rest --skip-existing --dir dist
-          gh release download ${{ needs.fetch-versions.outputs.templates_VERSION }}-templates --skip-existing --dir dist
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Bundle all packages in main release tag
-        run: |
-          find dist -type f -print0 | xargs -r0 gh release upload ${{ needs.fetch-versions.outputs.VERSION }} --clobber
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          file_pattern: '*/version.json'
-          commit_message: Update version to ${{ needs.fetch-versions.outputs.NEW_VERSION }}
-
-      - name: Reset changes
-        run: |
-          git reset --hard HEAD
-          git clean -fdx
