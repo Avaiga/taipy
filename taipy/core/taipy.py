@@ -583,7 +583,12 @@ def get_primary_scenarios(
         and in lexographical order for tags.
         If sorted is set to true, but an incorrect or no sort_key is provided, then the scenarios are sorted by name.
     """
-    return _ScenarioManagerFactory._build_manager()._get_primary_scenarios(sorted, sort_key)
+    scenario_manager = _ScenarioManagerFactory._build_manager()
+    scenarios = scenario_manager._get_primary_scenarios()
+    if is_sorted:
+        scenario_manager._sort_scenarios(scenarios, descending, sort_key)
+    return scenarios
+
 
 
 def is_promotable(scenario: Union[Scenario, ScenarioId]) -> bool:
