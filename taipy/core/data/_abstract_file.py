@@ -45,6 +45,9 @@ class _FileDataNodeMixin(object):
         if not self._path:
             self._path = self._build_path(self.storage_type())
 
+        properties[self._IS_GENERATED_KEY] = self._is_generated
+        properties[self._PATH_KEY] = self._path
+
     def _write_default_data(self, default_value: Any):
         if default_value is not None and not os.path.exists(self._path):
             self._write(default_value)
@@ -66,6 +69,17 @@ class _FileDataNodeMixin(object):
     @_self_reload(DataNode._MANAGER_NAME)
     def is_generated(self) -> bool:
         return self._is_generated
+
+    @property  # type: ignore
+    @_self_reload(DataNode._MANAGER_NAME)
+    def path(self) -> Any:
+        return self._path
+
+    @path.setter
+    def path(self, value):
+        self._path = value
+        self.properties[self._PATH_KEY] = value
+        self.properties[self._IS_GENERATED_KEY] = False
 
     @classmethod
     def storage_type(cls) -> str:

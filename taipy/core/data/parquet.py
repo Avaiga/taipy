@@ -18,7 +18,6 @@ import pandas as pd
 
 from taipy.config.common.scope import Scope
 
-from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..exceptions.exceptions import UnknownCompressionAlgorithm, UnknownParquetEngine
 from ..job.job_id import JobId
@@ -136,8 +135,6 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         default_value = properties.pop(self._DEFAULT_DATA_KEY, None)
         _FileDataNodeMixin.__init__(self, properties)
         _TabularDataNodeMixin.__init__(self, **properties)
-        properties[self._IS_GENERATED_KEY] = self._is_generated
-        properties[self._PATH_KEY] = self._path
 
         DataNode.__init__(
             self,
@@ -177,17 +174,6 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     @classmethod
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
-
-    @property  # type: ignore
-    @_self_reload(DataNode._MANAGER_NAME)
-    def path(self):
-        return self._path
-
-    @path.setter
-    def path(self, value):
-        self._path = value
-        self.properties[self._PATH_KEY] = value
-        self.properties[self._IS_GENERATED_KEY] = False
 
     def _read(self):
         return self.read_with_kwargs()
