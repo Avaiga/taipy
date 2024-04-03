@@ -104,7 +104,7 @@ class TestCSVDataNode:
     )
     def test_create_with_default_data(self, properties, exists):
         dn = CSVDataNode("foo", Scope.SCENARIO, DataNodeId(f"dn_id_{uuid.uuid4()}"), properties=properties)
-        assert dn.path == Config.core.storage_folder + "csvs/" + dn.id + ".csv"
+        assert dn.path == os.path.join(Config.core.storage_folder, "csvs", dn.id + ".csv")
         assert os.path.exists(dn.path) is exists
 
     def test_set_path(self):

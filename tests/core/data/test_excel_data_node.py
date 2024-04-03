@@ -139,7 +139,7 @@ class TestExcelDataNode:
     )
     def test_create_with_default_data(self, properties, exists):
         dn = ExcelDataNode("foo", Scope.SCENARIO, DataNodeId(f"dn_id_{uuid.uuid4()}"), properties=properties)
-        assert dn.path == Config.core.storage_folder + "excels/" + dn.id + ".xlsx"
+        assert dn.path == os.path.join(Config.core.storage_folder, "excels", dn.id + ".xlsx")
         assert os.path.exists(dn.path) is exists
 
     def test_read_write_after_modify_path(self):
