@@ -129,7 +129,7 @@ class TestParquetDataNode:
     )
     def test_create_with_default_data(self, properties, exists):
         dn = ParquetDataNode("foo", Scope.SCENARIO, DataNodeId(f"dn_id_{uuid.uuid4()}"), properties=properties)
-        assert dn.path == Config.core.storage_folder + "parquets/" + dn.id + ".parquet"
+        assert dn.path == os.path.join(Config.core.storage_folder, "parquets", dn.id + ".parquet")
         assert os.path.exists(dn.path) is exists
 
     @pytest.mark.parametrize("engine", __engine)
