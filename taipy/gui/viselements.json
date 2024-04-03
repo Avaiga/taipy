@@ -74,6 +74,13 @@
             "doc": "The value represented by this control."
           },
           {
+            "name": "width",
+            "default_property": false,
+            "type": "int|str",
+            "default_value": "15rem",
+            "doc": "The width of the control element."
+          },
+          {
             "name": "password",
             "type": "bool",
             "default_value": "False",

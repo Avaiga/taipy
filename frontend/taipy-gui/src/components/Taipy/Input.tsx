@@ -18,6 +18,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
 import { TaipyInputProps } from "./utils";
 import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
+import { Box } from "@mui/material";
 
 const AUTHORIZED_KEYS = ["Enter", "Escape", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"];
 
@@ -37,6 +38,7 @@ const Input = (props: TaipyInputProps) => {
     const {
         type,
         id,
+        width,
         updateVarName,
         propagate = true,
         defaultValue = "",
@@ -103,20 +105,23 @@ const Input = (props: TaipyInputProps) => {
 
     return (
         <Tooltip title={hover || ""}>
-            <TextField
-                margin="dense"
-                hiddenLabel
-                value={value ?? ""}
-                className={className}
-                type={type}
-                id={id}
-                label={props.label}
-                onChange={handleInput}
-                disabled={!active}
-                onKeyDown={handleAction}
-                multiline={multiline}
-                minRows={linesShown}
-            />
+            <Box width={width} data-testid="textfield-box">
+                <TextField
+                    margin="dense"
+                    hiddenLabel
+                    value={value ?? ""}
+                    className={className}
+                    type={type}
+                    id={id}
+                    label={props.label}
+                    onChange={handleInput}
+                    disabled={!active}
+                    onKeyDown={handleAction}
+                    multiline={multiline}
+                    minRows={linesShown}
+                    fullWidth
+                />
+            </Box>
         </Tooltip>
     );
 };

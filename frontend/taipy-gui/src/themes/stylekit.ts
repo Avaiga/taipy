@@ -59,7 +59,6 @@ export const stylekitTheme = {
         root: {
           marginTop: 4,
           width: "100%",
-          maxWidth: "15rem",
           verticalAlign: "middle",
         },
       },

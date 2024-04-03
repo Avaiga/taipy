@@ -47,6 +47,7 @@ export interface TaipyChangeProps {
 export interface TaipyInputProps extends TaipyActiveProps, TaipyChangeProps, TaipyLabelProps {
     type: string;
     value: string;
+    width?: string | number;
     defaultValue?: string;
     changeDelay?: number;
     onAction?: string;

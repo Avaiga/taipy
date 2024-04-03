@@ -23,6 +23,21 @@ def test_input_md(gui: Gui, helpers):
         'updateVarName="tpec_TpExPr_x_TPMDL_0"',
         'defaultValue="Hello World!"',
         'type="text"',
+        'width="15rem"',
+        "value={tpec_TpExPr_x_TPMDL_0}",
+    ]
+    helpers.test_control_md(gui, md_string, expected_list)
+
+def test_input_md_width(gui: Gui, helpers):
+    x = "Hello World!"  # noqa: F841
+    gui._set_frame(inspect.currentframe())
+    md_string = "<|{x}|input|width=70%|>"
+    expected_list = [
+        "<Input",
+        'updateVarName="tpec_TpExPr_x_TPMDL_0"',
+        'defaultValue="Hello World!"',
+        'type="text"',
+        'width="70%"',
         "value={tpec_TpExPr_x_TPMDL_0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
@@ -37,6 +52,7 @@ def test_password_md(gui: Gui, helpers):
         'updateVarName="tpec_TpExPr_x_TPMDL_0"',
         'defaultValue="Hello World!"',
         'type="password"',
+        'width="15rem"',
         "value={tpec_TpExPr_x_TPMDL_0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
@@ -51,6 +67,7 @@ def test_input_html_1(gui: Gui, helpers):
         'updateVarName="tpec_TpExPr_x_TPMDL_0"',
         'defaultValue="Hello World!"',
         'type="text"',
+        'width="15rem"',
         "value={tpec_TpExPr_x_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
@@ -59,12 +76,13 @@ def test_input_html_1(gui: Gui, helpers):
 def test_password_html(gui: Gui, helpers):
     x = "Hello World!"  # noqa: F841
     gui._set_frame(inspect.currentframe())
-    html_string = '<taipy:input value="{x}" password="True" />'
+    html_string = '<taipy:input value="{x}" password="True" width="{100}"/>'
     expected_list = [
         "<Input",
         'updateVarName="tpec_TpExPr_x_TPMDL_0"',
         'defaultValue="Hello World!"',
         'type="password"',
+        'width={100}',
         "value={tpec_TpExPr_x_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
@@ -79,6 +97,7 @@ def test_input_html_2(gui: Gui, helpers):
         'updateVarName="tpec_TpExPr_x_TPMDL_0"',
         'defaultValue="Hello World!"',
         'type="text"',
+        'width="15rem"',
         "value={tpec_TpExPr_x_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)

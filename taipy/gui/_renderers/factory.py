@@ -278,6 +278,7 @@ class _Factory:
         .set_attributes(
             [
                 ("id",),
+                ("width", PropertyType.string_or_number, "15rem"),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
                 ("on_change", PropertyType.function),
