@@ -11,11 +11,10 @@
 
 import pickle
 from datetime import datetime, timedelta
-from typing import Any, List, Optional, Set
+from typing import List, Optional, Set
 
 from taipy.config.common.scope import Scope
 
-from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
 from ._abstract_file import _FileDataNodeMixin
 from .data_node import DataNode
@@ -81,8 +80,6 @@ class PickleDataNode(DataNode, _FileDataNodeMixin):
 
         default_value = properties.pop(self._DEFAULT_DATA_KEY, None)
         _FileDataNodeMixin.__init__(self, properties)
-        properties[self._IS_GENERATED_KEY] = self._is_generated
-        properties[self._PATH_KEY] = self._path
 
         DataNode.__init__(
             self,
@@ -115,17 +112,6 @@ class PickleDataNode(DataNode, _FileDataNodeMixin):
     @classmethod
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
-
-    @property  # type: ignore
-    @_self_reload(DataNode._MANAGER_NAME)
-    def path(self) -> Any:
-        return self._path
-
-    @path.setter
-    def path(self, value):
-        self._path = value
-        self.properties[self._PATH_KEY] = value
-        self.properties[self._IS_GENERATED_KEY] = False
 
     def _read(self):
         with open(self._path, "rb") as pf:
