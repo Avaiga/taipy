@@ -274,7 +274,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     def _sort_scenarios(
         cls,
         scenarios: List[Scenario],
-        descending: Optional[bool] = False,
+        descending: bool = False,
         sort_key: Optional[Literal["name", "id", "config_id", "creation_date", "tags"]] = "name",
     ) -> List[Scenario]:
         if sort_key in ["name", "config_id", "creation_date", "tags"]:

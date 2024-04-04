@@ -839,25 +839,25 @@ def test_get_primary_scenarios_sorted():
     assert not_primary_scenario not in primary_scenarios
 
     primary_scenarios_sorted_by_name = [scenario_2, scenario_1, scenario_3, scenario_4]
-    assert primary_scenarios_sorted_by_name == _ScenarioManager._sort_scenarios(primary_scenarios, sort_key="name")
+    assert primary_scenarios_sorted_by_name == _ScenarioManager._sort_scenarios(primary_scenarios, descending=False, sort_key="name")
 
     scenarios_with_same_config_id = [scenario_2, scenario_3, scenario_4]
     scenarios_with_same_config_id.sort(key=lambda x: x.id)
     primary_scenarios_sorted_by_config_id = [scenario_1, scenarios_with_same_config_id[0], scenarios_with_same_config_id[1], scenarios_with_same_config_id[2]]
-    assert primary_scenarios_sorted_by_config_id == _ScenarioManager._sort_scenarios(primary_scenarios, sort_key="config_id")
+    assert primary_scenarios_sorted_by_config_id == _ScenarioManager._sort_scenarios(primary_scenarios, descending=False, sort_key="config_id")
 
     scenarios_sorted_by_id = [scenario_1, scenario_2, scenario_3, scenario_4]
     scenarios_sorted_by_id.sort(key=lambda x: x.id)
-    assert scenarios_sorted_by_id == _ScenarioManager._sort_scenarios(primary_scenarios, sort_key="id")
+    assert scenarios_sorted_by_id == _ScenarioManager._sort_scenarios(primary_scenarios, descending=False, sort_key="id")
 
     primary_scenarios_sorted_by_creation_date = [scenario_1, scenario_2, scenario_4,scenario_3]
-    assert primary_scenarios_sorted_by_creation_date == _ScenarioManager._sort_scenarios(primary_scenarios, 
+    assert primary_scenarios_sorted_by_creation_date == _ScenarioManager._sort_scenarios(primary_scenarios, descending=False,
                                                                                          sort_key="creation_date")
 
     scenarios_with_same_tags = [scenario_1, scenario_3]
     scenarios_with_same_tags.sort(key=lambda x: x.id)
     primary_scenarios_sorted_by_tags = [scenario_4, scenario_2, scenarios_with_same_tags[0], scenarios_with_same_tags[1]]
-    assert primary_scenarios_sorted_by_tags == _ScenarioManager._sort_scenarios(primary_scenarios, sort_key="tags")
+    assert primary_scenarios_sorted_by_tags == _ScenarioManager._sort_scenarios(primary_scenarios, descending=False, sort_key="tags")
 
     primary_scenarios_sorted_by_name_descending_order = [scenario_4, scenario_3, scenario_1, scenario_2]
     assert primary_scenarios_sorted_by_name_descending_order == _ScenarioManager._sort_scenarios(
