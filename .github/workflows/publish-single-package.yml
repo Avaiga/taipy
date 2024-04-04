@@ -1,0 +1,45 @@
+name: Publish a taipy package on Pypi
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The tag of the package to publish on Pypi (ex: 1.0.0, 1.0.0.dev0)"
+        required: true
+      target_package:
+        description: "The package to be released (gui, config, core, rest, templates, taipy)"
+        required: true
+
+jobs:
+
+  publish-package-to-pypi:
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+    timeout-minutes: 20
+    environment: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          sparse-checkout: taipy/${{ matrix.package }}
+          sparse-checkout-cone-mode: false
+
+      - name: Checks if package is already on Pypi
+        id: check-version
+        run: |
+          if curl https://pypi.org/simple/taipy-${{ github.event.inputs.target_package }}} | grep -o ">taipy-${{ github.event.inputs.target_package }}}-${{ github.event.inputs.version }}\.tar\.gz<"; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download assets from tag
+        if: steps.check-version.outputs.exists == 'false'
+        run: |
+          gh release download ${{ github.event.inputs.version }}-${{ github.event.inputs.target_package }}} --dir dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to PyPI
+        if: steps.check-version.outputs.exists == 'false'
+        uses: pypa/gh-action-pypi-publish@release/v1
