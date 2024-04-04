@@ -29,6 +29,7 @@ from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._warnings import _warn_deprecated
 from ..exceptions.exceptions import DataNodeIsBeingEdited, NoData
 from ..job.job_id import JobId
+from ..notification.dn_scenario_cache import SubmittableStatusCache
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
 from ._filter import _FilterDataNode
 from .data_node_id import DataNodeId, Edit
@@ -174,7 +175,10 @@ class DataNode(_Entity, _Labeled):
     @last_edit_date.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
     def last_edit_date(self, val):
+        prev_last_edit_date = self._last_edit_date
         self._last_edit_date = val
+        if prev_last_edit_date is None and self._last_edit_date:
+            SubmittableStatusCache.remove(self)
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -239,6 +243,8 @@ class DataNode(_Entity, _Labeled):
     @_self_setter(_MANAGER_NAME)
     def edit_in_progress(self, val):
         self._edit_in_progress = val
+        if self._edit_in_progress:
+            SubmittableStatusCache.remove(self)
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

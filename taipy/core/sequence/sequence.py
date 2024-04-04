@@ -64,8 +64,8 @@ class Sequence(_Entity, Submittable, _Labeled):
         subscribers: Optional[List[_Subscriber]] = None,
         version: Optional[str] = None,
     ):
-        super().__init__(subscribers)
         self.id: SequenceId = sequence_id
+        super().__init__(self.id, subscribers)
         self._tasks = tasks
         self._owner_id = owner_id
         self._parent_ids = parent_ids or set()

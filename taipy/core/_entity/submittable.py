@@ -19,6 +19,7 @@ from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
 from ..data.data_node import DataNode
 from ..job.job import Job
+from ..notification.dn_scenario_cache import SubmittableStatusCache
 from ..submission.submission import Submission
 from ..task.task import Task
 from ._dag import _DAG
@@ -33,7 +34,8 @@ class Submittable:
         subscribers (List[Callable]): The list of callbacks to be called on `Job^`'s status change.
     """
 
-    def __init__(self, subscribers: Optional[List[_Subscriber]] = None):
+    def __init__(self, submittable_id: str, subscribers: Optional[List[_Subscriber]] = None):
+        self._submittable_id = submittable_id
         self._subscribers = _ListAttributes(self, subscribers or [])
 
     @abc.abstractmethod
@@ -86,7 +88,13 @@ class Submittable:
         Returns:
             True if the given entity is ready to be run. False otherwise.
         """
-        return all(dn.is_ready_for_reading for dn in self.get_inputs())
+        if self._submittable_id not in SubmittableStatusCache.submittable_id_datanodes:
+            for dn in self.get_inputs():
+                if not dn.is_ready_for_reading:
+                    SubmittableStatusCache.add(self, dn)
+        if len(SubmittableStatusCache.submittable_id_datanodes[self._submittable_id]) == 0:
+            return True
+        return False
 
     def data_nodes_being_edited(self) -> Set[DataNode]:
         """Return the set of data nodes of the submittable entity that are being edited.
