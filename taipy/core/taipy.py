@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import os
 import pathlib
 import shutil
 from datetime import datetime
@@ -942,6 +943,8 @@ def clean_all_entities(version_number: str) -> bool:
 def export_scenario(
     scenario_id: ScenarioId,
     folder_path: Union[str, pathlib.Path],
+    override: Optional[bool] = False,
+    include_data: Optional[bool] = False,
 ):
     """Export all related entities of a scenario to a folder.
 
@@ -951,18 +954,33 @@ def export_scenario(
     Parameters:
         scenario_id (ScenarioId): The ID of the scenario to export.
         folder_path (Union[str, pathlib.Path]): The folder path to export the scenario to.
+        override (Optional[bool]): If True, the existing folder will be overridden. Default is False.
+        include_data (Optional[bool]): If True, the file-based data nodes are exported as well.
+            This includes Pickle, CSV, Excel, Parquet, and JSON data nodes.
+            If the scenario has a data node that is not file-based, a warning will be logged, and the data node
+            will not be exported. The default value is False.
     """
 
     manager = _ScenarioManagerFactory._build_manager()
     scenario = manager._get(scenario_id)
     entity_ids = manager._get_children_entity_ids(scenario)
     entity_ids.scenario_ids = {scenario_id}
-    entity_ids.cycle_ids = {scenario.cycle.id}
+    if scenario.cycle:
+        entity_ids.cycle_ids = {scenario.cycle.id}
 
-    shutil.rmtree(folder_path, ignore_errors=True)
+    if os.path.exists(folder_path):
+        if override:
+            __logger.warn(f"Override the existing folder '{folder_path}'")
+            shutil.rmtree(folder_path, ignore_errors=True)
+        else:
+            __logger.error(
+                f"Folder '{folder_path}' already exists and can not be used to export scenario '{scenario_id}'."
+                " Please use the 'override' parameter to override it."
+            )
+            raise SystemExit()
 
     for data_node_id in entity_ids.data_node_ids:
-        _DataManagerFactory._build_manager()._export(data_node_id, folder_path)
+        _DataManagerFactory._build_manager()._export(data_node_id, folder_path, include_data)
     for task_id in entity_ids.task_ids:
         _TaskManagerFactory._build_manager()._export(task_id, folder_path)
     for sequence_id in entity_ids.sequence_ids:

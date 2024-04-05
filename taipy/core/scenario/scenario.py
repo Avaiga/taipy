@@ -585,15 +585,22 @@ class Scenario(_Entity, Submittable, _Labeled):
     def export(
         self,
         folder_path: Union[str, pathlib.Path],
+        override: Optional[bool] = False,
+        include_data: Optional[bool] = False,
     ):
         """Export all related entities of this scenario to a folder.
 
         Parameters:
             folder_path (Union[str, pathlib.Path]): The folder path to export the scenario to.
+            override (Optional[bool]): If True, the existing folder will be overridden. Default is False.
+            include_data (Optional[bool]): If True, the file-based data nodes are exported as well.
+                This includes Pickle, CSV, Excel, Parquet, and JSON data nodes.
+                If the scenario has a data node that is not file-based, a warning will be logged, and the data node
+                will not be exported. The default value is False.
         """
         from ... import core as tp
 
-        return tp.export_scenario(self.id, folder_path)
+        return tp.export_scenario(self.id, folder_path, override, include_data)
 
     def set_primary(self):
         """Promote the scenario as the primary scenario of its cycle.
