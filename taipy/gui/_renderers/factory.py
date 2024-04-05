@@ -31,6 +31,7 @@ class _Factory:
 
     __CONTROL_DEFAULT_PROP_NAME = {
         "button": "label",
+        "chat": "messages",
         "chart": "data",
         "content": "value",
         "date": "date",
@@ -79,6 +80,22 @@ class _Factory:
                 ("on_action", PropertyType.function),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
+            ]
+        ),
+        "chat": lambda gui, control_type, attrs: _Builder(
+            gui=gui, control_type=control_type, element_name="Chat", attributes=attrs, default_value=None
+        )
+        .set_value_and_default(with_update=True, with_default=False, var_type=PropertyType.dynamic_list)
+        .set_attributes(
+            [
+                ("id",),
+                ("on_action", PropertyType.function),
+                ("active", PropertyType.dynamic_boolean, True),
+                ("hover_text", PropertyType.dynamic_string),
+                ("with_input", PropertyType.dynamic_boolean, True),
+                ("users", PropertyType.lov),
+                ("sender_id",),
+                ("height",)
             ]
         ),
         "chart": lambda gui, control_type, attrs: _Builder(
