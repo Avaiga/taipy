@@ -600,7 +600,7 @@ def test_notification_subscribe(mocker):
 
     # test unsubscribing notification
     # test notis subscribe only on new jobs
-    # _ScenarioManager._get(scenario)
+    # mocker.patch.object(_utils, "_load_fct", side_effect=[notify_1, notify_2])
     _ScenarioManager._unsubscribe(callback=notify_1, scenario=scenario)
     _ScenarioManager._subscribe(callback=notify_2, scenario=scenario)
     _ScenarioManager._submit(scenario)

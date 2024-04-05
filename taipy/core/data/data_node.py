@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import functools
 import os
 import uuid
 from abc import abstractmethod
@@ -34,6 +35,28 @@ from ..notification.event import Event, EventEntityType, EventOperation, _make_e
 from ._filter import _FilterDataNode
 from .data_node_id import DataNodeId, Edit
 from .operator import JoinOperator
+
+
+def _update_parent_submittable_cache_on_edit_in_progress(fct):
+    @functools.wraps(fct)
+    def _do_update_parent_submittable_cache_on_edit_in_progress(dn, *args, **kwargs):
+        fct(dn, *args, **kwargs)
+        if not dn._edit_in_progress:
+            SubmittableStatusCache.remove(dn.id)
+        else:
+            from ..scenario.scenario import Scenario
+            from ..sequence.sequence import Sequence
+            from ..task.task import Task
+
+            parent_entities = dn.get_parents()
+            for scenario_parent in parent_entities.get(Scenario._MANAGER_NAME, []):
+                SubmittableStatusCache.add(scenario_parent.id, dn.id)
+            for sequence_parent in parent_entities.get(Sequence._MANAGER_NAME, []):
+                SubmittableStatusCache.add(sequence_parent.id, dn.id)
+            for task_parent in parent_entities.get(Task._MANAGER_NAME, []):
+                SubmittableStatusCache.add(task_parent.id, dn.id)
+
+    return _do_update_parent_submittable_cache_on_edit_in_progress
 
 
 class DataNode(_Entity, _Labeled):
@@ -178,7 +201,7 @@ class DataNode(_Entity, _Labeled):
         prev_last_edit_date = self._last_edit_date
         self._last_edit_date = val
         if prev_last_edit_date is None and self._last_edit_date:
-            SubmittableStatusCache.remove(self)
+            SubmittableStatusCache.remove(self.id)
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -240,11 +263,10 @@ class DataNode(_Entity, _Labeled):
         return self._edit_in_progress
 
     @edit_in_progress.setter  # type: ignore
+    @_update_parent_submittable_cache_on_edit_in_progress
     @_self_setter(_MANAGER_NAME)
     def edit_in_progress(self, val):
         self._edit_in_progress = val
-        if self._edit_in_progress:
-            SubmittableStatusCache.remove(self)
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

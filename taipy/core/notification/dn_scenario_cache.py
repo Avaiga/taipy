@@ -10,27 +10,26 @@
 # specific language governing permissions and limitations under the License.
 
 from collections import defaultdict
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING, Dict, Set
 
 if TYPE_CHECKING:
-    from .._entity.submittable import Submittable
     from ..data.data_node import DataNode, DataNodeId
 
 
 class SubmittableStatusCache:
-    datanode_id_submittables: Dict["DataNodeId", List["Submittable"]] = defaultdict(lambda: [])
-    submittable_id_datanodes: Dict[str, List["DataNode"]] = defaultdict(lambda: [])
+    datanode_id_submittables: Dict["DataNodeId", Set[str]] = defaultdict(lambda: set())
+    submittable_id_datanodes: Dict[str, Set["DataNodeId"]] = defaultdict(lambda: set())
 
     @classmethod
-    def add(cls, entity: "Submittable", datanode: "DataNode"):
-        cls.datanode_id_submittables[datanode.id].append(entity)
-        cls.submittable_id_datanodes[entity.id].append(datanode)  # type: ignore
+    def add(cls, entity_id: str, datanode_id: "DataNodeId"):
+        cls.datanode_id_submittables[datanode_id].add(entity_id)
+        cls.submittable_id_datanodes[entity_id].add(datanode_id)  # type: ignore
 
     @classmethod
-    def remove(cls, datanode: "DataNode"):
-        submittables = cls.datanode_id_submittables.pop(datanode.id, [])
-        for submittable in submittables:
-            cls.submittable_id_datanodes[submittable.id].remove(datanode)
-            if len(cls.submittable_id_datanodes[submittable.id]) == 0:
+    def remove(cls, datanode_id: "DataNode"):
+        submittable_ids: Set = cls.datanode_id_submittables.pop(datanode_id, set())
+        for submittable_id in submittable_ids:
+            cls.submittable_id_datanodes[submittable_id].remove(datanode_id)
+            if len(cls.submittable_id_datanodes[submittable_id]) == 0:
                 # Notifier.publish(make_event(scenario, submittable, UPDATE))
-                cls.submittable_id_datanodes.pop(submittable.id)
+                cls.submittable_id_datanodes.pop(submittable_id)

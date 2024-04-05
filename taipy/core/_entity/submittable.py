@@ -91,7 +91,7 @@ class Submittable:
         if self._submittable_id not in SubmittableStatusCache.submittable_id_datanodes:
             for dn in self.get_inputs():
                 if not dn.is_ready_for_reading:
-                    SubmittableStatusCache.add(self, dn)
+                    SubmittableStatusCache.add(self._submittable_id, dn.id)
         if len(SubmittableStatusCache.submittable_id_datanodes[self._submittable_id]) == 0:
             return True
         return False
