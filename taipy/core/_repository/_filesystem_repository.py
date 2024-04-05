@@ -131,9 +131,6 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             export_dir.mkdir(parents=True)
 
         export_path = export_dir / f"{entity_id}.json"
-        # Delete if exists.
-        if export_path.exists():
-            export_path.unlink()
 
         shutil.copy2(self.__get_path(entity_id), export_path)
 
