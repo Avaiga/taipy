@@ -36,7 +36,7 @@ jobs:
       - name: Download assets from tag
         if: steps.check-version.outputs.exists == 'false'
         run: |
-          gh release download ${{ github.event.inputs.version }}-${{ github.event.inputs.target_package }}} --dir dist
+          gh release download ${{ github.event.inputs.version }}-${{ github.event.inputs.target_package }} --dir dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
