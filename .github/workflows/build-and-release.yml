@@ -122,6 +122,7 @@ jobs:
         if: matrix.package == 'gui'
         run: |
           pipenv install --dev
+          pipenv install numpy==1.26.4
 
       - name: Generate GUI pyi file
         if: matrix.package == 'gui'
