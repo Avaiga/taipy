@@ -41,6 +41,7 @@ from .data.data_node import DataNode
 from .data.data_node_id import DataNodeId
 from .exceptions.exceptions import (
     DataNodeConfigIsNotGlobal,
+    ExportFolderAlreadyExists,
     ModelNotFound,
     NonExistingVersion,
     VersionIsNotProductionVersion,
@@ -973,11 +974,7 @@ def export_scenario(
             __logger.warn(f"Override the existing folder '{folder_path}'")
             shutil.rmtree(folder_path, ignore_errors=True)
         else:
-            __logger.error(
-                f"Folder '{folder_path}' already exists and can not be used to export scenario '{scenario_id}'."
-                " Please use the 'override' parameter to override it."
-            )
-            raise SystemExit()
+            raise ExportFolderAlreadyExists(str(folder_path), scenario_id)
 
     for data_node_id in entity_ids.data_node_ids:
         _DataManagerFactory._build_manager()._export(data_node_id, folder_path, include_data)
