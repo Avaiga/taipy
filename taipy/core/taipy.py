@@ -573,9 +573,9 @@ def get_primary_scenarios(
     """Retrieve a list of all primary scenarios.
 
     Parameters:
-         is_sorted (Optional[bool]): The option to sort scenarios. The default sorting key is name.
-         descending (Optional[bool]): The option to sort scenarios on the sorting key in descending order.
-         sort_key (Optional[Literal["name", "id", "creation_date", "tags"]]): The optiononal sort_key to decide upon
+         is_sorted (bool): The option to sort scenarios. The default sorting key is name.
+         descending (bool): The option to sort scenarios on the sorting key in descending order.
+         sort_key (Literal["name", "id", "creation_date", "tags"]): The optiononal sort_key to decide upon
              what key scenarios are sorted. The sorting is in increasing order for dates, in alphabetical order 
              for name and id, in lexographical order for tags.
 
