@@ -46,7 +46,7 @@ jobs:
 
       - name: Create the pull request updating the dependencies (3.12 only)
         if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' and ${{matrix.python-version}} == '3.12'
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: Update Python${{matrix.python-version}} dependencies
@@ -62,7 +62,7 @@ jobs:
 
       - name: Create the pull request updating the Pipfile max
         if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' and ${{matrix.python-version}} != '3.12'
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: Update Python${{matrix.python-version}} Pipfile
