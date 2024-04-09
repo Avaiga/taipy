@@ -980,7 +980,7 @@ def export_scenario(
             raise ExportFolderAlreadyExists(str(folder_path), scenario_id)
 
     for data_node_id in entity_ids.data_node_ids:
-        _DataManagerFactory._build_manager()._export(data_node_id, folder_path, include_data)
+        _DataManagerFactory._build_manager()._export(data_node_id, folder_path, include_data=include_data)
     for task_id in entity_ids.task_ids:
         _TaskManagerFactory._build_manager()._export(task_id, folder_path)
     for sequence_id in entity_ids.sequence_ids:

@@ -168,20 +168,18 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
     @classmethod
     def _export(
         cls,
-        data_node_id: DataNodeId,
+        id: DataNodeId,
         folder_path: Union[str, pathlib.Path],
-        include_data: Optional[bool] = False,
+        **kwargs,
     ):
-        cls._repository._export(data_node_id, folder_path)
+        cls._repository._export(id, folder_path)
 
-        if not include_data:
+        if not kwargs.get("include_data"):
             return
 
-        data_node = cls._get(data_node_id)
+        data_node = cls._get(id)
         if not isinstance(data_node, _FileDataNodeMixin):
-            cls._logger.warning(
-                f"Data node {data_node_id} is not a file-based data node and the data will not be exported."
-            )
+            cls._logger.warning(f"Data node {id} is not a file-based data node and the data will not be exported.")
             return
 
         if isinstance(folder_path, str):
