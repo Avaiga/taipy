@@ -17,7 +17,7 @@ import pytest
 
 import taipy.core.taipy as tp
 from taipy import Config, Frequency, Scope
-from taipy.core.exceptions import InvalidExportPath
+from taipy.core.exceptions import ExportFolderAlreadyExists, InvalidExportPath
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -133,7 +133,7 @@ def test_export_scenario_override_existing_files():
     tp.submit(scenario_2)
 
     # Export the submitted scenario_2 to the same folder should raise an error
-    with pytest.raises(SystemExit):
+    with pytest.raises(ExportFolderAlreadyExists):
         tp.export_scenario(scenario_2.id, "./tmp/exp_scenario")
 
     # Export the submitted scenario_2 without a cycle and override the existing files
