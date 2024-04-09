@@ -25,6 +25,7 @@ from taipy.core.common import _utils
 from taipy.core.common._utils import _Subscriber
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.data.pickle import PickleDataNode
 from taipy.core.exceptions.exceptions import (
     InvalidSequenceId,
     ModelNotFound,
@@ -189,14 +190,17 @@ def test_get_all_on_multiple_versions_environment():
 
 
 def test_is_submittable():
-    dn = InMemoryDataNode("dn", Scope.SCENARIO, properties={"default_data": 10})
-    task = Task("task", {}, print, [dn])
-    scenario = Scenario("scenario", {task}, {}, set())
+    task_id = "TASK_task_id"
+    scenario_id = "SCENARIO_scenario_id"
+    dn = PickleDataNode("dn", Scope.SCENARIO, parent_ids={task_id, scenario_id}, properties={"default_data": 10})
+    task = Task("task", {}, print, [dn], id=task_id, parent_ids={scenario_id})
+    scenario = Scenario("scenario", {task}, {}, set(), scenario_id=scenario_id)
+    _DataManager._set(dn)
+    _TaskManager._set(task)
     _ScenarioManager._set(scenario)
 
     scenario.add_sequences({"sequence": [task]})
     sequence = scenario.sequences["sequence"]
-
     assert len(_SequenceManager._get_all()) == 1
     assert _SequenceManager._is_submittable(sequence)
     assert _SequenceManager._is_submittable(sequence.id)
