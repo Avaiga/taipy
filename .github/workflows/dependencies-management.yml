@@ -70,7 +70,7 @@ jobs:
             ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
           draft: false
           add-paths: |
-            tools/packages/pipfiles/Pipfile${{matrix.python-version}}.max
+            tools/packages/pipfiles
 
       # PRs created with the GITHUB_TOKEN don't trigger workflows.
       # This action triggers the overall-tests.yml workflow on the PR
