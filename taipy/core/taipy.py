@@ -943,8 +943,8 @@ def clean_all_entities(version_number: str) -> bool:
 def export_scenario(
     scenario_id: ScenarioId,
     folder_path: Union[str, pathlib.Path],
-    override: Optional[bool] = False,
-    include_data: Optional[bool] = False,
+    override: bool = False,
+    include_data: bool = False,
 ):
     """Export all related entities of a scenario to a folder.
 
@@ -954,8 +954,8 @@ def export_scenario(
     Parameters:
         scenario_id (ScenarioId): The ID of the scenario to export.
         folder_path (Union[str, pathlib.Path]): The folder path to export the scenario to.
-        override (Optional[bool]): If True, the existing folder will be overridden. Default is False.
-        include_data (Optional[bool]): If True, the file-based data nodes are exported as well.
+        override (bool): If True, the existing folder will be overridden. Default is False.
+        include_data (bool): If True, the file-based data nodes are exported as well.
             This includes Pickle, CSV, Excel, Parquet, and JSON data nodes.
             If the scenario has a data node that is not file-based, a warning will be logged, and the data node
             will not be exported. The default value is False.
