@@ -41,6 +41,10 @@ jobs:
           echo EOF >> "$GITHUB_OUTPUT"
           cat pipfiles/Pipfile${{matrix.python-version}}.max
 
+      - name: Debug
+        id: ensure-dependencies-are-up-to-date
+        run: git status
+
       - name: Create the pull request updating the dependencies (3.12 only)
         if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' and ${{matrix.python-version}} == '3.12'
         uses: peter-evans/create-pull-request@v5
