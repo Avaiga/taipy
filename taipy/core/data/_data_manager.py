@@ -166,12 +166,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         return cls._repository._load_all(filters)
 
     @classmethod
-    def _export(
-        cls,
-        id: DataNodeId,
-        folder_path: Union[str, pathlib.Path],
-        **kwargs,
-    ):
+    def _export(cls, id: str, folder_path: Union[str, pathlib.Path], **kwargs):
         cls._repository._export(id, folder_path)
 
         if not kwargs.get("include_data"):
