@@ -802,7 +802,7 @@ class _Builder:
                 else:
                     self.__set_default_value(var_name, var_type=var_type)
         else:
-            if var_type == PropertyType.data and self.__control_type == "chart" and "figure" not in self.__attributes:
+            if var_type == PropertyType.data and (self.__control_type != "chart" or "figure" not in self.__attributes):
                 _warn(f"{self.__control_type}.{var_name} property should be bound.")
             value = self.__attributes.get(var_name)
             if value is not None:
