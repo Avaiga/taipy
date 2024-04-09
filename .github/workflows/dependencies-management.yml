@@ -76,7 +76,7 @@ jobs:
       # This action triggers the overall-tests.yml workflow on the PR
       # to allow the tests to run on the new dependencies.
       - name: Run tests on PR
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           script: |
