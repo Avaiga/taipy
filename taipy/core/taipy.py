@@ -522,9 +522,9 @@ def get_scenarios(
     Parameters:
          cycle (Optional[Cycle^]): The optional `Cycle^` to filter scenarios by.
          tag (Optional[str]): The optional tag to filter scenarios by.
-         is_sorted (Optional[bool]): The option to sort scenarios. The default sorting key is name.
-         descending (Optional[bool]): The option to sort scenarios on the sorting key in descending order.
-         sort_key (Optional[Literal["name", "id", "creation_date", "tags"]]): The optiononal sort_key to decide upon
+         is_sorted (bool): The option to sort scenarios. The default sorting key is name.
+         descending (bool): The option to sort scenarios on the sorting key in descending order.
+         sort_key (Literal["name", "id", "creation_date", "tags"]): The optiononal sort_key to decide upon
              what key scenarios are sorted. The sorting is in increasing order for dates, in alphabetical order 
              for name and id, in lexographical order for tags.
 
