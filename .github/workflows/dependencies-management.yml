@@ -42,7 +42,6 @@ jobs:
           cat pipfiles/Pipfile${{matrix.python-version}}.max
 
       - name: Debug
-        id: ensure-dependencies-are-up-to-date
         run: git status
 
       - name: Create the pull request updating the dependencies (3.12 only)
