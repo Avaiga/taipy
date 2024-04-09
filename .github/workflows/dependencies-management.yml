@@ -64,6 +64,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: Update Python${{matrix.python-version}} Pipfile
           branch: dependencies/update-python${{matrix.python-version}}
+          base: develop
           title: 'New Pipfile available for Python${{matrix.python-version}}'
           body: |
             ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
