@@ -15,7 +15,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { BaseDateTimePickerSlotsComponentsProps } from "@mui/x-date-pickers/DateTimePicker/shared";
+import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { isValid } from "date-fns";
 import { ErrorBoundary } from "react-error-boundary";
@@ -38,7 +38,7 @@ interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
 }
 
 const boxSx = { display: "inline-block" };
-const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotsComponentsProps<Date>;
+const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotProps<Date>;
 
 const DateSelector = (props: DateSelectorProps) => {
     const { updateVarName, withTime = false, id, propagate = true } = props;

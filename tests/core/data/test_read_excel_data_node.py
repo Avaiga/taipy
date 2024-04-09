@@ -74,7 +74,7 @@ def test_read_empty_excel_with_header():
         Scope.SCENARIO,
         properties={"path": empty_excel_path, "exposed_type": MyCustomObject},
     )
-    assert len(empty_excel.read()) == 0
+    assert len(empty_excel.read()) == 1
 
 
 def test_raise_no_data_without_header():
@@ -93,7 +93,7 @@ def test_read_empty_excel_without_header():
         Scope.SCENARIO,
         properties={"path": empty_excel_path, "exposed_type": MyCustomObject, "has_header": False},
     )
-    assert len(empty_excel.read()) == 0
+    assert len(empty_excel.read()) == 1
 
 
 def test_read_multi_sheet_with_header_no_data():

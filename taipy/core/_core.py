@@ -103,7 +103,7 @@ class Core:
     def __update_core_section(cls):
         cls.__logger.info("Updating configuration with command-line arguments...")
         _CoreCLI.create_parser()
-        Config._applied_config._unique_sections[CoreSection.name]._update(_CoreCLI.parse_arguments())
+        Config._applied_config._unique_sections[CoreSection.name]._update(_CoreCLI.handle_command())
 
     @classmethod
     def __manage_version(cls):

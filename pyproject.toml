@@ -26,9 +26,7 @@ select = [
     "B", # flake8-bugbear best practices checker
     "I001", # isort import order
 ]
-ignore = [      # TODO: to be removed
-    "C409",  # Unnecessary list passed to tuple() - rewrite as a tuple literal
-]
+ignore = []
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]

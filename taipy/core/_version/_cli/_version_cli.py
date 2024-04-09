@@ -11,10 +11,10 @@
 
 import sys
 
-from taipy._cli._base_cli import _CLI
+from taipy._cli._base_cli._abstract_cli import _AbstractCLI
+from taipy._cli._base_cli._taipy_parser import _TaipyParser
 from taipy.config import Config
 from taipy.config.exceptions.exceptions import InconsistentEnvVariableError
-from taipy.logger._taipy_logger import _TaipyLogger
 
 from ...data._data_manager_factory import _DataManagerFactory
 from ...exceptions.exceptions import VersionIsNotProductionVersion
@@ -27,14 +27,15 @@ from .._version_manager_factory import _VersionManagerFactory
 from ._bcolor import _Bcolors
 
 
-class _VersionCLI:
+class _VersionCLI(_AbstractCLI):
     """Command-line interface of the versioning system."""
 
-    __logger = _TaipyLogger._get_logger()
+    _COMMAND_NAME = "manage-versions"
+    _ARGUMENTS = ["-l", "--list", "--rename", "--compare-config", "-d", "--delete", "-dp", "--delete-production"]
 
     @classmethod
     def create_parser(cls):
-        version_parser = _CLI._add_subparser("manage-versions", help="Taipy version control system.")
+        version_parser = _TaipyParser._add_subparser(cls._COMMAND_NAME, help="Taipy version control system.")
 
         version_parser.add_argument(
             "-l", "--list", action="store_true", help="List all existing versions of the Taipy application."
@@ -64,10 +65,9 @@ class _VersionCLI:
         )
 
     @classmethod
-    def parse_arguments(cls):
-        args = _CLI._parse()
-
-        if getattr(args, "which", None) != "manage-versions":
+    def handle_command(cls):
+        args = cls._parse_arguments()
+        if not args:
             return
 
         if args.list:
@@ -78,13 +78,13 @@ class _VersionCLI:
             try:
                 cls.__rename_version(args.rename[0], args.rename[1])
             except InconsistentEnvVariableError as error:
-                cls.__logger.error(
+                cls._logger.error(
                     f"Fail to rename version {args.rename[0]} to {args.rename[1]} due to outdated Configuration."
                     f"Detail: {str(error)}"
                 )
                 sys.exit(1)
 
-            cls.__logger.info(f"Successfully renamed version '{args.rename[0]}' to '{args.rename[1]}'.")
+            cls._logger.info(f"Successfully renamed version '{args.rename[0]}' to '{args.rename[1]}'.")
             sys.exit(0)
 
         if args.compare_config:
@@ -94,7 +94,7 @@ class _VersionCLI:
         if args.delete_production:
             try:
                 _VersionManagerFactory._build_manager()._delete_production_version(args.delete_production)
-                cls.__logger.info(
+                cls._logger.info(
                     f"Successfully delete version {args.delete_production} from the production version list."
                 )
                 sys.exit(0)
@@ -103,7 +103,7 @@ class _VersionCLI:
 
         if args.delete:
             if clean_all_entities(args.delete):
-                cls.__logger.info(f"Successfully delete version {args.delete}.")
+                cls._logger.info(f"Successfully delete version {args.delete}.")
             else:
                 sys.exit(1)
 
@@ -154,13 +154,13 @@ class _VersionCLI:
 
         # Check if the new version already exists, return an error
         if _version_manager._get(new_version):
-            cls.__logger.error(f"Version name '{new_version}' is already used.")
+            cls._logger.error(f"Version name '{new_version}' is already used.")
             sys.exit(1)
 
         # Make sure that all entities of the old version are exists and loadable
         version_entity = _version_manager._get(old_version)
         if version_entity is None:
-            cls.__logger.error(f"Version '{old_version}' does not exist.")
+            cls._logger.error(f"Version '{old_version}' does not exist.")
             sys.exit(1)
 
         jobs = _JobManagerFactory._build_manager()._get_all(version_number=old_version)
@@ -208,12 +208,12 @@ class _VersionCLI:
     def __compare_version_config(cls, version_1: str, version_2: str):
         version_entity_1 = _VersionManagerFactory._build_manager()._get(version_1)
         if version_entity_1 is None:
-            cls.__logger.error(f"Version '{version_1}' does not exist.")
+            cls._logger.error(f"Version '{version_1}' does not exist.")
             sys.exit(1)
 
         version_entity_2 = _VersionManagerFactory._build_manager()._get(version_2)
         if version_entity_2 is None:
-            cls.__logger.error(f"Version '{version_2}' does not exist.")
+            cls._logger.error(f"Version '{version_2}' does not exist.")
             sys.exit(1)
 
         Config._comparator._compare(  # type: ignore[attr-defined]

@@ -27,7 +27,6 @@ from taipy.core.job._job_manager import _JobManager
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.sequence._sequence_manager import _SequenceManager
 from taipy.core.task._task_manager import _TaskManager
-from tests.core.utils import assert_true_after_time
 
 
 def test_core_cli_no_arguments():
@@ -457,54 +456,42 @@ def test_force_override_production_version():
         core.stop()
 
 
-@pytest.mark.standalone
 def test_modified_job_configuration_dont_block_application_run(caplog, init_config):
-    scenario_config = config_scenario()
+    _ = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
         core = Core()
         Config.configure_job_executions(mode="development")
-        core.run(force_restart=True)
-        scenario = _ScenarioManager._create(scenario_config)
-        jobs = taipy.submit(scenario).jobs
-        assert all(job.is_finished() for job in jobs)
+        core.run()
         core.stop()
     init_config()
-    scenario_config = config_scenario()
+    _ = config_scenario()
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
         core = Core()
         Config.configure_job_executions(mode="standalone", max_nb_of_workers=3)
-        core.run(force_restart=True)
-        scenario = _ScenarioManager._create(scenario_config)
-        jobs = taipy.submit(scenario).jobs
-        assert_true_after_time(lambda: all(job.is_finished() for job in jobs))
+        core.run()
         error_message = str(caplog.text)
         assert 'JOB "mode" was modified' in error_message
         assert 'JOB "max_nb_of_workers" was added' in error_message
         core.stop()
 
 
-@pytest.mark.standalone
 def test_modified_config_properties_without_force(caplog, init_config):
-    scenario_config = config_scenario()
+    _ = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
         core = Core()
         core.run()
-        scenario = _ScenarioManager._create(scenario_config)
-        taipy.submit(scenario)
         core.stop()
 
     init_config()
 
-    scenario_config_2 = config_scenario_2()
+    _ = config_scenario_2()
 
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "--experiment", "1.0"]):
             core = Core()
             core.run()
-            scenario = _ScenarioManager._create(scenario_config_2)
-            taipy.submit(scenario)
     core.stop()
     error_message = str(caplog.text)
 

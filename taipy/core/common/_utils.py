@@ -25,7 +25,7 @@ def _load_fct(module_name: str, fct_name: str) -> Callable:
     return attrgetter(fct_name)(module)
 
 
-def _retry_read_entity(exceptions: Tuple, sleep_time: float = 0.2):
+def _retry_repository_operation(exceptions: Tuple, sleep_time: float = 0.2):
     """
     Retries the wrapped function/method if the exceptions listed
     in ``exceptions`` are thrown.

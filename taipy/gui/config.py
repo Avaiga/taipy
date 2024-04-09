@@ -185,7 +185,7 @@ class _Config(object):
 
     def _handle_argparse(self):
         _GuiCLI.create_parser()
-        args = _GuiCLI.parse_arguments()
+        args = _GuiCLI.handle_command()
 
         config = self.config
         if args.taipy_port:

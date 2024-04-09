@@ -373,5 +373,9 @@ class FileCannotBeRead(Exception):
     """Raised when a file cannot be read."""
 
 
+class SQLQueryCannotBeExecuted(Exception):
+    """Raised when an SQL Query cannot be executed."""
+
+
 class _SuspiciousFileOperation(Exception):
     pass

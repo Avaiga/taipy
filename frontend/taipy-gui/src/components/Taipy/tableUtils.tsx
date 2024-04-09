@@ -37,7 +37,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import { BaseDateTimePickerSlotsComponentsProps } from "@mui/x-date-pickers/DateTimePicker/shared";
+import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
 import { isValid } from "date-fns";
 
 import { FormatConfig } from "../../context/taipyReducers";
@@ -265,7 +265,7 @@ export const getTooltip = (row: Record<string, unknown>, tooltip?: string, col?:
 
 const setInputFocus = (input: HTMLInputElement) => input && input.focus();
 
-const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotsComponentsProps<Date>;
+const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotProps<Date>;
 
 const filter = createFilterOptions<string>();
 const getOptionKey = (option: string) => (Array.isArray(option) ? option[0] : option);
@@ -593,16 +593,16 @@ export const EditableCell = (props: EditableCellProps) => {
                         <Button size="small" onClick={onSelect} sx={ButtonSx}>
                             {formatValue(button[0] as RowValue, colDesc, formatConfig, nanValue)}
                         </Button>
-                    ) : val !== null && val !== undefined && colDesc.type && colDesc.type.startsWith("bool") ? (
+                    ) : value !== null && value !== undefined && colDesc.type && colDesc.type.startsWith("bool") ? (
                         <Switch
-                            checked={val as boolean}
+                            checked={value as boolean}
                             size="small"
-                            title={val ? "True" : "False"}
+                            title={value ? "True" : "False"}
                             sx={defaultCursorIcon}
                         />
                     ) : (
                         <span style={defaultCursor}>
-                            {formatValue(val as RowValue, colDesc, formatConfig, nanValue)}
+                            {formatValue(value as RowValue, colDesc, formatConfig, nanValue)}
                         </span>
                     )}
                     {onValidation && !button ? (

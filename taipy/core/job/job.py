@@ -11,7 +11,6 @@
 
 __all__ = ["Job"]
 
-import traceback
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Callable, List, Optional
 
@@ -312,18 +311,6 @@ class Job(_Entity, _Labeled):
 
         if functions:
             self._on_status_change(*functions)
-
-    def update_status(self, exceptions):
-        """Update the job status based on the success or the failure of its execution."""
-        if exceptions:
-            self.failed()
-            self.__logger.error(f" {len(exceptions)} errors occurred during execution of job {self.id}")
-            for e in exceptions:
-                st = "".join(traceback.format_exception(type(e), value=e, tb=e.__traceback__))
-                self._stacktrace.append(st)
-                self.__logger.error(st)
-        else:
-            self.completed()
 
     def __hash__(self):
         return hash(self.id)
