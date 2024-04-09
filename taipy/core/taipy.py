@@ -508,9 +508,9 @@ def delete(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, C
 def get_scenarios(
     cycle: Optional[Cycle] = None,
     tag: Optional[str] = None,
-    is_sorted: Optional[bool] = False,
-    descending: Optional[bool] = False,
-    sort_key: Optional[Literal["name", "id", "config_id", "creation_date", "tags"]] = "name",
+    is_sorted: bool = False,
+    descending: bool = False,
+    sort_key: Literal["name", "id", "config_id", "creation_date", "tags"] = "name",
 ) -> List[Scenario]:
     """Retrieve a list of existing scenarios filtered by cycle or tag.
 
