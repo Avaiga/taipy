@@ -39,7 +39,11 @@ jobs:
       - name: Setup Version
         id: version-setup
         run: |
-          python tools/release/fetch_latest_versions.py ${{ github.event.inputs.release_type }} ${{ github.event.inputs.internal_dep_on_pypi }} ${{ github.event.inputs.target_version }} >> $GITHUB_OUTPUT
+          python tools/release/fetch_latest_versions.py \
+          ${{ github.event.inputs.release_type }} \
+          ${{ github.event.inputs.internal_dep_on_pypi }} \
+          ${{ github.event.inputs.target_version }} \
+          ${{ github.event.inputs.target_package }} >> $GITHUB_OUTPUT
 
   build-and-release-package:
     needs: [fetch-versions]
@@ -64,27 +68,27 @@ jobs:
       - name: Set Build Variables
         id: set-variables
         run: |
-          if [ " ${{ github.event.inputs.target_package }}" == "config" ]; then
+          if [ "${{ github.event.inputs.target_package }}" == "config" ]; then
             echo "package_version=${{needs.fetch-versions.outputs.config_VERSION}}" >> $GITHUB_OUTPUT
             echo "package_dir=./taipy/config" >> $GITHUB_OUTPUT
             echo "release_name=${{needs.fetch-versions.outputs.config_VERSION}}-config" >> $GITHUB_OUTPUT
             echo "tar_path=./dist/${{ github.event.repository.name }}-config-${{needs.fetch-versions.outputs.config_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
-          elif [ " ${{ github.event.inputs.target_package }}" == "core" ]; then
+          elif [ "${{ github.event.inputs.target_package }}" == "core" ]; then
             echo "package_version=${{needs.fetch-versions.outputs.core_VERSION}}" >> $GITHUB_OUTPUT
             echo "package_dir=./taipy/core" >> $GITHUB_OUTPUT
             echo "release_name=${{needs.fetch-versions.outputs.core_VERSION}}-core" >> $GITHUB_OUTPUT
             echo "tar_path=./dist/${{ github.event.repository.name }}-core-${{needs.fetch-versions.outputs.core_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
-          elif [ " ${{ github.event.inputs.target_package }}" == "gui" ]; then
+          elif [ "${{ github.event.inputs.target_package }}" == "gui" ]; then
             echo "package_version=${{needs.fetch-versions.outputs.gui_VERSION}}" >> $GITHUB_OUTPUT
             echo "package_dir=./taipy/gui" >> $GITHUB_OUTPUT
             echo "release_name=${{needs.fetch-versions.outputs.gui_VERSION}}-gui" >> $GITHUB_OUTPUT
             echo "tar_path=./dist/${{ github.event.repository.name }}-gui-${{needs.fetch-versions.outputs.gui_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
-          elif [ " ${{ github.event.inputs.target_package }}" == "rest" ]; then
+          elif [ "${{ github.event.inputs.target_package }}" == "rest" ]; then
             echo "package_version=${{needs.fetch-versions.outputs.rest_VERSION}}" >> $GITHUB_OUTPUT
             echo "package_dir=./taipy/rest" >> $GITHUB_OUTPUT
             echo "release_name=${{needs.fetch-versions.outputs.rest_VERSION}}-rest" >> $GITHUB_OUTPUT
             echo "tar_path=./dist/${{ github.event.repository.name }}-rest-${{needs.fetch-versions.outputs.rest_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
-          elif [ " ${{ github.event.inputs.target_package }}" == "templates" ]; then
+          elif [ "${{ github.event.inputs.target_package }}" == "templates" ]; then
             echo "package_version=${{needs.fetch-versions.outputs.templates_VERSION}}" >> $GITHUB_OUTPUT
             echo "package_dir=./taipy/templates" >> $GITHUB_OUTPUT
             echo "release_name=${{needs.fetch-versions.outputs.templates_VERSION}}-templates" >> $GITHUB_OUTPUT
@@ -94,7 +98,7 @@ jobs:
 
       - name: Update setup.requirements.txt
         run: |
-          python tools/release/update_setup_requirements.py taipy- ${{ github.event.inputs.target_package }} \
+          python tools/release/update_setup_requirements.py taipy-${{ github.event.inputs.target_package }} \
             ${{needs.fetch-versions.outputs.config_VERSION}} \
             ${{needs.fetch-versions.outputs.core_VERSION}} \
             ${{needs.fetch-versions.outputs.gui_VERSION}} \
@@ -112,23 +116,23 @@ jobs:
           pip install build wheel pipenv mypy black isort
 
       - name: Install GUI dependencies
-        if: matrix.package == 'gui'
+        if: github.event.inputs.target_package == 'gui'
         run: |
           pipenv install --dev
 
       - name: Generate GUI pyi file
-        if: matrix.package == 'gui'
+        if: github.event.inputs.target_package == 'gui'
         run: |
           cp tools/gui/generate_pyi.py pyi_temp.py && pipenv run python pyi_temp.py && rm pyi_temp.py
 
       - name: Build frontends
-        if: matrix.package == 'gui'
+        if: github.event.inputs.target_package == 'gui'
         run: |
           python tools/frontend/bundle_build.py
 
       - name: Copy files from tools
         run: |
-          cp -r tools/packages/taipy-${{matrix.package}}/. ${{ steps.set-variables.outputs.package_dir }}
+          cp -r tools/packages/taipy-${{ github.event.inputs.target_package }}/. ${{ steps.set-variables.outputs.package_dir }}
 
       - name: Build Package Structure
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
@@ -136,7 +140,7 @@ jobs:
           python tools/release/build_package_structure.py  ${{ github.event.inputs.target_package }}
 
       - name: Copy Taipy Logger
-        if: matrix.package == 'config'
+        if: github.event.inputs.target_package == 'config'
         run: |
           cp -r taipy/logger/. ${{ steps.set-variables.outputs.package_dir }}/taipy/logger
 

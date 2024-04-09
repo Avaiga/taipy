@@ -11,10 +11,10 @@
 
 import sys
 
-import requests
+import requests  # type: ignore
 
 
-def fetch_latest_releases_from_github(dev=False):
+def fetch_latest_releases_from_github(dev=False, target_version="", target_package=""):
     releases = {}
     url = "https://api.github.com/repos/Avaiga/taipy/releases"
     response = requests.get(url)
@@ -35,11 +35,11 @@ def fetch_latest_releases_from_github(dev=False):
             releases["rest"] = releases.get("rest") or tag.split("-")[0]
         elif "templates" in tag:
             releases["templates"] = releases.get("templates") or tag.split("-")[0]
-
+    releases[target_package] = target_version
     return releases
 
 
-def fetch_latest_releases_from_pypi(dev=False):
+def fetch_latest_releases_from_pypi(dev=False, target_version="", target_package=""):
     releases = {}
 
     for pkg in ["config", "core", "gui", "rest", "templates"]:
@@ -54,7 +54,7 @@ def fetch_latest_releases_from_pypi(dev=False):
                 continue
             releases[pkg] = ver
             break
-
+    releases[target_package] = target_version
     return releases
 
 
@@ -62,6 +62,7 @@ if __name__ == "__main__":
     is_dev_version = sys.argv[1] == "dev"
     is_pypi = sys.argv[2] == "true"
     target_version = sys.argv[3]
+    target_package = sys.argv[4]
 
     if is_dev_version and ".dev" not in target_version:
         raise Exception("Version does not contain suffix .dev")
@@ -69,9 +70,9 @@ if __name__ == "__main__":
     versions = {}
 
     if not is_pypi:
-        versions = fetch_latest_releases_from_github(is_dev_version)
+        versions = fetch_latest_releases_from_github(is_dev_version, target_version, target_package)
     else:
-        versions = fetch_latest_releases_from_pypi(is_dev_version)
+        versions = fetch_latest_releases_from_pypi(is_dev_version, target_version, target_package)
 
     for name, version in versions.items():
         print(f"{name}_VERSION={version}")  # noqa: T201
