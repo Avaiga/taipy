@@ -52,7 +52,7 @@ from taipy.core import (
 from taipy.core import delete as core_delete
 from taipy.core import get as core_get
 from taipy.core import submit as core_submit
-from taipy.core.data._abstract_tabular import _TabularDataNodeMixin
+from taipy.core.data._tabular_datanode_mixin import _TabularDataNodeMixin
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event, EventOperation
 from taipy.core.notification.notifier import Notifier

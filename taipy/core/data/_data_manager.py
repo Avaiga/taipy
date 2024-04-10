@@ -24,8 +24,8 @@ from ..exceptions.exceptions import InvalidDataNodeType
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
-from ._abstract_file import _FileDataNodeMixin
 from ._data_fs_repository import _DataFSRepository
+from ._file_datanode_mixin import _FileDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId
 

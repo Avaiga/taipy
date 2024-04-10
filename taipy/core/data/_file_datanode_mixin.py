@@ -12,7 +12,6 @@
 import os
 import pathlib
 import shutil
-from abc import abstractmethod
 from datetime import datetime
 from os.path import isfile
 from typing import Any, Dict, Optional
@@ -41,16 +40,16 @@ class _FileDataNodeMixin(object):
         self._last_edit_date: Optional[datetime] = None
 
         if self._path and ".data" in self._path:
-            self._path = self._migrate_path(self.storage_type(), self._path)
+            self._path = self._migrate_path(self.storage_type(), self._path)  # type: ignore[attr-defined]
         if not self._path:
-            self._path = self._build_path(self.storage_type())
+            self._path = self._build_path(self.storage_type())  # type: ignore[attr-defined]
 
         properties[self._IS_GENERATED_KEY] = self._is_generated
         properties[self._PATH_KEY] = self._path
 
     def _write_default_data(self, default_value: Any):
         if default_value is not None and not os.path.exists(self._path):
-            self._write(default_value)
+            self._write(default_value)  # type: ignore[attr-defined]
             self._last_edit_date = datetime.now()
             self._edits.append(  # type: ignore[attr-defined]
                 Edit(
@@ -80,14 +79,6 @@ class _FileDataNodeMixin(object):
         self._path = value
         self.properties[self._PATH_KEY] = value
         self.properties[self._IS_GENERATED_KEY] = False
-
-    @classmethod
-    def storage_type(cls) -> str:
-        raise NotImplementedError
-
-    @abstractmethod
-    def _write(self, data):
-        raise NotImplementedError
 
     def _build_path(self, storage_type) -> str:
         folder = f"{storage_type}s"
