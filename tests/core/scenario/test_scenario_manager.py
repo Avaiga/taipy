@@ -873,7 +873,8 @@ def test_get_primary_scenarios_sorted():
     assert scenarios_sorted_by_id == _ScenarioManager._sort_scenarios(primary_scenarios, descending=False, sort_key="id")
 
     primary_scenarios_sorted_by_creation_date = [scenario_1, scenario_2, scenario_4,scenario_3]
-    assert primary_scenarios_sorted_by_creation_date == _ScenarioManager._sort_scenarios(primary_scenarios, descending=False,
+    assert primary_scenarios_sorted_by_creation_date == _ScenarioManager._sort_scenarios(primary_scenarios, 
+                                 descending=False,
                                                                                          sort_key="creation_date")
 
     scenarios_with_same_tags = [scenario_1, scenario_3]
