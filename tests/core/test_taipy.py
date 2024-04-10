@@ -467,7 +467,8 @@ class TestTaipy:
         scenarios_sorted_by_creation_date = [scenario_1, scenario_2, scenario_3, scenario_4]
         assert scenarios_sorted_by_creation_date == tp.get_scenarios(is_sorted=True, sort_key="creation_date")
 
-        scenarios_sorted_by_tag = [scenario_4, scenario_2, scenario_3, scenario_1] # Note: the scenario without any tags comes first.
+        # Note: the scenario without any tags comes first.
+        scenarios_sorted_by_tag = [scenario_4, scenario_2, scenario_3, scenario_1] 
         assert scenarios_sorted_by_tag == tp.get_scenarios(is_sorted=True, sort_key="tags")
 
         scenarios_sorted_by_name_descending_order = [scenario_4, scenario_2, scenario_1, scenario_3]
