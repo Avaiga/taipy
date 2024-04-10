@@ -820,9 +820,15 @@ def test_get_primary_scenarios_sorted():
 
     not_primary_scenario = _ScenarioManager._create(scenario_1_cfg, name="not_primary_scenario")
     scenario_1 = _ScenarioManager._create(scenario_1_cfg, name="B_scenario")
-    scenario_2 = _ScenarioManager._create(scenario_2_cfg, name="A_scenario", creation_date=datetime.now() + timedelta(days=2))
-    scenario_3 = _ScenarioManager._create(scenario_2_cfg, name="C_scenario", creation_date=datetime.now() + timedelta(days=4))
-    scenario_4 = _ScenarioManager._create(scenario_2_cfg, name="D_scenario", creation_date=datetime.now() + timedelta(days=3))
+    scenario_2 = _ScenarioManager._create(scenario_2_cfg,
+                                          name="A_scenario",
+                                          creation_date=datetime.now() + timedelta(days=2))
+    scenario_3 = _ScenarioManager._create(scenario_2_cfg,
+                                          name="C_scenario",
+                                          creation_date=datetime.now() + timedelta(days=4))
+    scenario_4 = _ScenarioManager._create(scenario_2_cfg,
+                                          name="D_scenario",
+                                          creation_date=datetime.now() + timedelta(days=3))
 
     _ScenarioManager._set_primary(scenario_1)
     scenario_1.tags = ["banana", "kiwi"]
