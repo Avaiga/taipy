@@ -853,8 +853,13 @@ def test_get_primary_scenarios_sorted():
 
     scenarios_with_same_config_id = [scenario_2, scenario_3, scenario_4]
     scenarios_with_same_config_id.sort(key=lambda x: x.id)
-    primary_scenarios_sorted_by_config_id = [scenario_1, scenarios_with_same_config_id[0], scenarios_with_same_config_id[1], scenarios_with_same_config_id[2]]
-    assert primary_scenarios_sorted_by_config_id == _ScenarioManager._sort_scenarios(primary_scenarios, descending=False, sort_key="config_id")
+    primary_scenarios_sorted_by_config_id = [scenario_1,
+                                             scenarios_with_same_config_id[0],
+                                             scenarios_with_same_config_id[1],
+                                             scenarios_with_same_config_id[2]]
+    assert primary_scenarios_sorted_by_config_id == _ScenarioManager._sort_scenarios(primary_scenarios,
+                                 descending=False,
+                                 sort_key="config_id")
 
     scenarios_sorted_by_id = [scenario_1, scenario_2, scenario_3, scenario_4]
     scenarios_sorted_by_id.sort(key=lambda x: x.id)
