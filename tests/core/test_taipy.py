@@ -457,7 +457,10 @@ class TestTaipy:
 
         scenarios_with_same_config_id = [scenario_2, scenario_3, scenario_4]
         scenarios_with_same_config_id.sort(key=lambda x: x.id)
-        scenarios_sorted_by_config_id = [scenario_1, scenarios_with_same_config_id[0], scenarios_with_same_config_id[1], scenarios_with_same_config_id[2]]
+        scenarios_sorted_by_config_id = [scenario_1,
+                                         scenarios_with_same_config_id[0],
+                                         scenarios_with_same_config_id[1],
+                                         scenarios_with_same_config_id[2]]
         assert scenarios_sorted_by_config_id == tp.get_scenarios(is_sorted=True, sort_key="config_id")
 
         scenarios_sorted_by_id = [scenario_1, scenario_2, scenario_3, scenario_4]
