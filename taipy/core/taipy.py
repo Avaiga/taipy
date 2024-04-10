@@ -581,7 +581,7 @@ def get_primary_scenarios(
 
     Returns:
         The list containing all primary scenarios, optionally sorted by name, id, creation_date or tags.
-            The sorting is in increasing order for dates, in alphabetical order for name and 
+            The sorting is in increasing order for dates, in alphabetical order for name and
             id, and in lexicographical order for tags. If sorted is set to true, but if an
             incorrect or no sort_key is provided, the scenarios are sorted by name.
     """
