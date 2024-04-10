@@ -848,6 +848,8 @@ def test_get_primary_scenarios_sorted():
     assert primary_scenarios_sorted_by_name == _ScenarioManager._sort_scenarios(primary_scenarios, 
                                  descending=False, 
                                  sort_key="name")
+                                 descending=False, 
+                                 sort_key="name")
 
     scenarios_with_same_config_id = [scenario_2, scenario_3, scenario_4]
     scenarios_with_same_config_id.sort(key=lambda x: x.id)
