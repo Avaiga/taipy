@@ -71,8 +71,8 @@ class Task(_Entity, _Labeled):
         self.id = id or TaskId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
         self._owner_id = owner_id
         self._parent_ids = parent_ids or set()
-        self.__input = {dn.config_id: dn for dn in input or []}
-        self.__output = {dn.config_id: dn for dn in output or []}
+        self._input = {dn.config_id: dn for dn in input or []}
+        self._output = {dn.config_id: dn for dn in output or []}
         self._function = function
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
         self._skippable = skippable
@@ -126,11 +126,11 @@ class Task(_Entity, _Labeled):
 
     @property
     def input(self) -> Dict[str, DataNode]:
-        return self.__input
+        return self._input
 
     @property
     def output(self) -> Dict[str, DataNode]:
-        return self.__output
+        return self._output
 
     @property
     def data_nodes(self) -> Dict[str, DataNode]:
@@ -164,7 +164,7 @@ class Task(_Entity, _Labeled):
             The lowest scope present in input and output data nodes or GLOBAL if there are
                 either no input or no output.
         """
-        data_nodes = list(self.__input.values()) + list(self.__output.values())
+        data_nodes = list(self._input.values()) + list(self._output.values())
         return Scope(min(dn.scope for dn in data_nodes)) if len(data_nodes) != 0 else Scope.GLOBAL
 
     @property
