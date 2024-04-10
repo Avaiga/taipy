@@ -17,7 +17,11 @@ if TYPE_CHECKING:
 
 
 class SubmittableStatusCache:
+    # A dictionary representing not ready_to_read datanode and its equivalent submittable entities
     datanode_id_submittables: Dict["DataNodeId", Set[str]] = defaultdict(lambda: set())
+
+    # A nested dictionary representing the submittable entities (Scenario, Sequence, Task) and
+    # its equivalent not ready_to_read input datanodes
     submittable_id_datanodes: Dict[str, Dict["DataNodeId", str]] = defaultdict(defaultdict)
 
     @classmethod
