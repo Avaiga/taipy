@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useMemo, useCallback, KeyboardEvent, MouseEvent } from "react";
+import React, { useMemo, useCallback, KeyboardEvent, MouseEvent, useState, useRef, useEffect, ReactNode } from "react";
 import { SxProps, Theme, darken, lighten } from "@mui/material/styles";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
@@ -23,33 +23,29 @@ import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Send from "@mui/icons-material/Send";
 
-import { createSendActionNameAction } from "../../context/taipyReducers";
+// import InfiniteLoader from "react-window-infinite-loader";
+
+import { createRequestInfiniteTableUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
 import { TaipyActiveProps, disableColor, getSuffixedClassNames } from "./utils";
-import {
-    useClassNames,
-    useDispatch,
-    useDispatchRequestUpdateOnFirstRender,
-    useDynamicProperty,
-    useModule,
-} from "../../utils/hooks";
+import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 import { LoVElt, useLovListMemo } from "./lovUtils";
 import { IconAvatar, avatarSx } from "../../utils/icon";
 import { getInitials } from "../../utils";
-
-export type Message = [string, string, string];
+import { RowType, TableValueType } from "./tableUtils";
 
 interface ChatProps extends TaipyActiveProps {
-    messages?: Message[];
+    messages?: TableValueType;
     withInput?: boolean;
     users?: LoVElt[];
     defaultUsers?: string;
     onAction?: string;
     senderId?: string;
     height?: string;
+    defaultKey?: string; // for testing purposes only
+    pageSize?: number;
 }
 
 const ENTER_KEY = "Enter";
-const NoMessages: Message[] = [];
 
 const indicWidth = 0.7;
 const avatarWidth = 24;
@@ -105,17 +101,64 @@ const defaultBoxSx = {
             : darken(theme.palette.background.paper, 0.15),
 } as SxProps<Theme>;
 
+interface key2Rows {
+    key: string;
+}
+
+interface ChatRowProps {
+    senderId: string;
+    message: string;
+    name: string;
+    className?: string;
+    getAvatar: (id: string) => ReactNode;
+}
+
+const ChatRow = ({ senderId, message, name, className, getAvatar }: ChatRowProps) => {
+    return senderId == name ? (
+        <Grid item className={getSuffixedClassNames(className, "-sent")} xs={12}>
+            <Box sx={senderMsgSx}>
+                <Paper sx={senderPaperSx}>{message}</Paper>
+            </Box>
+        </Grid>
+    ) : (
+        <Grid
+            item
+            container
+            className={getSuffixedClassNames(className, "-received")}
+            rowSpacing={0.2}
+            columnSpacing={1}
+        >
+            <Grid item sx={avatarColSx}></Grid>
+            <Grid item sx={nameSx}>
+                {name}
+            </Grid>
+            <Box width="100%" />
+            <Grid item sx={avatarColSx}>
+                {getAvatar(name)}
+            </Grid>
+            <Grid item>
+                <Paper sx={otherPaperSx}>{message}</Paper>
+            </Grid>
+        </Grid>
+    );
+};
+
 const Chat = (props: ChatProps) => {
-    const { id, updateVarName, senderId = "taipy", onAction, messages = NoMessages, withInput = true } = props;
+    const { id, updateVarName, senderId = "taipy", onAction, withInput = true, defaultKey = "", pageSize = 50 } = props;
     const dispatch = useDispatch();
     const module = useModule();
+
+    const [rows, setRows] = useState<RowType[]>([]);
+    const page = useRef<key2Rows>({ key: defaultKey });
+    const [rowCount, setRowCount] = useState(1000); // need something > 0 to bootstrap the infinite loader
+    // const [visibleStartIndex, setVisibleStartIndex] = useState(0);
+    // const infiniteLoaderRef = useRef<InfiniteLoader>(null);
+    const [columns, setColumns] = useState<Array<string>>([]);
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const users = useLovListMemo(props.users, props.defaultUsers || "");
-
-    useDispatchRequestUpdateOnFirstRender(dispatch, id, module, undefined, updateVarName);
 
     const boxSx = useMemo(
         () => (props.height ? { ...defaultBoxSx, maxHeight: props.height } : defaultBoxSx),
@@ -177,40 +220,78 @@ const Chat = (props: ChatProps) => {
         [avatars]
     );
 
+    const loadMoreItems = useCallback(
+        (startIndex: number) => {
+            const key = `Chat-${startIndex}-${startIndex + pageSize}`;
+            page.current = {
+                key: key,
+            };
+            dispatch(
+                createRequestInfiniteTableUpdateAction(
+                    updateVarName,
+                    id,
+                    module,
+                    [],
+                    key,
+                    startIndex,
+                    startIndex + pageSize,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    true // reverse
+                )
+            );
+        },
+        [pageSize, updateVarName, id, dispatch, module]
+    );
+
+    const refresh = typeof props.messages === "number";
+
+    useEffect(() => {
+        if (!refresh && props.messages && page.current.key && props.messages[page.current.key] !== undefined) {
+            const newValue = props.messages[page.current.key];
+            setRowCount(newValue.rowcount);
+            const nr = newValue.data as RowType[];
+            if (Array.isArray(nr) && nr.length > newValue.start) {
+                setRows(nr);
+                const cols = Object.keys(nr[0]);
+                setColumns(cols.length > 2 ? cols : cols.length == 2 ? [...cols, ""] : ["", ...cols, "", ""]);
+            }
+        }
+    }, [refresh, props.messages]);
+
+    useEffect(() => {
+        if (refresh) {
+            setRows([]);
+            setTimeout(() => loadMoreItems(0), 1); // So that the state can be changed
+        }
+    }, [refresh, loadMoreItems]);
+
+    useEffect(() => {
+        loadMoreItems(0);
+    }, [loadMoreItems]);
+
     return (
-        <Tooltip title={hover || ""}>
+        <Tooltip title={hover || "" || `rowCount: ${rowCount}`}>
             <Paper className={className} sx={boxSx} id={id}>
                 <Grid container rowSpacing={2} sx={gridSx}>
-                    {messages.map((msg) =>
-                        senderId == msg[2] ? (
-                            <Grid item key={msg[0]} className={getSuffixedClassNames(className, "-sent")} xs={12}>
-                                <Box sx={senderMsgSx}>
-                                    <Paper sx={senderPaperSx}>{msg[1]}</Paper>
-                                </Box>
-                            </Grid>
-                        ) : (
-                            <Grid
-                                item
-                                container
-                                key={msg[0]}
-                                className={getSuffixedClassNames(className, "-received")}
-                                rowSpacing={0.2}
-                                columnSpacing={1}
-                            >
-                                <Grid item sx={avatarColSx}></Grid>
-                                <Grid item sx={nameSx}>
-                                    {msg[2]}
-                                </Grid>
-                                <Box width="100%" />
-                                <Grid item sx={avatarColSx}>
-                                    {getAvatar(msg[2])}
-                                </Grid>
-                                <Grid item>
-                                    <Paper sx={otherPaperSx}>{msg[1]}</Paper>
-                                </Grid>
-                            </Grid>
-                        )
-                    )}
+                    {rows.map((row, idx) => (
+                        <ChatRow
+                            key={columns[0] ? `${row[columns[0]]}` : `id${idx}`}
+                            senderId={senderId}
+                            message={`${row[columns[1]]}`}
+                            name={columns[2] ? `${row[columns[2]]}` : "A"}
+                            className={className}
+                            getAvatar={getAvatar}
+                        />
+                    ))}
                 </Grid>
                 {withInput ? (
                     <TextField

@@ -16,17 +16,21 @@ import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
-import Chat, { Message } from "./Chat";
+import Chat from "./Chat";
 import { INITIAL_STATE, TaipyState } from "../../context/taipyReducers";
 import { TaipyContext } from "../../context/taipyContext";
 import { stringIcon } from "../../utils/icon";
+import { TableValueType } from "./tableUtils";
 
-const messages: Message[] = [
+const valueKey = "Infinite-Entity--asc";
+const messages: TableValueType = {
+    [valueKey]: {
+        data: [
     ["1", "msg 1", "Fred"],
     ["2", "msg From Another unknown User", "Fredo"],
     ["3", "This from the sender User", "taipy"],
     ["4", "And from another known one", "Fredi"],
-];
+]}};
 const user1: [string, stringIcon] = ["Fred", { path: "/images/favicon.png", text: "Fred.png" }];
 const user2: [string, stringIcon] = ["Fredi", { path: "/images/fred.png", text: "Fredi.png" }];
 const users = [user1, user2];

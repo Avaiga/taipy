@@ -381,6 +381,12 @@
                         "name": "height",
                         "type": "str|int|float",
                         "doc": "The maximum height, in CSS units, of this element."
+                    },
+                    {
+                        "name": "page_size",
+                        "type": "int",
+                        "default_value": 50,
+                        "doc": "The number of rows retrieved on the frontend."
                     }
                 ]
             }
@@ -1649,7 +1655,7 @@
                     {
                         "name": "type",
                         "type": "str",
-                        "default_value": "<i>Type of first lov element</i>",
+                        "default_value": "<i>Type name of the lov elements</i>",
                         "doc": "Must be specified if <i>lov</i> contains a non-specific type of data (ex: dict).<br/><i>value</i> must be of that type, <i>lov</i> must be an iterable on this type, and the adapter function will receive an object of this type."
                     },
                     {

@@ -640,6 +640,7 @@ export const createRequestInfiniteTableUpdateAction = (
     compare?: string,
     compareDatas?: string,
     stateContext?: Record<string, unknown>
+    reverse?: boolean,
 ): TaipyAction =>
     createRequestDataUpdateAction(name, id, context, columns, pageKey, ligtenPayload({
         infinite: true,
@@ -656,6 +657,7 @@ export const createRequestInfiniteTableUpdateAction = (
         compare: compare,
         compare_datas: compareDatas,
         state_context: stateContext,
+        reverse: !!reverse,
     }));
 
 /**

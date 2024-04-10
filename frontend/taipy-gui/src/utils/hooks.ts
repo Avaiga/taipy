@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { Dispatch, useContext, useEffect, useMemo, useRef } from "react";
+import { Dispatch, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
 
 import { getUpdateVars } from "../components/Taipy/utils";
@@ -184,3 +184,20 @@ export const useWhyDidYouUpdate = (name: string, props: Record<string, unknown>)
         previousProps.current = props;
     });
 };
+
+export const useElementVisible = (root: HTMLElement | null = null, rootMargin = "0px", threshold = 1.0) => {
+    const [container, setRef] = useState<HTMLElement| null>(null);
+    const [isVisible, setVisible] = useState(false);
+    const onObserver = useCallback((entries: Array<IntersectionObserverEntry>) => setVisible(entries.some(e => e.isIntersecting)), [setVisible]);
+    const observer = useMemo(() => new IntersectionObserver(onObserver, {root, rootMargin, threshold}), [root, rootMargin, threshold, onObserver]);
+    useEffect(() => {
+        if (!container) {
+            return;
+        }
+        const contRef = container;
+        const obsRef = observer;
+        observer.observe(container);
+        return () => {obsRef.unobserve(contRef);}
+    }, [container, observer]);
+    return [setRef, isVisible];
+}
