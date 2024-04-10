@@ -16,7 +16,7 @@ from typing import List, Optional, Set
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
-from ._abstract_file import _FileDataNodeMixin
+from ._file_datanode_mixin import _FileDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 

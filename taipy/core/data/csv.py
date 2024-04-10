@@ -20,8 +20,8 @@ from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..job.job_id import JobId
-from ._abstract_file import _FileDataNodeMixin
-from ._abstract_tabular import _TabularDataNodeMixin
+from ._file_datanode_mixin import _FileDataNodeMixin
+from ._tabular_datanode_mixin import _TabularDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
