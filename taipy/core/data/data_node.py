@@ -30,33 +30,22 @@ from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._warnings import _warn_deprecated
 from ..exceptions.exceptions import DataNodeIsBeingEdited, NoData
 from ..job.job_id import JobId
-from ..notification.dn_scenario_cache import SubmittableStatusCache
+from ..notification._submittable_status_cache import SubmittableStatusCache
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
 from ._filter import _FilterDataNode
 from .data_node_id import DataNodeId, Edit
 from .operator import JoinOperator
 
 
-def _update_parent_submittable_cache_on_edit_in_progress(fct):
+def _recompute_submittable_cache_wrapper(fct):
+    # This decorator must be wrapped before self_setter decorator as self_setter will run the function twice.
+
     @functools.wraps(fct)
-    def _do_update_parent_submittable_cache_on_edit_in_progress(dn, *args, **kwargs):
+    def _recompute_is_ready_for_reading(dn: "DataNode", *args, **kwargs):
         fct(dn, *args, **kwargs)
-        if not dn._edit_in_progress:
-            SubmittableStatusCache.remove(dn.id)
-        else:
-            from ..scenario.scenario import Scenario
-            from ..sequence.sequence import Sequence
-            from ..task.task import Task
+        SubmittableStatusCache._compute_if_dn_is_ready_for_reading(dn)
 
-            parent_entities = dn.get_parents()
-            for scenario_parent in parent_entities.get(Scenario._MANAGER_NAME, []):
-                SubmittableStatusCache.add(scenario_parent.id, dn.id)
-            for sequence_parent in parent_entities.get(Sequence._MANAGER_NAME, []):
-                SubmittableStatusCache.add(sequence_parent.id, dn.id)
-            for task_parent in parent_entities.get(Task._MANAGER_NAME, []):
-                SubmittableStatusCache.add(task_parent.id, dn.id)
-
-    return _do_update_parent_submittable_cache_on_edit_in_progress
+    return _recompute_is_ready_for_reading
 
 
 class DataNode(_Entity, _Labeled):
@@ -196,12 +185,10 @@ class DataNode(_Entity, _Labeled):
             return self._last_edit_date
 
     @last_edit_date.setter  # type: ignore
+    @_recompute_submittable_cache_wrapper
     @_self_setter(_MANAGER_NAME)
     def last_edit_date(self, val):
-        prev_last_edit_date = self._last_edit_date
         self._last_edit_date = val
-        if prev_last_edit_date is None and self._last_edit_date:
-            SubmittableStatusCache.remove(self.id)
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -263,7 +250,7 @@ class DataNode(_Entity, _Labeled):
         return self._edit_in_progress
 
     @edit_in_progress.setter  # type: ignore
-    @_update_parent_submittable_cache_on_edit_in_progress
+    @_recompute_submittable_cache_wrapper
     @_self_setter(_MANAGER_NAME)
     def edit_in_progress(self, val):
         self._edit_in_progress = val
