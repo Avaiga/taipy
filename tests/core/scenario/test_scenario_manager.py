@@ -879,8 +879,12 @@ def test_get_primary_scenarios_sorted():
 
     scenarios_with_same_tags = [scenario_1, scenario_3]
     scenarios_with_same_tags.sort(key=lambda x: x.id)
-    primary_scenarios_sorted_by_tags = [scenario_4, scenario_2, scenarios_with_same_tags[0], scenarios_with_same_tags[1]]
-    assert primary_scenarios_sorted_by_tags == _ScenarioManager._sort_scenarios(primary_scenarios, descending=False, sort_key="tags")
+    primary_scenarios_sorted_by_tags = [scenario_4,
+                                        scenario_2, scenarios_with_same_tags[0],
+                                        scenarios_with_same_tags[1]]
+    assert primary_scenarios_sorted_by_tags == _ScenarioManager._sort_scenarios(primary_scenarios,
+                                 descending=False,
+                                 sort_key="tags")
 
     primary_scenarios_sorted_by_name_descending_order = [scenario_4, scenario_3, scenario_1, scenario_2]
     assert primary_scenarios_sorted_by_name_descending_order == _ScenarioManager._sort_scenarios(
