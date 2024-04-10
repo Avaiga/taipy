@@ -18,18 +18,18 @@ if TYPE_CHECKING:
 
 class SubmittableStatusCache:
     datanode_id_submittables: Dict["DataNodeId", Set[str]] = defaultdict(lambda: set())
-    submittable_id_datanodes: Dict[str, Set["DataNodeId"]] = defaultdict(lambda: set())
+    submittable_id_datanodes: Dict[str, Dict["DataNodeId", str]] = defaultdict(defaultdict)
 
     @classmethod
     def __add(cls, entity_id: str, datanode_id: "DataNodeId", reason: str):
         cls.datanode_id_submittables[datanode_id].add(entity_id)
-        cls.submittable_id_datanodes[entity_id].add(datanode_id)  # type: ignore
+        cls.submittable_id_datanodes[entity_id][datanode_id] = reason
 
     @classmethod
     def __remove(cls, datanode_id: "DataNode"):
         submittable_ids: Set = cls.datanode_id_submittables.pop(datanode_id, set())
         for submittable_id in submittable_ids:
-            cls.submittable_id_datanodes[submittable_id].remove(datanode_id)
+            cls.submittable_id_datanodes[submittable_id].pop(datanode_id)
             if len(cls.submittable_id_datanodes[submittable_id]) == 0:
                 # Notifier.publish(make_event(scenario, submittable, UPDATE))
                 cls.submittable_id_datanodes.pop(submittable_id)
