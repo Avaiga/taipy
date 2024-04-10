@@ -870,7 +870,9 @@ def test_get_primary_scenarios_sorted():
 
     scenarios_sorted_by_id = [scenario_1, scenario_2, scenario_3, scenario_4]
     scenarios_sorted_by_id.sort(key=lambda x: x.id)
-    assert scenarios_sorted_by_id == _ScenarioManager._sort_scenarios(primary_scenarios, descending=False, sort_key="id")
+    assert scenarios_sorted_by_id == _ScenarioManager._sort_scenarios(primary_scenarios,
+                                                                      descending=False,
+                                                                      sort_key="id")
 
     primary_scenarios_sorted_by_creation_date = [scenario_1, scenario_2, scenario_4,scenario_3]
     assert primary_scenarios_sorted_by_creation_date == _ScenarioManager._sort_scenarios(primary_scenarios, 
