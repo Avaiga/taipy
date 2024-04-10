@@ -445,11 +445,11 @@ class TestTaipy:
         scenario_4 = _ScenarioManager._create(scenario_2_cfg, name="D_scenario")
 
         _ScenarioManager._tag(scenario_1, "banana")
-        _ScenarioManager._tag(scenario_1, "kiwi")    # scenario_1 now has tags {"banana", "kiwi"}
+        _ScenarioManager._tag(scenario_1, "kiwi")  # scenario_1 now has tags {"banana", "kiwi"}
         _ScenarioManager._tag(scenario_2, "apple")
         _ScenarioManager._tag(scenario_2, "banana")  # scenario_2 now has tags {"banana", "apple"}
         _ScenarioManager._tag(scenario_3, "apple")
-        _ScenarioManager._tag(scenario_3, "kiwi")    # scenario_3 now has tags {"kiwi", "apple"}
+        _ScenarioManager._tag(scenario_3, "kiwi")  # scenario_3 now has tags {"kiwi", "apple"}
 
         scenarios_sorted_by_name = [scenario_3, scenario_1, scenario_2, scenario_4]
         assert scenarios_sorted_by_name == tp.get_scenarios(is_sorted=True, sort_key="name")
@@ -457,10 +457,12 @@ class TestTaipy:
 
         scenarios_with_same_config_id = [scenario_2, scenario_3, scenario_4]
         scenarios_with_same_config_id.sort(key=lambda x: x.id)
-        scenarios_sorted_by_config_id = [scenario_1,
-                                         scenarios_with_same_config_id[0],
-                                         scenarios_with_same_config_id[1],
-                                         scenarios_with_same_config_id[2]]
+        scenarios_sorted_by_config_id = [
+            scenario_1,
+            scenarios_with_same_config_id[0],
+            scenarios_with_same_config_id[1],
+            scenarios_with_same_config_id[2],
+        ]
         assert scenarios_sorted_by_config_id == tp.get_scenarios(is_sorted=True, sort_key="config_id")
 
         scenarios_sorted_by_id = [scenario_1, scenario_2, scenario_3, scenario_4]
@@ -471,7 +473,7 @@ class TestTaipy:
         assert scenarios_sorted_by_creation_date == tp.get_scenarios(is_sorted=True, sort_key="creation_date")
 
         # Note: the scenario without any tags comes first.
-        scenarios_sorted_by_tag = [scenario_4, scenario_2, scenario_3, scenario_1] 
+        scenarios_sorted_by_tag = [scenario_4, scenario_2, scenario_3, scenario_1]
         assert scenarios_sorted_by_tag == tp.get_scenarios(is_sorted=True, sort_key="tags")
 
         scenarios_sorted_by_name_descending_order = [scenario_4, scenario_2, scenario_1, scenario_3]
