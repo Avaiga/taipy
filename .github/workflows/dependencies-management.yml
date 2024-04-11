@@ -82,7 +82,7 @@ jobs:
         with:
           github-token: ${{ secrets.TRIGGER_GITHUB_PR }}
           script: |
-            const result = github.rest.actions.createWorkflowDispatch({
+            const result = await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'overall-tests.yml',
