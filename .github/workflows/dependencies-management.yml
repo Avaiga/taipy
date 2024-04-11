@@ -77,8 +77,11 @@ jobs:
   tests:
     needs: latest-versions
     uses: ./.github/workflows/overall-tests.yml
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
     with:
-      branch: dependencies/update-python3.8
+      branch: dependencies/update-python${{matrix.python-version}}
       # PRs created with the GITHUB_TOKEN don't trigger workflows.
       # This action triggers the overall-tests.yml workflow on the PR
       # to allow the tests to run on the new dependencies.
