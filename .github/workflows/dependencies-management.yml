@@ -25,21 +25,21 @@ jobs:
         with:
           python-version: ${{matrix.python-version}}
 
-      - name: Check if the latest version supported is up to date.
-        id: ensure-dependencies-are-up-to-date
-        working-directory: tools/packages
-        run: |
-          # Ensure dependencies are aligned between Taipy packages
-          pip install -r requirements.txt
-          python check-dependencies.py ensure-same-version
+      # - name: Check if the latest version supported is up to date.
+      #   id: ensure-dependencies-are-up-to-date
+      #   working-directory: tools/packages
+      #   run: |
+      #     # Ensure dependencies are aligned between Taipy packages
+      #     pip install -r requirements.txt
+      #     python check-dependencies.py ensure-same-version
 
-          # Try to update the Pipfile.
-          # Any new packages available are printed to stdout.
-          # If nothing is printed, the Pipfile is up to date and workflow can stop.
-          echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
-          bash check-dependencies.sh pipfiles/Pipfile${{matrix.python-version}}.max >> "$GITHUB_OUTPUT"
-          echo EOF >> "$GITHUB_OUTPUT"
-          cat pipfiles/Pipfile${{matrix.python-version}}.max
+      #     # Try to update the Pipfile.
+      #     # Any new packages available are printed to stdout.
+      #     # If nothing is printed, the Pipfile is up to date and workflow can stop.
+      #     echo 'diff<<EOF' >> "$GITHUB_OUTPUT"
+      #     bash check-dependencies.sh pipfiles/Pipfile${{matrix.python-version}}.max >> "$GITHUB_OUTPUT"
+      #     echo EOF >> "$GITHUB_OUTPUT"
+      #     cat pipfiles/Pipfile${{matrix.python-version}}.max
 
       # - name: Create the pull request updating the dependencies (3.12 only)
       #   if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' and ${{matrix.python-version}} == '3.12'
@@ -58,21 +58,21 @@ jobs:
       #       tools/packages/pipfiles/Pipfile${{matrix.python-version}}.max
       #       tools/packages/taipy*/*requirements.txt
 
-      - name: Create the pull request updating the Pipfile max
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' and ${{matrix.python-version}} != '3.12'
-        uses: peter-evans/create-pull-request@v5
-        id: cpr
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: Update Python${{matrix.python-version}} Pipfile
-          branch: dependencies/update-python${{matrix.python-version}}
-          base: develop
-          title: 'New Pipfile available for Python${{matrix.python-version}}'
-          body: |
-            ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
-          draft: false
-          add-paths: |
-            tools/packages/pipfiles/Pipfile${{matrix.python-version}}.max
+      # - name: Create the pull request updating the Pipfile max
+      #   if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' and ${{matrix.python-version}} != '3.12'
+      #   uses: peter-evans/create-pull-request@v5
+      #   id: cpr
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     commit-message: Update Python${{matrix.python-version}} Pipfile
+      #     branch: dependencies/update-python${{matrix.python-version}}
+      #     base: develop
+      #     title: 'New Pipfile available for Python${{matrix.python-version}}'
+      #     body: |
+      #       ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
+      #     draft: false
+      #     add-paths: |
+      #       tools/packages/pipfiles/Pipfile${{matrix.python-version}}.max
 
   # tests:
   #   needs: latest-versions
@@ -103,7 +103,7 @@ jobs:
                 'X-GitHub-Api-Version': '2022-11-28'
               }
             })
-            console.log(runs);
+            console.log(runs.data.workflow_runs[0]);
             github.rest.pulls.update({
               owner: context.repo.owner,
               repo: context.repo.repo,
