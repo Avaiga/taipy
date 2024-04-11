@@ -8,7 +8,8 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-from datetime import datetime
+
+from datetime import datetime, timedelta
 from unittest import mock
 
 import freezegun
@@ -46,7 +47,7 @@ def test_submit_task_development_mode():
     scenario = create_scenario()
     orchestrator = _OrchestratorFactory._build_orchestrator()
 
-    submit_time = datetime.now()
+    submit_time = datetime.now() + timedelta(seconds=1)  # +1 to ensure the edit time of dn_0 is before the submit time
     with freezegun.freeze_time(submit_time):
         submission = orchestrator.submit_task(
             scenario.t1, no_of_retry=10, log=True, log_file="file_path"

@@ -11,6 +11,8 @@
 
 from collections import UserDict
 
+from taipy.config.common._template_handler import _TemplateHandler as _tpl
+
 from ..notification import EventOperation, Notifier, _make_event
 
 
@@ -25,9 +27,10 @@ class _Properties(UserDict):
 
     def __setitem__(self, key, value):
         super(_Properties, self).__setitem__(key, value)
-        from ... import core as tp
 
         if hasattr(self, "_entity_owner"):
+            from ... import core as tp
+
             event = _make_event(
                 self._entity_owner,
                 EventOperation.UPDATE,
@@ -44,15 +47,14 @@ class _Properties(UserDict):
                 self._entity_owner._in_context_attributes_changed_collector.append(event)
 
     def __getitem__(self, key):
-        from taipy.config.common._template_handler import _TemplateHandler as _tpl
-
         return _tpl._replace_templates(super(_Properties, self).__getitem__(key))
 
     def __delitem__(self, key):
         super(_Properties, self).__delitem__(key)
-        from ... import core as tp
 
         if hasattr(self, "_entity_owner"):
+            from ... import core as tp
+
             event = _make_event(
                 self._entity_owner,
                 EventOperation.UPDATE,

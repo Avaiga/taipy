@@ -11,6 +11,7 @@
 
 import os
 import pathlib
+import uuid
 from datetime import datetime
 from importlib import util
 from time import sleep
@@ -127,7 +128,8 @@ class TestParquetDataNode:
         ],
     )
     def test_create_with_default_data(self, properties, exists):
-        dn = ParquetDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
+        dn = ParquetDataNode("foo", Scope.SCENARIO, DataNodeId(f"dn_id_{uuid.uuid4()}"), properties=properties)
+        assert dn.path == os.path.join(Config.core.storage_folder.strip("/"), "parquets", dn.id + ".parquet")
         assert os.path.exists(dn.path) is exists
 
     @pytest.mark.parametrize("engine", __engine)
@@ -217,5 +219,5 @@ class TestParquetDataNode:
 
         dn = ParquetDataNode("foo_bar", Scope.SCENARIO, properties={"path": path, "name": "super name"})
 
-        assert ".data" not in dn.path.name
+        assert ".data" not in dn.path
         assert os.path.exists(dn.path)
