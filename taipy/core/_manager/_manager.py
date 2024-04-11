@@ -154,7 +154,7 @@ class _Manager(Generic[EntityType]):
         _SubmissionManagerFactory._build_manager()._delete_many(_entity_ids.submission_ids)
 
     @classmethod
-    def _export(cls, id: str, folder_path: Union[str, pathlib.Path]):
+    def _export(cls, id: str, folder_path: Union[str, pathlib.Path], **kwargs):
         """
         Export an entity.
         """
