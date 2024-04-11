@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import uuid
+from datetime import datetime
 from unittest import mock
 
 import pytest
@@ -22,6 +23,8 @@ from taipy.core._version._version_manager import _VersionManager
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.exceptions.exceptions import ModelNotFound, NonExistingTask
+from taipy.core.notification._submittable_status_cache import SubmittableStatusCache
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
@@ -303,23 +306,109 @@ def test_hard_delete():
 
 
 def test_is_submittable():
+    task_manager = _TaskManagerFactory._build_manager()
+    scenario_manager = _ScenarioManagerFactory._build_manager()
     assert len(_TaskManager._get_all()) == 0
-    dn_config = Config.configure_in_memory_data_node("dn", 10)
-    task_config = Config.configure_task("task", print, [dn_config])
-    task = _TaskManager._bulk_get_or_create([task_config])[0]
 
-    assert len(_TaskManager._get_all()) == 1
-    assert _TaskManager._is_submittable(task)
-    assert _TaskManager._is_submittable(task.id)
-    assert not _TaskManager._is_submittable("Task_temp")
+    dn_config_1 = Config.configure_pickle_data_node("dn_1", default_data=10)
+    dn_config_2 = Config.configure_pickle_data_node("dn_2", default_data=15)
+    task_config = Config.configure_task("task", print, [dn_config_1, dn_config_2])
+    scenario_config = Config.configure_scenario("scenario", [task_config])
 
-    task.input["dn"].edit_in_progress = True
-    assert not _TaskManager._is_submittable(task)
-    assert not _TaskManager._is_submittable(task.id)
+    scenario = scenario_manager._create(scenario_config)
+    task = scenario.tasks["task"]
+    dn_1 = scenario.dn_1
+    dn_2 = scenario.dn_2
 
-    task.input["dn"].edit_in_progress = False
-    assert _TaskManager._is_submittable(task)
-    assert _TaskManager._is_submittable(task.id)
+    assert len(task_manager._get_all()) == 1
+    assert len(scenario_manager._get_all()) == 1
+
+    assert scenario.id not in SubmittableStatusCache.submittable_id_datanodes
+    assert task.id not in SubmittableStatusCache.submittable_id_datanodes
+    assert task_manager._is_submittable(task)
+    assert task_manager._is_submittable(task.id)
+    assert scenario_manager._is_submittable(scenario)
+    assert scenario_manager._is_submittable(scenario.id)
+    assert not task_manager._is_submittable("Task_temp")
+
+    dn_1.edit_in_progress = True
+    assert scenario.id in SubmittableStatusCache.submittable_id_datanodes
+    assert task.id in SubmittableStatusCache.submittable_id_datanodes
+    assert dn_1.id in SubmittableStatusCache.submittable_id_datanodes[scenario.id]
+    assert dn_1.id in SubmittableStatusCache.submittable_id_datanodes[task.id]
+    assert dn_1.id in SubmittableStatusCache.datanode_id_submittables
+    assert scenario.id in SubmittableStatusCache.datanode_id_submittables[dn_1.id]
+    assert task.id in SubmittableStatusCache.datanode_id_submittables[dn_1.id]
+    assert (
+        SubmittableStatusCache.submittable_id_datanodes[scenario.id][dn_1.id] == f"DataNode {dn_1.id} is being edited."
+    )
+    assert SubmittableStatusCache.submittable_id_datanodes[task.id][dn_1.id] == f"DataNode {dn_1.id} is being edited."
+    assert not scenario_manager._is_submittable(scenario)
+    assert not task_manager._is_submittable(task)
+    assert not task_manager._is_submittable(task.id)
+
+    dn_1.edit_in_progress = False
+    assert scenario.id not in SubmittableStatusCache.submittable_id_datanodes
+    assert task.id not in SubmittableStatusCache.submittable_id_datanodes
+    assert dn_1.id not in SubmittableStatusCache.datanode_id_submittables
+    assert scenario_manager._is_submittable(scenario)
+    assert task_manager._is_submittable(task)
+    assert task_manager._is_submittable(task.id)
+
+    dn_1.last_edit_date = None
+    dn_2.edit_in_progress = True
+    assert scenario.id in SubmittableStatusCache.submittable_id_datanodes
+    assert task.id in SubmittableStatusCache.submittable_id_datanodes
+    assert dn_1.id in SubmittableStatusCache.submittable_id_datanodes[scenario.id]
+    assert dn_1.id in SubmittableStatusCache.submittable_id_datanodes[task.id]
+    assert dn_2.id in SubmittableStatusCache.submittable_id_datanodes[scenario.id]
+    assert dn_2.id in SubmittableStatusCache.submittable_id_datanodes[task.id]
+    assert dn_1.id in SubmittableStatusCache.datanode_id_submittables
+    assert scenario.id in SubmittableStatusCache.datanode_id_submittables[dn_1.id]
+    assert task.id in SubmittableStatusCache.datanode_id_submittables[dn_1.id]
+    assert dn_2.id in SubmittableStatusCache.datanode_id_submittables
+    assert scenario.id in SubmittableStatusCache.datanode_id_submittables[dn_2.id]
+    assert task.id in SubmittableStatusCache.datanode_id_submittables[dn_2.id]
+    assert (
+        SubmittableStatusCache.submittable_id_datanodes[scenario.id][dn_1.id] == f"DataNode {dn_1.id} is not written."
+    )
+    assert SubmittableStatusCache.submittable_id_datanodes[task.id][dn_1.id] == f"DataNode {dn_1.id} is not written."
+    assert (
+        SubmittableStatusCache.submittable_id_datanodes[scenario.id][dn_2.id] == f"DataNode {dn_2.id} is being edited."
+    )
+    assert SubmittableStatusCache.submittable_id_datanodes[task.id][dn_2.id] == f"DataNode {dn_2.id} is being edited."
+    assert not scenario_manager._is_submittable(scenario)
+    assert not task_manager._is_submittable(task)
+    assert not task_manager._is_submittable(task.id)
+
+    dn_1.last_edit_date = datetime.now()
+    assert scenario.id in SubmittableStatusCache.submittable_id_datanodes
+    assert task.id in SubmittableStatusCache.submittable_id_datanodes
+    assert dn_1.id not in SubmittableStatusCache.submittable_id_datanodes[scenario.id]
+    assert dn_1.id not in SubmittableStatusCache.submittable_id_datanodes[task.id]
+    assert dn_2.id in SubmittableStatusCache.submittable_id_datanodes[scenario.id]
+    assert dn_2.id in SubmittableStatusCache.submittable_id_datanodes[task.id]
+    assert dn_1.id not in SubmittableStatusCache.datanode_id_submittables
+    assert dn_2.id in SubmittableStatusCache.datanode_id_submittables
+    assert scenario.id in SubmittableStatusCache.datanode_id_submittables[dn_2.id]
+    assert task.id in SubmittableStatusCache.datanode_id_submittables[dn_2.id]
+    assert (
+        SubmittableStatusCache.submittable_id_datanodes[scenario.id][dn_2.id] == f"DataNode {dn_2.id} is being edited."
+    )
+    assert SubmittableStatusCache.submittable_id_datanodes[task.id][dn_2.id] == f"DataNode {dn_2.id} is being edited."
+    assert not scenario_manager._is_submittable(scenario)
+    assert not task_manager._is_submittable(task)
+    assert not task_manager._is_submittable(task.id)
+
+    dn_2.edit_in_progress = False
+    assert scenario.id not in SubmittableStatusCache.submittable_id_datanodes
+    assert task.id not in SubmittableStatusCache.submittable_id_datanodes
+    assert dn_2.id not in SubmittableStatusCache.submittable_id_datanodes[scenario.id]
+    assert dn_2.id not in SubmittableStatusCache.submittable_id_datanodes[task.id]
+    assert dn_2.id not in SubmittableStatusCache.datanode_id_submittables
+    assert scenario_manager._is_submittable(scenario)
+    assert task_manager._is_submittable(task)
+    assert task_manager._is_submittable(task.id)
 
 
 def test_submit_task():

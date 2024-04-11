@@ -38,6 +38,7 @@ from taipy.core.exceptions.exceptions import (
     UnauthorizedTagError,
 )
 from taipy.core.job._job_manager import _JobManager
+from taipy.core.notification._submittable_status_cache import SubmittableStatusCache
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from taipy.core.scenario.scenario import Scenario
@@ -933,21 +934,72 @@ def test_hard_delete_shared_entities():
 def test_is_submittable():
     assert len(_ScenarioManager._get_all()) == 0
 
-    dn_config = Config.configure_in_memory_data_node("dn", 10)
-    task_config = Config.configure_task("task", print, [dn_config])
+    dn_config_1 = Config.configure_in_memory_data_node("dn_1", 10)
+    dn_config_2 = Config.configure_in_memory_data_node("dn_2", 10)
+    task_config = Config.configure_task("task", print, [dn_config_1, dn_config_2])
     scenario_config = Config.configure_scenario("sc", {task_config}, set(), Frequency.DAILY)
     scenario = _ScenarioManager._create(scenario_config)
+    dn_1 = scenario.dn_1
+    dn_2 = scenario.dn_2
 
     assert len(_ScenarioManager._get_all()) == 1
+    assert scenario.id not in SubmittableStatusCache.submittable_id_datanodes
     assert _ScenarioManager._is_submittable(scenario)
     assert _ScenarioManager._is_submittable(scenario.id)
     assert not _ScenarioManager._is_submittable("Scenario_temp")
 
-    scenario.dn.edit_in_progress = True
+    dn_1.edit_in_progress = True
+    assert scenario.id in SubmittableStatusCache.submittable_id_datanodes
+    assert dn_1.id in SubmittableStatusCache.submittable_id_datanodes[scenario.id]
+    assert dn_1.id in SubmittableStatusCache.datanode_id_submittables
+    assert scenario.id in SubmittableStatusCache.datanode_id_submittables[dn_1.id]
+    assert (
+        SubmittableStatusCache.submittable_id_datanodes[scenario.id][dn_1.id] == f"DataNode {dn_1.id} is being edited."
+    )
     assert not _ScenarioManager._is_submittable(scenario)
     assert not _ScenarioManager._is_submittable(scenario.id)
 
-    scenario.dn.edit_in_progress = False
+    dn_1.edit_in_progress = False
+    assert scenario.id not in SubmittableStatusCache.submittable_id_datanodes
+    assert dn_1.id not in SubmittableStatusCache.datanode_id_submittables
+    assert _ScenarioManager._is_submittable(scenario)
+    assert _ScenarioManager._is_submittable(scenario.id)
+
+    dn_1.last_edit_date = None
+    dn_2.edit_in_progress = True
+    assert scenario.id in SubmittableStatusCache.submittable_id_datanodes
+    assert dn_1.id in SubmittableStatusCache.submittable_id_datanodes[scenario.id]
+    assert dn_2.id in SubmittableStatusCache.submittable_id_datanodes[scenario.id]
+    assert dn_1.id in SubmittableStatusCache.datanode_id_submittables
+    assert scenario.id in SubmittableStatusCache.datanode_id_submittables[dn_1.id]
+    assert dn_2.id in SubmittableStatusCache.datanode_id_submittables
+    assert scenario.id in SubmittableStatusCache.datanode_id_submittables[dn_2.id]
+    assert (
+        SubmittableStatusCache.submittable_id_datanodes[scenario.id][dn_1.id] == f"DataNode {dn_1.id} is not written."
+    )
+    assert (
+        SubmittableStatusCache.submittable_id_datanodes[scenario.id][dn_2.id] == f"DataNode {dn_2.id} is being edited."
+    )
+    assert not _ScenarioManager._is_submittable(scenario)
+    assert not _ScenarioManager._is_submittable(scenario.id)
+
+    dn_1.last_edit_date = datetime.now()
+    assert scenario.id in SubmittableStatusCache.submittable_id_datanodes
+    assert dn_1.id not in SubmittableStatusCache.submittable_id_datanodes[scenario.id]
+    assert dn_2.id in SubmittableStatusCache.submittable_id_datanodes[scenario.id]
+    assert dn_1.id not in SubmittableStatusCache.datanode_id_submittables
+    assert dn_2.id in SubmittableStatusCache.datanode_id_submittables
+    assert scenario.id in SubmittableStatusCache.datanode_id_submittables[dn_2.id]
+    assert (
+        SubmittableStatusCache.submittable_id_datanodes[scenario.id][dn_2.id] == f"DataNode {dn_2.id} is being edited."
+    )
+    assert not _ScenarioManager._is_submittable(scenario)
+    assert not _ScenarioManager._is_submittable(scenario.id)
+
+    dn_2.edit_in_progress = False
+    assert dn_1.id not in SubmittableStatusCache.datanode_id_submittables
+    assert dn_2.id not in SubmittableStatusCache.datanode_id_submittables
+    assert scenario.id not in SubmittableStatusCache.submittable_id_datanodes
     assert _ScenarioManager._is_submittable(scenario)
     assert _ScenarioManager._is_submittable(scenario.id)
 
