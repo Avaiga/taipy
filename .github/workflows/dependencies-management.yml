@@ -88,7 +88,7 @@ jobs:
               workflow_id: 'overall-tests.yml',
               ref: 'dependencies/update-python${{matrix.python-version}}',
             })
-            octokit.rest.pulls.update({
+            github.rest.pulls.update({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: ${{ steps.cpr.outputs.pull-request-number }},
