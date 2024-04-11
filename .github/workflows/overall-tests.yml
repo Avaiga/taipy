@@ -7,12 +7,12 @@ on:
     branches: [ develop, dev/*, release/* ]
   workflow_dispatch:
   workflow_call:
-    inputs:
-      branch:
-        description: 'Branch to run the workflow on'
-        required: false
-        type: string
-        default: ''
+    # inputs:
+    #   branch:
+    #     description: 'Branch to run the workflow on'
+    #     required: false
+    #     type: string
+    #     default: ''
 
 jobs:
   # partial-tests:
@@ -59,8 +59,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.branch }}
+        # with:
+        #   ref: ${{ inputs.branch }}
 
       - uses: actions/setup-python@v5
         with:
