@@ -104,9 +104,9 @@ jobs:
               }
             })
             console.log(runs.data.workflow_runs[0]);
-            github.rest.pulls.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: ${{ steps.cpr.outputs.pull-request-number }},
-              body: 'Tests: ' + result.url,
-            });
+# github.rest.pulls.update({
+#   owner: context.repo.owner,
+#   repo: context.repo.repo,
+#   pull_number: ${{ steps.cpr.outputs.pull-request-number }},
+#   body: 'Tests: ' + result.url,
+# });
