@@ -30,13 +30,13 @@ class SubmittableStatusCache:
         cls.submittable_id_datanodes[entity_id][datanode_id] = reason
 
     @classmethod
-    def __remove(cls, datanode_id: "DataNode"):
+    def __remove(cls, datanode_id: "DataNodeId"):
         submittable_ids: Set = cls.datanode_id_submittables.pop(datanode_id, set())
         for submittable_id in submittable_ids:
-            cls.submittable_id_datanodes[submittable_id].pop(datanode_id)
+            cls.submittable_id_datanodes[submittable_id].pop(datanode_id, None)
             if len(cls.submittable_id_datanodes[submittable_id]) == 0:
                 # Notifier.publish(make_event(scenario, submittable, UPDATE))
-                cls.submittable_id_datanodes.pop(submittable_id)
+                cls.submittable_id_datanodes.pop(submittable_id, None)
 
     @classmethod
     def _check_submittable_is_ready_to_submit(cls, entity_id: str):
