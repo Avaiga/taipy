@@ -1,8 +1,8 @@
 // This script is used to link a workflow run to a pull request.
-// The script retrieves the workflow runs for the repository and finds the workflow run for the branch targetted.
+// The script retrieves the workflow runs for the repository and finds the workflow run for the branch targeted.
 // It then updates the pull request description with the link to the workflow run.
 
-module.exports = async ({github, context, branchTargetted, pullRequestNumber}) => {
+module.exports = async ({github, context, branchTargetted: branchTargeted, pullRequestNumber}) => {
   // Retrieve the workflow runs for the repository.
   const runs = await github.request('GET /repos/{owner}/{repo}/actions/runs', {
     owner: context.repo.owner,
@@ -13,10 +13,10 @@ module.exports = async ({github, context, branchTargetted, pullRequestNumber}) =
   })
 
   // Retrieve the workflow run for the branch targetted.
-  const workflow = runs.data.workflow_runs.find(run => run.head_branch == branchTargetted)
+  const workflow = runs.data.workflow_runs.find(run => run.head_branch == branchTargeted)
 
   // Handle the error case.
-  let message = `No workflow found for the branch ${branchTargetted}`;
+  let message = `No workflow found for the branch ${branchTargeted}`;
   if (workflow) {
     message = `[Workflow result](${workflow.html_url})`;
   }
