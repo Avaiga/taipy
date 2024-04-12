@@ -43,7 +43,6 @@ jobs:
       # - name: Create the pull request updating the dependencies (3.12 only)
       #   if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' and ${{matrix.python-version}} == '3.12'
       #   uses: peter-evans/create-pull-request@v5
-      #   id: cpr-latest
       #   with:
       #     token: ${{ secrets.GITHUB_TOKEN }}
       #     commit-message: Update Python${{matrix.python-version}} dependencies
@@ -60,7 +59,6 @@ jobs:
       - name: Create the pull request updating the Pipfile max
         if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' and ${{matrix.python-version}} != '3.12'
         uses: peter-evans/create-pull-request@v5
-        id: cpr
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: Update Python${{matrix.python-version}} Pipfile
@@ -82,4 +80,5 @@ jobs:
           github-token: ${{ secrets.TRIGGER_GITHUB_PR }}
           script: |
             const script = require('.github/scripts/run-overall-tests.js')
-            await script({github, context, core, ${{matrix.python-version}}, ${{ steps.cpr.outputs.pull-request-number }}})
+            const branchTargetted = `dependencies/update-python${{matrix.python-version}}`
+            await script({github, context, core, branchTargetted})

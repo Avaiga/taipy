@@ -1,7 +1,7 @@
-module.exports = async ({github, context, core, pythonVersion, workflowRunId}) => {
-  const branchTargetted = `dependencies/update-python${pythonVersion}`;
+module.exports = async ({github, context, core, branchTargetted}) => {
+  const workflowRunId = process.env.PULL_REQUEST_NUMBER;
 
-  const result = await github.rest.actions.createWorkflowDispatch({
+  await github.rest.actions.createWorkflowDispatch({
     owner: context.repo.owner,
     repo: context.repo.repo,
     workflow_id: 'overall-tests.yml',
@@ -14,7 +14,7 @@ module.exports = async ({github, context, core, pythonVersion, workflowRunId}) =
       'X-GitHub-Api-Version': '2022-11-28'
     }
   })
-  console.log(runs.data.workflow_runs[0]);
+
   const workflow = runs.data.workflow_runs.find(run => run.head_branch == branchTargetted)
   github.rest.pulls.update({
     owner: context.repo.owner,
