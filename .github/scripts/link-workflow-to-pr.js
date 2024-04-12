@@ -1,3 +1,7 @@
+// This script is used to link a workflow run to a pull request.
+// The script retrieves the workflow runs for the repository and finds the workflow run for the branch targetted.
+// It then updates the pull request description with the link to the workflow run.
+
 module.exports = async ({github, context, branchTargetted, pullRequestNumber}) => {
   // Retrieve the workflow runs for the repository.
   const runs = await github.request('GET /repos/{owner}/{repo}/actions/runs', {

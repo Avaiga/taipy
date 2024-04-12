@@ -82,11 +82,12 @@ jobs:
             const runTests = require('.github/scripts/run-workflow.js')
             const linkTests = require('.github/scripts/link-workflow-to-pr.js')
 
-            // Branch 
+            // Branch to target with the workflow run.
             const branchTargetted = `dependencies/update-python${{matrix.python-version}}`
-            const workflowToTrigger = 'overall-tests.yml';
             // The current pull request number to link the workflow run.
             const pullRequestNumber = process.env.PULL_REQUEST_NUMBER;
+            // The workflow file to trigger.
+            const workflowToTrigger = 'overall-tests.yml';
 
             await runTests({github, context, branchTargetted, workflowToTrigger})
             await linkTests({github, context, branchTargetted, pullRequestNumber})
