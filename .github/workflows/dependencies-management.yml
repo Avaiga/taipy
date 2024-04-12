@@ -41,7 +41,7 @@ jobs:
           cat pipfiles/Pipfile${{matrix.python-version}}.max
 
       - name: Create the pull request updating the dependencies (3.12 only)
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' and matrix.python-version == '3.12'
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == '3.12'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -57,7 +57,7 @@ jobs:
             tools/packages/taipy*/*requirements.txt
 
       - name: Create the pull request updating the Pipfile max
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' and matrix.python-version != '3.12'
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version != '3.12'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
