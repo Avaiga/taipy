@@ -50,34 +50,34 @@ version = "==4.2.13"
 
 
 [packages]
-"pyarrow" = {version="==15.0.0"}
+"pyarrow" = {version="==15.0.2"}
 "networkx" = {version="==3.2.1", markers="python_version>'3.8'"}
 "openpyxl" = {version="==3.1.2"}
-"pandas" = {version="==2.2.0", markers="python_version>'3.8'"}
-"pymongo" = {version="==4.6.1", extras=["srv"]}
-"sqlalchemy" = {version="==2.0.25"}
+"pandas" = {version="==2.2.2", markers="python_version>'3.8'"}
+"pymongo" = {version="==4.6.3", extras=["srv"]}
+"sqlalchemy" = {version="==2.0.29"}
 "toml" = {version="==0.10.2"}
-"boto3" = {version="==1.34.25"}
+"boto3" = {version="==1.34.83"}
 "backports.zoneinfo" = {version="==0.2.1", markers="python_version<'3.9'"}
-"cookiecutter" = {version="==2.5.0"}
-"flask" = {version="==3.0.1"}
+"cookiecutter" = {version="==2.6.0"}
+"flask" = {version="==3.0.3"}
 "flask-cors" = {version="==4.0.0"}
 "flask-socketio" = {version="==5.3.6"}
-"markdown" = {version="==3.5.2"}
+"markdown" = {version="==3.6"}
 "python-dotenv" = {version="==1.0.1"}
-"pytz" = {version="==2023.3.post1"}
+"pytz" = {version="==2024.1"}
 "tzlocal" = {version="==5.2"}
-"gevent" = {version="==23.9.1"}
+"gevent" = {version="==24.2.1"}
 "gevent-websocket" = {version="==0.10.1"}
 "kthread" = {version="==0.2.3"}
 "gitignore-parser" = {version="==0.1.11"}
 "simple-websocket" = {version="==1.0.0"}
-"twisted" = {version="==23.10.0"}
-"deepdiff" = {version="==6.7.1"}
+"twisted" = {version="==24.3.0"}
+"deepdiff" = {version="==7.0.1"}
 "flask-restful" = {version="==0.3.10"}
 "passlib" = {version="==1.7.4"}
-"marshmallow" = {version="==3.20.2"}
-"apispec" = {version="==6.4.0", extras=["yaml"]}
-"apispec-webframeworks" = {version="==1.0.0"}
+"marshmallow" = {version="==3.21.1"}
+"apispec" = {version="==6.6.0", extras=["yaml"]}
+"apispec-webframeworks" = {version="==1.1.0"}
 "watchdog" = {version="==4.0.0"}
 "charset-normalizer" = {version="==3.3.2"}
