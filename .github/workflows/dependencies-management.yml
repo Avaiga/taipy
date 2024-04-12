@@ -79,11 +79,14 @@ jobs:
         with:
           github-token: ${{ secrets.TRIGGER_GITHUB_PR }}
           script: |
-            const runTests = require('.github/scripts/dependencies-management/run-workflow.js')
-            const linkTests = require('.github/scripts/dependencies-management/link-workflow-to-pr.js')
+            const runTests = require('.github/scripts/run-workflow.js')
+            const linkTests = require('.github/scripts/link-workflow-to-pr.js')
 
+            // Branch 
             const branchTargetted = `dependencies/update-python${{matrix.python-version}}`
             const workflowToTrigger = 'overall-tests.yml';
+            // The current pull request number to link the workflow run.
+            const pullRequestNumber = process.env.PULL_REQUEST_NUMBER;
 
             await runTests({github, context, branchTargetted, workflowToTrigger})
-            await linkTests({github, context, branchTargetted})
+            await linkTests({github, context, branchTargetted, pullRequestNumber})
