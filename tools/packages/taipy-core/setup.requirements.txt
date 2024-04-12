@@ -1,9 +1,9 @@
-boto3>=1.29.4,<=1.34.34
-networkx>=2.6,<=3.2.1
+boto3>=1.29.4,<=1.34.83
+networkx>=2.6,<=3.3
 openpyxl>=3.1.2,<=3.1.2
-pandas>=1.3.5,<=2.2.0
-pyarrow>=14.0.2,<=15.0.0
-pymongo[srv]>=4.2.0,<=4.6.1
-sqlalchemy>=2.0.16,<=2.0.25
+pandas>=1.3.5,<=2.2.2
+pyarrow>=14.0.2,<=15.0.2
+pymongo[srv]>=4.2.0,<=4.6.3
+sqlalchemy>=2.0.16,<=2.0.29
 taipy-config
 toml>=0.10,<=0.10.2
