@@ -590,7 +590,11 @@ def test_notification_subscribe(mocker):
 
     notify_1 = NotifyMock(scenario)
     notify_2 = NotifyMock(scenario)
-    mocker.patch.object(_utils, "_load_fct", side_effect=[notify_1, notify_1, notify_1, notify_2, notify_2, notify_2])
+    mocker.patch.object(
+        _utils,
+        "_load_fct",
+        side_effect=[notify_1, notify_1, notify_1, notify_1, notify_2, notify_2, notify_2, notify_2],
+    )
 
     # test subscribing notification
     _ScenarioManager._subscribe(callback=notify_1, scenario=scenario)
@@ -943,63 +947,63 @@ def test_is_submittable():
     dn_2 = scenario.dn_2
 
     assert len(_ScenarioManager._get_all()) == 1
-    assert scenario.id not in SubmittableStatusCache.submittable_id_datanodes
+    assert scenario.id not in SubmittableStatusCache._submittable_id_datanodes
     assert _ScenarioManager._is_submittable(scenario)
     assert _ScenarioManager._is_submittable(scenario.id)
     assert not _ScenarioManager._is_submittable("Scenario_temp")
 
     dn_1.edit_in_progress = True
-    assert scenario.id in SubmittableStatusCache.submittable_id_datanodes
-    assert dn_1.id in SubmittableStatusCache.submittable_id_datanodes[scenario.id]
-    assert dn_1.id in SubmittableStatusCache.datanode_id_submittables
-    assert scenario.id in SubmittableStatusCache.datanode_id_submittables[dn_1.id]
+    assert scenario.id in SubmittableStatusCache._submittable_id_datanodes
+    assert dn_1.id in SubmittableStatusCache._submittable_id_datanodes[scenario.id]
+    assert dn_1.id in SubmittableStatusCache._datanode_id_submittables
+    assert scenario.id in SubmittableStatusCache._datanode_id_submittables[dn_1.id]
     assert (
-        SubmittableStatusCache.submittable_id_datanodes[scenario.id][dn_1.id] == f"DataNode {dn_1.id} is being edited."
+        SubmittableStatusCache._submittable_id_datanodes[scenario.id][dn_1.id] == f"DataNode {dn_1.id} is being edited"
     )
     assert not _ScenarioManager._is_submittable(scenario)
     assert not _ScenarioManager._is_submittable(scenario.id)
 
     dn_1.edit_in_progress = False
-    assert scenario.id not in SubmittableStatusCache.submittable_id_datanodes
-    assert dn_1.id not in SubmittableStatusCache.datanode_id_submittables
+    assert scenario.id not in SubmittableStatusCache._submittable_id_datanodes
+    assert dn_1.id not in SubmittableStatusCache._datanode_id_submittables
     assert _ScenarioManager._is_submittable(scenario)
     assert _ScenarioManager._is_submittable(scenario.id)
 
     dn_1.last_edit_date = None
     dn_2.edit_in_progress = True
-    assert scenario.id in SubmittableStatusCache.submittable_id_datanodes
-    assert dn_1.id in SubmittableStatusCache.submittable_id_datanodes[scenario.id]
-    assert dn_2.id in SubmittableStatusCache.submittable_id_datanodes[scenario.id]
-    assert dn_1.id in SubmittableStatusCache.datanode_id_submittables
-    assert scenario.id in SubmittableStatusCache.datanode_id_submittables[dn_1.id]
-    assert dn_2.id in SubmittableStatusCache.datanode_id_submittables
-    assert scenario.id in SubmittableStatusCache.datanode_id_submittables[dn_2.id]
+    assert scenario.id in SubmittableStatusCache._submittable_id_datanodes
+    assert dn_1.id in SubmittableStatusCache._submittable_id_datanodes[scenario.id]
+    assert dn_2.id in SubmittableStatusCache._submittable_id_datanodes[scenario.id]
+    assert dn_1.id in SubmittableStatusCache._datanode_id_submittables
+    assert scenario.id in SubmittableStatusCache._datanode_id_submittables[dn_1.id]
+    assert dn_2.id in SubmittableStatusCache._datanode_id_submittables
+    assert scenario.id in SubmittableStatusCache._datanode_id_submittables[dn_2.id]
     assert (
-        SubmittableStatusCache.submittable_id_datanodes[scenario.id][dn_1.id] == f"DataNode {dn_1.id} is not written."
+        SubmittableStatusCache._submittable_id_datanodes[scenario.id][dn_1.id] == f"DataNode {dn_1.id} is not written"
     )
     assert (
-        SubmittableStatusCache.submittable_id_datanodes[scenario.id][dn_2.id] == f"DataNode {dn_2.id} is being edited."
+        SubmittableStatusCache._submittable_id_datanodes[scenario.id][dn_2.id] == f"DataNode {dn_2.id} is being edited"
     )
     assert not _ScenarioManager._is_submittable(scenario)
     assert not _ScenarioManager._is_submittable(scenario.id)
 
     dn_1.last_edit_date = datetime.now()
-    assert scenario.id in SubmittableStatusCache.submittable_id_datanodes
-    assert dn_1.id not in SubmittableStatusCache.submittable_id_datanodes[scenario.id]
-    assert dn_2.id in SubmittableStatusCache.submittable_id_datanodes[scenario.id]
-    assert dn_1.id not in SubmittableStatusCache.datanode_id_submittables
-    assert dn_2.id in SubmittableStatusCache.datanode_id_submittables
-    assert scenario.id in SubmittableStatusCache.datanode_id_submittables[dn_2.id]
+    assert scenario.id in SubmittableStatusCache._submittable_id_datanodes
+    assert dn_1.id not in SubmittableStatusCache._submittable_id_datanodes[scenario.id]
+    assert dn_2.id in SubmittableStatusCache._submittable_id_datanodes[scenario.id]
+    assert dn_1.id not in SubmittableStatusCache._datanode_id_submittables
+    assert dn_2.id in SubmittableStatusCache._datanode_id_submittables
+    assert scenario.id in SubmittableStatusCache._datanode_id_submittables[dn_2.id]
     assert (
-        SubmittableStatusCache.submittable_id_datanodes[scenario.id][dn_2.id] == f"DataNode {dn_2.id} is being edited."
+        SubmittableStatusCache._submittable_id_datanodes[scenario.id][dn_2.id] == f"DataNode {dn_2.id} is being edited"
     )
     assert not _ScenarioManager._is_submittable(scenario)
     assert not _ScenarioManager._is_submittable(scenario.id)
 
     dn_2.edit_in_progress = False
-    assert dn_1.id not in SubmittableStatusCache.datanode_id_submittables
-    assert dn_2.id not in SubmittableStatusCache.datanode_id_submittables
-    assert scenario.id not in SubmittableStatusCache.submittable_id_datanodes
+    assert dn_1.id not in SubmittableStatusCache._datanode_id_submittables
+    assert dn_2.id not in SubmittableStatusCache._datanode_id_submittables
+    assert scenario.id not in SubmittableStatusCache._submittable_id_datanodes
     assert _ScenarioManager._is_submittable(scenario)
     assert _ScenarioManager._is_submittable(scenario.id)
 

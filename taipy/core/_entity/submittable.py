@@ -88,7 +88,7 @@ class Submittable:
         Returns:
             True if the given entity is ready to be run. False otherwise.
         """
-        if self._submittable_id not in SubmittableStatusCache.submittable_id_datanodes:
+        if self._submittable_id not in SubmittableStatusCache._submittable_id_datanodes:
             for dn in self.get_inputs():
                 SubmittableStatusCache._compute_if_dn_is_ready_for_reading(dn)
         return SubmittableStatusCache._check_submittable_is_ready_to_submit(self._submittable_id)
