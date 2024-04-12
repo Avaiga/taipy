@@ -12,7 +12,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        python-version: ['3.8'] #, '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
         os: [ubuntu-latest]
     permissions:
       contents: write
@@ -40,21 +40,21 @@ jobs:
           echo EOF >> "$GITHUB_OUTPUT"
           cat pipfiles/Pipfile${{matrix.python-version}}.max
 
-      # - name: Create the pull request updating the dependencies (3.12 only)
-      #   if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' and ${{matrix.python-version}} == '3.12'
-      #   uses: peter-evans/create-pull-request@v5
-      #   with:
-      #     token: ${{ secrets.GITHUB_TOKEN }}
-      #     commit-message: Update Python${{matrix.python-version}} dependencies
-      #     branch: dependencies/update-python${{matrix.python-version}}
-      #     base: develop
-      #     title: 'New dependencies available for Python${{matrix.python-version}}'
-      #     body: |
-      #       ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
-      #     draft: false
-      #     add-paths: |
-      #       tools/packages/pipfiles/Pipfile${{matrix.python-version}}.max
-      #       tools/packages/taipy*/*requirements.txt
+      - name: Create the pull request updating the dependencies (3.12 only)
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' and ${{matrix.python-version}} == '3.12'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Update Python${{matrix.python-version}} dependencies
+          branch: dependencies/update-python${{matrix.python-version}}
+          base: develop
+          title: 'New dependencies available for Python${{matrix.python-version}}'
+          body: |
+            ${{ steps.ensure-dependencies-are-up-to-date.outputs.diff }}
+          draft: false
+          add-paths: |
+            tools/packages/pipfiles/Pipfile${{matrix.python-version}}.max
+            tools/packages/taipy*/*requirements.txt
 
       - name: Create the pull request updating the Pipfile max
         if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' and ${{matrix.python-version}} != '3.12'
@@ -79,6 +79,11 @@ jobs:
         with:
           github-token: ${{ secrets.TRIGGER_GITHUB_PR }}
           script: |
-            const script = require('.github/scripts/run-overall-tests.js')
+            const runTests = require('.github/scripts/dependencies-management/run-workflow.js')
+            const linkTests = require('.github/scripts/dependencies-management/link-workflow-to-pr.js')
+
             const branchTargetted = `dependencies/update-python${{matrix.python-version}}`
-            await script({github, context, core, branchTargetted})
+            const workflowToTrigger = 'overall-tests.yml';
+
+            await runTests({github, context, branchTargetted, workflowToTrigger})
+            await linkTests({github, context, branchTargetted})
