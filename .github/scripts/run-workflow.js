@@ -5,6 +5,6 @@ module.exports = async ({github, context, branchTargeted, workflowToTrigger}) =>
     owner: context.repo.owner,
     repo: context.repo.repo,
     workflow_id: workflowToTrigger,
-    ref: branchTargetted,
+    ref: branchTargeted,
   })
 }
