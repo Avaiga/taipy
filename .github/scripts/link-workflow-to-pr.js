@@ -13,7 +13,7 @@ module.exports = async ({github, context, branchTargeted, pullRequestNumber}) =>
     }
   })
 
-  // Retrieve the workflow run for the branch targetted.
+  // Retrieve the workflow run for the branch targeted.
   const workflow = runs.data.workflow_runs.find(run => run.head_branch == branchTargeted)
 
   // Handle the error case.
