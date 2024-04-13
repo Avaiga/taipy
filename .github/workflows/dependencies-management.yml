@@ -83,7 +83,7 @@ jobs:
             const linkTests = require('.github/scripts/link-workflow-to-pr.js')
 
             // Branch to target with the workflow run.
-            const branchTargeted = `dependencies/update-python${{matrix.python-version}}`
+            const branchTargeted = "dependencies/update-python${{matrix.python-version}}";
             // The current pull request number to link the workflow run.
             const pullRequestNumber = process.env.PULL_REQUEST_NUMBER;
             // The workflow file to trigger.
