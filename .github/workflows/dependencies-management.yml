@@ -88,6 +88,11 @@ jobs:
             const pullRequestNumber = process.env.PULL_REQUEST_NUMBER;
             // The workflow file to trigger.
             const workflowToTrigger = 'overall-tests.yml';
+            const waitForWorkflowCreation = 120000; // 2 minutes
 
-            await runTests({github, context, branchTargeted, workflowToTrigger})
-            await linkTests({github, context, branchTargeted, pullRequestNumber})
+            // Run the tests.
+            await runTests({github, context, branchTargeted, workflowToTrigger});
+            // Wait for the workflow to be created.
+            await new Promise(r => setTimeout(r, waitForWorkflowCreation));
+            // Link the workflow to the PR.
+            await linkTests({github, context, branchTargeted, pullRequestNumber});

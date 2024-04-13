@@ -3,6 +3,7 @@
 // It then updates the pull request description with the link to the workflow run.
 
 module.exports = async ({github, context, branchTargeted, pullRequestNumber}) => {
+  console.log(`Link the workflow run to the pull request #${pullRequestNumber} for the branch '${branchTargeted}'`);
   // Retrieve the workflow runs for the repository.
   const runs = await github.request('GET /repos/{owner}/{repo}/actions/runs', {
     owner: context.repo.owner,
@@ -18,6 +19,7 @@ module.exports = async ({github, context, branchTargeted, pullRequestNumber}) =>
   // Handle the error case.
   let message = `No workflow found for the branch ${branchTargeted}`;
   if (workflow) {
+    console.warn(`Workflow run found: ${workflow.html_url}`)
     message = `[Workflow result](${workflow.html_url})`;
   }
 
