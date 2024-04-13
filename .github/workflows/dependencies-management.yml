@@ -1,3 +1,13 @@
+# This workflow is used to manage the dependencies of the Taipy packages.
+# - Runs each Sunday.
+# - For each Python version supported:
+#   - Call a custom script to align dependencies between Taipy packages.
+#   - Call a custom script to update dependencies (Pipfile and requirements.txt).
+#   - If a new package version is available for the Python version:
+#     - The Python version's Pull Request (PR) is created.
+#       - If the Python version is the latest supported, the PR contains an updated Pipfile and requirements.txt.
+#       - Otherwise, the PR contains the updated Pipfile.
+#     - The action triggers tests workflow to test compatibility and link the workflow to the PR in the description.
 name: Dependencies management
 
 on:
