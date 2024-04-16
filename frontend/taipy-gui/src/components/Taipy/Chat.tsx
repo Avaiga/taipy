@@ -27,7 +27,7 @@ import Send from "@mui/icons-material/Send";
 
 import { createRequestInfiniteTableUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
 import { TaipyActiveProps, disableColor, getSuffixedClassNames } from "./utils";
-import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
+import { useClassNames, useDispatch, useDynamicProperty, useModule, useWhyDidYouUpdate } from "../../utils/hooks";
 import { LoVElt, useLovListMemo } from "./lovUtils";
 import { IconAvatar, avatarSx } from "../../utils/icon";
 import { getInitials } from "../../utils";
@@ -52,7 +52,7 @@ const avatarWidth = 24;
 const chatAvatarSx = { ...avatarSx, width: avatarWidth, height: avatarWidth };
 const avatarColSx = { width: 1.5 * avatarWidth };
 const senderMsgSx = { width: "fit-content", maxWidth: "80%", marginLeft: "auto" };
-const gridSx = { pb: "1em" };
+const gridSx = { pb: "1em", mt: "unset", flex: 1, overflow: "auto" };
 const inputSx = { maxWidth: "unset" };
 const nameSx = { fontSize: "0.6em", fontWeight: "bolder" };
 const senderPaperSx = {
@@ -100,6 +100,8 @@ const defaultBoxSx = {
             ? lighten(theme.palette.background.paper, 0.05)
             : darken(theme.palette.background.paper, 0.15),
 } as SxProps<Theme>;
+const noAnchorSx = { overflowAnchor: "none" } as SxProps<Theme>;
+const anchorSx = { overflowAnchor: "auto", height: "1px", width: "100%" } as SxProps<Theme>;
 
 interface key2Rows {
     key: string;
@@ -111,13 +113,18 @@ interface ChatRowProps {
     name: string;
     className?: string;
     getAvatar: (id: string) => ReactNode;
+    index: number;
 }
 
-const ChatRow = ({ senderId, message, name, className, getAvatar }: ChatRowProps) => {
+const ChatRow = (props: ChatRowProps) => {
+    const { senderId, message, name, className, getAvatar, index } = props;
+    useWhyDidYouUpdate("ChatRow", props as unknown as Record<string, unknown>);
     return senderId == name ? (
-        <Grid item className={getSuffixedClassNames(className, "-sent")} xs={12}>
+        <Grid item className={getSuffixedClassNames(className, "-sent")} xs={12} sx={noAnchorSx}>
             <Box sx={senderMsgSx}>
-                <Paper sx={senderPaperSx}>{message}</Paper>
+                <Paper sx={senderPaperSx} data-idx={index}>
+                    {message}
+                </Paper>
             </Box>
         </Grid>
     ) : (
@@ -127,6 +134,7 @@ const ChatRow = ({ senderId, message, name, className, getAvatar }: ChatRowProps
             className={getSuffixedClassNames(className, "-received")}
             rowSpacing={0.2}
             columnSpacing={1}
+            sx={noAnchorSx}
         >
             <Grid item sx={avatarColSx}></Grid>
             <Grid item sx={nameSx}>
@@ -137,7 +145,9 @@ const ChatRow = ({ senderId, message, name, className, getAvatar }: ChatRowProps
                 {getAvatar(name)}
             </Grid>
             <Grid item>
-                <Paper sx={otherPaperSx}>{message}</Paper>
+                <Paper sx={otherPaperSx} data-idx={index}>
+                    {message}
+                </Paper>
             </Grid>
         </Grid>
     );
@@ -154,6 +164,7 @@ const Chat = (props: ChatProps) => {
     // const [visibleStartIndex, setVisibleStartIndex] = useState(0);
     // const infiniteLoaderRef = useRef<InfiniteLoader>(null);
     const [columns, setColumns] = useState<Array<string>>([]);
+    const scrollDivRef = useRef<HTMLDivElement>(null);
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -161,7 +172,15 @@ const Chat = (props: ChatProps) => {
     const users = useLovListMemo(props.users, props.defaultUsers || "");
 
     const boxSx = useMemo(
-        () => (props.height ? { ...defaultBoxSx, maxHeight: props.height } : defaultBoxSx),
+        () =>
+            props.height
+                ? ({
+                      ...defaultBoxSx,
+                      maxHeight: props.height,
+                      display: "flex",
+                      flexDirection: "column",
+                  } as SxProps<Theme>)
+                : defaultBoxSx,
         [props.height]
     );
     const handleAction = useCallback(
@@ -259,9 +278,10 @@ const Chat = (props: ChatProps) => {
             const newValue = props.messages[page.current.key];
             setRowCount(newValue.rowcount);
             const nr = newValue.data as RowType[];
-            if (Array.isArray(nr) && nr.length > newValue.start) {
+            if (Array.isArray(nr) && nr.length > newValue.start && nr[newValue.start]) {
+                console.log("scrollTop", scrollDivRef.current?.scrollTop);
                 setRows(nr);
-                const cols = Object.keys(nr[0]);
+                const cols = Object.keys(nr[newValue.start]);
                 setColumns(cols.length > 2 ? cols : cols.length == 2 ? [...cols, ""] : ["", ...cols, "", ""]);
             }
         }
@@ -281,17 +301,22 @@ const Chat = (props: ChatProps) => {
     return (
         <Tooltip title={hover || "" || `rowCount: ${rowCount}`}>
             <Paper className={className} sx={boxSx} id={id}>
-                <Grid container rowSpacing={2} sx={gridSx}>
-                    {rows.map((row, idx) => (
-                        <ChatRow
-                            key={columns[0] ? `${row[columns[0]]}` : `id${idx}`}
-                            senderId={senderId}
-                            message={`${row[columns[1]]}`}
-                            name={columns[2] ? `${row[columns[2]]}` : "A"}
-                            className={className}
-                            getAvatar={getAvatar}
-                        />
-                    ))}
+                <Grid container rowSpacing={2} sx={gridSx} ref={scrollDivRef}>
+                    {rows
+                        .filter((row) => row)
+                        .map((row, idx) => {
+                            console.log("ChatRow", row)
+                            return <ChatRow
+                                key={`id${idx}`}
+                                senderId={senderId}
+                                message={`${row[columns[1]]}`}
+                                name={columns[2] ? `${row[columns[2]]}` : "A"}
+                                className={className}
+                                getAvatar={getAvatar}
+                                index={idx}
+                            />
+                        })}
+                    <Box sx={anchorSx} />
                 </Grid>
                 {withInput ? (
                     <TextField

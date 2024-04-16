@@ -313,9 +313,14 @@ class _PandasDataAccessor(_DataAccessor):
                 start = 0
             if end < 0 or end >= rowcount:
                 end = rowcount - 1
-            if bool(payload.get("reverse", False)):
-                start = rowcount - end + start - 1
-                end = rowcount - 1
+            if payload.get("reverse", False):
+                diff = end - start
+                end = rowcount - 1 - start
+                if end < 0:
+                    end = rowcount - 1
+                start = end - diff
+                if start < 0:
+                    start = 0
             # deal with sort
             order_by = payload.get("orderby")
             if isinstance(order_by, str) and len(order_by):
