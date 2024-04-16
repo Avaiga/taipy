@@ -19,7 +19,7 @@ from taipy.config.config import Config
 
 from ..common._utils import _retry_repository_operation
 from ..common.typing import Converter, Entity, Json, ModelType
-from ..exceptions import FileCannotBeRead, InvalidExportPath, ModelNotFound
+from ..exceptions import FileCannotBeRead, ModelNotFound
 from ._abstract_repository import _AbstractRepository
 from ._decoder import _Decoder
 from ._encoder import _Encoder
@@ -122,9 +122,6 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             folder: pathlib.Path = pathlib.Path(folder_path)
         else:
             folder = folder_path
-
-        if folder.resolve() == self._storage_folder.resolve():
-            raise InvalidExportPath("The export folder must not be the storage folder.")
 
         export_dir = folder / self._dir_name
         if not export_dir.exists():
