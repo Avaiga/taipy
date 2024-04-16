@@ -12,7 +12,7 @@
 from datetime import datetime
 
 from taipy.config import Config, Frequency
-from taipy.core.notification._submittable_status_cache import SubmittableStatusCache
+from taipy.core.notification._ready_to_run_cache import _ReadyToRunCache
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 
 
@@ -32,7 +32,7 @@ def test_get_reason_submittable_is_not_ready_to_submit():
     assert not scenario.is_ready_to_run()
     assert not scenario_manager._is_submittable(scenario)
     assert (
-        SubmittableStatusCache.get_reason_submittable_is_not_ready_to_submit(scenario.id)
+        _ReadyToRunCache.get_reason_submittable_is_not_ready_to_submit(scenario.id)
         == f"DataNode {dn_2.id} is being edited."
     )
 
@@ -40,7 +40,7 @@ def test_get_reason_submittable_is_not_ready_to_submit():
     assert not scenario.is_ready_to_run()
     assert not scenario_manager._is_submittable(scenario)
     assert (
-        SubmittableStatusCache.get_reason_submittable_is_not_ready_to_submit(scenario.id)
+        _ReadyToRunCache.get_reason_submittable_is_not_ready_to_submit(scenario.id)
         == f"DataNode {dn_2.id} is being edited; DataNode {dn_1.id} is not written."
     )
 
@@ -48,11 +48,11 @@ def test_get_reason_submittable_is_not_ready_to_submit():
     assert not scenario.is_ready_to_run()
     assert not scenario_manager._is_submittable(scenario)
     assert (
-        SubmittableStatusCache.get_reason_submittable_is_not_ready_to_submit(scenario.id)
+        _ReadyToRunCache.get_reason_submittable_is_not_ready_to_submit(scenario.id)
         == f"DataNode {dn_1.id} is not written."
     )
 
     dn_1.last_edit_date = datetime.now()
     assert scenario.is_ready_to_run()
     assert scenario_manager._is_submittable(scenario)
-    assert SubmittableStatusCache.get_reason_submittable_is_not_ready_to_submit(scenario.id) == ""
+    assert _ReadyToRunCache.get_reason_submittable_is_not_ready_to_submit(scenario.id) == ""
