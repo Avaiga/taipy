@@ -25,7 +25,7 @@ class Snapshot:
     A captured snapshot of the recording core events consumer.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.collected_events = []
         self.entity_type_collected = {}
         self.operation_collected = {}

@@ -54,7 +54,7 @@ class _DefaultJsonAdapter(JsonAdapter):
 
 
 class _TaipyJsonAdapter(object, metaclass=_Singleton):
-    def __init__(self):
+    def __init__(self) -> None:
         self._adapters: t.List[JsonAdapter] = []
         self.register(_DefaultJsonAdapter())
 

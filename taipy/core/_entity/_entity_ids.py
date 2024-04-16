@@ -13,7 +13,7 @@ from __future__ import annotations
 
 
 class _EntityIds:
-    def __init__(self):
+    def __init__(self) -> None:
         self.data_node_ids = set()
         self.task_ids = set()
         self.scenario_ids = set()
