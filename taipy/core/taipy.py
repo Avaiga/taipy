@@ -15,7 +15,7 @@ import shutil
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set, Union, overload
 
-from taipy.config.common.scope import Scope
+from taipy.config import Config, Scope
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._core import Core
@@ -42,6 +42,7 @@ from .data.data_node_id import DataNodeId
 from .exceptions.exceptions import (
     DataNodeConfigIsNotGlobal,
     ExportFolderAlreadyExists,
+    InvalidExportPath,
     ModelNotFound,
     NonExistingVersion,
     VersionIsNotProductionVersion,
@@ -972,9 +973,12 @@ def export_scenario(
     if scenario.cycle:
         entity_ids.cycle_ids = {scenario.cycle.id}
 
+    if folder_path == Config.core.taipy_storage_folder:
+        raise InvalidExportPath("The export folder must not be the storage folder.")
+
     if os.path.exists(folder_path):
         if override:
-            __logger.warn(f"Override the existing folder '{folder_path}'")
+            __logger.warning(f"Override the existing folder '{folder_path}'")
             shutil.rmtree(folder_path, ignore_errors=True)
         else:
             raise ExportFolderAlreadyExists(str(folder_path), scenario_id)
@@ -991,6 +995,9 @@ def export_scenario(
         _ScenarioManagerFactory._build_manager()._export(scenario_id, folder_path)
     for job_id in entity_ids.job_ids:
         _JobManagerFactory._build_manager()._export(job_id, folder_path)
+    for submission_id in entity_ids.submission_ids:
+        _SubmissionManagerFactory._build_manager()._export(submission_id, folder_path)
+    _VersionManagerFactory._build_manager()._export(scenario.version, folder_path)
 
 
 def get_parents(

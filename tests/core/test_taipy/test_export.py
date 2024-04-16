@@ -69,7 +69,8 @@ def test_export_scenario_with_cycle():
     scenario_cfg = configure_test_scenario(1, frequency=Frequency.DAILY)
 
     scenario = tp.create_scenario(scenario_cfg)
-    jobs = tp.submit(scenario).jobs
+    submission = tp.submit(scenario)
+    jobs = submission.jobs
 
     # Export the submitted scenario
     tp.export_scenario(scenario.id, "./tmp/exp_scenario")
@@ -95,6 +96,7 @@ def test_export_scenario_with_cycle():
     assert sorted(os.listdir("./tmp/exp_scenario/jobs")) == sorted(
         [f"{jobs[0].id}.json", f"{jobs[1].id}.json", f"{jobs[2].id}.json", f"{jobs[3].id}.json"]
     )
+    assert os.listdir("./tmp/exp_scenario/submission") == [f"{submission.id}.json"]
     assert sorted(os.listdir("./tmp/exp_scenario/cycles")) == sorted([f"{scenario.cycle.id}.json"])
 
 
@@ -111,6 +113,7 @@ def test_export_scenario_without_cycle():
     assert os.path.exists("./tmp/exp_scenario/tasks")
     assert os.path.exists("./tmp/exp_scenario/scenarios")
     assert os.path.exists("./tmp/exp_scenario/jobs")
+    assert os.path.exists("./tmp/exp_scenario/submission")
     assert not os.path.exists("./tmp/exp_scenario/cycles")  # No cycle
 
 
@@ -127,6 +130,7 @@ def test_export_scenario_override_existing_files():
     assert os.path.exists("./tmp/exp_scenario/tasks")
     assert os.path.exists("./tmp/exp_scenario/scenarios")
     assert os.path.exists("./tmp/exp_scenario/jobs")
+    assert os.path.exists("./tmp/exp_scenario/submission")
     assert os.path.exists("./tmp/exp_scenario/cycles")
 
     scenario_2 = tp.create_scenario(scenario_2_cfg)
@@ -142,6 +146,7 @@ def test_export_scenario_override_existing_files():
     assert os.path.exists("./tmp/exp_scenario/tasks")
     assert os.path.exists("./tmp/exp_scenario/scenarios")
     assert os.path.exists("./tmp/exp_scenario/jobs")
+    assert os.path.exists("./tmp/exp_scenario/submission")
     # The cycles folder should be removed when overriding
     assert not os.path.exists("./tmp/exp_scenario/cycles")
 
@@ -158,7 +163,8 @@ def test_export_scenario_filesystem_with_data():
     # Export scenario with data
     tp.export_scenario(scenario.id, "./tmp/exp_scenario", include_data=True, override=True)
     assert os.path.exists("./tmp/exp_scenario/user_data")
-    assert sorted(os.listdir("./tmp/exp_scenario/user_data")) == sorted(
+    data_files = [f for _, _, files in os.walk("./tmp/exp_scenario/user_data") for f in files]
+    assert sorted(data_files) == sorted(
         [
             f"{scenario.i_1.id}.p",
             f"{scenario.o_1_csv.id}.csv",

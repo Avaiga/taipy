@@ -416,7 +416,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         submissions = _SubmissionManagerFactory._build_manager()._get_all()
         submitted_entity_ids = list(entity_ids.scenario_ids.union(entity_ids.sequence_ids, entity_ids.task_ids))
         for submission in submissions:
-            if submission.entity_id in submitted_entity_ids:
+            if submission.entity_id in submitted_entity_ids or submission.entity_id == scenario.id:
                 entity_ids.submission_ids.add(submission.id)
 
         return entity_ids
