@@ -1023,7 +1023,7 @@ def import_scenario(folder_path: Union[str, pathlib.Path], override: bool = Fals
         "version": _VersionManagerFactory._build_manager,
         "scenarios": _ScenarioManagerFactory._build_manager,
         "jobs": _JobManagerFactory._build_manager,
-        "submissions": _SubmissionManagerFactory._build_manager,
+        "submission": _SubmissionManagerFactory._build_manager,
         "cycles": _CycleManagerFactory._build_manager,
         "sequences": _SequenceManagerFactory._build_manager,
         "tasks": _TaskManagerFactory._build_manager,
@@ -1045,7 +1045,7 @@ def import_scenario(folder_path: Union[str, pathlib.Path], override: bool = Fals
         raise ImportScenarioDoesntHaveAVersion(folder_path)
     entity_managers["version"]()._import(next((folder / "version").iterdir()), "")
 
-    valid_entity_folders = ["version", "scenarios", "jobs", "submissions", "cycles", "sequences", "tasks", "data_nodes"]
+    valid_entity_folders = ["version", "scenarios", "jobs", "submission", "cycles", "sequences", "tasks", "data_nodes"]
     valid_data_folder = Config.core.storage_folder
 
     def check_if_any_importing_entity_exists(log):
