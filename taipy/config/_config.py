@@ -20,12 +20,12 @@ from .unique_section import UniqueSection
 class _Config:
     DEFAULT_KEY = "default"
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._sections: Dict[str, Dict[str, Section]] = {}
         self._unique_sections: Dict[str, UniqueSection] = {}
         self._global_config: GlobalAppConfig = GlobalAppConfig()
 
-    def _clean(self):
+    def _clean(self) -> None:
         self._global_config._clean()
         for unique_section in self._unique_sections.values():
             unique_section._clean()
@@ -39,7 +39,7 @@ class _Config:
         config._global_config = GlobalAppConfig.default_config()
         return config
 
-    def _update(self, other_config):
+    def _update(self, other_config) -> None:
         self._global_config._update(other_config._global_config._to_dict())
         if other_config._unique_sections:
             for section_name, other_section in other_config._unique_sections.items():
@@ -55,12 +55,12 @@ class _Config:
                     self._sections[section_name] = {}
                     self.__add_sections(self._sections[section_name], other_non_unique_sections)
 
-    def __add_sections(self, entity_config, other_entity_configs):
+    def __add_sections(self, entity_config, other_entity_configs) -> None:
         for cfg_id, sub_config in other_entity_configs.items():
             entity_config[cfg_id] = copy(sub_config)
             self.__point_nested_section_to_self(sub_config)
 
-    def __update_sections(self, entity_config, other_entity_configs):
+    def __update_sections(self, entity_config, other_entity_configs) -> None:
         if self.DEFAULT_KEY in other_entity_configs:
             if self.DEFAULT_KEY in entity_config:
                 entity_config[self.DEFAULT_KEY]._update(other_entity_configs[self.DEFAULT_KEY]._to_dict())
@@ -73,7 +73,7 @@ class _Config:
                 entity_config[cfg_id]._update(sub_config._to_dict(), entity_config.get(self.DEFAULT_KEY))
             self.__point_nested_section_to_self(sub_config)
 
-    def __point_nested_section_to_self(self, section):
+    def __point_nested_section_to_self(self, section) -> None:
         """Loop through attributes of a Section to find if any attribute has a list of Section as value.
         If there is, update each nested Section by the corresponding instance in self.
 

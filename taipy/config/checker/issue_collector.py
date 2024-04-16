@@ -29,10 +29,10 @@ class IssueCollector:
     _WARNING_LEVEL = "WARNING"
     _INFO_LEVEL = "INFO"
 
-    def __init__(self):
-        self._errors = []
-        self._warnings = []
-        self._infos = []
+    def __init__(self) -> None:
+        self._errors: List[Issue] = []
+        self._warnings: List[Issue] = []
+        self._infos: List[Issue] = []
 
     @property
     def all(self) -> List[Issue]:
@@ -50,11 +50,11 @@ class IssueCollector:
     def errors(self) -> List[Issue]:
         return self._errors
 
-    def _add_error(self, field: str, value: Any, message: str, checker_name: str):
+    def _add_error(self, field: str, value: Any, message: str, checker_name: str) -> None:
         self._errors.append(Issue(self._ERROR_LEVEL, field, value, message, checker_name))
 
-    def _add_warning(self, field: str, value: Any, message: str, checker_name: str):
+    def _add_warning(self, field: str, value: Any, message: str, checker_name: str) -> None:
         self._warnings.append(Issue(self._WARNING_LEVEL, field, value, message, checker_name))
 
-    def _add_info(self, field: str, value: Any, message: str, checker_name: str):
+    def _add_info(self, field: str, value: Any, message: str, checker_name: str) -> None:
         self._infos.append(Issue(self._INFO_LEVEL, field, value, message, checker_name))
