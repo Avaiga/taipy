@@ -29,8 +29,8 @@ from ..exceptions.exceptions import (
     DifferentScenarioConfigs,
     DoesNotBelongToACycle,
     InsufficientScenarioToCompare,
+    InvalidScenario,
     InvalidSequence,
-    InvalidSscenario,
     NonExistingComparator,
     NonExistingScenario,
     NonExistingScenarioConfig,
@@ -180,7 +180,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         cls._set(scenario)
 
         if not scenario._is_consistent():
-            raise InvalidSscenario(scenario.id)
+            raise InvalidScenario(scenario.id)
 
         actual_sequences = scenario._get_sequences()
         for sequence_name in sequences.keys():
