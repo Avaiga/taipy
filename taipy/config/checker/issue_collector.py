@@ -30,9 +30,9 @@ class IssueCollector:
     _INFO_LEVEL = "INFO"
 
     def __init__(self):
-        self._errors: List[Issue] = []
-        self._warnings: List[Issue] = []
-        self._infos: List[Issue] = []
+        self._errors = []
+        self._warnings = []
+        self._infos = []
 
     @property
     def all(self) -> List[Issue]:
