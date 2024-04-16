@@ -102,7 +102,7 @@ from .utils import (
     _variable_decode,
     is_debugging,
 )
-from .utils._adapter import _Adapter
+from .utils._adapter import _Adapter, _AdaptedLov
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
 from .utils._variable_directory import _MODULE_ID, _VariableDirectory
@@ -1006,16 +1006,10 @@ class Gui:
                     newvalue = self._get_user_content_url(
                         None, {"variable_name": str(_var), Gui._HTML_CONTENT_KEY: str(time.time())}
                     )
-                elif isinstance(newvalue, _TaipyLov):
-                    newvalue = [self.__adapter._run_for_var(newvalue.get_name(), elt) for elt in newvalue.get()]
-                elif isinstance(newvalue, _TaipyLovValue):
-                    if isinstance(newvalue.get(), list):
-                        newvalue = [
-                            self.__adapter._run_for_var(newvalue.get_name(), elt, id_only=True)
-                            for elt in newvalue.get()
-                        ]
-                    else:
-                        newvalue = self.__adapter._run_for_var(newvalue.get_name(), newvalue.get(), id_only=True)
+                elif isinstance(newvalue, (_TaipyLov, _TaipyLovValue)):
+                    newvalue = self.__adapter.run(
+                        newvalue.get_name(), newvalue.get(), id_only=isinstance(newvalue, _TaipyLovValue)
+                    )
                 elif isinstance(newvalue, _TaipyToJson):
                     newvalue = newvalue.get()
                 if isinstance(newvalue, (dict, _MapDict)):
@@ -1493,7 +1487,7 @@ class Gui:
     def __is_building(self):
         return hasattr(self, "_building") and self._building
 
-    def _get_rebuild_fn_name(self, name: str):
+    def _get_call_method_name(self, name: str):
         return f"{Gui.__SELF_VAR}.{name}"
 
     def __get_attributes(self, attr_json: str, hash_json: str, args_dict: t.Dict[str, t.Any]):
@@ -1504,6 +1498,9 @@ class Gui:
 
     def _compare_data(self, *data):
         return data[0]
+
+    def _get_adapted_lov(self, lov: list, var_type: str):
+        return self.__adapter._get_adapted_lov(lov, var_type)
 
     def _tbl_cols(
         self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs
