@@ -261,7 +261,7 @@ class NonExistingScenarioConfig(Exception):
         self.message = f"Scenario config: {scenario_config_id} does not exist."
 
 
-class InvalidSscenario(Exception):
+class InvalidScenario(Exception):
     """Raised if a Scenario is not a Directed Acyclic Graph."""
 
     def __init__(self, scenario_id: str):
@@ -381,6 +381,40 @@ class ExportFolderAlreadyExists(Exception):
             f"Folder '{folder_path}' already exists and can not be used to export scenario '{scenario_id}'."
             " Please use the 'override' parameter to override it."
         )
+
+
+class EntitiesToBeImportAlredyExist(Exception):
+    """Raised when entities in the scenario to be imported have already exists"""
+
+    def __init__(self, folder_path):
+        self.message = (
+            f"The import folder {folder_path} contains entities that have already existed."
+            " Please use the 'override' parameter to override those."
+        )
+
+
+class DataToBeImportAlredyExist(Exception):
+    """Raised when data files in the scenario to be imported have already exists"""
+
+    def __init__(self, folder_path):
+        self.message = (
+            f"The import folder {folder_path} contains data files that have already existed."
+            " Please use the 'override' parameter to override those."
+        )
+
+
+class ImportFolderDoesntContainAnyScenario(Exception):
+    """Raised when the import folder doesn't contain any scenario"""
+
+    def __init__(self, folder_path):
+        self.message = f"The import folder {folder_path} doesn't contain any scenario."
+
+
+class ImportScenarioDoesntHaveAVersion(Exception):
+    """Raised when the import folder doesn't contain any scenario"""
+
+    def __init__(self, folder_path):
+        self.message = f"The import scenario in the folder {folder_path} doesn't have a version."
 
 
 class SQLQueryCannotBeExecuted(Exception):

@@ -131,6 +131,11 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
         shutil.copy2(self.__get_path(entity_id), export_path)
 
+    def _import(self, entity_file_path: pathlib.Path):
+        file_content = self.__read_file(entity_file_path)
+        entity = self.__file_content_to_entity(file_content)
+        return entity
+
     ###########################################
     # ##   Specific or optimized methods   ## #
     ###########################################

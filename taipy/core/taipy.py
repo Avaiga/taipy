@@ -41,7 +41,10 @@ from .data.data_node import DataNode
 from .data.data_node_id import DataNodeId
 from .exceptions.exceptions import (
     DataNodeConfigIsNotGlobal,
+    EntitiesToBeImportAlredyExist,
     ExportFolderAlreadyExists,
+    ImportFolderDoesntContainAnyScenario,
+    ImportScenarioDoesntHaveAVersion,
     InvalidExportPath,
     ModelNotFound,
     NonExistingVersion,
@@ -65,7 +68,7 @@ from .task.task_id import TaskId
 __logger = _TaipyLogger._get_logger()
 
 
-def set(entity: Union[DataNode, Task, Sequence, Scenario, Cycle]):
+def set(entity: Union[DataNode, Task, Sequence, Scenario, Cycle, Submission]):
     """Save or update an entity.
 
     This function allows you to save or update an entity in Taipy.
@@ -998,6 +1001,101 @@ def export_scenario(
     for submission_id in entity_ids.submission_ids:
         _SubmissionManagerFactory._build_manager()._export(submission_id, folder_path)
     _VersionManagerFactory._build_manager()._export(scenario.version, folder_path)
+
+
+def import_scenario(folder_path: Union[str, pathlib.Path], override: bool = False):
+    """Import a folder contains an exported scenario into the current Taipy application.
+
+    Args:
+        folder_path (Union[str, pathlib.Path]): The folder path to the scenario to import.
+            If the path doesn't exist, an exception is raised.
+        override (bool): If True, override the entities if existed. Default value is False.
+
+    Return:
+        The imported scenario.
+
+    Raises:
+        FileNotFoundError: If the import folder path does not exist.
+        ImportFolderDoesntContainAnyScenario: If the import folder doesn't contain any scenario.
+        EntitiesToBeImportAlredyExist: If there is any entity in the import folder that has already existed.
+    """
+    entity_managers = {
+        "version": _VersionManagerFactory._build_manager,
+        "scenarios": _ScenarioManagerFactory._build_manager,
+        "jobs": _JobManagerFactory._build_manager,
+        "submissions": _SubmissionManagerFactory._build_manager,
+        "cycles": _CycleManagerFactory._build_manager,
+        "sequences": _SequenceManagerFactory._build_manager,
+        "tasks": _TaskManagerFactory._build_manager,
+        "data_nodes": _DataManagerFactory._build_manager,
+    }
+
+    if isinstance(folder_path, str):
+        folder: pathlib.Path = pathlib.Path(folder_path)
+    else:
+        folder = folder_path
+
+    if not folder.exists():
+        raise FileNotFoundError(f"The import folder '{folder_path}' does not exist.")
+
+    if not (folder / "scenarios").exists():
+        raise ImportFolderDoesntContainAnyScenario(folder_path)
+
+    if not (folder / "version").exists():
+        raise ImportScenarioDoesntHaveAVersion(folder_path)
+    entity_managers["version"]()._import(next((folder / "version").iterdir()), "")
+
+    valid_entity_folders = ["version", "scenarios", "jobs", "submissions", "cycles", "sequences", "tasks", "data_nodes"]
+    valid_data_folder = Config.core.storage_folder
+
+    def check_if_any_importing_entity_exists(log):
+        any_entity_exists = False
+
+        for entity_folder in valid_entity_folders:
+            if not (folder / entity_folder).exists():
+                continue
+
+            manager = entity_managers[entity_folder]()
+
+            for entity_file in (folder / entity_folder).iterdir():
+                if not entity_file.is_file():
+                    continue
+                entity_id = entity_file.stem
+                if manager._exists(entity_id):
+                    log(f"{entity_id} already exists and maybe overridden if imported.")
+                    any_entity_exists = True
+
+        return any_entity_exists
+
+    if override:
+        check_if_any_importing_entity_exists(__logger.warning)
+    else:
+        if check_if_any_importing_entity_exists(__logger.error):
+            raise EntitiesToBeImportAlredyExist(folder_path)
+
+    imported_scenario = None
+
+    for entity_folder in folder.iterdir():
+        if not entity_folder.is_dir() or entity_folder.name not in valid_entity_folders + [valid_data_folder]:
+            __logger.warning(f"{entity_folder} is not a valid Taipy folder and will not be imported.")
+            continue
+
+        # Skip the version folder as it is already checked
+        if entity_folder.name == "version":
+            continue
+
+        entity_type = entity_folder.name
+        manager = entity_managers[entity_type]()
+        for entity_file in entity_folder.iterdir():
+            imported_entity = manager._import(
+                entity_file,
+                version=_VersionManagerFactory._build_manager()._get_latest_version(),
+                data_folder=folder / valid_data_folder,
+            )
+            if entity_type == "scenarios":
+                imported_scenario = imported_entity
+
+    return imported_scenario
 
 
 def get_parents(
