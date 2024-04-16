@@ -102,7 +102,7 @@ from .utils import (
     _variable_decode,
     is_debugging,
 )
-from .utils._adapter import _Adapter, _AdaptedLov
+from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
 from .utils._variable_directory import _MODULE_ID, _VariableDirectory
