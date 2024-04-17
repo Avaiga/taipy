@@ -1004,7 +1004,10 @@ def export_scenario(
 
 
 def import_scenario(folder_path: Union[str, pathlib.Path], override: bool = False):
-    """Import a folder contains an exported scenario into the current Taipy application.
+    """Import a folder containing an exported scenario into the current Taipy application.
+
+    The folder should contain all related entities of the scenario, and all entities should
+    belong to the same version that is compatible with the current Taipy application version.
 
     Args:
         folder_path (Union[str, pathlib.Path]): The folder path to the scenario to import.
@@ -1018,18 +1021,8 @@ def import_scenario(folder_path: Union[str, pathlib.Path], override: bool = Fals
         FileNotFoundError: If the import folder path does not exist.
         ImportFolderDoesntContainAnyScenario: If the import folder doesn't contain any scenario.
         EntitiesToBeImportAlredyExist: If there is any entity in the import folder that has already existed.
+        ConflictedConfigurationError: If the configuration of the imported scenario is conflicted with the current one.
     """
-    entity_managers = {
-        "version": _VersionManagerFactory._build_manager,
-        "scenarios": _ScenarioManagerFactory._build_manager,
-        "jobs": _JobManagerFactory._build_manager,
-        "submission": _SubmissionManagerFactory._build_manager,
-        "cycles": _CycleManagerFactory._build_manager,
-        "sequences": _SequenceManagerFactory._build_manager,
-        "tasks": _TaskManagerFactory._build_manager,
-        "data_nodes": _DataManagerFactory._build_manager,
-    }
-
     if isinstance(folder_path, str):
         folder: pathlib.Path = pathlib.Path(folder_path)
     else:
@@ -1038,63 +1031,72 @@ def import_scenario(folder_path: Union[str, pathlib.Path], override: bool = Fals
     if not folder.exists():
         raise FileNotFoundError(f"The import folder '{folder_path}' does not exist.")
 
-    if not (folder / "scenarios").exists():
+    if not ((folder / "scenarios").exists() or (folder / "scenario").exists()):
         raise ImportFolderDoesntContainAnyScenario(folder_path)
 
     if not (folder / "version").exists():
         raise ImportScenarioDoesntHaveAVersion(folder_path)
+
+    entity_managers = {
+        "cycles": _CycleManagerFactory._build_manager,
+        "cycle": _CycleManagerFactory._build_manager,
+        "data_nodes": _DataManagerFactory._build_manager,
+        "data_node": _DataManagerFactory._build_manager,
+        "tasks": _TaskManagerFactory._build_manager,
+        "task": _TaskManagerFactory._build_manager,
+        "scenarios": _ScenarioManagerFactory._build_manager,
+        "scenario": _ScenarioManagerFactory._build_manager,
+        "jobs": _JobManagerFactory._build_manager,
+        "job": _JobManagerFactory._build_manager,
+        "submission": _SubmissionManagerFactory._build_manager,
+        "version": _VersionManagerFactory._build_manager,
+    }
+
     entity_managers["version"]()._import(next((folder / "version").iterdir()), "")
 
-    valid_entity_folders = ["version", "scenarios", "jobs", "submission", "cycles", "sequences", "tasks", "data_nodes"]
+    valid_entity_folders = list(entity_managers.keys())
     valid_data_folder = Config.core.storage_folder
 
-    def check_if_any_importing_entity_exists(log):
-        any_entity_exists = False
-
-        for entity_folder in valid_entity_folders:
-            if not (folder / entity_folder).exists():
-                continue
-
-            manager = entity_managers[entity_folder]()
-
-            for entity_file in (folder / entity_folder).iterdir():
-                if not entity_file.is_file():
-                    continue
-                entity_id = entity_file.stem
-                if manager._exists(entity_id):
-                    log(f"{entity_id} already exists and maybe overridden if imported.")
-                    any_entity_exists = True
-
-        return any_entity_exists
-
-    if override:
-        check_if_any_importing_entity_exists(__logger.warning)
-    else:
-        if check_if_any_importing_entity_exists(__logger.error):
-            raise EntitiesToBeImportAlredyExist(folder_path)
-
     imported_scenario = None
+    imported_entities = []
 
     for entity_folder in folder.iterdir():
         if not entity_folder.is_dir() or entity_folder.name not in valid_entity_folders + [valid_data_folder]:
             __logger.warning(f"{entity_folder} is not a valid Taipy folder and will not be imported.")
             continue
 
-        # Skip the version folder as it is already checked
-        if entity_folder.name == "version":
+    for entity_type in valid_entity_folders:
+        # Skip the version folder as it is already handled
+        if entity_type == "version":
             continue
 
-        entity_type = entity_folder.name
+        entity_folder = folder / entity_type
+        if not entity_folder.exists():
+            continue
+
         manager = entity_managers[entity_type]()
         for entity_file in entity_folder.iterdir():
+            # Check if the to-be-imported entity already exists
+            entity_id = entity_file.stem
+            if manager._exists(entity_id):
+                if override:
+                    __logger.warning(f"{entity_id} already exists and will be overridden.")
+                else:
+                    __logger.error(f"{entity_id} already exists. Please use the 'override' parameter to override it.")
+                    raise EntitiesToBeImportAlredyExist(folder_path)
+
+            # Import the entity
             imported_entity = manager._import(
                 entity_file,
                 version=_VersionManagerFactory._build_manager()._get_latest_version(),
                 data_folder=folder / valid_data_folder,
             )
-            if entity_type == "scenarios":
+
+            imported_entities.append(imported_entity)
+            if entity_type in ["scenario", "scenarios"]:
                 imported_scenario = imported_entity
 
+    __logger.info(f"Scenario {imported_scenario.id} has been successfully imported.")  # type: ignore[union-attr]
     return imported_scenario
 
 

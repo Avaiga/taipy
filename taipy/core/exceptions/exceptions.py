@@ -387,10 +387,7 @@ class EntitiesToBeImportAlredyExist(Exception):
     """Raised when entities in the scenario to be imported have already exists"""
 
     def __init__(self, folder_path):
-        self.message = (
-            f"The import folder {folder_path} contains entities that have already existed."
-            " Please use the 'override' parameter to override those."
-        )
+        self.message = f"The import folder {folder_path} contains entities that have already existed."
 
 
 class DataToBeImportAlredyExist(Exception):
