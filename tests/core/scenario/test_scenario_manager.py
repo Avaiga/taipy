@@ -593,7 +593,18 @@ def test_notification_subscribe(mocker):
     mocker.patch.object(
         _utils,
         "_load_fct",
-        side_effect=[notify_1, notify_1, notify_1, notify_1, notify_2, notify_2, notify_2, notify_2],
+        side_effect=[
+            notify_1,
+            notify_1,
+            notify_1,
+            notify_1,
+            notify_1,
+            notify_2,
+            notify_2,
+            notify_2,
+            notify_2,
+            notify_2,
+        ],
     )
 
     # test subscribing notification

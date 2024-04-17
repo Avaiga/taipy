@@ -167,7 +167,9 @@ def test_events_published_for_scenario_submission():
     register_id_0, register_queue_0 = Notifier.register()
     all_evts = RecordingConsumer(register_id_0, register_queue_0)
     all_evts.start()
-    # Write value to the unwritten data node trigger 3 is_submittable update events for the scenario, sequence and task
+    # Before and after writing value to the unwritten data node trigger:
+    # 3 is_submittable update events for the scenario, sequence and task being not submittable
+    # 3 is_submittable update events for the scenario, sequence and task being submittable
     # Submit a scenario triggers:
     # 1 scenario submission event
     # 7 dn update events (for last_edit_date, editor_id(x2), editor_expiration_date(x2) and edit_in_progress(x2))
@@ -180,16 +182,16 @@ def test_events_published_for_scenario_submission():
     scenario.submit()
     snapshot = all_evts.capture()
 
-    assert len(snapshot.collected_events) == 20
+    assert len(snapshot.collected_events) == 23
     assert snapshot.entity_type_collected.get(EventEntityType.CYCLE, 0) == 0
     assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 7
-    assert snapshot.entity_type_collected.get(EventEntityType.TASK, 0) == 1
-    assert snapshot.entity_type_collected.get(EventEntityType.SEQUENCE, 0) == 1
-    assert snapshot.entity_type_collected.get(EventEntityType.SCENARIO, 0) == 2
+    assert snapshot.entity_type_collected.get(EventEntityType.TASK, 0) == 2
+    assert snapshot.entity_type_collected.get(EventEntityType.SEQUENCE, 0) == 2
+    assert snapshot.entity_type_collected.get(EventEntityType.SCENARIO, 0) == 3
     assert snapshot.entity_type_collected.get(EventEntityType.JOB, 0) == 4
     assert snapshot.entity_type_collected.get(EventEntityType.SUBMISSION, 0) == 5
     assert snapshot.operation_collected.get(EventOperation.CREATION, 0) == 2
-    assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 17
+    assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 20
     assert snapshot.operation_collected.get(EventOperation.SUBMISSION, 0) == 1
 
     assert snapshot.attr_name_collected["last_edit_date"] == 1
@@ -199,7 +201,7 @@ def test_events_published_for_scenario_submission():
     assert snapshot.attr_name_collected["status"] == 3
     assert snapshot.attr_name_collected["jobs"] == 1
     assert snapshot.attr_name_collected["submission_status"] == 3
-    assert snapshot.attr_name_collected["is_submittable"] == 3
+    assert snapshot.attr_name_collected["is_submittable"] == 6
 
     all_evts.stop()
 
@@ -308,10 +310,13 @@ def test_scenario_events():
 
     scenario.submit()
     snapshot = consumer.capture()
-    assert len(snapshot.collected_events) == 1
-    assert snapshot.collected_events[0].operation == EventOperation.SUBMISSION
+    assert len(snapshot.collected_events) == 2
+    assert snapshot.collected_events[0].operation == EventOperation.UPDATE
     assert snapshot.collected_events[0].entity_type == EventEntityType.SCENARIO
     assert snapshot.collected_events[0].metadata.get("config_id") == scenario.config_id
+    assert snapshot.collected_events[1].operation == EventOperation.SUBMISSION
+    assert snapshot.collected_events[1].entity_type == EventEntityType.SCENARIO
+    assert snapshot.collected_events[1].metadata.get("config_id") == scenario.config_id
 
     # Delete scenario
     tp.delete(scenario.id)

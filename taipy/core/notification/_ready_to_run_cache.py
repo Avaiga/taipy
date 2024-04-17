@@ -51,6 +51,8 @@ class _ReadyToRunCache:
     @classmethod
     def _add(cls, submittable_id: Union["ScenarioId", "SequenceId", "TaskId"], datanode_id: "DataNodeId", reason: str):
         cls._datanode_id_submittables[datanode_id].add(submittable_id)
+        if submittable_id not in cls._submittable_id_datanodes:
+            cls._publish_submittable_property_event(submittable_id, False)
         cls._submittable_id_datanodes[submittable_id][datanode_id] = reason
 
     @classmethod
