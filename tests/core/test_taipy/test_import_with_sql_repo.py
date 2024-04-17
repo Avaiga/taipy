@@ -20,12 +20,7 @@ from taipy import Config, Frequency, Scope
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data._data_manager import _DataManager
-from taipy.core.exceptions.exceptions import (
-    ConflictedConfigurationError,
-    EntitiesToBeImportAlredyExist,
-    ImportFolderDoesntContainAnyScenario,
-    ImportScenarioDoesntHaveAVersion,
-)
+from taipy.core.exceptions.exceptions import ConflictedConfigurationError, EntitiesToBeImportAlredyExist
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.submission._submission_manager import _SubmissionManager
@@ -78,7 +73,7 @@ def export_test_scenario(scenario_cfg, folder_path="./tmp/exp_scenario", overrid
     return scenario
 
 
-def test_import_scenario_without_data(init_managers):
+def test_import_scenario_without_data(init_sql_repo, init_managers):
     scenario_cfg = configure_test_scenario(1, frequency=Frequency.DAILY)
     scenario = export_test_scenario(scenario_cfg)
 
@@ -100,7 +95,7 @@ def test_import_scenario_without_data(init_managers):
     assert len(_VersionManager._get_all()) == 1
 
 
-def test_import_scenario_with_data(init_managers):
+def test_import_scenario_with_data(init_sql_repo, init_managers):
     scenario_cfg = configure_test_scenario(1, frequency=Frequency.DAILY)
     export_test_scenario(scenario_cfg, include_data=True)
 
@@ -113,7 +108,7 @@ def test_import_scenario_with_data(init_managers):
     assert all(os.path.exists(dn.path) for dn in imported_scenario.data_nodes.values())
 
 
-def test_import_scenario_when_entities_are_already_existed(caplog):
+def test_import_scenario_when_entities_are_already_existed(init_sql_repo, caplog):
     scenario_cfg = configure_test_scenario(1, frequency=Frequency.DAILY)
     export_test_scenario(scenario_cfg)
 
@@ -135,7 +130,7 @@ def test_import_scenario_when_entities_are_already_existed(caplog):
     assert len(_ScenarioManager._get_all()) == 1
 
 
-def test_import_incompatible_scenario(init_managers):
+def test_import_incompatible_scenario(init_sql_repo, init_managers):
     scenario_cfg = configure_test_scenario(1, frequency=Frequency.DAILY)
     export_test_scenario(scenario_cfg)
 
@@ -145,28 +140,4 @@ def test_import_incompatible_scenario(init_managers):
     Config.configure_data_node("new_dn")
 
     with pytest.raises(ConflictedConfigurationError):
-        tp.import_scenario("./tmp/exp_scenario")
-
-
-def test_import_a_non_exists_folder():
-    scenario_cfg = configure_test_scenario(1, frequency=Frequency.DAILY)
-    export_test_scenario(scenario_cfg)
-
-    with pytest.raises(FileNotFoundError):
-        tp.import_scenario("non_exists_folder")
-
-
-def test_import_an_empty_folder(tmpdir_factory):
-    empty_folder = tmpdir_factory.mktemp("empty_folder").strpath
-
-    with pytest.raises(ImportFolderDoesntContainAnyScenario):
-        tp.import_scenario(empty_folder)
-
-
-def test_import_with_no_version():
-    scenario_cfg = configure_test_scenario(1, frequency=Frequency.DAILY)
-    export_test_scenario(scenario_cfg)
-    shutil.rmtree("./tmp/exp_scenario/version")
-
-    with pytest.raises(ImportScenarioDoesntHaveAVersion):
         tp.import_scenario("./tmp/exp_scenario")
