@@ -96,7 +96,7 @@ class _Factory:
                 ("users", PropertyType.lov),
                 ("sender_id",),
                 ("height",),
-                ("page_size", PropertyType.number, 50)
+                ("page_size", PropertyType.number, 50),
             ]
         ),
         "chart": lambda gui, control_type, attrs: _Builder(

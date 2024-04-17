@@ -15,19 +15,22 @@ import React, { useMemo, useCallback, KeyboardEvent, MouseEvent, useState, useRe
 import { SxProps, Theme, darken, lighten } from "@mui/material/styles";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
+import Chip from "@mui/material/Chip";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Paper from "@mui/material/Paper";
+import Popper from "@mui/material/Popper";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Send from "@mui/icons-material/Send";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
 // import InfiniteLoader from "react-window-infinite-loader";
 
 import { createRequestInfiniteTableUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
 import { TaipyActiveProps, disableColor, getSuffixedClassNames } from "./utils";
-import { useClassNames, useDispatch, useDynamicProperty, useModule, useWhyDidYouUpdate } from "../../utils/hooks";
+import { useClassNames, useDispatch, useDynamicProperty, useElementVisible, useModule } from "../../utils/hooks";
 import { LoVElt, useLovListMemo } from "./lovUtils";
 import { IconAvatar, avatarSx } from "../../utils/icon";
 import { getInitials } from "../../utils";
@@ -100,7 +103,7 @@ const defaultBoxSx = {
             ? lighten(theme.palette.background.paper, 0.05)
             : darken(theme.palette.background.paper, 0.15),
 } as SxProps<Theme>;
-const noAnchorSx = { overflowAnchor: "none" } as SxProps<Theme>;
+const noAnchorSx = { overflowAnchor: "none", "& *": { overflowAnchor: "none" } } as SxProps<Theme>;
 const anchorSx = { overflowAnchor: "auto", height: "1px", width: "100%" } as SxProps<Theme>;
 
 interface key2Rows {
@@ -118,7 +121,6 @@ interface ChatRowProps {
 
 const ChatRow = (props: ChatRowProps) => {
     const { senderId, message, name, className, getAvatar, index } = props;
-    useWhyDidYouUpdate("ChatRow", props as unknown as Record<string, unknown>);
     return senderId == name ? (
         <Grid item className={getSuffixedClassNames(className, "-sent")} xs={12} sx={noAnchorSx}>
             <Box sx={senderMsgSx}>
@@ -160,11 +162,13 @@ const Chat = (props: ChatProps) => {
 
     const [rows, setRows] = useState<RowType[]>([]);
     const page = useRef<key2Rows>({ key: defaultKey });
-    const [rowCount, setRowCount] = useState(1000); // need something > 0 to bootstrap the infinite loader
-    // const [visibleStartIndex, setVisibleStartIndex] = useState(0);
-    // const infiniteLoaderRef = useRef<InfiniteLoader>(null);
+    const [rowCount, setRowCount] = useState(0);
     const [columns, setColumns] = useState<Array<string>>([]);
     const scrollDivRef = useRef<HTMLDivElement>(null);
+    const anchorDivRef = useRef<HTMLElement>(null);
+    const isAnchorDivVisible = useElementVisible(anchorDivRef);
+    const [showMessage, setShowMessage] = useState(false);
+    const [anchorPopup, setAnchorPopup] = useState<HTMLDivElement | null>(null);
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -271,6 +275,11 @@ const Chat = (props: ChatProps) => {
         [pageSize, updateVarName, id, dispatch, module]
     );
 
+    const showBottom = useCallback(() => {
+        anchorDivRef.current?.scrollIntoView();
+        setShowMessage(false);
+    }, []);
+
     const refresh = typeof props.messages === "number";
 
     useEffect(() => {
@@ -279,8 +288,10 @@ const Chat = (props: ChatProps) => {
             setRowCount(newValue.rowcount);
             const nr = newValue.data as RowType[];
             if (Array.isArray(nr) && nr.length > newValue.start && nr[newValue.start]) {
-                console.log("scrollTop", scrollDivRef.current?.scrollTop);
-                setRows(nr);
+                setRows((old) => {
+                    old.length && nr.length > old.length && setShowMessage(true);
+                    return nr;
+                });
                 const cols = Object.keys(nr[newValue.start]);
                 setColumns(cols.length > 2 ? cols : cols.length == 2 ? [...cols, ""] : ["", ...cols, "", ""]);
             }
@@ -288,8 +299,16 @@ const Chat = (props: ChatProps) => {
     }, [refresh, props.messages]);
 
     useEffect(() => {
+        if (showMessage && !isAnchorDivVisible) {
+            setAnchorPopup(scrollDivRef.current);
+            setTimeout(() => setShowMessage(false), 5000);
+        } else if (!showMessage) {
+            setAnchorPopup(null);
+        }
+    }, [showMessage, isAnchorDivVisible]);
+
+    useEffect(() => {
         if (refresh) {
-            setRows([]);
             setTimeout(() => loadMoreItems(0), 1); // So that the state can be changed
         }
     }, [refresh, loadMoreItems]);
@@ -302,22 +321,29 @@ const Chat = (props: ChatProps) => {
         <Tooltip title={hover || "" || `rowCount: ${rowCount}`}>
             <Paper className={className} sx={boxSx} id={id}>
                 <Grid container rowSpacing={2} sx={gridSx} ref={scrollDivRef}>
-                    {rows
-                        .filter((row) => row)
-                        .map((row, idx) => {
-                            console.log("ChatRow", row)
-                            return <ChatRow
-                                key={`id${idx}`}
+                    {rows.map((row, idx) =>
+                        row ? (
+                            <ChatRow
+                                key={columns[0] ? `${row[columns[0]]}` : `id${idx}`}
                                 senderId={senderId}
                                 message={`${row[columns[1]]}`}
-                                name={columns[2] ? `${row[columns[2]]}` : "A"}
+                                name={columns[2] ? `${row[columns[2]]}` : "Unknown"}
                                 className={className}
                                 getAvatar={getAvatar}
                                 index={idx}
                             />
-                        })}
-                    <Box sx={anchorSx} />
+                        ) : null
+                    )}
+                    <Box sx={anchorSx} ref={anchorDivRef} />
                 </Grid>
+                <Popper id={id} open={Boolean(anchorPopup)} anchorEl={anchorPopup} placement="right">
+                    <Chip
+                        label="A new message is available"
+                        variant="outlined"
+                        onClick={showBottom}
+                        icon={<ArrowDownwardIcon />}
+                    />
+                </Popper>
                 {withInput ? (
                     <TextField
                         margin="dense"
