@@ -318,7 +318,7 @@ const Chat = (props: ChatProps) => {
     }, [loadMoreItems]);
 
     return (
-        <Tooltip title={hover || "" || `rowCount: ${rowCount}`}>
+        <Tooltip title={hover || ""}>
             <Paper className={className} sx={boxSx} id={id}>
                 <Grid container rowSpacing={2} sx={gridSx} ref={scrollDivRef}>
                     {rows.map((row, idx) =>
