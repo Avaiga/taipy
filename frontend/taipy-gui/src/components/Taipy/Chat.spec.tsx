@@ -30,48 +30,48 @@ const messages: TableValueType = {
     ["2", "msg From Another unknown User", "Fredo"],
     ["3", "This from the sender User", "taipy"],
     ["4", "And from another known one", "Fredi"],
-]}};
+], rowcount: 4, start: 0}};
 const user1: [string, stringIcon] = ["Fred", { path: "/images/favicon.png", text: "Fred.png" }];
 const user2: [string, stringIcon] = ["Fredi", { path: "/images/fred.png", text: "Fredi.png" }];
 const users = [user1, user2];
 
-const searchMsg = messages[0][1];
+const searchMsg = messages[valueKey].data[0][1];
 
 describe("Chat Component", () => {
     it("renders", async () => {
-        const { getByText, getByLabelText } = render(<Chat messages={messages} />);
+        const { getByText, getByLabelText } = render(<Chat messages={messages} defaultKey={valueKey} />);
         const elt = getByText(searchMsg);
         expect(elt.tagName).toBe("DIV");
         const input = getByLabelText("message (taipy)");
         expect(input.tagName).toBe("INPUT");
     });
     it("uses the class", async () => {
-        const { getByText } = render(<Chat messages={messages} className="taipy-chat" />);
+        const { getByText } = render(<Chat messages={messages} className="taipy-chat" defaultKey={valueKey} />);
         const elt = getByText(searchMsg);
         expect(elt.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("taipy-chat");
     });
     it("can display an avatar", async () => {
-        const { getByAltText } = render(<Chat messages={messages} users={users} />);
+        const { getByAltText } = render(<Chat messages={messages} users={users} defaultKey={valueKey} />);
         const elt = getByAltText("Fred.png");
         expect(elt.tagName).toBe("IMG");
     });
     it("is disabled", async () => {
-        const { getAllByRole } = render(<Chat messages={messages} active={false} />);
+        const { getAllByRole } = render(<Chat messages={messages} active={false} defaultKey={valueKey} />);
         const elts = getAllByRole("button");
         elts.forEach((elt) => expect(elt).toHaveClass("Mui-disabled"));
     });
     it("is enabled by default", async () => {
-        const { getAllByRole } = render(<Chat messages={messages} />);
+        const { getAllByRole } = render(<Chat messages={messages} defaultKey={valueKey} />);
         const elts = getAllByRole("button");
         elts.forEach((elt) => expect(elt).not.toHaveClass("Mui-disabled"));
     });
     it("is enabled by active", async () => {
-        const { getAllByRole } = render(<Chat messages={messages} active={true} />);
+        const { getAllByRole } = render(<Chat messages={messages} active={true} defaultKey={valueKey} />);
         const elts = getAllByRole("button");
         elts.forEach((elt) => expect(elt).not.toHaveClass("Mui-disabled"));
     });
     it("can hide input", async () => {
-        render(<Chat messages={messages} withInput={false} className="taipy-chat" />);
+        render(<Chat messages={messages} withInput={false} className="taipy-chat" defaultKey={valueKey} />);
         const elt = document.querySelector(".taipy-chat input");
         expect(elt).toBeNull();
     });
@@ -80,7 +80,7 @@ describe("Chat Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByLabelText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Chat messages={messages} updateVarName="varname" />
+                <Chat messages={messages} updateVarName="varname" defaultKey={valueKey} />
             </TaipyContext.Provider>
         );
         const elt = getByLabelText("message (taipy)");
@@ -101,7 +101,7 @@ describe("Chat Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByLabelText, getByRole } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Chat messages={messages} updateVarName="varname" />
+                <Chat messages={messages} updateVarName="varname" defaultKey={valueKey} />
             </TaipyContext.Provider>
         );
         const elt = getByLabelText("message (taipy)");
