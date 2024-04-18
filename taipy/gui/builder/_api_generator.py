@@ -27,7 +27,7 @@ if t.TYPE_CHECKING:
 
 
 class _ElementApiGenerator(object, metaclass=_Singleton):
-    def __init__(self):
+    def __init__(self) -> None:
         self.__module: t.Optional[types.ModuleType] = None
 
     @staticmethod

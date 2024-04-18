@@ -18,7 +18,7 @@ if t.TYPE_CHECKING:
 
 
 class _BuilderContextManager(object, metaclass=_Singleton):
-    def __init__(self):
+    def __init__(self) -> None:
         self.__blocks: t.List["_Block"] = []
 
     def push(self, element: "_Block") -> None:

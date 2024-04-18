@@ -58,7 +58,7 @@ class Task(_Entity, _Labeled):
         self,
         config_id: str,
         properties: Dict[str, Any],
-        function,
+        function: Callable,
         input: Optional[Iterable[DataNode]] = None,
         output: Optional[Iterable[DataNode]] = None,
         id: Optional[TaskId] = None,
@@ -66,7 +66,7 @@ class Task(_Entity, _Labeled):
         parent_ids: Optional[Set[str]] = None,
         version: Optional[str] = None,
         skippable: bool = False,
-    ):
+    ) -> None:
         self._config_id = _validate_id(config_id)
         self.id = id or TaskId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
         self._owner_id = owner_id

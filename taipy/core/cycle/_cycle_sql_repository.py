@@ -14,5 +14,5 @@ from ._cycle_model import _CycleModel
 
 
 class _CycleSQLRepository(_SQLRepository):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(model_type=_CycleModel, converter=_CycleConverter)

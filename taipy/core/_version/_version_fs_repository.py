@@ -22,7 +22,7 @@ from ._version_repository_interface import _VersionRepositoryInterface
 
 
 class _VersionFSRepository(_FileSystemRepository, _VersionRepositoryInterface):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(model_type=_VersionModel, converter=_VersionConverter, dir_name="version")
 
     @property

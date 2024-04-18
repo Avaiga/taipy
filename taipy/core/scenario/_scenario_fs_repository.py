@@ -14,5 +14,5 @@ from ._scenario_model import _ScenarioModel
 
 
 class _ScenarioFSRepository(_FileSystemRepository):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(model_type=_ScenarioModel, converter=_ScenarioConverter, dir_name="scenarios")
