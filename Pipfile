@@ -36,6 +36,7 @@ tzlocal = "==3.0"
 boto3 = "==1.29.1"
 watchdog = "==4.0.0"
 charset-normalizer = "==3.3.2"
+numpy = "<2.0.0"
 
 [dev-packages]
 freezegun = "*"
