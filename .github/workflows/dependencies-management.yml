@@ -1,3 +1,13 @@
+# This workflow is used to manage the dependencies of the Taipy packages.
+# - Runs each Sunday.
+# - For each Python version supported:
+#   - Call a custom script to align dependencies between Taipy packages.
+#   - Call a custom script to update dependencies (Pipfile and requirements.txt).
+#   - If a new package version is available for the Python version:
+#     - The Python version's Pull Request (PR) is created.
+#       - If the Python version is the latest supported, the PR contains an updated Pipfile and requirements.txt.
+#       - Otherwise, the PR contains the updated Pipfile.
+#     - The action triggers tests workflow to test compatibility and link the workflow to the PR in the description.
 name: Dependencies management
 
 on:
@@ -20,7 +30,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: ${{matrix.python-version}}
@@ -42,7 +51,7 @@ jobs:
           cat pipfiles/Pipfile${{matrix.python-version}}.max
 
       - name: Create the pull request updating the dependencies (3.12 only)
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' and ${{matrix.python-version}} == '3.12'
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == '3.12'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -58,7 +67,7 @@ jobs:
             tools/packages/taipy*/*requirements.txt
 
       - name: Create the pull request updating the Pipfile max
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' and ${{matrix.python-version}} != '3.12'
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version != '3.12'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -76,12 +85,24 @@ jobs:
       # This action triggers the overall-tests.yml workflow on the PR
       # to allow the tests to run on the new dependencies.
       - name: Run tests on PR
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
+          github-token: ${{ secrets.TRIGGER_GITHUB_PR }}
           script: |
-            github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'overall-tests.yml',
-              ref: 'dependencies/update-python${{matrix.python-version}}',
-            })
+            const runTests = require('.github/scripts/run-workflow.js')
+            const linkTests = require('.github/scripts/link-workflow-to-pr.js')
+
+            // Branch to target with the workflow run.
+            const branchTargeted = "dependencies/update-python${{matrix.python-version}}";
+            // The current pull request number to link the workflow run.
+            const pullRequestNumber = process.env.PULL_REQUEST_NUMBER;
+            // The workflow file to trigger.
+            const workflowToTrigger = 'overall-tests.yml';
+            const waitForWorkflowCreation = 120000; // 2 minutes
+
+            // Run the tests.
+            await runTests({github, context, branchTargeted, workflowToTrigger});
+            // Wait for the workflow to be created.
+            await new Promise(r => setTimeout(r, waitForWorkflowCreation));
+            // Link the workflow to the PR.
+            await linkTests({github, context, branchTargeted, pullRequestNumber});
