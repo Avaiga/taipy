@@ -11,13 +11,14 @@
 
 from __future__ import annotations
 
-from typing import Set
+from typing import TYPE_CHECKING, Set
+
+if TYPE_CHECKING:
+    from taipy import CycleId, DataNodeId, JobId, ScenarioId, SequenceId, SubmissionId, TaskId
 
 
 class _EntityIds:
     def __init__(self) -> None:
-        from taipy import CycleId, DataNodeId, JobId, ScenarioId, SequenceId, SubmissionId, TaskId
-
         self.data_node_ids: Set[DataNodeId] = set()
         self.task_ids: Set[TaskId] = set()
         self.scenario_ids: Set[ScenarioId] = set()
