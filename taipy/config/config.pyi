@@ -787,10 +787,10 @@ class Config:
     @staticmethod
     def configure_task(
         id: str,
-        function,
+        function: Optional[Callable],
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
-        skippable: Optional[bool] = False,
+        skippable: bool = False,
         **properties,
     ) -> "TaskConfig":
         """Configure a new task configuration.
@@ -815,10 +815,10 @@ class Config:
 
     @staticmethod
     def set_default_task_configuration(
-        function,
+        function: Optional[Callable],
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
-        skippable: Optional[bool] = False,
+        skippable: bool = False,
         **properties,
     ) -> "TaskConfig":
         """Set the default values for task configurations.

@@ -14,5 +14,5 @@ from ._job_model import _JobModel
 
 
 class _JobSQLRepository(_SQLRepository):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(model_type=_JobModel, converter=_JobConverter)

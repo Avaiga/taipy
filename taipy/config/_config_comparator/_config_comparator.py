@@ -22,11 +22,11 @@ from ._comparator_result import _ComparatorResult
 
 
 class _ConfigComparator:
-    def __init__(self):
+    def __init__(self) -> None:
         self._unconflicted_sections: Set[str] = set()
         self.__logger = _TaipyLogger._get_logger()
 
-    def _add_unconflicted_section(self, section_name: Union[str, Set[str]]):
+    def _add_unconflicted_section(self, section_name: Union[str, Set[str]]) -> None:
         if isinstance(section_name, str):
             section_name = {section_name}
 

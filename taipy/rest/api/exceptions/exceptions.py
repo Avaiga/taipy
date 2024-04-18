@@ -11,15 +11,15 @@
 
 
 class ConfigIdMissingException(Exception):
-    def __init__(self):
+    def __init__(self) -> None:
         self.message = "Config id is missing."
 
 
 class ScenarioIdMissingException(Exception):
-    def __init__(self):
+    def __init__(self) -> None:
         self.message = "Scenario id is missing."
 
 
 class SequenceNameMissingException(Exception):
-    def __init__(self):
+    def __init__(self) -> None:
         self.message = "Sequence name is missing."
