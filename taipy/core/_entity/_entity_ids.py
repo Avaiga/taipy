@@ -11,16 +11,20 @@
 
 from __future__ import annotations
 
+from typing import Set
+
 
 class _EntityIds:
     def __init__(self) -> None:
-        self.data_node_ids = set()
-        self.task_ids = set()
-        self.scenario_ids = set()
-        self.sequence_ids = set()
-        self.job_ids = set()
-        self.cycle_ids = set()
-        self.submission_ids = set()
+        from taipy import ScenarioId, TaskId, SequenceId, JobId, CycleId, SubmissionId, DataNodeId
+
+        self.data_node_ids: Set[DataNodeId] = set()
+        self.task_ids: Set[TaskId] = set()
+        self.scenario_ids: Set[ScenarioId] = set()
+        self.sequence_ids: Set[SequenceId] = set()
+        self.job_ids: Set[JobId] = set()
+        self.cycle_ids: Set[CycleId] = set()
+        self.submission_ids: Set[SubmissionId] = set()
 
     def __add__(self, other: _EntityIds):
         self.data_node_ids.update(other.data_node_ids)

@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from queue import SimpleQueue
+from typing import List, Dict
 
 from taipy.config import Config, Frequency
 from taipy.core import taipy as tp
@@ -26,10 +27,10 @@ class Snapshot:
     """
 
     def __init__(self) -> None:
-        self.collected_events = []
-        self.entity_type_collected = {}
-        self.operation_collected = {}
-        self.attr_name_collected = {}
+        self.collected_events: List[Event] = []
+        self.entity_type_collected: Dict[EventEntityType, int] = {}
+        self.operation_collected: Dict[EventEntityType, int] = {}
+        self.attr_name_collected: Dict[EventEntityType, int] = {}
 
     def capture_event(self, event):
         self.collected_events.append(event)
