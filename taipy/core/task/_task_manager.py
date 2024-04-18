@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from typing import Callable, List, Optional, Type, Union
+from typing import Callable, List, Optional, Type, Union, cast
 
 from taipy.config import Config
 from taipy.config.common.scope import Scope
@@ -101,10 +101,11 @@ class _TaskManager(_Manager[Task], _VersionMixin):
                     for output_config in [Config.data_nodes[dnc.id] for dnc in task_config.output_configs]
                 ]
                 skippable = task_config.skippable
+
                 task = Task(
                     str(task_config.id),
                     dict(**task_config._properties),
-                    task_config.function,
+                    cast(Callable, task_config.function),
                     inputs,
                     outputs,
                     owner_id=owner_id,

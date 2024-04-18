@@ -19,7 +19,7 @@ from ._version_repository_interface import _VersionRepositoryInterface
 
 
 class _VersionSQLRepository(_SQLRepository, _VersionRepositoryInterface):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(model_type=_VersionModel, converter=_VersionConverter)
 
     def _set_latest_version(self, version_number):

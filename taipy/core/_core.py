@@ -40,7 +40,7 @@ class Core:
     _orchestrator: Optional[_Orchestrator] = None
     _dispatcher: Optional[_JobDispatcher] = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initialize a Core service.
         """

@@ -144,7 +144,7 @@ class _Config(object):
         r"^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
     )
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.pages: t.List[_Page] = []
         self.root_page: t.Optional[_Page] = None
         self.routes: t.List[str] = []
