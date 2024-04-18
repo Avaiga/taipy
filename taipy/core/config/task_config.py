@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from copy import copy
-from typing import Any, Dict, List, Optional, Union, cast, Callable
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 from taipy.config._config import _Config
 from taipy.config.common._template_handler import _TemplateHandler as _tpl

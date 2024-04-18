@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from queue import SimpleQueue
-from typing import List, Dict
+from typing import Dict, List
 
 from taipy.config import Config, Frequency
 from taipy.core import taipy as tp
