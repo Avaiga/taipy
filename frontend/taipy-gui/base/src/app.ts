@@ -78,8 +78,8 @@ export class TaipyApp {
         return this._onReload;
     }
     set onReload(handler: onReloadHandler | undefined) {
-        if (handler !== undefined && handler?.length !== 1) {
-            throw new Error("_onReload() requires one parameter");
+        if (handler !== undefined && handler?.length !== 2) {
+            throw new Error("_onReload() requires two parameters");
         }
         this._onReload = handler;
     }
