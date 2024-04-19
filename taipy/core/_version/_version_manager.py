@@ -233,7 +233,7 @@ class _VersionManager(_Manager[_Version]):
         raise NotImplementedError
 
     @classmethod
-    def _import(cls, entity_file: pathlib.Path, version: str, **kwargs):
+    def _import(cls, entity_file: pathlib.Path, version: str, **kwargs) -> _Version:
         imported_version = cls._repository._import(entity_file)
 
         comparator_result = Config._comparator._find_conflict_config(  # type: ignore[attr-defined]

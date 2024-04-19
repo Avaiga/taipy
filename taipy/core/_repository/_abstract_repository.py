@@ -127,7 +127,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         """
         raise NotImplementedError
 
-    def _import(self, entity_file_path: pathlib.Path):
+    def _import(self, entity_file_path: pathlib.Path) -> Entity:
         """
         Import an entity from an exported file.
 
@@ -146,8 +146,6 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         except Exception:
             raise FileCannotBeRead(str(entity_file_path)) from None
 
-        if not file_content:
-            return None
         if isinstance(file_content, str):
             file_content = json.loads(file_content, cls=_Decoder)
         model = self.model_type.from_dict(file_content)  # type: ignore[attr-defined]

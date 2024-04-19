@@ -161,7 +161,7 @@ class _Manager(Generic[EntityType]):
         return cls._repository._export(id, folder_path)
 
     @classmethod
-    def _import(cls, entity_file: pathlib.Path, version: str, **kwargs):
+    def _import(cls, entity_file: pathlib.Path, version: str, **kwargs) -> EntityType:
         imported_entity = cls._repository._import(entity_file)
         imported_entity._version = version
         cls._set(imported_entity)

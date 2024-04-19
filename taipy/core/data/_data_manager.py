@@ -190,7 +190,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
             shutil.copy2(data_node.path, data_export_path)
 
     @classmethod
-    def _import(cls, entity_file: pathlib.Path, version: str, **kwargs):
+    def _import(cls, entity_file: pathlib.Path, version: str, **kwargs) -> DataNode:
         imported_data_node = cls._repository._import(entity_file)
         imported_data_node._version = version
         cls._set(imported_data_node)
@@ -204,3 +204,5 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
 
         if (data_folder / imported_data_node.path).exists():
             shutil.copy2(data_folder / imported_data_node.path, imported_data_node.path)
+
+        return imported_data_node
