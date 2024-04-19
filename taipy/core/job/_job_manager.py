@@ -58,11 +58,11 @@ class _JobManager(_Manager[Job], _VersionMixin):
         return job
 
     @classmethod
-    def _delete(cls, job: Job, force=False):
-        if cls._is_deletable(job) or force:
-            super()._delete(job.id)
+    def _delete(cls, job_id: JobId, force=False):
+        if cls._is_deletable(job_id) or force:
+            super()._delete(job_id)
         else:
-            err = JobNotDeletedException(job.id)
+            err = JobNotDeletedException(job_id)
             cls._logger.error(err)
             raise err
 

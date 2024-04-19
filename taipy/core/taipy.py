@@ -1003,7 +1003,7 @@ def export_scenario(
     _VersionManagerFactory._build_manager()._export(scenario.version, folder_path)
 
 
-def import_scenario(folder_path: Union[str, pathlib.Path], override: bool = False):
+def import_scenario(folder_path: Union[str, pathlib.Path], override: bool = False) -> Optional[Scenario]:
     """Import a folder containing an exported scenario into the current Taipy application.
 
     The folder should contain all related entities of the scenario, and all entities should
@@ -1015,12 +1015,11 @@ def import_scenario(folder_path: Union[str, pathlib.Path], override: bool = Fals
         override (bool): If True, override the entities if existed. Default value is False.
 
     Return:
-        The imported scenario.
+        The imported scenario if the import is successful.
 
     Raises:
         FileNotFoundError: If the import folder path does not exist.
         ImportFolderDoesntContainAnyScenario: If the import folder doesn't contain any scenario.
-        EntitiesToBeImportAlredyExist: If there is any entity in the import folder that has already existed.
         ConflictedConfigurationError: If the configuration of the imported scenario is conflicted with the current one.
     """
     if isinstance(folder_path, str):
@@ -1052,49 +1051,65 @@ def import_scenario(folder_path: Union[str, pathlib.Path], override: bool = Fals
         "version": _VersionManagerFactory._build_manager,
     }
 
+    # Import the version to check for compatibility
     entity_managers["version"]()._import(next((folder / "version").iterdir()), "")
 
     valid_entity_folders = list(entity_managers.keys())
     valid_data_folder = Config.core.storage_folder
 
     imported_scenario = None
-    imported_entities = []
+    imported_entities: Dict[str, List] = {}
 
     for entity_folder in folder.iterdir():
         if not entity_folder.is_dir() or entity_folder.name not in valid_entity_folders + [valid_data_folder]:
             __logger.warning(f"{entity_folder} is not a valid Taipy folder and will not be imported.")
             continue
 
-    for entity_type in valid_entity_folders:
-        # Skip the version folder as it is already handled
-        if entity_type == "version":
-            continue
+    try:
+        for entity_type in valid_entity_folders:
+            # Skip the version folder as it is already handled
+            if entity_type == "version":
+                continue
 
-        entity_folder = folder / entity_type
-        if not entity_folder.exists():
-            continue
+            entity_folder = folder / entity_type
+            if not entity_folder.exists():
+                continue
 
-        manager = entity_managers[entity_type]()
-        for entity_file in entity_folder.iterdir():
-            # Check if the to-be-imported entity already exists
-            entity_id = entity_file.stem
-            if manager._exists(entity_id):
-                if override:
-                    __logger.warning(f"{entity_id} already exists and will be overridden.")
-                else:
-                    __logger.error(f"{entity_id} already exists. Please use the 'override' parameter to override it.")
-                    raise EntitiesToBeImportAlredyExist(folder_path)
+            manager = entity_managers[entity_type]()
+            imported_entities[entity_type] = []
 
-            # Import the entity
-            imported_entity = manager._import(
-                entity_file,
-                version=_VersionManagerFactory._build_manager()._get_latest_version(),
-                data_folder=folder / valid_data_folder,
-            )
+            for entity_file in entity_folder.iterdir():
+                # Check if the to-be-imported entity already exists
+                entity_id = entity_file.stem
+                if manager._exists(entity_id):
+                    if override:
+                        __logger.warning(f"{entity_id} already exists and will be overridden.")
+                    else:
+                        __logger.error(
+                            f"{entity_id} already exists. Please use the 'override' parameter to override it."
+                        )
+                        raise EntitiesToBeImportAlredyExist(folder_path)
 
-            imported_entities.append(imported_entity)
-            if entity_type in ["scenario", "scenarios"]:
-                imported_scenario = imported_entity
+                # Import the entity
+                imported_entity = manager._import(
+                    entity_file,
+                    version=_VersionManagerFactory._build_manager()._get_latest_version(),
+                    data_folder=folder / valid_data_folder,
+                )
+
+                imported_entities[entity_type].append(imported_entity.id)
+                if entity_type in ["scenario", "scenarios"]:
+                    imported_scenario = imported_entity
+    except Exception as err:
+        __logger.error(f"An error occurred during the import: {err}. Rollback the import.")
+
+        # Rollback the import
+        for entity_type, entity_ids in list(imported_entities.items())[::-1]:
+            manager = entity_managers[entity_type]()
+            for entity_id in entity_ids:
+                if manager._exists(entity_id):
+                    manager._delete(entity_id)
+        return None
 
     __logger.info(f"Scenario {imported_scenario.id} has been successfully imported.")  # type: ignore[union-attr]
     return imported_scenario

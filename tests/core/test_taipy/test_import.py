@@ -22,7 +22,6 @@ from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.exceptions.exceptions import (
     ConflictedConfigurationError,
-    EntitiesToBeImportAlredyExist,
     ImportFolderDoesntContainAnyScenario,
     ImportScenarioDoesntHaveAVersion,
 )
@@ -113,26 +112,56 @@ def test_import_scenario_with_data(init_managers):
     assert all(os.path.exists(dn.path) for dn in imported_scenario.data_nodes.values())
 
 
-def test_import_scenario_when_entities_are_already_existed(caplog):
+def test_import_scenario_when_entities_are_already_existed_should_rollback(caplog):
     scenario_cfg = configure_test_scenario(1, frequency=Frequency.DAILY)
     export_test_scenario(scenario_cfg)
 
     caplog.clear()
 
+    _CycleManager._delete_all()
+    _TaskManager._delete_all()
+    _DataManager._delete_all()
+    _JobManager._delete_all()
+    _ScenarioManager._delete_all()
+
+    assert len(_CycleManager._get_all()) == 0
+    assert len(_TaskManager._get_all()) == 0
+    assert len(_DataManager._get_all()) == 0
+    assert len(_JobManager._get_all()) == 0
+    assert len(_SubmissionManager._get_all()) == 1  # Keep the submission entity to test the rollback
+    submission_id = _SubmissionManager._get_all()[0].id
+    assert len(_ScenarioManager._get_all()) == 0
+
     # Import the scenario when the old entities still exist
-    with pytest.raises(EntitiesToBeImportAlredyExist):
-        tp.import_scenario("./tmp/exp_scenario")
-    assert all(log.levelname == "ERROR" for log in caplog.records[1:])
+    imported_entity = tp.import_scenario("./tmp/exp_scenario")
+    assert imported_entity is None
+    assert all(log.levelname in ["ERROR", "INFO"] for log in caplog.records)
+    assert "An error occurred during the import" in caplog.text
+    assert f"{submission_id} already exists. Please use the 'override' parameter to override it" in caplog.text
+
+    # No entity should be imported and the old entities should be kept
+    assert len(_CycleManager._get_all()) == 0
+    assert len(_TaskManager._get_all()) == 0
+    assert len(_DataManager._get_all()) == 0
+    assert len(_JobManager._get_all()) == 0
+    assert len(_SubmissionManager._get_all()) == 1  # Keep the submission entity to test the rollback
+    assert len(_ScenarioManager._get_all()) == 0
 
     caplog.clear()
 
     # Import with override flag
-    assert len(_ScenarioManager._get_all()) == 1
     tp.import_scenario("./tmp/exp_scenario", override=True)
-    assert all(log.levelname == "WARNING" for log in caplog.records[1:])
+    assert all(log.levelname in ["WARNING", "INFO"] for log in caplog.records)
+    assert f"{submission_id} already exists and will be overridden" in caplog.text
 
-    # The scenario is overridden
+    # The scenario is imported and overridden the old one
     assert len(_ScenarioManager._get_all()) == 1
+    assert len(_CycleManager._get_all()) == 1
+    assert len(_TaskManager._get_all()) == 4
+    assert len(_DataManager._get_all()) == 5
+    assert len(_JobManager._get_all()) == 4
+    assert len(_SubmissionManager._get_all()) == 1
+    assert len(_VersionManager._get_all()) == 1
 
 
 def test_import_incompatible_scenario(init_managers):
