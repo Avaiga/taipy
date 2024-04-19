@@ -83,7 +83,7 @@ class DataNode(_Entity, _Labeled):
     __logger = _TaipyLogger._get_logger()
     _REQUIRED_PROPERTIES: List[str] = []
     _MANAGER_NAME: str = "data"
-    __PATH_KEY = "path"
+    _PATH_KEY = "path"
     __EDIT_TIMEOUT = 30
 
     _TAIPY_PROPERTIES: Set[str] = set()
@@ -105,7 +105,7 @@ class DataNode(_Entity, _Labeled):
         **kwargs,
     ) -> None:
         self._config_id = _validate_id(config_id)
-        self.id = id or self._new_id(self.config_id)
+        self.id = id or self._new_id(self._config_id)
         self._owner_id = owner_id
         self._parent_ids = parent_ids or set()
         self._scope = scope
