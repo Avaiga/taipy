@@ -31,7 +31,17 @@ from urllib.parse import unquote, urlencode, urlparse
 
 import markdown as md_lib
 import tzlocal
-from flask import Blueprint, Flask, g, has_app_context, jsonify, request, send_file, send_from_directory
+from flask import (
+    Blueprint,
+    Flask,
+    g,
+    has_app_context,
+    has_request_context,
+    jsonify,
+    request,
+    send_file,
+    send_from_directory,
+)
 from werkzeug.utils import secure_filename
 
 import __main__  # noqa: F401
@@ -732,7 +742,8 @@ class Gui:
             return f"{var_name_decode}.{suffix_var_name}" if suffix_var_name else var_name_decode, module_name
         if module_name == current_context:
             var_name = var_name_decode
-        else:
+        # only strict checking for cross-context linked variable when the context has been properly set
+        elif self._has_set_context():
             if var_name not in self.__var_dir._var_head:
                 raise NameError(f"Can't find matching variable for {var_name} on context: {current_context}")
             _found = False
@@ -940,8 +951,11 @@ class Gui:
                     try:
                         with open(file_path, "wb") as grouped_file:
                             for nb in range(part + 1):
-                                with open(upload_path / f"{file_path.name}.part.{nb}", "rb") as part_file:
+                                part_file_path = upload_path / f"{file_path.name}.part.{nb}"
+                                with open(part_file_path, "rb") as part_file:
                                     grouped_file.write(part_file.read())
+                                # remove file_path after it is merged
+                                part_file_path.unlink()
                     except EnvironmentError as ee:  # pragma: no cover
                         _warn("Cannot group file after chunk upload", ee)
                         return
@@ -1002,7 +1016,13 @@ class Gui:
                 elif isinstance(newvalue, _TaipyToJson):
                     newvalue = newvalue.get()
                 if isinstance(newvalue, (dict, _MapDict)):
-                    continue  # this var has no transformer
+                    # Skip in taipy-gui, available in custom frontend
+                    resource_handler_id = None
+                    with contextlib.suppress(Exception):
+                        if has_request_context():
+                            resource_handler_id = request.cookies.get(_Server._RESOURCE_HANDLER_ARG, None)
+                    if resource_handler_id is None:
+                        continue  # this var has no transformer
                 if isinstance(newvalue, float) and math.isnan(newvalue):
                     # do not let NaN go through json, it is not handle well (dies silently through websocket)
                     newvalue = None
@@ -1568,6 +1588,9 @@ class Gui:
     def _set_locals_context(self, context: t.Optional[str]) -> t.ContextManager[None]:
         return self.__locals_context.set_locals_context(context)
 
+    def _has_set_context(self):
+        return self.__locals_context.get_context() is not None
+
     def _get_page_context(self, page_name: str) -> str | None:
         if page_name not in self._config.routes:
             return None
@@ -2062,6 +2085,7 @@ class Gui:
                 to=page_name,
                 params={
                     _Server._RESOURCE_HANDLER_ARG: pr._resource_handler.get_id(),
+                    _Server._CUSTOM_PAGE_META_ARG: json.dumps(pr._metadata, cls=_TaipyJsonEncoder)
                 },
             ):
                 # Proactively handle the bindings of custom page variables
