@@ -10,6 +10,8 @@
 # specific language governing permissions and limitations under the License.
 
 import os
+import pathlib
+import shutil
 from typing import Dict, Iterable, List, Optional, Set, Union
 
 from taipy.config._config import _Config
@@ -24,6 +26,7 @@ from ..exceptions.exceptions import InvalidDataNodeType
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
+from ._abstract_file import _FileDataNodeMixin
 from ._data_fs_repository import _DataFSRepository
 from ._file_datanode_mixin import _FileDataNodeMixin
 from .data_node import DataNode
@@ -161,3 +164,28 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         for fil in filters:
             fil.update({"config_id": config_id})
         return cls._repository._load_all(filters)
+
+    @classmethod
+    def _export(cls, id: str, folder_path: Union[str, pathlib.Path], **kwargs):
+        cls._repository._export(id, folder_path)
+
+        if not kwargs.get("include_data"):
+            return
+
+        data_node = cls._get(id)
+        if not isinstance(data_node, _FileDataNodeMixin):
+            cls._logger.warning(f"Data node {id} is not a file-based data node and the data will not be exported.")
+            return
+
+        if isinstance(folder_path, str):
+            folder: pathlib.Path = pathlib.Path(folder_path)
+        else:
+            folder = folder_path
+
+        data_export_dir = folder / Config.core.storage_folder
+        if not data_export_dir.exists():
+            data_export_dir.mkdir(parents=True)
+
+        data_export_path = data_export_dir / os.path.basename(data_node.path)
+        if os.path.exists(data_node.path):
+            shutil.copy(data_node.path, data_export_path)
