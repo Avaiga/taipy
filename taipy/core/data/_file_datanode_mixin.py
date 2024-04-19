@@ -54,7 +54,7 @@ class _FileDataNodeMixin(object):
             self._edits.append(  # type: ignore[attr-defined]
                 Edit(
                     {
-                        "timestamp": self._last_edit_date,
+                        "timestamp": self.last_edit_date,  # type: ignore[attr-defined]
                         "writer_identifier": "TAIPY",
                         "comments": "Default data written.",
                     }
