@@ -165,7 +165,7 @@ class DataNode(_Entity, _Labeled):
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def last_edit_date(self):
-        last_modified_datetime = self.__get_last_modified_datetime()
+        last_modified_datetime = self._get_last_modified_datetime(self._properties.get(self._PATH_KEY, None))
         if last_modified_datetime and last_modified_datetime > self._last_edit_date:
             return last_modified_datetime
         else:
@@ -297,8 +297,8 @@ class DataNode(_Entity, _Labeled):
             return self._properties[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of data node {self.id}")
 
-    def __get_last_modified_datetime(self) -> Optional[datetime]:
-        path = self._properties.get(self._PATH_KEY, None)
+    @classmethod
+    def _get_last_modified_datetime(cls, path: Optional[str] = None) -> Optional[datetime]:
         if path and os.path.isfile(path):
             return datetime.fromtimestamp(os.path.getmtime(path))
 
@@ -387,7 +387,9 @@ class DataNode(_Entity, _Labeled):
         """
         edit = {k: v for k, v in options.items() if v is not None}
         if "timestamp" not in edit:
-            edit["timestamp"] = datetime.now()
+            edit["timestamp"] = (
+                self._get_last_modified_datetime(self._properties.get(self._PATH_KEY, None)) or datetime.now()
+            )
         self.last_edit_date = edit.get("timestamp")
         self._edits.append(edit)
 

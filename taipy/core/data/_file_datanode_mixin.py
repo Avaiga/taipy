@@ -34,9 +34,9 @@ class _FileDataNodeMixin(object):
     _DEFAULT_PATH_KEY = "default_path"
     _IS_GENERATED_KEY = "is_generated"
 
-    def __init__(self, properties: Dict):
-        self._path = properties.get(self._PATH_KEY, properties.get(self._DEFAULT_PATH_KEY))
-        self._is_generated = properties.get(self._IS_GENERATED_KEY, self._path is None)
+    def __init__(self, properties: Dict) -> None:
+        self._path: str = properties.get(self._PATH_KEY, properties.get(self._DEFAULT_PATH_KEY))
+        self._is_generated: bool = properties.get(self._IS_GENERATED_KEY, self._path is None)
         self._last_edit_date: Optional[datetime] = None
 
         if self._path and ".data" in self._path:
@@ -50,11 +50,11 @@ class _FileDataNodeMixin(object):
     def _write_default_data(self, default_value: Any):
         if default_value is not None and not os.path.exists(self._path):
             self._write(default_value)  # type: ignore[attr-defined]
-            self._last_edit_date = datetime.now()
+            self._last_edit_date = DataNode._get_last_modified_datetime(self._path) or datetime.now()
             self._edits.append(  # type: ignore[attr-defined]
                 Edit(
                     {
-                        "timestamp": self.last_edit_date,  # type: ignore[attr-defined]
+                        "timestamp": self._last_edit_date,
                         "writer_identifier": "TAIPY",
                         "comments": "Default data written.",
                     }
