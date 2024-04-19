@@ -48,7 +48,7 @@ export class TaipyApp {
         return this._onInit;
     }
     set onInit(handler: OnInitHandler | undefined) {
-        if (handler !== undefined && handler?.length !== 1) {
+        if (handler !== undefined && handler.length !== 1) {
             throw new Error("onInit() requires one parameter");
         }
         this._onInit = handler;
@@ -58,7 +58,7 @@ export class TaipyApp {
         return this._onChange;
     }
     set onChange(handler: OnChangeHandler | undefined) {
-        if (handler !== undefined && handler?.length !== 3) {
+        if (handler !== undefined && handler.length !== 3) {
             throw new Error("onChange() requires three parameters");
         }
         this._onChange = handler;
@@ -68,7 +68,7 @@ export class TaipyApp {
         return this._onNotify;
     }
     set onNotify(handler: OnNotifyHandler | undefined) {
-        if (handler !== undefined && handler?.length !== 3) {
+        if (handler !== undefined && handler.length !== 3) {
             throw new Error("onNotify() requires three parameters");
         }
         this._onNotify = handler;
