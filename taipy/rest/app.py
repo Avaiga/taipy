@@ -18,7 +18,7 @@ from .commons.encoder import _CustomEncoder
 from .extensions import apispec
 
 
-def create_app(testing=False, flask_env=None, secret_key=None):
+def create_app(testing=False, flask_env=None, secret_key=None) -> Flask:
     """Application factory, used to create application"""
     app = Flask(__name__)
     app.config.update(

@@ -69,7 +69,7 @@ class _DataNodeModel(_BaseModel):
             scope=Scope._from_repr(data["scope"]),
             storage_type=data["storage_type"],
             owner_id=data.get("owner_id"),
-            parent_ids=data.get("parent_ids", []),
+            parent_ids=_BaseModel._deserialize_attribute(data.get("parent_ids", [])),
             last_edit_date=data.get("last_edit_date"),
             edits=_BaseModel._deserialize_attribute(data["edits"]),
             version=data["version"],

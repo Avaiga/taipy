@@ -46,7 +46,7 @@ class CoreEventConsumerBase(threading.Thread):
 
     """
 
-    def __init__(self, registration_id: str, queue: SimpleQueue):
+    def __init__(self, registration_id: str, queue: SimpleQueue) -> None:
         """Initialize a CoreEventConsumerBase instance.
 
         Parameters:
@@ -61,16 +61,16 @@ class CoreEventConsumerBase(threading.Thread):
         self.__STOP_FLAG = False
         self._TIMEOUT = 0.1
 
-    def start(self):
+    def start(self) -> None:
         """Start the event consumer thread."""
         self.__STOP_FLAG = False
         threading.Thread.start(self)
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the event consumer thread."""
         self.__STOP_FLAG = True
 
-    def run(self):
+    def run(self) -> None:
         while not self.__STOP_FLAG:
             try:
                 event: Event = self.queue.get(block=True, timeout=self._TIMEOUT)
@@ -79,6 +79,6 @@ class CoreEventConsumerBase(threading.Thread):
                 pass
 
     @abc.abstractmethod
-    def process_event(self, event: Event):
+    def process_event(self, event: Event) -> None:
         """This method should be overridden in subclasses to define how events are processed."""
         raise NotImplementedError

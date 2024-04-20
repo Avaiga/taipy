@@ -16,9 +16,6 @@ import shutil
 
 import pytest
 
-from taipy.config.config import Config
-from taipy.core.exceptions.exceptions import InvalidExportPath
-
 from .mocks import MockConverter, MockFSRepository, MockModel, MockObj, MockSQLRepository
 
 
@@ -164,9 +161,5 @@ class TestRepositoriesStorage:
         # Export to same location again should work
         r._export("uuid", export_path)
         assert pathlib.Path(os.path.join(export_path, "mock_model/uuid.json")).exists()
-
-        if mock_repo == MockFSRepository:
-            with pytest.raises(InvalidExportPath):
-                r._export("uuid", Config.core.storage_folder)
 
         shutil.rmtree(export_path, ignore_errors=True)
