@@ -1,0 +1,34 @@
+This is a quick guide on how to work on Taipy using Docker!
+
+  1.Install Docker (https://www.docker.com/products/docker-desktop/).
+  2.Create a Dockerfile inside the directory where Taipy is located in your PC.
+          DockerFile
+
+          FROM python:3.9
+
+          # Set the working directory in the container
+          WORKDIR /app
+
+          # Copy the current directory contents into the container at /app
+          COPY . /app
+
+          # Install any needed dependencies specified in requirements.txt
+          RUN pip install --no-cache-dir -r requirements.txt
+
+          # Make port 80 available to the world outside this container
+          EXPOSE 80
+
+          # Run app.py when the container launches
+          CMD ["python", "app.py"]
+
+  3.Create a requirements.txt file listing all the Python dependency packages that Taipy uses.
+  4.Docker Image build. Open cmd navigate to the directory with Taipy files, Dockerfile and requirements.txt and run:
+
+                    
+                    docker build -t taipy.app
+  5.Run the docker 
+                    .
+                    docker run -p 4000:80 taipy-app
+
+  Your Docker is ready! Access it with navigating to "http://localhost:4000".
+  
