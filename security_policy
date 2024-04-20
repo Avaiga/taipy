@@ -1,0 +1,22 @@
+# Security Policy
+
+## Supported Versions
+
+Taipy follows a security support policy to ensure that security vulnerabilities are addressed promptly. The following table outlines the supported versions of Taipy and whether they receive security updates:
+
+| Version   | Supported          |
+| --------- | ------------------ |
+| 3.1.x     | ✅                 |
+| < 3.1.x   | ❌                 |
+
+## Reporting a Vulnerability
+
+If you discover a security vulnerability in Taipy, please report it to us immediately. We take security vulnerabilities seriously and appreciate your responsible disclosure.
+
+To report a security vulnerability, please use the GitHub Security Advisories feature by visiting the following URL:
+
+[Report Vulnerability](https://github.com/taipy/securitypolicy)
+
+Please provide detailed information about the vulnerability, including steps to reproduce, affected versions, and potential impact. We will review and respond to security vulnerability reports promptly.
+
+Thank you for helping us keep Taipy secure.
