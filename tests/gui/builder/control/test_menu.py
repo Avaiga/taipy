@@ -23,6 +23,6 @@ def test_menu_builder(gui: Gui, test_client, helpers):
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;, &quot;Item 4&quot;]"',
         "lov={_TpL_tp_TpExPr_gui_get_adapted_lov_lov_tuple_TPMDL_0_0}",
         'onAction="on_menu_action"',
-        'updateVars="lov=_TpL_tpec_TpExPr_lov_TPMDL_0"',
+        'updateVars="lov=_TpL_tp_TpExPr_gui_get_adapted_lov_lov_tuple_TPMDL_0_0"',
     ]
     helpers.test_control_builder(gui, page, expected_list)

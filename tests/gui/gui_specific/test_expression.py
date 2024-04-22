@@ -123,7 +123,7 @@ def test_lambda_expression_selector(gui: Gui, test_client, helpers):
         "<Selector",
         'defaultLov="[[&quot;1&quot;, &quot;scenario 1&quot;], [&quot;3&quot;, &quot;scenario 3&quot;], [&quot;2&quot;, &quot;scenario 2&quot;]]"',  # noqa: E501
         'defaultValue="[&quot;1&quot;]"',
-        'updateVars="lov=_TpL_tpec_TpExPr_lov_TPMDL_0"',
+        'updateVars="lov=_TpL_tp_TpExPr_gui_get_adapted_lov_lov_tuple_TPMDL_0_0"',
         "lov={_TpL_tp_TpExPr_gui_get_adapted_lov_lov_tuple_TPMDL_0_0}",
         'updateVarName="_TpLv_tpec_TpExPr_sel_TPMDL_0"',
         "value={_TpLv_tpec_TpExPr_sel_TPMDL_0}",
