@@ -81,6 +81,7 @@ import {
 } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
 import { getSuffixedClassNames, getUpdateVar } from "./utils";
+import { emptyArray } from "../../utils";
 
 const loadingStyle: CSSProperties = { width: "100%", height: "3em", textAlign: "right", verticalAlign: "center" };
 const skelSx = { width: "100%", height: "3em" };
@@ -95,7 +96,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         allowAllRows = false,
         showAll = false,
         height,
-        selected = [],
+        selected = emptyArray,
         updateVars,
         onEdit = "",
         onDelete = "",
@@ -147,7 +148,12 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                         col.tooltip = props.tooltip;
                     }
                 });
-                addDeleteColumn((active && (onAdd || onDelete) ? 1 : 0) + (active && filter ? 1 : 0) + (active && downloadable ? 1 : 0), baseColumns);
+                addDeleteColumn(
+                    (active && (onAdd || onDelete) ? 1 : 0) +
+                        (active && filter ? 1 : 0) +
+                        (active && downloadable ? 1 : 0),
+                    baseColumns
+                );
                 const colsOrder = Object.keys(baseColumns).sort(getsortByIndex(baseColumns));
                 const styTt = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
                     if (baseColumns[col].style) {
@@ -178,7 +184,18 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             hNan,
             false,
         ];
-    }, [active, editable, onAdd, onDelete, baseColumns, props.lineStyle, props.tooltip, props.nanValue, props.filter, downloadable]);
+    }, [
+        active,
+        editable,
+        onAdd,
+        onDelete,
+        baseColumns,
+        props.lineStyle,
+        props.tooltip,
+        props.nanValue,
+        props.filter,
+        downloadable,
+    ]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
 
@@ -267,7 +284,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         dispatch,
         module,
         compare,
-        onCompare
+        onCompare,
     ]);
 
     const onSort = useCallback(
@@ -359,7 +376,12 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     }, [pageSizeOptions, allowAllRows, pageSize]);
 
     const { rows, rowCount, filteredCount, compRows } = useMemo(() => {
-        const ret = { rows: [], rowCount: 0, filteredCount: 0, compRows: [] } as { rows: RowType[]; rowCount: number; filteredCount: number; compRows: RowType[] };
+        const ret = { rows: [], rowCount: 0, filteredCount: 0, compRows: [] } as {
+            rows: RowType[];
+            rowCount: number;
+            filteredCount: number;
+            compRows: RowType[];
+        };
         if (value) {
             if (value.data) {
                 ret.rows = value.data as RowType[];
@@ -367,7 +389,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             if (value.rowcount) {
                 ret.rowCount = value.rowcount as unknown as number;
                 if (value.fullrowcount && value.rowcount != value.fullrowcount) {
-                    ret.filteredCount = (value.fullrowcount as unknown as number - ret.rowCount);
+                    ret.filteredCount = (value.fullrowcount as unknown as number) - ret.rowCount;
                 }
             }
             if (value.comp) {
@@ -413,7 +435,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     index: getRowIndex(rows[rowIndex], rowIndex, startIndex),
                     col: colName === undefined ? null : colName,
                     value,
-                    reason: value === undefined ? "click": "button",
+                    reason: value === undefined ? "click" : "button",
                     user_data: userData,
                 })
             ),

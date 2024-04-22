@@ -215,3 +215,6 @@ export const MenuProps = {
 export const selectSx = { m: 1, width: 300 };
 
 export const DeleteIconSx = { height: 50, width: 50, p: 0 };
+
+
+export const EmptyArray = [];
