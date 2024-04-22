@@ -48,7 +48,7 @@ class _Reloader:
         self._no_reload_context = False
 
 
-def _self_reload(manager):
+def _self_reload(manager: str):
     def __reload(fct):
         @functools.wraps(fct)
         def _do_reload(self, *args, **kwargs):

@@ -21,12 +21,25 @@ from taipy.core.exceptions import ModelNotFound
 
 class TestDataNodeRepository:
     @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
-    def test_save_and_load(self, data_node, repo, init_sql_repo):
+    def test_save_and_load(self, data_node: DataNode, repo, init_sql_repo):
         repository = repo()
         repository._save(data_node)
 
-        obj = repository._load(data_node.id)
-        assert isinstance(obj, DataNode)
+        loaded_data_node = repository._load(data_node.id)
+        assert isinstance(loaded_data_node, DataNode)
+        assert data_node.id == loaded_data_node.id
+        assert data_node._config_id == loaded_data_node._config_id
+        assert data_node._owner_id == loaded_data_node._owner_id
+        assert data_node._parent_ids == loaded_data_node._parent_ids
+        assert data_node._scope == loaded_data_node._scope
+        assert data_node._last_edit_date == loaded_data_node._last_edit_date
+        assert data_node._edit_in_progress == loaded_data_node._edit_in_progress
+        assert data_node._version == loaded_data_node._version
+        assert data_node._validity_period == loaded_data_node._validity_period
+        assert data_node._editor_id == loaded_data_node._editor_id
+        assert data_node._editor_expiration_date == loaded_data_node._editor_expiration_date
+        assert data_node._edits == loaded_data_node._edits
+        assert data_node._properties == loaded_data_node._properties
 
     @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
     def test_exists(self, data_node, repo, init_sql_repo):

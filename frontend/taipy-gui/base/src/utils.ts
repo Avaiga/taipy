@@ -1,3 +1,4 @@
+import merge from "lodash/merge";
 import { Socket } from "socket.io-client";
 import { IdMessage, storeClientId } from "../../src/context/utils";
 import { WsMessage, sendWsMessage } from "../../src/context/wsUtils";
@@ -74,8 +75,12 @@ const processWsMessage = (message: WsMessage, appManager: TaipyApp) => {
             const variableData = payload.variable;
             const functionData = payload.function;
             if (appManager.variableData && appManager.functionData) {
-                appManager.variableData.init(variableData);
-                appManager.functionData.init(functionData);
+                const varChanges = appManager.variableData.init(variableData);
+                const functionChanges = appManager.functionData.init(functionData);
+                const changes = merge(varChanges, functionChanges);
+                if (varChanges || functionChanges) {
+                    appManager.onReload && appManager.onReload(appManager, changes);
+                }
             } else {
                 appManager.variableData = new DataManager(variableData);
                 appManager.functionData = new DataManager(functionData);

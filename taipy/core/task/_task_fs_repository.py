@@ -14,5 +14,5 @@ from ._task_model import _TaskModel
 
 
 class _TaskFSRepository(_FileSystemRepository):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(model_type=_TaskModel, converter=_TaskConverter, dir_name="tasks")

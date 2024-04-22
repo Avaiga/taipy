@@ -14,5 +14,5 @@ from ._submission_model import _SubmissionModel
 
 
 class _SubmissionFSRepository(_FileSystemRepository):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(model_type=_SubmissionModel, converter=_SubmissionConverter, dir_name="submission")

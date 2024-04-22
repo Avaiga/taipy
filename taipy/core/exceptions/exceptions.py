@@ -373,6 +373,16 @@ class FileCannotBeRead(Exception):
     """Raised when a file cannot be read."""
 
 
+class ExportFolderAlreadyExists(Exception):
+    """Raised when the export folder already exists."""
+
+    def __init__(self, folder_path: str, scenario_id: str):
+        self.message = (
+            f"Folder '{folder_path}' already exists and can not be used to export scenario '{scenario_id}'."
+            " Please use the 'override' parameter to override it."
+        )
+
+
 class SQLQueryCannotBeExecuted(Exception):
     """Raised when an SQL Query cannot be executed."""
 

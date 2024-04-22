@@ -38,7 +38,7 @@ class _Element(ABC):
             parent.add(obj)
         return obj
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self._properties: t.Dict[str, t.Any] = {}
         if args and self._DEFAULT_PROPERTY != "":
             self._properties = {self._DEFAULT_PROPERTY: args[0]}
@@ -81,7 +81,7 @@ class _Element(ABC):
 class _Block(_Element):
     """NOT DOCUMENTED"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._children: t.List[_Element] = []
 

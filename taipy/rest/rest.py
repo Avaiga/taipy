@@ -8,6 +8,8 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+from flask import Flask
+
 from taipy.config import Config
 
 from .app import create_app as _create_app
@@ -18,7 +20,7 @@ class Rest:
     Runnable Rest application serving REST APIs on top of Taipy Core functionalities.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initialize a REST API server.
 
@@ -31,7 +33,7 @@ class Rest:
         However, editing these parameters is only recommended for advanced users. Indeed, the default behavior of the
         REST server without any required configuration satisfies all the standard and basic needs.
         """
-        self._app = _create_app(
+        self._app: Flask = _create_app(
             Config.global_config.testing or False, Config.global_config.env, Config.global_config.secret_key
         )
 

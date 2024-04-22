@@ -33,7 +33,7 @@ class _AdaptedLov:
 
 
 class _Adapter:
-    def __init__(self):
+    def __init__(self) -> None:
         self.__adapter_for_type: t.Dict[str, t.Callable] = {}
         self.__type_for_variable: t.Dict[str, str] = {}
         self.__warning_by_type: t.Set[str] = set()
