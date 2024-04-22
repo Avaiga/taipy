@@ -17,9 +17,8 @@ import networkx as nx
 
 from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
-from ..data.data_node import DataNode, _compute_if_dn_is_ready_for_reading
+from ..data.data_node import DataNode
 from ..job.job import Job
-from ..notification._ready_to_run_cache import _ReadyToRunCache
 from ..submission.submission import Submission
 from ..task.task import Task
 from ._dag import _DAG
@@ -34,7 +33,7 @@ class Submittable:
         subscribers (List[Callable]): The list of callbacks to be called on `Job^`'s status change.
     """
 
-    def __init__(self, submittable_id: str, subscribers: Optional[List[_Subscriber]] = None):
+    def __init__(self, submittable_id: str, subscribers: Optional[List[_Subscriber]] = None) -> None:
         self._submittable_id = submittable_id
         self._subscribers = _ListAttributes(self, subscribers or [])
 
@@ -88,10 +87,7 @@ class Submittable:
         Returns:
             True if the given entity is ready to be run. False otherwise.
         """
-        if self._submittable_id not in _ReadyToRunCache._submittable_id_datanodes:
-            for dn in self.get_inputs():
-                _compute_if_dn_is_ready_for_reading(dn)
-        return _ReadyToRunCache._check_submittable_is_ready_to_submit(self._submittable_id)
+        return all(dn.is_ready_for_reading for dn in self.get_inputs())
 
     def data_nodes_being_edited(self) -> Set[DataNode]:
         """Return the set of data nodes of the submittable entity that are being edited.

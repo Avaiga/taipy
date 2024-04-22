@@ -25,36 +25,16 @@ from taipy.logger._taipy_logger import _TaipyLogger
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
+from .._entity._ready_to_run_property import _ReadyToRunProperty
 from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._warnings import _warn_deprecated
 from ..exceptions.exceptions import DataNodeIsBeingEdited, NoData
 from ..job.job_id import JobId
-from ..notification._ready_to_run_cache import _ReadyToRunCache
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
 from ._filter import _FilterDataNode
 from .data_node_id import DataNodeId, Edit
 from .operator import JoinOperator
-
-
-def _compute_if_dn_is_ready_for_reading(dn: "DataNode"):
-    if dn._edit_in_progress:
-        _ReadyToRunCache._add_parent_entities_to_submittable_cache(dn, f"DataNode {dn.id} is being edited")
-    elif not dn._last_edit_date:
-        _ReadyToRunCache._add_parent_entities_to_submittable_cache(dn, f"DataNode {dn.id} is not written")
-    elif dn.is_ready_for_reading:
-        _ReadyToRunCache._remove(dn.id)
-
-
-def _update_ready_for_reading(fct):
-    # This decorator must be wrapped before self_setter decorator as self_setter will run the function twice.
-
-    @functools.wraps(fct)
-    def _recompute_is_ready_for_reading(dn: "DataNode", *args, **kwargs):
-        fct(dn, *args, **kwargs)
-        _compute_if_dn_is_ready_for_reading(dn)
-
-    return _recompute_is_ready_for_reading
 
 
 class DataNode(_Entity, _Labeled):
@@ -184,6 +164,22 @@ class DataNode(_Entity, _Labeled):
         """
         return self._edits[-1] if self._edits else None
 
+    def __update_ready_for_reading(fct):
+        # This decorator must be wrapped before self_setter decorator as self_setter will run the function twice.
+        @functools.wraps(fct)
+        def _recompute_is_ready_for_reading(dn: "DataNode", *args, **kwargs):
+            fct(dn, *args, **kwargs)
+            if dn._edit_in_progress:
+                _ReadyToRunProperty._add_parent_entities_to_submittable_cache(dn, f"DataNode {dn.id} is being edited")
+            else:
+                _ReadyToRunProperty._remove(dn.id, f"DataNode {dn.id} is being edited")
+            if not dn._last_edit_date:
+                _ReadyToRunProperty._add_parent_entities_to_submittable_cache(dn, f"DataNode {dn.id} is not written")
+            else:
+                _ReadyToRunProperty._remove(dn.id, f"DataNode {dn.id} is not written")
+
+        return _recompute_is_ready_for_reading
+
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def last_edit_date(self):
@@ -194,7 +190,7 @@ class DataNode(_Entity, _Labeled):
             return self._last_edit_date
 
     @last_edit_date.setter  # type: ignore
-    @_update_ready_for_reading
+    @__update_ready_for_reading
     @_self_setter(_MANAGER_NAME)
     def last_edit_date(self, val):
         self._last_edit_date = val
@@ -259,7 +255,7 @@ class DataNode(_Entity, _Labeled):
         return self._edit_in_progress
 
     @edit_in_progress.setter  # type: ignore
-    @_update_ready_for_reading
+    @__update_ready_for_reading
     @_self_setter(_MANAGER_NAME)
     def edit_in_progress(self, val):
         self._edit_in_progress = val
