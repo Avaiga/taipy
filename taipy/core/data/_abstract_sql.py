@@ -90,7 +90,7 @@ class _AbstractSQLDataNode(DataNode, _TabularDataNodeMixin):
         editor_id: Optional[str] = None,
         editor_expiration_date: Optional[datetime] = None,
         properties: Optional[Dict] = None,
-    ):
+    ) -> None:
         if properties is None:
             properties = {}
         self._check_required_properties(properties)

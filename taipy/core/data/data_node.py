@@ -37,6 +37,23 @@ from .data_node_id import DataNodeId, Edit
 from .operator import JoinOperator
 
 
+def _update_ready_for_reading(fct):
+    # This decorator must be wrapped before self_setter decorator as self_setter will run the function twice.
+    @functools.wraps(fct)
+    def _recompute_is_ready_for_reading(dn: "DataNode", *args, **kwargs):
+        fct(dn, *args, **kwargs)
+        if dn._edit_in_progress:
+            _ReadyToRunProperty._add_parent_entities_to_submittable_cache(dn, f"DataNode {dn.id} is being edited")
+        else:
+            _ReadyToRunProperty._remove(dn.id, f"DataNode {dn.id} is being edited")
+        if not dn._last_edit_date:
+            _ReadyToRunProperty._add_parent_entities_to_submittable_cache(dn, f"DataNode {dn.id} is not written")
+        else:
+            _ReadyToRunProperty._remove(dn.id, f"DataNode {dn.id} is not written")
+
+    return _recompute_is_ready_for_reading
+
+
 class DataNode(_Entity, _Labeled):
     """Reference to a dataset.
 
@@ -164,22 +181,6 @@ class DataNode(_Entity, _Labeled):
         """
         return self._edits[-1] if self._edits else None
 
-    def __update_ready_for_reading(fct):
-        # This decorator must be wrapped before self_setter decorator as self_setter will run the function twice.
-        @functools.wraps(fct)
-        def _recompute_is_ready_for_reading(dn: "DataNode", *args, **kwargs):
-            fct(dn, *args, **kwargs)
-            if dn._edit_in_progress:
-                _ReadyToRunProperty._add_parent_entities_to_submittable_cache(dn, f"DataNode {dn.id} is being edited")
-            else:
-                _ReadyToRunProperty._remove(dn.id, f"DataNode {dn.id} is being edited")
-            if not dn._last_edit_date:
-                _ReadyToRunProperty._add_parent_entities_to_submittable_cache(dn, f"DataNode {dn.id} is not written")
-            else:
-                _ReadyToRunProperty._remove(dn.id, f"DataNode {dn.id} is not written")
-
-        return _recompute_is_ready_for_reading
-
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def last_edit_date(self):
@@ -190,7 +191,7 @@ class DataNode(_Entity, _Labeled):
             return self._last_edit_date
 
     @last_edit_date.setter  # type: ignore
-    @__update_ready_for_reading
+    @_update_ready_for_reading
     @_self_setter(_MANAGER_NAME)
     def last_edit_date(self, val):
         self._last_edit_date = val
@@ -255,7 +256,7 @@ class DataNode(_Entity, _Labeled):
         return self._edit_in_progress
 
     @edit_in_progress.setter  # type: ignore
-    @__update_ready_for_reading
+    @_update_ready_for_reading
     @_self_setter(_MANAGER_NAME)
     def edit_in_progress(self, val):
         self._edit_in_progress = val

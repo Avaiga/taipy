@@ -36,7 +36,7 @@ class _ReadyToRunProperty:
     @staticmethod
     def _publish_submittable_property_event(
         submittable_id: Union["ScenarioId", "SequenceId", "TaskId"], submittable_property
-    ):
+    ) -> None:
         from ..taipy import get as tp_get
 
         Notifier.publish(
@@ -51,14 +51,14 @@ class _ReadyToRunProperty:
     @classmethod
     def __add_unsubmittable_reason(
         cls, submittable_id: Union["ScenarioId", "SequenceId", "TaskId"], datanode_id: "DataNodeId", reason: str
-    ):
+    ) -> None:
         cls._datanode_id_submittables[datanode_id].add(submittable_id)
         if submittable_id not in cls._submittable_id_datanodes:
             cls._publish_submittable_property_event(submittable_id, False)
         cls._submittable_id_datanodes[submittable_id][datanode_id].add(reason)
 
     @classmethod
-    def _remove(cls, datanode_id: "DataNodeId", reason: str):
+    def _remove(cls, datanode_id: "DataNodeId", reason: str) -> None:
         # check the data node status to determine the reason to be removed
         submittable_ids: Set = cls._datanode_id_submittables.get(datanode_id, set())
 
@@ -78,11 +78,7 @@ class _ReadyToRunProperty:
             cls._datanode_id_submittables.pop(datanode_id)
 
     @classmethod
-    def _check_submittable_is_ready_to_submit(cls, submittable_id: Union["ScenarioId", "SequenceId", "TaskId"]):
-        return len(_ReadyToRunProperty._submittable_id_datanodes.get(submittable_id, [])) == 0
-
-    @classmethod
-    def _add_parent_entities_to_submittable_cache(cls, dn: "DataNode", reason: str):
+    def _add_parent_entities_to_submittable_cache(cls, dn: "DataNode", reason: str) -> None:
         from ..scenario.scenario import Scenario
         from ..sequence.sequence import Sequence
         from ..task.task import Task
