@@ -19,9 +19,9 @@ def test_menu_md(gui: Gui, test_client, helpers):
         "<MenuCtl",
         'libClassName="taipy-menu"',
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;, &quot;Item 4&quot;]"',
-        "lov={_TpL_tp_TpExPr_gui_get_adapted_lov_lov_tuple_TPMDL_0_0}",
+        "lov={_TpL_tp_TpExPr_gui_get_adapted_lov_lov_str_TPMDL_0_0}",
         'onAction="on_menu_action"',
-        'updateVars="lov=_TpL_tp_TpExPr_gui_get_adapted_lov_lov_tuple_TPMDL_0_0"',
+        'updateVars="lov=_TpL_tp_TpExPr_gui_get_adapted_lov_lov_str_TPMDL_0_0"',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -33,7 +33,7 @@ def test_menu_html(gui: Gui, test_client, helpers):
         "<MenuCtl",
         'libClassName="taipy-menu"',
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;, &quot;Item 4&quot;]"',
-        "lov={_TpL_tp_TpExPr_gui_get_adapted_lov_lov_tuple_TPMDL_0_0}",
-        'updateVars="lov=_TpL_tp_TpExPr_gui_get_adapted_lov_lov_tuple_TPMDL_0_0"',
+        "lov={_TpL_tp_TpExPr_gui_get_adapted_lov_lov_str_TPMDL_0_0}",
+        'updateVars="lov=_TpL_tp_TpExPr_gui_get_adapted_lov_lov_str_TPMDL_0_0"',
     ]
     helpers.test_control_html(gui, html_string, expected_list)
