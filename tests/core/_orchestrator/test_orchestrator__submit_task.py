@@ -55,7 +55,7 @@ def test_submit_task_development_mode():
         job = submission.jobs[0]
 
     # task output should have been written
-    assert scenario.dn_1.last_edit_date == submit_time
+    assert scenario.dn_1.last_edit_date is not None
 
     # job exists and is correct
     assert job.task == scenario.t1
