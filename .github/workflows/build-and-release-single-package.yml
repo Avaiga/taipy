@@ -72,27 +72,27 @@ jobs:
             echo "package_version=${{needs.fetch-versions.outputs.config_VERSION}}" >> $GITHUB_OUTPUT
             echo "package_dir=./taipy/config" >> $GITHUB_OUTPUT
             echo "release_name=${{needs.fetch-versions.outputs.config_VERSION}}-config" >> $GITHUB_OUTPUT
-            echo "tar_path=./dist/${{ github.event.repository.name }}_config-${{needs.fetch-versions.outputs.config_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
+            echo "tar_path=./dist/${{ github.event.repository.name }}-config-${{needs.fetch-versions.outputs.config_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
           elif [ "${{ github.event.inputs.target_package }}" == "core" ]; then
             echo "package_version=${{needs.fetch-versions.outputs.core_VERSION}}" >> $GITHUB_OUTPUT
             echo "package_dir=./taipy/core" >> $GITHUB_OUTPUT
             echo "release_name=${{needs.fetch-versions.outputs.core_VERSION}}-core" >> $GITHUB_OUTPUT
-            echo "tar_path=./dist/${{ github.event.repository.name }}_core-${{needs.fetch-versions.outputs.core_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
+            echo "tar_path=./dist/${{ github.event.repository.name }}-core-${{needs.fetch-versions.outputs.core_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
           elif [ "${{ github.event.inputs.target_package }}" == "gui" ]; then
             echo "package_version=${{needs.fetch-versions.outputs.gui_VERSION}}" >> $GITHUB_OUTPUT
             echo "package_dir=./taipy/gui" >> $GITHUB_OUTPUT
             echo "release_name=${{needs.fetch-versions.outputs.gui_VERSION}}-gui" >> $GITHUB_OUTPUT
-            echo "tar_path=./dist/${{ github.event.repository.name }}_gui-${{needs.fetch-versions.outputs.gui_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
+            echo "tar_path=./dist/${{ github.event.repository.name }}-gui-${{needs.fetch-versions.outputs.gui_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
           elif [ "${{ github.event.inputs.target_package }}" == "rest" ]; then
             echo "package_version=${{needs.fetch-versions.outputs.rest_VERSION}}" >> $GITHUB_OUTPUT
             echo "package_dir=./taipy/rest" >> $GITHUB_OUTPUT
             echo "release_name=${{needs.fetch-versions.outputs.rest_VERSION}}-rest" >> $GITHUB_OUTPUT
-            echo "tar_path=./dist/${{ github.event.repository.name }}_rest-${{needs.fetch-versions.outputs.rest_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
+            echo "tar_path=./dist/${{ github.event.repository.name }}-rest-${{needs.fetch-versions.outputs.rest_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
           elif [ "${{ github.event.inputs.target_package }}" == "templates" ]; then
             echo "package_version=${{needs.fetch-versions.outputs.templates_VERSION}}" >> $GITHUB_OUTPUT
             echo "package_dir=./taipy/templates" >> $GITHUB_OUTPUT
             echo "release_name=${{needs.fetch-versions.outputs.templates_VERSION}}-templates" >> $GITHUB_OUTPUT
-            echo "tar_path=./dist/${{ github.event.repository.name }}_templates-${{needs.fetch-versions.outputs.templates_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
+            echo "tar_path=./dist/${{ github.event.repository.name }}-templates-${{needs.fetch-versions.outputs.templates_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
           fi
         shell: bash
 
@@ -153,6 +153,7 @@ jobs:
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
         run: |
           python setup.py build_py && python -m build
+          for file in ./dist/*; do mv "$file" "${file//_/-}"; done
 
       - name: Create tag and release
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
