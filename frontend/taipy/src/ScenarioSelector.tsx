@@ -422,7 +422,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
     const onSubmit = useCallback(
         (...values: unknown[]) => {
-            dispatch(createSendActionNameAction(props.id, module, props.onScenarioCrud, props.onCreation, ...values));
+            dispatch(createSendActionNameAction(props.id, module, props.onScenarioCrud, props.onCreation, props.updateVarName, ...values));
             if (values.length > 1 && values[1]) {
                 // delete requested => unselect current node
                 const lovVar = getUpdateVar(props.updateVars, "scenarios");

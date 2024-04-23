@@ -44,6 +44,7 @@ import {
     BadgePos,
     BadgeSx,
     BaseTreeViewSx,
+    EmptyArray,
     FlagSx,
     ParentItemSx,
     iconLabelSx,
@@ -55,7 +56,7 @@ export interface EditProps {
     id: string;
 }
 
-const treeSlots = {expandIcon: ChevronRight};
+const treeSlots = { expandIcon: ChevronRight };
 
 type Entities = Cycles | Scenarios | DataNodes;
 type Entity = Cycle | Scenario | Sequence | DataNode;
@@ -109,7 +110,7 @@ const CoreItem = (props: {
     onPin?: (e: MouseEvent<HTMLElement>) => void;
     hideNonPinned: boolean;
 }) => {
-    const [id, label, items = [], nodeType, primary] = props.item;
+    const [id, label, items = EmptyArray, nodeType, primary] = props.item;
     const isPinned = props.pins[0][id];
     const isShown = props.hideNonPinned ? props.pins[1][id] : true;
 
@@ -226,6 +227,15 @@ const getChildrenIds = (entity: Entity): string[] => {
     return res;
 };
 
+const getExpandedIds = (nodeId: string, exp?: string[], entities?: Entities) => {
+    const ret = entities && findEntityAndParents(nodeId, entities);
+    if (ret && ret[1]) {
+        const res = ret[1].map((r) => r[0]);
+        return exp ? [...exp, ...res] : res;
+    }
+    return exp;
+};
+
 const CoreSelector = (props: CoreSelectorProps) => {
     const {
         id = "",
@@ -249,6 +259,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
     const [selected, setSelected] = useState("");
     const [pins, setPins] = useState<[Pinned, Pinned]>([{}, {}]);
     const [hideNonPinned, setShowPinned] = useState(false);
+    const [expandedItems, setExpandedItems] = useState<string[]>();
 
     const dispatch = useDispatch();
     const module = useModule();
@@ -292,21 +303,27 @@ const CoreSelector = (props: CoreSelectorProps) => {
     useEffect(() => {
         if (value !== undefined && value !== null) {
             setSelected(value);
+            setExpandedItems((exp) => getExpandedIds(value, exp, props.entities));
         } else if (defaultValue) {
             try {
                 const parsedValue = JSON.parse(defaultValue);
                 if (Array.isArray(parsedValue)) {
-                    parsedValue.length && setSelected(parsedValue[0]);
+                    if (parsedValue.length) {
+                        setSelected(parsedValue[0]);
+                        setExpandedItems((exp) => getExpandedIds(parsedValue[0], exp, props.entities));
+                    }
                 } else {
                     setSelected(parsedValue);
+                    setExpandedItems((exp) => getExpandedIds(parsedValue, exp, props.entities));
                 }
             } catch {
                 setSelected(defaultValue);
+                setExpandedItems((exp) => getExpandedIds(defaultValue, exp, props.entities));
             }
         } else if (value === null) {
             setSelected("");
         }
-    }, [defaultValue, value]);
+    }, [defaultValue, value, props.entities]);
 
     useEffect(() => {
         if (entities && !entities.length) {
@@ -402,11 +419,12 @@ const CoreSelector = (props: CoreSelectorProps) => {
                 onItemSelectionToggle={onNodeSelect}
                 selectedItems={selected}
                 multiSelect={multiple && !multiple}
+                expandedItems={expandedItems}
             >
                 {entities
                     ? entities.map((item) => (
                           <CoreItem
-                              key={item[0]}
+                              key={item ? item[0] : ""}
                               item={item}
                               displayCycles={displayCycles}
                               showPrimaryFlag={showPrimaryFlag}
