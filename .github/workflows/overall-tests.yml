@@ -41,7 +41,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   overall-tests:
-    needs: [coverage, partial-tests]
+    needs: [partial-tests]
     timeout-minutes: 50
     strategy:
       fail-fast: false
@@ -69,7 +69,7 @@ jobs:
           pipenv run pytest -m "not orchestrator_dispatcher and not standalone and not teste2e" tests
 
   intermittent-tests:
-    needs: [coverage, partial-tests]
+    needs: [partial-tests]
     timeout-minutes: 40
     strategy:
       fail-fast: false

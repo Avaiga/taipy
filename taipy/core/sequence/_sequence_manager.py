@@ -344,7 +344,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         return True if cls._get(entity_id) else False
 
     @classmethod
-    def _export(cls, id: str, folder_path: Union[str, pathlib.Path]):
+    def _export(cls, id: str, folder_path: Union[str, pathlib.Path], **kwargs):
         """
         Export a Sequence entity.
         """

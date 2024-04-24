@@ -107,6 +107,7 @@ class PropertyType(Enum):
     """
     image = _TaipyContentImage
     json = "json"
+    single_lov = "singlelov"
     lov = _TaipyLov
     """
     The property holds a LoV (list of values).

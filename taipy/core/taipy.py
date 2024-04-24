@@ -9,12 +9,13 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import os
 import pathlib
 import shutil
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Literal, Optional, Set, Union, overload
 
-from taipy.config.common.scope import Scope
+from taipy.config import Config, Scope
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._core import Core
@@ -40,6 +41,8 @@ from .data.data_node import DataNode
 from .data.data_node_id import DataNodeId
 from .exceptions.exceptions import (
     DataNodeConfigIsNotGlobal,
+    ExportFolderAlreadyExists,
+    InvalidExportPath,
     ModelNotFound,
     NonExistingVersion,
     VersionIsNotProductionVersion,
@@ -979,6 +982,8 @@ def clean_all_entities(version_number: str) -> bool:
 def export_scenario(
     scenario_id: ScenarioId,
     folder_path: Union[str, pathlib.Path],
+    override: bool = False,
+    include_data: bool = False,
 ):
     """Export all related entities of a scenario to a folder.
 
@@ -988,18 +993,35 @@ def export_scenario(
     Parameters:
         scenario_id (ScenarioId): The ID of the scenario to export.
         folder_path (Union[str, pathlib.Path]): The folder path to export the scenario to.
-    """
+            If the path exists and the override parameter is False, an exception is raised.
+        override (bool): If True, the existing folder will be overridden. Default is False.
+        include_data (bool): If True, the file-based data nodes are exported as well.
+            This includes Pickle, CSV, Excel, Parquet, and JSON data nodes.
+            If the scenario has a data node that is not file-based, a warning will be logged, and the data node
+            will not be exported. The default value is False.
 
+    Raises:
+        ExportFolderAlreadyExist^: If the `folder_path` already exists and the override parameter is False.
+    """
     manager = _ScenarioManagerFactory._build_manager()
     scenario = manager._get(scenario_id)
     entity_ids = manager._get_children_entity_ids(scenario)
     entity_ids.scenario_ids = {scenario_id}
-    entity_ids.cycle_ids = {scenario.cycle.id}
+    if scenario.cycle:
+        entity_ids.cycle_ids = {scenario.cycle.id}
 
-    shutil.rmtree(folder_path, ignore_errors=True)
+    if folder_path == Config.core.taipy_storage_folder:
+        raise InvalidExportPath("The export folder must not be the storage folder.")
+
+    if os.path.exists(folder_path):
+        if override:
+            __logger.warning(f"Override the existing folder '{folder_path}'")
+            shutil.rmtree(folder_path, ignore_errors=True)
+        else:
+            raise ExportFolderAlreadyExists(str(folder_path), scenario_id)
 
     for data_node_id in entity_ids.data_node_ids:
-        _DataManagerFactory._build_manager()._export(data_node_id, folder_path)
+        _DataManagerFactory._build_manager()._export(data_node_id, folder_path, include_data=include_data)
     for task_id in entity_ids.task_ids:
         _TaskManagerFactory._build_manager()._export(task_id, folder_path)
     for sequence_id in entity_ids.sequence_ids:
@@ -1010,6 +1032,9 @@ def export_scenario(
         _ScenarioManagerFactory._build_manager()._export(scenario_id, folder_path)
     for job_id in entity_ids.job_ids:
         _JobManagerFactory._build_manager()._export(job_id, folder_path)
+    for submission_id in entity_ids.submission_ids:
+        _SubmissionManagerFactory._build_manager()._export(submission_id, folder_path)
+    _VersionManagerFactory._build_manager()._export(scenario.version, folder_path)
 
 
 def get_parents(

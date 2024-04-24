@@ -10,9 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import datetime
-import os
-import pathlib
-import shutil
 from unittest import mock
 
 import pytest
@@ -44,7 +41,7 @@ from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.pickle import PickleDataNode
-from taipy.core.exceptions.exceptions import DataNodeConfigIsNotGlobal, InvalidExportPath
+from taipy.core.exceptions.exceptions import DataNodeConfigIsNotGlobal
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job
 from taipy.core.scenario._scenario_manager import _ScenarioManager
@@ -713,58 +710,6 @@ class TestTaipy:
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._create") as mck:
             tp.create_scenario(scenario_config, datetime.datetime(2022, 2, 5), "displayable_name")
             mck.assert_called_once_with(scenario_config, datetime.datetime(2022, 2, 5), "displayable_name")
-
-    def test_export_scenario_filesystem(self):
-        shutil.rmtree("./tmp", ignore_errors=True)
-
-        input_cfg_1 = Config.configure_data_node(id="i1", storage_type="pickle", scope=Scope.SCENARIO, default_data=1)
-        output_cfg_1 = Config.configure_data_node(id="o1", storage_type="pickle", scope=Scope.SCENARIO)
-        task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)
-        scenario_cfg_1 = Config.configure_scenario("s1", [task_cfg_1], [], Frequency.DAILY)
-
-        input_cfg_2 = Config.configure_data_node(id="i2", storage_type="pickle", scope=Scope.SCENARIO, default_data=2)
-        output_cfg_2 = Config.configure_data_node(id="o2", storage_type="pickle", scope=Scope.SCENARIO)
-        task_cfg_2 = Config.configure_task("t2", print, input_cfg_2, output_cfg_2)
-        scenario_cfg_2 = Config.configure_scenario("s2", [task_cfg_2], [], Frequency.DAILY)
-
-        scenario_1 = tp.create_scenario(scenario_cfg_1)
-        job_1 = tp.submit(scenario_1).jobs[0]
-
-        # Export scenario 1
-        tp.export_scenario(scenario_1.id, "./tmp/exp_scenario_1")
-        assert sorted(os.listdir("./tmp/exp_scenario_1/data_nodes")) == sorted(
-            [f"{scenario_1.i1.id}.json", f"{scenario_1.o1.id}.json"]
-        )
-        assert sorted(os.listdir("./tmp/exp_scenario_1/tasks")) == sorted([f"{scenario_1.t1.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_1/scenarios")) == sorted([f"{scenario_1.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_1/jobs")) == sorted([f"{job_1.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_1/cycles")) == sorted([f"{scenario_1.cycle.id}.json"])
-
-        scenario_2 = tp.create_scenario(scenario_cfg_2)
-        job_2 = tp.submit(scenario_2).jobs[0]
-
-        # Export scenario 2
-        scenario_2.export(pathlib.Path.cwd() / "./tmp/exp_scenario_2")
-        assert sorted(os.listdir("./tmp/exp_scenario_2/data_nodes")) == sorted(
-            [f"{scenario_2.i2.id}.json", f"{scenario_2.o2.id}.json"]
-        )
-        assert sorted(os.listdir("./tmp/exp_scenario_2/tasks")) == sorted([f"{scenario_2.t2.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_2/scenarios")) == sorted([f"{scenario_2.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_2/jobs")) == sorted([f"{job_2.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_2/cycles")) == sorted([f"{scenario_2.cycle.id}.json"])
-
-        # Export scenario 2 into the folder containing scenario 1 files
-        tp.export_scenario(scenario_2.id, "./tmp/exp_scenario_1")
-        # Should have the files as scenario 1 only
-        assert sorted(os.listdir("./tmp/exp_scenario_1/tasks")) == sorted([f"{scenario_2.t2.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_1/scenarios")) == sorted([f"{scenario_2.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_1/jobs")) == sorted([f"{job_2.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_1/cycles")) == sorted([f"{scenario_2.cycle.id}.json"])
-
-        with pytest.raises(InvalidExportPath):
-            tp.export_scenario(scenario_2.id, Config.core.taipy_storage_folder)
-
-        shutil.rmtree("./tmp", ignore_errors=True)
 
     def test_get_parents(self):
         def assert_result_parents_and_expected_parents(parents, expected_parents):

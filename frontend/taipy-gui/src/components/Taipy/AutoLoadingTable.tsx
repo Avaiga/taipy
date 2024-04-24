@@ -75,6 +75,7 @@ import {
 } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
 import { getSuffixedClassNames, getUpdateVar } from "./utils";
+import { emptyArray } from "../../utils";
 
 interface RowData {
     colsOrder: string[];
@@ -177,7 +178,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         height = "80vh",
         width = "100%",
         updateVars,
-        selected = [],
+        selected = emptyArray,
         pageSize = 100,
         defaultKey = "",
         onEdit = "",
