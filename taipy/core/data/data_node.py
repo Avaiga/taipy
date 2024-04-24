@@ -505,11 +505,11 @@ class DataNode(_Entity, _Labeled):
     def is_up_to_date(self) -> bool:
         """Indicate if this data node is up-to-date.
 
-    Returns:
-        False if a preceding data node has been updated before the selected data node
-        or the selected data is invalid.<br/>
-        True otherwise.
-    """
+        Returns:
+            False if a preceding data node has been updated before the selected data node
+            or the selected data is invalid.<br/>
+            True otherwise.
+        """
 
         if self.is_valid:
             from ..scenario.scenario import Scenario
