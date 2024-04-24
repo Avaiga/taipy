@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-13]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -61,7 +61,7 @@ jobs:
         run: pipenv install --dev --python=${{ matrix.python-version }}
 
       - name: Setup LibMagic (MacOS)
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-13'
         run: brew install libmagic
 
       - uses: actions/setup-node@v4
@@ -116,7 +116,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-13]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -141,7 +141,7 @@ jobs:
         run: pipenv install --dev --python=${{ matrix.python-version }}
 
       - name: Setup LibMagic (MacOS)
-        if: matrix.os == 'macos-latest' && steps.changes.outputs.core == 'true'
+        if: matrix.os == 'macos-13' && steps.changes.outputs.core == 'true'
         run: brew install libmagic
 
       - name: Pytest Core orchestrator_dispatcher
@@ -155,7 +155,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-13]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -180,7 +180,7 @@ jobs:
         run: pipenv install --dev --python=${{ matrix.python-version }}
 
       - name: Setup LibMagic (MacOS)
-        if: matrix.os == 'macos-latest' && steps.changes.outputs.core == 'true'
+        if: matrix.os == 'macos-13' && steps.changes.outputs.core == 'true'
         run: brew install libmagic
 
       - name: Pytest Core standalone
