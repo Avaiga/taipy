@@ -12,6 +12,7 @@
 import pathlib
 import sys
 
+from cookiecutter.exceptions import OutputDirExistsException
 from cookiecutter.main import cookiecutter
 
 import taipy
@@ -45,6 +46,10 @@ class _ScaffoldCLI(_AbstractCLI):
         args = cls._parse_arguments()
         if not args:
             return
-
-        cookiecutter(cls._TEMPLATE_MAP[args.template])
+        try:
+            cookiecutter(cls._TEMPLATE_MAP[args.template])
+        except OutputDirExistsException as err:
+            error_msg = f"{str(err)[7:]}. Please remove the existing directory or provide a new folder name."
+            cls._logger.error(error_msg)
+            sys.exit(1)
         sys.exit(0)

@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import os
 from unittest.mock import patch
 
 import pytest
@@ -29,3 +30,17 @@ def test_create_cli_with_unsupported_template(capsys):
             _entrypoint()
         _, err = capsys.readouterr()
         assert "invalid choice: 'not-a-template'" in err
+
+
+def test_create_app_on_existing_folder(tmpdir, caplog, monkeypatch):
+    os.chdir(tmpdir)
+    os.mkdir(os.path.join(tmpdir, "taipy_application"))
+
+    # Mock the click.prompt to always return the default value
+    monkeypatch.setattr("click.prompt", lambda *args, **kw: kw["default"] if "default" in kw else "")
+
+    with patch("sys.argv", ["prog", "create"]):
+        with pytest.raises(SystemExit):
+            _entrypoint()
+
+    assert '"taipy_application" directory already exists' in caplog.text
