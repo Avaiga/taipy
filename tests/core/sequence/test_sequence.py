@@ -13,6 +13,7 @@ from unittest import mock
 
 import pytest
 
+from taipy.config import Config
 from taipy.config.common.scope import Scope
 from taipy.core.common._utils import _Subscriber
 from taipy.core.data._data_manager_factory import _DataManagerFactory
@@ -26,6 +27,25 @@ from taipy.core.sequence.sequence import Sequence
 from taipy.core.sequence.sequence_id import SequenceId
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task, TaskId
+
+
+def test_sequence_equals():
+    task_config = Config.configure_task("mult_by_3", print, [], None)
+    scenario_config = Config.configure_scenario("scenario", [task_config])
+
+    scenario = _ScenarioManager._create(scenario_config)
+    scenario.add_sequences({"print": list(scenario.tasks.values())})
+    sequence_1 = scenario.sequences["print"]
+    sequence_id = sequence_1.id
+
+    assert sequence_1.name == "print"
+    sequence_2 = _SequenceManager._get(sequence_id)
+    # To test if instance is same type
+    task = Task("task", {}, print, [], [], sequence_id)
+
+    assert sequence_1 == sequence_2
+    assert sequence_1 != sequence_id
+    assert sequence_1 != task
 
 
 def test_create_sequence():
