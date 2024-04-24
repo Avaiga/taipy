@@ -77,9 +77,8 @@ def test_need_to_run_skippable_task_with_validity_period_on_output():
 
     assert dispatcher._needs_to_run(task)  # output data is not edited
 
-    output_edit_time = datetime.now()  # edit time
-    with freezegun.freeze_time(output_edit_time):
-        task.output["output"].write("Hello world !")  # output data is edited
+    task.output["output"].write("Hello world !")  # output data is edited
+    output_edit_time = task.output["output"].last_edit_date
 
     with freezegun.freeze_time(output_edit_time + timedelta(minutes=30)):  # 30 min after edit time
         assert not dispatcher._needs_to_run(task)  # output data is written and validity period not expired

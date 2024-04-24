@@ -11,10 +11,8 @@
 
 import dataclasses
 import json
-import os
 from datetime import date, datetime, timedelta
 from enum import Enum
-from os.path import isfile
 from pydoc import locate
 from typing import Any, Dict, List, Optional, Set
 
@@ -22,7 +20,7 @@ from taipy.config.common.scope import Scope
 
 from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
-from ._abstract_file import _FileDataNodeMixin
+from ._file_datanode_mixin import _FileDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
@@ -62,9 +60,6 @@ class JSONDataNode(DataNode, _FileDataNodeMixin):
     """
 
     __STORAGE_TYPE = "json"
-    __DEFAULT_DATA_KEY = "default_data"
-    __DEFAULT_PATH_KEY = "default_path"
-    __PATH_KEY = "path"
     __ENCODING_KEY = "encoding"
     _ENCODER_KEY = "encoder"
     _DECODER_KEY = "decoder"
@@ -86,18 +81,22 @@ class JSONDataNode(DataNode, _FileDataNodeMixin):
         editor_expiration_date: Optional[datetime] = None,
         properties: Optional[Dict] = None,
     ):
+        self.id = id or self._new_id(config_id)
+
         if properties is None:
             properties = {}
-
-        default_value = properties.pop(self.__DEFAULT_DATA_KEY, None)
 
         if self.__ENCODING_KEY not in properties.keys():
             properties[self.__ENCODING_KEY] = "utf-8"
 
-        super().__init__(
+        default_value = properties.pop(self._DEFAULT_DATA_KEY, None)
+        _FileDataNodeMixin.__init__(self, properties)
+
+        DataNode.__init__(
+            self,
             config_id,
             scope,
-            id,
+            self.id,
             owner_id,
             parent_ids,
             last_edit_date,
@@ -109,39 +108,19 @@ class JSONDataNode(DataNode, _FileDataNodeMixin):
             editor_expiration_date,
             **properties,
         )
-        self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
-        if self._path and ".data" in self._path:
-            self._path = self._migrate_path(self.storage_type(), self._path)
-
-        if not self._path:
-            self._path = self._build_path(self.storage_type())
-        properties[self.__PATH_KEY] = self._path
 
         self._decoder = self._properties.get(self._DECODER_KEY, _DefaultJSONDecoder)
         self._encoder = self._properties.get(self._ENCODER_KEY, _DefaultJSONEncoder)
 
-        if default_value is not None and not os.path.exists(self._path):
-            self._write(default_value)
-            self._last_edit_date = datetime.now()
-            self._edits.append(
-                Edit(
-                    {
-                        "timestamp": self._last_edit_date,
-                        "writer_identifier": "TAIPY",
-                        "comments": "Default data written.",
-                    }
-                )
-            )
-
-        if not self._last_edit_date and isfile(self._path):  # type: ignore
-            self._last_edit_date = datetime.now()
+        self._write_default_data(default_value)
 
         self._TAIPY_PROPERTIES.update(
             {
-                self.__PATH_KEY,
-                self.__DEFAULT_PATH_KEY,
+                self._PATH_KEY,
+                self._DEFAULT_PATH_KEY,
+                self._DEFAULT_DATA_KEY,
+                self._IS_GENERATED_KEY,
                 self.__ENCODING_KEY,
-                self.__DEFAULT_DATA_KEY,
                 self._ENCODER_KEY,
                 self._DECODER_KEY,
             }
@@ -150,16 +129,6 @@ class JSONDataNode(DataNode, _FileDataNodeMixin):
     @classmethod
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
-
-    @property  # type: ignore
-    @_self_reload(DataNode._MANAGER_NAME)
-    def path(self):
-        return self._path
-
-    @path.setter
-    def path(self, value):
-        self._path = value
-        self.properties[self.__PATH_KEY] = value
 
     @property  # type: ignore
     @_self_reload(DataNode._MANAGER_NAME)

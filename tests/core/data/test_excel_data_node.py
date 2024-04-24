@@ -11,6 +11,7 @@
 
 import os
 import pathlib
+import uuid
 from datetime import datetime
 from time import sleep
 from typing import Dict
@@ -132,12 +133,13 @@ class TestExcelDataNode:
     @pytest.mark.parametrize(
         ["properties", "exists"],
         [
-            ({}, False),
             ({"default_data": {"a": ["foo", "bar"]}}, True),
+            ({}, False),
         ],
     )
     def test_create_with_default_data(self, properties, exists):
-        dn = ExcelDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
+        dn = ExcelDataNode("foo", Scope.SCENARIO, DataNodeId(f"dn_id_{uuid.uuid4()}"), properties=properties)
+        assert dn.path == os.path.join(Config.core.storage_folder.strip("/"), "excels", dn.id + ".xlsx")
         assert os.path.exists(dn.path) is exists
 
     def test_read_write_after_modify_path(self):
@@ -361,5 +363,5 @@ class TestExcelDataNode:
 
         dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
 
-        assert ".data" not in dn.path.name
+        assert ".data" not in dn.path
         assert os.path.exists(dn.path)

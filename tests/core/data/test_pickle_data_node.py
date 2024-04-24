@@ -44,7 +44,7 @@ class TestPickleDataNodeEntity:
 
     def test_create(self):
         dn = PickleDataNode("foobar_bazxyxea", Scope.SCENARIO, properties={"default_data": "Data"})
-        assert os.path.isfile(Config.core.storage_folder + "pickles/" + dn.id + ".p")
+        assert os.path.isfile(os.path.join(Config.core.storage_folder.strip("/"), "pickles", dn.id + ".p"))
         assert isinstance(dn, PickleDataNode)
         assert dn.storage_type() == "pickle"
         assert dn.config_id == "foobar_bazxyxea"
@@ -190,5 +190,5 @@ class TestPickleDataNodeEntity:
 
         dn = PickleDataNode("foo", Scope.SCENARIO, properties={"default_data": "bar", "path": path})
 
-        assert ".data" not in dn.path.name
+        assert ".data" not in dn.path
         assert os.path.exists(dn.path)
