@@ -267,24 +267,6 @@
             "if": {
               "properties": {
                 "storage_type": {
-                  "enum": [
-                    "csv",
-                    "excel",
-                    "json"
-                  ]
-                }
-              }
-            },
-            "then": {
-              "required": [
-                "default_path"
-              ]
-            }
-          },
-          {
-            "if": {
-              "properties": {
-                "storage_type": {
                   "const": "generic"
                 }
               }
