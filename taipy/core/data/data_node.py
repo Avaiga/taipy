@@ -43,11 +43,11 @@ def _update_ready_for_reading(fct):
     def _recompute_is_ready_for_reading(dn: "DataNode", *args, **kwargs):
         fct(dn, *args, **kwargs)
         if dn._edit_in_progress:
-            _ReadyToRunProperty._add_parent_entities_to_submittable_cache(dn, f"DataNode {dn.id} is being edited")
+            _ReadyToRunProperty._add(dn, f"DataNode {dn.id} is being edited")
         else:
             _ReadyToRunProperty._remove(dn.id, f"DataNode {dn.id} is being edited")
         if not dn._last_edit_date:
-            _ReadyToRunProperty._add_parent_entities_to_submittable_cache(dn, f"DataNode {dn.id} is not written")
+            _ReadyToRunProperty._add(dn, f"DataNode {dn.id} is not written")
         else:
             _ReadyToRunProperty._remove(dn.id, f"DataNode {dn.id} is not written")
 
