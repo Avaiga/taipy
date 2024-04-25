@@ -100,7 +100,7 @@
               "generic",
               "parquet",
               "s3_object",
-              "",
+              ""
             ],
             "default": "pickle"
           },
@@ -237,47 +237,51 @@
             "description": "storage_type: parquet specific.Additional parameters when writing parquet files, default is an empty dictionary",
             "type": "object"
           },
-          "aws_access_key":{
+          "aws_access_key": {
             "description": "storage_type: s3_object specific.Amazon Storage public key",
             "type": "string"
           },
-          "aws_secret_access_key":{
+          "aws_secret_access_key": {
             "description": "storage_type: s3_object specific.Amazon Storage secret key",
             "type": "string"
           },
-          "aws_s3_bucket_name":{
+          "aws_s3_bucket_name": {
             "description": "storage_type: s3_object specific.Name of Bucket",
             "type": "string"
           },
-          "aws_s3_object_key":{
+          "aws_s3_object_key": {
             "description": "storage_type: s3_object specific.File name",
             "type": "string"
           },
-          "aws_region":{
+          "aws_region": {
             "description": "storage_type: s3_object specific.Bucket Location",
             "type": "string"
           },
-          "aws_s3_object_parameters":{
+          "aws_s3_object_parameters": {
             "description": "storage_type: s3_object specific.Additional parameters when accessing s3 object, default is an empty dictionary",
             "type": "array"
-          },
-          "if": {
-            "properties": {
-              "storage_type": {
-                "enum": [
-                  "csv",
-                  "excel",
-                  "json"
-                ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "storage_type": {
+                  "enum": [
+                    "csv",
+                    "excel",
+                    "json"
+                  ]
+                }
               }
+            },
+            "then": {
+              "required": [
+                "default_path"
+              ]
             }
           },
-          "then": {
-            "required": [
-              "default_path"
-            ]
-          },
-          "else": {
+          {
             "if": {
               "properties": {
                 "storage_type": {
@@ -290,84 +294,111 @@
                 "read_fct",
                 "write_fct"
               ]
-            },
-            "else": {
-              "if": {
-                "properties": {
-                  "storage_type": {
-                    "enum": [
-                      "sql",
-                      "sql_table",
-                      "mongo_collection"
-                    ]
-                  }
-                }
-              },
-              "then": {
-                "required": [
-                  "db_name"
-                ],
-            "else": {
-              "if": {
-                "properties": {
-                  "storage_type": {
-                    "enum": [
-                      "s3_object",
-                    ]
-                  }
-                }
-              },
-              "then": {
-                "required": [
-                  "aws_access_key",
-                  "aws_secret_access_key",
-                  "aws_s3_bucket_name",
-                  "aws_s3_object_key"
-                ],
-                "if": {
-                  "properties": {
-                    "storage_type": {
-                      "enum": [
-                        "sql",
-                        "sql_table"
-                      ]
-                    }
-                  }
-                },
-                "then": {
-                  "required": [
-                    "db_username",
-                    "db_password",
-                    "db_engine"
-                  ],
-                  "if": {
-                    "properties": {
-                      "storage_type": {
-                        "const": "sql"
-                      }
-                    }
-                  },
-                  "then": {
-                    "required": [
-                      "read_query",
-                      "write_query_builder"
-                    ]
-                  },
-                  "else": {
-                    "required": [
-                      "table_name"
-                    ]
-                  }
-                },
-                "else": {
-                  "required": [
-                    "collection_name"
-                  ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "storage_type": {
+                  "const": "sql"
                 }
               }
+            },
+            "then": {
+              "if": {
+                "properties": {
+                  "db_engine": {
+                    "const": "sqlite"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "db_name",
+                  "db_engine",
+                  "read_query",
+                  "write_query_builder"
+                ]
+              },
+              "else": {
+                "required": [
+                  "db_username",
+                  "db_password",
+                  "db_name",
+                  "db_engine",
+                  "read_query",
+                  "write_query_builder"
+                ]
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "storage_type": {
+                  "const": "sql_table"
+                }
+              }
+            },
+            "then": {
+              "if": {
+                "properties": {
+                  "db_engine": {
+                    "const": "sqlite"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "db_name",
+                  "db_engine",
+                  "table_name"
+                ]
+              },
+              "else": {
+                "required": [
+                  "db_username",
+                  "db_password",
+                  "db_name",
+                  "db_engine",
+                  "table_name"
+                ]
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "storage_type": {
+                  "const": "mongo_collection"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "db_name",
+                "collection_name"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "storage_type": {
+                  "const": "s3_object"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "aws_access_key",
+                "aws_secret_access_key",
+                "aws_s3_bucket_name",
+                "aws_s3_object_key"
+              ]
             }
           }
-        }
+        ]
       }
     },
     "TASK": {
