@@ -45,11 +45,11 @@ def _update_ready_for_reading(fct):
         if dn._edit_in_progress:
             _ReadyToRunProperty._add(dn, f"DataNode {dn.id} is being edited")
         else:
-            _ReadyToRunProperty._remove(dn.id, f"DataNode {dn.id} is being edited")
+            _ReadyToRunProperty._remove(dn, f"DataNode {dn.id} is being edited")
         if not dn._last_edit_date:
             _ReadyToRunProperty._add(dn, f"DataNode {dn.id} is not written")
         else:
-            _ReadyToRunProperty._remove(dn.id, f"DataNode {dn.id} is not written")
+            _ReadyToRunProperty._remove(dn, f"DataNode {dn.id} is not written")
 
     return _recompute_is_ready_for_reading
 

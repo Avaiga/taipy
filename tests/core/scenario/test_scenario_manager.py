@@ -597,8 +597,6 @@ def test_notification_subscribe(mocker):
             notify_1,
             notify_1,
             notify_1,
-            notify_1,
-            notify_2,
             notify_2,
             notify_2,
             notify_2,
@@ -610,25 +608,15 @@ def test_notification_subscribe(mocker):
     _ScenarioManager._subscribe(callback=notify_1, scenario=scenario)
     _ScenarioManager._submit(scenario)
     notify_1.assert_called_3_times()
-
     notify_1.reset()
 
     # test unsubscribing notification
-    # test notis subscribe only on new jobs
+    # test notif subscribe only on new jobs
     _ScenarioManager._unsubscribe(callback=notify_1, scenario=scenario)
     _ScenarioManager._subscribe(callback=notify_2, scenario=scenario)
     _ScenarioManager._submit(scenario)
-
     notify_1.assert_not_called()
     notify_2.assert_called_3_times()
-
-
-class Notify:
-    def __call__(self, *args, **kwargs):
-        self.args = args
-
-    def assert_called_with(self, args):
-        assert args in self.args
 
 
 def test_notification_subscribe_multiple_params(mocker):
