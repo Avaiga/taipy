@@ -51,5 +51,5 @@ class _ScaffoldCLI(_AbstractCLI):
         except OutputDirExistsException as err:
            error_msg = f"{str(err)}. Please remove the existing directory or provide a new folder name."
            print(error_msg)
-            sys.exit(1)
+           sys.exit(1)
         sys.exit(0)
