@@ -49,7 +49,7 @@ class _ScaffoldCLI(_AbstractCLI):
         try:
             cookiecutter(cls._TEMPLATE_MAP[args.template])
         except OutputDirExistsException as err:
-            error_msg = f"{str(err)[7:]}. Please remove the existing directory or provide a new folder name."
-            cls._logger.error(error_msg)
+           error_msg = f"{str(err)}. Please remove the existing directory or provide a new folder name."
+           print(error_msg)
             sys.exit(1)
         sys.exit(0)
