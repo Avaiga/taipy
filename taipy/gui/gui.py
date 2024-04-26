@@ -691,7 +691,7 @@ class Gui:
         propagate=True,
         holder: t.Optional[_TaipyBase] = None,
         on_change: t.Optional[str] = None,
-        forward: t.optional[bool] = True,
+        forward: t.Optional[bool] = True,
     ) -> None:
         if holder:
             var_name = holder.get_name()
