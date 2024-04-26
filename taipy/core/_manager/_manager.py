@@ -155,9 +155,6 @@ class _Manager(Generic[EntityType]):
 
     @classmethod
     def _export(cls, id: str, folder_path: Union[str, pathlib.Path], **kwargs):
-        """
-        Export an entity.
-        """
         return cls._repository._export(id, folder_path)
 
     @classmethod

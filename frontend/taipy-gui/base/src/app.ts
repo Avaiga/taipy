@@ -3,18 +3,20 @@ import { sendWsMessage, TAIPY_CLIENT_ID } from "../../src/context/wsUtils";
 import { uploadFile } from "../../src/workers/fileupload";
 
 import { Socket, io } from "socket.io-client";
-import { DataManager } from "./dataManager";
+import { DataManager, ModuleData } from "./dataManager";
 import { initSocket } from "./utils";
 
 export type OnInitHandler = (appManager: TaipyApp) => void;
 export type OnChangeHandler = (appManager: TaipyApp, encodedName: string, value: unknown) => void;
 export type OnNotifyHandler = (appManager: TaipyApp, type: string, message: string) => void;
+export type onReloadHandler = (appManager: TaipyApp, removedChanges: ModuleData) => void;
 
 export class TaipyApp {
     socket: Socket;
     _onInit: OnInitHandler | undefined;
     _onChange: OnChangeHandler | undefined;
     _onNotify: OnNotifyHandler | undefined;
+    _onReload: onReloadHandler | undefined;
     variableData: DataManager | undefined;
     functionData: DataManager | undefined;
     appId: string;
@@ -46,7 +48,7 @@ export class TaipyApp {
         return this._onInit;
     }
     set onInit(handler: OnInitHandler | undefined) {
-        if (handler !== undefined && handler?.length !== 1) {
+        if (handler !== undefined && handler.length !== 1) {
             throw new Error("onInit() requires one parameter");
         }
         this._onInit = handler;
@@ -56,7 +58,7 @@ export class TaipyApp {
         return this._onChange;
     }
     set onChange(handler: OnChangeHandler | undefined) {
-        if (handler !== undefined && handler?.length !== 3) {
+        if (handler !== undefined && handler.length !== 3) {
             throw new Error("onChange() requires three parameters");
         }
         this._onChange = handler;
@@ -66,10 +68,20 @@ export class TaipyApp {
         return this._onNotify;
     }
     set onNotify(handler: OnNotifyHandler | undefined) {
-        if (handler !== undefined && handler?.length !== 3) {
+        if (handler !== undefined && handler.length !== 3) {
             throw new Error("onNotify() requires three parameters");
         }
         this._onNotify = handler;
+    }
+
+    get onReload() {
+        return this._onReload;
+    }
+    set onReload(handler: onReloadHandler | undefined) {
+        if (handler !== undefined && handler?.length !== 2) {
+            throw new Error("_onReload() requires two parameters");
+        }
+        this._onReload = handler;
     }
 
     // Utility methods

@@ -23,7 +23,7 @@ import { getRegisteredComponents } from "../Taipy";
 import { unregisteredRender, renderError } from "../Taipy/Unregistered";
 import { createPartialAction } from "../../context/taipyReducers";
 import ErrorFallback from "../../utils/ErrorBoundary";
-import { getBaseURL } from "../../utils";
+import { emptyArray, getBaseURL } from "../../utils";
 
 interface TaipyRenderedProps {
     path?: string;
@@ -60,8 +60,6 @@ const setStyle = (id: string, styleString: string): void => {
         style.textContent = styleString;
     }
 };
-
-const emptyArray: string[] = [];
 
 interface PageState {
     jsx?: string;

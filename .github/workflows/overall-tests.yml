@@ -12,6 +12,7 @@ jobs:
     uses: ./.github/workflows/partial-tests.yml
 
   coverage:
+    timeout-minutes: 40
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'pull_request' }}
     steps:
@@ -40,18 +41,17 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   overall-tests:
-    needs: [coverage, partial-tests]
+    needs: [partial-tests]
     timeout-minutes: 50
     strategy:
       fail-fast: false
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-13]
         pipfile-version: ['min', 'max']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: ${{matrix.python-version}}
@@ -69,13 +69,13 @@ jobs:
           pipenv run pytest -m "not orchestrator_dispatcher and not standalone and not teste2e" tests
 
   intermittent-tests:
-    needs: [coverage, partial-tests]
+    needs: [partial-tests]
     timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-13]
         orchestrator: ['orchestrator_dispatcher', 'standalone']
         pipfile-version: ['min', 'max']
     runs-on: ${{ matrix.os }}

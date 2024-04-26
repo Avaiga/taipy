@@ -195,7 +195,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         imported_data_node._version = version
         cls._set(imported_data_node)
 
-        if not isinstance(imported_data_node, _FileDataNodeMixin):
+        if not (isinstance(imported_data_node, _FileDataNodeMixin) and isinstance(imported_data_node, DataNode)):
             return imported_data_node
 
         data_folder: pathlib.Path = pathlib.Path(str(kwargs.get("data_folder")))

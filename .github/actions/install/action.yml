@@ -45,7 +45,7 @@ runs:
       shell: bash
 
     - name: Setup LibMagic (MacOS)
-      if: inputs.os == 'macos-latest' && inputs.install-gui
+      if: inputs.os == 'macos-13' && inputs.install-gui
       run: brew install libmagic
       shell: bash
 

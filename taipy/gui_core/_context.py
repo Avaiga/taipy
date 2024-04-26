@@ -277,19 +277,20 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def crud_scenario(self, state: State, id: str, payload: t.Dict[str, str]):  # noqa: C901
         args = payload.get("args")
+        start_idx = 2
         if (
             args is None
             or not isinstance(args, list)
-            or len(args) < 4
-            or not isinstance(args[1], bool)
-            or not isinstance(args[2], bool)
-            or not isinstance(args[3], dict)
+            or len(args) < start_idx + 3
+            or not isinstance(args[start_idx], bool)
+            or not isinstance(args[start_idx + 1], bool)
+            or not isinstance(args[start_idx + 2], dict)
         ):
             return
-        update = args[1]
-        delete = args[2]
-        data = args[3]
-        with_dialog = True if len(args) < 5 else bool(args[4])
+        update = args[start_idx]
+        delete = args[start_idx + 1]
+        data = args[start_idx + 2]
+        with_dialog = True if len(args) < start_idx + 4 else bool(args[start_idx + 3])
         scenario = None
 
         name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
@@ -331,7 +332,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 date = None
             scenario_id = None
             try:
-                gui: Gui = state._gui
+                gui = state.get_gui()
                 on_creation = args[0] if isinstance(args[0], str) else None
                 on_creation_function = gui._get_user_function(on_creation) if on_creation else None
                 if callable(on_creation_function):
@@ -370,7 +371,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     _warn(f"on_creation(): '{on_creation}' is not a function.")
                 elif not with_dialog:
                     if len(Config.scenarios) == 2:
-                        scenario_config = [sc for k, sc in Config.scenarios.items() if k != "default"][0]
+                        scenario_config = next(sc for k, sc in Config.scenarios.items() if k != "default")
                     else:
                         state.assign(
                             _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR,
@@ -385,6 +386,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error creating Scenario. {e}")
             finally:
                 self.scenario_refresh(scenario_id)
+                if scenario and (sel_scenario_var := args[1] if isinstance(args[1], str) else None):
+                    try:
+                        var_name, _ = gui._get_real_var_name(sel_scenario_var)
+                        state.assign(var_name, scenario)
+                    except Exception as e:  # pragma: no cover
+                        _warn("Can't find value variable name in context", e)
         if scenario:
             if not is_editable(scenario):
                 state.assign(

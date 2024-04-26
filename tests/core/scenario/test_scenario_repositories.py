@@ -21,12 +21,23 @@ from taipy.core.scenario.scenario import Scenario, ScenarioId
 
 class TestScenarioFSRepository:
     @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
-    def test_save_and_load(self, scenario, repo, init_sql_repo):
+    def test_save_and_load(self, scenario: Scenario, repo, init_sql_repo):
         repository = repo()
         repository._save(scenario)
 
-        obj = repository._load(scenario.id)
-        assert isinstance(obj, Scenario)
+        loaded_scenario = repository._load(scenario.id)
+        assert isinstance(loaded_scenario, Scenario)
+        assert scenario._config_id == loaded_scenario._config_id
+        assert scenario.id == loaded_scenario.id
+        assert scenario._tasks == loaded_scenario._tasks
+        assert scenario._additional_data_nodes == loaded_scenario._additional_data_nodes
+        assert scenario._creation_date == loaded_scenario._creation_date
+        assert scenario._cycle == loaded_scenario._cycle
+        assert scenario._primary_scenario == loaded_scenario._primary_scenario
+        assert scenario._tags == loaded_scenario._tags
+        assert scenario._properties == loaded_scenario._properties
+        assert scenario._sequences == loaded_scenario._sequences
+        assert scenario._version == loaded_scenario._version
 
     @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
     def test_exists(self, scenario, repo, init_sql_repo):
