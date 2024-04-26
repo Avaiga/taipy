@@ -32,7 +32,7 @@ def test_create_cli_with_unsupported_template(capsys):
         assert "invalid choice: 'not-a-template'" in err
 
 
-def test_create_app_on_existing_folder(tmpdir, caplog, monkeypatch):
+def test_create_app_on_existing_folder(tmpdir, capsys, monkeypatch):
     os.chdir(tmpdir)
     os.mkdir(os.path.join(tmpdir, "taipy_application"))
 
@@ -43,4 +43,5 @@ def test_create_app_on_existing_folder(tmpdir, caplog, monkeypatch):
         with pytest.raises(SystemExit):
             _entrypoint()
 
-    assert '"taipy_application" directory already exists' in caplog.text
+    out, _ = capsys.readouterr()
+    assert '"taipy_application" directory already exists' in out
