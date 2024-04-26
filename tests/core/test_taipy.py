@@ -436,10 +436,11 @@ class TestTaipy:
         scenario_1_cfg = Config.configure_scenario(id="scenario_1")
         scenario_2_cfg = Config.configure_scenario(id="scenario_2")
 
-        scenario_1 = _ScenarioManager._create(scenario_1_cfg, name="B_scenario")
-        scenario_2 = _ScenarioManager._create(scenario_2_cfg, name="C_scenario")
-        scenario_3 = _ScenarioManager._create(scenario_2_cfg, name="A_scenario")
-        scenario_4 = _ScenarioManager._create(scenario_2_cfg, name="D_scenario")
+        now = datetime.datetime.now() + datetime.timedelta(seconds=1)
+        scenario_1 = _ScenarioManager._create(scenario_1_cfg, now, "B_scenario")
+        scenario_2 = _ScenarioManager._create(scenario_2_cfg, now + datetime.timedelta(seconds=1), "C_scenario")
+        scenario_3 = _ScenarioManager._create(scenario_2_cfg, now + datetime.timedelta(seconds=2), "A_scenario")
+        scenario_4 = _ScenarioManager._create(scenario_2_cfg, now + datetime.timedelta(seconds=3), "D_scenario")
 
         _ScenarioManager._tag(scenario_1, "banana")
         _ScenarioManager._tag(scenario_1, "kiwi")  # scenario_1 now has tags {"banana", "kiwi"}
