@@ -286,6 +286,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         module,
         compare,
         onCompare,
+        userData
     ]);
 
     const onSort = useCallback(

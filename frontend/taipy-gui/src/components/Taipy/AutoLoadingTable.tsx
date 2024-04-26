@@ -429,6 +429,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             onCompare,
             dispatch,
             module,
+            userData
         ]
     );
 
