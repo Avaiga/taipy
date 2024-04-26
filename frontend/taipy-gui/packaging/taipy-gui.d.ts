@@ -272,7 +272,8 @@ export declare const createRequestUpdateAction: (
     id: string | undefined,
     context: string | undefined,
     names: string[],
-    forceRefresh?: boolean
+    forceRefresh?: boolean,
+    stateContext?: Record<string, unknown>
 ) => Action;
 /**
  * A column description as received by the backend.

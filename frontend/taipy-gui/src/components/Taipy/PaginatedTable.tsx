@@ -258,7 +258,8 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     handleNan,
                     afs,
                     compare ? onCompare : undefined,
-                    updateVars && getUpdateVar(updateVars, "comparedatas")
+                    updateVars && getUpdateVar(updateVars, "comparedatas"),
+                    typeof userData == "object" ? (userData as Record<string, Record<string, unknown>>).context : undefined
                 )
             );
         } else {

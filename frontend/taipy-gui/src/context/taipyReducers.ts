@@ -576,6 +576,15 @@ export const createRequestChartUpdateAction = (
         true
     );
 
+const ligtenPayload = (payload: Record<string, unknown>) => {
+    return Object.keys(payload || {}).reduce((pv, key) => {
+        if (payload[key] !== undefined) {
+            pv[key] = payload[key];
+        }
+        return pv;
+    }, {} as typeof payload)
+}
+
 export const createRequestTableUpdateAction = (
     name: string | undefined,
     id: string | undefined,
@@ -593,9 +602,10 @@ export const createRequestTableUpdateAction = (
     handleNan?: boolean,
     filters?: Array<FilterDesc>,
     compare?: string,
-    compareDatas?: string
+    compareDatas?: string,
+    stateContext?: Record<string, unknown>
 ): TaipyAction =>
-    createRequestDataUpdateAction(name, id, context, columns, pageKey, {
+    createRequestDataUpdateAction(name, id, context, columns, pageKey, ligtenPayload({
         start: start,
         end: end,
         orderby: orderBy,
@@ -608,7 +618,8 @@ export const createRequestTableUpdateAction = (
         filters: filters,
         compare: compare,
         compare_datas: compareDatas,
-    });
+        state_context: stateContext,
+    }));
 
 export const createRequestInfiniteTableUpdateAction = (
     name: string | undefined,
@@ -627,9 +638,10 @@ export const createRequestInfiniteTableUpdateAction = (
     handleNan?: boolean,
     filters?: Array<FilterDesc>,
     compare?: string,
-    compareDatas?: string
+    compareDatas?: string,
+    stateContext?: Record<string, unknown>
 ): TaipyAction =>
-    createRequestDataUpdateAction(name, id, context, columns, pageKey, {
+    createRequestDataUpdateAction(name, id, context, columns, pageKey, ligtenPayload({
         infinite: true,
         start: start,
         end: end,
@@ -643,7 +655,8 @@ export const createRequestInfiniteTableUpdateAction = (
         filters: filters,
         compare: compare,
         compare_datas: compareDatas,
-    });
+        state_context: stateContext,
+    }));
 
 /**
  * Create a *request data update* `Action` that will be used to update the `Context`.
@@ -710,16 +723,18 @@ export const createRequestUpdateAction = (
     id: string | undefined,
     context: string | undefined,
     names: string[],
-    forceRefresh = false
+    forceRefresh = false,
+    stateContext?: Record<string, unknown>
 ): TaipyAction => ({
     type: Types.RequestUpdate,
     name: "",
     context: context,
-    payload: {
+    payload: ligtenPayload({
         id: id,
         names: names,
         refresh: forceRefresh,
-    },
+        state_context: stateContext,
+    }),
 });
 
 export const createSetLocationsAction = (locations: Record<string, string>): TaipyAction => ({
