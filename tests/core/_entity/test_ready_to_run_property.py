@@ -31,11 +31,13 @@ def test_scenario_is_ready_to_run_property():
 
     dn_config_1 = Config.configure_in_memory_data_node("dn_1", 10)
     dn_config_2 = Config.configure_in_memory_data_node("dn_2", 10)
-    task_config = Config.configure_task("task", print, [dn_config_1, dn_config_2])
+    dn_config_3 = Config.configure_in_memory_data_node("dn_3", 10)
+    task_config = Config.configure_task("task", print, [dn_config_1, dn_config_2], [dn_config_3])
     scenario_config = Config.configure_scenario("sc", {task_config}, set(), Frequency.DAILY)
     scenario = scenario_manager._create(scenario_config)
     dn_1 = scenario.dn_1
     dn_2 = scenario.dn_2
+    dn_3 = scenario.dn_3
 
     assert len(scenario_manager._get_all()) == 1
     assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
@@ -96,6 +98,12 @@ def test_scenario_is_ready_to_run_property():
     assert scenario_manager._is_submittable(scenario)
     assert scenario_manager._is_submittable(scenario.id)
 
+    dn_3.edit_in_progress = True
+    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
+    assert dn_3.id not in _ReadyToRunProperty._datanode_id_submittables
+    assert scenario_manager._is_submittable(scenario)
+    assert scenario_manager._is_submittable(scenario.id)
+
 
 def test_sequence_is_ready_to_run_property():
     data_manager = _DataManagerFactory._build_manager()
@@ -107,15 +115,18 @@ def test_sequence_is_ready_to_run_property():
     scenario_id = "SCENARIO_scenario_id"
     dn_1 = PickleDataNode("dn_1", Scope.SCENARIO, parent_ids={task_id, scenario_id}, properties={"default_data": 10})
     dn_2 = PickleDataNode("dn_2", Scope.SCENARIO, parent_ids={task_id, scenario_id}, properties={"default_data": 10})
-    task = Task("task", {}, print, [dn_1, dn_2], id=task_id, parent_ids={scenario_id})
+    dn_3 = PickleDataNode("dn_3", Scope.SCENARIO, parent_ids={task_id, scenario_id}, properties={"default_data": 10})
+    task = Task("task", {}, print, [dn_1, dn_2], [dn_3], id=task_id, parent_ids={scenario_id})
     scenario = Scenario("scenario", {task}, {}, set(), scenario_id=scenario_id)
     data_manager._set(dn_1)
     data_manager._set(dn_2)
+    data_manager._set(dn_3)
     task_manager._set(task)
     scenario_manager._set(scenario)
 
     dn_1 = scenario.dn_1
     dn_2 = scenario.dn_2
+    dn_3 = scenario.dn_3
 
     scenario.add_sequences({"sequence": [task]})
     sequence = scenario.sequences["sequence"]
@@ -204,9 +215,15 @@ def test_sequence_is_ready_to_run_property():
     dn_2.edit_in_progress = False
     assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
     assert sequence.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_2.id not in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
-    assert dn_2.id not in _ReadyToRunProperty._submittable_id_datanodes[sequence.id]
     assert dn_2.id not in _ReadyToRunProperty._datanode_id_submittables
+    assert scenario_manager._is_submittable(scenario)
+    assert sequence_manager._is_submittable(sequence)
+    assert sequence_manager._is_submittable(sequence.id)
+
+    dn_3.edit_in_progress = True
+    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
+    assert sequence.id not in _ReadyToRunProperty._submittable_id_datanodes
+    assert dn_3.id not in _ReadyToRunProperty._datanode_id_submittables
     assert scenario_manager._is_submittable(scenario)
     assert sequence_manager._is_submittable(sequence)
     assert sequence_manager._is_submittable(sequence.id)
@@ -220,13 +237,15 @@ def test_task_is_ready_to_run_property():
 
     dn_config_1 = Config.configure_pickle_data_node("dn_1", default_data=10)
     dn_config_2 = Config.configure_pickle_data_node("dn_2", default_data=15)
-    task_config = Config.configure_task("task", print, [dn_config_1, dn_config_2])
+    dn_config_3 = Config.configure_pickle_data_node("dn_3", default_data=20)
+    task_config = Config.configure_task("task", print, [dn_config_1, dn_config_2], [dn_config_3])
     scenario_config = Config.configure_scenario("scenario", [task_config])
 
     scenario = scenario_manager._create(scenario_config)
     task = scenario.tasks["task"]
     dn_1 = scenario.dn_1
     dn_2 = scenario.dn_2
+    dn_3 = scenario.dn_3
 
     assert len(task_manager._get_all()) == 1
     assert len(scenario_manager._get_all()) == 1
@@ -309,9 +328,14 @@ def test_task_is_ready_to_run_property():
     dn_2.edit_in_progress = False
     assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
     assert task.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_2.id not in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
-    assert dn_2.id not in _ReadyToRunProperty._submittable_id_datanodes[task.id]
     assert dn_2.id not in _ReadyToRunProperty._datanode_id_submittables
+    assert scenario_manager._is_submittable(scenario)
+    assert task_manager._is_submittable(task)
+    assert task_manager._is_submittable(task.id)
+
+    dn_3.edit_in_progress = True
+    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
+    assert task.id not in _ReadyToRunProperty._submittable_id_datanodes
     assert scenario_manager._is_submittable(scenario)
     assert task_manager._is_submittable(task)
     assert task_manager._is_submittable(task.id)

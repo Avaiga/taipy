@@ -455,8 +455,6 @@ def test_sequence_notification_subscribe(mocker):
             notify_1,
             notify_1,
             notify_1,
-            notify_1,
-            notify_2,
             notify_2,
             notify_2,
             notify_2,

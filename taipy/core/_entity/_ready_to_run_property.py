@@ -9,7 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from collections import defaultdict
 from typing import TYPE_CHECKING, Dict, Set, Union
 
 from ..notification import EventOperation, Notifier, _make_event
@@ -25,13 +24,11 @@ class _ReadyToRunProperty:
     IS_SUBMITTABLE_PROPERTY_NAME: str = "is_submittable"
 
     # A dictionary of the data nodes not ready_to_read and their corresponding submittable entities.
-    _datanode_id_submittables: Dict["DataNodeId", Set[Union["ScenarioId", "SequenceId", "TaskId"]]] = defaultdict(set)
+    _datanode_id_submittables: Dict["DataNodeId", Set[Union["ScenarioId", "SequenceId", "TaskId"]]] = {}
 
     # A nested dictionary of the submittable entities (Scenario, Sequence, Task) and
     # the data nodes that make it not ready_to_run with the reason(s)
-    _submittable_id_datanodes: Dict[
-        Union["ScenarioId", "SequenceId", "TaskId"], Dict["DataNodeId", Set[str]]
-    ] = defaultdict(lambda: defaultdict(set))
+    _submittable_id_datanodes: Dict[Union["ScenarioId", "SequenceId", "TaskId"], Dict["DataNodeId", Set[str]]] = {}
 
     @classmethod
     def _add(cls, dn: "DataNode", reason: str) -> None:
@@ -42,28 +39,34 @@ class _ReadyToRunProperty:
         parent_entities = dn.get_parents()
 
         for scenario_parent in parent_entities.get(Scenario._MANAGER_NAME, []):
-            _ReadyToRunProperty.__add(scenario_parent, dn, reason)
+            if dn in scenario_parent.get_inputs():
+                _ReadyToRunProperty.__add(scenario_parent, dn, reason)
         for sequence_parent in parent_entities.get(Sequence._MANAGER_NAME, []):
-            _ReadyToRunProperty.__add(sequence_parent, dn, reason)
+            if dn in sequence_parent.get_inputs():
+                _ReadyToRunProperty.__add(sequence_parent, dn, reason)
         for task_parent in parent_entities.get(Task._MANAGER_NAME, []):
-            _ReadyToRunProperty.__add(task_parent, dn, reason)
+            if dn in task_parent.input.values():
+                _ReadyToRunProperty.__add(task_parent, dn, reason)
 
     @classmethod
     def _remove(cls, datanode: "DataNode", reason: str) -> None:
+        from ..taipy import get as tp_get
+
         # check the data node status to determine the reason to be removed
         submittable_ids: Set = cls._datanode_id_submittables.get(datanode.id, set())
 
         to_remove_dn = False
         for submittable_id in submittable_ids:
             # check remove the reason
-            if reason in cls._submittable_id_datanodes[submittable_id].get(datanode.id, set()):
-                cls._submittable_id_datanodes[submittable_id].get(datanode.id, set()).remove(reason)
-            if len(cls._submittable_id_datanodes[submittable_id][datanode.id]) == 0:
+            if reason in cls._submittable_id_datanodes.get(submittable_id, {}).get(datanode.id, set()):
+                cls._submittable_id_datanodes[submittable_id][datanode.id].remove(reason)
+            if len(cls._submittable_id_datanodes.get(submittable_id, {}).get(datanode.id, set())) == 0:
                 to_remove_dn = True
-                cls._submittable_id_datanodes[submittable_id].pop(datanode.id, None)
-                if len(cls._submittable_id_datanodes[submittable_id]) == 0:
-                    from ..taipy import get as tp_get
-
+                cls._submittable_id_datanodes.get(submittable_id, {}).pop(datanode.id, None)
+                if (
+                    submittable_id in cls._submittable_id_datanodes
+                    and len(cls._submittable_id_datanodes[submittable_id]) == 0
+                ):
                     submittable = tp_get(submittable_id)
                     cls.__publish_submittable_property_event(submittable, True)
                     cls._submittable_id_datanodes.pop(submittable_id, None)
@@ -72,12 +75,18 @@ class _ReadyToRunProperty:
             cls._datanode_id_submittables.pop(datanode.id)
 
     @classmethod
-    def __add(
-        cls, submittable: Union["Scenario", "Sequence", "Task"], datanode: "DataNode", reason: str
-    ) -> None:
+    def __add(cls, submittable: Union["Scenario", "Sequence", "Task"], datanode: "DataNode", reason: str) -> None:
+        if datanode.id not in cls._datanode_id_submittables:
+            cls._datanode_id_submittables[datanode.id] = set()
         cls._datanode_id_submittables[datanode.id].add(submittable.id)
+
         if submittable.id not in cls._submittable_id_datanodes:
             cls.__publish_submittable_property_event(submittable, False)
+
+        if submittable.id not in cls._submittable_id_datanodes:
+            cls._submittable_id_datanodes[submittable.id] = {}
+        if datanode.id not in cls._submittable_id_datanodes[submittable.id]:
+            cls._submittable_id_datanodes[submittable.id][datanode.id] = set()
         cls._submittable_id_datanodes[submittable.id][datanode.id].add(reason)
 
     @staticmethod
