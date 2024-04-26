@@ -82,7 +82,7 @@ class Task(_Entity, _Labeled):
         return hash(self.id)
 
     def __eq__(self, other):
-        return self.id == other.id
+        return isinstance(other, Task) and self.id == other.id
 
     def __getstate__(self):
         return vars(self)

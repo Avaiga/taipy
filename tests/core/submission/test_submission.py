@@ -24,6 +24,21 @@ from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
 
 
+def test_submission_equals(submission):
+    submission_manager = _SubmissionManagerFactory()._build_manager()
+
+    submission_id = submission.id
+    submission_manager._set(submission)
+
+    # To test if instance is same type
+    task = Task("task", {}, print, [], [], submission_id)
+
+    submission_2 = submission_manager._get(submission_id)
+    assert submission == submission_2
+    assert submission != submission_id
+    assert submission != task
+
+
 def test_create_submission(scenario, job, current_datetime):
     submission_1 = Submission(scenario.id, scenario._ID_PREFIX, scenario.config_id)
 

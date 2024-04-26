@@ -136,7 +136,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         return hash(self.id)
 
     def __eq__(self, other):
-        return self.id == other.id
+        return isinstance(other, Scenario) and self.id == other.id
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = _validate_id(attribute_name)

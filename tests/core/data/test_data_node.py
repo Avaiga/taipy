@@ -21,11 +21,13 @@ from taipy.config import Config
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 from taipy.core.data._data_manager import _DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.exceptions.exceptions import DataNodeIsBeingEdited, NoData
 from taipy.core.job.job_id import JobId
+from taipy.core.task.task import Task
 
 from .utils import FakeDataNode
 
@@ -46,6 +48,20 @@ def funct_b_d(input: str):
 
 
 class TestDataNode:
+    def test_dn_equals(self, data_node):
+        data_manager = _DataManagerFactory()._build_manager()
+
+        dn_id = data_node.id
+        data_manager._set(data_node)
+
+        # # To test if instance is same type
+        task = Task("task", {}, print, [], [], dn_id)
+
+        dn_2 = data_manager._get(dn_id)
+        assert data_node == dn_2
+        assert data_node != dn_id
+        assert data_node != task
+
     def test_create_with_default_values(self):
         dn = DataNode("foo_bar")
         assert dn.config_id == "foo_bar"
