@@ -38,6 +38,7 @@ def test_create_app_on_existing_folder(tmpdir, capsys, monkeypatch):
 
     # Mock the click.prompt to always return the default value
     monkeypatch.setattr("click.prompt", lambda *args, **kw: kw["default"] if "default" in kw else "")
+    monkeypatch.setattr("builtins.input", lambda _: "")
 
     with patch("sys.argv", ["prog", "create"]):
         with pytest.raises(SystemExit):
