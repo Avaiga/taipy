@@ -13,7 +13,7 @@ import os
 import pathlib
 import shutil
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Set, Union, overload
+from typing import Any, Callable, Dict, List, Literal, Optional, Set, Union, overload
 
 from taipy.config import Config, Scope
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -508,7 +508,13 @@ def delete(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, C
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 
-def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> List[Scenario]:
+def get_scenarios(
+    cycle: Optional[Cycle] = None,
+    tag: Optional[str] = None,
+    is_sorted: bool = False,
+    descending: bool = False,
+    sort_key: Literal["name", "id", "config_id", "creation_date", "tags"] = "name",
+) -> List[Scenario]:
     """Retrieve a list of existing scenarios filtered by cycle or tag.
 
     This function allows you to retrieve a list of scenarios based on optional
@@ -519,22 +525,34 @@ def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> L
     Parameters:
          cycle (Optional[Cycle^]): The optional `Cycle^` to filter scenarios by.
          tag (Optional[str]): The optional tag to filter scenarios by.
+         is_sorted (bool): The option to sort scenarios. The default sorting key is name.
+         descending (bool): The option to sort scenarios on the sorting key in descending order.
+         sort_key (Literal["name", "id", "creation_date", "tags"]): The optiononal sort_key to
+             decide upon what key scenarios are sorted. The sorting is in increasing order for
+             dates, in alphabetical order for name and id, in lexographical order for tags.
 
     Returns:
-        The list of scenarios filtered by cycle or tag. If no filtering criteria
-            are provided, this method returns all existing scenarios.
+        The list of scenarios filtered by cycle or tag and optionally sorted by name, id, creation_date or tags.
+            If no filtering criterion is provided, this method returns all existing scenarios.
+            If is_sorted is set to true, the scenarios are sorted by sort_key. The scenarios
+            are sorted by name if an incorrect or no sort_key is provided.
     """
     scenario_manager = _ScenarioManagerFactory._build_manager()
     if not cycle and not tag:
-        return scenario_manager._get_all()
-    if cycle and not tag:
-        return scenario_manager._get_all_by_cycle(cycle)
-    if not cycle and tag:
-        return scenario_manager._get_all_by_tag(tag)
-    if cycle and tag:
+        scenarios = scenario_manager._get_all()
+    elif cycle and not tag:
+        scenarios = scenario_manager._get_all_by_cycle(cycle)
+    elif not cycle and tag:
+        scenarios = scenario_manager._get_all_by_tag(tag)
+    elif cycle and tag:
         cycles_scenarios = scenario_manager._get_all_by_cycle(cycle)
-        return [scenario for scenario in cycles_scenarios if scenario.has_tag(tag)]
-    return []
+        scenarios = [scenario for scenario in cycles_scenarios if scenario.has_tag(tag)]
+    else:
+        scenarios = []
+
+    if is_sorted:
+        scenario_manager._sort_scenarios(scenarios, descending, sort_key)
+    return scenarios
 
 
 def get_primary(cycle: Cycle) -> Optional[Scenario]:
@@ -550,13 +568,32 @@ def get_primary(cycle: Cycle) -> Optional[Scenario]:
     return _ScenarioManagerFactory._build_manager()._get_primary(cycle)
 
 
-def get_primary_scenarios() -> List[Scenario]:
+def get_primary_scenarios(
+    is_sorted: bool = False,
+    descending: bool = False,
+    sort_key: Literal["name", "id", "config_id", "creation_date", "tags"] = "name",
+) -> List[Scenario]:
     """Retrieve a list of all primary scenarios.
 
+    Parameters:
+         is_sorted (bool): The option to sort scenarios. The default sorting key is name.
+         descending (bool): The option to sort scenarios on the sorting key in descending order.
+         sort_key (Literal["name", "id", "creation_date", "tags"]): The optiononal sort_key to
+             decide upon what key scenarios are sorted. The sorting is in increasing order for
+             dates, in alphabetical order for name and id, in lexographical order for tags.
+
     Returns:
-        A list containing all primary scenarios.
+        The list containing all primary scenarios, optionally sorted by name, id, creation_date or tags.
+            The sorting is in increasing order for dates, in alphabetical order for name and
+            id, and in lexicographical order for tags. If sorted is set to true, but if an
+            incorrect or no sort_key is provided, the scenarios are sorted by name.
     """
-    return _ScenarioManagerFactory._build_manager()._get_primary_scenarios()
+    scenario_manager = _ScenarioManagerFactory._build_manager()
+    scenarios = scenario_manager._get_primary_scenarios()
+    if is_sorted:
+        scenario_manager._sort_scenarios(scenarios, descending, sort_key)
+    return scenarios
+
 
 
 def is_promotable(scenario: Union[Scenario, ScenarioId]) -> bool:
