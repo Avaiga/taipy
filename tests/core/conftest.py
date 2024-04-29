@@ -44,7 +44,7 @@ from taipy.core.cycle.cycle import Cycle
 from taipy.core.cycle.cycle_id import CycleId
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data._data_model import _DataNodeModel
-from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.data.in_memory import DataNodeId, InMemoryDataNode
 from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.job.job import Job
 from taipy.core.job.job_id import JobId
@@ -59,7 +59,7 @@ from taipy.core.sequence.sequence_id import SequenceId
 from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from taipy.core.submission.submission import Submission
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
-from taipy.core.task.task import Task
+from taipy.core.task.task import Task, TaskId
 
 current_time = datetime.now()
 
@@ -188,7 +188,7 @@ def scenario(cycle):
         set(),
         {},
         set(),
-        ScenarioId("sc_id"),
+        ScenarioId("SCENARIO_scenario_id"),
         current_time,
         is_primary=False,
         tags={"foo"},
@@ -199,7 +199,9 @@ def scenario(cycle):
 
 @pytest.fixture(scope="function")
 def data_node():
-    return InMemoryDataNode("data_node_config_id", Scope.SCENARIO, version="random_version_number")
+    return InMemoryDataNode(
+        "data_node_config_id", Scope.SCENARIO, version="random_version_number", id=DataNodeId("DATANODE_data_node_id")
+    )
 
 
 @pytest.fixture(scope="function")
@@ -225,7 +227,7 @@ def data_node_model():
 @pytest.fixture(scope="function")
 def task(data_node):
     dn = InMemoryDataNode("dn_config_id", Scope.SCENARIO, version="random_version_number")
-    return Task("task_config_id", {}, print, [data_node], [dn])
+    return Task("task_config_id", {}, print, [data_node], [dn], TaskId("TASK_task_id"))
 
 
 @pytest.fixture(scope="function")
@@ -255,7 +257,7 @@ def cycle():
         start_date=example_date,
         end_date=example_date,
         name="cc",
-        id=CycleId("cc_id"),
+        id=CycleId("CYCLE_cycle_id"),
     )
 
 

@@ -9,8 +9,12 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import math
 import typing as t
 from enum import Enum
+from numbers import Number
+
+import pandas as pd
 
 from taipy.core import (
     Cycle,
@@ -26,6 +30,7 @@ from taipy.core import (
     is_submittable,
 )
 from taipy.core import get as core_get
+from taipy.core.data._tabular_datanode_mixin import _TabularDataNodeMixin
 from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
 from taipy.gui.utils import _TaipyBase
@@ -158,7 +163,42 @@ class _GuiCoreScenarioNoUpdate(_TaipyBase, _DoNotUpdate):
 
 
 class _GuiCoreDatanodeAdapter(_TaipyBase):
-    __INNER_PROPS = ["name"]
+
+    @staticmethod
+    def _is_tabular_data(datanode: DataNode, value: t.Any):
+        if isinstance(datanode, _TabularDataNodeMixin):
+            return True
+        if datanode.is_ready_for_reading:
+            return isinstance(value, (pd.DataFrame, pd.Series, list, tuple, dict))
+        return False
+
+    def __get_data(self, dn: DataNode):
+            if dn._last_edit_date:
+                if isinstance(dn, _TabularDataNodeMixin):
+                    return (None, None, True, None)
+                try:
+                    value = dn.read()
+                    if _GuiCoreDatanodeAdapter._is_tabular_data(dn, value):
+                        return (None, None, True, None)
+                    val_type = (
+                        "date"
+                        if "date" in type(value).__name__
+                        else type(value).__name__
+                        if isinstance(value, Number)
+                        else None
+                    )
+                    if isinstance(value, float):
+                        if math.isnan(value):
+                            value = None
+                    return (
+                        value,
+                        val_type,
+                        None,
+                        None,
+                    )
+                except Exception as e:
+                    return (None, None, None, f"read data_node: {e}")
+            return (None, None, None, f"Data unavailable for {dn.get_simple_label()}")
 
     def get(self):
         data = super().get()
@@ -180,11 +220,7 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                         else _EntityType.SCENARIO.value
                         if isinstance(owner, Scenario)
                         else -1,
-                        [
-                            (k, f"{v}")
-                            for k, v in datanode._get_user_properties().items()
-                            if k not in _GuiCoreDatanodeAdapter.__INNER_PROPS
-                        ],
+                        self.__get_data(datanode),
                         datanode._edit_in_progress,
                         datanode._editor_id,
                         is_readable(datanode),

@@ -22,6 +22,7 @@ from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.task._task_manager import _TaskManager
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
 
 
@@ -43,6 +44,21 @@ def input():
 @pytest.fixture
 def input_config():
     return [DataNodeConfig("input_name_1"), DataNodeConfig("input_name_2"), DataNodeConfig("input_name_3")]
+
+
+def test_task_equals(task):
+    task_manager = _TaskManagerFactory()._build_manager()
+
+    task_id = task.id
+    task_manager._set(task)
+
+    # To test if instance is same type
+    dn = CSVDataNode("foo_bar", Scope.SCENARIO, task_id)
+
+    task_2 = task_manager._get(task_id)
+    assert task == task_2
+    assert task != task_id
+    assert task != dn
 
 
 def test_create_task():

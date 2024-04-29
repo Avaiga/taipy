@@ -233,7 +233,7 @@ const getExpandedIds = (nodeId: string, exp?: string[], entities?: Entities) => 
         const res = ret[1].map((r) => r[0]);
         return exp ? [...exp, ...res] : res;
     }
-    return exp;
+    return exp || [];
 };
 
 const CoreSelector = (props: CoreSelectorProps) => {
@@ -259,7 +259,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
     const [selected, setSelected] = useState("");
     const [pins, setPins] = useState<[Pinned, Pinned]>([{}, {}]);
     const [hideNonPinned, setShowPinned] = useState(false);
-    const [expandedItems, setExpandedItems] = useState<string[]>();
+    const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
     const dispatch = useDispatch();
     const module = useModule();

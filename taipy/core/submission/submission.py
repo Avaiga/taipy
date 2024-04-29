@@ -138,7 +138,7 @@ class Submission(_Entity, _Labeled):
         return hash(self.id)
 
     def __eq__(self, other):
-        return self.id == other.id
+        return isinstance(other, Submission) and self.id == other.id
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

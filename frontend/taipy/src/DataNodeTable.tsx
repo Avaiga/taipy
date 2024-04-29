@@ -51,6 +51,7 @@ interface DataNodeTableProps {
     editInProgress?: boolean;
     editLock: MutableRefObject<boolean>;
     editable: boolean;
+    idVar?: string;
 }
 
 const pushRightSx = { ml: "auto" };
@@ -117,7 +118,11 @@ const DataNodeTable = (props: DataNodeTableProps) => {
         [nodeId, dispatch, module, props.onLock, props.editLock]
     );
 
-    const userData = useMemo(() => ({ dn_id: nodeId, comment: "" }), [nodeId]);
+    const userData = useMemo(() => {
+        const ret: Record<string, unknown> = {dn_id: nodeId, comment: ""};
+        props.idVar && (ret.context = { [props.idVar]: nodeId });
+        return ret
+    }, [nodeId, props.idVar]);
     const [comment, setComment] = useState("");
     const changeComment = useCallback(
         (e: ChangeEvent<HTMLInputElement>) => {
@@ -198,6 +203,7 @@ const DataNodeTable = (props: DataNodeTableProps) => {
                 onEdit={tableEdit ? props.onEdit : undefined}
                 filter={true}
                 libClassName="taipy-table"
+                pageSize={25}
             />
         </>
     );

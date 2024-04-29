@@ -327,19 +327,18 @@ class _Factory:
                 ("on_action", PropertyType.function),
                 ("inactive_ids", PropertyType.dynamic_list),
                 ("hover_text", PropertyType.dynamic_string),
-                ("lov", PropertyType.lov)
+                ("lov", PropertyType.lov),
             ]
         )
         ._set_propagate(),
         "navbar": lambda gui, control_type, attrs: _Builder(
             gui=gui, control_type=control_type, element_name="NavBar", attributes=attrs, default_value=None
-        )
-        .set_attributes(
+        ).set_attributes(
             [
                 ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
-                ("lov", PropertyType.single_lov)
+                ("lov", PropertyType.single_lov),
             ]
         ),
         "number": lambda gui, control_type, attrs: _Builder(
@@ -414,7 +413,7 @@ class _Factory:
                 ("on_change", PropertyType.function),
                 ("label",),
                 ("mode",),
-                ("lov", PropertyType.lov)
+                ("lov", PropertyType.lov),
             ]
         )
         ._set_propagate(),
@@ -526,7 +525,7 @@ class _Factory:
                 ("allow_unselect", PropertyType.boolean),
                 ("on_change", PropertyType.function),
                 ("mode",),
-                ("lov", PropertyType.single_lov)
+                ("lov", PropertyType.single_lov),
             ]
         )
         ._set_kind()
@@ -560,6 +559,8 @@ class _Factory:
 
     # TODO: process \" in property value
     _PROPERTY_RE = re.compile(r"\s+([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)=\"((?:(?:(?<=\\)\")|[^\"])*)\"")
+
+    __COUNTER = 0
 
     @staticmethod
     def set_library(library: "ElementLibrary"):
@@ -620,6 +621,7 @@ class _Factory:
         name = name[len(_Factory.__TAIPY_NAME_SPACE) :] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
         builder = _Factory.__CONTROL_BUILDERS.get(name)
         built = None
+        _Factory.__COUNTER += 1
         with gui._get_autorization():
             if builder is None:
                 lib, element_name, element = _Factory.__get_library_element(name)
@@ -627,7 +629,9 @@ class _Factory:
                     from ..extension.library import Element
 
                     if isinstance(element, Element):
-                        return element._call_builder(element_name, gui, all_properties, lib, is_html)
+                        return element._call_builder(
+                            element_name, gui, all_properties, lib, is_html, counter=_Factory.__COUNTER
+                        )
             else:
                 built = builder(gui, name, all_properties)
             if isinstance(built, _Builder):
