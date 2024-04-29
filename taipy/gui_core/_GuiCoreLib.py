@@ -60,6 +60,7 @@ class _GuiCore(ElementLibrary):
                 "on_creation": ElementProperty(PropertyType.function),
                 "show_dialog": ElementProperty(PropertyType.boolean, True),
                 "scenarios": ElementProperty(PropertyType.dynamic_list),
+                "multiple": ElementProperty(PropertyType.boolean, False),
             },
             inner_properties={
                 "inner_scenarios": ElementProperty(
@@ -133,6 +134,7 @@ class _GuiCore(ElementLibrary):
                 "class_name": ElementProperty(PropertyType.dynamic_string),
                 "show_pins": ElementProperty(PropertyType.boolean, True),
                 _GuiCoreContext._DATANODE_SEL_SCENARIO_PROP: ElementProperty(_GuiCoreScenarioNoUpdate),
+                "multiple": ElementProperty(PropertyType.boolean, False),
             },
             inner_properties={
                 "datanodes": ElementProperty(
