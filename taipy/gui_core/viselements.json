@@ -90,7 +90,7 @@
                     {
                         "name": "scenarios",
                         "type": "dynamic(list[Scenario|Cycle])",
-                        "doc": "The list of Scenario/Cycle to show. Shows all Cycle/Scenario if value is None."
+                        "doc": "TODO: The list of Scenario/Cycle to show. Shows all Cycle/Scenario if value is None."
                     }
                 ]
             }
