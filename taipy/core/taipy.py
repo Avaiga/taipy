@@ -14,7 +14,7 @@ import pathlib
 import shutil
 import tempfile
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Literal, Optional, Set, Union, overload
+from typing import Any, Callable, Dict, List, Literal, Optional, Set, Type, Union, overload
 
 from taipy.config import Scope
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -1069,7 +1069,7 @@ def import_scenario(input_path: Union[str, pathlib.Path], override: bool = False
     if not zip_file_path.exists():
         raise FileNotFoundError(f"The import archive path '{zip_file_path}' does not exist.")
 
-    entity_managers: Dict[str, _Manager] = {
+    entity_managers: Dict[str, Type[_Manager]] = {
         "cycles": _CycleManagerFactory._build_manager(),
         "cycle": _CycleManagerFactory._build_manager(),
         "data_nodes": _DataManagerFactory._build_manager(),

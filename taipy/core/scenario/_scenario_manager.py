@@ -14,7 +14,7 @@ import pathlib
 import tempfile
 import zipfile
 from functools import partial
-from typing import Any, Callable, Dict, List, Literal, Optional, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Type, Union
 
 from taipy.config import Config
 
@@ -463,7 +463,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         cls,
         zip_file_path: pathlib.Path,
         override: bool,
-        entity_managers: Dict[str, _Manager],
+        entity_managers: Dict[str, Type[_Manager]],
     ) -> Optional[Scenario]:
         with tempfile.TemporaryDirectory() as tmp_dir:
             with zipfile.ZipFile(zip_file_path) as zip_file:

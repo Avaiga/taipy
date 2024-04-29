@@ -238,7 +238,7 @@ class _VersionManager(_Manager[_Version]):
 
         comparator_result = Config._comparator._find_conflict_config(  # type: ignore[attr-defined]
             imported_version.config,
-            Config._applied_config,
+            Config._applied_config,  # type: ignore[attr-defined]
             imported_version.id,
         )
         if comparator_result.get(_ComparatorResult.CONFLICTED_SECTION_KEY):
