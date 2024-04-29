@@ -63,10 +63,23 @@
                         "doc": "If True, a pin is shown on each item of the selector and allows to restrict the number of displayed items."
                     },
                     {
-                      "name": "on_creation",
-                      "type": "Callback",
-                      "doc": "The name of the function that is triggered when a scenario is about to be created.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the scenario selector.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>config: the name of the selected scenario configuration.</li>\n<li>date: the creation date for the new scenario.</li>\n<li>label: the user-specified label.</li>\n<li>properties: a dictionary containing all the user-defined custom properties.</li>\n</ul>\n</li>\n<li>The callback function can return a scenario, a string containing an error message (a scenario will not be created), or None (then a new scenario is created with the user parameters).</li>\n</ul>",
-                      "signature": [["state", "State"], ["id", "str"], ["payload", "dict"]]
+                        "name": "on_creation",
+                        "type": "Callback",
+                        "doc": "The name of the function that is triggered when a scenario is about to be created.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the scenario selector.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>config: the name of the selected scenario configuration.</li>\n<li>date: the creation date for the new scenario.</li>\n<li>label: the user-specified label.</li>\n<li>properties: a dictionary containing all the user-defined custom properties.</li>\n</ul>\n</li>\n<li>The callback function can return a scenario, a string containing an error message (a scenario will not be created), or None (then a new scenario is created with the user parameters).</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
                     },
                     {
                         "name": "show_dialog",
@@ -171,7 +184,20 @@
                         "name": "on_submission_change",
                         "type": "Callback",
                         "doc": "The name of the function that is triggered when a submission status is changed.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>submittable (Submittable): the entity (usually a Scenario) that was submitted.</li>\n<li>details (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>submission_status (str): the new status of the submission (possible values: SUBMITTED, COMPLETED, CANCELED, FAILED, BLOCKED, WAITING, RUNNING).</li>\n<li>job: the Job (if any) that is at the origin of the submission status change.</li>\n</ul>",
-                        "signature": [["state", "State"], ["submittable", "Submittable"], ["details", "dict"]]
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "submittable",
+                                "Submittable"
+                            ],
+                            [
+                                "details",
+                                "dict"
+                            ]
+                        ]
                     }
                 ]
             }
@@ -217,7 +243,16 @@
                         "name": "on_action",
                         "type": "Callback",
                         "doc": "The name of the function that is triggered when a a node is selected.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>entity (DataNode | Task): the entity (DataNode or Task) that was selected.</li>\n</ul>",
-                        "signature": [["state", "State"], ["entity", "Task | DataNode"]]
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "entity",
+                                "Task | DataNode"
+                            ]
+                        ]
                     }
                 ]
             }
