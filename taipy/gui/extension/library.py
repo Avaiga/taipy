@@ -42,6 +42,7 @@ class ElementProperty:
         property_type: t.Union[PropertyType, t.Type[_TaipyBase]],
         default_value: t.Optional[t.Any] = None,
         js_name: t.Optional[str] = None,
+        with_update: t.Optional[bool] = None,
     ) -> None:
         """Initializes a new custom property declaration for an `Element^`.
 
@@ -64,6 +65,7 @@ class ElementProperty:
         else:
             self.property_type = property_type
         self._js_name = js_name
+        self.with_update = with_update
         super().__init__()
 
     def check(self, element_name: str, prop_name: str):
@@ -75,7 +77,11 @@ class ElementProperty:
             _warn(f"Property type '{self.property_type}' is invalid for element property '{element_name}.{prop_name}'.")
 
     def _get_tuple(self, name: str) -> tuple:
-        return (name, self.property_type, self.default_value)
+        return (
+            (name, self.property_type, self.default_value)
+            if self.with_update is None
+            else (name, self.property_type, self.default_value, self.with_update)
+        )
 
     def get_js_name(self, name: str) -> str:
         return self._js_name or _to_camel_case(name)
@@ -90,6 +96,7 @@ class Element:
     """
 
     __RE_PROP_VAR = re.compile(r"<tp:prop:(\w+)>")
+    __RE_UNIQUE_VAR = re.compile(r"<tp:uniq:(\w+)>")
 
     def __init__(
         self,
@@ -152,9 +159,11 @@ class Element:
         properties: t.Optional[t.Dict[str, t.Any]],
         lib: "ElementLibrary",
         is_html: t.Optional[bool] = False,
+        counter: int = 0
     ) -> t.Union[t.Any, t.Tuple[str, str]]:
         attributes = properties if isinstance(properties, dict) else {}
         if self.inner_properties:
+            uniques: t.Dict[str, int] = {}
             self.attributes.update(self.inner_properties)
             for prop, attr in self.inner_properties.items():
                 val = attr.default_value
@@ -164,6 +173,14 @@ class Element:
                         var = attributes.get(m.group(1))
                         hash_value = "None" if var is None else gui._evaluate_expr(var)
                         val = val[: m.start()] + hash_value + val[m.end() :]
+                    # handling unique id replacement in inner properties <tp:uniq:...>
+                    while m := Element.__RE_UNIQUE_VAR.search(val):
+                        id = uniques.get(m.group(1))
+                        if id is None:
+                            id = len(uniques) + 1
+                            uniques[m.group(1)] = id
+                        val = f"{val[: m.start()]}'{counter}.{id}'{val[m.end() :]}"
+
                 attributes[prop] = val
         # this modifies attributes
         hash_names = _Builder._get_variable_hash_names(gui, attributes)  # variable replacement

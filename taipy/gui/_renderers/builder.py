@@ -366,16 +366,18 @@ class _Builder:
         lov_name = self.__hashes.get(var_name)
         lov = self.__get_list_of_(var_name)
         default_lov = []
+
+        adapter = self.__attributes.get("adapter")
+        if adapter and isinstance(adapter, str):
+            adapter = self.__gui._get_user_function(adapter)
+        if adapter and not callable(adapter):
+            _warn(f"{self.__element_name}: adapter property value is invalid.")
+            adapter = None
+        var_type = self.__attributes.get("type")
+        if isclass(var_type):
+            var_type = var_type.__name__  # type: ignore
+
         if isinstance(lov, list):
-            adapter = self.__attributes.get("adapter")
-            if adapter and isinstance(adapter, str):
-                adapter = self.__gui._get_user_function(adapter)
-            if adapter and not callable(adapter):
-                _warn(f"{self.__element_name}: adapter property value is invalid.")
-                adapter = None
-            var_type = self.__attributes.get("type")
-            if isclass(var_type):
-                var_type = var_type.__name__  # type: ignore
             if not isinstance(var_type, str):
                 elt = None
                 if len(lov) == 0:
@@ -1009,7 +1011,7 @@ class _Builder:
                     self.__update_vars.append(f"{prop_name}={hash_name}")
                     self.__set_react_attribute(prop_name, hash_name)
 
-            self.__set_refresh_on_update()
+        self.__set_refresh_on_update()
         return self
 
     def set_attribute(self, name: str, value: t.Any):
