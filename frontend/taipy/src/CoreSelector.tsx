@@ -266,6 +266,15 @@ const CoreSelector = (props: CoreSelectorProps) => {
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars, undefined, true);
 
+    const onItemExpand = useCallback((e: SyntheticEvent, itemId: string, expanded: boolean) => {
+        setExpandedItems(old => {
+            if (!expanded) {
+                return old.filter(id => id != itemId);
+            }
+            return [...old, itemId];
+        })
+    }, []);
+
     const onNodeSelect = useCallback(
         (e: SyntheticEvent, nodeId: string, isSelected: boolean) => {
             if (!isSelected) {
@@ -420,6 +429,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                 selectedItems={selected}
                 multiSelect={multiple && !multiple}
                 expandedItems={expandedItems}
+                onItemExpansionToggle={onItemExpand}
             >
                 {entities
                     ? entities.map((item) => (

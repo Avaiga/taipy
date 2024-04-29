@@ -452,8 +452,9 @@ class _Builder:
                 else lov_name
             )
             hash_name = self.__get_typed_hash_name(typed_lov_hash, PropertyType.lov)
-            self.__update_vars.append(f"{property_name}={hash_name}")
-            self.__set_react_attribute(property_name, hash_name)
+            camel_prop = _to_camel_case(property_name)
+            self.__update_vars.append(f"{camel_prop}={hash_name}")
+            self.__set_react_attribute(camel_prop, hash_name)
 
         return self
 

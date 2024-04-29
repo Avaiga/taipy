@@ -240,16 +240,19 @@ class _GuiCoreContext(CoreEventConsumerBase):
             )
         return None
 
-    def get_scenarios(self):
-        cycles_scenarios = []
-        with self.lock:
-            if self.scenario_by_cycle is None:
-                self.scenario_by_cycle = get_cycles_scenarios()
-            for cycle, scenarios in self.scenario_by_cycle.items():
-                if cycle is None:
-                    cycles_scenarios.extend(scenarios)
-                else:
-                    cycles_scenarios.append(cycle)
+    def get_scenarios(self, scenarios: t.Optional[t.List[t.Union[Cycle, Scenario]]]):
+        cycles_scenarios: t.List[t.Union[Cycle, Scenario]] = []
+        if scenarios is None:
+            with self.lock:
+                if self.scenario_by_cycle is None:
+                    self.scenario_by_cycle = get_cycles_scenarios()
+                for cycle, c_scenarios in self.scenario_by_cycle.items():
+                    if cycle is None:
+                        cycles_scenarios.extend(c_scenarios)
+                    else:
+                        cycles_scenarios.append(cycle)
+        else:
+            cycles_scenarios = scenarios
         return sorted(cycles_scenarios, key=_GuiCoreContext.get_entity_creation_date_iso)
 
     def select_scenario(self, state: State, id: str, payload: t.Dict[str, str]):
@@ -506,7 +509,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             self.__do_datanodes_tree()
         return (
             self.data_nodes_by_owner.get(scenario.id if scenario else None, []) if self.data_nodes_by_owner else []
-        ) + (self.get_scenarios() if not scenario else [])
+        ) + (self.get_scenarios(None) if not scenario else [])
 
     def data_node_adapter(self, data):
         try:

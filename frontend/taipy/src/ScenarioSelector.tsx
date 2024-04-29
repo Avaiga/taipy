@@ -67,7 +67,7 @@ interface ScenarioSelectorProps {
     showPrimaryFlag?: boolean;
     updateVarName?: string;
     updateVars: string;
-    scenarios?: Cycles | Scenarios;
+    innerScenarios?: Cycles | Scenarios;
     onScenarioCrud: string;
     onChange?: string;
     onCreation?: string;
@@ -425,7 +425,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             dispatch(createSendActionNameAction(props.id, module, props.onScenarioCrud, props.onCreation, props.updateVarName, ...values));
             if (values.length > 1 && values[1]) {
                 // delete requested => unselect current node
-                const lovVar = getUpdateVar(props.updateVars, "scenarios");
+                const lovVar = getUpdateVar(props.updateVars, "innerScenarios");
                 dispatch(
                     createSendUpdateAction(props.updateVarName, undefined, module, props.onChange, propagate, lovVar)
                 );
@@ -487,9 +487,9 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             <Box sx={MainTreeBoxSx} id={props.id} className={className}>
                 <CoreSelector
                     {...props}
-                    entities={props.scenarios}
+                    entities={props.innerScenarios}
                     leafType={NodeType.SCENARIO}
-                    lovPropertyName="scenarios"
+                    lovPropertyName="innerScenarios"
                     editComponent={EditScenario}
                     showPins={showPins}
                 />
