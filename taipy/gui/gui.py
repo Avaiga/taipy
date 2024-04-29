@@ -991,7 +991,9 @@ class Gui:
         for k, v in values.items():
             if isinstance(v, (_TaipyData, _TaipyContentHtml)) and v.get_name() in modified_vars:
                 modified_vars.remove(v.get_name())
-            elif isinstance(v, _DoNotUpdate):
+            elif isinstance(v, _DoNotUpdate) or (
+                isinstance(v, (list, tuple)) and next(isinstance(i, _DoNotUpdate) for i in v)
+            ):
                 modified_vars.remove(k)
         for _var in modified_vars:
             newvalue = values.get(_var)

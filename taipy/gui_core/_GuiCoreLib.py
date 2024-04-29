@@ -59,9 +59,12 @@ class _GuiCore(ElementLibrary):
                 "show_pins": ElementProperty(PropertyType.boolean, False),
                 "on_creation": ElementProperty(PropertyType.function),
                 "show_dialog": ElementProperty(PropertyType.boolean, True),
+                "scenarios": ElementProperty(PropertyType.dynamic_list),
             },
             inner_properties={
-                "scenarios": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_scenarios()}}"),
+                "inner_scenarios": ElementProperty(
+                    PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_scenarios(<tp:prop:scenarios>)}}"
+                ),
                 "on_scenario_crud": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.crud_scenario}}"),
                 "configs": ElementProperty(PropertyType.react, f"{{{__CTX_VAR_NAME}.get_scenario_configs()}}"),
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
@@ -178,7 +181,8 @@ class _GuiCore(ElementLibrary):
                 ),
                 "history": ElementProperty(
                     PropertyType.react,
-                    f"{{{__CTX_VAR_NAME}.get_data_node_history(" + f"{_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR},"
+                    f"{{{__CTX_VAR_NAME}.get_data_node_history("
+                    + f"{_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR},"
                     + "<tp:uniq:dn>)}",
                 ),
                 "tabular_data": ElementProperty(
@@ -214,7 +218,7 @@ class _GuiCore(ElementLibrary):
                     + f"chart_id={_GuiCoreContext._DATANODE_VIZ_DATA_CHART_ID_VAR};"
                     + f"properties_id={_GuiCoreContext._DATANODE_VIZ_PROPERTIES_ID_VAR}",
                 ),
-            }
+            },
         ),
         "job_selector": Element(
             "value",
