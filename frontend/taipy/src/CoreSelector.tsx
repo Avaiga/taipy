@@ -267,12 +267,12 @@ const CoreSelector = (props: CoreSelectorProps) => {
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars, undefined, true);
 
     const onItemExpand = useCallback((e: SyntheticEvent, itemId: string, expanded: boolean) => {
-        setExpandedItems(old => {
+        setExpandedItems((old) => {
             if (!expanded) {
-                return old.filter(id => id != itemId);
+                return old.filter((id) => id != itemId);
             }
             return [...old, itemId];
-        })
+        });
     }, []);
 
     const onNodeSelect = useCallback(

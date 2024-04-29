@@ -278,7 +278,9 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                                         <DatePicker
                                             label="Date"
                                             value={new Date(form.values.date)}
-                                            onChange={(date?:Date|null) => form.setFieldValue("date", date?.toISOString())}
+                                            onChange={(date?: Date | null) =>
+                                                form.setFieldValue("date", date?.toISOString())
+                                            }
                                             disabled={actionEdit}
                                         />
                                     </LocalizationProvider>
@@ -422,7 +424,16 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
     const onSubmit = useCallback(
         (...values: unknown[]) => {
-            dispatch(createSendActionNameAction(props.id, module, props.onScenarioCrud, props.onCreation, props.updateVarName, ...values));
+            dispatch(
+                createSendActionNameAction(
+                    props.id,
+                    module,
+                    props.onScenarioCrud,
+                    props.onCreation,
+                    props.updateVarName,
+                    ...values
+                )
+            );
             if (values.length > 1 && values[1]) {
                 // delete requested => unselect current node
                 const lovVar = getUpdateVar(props.updateVars, "innerScenarios");
