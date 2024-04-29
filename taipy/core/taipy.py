@@ -12,6 +12,8 @@
 import os
 import pathlib
 import shutil
+import tempfile
+import zipfile
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set, Union, overload
 
@@ -42,10 +44,9 @@ from .data.data_node_id import DataNodeId
 from .exceptions.exceptions import (
     DataNodeConfigIsNotGlobal,
     EntitiesToBeImportAlredyExist,
-    ExportFolderAlreadyExists,
-    ImportFolderDoesntContainAnyScenario,
+    ExportPathAlreadyExists,
+    ImportArchiveDoesntContainAnyScenario,
     ImportScenarioDoesntHaveAVersion,
-    InvalidExportPath,
     ModelNotFound,
     NonExistingVersion,
     VersionIsNotProductionVersion,
@@ -947,18 +948,19 @@ def clean_all_entities(version_number: str) -> bool:
 
 def export_scenario(
     scenario_id: ScenarioId,
-    folder_path: Union[str, pathlib.Path],
+    output_path: Union[str, pathlib.Path],
     override: bool = False,
     include_data: bool = False,
 ):
-    """Export all related entities of a scenario to a folder.
+    """Export all related entities of a scenario to a archive zip file.
 
     This function exports all related entities of the specified scenario to the
-    specified folder.
+    specified archive zip file.
 
     Parameters:
         scenario_id (ScenarioId): The ID of the scenario to export.
-        folder_path (Union[str, pathlib.Path]): The folder path to export the scenario to.
+        output_path (Union[str, pathlib.Path]): The path to export the scenario to.
+            The path should include the file name without the extension or with the `.zip` extension.
             If the path exists and the override parameter is False, an exception is raised.
         override (bool): If True, the existing folder will be overridden. Default is False.
         include_data (bool): If True, the file-based data nodes are exported as well.
@@ -967,7 +969,7 @@ def export_scenario(
             will not be exported. The default value is False.
 
     Raises:
-        ExportFolderAlreadyExist^: If the `folder_path` already exists and the override parameter is False.
+        ExportPathAlreadyExists^: If the `output_path` already exists and the override parameter is False.
     """
     manager = _ScenarioManagerFactory._build_manager()
     scenario = manager._get(scenario_id)
@@ -976,41 +978,45 @@ def export_scenario(
     if scenario.cycle:
         entity_ids.cycle_ids = {scenario.cycle.id}
 
-    if folder_path == Config.core.taipy_storage_folder:
-        raise InvalidExportPath("The export folder must not be the storage folder.")
+    output_filename = os.path.splitext(output_path)[0] if str(output_path).endswith(".zip") else str(output_path)
+    output_zip_path = pathlib.Path(output_filename + ".zip")
 
-    if os.path.exists(folder_path):
+    if output_zip_path.exists():
         if override:
-            __logger.warning(f"Override the existing folder '{folder_path}'")
-            shutil.rmtree(folder_path, ignore_errors=True)
+            __logger.warning(f"Override the existing path '{output_zip_path}' to export scenario {scenario_id}.")
+            output_zip_path.unlink()
         else:
-            raise ExportFolderAlreadyExists(str(folder_path), scenario_id)
+            raise ExportPathAlreadyExists(str(output_zip_path), scenario_id)
 
-    for data_node_id in entity_ids.data_node_ids:
-        _DataManagerFactory._build_manager()._export(data_node_id, folder_path, include_data=include_data)
-    for task_id in entity_ids.task_ids:
-        _TaskManagerFactory._build_manager()._export(task_id, folder_path)
-    for sequence_id in entity_ids.sequence_ids:
-        _SequenceManagerFactory._build_manager()._export(sequence_id, folder_path)
-    for cycle_id in entity_ids.cycle_ids:
-        _CycleManagerFactory._build_manager()._export(cycle_id, folder_path)
-    for scenario_id in entity_ids.scenario_ids:
-        _ScenarioManagerFactory._build_manager()._export(scenario_id, folder_path)
-    for job_id in entity_ids.job_ids:
-        _JobManagerFactory._build_manager()._export(job_id, folder_path)
-    for submission_id in entity_ids.submission_ids:
-        _SubmissionManagerFactory._build_manager()._export(submission_id, folder_path)
-    _VersionManagerFactory._build_manager()._export(scenario.version, folder_path)
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        for data_node_id in entity_ids.data_node_ids:
+            _DataManagerFactory._build_manager()._export(data_node_id, tmp_dir, include_data=include_data)
+        for task_id in entity_ids.task_ids:
+            _TaskManagerFactory._build_manager()._export(task_id, tmp_dir)
+        for sequence_id in entity_ids.sequence_ids:
+            _SequenceManagerFactory._build_manager()._export(sequence_id, tmp_dir)
+        for cycle_id in entity_ids.cycle_ids:
+            _CycleManagerFactory._build_manager()._export(cycle_id, tmp_dir)
+        for scenario_id in entity_ids.scenario_ids:
+            _ScenarioManagerFactory._build_manager()._export(scenario_id, tmp_dir)
+        for job_id in entity_ids.job_ids:
+            _JobManagerFactory._build_manager()._export(job_id, tmp_dir)
+        for submission_id in entity_ids.submission_ids:
+            _SubmissionManagerFactory._build_manager()._export(submission_id, tmp_dir)
+        _VersionManagerFactory._build_manager()._export(scenario.version, tmp_dir)
+
+        shutil.make_archive(output_filename, "zip", tmp_dir)
 
 
-def import_scenario(folder_path: Union[str, pathlib.Path], override: bool = False) -> Optional[Scenario]:
-    """Import a folder containing an exported scenario into the current Taipy application.
+def import_scenario(input_path: Union[str, pathlib.Path], override: bool = False) -> Optional[Scenario]:
+    """Import from an archive zip file containing an exported scenario into the current Taipy application.
 
-    The folder should contain all related entities of the scenario, and all entities should
-    belong to the same version that is compatible with the current Taipy application version.
+    The zip file should be created by the `taipy.import()^` method, which contains all related entities
+    of the scenario.
+    All entities should belong to the same version that is compatible with the current Taipy application version.
 
-    Args:
-        folder_path (Union[str, pathlib.Path]): The folder path to the scenario to import.
+    Parameters:
+        input_path (Union[str, pathlib.Path]): The path to the archive scenario to import.
             If the path doesn't exist, an exception is raised.
         override (bool): If True, override the entities if existed. Default value is False.
 
@@ -1018,98 +1024,104 @@ def import_scenario(folder_path: Union[str, pathlib.Path], override: bool = Fals
         The imported scenario if the import is successful.
 
     Raises:
-        FileNotFoundError: If the import folder path does not exist.
-        ImportFolderDoesntContainAnyScenario: If the import folder doesn't contain any scenario.
+        FileNotFoundError: If the import path does not exist.
+        ImportArchiveDoesntContainAnyScenario: If the unzip folder doesn't contain any scenario.
         ConflictedConfigurationError: If the configuration of the imported scenario is conflicted with the current one.
     """
-    if isinstance(folder_path, str):
-        folder: pathlib.Path = pathlib.Path(folder_path)
+    if isinstance(input_path, str):
+        zip_file_path: pathlib.Path = pathlib.Path(input_path)
     else:
-        folder = folder_path
+        zip_file_path = input_path
 
-    if not folder.exists():
-        raise FileNotFoundError(f"The import folder '{folder_path}' does not exist.")
+    if not zip_file_path.exists():
+        raise FileNotFoundError(f"The import archive path '{input_path}' does not exist.")
 
-    if not ((folder / "scenarios").exists() or (folder / "scenario").exists()):
-        raise ImportFolderDoesntContainAnyScenario(folder_path)
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        with zipfile.ZipFile(zip_file_path) as zip_file:
+            zip_file.extractall(tmp_dir)
 
-    if not (folder / "version").exists():
-        raise ImportScenarioDoesntHaveAVersion(folder_path)
+        tmp_dir_path = pathlib.Path(tmp_dir)
 
-    entity_managers = {
-        "cycles": _CycleManagerFactory._build_manager,
-        "cycle": _CycleManagerFactory._build_manager,
-        "data_nodes": _DataManagerFactory._build_manager,
-        "data_node": _DataManagerFactory._build_manager,
-        "tasks": _TaskManagerFactory._build_manager,
-        "task": _TaskManagerFactory._build_manager,
-        "scenarios": _ScenarioManagerFactory._build_manager,
-        "scenario": _ScenarioManagerFactory._build_manager,
-        "jobs": _JobManagerFactory._build_manager,
-        "job": _JobManagerFactory._build_manager,
-        "submission": _SubmissionManagerFactory._build_manager,
-        "version": _VersionManagerFactory._build_manager,
-    }
+        if not ((tmp_dir_path / "scenarios").exists() or (tmp_dir_path / "scenario").exists()):
+            raise ImportArchiveDoesntContainAnyScenario(input_path)
 
-    # Import the version to check for compatibility
-    entity_managers["version"]()._import(next((folder / "version").iterdir()), "")
+        if not (tmp_dir_path / "version").exists():
+            raise ImportScenarioDoesntHaveAVersion(input_path)
 
-    valid_entity_folders = list(entity_managers.keys())
-    valid_data_folder = Config.core.storage_folder
+        entity_managers = {
+            "cycles": _CycleManagerFactory._build_manager,
+            "cycle": _CycleManagerFactory._build_manager,
+            "data_nodes": _DataManagerFactory._build_manager,
+            "data_node": _DataManagerFactory._build_manager,
+            "tasks": _TaskManagerFactory._build_manager,
+            "task": _TaskManagerFactory._build_manager,
+            "scenarios": _ScenarioManagerFactory._build_manager,
+            "scenario": _ScenarioManagerFactory._build_manager,
+            "jobs": _JobManagerFactory._build_manager,
+            "job": _JobManagerFactory._build_manager,
+            "submission": _SubmissionManagerFactory._build_manager,
+            "version": _VersionManagerFactory._build_manager,
+        }
 
-    imported_scenario = None
-    imported_entities: Dict[str, List] = {}
+        # Import the version to check for compatibility
+        entity_managers["version"]()._import(next((tmp_dir_path / "version").iterdir()), "")
 
-    for entity_folder in folder.iterdir():
-        if not entity_folder.is_dir() or entity_folder.name not in valid_entity_folders + [valid_data_folder]:
-            __logger.warning(f"{entity_folder} is not a valid Taipy folder and will not be imported.")
-            continue
+        valid_entity_folders = list(entity_managers.keys())
+        valid_data_folder = Config.core.storage_folder
 
-    try:
-        for entity_type in valid_entity_folders:
-            # Skip the version folder as it is already handled
-            if entity_type == "version":
+        imported_scenario = None
+        imported_entities: Dict[str, List] = {}
+
+        for entity_folder in tmp_dir_path.iterdir():
+            if not entity_folder.is_dir() or entity_folder.name not in valid_entity_folders + [valid_data_folder]:
+                __logger.warning(f"{entity_folder} is not a valid Taipy folder and will not be imported.")
                 continue
 
-            entity_folder = folder / entity_type
-            if not entity_folder.exists():
-                continue
+        try:
+            for entity_type in valid_entity_folders:
+                # Skip the version folder as it is already handled
+                if entity_type == "version":
+                    continue
 
-            manager = entity_managers[entity_type]()
-            imported_entities[entity_type] = []
+                entity_folder = tmp_dir_path / entity_type
+                if not entity_folder.exists():
+                    continue
 
-            for entity_file in entity_folder.iterdir():
-                # Check if the to-be-imported entity already exists
-                entity_id = entity_file.stem
-                if manager._exists(entity_id):
-                    if override:
-                        __logger.warning(f"{entity_id} already exists and will be overridden.")
-                    else:
-                        __logger.error(
-                            f"{entity_id} already exists. Please use the 'override' parameter to override it."
-                        )
-                        raise EntitiesToBeImportAlredyExist(folder_path)
+                manager = entity_managers[entity_type]()
+                imported_entities[entity_type] = []
 
-                # Import the entity
-                imported_entity = manager._import(
-                    entity_file,
-                    version=_VersionManagerFactory._build_manager()._get_latest_version(),
-                    data_folder=folder / valid_data_folder,
-                )
+                for entity_file in entity_folder.iterdir():
+                    # Check if the to-be-imported entity already exists
+                    entity_id = entity_file.stem
+                    if manager._exists(entity_id):
+                        if override:
+                            __logger.warning(f"{entity_id} already exists and will be overridden.")
+                        else:
+                            __logger.error(
+                                f"{entity_id} already exists. Please use the 'override' parameter to override it."
+                            )
+                            raise EntitiesToBeImportAlredyExist(input_path)
 
-                imported_entities[entity_type].append(imported_entity.id)
-                if entity_type in ["scenario", "scenarios"]:
-                    imported_scenario = imported_entity
-    except Exception as err:
-        __logger.error(f"An error occurred during the import: {err}. Rollback the import.")
+                    # Import the entity
+                    imported_entity = manager._import(
+                        entity_file,
+                        version=_VersionManagerFactory._build_manager()._get_latest_version(),
+                        data_folder=tmp_dir_path / valid_data_folder,
+                    )
 
-        # Rollback the import
-        for entity_type, entity_ids in list(imported_entities.items())[::-1]:
-            manager = entity_managers[entity_type]()
-            for entity_id in entity_ids:
-                if manager._exists(entity_id):
-                    manager._delete(entity_id)
-        return None
+                    imported_entities[entity_type].append(imported_entity.id)
+                    if entity_type in ["scenario", "scenarios"]:
+                        imported_scenario = imported_entity
+        except Exception as err:
+            __logger.error(f"An error occurred during the import: {err}. Rollback the import.")
+
+            # Rollback the import
+            for entity_type, entity_ids in list(imported_entities.items())[::-1]:
+                manager = entity_managers[entity_type]()
+                for entity_id in entity_ids:
+                    if manager._exists(entity_id):
+                        manager._delete(entity_id)
+            return None
 
     __logger.info(f"Scenario {imported_scenario.id} has been successfully imported.")  # type: ignore[union-attr]
     return imported_scenario

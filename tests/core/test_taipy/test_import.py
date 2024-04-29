@@ -11,6 +11,7 @@
 
 import os
 import shutil
+import zipfile
 
 import pandas as pd
 import pytest
@@ -22,7 +23,7 @@ from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.exceptions.exceptions import (
     ConflictedConfigurationError,
-    ImportFolderDoesntContainAnyScenario,
+    ImportArchiveDoesntContainAnyScenario,
     ImportScenarioDoesntHaveAVersion,
 )
 from taipy.core.job._job_manager import _JobManager
@@ -32,10 +33,12 @@ from taipy.core.task._task_manager import _TaskManager
 
 
 @pytest.fixture(scope="function", autouse=True)
-def clean_tmp_folder():
-    shutil.rmtree("./tmp", ignore_errors=True)
+def clean_export_zip_file():
+    if os.path.exists("./tmp.zip"):
+        os.remove("./tmp.zip")
     yield
-    shutil.rmtree("./tmp", ignore_errors=True)
+    if os.path.exists("./tmp.zip"):
+        os.remove("./tmp.zip")
 
 
 def plus_1(x):
@@ -68,12 +71,12 @@ def configure_test_scenario(input_data, frequency=None):
     return scenario_cfg
 
 
-def export_test_scenario(scenario_cfg, folder_path="./tmp/exp_scenario", override=False, include_data=False):
+def export_test_scenario(scenario_cfg, export_path="tmp.zip", override=False, include_data=False):
     scenario = tp.create_scenario(scenario_cfg)
     tp.submit(scenario)
 
     # Export the submitted scenario
-    tp.export_scenario(scenario.id, folder_path, override, include_data)
+    tp.export_scenario(scenario.id, export_path, override, include_data)
     return scenario
 
 
@@ -84,7 +87,7 @@ def test_import_scenario_without_data(init_managers):
     init_managers()
 
     assert _ScenarioManager._get_all() == []
-    imported_scenario = tp.import_scenario("./tmp/exp_scenario")
+    imported_scenario = tp.import_scenario("tmp.zip")
 
     # The imported scenario should be the same as the exported scenario
     assert _ScenarioManager._get_all() == [imported_scenario]
@@ -106,7 +109,7 @@ def test_import_scenario_with_data(init_managers):
     init_managers()
 
     assert _ScenarioManager._get_all() == []
-    imported_scenario = tp.import_scenario("./tmp/exp_scenario")
+    imported_scenario = tp.import_scenario("tmp.zip")
 
     # All data of all data nodes should be imported
     assert all(os.path.exists(dn.path) for dn in imported_scenario.data_nodes.values())
@@ -133,7 +136,7 @@ def test_import_scenario_when_entities_are_already_existed_should_rollback(caplo
     assert len(_ScenarioManager._get_all()) == 0
 
     # Import the scenario when the old entities still exist
-    imported_entity = tp.import_scenario("./tmp/exp_scenario")
+    imported_entity = tp.import_scenario("tmp.zip")
     assert imported_entity is None
     assert all(log.levelname in ["ERROR", "INFO"] for log in caplog.records)
     assert "An error occurred during the import" in caplog.text
@@ -150,7 +153,7 @@ def test_import_scenario_when_entities_are_already_existed_should_rollback(caplo
     caplog.clear()
 
     # Import with override flag
-    tp.import_scenario("./tmp/exp_scenario", override=True)
+    tp.import_scenario("tmp.zip", override=True)
     assert all(log.levelname in ["WARNING", "INFO"] for log in caplog.records)
     assert f"{submission_id} already exists and will be overridden" in caplog.text
 
@@ -174,7 +177,7 @@ def test_import_incompatible_scenario(init_managers):
     Config.configure_data_node("new_dn")
 
     with pytest.raises(ConflictedConfigurationError):
-        tp.import_scenario("./tmp/exp_scenario")
+        tp.import_scenario("tmp.zip")
 
 
 def test_import_a_non_exists_folder():
@@ -185,17 +188,25 @@ def test_import_a_non_exists_folder():
         tp.import_scenario("non_exists_folder")
 
 
-def test_import_an_empty_folder(tmpdir_factory):
+def test_import_an_empty_archive(tmpdir_factory):
     empty_folder = tmpdir_factory.mktemp("empty_folder").strpath
+    shutil.make_archive("tmp", "zip", empty_folder)
 
-    with pytest.raises(ImportFolderDoesntContainAnyScenario):
-        tp.import_scenario(empty_folder)
+    with pytest.raises(ImportArchiveDoesntContainAnyScenario):
+        tp.import_scenario("tmp.zip")
 
 
-def test_import_with_no_version():
+def test_import_with_no_version(tmp_path):
     scenario_cfg = configure_test_scenario(1, frequency=Frequency.DAILY)
     export_test_scenario(scenario_cfg)
-    shutil.rmtree("./tmp/exp_scenario/version")
+
+    # Extract the zip,
+    with zipfile.ZipFile("./tmp.zip") as zip_file:
+        zip_file.extractall(tmp_path)
+    # remove the version,
+    shutil.rmtree(f"{tmp_path}/version")
+    # and archive the scenario without the version again
+    shutil.make_archive("tmp", "zip", tmp_path)
 
     with pytest.raises(ImportScenarioDoesntHaveAVersion):
-        tp.import_scenario("./tmp/exp_scenario")
+        tp.import_scenario("tmp.zip")
