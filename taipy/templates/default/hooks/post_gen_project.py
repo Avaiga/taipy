@@ -11,6 +11,7 @@
 
 import os
 import shutil
+import subprocess
 
 
 def handle_services(use_rest, use_core):
@@ -148,6 +149,26 @@ def generate_main_file():
         app_main_file.write(main_lines)
 
 
+# Initialize git in the generated project repo
+def git_init(directory: str) -> str:
+    if shutil.which("git") is None:
+        msg = "Git executable not found, skipping git initialisation"
+        return msg
+    try:
+        subprocess.run(
+            ["git", "init", "."],
+            cwd=directory,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True,
+        )
+        msg = "Initialised Git repository in the project"
+        return msg
+    except subprocess.CalledProcessError:
+        msg = "Failed to initialise Git repository in the project"
+        return msg
+
+
 use_core = "{{ cookiecutter.__core }}".upper()
 use_rest = "{{ cookiecutter.__rest }}".upper()
 handle_services(use_rest in ["YES", "Y"], use_core in ["YES", "Y"])
@@ -166,8 +187,12 @@ generate_main_file()
 shutil.rmtree(os.path.join(os.getcwd(), "sections"))
 
 main_file_name = "{{cookiecutter.__main_file}}.py"
+
+git_init_msg = git_init(os.getcwd())
+
 print(
     f"New Taipy application has been created at {os.path.join(os.getcwd())}"
+    f"\n{git_init_msg}"
     f"\n\nTo start the application, change directory to the newly created folder:"
     f"\n\tcd {os.path.join(os.getcwd())}"
     f"\nand run the application as follows:"
