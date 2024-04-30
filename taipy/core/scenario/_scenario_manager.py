@@ -535,7 +535,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
                     for entity_id in entity_ids:
                         if manager._exists(entity_id):
                             manager._delete(entity_id)
-                return None
+                raise err
 
         cls._logger.info(f"Scenario {imported_scenario.id} has been successfully imported.")  # type: ignore[union-attr]
         return imported_scenario

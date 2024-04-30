@@ -19,7 +19,7 @@ from taipy import Config, Frequency, Scope
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data._data_manager import _DataManager
-from taipy.core.exceptions.exceptions import ConflictedConfigurationError
+from taipy.core.exceptions.exceptions import ConflictedConfigurationError, EntitiesToBeImportAlredyExist
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.submission._submission_manager import _SubmissionManager
@@ -129,9 +129,9 @@ def test_import_scenario_when_entities_are_already_existed_should_rollback(init_
     submission_id = _SubmissionManager._get_all()[0].id
     assert len(_ScenarioManager._get_all()) == 0
 
-    # Import the scenario when the old entities still exist
-    imported_entity = tp.import_scenario("tmp.zip")
-    assert imported_entity is None
+    # Import the scenario when the old entities still exist should raise an error
+    with pytest.raises(EntitiesToBeImportAlredyExist):
+        tp.import_scenario("tmp.zip")
     assert all(log.levelname in ["ERROR", "INFO"] for log in caplog.records)
     assert "An error occurred during the import" in caplog.text
     assert f"{submission_id} already exists. Please use the 'override' parameter to override it" in caplog.text

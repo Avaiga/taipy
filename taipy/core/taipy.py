@@ -1054,7 +1054,7 @@ def import_scenario(input_path: Union[str, pathlib.Path], override: bool = False
         override (bool): If True, override the entities if existed. Default value is False.
 
     Return:
-        The imported scenario if the import is successful.
+        The imported scenario.
 
     Raises:
         FileNotFoundError: If the import path does not exist.
