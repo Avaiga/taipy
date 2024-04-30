@@ -321,8 +321,8 @@
                     },
                     {
                         "name": "scenario",
-                        "type": "dynamic(Scenario)",
-                        "doc": "If the <code>Scenario^</code> is set, the selector will only show datanodes owned by this scenario."
+                        "type": "dynamic(Scenario|list[Scenario])",
+                        "doc": "TODO: If the <code>Scenario^</code> is set, the selector will only show datanodes owned by this scenario."
                     },
                     {
                         "name": "multiple",
