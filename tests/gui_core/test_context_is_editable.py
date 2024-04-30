@@ -58,6 +58,7 @@ class TestGuiCoreContext_is_editable:
                 {
                     "args": [
                         "",
+                        "",
                         True,
                         False,
                         {"name": "name", "id": a_scenario.id},
@@ -73,6 +74,7 @@ class TestGuiCoreContext_is_editable:
                     "",
                     {
                         "args": [
+                            "",
                             "",
                             True,
                             False,

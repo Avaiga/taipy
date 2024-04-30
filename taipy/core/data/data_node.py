@@ -82,8 +82,8 @@ class DataNode(_Entity, _Labeled):
     __ID_SEPARATOR = "_"
     __logger = _TaipyLogger._get_logger()
     _REQUIRED_PROPERTIES: List[str] = []
-    _MANAGER_NAME = "data"
-    __PATH_KEY = "path"
+    _MANAGER_NAME: str = "data"
+    _PATH_KEY = "path"
     __EDIT_TIMEOUT = 30
 
     _TAIPY_PROPERTIES: Set[str] = set()
@@ -103,9 +103,9 @@ class DataNode(_Entity, _Labeled):
         editor_id: Optional[str] = None,
         editor_expiration_date: Optional[datetime] = None,
         **kwargs,
-    ):
+    ) -> None:
         self._config_id = _validate_id(config_id)
-        self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
+        self.id = id or self._new_id(self._config_id)
         self._owner_id = owner_id
         self._parent_ids = parent_ids or set()
         self._scope = scope
@@ -120,6 +120,13 @@ class DataNode(_Entity, _Labeled):
         self._edits = edits or []
 
         self._properties = _Properties(self, **kwargs)
+
+    @staticmethod
+    def _new_id(config_id: str) -> DataNodeId:
+        """Generate a unique datanode identifier."""
+        return DataNodeId(
+            DataNode.__ID_SEPARATOR.join([DataNode._ID_PREFIX, _validate_id(config_id), str(uuid.uuid4())])
+        )
 
     @property
     def config_id(self):
@@ -158,7 +165,7 @@ class DataNode(_Entity, _Labeled):
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def last_edit_date(self):
-        last_modified_datetime = self.__get_last_modified_datetime()
+        last_modified_datetime = self._get_last_modified_datetime(self._properties.get(self._PATH_KEY, None))
         if last_modified_datetime and last_modified_datetime > self._last_edit_date:
             return last_modified_datetime
         else:
@@ -270,7 +277,7 @@ class DataNode(_Entity, _Labeled):
         return {key: value for key, value in self.properties.items() if key not in self._TAIPY_PROPERTIES}
 
     def __eq__(self, other):
-        return self.id == other.id
+        return isinstance(other, DataNode) and self.id == other.id
 
     def __ne__(self, other):
         return not self == other
@@ -290,8 +297,8 @@ class DataNode(_Entity, _Labeled):
             return self._properties[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of data node {self.id}")
 
-    def __get_last_modified_datetime(self) -> Optional[datetime]:
-        path = self._properties.get(self.__PATH_KEY, None)
+    @classmethod
+    def _get_last_modified_datetime(cls, path: Optional[str] = None) -> Optional[datetime]:
         if path and os.path.isfile(path):
             return datetime.fromtimestamp(os.path.getmtime(path))
 
@@ -380,7 +387,9 @@ class DataNode(_Entity, _Labeled):
         """
         edit = {k: v for k, v in options.items() if v is not None}
         if "timestamp" not in edit:
-            edit["timestamp"] = datetime.now()
+            edit["timestamp"] = (
+                self._get_last_modified_datetime(self._properties.get(self._PATH_KEY, None)) or datetime.now()
+            )
         self.last_edit_date = edit.get("timestamp")
         self._edits.append(edit)
 

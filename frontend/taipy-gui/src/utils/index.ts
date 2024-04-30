@@ -206,3 +206,5 @@ export const TIMEZONE_CLIENT = Intl.DateTimeFormat().resolvedOptions().timeZone;
 export const getBaseURL = (): string => {
     return window.taipyConfig?.baseURL || "/";
 };
+
+export const emptyArray = [];

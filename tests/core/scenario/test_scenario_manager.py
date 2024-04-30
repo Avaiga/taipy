@@ -19,6 +19,7 @@ from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.core import Job
+from taipy.core import taipy as tp
 from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core.common import _utils
@@ -811,6 +812,77 @@ def test_get_set_primary_scenario():
     assert len(_ScenarioManager._get_primary_scenarios()) == 1
     assert len(_ScenarioManager._get_all_by_cycle(cycle_1)) == 2
     assert _ScenarioManager._get_primary(cycle_1) == scenario_2
+
+
+def test_get_primary_scenarios_sorted():
+    scenario_1_cfg = Config.configure_scenario(id="scenario_1", frequency=Frequency.DAILY)
+    scenario_2_cfg = Config.configure_scenario(id="scenario_2", frequency=Frequency.DAILY)
+
+    not_primary_scenario = _ScenarioManager._create(scenario_1_cfg, name="not_primary_scenario")
+    now = datetime.now()
+    scenario_1 = _ScenarioManager._create(scenario_1_cfg, now, "B_scenario")
+    scenario_2 = _ScenarioManager._create(scenario_2_cfg, now + timedelta(days=2), "A_scenario")
+    scenario_3 = _ScenarioManager._create(scenario_2_cfg, now + timedelta(days=4), "C_scenario")
+    scenario_4 = _ScenarioManager._create(scenario_2_cfg, now + timedelta(days=3), "D_scenario")
+
+    _ScenarioManager._set_primary(scenario_1)
+    scenario_1.tags = ["banana", "kiwi"]
+    _ScenarioManager._set_primary(scenario_2)
+    scenario_2.tags = ["apple", "banana"]
+    _ScenarioManager._set_primary(scenario_3)
+    scenario_3.tags = ["banana", "kiwi"]
+    _ScenarioManager._set_primary(scenario_4)
+
+    all_scenarios = tp.get_scenarios()
+    assert not_primary_scenario in all_scenarios
+
+    primary_scenarios = _ScenarioManager._get_primary_scenarios()
+    assert not_primary_scenario not in primary_scenarios
+
+    primary_scenarios_sorted_by_name = [scenario_2, scenario_1, scenario_3, scenario_4]
+    assert primary_scenarios_sorted_by_name == _ScenarioManager._sort_scenarios(
+        primary_scenarios, descending=False, sort_key="name"
+    )
+
+    scenarios_with_same_config_id = [scenario_2, scenario_3, scenario_4]
+    scenarios_with_same_config_id.sort(key=lambda x: x.id)
+    primary_scenarios_sorted_by_config_id = [
+        scenario_1,
+        scenarios_with_same_config_id[0],
+        scenarios_with_same_config_id[1],
+        scenarios_with_same_config_id[2],
+    ]
+    assert primary_scenarios_sorted_by_config_id == _ScenarioManager._sort_scenarios(
+        primary_scenarios, descending=False, sort_key="config_id"
+    )
+
+    scenarios_sorted_by_id = [scenario_1, scenario_2, scenario_3, scenario_4]
+    scenarios_sorted_by_id.sort(key=lambda x: x.id)
+    assert scenarios_sorted_by_id == _ScenarioManager._sort_scenarios(
+        primary_scenarios, descending=False, sort_key="id"
+    )
+
+    primary_scenarios_sorted_by_creation_date = [scenario_1, scenario_2, scenario_4, scenario_3]
+    assert primary_scenarios_sorted_by_creation_date == _ScenarioManager._sort_scenarios(
+        primary_scenarios, descending=False, sort_key="creation_date"
+    )
+
+    scenarios_with_same_tags = [scenario_1, scenario_3]
+    scenarios_with_same_tags.sort(key=lambda x: x.id)
+    primary_scenarios_sorted_by_tags = [
+        scenario_4,
+        scenario_2,
+        scenarios_with_same_tags[0],
+        scenarios_with_same_tags[1],
+    ]
+    assert primary_scenarios_sorted_by_tags == _ScenarioManager._sort_scenarios(
+        primary_scenarios, descending=False, sort_key="tags"
+    )
+
+    primary_scenarios_sorted_by_name_descending_order = [scenario_4, scenario_3, scenario_1, scenario_2]
+    assert primary_scenarios_sorted_by_name_descending_order == _ScenarioManager._sort_scenarios(
+        primary_scenarios, descending=True, sort_key="name"
+    )
 
 
 def test_hard_delete_one_single_scenario_with_scenario_data_nodes():

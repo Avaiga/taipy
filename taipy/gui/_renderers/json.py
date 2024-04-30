@@ -54,7 +54,7 @@ class _DefaultJsonAdapter(JsonAdapter):
 
 
 class _TaipyJsonAdapter(object, metaclass=_Singleton):
-    def __init__(self):
+    def __init__(self) -> None:
         self._adapters: t.List[JsonAdapter] = []
         self.register(_DefaultJsonAdapter())
 
@@ -66,7 +66,7 @@ class _TaipyJsonAdapter(object, metaclass=_Singleton):
             for adapter in reversed(self._adapters):
                 if (output := adapter.parse(o)) is not None:
                     return output
-            raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
+            raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable (value: {o}).")
         except Exception as e:
             _warn("Exception while resolving JSON", e)
             return None

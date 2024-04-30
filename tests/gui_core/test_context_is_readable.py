@@ -90,6 +90,7 @@ class TestGuiCoreContext_is_readable:
                 {
                     "args": [
                         "",
+                        "",
                         True,
                         False,
                         {"name": "name", "id": a_scenario.id},
@@ -105,6 +106,7 @@ class TestGuiCoreContext_is_readable:
                     "",
                     {
                         "args": [
+                            "",
                             "",
                             True,
                             False,
@@ -326,7 +328,7 @@ class TestGuiCoreContext_is_readable:
     def test_get_scenarios_for_owner(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get) as mockget:
             gui_core_context = _GuiCoreContext(Mock())
-            gui_core_context.get_scenarios_for_owner(a_scenario.id)
+            gui_core_context.get_scenarios_for_owner(a_scenario.id, '')
             mockget.assert_called_once()
             mockget.reset_mock()
 
@@ -404,18 +406,18 @@ class TestGuiCoreContext_is_readable:
     def test_get_data_node_tabular_data(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get) as mockget:
             gui_core_context = _GuiCoreContext(Mock())
-            gui_core_context.get_data_node_tabular_data(a_datanode, a_datanode.id)
+            gui_core_context.get_data_node_tabular_data(a_datanode.id, "")
             mockget.assert_called_once()
             mockget.reset_mock()
 
             with patch("taipy.gui_core._context.is_readable", side_effect=mock_is_readable_false):
-                gui_core_context.get_data_node_tabular_data(a_datanode, a_datanode.id)
+                gui_core_context.get_data_node_tabular_data(a_datanode.id, "")
                 mockget.assert_not_called()
 
     def test_get_data_node_tabular_columns(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get) as mockget:
             gui_core_context = _GuiCoreContext(Mock())
-            gui_core_context.get_data_node_tabular_columns(a_datanode, a_datanode.id)
+            gui_core_context.get_data_node_tabular_columns(a_datanode.id, "")
             mockget.assert_called_once()
             mockget.reset_mock()
 
@@ -426,10 +428,10 @@ class TestGuiCoreContext_is_readable:
     def test_get_data_node_chart_config(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get) as mockget:
             gui_core_context = _GuiCoreContext(Mock())
-            gui_core_context.get_data_node_chart_config(a_datanode, a_datanode.id)
+            gui_core_context.get_data_node_chart_config(a_datanode.id, "")
             mockget.assert_called_once()
             mockget.reset_mock()
 
             with patch("taipy.gui_core._context.is_readable", side_effect=mock_is_readable_false):
-                gui_core_context.get_data_node_chart_config(a_datanode, a_datanode.id)
+                gui_core_context.get_data_node_chart_config(a_datanode.id, "")
                 mockget.assert_not_called()

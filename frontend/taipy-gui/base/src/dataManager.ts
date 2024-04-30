@@ -50,6 +50,7 @@ export class DataManager {
                 this._data[vData["encoded_name"]] = vData.value;
             }
         }
+        return changes;
     }
 
     getEncodedName(varName: string, module: string): string | undefined {

@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import json
-import math
 import typing as t
 from collections import defaultdict
 from numbers import Number
@@ -52,7 +51,6 @@ from taipy.core import (
 from taipy.core import delete as core_delete
 from taipy.core import get as core_get
 from taipy.core import submit as core_submit
-from taipy.core.data._abstract_tabular import _TabularDataNodeMixin
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event, EventOperation
 from taipy.core.notification.notifier import Notifier
@@ -61,7 +59,7 @@ from taipy.gui import Gui, State
 from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
 
-from ._adapters import _EntityType
+from ._adapters import _EntityType, _GuiCoreDatanodeAdapter
 
 
 class _GuiCoreContext(CoreEventConsumerBase):
@@ -82,6 +80,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
     _DATANODE_VIZ_ERROR_VAR = "gui_core_dv_error"
     _DATANODE_VIZ_OWNER_ID_VAR = "gui_core_dv_owner_id"
     _DATANODE_VIZ_HISTORY_ID_VAR = "gui_core_dv_history_id"
+    _DATANODE_VIZ_PROPERTIES_ID_VAR = "gui_core_dv_properties_id"
     _DATANODE_VIZ_DATA_ID_VAR = "gui_core_dv_data_id"
     _DATANODE_VIZ_DATA_CHART_ID_VAR = "gui_core_dv_data_chart_id"
     _DATANODE_VIZ_DATA_NODE_PROP = "data_node"
@@ -241,16 +240,19 @@ class _GuiCoreContext(CoreEventConsumerBase):
             )
         return None
 
-    def get_scenarios(self):
-        cycles_scenarios = []
-        with self.lock:
-            if self.scenario_by_cycle is None:
-                self.scenario_by_cycle = get_cycles_scenarios()
-            for cycle, scenarios in self.scenario_by_cycle.items():
-                if cycle is None:
-                    cycles_scenarios.extend(scenarios)
-                else:
-                    cycles_scenarios.append(cycle)
+    def get_scenarios(self, scenarios: t.Optional[t.List[t.Union[Cycle, Scenario]]]):
+        cycles_scenarios: t.List[t.Union[Cycle, Scenario]] = []
+        if scenarios is None:
+            with self.lock:
+                if self.scenario_by_cycle is None:
+                    self.scenario_by_cycle = get_cycles_scenarios()
+                for cycle, c_scenarios in self.scenario_by_cycle.items():
+                    if cycle is None:
+                        cycles_scenarios.extend(c_scenarios)
+                    else:
+                        cycles_scenarios.append(cycle)
+        else:
+            cycles_scenarios = scenarios
         return sorted(cycles_scenarios, key=_GuiCoreContext.get_entity_creation_date_iso)
 
     def select_scenario(self, state: State, id: str, payload: t.Dict[str, str]):
@@ -277,19 +279,20 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def crud_scenario(self, state: State, id: str, payload: t.Dict[str, str]):  # noqa: C901
         args = payload.get("args")
+        start_idx = 2
         if (
             args is None
             or not isinstance(args, list)
-            or len(args) < 4
-            or not isinstance(args[1], bool)
-            or not isinstance(args[2], bool)
-            or not isinstance(args[3], dict)
+            or len(args) < start_idx + 3
+            or not isinstance(args[start_idx], bool)
+            or not isinstance(args[start_idx + 1], bool)
+            or not isinstance(args[start_idx + 2], dict)
         ):
             return
-        update = args[1]
-        delete = args[2]
-        data = args[3]
-        with_dialog = True if len(args) < 5 else bool(args[4])
+        update = args[start_idx]
+        delete = args[start_idx + 1]
+        data = args[start_idx + 2]
+        with_dialog = True if len(args) < start_idx + 4 else bool(args[start_idx + 3])
         scenario = None
 
         name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
@@ -331,7 +334,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 date = None
             scenario_id = None
             try:
-                gui: Gui = state._gui
+                gui = state.get_gui()
                 on_creation = args[0] if isinstance(args[0], str) else None
                 on_creation_function = gui._get_user_function(on_creation) if on_creation else None
                 if callable(on_creation_function):
@@ -370,7 +373,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     _warn(f"on_creation(): '{on_creation}' is not a function.")
                 elif not with_dialog:
                     if len(Config.scenarios) == 2:
-                        scenario_config = [sc for k, sc in Config.scenarios.items() if k != "default"][0]
+                        scenario_config = next(sc for k, sc in Config.scenarios.items() if k != "default")
                     else:
                         state.assign(
                             _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR,
@@ -385,6 +388,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error creating Scenario. {e}")
             finally:
                 self.scenario_refresh(scenario_id)
+                if scenario and (sel_scenario_var := args[1] if isinstance(args[1], str) else None):
+                    try:
+                        var_name, _ = gui._get_real_var_name(sel_scenario_var)
+                        state.assign(var_name, scenario)
+                    except Exception as e:  # pragma: no cover
+                        _warn("Can't find value variable name in context", e)
         if scenario:
             if not is_editable(scenario):
                 state.assign(
@@ -500,7 +509,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             self.__do_datanodes_tree()
         return (
             self.data_nodes_by_owner.get(scenario.id if scenario else None, []) if self.data_nodes_by_owner else []
-        ) + (self.get_scenarios() if not scenario else [])
+        ) + (self.get_scenarios(None) if not scenario else [])
 
     def data_node_adapter(self, data):
         try:
@@ -673,7 +682,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         # we might be comparing naive and aware datetime ISO
         return entity.creation_date.isoformat()
 
-    def get_scenarios_for_owner(self, owner_id: str):
+    def get_scenarios_for_owner(self, owner_id: str, uid: str):
         cycles_scenarios: t.List[t.Union[Scenario, Cycle]] = []
         with self.lock:
             if self.scenario_by_cycle is None:
@@ -693,14 +702,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         cycles_scenarios.append(entity)
         return sorted(cycles_scenarios, key=_GuiCoreContext.get_entity_creation_date_iso)
 
-    def get_data_node_history(self, datanode: DataNode, id: str):
-        if (
-            id
-            and isinstance(datanode, DataNode)
-            and id == datanode.id
-            and (dn := core_get(id))
-            and isinstance(dn, DataNode)
-        ):
+    def get_data_node_history(self, id: str, uid: str):
+        if id and (dn := core_get(id)) and isinstance(dn, DataNode):
             res = []
             for e in dn.edits:
                 job_id = e.get("job_id")
@@ -720,50 +723,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     )
                 )
             return sorted(res, key=lambda r: r[0], reverse=True)
-        return _DoNotUpdate()
-
-    @staticmethod
-    def __is_tabular_data(datanode: DataNode, value: t.Any):
-        if isinstance(datanode, _TabularDataNodeMixin):
-            return True
-        if datanode.is_ready_for_reading:
-            return isinstance(value, (pd.DataFrame, pd.Series, list, tuple, dict))
-        return False
-
-    def get_data_node_data(self, datanode: DataNode, id: str):
-        if (
-            id
-            and isinstance(datanode, DataNode)
-            and id == datanode.id
-            and (dn := core_get(id))
-            and isinstance(dn, DataNode)
-        ):
-            if dn._last_edit_date:
-                if isinstance(dn, _TabularDataNodeMixin):
-                    return (None, None, True, None)
-                try:
-                    value = dn.read()
-                    if _GuiCoreContext.__is_tabular_data(dn, value):
-                        return (None, None, True, None)
-                    val_type = (
-                        "date"
-                        if "date" in type(value).__name__
-                        else type(value).__name__
-                        if isinstance(value, Number)
-                        else None
-                    )
-                    if isinstance(value, float):
-                        if math.isnan(value):
-                            value = None
-                    return (
-                        value,
-                        val_type,
-                        None,
-                        None,
-                    )
-                except Exception as e:
-                    return (None, None, None, f"read data_node: {e}")
-            return (None, None, None, f"Data unavailable for {dn.get_simple_label()}")
         return _DoNotUpdate()
 
     def __check_readable_editable(self, state: State, id: str, ent_type: str, var: str):
@@ -865,14 +824,26 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode tabular value. {e}")
         setattr(state, _GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, dn_id)
 
+    def get_data_node_properties(self, id: str, uid: str):
+        if id and is_readable(t.cast(DataNodeId, id)) and (dn := core_get(id)) and isinstance(dn, DataNode):
+            try:
+                return (
+                    (
+                        (k, f"{v}")
+                        for k, v in dn._get_user_properties().items()
+                        if k != _GuiCoreContext.__PROP_ENTITY_NAME
+                    ),
+                )
+            except Exception:
+                return None
+        return None
+
     def __read_tabular_data(self, datanode: DataNode):
         return datanode.read()
 
-    def get_data_node_tabular_data(self, datanode: DataNode, id: str):
+    def get_data_node_tabular_data(self, id: str, uid: str):
         if (
             id
-            and isinstance(datanode, DataNode)
-            and id == datanode.id
             and is_readable(t.cast(DataNodeId, id))
             and (dn := core_get(id))
             and isinstance(dn, DataNode)
@@ -880,17 +851,15 @@ class _GuiCoreContext(CoreEventConsumerBase):
         ):
             try:
                 value = self.__read_tabular_data(dn)
-                if _GuiCoreContext.__is_tabular_data(dn, value):
+                if _GuiCoreDatanodeAdapter._is_tabular_data(dn, value):
                     return value
             except Exception:
                 return None
         return None
 
-    def get_data_node_tabular_columns(self, datanode: DataNode, id: str):
+    def get_data_node_tabular_columns(self, id: str, uid: str):
         if (
             id
-            and isinstance(datanode, DataNode)
-            and id == datanode.id
             and is_readable(t.cast(DataNodeId, id))
             and (dn := core_get(id))
             and isinstance(dn, DataNode)
@@ -898,7 +867,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         ):
             try:
                 value = self.__read_tabular_data(dn)
-                if _GuiCoreContext.__is_tabular_data(dn, value):
+                if _GuiCoreDatanodeAdapter._is_tabular_data(dn, value):
                     return self.gui._tbl_cols(
                         True, True, "{}", json.dumps({"data": "tabular_data"}), tabular_data=value
                     )
@@ -906,11 +875,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return None
         return None
 
-    def get_data_node_chart_config(self, datanode: DataNode, id: str):
+    def get_data_node_chart_config(self, id: str, uid: str):
         if (
             id
-            and isinstance(datanode, DataNode)
-            and id == datanode.id
             and is_readable(t.cast(DataNodeId, id))
             and (dn := core_get(id))
             and isinstance(dn, DataNode)
@@ -923,20 +890,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
             except Exception:
                 return None
         return None
-
-    def select_id(self, state: State, id: str, payload: t.Dict[str, str]):
-        args = payload.get("args")
-        if args is None or not isinstance(args, list) or len(args) == 0 and isinstance(args[0], dict):
-            return
-        data = args[0]
-        if owner_id := data.get("owner_id"):
-            state.assign(_GuiCoreContext._DATANODE_VIZ_OWNER_ID_VAR, owner_id)
-        elif history_id := data.get("history_id"):
-            state.assign(_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR, history_id)
-        elif data_id := data.get("data_id"):
-            state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, data_id)
-        elif chart_id := data.get("chart_id"):
-            state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_CHART_ID_VAR, chart_id)
 
     def on_dag_select(self, state: State, id: str, payload: t.Dict[str, str]):
         args = payload.get("args")

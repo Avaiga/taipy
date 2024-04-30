@@ -13,6 +13,7 @@ import datetime
 import json
 import os
 import pathlib
+import uuid
 from dataclasses import dataclass
 from enum import Enum
 from time import sleep
@@ -308,12 +309,13 @@ class TestJSONDataNode:
     @pytest.mark.parametrize(
         ["properties", "exists"],
         [
-            ({}, False),
             ({"default_data": {"foo": "bar"}}, True),
+            ({}, False),
         ],
     )
     def test_create_with_default_data(self, properties, exists):
-        dn = JSONDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
+        dn = JSONDataNode("foo", Scope.SCENARIO, DataNodeId(f"dn_id_{uuid.uuid4()}"), properties=properties)
+        assert dn.path == os.path.join(Config.core.storage_folder.strip("/"), "jsons", dn.id + ".json")
         assert os.path.exists(dn.path) is exists
 
     def test_set_path(self):
@@ -366,5 +368,5 @@ class TestJSONDataNode:
 
         dn = JSONDataNode("foo", Scope.SCENARIO, properties={"path": path})
 
-        assert ".data" not in dn.path.name
+        assert ".data" not in dn.path
         assert os.path.exists(dn.path)

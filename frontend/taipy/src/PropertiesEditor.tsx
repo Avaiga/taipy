@@ -36,12 +36,14 @@ type PropertiesEditPayload = {
     deleted_properties?: Array<Partial<Property>>;
 };
 
+export type DatanodeProperties = Array<[string, string]>;
+
 interface PropertiesEditorProps {
     id?: string;
     entityId: string;
     active: boolean;
     show: boolean;
-    entProperties: Array<[string, string]>;
+    entProperties: DatanodeProperties;
     onFocus: (e: MouseEvent<HTMLElement>) => void;
     focusName: string;
     setFocusName: (name: string) => void;
@@ -124,8 +126,8 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                     e.stopPropagation();
                 }
             }
-
-        }, [editProperty, cancelProperty]
+        },
+        [editProperty, cancelProperty]
     );
 
     const deleteProperty = useCallback(
@@ -187,7 +189,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                                   data-name="key"
                                                   data-id={property.id}
                                                   onChange={updatePropertyField}
-                                                  inputProps={{onKeyDown}}
+                                                  inputProps={{ onKeyDown }}
                                               />
                                           </Grid>
                                           <Grid item xs={5}>
@@ -200,7 +202,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                                   data-name="value"
                                                   data-id={property.id}
                                                   onChange={updatePropertyField}
-                                                  inputProps={{onKeyDown, "data-enter": true}}
+                                                  inputProps={{ onKeyDown, "data-enter": true }}
                                               />
                                           </Grid>
                                           <Grid
@@ -293,7 +295,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                     variant="outlined"
                                     sx={FieldNoMaxWidth}
                                     disabled={!isDefined}
-                                    inputProps={{onKeyDown}}
+                                    inputProps={{ onKeyDown }}
                                 />
                             </Grid>
                             <Grid item xs={5}>
@@ -305,7 +307,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                     variant="outlined"
                                     sx={FieldNoMaxWidth}
                                     disabled={!isDefined}
-                                    inputProps={{onKeyDown, "data-enter": true}}
+                                    inputProps={{ onKeyDown, "data-enter": true }}
                                 />
                             </Grid>
                             <Grid

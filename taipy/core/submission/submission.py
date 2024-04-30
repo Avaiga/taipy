@@ -52,7 +52,7 @@ class Submission(_Entity, _Labeled):
         entity_id: str,
         entity_type: str,
         entity_config_id: Optional[str] = None,
-        id: Optional[str] = None,
+        id: Optional[SubmissionId] = None,
         jobs: Optional[Union[List[Job], List[JobId]]] = None,
         properties: Optional[Dict[str, Any]] = None,
         creation_date: Optional[datetime] = None,
@@ -80,7 +80,7 @@ class Submission(_Entity, _Labeled):
         self._pending_jobs: Set = set()
 
     @staticmethod
-    def __new_id() -> str:
+    def __new_id() -> SubmissionId:
         """Generate a unique Submission identifier."""
         return SubmissionId(Submission.__SEPARATOR.join([Submission._ID_PREFIX, str(uuid.uuid4())]))
 
@@ -138,7 +138,7 @@ class Submission(_Entity, _Labeled):
         return hash(self.id)
 
     def __eq__(self, other):
-        return self.id == other.id
+        return isinstance(other, Submission) and self.id == other.id
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

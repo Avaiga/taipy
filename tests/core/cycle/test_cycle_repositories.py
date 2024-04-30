@@ -21,12 +21,19 @@ from taipy.core.exceptions import ModelNotFound
 
 class TestCycleRepositories:
     @pytest.mark.parametrize("repo", [_CycleFSRepository, _CycleSQLRepository])
-    def test_save_and_load(self, cycle, repo, init_sql_repo):
+    def test_save_and_load(self, cycle: Cycle, repo, init_sql_repo):
         repository = repo()
         repository._save(cycle)
 
-        obj = repository._load(cycle.id)
-        assert isinstance(obj, Cycle)
+        loaded_cycle = repository._load(cycle.id)
+        assert isinstance(loaded_cycle, Cycle)
+        assert cycle._frequency == loaded_cycle._frequency
+        assert cycle._creation_date == loaded_cycle._creation_date
+        assert cycle._start_date == loaded_cycle._start_date
+        assert cycle._end_date == loaded_cycle._end_date
+        assert cycle._name == loaded_cycle._name
+        assert cycle.id == loaded_cycle.id
+        assert cycle._properties == loaded_cycle._properties
 
     @pytest.mark.parametrize("repo", [_CycleFSRepository, _CycleSQLRepository])
     def test_exists(self, cycle, repo, init_sql_repo):

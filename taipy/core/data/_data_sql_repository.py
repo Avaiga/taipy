@@ -14,5 +14,5 @@ from ._data_model import _DataNodeModel
 
 
 class _DataSQLRepository(_SQLRepository):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(model_type=_DataNodeModel, converter=_DataNodeConverter)

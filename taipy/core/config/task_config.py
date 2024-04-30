@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from copy import copy
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 from taipy.config._config import _Config
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
@@ -53,12 +53,12 @@ class TaskConfig(Section):
     def __init__(
         self,
         id: str,
-        function,
+        function: Optional[Callable],
         inputs: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         outputs: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
-        skippable: Optional[bool] = False,
+        skippable: bool = False,
         **properties,
-    ):
+    ) -> None:
         if inputs:
             self._inputs = [inputs] if isinstance(inputs, DataNodeConfig) else copy(inputs)
         else:
@@ -71,8 +71,8 @@ class TaskConfig(Section):
                 skippable = True
         else:
             self._outputs = []
-        self._skippable = skippable
-        self.function = function
+        self._skippable: bool = skippable
+        self.function: Optional[Callable] = function
         super().__init__(id, **properties)
 
     def __copy__(self):
@@ -100,14 +100,14 @@ class TaskConfig(Section):
         return list(self._outputs)
 
     @property
-    def skippable(self):
+    def skippable(self) -> bool:
         return _tpl._replace_templates(self._skippable)
 
     @classmethod
     def default_config(cls):
         return TaskConfig(cls._DEFAULT_KEY, None, [], [], False)
 
-    def _clean(self):
+    def _clean(self) -> None:
         self.function = None
         self._inputs = []
         self._outputs = []
@@ -158,10 +158,10 @@ class TaskConfig(Section):
     @staticmethod
     def _configure(
         id: str,
-        function,
+        function: Optional[Callable],
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
-        skippable: Optional[bool] = False,
+        skippable: bool = False,
         **properties,
     ) -> "TaskConfig":
         """Configure a new task configuration.
@@ -189,10 +189,10 @@ class TaskConfig(Section):
 
     @staticmethod
     def _set_default_configuration(
-        function,
+        function: Optional[Callable],
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
-        skippable: Optional[bool] = False,
+        skippable: bool = False,
         **properties,
     ) -> "TaskConfig":
         """Set the default values for task configurations.

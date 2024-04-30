@@ -11,7 +11,7 @@
 
 import datetime
 from functools import partial
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, List, Literal, Optional, Union
 
 from taipy.config import Config
 
@@ -271,6 +271,24 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         return [scenario for scenario in cls._get_all() if scenario.is_primary]
 
     @classmethod
+    def _sort_scenarios(
+        cls,
+        scenarios: List[Scenario],
+        descending: bool = False,
+        sort_key: Literal["name", "id", "config_id", "creation_date", "tags"] = "name",
+    ) -> List[Scenario]:
+        if sort_key in ["name", "config_id", "creation_date", "tags"]:
+            if sort_key == "tags":
+                scenarios.sort(key=lambda x: (tuple(sorted(x.tags)), x.id), reverse=descending)
+            else:
+                scenarios.sort(key=lambda x: (getattr(x, sort_key), x.id), reverse=descending)
+        elif sort_key == "id":
+            scenarios.sort(key=lambda x: x.id, reverse=descending)
+        else:
+            scenarios.sort(key=lambda x: (x.name, x.id), reverse=descending)
+        return scenarios
+
+    @classmethod
     def _is_promotable_to_primary(cls, scenario: Union[Scenario, ScenarioId]) -> bool:
         if isinstance(scenario, str):
             scenario = cls._get(scenario)
@@ -416,7 +434,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         submissions = _SubmissionManagerFactory._build_manager()._get_all()
         submitted_entity_ids = list(entity_ids.scenario_ids.union(entity_ids.sequence_ids, entity_ids.task_ids))
         for submission in submissions:
-            if submission.entity_id in submitted_entity_ids:
+            if submission.entity_id in submitted_entity_ids or submission.entity_id == scenario.id:
                 entity_ids.submission_ids.add(submission.id)
 
         return entity_ids

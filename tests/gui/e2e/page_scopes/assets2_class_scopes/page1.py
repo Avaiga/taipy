@@ -13,7 +13,7 @@ from taipy.gui import Markdown, Page
 
 
 class Page1(Page):
-    def __init__(self):
+    def __init__(self) -> None:
         self.operand_2 = 0
         super().__init__()
 

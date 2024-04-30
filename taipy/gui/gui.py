@@ -691,6 +691,7 @@ class Gui:
         propagate=True,
         holder: t.Optional[_TaipyBase] = None,
         on_change: t.Optional[str] = None,
+        forward: t.Optional[bool] = True,
     ) -> None:
         if holder:
             var_name = holder.get_name()
@@ -707,17 +708,22 @@ class Gui:
                 derived_vars.update(self._re_evaluate_expr(var_name))
         elif holder:
             derived_vars.update(self._evaluate_holders(hash_expr))
-        # if the variable has been evaluated then skip updating to prevent infinite loop
-        var_modified = self.__is_var_modified_in_context(hash_expr, derived_vars)
-        if not var_modified:
-            self._call_on_change(
-                var_name,
-                value.get() if isinstance(value, _TaipyBase) else value._dict if isinstance(value, _MapDict) else value,
-                on_change,
-            )
-        derived_modified = self.__clean_vars_on_exit()
-        if derived_modified is not None:
-            self.__send_var_list_update(list(derived_modified), var_name)
+        if forward:
+            # if the variable has been evaluated then skip updating to prevent infinite loop
+            var_modified = self.__is_var_modified_in_context(hash_expr, derived_vars)
+            if not var_modified:
+                self._call_on_change(
+                    var_name,
+                    value.get()
+                    if isinstance(value, _TaipyBase)
+                    else value._dict
+                    if isinstance(value, _MapDict)
+                    else value,
+                    on_change,
+                )
+            derived_modified = self.__clean_vars_on_exit()
+            if derived_modified is not None:
+                self.__send_var_list_update(list(derived_modified), var_name)
 
     def _get_real_var_name(self, var_name: str) -> t.Tuple[str, str]:
         if not var_name:
@@ -985,7 +991,9 @@ class Gui:
         for k, v in values.items():
             if isinstance(v, (_TaipyData, _TaipyContentHtml)) and v.get_name() in modified_vars:
                 modified_vars.remove(v.get_name())
-            elif isinstance(v, _DoNotUpdate):
+            elif isinstance(v, _DoNotUpdate) or (
+                isinstance(v, (list, tuple)) and next(isinstance(i, _DoNotUpdate) for i in v)
+            ):
                 modified_vars.remove(k)
         for _var in modified_vars:
             newvalue = values.get(_var)
@@ -1006,16 +1014,10 @@ class Gui:
                     newvalue = self._get_user_content_url(
                         None, {"variable_name": str(_var), Gui._HTML_CONTENT_KEY: str(time.time())}
                     )
-                elif isinstance(newvalue, _TaipyLov):
-                    newvalue = [self.__adapter._run_for_var(newvalue.get_name(), elt) for elt in newvalue.get()]
-                elif isinstance(newvalue, _TaipyLovValue):
-                    if isinstance(newvalue.get(), list):
-                        newvalue = [
-                            self.__adapter._run_for_var(newvalue.get_name(), elt, id_only=True)
-                            for elt in newvalue.get()
-                        ]
-                    else:
-                        newvalue = self.__adapter._run_for_var(newvalue.get_name(), newvalue.get(), id_only=True)
+                elif isinstance(newvalue, (_TaipyLov, _TaipyLovValue)):
+                    newvalue = self.__adapter.run(
+                        newvalue.get_name(), newvalue.get(), id_only=isinstance(newvalue, _TaipyLovValue)
+                    )
                 elif isinstance(newvalue, _TaipyToJson):
                     newvalue = newvalue.get()
                 if isinstance(newvalue, (dict, _MapDict)):
@@ -1050,12 +1052,20 @@ class Gui:
         # TODO: What if value == newvalue?
         self.__send_ws_update_with_dict(ws_dict)
 
+    def __update_state_context(self, payload: dict):
+        # apply state context if any
+        state_context = payload.get("state_context")
+        if isinstance(state_context, dict):
+            for var, val in state_context.items():
+                self._update_var(var, val, True, forward=False)
+
     def __request_data_update(self, var_name: str, payload: t.Any) -> None:
         # Use custom attrgetter function to allow value binding for _MapDict
         newvalue = _getscopeattr_drill(self, var_name)
         if isinstance(newvalue, _TaipyData):
             ret_payload = None
             if isinstance(payload, dict):
+                self.__update_state_context(payload)
                 lib_name = payload.get("library")
                 if isinstance(lib_name, str):
                     libs = self.__extensions.get(lib_name, [])
@@ -1079,6 +1089,7 @@ class Gui:
 
     def __request_var_update(self, payload: t.Any):
         if isinstance(payload, dict) and isinstance(payload.get("names"), list):
+            self.__update_state_context(payload)
             if payload.get("refresh", False):
                 # refresh vars
                 for _var in t.cast(list, payload.get("names")):
@@ -1493,7 +1504,7 @@ class Gui:
     def __is_building(self):
         return hasattr(self, "_building") and self._building
 
-    def _get_rebuild_fn_name(self, name: str):
+    def _get_call_method_name(self, name: str):
         return f"{Gui.__SELF_VAR}.{name}"
 
     def __get_attributes(self, attr_json: str, hash_json: str, args_dict: t.Dict[str, t.Any]):
@@ -1504,6 +1515,9 @@ class Gui:
 
     def _compare_data(self, *data):
         return data[0]
+
+    def _get_adapted_lov(self, lov: list, var_type: str):
+        return self.__adapter._get_adapted_lov(lov, var_type)
 
     def _tbl_cols(
         self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs

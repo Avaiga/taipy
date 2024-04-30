@@ -9,12 +9,13 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import os
 import pathlib
 import shutil
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Set, Union, overload
+from typing import Any, Callable, Dict, List, Literal, Optional, Set, Union, overload
 
-from taipy.config.common.scope import Scope
+from taipy.config import Config, Scope
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._core import Core
@@ -40,6 +41,8 @@ from .data.data_node import DataNode
 from .data.data_node_id import DataNodeId
 from .exceptions.exceptions import (
     DataNodeConfigIsNotGlobal,
+    ExportFolderAlreadyExists,
+    InvalidExportPath,
     ModelNotFound,
     NonExistingVersion,
     VersionIsNotProductionVersion,
@@ -505,7 +508,13 @@ def delete(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, C
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 
-def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> List[Scenario]:
+def get_scenarios(
+    cycle: Optional[Cycle] = None,
+    tag: Optional[str] = None,
+    is_sorted: bool = False,
+    descending: bool = False,
+    sort_key: Literal["name", "id", "config_id", "creation_date", "tags"] = "name",
+) -> List[Scenario]:
     """Retrieve a list of existing scenarios filtered by cycle or tag.
 
     This function allows you to retrieve a list of scenarios based on optional
@@ -516,22 +525,34 @@ def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> L
     Parameters:
          cycle (Optional[Cycle^]): The optional `Cycle^` to filter scenarios by.
          tag (Optional[str]): The optional tag to filter scenarios by.
+         is_sorted (bool): The option to sort scenarios. The default sorting key is name.
+         descending (bool): The option to sort scenarios on the sorting key in descending order.
+         sort_key (Literal["name", "id", "creation_date", "tags"]): The optiononal sort_key to
+             decide upon what key scenarios are sorted. The sorting is in increasing order for
+             dates, in alphabetical order for name and id, in lexographical order for tags.
 
     Returns:
-        The list of scenarios filtered by cycle or tag. If no filtering criteria
-            are provided, this method returns all existing scenarios.
+        The list of scenarios filtered by cycle or tag and optionally sorted by name, id, creation_date or tags.
+            If no filtering criterion is provided, this method returns all existing scenarios.
+            If is_sorted is set to true, the scenarios are sorted by sort_key. The scenarios
+            are sorted by name if an incorrect or no sort_key is provided.
     """
     scenario_manager = _ScenarioManagerFactory._build_manager()
     if not cycle and not tag:
-        return scenario_manager._get_all()
-    if cycle and not tag:
-        return scenario_manager._get_all_by_cycle(cycle)
-    if not cycle and tag:
-        return scenario_manager._get_all_by_tag(tag)
-    if cycle and tag:
+        scenarios = scenario_manager._get_all()
+    elif cycle and not tag:
+        scenarios = scenario_manager._get_all_by_cycle(cycle)
+    elif not cycle and tag:
+        scenarios = scenario_manager._get_all_by_tag(tag)
+    elif cycle and tag:
         cycles_scenarios = scenario_manager._get_all_by_cycle(cycle)
-        return [scenario for scenario in cycles_scenarios if scenario.has_tag(tag)]
-    return []
+        scenarios = [scenario for scenario in cycles_scenarios if scenario.has_tag(tag)]
+    else:
+        scenarios = []
+
+    if is_sorted:
+        scenario_manager._sort_scenarios(scenarios, descending, sort_key)
+    return scenarios
 
 
 def get_primary(cycle: Cycle) -> Optional[Scenario]:
@@ -547,13 +568,32 @@ def get_primary(cycle: Cycle) -> Optional[Scenario]:
     return _ScenarioManagerFactory._build_manager()._get_primary(cycle)
 
 
-def get_primary_scenarios() -> List[Scenario]:
+def get_primary_scenarios(
+    is_sorted: bool = False,
+    descending: bool = False,
+    sort_key: Literal["name", "id", "config_id", "creation_date", "tags"] = "name",
+) -> List[Scenario]:
     """Retrieve a list of all primary scenarios.
 
+    Parameters:
+         is_sorted (bool): The option to sort scenarios. The default sorting key is name.
+         descending (bool): The option to sort scenarios on the sorting key in descending order.
+         sort_key (Literal["name", "id", "creation_date", "tags"]): The optiononal sort_key to
+             decide upon what key scenarios are sorted. The sorting is in increasing order for
+             dates, in alphabetical order for name and id, in lexographical order for tags.
+
     Returns:
-        A list containing all primary scenarios.
+        The list containing all primary scenarios, optionally sorted by name, id, creation_date or tags.
+            The sorting is in increasing order for dates, in alphabetical order for name and
+            id, and in lexicographical order for tags. If sorted is set to true, but if an
+            incorrect or no sort_key is provided, the scenarios are sorted by name.
     """
-    return _ScenarioManagerFactory._build_manager()._get_primary_scenarios()
+    scenario_manager = _ScenarioManagerFactory._build_manager()
+    scenarios = scenario_manager._get_primary_scenarios()
+    if is_sorted:
+        scenario_manager._sort_scenarios(scenarios, descending, sort_key)
+    return scenarios
+
 
 
 def is_promotable(scenario: Union[Scenario, ScenarioId]) -> bool:
@@ -942,6 +982,8 @@ def clean_all_entities(version_number: str) -> bool:
 def export_scenario(
     scenario_id: ScenarioId,
     folder_path: Union[str, pathlib.Path],
+    override: bool = False,
+    include_data: bool = False,
 ):
     """Export all related entities of a scenario to a folder.
 
@@ -951,18 +993,35 @@ def export_scenario(
     Parameters:
         scenario_id (ScenarioId): The ID of the scenario to export.
         folder_path (Union[str, pathlib.Path]): The folder path to export the scenario to.
-    """
+            If the path exists and the override parameter is False, an exception is raised.
+        override (bool): If True, the existing folder will be overridden. Default is False.
+        include_data (bool): If True, the file-based data nodes are exported as well.
+            This includes Pickle, CSV, Excel, Parquet, and JSON data nodes.
+            If the scenario has a data node that is not file-based, a warning will be logged, and the data node
+            will not be exported. The default value is False.
 
+    Raises:
+        ExportFolderAlreadyExist^: If the `folder_path` already exists and the override parameter is False.
+    """
     manager = _ScenarioManagerFactory._build_manager()
     scenario = manager._get(scenario_id)
     entity_ids = manager._get_children_entity_ids(scenario)
     entity_ids.scenario_ids = {scenario_id}
-    entity_ids.cycle_ids = {scenario.cycle.id}
+    if scenario.cycle:
+        entity_ids.cycle_ids = {scenario.cycle.id}
 
-    shutil.rmtree(folder_path, ignore_errors=True)
+    if folder_path == Config.core.taipy_storage_folder:
+        raise InvalidExportPath("The export folder must not be the storage folder.")
+
+    if os.path.exists(folder_path):
+        if override:
+            __logger.warning(f"Override the existing folder '{folder_path}'")
+            shutil.rmtree(folder_path, ignore_errors=True)
+        else:
+            raise ExportFolderAlreadyExists(str(folder_path), scenario_id)
 
     for data_node_id in entity_ids.data_node_ids:
-        _DataManagerFactory._build_manager()._export(data_node_id, folder_path)
+        _DataManagerFactory._build_manager()._export(data_node_id, folder_path, include_data=include_data)
     for task_id in entity_ids.task_ids:
         _TaskManagerFactory._build_manager()._export(task_id, folder_path)
     for sequence_id in entity_ids.sequence_ids:
@@ -973,6 +1032,9 @@ def export_scenario(
         _ScenarioManagerFactory._build_manager()._export(scenario_id, folder_path)
     for job_id in entity_ids.job_ids:
         _JobManagerFactory._build_manager()._export(job_id, folder_path)
+    for submission_id in entity_ids.submission_ids:
+        _SubmissionManagerFactory._build_manager()._export(submission_id, folder_path)
+    _VersionManagerFactory._build_manager()._export(scenario.version, folder_path)
 
 
 def get_parents(

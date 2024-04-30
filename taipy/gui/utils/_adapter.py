@@ -18,11 +18,28 @@ from ..icon import Icon
 from . import _MapDict
 
 
+class _AdaptedLov:
+    def __init__(self, lov: t.Any, var_type: str) -> None:
+        self._lov = lov
+        self._type = var_type
+
+    @staticmethod
+    def get_lov(lov: t.Any):
+        return lov._lov if isinstance(lov, _AdaptedLov) else lov
+
+    @staticmethod
+    def get_type(lov: t.Any):
+        return lov._type if isinstance(lov, _AdaptedLov) else None
+
+
 class _Adapter:
-    def __init__(self):
+    def __init__(self) -> None:
         self.__adapter_for_type: t.Dict[str, t.Callable] = {}
         self.__type_for_variable: t.Dict[str, str] = {}
         self.__warning_by_type: t.Set[str] = set()
+
+    def _get_adapted_lov(self, lov: t.Any, var_type: str) -> _AdaptedLov:
+        return _AdaptedLov(lov, var_type)
 
     def _add_for_type(self, type_name: str, adapter: t.Callable) -> None:
         self.__adapter_for_type[type_name] = adapter
@@ -40,23 +57,44 @@ class _Adapter:
             index += 1
         return type_name
 
-    def _run_for_var(self, var_name: str, value: t.Any, id_only=False) -> t.Any:
-        ret = self._run(self.__get_for_var(var_name, value), value, var_name, id_only)
-        return ret if ret is not None else value
+    def run(self, var_name: str, value: t.Any, id_only=False) -> t.Any:
+        lov = _AdaptedLov.get_lov(value)
+        adapter = self.__get_for_var(var_name, value)
+        if isinstance(lov, (list, tuple)):
+            res = []
+            for elt in lov:
+                v = self._run(adapter, elt, var_name, id_only)
+                res.append(v if v is not None else elt)
+            return res
+        return self._run(adapter, lov, var_name, id_only)
 
     def __get_for_var(self, var_name: str, value: t.Any) -> t.Optional[t.Callable]:
         adapter = None
+        type_name = _AdaptedLov.get_type(value)
+        if type_name:
+            adapter = self.__adapter_for_type.get(type_name)
+        if callable(adapter):
+            return adapter
         type_name = self.__type_for_variable.get(var_name)
         if not isinstance(type_name, str):
             adapter = self.__adapter_for_type.get(var_name)
-            type_name = var_name if callable(adapter) else type(value).__name__
+            lov = _AdaptedLov.get_lov(value)
+            elt = lov[0] if isinstance(lov, (list, tuple)) and len(lov) else None
+            type_name = var_name if callable(adapter) else type(elt).__name__
         if adapter is None:
             adapter = self.__adapter_for_type.get(type_name)
         return adapter if callable(adapter) else None
 
-    def _get_elt_per_ids(self, var_name: str, lov: t.List[t.Any]) -> t.Dict[str, t.Any]:
+    def _get_elt_per_ids(
+        self, var_name: str, lov: t.List[t.Any], adapter: t.Optional[t.Callable] = None
+    ) -> t.Dict[str, t.Any]:
         dict_res = {}
-        adapter = self.__get_for_var(var_name, lov[0] if lov else None)
+        type_name = _AdaptedLov.get_type(lov)
+        lov = _AdaptedLov.get_lov(lov)
+        if not adapter and type_name:
+            adapter = self.__adapter_for_type.get(type_name)
+        if not adapter:
+            adapter = self.__get_for_var(var_name, lov[0] if lov else None)
         for value in lov:
             try:
                 result = adapter(value._dict if isinstance(value, _MapDict) else value) if adapter else value
@@ -64,7 +102,7 @@ class _Adapter:
                     dict_res[self.__get_id(result)] = value
                     children = self.__get_children(result)
                     if children is not None:
-                        dict_res.update(self._get_elt_per_ids(var_name, children))
+                        dict_res.update(self._get_elt_per_ids(var_name, children, adapter))
             except Exception as e:
                 _warn(f"Cannot run adapter for {var_name}", e)
         return dict_res

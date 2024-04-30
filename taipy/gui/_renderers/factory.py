@@ -317,31 +317,28 @@ class _Factory:
             element_name="MenuCtl",
             attributes=attrs,
         )
-        ._get_adapter("lov")  # need to be called before set_lov
-        ._set_lov()
         .set_attributes(
             [
                 ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
-                ("label"),
-                ("width"),
+                ("label",),
+                ("width",),
                 ("width[mobile]",),
                 ("on_action", PropertyType.function),
                 ("inactive_ids", PropertyType.dynamic_list),
                 ("hover_text", PropertyType.dynamic_string),
+                ("lov", PropertyType.lov),
             ]
         )
         ._set_propagate(),
         "navbar": lambda gui, control_type, attrs: _Builder(
             gui=gui, control_type=control_type, element_name="NavBar", attributes=attrs, default_value=None
-        )
-        ._get_adapter("lov", multi_selection=False)  # need to be called before set_lov
-        ._set_lov()
-        .set_attributes(
+        ).set_attributes(
             [
                 ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
+                ("lov", PropertyType.single_lov),
             ]
         ),
         "number": lambda gui, control_type, attrs: _Builder(
@@ -402,8 +399,6 @@ class _Factory:
             gui=gui, control_type=control_type, element_name="Selector", attributes=attrs, default_value=None
         )
         .set_value_and_default(with_default=False, var_type=PropertyType.lov_value)
-        ._get_adapter("lov")  # need to be called before set_lov
-        ._set_lov()
         .set_attributes(
             [
                 ("active", PropertyType.dynamic_boolean, True),
@@ -418,6 +413,7 @@ class _Factory:
                 ("on_change", PropertyType.function),
                 ("label",),
                 ("mode",),
+                ("lov", PropertyType.lov),
             ]
         )
         ._set_propagate(),
@@ -432,14 +428,14 @@ class _Factory:
         .set_attributes(
             [
                 ("active", PropertyType.dynamic_boolean, True),
-                ("height"),
+                ("height",),
                 ("hover_text", PropertyType.dynamic_string),
                 ("id",),
                 ("value_by_id", PropertyType.boolean),
                 ("max", PropertyType.number, 100),
                 ("min", PropertyType.number, 0),
                 ("step", PropertyType.number, 1),
-                ("orientation"),
+                ("orientation",),
                 ("width", PropertyType.string, "300px"),
                 ("on_change", PropertyType.function),
                 ("continuous", PropertyType.boolean, True),
@@ -518,8 +514,6 @@ class _Factory:
             gui=gui, control_type=control_type, element_name="Toggle", attributes=attrs, default_value=None
         )
         .set_value_and_default(with_default=False, var_type=PropertyType.toggle_value)
-        ._get_adapter("lov", multi_selection=False)  # need to be called before set_lov
-        ._set_lov()
         .set_attributes(
             [
                 ("active", PropertyType.dynamic_boolean, True),
@@ -531,6 +525,7 @@ class _Factory:
                 ("allow_unselect", PropertyType.boolean),
                 ("on_change", PropertyType.function),
                 ("mode",),
+                ("lov", PropertyType.single_lov),
             ]
         )
         ._set_kind()
@@ -564,6 +559,8 @@ class _Factory:
 
     # TODO: process \" in property value
     _PROPERTY_RE = re.compile(r"\s+([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)=\"((?:(?:(?<=\\)\")|[^\"])*)\"")
+
+    __COUNTER = 0
 
     @staticmethod
     def set_library(library: "ElementLibrary"):
@@ -624,6 +621,7 @@ class _Factory:
         name = name[len(_Factory.__TAIPY_NAME_SPACE) :] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
         builder = _Factory.__CONTROL_BUILDERS.get(name)
         built = None
+        _Factory.__COUNTER += 1
         with gui._get_autorization():
             if builder is None:
                 lib, element_name, element = _Factory.__get_library_element(name)
@@ -631,7 +629,9 @@ class _Factory:
                     from ..extension.library import Element
 
                     if isinstance(element, Element):
-                        return element._call_builder(element_name, gui, all_properties, lib, is_html)
+                        return element._call_builder(
+                            element_name, gui, all_properties, lib, is_html, counter=_Factory.__COUNTER
+                        )
             else:
                 built = builder(gui, name, all_properties)
             if isinstance(built, _Builder):

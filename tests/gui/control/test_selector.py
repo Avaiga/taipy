@@ -53,9 +53,9 @@ def test_selector_md_3(gui: Gui, test_client, helpers):
         "<Selector",
         'defaultLov="[[&quot;1&quot;, &quot;scenario 1&quot;], [&quot;3&quot;, &quot;scenario 3&quot;], [&quot;2&quot;, &quot;scenario 2&quot;]]"',  # noqa: E501
         'defaultValue="[&quot;1&quot;]"',
-        "lov={_TpL_tpec_TpExPr_scenario_list_TPMDL_0}",
+        "lov={_TpL_tp_TpExPr_gui_get_adapted_lov_scenario_list_Scenario_TPMDL_0_0}",
         "propagate={false}",
-        'updateVars="lov=_TpL_tpec_TpExPr_scenario_list_TPMDL_0"',
+        'updateVars="lov=_TpL_tp_TpExPr_gui_get_adapted_lov_scenario_list_Scenario_TPMDL_0_0"',
         'updateVarName="_TpLv_tpec_TpExPr_selected_obj_TPMDL_0"',
         "value={_TpLv_tpec_TpExPr_selected_obj_TPMDL_0}",
     ]
