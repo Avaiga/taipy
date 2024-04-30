@@ -20,7 +20,6 @@ from ._adapters import (
     _GuiCoreDatanodeAdapter,
     _GuiCoreScenarioAdapter,
     _GuiCoreScenarioDagAdapter,
-    _GuiCoreScenarioNoUpdate,
 )
 from ._context import _GuiCoreContext
 
