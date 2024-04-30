@@ -59,12 +59,13 @@ class _GuiCore(ElementLibrary):
                 "show_pins": ElementProperty(PropertyType.boolean, False),
                 "on_creation": ElementProperty(PropertyType.function),
                 "show_dialog": ElementProperty(PropertyType.boolean, True),
-                "scenarios": ElementProperty(PropertyType.dynamic_list),
+                _GuiCoreContext._SEL_SCENARIOS_PROP: ElementProperty(PropertyType.dynamic_list),
                 "multiple": ElementProperty(PropertyType.boolean, False),
             },
             inner_properties={
                 "inner_scenarios": ElementProperty(
-                    PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_scenarios(<tp:prop:scenarios>)}}"
+                    PropertyType.lov,
+                    f"{{{__CTX_VAR_NAME}.get_scenarios(<tp:prop:{_GuiCoreContext._SEL_SCENARIOS_PROP}>)}}",
                 ),
                 "on_scenario_crud": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.crud_scenario}}"),
                 "configs": ElementProperty(PropertyType.react, f"{{{__CTX_VAR_NAME}.get_scenario_configs()}}"),
@@ -133,7 +134,7 @@ class _GuiCore(ElementLibrary):
                 "height": ElementProperty(PropertyType.string, "50vh"),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
                 "show_pins": ElementProperty(PropertyType.boolean, True),
-                _GuiCoreContext._DATANODE_SEL_SCENARIO_PROP: ElementProperty(_GuiCoreScenarioNoUpdate),
+                _GuiCoreContext._DATANODE_SEL_SCENARIO_PROP: ElementProperty(PropertyType.dynamic_list),
                 "multiple": ElementProperty(PropertyType.boolean, False),
             },
             inner_properties={
