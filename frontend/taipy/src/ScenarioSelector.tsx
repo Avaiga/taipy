@@ -85,6 +85,7 @@ interface ScenarioSelectorProps {
     dynamicClassName?: string;
     showPins?: boolean;
     showDialog?: boolean;
+    multiple?: boolean;
 }
 
 interface ScenarioEditDialogProps {
@@ -413,7 +414,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
 };
 
 const ScenarioSelector = (props: ScenarioSelectorProps) => {
-    const { showAddButton = true, propagate = true, showPins = false, showDialog = true } = props;
+    const { showAddButton = true, propagate = true, showPins = false, showDialog = true, multiple = false } = props;
     const [open, setOpen] = useState(false);
     const [actionEdit, setActionEdit] = useState<boolean>(false);
 
@@ -503,6 +504,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                     lovPropertyName="innerScenarios"
                     editComponent={EditScenario}
                     showPins={showPins}
+                    multiple={multiple}
                 />
                 {showAddButton ? (
                     <Button variant="outlined" onClick={onDialogOpen} fullWidth endIcon={<Add />}>

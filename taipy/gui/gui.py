@@ -74,6 +74,7 @@ from .state import State
 from .types import _WsType
 from .utils import (
     _delscopeattr,
+    _DoNotUpdate,
     _filter_locals,
     _get_broadcast_var_name,
     _get_client_var_name,
@@ -108,11 +109,6 @@ from .utils._evaluator import _Evaluator
 from .utils._variable_directory import _MODULE_ID, _VariableDirectory
 from .utils.chart_config_builder import _build_chart_config
 from .utils.table_col_builder import _enhance_columns
-
-
-class _DoNotUpdate:
-    def __repr__(self):
-        return "Taipy: Do not update"
 
 
 class Gui:
@@ -991,9 +987,7 @@ class Gui:
         for k, v in values.items():
             if isinstance(v, (_TaipyData, _TaipyContentHtml)) and v.get_name() in modified_vars:
                 modified_vars.remove(v.get_name())
-            elif isinstance(v, _DoNotUpdate) or (
-                isinstance(v, (list, tuple)) and next(isinstance(i, _DoNotUpdate) for i in v)
-            ):
+            elif isinstance(v, _DoNotUpdate):
                 modified_vars.remove(k)
         for _var in modified_vars:
             newvalue = values.get(_var)

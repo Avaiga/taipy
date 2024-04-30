@@ -171,7 +171,12 @@ class Element:
                     # handling property replacement in inner properties <tp:prop:...>
                     while m := Element.__RE_PROP_VAR.search(val):
                         var = attributes.get(m.group(1))
-                        hash_value = "None" if var is None else gui._evaluate_expr(var)
+                        hash_value = None if var is None else gui._evaluate_expr(var)
+                        if hash_value:
+                            names = gui._get_real_var_name(hash_value)
+                            hash_value = names[0] if isinstance(names, tuple) else names
+                        else:
+                            hash_value = "None"
                         val = val[: m.start()] + hash_value + val[m.end() :]
                     # handling unique id replacement in inner properties <tp:uniq:...>
                     while m := Element.__RE_UNIQUE_VAR.search(val):

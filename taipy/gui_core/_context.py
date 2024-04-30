@@ -85,11 +85,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
     _DATANODE_VIZ_DATA_CHART_ID_VAR = "gui_core_dv_data_chart_id"
     _DATANODE_VIZ_DATA_NODE_PROP = "data_node"
     _DATANODE_SEL_SCENARIO_PROP = "scenario"
+    _SEL_SCENARIOS_PROP = "scenarios"
 
     def __init__(self, gui: Gui) -> None:
         self.gui = gui
         self.scenario_by_cycle: t.Optional[t.Dict[t.Optional[Cycle], t.List[Scenario]]] = None
-        self.data_nodes_by_owner: t.Optional[t.Dict[t.Optional[str], DataNode]] = None
+        self.data_nodes_by_owner: t.Optional[t.Dict[t.Optional[str], t.List[DataNode]]] = None
         self.scenario_configs: t.Optional[t.List[t.Tuple[str, str]]] = None
         self.jobs_list: t.Optional[t.List[Job]] = None
         self.client_submission: t.Dict[str, SubmissionStatus] = {}
@@ -504,12 +505,17 @@ class _GuiCoreContext(CoreEventConsumerBase):
             for dn in get_data_nodes():
                 self.data_nodes_by_owner[dn.owner_id].append(dn)
 
-    def get_datanodes_tree(self, scenario: t.Optional[Scenario]):
+    def get_datanodes_tree(self, scenarios: t.Optional[t.Union[Scenario, t.List[Scenario]]]):
         with self.lock:
             self.__do_datanodes_tree()
-        return (
-            self.data_nodes_by_owner.get(scenario.id if scenario else None, []) if self.data_nodes_by_owner else []
-        ) + (self.get_scenarios(None) if not scenario else [])
+        if scenarios is None:
+            return (self.data_nodes_by_owner.get(None) if self.data_nodes_by_owner else []) + self.get_scenarios(None)
+        if not self.data_nodes_by_owner:
+            return []
+        if isinstance(scenarios, (list, tuple)) and len(scenarios) > 1:
+            return scenarios
+        owners = scenarios if isinstance(scenarios, (list, tuple)) else [scenarios]
+        return [d for owner in owners for d in t.cast(list, self.data_nodes_by_owner.get(owner.id))]
 
     def data_node_adapter(self, data):
         try:
