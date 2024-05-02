@@ -261,7 +261,7 @@ class NonExistingScenarioConfig(Exception):
         self.message = f"Scenario config: {scenario_config_id} does not exist."
 
 
-class InvalidSscenario(Exception):
+class InvalidScenario(Exception):
     """Raised if a Scenario is not a Directed Acyclic Graph."""
 
     def __init__(self, scenario_id: str):
@@ -339,10 +339,6 @@ class ModeNotAvailable(Exception):
     """Raised if the mode in JobConfig is not supported."""
 
 
-class InvalidExportPath(Exception):
-    """Raised if the export path is not valid."""
-
-
 class NonExistingVersion(Exception):
     """Raised if request a Version that is not known by the Version Manager."""
 
@@ -373,14 +369,45 @@ class FileCannotBeRead(Exception):
     """Raised when a file cannot be read."""
 
 
-class ExportFolderAlreadyExists(Exception):
+class ExportPathAlreadyExists(Exception):
     """Raised when the export folder already exists."""
 
-    def __init__(self, folder_path: str, scenario_id: str):
+    def __init__(self, export_path: str, scenario_id: str):
         self.message = (
-            f"Folder '{folder_path}' already exists and can not be used to export scenario '{scenario_id}'."
+            f"The path '{export_path}' already exists and can not be used to export scenario '{scenario_id}'."
             " Please use the 'override' parameter to override it."
         )
+
+
+class EntitiesToBeImportAlredyExist(Exception):
+    """Raised when entities in the scenario to be imported have already exists"""
+
+    def __init__(self, import_path):
+        self.message = f"The import archive file {import_path} contains entities that have already existed."
+
+
+class DataToBeImportAlredyExist(Exception):
+    """Raised when data files in the scenario to be imported have already exists"""
+
+    def __init__(self, import_path):
+        self.message = (
+            f"The import archive file {import_path} contains data files that have already existed."
+            " Please use the 'override' parameter to override those."
+        )
+
+
+class ImportArchiveDoesntContainAnyScenario(Exception):
+    """Raised when the import archive file doesn't contain any scenario"""
+
+    def __init__(self, import_path):
+        self.message = f"The import archive file {import_path} doesn't contain any scenario."
+
+
+class ImportScenarioDoesntHaveAVersion(Exception):
+    """Raised when the import scenario doesn't have a version"""
+
+    def __init__(self, import_path):
+        self.message = f"The import scenario in the import archive file {import_path} doesn't have a version."
 
 
 class SQLQueryCannotBeExecuted(Exception):
