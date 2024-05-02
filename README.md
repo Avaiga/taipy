@@ -1,8 +1,11 @@
+[![Taipy Designer](https://github.com/Avaiga/taipy/assets/100117126/50cbc1e8-318e-4b40-ae7e-6eebfb933c75)
+](https://taipy.io/enterprise)
+
 <div align="center">
   <a href="https://taipy.io?utm_source=github" target="_blank">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Avaiga/taipy/assets/100117126/f59f70e9-1905-4abc-8760-8631b57c14c2">
-    <img alt="Taipy" src="readme_img/readme_logo.png" width="200" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Avaiga/taipy/assets/100117126/509bf101-54c2-4321-adaf-a2af63af9682">
+    <img alt="Taipy" src="https://github.com/Avaiga/taipy/assets/100117126/4df8a733-d8d0-4893-acf0-d24ef9e8b58a" width="400" />
   </picture>
   </a>
 </div>
