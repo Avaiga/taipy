@@ -74,6 +74,7 @@ interface JobSelectorProps {
     value?: string;
     defaultValue?: string;
     propagate?: boolean;
+    updateJbVars?: string;
 }
 
 // job id, job name, empty list, entity id, entity name, submit id, creation date, status
@@ -406,7 +407,7 @@ const JobSelectedTableRow = ({
     showSubmissionId,
     showDate,
     showCancel,
-    showDelete,
+    showDelete
 }: JobSelectedTableRowProps) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [id, jobName, _, entityId, entityName, submitId, creationDate, status] = row;
@@ -481,6 +482,7 @@ const JobSelector = (props: JobSelectorProps) => {
         showCancel = true,
         showDelete = true,
         propagate = true,
+        updateJbVars = ""
     } = props;
     const [checked, setChecked] = useState<string[]>([]);
     const [selected, setSelected] = useState<string[]>([]);
@@ -611,13 +613,14 @@ const JobSelector = (props: JobSelectorProps) => {
                     createSendActionNameAction(props.id, module, props.onJobAction, {
                         id: multiple === false ? [id] : JSON.parse(id),
                         action: "cancel",
+                        error_id: getUpdateVar(updateJbVars, "error_id")
                     })
                 );
             } catch (e) {
                 console.warn("Error parsing ids for cancel.", e);
             }
         },
-        [dispatch, module, props.id, props.onJobAction]
+        [dispatch, module, props.id, props.onJobAction, updateJbVars]
     );
 
     const handleDeleteJobs = useCallback(
@@ -629,13 +632,14 @@ const JobSelector = (props: JobSelectorProps) => {
                     createSendActionNameAction(props.id, module, props.onJobAction, {
                         id: multiple === false ? [id] : JSON.parse(id),
                         action: "delete",
+                        error_id: getUpdateVar(updateJbVars, "error_id")
                     })
                 );
             } catch (e) {
                 console.warn("Error parsing ids for delete.", e);
             }
         },
-        [dispatch, module, props.id, props.onJobAction]
+        [dispatch, module, props.id, props.onJobAction, updateJbVars]
     );
 
     const allowCancelJobs = useMemo(

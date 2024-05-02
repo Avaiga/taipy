@@ -20,7 +20,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { DeleteOutline, CheckCircle, Cancel } from "@mui/icons-material";
 
-import { createSendActionNameAction, useDispatch, useModule } from "taipy-gui";
+import { createSendActionNameAction, getUpdateVar, useDispatch, useModule } from "taipy-gui";
 
 import { DeleteIconSx, FieldNoMaxWidth, IconPaddingSx, disableColor, hoverSx } from "./utils";
 
@@ -34,6 +34,7 @@ type PropertiesEditPayload = {
     id: string;
     properties?: Property[];
     deleted_properties?: Array<Partial<Property>>;
+    error_id?: string;
 };
 
 export type DatanodeProperties = Array<[string, string]>;
@@ -50,10 +51,23 @@ interface PropertiesEditorProps {
     isDefined: boolean;
     onEdit?: string;
     editable: boolean;
+    updatePropVars?: string;
 }
 
 const PropertiesEditor = (props: PropertiesEditorProps) => {
-    const { id, entityId, isDefined, show, active, onFocus, focusName, setFocusName, entProperties, editable } = props;
+    const {
+        id,
+        entityId,
+        isDefined,
+        show,
+        active,
+        onFocus,
+        focusName,
+        setFocusName,
+        entProperties,
+        editable,
+        updatePropVars = "",
+    } = props;
 
     const dispatch = useDispatch();
     const module = useModule();
@@ -85,7 +99,11 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                 const property = propId ? properties.find((p) => p.id === propId) : newProp;
                 if (property) {
                     const oldId = property.id;
-                    const payload: PropertiesEditPayload = { id: entityId, properties: [property] };
+                    const payload: PropertiesEditPayload = {
+                        id: entityId,
+                        properties: [property],
+                        error_id: getUpdateVar(updatePropVars, "error_id"),
+                    };
                     if (oldId && oldId != property.key) {
                         payload.deleted_properties = [{ key: oldId }];
                     }
@@ -95,7 +113,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                 setFocusName("");
             }
         },
-        [isDefined, props.onEdit, entityId, properties, newProp, id, dispatch, module, setFocusName]
+        [isDefined, props.onEdit, entityId, properties, newProp, id, dispatch, module, setFocusName, updatePropVars]
     );
     const cancelProperty = useCallback(
         (e?: MouseEvent<HTMLElement>, dataset?: DOMStringMap) => {

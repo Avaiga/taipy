@@ -12,7 +12,7 @@
 import typing as t
 from datetime import datetime
 
-from taipy.gui import Gui, State
+from taipy.gui import Gui
 from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
 
 from ..version import _get_version
@@ -20,6 +20,7 @@ from ._adapters import (
     _GuiCoreDatanodeAdapter,
     _GuiCoreScenarioAdapter,
     _GuiCoreScenarioDagAdapter,
+    _GuiCoreScenarioProperties,
 )
 from ._context import _GuiCoreContext
 
@@ -30,18 +31,21 @@ class _GuiCore(ElementLibrary):
     __SCENARIO_ADAPTER = "tgc_scenario"
     __DATANODE_ADAPTER = "tgc_datanode"
     __JOB_ADAPTER = "tgc_job"
-    __INNER_VARS = (
-        _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR,
-        _GuiCoreContext._SCENARIO_SELECTOR_ID_VAR,
-        _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR,
-        _GuiCoreContext._JOB_SELECTOR_ERROR_VAR,
-        _GuiCoreContext._DATANODE_VIZ_ERROR_VAR,
-        _GuiCoreContext._DATANODE_VIZ_OWNER_ID_VAR,
-        _GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR,
-        _GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR,
-        _GuiCoreContext._DATANODE_VIZ_DATA_CHART_ID_VAR,
-        _GuiCoreContext._DATANODE_VIZ_PROPERTIES_ID_VAR,
-    )
+
+    __SCENARIO_SELECTOR_ERROR_VAR = "__tpgc_sc_error"
+    __SCENARIO_SELECTOR_ID_VAR = "__tpgc_sc_id"
+    __SCENARIO_SELECTOR_FILTER_VAR = "__tpgc_sc_filter"
+    __SCENARIO_VIZ_ERROR_VAR = "__tpgc_sv_error"
+    __JOB_SELECTOR_ERROR_VAR = "__tpgc_js_error"
+    __DATANODE_VIZ_ERROR_VAR = "__tpgc_dv_error"
+    __DATANODE_VIZ_OWNER_ID_VAR = "__tpgc_dv_owner_id"
+    __DATANODE_VIZ_HISTORY_ID_VAR = "__tpgc_dv_history_id"
+    __DATANODE_VIZ_PROPERTIES_ID_VAR = "__tpgc_dv_properties_id"
+    __DATANODE_VIZ_DATA_ID_VAR = "__tpgc_dv_data_id"
+    __DATANODE_VIZ_DATA_CHART_ID_VAR = "__tpgc_dv_data_chart_id"
+    __DATANODE_VIZ_DATA_NODE_PROP = "data_node"
+    __DATANODE_SEL_SCENARIO_PROP = "scenario"
+    __SEL_SCENARIOS_PROP = "scenarios"
 
     __elts = {
         "scenario_selector": Element(
@@ -58,24 +62,34 @@ class _GuiCore(ElementLibrary):
                 "show_pins": ElementProperty(PropertyType.boolean, False),
                 "on_creation": ElementProperty(PropertyType.function),
                 "show_dialog": ElementProperty(PropertyType.boolean, True),
-                _GuiCoreContext._SEL_SCENARIOS_PROP: ElementProperty(PropertyType.dynamic_list),
+                __SEL_SCENARIOS_PROP: ElementProperty(PropertyType.dynamic_list),
                 "multiple": ElementProperty(PropertyType.boolean, False),
+                "filter_by": ElementProperty(_GuiCoreScenarioProperties),
             },
             inner_properties={
                 "inner_scenarios": ElementProperty(
                     PropertyType.lov,
-                    f"{{{__CTX_VAR_NAME}.get_scenarios(<tp:prop:{_GuiCoreContext._SEL_SCENARIOS_PROP}>)}}",
+                    f"{{{__CTX_VAR_NAME}.get_scenarios(<tp:prop:{__SEL_SCENARIOS_PROP}>, "
+                    + f"{__SCENARIO_SELECTOR_FILTER_VAR}<tp:uniq:sc>)}}",
                 ),
                 "on_scenario_crud": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.crud_scenario}}"),
                 "configs": ElementProperty(PropertyType.react, f"{{{__CTX_VAR_NAME}.get_scenario_configs()}}"),
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
-                "error": ElementProperty(PropertyType.react, f"{{{_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR}}}"),
+                "error": ElementProperty(
+                    PropertyType.react, f"{{{__SCENARIO_SELECTOR_ERROR_VAR}<tp:uniq:sc>}}"
+                ),
                 "type": ElementProperty(PropertyType.inner, __SCENARIO_ADAPTER),
                 "scenario_edit": ElementProperty(
                     _GuiCoreScenarioAdapter,
-                    f"{{{__CTX_VAR_NAME}.get_scenario_by_id({_GuiCoreContext._SCENARIO_SELECTOR_ID_VAR})}}",
+                    f"{{{__CTX_VAR_NAME}.get_scenario_by_id({__SCENARIO_SELECTOR_ID_VAR}<tp:uniq:sc>)}}",
                 ),
                 "on_scenario_select": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.select_scenario}}"),
+                "update_sc_vars": ElementProperty(
+                    PropertyType.string,
+                    f"filter={__SCENARIO_SELECTOR_FILTER_VAR}<tp:uniq:sc>;"
+                    + f"sc_id={__SCENARIO_SELECTOR_ID_VAR}<tp:uniq:sc>;"
+                    + f"error_id={__SCENARIO_SELECTOR_ERROR_VAR}<tp:uniq:sc>",
+                ),
             },
         ),
         "scenario": Element(
@@ -102,7 +116,13 @@ class _GuiCore(ElementLibrary):
                 "on_submit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.submit_entity}}"),
                 "on_delete": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.crud_scenario}}"),
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
-                "error": ElementProperty(PropertyType.react, f"{{{_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR}}}"),
+                "error": ElementProperty(
+                    PropertyType.react, f"{{{__SCENARIO_VIZ_ERROR_VAR}<tp:uniq:sv>}}"
+                ),
+                "update_sc_vars": ElementProperty(
+                    PropertyType.string,
+                    f"error_id={__SCENARIO_SELECTOR_ERROR_VAR}<tp:uniq:sv>",
+                ),
             },
         ),
         "scenario_dag": Element(
@@ -133,23 +153,23 @@ class _GuiCore(ElementLibrary):
                 "height": ElementProperty(PropertyType.string, "50vh"),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
                 "show_pins": ElementProperty(PropertyType.boolean, True),
-                _GuiCoreContext._DATANODE_SEL_SCENARIO_PROP: ElementProperty(PropertyType.dynamic_list),
+                __DATANODE_SEL_SCENARIO_PROP: ElementProperty(PropertyType.dynamic_list),
                 "multiple": ElementProperty(PropertyType.boolean, False),
             },
             inner_properties={
                 "datanodes": ElementProperty(
                     PropertyType.lov,
-                    f"{{{__CTX_VAR_NAME}.get_datanodes_tree(<tp:prop:{_GuiCoreContext._DATANODE_SEL_SCENARIO_PROP}>)}}",
+                    f"{{{__CTX_VAR_NAME}.get_datanodes_tree(<tp:prop:{__DATANODE_SEL_SCENARIO_PROP}>)}}",
                 ),
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
                 "type": ElementProperty(PropertyType.inner, __DATANODE_ADAPTER),
             },
         ),
         "data_node": Element(
-            _GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP,
+            __DATANODE_VIZ_DATA_NODE_PROP,
             {
                 "id": ElementProperty(PropertyType.string),
-                _GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP: ElementProperty(_GuiCoreDatanodeAdapter),
+                __DATANODE_VIZ_DATA_NODE_PROP: ElementProperty(_GuiCoreDatanodeAdapter),
                 "active": ElementProperty(PropertyType.dynamic_boolean, True),
                 "expandable": ElementProperty(PropertyType.boolean, True),
                 "expanded": ElementProperty(PropertyType.boolean, True),
@@ -168,43 +188,39 @@ class _GuiCore(ElementLibrary):
             inner_properties={
                 "on_edit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.edit_data_node}}"),
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
-                "error": ElementProperty(PropertyType.react, f"{{{_GuiCoreContext._DATANODE_VIZ_ERROR_VAR}}}"),
+                "error": ElementProperty(
+                    PropertyType.react, f"{{{__DATANODE_VIZ_ERROR_VAR}<tp:uniq:dn>}}"
+                ),
                 "scenarios": ElementProperty(
                     PropertyType.lov,
-                    f"{{{__CTX_VAR_NAME}.get_scenarios_for_owner({_GuiCoreContext._DATANODE_VIZ_OWNER_ID_VAR},"
-                    + "<tp:uniq:dn>)}",
+                    f"{{{__CTX_VAR_NAME}.get_scenarios_for_owner({__DATANODE_VIZ_OWNER_ID_VAR}<tp:uniq:dn>)}}",
                 ),
                 "type": ElementProperty(PropertyType.inner, __SCENARIO_ADAPTER),
                 "dn_properties": ElementProperty(
                     PropertyType.react,
                     f"{{{__CTX_VAR_NAME}.get_data_node_properties("
-                    + f"{_GuiCoreContext._DATANODE_VIZ_PROPERTIES_ID_VAR},"
-                    + "<tp:uniq:dn>)}",
+                    + f"{__DATANODE_VIZ_PROPERTIES_ID_VAR}<tp:uniq:dn>)}}",
                 ),
                 "history": ElementProperty(
                     PropertyType.react,
                     f"{{{__CTX_VAR_NAME}.get_data_node_history("
-                    + f"{_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR},"
-                    + "<tp:uniq:dn>)}",
+                    + f"{__DATANODE_VIZ_HISTORY_ID_VAR}<tp:uniq:dn>)}}",
                 ),
                 "tabular_data": ElementProperty(
                     PropertyType.data,
                     f"{{{__CTX_VAR_NAME}.get_data_node_tabular_data("
-                    + f"{_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR},"
-                    + "<tp:uniq:dn>)}",
+                    + f"{__DATANODE_VIZ_DATA_ID_VAR}<tp:uniq:dn>)}}",
                 ),
                 "tabular_columns": ElementProperty(
                     PropertyType.dynamic_string,
                     f"{{{__CTX_VAR_NAME}.get_data_node_tabular_columns("
-                    + f"{_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR},"
-                    + "<tp:uniq:dn>)}",
+                    + f"{__DATANODE_VIZ_DATA_ID_VAR}<tp:uniq:dn>)}}",
                     with_update=True,
                 ),
                 "chart_config": ElementProperty(
                     PropertyType.dynamic_string,
                     f"{{{__CTX_VAR_NAME}.get_data_node_chart_config("
-                    + f"{_GuiCoreContext._DATANODE_VIZ_DATA_CHART_ID_VAR},"
-                    + "<tp:uniq:dn>)}",
+                    + f"{__DATANODE_VIZ_DATA_CHART_ID_VAR}<tp:uniq:dn>)}}",
                     with_update=True,
                 ),
                 "on_data_value": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.update_data}}"),
@@ -214,11 +230,12 @@ class _GuiCore(ElementLibrary):
                 "on_lock": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.lock_datanode_for_edit}}"),
                 "update_dn_vars": ElementProperty(
                     PropertyType.string,
-                    f"data_id={_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR};"
-                    + f"history_id={_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR};"
-                    + f"owner_id={_GuiCoreContext._DATANODE_VIZ_OWNER_ID_VAR};"
-                    + f"chart_id={_GuiCoreContext._DATANODE_VIZ_DATA_CHART_ID_VAR};"
-                    + f"properties_id={_GuiCoreContext._DATANODE_VIZ_PROPERTIES_ID_VAR}",
+                    f"data_id={__DATANODE_VIZ_DATA_ID_VAR}<tp:uniq:dn>;"
+                    + f"history_id={__DATANODE_VIZ_HISTORY_ID_VAR}<tp:uniq:dn>;"
+                    + f"owner_id={__DATANODE_VIZ_OWNER_ID_VAR}<tp:uniq:dn>;"
+                    + f"chart_id={__DATANODE_VIZ_DATA_CHART_ID_VAR}<tp:uniq:dn>;"
+                    + f"properties_id={__DATANODE_VIZ_PROPERTIES_ID_VAR}<tp:uniq:dn>;"
+                    + f"error_id={__DATANODE_VIZ_ERROR_VAR}<tp:uniq:dn>",
                 ),
             },
         ),
@@ -243,7 +260,12 @@ class _GuiCore(ElementLibrary):
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
                 "type": ElementProperty(PropertyType.inner, __JOB_ADAPTER),
                 "on_job_action": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.act_on_jobs}}"),
-                "error": ElementProperty(PropertyType.dynamic_string, f"{{{_GuiCoreContext._JOB_SELECTOR_ERROR_VAR}}}"),
+                "error": ElementProperty(
+                    PropertyType.dynamic_string, f"{{{__JOB_SELECTOR_ERROR_VAR}<tp:uniquejb>}}"
+                ),
+                "update_jb_vars": ElementProperty(
+                    PropertyType.string, f"error_id={__JOB_SELECTOR_ERROR_VAR}<tp:uniq:jb>"
+                ),
             },
         ),
     }
@@ -258,16 +280,11 @@ class _GuiCore(ElementLibrary):
         return ["lib/taipy-gui-core.js"]
 
     def on_init(self, gui: Gui) -> t.Optional[t.Tuple[str, t.Any]]:
-        gui._get_default_locals_bind().update({v: "" for v in _GuiCore.__INNER_VARS})
         ctx = _GuiCoreContext(gui)
         gui._add_adapter_for_type(_GuiCore.__SCENARIO_ADAPTER, ctx.scenario_adapter)
         gui._add_adapter_for_type(_GuiCore.__DATANODE_ADAPTER, ctx.data_node_adapter)
         gui._add_adapter_for_type(_GuiCore.__JOB_ADAPTER, ctx.job_adapter)
         return _GuiCore.__CTX_VAR_NAME, ctx
-
-    def on_user_init(self, state: State):
-        for var in _GuiCore.__INNER_VARS:
-            state._add_attribute(var, "")
 
     def get_version(self) -> str:
         if not hasattr(self, "version"):

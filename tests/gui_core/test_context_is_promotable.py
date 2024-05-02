@@ -59,11 +59,12 @@ class TestGuiCoreContext_is_promotable:
                 {
                     "args": [
                         {"name": "name", "id": a_scenario.id, "primary": True},
-                    ]
+                    ],
+                    "error_id": "error_var",
                 },
             )
             assign.assert_called_once()
-            assert assign.call_args.args[0] == "gui_core_sv_error"
+            assert assign.call_args.args[0] == "error_var"
             assert str(assign.call_args.args[1]).endswith("to primary because it doesn't belong to a cycle.")
             assign.reset_mock()
 
@@ -74,9 +75,10 @@ class TestGuiCoreContext_is_promotable:
                     {
                         "args": [
                             {"name": "name", "id": a_scenario.id, "primary": True},
-                        ]
+                        ],
+                        "error_id": "error_var",
                     },
                 )
                 assign.assert_called_once()
-                assert assign.call_args.args[0] == "gui_core_sv_error"
+                assert assign.call_args.args[0] == "error_var"
                 assert str(assign.call_args.args[1]).endswith("is not promotable.")

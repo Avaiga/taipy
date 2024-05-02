@@ -15,6 +15,7 @@ import ast
 import builtins
 import re
 import typing as t
+import warnings
 
 from .._warnings import _warn
 
@@ -84,7 +85,9 @@ class _Evaluator:
     def _fetch_expression_list(self, expr: str) -> t.List:
         return [v[0] for v in _Evaluator.__EXPR_RE.findall(expr)]
 
-    def _analyze_expression(self, gui: Gui, expr: str) -> t.Tuple[t.Dict[str, t.Any], t.Dict[str, str]]:
+    def _analyze_expression(
+        self, gui: Gui, expr: str, lazy_declare: t.Optional[bool] = False
+    ) -> t.Tuple[t.Dict[str, t.Any], t.Dict[str, str]]:
         var_val: t.Dict[str, t.Any] = {}
         var_map: t.Dict[str, str] = {}
         non_vars = list(self.__global_ctx.keys())
@@ -105,7 +108,15 @@ class _Evaluator:
                     var_name = node.id.split(sep=".")[0]
                     if var_name not in args and var_name not in targets and var_name not in non_vars:
                         try:
-                            encoded_var_name = gui._bind_var(var_name)
+                            if lazy_declare and var_name.startswith("__"):
+                                with warnings.catch_warnings(record=True) as warns:
+                                    warnings.resetwarnings()
+                                    encoded_var_name = gui._bind_var(var_name)
+                                    if len(warns):
+                                        gui._get_locals_bind()[var_name] = None
+                                        gui._bind_var_val(var_name, None)
+                            else:
+                                encoded_var_name = gui._bind_var(var_name)
                             var_val[var_name] = _getscopeattr_drill(gui, encoded_var_name)
                             var_map[var_name] = encoded_var_name
                         except AttributeError as e:
@@ -200,10 +211,10 @@ class _Evaluator:
             _warn(f"Cannot evaluate expression {holder.__name__}({expr_hash},'{expr_hash}') for {expr}", e)
         return None
 
-    def evaluate_expr(self, gui: Gui, expr: str) -> t.Any:
+    def evaluate_expr(self, gui: Gui, expr: str, lazy_declare: t.Optional[bool] = False) -> t.Any:
         if not self._is_expression(expr):
             return expr
-        var_val, var_map = self._analyze_expression(gui, expr)
+        var_val, var_map = self._analyze_expression(gui, expr, lazy_declare)
         expr_hash = None
         is_edge_case = False
 
