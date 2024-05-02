@@ -188,6 +188,30 @@ def test_get_all_on_multiple_versions_environment():
     )
 
 
+def test_is_submittable():
+    dn = InMemoryDataNode("dn", Scope.SCENARIO, properties={"default_data": 10})
+    task = Task("task", {}, print, [dn])
+    scenario = Scenario("scenario", {task}, {}, set())
+    _ScenarioManager._set(scenario)
+
+    scenario.add_sequences({"sequence": [task]})
+    sequence = scenario.sequences["sequence"]
+
+    assert len(_SequenceManager._get_all()) == 1
+    assert _SequenceManager._is_submittable(sequence)
+    assert _SequenceManager._is_submittable(sequence.id)
+    assert not _SequenceManager._is_submittable("Sequence_temp")
+    assert not _SequenceManager._is_submittable("SEQUENCE_temp_SCENARIO_scenario")
+
+    scenario.dn.edit_in_progress = True
+    assert not _SequenceManager._is_submittable(sequence)
+    assert not _SequenceManager._is_submittable(sequence.id)
+
+    scenario.dn.edit_in_progress = False
+    assert _SequenceManager._is_submittable(sequence)
+    assert _SequenceManager._is_submittable(sequence.id)
+
+
 def test_submit():
     data_node_1 = InMemoryDataNode("foo", Scope.SCENARIO, "s1")
     data_node_2 = InMemoryDataNode("bar", Scope.SCENARIO, "s2")
