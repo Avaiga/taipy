@@ -181,10 +181,28 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         else:
             folder = folder_path
 
-        data_export_dir = folder / Config.core.storage_folder
+        data_export_dir = folder / Config.core.storage_folder / os.path.dirname(data_node.path)
         if not data_export_dir.exists():
             data_export_dir.mkdir(parents=True)
 
         data_export_path = data_export_dir / os.path.basename(data_node.path)
         if os.path.exists(data_node.path):
-            shutil.copy(data_node.path, data_export_path)
+            shutil.copy2(data_node.path, data_export_path)
+
+    @classmethod
+    def _import(cls, entity_file: pathlib.Path, version: str, **kwargs) -> DataNode:
+        imported_data_node = cls._repository._import(entity_file)
+        imported_data_node._version = version
+        cls._set(imported_data_node)
+
+        if not (isinstance(imported_data_node, _FileDataNodeMixin) and isinstance(imported_data_node, DataNode)):
+            return imported_data_node
+
+        data_folder: pathlib.Path = pathlib.Path(str(kwargs.get("data_folder")))
+        if not data_folder.exists():
+            return imported_data_node
+
+        if (data_folder / imported_data_node.path).exists():
+            shutil.copy2(data_folder / imported_data_node.path, imported_data_node.path)
+
+        return imported_data_node

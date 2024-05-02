@@ -19,11 +19,10 @@ from ._task_sql_repository import _TaskSQLRepository
 
 
 class _TaskManagerFactory(_ManagerFactory):
-
     __REPOSITORY_MAP = {"default": _TaskFSRepository, "sql": _TaskSQLRepository}
 
     @classmethod
-    def _build_manager(cls) -> Type[_TaskManager]:  # type: ignore
+    def _build_manager(cls) -> Type[_TaskManager]:
         if cls._using_enterprise():
             task_manager = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + ".task._task_manager", "_TaskManager"
