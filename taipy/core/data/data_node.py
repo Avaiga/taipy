@@ -298,7 +298,7 @@ class DataNode(_Entity, _Labeled):
         return {key: value for key, value in self.properties.items() if key not in self._TAIPY_PROPERTIES}
 
     def __eq__(self, other):
-        return self.id == other.id
+        return isinstance(other, DataNode) and self.id == other.id
 
     def __ne__(self, other):
         return not self == other

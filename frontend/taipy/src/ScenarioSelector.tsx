@@ -67,7 +67,7 @@ interface ScenarioSelectorProps {
     showPrimaryFlag?: boolean;
     updateVarName?: string;
     updateVars: string;
-    scenarios?: Cycles | Scenarios;
+    innerScenarios?: Cycles | Scenarios;
     onScenarioCrud: string;
     onChange?: string;
     onCreation?: string;
@@ -85,6 +85,7 @@ interface ScenarioSelectorProps {
     dynamicClassName?: string;
     showPins?: boolean;
     showDialog?: boolean;
+    multiple?: boolean;
 }
 
 interface ScenarioEditDialogProps {
@@ -278,7 +279,9 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                                         <DatePicker
                                             label="Date"
                                             value={new Date(form.values.date)}
-                                            onChange={(date?:Date|null) => form.setFieldValue("date", date?.toISOString())}
+                                            onChange={(date?: Date | null) =>
+                                                form.setFieldValue("date", date?.toISOString())
+                                            }
                                             disabled={actionEdit}
                                         />
                                     </LocalizationProvider>
@@ -411,7 +414,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
 };
 
 const ScenarioSelector = (props: ScenarioSelectorProps) => {
-    const { showAddButton = true, propagate = true, showPins = false, showDialog = true } = props;
+    const { showAddButton = true, propagate = true, showPins = false, showDialog = true, multiple = false } = props;
     const [open, setOpen] = useState(false);
     const [actionEdit, setActionEdit] = useState<boolean>(false);
 
@@ -422,10 +425,19 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
     const onSubmit = useCallback(
         (...values: unknown[]) => {
-            dispatch(createSendActionNameAction(props.id, module, props.onScenarioCrud, props.onCreation, props.updateVarName, ...values));
+            dispatch(
+                createSendActionNameAction(
+                    props.id,
+                    module,
+                    props.onScenarioCrud,
+                    props.onCreation,
+                    props.updateVarName,
+                    ...values
+                )
+            );
             if (values.length > 1 && values[1]) {
                 // delete requested => unselect current node
-                const lovVar = getUpdateVar(props.updateVars, "scenarios");
+                const lovVar = getUpdateVar(props.updateVars, "innerScenarios");
                 dispatch(
                     createSendUpdateAction(props.updateVarName, undefined, module, props.onChange, propagate, lovVar)
                 );
@@ -487,11 +499,12 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             <Box sx={MainTreeBoxSx} id={props.id} className={className}>
                 <CoreSelector
                     {...props}
-                    entities={props.scenarios}
+                    entities={props.innerScenarios}
                     leafType={NodeType.SCENARIO}
-                    lovPropertyName="scenarios"
+                    lovPropertyName="innerScenarios"
                     editComponent={EditScenario}
                     showPins={showPins}
+                    multiple={multiple}
                 />
                 {showAddButton ? (
                     <Button variant="outlined" onClick={onDialogOpen} fullWidth endIcon={<Add />}>

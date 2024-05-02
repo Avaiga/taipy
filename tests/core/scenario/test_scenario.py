@@ -32,6 +32,21 @@ from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task, TaskId
 
 
+def test_scenario_equals(scenario):
+    scenario_manager = _ScenarioManagerFactory()._build_manager()
+
+    scenario_id = scenario.id
+    scenario_manager._set(scenario)
+
+    # To test if instance is same type
+    task = Task("task", {}, print, [], [], scenario_id)
+
+    scenario_2 = scenario_manager._get(scenario_id)
+    assert scenario == scenario_2
+    assert scenario != scenario_id
+    assert scenario != task
+
+
 def test_create_primary_scenario(cycle):
     scenario = Scenario("foo", set(), {"key": "value"}, is_primary=True, cycle=cycle)
     assert scenario.id is not None

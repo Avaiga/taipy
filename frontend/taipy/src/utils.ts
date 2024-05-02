@@ -13,7 +13,7 @@
 import { Theme, alpha } from "@mui/material";
 import { PopoverOrigin } from "@mui/material/Popover";
 
-import { useDynamicProperty } from "taipy-gui";
+import { getUpdateVar, useDynamicProperty } from "taipy-gui";
 
 export type ScenarioFull = [
     string,     // id
@@ -218,3 +218,5 @@ export const DeleteIconSx = { height: 50, width: 50, p: 0 };
 
 
 export const EmptyArray = [];
+
+export const getUpdateVarNames = (updateVars: string, ...vars: string[]) => vars.map((v) => getUpdateVar(updateVars, v) || "").filter(v => v);

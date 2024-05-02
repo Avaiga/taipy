@@ -164,7 +164,7 @@ class Job(_Entity, _Labeled):
         return self.creation_date.timestamp() >= other.creation_date.timestamp()
 
     def __eq__(self, other):
-        return self.id == other.id
+        return isinstance(other, Job) and self.id == other.id
 
     @_run_callbacks
     def blocked(self):

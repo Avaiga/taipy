@@ -20,6 +20,11 @@ from .._warnings import _warn
 from . import _date_to_string, _MapDict, _string_to_date, _variable_decode
 
 
+class _DoNotUpdate:
+    def __repr__(self):
+        return "Taipy: Do not update"
+
+
 class _TaipyBase(ABC):
     __HOLDER_PREFIXES: t.Optional[t.List[str]] = None
     _HOLDER_PREFIX = "_Tp"

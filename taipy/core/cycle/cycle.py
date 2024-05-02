@@ -157,7 +157,7 @@ class Cycle(_Entity, _Labeled):
         raise AttributeError(f"{attribute_name} is not an attribute of cycle {self.id}")
 
     def __eq__(self, other):
-        return self.id == other.id
+        return isinstance(other, Cycle) and self.id == other.id
 
     def __hash__(self):
         return hash(self.id)
