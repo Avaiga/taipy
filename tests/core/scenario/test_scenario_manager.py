@@ -1005,6 +1005,28 @@ def test_hard_delete_shared_entities():
     assert len(_JobManager._get_all()) == 6
 
 
+def test_is_submittable():
+    assert len(_ScenarioManager._get_all()) == 0
+
+    dn_config = Config.configure_in_memory_data_node("dn", 10)
+    task_config = Config.configure_task("task", print, [dn_config])
+    scenario_config = Config.configure_scenario("sc", {task_config}, set(), Frequency.DAILY)
+    scenario = _ScenarioManager._create(scenario_config)
+
+    assert len(_ScenarioManager._get_all()) == 1
+    assert _ScenarioManager._is_submittable(scenario)
+    assert _ScenarioManager._is_submittable(scenario.id)
+    assert not _ScenarioManager._is_submittable("Scenario_temp")
+
+    scenario.dn.edit_in_progress = True
+    assert not _ScenarioManager._is_submittable(scenario)
+    assert not _ScenarioManager._is_submittable(scenario.id)
+
+    scenario.dn.edit_in_progress = False
+    assert _ScenarioManager._is_submittable(scenario)
+    assert _ScenarioManager._is_submittable(scenario.id)
+
+
 def test_submit():
     data_node_1 = InMemoryDataNode("foo", Scope.SCENARIO, "s1")
     data_node_2 = InMemoryDataNode("bar", Scope.SCENARIO, "s2")
