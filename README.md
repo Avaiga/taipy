@@ -1,4 +1,4 @@
-[![Taipy Designer](https://github.com/Avaiga/taipy/assets/100117126/50cbc1e8-318e-4b40-ae7e-6eebfb933c75)
+[![Taipy Designer](https://github.com/nevo-david/taipy/assets/100117126/e787ba7b-ec7a-4d3f-a7e4-0f195daadce7)
 ](https://taipy.io/enterprise)
 
 <div align="center">
