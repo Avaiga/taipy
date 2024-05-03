@@ -524,6 +524,7 @@ class DataNode(_Entity, _Labeled):
                         and ancestor_node.last_edit_date > self.last_edit_date
                     ):
                         return False
+                return True
         return False
 
 
