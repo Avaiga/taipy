@@ -194,58 +194,93 @@ class _GuiCoreContext(CoreEventConsumerBase):
         finally:
             self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"jobs": True})
 
-    def scenario_adapter(self, scenario_or_cycle):
+    def no_change_adapter(self, entity: t.List):
+        return entity
+
+    def cycle_adapter(self, cycle: Cycle):
         try:
             if (
-                hasattr(scenario_or_cycle, "id")
-                and is_readable(scenario_or_cycle.id)
-                and core_get(scenario_or_cycle.id) is not None
+                hasattr(cycle, "id")
+                and is_readable(cycle.id)
+                and core_get(cycle.id) is not None
             ):
-                if self.scenario_by_cycle and isinstance(scenario_or_cycle, Cycle):
-                    return (
-                        scenario_or_cycle.id,
-                        scenario_or_cycle.get_simple_label(),
+                if self.scenario_by_cycle and isinstance(cycle, Cycle):
+                    return [
+                        cycle.id,
+                        cycle.get_simple_label(),
                         sorted(
-                            self.scenario_by_cycle.get(scenario_or_cycle, []),
+                            self.scenario_by_cycle.get(cycle, []),
                             key=_GuiCoreContext.get_entity_creation_date_iso,
                         ),
                         _EntityType.CYCLE.value,
                         False,
-                    )
-                elif isinstance(scenario_or_cycle, Scenario):
-                    return (
-                        scenario_or_cycle.id,
-                        scenario_or_cycle.get_simple_label(),
-                        None,
-                        _EntityType.SCENARIO.value,
-                        scenario_or_cycle.is_primary,
-                    )
+                    ]
+            return cycle
         except Exception as e:
             _warn(
-                f"Access to {type(scenario_or_cycle)} "
-                + f"({scenario_or_cycle.id if hasattr(scenario_or_cycle, 'id') else 'No_id'})"
+                f"Access to {type(cycle).__name__} "
+                + f"({cycle.id if hasattr(cycle, 'id') else 'No_id'})"
                 + " failed",
                 e,
             )
         return None
 
+    def scenario_adapter(self, scenario: Scenario):
+        try:
+            if (
+                hasattr(scenario, "id")
+                and is_readable(scenario.id)
+                and core_get(scenario.id) is not None
+            ):
+                if isinstance(scenario, Scenario):
+                    return [
+                        scenario.id,
+                        scenario.get_simple_label(),
+                        None,
+                        _EntityType.SCENARIO.value,
+                        scenario.is_primary,
+                    ]
+            return scenario
+        except Exception as e:
+            _warn(
+                f"Access to {type(scenario).__name__} "
+                + f"({scenario.id if hasattr(scenario, 'id') else 'No_id'})"
+                + " failed",
+                e,
+            )
+        return None
+
+    def filter_scenarios(self, cycle: t.List, col: str, action: str, val: t.Any):
+        cycle[2] = [e for e in cycle[2] if _invoke_action(e, col, action, val)]
+        return cycle
+
+    def adapt_scenarios(self, cycle: t.List):
+        cycle[2] = [self.scenario_adapter(e) for e in cycle[2]]
+        return cycle
+
     def get_scenarios(
         self, scenarios: t.Optional[t.List[t.Union[Cycle, Scenario]]], filters: t.Optional[t.List[t.Dict[str, t.Any]]]
     ):
         cycles_scenarios: t.List[t.Union[Cycle, Scenario]] = []
-        if scenarios is None:
-            with self.lock:
-                if self.scenario_by_cycle is None:
-                    self.scenario_by_cycle = get_cycles_scenarios()
+        with self.lock:
+            if self.scenario_by_cycle is None:
+                self.scenario_by_cycle = get_cycles_scenarios()
+            if scenarios is None:
                 for cycle, c_scenarios in self.scenario_by_cycle.items():
                     if cycle is None:
                         cycles_scenarios.extend(c_scenarios)
                     else:
                         cycles_scenarios.append(cycle)
-        else:
+        if scenarios is not None:
             cycles_scenarios = scenarios
+        # sorting
+        adapted_list = [
+            self.cycle_adapter(e) if isinstance(e, Cycle) else e
+            for e in sorted(cycles_scenarios, key=_GuiCoreContext.get_entity_creation_date_iso)
+        ]
         if filters:
-            res = list(cycles_scenarios)
+            # filtering
+            filtered_list = list(adapted_list)
             for fd in filters:
                 col = fd.get("col", "")
                 col_type = _attr_type(col)
@@ -253,9 +288,18 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 action = fd.get("action", "")
                 if isinstance(val, str) and col_type == "date":
                     val = datetime.fromisoformat(val[:-1])
-                res = [e for e in res if not isinstance(e, Scenario) or _invoke_action(e, col, action, val)]
-            cycles_scenarios = res
-        return sorted(cycles_scenarios, key=_GuiCoreContext.get_entity_creation_date_iso)
+                # level 1 filtering
+                filtered_list = [
+                    e for e in filtered_list if not isinstance(e, Scenario) or _invoke_action(e, col, action, val)
+                ]
+                # level 2 filtering
+                filtered_list = [
+                    self.filter_scenarios(e, col, action, val) if not isinstance(e, Scenario) else e
+                    for e in filtered_list
+                ]
+            # remove empty cycles
+            adapted_list = [e for e in filtered_list if isinstance(e, Scenario) or len(e[2])]
+        return adapted_list
 
     def select_scenario(self, state: State, id: str, payload: t.Dict[str, str]):
         args = payload.get("args")
