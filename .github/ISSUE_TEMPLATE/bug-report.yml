@@ -9,14 +9,14 @@ body:
         - Thank you for using Taipy and taking the time to report a bug! 😄 
         - Please try to spend some time to understand the bug and reproduce it.
         - Take a look at our template and try to add as much detail as possible.
-        - The more details we have, easier it would be to fix it. 
-        - If any heading is not applicable, put `NA`
+        - The more details we have, the easier it would be to fix it. 
+        - If any heading is not applicable, please set it to `NA`.
   - type: textarea
     id: something_wrong
     attributes:
       label: "What went wrong? 🤔"
       description: Please provide a detailed description of the issue you encountered. Be clear and concise in explaining what is not working as expected.
-      placeholder: Please describe the issue you experienced in detail, including any relevant information or context.
+      placeholder: The description of the issue you experienced in detail, including any relevant information or context.
     validations:
       required: true
   - type: textarea
@@ -24,7 +24,7 @@ body:
     attributes:
       label: "Expected Behavior"
       description: Please describe how you expected the system to behave when you encountered the issue.
-      placeholder: Please describe the behavior that you expected to see when encountering the issue.
+      placeholder: The description of the behavior that you expected to see when encountering the issue.
   - type: textarea
     id: reproduction_steps
     attributes:
@@ -32,14 +32,14 @@ body:
       description: If possible, please share the steps to reproduce the issue.
       value: |
         1. A code fragment
-        2. And/or configuration files or code:
+        2. And/or configuration files or code
         3. And/or Taipy GUI Markdown or HTML files
   - type: textarea
     id: solution_proposed
     attributes:
       label: "Expected behavior"
       description: If you have any ideas of the expected behavior, please provide them in this section.
-      placeholder: Please describe the expected behavior of the problem.
+      placeholder: The description of the expected behavior of the problem.
   - type: textarea
     id: screenshot
     attributes:
@@ -94,7 +94,7 @@ body:
     attributes:
       label: "Version of Taipy"
       description: Please provide the version number of taipy you are using (if applicable) in the text field provided. This can help developers determine if the issue has already been solved in a newer version of the software.
-      placeholder: ex. 3.1.1
+      placeholder: ex. 3.0.1
     validations:
       required: false
   - type: textarea
@@ -113,18 +113,16 @@ body:
       options:
         - label: "Ensure new code is unit tested, and check code coverage is at least 90%."
           required: true
-
-        - label: "Create related issue in taipy-doc for documentation and Release Notes if relevant."
+        - label: "Create a related issue in taipy-doc for documentation and Release Notes if relevant."
           required: true
   - type: checkboxes
     id: terms_checklist_bug
     attributes:
       label: Code of Conduct
-      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/Avaiga/taipy/blob/develop/CODE_OF_CONDUCT.md) and [Contributing Guidelines](https://github.com/Avaiga/taipy/blob/develop/CONTRIBUTING.md)
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/Avaiga/taipy/blob/develop/CODE_OF_CONDUCT.md) and [Contributing Guidelines](https://github.com/Avaiga/taipy/blob/develop/CONTRIBUTING.md).
       options:
-        - label: "I have checked the [existing issues](https://github.com/Avaiga/taipy/issues?q=is%3Aissue+)"
+        - label: "I have checked the [existing issues](https://github.com/Avaiga/taipy/issues?q=is%3Aissue+)."
           required: true
-
         - label: "I am willing to work on this issue (optional)"
           required: false
   - type: markdown
