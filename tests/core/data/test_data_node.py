@@ -58,7 +58,7 @@ class TestDataNode:
         assert dn.job_ids == []
         assert not dn.is_ready_for_reading
         assert len(dn.properties) == 0
-    
+
     def test_is_up_to_date_when_not_written(self):
         dn_confg_1 = Config.configure_in_memory_data_node("dn_1", default_data="a")
         dn_confg_2 = Config.configure_in_memory_data_node("dn_2")
