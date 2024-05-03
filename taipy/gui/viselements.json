@@ -385,7 +385,7 @@
                     {
                         "name": "page_size",
                         "type": "int",
-                        "default_value": 50,
+                        "default_value": "50",
                         "doc": "The number of rows retrieved on the frontend."
                     }
                 ]
