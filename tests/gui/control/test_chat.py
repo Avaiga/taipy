@@ -32,19 +32,19 @@ def test_chat_md_1(gui: Gui, test_client, helpers):
             "sender_id": "sender",
             "on_action": "on_action",
             "with_input": False,
-            "height": "50vh"
+            "height": "50vh",
         },
     )
     md_string = "<|{messages}|chat|properties=chat_properties|>"
     expected_list = [
         "<Chat",
         'defaultUsers="[[&quot;Fred&quot;, &#x7B;&quot;path&quot;: &quot;/images/favicon.png&quot;, &quot;text&quot;: &quot;Fred.png&quot;&#x7D;], [&quot;Fredi&quot;, &#x7B;&quot;path&quot;: &quot;/images/fred.png&quot;, &quot;text&quot;: &quot;Fred.png&quot;&#x7D;]]"',  # noqa: E501
-        "messages={tpec_TpExPr_messages_TPMDL_0}",
-        'updateVarName="tpec_TpExPr_messages_TPMDL_0"',
+        "messages={_TpD_tpec_TpExPr_messages_TPMDL_0}",
+        'updateVarName="_TpD_tpec_TpExPr_messages_TPMDL_0"',
         'senderId="sender"',
         'onAction="on_action"',
         "defaultWithInput={false}",
-        'height="50vh"'
+        'height="50vh"',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -67,12 +67,12 @@ def test_chat_md_2(gui: Gui, test_client, helpers):
     expected_list = [
         "<Chat",
         'defaultUsers="[[&quot;Fred&quot;, &#x7B;&quot;path&quot;: &quot;/images/favicon.png&quot;, &quot;text&quot;: &quot;Fred.png&quot;&#x7D;], [&quot;Fredi&quot;, &#x7B;&quot;path&quot;: &quot;/images/fred.png&quot;, &quot;text&quot;: &quot;Fred.png&quot;&#x7D;]]"',  # noqa: E501
-        "messages={tpec_TpExPr_messages_TPMDL_0}",
-        'updateVarName="tpec_TpExPr_messages_TPMDL_0"',
-        "users={_TpL_tpec_TpExPr_users_TPMDL_0}",
-        'updateVars="users=_TpL_tpec_TpExPr_users_TPMDL_0"',
-        "withInput={_TpB_tpec_TpExPr_winp_TPMDL_0}",
-        "defaultWithInput={false}"
+        "messages={_TpD_tpec_TpExPr_messages_TPMDL_0}",
+        'updateVarName="_TpD_tpec_TpExPr_messages_TPMDL_0"',
+        'updateVars="users=_TpL_tp_TpExPr_gui_get_adapted_lov_users_list_TPMDL_0_0"',
+        "users={_TpL_tp_TpExPr_gui_get_adapted_lov_users_list_TPMDL_0_0}",
+        "withInput={_TpB_tpec_TpExPr_winp_TPMDL_0}>",
+        "defaultWithInput={false}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -95,8 +95,8 @@ def test_chat_html_1_1(gui: Gui, test_client, helpers):
     expected_list = [
         "<Chat",
         'defaultUsers="[[&quot;Fred&quot;, &#x7B;&quot;path&quot;: &quot;/images/favicon.png&quot;, &quot;text&quot;: &quot;Fred.png&quot;&#x7D;], [&quot;Fredi&quot;, &#x7B;&quot;path&quot;: &quot;/images/fred.png&quot;, &quot;text&quot;: &quot;Fred.png&quot;&#x7D;]]"',  # noqa: E501
-        "messages={tpec_TpExPr_messages_TPMDL_0}",
-        'updateVarName="tpec_TpExPr_messages_TPMDL_0"',
+        "messages={_TpD_tpec_TpExPr_messages_TPMDL_0}",
+        'updateVarName="_TpD_tpec_TpExPr_messages_TPMDL_0"',
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -119,8 +119,8 @@ def test_chat_html_1_2(gui: Gui, test_client, helpers):
     expected_list = [
         "<Chat",
         'defaultUsers="[[&quot;Fred&quot;, &#x7B;&quot;path&quot;: &quot;/images/favicon.png&quot;, &quot;text&quot;: &quot;Fred.png&quot;&#x7D;], [&quot;Fredi&quot;, &#x7B;&quot;path&quot;: &quot;/images/fred.png&quot;, &quot;text&quot;: &quot;Fred.png&quot;&#x7D;]]"',  # noqa: E501
-        "messages={tpec_TpExPr_messages_TPMDL_0}",
-        'updateVarName="tpec_TpExPr_messages_TPMDL_0"',
+        "messages={_TpD_tpec_TpExPr_messages_TPMDL_0}",
+        'updateVarName="_TpD_tpec_TpExPr_messages_TPMDL_0"',
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -142,10 +142,10 @@ def test_chat_html_2_1(gui: Gui, test_client, helpers):
     expected_list = [
         "<Chat",
         'defaultUsers="[[&quot;Fred&quot;, &#x7B;&quot;path&quot;: &quot;/images/favicon.png&quot;, &quot;text&quot;: &quot;Fred.png&quot;&#x7D;], [&quot;Fredi&quot;, &#x7B;&quot;path&quot;: &quot;/images/fred.png&quot;, &quot;text&quot;: &quot;Fred.png&quot;&#x7D;]]"',  # noqa: E501
-        "messages={tpec_TpExPr_messages_TPMDL_0}",
-        'updateVarName="tpec_TpExPr_messages_TPMDL_0"',
-        "users={_TpL_tpec_TpExPr_users_TPMDL_0}",
-        'updateVars="users=_TpL_tpec_TpExPr_users_TPMDL_0"',
+        "messages={_TpD_tpec_TpExPr_messages_TPMDL_0}",
+        'updateVarName="_TpD_tpec_TpExPr_messages_TPMDL_0"',
+        'updateVars="users=_TpL_tp_TpExPr_gui_get_adapted_lov_users_list_TPMDL_0_0"',
+        "users={_TpL_tp_TpExPr_gui_get_adapted_lov_users_list_TPMDL_0_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -167,9 +167,9 @@ def test_chat_html_2_2(gui: Gui, test_client, helpers):
     expected_list = [
         "<Chat",
         'defaultUsers="[[&quot;Fred&quot;, &#x7B;&quot;path&quot;: &quot;/images/favicon.png&quot;, &quot;text&quot;: &quot;Fred.png&quot;&#x7D;], [&quot;Fredi&quot;, &#x7B;&quot;path&quot;: &quot;/images/fred.png&quot;, &quot;text&quot;: &quot;Fred.png&quot;&#x7D;]]"',  # noqa: E501
-        "messages={tpec_TpExPr_messages_TPMDL_0}",
-        'updateVarName="tpec_TpExPr_messages_TPMDL_0"',
-        "users={_TpL_tpec_TpExPr_users_TPMDL_0}",
-        'updateVars="users=_TpL_tpec_TpExPr_users_TPMDL_0"',
+        "messages={_TpD_tpec_TpExPr_messages_TPMDL_0}",
+        'updateVarName="_TpD_tpec_TpExPr_messages_TPMDL_0"',
+        'updateVars="users=_TpL_tp_TpExPr_gui_get_adapted_lov_users_list_TPMDL_0_0"',
+        "users={_TpL_tp_TpExPr_gui_get_adapted_lov_users_list_TPMDL_0_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
