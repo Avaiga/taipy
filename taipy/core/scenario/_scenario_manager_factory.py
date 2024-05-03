@@ -19,11 +19,10 @@ from ._scenario_sql_repository import _ScenarioSQLRepository
 
 
 class _ScenarioManagerFactory(_ManagerFactory):
-
     __REPOSITORY_MAP = {"default": _ScenarioFSRepository, "sql": _ScenarioSQLRepository}
 
     @classmethod
-    def _build_manager(cls) -> Type[_ScenarioManager]:  # type: ignore
+    def _build_manager(cls) -> Type[_ScenarioManager]:
         if cls._using_enterprise():
             scenario_manager = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + ".scenario._scenario_manager", "_ScenarioManager"

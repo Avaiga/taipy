@@ -33,7 +33,15 @@ import TextField from "@mui/material/TextField";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
-import { ColumnDesc, Table, TraceValueType, createSendActionNameAction, useDispatch, useModule } from "taipy-gui";
+import {
+    ColumnDesc,
+    Table,
+    TraceValueType,
+    createSendActionNameAction,
+    getUpdateVar,
+    useDispatch,
+    useModule,
+} from "taipy-gui";
 
 import { ChartViewType, MenuProps, TableViewType, selectSx, tabularHeaderSx } from "./utils";
 
@@ -51,12 +59,13 @@ interface DataNodeTableProps {
     editInProgress?: boolean;
     editLock: MutableRefObject<boolean>;
     editable: boolean;
+    updateDnVars?: string;
 }
 
 const pushRightSx = { ml: "auto" };
 
 const DataNodeTable = (props: DataNodeTableProps) => {
-    const { uniqid, configId, nodeId, columns = "", onViewTypeChange, editable } = props;
+    const { uniqid, configId, nodeId, columns = "", onViewTypeChange, editable, updateDnVars = "" } = props;
 
     const dispatch = useDispatch();
     const module = useModule();
@@ -111,13 +120,24 @@ const DataNodeTable = (props: DataNodeTableProps) => {
         () =>
             setTableEdit((e) => {
                 props.editLock.current = !e;
-                dispatch(createSendActionNameAction("", module, props.onLock, { id: nodeId, lock: !e }));
+                dispatch(
+                    createSendActionNameAction("", module, props.onLock, {
+                        id: nodeId,
+                        lock: !e,
+                        error_id: getUpdateVar(updateDnVars, "error_id"),
+                    })
+                );
                 return !e;
             }),
-        [nodeId, dispatch, module, props.onLock, props.editLock]
+        [nodeId, dispatch, module, props.onLock, props.editLock, updateDnVars]
     );
 
-    const userData = useMemo(() => ({ dn_id: nodeId, comment: "" }), [nodeId]);
+    const userData = useMemo(() => {
+        const ret: Record<string, unknown> = { dn_id: nodeId, comment: "" };
+        const idVar = getUpdateVar(updateDnVars, "data_id");
+        idVar && (ret.context = { [idVar]: nodeId, data_id: idVar, error_id: getUpdateVar(updateDnVars, "error_id") });
+        return ret;
+    }, [nodeId, updateDnVars]);
     const [comment, setComment] = useState("");
     const changeComment = useCallback(
         (e: ChangeEvent<HTMLInputElement>) => {
@@ -198,6 +218,7 @@ const DataNodeTable = (props: DataNodeTableProps) => {
                 onEdit={tableEdit ? props.onEdit : undefined}
                 filter={true}
                 libClassName="taipy-table"
+                pageSize={25}
             />
         </>
     );

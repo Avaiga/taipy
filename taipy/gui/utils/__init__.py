@@ -37,6 +37,7 @@ from .is_debugging import is_debugging
 from .is_port_open import _is_port_open
 from .isnotebook import _is_in_notebook
 from .types import (
+    _DoNotUpdate,
     _TaipyBase,
     _TaipyBool,
     _TaipyContent,

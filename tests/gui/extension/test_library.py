@@ -162,7 +162,7 @@ def test_lib_inner_md(gui: Gui, test_client, helpers):
     expected = [
         "<TestLib_Inner",
         "value={tpec_TpExPr_val_TPMDL_0}",
-        "withProperty={tpec_TpExPr_tpec_TpExPr_val_TPMDL_0_TPMDL_0}",
+        "withProperty={tpec_TpExPr_val_TPMDL_0}",
     ]
     helpers.test_control_md(gui, md_string, expected)
 

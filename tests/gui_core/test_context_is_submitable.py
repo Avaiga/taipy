@@ -59,11 +59,12 @@ class TestGuiCoreContext_is_submittable:
                 {
                     "args": [
                         {"name": "name", "id": a_scenario.id},
-                    ]
+                    ],
+                    "error_id": "error_var",
                 },
             )
             assign.assert_called_once()
-            assert assign.call_args.args[0] == "gui_core_sv_error"
+            assert assign.call_args.args[0] == "error_var"
             assert str(assign.call_args.args[1]).startswith("Error submitting entity.")
 
             with patch("taipy.gui_core._context.is_submittable", side_effect=mock_is_submittable_false):
@@ -74,9 +75,10 @@ class TestGuiCoreContext_is_submittable:
                     {
                         "args": [
                             {"name": "name", "id": a_scenario.id},
-                        ]
+                        ],
+                        "error_id": "error_var",
                     },
                 )
                 assign.assert_called_once()
-                assert assign.call_args.args[0] == "gui_core_sv_error"
+                assert assign.call_args.args[0] == "error_var"
                 assert str(assign.call_args.args[1]).endswith("is not submittable.")

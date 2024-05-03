@@ -117,6 +117,21 @@ export interface TableProps extends TaipyPaginatedTableProps {
 }
 export declare const Table: (props: TableProps) => JSX.Element;
 
+export interface FilterDesc {
+    col: string;
+    action: string;
+    value: string | number | boolean | Date;
+}
+export interface TableFilterProps {
+    columns: Record<string, ColumnDesc>;
+    colsOrder?: Array<string>;
+    onValidate: (data: Array<FilterDesc>) => void;
+    appliedFilters?: Array<FilterDesc>;
+    className?: string;
+    filteredCount: number;
+}
+export declare const TableFilter: (props: TableFilterProps) => JSX.Element;
+
 export declare const Router: () => JSX.Element;
 
 /**
@@ -272,7 +287,8 @@ export declare const createRequestUpdateAction: (
     id: string | undefined,
     context: string | undefined,
     names: string[],
-    forceRefresh?: boolean
+    forceRefresh?: boolean,
+    stateContext?: Record<string, unknown>
 ) => Action;
 /**
  * A column description as received by the backend.

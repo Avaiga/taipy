@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -29,7 +29,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { DateField, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
-import { ColumnDesc, defaultDateFormat, iconInRowSx } from "./tableUtils";
+import { ColumnDesc, defaultDateFormat, getsortByIndex, iconInRowSx } from "./tableUtils";
 import { getDateTime, getTypeFromDf } from "../../utils";
 import { getSuffixedClassNames } from "./utils";
 
@@ -41,7 +41,7 @@ export interface FilterDesc {
 
 interface TableFilterProps {
     columns: Record<string, ColumnDesc>;
-    colsOrder: Array<string>;
+    colsOrder?: Array<string>;
     onValidate: (data: Array<FilterDesc>) => void;
     appliedFilters?: Array<FilterDesc>;
     className?: string;
@@ -279,11 +279,18 @@ const FilterRow = (props: FilterRowProps) => {
 };
 
 const TableFilter = (props: TableFilterProps) => {
-    const { onValidate, appliedFilters, columns, colsOrder, className = "", filteredCount } = props;
+    const { onValidate, appliedFilters, columns, className = "", filteredCount } = props;
 
     const [showFilter, setShowFilter] = useState(false);
     const filterRef = useRef<HTMLButtonElement | null>(null);
     const [filters, setFilters] = useState<Array<FilterDesc>>([]);
+
+    const colsOrder = useMemo(()=> {
+        if (props.colsOrder) {
+            return props.colsOrder;
+        }
+        return Object.keys(columns).sort(getsortByIndex(columns));
+    }, [props.colsOrder, columns]);
 
     const onShowFilterClick = useCallback(() => setShowFilter((f) => !f), []);
 
