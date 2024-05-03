@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from queue import SimpleQueue
-from typing import Dict, List
+from typing import Dict, List, Any
 
 from taipy.config import Config, Frequency
 from taipy.core import taipy as tp
@@ -31,6 +31,7 @@ class Snapshot:
         self.entity_type_collected: Dict[EventEntityType, int] = {}
         self.operation_collected: Dict[EventEntityType, int] = {}
         self.attr_name_collected: Dict[EventEntityType, int] = {}
+        self.attr_value_collected: Dict[EventEntityType, List[Any]] = {}
 
     def capture_event(self, event):
         self.collected_events.append(event)
@@ -38,6 +39,10 @@ class Snapshot:
         self.operation_collected[event.operation] = self.operation_collected.get(event.operation, 0) + 1
         if event.attribute_name:
             self.attr_name_collected[event.attribute_name] = self.attr_name_collected.get(event.attribute_name, 0) + 1
+            if self.attr_value_collected.get(event.attribute_name, None):
+                self.attr_value_collected[event.attribute_name].append(event.attribute_value)
+            else:
+                self.attr_value_collected[event.attribute_name] = [event.attribute_value]
 
 
 class RecordingConsumer(CoreEventConsumerBase):
@@ -142,12 +147,11 @@ def test_events_published_for_writing_dn():
 
     # Write input manually trigger 4 data node update events
     # for last_edit_date, editor_id, editor_expiration_date and edit_in_progress
-    scenario.the_input.lock_edit()
     scenario.the_input.write("test")
     snapshot = all_evts.capture()
     assert len(snapshot.collected_events) == 13
     assert snapshot.entity_type_collected.get(EventEntityType.CYCLE, 0) == 0
-    assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 7
+    assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 6
     assert snapshot.entity_type_collected.get(EventEntityType.TASK, 0) == 2
     assert snapshot.entity_type_collected.get(EventEntityType.SEQUENCE, 0) == 2
     assert snapshot.entity_type_collected.get(EventEntityType.SCENARIO, 0) == 2
@@ -157,8 +161,8 @@ def test_events_published_for_writing_dn():
 
 
 def test_events_published_for_scenario_submission():
-    input_config = Config.configure_pickle_data_node("the_input")
-    output_config = Config.configure_pickle_data_node("the_output")
+    input_config = Config.configure_data_node("the_input")
+    output_config = Config.configure_data_node("the_output")
     task_config = Config.configure_task("the_task", identity, input=input_config, output=output_config)
     sc_config = Config.configure_scenario(
         "the_scenario", task_configs=[task_config], frequency=Frequency.DAILY, sequences={"the_seq": [task_config]}
@@ -179,7 +183,6 @@ def test_events_published_for_scenario_submission():
     # 1 submission update event for is_completed
     scenario.submit()
     snapshot = all_evts.capture()
-
     assert len(snapshot.collected_events) == 17
     assert snapshot.entity_type_collected.get(EventEntityType.CYCLE, 0) == 0
     assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 7

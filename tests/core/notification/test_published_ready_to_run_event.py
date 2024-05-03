@@ -21,51 +21,71 @@ def empty_fct(inp):
     return inp
 
 
-def test_published_is_ready_to_run_event():
-    scenario_manager = _ScenarioManagerFactory._build_manager()
-    assert len(scenario_manager._get_all()) == 0
-
+def test_lock_edit_publish_submittable_event():
     dn_config_1 = Config.configure_pickle_data_node("dn_1")
     dn_config_2 = Config.configure_pickle_data_node("dn_2")
     task_config = Config.configure_task("task", empty_fct, [dn_config_1], [dn_config_2])
-    scenario_config = Config.configure_scenario("sc", {task_config}, set())
-    scenario = scenario_manager._create(scenario_config)
+    scenario_config = Config.configure_scenario("sc", [task_config])
+    scenario = _ScenarioManagerFactory._build_manager()._create(scenario_config)
     scenario.add_sequences({"sequence": [scenario.task]})
     dn_1 = scenario.dn_1
-    dn_2 = scenario.dn_2
-
     register_id_0, register_queue_0 = Notifier.register()
     all_evts = RecordingConsumer(register_id_0, register_queue_0)
+
     all_evts.start()
-
     dn_1.lock_edit()
-    dn_1.write(15)
-
     snapshot = all_evts.capture()
 
-    assert len(snapshot.collected_events) == 13
-    assert snapshot.entity_type_collected.get(EventEntityType.CYCLE, 0) == 0
-    assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 7
-    assert snapshot.entity_type_collected.get(EventEntityType.TASK, 0) == 2
-    assert snapshot.entity_type_collected.get(EventEntityType.SEQUENCE, 0) == 2
-    assert snapshot.entity_type_collected.get(EventEntityType.SCENARIO, 0) == 2
-    assert snapshot.operation_collected.get(EventOperation.CREATION, 0) == 0
-    assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 13
-    assert snapshot.attr_name_collected["is_submittable"] == 6
+    assert len(snapshot.collected_events) == 6
+    assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 3
+    assert snapshot.entity_type_collected.get(EventEntityType.TASK, 0) == 1
+    assert snapshot.entity_type_collected.get(EventEntityType.SEQUENCE, 0) == 1
+    assert snapshot.entity_type_collected.get(EventEntityType.SCENARIO, 0) == 1
+    assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 6
+    assert snapshot.attr_name_collected["is_submittable"] == 3
+    assert snapshot.attr_value_collected["is_submittable"] == [False, False, False]
 
-    dn_2.write(15)
+
+def test_write_never_written_input_publish_submittable_event():
+    dn_config_1 = Config.configure_pickle_data_node("dn_1")
+    dn_config_2 = Config.configure_pickle_data_node("dn_2")
+    task_config = Config.configure_task("task", empty_fct, [dn_config_1], [dn_config_2])
+    scenario_config = Config.configure_scenario("sc", [task_config])
+    scenario = _ScenarioManagerFactory._build_manager()._create(scenario_config)
+    scenario.add_sequences({"sequence": [scenario.task]})
+    register_id_0, register_queue_0 = Notifier.register()
+    all_evts = RecordingConsumer(register_id_0, register_queue_0)
+
+    all_evts.start()
+    scenario.dn_1.write(15)
+    snapshot = all_evts.capture()
+
+    assert len(snapshot.collected_events) == 7
+    assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 4
+    assert snapshot.entity_type_collected.get(EventEntityType.TASK, 0) == 1
+    assert snapshot.entity_type_collected.get(EventEntityType.SEQUENCE, 0) == 1
+    assert snapshot.entity_type_collected.get(EventEntityType.SCENARIO, 0) == 1
+    assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 7
+    assert snapshot.attr_name_collected["is_submittable"] == 3
+    assert snapshot.attr_value_collected["is_submittable"] == [True, True, True]
+
+def test_write_output_does_not_publish_submittable_event():
+    dn_config_1 = Config.configure_pickle_data_node("dn_1", default_data="any value")
+    dn_config_2 = Config.configure_pickle_data_node("dn_2")
+    task_config = Config.configure_task("task", empty_fct, [dn_config_1], [dn_config_2])
+    scenario_config = Config.configure_scenario("sc", [task_config])
+    scenario = _ScenarioManagerFactory._build_manager()._create(scenario_config)
+    scenario.add_sequences({"sequence": [scenario.task]})
+    register_id_0, register_queue_0 = Notifier.register()
+    all_evts = RecordingConsumer(register_id_0, register_queue_0)
+
+    all_evts.start()
+    scenario.dn_2.write(15)
     snapshot = all_evts.capture()
 
     assert len(snapshot.collected_events) == 4
-    assert snapshot.entity_type_collected.get(EventEntityType.CYCLE, 0) == 0
     assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 4
-    assert snapshot.entity_type_collected.get(EventEntityType.TASK, 0) == 0
-    assert snapshot.entity_type_collected.get(EventEntityType.SEQUENCE, 0) == 0
-    assert snapshot.entity_type_collected.get(EventEntityType.SCENARIO, 0) == 0
-    assert snapshot.operation_collected.get(EventOperation.CREATION, 0) == 0
     assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 4
-    assert snapshot.attr_name_collected["editor_id"] == 1
-    assert snapshot.attr_name_collected["editor_expiration_date"] == 1
-    assert snapshot.attr_name_collected["edit_in_progress"] == 1
-    assert snapshot.attr_name_collected["last_edit_date"] == 1
+    assert "is_submittable" not in snapshot.attr_name_collected
+    assert "is_submittable" not in snapshot.attr_value_collected
     all_evts.stop()

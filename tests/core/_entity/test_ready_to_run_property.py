@@ -12,6 +12,7 @@
 
 from datetime import datetime
 
+from taipy import ScenarioId, SequenceId, TaskId
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
@@ -25,317 +26,199 @@ from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
 
 
-def test_scenario_is_ready_to_run_property():
-    scenario_manager = _ScenarioManagerFactory._build_manager()
-    assert len(scenario_manager._get_all()) == 0
+def test_non_existing_submittable_is_not_ready_to_run():
+    assert not _ScenarioManagerFactory._build_manager()._is_submittable(ScenarioId("wrong_id"))
+    assert not _SequenceManagerFactory._build_manager()._is_submittable(SequenceId("wrong_id"))
+    assert not _TaskManagerFactory._build_manager()._is_submittable(TaskId("wrong_id"))
 
+
+def test_scenario_without_input_is_ready_to_run():
+    scenario_manager = _ScenarioManagerFactory._build_manager()
+    task_config = Config.configure_task("task", print, [], [])
+    scenario_config = Config.configure_scenario("sc", [task_config], [], Frequency.DAILY)
+    scenario = scenario_manager._create(scenario_config)
+
+    assert scenario_manager._is_submittable(scenario)
+    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
+
+
+def test_scenario_submittable_with_inputs_is_ready_to_run():
+    scenario_manager = _ScenarioManagerFactory._build_manager()
     dn_config_1 = Config.configure_in_memory_data_node("dn_1", 10)
     dn_config_2 = Config.configure_in_memory_data_node("dn_2", 10)
+    task_config = Config.configure_task("task", print, [dn_config_1, dn_config_2], [])
+    scenario_config = Config.configure_scenario("sc", [task_config])
+    scenario = scenario_manager._create(scenario_config)
+
+    assert scenario_manager._is_submittable(scenario)
+    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
+
+
+def test_scenario_submittable_even_with_output_not_ready_to_run():
+    scenario_manager = _ScenarioManagerFactory._build_manager()
+    dn_config_1 = Config.configure_in_memory_data_node("dn_1", 10)
+    dn_config_2 = Config.configure_in_memory_data_node("dn_2", 10)
+    dn_config_3 = Config.configure_in_memory_data_node("dn_3")
+    task_config = Config.configure_task("task", print, [dn_config_1, dn_config_2], [dn_config_3])
+    scenario_config = Config.configure_scenario("sc", [task_config])
+    scenario = scenario_manager._create(scenario_config)
+    dn_3 = scenario.dn_3
+
+    assert not dn_3.is_ready_for_reading
+    assert scenario_manager._is_submittable(scenario)
+    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
+
+
+def test_scenario_not_submittable_if_one_input_never_been_written():
+    scenario_manager = _ScenarioManagerFactory._build_manager()
+    dn_config_1 = Config.configure_in_memory_data_node("dn_1", 10)
+    dn_config_2 = Config.configure_in_memory_data_node("dn_2")
+    task_config = Config.configure_task("task", print, [dn_config_1, dn_config_2], [])
+    scenario_config = Config.configure_scenario("sc", [task_config], [], Frequency.DAILY)
+    scenario = scenario_manager._create(scenario_config)
+    dn_1 = scenario.dn_1
+    dn_2 = scenario.dn_2
+
+    assert dn_1.is_ready_for_reading
+    assert not dn_2.is_ready_for_reading
+    assert not scenario_manager._is_submittable(scenario)
+
+    assert scenario.id in _ReadyToRunProperty._submittable_id_datanodes
+    assert dn_1.id not in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
+    assert dn_2.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
+    assert dn_1.id not in _ReadyToRunProperty._datanode_id_submittables
+    assert dn_2.id in _ReadyToRunProperty._datanode_id_submittables
+    assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_2.id]
+    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_2.id] == {f"DataNode {dn_2.id} is not written"}
+
+
+def test_scenario_not_submittable_if_one_input_edit_in_progress():
+    scenario_manager = _ScenarioManagerFactory._build_manager()
+    dn_config_1 = Config.configure_in_memory_data_node("dn_1", 10)
+    task_config = Config.configure_task("task", print, [dn_config_1], [])
+    scenario_config = Config.configure_scenario("sc", [task_config])
+    scenario = scenario_manager._create(scenario_config)
+    dn_1 = scenario.dn_1
+    dn_1.lock_edit()
+
+    assert not dn_1.is_ready_for_reading
+    assert not scenario_manager._is_submittable(scenario)
+
+    assert scenario.id in _ReadyToRunProperty._submittable_id_datanodes
+    assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
+    assert dn_1.id in _ReadyToRunProperty._datanode_id_submittables
+    assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_1.id]
+    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id] == {f"DataNode {dn_1.id} is being edited"}
+
+
+def test_scenario_not_submittable_for_multiple_reasons():
+    scenario_manager = _ScenarioManagerFactory._build_manager()
+    dn_config_1 = Config.configure_in_memory_data_node("dn_1", 10)
+    dn_config_2 = Config.configure_in_memory_data_node("dn_2")
     dn_config_3 = Config.configure_in_memory_data_node("dn_3", 10)
-    task_config = Config.configure_task("task", print, [dn_config_1, dn_config_2], [dn_config_3])
-    scenario_config = Config.configure_scenario("sc", {task_config}, set(), Frequency.DAILY)
+    task_config = Config.configure_task("task", print, [dn_config_1, dn_config_2, dn_config_3], [])
+    scenario_config = Config.configure_scenario("sc", [task_config])
     scenario = scenario_manager._create(scenario_config)
     dn_1 = scenario.dn_1
+    dn_1.lock_edit()
     dn_2 = scenario.dn_2
-    dn_3 = scenario.dn_3
+    dn_2.lock_edit()
 
-    assert len(scenario_manager._get_all()) == 1
-    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert scenario_manager._is_submittable(scenario)
-    assert scenario_manager._is_submittable(scenario.id)
-    assert not scenario_manager._is_submittable("Scenario_temp")
-
-    dn_1.edit_in_progress = True
-    assert scenario.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
-    assert dn_1.id in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_1.id]
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id] == {
-        f"DataNode {dn_1.id} is being edited"
-    }
+    assert not dn_1.is_ready_for_reading
+    assert not dn_2.is_ready_for_reading
     assert not scenario_manager._is_submittable(scenario)
-    assert not scenario_manager._is_submittable(scenario.id)
 
-    dn_1.edit_in_progress = False
-    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_1.id not in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario_manager._is_submittable(scenario)
-    assert scenario_manager._is_submittable(scenario.id)
-
-    dn_1.last_edit_date = None
-    dn_2.edit_in_progress = True
     assert scenario.id in _ReadyToRunProperty._submittable_id_datanodes
     assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
     assert dn_2.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
     assert dn_1.id in _ReadyToRunProperty._datanode_id_submittables
+    assert dn_2.id in _ReadyToRunProperty._datanode_id_submittables
     assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_1.id]
-    assert dn_2.id in _ReadyToRunProperty._datanode_id_submittables
+    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id] == {f"DataNode {dn_1.id} is being edited"}
     assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_2.id]
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id] == {f"DataNode {dn_1.id} is not written"}
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_2.id] == {
-        f"DataNode {dn_2.id} is being edited"
-    }
-    assert not scenario_manager._is_submittable(scenario)
-    assert not scenario_manager._is_submittable(scenario.id)
-
-    dn_1.last_edit_date = datetime.now()
-    assert scenario.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_1.id not in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
-    assert dn_2.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
-    assert dn_1.id not in _ReadyToRunProperty._datanode_id_submittables
-    assert dn_2.id in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_2.id]
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_2.id] == {
-        f"DataNode {dn_2.id} is being edited"
-    }
-    assert not scenario_manager._is_submittable(scenario)
-    assert not scenario_manager._is_submittable(scenario.id)
-
-    dn_2.edit_in_progress = False
-    assert dn_1.id not in _ReadyToRunProperty._datanode_id_submittables
-    assert dn_2.id not in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert scenario_manager._is_submittable(scenario)
-    assert scenario_manager._is_submittable(scenario.id)
-
-    dn_3.edit_in_progress = True
-    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_3.id not in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario_manager._is_submittable(scenario)
-    assert scenario_manager._is_submittable(scenario.id)
+    assert (_ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_2.id]
+            == {f"DataNode {dn_2.id} is being edited"}, f"DataNode {dn_2.id} is not written")
 
 
-def test_sequence_is_ready_to_run_property():
-    data_manager = _DataManagerFactory._build_manager()
+def test_writing_input_remove_reasons():
     scenario_manager = _ScenarioManagerFactory._build_manager()
-    task_manager = _TaskManagerFactory._build_manager()
-    sequence_manager = _SequenceManagerFactory._build_manager()
-
-    task_id = "TASK_task_id"
-    scenario_id = "SCENARIO_scenario_id"
-    dn_1 = PickleDataNode("dn_1", Scope.SCENARIO, parent_ids={task_id, scenario_id}, properties={"default_data": 10})
-    dn_2 = PickleDataNode("dn_2", Scope.SCENARIO, parent_ids={task_id, scenario_id}, properties={"default_data": 10})
-    dn_3 = PickleDataNode("dn_3", Scope.SCENARIO, parent_ids={task_id, scenario_id}, properties={"default_data": 10})
-    task = Task("task", {}, print, [dn_1, dn_2], [dn_3], id=task_id, parent_ids={scenario_id})
-    scenario = Scenario("scenario", {task}, {}, set(), scenario_id=scenario_id)
-    data_manager._set(dn_1)
-    data_manager._set(dn_2)
-    data_manager._set(dn_3)
-    task_manager._set(task)
-    scenario_manager._set(scenario)
-
-    dn_1 = scenario.dn_1
-    dn_2 = scenario.dn_2
-    dn_3 = scenario.dn_3
-
-    scenario.add_sequences({"sequence": [task]})
-    sequence = scenario.sequences["sequence"]
-    assert len(sequence_manager._get_all()) == 1
-    assert sequence.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert sequence_manager._is_submittable(sequence)
-    assert sequence_manager._is_submittable(sequence.id)
-    assert scenario_manager._is_submittable(scenario)
-    assert not sequence_manager._is_submittable("Sequence_temp")
-    assert not sequence_manager._is_submittable("SEQUENCE_temp_SCENARIO_scenario")
-
-    dn_1.edit_in_progress = True
-    assert scenario.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert sequence.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
-    assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[sequence.id]
-    assert dn_1.id in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_1.id]
-    assert sequence.id in _ReadyToRunProperty._datanode_id_submittables[dn_1.id]
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id] == {
-        f"DataNode {dn_1.id} is being edited"
-    }
-    assert _ReadyToRunProperty._submittable_id_datanodes[sequence.id][dn_1.id] == {
-        f"DataNode {dn_1.id} is being edited"
-    }
-    assert not scenario_manager._is_submittable(scenario)
-    assert not sequence_manager._is_submittable(sequence)
-    assert not sequence_manager._is_submittable(sequence.id)
-
-    dn_1.edit_in_progress = False
-    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert sequence.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_1.id not in _ReadyToRunProperty._datanode_id_submittables
-    assert sequence_manager._is_submittable(sequence)
-    assert sequence_manager._is_submittable(sequence.id)
-    assert scenario_manager._is_submittable(scenario)
-
-    dn_1.last_edit_date = None
-    dn_2.edit_in_progress = True
-    assert scenario.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert sequence.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
-    assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[sequence.id]
-    assert dn_2.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
-    assert dn_2.id in _ReadyToRunProperty._submittable_id_datanodes[sequence.id]
-    assert dn_1.id in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_1.id]
-    assert sequence.id in _ReadyToRunProperty._datanode_id_submittables[dn_1.id]
-    assert dn_2.id in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_2.id]
-    assert sequence.id in _ReadyToRunProperty._datanode_id_submittables[dn_2.id]
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id] == {f"DataNode {dn_1.id} is not written"}
-    assert _ReadyToRunProperty._submittable_id_datanodes[sequence.id][dn_1.id] == {f"DataNode {dn_1.id} is not written"}
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_2.id] == {
-        f"DataNode {dn_2.id} is being edited"
-    }
-    assert _ReadyToRunProperty._submittable_id_datanodes[sequence.id][dn_2.id] == {
-        f"DataNode {dn_2.id} is being edited"
-    }
-    assert not scenario_manager._is_submittable(scenario)
-    assert not sequence_manager._is_submittable(sequence)
-    assert not sequence_manager._is_submittable(sequence.id)
-
-    dn_1.last_edit_date = datetime.now()
-    assert scenario.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert sequence.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_1.id not in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
-    assert dn_1.id not in _ReadyToRunProperty._submittable_id_datanodes[sequence.id]
-    assert dn_2.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
-    assert dn_2.id in _ReadyToRunProperty._submittable_id_datanodes[sequence.id]
-    assert dn_1.id not in _ReadyToRunProperty._datanode_id_submittables
-    assert dn_2.id in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_2.id]
-    assert sequence.id in _ReadyToRunProperty._datanode_id_submittables[dn_2.id]
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_2.id] == {
-        f"DataNode {dn_2.id} is being edited"
-    }
-    assert _ReadyToRunProperty._submittable_id_datanodes[sequence.id][dn_2.id] == {
-        f"DataNode {dn_2.id} is being edited"
-    }
-    assert not scenario_manager._is_submittable(scenario)
-    assert not sequence_manager._is_submittable(sequence)
-    assert not sequence_manager._is_submittable(sequence.id)
-
-    dn_2.edit_in_progress = False
-    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert sequence.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_2.id not in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario_manager._is_submittable(scenario)
-    assert sequence_manager._is_submittable(sequence)
-    assert sequence_manager._is_submittable(sequence.id)
-
-    dn_3.edit_in_progress = True
-    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert sequence.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_3.id not in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario_manager._is_submittable(scenario)
-    assert sequence_manager._is_submittable(sequence)
-    assert sequence_manager._is_submittable(sequence.id)
-
-
-def test_task_is_ready_to_run_property():
-    task_manager = _TaskManagerFactory._build_manager()
-    scenario_manager = _ScenarioManagerFactory._build_manager()
-
-    assert len(task_manager._get_all()) == 0
-
-    dn_config_1 = Config.configure_pickle_data_node("dn_1", default_data=10)
-    dn_config_2 = Config.configure_pickle_data_node("dn_2", default_data=15)
-    dn_config_3 = Config.configure_pickle_data_node("dn_3", default_data=20)
-    task_config = Config.configure_task("task", print, [dn_config_1, dn_config_2], [dn_config_3])
-    scenario_config = Config.configure_scenario("scenario", [task_config])
-
+    dn_config_1 = Config.configure_in_memory_data_node("dn_1")
+    task_config = Config.configure_task("task", print, [dn_config_1], [])
+    scenario_config = Config.configure_scenario("sc", [task_config])
     scenario = scenario_manager._create(scenario_config)
-    task = scenario.tasks["task"]
     dn_1 = scenario.dn_1
-    dn_2 = scenario.dn_2
-    dn_3 = scenario.dn_3
 
-    assert len(task_manager._get_all()) == 1
-    assert len(scenario_manager._get_all()) == 1
-
-    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert task.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert task_manager._is_submittable(task)
-    assert task_manager._is_submittable(task.id)
-    assert scenario_manager._is_submittable(scenario)
-    assert scenario_manager._is_submittable(scenario.id)
-    assert not task_manager._is_submittable("Task_temp")
-
-    dn_1.edit_in_progress = True
-    assert scenario.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert task.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
-    assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[task.id]
-    assert dn_1.id in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_1.id]
-    assert task.id in _ReadyToRunProperty._datanode_id_submittables[dn_1.id]
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id] == {
-        f"DataNode {dn_1.id} is being edited"
-    }
-    assert _ReadyToRunProperty._submittable_id_datanodes[task.id][dn_1.id] == {f"DataNode {dn_1.id} is being edited"}
+    assert not dn_1.is_ready_for_reading
     assert not scenario_manager._is_submittable(scenario)
-    assert not task_manager._is_submittable(task)
-    assert not task_manager._is_submittable(task.id)
-
-    dn_1.edit_in_progress = False
-    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert task.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_1.id not in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario_manager._is_submittable(scenario)
-    assert task_manager._is_submittable(task)
-    assert task_manager._is_submittable(task.id)
-
-    dn_1.last_edit_date = None
-    dn_2.edit_in_progress = True
-    assert scenario.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert task.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
-    assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[task.id]
-    assert dn_2.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
-    assert dn_2.id in _ReadyToRunProperty._submittable_id_datanodes[task.id]
-    assert dn_1.id in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_1.id]
-    assert task.id in _ReadyToRunProperty._datanode_id_submittables[dn_1.id]
-    assert dn_2.id in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_2.id]
-    assert task.id in _ReadyToRunProperty._datanode_id_submittables[dn_2.id]
     assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id] == {f"DataNode {dn_1.id} is not written"}
-    assert _ReadyToRunProperty._submittable_id_datanodes[task.id][dn_1.id] == {f"DataNode {dn_1.id} is not written"}
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_2.id] == {
-        f"DataNode {dn_2.id} is being edited"
-    }
-    assert _ReadyToRunProperty._submittable_id_datanodes[task.id][dn_2.id] == {f"DataNode {dn_2.id} is being edited"}
-    assert not scenario_manager._is_submittable(scenario)
-    assert not task_manager._is_submittable(task)
-    assert not task_manager._is_submittable(task.id)
 
-    dn_1.last_edit_date = datetime.now()
-    assert scenario.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert task.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_1.id not in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
-    assert dn_1.id not in _ReadyToRunProperty._submittable_id_datanodes[task.id]
-    assert dn_2.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
-    assert dn_2.id in _ReadyToRunProperty._submittable_id_datanodes[task.id]
+    dn_1.lock_edit()
+    assert (_ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id]
+            == {f"DataNode {dn_1.id} is being edited", f"DataNode {dn_1.id} is not written"})
+
+    dn_1.write(10)
+    assert scenario_manager._is_submittable(scenario)
+    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
     assert dn_1.id not in _ReadyToRunProperty._datanode_id_submittables
-    assert dn_2.id in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_2.id]
-    assert task.id in _ReadyToRunProperty._datanode_id_submittables[dn_2.id]
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_2.id] == {
-        f"DataNode {dn_2.id} is being edited"
-    }
-    assert _ReadyToRunProperty._submittable_id_datanodes[task.id][dn_2.id] == {f"DataNode {dn_2.id} is being edited"}
-    assert not scenario_manager._is_submittable(scenario)
-    assert not task_manager._is_submittable(task)
-    assert not task_manager._is_submittable(task.id)
 
-    dn_2.edit_in_progress = False
-    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert task.id not in _ReadyToRunProperty._submittable_id_datanodes
+
+def identity(arg):
+    return arg
+
+
+def __assert_not_submittable_becomes_submittable(scenario, sequence, manager):
+    dn_2 = scenario.dn_2
+    assert not dn_2.is_ready_for_reading
+    assert not manager._is_submittable(sequence)
+    assert _ReadyToRunProperty._submittable_id_datanodes[sequence.id][dn_2.id] == {f"DataNode {dn_2.id} is not written"}
+    dn_2.lock_edit()
+    assert (_ReadyToRunProperty._submittable_id_datanodes[sequence.id][dn_2.id]
+            == {f"DataNode {dn_2.id} is being edited", f"DataNode {dn_2.id} is not written"})
+    dn_2.write("ANY VALUE")
+    assert manager._is_submittable(sequence)
+    assert sequence.id not in _ReadyToRunProperty._submittable_id_datanodes
     assert dn_2.id not in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario_manager._is_submittable(scenario)
-    assert task_manager._is_submittable(task)
-    assert task_manager._is_submittable(task.id)
 
-    dn_3.edit_in_progress = True
-    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert task.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert scenario_manager._is_submittable(scenario)
-    assert task_manager._is_submittable(task)
-    assert task_manager._is_submittable(task.id)
+
+def test_writing_config_sequence_input_remove_reasons():
+    scenario_manager = _ScenarioManagerFactory._build_manager()
+    dn_config_1 = Config.configure_in_memory_data_node("dn_1", 10)
+    dn_config_2 = Config.configure_in_memory_data_node("dn_2")
+    dn_config_3 = Config.configure_in_memory_data_node("dn_3")
+    task_1_config = Config.configure_task("task_1", identity, [dn_config_1], [dn_config_2])
+    task_2_config = Config.configure_task("task_2", identity, [dn_config_2], [dn_config_3])
+    scenario_config = Config.configure_scenario("sc", [task_1_config, task_2_config],
+                                                sequences={"seq": [task_2_config]})
+    scenario = scenario_manager._create(scenario_config)
+
+    manager = _SequenceManagerFactory._build_manager()
+    __assert_not_submittable_becomes_submittable(scenario, scenario.sequences["seq"], manager)
+
+
+def test_writing_runtime_sequence_input_remove_reasons():
+    scenario_manager = _ScenarioManagerFactory._build_manager()
+    dn_config_1 = Config.configure_in_memory_data_node("dn_1", 10)
+    dn_config_2 = Config.configure_in_memory_data_node("dn_2")
+    dn_config_3 = Config.configure_in_memory_data_node("dn_3")
+    task_1_config = Config.configure_task("task_1", identity, [dn_config_1], [dn_config_2])
+    task_2_config = Config.configure_task("task_2", identity, [dn_config_2], [dn_config_3])
+    scenario_config = Config.configure_scenario("sc", [task_1_config, task_2_config])
+    scenario = scenario_manager._create(scenario_config)
+    scenario.add_sequence("seq", [scenario.tasks["task_2"]])
+
+    manager = _SequenceManagerFactory._build_manager()
+    __assert_not_submittable_becomes_submittable(scenario, scenario.sequences["seq"], manager)
+
+
+def test_writing_task_input_remove_reasons():
+    scenario_manager = _ScenarioManagerFactory._build_manager()
+    dn_config_1 = Config.configure_in_memory_data_node("dn_1", 10)
+    dn_config_2 = Config.configure_in_memory_data_node("dn_2")
+    dn_config_3 = Config.configure_in_memory_data_node("dn_3")
+    task_1_config = Config.configure_task("task_1", identity, [dn_config_1], [dn_config_2])
+    task_2_config = Config.configure_task("task_2", identity, [dn_config_2], [dn_config_3])
+    scenario_config = Config.configure_scenario("sc", [task_1_config, task_2_config])
+    scenario = scenario_manager._create(scenario_config)
+
+    manager = _TaskManagerFactory._build_manager()
+    __assert_not_submittable_becomes_submittable(scenario, scenario.tasks["task_2"], manager)
