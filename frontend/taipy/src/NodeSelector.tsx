@@ -36,10 +36,11 @@ interface NodeSelectorProps {
     className?: string;
     dynamicClassName?: string;
     showPins?: boolean;
+    multiple?: boolean;
 }
 
 const NodeSelector = (props: NodeSelectorProps) => {
-    const { showPins = true } = props;
+    const { showPins = true, multiple = false } = props;
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     return (
         <Box sx={MainTreeBoxSx} id={props.id} className={className}>
@@ -49,6 +50,7 @@ const NodeSelector = (props: NodeSelectorProps) => {
                 leafType={NodeType.NODE}
                 lovPropertyName="datanodes"
                 showPins={showPins}
+                multiple={multiple}
             />
             <Box>{props.error}</Box>
         </Box>

@@ -9,9 +9,13 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import json
 import pathlib
 from abc import abstractmethod
 from typing import Any, Dict, Generic, Iterable, List, Optional, TypeVar, Union
+
+from ..exceptions import FileCannotBeRead
+from ._decoder import _Decoder
 
 ModelType = TypeVar("ModelType")
 Entity = TypeVar("Entity")
@@ -122,3 +126,27 @@ class _AbstractRepository(Generic[ModelType, Entity]):
             folder_path (Union[str, pathlib.Path]): The folder path to export the entity to.
         """
         raise NotImplementedError
+
+    def _import(self, entity_file_path: pathlib.Path) -> Entity:
+        """
+        Import an entity from an exported file.
+
+        Parameters:
+            folder_path (Union[str, pathlib.Path]): The folder path to export the entity to.
+
+        Returns:
+            The imported entity.
+        """
+        if not entity_file_path.is_file():
+            raise FileNotFoundError
+
+        try:
+            with entity_file_path.open("r", encoding="UTF-8") as f:
+                file_content = f.read()
+        except Exception:
+            raise FileCannotBeRead(str(entity_file_path)) from None
+
+        if isinstance(file_content, str):
+            file_content = json.loads(file_content, cls=_Decoder)
+        model = self.model_type.from_dict(file_content)  # type: ignore[attr-defined]
+        return self.converter._model_to_entity(model)  # type: ignore[attr-defined]

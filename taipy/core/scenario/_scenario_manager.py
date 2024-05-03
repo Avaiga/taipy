@@ -10,14 +10,18 @@
 # specific language governing permissions and limitations under the License.
 
 import datetime
+import pathlib
+import tempfile
+import zipfile
 from functools import partial
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Type, Union
 
 from taipy.config import Config
 
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._repository._abstract_repository import _AbstractRepository
+from .._version._version_manager_factory import _VersionManagerFactory
 from .._version._version_mixin import _VersionMixin
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.scenario_config import ScenarioConfig
@@ -28,9 +32,12 @@ from ..exceptions.exceptions import (
     DeletingPrimaryScenario,
     DifferentScenarioConfigs,
     DoesNotBelongToACycle,
+    EntitiesToBeImportAlredyExist,
+    ImportArchiveDoesntContainAnyScenario,
+    ImportScenarioDoesntHaveAVersion,
     InsufficientScenarioToCompare,
+    InvalidScenario,
     InvalidSequence,
-    InvalidSscenario,
     NonExistingComparator,
     NonExistingScenario,
     NonExistingScenarioConfig,
@@ -180,7 +187,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         cls._set(scenario)
 
         if not scenario._is_consistent():
-            raise InvalidSscenario(scenario.id)
+            raise InvalidScenario(scenario.id)
 
         actual_sequences = scenario._get_sequences()
         for sequence_name in sequences.keys():
@@ -269,6 +276,24 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     @classmethod
     def _get_primary_scenarios(cls) -> List[Scenario]:
         return [scenario for scenario in cls._get_all() if scenario.is_primary]
+
+    @classmethod
+    def _sort_scenarios(
+        cls,
+        scenarios: List[Scenario],
+        descending: bool = False,
+        sort_key: Literal["name", "id", "config_id", "creation_date", "tags"] = "name",
+    ) -> List[Scenario]:
+        if sort_key in ["name", "config_id", "creation_date", "tags"]:
+            if sort_key == "tags":
+                scenarios.sort(key=lambda x: (tuple(sorted(x.tags)), x.id), reverse=descending)
+            else:
+                scenarios.sort(key=lambda x: (getattr(x, sort_key), x.id), reverse=descending)
+        elif sort_key == "id":
+            scenarios.sort(key=lambda x: x.id, reverse=descending)
+        else:
+            scenarios.sort(key=lambda x: (x.name, x.id), reverse=descending)
+        return scenarios
 
     @classmethod
     def _is_promotable_to_primary(cls, scenario: Union[Scenario, ScenarioId]) -> bool:
@@ -432,3 +457,85 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         for fil in filters:
             fil.update({"config_id": config_id})
         return cls._repository._load_all(filters)
+
+    @classmethod
+    def _import_scenario_and_children_entities(
+        cls,
+        zip_file_path: pathlib.Path,
+        override: bool,
+        entity_managers: Dict[str, Type[_Manager]],
+    ) -> Optional[Scenario]:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with zipfile.ZipFile(zip_file_path) as zip_file:
+                zip_file.extractall(tmp_dir)
+
+            tmp_dir_path = pathlib.Path(tmp_dir)
+
+            if not ((tmp_dir_path / "scenarios").exists() or (tmp_dir_path / "scenario").exists()):
+                raise ImportArchiveDoesntContainAnyScenario(zip_file_path)
+
+            if not (tmp_dir_path / "version").exists():
+                raise ImportScenarioDoesntHaveAVersion(zip_file_path)
+
+            # Import the version to check for compatibility
+            entity_managers["version"]._import(next((tmp_dir_path / "version").iterdir()), "")
+
+            valid_entity_folders = list(entity_managers.keys())
+            valid_data_folder = Config.core.storage_folder
+
+            imported_scenario = None
+            imported_entities: Dict[str, List] = {}
+
+            for entity_folder in tmp_dir_path.iterdir():
+                if not entity_folder.is_dir() or entity_folder.name not in valid_entity_folders + [valid_data_folder]:
+                    cls._logger.warning(f"{entity_folder} is not a valid Taipy folder and will not be imported.")
+                    continue
+
+            try:
+                for entity_type in valid_entity_folders:
+                    # Skip the version folder as it is already handled
+                    if entity_type == "version":
+                        continue
+
+                    entity_folder = tmp_dir_path / entity_type
+                    if not entity_folder.exists():
+                        continue
+
+                    manager = entity_managers[entity_type]
+                    imported_entities[entity_type] = []
+
+                    for entity_file in entity_folder.iterdir():
+                        # Check if the to-be-imported entity already exists
+                        entity_id = entity_file.stem
+                        if manager._exists(entity_id):
+                            if override:
+                                cls._logger.warning(f"{entity_id} already exists and will be overridden.")
+                            else:
+                                cls._logger.error(
+                                    f"{entity_id} already exists. Please use the 'override' parameter to override it."
+                                )
+                                raise EntitiesToBeImportAlredyExist(zip_file_path)
+
+                        # Import the entity
+                        imported_entity = manager._import(
+                            entity_file,
+                            version=_VersionManagerFactory._build_manager()._get_latest_version(),
+                            data_folder=tmp_dir_path / valid_data_folder,
+                        )
+
+                        imported_entities[entity_type].append(imported_entity.id)
+                        if entity_type in ["scenario", "scenarios"]:
+                            imported_scenario = imported_entity
+            except Exception as err:
+                cls._logger.error(f"An error occurred during the import: {err}. Rollback the import.")
+
+                # Rollback the import
+                for entity_type, entity_ids in list(imported_entities.items())[::-1]:
+                    manager = entity_managers[entity_type]
+                    for entity_id in entity_ids:
+                        if manager._exists(entity_id):
+                            manager._delete(entity_id)
+                raise err
+
+        cls._logger.info(f"Scenario {imported_scenario.id} has been successfully imported.")  # type: ignore[union-attr]
+        return imported_scenario

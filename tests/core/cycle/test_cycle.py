@@ -14,7 +14,24 @@ from datetime import timedelta
 from taipy.config.common.frequency import Frequency
 from taipy.core import CycleId
 from taipy.core.cycle._cycle_manager import _CycleManager
+from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from taipy.core.cycle.cycle import Cycle
+from taipy.core.task.task import Task
+
+
+def test_cycle_equals(cycle):
+    cycle_manager = _CycleManagerFactory()._build_manager()
+
+    cycle_id = cycle.id
+    cycle_manager._set(cycle)
+
+    # To test if instance is same type
+    task = Task("task", {}, print, [], [], cycle_id)
+
+    cycle_2 = cycle_manager._get(cycle_id)
+    assert cycle == cycle_2
+    assert cycle != cycle_id
+    assert cycle != task
 
 
 def test_create_cycle_entity(current_datetime):

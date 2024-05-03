@@ -233,7 +233,7 @@ const TaipyPlotlyButtons: ModeBarButtonAny[] = [
             if (height) {
                 gd.attributeStyleMap.set("height", height);
             } else {
-                gd.setAttribute("data-height", getComputedStyle(gd.querySelector(".svg-container") || gd).height)
+                gd.setAttribute("data-height", getComputedStyle(gd).height)
             }
             window.dispatchEvent(new Event('resize'));
         },
