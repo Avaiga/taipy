@@ -582,8 +582,8 @@ const ligtenPayload = (payload: Record<string, unknown>) => {
             pv[key] = payload[key];
         }
         return pv;
-    }, {} as typeof payload)
-}
+    }, {} as typeof payload);
+};
 
 export const createRequestTableUpdateAction = (
     name: string | undefined,
@@ -605,21 +605,28 @@ export const createRequestTableUpdateAction = (
     compareDatas?: string,
     stateContext?: Record<string, unknown>
 ): TaipyAction =>
-    createRequestDataUpdateAction(name, id, context, columns, pageKey, ligtenPayload({
-        start: start,
-        end: end,
-        orderby: orderBy,
-        sort: sort,
-        aggregates: aggregates,
-        applies: applies,
-        styles: styles,
-        tooltips: tooltips,
-        handlenan: handleNan,
-        filters: filters,
-        compare: compare,
-        compare_datas: compareDatas,
-        state_context: stateContext,
-    }));
+    createRequestDataUpdateAction(
+        name,
+        id,
+        context,
+        columns,
+        pageKey,
+        ligtenPayload({
+            start: start,
+            end: end,
+            orderby: orderBy,
+            sort: sort,
+            aggregates: aggregates,
+            applies: applies,
+            styles: styles,
+            tooltips: tooltips,
+            handlenan: handleNan,
+            filters: filters,
+            compare: compare,
+            compare_datas: compareDatas,
+            state_context: stateContext,
+        })
+    );
 
 export const createRequestInfiniteTableUpdateAction = (
     name: string | undefined,
@@ -639,26 +646,33 @@ export const createRequestInfiniteTableUpdateAction = (
     filters?: Array<FilterDesc>,
     compare?: string,
     compareDatas?: string,
-    stateContext?: Record<string, unknown>
-    reverse?: boolean,
+    stateContext?: Record<string, unknown>,
+    reverse?: boolean
 ): TaipyAction =>
-    createRequestDataUpdateAction(name, id, context, columns, pageKey, ligtenPayload({
-        infinite: true,
-        start: start,
-        end: end,
-        orderby: orderBy,
-        sort: sort,
-        aggregates: aggregates,
-        applies: applies,
-        styles: styles,
-        tooltips: tooltips,
-        handlenan: handleNan,
-        filters: filters,
-        compare: compare,
-        compare_datas: compareDatas,
-        state_context: stateContext,
-        reverse: !!reverse,
-    }));
+    createRequestDataUpdateAction(
+        name,
+        id,
+        context,
+        columns,
+        pageKey,
+        ligtenPayload({
+            infinite: true,
+            start: start,
+            end: end,
+            orderby: orderBy,
+            sort: sort,
+            aggregates: aggregates,
+            applies: applies,
+            styles: styles,
+            tooltips: tooltips,
+            handlenan: handleNan,
+            filters: filters,
+            compare: compare,
+            compare_datas: compareDatas,
+            state_context: stateContext,
+            reverse: !!reverse,
+        })
+    );
 
 /**
  * Create a *request data update* `Action` that will be used to update the `Context`.
