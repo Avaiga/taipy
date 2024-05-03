@@ -510,7 +510,6 @@ class DataNode(_Entity, _Labeled):
             or the selected data is invalid.<br/>
             True otherwise.
         """
-
         if self.is_valid:
             from ..scenario.scenario import Scenario
             from ..taipy import get_parents
@@ -524,9 +523,8 @@ class DataNode(_Entity, _Labeled):
                         and ancestor_node.last_edit_date > self.last_edit_date
                     ):
                         return False
-                return True
+            return True
         return False
-
 
     @staticmethod
     def _class_map():
