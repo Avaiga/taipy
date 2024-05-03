@@ -16,13 +16,20 @@ import Dialog from "../components/Taipy/Dialog";
 import Login from "../components/Taipy/Login";
 import Router from "../components/Router";
 import Table from "../components/Taipy/Table";
+import TableFilter, { FilterDesc } from "../components/Taipy/TableFilter";
 import { useLovListMemo, LoV, LoVElt } from "../components/Taipy/lovUtils";
 import { LovItem } from "../utils/lov";
 import { getUpdateVar } from "../components/Taipy/utils";
 import { ColumnDesc, RowType, RowValue } from "../components/Taipy/tableUtils";
 import { TaipyContext, TaipyStore } from "../context/taipyContext";
 import { TaipyBaseAction, TaipyState } from "../context/taipyReducers";
-import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDispatch, useDynamicProperty, useModule } from "../utils/hooks";
+import {
+    useClassNames,
+    useDispatchRequestUpdateOnFirstRender,
+    useDispatch,
+    useDynamicProperty,
+    useModule,
+} from "../utils/hooks";
 import {
     createSendActionNameAction,
     createSendUpdateAction,
@@ -36,6 +43,7 @@ export {
     Login,
     Router,
     Table,
+    TableFilter,
     TaipyContext as Context,
     createRequestDataUpdateAction,
     createRequestUpdateAction,
@@ -52,6 +60,7 @@ export {
 
 export type {
     ColumnDesc,
+    FilterDesc,
     LoV,
     LoVElt,
     LovItem,

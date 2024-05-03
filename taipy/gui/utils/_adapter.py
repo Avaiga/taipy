@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import typing as t
+from operator import add
 
 from .._warnings import _warn
 from ..icon import Icon
@@ -129,8 +130,8 @@ class _Adapter:
                 if not id_only and len(tpl_res) > 2 and isinstance(tpl_res[2], list) and len(tpl_res[2]) > 0:
                     tpl_res = (tpl_res[0], tpl_res[1], self.__on_tree(adapter, tpl_res[2]))
                 return (
-                    (tpl_res + result[len(tpl_res) :])
-                    if isinstance(result, tuple) and isinstance(tpl_res, tuple)
+                    add(type(result)(tpl_res), result[len(tpl_res) :])
+                    if isinstance(result, (tuple, list)) and isinstance(tpl_res, (tuple, list))
                     else tpl_res
                 )
         except Exception as e:

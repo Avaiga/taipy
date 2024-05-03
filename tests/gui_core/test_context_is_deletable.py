@@ -63,11 +63,12 @@ class TestGuiCoreContext_is_deletable:
                         True,
                         True,
                         {"name": "name", "id": a_scenario.id},
-                    ]
+                    ],
+                    "error_id": "error_var",
                 },
             )
             assign.assert_called_once()
-            assert assign.call_args.args[0] == "gui_core_sc_error"
+            assert assign.call_args.args[0] == "error_var"
             assert str(assign.call_args.args[1]).startswith("Error deleting Scenario.")
 
             with patch("taipy.gui_core._context.is_deletable", side_effect=mock_is_deletable_false):
@@ -82,11 +83,12 @@ class TestGuiCoreContext_is_deletable:
                             True,
                             True,
                             {"name": "name", "id": a_scenario.id},
-                        ]
+                        ],
+                        "error_id": "error_var",
                     },
                 )
                 assign.assert_called_once()
-                assert assign.call_args.args[0] == "gui_core_sc_error"
+                assert assign.call_args.args[0] == "error_var"
                 assert str(assign.call_args.args[1]).endswith("is not deletable.")
 
     def test_act_on_jobs(self):
@@ -101,11 +103,12 @@ class TestGuiCoreContext_is_deletable:
                 {
                     "args": [
                         {"id": [a_job.id], "action": "delete"},
-                    ]
+                    ],
+                    "error_id": "error_var",
                 },
             )
             assign.assert_called_once()
-            assert assign.call_args.args[0] == "gui_core_js_error"
+            assert assign.call_args.args[0] == "error_var"
             assert str(assign.call_args.args[1]).find("is not deletable.") == -1
             assign.reset_mock()
 
@@ -116,9 +119,10 @@ class TestGuiCoreContext_is_deletable:
                     {
                         "args": [
                             {"id": [a_job.id], "action": "delete"},
-                        ]
+                        ],
+                        "error_id": "error_var",
                     },
                 )
                 assign.assert_called_once()
-                assert assign.call_args.args[0] == "gui_core_js_error"
+                assert assign.call_args.args[0] == "error_var"
                 assert str(assign.call_args.args[1]).endswith("is not readable.")

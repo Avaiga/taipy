@@ -38,6 +38,7 @@ import deepEqual from "fast-deep-equal/es6";
 import {
     createRequestUpdateAction,
     createSendActionNameAction,
+    getUpdateVar,
     useDispatch,
     useDynamicProperty,
     useModule,
@@ -87,6 +88,7 @@ interface ScenarioViewerProps {
     className?: string;
     dynamicClassName?: string;
     onSubmissionChange?: string;
+    updateScVar?: string;
 }
 
 interface SequencesRowProps {
@@ -340,6 +342,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         showSubmit = true,
         showSubmitSequences = true,
         showTags = true,
+        updateScVar = "",
     } = props;
 
     const dispatch = useDispatch();
@@ -401,9 +404,15 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const onPromote = useCallback(() => {
         setPrimaryDialog(false);
         if (valid) {
-            dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scId, primary: true }));
+            dispatch(
+                createSendActionNameAction(id, module, props.onEdit, {
+                    id: scId,
+                    primary: true,
+                    error_id: getUpdateVar(updateScVar, "error_id"),
+                })
+            );
         }
-    }, [valid, props.onEdit, scId, id, dispatch, module]);
+    }, [valid, props.onEdit, scId, id, dispatch, module, updateScVar]);
 
     // userExpanded
     const [userExpanded, setUserExpanded] = useState(valid && expanded);
@@ -421,10 +430,11 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         id: scId,
                         sequence: label,
                         on_submission_change: props.onSubmissionChange,
+                        error_id: getUpdateVar(updateScVar, "error_id")
                     })
                 );
         },
-        [scId, props.onSubmit, props.onSubmissionChange, id, dispatch, module]
+        [scId, props.onSubmit, props.onSubmissionChange, id, dispatch, module, updateScVar]
     );
 
     const submitScenario = useCallback(
@@ -435,11 +445,12 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     createSendActionNameAction(id, module, props.onSubmit, {
                         id: scId,
                         on_submission_change: props.onSubmissionChange,
+                        error_id: getUpdateVar(updateScVar, "error_id")
                     })
                 );
             }
         },
-        [valid, props.onSubmit, props.onSubmissionChange, id, scId, dispatch, module]
+        [valid, props.onSubmit, props.onSubmissionChange, id, scId, dispatch, module, updateScVar]
     );
 
     // focus
@@ -455,11 +466,17 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         (e?: MouseEvent<HTMLElement>) => {
             e && e.stopPropagation();
             if (valid) {
-                dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scId, name: label }));
+                dispatch(
+                    createSendActionNameAction(id, module, props.onEdit, {
+                        id: scId,
+                        name: label,
+                        error_id: getUpdateVar(updateScVar, "error_id"),
+                    })
+                );
                 setFocusName("");
             }
         },
-        [valid, props.onEdit, scId, label, id, dispatch, module]
+        [valid, props.onEdit, scId, label, id, dispatch, module, updateScVar]
     );
     const cancelLabel = useCallback(
         (e?: MouseEvent<HTMLElement>) => {
@@ -493,11 +510,17 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         (e?: MouseEvent<HTMLElement>) => {
             e && e.stopPropagation();
             if (valid) {
-                dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scId, tags: tags }));
+                dispatch(
+                    createSendActionNameAction(id, module, props.onEdit, {
+                        id: scId,
+                        tags: tags,
+                        error_id: getUpdateVar(updateScVar, "error_id"),
+                    })
+                );
                 setFocusName("");
             }
         },
-        [valid, props.onEdit, scId, tags, id, dispatch, module]
+        [valid, props.onEdit, scId, tags, id, dispatch, module, updateScVar]
     );
     const cancelTags = useCallback(
         (e?: MouseEvent<HTMLElement>) => {
@@ -532,6 +555,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             name: label,
                             task_ids: taskIds,
                             del: !!del,
+                            error_id: getUpdateVar(updateScVar, "error_id"),
                         })
                     );
                 } else {
@@ -540,7 +564,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 setFocusName("");
             }
         },
-        [valid, id, scId, props.onEdit, dispatch, module]
+        [valid, id, scId, props.onEdit, dispatch, module, updateScVar]
     );
     const isValidSequence = useCallback(
         (sLabel: string, label: string) => !!label && (sLabel == label || !sequences.find((seq) => seq[0] === label)),
@@ -800,6 +824,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 onFocus={onFocus}
                                 onEdit={props.onEdit}
                                 editable={scEditable}
+                                updatePropVars={updateScVar}
                             />
                             {showSequences ? (
                                 <>
