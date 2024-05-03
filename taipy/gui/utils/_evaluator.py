@@ -17,7 +17,7 @@ import re
 import typing as t
 import warnings
 
-from .._warnings import _warn
+from .._warnings import TaipyGuiWarning, _warn
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
@@ -112,8 +112,7 @@ class _Evaluator:
                                 with warnings.catch_warnings(record=True) as warns:
                                     warnings.resetwarnings()
                                     encoded_var_name = gui._bind_var(var_name)
-                                    if len(warns):
-                                        gui._get_locals_bind()[var_name] = None
+                                    if next((w for w in warns if w.category is TaipyGuiWarning), None):
                                         gui._bind_var_val(var_name, None)
                             else:
                                 encoded_var_name = gui._bind_var(var_name)

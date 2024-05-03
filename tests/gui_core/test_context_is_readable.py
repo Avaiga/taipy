@@ -11,15 +11,18 @@
 
 import contextlib
 import typing as t
+from datetime import datetime
 from unittest.mock import Mock, patch
 
+from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
-from taipy.core import Job, JobId, Scenario, Task
+from taipy.core import Cycle, CycleId, Job, JobId, Scenario, Task
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.submission.submission import Submission, SubmissionStatus
 from taipy.gui import Gui
 from taipy.gui_core._context import _GuiCoreContext
 
+a_cycle = Cycle(Frequency.DAILY, {}, datetime.now(), datetime.now(), datetime.now(), id=CycleId("CYCLE_id"))
 a_scenario = Scenario("scenario_config_id", None, {}, sequences={"sequence": {}})
 a_task = Task("task_config_id", {}, print)
 a_job = Job(t.cast(JobId, "JOB_job_id"), a_task, "submit_id", a_scenario.id)
@@ -50,6 +53,8 @@ def mock_core_get(entity_id):
         return a_datanode
     if entity_id == a_submission.id:
         return a_submission
+    if entity_id == a_cycle.id:
+        return a_cycle
     return a_task
 
 
@@ -62,12 +67,25 @@ class TestGuiCoreContext_is_readable:
     def test_scenario_adapter(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
             gui_core_context = _GuiCoreContext(Mock())
+            gui_core_context.scenario_by_cycle = {}
             outcome = gui_core_context.scenario_adapter(a_scenario)
-            assert isinstance(outcome, tuple)
+            assert isinstance(outcome, list)
             assert outcome[0] == a_scenario.id
 
             with patch("taipy.gui_core._context.is_readable", side_effect=mock_is_readable_false):
                 outcome = gui_core_context.scenario_adapter(a_scenario)
+                assert outcome is None
+
+    def test_cycle_adapter(self):
+        with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
+            gui_core_context = _GuiCoreContext(Mock())
+            gui_core_context.scenario_by_cycle = {"a": 1}
+            outcome = gui_core_context.cycle_adapter(a_cycle)
+            assert isinstance(outcome, list)
+            assert outcome[0] == a_cycle.id
+
+            with patch("taipy.gui_core._context.is_readable", side_effect=mock_is_readable_false):
+                outcome = gui_core_context.cycle_adapter(a_cycle)
                 assert outcome is None
 
     def test_get_scenario_by_id(self):

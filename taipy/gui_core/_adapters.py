@@ -193,8 +193,7 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                     if isinstance(value, Number)
                     else None
                 )
-                if isinstance(value, float):
-                    if math.isnan(value):
+                if isinstance(value, float) and math.isnan(value):
                         value = None
                 return (
                     value,

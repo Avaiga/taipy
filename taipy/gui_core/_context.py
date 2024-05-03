@@ -200,47 +200,40 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def cycle_adapter(self, cycle: Cycle):
         try:
             if (
-                hasattr(cycle, "id")
+                isinstance(cycle, Cycle)
                 and is_readable(cycle.id)
                 and core_get(cycle.id) is not None
+                and self.scenario_by_cycle
             ):
-                if self.scenario_by_cycle and isinstance(cycle, Cycle):
-                    return [
-                        cycle.id,
-                        cycle.get_simple_label(),
-                        sorted(
-                            self.scenario_by_cycle.get(cycle, []),
-                            key=_GuiCoreContext.get_entity_creation_date_iso,
-                        ),
-                        _EntityType.CYCLE.value,
-                        False,
-                    ]
-            return cycle
+                return [
+                    cycle.id,
+                    cycle.get_simple_label(),
+                    sorted(
+                        self.scenario_by_cycle.get(cycle, []),
+                        key=_GuiCoreContext.get_entity_creation_date_iso,
+                    ),
+                    _EntityType.CYCLE.value,
+                    False,
+                ]
         except Exception as e:
             _warn(
-                f"Access to {type(cycle).__name__} "
-                + f"({cycle.id if hasattr(cycle, 'id') else 'No_id'})"
-                + " failed",
+                f"Access to {type(cycle).__name__} " + f"({cycle.id if hasattr(cycle, 'id') else 'No_id'})" + " failed",
                 e,
             )
         return None
 
     def scenario_adapter(self, scenario: Scenario):
-        try:
-            if (
-                hasattr(scenario, "id")
-                and is_readable(scenario.id)
-                and core_get(scenario.id) is not None
-            ):
-                if isinstance(scenario, Scenario):
-                    return [
-                        scenario.id,
-                        scenario.get_simple_label(),
-                        None,
-                        _EntityType.SCENARIO.value,
-                        scenario.is_primary,
-                    ]
+        if isinstance(scenario, (tuple, list)):
             return scenario
+        try:
+            if isinstance(scenario, Scenario) and is_readable(scenario.id) and core_get(scenario.id) is not None:
+                return [
+                    scenario.id,
+                    scenario.get_simple_label(),
+                    None,
+                    _EntityType.SCENARIO.value,
+                    scenario.is_primary,
+                ]
         except Exception as e:
             _warn(
                 f"Access to {type(scenario).__name__} "
@@ -298,7 +291,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     for e in filtered_list
                 ]
             # remove empty cycles
-            adapted_list = [e for e in filtered_list if isinstance(e, Scenario) or len(e[2])]
+            adapted_list = [
+                e for e in filtered_list if isinstance(e, Scenario) or (isinstance(e, (tuple, list)) and len(e[2]))
+            ]
         return adapted_list
 
     def select_scenario(self, state: State, id: str, payload: t.Dict[str, str]):
@@ -567,6 +562,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return [d for owner in owners for d in t.cast(list, self.data_nodes_by_owner.get(owner.id))]
 
     def data_node_adapter(self, data):
+        if isinstance(data, (tuple, list)):
+            return data
         try:
             if hasattr(data, "id") and is_readable(data.id) and core_get(data.id) is not None:
                 if isinstance(data, DataNode):

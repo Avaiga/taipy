@@ -1031,7 +1031,7 @@ class Gui:
                     json.dumps(newvalue, cls=_TaipyJsonEncoder)
                     if len(warns):
                         keep_value = True
-                        for w in list(warns):
+                        for w in warns:
                             if is_debugging():
                                 debug_warnings.append(w)
                             if w.category is not DeprecationWarning and w.category is not PendingDeprecationWarning:
