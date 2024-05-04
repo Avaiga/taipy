@@ -261,7 +261,7 @@ class _GuiCore(ElementLibrary):
                 "type": ElementProperty(PropertyType.inner, __JOB_ADAPTER),
                 "on_job_action": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.act_on_jobs}}"),
                 "error": ElementProperty(
-                    PropertyType.dynamic_string, f"{{{__JOB_SELECTOR_ERROR_VAR}<tp:uniquejb>}}"
+                    PropertyType.dynamic_string, f"{{{__JOB_SELECTOR_ERROR_VAR}<tp:uniq:jb>}}"
                 ),
                 "update_jb_vars": ElementProperty(
                     PropertyType.string, f"error_id={__JOB_SELECTOR_ERROR_VAR}<tp:uniq:jb>"
