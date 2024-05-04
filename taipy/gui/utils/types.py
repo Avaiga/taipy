@@ -12,7 +12,7 @@
 
 import json
 import typing as t
-from abc import ABC
+from abc import ABC, abstractmethod
 from datetime import datetime
 from importlib.util import find_spec
 
@@ -55,6 +55,7 @@ class _TaipyBase(ABC):
             return self.__hash_name
 
     @staticmethod
+    @abstractmethod
     def get_hash():
         return NotImplementedError
 
