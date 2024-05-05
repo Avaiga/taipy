@@ -57,7 +57,7 @@ class _TaipyBase(ABC):
     @staticmethod
     @abstractmethod
     def get_hash():
-        return NotImplementedError
+        raise NotImplementedError
 
     @staticmethod
     def _get_holder_prefixes() -> t.List[str]:
