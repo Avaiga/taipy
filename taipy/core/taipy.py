@@ -519,24 +519,25 @@ def get_scenarios(
     """Retrieve a list of existing scenarios filtered by cycle or tag.
 
     This function allows you to retrieve a list of scenarios based on optional
-    filtering criteria. If both a _cycle_ and a _tag_ are provided, the returned
-    list contains scenarios that belong to the specified _cycle_ **and** also
-    have the specified _tag_.
+    filtering criteria. If both a *cycle* and a *tag* are provided, the returned
+    list contains scenarios that belong to the specified *cycle* and also
+    have the specified *tag*.
 
     Parameters:
-         cycle (Optional[Cycle^]): The optional `Cycle^` to filter scenarios by.
-         tag (Optional[str]): The optional tag to filter scenarios by.
-         is_sorted (bool): The option to sort scenarios. The default sorting key is name.
-         descending (bool): The option to sort scenarios on the sorting key in descending order.
-         sort_key (Literal["name", "id", "creation_date", "tags"]): The optiononal sort_key to
-             decide upon what key scenarios are sorted. The sorting is in increasing order for
-             dates, in alphabetical order for name and id, in lexographical order for tags.
+        cycle (Optional[Cycle^]): The optional `Cycle^` to filter scenarios by.
+        tag (Optional[str]): The optional tag to filter scenarios by.
+        is_sorted (bool): If True, sort the output list of scenarios using the sorting key.
+            The default value is False.
+        descending (bool): If True, sort the output list of scenarios in descending order.
+            The default value is False.
+        sort_key (Literal["name", "id", "creation_date", "tags"]): The optiononal sort_key to
+            decide upon what key scenarios are sorted. The sorting is in increasing order for
+            dates, in alphabetical order for name and id, and in lexicographical order for tags.
+            The default value is "name".<br/>
+            If an incorrect sorting key is provided, the scenarios are sorted by name.
 
     Returns:
-        The list of scenarios filtered by cycle or tag and optionally sorted by name, id, creation_date or tags.
-            If no filtering criterion is provided, this method returns all existing scenarios.
-            If is_sorted is set to true, the scenarios are sorted by sort_key. The scenarios
-            are sorted by name if an incorrect or no sort_key is provided.
+        The list of scenarios filtered by cycle or tag.
     """
     scenario_manager = _ScenarioManagerFactory._build_manager()
     if not cycle and not tag:
@@ -577,17 +578,18 @@ def get_primary_scenarios(
     """Retrieve a list of all primary scenarios.
 
     Parameters:
-         is_sorted (bool): The option to sort scenarios. The default sorting key is name.
-         descending (bool): The option to sort scenarios on the sorting key in descending order.
-         sort_key (Literal["name", "id", "creation_date", "tags"]): The optiononal sort_key to
-             decide upon what key scenarios are sorted. The sorting is in increasing order for
-             dates, in alphabetical order for name and id, in lexographical order for tags.
+        is_sorted (bool): If True, sort the output list of scenarios using the sorting key.
+            The default value is False.
+        descending (bool): If True, sort the output list of scenarios in descending order.
+            The default value is False.
+        sort_key (Literal["name", "id", "creation_date", "tags"]): The optiononal sort_key to
+            decide upon what key scenarios are sorted. The sorting is in increasing order for
+            dates, in alphabetical order for name and id, and in lexicographical order for tags.
+            The default value is "name".<br/>
+            If an incorrect sorting key is provided, the scenarios are sorted by name.
 
     Returns:
-        The list containing all primary scenarios, optionally sorted by name, id, creation_date or tags.
-            The sorting is in increasing order for dates, in alphabetical order for name and
-            id, and in lexicographical order for tags. If sorted is set to true, but if an
-            incorrect or no sort_key is provided, the scenarios are sorted by name.
+        A list contains all primary scenarios.
     """
     scenario_manager = _ScenarioManagerFactory._build_manager()
     scenarios = scenario_manager._get_primary_scenarios()
@@ -995,7 +997,7 @@ def export_scenario(
         output_path (Union[str, pathlib.Path]): The path to export the scenario to.
             The path should include the file name without the extension or with the `.zip` extension.
             If the path exists and the override parameter is False, an exception is raised.
-        override (bool): If True, the existing folder will be overridden. Default is False.
+        override (bool): If True, the existing folder will be overridden. The default value is False.
         include_data (bool): If True, the file-based data nodes are exported as well.
             This includes Pickle, CSV, Excel, Parquet, and JSON data nodes.
             If the scenario has a data node that is not file-based, a warning will be logged, and the data node
@@ -1051,7 +1053,7 @@ def import_scenario(input_path: Union[str, pathlib.Path], override: bool = False
     Parameters:
         input_path (Union[str, pathlib.Path]): The path to the archive scenario to import.
             If the path doesn't exist, an exception is raised.
-        override (bool): If True, override the entities if existed. Default value is False.
+        override (bool): If True, override the entities if existed. The default value is False.
 
     Return:
         The imported scenario.
