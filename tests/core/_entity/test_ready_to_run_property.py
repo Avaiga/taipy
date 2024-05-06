@@ -16,6 +16,7 @@ from taipy import ScenarioId, SequenceId, TaskId
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
+from taipy.core import taipy
 from taipy.core._entity._ready_to_run_property import _ReadyToRunProperty
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.pickle import PickleDataNode
@@ -69,7 +70,7 @@ def test_scenario_submittable_even_with_output_not_ready_to_run():
     assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
 
 
-def test_scenario_not_submittable_if_one_input_never_been_written():
+def test_scenario_not_submittable_not_in_property_because_it_is_lazy():
     scenario_manager = _ScenarioManagerFactory._build_manager()
     dn_config_1 = Config.configure_in_memory_data_node("dn_1", 10)
     dn_config_2 = Config.configure_in_memory_data_node("dn_2")
@@ -83,13 +84,10 @@ def test_scenario_not_submittable_if_one_input_never_been_written():
     assert not dn_2.is_ready_for_reading
     assert not scenario_manager._is_submittable(scenario)
 
-    assert scenario.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_1.id not in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
-    assert dn_2.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
+    # Since it is a lazy property, the scenario and the datanodes is not yet in the dictionary
+    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
     assert dn_1.id not in _ReadyToRunProperty._datanode_id_submittables
-    assert dn_2.id in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_2.id]
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_2.id] == {f"DataNode {dn_2.id} is not written"}
+    assert dn_2.id not in _ReadyToRunProperty._datanode_id_submittables
 
 
 def test_scenario_not_submittable_if_one_input_edit_in_progress():
@@ -150,7 +148,8 @@ def test_writing_input_remove_reasons():
 
     assert not dn_1.is_ready_for_reading
     assert not scenario_manager._is_submittable(scenario)
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id] == {f"DataNode {dn_1.id} is not written"}
+    # Since it is a lazy property, the scenario is not yet in the dictionary
+    assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
 
     dn_1.lock_edit()
     assert (_ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id]
@@ -166,18 +165,19 @@ def identity(arg):
     return arg
 
 
-def __assert_not_submittable_becomes_submittable(scenario, sequence, manager):
-    dn_2 = scenario.dn_2
-    assert not dn_2.is_ready_for_reading
+def __assert_not_submittable_becomes_submittable_when_dn_edited(sequence, manager, dn):
+    assert not dn.is_ready_for_reading
     assert not manager._is_submittable(sequence)
-    assert _ReadyToRunProperty._submittable_id_datanodes[sequence.id][dn_2.id] == {f"DataNode {dn_2.id} is not written"}
-    dn_2.lock_edit()
-    assert (_ReadyToRunProperty._submittable_id_datanodes[sequence.id][dn_2.id]
-            == {f"DataNode {dn_2.id} is being edited", f"DataNode {dn_2.id} is not written"})
-    dn_2.write("ANY VALUE")
+    # Since it is a lazy property, the sequence is not yet in the dictionary
+    assert sequence.id not in _ReadyToRunProperty._submittable_id_datanodes
+
+    dn.lock_edit()
+    assert (_ReadyToRunProperty._submittable_id_datanodes[sequence.id][dn.id]
+            == {f"DataNode {dn.id} is being edited", f"DataNode {dn.id} is not written"})
+    dn.write("ANY VALUE")
     assert manager._is_submittable(sequence)
     assert sequence.id not in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_2.id not in _ReadyToRunProperty._datanode_id_submittables
+    assert dn.id not in _ReadyToRunProperty._datanode_id_submittables
 
 
 def test_writing_config_sequence_input_remove_reasons():
@@ -192,7 +192,7 @@ def test_writing_config_sequence_input_remove_reasons():
     scenario = scenario_manager._create(scenario_config)
 
     manager = _SequenceManagerFactory._build_manager()
-    __assert_not_submittable_becomes_submittable(scenario, scenario.sequences["seq"], manager)
+    __assert_not_submittable_becomes_submittable_when_dn_edited(scenario.sequences["seq"], manager, scenario.dn_2)
 
 
 def test_writing_runtime_sequence_input_remove_reasons():
@@ -207,7 +207,7 @@ def test_writing_runtime_sequence_input_remove_reasons():
     scenario.add_sequence("seq", [scenario.tasks["task_2"]])
 
     manager = _SequenceManagerFactory._build_manager()
-    __assert_not_submittable_becomes_submittable(scenario, scenario.sequences["seq"], manager)
+    __assert_not_submittable_becomes_submittable_when_dn_edited(scenario.sequences["seq"], manager, scenario.dn_2)
 
 
 def test_writing_task_input_remove_reasons():
@@ -221,4 +221,4 @@ def test_writing_task_input_remove_reasons():
     scenario = scenario_manager._create(scenario_config)
 
     manager = _TaskManagerFactory._build_manager()
-    __assert_not_submittable_becomes_submittable(scenario, scenario.tasks["task_2"], manager)
+    __assert_not_submittable_becomes_submittable_when_dn_edited(scenario.tasks["task_2"], manager, scenario.dn_2)

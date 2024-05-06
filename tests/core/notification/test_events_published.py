@@ -149,14 +149,9 @@ def test_events_published_for_writing_dn():
     # for last_edit_date, editor_id, editor_expiration_date and edit_in_progress
     scenario.the_input.write("test")
     snapshot = all_evts.capture()
-    assert len(snapshot.collected_events) == 13
-    assert snapshot.entity_type_collected.get(EventEntityType.CYCLE, 0) == 0
-    assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 6
-    assert snapshot.entity_type_collected.get(EventEntityType.TASK, 0) == 2
-    assert snapshot.entity_type_collected.get(EventEntityType.SEQUENCE, 0) == 2
-    assert snapshot.entity_type_collected.get(EventEntityType.SCENARIO, 0) == 2
-    assert snapshot.operation_collected.get(EventOperation.CREATION, 0) == 0
-    assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 13
+    assert len(snapshot.collected_events) == 4
+    assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 4
+    assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 4
     all_evts.stop()
 
 
