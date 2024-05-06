@@ -13,6 +13,7 @@ import os
 import shutil
 import uuid
 from datetime import datetime, timedelta
+from queue import Queue
 
 import pandas as pd
 import pytest
@@ -22,6 +23,7 @@ from taipy.config import Config
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.core import Cycle, DataNodeId, Job, JobId, Scenario, Sequence, Task
+from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.job._job_manager import _JobManager
@@ -323,3 +325,17 @@ def cleanup_files(reset_configuration_singleton, inject_core_sections):
     for path in [".data", ".my_data", "user_data", ".taipy"]:
         if os.path.exists(path):
             shutil.rmtree(path, ignore_errors=True)
+
+
+@pytest.fixture
+def init_orchestrator():
+    def _init_orchestrator():
+        _OrchestratorFactory._remove_dispatcher()
+
+        if _OrchestratorFactory._orchestrator is None:
+            _OrchestratorFactory._build_orchestrator()
+        _OrchestratorFactory._build_dispatcher(force_restart=True)
+        _OrchestratorFactory._orchestrator.jobs_to_run = Queue()
+        _OrchestratorFactory._orchestrator.blocked_jobs = []
+
+    return _init_orchestrator
