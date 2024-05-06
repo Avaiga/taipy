@@ -10,21 +10,23 @@
 # specific language governing permissions and limitations under the License.
 
 import os
-import shutil
+import zipfile
 
 import pandas as pd
 import pytest
 
 import taipy.core.taipy as tp
 from taipy import Config, Frequency, Scope
-from taipy.core.exceptions import ExportFolderAlreadyExists, InvalidExportPath
+from taipy.core.exceptions import ExportPathAlreadyExists
 
 
 @pytest.fixture(scope="function", autouse=True)
-def clean_tmp_folder():
-    shutil.rmtree("./tmp", ignore_errors=True)
+def clean_export_zip_file():
+    if os.path.exists("./tmp.zip"):
+        os.remove("./tmp.zip")
     yield
-    shutil.rmtree("./tmp", ignore_errors=True)
+    if os.path.exists("./tmp.zip"):
+        os.remove("./tmp.zip")
 
 
 def plus_1(x):
@@ -57,15 +59,7 @@ def configure_test_scenario(input_data, frequency=None):
     return scenario_cfg
 
 
-def test_export_scenario_to_the_storage_folder(init_sql_repo):
-    scenario_cfg = configure_test_scenario(1, frequency=Frequency.DAILY)
-    scenario = tp.create_scenario(scenario_cfg)
-
-    with pytest.raises(InvalidExportPath):
-        tp.export_scenario(scenario.id, Config.core.taipy_storage_folder)
-
-
-def test_export_scenario_with_cycle(init_sql_repo):
+def test_export_scenario_with_cycle(tmp_path, init_sql_repo):
     scenario_cfg = configure_test_scenario(1, frequency=Frequency.DAILY)
 
     scenario = tp.create_scenario(scenario_cfg)
@@ -73,9 +67,11 @@ def test_export_scenario_with_cycle(init_sql_repo):
     jobs = submission.jobs
 
     # Export the submitted scenario
-    tp.export_scenario(scenario.id, "./tmp/exp_scenario")
+    tp.export_scenario(scenario.id, "tmp.zip")
+    with zipfile.ZipFile("./tmp.zip") as zip_file:
+        zip_file.extractall(tmp_path)
 
-    assert sorted(os.listdir("./tmp/exp_scenario/data_node")) == sorted(
+    assert sorted(os.listdir(f"{tmp_path}/data_node")) == sorted(
         [
             f"{scenario.i_1.id}.json",
             f"{scenario.o_1_csv.id}.json",
@@ -84,7 +80,7 @@ def test_export_scenario_with_cycle(init_sql_repo):
             f"{scenario.o_1_json.id}.json",
         ]
     )
-    assert sorted(os.listdir("./tmp/exp_scenario/task")) == sorted(
+    assert sorted(os.listdir(f"{tmp_path}/task")) == sorted(
         [
             f"{scenario.t_1_csv.id}.json",
             f"{scenario.t_1_excel.id}.json",
@@ -92,32 +88,34 @@ def test_export_scenario_with_cycle(init_sql_repo):
             f"{scenario.t_1_json.id}.json",
         ]
     )
-    assert sorted(os.listdir("./tmp/exp_scenario/scenario")) == sorted([f"{scenario.id}.json"])
-    assert sorted(os.listdir("./tmp/exp_scenario/job")) == sorted(
+    assert sorted(os.listdir(f"{tmp_path}/scenario")) == sorted([f"{scenario.id}.json"])
+    assert sorted(os.listdir(f"{tmp_path}/job")) == sorted(
         [f"{jobs[0].id}.json", f"{jobs[1].id}.json", f"{jobs[2].id}.json", f"{jobs[3].id}.json"]
     )
-    assert os.listdir("./tmp/exp_scenario/submission") == [f"{submission.id}.json"]
-    assert sorted(os.listdir("./tmp/exp_scenario/cycle")) == sorted([f"{scenario.cycle.id}.json"])
+    assert os.listdir(f"{tmp_path}/submission") == [f"{submission.id}.json"]
+    assert sorted(os.listdir(f"{tmp_path}/cycle")) == sorted([f"{scenario.cycle.id}.json"])
 
 
-def test_export_scenario_without_cycle(init_sql_repo):
+def test_export_scenario_without_cycle(tmp_path, init_sql_repo):
     scenario_cfg = configure_test_scenario(1)
 
     scenario = tp.create_scenario(scenario_cfg)
     tp.submit(scenario)
 
     # Export the submitted scenario
-    tp.export_scenario(scenario.id, "./tmp/exp_scenario")
+    tp.export_scenario(scenario.id, "tmp.zip")
+    with zipfile.ZipFile("./tmp.zip") as zip_file:
+        zip_file.extractall(tmp_path)
 
-    assert os.path.exists("./tmp/exp_scenario/data_node")
-    assert os.path.exists("./tmp/exp_scenario/task")
-    assert os.path.exists("./tmp/exp_scenario/scenario")
-    assert os.path.exists("./tmp/exp_scenario/job")
-    assert os.path.exists("./tmp/exp_scenario/submission")
-    assert not os.path.exists("./tmp/exp_scenario/cycle")  # No cycle
+    assert os.path.exists(f"{tmp_path}/data_node")
+    assert os.path.exists(f"{tmp_path}/task")
+    assert os.path.exists(f"{tmp_path}/scenario")
+    assert os.path.exists(f"{tmp_path}/job")
+    assert os.path.exists(f"{tmp_path}/submission")
+    assert not os.path.exists(f"{tmp_path}/cycle")  # No cycle
 
 
-def test_export_scenario_override_existing_files(init_sql_repo):
+def test_export_scenario_override_existing_files(tmp_path, init_sql_repo):
     scenario_1_cfg = configure_test_scenario(1, frequency=Frequency.DAILY)
     scenario_2_cfg = configure_test_scenario(2)
 
@@ -125,45 +123,54 @@ def test_export_scenario_override_existing_files(init_sql_repo):
     tp.submit(scenario_1)
 
     # Export the submitted scenario_1
-    tp.export_scenario(scenario_1.id, "./tmp/exp_scenario")
-    assert os.path.exists("./tmp/exp_scenario/data_node")
-    assert os.path.exists("./tmp/exp_scenario/task")
-    assert os.path.exists("./tmp/exp_scenario/scenario")
-    assert os.path.exists("./tmp/exp_scenario/job")
-    assert os.path.exists("./tmp/exp_scenario/submission")
-    assert os.path.exists("./tmp/exp_scenario/cycle")
+    tp.export_scenario(scenario_1.id, "tmp.zip")
+    with zipfile.ZipFile("./tmp.zip") as zip_file:
+        zip_file.extractall(tmp_path / "scenario_1")
+    assert os.path.exists(f"{tmp_path}/scenario_1/data_node")
+    assert os.path.exists(f"{tmp_path}/scenario_1/task")
+    assert os.path.exists(f"{tmp_path}/scenario_1/scenario")
+    assert os.path.exists(f"{tmp_path}/scenario_1/job")
+    assert os.path.exists(f"{tmp_path}/scenario_1/submission")
+    assert os.path.exists(f"{tmp_path}/scenario_1/cycle")
 
     scenario_2 = tp.create_scenario(scenario_2_cfg)
     tp.submit(scenario_2)
 
     # Export the submitted scenario_2 to the same folder should raise an error
-    with pytest.raises(ExportFolderAlreadyExists):
-        tp.export_scenario(scenario_2.id, "./tmp/exp_scenario")
+    with pytest.raises(ExportPathAlreadyExists):
+        tp.export_scenario(scenario_2.id, "tmp.zip")
 
     # Export the submitted scenario_2 without a cycle and override the existing files
-    tp.export_scenario(scenario_2.id, "./tmp/exp_scenario", override=True)
-    assert os.path.exists("./tmp/exp_scenario/data_node")
-    assert os.path.exists("./tmp/exp_scenario/task")
-    assert os.path.exists("./tmp/exp_scenario/scenario")
-    assert os.path.exists("./tmp/exp_scenario/job")
-    assert os.path.exists("./tmp/exp_scenario/submission")
-    # The cycles folder should be removed when overriding
-    assert not os.path.exists("./tmp/exp_scenario/cycle")
+    tp.export_scenario(scenario_2.id, "tmp.zip", override=True)
+    with zipfile.ZipFile("./tmp.zip") as zip_file:
+        zip_file.extractall(tmp_path / "scenario_2")
+    assert os.path.exists(f"{tmp_path}/scenario_2/data_node")
+    assert os.path.exists(f"{tmp_path}/scenario_2/task")
+    assert os.path.exists(f"{tmp_path}/scenario_2/scenario")
+    assert os.path.exists(f"{tmp_path}/scenario_2/job")
+    assert os.path.exists(f"{tmp_path}/scenario_2/submission")
+    # The cycles folder should not exists since the new scenario does not have a cycle
+    assert not os.path.exists(f"{tmp_path}/scenario_2/cycle")
 
 
-def test_export_scenario_filesystem_with_data(init_sql_repo):
+def test_export_scenario_sql_repo_with_data(tmp_path, init_sql_repo):
     scenario_cfg = configure_test_scenario(1)
     scenario = tp.create_scenario(scenario_cfg)
     tp.submit(scenario)
 
     # Export scenario without data
-    tp.export_scenario(scenario.id, "./tmp/exp_scenario")
-    assert not os.path.exists("./tmp/exp_scenario/user_data")
+    tp.export_scenario(scenario.id, "tmp.zip")
+    with zipfile.ZipFile("./tmp.zip") as zip_file:
+        zip_file.extractall(tmp_path / "scenario_without_data")
+    assert not os.path.exists(f"{tmp_path}/scenario_without_data/user_data")
 
     # Export scenario with data
-    tp.export_scenario(scenario.id, "./tmp/exp_scenario", include_data=True, override=True)
-    assert os.path.exists("./tmp/exp_scenario/user_data")
-    data_files = [f for _, _, files in os.walk("./tmp/exp_scenario/user_data") for f in files]
+    tp.export_scenario(scenario.id, "tmp.zip", include_data=True, override=True)
+    with zipfile.ZipFile("./tmp.zip") as zip_file:
+        zip_file.extractall(tmp_path / "scenario_with_data")
+    assert os.path.exists(f"{tmp_path}/scenario_with_data/user_data")
+
+    data_files = [f for _, _, files in os.walk(f"{tmp_path}/scenario_with_data/user_data") for f in files]
     assert sorted(data_files) == sorted(
         [
             f"{scenario.i_1.id}.p",
@@ -188,6 +195,6 @@ def test_export_non_file_based_data_node_raise_warning(init_sql_repo, caplog):
     tp.submit(scenario)
 
     # Export scenario with in-memory data node
-    tp.export_scenario(scenario.id, "./tmp/exp_scenario", include_data=True)
+    tp.export_scenario(scenario.id, "tmp.zip", include_data=True)
     expected_warning = f"Data node {scenario.o_mem.id} is not a file-based data node and the data will not be exported"
     assert expected_warning in caplog.text

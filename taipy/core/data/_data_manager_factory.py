@@ -19,11 +19,10 @@ from ._data_sql_repository import _DataSQLRepository
 
 
 class _DataManagerFactory(_ManagerFactory):
-
     __REPOSITORY_MAP = {"default": _DataFSRepository, "sql": _DataSQLRepository}
 
     @classmethod
-    def _build_manager(cls) -> Type[_DataManager]:  # type: ignore
+    def _build_manager(cls) -> Type[_DataManager]:
         if cls._using_enterprise():
             data_manager = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + ".data._data_manager", "_DataManager"

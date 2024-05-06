@@ -519,20 +519,21 @@ class DataNode(_Entity, _Labeled):
             or the selected data is invalid.<br/>
             True otherwise.
         """
+        if self.is_valid:
+            from ..scenario.scenario import Scenario
+            from ..taipy import get_parents
 
-        from ..scenario.scenario import Scenario
-        from ..taipy import get_parents
-
-        parent_scenarios: Set[Scenario] = get_parents(self)["scenario"]  # type: ignore
-        for parent_scenario in parent_scenarios:
-            for ancestor_node in nx.ancestors(parent_scenario._build_dag(), self):
-                if (
-                    isinstance(ancestor_node, DataNode)
-                    and ancestor_node.last_edit_date
-                    and ancestor_node.last_edit_date > self.last_edit_date
-                ):
-                    return False
-        return self.is_valid
+            parent_scenarios: Set[Scenario] = get_parents(self)["scenario"]  # type: ignore
+            for parent_scenario in parent_scenarios:
+                for ancestor_node in nx.ancestors(parent_scenario._build_dag(), self):
+                    if (
+                        isinstance(ancestor_node, DataNode)
+                        and ancestor_node.last_edit_date
+                        and ancestor_node.last_edit_date > self.last_edit_date
+                    ):
+                        return False
+            return True
+        return False
 
     @staticmethod
     def _class_map():
