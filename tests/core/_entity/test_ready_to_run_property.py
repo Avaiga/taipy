@@ -10,21 +10,13 @@
 # specific language governing permissions and limitations under the License.
 
 
-from datetime import datetime
-
 from taipy import ScenarioId, SequenceId, TaskId
 from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.core import taipy
 from taipy.core._entity._ready_to_run_property import _ReadyToRunProperty
-from taipy.core.data._data_manager_factory import _DataManagerFactory
-from taipy.core.data.pickle import PickleDataNode
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
-from taipy.core.scenario.scenario import Scenario
 from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
-from taipy.core.task.task import Task
 
 
 def test_non_existing_submittable_is_not_ready_to_run():
@@ -106,7 +98,9 @@ def test_scenario_not_submittable_if_one_input_edit_in_progress():
     assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
     assert dn_1.id in _ReadyToRunProperty._datanode_id_submittables
     assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_1.id]
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id] == {f"DataNode {dn_1.id} is being edited"}
+    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id] == {
+        f"DataNode {dn_1.id} is being edited"
+    }
 
 
 def test_scenario_not_submittable_for_multiple_reasons():
@@ -132,10 +126,14 @@ def test_scenario_not_submittable_for_multiple_reasons():
     assert dn_1.id in _ReadyToRunProperty._datanode_id_submittables
     assert dn_2.id in _ReadyToRunProperty._datanode_id_submittables
     assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_1.id]
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id] == {f"DataNode {dn_1.id} is being edited"}
+    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id] == {
+        f"DataNode {dn_1.id} is being edited"
+    }
     assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_2.id]
-    assert (_ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_2.id]
-            == {f"DataNode {dn_2.id} is being edited"}, f"DataNode {dn_2.id} is not written")
+    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_2.id] == {
+        f"DataNode {dn_2.id} is being edited",
+        f"DataNode {dn_2.id} is not written",
+    }
 
 
 def test_writing_input_remove_reasons():
@@ -152,8 +150,10 @@ def test_writing_input_remove_reasons():
     assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
 
     dn_1.lock_edit()
-    assert (_ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id]
-            == {f"DataNode {dn_1.id} is being edited", f"DataNode {dn_1.id} is not written"})
+    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id] == {
+        f"DataNode {dn_1.id} is being edited",
+        f"DataNode {dn_1.id} is not written",
+    }
 
     dn_1.write(10)
     assert scenario_manager._is_submittable(scenario)
@@ -172,8 +172,10 @@ def __assert_not_submittable_becomes_submittable_when_dn_edited(sequence, manage
     assert sequence.id not in _ReadyToRunProperty._submittable_id_datanodes
 
     dn.lock_edit()
-    assert (_ReadyToRunProperty._submittable_id_datanodes[sequence.id][dn.id]
-            == {f"DataNode {dn.id} is being edited", f"DataNode {dn.id} is not written"})
+    assert _ReadyToRunProperty._submittable_id_datanodes[sequence.id][dn.id] == {
+        f"DataNode {dn.id} is being edited",
+        f"DataNode {dn.id} is not written",
+    }
     dn.write("ANY VALUE")
     assert manager._is_submittable(sequence)
     assert sequence.id not in _ReadyToRunProperty._submittable_id_datanodes
@@ -187,8 +189,9 @@ def test_writing_config_sequence_input_remove_reasons():
     dn_config_3 = Config.configure_in_memory_data_node("dn_3")
     task_1_config = Config.configure_task("task_1", identity, [dn_config_1], [dn_config_2])
     task_2_config = Config.configure_task("task_2", identity, [dn_config_2], [dn_config_3])
-    scenario_config = Config.configure_scenario("sc", [task_1_config, task_2_config],
-                                                sequences={"seq": [task_2_config]})
+    scenario_config = Config.configure_scenario(
+        "sc", [task_1_config, task_2_config], sequences={"seq": [task_2_config]}
+    )
     scenario = scenario_manager._create(scenario_config)
 
     manager = _SequenceManagerFactory._build_manager()
