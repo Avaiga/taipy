@@ -65,7 +65,7 @@ def test_show_decrease_delta_value(page: Page, gui: Gui, helpers):
   delta_value = events_list.nth(1).text_content()
   assert delta_value == "▼−20"
 
-@pytest.mark.teste2es
+@pytest.mark.teste2e
 def test_show_linear_chart(page: Page, gui: Gui, helpers):
   default_value = 100
   page_md = """
@@ -79,7 +79,7 @@ def test_show_linear_chart(page: Page, gui: Gui, helpers):
   chart = page.locator("//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='bullet']")
   assert chart.is_visible()
 
-@pytest.mark.teste2es
+@pytest.mark.teste2e
 def test_show_circular_chart_as_default_type(page: Page, gui: Gui, helpers):
   default_value = 100
   page_md = """
