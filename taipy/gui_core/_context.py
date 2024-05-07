@@ -551,15 +551,15 @@ class _GuiCoreContext(CoreEventConsumerBase):
         with self.lock:
             self.__do_datanodes_tree()
         if scenarios is None:
-            return (self.data_nodes_by_owner.get(None) if self.data_nodes_by_owner else []) + self.get_scenarios(
-                None, None
+            return (self.data_nodes_by_owner.get(None, []) if self.data_nodes_by_owner else []) + (
+                self.get_scenarios(None, None) or []
             )
         if not self.data_nodes_by_owner:
             return []
         if isinstance(scenarios, (list, tuple)) and len(scenarios) > 1:
             return scenarios
         owners = scenarios if isinstance(scenarios, (list, tuple)) else [scenarios]
-        return [d for owner in owners for d in t.cast(list, self.data_nodes_by_owner.get(owner.id))]
+        return [d for owner in owners for d in self.data_nodes_by_owner.get(owner.id, [])]
 
     def data_node_adapter(self, data):
         if isinstance(data, (tuple, list)):
