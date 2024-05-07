@@ -159,12 +159,17 @@ class Element:
         properties: t.Optional[t.Dict[str, t.Any]],
         lib: "ElementLibrary",
         is_html: t.Optional[bool] = False,
-        counter: int = 0
+        counter: int = 0,
     ) -> t.Union[t.Any, t.Tuple[str, str]]:
         attributes = properties if isinstance(properties, dict) else {}
         if self.inner_properties:
             uniques: t.Dict[str, int] = {}
-            self.attributes.update(self.inner_properties)
+            self.attributes.update(
+                {
+                    prop: ElementProperty(attr.property_type, None, attr._js_name, attr.with_update)
+                    for prop, attr in self.inner_properties.items()
+                }
+            )
             for prop, attr in self.inner_properties.items():
                 val = attr.default_value
                 if val:
@@ -184,7 +189,9 @@ class Element:
                         if id is None:
                             id = len(uniques) + 1
                             uniques[m.group(1)] = id
-                        val = f"{val[: m.start()]}'{counter}.{id}'{val[m.end() :]}"
+                        val = f"{val[: m.start()]}{counter}{id}{val[m.end() :]}"
+                        if gui._is_expression(val):
+                            gui._evaluate_expr(val, True)
 
                 attributes[prop] = val
         # this modifies attributes
@@ -286,7 +293,7 @@ class ElementLibrary(ABC):
             because each JavaScript module will have to have a unique name.
 
         """
-        return NotImplementedError  # type: ignore
+        raise NotImplementedError
 
     def get_js_module_name(self) -> str:
         """

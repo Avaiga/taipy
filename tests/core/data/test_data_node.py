@@ -75,6 +75,21 @@ class TestDataNode:
         assert not dn.is_ready_for_reading
         assert len(dn.properties) == 0
 
+    def test_is_up_to_date_when_not_written(self):
+        dn_confg_1 = Config.configure_in_memory_data_node("dn_1", default_data="a")
+        dn_confg_2 = Config.configure_in_memory_data_node("dn_2")
+        task_config_1 = Config.configure_task("t1", funct_a_b, [dn_confg_1], [dn_confg_2])
+        scenario_config = Config.configure_scenario("sc", [task_config_1])
+
+        scenario = tp.create_scenario(scenario_config)
+
+        assert scenario.dn_1.is_up_to_date is True
+        assert scenario.dn_2.is_up_to_date is False
+
+        tp.submit(scenario)
+        assert scenario.dn_1.is_up_to_date is True
+        assert scenario.dn_2.is_up_to_date is True
+
     def test_create(self):
         a_date = datetime.now()
         dn = DataNode(

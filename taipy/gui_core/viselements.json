@@ -97,6 +97,11 @@
                         "type": "bool",
                         "default_value": "False",
                         "doc": "TODO: If True, the user can select multiple scenarios."
+                    },
+                    {
+                        "name": "filter_by",
+                        "type": "str|list[str]",
+                        "doc": "TODO: a list of scenario attributes to filter on."
                     }
                 ]
             }

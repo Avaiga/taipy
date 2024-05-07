@@ -11,7 +11,6 @@
 
 from unittest import mock
 
-import pytest
 from flask import url_for
 
 
@@ -75,16 +74,16 @@ def test_get_all_scenarios(client, default_sequence, default_scenario_config_lis
     assert len(results) == 10
 
 
-@pytest.mark.xfail()
-def test_execute_scenario(client, default_scenario):
+def test_execute_scenario(client, default_scenario_config):
     # test 404
     user_url = url_for("api.scenario_submit", scenario_id="foo")
     rep = client.post(user_url)
     assert rep.status_code == 404
 
-    with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._get") as manager_mock:
-        manager_mock.return_value = default_scenario
+    with mock.patch("taipy.rest.api.resources.scenario.ScenarioList.fetch_config") as config_mock:
+        config_mock.return_value = default_scenario_config
+        scenarios_url = url_for("api.scenarios", config_id="bar")
+        scn = client.post(scenarios_url)
 
-        # test get_scenario
-        rep = client.post(url_for("api.scenario_submit", scenario_id="foo"))
-        assert rep.status_code == 200
+    rep = client.post(url_for("api.scenario_submit", scenario_id=scn.json["scenario"]["id"]))
+    assert rep.status_code == 200
