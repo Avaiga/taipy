@@ -19,11 +19,10 @@ from ._submission_sql_repository import _SubmissionSQLRepository
 
 
 class _SubmissionManagerFactory(_ManagerFactory):
-
     __REPOSITORY_MAP = {"default": _SubmissionFSRepository, "sql": _SubmissionSQLRepository}
 
     @classmethod
-    def _build_manager(cls) -> Type[_SubmissionManager]:  # type: ignore
+    def _build_manager(cls) -> Type[_SubmissionManager]:
         if cls._using_enterprise():
             submission_manager = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + ".submission._submission_manager", "_SubmissionManager"

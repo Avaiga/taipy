@@ -9,6 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from typing import Type
+
 from .._manager._manager_factory import _ManagerFactory
 from ..common import _utils
 from ._version_fs_repository import _VersionFSRepository
@@ -17,11 +19,10 @@ from ._version_sql_repository import _VersionSQLRepository
 
 
 class _VersionManagerFactory(_ManagerFactory):
-
     __REPOSITORY_MAP = {"default": _VersionFSRepository, "sql": _VersionSQLRepository}
 
     @classmethod
-    def _build_manager(cls) -> _VersionManager:  # type: ignore
+    def _build_manager(cls) -> Type[_VersionManager]:
         if cls._using_enterprise():
             version_manager = _utils._load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + "._version._version_manager", "_VersionManager"

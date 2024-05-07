@@ -31,6 +31,7 @@ import {
     createSendUpdateAction,
     useDispatchRequestUpdateOnFirstRender,
     createRequestUpdateAction,
+    useDynamicProperty,
 } from "taipy-gui";
 
 import { Cycles, Cycle, DataNodes, NodeType, Scenarios, Scenario, DataNode, Sequence } from "./utils/types";
@@ -54,6 +55,7 @@ import {
 
 export interface EditProps {
     id: string;
+    active: boolean;
 }
 
 const treeSlots = { expandIcon: ChevronRight };
@@ -64,6 +66,8 @@ type Pinned = Record<string, boolean>;
 
 interface CoreSelectorProps {
     id?: string;
+    active?: boolean;
+    defaultActive?: boolean;
     updateVarName?: string;
     entities?: Entities;
     coreChanged?: Record<string, unknown>;
@@ -109,6 +113,7 @@ const CoreItem = (props: {
     pins: [Pinned, Pinned];
     onPin?: (e: MouseEvent<HTMLElement>) => void;
     hideNonPinned: boolean;
+    active: boolean;
 }) => {
     const [id, label, items = EmptyArray, nodeType, primary] = props.item;
     const isPinned = props.pins[0][id];
@@ -126,6 +131,7 @@ const CoreItem = (props: {
                     pins={props.pins}
                     onPin={props.onPin}
                     hideNonPinned={props.hideNonPinned}
+                    active={props.active}
                 />
             ))}
         </>
@@ -161,7 +167,7 @@ const CoreItem = (props: {
                     </Grid>
                     {props.editComponent && nodeType === props.leafType ? (
                         <Grid item xs="auto">
-                            <props.editComponent id={id} />
+                            <props.editComponent id={id} active={props.active} />
                         </Grid>
                     ) : null}
                     {props.onPin ? (
@@ -194,6 +200,7 @@ const CoreItem = (props: {
                     pins={props.pins}
                     onPin={props.onPin}
                     hideNonPinned={props.hideNonPinned}
+                    active={props.active}
                 />
             ))}
         </TreeItem>
@@ -261,6 +268,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
     const [hideNonPinned, setShowPinned] = useState(false);
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
+    const active = useDynamicProperty(props.active, props.defaultActive, true);
     const dispatch = useDispatch();
     const module = useModule();
 
@@ -437,6 +445,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                               onPin={showPins ? onPin : undefined}
                               pins={pins}
                               hideNonPinned={hideNonPinned}
+                              active={!!active}
                           />
                       ))
                     : null}

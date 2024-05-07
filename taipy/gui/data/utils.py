@@ -79,7 +79,7 @@ class Decimator(ABC):
                 from *data* should be preserved, or False requires that this
                 data point be dropped.
         """
-        return NotImplementedError  # type: ignore
+        raise NotImplementedError
 
 
 def _df_data_filter(

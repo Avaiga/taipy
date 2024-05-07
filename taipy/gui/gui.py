@@ -1031,7 +1031,7 @@ class Gui:
                     json.dumps(newvalue, cls=_TaipyJsonEncoder)
                     if len(warns):
                         keep_value = True
-                        for w in list(warns):
+                        for w in warns:
                             if is_debugging():
                                 debug_warnings.append(w)
                             if w.category is not DeprecationWarning and w.category is not PendingDeprecationWarning:
@@ -1468,8 +1468,8 @@ class Gui:
             return False
 
     # Proxy methods for Evaluator
-    def _evaluate_expr(self, expr: str) -> t.Any:
-        return self.__evaluator.evaluate_expr(self, expr)
+    def _evaluate_expr(self, expr: str, lazy_declare: t.Optional[bool] = False) -> t.Any:
+        return self.__evaluator.evaluate_expr(self, expr, lazy_declare)
 
     def _re_evaluate_expr(self, var_name: str) -> t.Set[str]:
         return self.__evaluator.re_evaluate_expr(self, var_name)

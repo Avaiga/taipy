@@ -1005,12 +1005,14 @@ class _Builder:
             elif var_type == PropertyType.toHtmlContent:
                 self.__set_html_content(attr[0], "page", var_type)
             elif isclass(var_type) and issubclass(var_type, _TaipyBase):
+                prop_name = _to_camel_case(attr[0])
                 if hash_name := self.__hashes.get(attr[0]):
-                    prop_name = _to_camel_case(attr[0])
                     expr = self.__gui._get_expr_from_hash(hash_name)
                     hash_name = self.__gui._evaluate_bind_holder(var_type, expr)
                     self.__update_vars.append(f"{prop_name}={hash_name}")
                     self.__set_react_attribute(prop_name, hash_name)
+                else:
+                    self.set_attribute(prop_name, var_type(self.__attributes.get(attr[0]), "").get())
 
         self.__set_refresh_on_update()
         return self
@@ -1025,7 +1027,8 @@ class _Builder:
             name (str): The name of the attribute.
             value (Any): The value of the attribute (must be json serializable).
         """
-        self.el.set(name, value)
+        if value is not None:
+            self.el.set(name, value)
         return self
 
     def get_element(self):
