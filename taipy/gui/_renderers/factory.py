@@ -56,6 +56,7 @@ class _Factory:
         "text": "value",
         "toggle": "value",
         "tree": "value",
+        "metric": "value"
     }
 
     _TEXT_ATTRIBUTES = ["format", "id", "hover_text", "raw"]
@@ -331,6 +332,27 @@ class _Factory:
             ]
         )
         ._set_propagate(),
+        "metric": lambda gui, control_type, attrs: _Builder(
+            gui=gui,
+            control_type=control_type,
+            element_name="Metric",
+            attributes=attrs,
+        )
+        .set_value_and_default(var_type=PropertyType.dynamic_number)
+        .set_attributes(
+            [
+                ("id",),
+                ("active", PropertyType.dynamic_boolean, True),
+                ("hover_text", PropertyType.dynamic_string),
+                ("value", PropertyType.dynamic_number),
+                ("type", PropertyType.string, "circular"),
+                ("min", PropertyType.number, 0),
+                ("max", PropertyType.number, 100),
+                ("delta", PropertyType.dynamic_number),
+                ("format",),
+                ("format_delta",),
+            ]
+        ),
         "navbar": lambda gui, control_type, attrs: _Builder(
             gui=gui, control_type=control_type, element_name="NavBar", attributes=attrs, default_value=None
         ).set_attributes(

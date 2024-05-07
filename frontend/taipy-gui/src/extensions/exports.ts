@@ -16,6 +16,7 @@ import Dialog from "../components/Taipy/Dialog";
 import Login from "../components/Taipy/Login";
 import Router from "../components/Router";
 import Table from "../components/Taipy/Table";
+import Metric from "../components/Taipy/Metric";
 import { useLovListMemo, LoV, LoVElt } from "../components/Taipy/lovUtils";
 import { LovItem } from "../utils/lov";
 import { getUpdateVar } from "../components/Taipy/utils";
@@ -36,6 +37,7 @@ export {
     Login,
     Router,
     Table,
+    Metric,
     TaipyContext as Context,
     createRequestDataUpdateAction,
     createRequestUpdateAction,

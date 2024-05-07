@@ -38,6 +38,7 @@ import StatusList from "./StatusList";
 import Table from "./Table";
 import Toggle from "./Toggle";
 import TreeView from "./TreeView";
+import Metric from "./Metric";
 
 const registeredComponents: Record<string, ComponentType> = {};
 
@@ -60,6 +61,7 @@ export const getRegisteredComponents = () => {
             Login: Login,
             Layout: Layout,
             MenuCtl: MenuCtl,
+            Metric: Metric,
             NavBar: NavBar,
             PageContent: PageContent,
             Pane: Pane,
