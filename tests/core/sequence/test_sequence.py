@@ -432,26 +432,42 @@ def test_get_inputs():
 
 
 def test_is_ready_to_run():
-    data_node_1 = PickleDataNode("foo", Scope.SCENARIO, "s1", properties={"default_data": 1})
-    data_node_2 = PickleDataNode("bar", Scope.SCENARIO, "s2", properties={"default_data": 2})
-    data_node_4 = PickleDataNode("qux", Scope.SCENARIO, "s4", properties={"default_data": 4})
-    data_node_5 = PickleDataNode("quux", Scope.SCENARIO, "s5", properties={"default_data": 5})
-    data_node_6 = PickleDataNode("quuz", Scope.SCENARIO, "s6", properties={"default_data": 6})
-    data_node_7 = PickleDataNode("corge", Scope.SCENARIO, "s7", properties={"default_data": 7})
-    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
-    task_2 = Task("garply", {}, print, [data_node_6], [data_node_5], TaskId("t2"))
-    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], id=TaskId("t3"))
-    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
-    sequence = Sequence({}, [task_4, task_2, task_1, task_3], SequenceId("p1"))
-    # s1 ---      s6 ---> t2 ---> s5
+    scenario_id = "SCENARIO_scenario_id"
+    task_1_id, task_2_id, task_3_id, task_4_id = (
+        TaskId("TASK_t1"),
+        TaskId("TASK_t2"),
+        TaskId("TASK_t3"),
+        TaskId("TASK_t4"),
+    )
+    data_node_1 = PickleDataNode("foo", Scope.SCENARIO, "s1", parent_ids={task_1_id}, properties={"default_data": 1})
+    data_node_2 = PickleDataNode("bar", Scope.SCENARIO, "s2", parent_ids={task_1_id}, properties={"default_data": 2})
+    data_node_3 = PickleDataNode(
+        "qux", Scope.SCENARIO, "s3", parent_ids={task_1_id, task_3_id, task_4_id}, properties={"default_data": 4}
+    )
+    data_node_4 = PickleDataNode(
+        "quux", Scope.SCENARIO, "s4", parent_ids={task_2_id, task_3_id}, properties={"default_data": 5}
+    )
+    data_node_5 = PickleDataNode("quuz", Scope.SCENARIO, "s5", parent_ids={task_2_id}, properties={"default_data": 6})
+    data_node_6 = PickleDataNode("corge", Scope.SCENARIO, "s6", parent_ids={task_4_id}, properties={"default_data": 7})
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_3], id=task_1_id)
+    task_2 = Task("garply", {}, print, [data_node_5], [data_node_4], id=task_2_id)
+    task_3 = Task("waldo", {}, print, [data_node_4, data_node_3], id=task_3_id)
+    task_4 = Task("fred", {}, print, [data_node_3], [data_node_6], id=task_4_id)
+    scenario = Scenario("scenario_config", [task_1, task_2, task_3, task_4], {}, scenario_id=scenario_id)
+
+    data_manager = _DataManagerFactory._build_manager()
+    for dn in [data_node_1, data_node_2, data_node_3, data_node_4, data_node_5, data_node_6]:
+        data_manager._set(dn)
+    for task in [task_1, task_2, task_3, task_4]:
+        _TaskManager._set(task)
+    _ScenarioManager._set(scenario)
+    scenario.add_sequence("sequence", [task_4, task_2, task_1, task_3])
+    sequence = scenario.sequences["sequence"]
+    # s1 ---      s5 ---> t2 ---> s4
     #       |                     |
     #       |---> t1 ---|      -----> t3
     #       |           |      |
-    # s2 ---             ---> s4 ---> t4 ---> s7
-
-    data_manager = _DataManagerFactory._build_manager()
-    for dn in [data_node_1, data_node_2, data_node_4, data_node_5, data_node_6, data_node_7]:
-        data_manager._set(dn)
+    # s2 ---             ---> s3 ---> t4 ---> s6
 
     assert sequence.is_ready_to_run()
 
@@ -459,12 +475,12 @@ def test_is_ready_to_run():
     assert not sequence.is_ready_to_run()
 
     data_node_2.edit_in_progress = True
-    data_node_6.edit_in_progress = True
+    data_node_5.edit_in_progress = True
     assert not sequence.is_ready_to_run()
 
     data_node_1.edit_in_progress = False
     data_node_2.edit_in_progress = False
-    data_node_6.edit_in_progress = False
+    data_node_5.edit_in_progress = False
     assert sequence.is_ready_to_run()
 
 

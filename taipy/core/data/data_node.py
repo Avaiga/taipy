@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import functools
 import os
 import uuid
 from abc import abstractmethod
@@ -24,6 +25,7 @@ from taipy.logger._taipy_logger import _TaipyLogger
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
+from .._entity._ready_to_run_property import _ReadyToRunProperty
 from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._warnings import _warn_deprecated
@@ -33,6 +35,23 @@ from ..notification.event import Event, EventEntityType, EventOperation, _make_e
 from ._filter import _FilterDataNode
 from .data_node_id import DataNodeId, Edit
 from .operator import JoinOperator
+
+
+def _update_ready_for_reading(fct):
+    # This decorator must be wrapped before self_setter decorator as self_setter will run the function twice.
+    @functools.wraps(fct)
+    def _recompute_is_ready_for_reading(dn: "DataNode", *args, **kwargs):
+        fct(dn, *args, **kwargs)
+        if dn._edit_in_progress:
+            _ReadyToRunProperty._add(dn, f"DataNode {dn.id} is being edited")
+        else:
+            _ReadyToRunProperty._remove(dn, f"DataNode {dn.id} is being edited")
+        if not dn._last_edit_date:
+            _ReadyToRunProperty._add(dn, f"DataNode {dn.id} is not written")
+        else:
+            _ReadyToRunProperty._remove(dn, f"DataNode {dn.id} is not written")
+
+    return _recompute_is_ready_for_reading
 
 
 class DataNode(_Entity, _Labeled):
@@ -172,6 +191,7 @@ class DataNode(_Entity, _Labeled):
             return self._last_edit_date
 
     @last_edit_date.setter  # type: ignore
+    @_update_ready_for_reading
     @_self_setter(_MANAGER_NAME)
     def last_edit_date(self, val):
         self._last_edit_date = val
@@ -236,6 +256,7 @@ class DataNode(_Entity, _Labeled):
         return self._edit_in_progress
 
     @edit_in_progress.setter  # type: ignore
+    @_update_ready_for_reading
     @_self_setter(_MANAGER_NAME)
     def edit_in_progress(self, val):
         self._edit_in_progress = val
@@ -382,7 +403,7 @@ class DataNode(_Entity, _Labeled):
         """Creates and adds a new entry in the edits attribute without writing the data.
 
         Parameters:
-            options (dict[str, any)): track `timestamp`, `comments`, `job_id`. The others are user-custom, users can
+            options (dict[str, any]): track `timestamp`, `comments`, `job_id`. The others are user-custom, users can
                 use options to attach any information to an external edit of a data node.
         """
         edit = {k: v for k, v in options.items() if v is not None}
