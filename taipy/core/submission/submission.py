@@ -22,7 +22,7 @@ from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..job.job import Job, JobId, Status
-from ..notification.event import Event, EventEntityType, EventOperation, _make_event
+from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
 from .submission_id import SubmissionId
 from .submission_status import SubmissionStatus
 
@@ -146,7 +146,7 @@ class Submission(_Entity, _Labeled):
         return self._submission_status
 
     @submission_status.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
+    @_self_setter(_MANAGER_NAME, False)
     def submission_status(self, submission_status):
         self._submission_status = submission_status
 
@@ -198,6 +198,8 @@ class Submission(_Entity, _Labeled):
         with self.lock:
             submission_manager = _SubmissionManagerFactory._build_manager()
             submission = submission_manager._get(self)
+            _current_submission_status = submission._submission_status
+
             if submission._submission_status == SubmissionStatus.FAILED:
                 return
 
@@ -249,8 +251,22 @@ class Submission(_Entity, _Labeled):
             else:
                 submission.submission_status = SubmissionStatus.UNDEFINED  # type: ignore
             self.__logger.debug(
-                f"{job.id} status is {job_status}. Submission status set to " f"{submission._submission_status}"
+                f"{job.id} status is {job_status}. Submission status set to `{submission._submission_status}`"
             )
+
+            if _current_submission_status != submission._submission_status:
+                event = Event(
+                    entity_type=EventEntityType.SUBMISSION,
+                    entity_id=submission.id,
+                    operation=EventOperation.UPDATE,
+                    attribute_name="submission_status",
+                    attribute_value=submission._submission_status,
+                    metadata={"job": job.id},
+                )
+                if not self._is_in_context:
+                    Notifier.publish(event)
+                else:
+                    self._in_context_attributes_changed_collector.append(event)
 
     def is_finished(self) -> bool:
         """Indicate if the submission is finished.

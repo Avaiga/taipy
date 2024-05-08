@@ -60,7 +60,7 @@ def _self_reload(manager: str):
     return __reload
 
 
-def _self_setter(manager):
+def _self_setter(manager, publish=True):
     def __set_entity(fct):
         @functools.wraps(fct)
         def _do_set_entity(self, *args, **kwargs):
@@ -77,9 +77,11 @@ def _self_setter(manager):
                 entity = _Reloader()._reload(manager, self)
                 fct(entity, *args, **kwargs)
                 entity_manager._set(entity)
-                Notifier.publish(event)
+                if publish:
+                    Notifier.publish(event)
             else:
-                self._in_context_attributes_changed_collector.append(event)
+                if publish:
+                    self._in_context_attributes_changed_collector.append(event)
 
         return _do_set_entity
 
@@ -104,6 +106,4 @@ def _get_manager(manager: str) -> _Manager:
         "job": _JobManagerFactory._build_manager(),
         "task": _TaskManagerFactory._build_manager(),
         "submission": _SubmissionManagerFactory._build_manager(),
-    }[
-        manager
-    ]  # type: ignore
+    }[manager]  # type: ignore
