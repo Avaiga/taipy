@@ -95,10 +95,10 @@ def test_scenario_not_submittable_if_one_input_edit_in_progress():
     assert not scenario_manager._is_submittable(scenario)
 
     assert scenario.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
+    assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id].reasons
     assert dn_1.id in _ReadyToRunProperty._datanode_id_submittables
     assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_1.id]
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id] == {
+    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id].reasons[dn_1.id] == {
         f"DataNode {dn_1.id} is being edited"
     }
 
@@ -121,16 +121,16 @@ def test_scenario_not_submittable_for_multiple_reasons():
     assert not scenario_manager._is_submittable(scenario)
 
     assert scenario.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
-    assert dn_2.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]
+    assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id].reasons
+    assert dn_2.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id].reasons
     assert dn_1.id in _ReadyToRunProperty._datanode_id_submittables
     assert dn_2.id in _ReadyToRunProperty._datanode_id_submittables
     assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_1.id]
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id] == {
+    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id].reasons[dn_1.id] == {
         f"DataNode {dn_1.id} is being edited"
     }
     assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_2.id]
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_2.id] == {
+    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id].reasons[dn_2.id] == {
         f"DataNode {dn_2.id} is being edited",
         f"DataNode {dn_2.id} is not written",
     }
@@ -150,7 +150,7 @@ def test_writing_input_remove_reasons():
     assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
 
     dn_1.lock_edit()
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id][dn_1.id] == {
+    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id].reasons[dn_1.id] == {
         f"DataNode {dn_1.id} is being edited",
         f"DataNode {dn_1.id} is not written",
     }
@@ -172,7 +172,7 @@ def __assert_not_submittable_becomes_submittable_when_dn_edited(sequence, manage
     assert sequence.id not in _ReadyToRunProperty._submittable_id_datanodes
 
     dn.lock_edit()
-    assert _ReadyToRunProperty._submittable_id_datanodes[sequence.id][dn.id] == {
+    assert _ReadyToRunProperty._submittable_id_datanodes[sequence.id].reasons[dn.id] == {
         f"DataNode {dn.id} is being edited",
         f"DataNode {dn.id} is not written",
     }
