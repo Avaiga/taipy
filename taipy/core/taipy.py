@@ -33,6 +33,7 @@ from .common._check_instance import (
     _is_task,
 )
 from .common._warnings import _warn_deprecated, _warn_no_core_service
+from .common.reason import Reason
 from .config.data_node_config import DataNodeConfig
 from .config.scenario_config import ScenarioConfig
 from .cycle._cycle_manager_factory import _CycleManagerFactory
@@ -89,7 +90,7 @@ def set(entity: Union[DataNode, Task, Sequence, Scenario, Cycle, Submission]):
         return _SubmissionManagerFactory._build_manager()._set(entity)
 
 
-def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Task, TaskId, str]) -> bool:
+def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Task, TaskId, str]) -> Reason:
     """Indicate if an entity can be submitted.
 
     This function checks if the given entity can be submitted for execution.
@@ -109,7 +110,7 @@ def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Tas
         return _TaskManagerFactory._build_manager()._is_submittable(entity)
     if isinstance(entity, str) and entity.startswith(Task._ID_PREFIX):
         return _TaskManagerFactory._build_manager()._is_submittable(TaskId(entity))
-    return False
+    return Reason(str(entity))._add_reason(str(entity), _Manager._build_not_submittable_entity_reason(str(entity)))
 
 
 def is_editable(

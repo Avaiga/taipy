@@ -11,7 +11,7 @@
 
 from typing import TYPE_CHECKING, Dict, Set, Union
 
-from ..common._reason import Reason
+from ..common.reason import Reason
 from ..notification import EventOperation, Notifier, _make_event
 
 if TYPE_CHECKING:
