@@ -11,17 +11,12 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React,
-{
-  useMemo,
-  lazy,
-  useState,
-  useEffect,
-} from 'react';
-import {Delta} from "plotly.js";
+import React, {useMemo, lazy, Suspense} from 'react';
+import {Data} from "plotly.js";
 import {useClassNames, useDynamicProperty} from "../../utils/hooks";
 import {TaipyBaseProps, TaipyHoverProps} from "./utils";
 import Box from "@mui/material/Box";
+import Skeleton from "@mui/material/Skeleton";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -33,111 +28,104 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
   defaultValue?: number
   delta?: number
   defaultDelta?: number
-  thresholdValue?: number
-  defaultThresholdValue?: number
+  threshold?: number
+  defaultThreshold?: number
   format?: string
   formatDelta?: string
   testId?: string
 }
 
-interface DeltaProps extends Partial<Delta> {
-  suffix: string
-}
-
 const Metric = (props: MetricProps) => {
   const metricValue = useDynamicProperty(props.value, props.defaultValue, 0)
-  const gaugeThresholdValue = useDynamicProperty(props.thresholdValue, props.defaultThresholdValue, undefined)
+  const metricThresholdValue = useDynamicProperty(props.threshold, props.defaultThreshold, undefined)
   const metricDelta = useDynamicProperty(props.delta, props.defaultDelta, undefined)
   const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
-  const [metricType, setMetricType] = useState<"angular" | "bullet">("angular");
-  const [formatType, setFormatType] = useState<"%" | "">("");
-  const [isDeltaFormatPercentage, setIsDeltaFormatPercentage] = useState<"%" | "">("");
+  console.log(metricThresholdValue)
 
-  useEffect(() => {
-  switch (props.type) {
-    case "circular":
-      setMetricType("angular");
-      break;
-    case "linear":
-      setMetricType("bullet");
-      break;
-    default:
-      setMetricType("angular");
-  }
-}, [props.type]);
-
-useEffect(() => {
-  switch (props.format) {
-    case "%.2f%%":
-      setFormatType("%");
-      break;
-    default:
-      setFormatType("");
-  }
-}, [props.format]);
-
-useEffect(() => {
-  switch (props.formatDelta) {
-    case "%.2f%%":
-      setIsDeltaFormatPercentage("%");
-      break;
-    default:
-      setIsDeltaFormatPercentage("");
-  }
-}, [props.formatDelta]);
-
-  const refValue = useMemo(() => {
-    if (typeof metricValue === 'number' && typeof metricDelta === 'number') {
-      return metricValue - metricDelta;
-    } else {
-      return;
+  const deltaValueSuffix = useMemo(() => {
+    switch (props.formatDelta) {
+      case "%.2f%%":
+        return "%";
+      default:
+        return "";
     }
-  }, [metricValue, metricDelta]);
+  }, [props.formatDelta]);
 
-  const extendedDelta: DeltaProps = {
-    reference: refValue,
-    suffix: isDeltaFormatPercentage,
+  const formatType = useMemo(() => {
+    switch (props.format) {
+      case "%.2f%%":
+        return "%";
+      default:
+        return "";
+    }
+  }, [props.format]);
+
+  const metricType = useMemo(() => {
+    switch (props.type) {
+      case "circular":
+        return "angular";
+      case "linear":
+        return "bullet";
+      default:
+        return "angular";
+    }
+  }, [props.type]);
+
+  const extendedDelta = useMemo(() => {
+    const refValue = typeof metricValue === 'number' && typeof metricDelta === 'number' ? metricValue - metricDelta : undefined;
+    return {
+      reference: refValue,
+      suffix: deltaValueSuffix,
+    };
+  }, [metricValue, metricDelta, deltaValueSuffix]);
+
+  const data = useMemo(() => ([
+    {
+      domain: {x: [0, 1], y: [0, 1]},
+      value: metricValue,
+      type: "indicator",
+      mode: "gauge+number+delta",
+      number: {
+        suffix: formatType
+      },
+      delta: extendedDelta,
+      gauge: {
+        axis: {range: [props.min, props.max]},
+        shape: metricType,
+        threshold: {
+          line: {color: "red", width: 4},
+          thickness: 0.75,
+          value: metricThresholdValue
+        }
+      },
+    }
+  ]), [metricValue, formatType, extendedDelta, props.min, props.max, metricType, metricThresholdValue]);
+
+  const style = {
+    position: "relative",
+    display: "inline-block",
+    borderRadius: "20px",
+    overflow: "hidden",
   }
 
   return (
     <Box data-testid={props.testId} className={className}>
+      <Suspense fallback={<Skeleton key="skeleton"/>}>
         <Plot
-        data={[
-          {
-            domain: {x: [0, 1], y: [0, 1]},
-            value: metricValue,
-            type: "indicator",
-            mode: "gauge+number+delta",
-            number: {
-              suffix: formatType
-            },
-            delta: extendedDelta,
-            gauge: {
-              axis: {range: [props.min, props.max]},
-              shape: metricType,
-              threshold: {
-                line: {color: "red", width: 4},
-                thickness: 0.75,
-                value: gaugeThresholdValue
-              }
-            },
-          }
-        ]}
-        layout={{
-          paper_bgcolor: "#fff",
-          width: 600,
-          height: 600,
-        }}
-        style={{
-          position: "relative",
-          display: "inline-block",
-          borderRadius: "20px",
-          overflow: "hidden",
-        }}
-      />
+          data={data as Data[]}
+          layout={metricLayout}
+          style={style as React.CSSProperties}
+        />
+      </Suspense>
     </Box>
   );
 }
 
 export default Metric;
+
+const metricLayout = {
+  paper_bgcolor: "#fff",
+  width: 600,
+  height: 600,
+}

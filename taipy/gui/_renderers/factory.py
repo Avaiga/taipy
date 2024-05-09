@@ -338,17 +338,17 @@ class _Factory:
             element_name="Metric",
             attributes=attrs,
         )
-        .set_value_and_default(var_type=PropertyType.dynamic_number)
+        .set_value_and_default(with_default=False, var_type=PropertyType.dynamic_number, native_type=True)
         .set_attributes(
             [
                 ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
-                ("value", PropertyType.dynamic_number),
                 ("type", PropertyType.string, "circular"),
                 ("min", PropertyType.number, 0),
                 ("max", PropertyType.number, 100),
                 ("delta", PropertyType.dynamic_number),
+                ("threshold", PropertyType.number),
                 ("format",),
                 ("format_delta",),
             ]
