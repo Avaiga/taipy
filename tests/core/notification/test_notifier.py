@@ -742,6 +742,7 @@ def test_publish_submission_event():
         and event.attribute_name == expected_attribute_names[i]
         for i, event in enumerate(published_events)
     )
+    assert published_events[4].metadata == {"job": job.id}
 
 
 def test_publish_deletion_event():
