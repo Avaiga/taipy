@@ -348,7 +348,7 @@ class _Factory:
                 ("min", PropertyType.number, 0),
                 ("max", PropertyType.number, 100),
                 ("delta", PropertyType.dynamic_number),
-                ("threshold", PropertyType.number),
+                ("threshold", PropertyType.dynamic_number),
                 ("format",),
                 ("format_delta",),
             ]

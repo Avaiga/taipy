@@ -102,13 +102,6 @@ const Metric = (props: MetricProps) => {
     }
   ]), [metricValue, formatType, extendedDelta, props.min, props.max, metricType, metricThresholdValue]);
 
-  const style = {
-    position: "relative",
-    display: "inline-block",
-    borderRadius: "20px",
-    overflow: "hidden",
-  }
-
   return (
     <Box data-testid={props.testId} className={className}>
       <Suspense fallback={<Skeleton key="skeleton"/>}>
@@ -129,3 +122,10 @@ const metricLayout = {
   width: 600,
   height: 600,
 }
+
+  const style = {
+    position: "relative",
+    display: "inline-block",
+    borderRadius: "20px",
+    overflow: "hidden",
+  }
