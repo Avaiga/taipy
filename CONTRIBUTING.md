@@ -37,17 +37,14 @@ Do not hesitate to create an issue or pull request directly on the
 ## Implement Features
 
 The Taipy team manages its backlog in private. Each issue that will be done during our current sprint is
-attached to the `current sprint`. Please, do not work on it, the Taipy team is on it.
+attached to the "current sprint". Please, do not work on it, the Taipy team is on it.
 
 ## Code organisation
 
-Taipy is organised in five main repositories:
+Taipy is organised in two main repositories:
 
-- [taipy-config](https://github.com/Avaiga/taipy-config).
-- [taipy-core](https://github.com/Avaiga/taipy-core).
-- [taipy-gui](https://github.com/Avaiga/taipy-gui).
-- [taipy-rest](https://github.com/Avaiga/taipy-rest).
-- [taipy](https://github.com/Avaiga/taipy) brings previous packages in a single one.
+- [taipy](https://github.com/Avaiga/taipy) is the main repository that containing the code of taipy packages.
+- [taipy-doc](https://github.com/Avaiga/taipy-doc) is the documentation repository.
 
 ## Coding style and best practices
 
@@ -83,8 +80,10 @@ Where:
 
 ## Contribution workflow
 
-Find an issue without the label `current sprint` and add a comment on it to inform the community that you are
-working on it.
+All other issues are sorted by labels and free to be taken. If you are new to the project, you can start with the
+"good first issue" or "🆘 Help wanted" label. You can also start with issue with higher priority like "Critical"
+or "High". The higher the priority, the more value it will bring to the project. If you want to work on an issue,
+please add a comment and wait to be assigned to the to inform the community that you are working on it.
 
 1. Make your [own fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) of the repository
    target by the issue. Clone it on our local machine, then go inside the directory.
@@ -120,6 +119,16 @@ working on it.
 6. The taipy team will have a look at your Pull Request and will give feedback. If every requirement is valid, your
    work will be added in the next release, congratulation!
 
+### Important Notes
+
+- If your PR is not created or there is no other activity within 14 days of being assigned to the issue, a warning message will appear on the issue, and the issue will be marked as "stale".
+- If your issue is marked as "stale", you will be unassigned after 14 days of inactivity.
+- Similarly, if there is no activity within 14 days of your PR, the PR will be marked as "stale".
+- If your PR is marked as "stale", it will be closed after 14 days of inactivity.
+
+We do this in order to keep our backlog moving quickly. Please don't take it personally if your issue or PR gets closed
+because of this 14-day inactivity time limit. You can always reopen the issue or PR if you're still interested in working
+on it.
 
 ## Dependency management
 
