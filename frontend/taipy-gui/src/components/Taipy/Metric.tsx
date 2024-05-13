@@ -11,9 +11,9 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, {useMemo, lazy, Suspense} from 'react';
+import React, {CSSProperties, lazy, Suspense, useMemo} from 'react';
 import {Data} from "plotly.js";
-import {useClassNames, useDynamicProperty} from "../../utils/hooks";
+import {useClassNames, useDynamicJsonProperty, useDynamicProperty} from "../../utils/hooks";
 import {TaipyBaseProps, TaipyHoverProps} from "./utils";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
@@ -33,15 +33,22 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
   format?: string
   formatDelta?: string
   testId?: string
+  defaultLayout?: string;
+  layout?: string;
+  defaultStyle?: string;
+  style?: string;
 }
+
+const emptyLayout = {} as Record<string, Record<string, unknown>>;
+const defaultStyle = { position: "relative", display: "inline-block" };
 
 const Metric = (props: MetricProps) => {
   const metricValue = useDynamicProperty(props.value, props.defaultValue, 0)
   const metricThresholdValue = useDynamicProperty(props.threshold, props.defaultThreshold, undefined)
   const metricDelta = useDynamicProperty(props.delta, props.defaultDelta, undefined)
   const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
-
-  console.log(metricThresholdValue)
+  const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
+  const baseStyle = useDynamicJsonProperty(props.style, props.defaultStyle || "", defaultStyle);
 
   const deltaValueSuffix = useMemo(() => {
     switch (props.formatDelta) {
@@ -102,13 +109,19 @@ const Metric = (props: MetricProps) => {
     }
   ]), [metricValue, formatType, extendedDelta, props.min, props.max, metricType, metricThresholdValue]);
 
+  const layout = useMemo(() => {
+    return {...baseLayout};
+  }, [baseLayout]);
+
+  const style = useMemo(() => props.defaultStyle ? {...baseStyle} : {...defaultStyle}, [baseStyle, props.defaultStyle]);
+
   return (
     <Box data-testid={props.testId} className={className}>
       <Suspense fallback={<Skeleton key="skeleton"/>}>
         <Plot
           data={data as Data[]}
-          layout={metricLayout}
-          style={style as React.CSSProperties}
+          layout={layout}
+          style={style as CSSProperties}
         />
       </Suspense>
     </Box>
@@ -116,16 +129,3 @@ const Metric = (props: MetricProps) => {
 }
 
 export default Metric;
-
-const metricLayout = {
-  paper_bgcolor: "#fff",
-  width: 600,
-  height: 600,
-}
-
-  const style = {
-    position: "relative",
-    display: "inline-block",
-    borderRadius: "20px",
-    overflow: "hidden",
-  }

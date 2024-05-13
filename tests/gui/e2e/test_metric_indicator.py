@@ -19,7 +19,7 @@ if util.find_spec("playwright"):
 from taipy.gui import Gui
 
 
-@pytest.mark.teste2e
+@pytest.mark.extension
 def test_has_default_value(page: Page, gui: Gui, helpers):
   page_md = """
 <|100|metric|>
@@ -34,7 +34,7 @@ def test_has_default_value(page: Page, gui: Gui, helpers):
   assert gauge_value == "100"
 
 
-@pytest.mark.teste2e
+@pytest.mark.extension
 def test_show_increase_delta_value(page: Page, gui: Gui, helpers):
   page_md = """
 <|100|metric|delta=20|type=linear|>
@@ -49,7 +49,7 @@ def test_show_increase_delta_value(page: Page, gui: Gui, helpers):
   assert delta_value == "▲20"
 
 
-@pytest.mark.teste2e
+@pytest.mark.extension
 def test_show_decrease_delta_value(page: Page, gui: Gui, helpers):
   page_md = """
 <|100|metric|delta=-20|type=linear|>
@@ -64,7 +64,7 @@ def test_show_decrease_delta_value(page: Page, gui: Gui, helpers):
   assert delta_value == "▼−20"
 
 
-@pytest.mark.teste2e
+@pytest.mark.extension
 def test_show_linear_chart(page: Page, gui: Gui, helpers):
   page_md = """
 <|100|metric|delta=-20|type=linear|>
@@ -78,7 +78,7 @@ def test_show_linear_chart(page: Page, gui: Gui, helpers):
   assert chart.is_visible()
 
 
-@pytest.mark.teste2e
+@pytest.mark.extension
 def test_show_circular_chart_as_default_type(page: Page, gui: Gui, helpers):
   page_md = """
 <|100|metric|>

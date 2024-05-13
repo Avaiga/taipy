@@ -343,6 +343,8 @@ class _Factory:
             [
                 ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
+                ("layout", PropertyType.dynamic_dict),
+                ("style", PropertyType.dynamic_dict),
                 ("hover_text", PropertyType.dynamic_string),
                 ("type", PropertyType.string, "circular"),
                 ("min", PropertyType.number, 0),
