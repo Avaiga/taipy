@@ -22,8 +22,8 @@ const Plot = lazy(() => import("react-plotly.js"));
 
 interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     type?: string
-    min?: number | string
-    max?: number | string
+    min?: number
+    max?: number
     value?: number
     defaultValue?: number
     delta?: number
