@@ -87,7 +87,7 @@ class Submittable:
 
         Returns:
             A Reason object that can function as a Boolean value.
-            True if the given entity is ready to be run. False otherwise.
+            which is True if the given entity is ready to be run or there is no reason to be blocked, False otherwise.
         """
         reason = Reason(self._submittable_id)
 
