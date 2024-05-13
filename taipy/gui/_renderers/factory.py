@@ -347,12 +347,14 @@ class _Factory:
                 ("style", PropertyType.dynamic_dict),
                 ("hover_text", PropertyType.dynamic_string),
                 ("type", PropertyType.string, "circular"),
-                ("min", PropertyType.number, 0),
-                ("max", PropertyType.number, 100),
+                ("min", PropertyType.string_or_number, "0"),
+                ("max", PropertyType.string_or_number, "100"),
                 ("delta", PropertyType.dynamic_number),
                 ("threshold", PropertyType.dynamic_number),
                 ("format",),
                 ("format_delta",),
+                ("width", PropertyType.string_or_number),
+                ("height", PropertyType.string_or_number),
             ]
         ),
         "navbar": lambda gui, control_type, attrs: _Builder(

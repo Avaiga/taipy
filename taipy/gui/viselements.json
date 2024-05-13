@@ -795,13 +795,13 @@
           {
             "name": "min",
             "type": "int|float",
-            "default_value": 0,
+            "default_value": "0",
             "doc": "The minimum value of the metric indicator"
           },
           {
             "name": "max",
             "type": "int|float",
-            "default_value": 100,
+            "default_value": "100",
             "doc": "The maximum value of the metric indicator"
           },
           {
