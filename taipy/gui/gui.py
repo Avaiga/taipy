@@ -2325,13 +2325,13 @@ class Gui:
         extension_bp = Blueprint("taipy_extensions", __name__)
         extension_bp.add_url_rule(f"/{Gui._EXTENSION_ROOT}/<path:path>", view_func=self.__serve_extension)
         scripts = [
-            s if bool(urlparse(s).netloc) else f"/{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
+            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
             for name, libs in Gui.__extensions.items()
             for lib in libs
             for s in (lib.get_scripts() or [])
         ]
         styles = [
-            s if bool(urlparse(s).netloc) else f"/{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
+            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
             for name, libs in Gui.__extensions.items()
             for lib in libs
             for s in (lib.get_styles() or [])
@@ -2341,7 +2341,7 @@ class Gui:
         else:
             styles.append(Gui.__ROBOTO_FONT)
         if self.__css_file:
-            styles.append(f"/{self.__css_file}")
+            styles.append(f"{self.__css_file}")
 
         self._flask_blueprint.append(extension_bp)
 
