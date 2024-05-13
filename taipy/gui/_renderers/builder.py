@@ -70,6 +70,7 @@ class _Builder:
         "style",
         "tooltip",
         "lov",
+        "on_edit",
     ]
 
     def __init__(
@@ -480,7 +481,7 @@ class _Builder:
     def __build_rebuild_fn(self, fn_name: str, attribute_names: t.Iterable[str]):
         rebuild = self.__attributes.get("rebuild", False)
         rebuild_hash = self.__hashes.get("rebuild")
-        if rebuild_hash or rebuild:
+        if rebuild_hash or _is_boolean_true(rebuild):
             attributes, hashes = self.__filter_attributes_hashes(self.__filter_attribute_names(attribute_names))
             rebuild_name = f"bool({self.__gui._get_real_var_name(rebuild_hash)[0]})" if rebuild_hash else "None"
             try:
