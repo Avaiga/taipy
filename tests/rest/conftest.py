@@ -25,7 +25,7 @@ from taipy.config.common.scope import Scope
 from taipy.core import Cycle, DataNodeId, Job, JobId, Scenario, Sequence, Task
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.cycle._cycle_manager import _CycleManager
-from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.data.pickle import PickleDataNode
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.task._task_manager import _TaskManager
 from taipy.rest.app import create_app
@@ -124,24 +124,24 @@ def scenario_data():
 
 @pytest.fixture
 def default_datanode():
-    return InMemoryDataNode(
+    return PickleDataNode(
         "input_ds",
         Scope.SCENARIO,
         DataNodeId("f"),
-        "my name",
         "owner_id",
+        None,
         properties={"default_data": [1, 2, 3, 4, 5, 6]},
     )
 
 
 @pytest.fixture
 def default_df_datanode():
-    return InMemoryDataNode(
+    return PickleDataNode(
         "input_ds",
         Scope.SCENARIO,
         DataNodeId("id_uio2"),
-        "my name",
         "owner_id",
+        None,
         properties={"default_data": pd.DataFrame([{"a": 1, "b": 2}, {"a": 3, "b": 4}, {"a": 5, "b": 6}])},
     )
 
@@ -160,21 +160,21 @@ def default_datanode_config_list():
 
 
 def __default_task():
-    input_ds = InMemoryDataNode(
+    input_ds = PickleDataNode(
         "input_ds",
         Scope.SCENARIO,
         DataNodeId("id_uio"),
-        "my name",
         "owner_id",
+        {"TASK_task_id"},
         properties={"default_data": "In memory Data Source"},
     )
 
-    output_ds = InMemoryDataNode(
+    output_ds = PickleDataNode(
         "output_ds",
         Scope.SCENARIO,
         DataNodeId("id_uio"),
-        "my name",
         "owner_id",
+        {"TASK_task_id"},
         properties={"default_data": "In memory Data Source"},
     )
     return Task(
@@ -183,7 +183,7 @@ def __default_task():
         function=print,
         input=[input_ds],
         output=[output_ds],
-        id=None,
+        id="TASK_task_id",
     )
 
 

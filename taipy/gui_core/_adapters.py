@@ -172,11 +172,9 @@ class _GuiCoreScenarioNoUpdate(_TaipyBase, _DoNotUpdate):
 class _GuiCoreDatanodeAdapter(_TaipyBase):
     @staticmethod
     def _is_tabular_data(datanode: DataNode, value: t.Any):
-        if isinstance(datanode, _TabularDataNodeMixin):
-            return True
-        if datanode.is_ready_for_reading:
-            return isinstance(value, (pd.DataFrame, pd.Series, list, tuple, dict))
-        return False
+        return isinstance(datanode, _TabularDataNodeMixin) or isinstance(
+            value, (pd.DataFrame, pd.Series, list, tuple, dict)
+        )
 
     def __get_data(self, dn: DataNode):
         if dn._last_edit_date:
@@ -194,7 +192,7 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                     else None
                 )
                 if isinstance(value, float) and math.isnan(value):
-                        value = None
+                    value = None
                 return (
                     value,
                     val_type,

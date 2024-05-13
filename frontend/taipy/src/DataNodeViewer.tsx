@@ -354,7 +354,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             createSendActionNameAction(id, module, props.onLock, {
                                 id: oldId,
                                 lock: false,
-                                error_id: getUpdateVar(updateDnVars, "error_id")
+                                error_id: getUpdateVar(updateDnVars, "error_id"),
                             })
                         ),
                     1
@@ -443,7 +443,13 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         () => () => {
             dnId &&
                 editLock.current &&
-                dispatch(createSendActionNameAction(id, module, props.onLock, { id: dnId, lock: false, error_id: getUpdateVar(updateDnVars, "error_id") }));
+                dispatch(
+                    createSendActionNameAction(id, module, props.onLock, {
+                        id: dnId,
+                        lock: false,
+                        error_id: getUpdateVar(updateDnVars, "error_id"),
+                    })
+                );
         },
         [dnId, id, dispatch, module, props.onLock, updateDnVars]
     );
@@ -470,7 +476,13 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
             e.stopPropagation();
             setFocusName(e.currentTarget.dataset.focus || "");
             if (e.currentTarget.dataset.focus === dataValueFocus && !editLock.current) {
-                dispatch(createSendActionNameAction(id, module, props.onLock, { id: dnId, lock: true, error_id: getUpdateVar(updateDnVars, "error_id") }));
+                dispatch(
+                    createSendActionNameAction(id, module, props.onLock, {
+                        id: dnId,
+                        lock: true,
+                        error_id: getUpdateVar(updateDnVars, "error_id"),
+                    })
+                );
                 editLock.current = true;
             }
         },
@@ -483,7 +495,13 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
             if (valid) {
-                dispatch(createSendActionNameAction(id, module, props.onEdit, { id: dnId, name: label, error_id: getUpdateVar(updateDnVars, "error_id") }));
+                dispatch(
+                    createSendActionNameAction(id, module, props.onEdit, {
+                        id: dnId,
+                        name: label,
+                        error_id: getUpdateVar(updateDnVars, "error_id"),
+                    })
+                );
                 setFocusName("");
             }
         },
@@ -550,7 +568,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         type: dtType,
                         comment: comment,
                         error_id: getUpdateVar(updateDnVars, "error_id"),
-                        data_id: getUpdateVar(updateDnVars, "data_id")
+                        data_id: getUpdateVar(updateDnVars, "data_id"),
                     })
                 );
                 setFocusName("");
@@ -563,7 +581,13 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
             e.stopPropagation();
             setDataValue(getDataValue(dtValue, dtType));
             setFocusName("");
-            dispatch(createSendActionNameAction(id, module, props.onLock, { id: dnId, lock: false, error_id: getUpdateVar(updateDnVars, "error_id") }));
+            dispatch(
+                createSendActionNameAction(id, module, props.onLock, {
+                    id: dnId,
+                    lock: false,
+                    error_id: getUpdateVar(updateDnVars, "error_id"),
+                })
+            );
         },
         [dtValue, dtType, dnId, id, dispatch, module, props.onLock, updateDnVars]
     );
@@ -1035,7 +1059,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                                   format(dataValue as Date, "yyyy/MM/dd HH:mm:ss")
                                                                 : dtType == "float" && dtValue === null
                                                                 ? "NaN"
-                                                                : dtValue}
+                                                                : `${dtValue}`}
                                                         </Typography>
                                                     )}
                                                 </Grid>
