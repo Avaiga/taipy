@@ -65,7 +65,37 @@ class DataNode(_Entity, _Labeled):
     SQL Data Node, CSV Data Node, ...).
 
     !!! note
-        It is recommended not to instantiate subclasses of `DataNode` directly.
+        It is not recommended to instantiate subclasses of `DataNode` directly. Instead,
+        you have two ways:
+
+        1. Create a Scenario using the `create_scenario()^` function. Related data nodes
+            will be created automatically. Please refer to the `Scenario^` class for more
+            information.
+        2. Configure a `DataNodeConfig^` with the various configuration methods form `Config^`
+            and use the `create_global_data_node()^` function as illustrated in the following
+            example.
+
+    !!! Example
+
+        ```python
+        import taipy as tp
+        from taipy import Config
+
+        # Configure a global data node
+        dataset_cfg = Config.configure_data_node("my_dataset", scope=tp.Scope.GLOBAL)
+
+        # Instantiate a global data node
+        dataset = tp.create_global_data_node(dataset_cfg)
+
+        # Retrieve the list of all data nodes
+        all_data_nodes = tp.get_data_nodes()
+
+        # Write the data
+        dataset.write("Hello, World!")
+
+        # Read the data
+        print(dataset.read())
+        ```
 
     Attributes:
         config_id (str): Identifier of the data node configuration. It must be a valid Python
@@ -78,10 +108,11 @@ class DataNode(_Entity, _Labeled):
         parent_ids (Optional[Set[str]]): The set of identifiers of the parent tasks.
         last_edit_date (datetime): The date and time of the last modification.
         edits (List[Edit^]): The list of Edits (an alias for dict) containing metadata about each
-            data edition including but not limited to timestamp, comments, job_id:
-            timestamp: The time instant of the writing
-            comments: Representation of a free text to explain or comment on a data change
-            job_id: Only populated when the data node is written by a task execution and corresponds to the job's id.
+            data edition including but not limited to:
+                <ul><li>timestamp: The time instant of the writing </li>
+                <li>comments: Representation of a free text to explain or comment on a data change</li>
+                <li>job_id: Only populated when the data node is written by a task execution and
+                    corresponds to the job's id.</li></ul>
             Additional metadata related to the edition made to the data node can also be provided in Edits.
         version (str): The string indicates the application version of the data node to
             instantiate. If not provided, the current version is used.
