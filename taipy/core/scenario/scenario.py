@@ -129,9 +129,9 @@ class Scenario(_Entity, Submittable, _Labeled):
         version: str = None,
         sequences: Optional[Dict[str, Dict]] = None,
     ):
-        super().__init__(subscribers or [])
         self._config_id = _validate_id(config_id)
         self.id: ScenarioId = scenario_id or self._new_id(self.config_id)
+        super().__init__(self.id, subscribers or [])
 
         self._tasks: Union[Set[TaskId], Set[Task], Set] = tasks or set()
         self._additional_data_nodes: Union[Set[DataNodeId], Set[DataNode], Set] = additional_data_nodes or set()

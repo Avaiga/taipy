@@ -51,7 +51,7 @@ class Cycle(_Entity, _Labeled):
         end_date: datetime,
         name: Optional[str] = None,
         id: Optional[CycleId] = None,
-    ):
+    ) -> None:
         self._frequency = frequency
         self._creation_date = creation_date
         self._start_date = start_date
