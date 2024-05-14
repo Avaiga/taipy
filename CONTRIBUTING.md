@@ -6,7 +6,7 @@ Every little help and credit will always be given.
 There are multiple ways to contribute to Taipy: code, but also reporting bugs, creating feature requests, helping
 other users in our forums, [stack**overflow**](https://stackoverflow.com/), etc.
 
-For questions, please reach out on [Discord](https://discord.com/invite/SJyz2VJGxV) or create an issue on GitHub.
+For questions, please get in touch on [Discord](https://discord.com/invite/SJyz2VJGxV) or on GitHub with a discussion or an issue.
 
 ## Code organisation
 
