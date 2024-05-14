@@ -106,4 +106,4 @@ def _get_manager(manager: str) -> _Manager:
         "job": _JobManagerFactory._build_manager(),
         "task": _TaskManagerFactory._build_manager(),
         "submission": _SubmissionManagerFactory._build_manager(),
-    }[manager]  # type: ignore
+    }[manager]
