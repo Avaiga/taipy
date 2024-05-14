@@ -52,8 +52,8 @@ class DataNode(_Entity, _Labeled):
         1. Create a Scenario using the `create_scenario()^` function. Related data nodes
             will be created automatically. Please refer to the `Scenario^` class for more
             information.
-        2. Configure a `DataNodeConfig^` with the various `Config^` methods and use
-            the `create_global_data_node()^` function as illustrated in the following
+        2. Configure a `DataNodeConfig^` with the various configuration methods form `Config^`
+            and use the `create_global_data_node()^` function as illustrated in the following
             example.
 
     !!! Example
