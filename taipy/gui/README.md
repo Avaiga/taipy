@@ -36,7 +36,7 @@ Want to install and try *Taipy GUI*? Check out our [`INSTALLATION.md`](INSTALLAT
 
 ## Contributing
 
-Want to help build *Taipy GUI*? Check out our [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
+Want to help build *Taipy GUI*? Check out our [`CONTRIBUTING.md`](../../CONTRIBUTING.md) file.
 
 ## Code of conduct
 

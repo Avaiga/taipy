@@ -46,11 +46,11 @@ working directory.
 
 ## Contributing
 
-Want to help build _Taipy_? Check out our [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
+Want to help build *Taipy*? Check out our [`CONTRIBUTING.md`](../../CONTRIBUTING.md) file.
 
 ## Code of conduct
 
-Want to be part of the _Taipy_ community? Check out our
+Want to be part of the *Taipy* community? Check out our
 [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) file.
 
 ## Directory Structure
@@ -61,10 +61,10 @@ Want to be part of the _Taipy_ community? Check out our
       - `{{cookiecutter.__root_folder_name}}/`: The root folder of the application created using this template.
       - `hooks/`: Contains hooks to be executed before and after the application is created.
       - `cookiecutter.json`: The configuration file for the template.
-    - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy-templates_.
-    - `CONTRIBUTING.md`: Instructions to contribute to _taipy-templates_.
+    - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of *taipy-templates*.
+    - `CONTRIBUTING.md`: Instructions to contribute to *taipy-templates*.
     - `LICENSE`: The Apache 2.0 License.
     - `README.md`: Current file.
-    - `setup.py`: The setup script managing building, distributing, and installing _taipy-templates_.
+    - `setup.py`: The setup script managing building, distributing, and installing *taipy-templates*.
 - `tests/`:
   - `templates/`: Unit tests following the `taipy/templates/` structure.

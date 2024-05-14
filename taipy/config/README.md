@@ -1,4 +1,4 @@
-# Taipy config
+# Taipy Config
 
 ## License
 Copyright 2021-2024 Avaiga Private Limited
@@ -14,33 +14,33 @@ specific language governing permissions and limitations under the License.
 ## Usage
 - [License](#license)
 - [Usage](#usage)
-- [Taipy config](#what-is-taipy-config)
+- [Taipy Config](#what-is-taipy-config)
 - [Installation](#installation)
 - [Contributing](#contributing)
 - [Code of conduct](#code-of-conduct)
 - [Directory Structure](#directory-structure)
 
-## What is Taipy config
+## What is Taipy Config
 
 Taipy is a Python library for creating Business Applications. More information on our
-[website](https://www.taipy.io). Taipy is split into multiple repositories including _taipy-config_ to let users
+[website](https://www.taipy.io). Taipy is split into multiple repositories including *taipy-config* to let users
 install the minimum they need.
 
-Taipy config is a package designed to help users configure their Taipy application.
+Taipy Config is a package designed to help users configure their Taipy application.
 
 More in-depth documentation of taipy can be found [here](https://docs.taipy.io).
 
 ## Installation
 
-Want to install _Taipy config_? Check out our [`INSTALLATION.md`](INSTALLATION.md) file.
+Want to install *Taipy Config*? Check out our [`INSTALLATION.md`](INSTALLATION.md) file.
 
 ## Contributing
 
-Want to help build _Taipy config_? Check out our [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
+Want to help build *Taipy Config*? Check out our [`CONTRIBUTING.md`](../../CONTRIBUTING.md) file.
 
 ## Code of conduct
 
-Want to be part of the _Taipy config_ community? Check out our [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) file.
+Want to be part of the *Taipy Config* community? Check out our [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) file.
 
 ## Directory Structure
 
@@ -54,11 +54,11 @@ Want to be part of the _Taipy config_ community? Check out our [`CODE_OF_CONDUCT
     - `global_app/`: `GlobalAppConfig` implementation.
     - `stubs/`: Helper functions to create the `config.pyi` file.
     - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of *taipy-config*.
-    - `CONTRIBUTING.md`: Instructions to contribute to _taipy-config_.
-    - `INSTALLATION.md`: Instructions to install _taipy-config_.
+    - `CONTRIBUTING.md`: Instructions to contribute to *taipy-config*.
+    - `INSTALLATION.md`: Instructions to install *taipy-config*.
     - `LICENSE`: The Apache 2.0 License.
     - `README.md`: Current file.
-    - `setup.py`: The setup script managing building, distributing, and installing _taipy-config_.
+    - `setup.py`: The setup script managing building, distributing, and installing *taipy-config*.
   - `logger/`: Taipy logger implementation.
 - `tests/`:
-  - `config/`: Tests for the _taipy-config_ package.
+  - `config/`: Tests for the *taipy-config* package.
