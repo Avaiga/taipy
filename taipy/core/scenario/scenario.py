@@ -56,8 +56,9 @@ class Scenario(_Entity, Submittable, _Labeled):
     for extra data related to the scenario.
 
     !!! note
-    It is not recommended to instantiate a `Scenario` directly. Instead, it should be
-    created with the `create_scenario()^` function.
+
+        It is not recommended to instantiate a `Scenario` directly. Instead, it should be
+        created with the `create_scenario()^` function.
 
     !!! Example
 

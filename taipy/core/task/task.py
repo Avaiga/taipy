@@ -69,7 +69,7 @@ class Task(_Entity, _Labeled):
         # Read the result
         print(task_result.read())  # Output: 6
 
-        # Retrieve all tasks
+        # Retrieve the list of all tasks
         all_tasks = tp.get_tasks()
         ```
 
