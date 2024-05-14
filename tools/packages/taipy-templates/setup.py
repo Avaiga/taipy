@@ -12,14 +12,13 @@
 """The setup script."""
 
 import json
-
 from pathlib import Path
 
 from setuptools import find_packages, setup
 
 root_folder = Path(__file__).parent
 
-readme = Path(root_folder / "README.md").read_text("UTF-8")
+package_desc = Path(root_folder / "package_desc.md").read_text("UTF-8")
 
 version_path = "taipy/templates/version.json"
 
@@ -40,6 +39,7 @@ setup(
     author_email="dev@taipy.io",
     python_requires=">=3.8",
     classifiers=[
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Natural Language :: English",
@@ -49,6 +49,12 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Topic :: Software Development",
+        "Topic :: Scientific/Engineering",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: POSIX",
+        "Operating System :: Unix",
+        "Operating System :: MacOS",
     ],
     description="An open-source package holding Taipy application templates.",
     license="Apache License 2.0",
@@ -60,7 +66,14 @@ setup(
     packages=find_packages(where=root_folder, include=["taipy"]),
     include_package_data=True,
     test_suite="tests",
-    url="https://github.com/avaiga/taipy-templates",
     version=version_string,
     zip_safe=False,
+    project_urls={
+        "Homepage": "https://www.taipy.io",
+        "Documentation": "https://docs.taipy.io",
+        "Source": "https://github.com/Avaiga/taipy",
+        "Download": "https://pypi.org/project/taipy/#files",
+        "Tracker": "https://github.com/Avaiga/taipy/issues",
+        "Release notes": "https://docs.taipy.io/en/latest/relnotes/",
+    },
 )

@@ -9,15 +9,15 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-"""The setup script."""
+"""The setup script for taipy-templates package"""
 
 import json
 import os
+from pathlib import Path
 
 from setuptools import find_namespace_packages, find_packages, setup
 
-with open("README.md", "rb") as readme_file:
-    readme = readme_file.read().decode("UTF-8")
+package_desc = Path("package_desc.md").read_text("UTF-8")
 
 version_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "version.json")
 with open(version_path) as version_file:
@@ -33,6 +33,7 @@ setup(
     author_email="dev@taipy.io",
     python_requires=">=3.8",
     classifiers=[
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Natural Language :: English",
@@ -42,10 +43,16 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Topic :: Software Development",
+        "Topic :: Scientific/Engineering",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: POSIX",
+        "Operating System :: Unix",
+        "Operating System :: MacOS",
     ],
     description="An open-source package holding Taipy application templates.",
     license="Apache License 2.0",
-    long_description=readme,
+    long_description=package_desc,
     long_description_content_type="text/markdown",
     keywords="taipy-templates",
     name="taipy-templates",
@@ -53,7 +60,14 @@ setup(
     include_package_data=True,
     data_files=[('version', ['version.json'])],
     test_suite="tests",
-    url="https://github.com/avaiga/taipy-templates",
     version=version_string,
     zip_safe=False,
+    project_urls={
+        "Homepage": "https://www.taipy.io",
+        "Documentation": "https://docs.taipy.io",
+        "Source": "https://github.com/Avaiga/taipy",
+        "Download": "https://pypi.org/project/taipy/#files",
+        "Tracker": "https://github.com/Avaiga/taipy/issues",
+        "Release notes": "https://docs.taipy.io/en/latest/relnotes/",
+    },
 )

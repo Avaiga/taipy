@@ -8,6 +8,9 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
+"""The setup script for taipy-rest package"""
+
 import json
 import os
 from pathlib import Path
@@ -16,8 +19,7 @@ from setuptools import find_namespace_packages, find_packages, setup
 
 root_folder = Path(__file__).parent
 
-with open("README.md") as readme_file:
-    readme = readme_file.read()
+package_desc = Path("package_desc.md").read_text("UTF-8")
 
 version_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "version.json")
 with open(version_path) as version_file:
@@ -50,11 +52,12 @@ setup(
     packages=find_namespace_packages(where=".") + find_packages(include=["taipy", "taipy.rest"]),
     include_package_data=True,
     data_files=[('version', ['version.json'])],
-    long_description=readme,
+    long_description=package_desc,
     long_description_content_type="text/markdown",
     description="Library to expose taipy-core REST APIs.",
     license="Apache License 2.0",
     classifiers=[
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Natural Language :: English",
@@ -64,6 +67,20 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Topic :: Software Development",
+        "Topic :: Scientific/Engineering",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: POSIX",
+        "Operating System :: Unix",
+        "Operating System :: MacOS",
     ],
     install_requires=get_requirements(),
+    project_urls={
+        "Homepage": "https://www.taipy.io",
+        "Documentation": "https://docs.taipy.io",
+        "Source": "https://github.com/Avaiga/taipy",
+        "Download": "https://pypi.org/project/taipy/#files",
+        "Tracker": "https://github.com/Avaiga/taipy/issues",
+        "Release notes": "https://docs.taipy.io/en/latest/relnotes/",
+    },
 )
