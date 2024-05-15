@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import functools
-from typing import Dict
 
 from .._manager._manager import _Manager
 from ..notification import EventOperation, Notifier, _make_event
@@ -97,7 +96,7 @@ def _get_manager(manager: str) -> _Manager:
     from ..submission._submission_manager_factory import _SubmissionManagerFactory
     from ..task._task_manager_factory import _TaskManagerFactory
 
-    manager_dict: Dict[str, _Manager] = {
+    return {
         "scenario": _ScenarioManagerFactory._build_manager(),
         "sequence": _SequenceManagerFactory._build_manager(),
         "data": _DataManagerFactory._build_manager(),
@@ -105,5 +104,4 @@ def _get_manager(manager: str) -> _Manager:
         "job": _JobManagerFactory._build_manager(),
         "task": _TaskManagerFactory._build_manager(),
         "submission": _SubmissionManagerFactory._build_manager(),
-    }
-    return manager_dict[manager]
+    }[manager]  # type: ignore
