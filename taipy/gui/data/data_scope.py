@@ -25,7 +25,7 @@ class _DataScopes:
     _META_PRE_RENDER = "pre_render"
     _DEFAULT_METADATA = {_META_PRE_RENDER: False}
 
-    def __init__(self, gui: Gui) -> None:
+    def __init__(self, gui: "Gui") -> None:
         self.__gui = gui
         self.__scopes: t.Dict[str, SimpleNamespace] = {_DataScopes._GLOBAL_ID: SimpleNamespace()}
         # { scope_name: { metadata: value } }
