@@ -81,6 +81,7 @@ setup(
         "Source": "https://github.com/Avaiga/taipy",
         "Download": "https://pypi.org/project/taipy/#files",
         "Tracker": "https://github.com/Avaiga/taipy/issues",
-        "Release notes": "https://docs.taipy.io/en/latest/relnotes/",
+        "Security": "https://github.com/Avaiga/taipy?tab=security-ov-file#readme",
+        f"Release notes": "https://docs.taipy.io/en/release-{version_string}/relnotes/",
     },
 )
