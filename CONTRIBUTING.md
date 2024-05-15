@@ -125,10 +125,10 @@ Where:
 
 ## Important Notes
 
-- If your PR is not created or there is no other activity within 14 days of being assigned to the issue, a warning message will appear on the issue, and the issue will be marked as "stale".
-- If your issue is marked as "stale", you will be unassigned after 14 days of inactivity.
-- Similarly, if there is no activity within 14 days of your PR, the PR will be marked as "stale".
-- If your PR is marked as "stale", it will be closed after 14 days of inactivity.
+- If your PR is not created or there is no other activity within 14 days of being assigned to the issue, a warning message will appear on the issue, and the issue will be marked as "🥶Waiting for contributor".
+- If your issue is marked as "🥶Waiting for contributor", you will be unassigned after 14 days of inactivity.
+- Similarly, if there is no activity within 14 days of your PR, the PR will be marked as "🥶Waiting for contributor".
+- If your PR is marked as "🥶Waiting for contributor", it will be closed after 14 days of inactivity.
 
 We do this in order to keep our backlog moving quickly. Please don't take it personally if your issue or PR gets closed
 because of this 14-day inactivity time limit. You can always reopen the issue or PR if you're still interested in working
