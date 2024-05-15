@@ -21,8 +21,8 @@ from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..job.job import Job, JobId, Status
-from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
+from ..job.job import Job, JobId
+from ..notification import Event, EventEntityType, EventOperation, _make_event
 from .submission_id import SubmissionId
 from .submission_status import SubmissionStatus
 
@@ -146,7 +146,7 @@ class Submission(_Entity, _Labeled):
         return self._submission_status
 
     @submission_status.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME, False)
+    @_self_setter(_MANAGER_NAME)
     def submission_status(self, submission_status):
         self._submission_status = submission_status
 
@@ -191,82 +191,6 @@ class Submission(_Entity, _Labeled):
 
     def __ge__(self, other):
         return self.creation_date.timestamp() >= other.creation_date.timestamp()
-
-    def _update_submission_status(self, job: Job):
-        from ._submission_manager_factory import _SubmissionManagerFactory
-
-        with self.lock:
-            submission_manager = _SubmissionManagerFactory._build_manager()
-            submission = submission_manager._get(self)
-            _current_submission_status = submission._submission_status
-
-            if submission._submission_status == SubmissionStatus.FAILED:
-                return
-
-            job_status = job.status
-            if job_status == Status.FAILED:
-                submission._submission_status = SubmissionStatus.FAILED
-                submission_manager._set(submission)
-                self.__logger.debug(
-                    f"{job.id} status is {job_status}. Submission status set to " f"{submission._submission_status}"
-                )
-                return
-            if job_status == Status.CANCELED:
-                submission._is_canceled = True
-            elif job_status == Status.BLOCKED:
-                submission._blocked_jobs.add(job.id)
-                submission._pending_jobs.discard(job.id)
-            elif job_status == Status.PENDING or job_status == Status.SUBMITTED:
-                submission._pending_jobs.add(job.id)
-                submission._blocked_jobs.discard(job.id)
-            elif job_status == Status.RUNNING:
-                submission._running_jobs.add(job.id)
-                submission._pending_jobs.discard(job.id)
-            elif job_status == Status.COMPLETED or job_status == Status.SKIPPED:
-                submission._is_completed = True  # type: ignore
-                submission._blocked_jobs.discard(job.id)
-                submission._pending_jobs.discard(job.id)
-                submission._running_jobs.discard(job.id)
-            elif job_status == Status.ABANDONED:
-                submission._is_abandoned = True  # type: ignore
-                submission._running_jobs.discard(job.id)
-                submission._blocked_jobs.discard(job.id)
-                submission._pending_jobs.discard(job.id)
-            submission_manager._set(submission)
-
-            # The submission_status is set later to make sure notification for updating
-            # the submission_status attribute is triggered
-            if submission._is_canceled:
-                submission.submission_status = SubmissionStatus.CANCELED  # type: ignore
-            elif submission._is_abandoned:
-                submission.submission_status = SubmissionStatus.UNDEFINED  # type: ignore
-            elif submission._running_jobs:
-                submission.submission_status = SubmissionStatus.RUNNING  # type: ignore
-            elif submission._pending_jobs:
-                submission.submission_status = SubmissionStatus.PENDING  # type: ignore
-            elif submission._blocked_jobs:
-                submission.submission_status = SubmissionStatus.BLOCKED  # type: ignore
-            elif submission._is_completed:
-                submission.submission_status = SubmissionStatus.COMPLETED  # type: ignore
-            else:
-                submission.submission_status = SubmissionStatus.UNDEFINED  # type: ignore
-            self.__logger.debug(
-                f"{job.id} status is {job_status}. Submission status set to `{submission._submission_status}`"
-            )
-
-            if _current_submission_status != submission._submission_status:
-                event = Event(
-                    entity_type=EventEntityType.SUBMISSION,
-                    entity_id=submission.id,
-                    operation=EventOperation.UPDATE,
-                    attribute_name="submission_status",
-                    attribute_value=submission._submission_status,
-                    metadata={"job": job.id},
-                )
-                if not self._is_in_context:
-                    Notifier.publish(event)
-                else:
-                    self._in_context_attributes_changed_collector.append(event)
 
     def is_finished(self) -> bool:
         """Indicate if the submission is finished.

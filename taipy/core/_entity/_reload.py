@@ -61,7 +61,7 @@ def _self_reload(manager: str):
     return __reload
 
 
-def _self_setter(manager, publish=True):
+def _self_setter(manager):
     def __set_entity(fct):
         @functools.wraps(fct)
         def _do_set_entity(self, *args, **kwargs):
@@ -78,11 +78,9 @@ def _self_setter(manager, publish=True):
                 entity = _Reloader()._reload(manager, self)
                 fct(entity, *args, **kwargs)
                 entity_manager._set(entity)
-                if publish:
-                    Notifier.publish(event)
+                Notifier.publish(event)
             else:
-                if publish:
-                    self._in_context_attributes_changed_collector.append(event)
+                self._in_context_attributes_changed_collector.append(event)
 
         return _do_set_entity
 
