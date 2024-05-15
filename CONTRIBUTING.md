@@ -43,15 +43,17 @@ Do not hesitate to create an issue or pull request directly on the
 
 ## Implement Features
 
-The Taipy team manages its backlog in private. Each issue that will be done during our current sprint is
-attached to the "current sprint". Please, do not work on it, the Taipy team is on it.
+The Taipy team manages its backlog in private. Each issue that is or is going to be engaged by the
+Taipy team is attached to the "🔒 Staff only" label or has already assigned to a Taipy team member.
+Please, do not work on it, the Taipy team is on it.
 
-All other issues are sorted by labels and free to be taken. If you are new to the project, you can start with the
-"good first issue" or "🆘 Help wanted" label. You can also start with issue with higher priority like "Critical"
-or "High". The higher the priority, the more value it will bring to the project.
+All other issues are sorted by labels and are available for a contribution. If you are new to the
+project, you can start with the "good first issue" or "🆘 Help wanted" label. You can also start with
+issue with higher priority like "Critical" or "High". The higher the priority, the more value it
+will bring to Taipy.
 
-If you want to work on an issue, please add a comment and wait to be assigned to the to inform the community that
-you are working on it.
+If you want to work on an issue, please add a comment and wait to be assigned to the issue to inform
+the community that you are working on it.
 
 ### Contribution workflow
 
