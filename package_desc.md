@@ -33,13 +33,21 @@ built-in scheduling, and deployment tools.
 
 ## ✨ Features
 
-- **Python-Based UI Framework:** Taipy is designed for Python users, particularly those working in AI and data science. It allows them to create full stack applications without needing to learn additional skills like HTML, CSS, or JavaScript.
+- **Python-Based UI Framework:** Taipy is designed for Python users, particularly those
+  in AI and data science. It allows them to create full-stack applications without
+  learning additional skills like HTML, CSS, or JavaScript.
 
-- **Pre-Built Components for Data Pipelines:** Taipy includes pre-built components that allow users to interact with data pipelines, including visualization and management tools.
+- **Pre-Built Components for Data Pipelines:** Taipy includes pre-built components that
+  allow users to interact with data pipelines, including visualization and management
+  tools.
 
-- **Scenario and Data Management Features:** Taipy offers features for managing different business scenarios and data, which can be useful for applications like demand forecasting or production planning.
+- **Scenario and Data Management Features:** Taipy offers features for managing different
+  business scenarios and data, which can be useful for applications like demand forecasting
+  or production planning.
 
-- **Version Management and Pipeline Orchestration:** It includes tools for managing application versions, pipeline versions, and data versions, which are beneficial for multi-user environments.
+- **Version Management and Pipeline Orchestration:** It includes tools for managing
+  application versions, pipeline versions, and data versions, which are beneficial 
+  for multi-user environments.
 
 ## Installation
 
@@ -48,7 +56,8 @@ To install Taipy stable release run:
 pip install taipy
 ```
 
-To install Taipy on a Conda Environment or from source, please refer to the [Installation Guide](https://docs.taipy.io/en/latest/installation/).<br />
+To install Taipy on a Conda Environment or from source code, please refer to the
+[Installation Guide](https://docs.taipy.io/en/latest/installation/).<br />
 To get started with Taipy, please refer to the [Getting Started Guide](https://docs.taipy.io/en/latest/getting_started/).
 
 ## Contributing
