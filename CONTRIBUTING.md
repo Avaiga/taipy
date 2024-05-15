@@ -87,7 +87,7 @@ the community that you are working on it.
      - Code is [rebase](http://stackoverflow.com/a/7244456/1110993).
      - License is present.
      - pre-commit works - without mypy error.
-     - GitHub's actions are passing.
+     - Taipy tests are passing.
 
 6. The Taipy team will have a look at your Pull Request and will give feedback. If every requirement is valid, your
    work will be added in the next release, congratulation!
