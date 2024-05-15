@@ -75,7 +75,6 @@ Want to be part of the *Taipy REST* community? Check out our
     - `extensions.py`: Singletons used on the application factory
     - `rest.py`: Main python entrypoint for running *taipy-rest* application.
     - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of *taipy-rest*.
-    - `CONTRIBUTING.md`: Instructions to contribute to *taipy-rest*.
     - `INSTALLATION.md`: Instructions to install *taipy-rest*.
     - `LICENSE`: The Apache 2.0 License.
     - `README.md`: Current file.

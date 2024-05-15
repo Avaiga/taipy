@@ -71,7 +71,6 @@ Want to be part of the *Taipy Core* community? Check out our
     - `task/`: Task definition, management and implementation.
     - `taipy.py`: Main entrypoint for *taipy-core* runtime features.
     - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of *taipy-core*.
-    - `CONTRIBUTING.md`: Instructions to contribute to *taipy-core*.
     - `INSTALLATION.md`: Instructions to install *taipy-core*.
     - `LICENSE`: The Apache 2.0 License.
     - `README.md`: Current file.

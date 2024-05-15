@@ -49,7 +49,6 @@ Want to be part of the *Taipy GUI* community? Check out our [`CODE_OF_CONDUCT.md
 - `tests/gui`: Unit tests;
 - `tools`: Files used to document `taipy-gui`;
 - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of `taipy-gui`;
-- `CONTRIBUTING.md`: Instructions to contribute to `taipy-gui`;
 - `INSTALLATION.md`: Instructions to build and install `taipy-gui`;
 - `LICENSE`: The Apache 2.0 License;
 - `README.md`: Current file;

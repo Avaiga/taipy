@@ -62,7 +62,6 @@ Want to be part of the *Taipy* community? Check out our
       - `hooks/`: Contains hooks to be executed before and after the application is created.
       - `cookiecutter.json`: The configuration file for the template.
     - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of *taipy-templates*.
-    - `CONTRIBUTING.md`: Instructions to contribute to *taipy-templates*.
     - `LICENSE`: The Apache 2.0 License.
     - `README.md`: Current file.
     - `setup.py`: The setup script managing building, distributing, and installing *taipy-templates*.

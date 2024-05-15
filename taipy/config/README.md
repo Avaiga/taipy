@@ -54,7 +54,6 @@ Want to be part of the *Taipy Config* community? Check out our [`CODE_OF_CONDUCT
     - `global_app/`: `GlobalAppConfig` implementation.
     - `stubs/`: Helper functions to create the `config.pyi` file.
     - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of *taipy-config*.
-    - `CONTRIBUTING.md`: Instructions to contribute to *taipy-config*.
     - `INSTALLATION.md`: Instructions to install *taipy-config*.
     - `LICENSE`: The Apache 2.0 License.
     - `README.md`: Current file.
