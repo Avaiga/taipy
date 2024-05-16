@@ -293,7 +293,7 @@ class ElementLibrary(ABC):
             because each JavaScript module will have to have a unique name.
 
         """
-        return NotImplementedError  # type: ignore
+        raise NotImplementedError
 
     def get_js_module_name(self) -> str:
         """

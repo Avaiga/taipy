@@ -23,7 +23,7 @@ if t.TYPE_CHECKING:
 class _Bindings:
     def __init__(self, gui: "Gui") -> None:
         self.__gui = gui
-        self.__scopes = _DataScopes()
+        self.__scopes = _DataScopes(gui)
 
     def _bind(self, name: str, value: t.Any) -> None:
         if hasattr(self, name):
@@ -69,7 +69,7 @@ class _Bindings:
         return id, create
 
     def _new_scopes(self):
-        self.__scopes = _DataScopes()
+        self.__scopes = _DataScopes(self.__gui)
 
     def _get_data_scope(self):
         return self.__scopes.get_scope(self.__gui._get_client_id())[0]

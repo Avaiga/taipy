@@ -60,7 +60,7 @@ def delete(url, client):
     assert response.status_code == 200
 
 
-def test_end_to_end(client, setup_end_to_end):
+def test_end_to_end(client, setup_end_to_end, init_orchestrator):
     # Create Scenario: Should also create all of its dependencies(sequences, tasks, datanodes, etc)
     scenario = create_and_submit_scenario("scenario", client)
 
@@ -104,3 +104,5 @@ def test_end_to_end(client, setup_end_to_end):
     url_without_slash = url_for("api.scenarios")[:-1]
     get_all(url_with_slash, 1, client)
     get_all(url_without_slash, 1, client)
+
+    init_orchestrator()

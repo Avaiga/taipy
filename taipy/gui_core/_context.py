@@ -551,15 +551,15 @@ class _GuiCoreContext(CoreEventConsumerBase):
         with self.lock:
             self.__do_datanodes_tree()
         if scenarios is None:
-            return (self.data_nodes_by_owner.get(None) if self.data_nodes_by_owner else []) + self.get_scenarios(
-                None, None
+            return (self.data_nodes_by_owner.get(None, []) if self.data_nodes_by_owner else []) + (
+                self.get_scenarios(None, None) or []
             )
         if not self.data_nodes_by_owner:
             return []
         if isinstance(scenarios, (list, tuple)) and len(scenarios) > 1:
             return scenarios
         owners = scenarios if isinstance(scenarios, (list, tuple)) else [scenarios]
-        return [d for owner in owners for d in t.cast(list, self.data_nodes_by_owner.get(owner.id))]
+        return [d for owner in owners for d in self.data_nodes_by_owner.get(owner.id, [])]
 
     def data_node_adapter(self, data):
         if isinstance(data, (tuple, list)):
@@ -736,7 +736,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         # we might be comparing naive and aware datetime ISO
         return entity.creation_date.isoformat()
 
-    def get_scenarios_for_owner(self, owner_id: str, uid: str):
+    def get_scenarios_for_owner(self, owner_id: str):
         cycles_scenarios: t.List[t.Union[Scenario, Cycle]] = []
         with self.lock:
             if self.scenario_by_cycle is None:
@@ -756,7 +756,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         cycles_scenarios.append(entity)
         return sorted(cycles_scenarios, key=_GuiCoreContext.get_entity_creation_date_iso)
 
-    def get_data_node_history(self, id: str, uid: str):
+    def get_data_node_history(self, id: str):
         if id and (dn := core_get(id)) and isinstance(dn, DataNode):
             res = []
             for e in dn.edits:
@@ -882,7 +882,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 _GuiCoreContext.__assign_var(state, error_var, f"Error updating Datanode tabular value. {e}")
         _GuiCoreContext.__assign_var(state, payload.get("data_id"), dn_id)
 
-    def get_data_node_properties(self, id: str, uid: str):
+    def get_data_node_properties(self, id: str):
         if id and is_readable(t.cast(DataNodeId, id)) and (dn := core_get(id)) and isinstance(dn, DataNode):
             try:
                 return (
@@ -899,7 +899,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def __read_tabular_data(self, datanode: DataNode):
         return datanode.read()
 
-    def get_data_node_tabular_data(self, id: str, uid: str):
+    def get_data_node_tabular_data(self, id: str):
         if (
             id
             and is_readable(t.cast(DataNodeId, id))
@@ -915,7 +915,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return None
         return None
 
-    def get_data_node_tabular_columns(self, id: str, uid: str):
+    def get_data_node_tabular_columns(self, id: str):
         if (
             id
             and is_readable(t.cast(DataNodeId, id))
@@ -933,7 +933,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return None
         return None
 
-    def get_data_node_chart_config(self, id: str, uid: str):
+    def get_data_node_chart_config(self, id: str):
         if (
             id
             and is_readable(t.cast(DataNodeId, id))

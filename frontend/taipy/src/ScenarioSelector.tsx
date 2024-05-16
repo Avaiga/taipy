@@ -548,15 +548,17 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
     const EditScenario = useCallback(
         (props: EditProps) => (
-            <Tooltip title="Edit Scenario">
-                <IconButton
-                    data-id={props.id}
-                    onClick={openEditDialog}
-                    sx={tinyEditIconButtonSx}
-                    disabled={props.active}
-                >
-                    <EditOutlined />
-                </IconButton>
+            <Tooltip title={props.active ? "Edit Scenario" : "Can't edit Scenario"}>
+                <span>
+                    <IconButton
+                        data-id={props.id}
+                        onClick={openEditDialog}
+                        sx={tinyEditIconButtonSx}
+                        disabled={props.active}
+                    >
+                        <EditOutlined />
+                    </IconButton>
+                </span>
             </Tooltip>
         ),
         [openEditDialog]

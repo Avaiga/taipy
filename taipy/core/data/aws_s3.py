@@ -97,7 +97,7 @@ class S3ObjectDataNode(DataNode):
         editor_id: Optional[str] = None,
         editor_expiration_date: Optional[datetime] = None,
         properties: Optional[Dict] = None,
-    ):
+    ) -> None:
         _check_dependency_is_installed("S3 Data Node", "boto3")
         if properties is None:
             properties = {}
