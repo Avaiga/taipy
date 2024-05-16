@@ -71,10 +71,22 @@ class Scope(_OrderedEnum):
         - Three data nodes with a `CYCLE` scope, for the trained model, the current month, and the sales predictions.
         - Two data nodes with a `SCENARIO` scope, for the capacity and the production orders.
 
-        ![scopes](../images/scopes.svg){ align=left }
+        The following code snippet shows how to configure the data nodes with the different scopes:
 
-        The picture above shows the data nodes and their scopes in blue boxes. The orange boxes represent the
-        tasks that use the data nodes as input or output.
+        ```python
+        from taipy import Config, Scope
+
+        hist_cfg = Config.configure_csv_data_node("sales_history", scope=Scope.GLOBAL)
+        model_cfg = Config.configure_data_node("trained_model", scope=Scope.CYCLE)
+        month_cfg = Config.configure_data_node("current_month", scope=Scope.CYCLE)
+        predictions_cfg = Config.configure_data_node("sales_predictions", scope=Scope.CYCLE)
+        capacity_cfg = Config.configure_data_node("capacity", scope=Scope.SCENARIO)
+        orders_cfg = Config.configure_sql_data_node("production_orders",
+                                                    scope=Scope.SCENARIO,
+                                                    db_name="taipy",
+                                                    db_engine="sqlite",
+                                                    table_name="sales")
+        ```
     """
 
     GLOBAL = 3
