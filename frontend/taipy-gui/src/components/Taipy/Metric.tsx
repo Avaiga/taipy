@@ -13,6 +13,7 @@
 
 import React, {CSSProperties, lazy, Suspense, useMemo} from 'react';
 import {Data} from "plotly.js";
+import {sprintf} from "sprintf-js";
 import {useClassNames, useDynamicJsonProperty, useDynamicProperty} from "../../utils/hooks";
 import {TaipyBaseProps, TaipyHoverProps} from "./utils";
 import Box from "@mui/material/Box";
@@ -56,56 +57,31 @@ const Metric = (props: MetricProps) => {
     const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
     const baseStyle = useDynamicJsonProperty(props.style, props.defaultStyle || "", defaultStyle);
 
-    const deltaValueSuffix = useMemo(() => {
-        switch (props.formatDelta) {
-            case "%.2f%%":
-                return "%";
-            default:
-                return "";
-        }
-    }, [props.formatDelta]);
-
-    const formatType = useMemo(() => {
-        switch (props.format) {
-            case "%.2f%%":
-                return "%";
-            default:
-                return "";
-        }
-    }, [props.format]);
-
-    const metricType = useMemo(() => {
-        switch (props.type) {
-            case "circular":
-                return "angular";
-            case "linear":
-                return "bullet";
-            default:
-                return "angular";
-        }
-    }, [props.type]);
-
-    const extendedDelta = useMemo(() => {
-        const refValue = typeof metricValue === 'number' && typeof metricDelta === 'number' ? metricValue - metricDelta : undefined;
-        return {
-            reference: refValue,
-            suffix: deltaValueSuffix,
-        };
-    }, [metricValue, metricDelta, deltaValueSuffix]);
-
     const data = useMemo(() => ([
         {
             domain: {x: [0, 1], y: [0, 1]},
-            value: metricValue,
+            value: props.format === undefined ? metricValue : parseFloat(sprintf(props.format, metricValue)),
             type: "indicator",
-            mode: "gauge+number+delta",
+            mode: (() => {
+                let mode = "gauge";
+                if (metricValue !== undefined) mode += "+number";
+                if (metricDelta !== undefined) mode += "+delta";
+                return mode;
+            })(),
             number: {
-                suffix: formatType
+                suffix: props.format?.includes("f%%") ? "%" : "",
+                valueformat: "f",
             },
-            delta: extendedDelta,
+            delta: {
+                reference: typeof metricValue === 'number' && typeof metricDelta === 'number' ? metricValue - metricDelta : undefined,
+                suffix: props.format?.includes("f%%") ? "%" : "",
+            },
             gauge: {
-                axis: {range: [props.min, props.max]},
-                shape: metricType,
+                axis: {range: [
+                    typeof props.min === 'number' ? props.min : 0,
+                    typeof props.max === 'number' ? props.max : 100
+                    ]},
+                shape: props.type === "linear" ? "bullet" : "angular",
                 threshold: {
                     line: {color: "red", width: 4},
                     thickness: 0.75,
@@ -113,17 +89,21 @@ const Metric = (props: MetricProps) => {
                 }
             },
         }
-    ]), [metricValue, formatType, extendedDelta, props.min, props.max, metricType, metricThresholdValue]);
-
-    const layout = useMemo(() => {
-      return {...baseLayout};
-    }, [baseLayout]);
+    ]), [
+        metricValue,
+        metricDelta,
+        props.format,
+        props.min,
+        props.max,
+        props.type,
+        metricThresholdValue
+    ]);
 
     const style = useMemo(
         () =>
             height === undefined
-                ? ({ ...baseStyle, width: width } as CSSProperties)
-                : ({ ...baseStyle, width: width, height: height } as CSSProperties),
+                ? ({...baseStyle, width: width} as CSSProperties)
+                : ({...baseStyle, width: width, height: height} as CSSProperties),
         [baseStyle, height, width]
     );
 
@@ -132,7 +112,7 @@ const Metric = (props: MetricProps) => {
             <Suspense fallback={<Skeleton key="skeleton"/>}>
                 <Plot
                     data={data as Data[]}
-                    layout={layout}
+                    layout={baseLayout}
                     style={style}
                 />
             </Suspense>
