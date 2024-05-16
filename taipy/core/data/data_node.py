@@ -57,7 +57,7 @@ def _update_ready_for_reading(fct):
 class DataNode(_Entity, _Labeled):
     """Reference to a dataset.
 
-    A Data Node is an abstract class that holds metadata related to the dataset it refers to.
+    A Data Node is an abstract class that holds metadata related to the data it refers to.
     In particular, a data node holds the name, the scope, the owner identifier, the last
     edit date, and some additional properties of the data.<br/>
     A Data Node also contains information and methods needed to access the dataset. This
