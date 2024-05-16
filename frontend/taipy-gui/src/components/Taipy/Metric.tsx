@@ -63,8 +63,7 @@ const Metric = (props: MetricProps) => {
             value: props.format === undefined ? metricValue : parseFloat(sprintf(props.format, metricValue)),
             type: "indicator",
             mode: (() => {
-                let mode = "gauge";
-                if (metricValue !== undefined) mode += "+number";
+                let mode = "gauge+number";
                 if (metricDelta !== undefined) mode += "+delta";
                 return mode;
             })(),
@@ -74,7 +73,8 @@ const Metric = (props: MetricProps) => {
             },
             delta: {
                 reference: typeof metricValue === 'number' && typeof metricDelta === 'number' ? metricValue - metricDelta : undefined,
-                suffix: props.format?.includes("f%%") ? "%" : "",
+                suffix: props.formatDelta?.includes("f%%") ? "%" : "",
+                valueformat: "f",
             },
             gauge: {
                 axis: {range: [
