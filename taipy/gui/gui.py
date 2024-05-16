@@ -2275,12 +2275,19 @@ class Gui:
 
     def __init_ngrok(self):
         app_config = self._config.config
-        if app_config["run_server"] and app_config["ngrok_token"]:  # pragma: no cover
+        if hasattr(self, "_ngrok"):
+            # Keep the ngrok instance if token has not changed
+            if app_config["ngrok_token"] == self._ngrok[1]:
+                _TaipyLogger._get_logger().info(f" * NGROK Public Url: {self._ngrok[0].public_url}")
+                return
+            # Close the old tunnel so new tunnel can open for new token
+            ngrok.disconnect(self._ngrok[0].public_url)
+        if app_config["run_server"] and (token := app_config["ngrok_token"]):  # pragma: no cover
             if not util.find_spec("pyngrok"):
                 raise RuntimeError("Cannot use ngrok as pyngrok package is not installed.")
-            ngrok.set_auth_token(app_config["ngrok_token"])
-            http_tunnel = ngrok.connect(app_config["port"], "http")
-            _TaipyLogger._get_logger().info(f" * NGROK Public Url: {http_tunnel.public_url}")
+            ngrok.set_auth_token(token)
+            self._ngrok = (ngrok.connect(app_config["port"], "http"), token)
+            _TaipyLogger._get_logger().info(f" * NGROK Public Url: {self._ngrok[0].public_url}")
 
     def __bind_default_function(self):
         with self.get_flask_app().app_context():
@@ -2325,13 +2332,13 @@ class Gui:
         extension_bp = Blueprint("taipy_extensions", __name__)
         extension_bp.add_url_rule(f"/{Gui._EXTENSION_ROOT}/<path:path>", view_func=self.__serve_extension)
         scripts = [
-            s if bool(urlparse(s).netloc) else f"/{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
+            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
             for name, libs in Gui.__extensions.items()
             for lib in libs
             for s in (lib.get_scripts() or [])
         ]
         styles = [
-            s if bool(urlparse(s).netloc) else f"/{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
+            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
             for name, libs in Gui.__extensions.items()
             for lib in libs
             for s in (lib.get_styles() or [])
@@ -2341,7 +2348,7 @@ class Gui:
         else:
             styles.append(Gui.__ROBOTO_FONT)
         if self.__css_file:
-            styles.append(f"/{self.__css_file}")
+            styles.append(f"{self.__css_file}")
 
         self._flask_blueprint.append(extension_bp)
 
