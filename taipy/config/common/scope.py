@@ -44,19 +44,20 @@ class Scope(_OrderedEnum):
     - `SCENARIO` (Default value)
 
     Each data node config has a scope. It is an attribute propagated to the `DataNode^` when instantiated from
-    a DataNodeConfig^`. The scope is used to determine the _visibility_ of the data node, and which scenarios can
+    a `DataNodeConfig^`. The scope is used to determine the _visibility_ of the data node, and which scenarios can
     access it.
 
     In other words :
-        - There can be only one data node instantiated from a `DataNodeConfig^` with a `GLOBAL` scope. All the
-            scenarios share the same data node. When a new scenario is created, the data node is also created if
-            and only if it does not exist yet.
-        - Only one data node instantiated from a `DataNodeConfig^` with a `CYCLE` scope is created for each cycle.
-            All the scenarios of the same cycle share the same data node. When a new scenario is created within a
-            cycle, Taipy instantiates a new data node if and only if there is no data node for the cycle yet.
-        - A data node that has the scope set to `SCENARIO` belongs to a unique scenario and cannot be used by others
-            When creating a new scenario, data nodes with a `SCENARIO` scope are systematically created along with
-            the new scenario.
+
+    - There can be only one data node instantiated from a `DataNodeConfig^` with a `GLOBAL` scope. All the
+        scenarios share the unique data node. When a new scenario is created, the data node is also created if
+        and only if it does not exist yet.
+    - Only one data node instantiated from a `DataNodeConfig^` with a `CYCLE` scope is created for each cycle.
+        All the scenarios of the same cycle share the same data node. When a new scenario is created within a
+        cycle, Taipy instantiates a new data node if and only if there is no data node for the cycle yet.
+    - A data node that has the scope set to `SCENARIO` belongs to a unique scenario and cannot be used by others
+        When creating a new scenario, data nodes with a `SCENARIO` scope are systematically created along with
+        the new scenario.
 
     !!! example
 
