@@ -15,6 +15,7 @@ import React, { useMemo, useCallback, KeyboardEvent, MouseEvent, useState, useRe
 import { SxProps, Theme, darken, lighten } from "@mui/material/styles";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
@@ -24,7 +25,8 @@ import Popper from "@mui/material/Popper";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Send from "@mui/icons-material/Send";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import ArrowDownward from "@mui/icons-material/ArrowDownward";
+import ArrowUpward from "@mui/icons-material/ArrowUpward";
 
 // import InfiniteLoader from "react-window-infinite-loader";
 
@@ -56,6 +58,7 @@ const chatAvatarSx = { ...avatarSx, width: avatarWidth, height: avatarWidth };
 const avatarColSx = { width: 1.5 * avatarWidth };
 const senderMsgSx = { width: "fit-content", maxWidth: "80%", marginLeft: "auto" };
 const gridSx = { pb: "1em", mt: "unset", flex: 1, overflow: "auto" };
+const loadMoreSx = { width: "fit-content", marginLeft: "auto", marginRight: "auto" };
 const inputSx = { maxWidth: "unset" };
 const nameSx = { fontSize: "0.6em", fontWeight: "bolder" };
 const senderPaperSx = {
@@ -155,6 +158,8 @@ const ChatRow = (props: ChatRowProps) => {
     );
 };
 
+const getChatKey = (start: number) => `Chat-${start}`
+
 const Chat = (props: ChatProps) => {
     const { id, updateVarName, senderId = "taipy", onAction, withInput = true, defaultKey = "", pageSize = 50 } = props;
     const dispatch = useDispatch();
@@ -245,7 +250,7 @@ const Chat = (props: ChatProps) => {
 
     const loadMoreItems = useCallback(
         (startIndex: number) => {
-            const key = `Chat-${startIndex}-${startIndex + pageSize}`;
+            const key = getChatKey(startIndex);
             page.current = {
                 key: key,
             };
@@ -291,11 +296,18 @@ const Chat = (props: ChatProps) => {
             if (Array.isArray(nr) && nr.length > newValue.start && nr[newValue.start]) {
                 setRows((old) => {
                     old.length && nr.length > old.length && setShowMessage(true);
+                    if (nr.length < old.length) {
+                        return nr.concat(old.slice(nr.length))
+                    }
+                    if (old.length > newValue.start) {
+                        return old.slice(0, newValue.start).concat(nr.slice(newValue.start));
+                    }
                     return nr;
                 });
                 const cols = Object.keys(nr[newValue.start]);
                 setColumns(cols.length > 2 ? cols : cols.length == 2 ? [...cols, ""] : ["", ...cols, "", ""]);
             }
+            page.current.key = getChatKey(0);
         }
     }, [refresh, props.messages]);
 
@@ -318,10 +330,33 @@ const Chat = (props: ChatProps) => {
         loadMoreItems(0);
     }, [loadMoreItems]);
 
+    const loadOlder = useCallback(
+        (evt: MouseEvent<HTMLElement>) => {
+            const { start } = evt.currentTarget.dataset;
+            if (start) {
+                loadMoreItems(parseInt(start));
+            }
+        },
+        [loadMoreItems]
+    );
+
     return (
         <Tooltip title={hover || "" || `rowCount: ${rowCount}`}>
             <Paper className={className} sx={boxSx} id={id}>
                 <Grid container rowSpacing={2} sx={gridSx} ref={scrollDivRef}>
+                    {rows.length && !rows[0] ? (
+                        <Grid item className={getSuffixedClassNames(className, "-load")} xs={12} sx={noAnchorSx}>
+                            <Box sx={loadMoreSx}>
+                                <Button
+                                    endIcon={<ArrowUpward />}
+                                    onClick={loadOlder}
+                                    data-start={rows.length - rows.findIndex((row) => !!row)}
+                                >
+                                    Load More
+                                </Button>
+                            </Box>
+                        </Grid>
+                    ) : null}
                     {rows.map((row, idx) =>
                         row ? (
                             <ChatRow
@@ -342,7 +377,7 @@ const Chat = (props: ChatProps) => {
                         label="A new message is available"
                         variant="outlined"
                         onClick={showBottom}
-                        icon={<ArrowDownwardIcon />}
+                        icon={<ArrowDownward />}
                     />
                 </Popper>
                 {withInput ? (
