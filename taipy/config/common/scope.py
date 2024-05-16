@@ -65,13 +65,13 @@ class Scope(_OrderedEnum):
         the sales forecasts the company wants to plan its production orders. The company wants to simulate two
         scenarios every month: one with low capacity and one with high capacity.
 
-        We can create the following `DataNodeConfig^`s with the following scopes:
+        We can create the `DataNodeConfig^`s with the following scopes:
 
         - One data node for the historical sales with a `GLOBAL` scope.
         - Three data nodes with a `CYCLE` scope, for the trained model, the current month, and the sales predictions.
         - Two data nodes with a `SCENARIO` scope, for the capacity and the production orders.
 
-        The following code snippet shows how to configure the data nodes with the different scopes:
+        The code snippet below shows how to configure the data nodes with the different scopes:
 
         ```python
         from taipy import Config, Scope
