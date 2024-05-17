@@ -803,16 +803,6 @@
             "type": "int|float",
             "default_value": "100",
             "doc": "The maximum value of the metric indicator"
-          },
-          {
-            "name": "format",
-            "type": "str",
-            "doc": "The format to use when displaying the value.<br/>This uses the <code>printf</code> syntax."
-          },
-          {
-            "name": "format_delta",
-            "type": "str",
-            "doc": "The format to use when displaying the delta value.<br/>This uses the <code>printf</code> syntax."
           }
         ]
       }

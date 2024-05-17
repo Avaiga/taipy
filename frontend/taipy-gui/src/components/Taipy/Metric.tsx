@@ -13,7 +13,6 @@
 
 import React, {CSSProperties, lazy, Suspense, useMemo} from 'react';
 import {Data} from "plotly.js";
-import {sprintf} from "sprintf-js";
 import {useClassNames, useDynamicJsonProperty, useDynamicProperty} from "../../utils/hooks";
 import {TaipyBaseProps, TaipyHoverProps} from "./utils";
 import Box from "@mui/material/Box";
@@ -31,8 +30,6 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     defaultDelta?: number
     threshold?: number
     defaultThreshold?: number
-    format?: string
-    formatDelta?: string
     testId?: string
     defaultLayout?: string;
     layout?: string;
@@ -50,9 +47,9 @@ const Metric = (props: MetricProps) => {
         width = "100%",
         height
     } = props;
-    const metricValue = useDynamicProperty(props.value, props.defaultValue, 0)
-    const metricThresholdValue = useDynamicProperty(props.threshold, props.defaultThreshold, undefined)
-    const metricDelta = useDynamicProperty(props.delta, props.defaultDelta, undefined)
+    const value = useDynamicProperty(props.value, props.defaultValue, 0)
+    const threshold = useDynamicProperty(props.threshold, props.defaultThreshold, undefined)
+    const delta = useDynamicProperty(props.delta, props.defaultDelta, undefined)
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
     const baseStyle = useDynamicJsonProperty(props.style, props.defaultStyle || "", defaultStyle);
@@ -60,21 +57,15 @@ const Metric = (props: MetricProps) => {
     const data = useMemo(() => ([
         {
             domain: {x: [0, 1], y: [0, 1]},
-            value: props.format === undefined ? metricValue : parseFloat(sprintf(props.format, metricValue)),
+            value: value,
             type: "indicator",
             mode: (() => {
                 let mode = "gauge+number";
-                if (metricDelta !== undefined) mode += "+delta";
+                if (delta !== undefined) mode += "+delta";
                 return mode;
             })(),
-            number: {
-                suffix: props.format?.includes("f%%") ? "%" : "",
-                valueformat: "f",
-            },
             delta: {
-                reference: typeof metricValue === 'number' && typeof metricDelta === 'number' ? metricValue - metricDelta : undefined,
-                suffix: props.formatDelta?.includes("f%%") ? "%" : "",
-                valueformat: "f",
+                reference: typeof threshold === 'number' && typeof delta === 'number' ? threshold - delta : undefined,
             },
             gauge: {
                 axis: {range: [
@@ -85,18 +76,17 @@ const Metric = (props: MetricProps) => {
                 threshold: {
                     line: {color: "red", width: 4},
                     thickness: 0.75,
-                    value: metricThresholdValue
+                    value: threshold
                 }
             },
         }
     ]), [
-        metricValue,
-        metricDelta,
-        props.format,
         props.min,
         props.max,
         props.type,
-        metricThresholdValue
+        value,
+        threshold,
+        delta
     ]);
 
     const style = useMemo(

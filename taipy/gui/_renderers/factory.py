@@ -351,8 +351,6 @@ class _Factory:
                 ("max", PropertyType.number, 100),
                 ("delta", PropertyType.dynamic_number),
                 ("threshold", PropertyType.dynamic_number),
-                ("format",),
-                ("format_delta",),
                 ("width", PropertyType.string_or_number),
                 ("height", PropertyType.string_or_number),
             ]
