@@ -24,8 +24,8 @@ jobs:
           close-pr-message: "This PR has been closed because it has been marked as \"🥶Waiting for contributor\" for more than 14 days with no activity."
           delete-branch: true  # Delete branch after closing a stale PR
           days-before-issue-close: -1  # Never close an issue
-          exempt-issue-labels: "❌ Blocked"  # Issues with label ❌ Blocked are exempted from stale
-          exempt-pr-labels: "❌ Blocked"  # PRs with label ❌ Blocked are exempted from stale
+          exempt-issue-labels: "❌ Blocked,💬 Discussion"  # Issues with label ❌ Blocked or 💬 Discussion are exempted from stale
+          exempt-pr-labels: "❌ Blocked,💬 Discussion"  # PRs with label ❌ Blocked or 💬 Discussion are exempted from stale
           exempt-assignees: "jrobinAV,FabienLelaquais"  # Assignees on issues/PRs exempted from stale
           remove-stale-when-updated: true
 
