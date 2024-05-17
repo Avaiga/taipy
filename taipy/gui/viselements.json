@@ -114,30 +114,6 @@
             }
         ],
         [
-            "number",
-            {
-                "inherits": [
-                    "sharedInput",
-                    "on_change",
-                    "propagate"
-                ],
-                "properties": [
-                    {
-                        "name": "value",
-                        "default_property": true,
-                        "type": "dynamic(any)",
-                        "doc": "The numerical value represented by this control."
-                    },
-                    {
-                        "name": "label",
-                        "type": "str",
-                        "default_value": "None",
-                        "doc": "The label associated with the input."
-                    }
-                ]
-            }
-        ],
-        [
             "slider",
             {
                 "inherits": [
@@ -208,6 +184,30 @@
                         "type": "str",
                         "default_value": "\"horizontal\"",
                         "doc": "The orientation of this slider.<br/>Valid values are \"horizontal\" or \"vertical\"."
+                    }
+                ]
+            }
+        ],
+        [
+            "number",
+            {
+                "inherits": [
+                    "sharedInput",
+                    "on_change",
+                    "propagate"
+                ],
+                "properties": [
+                    {
+                        "name": "value",
+                        "default_property": true,
+                        "type": "dynamic(any)",
+                        "doc": "The numerical value represented by this control."
+                    },
+                    {
+                        "name": "label",
+                        "type": "str",
+                        "default_value": "None",
+                        "doc": "The label associated with the input."
                     }
                 ]
             }
@@ -322,71 +322,6 @@
                         "name": "label_end",
                         "type": "str",
                         "doc": "The label associated with the second input."
-                    }
-                ]
-            }
-        ],
-        [
-            "chat",
-            {
-                "inherits": [
-                    "active",
-                    "shared"
-                ],
-                "properties": [
-                    {
-                        "name": "messages",
-                        "default_property": true,
-                        "required": true,
-                        "type": "dynamic(list[str])",
-                        "doc": "The list of messages. Each element is a list composed of an id, a message and an user identifier."
-                    },
-                    {
-                        "name": "users",
-                        "type": "dynamic(list[str|Icon])",
-                        "doc": "The list of users. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
-                    },
-                    {
-                        "name": "on_action",
-                        "type": "Callback",
-                        "doc": "The name of a function that is triggered when the user enters a new message.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the messages variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args (list): A list composed of a reason (click or Enter), variable name, message, sender id.</li></ul></li></ul>.",
-                        "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "var_name",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
-                        ]
-                    },
-                    {
-                        "name": "with_input",
-                        "type": "dynamic(bool)",
-                        "default_value": "True",
-                        "doc": "If True, the input field is visible."
-                    },
-                    {
-                        "name": "sender_id",
-                        "type": "str",
-                        "default_value": "taipy",
-                        "doc": "The user id associated with the message sent from the input"
-                    },
-                    {
-                        "name": "height",
-                        "type": "str|int|float",
-                        "doc": "The maximum height, in CSS units, of this element."
-                    },
-                    {
-                        "name": "page_size",
-                        "type": "int",
-                        "default_value": "50",
-                        "doc": "The number of rows retrieved on the frontend."
                     }
                 ]
             }
@@ -665,439 +600,6 @@
             }
         ],
         [
-            "file_download",
-            {
-                "inherits": [
-                    "active",
-                    "shared"
-                ],
-                "properties": [
-                    {
-                        "name": "content",
-                        "default_property": true,
-                        "type": "dynamic(path|file|URL|ReadableBuffer|None)",
-                        "doc": "The content to transfer.<br/>If this is a string, a URL, or a file, then the content is read from this source.<br/>If a readable buffer is provided (such as an array of bytes...), and to prevent the bandwidth from being consumed too much, the way the data is transferred depends on the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the buffer size is smaller than this setting, then the raw content is generated as a data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li>\n<li>If the buffer size exceeds this setting, then it is transferred through a temporary file.</li>\n</ul>If this property is set to None, that indicates that dynamic content is generated. Please take a look at the examples below for details on dynamic generation."
-                    },
-                    {
-                        "name": "label",
-                        "type": "dynamic(str)",
-                        "doc": "The label of the button."
-                    },
-                    {
-                        "name": "on_action",
-                        "type": "Callback",
-                        "doc": "The name of a function that is triggered when the download is terminated (or on user action if <i>content</i> is None).<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has two keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: A list of two elements: <i>args[0]</i> reflects the <i>name</i> property and <i>args[1]</i> holds the file URL.</li>\n</ul>\n</li>\n</ul>",
-                        "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
-                        ]
-                    },
-                    {
-                        "name": "auto",
-                        "type": "bool",
-                        "default_value": "False",
-                        "doc": "If True, the download starts as soon as the page is loaded."
-                    },
-                    {
-                        "name": "render",
-                        "type": "dynamic(bool)",
-                        "default_value": "True",
-                        "doc": "If True, the control is displayed.<br/>If False, the control is not displayed."
-                    },
-                    {
-                        "name": "bypass_preview",
-                        "type": "bool",
-                        "default_value": "True",
-                        "doc": "If False, allows the browser to try to show the content in a different tab.<br/>The file download is always performed."
-                    },
-                    {
-                        "name": "name",
-                        "type": "str",
-                        "doc": "A name proposition for the file to save, that the user can change."
-                    }
-                ]
-            }
-        ],
-        [
-            "file_selector",
-            {
-                "inherits": [
-                    "active",
-                    "shared"
-                ],
-                "properties": [
-                    {
-                        "name": "content",
-                        "default_property": true,
-                        "type": "dynamic(str)",
-                        "doc": "The path or the list of paths of the uploaded files."
-                    },
-                    {
-                        "name": "label",
-                        "type": "str",
-                        "doc": "The label of the button."
-                    },
-                    {
-                        "name": "on_action",
-                        "type": "Callback",
-                        "doc": "The name of the function that will be triggered.<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
-                        "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
-                        ]
-                    },
-                    {
-                        "name": "multiple",
-                        "type": "bool",
-                        "default_value": "False",
-                        "doc": "If set to True, multiple files can be uploaded."
-                    },
-                    {
-                        "name": "extensions",
-                        "type": "str",
-                        "default_value": "\".csv,.xlsx\"",
-                        "doc": "The list of file extensions that can be uploaded."
-                    },
-                    {
-                        "name": "drop_message",
-                        "type": "str",
-                        "default_value": "\"Drop here to Upload\"",
-                        "doc": "The message that is displayed when the user drags a file above the button."
-                    },
-                    {
-                        "name": "notify",
-                        "type": "bool",
-                        "default_value": "True",
-                        "doc": "If set to False, the user won't be notified of upload finish."
-                    }
-                ]
-            }
-        ],
-        [
-            "image",
-            {
-                "inherits": [
-                    "active",
-                    "shared"
-                ],
-                "properties": [
-                    {
-                        "name": "content",
-                        "default_property": true,
-                        "type": "dynamic(path|URL|file|ReadableBuffer)",
-                        "doc": "The image source.<br/>If a buffer is provided (string, array of bytes...), and in order to prevent the bandwidth to be consumed too much, the way the image data is transferred depends on the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the size of the buffer is smaller than this setting, then the raw content is generated as a\n  data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li>\n<li>If the size of the buffer is greater than this setting, then it is transferred through a temporary\n  file.</li>\n</ul>"
-                    },
-                    {
-                        "name": "label",
-                        "type": "dynamic(str)",
-                        "doc": "The label for this image."
-                    },
-                    {
-                        "name": "on_action",
-                        "type": "Callback",
-                        "doc": "The name of a function that is triggered when the user clicks on the image.<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
-                        "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
-                        ]
-                    },
-                    {
-                        "name": "width",
-                        "type": "str|int|float",
-                        "default_value": "\"300px\"",
-                        "doc": "The width, in CSS units, of this element."
-                    },
-                    {
-                        "name": "height",
-                        "type": "str|int|float",
-                        "doc": "The height, in CSS units, of this element."
-                    }
-                ]
-            }
-        ],
-        [
-            "indicator",
-            {
-                "inherits": [
-                    "shared"
-                ],
-                "properties": [
-                    {
-                        "name": "display",
-                        "default_property": true,
-                        "type": "dynamic(any)",
-                        "doc": "The label to be displayed.<br/>This can be formatted if it is a numerical value."
-                    },
-                    {
-                        "name": "value",
-                        "type": "dynamic(int,float)",
-                        "default_value": "<i>min</i>",
-                        "doc": "The location of the label on the [<i>min</i>, <i>max</i>] range."
-                    },
-                    {
-                        "name": "min",
-                        "type": "int|float",
-                        "default_value": "0",
-                        "doc": "The minimum value of the range."
-                    },
-                    {
-                        "name": "max",
-                        "type": "int|float",
-                        "default_value": "100",
-                        "doc": "The maximum value of the range."
-                    },
-                    {
-                        "name": "format",
-                        "type": "str",
-                        "doc": "The format to use when displaying the value.<br/>This uses the <code>printf</code> syntax."
-                    },
-                    {
-                        "name": "orientation",
-                        "type": "str",
-                        "default_value": "\"horizontal\"",
-                        "doc": "The orientation of this slider."
-                    },
-                    {
-                        "name": "width",
-                        "type": "str",
-                        "default_value": "None",
-                        "doc": "The width, in CSS units, of the indicator (used when orientation is horizontal)."
-                    },
-                    {
-                        "name": "height",
-                        "type": "str",
-                        "default_value": "None",
-                        "doc": "The height, in CSS units, of the indicator (used when orientation is vertical)."
-                    }
-                ]
-            }
-        ],
-        [
-            "login",
-            {
-                "inherits": [
-                    "shared"
-                ],
-                "properties": [
-                    {
-                        "name": "title",
-                        "default_property": true,
-                        "type": "str",
-                        "default_value": "\"Log in\"",
-                        "doc": "The title of the login dialog."
-                    },
-                    {
-                        "name": "on_action",
-                        "type": "Callback",
-                        "doc": "The name of the function that is triggered when the dialog button is pressed.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: a list with three elements:<ul><li>The first element is the username</li><li>The second element is the password</li><li>The third element is the current page name</li></ul></li></li>\n</ul>\n</li>\n</ul><br/>When the button is pressed, and if this property is not set, Taipy will try to find a callback function called <i>on_login()</i> and invoke it with the parameters listed above.",
-                        "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
-                        ]
-                    },
-                    {
-                        "name": "message",
-                        "type": "dynamic(str)",
-                        "doc": "The message shown in the dialog."
-                    }
-                ]
-            }
-        ],
-        [
-            "menu",
-            {
-                "inherits": [
-                    "active"
-                ],
-                "properties": [
-                    {
-                        "name": "lov",
-                        "default_property": true,
-                        "type": "dynamic(str|list[str|Icon|any])",
-                        "doc": "The list of menu option values."
-                    },
-                    {
-                        "name": "adapter",
-                        "type": "Function",
-                        "default_value": "`\"lambda x: str(x)\"`",
-                        "doc": "The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:str|Icon)</i>."
-                    },
-                    {
-                        "name": "type",
-                        "type": "str",
-                        "default_value": "<i>Type of the first lov element</i>",
-                        "doc": "Must be specified if <i>lov</i> contains a non specific type of data (ex: dict).<br/><i>value</i> must be of that type, <i>lov</i> must be an iterable on this type, and the adapter function will receive an object of this type."
-                    },
-                    {
-                        "name": "label",
-                        "type": "str",
-                        "doc": "The title of the menu."
-                    },
-                    {
-                        "name": "width",
-                        "type": "str",
-                        "default_value": "\"15vw\"",
-                        "doc": "The width, in CSS units, of the menu when unfolded.<br/>Note that when running on a mobile device, the property <i>width[active]</i> is used instead."
-                    },
-                    {
-                        "name": "width[mobile]",
-                        "type": "str",
-                        "default_value": "\"85vw\"",
-                        "doc": "The width, in CSS units, of the menu when unfolded, on a mobile device."
-                    },
-                    {
-                        "name": "on_action",
-                        "type": "Callback",
-                        "doc": "The name of the function that is triggered when a menu option is selected.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: List where the first element contains the id of the selected option.</li>\n</ul>\n</li>\n</ul>",
-                        "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
-                        ]
-                    }
-                ]
-            }
-        ],
-        [
-            "navbar",
-            {
-                "inherits": [
-                    "active",
-                    "shared"
-                ],
-                "properties": [
-                    {
-                        "name": "lov",
-                        "default_property": true,
-                        "type": "dict[str, any]",
-                        "doc": "The list of pages. The keys should be:\n<ul>\n<li>page id (start with \"/\")</li>\n<li>or full URL</li>\n</ul>\nThe values are labels. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
-                    }
-                ]
-            }
-        ],
-        [
-            "selector",
-            {
-                "inherits": [
-                    "lovComp",
-                    "propagate"
-                ],
-                "properties": [
-                    {
-                        "name": "filter",
-                        "type": "bool",
-                        "default_value": "False",
-                        "doc": "If True, this control is combined with a filter input area."
-                    },
-                    {
-                        "name": "multiple",
-                        "type": "bool",
-                        "default_value": "False",
-                        "doc": "If True, the user can select multiple items."
-                    },
-                    {
-                        "name": "width",
-                        "type": "str|int",
-                        "default_value": "\"360px\"",
-                        "doc": "The width, in CSS units, of this element."
-                    },
-                    {
-                        "name": "height",
-                        "type": "str|int",
-                        "doc": "The height, in CSS units, of this element."
-                    },
-                    {
-                        "name": "dropdown",
-                        "type": "bool",
-                        "default_value": "False",
-                        "doc": "If True, the list of items is shown in a dropdown menu.<br/><br/>You cannot use the filter in that situation."
-                    },
-                    {
-                        "name": "label",
-                        "type": "str",
-                        "default_value": "None",
-                        "doc": "The label associated with the selector when in dropdown mode."
-                    },
-                    {
-                        "name": "mode",
-                        "type": "str",
-                        "doc": "Define the way the selector is displayed:<ul><li>&quot;radio&quot;: list of radio buttons</li><li>&quot;check&quot;: list of check buttons</li><li>any other value: selector as usual."
-                    }
-                ]
-            }
-        ],
-        [
-            "status",
-            {
-                "inherits": [
-                    "shared"
-                ],
-                "properties": [
-                    {
-                        "name": "value",
-                        "default_property": true,
-                        "type": "tuple|dict|list[dict]|list[tuple]",
-                        "doc": "The different status items to represent. See below."
-                    },
-                    {
-                        "name": "without_close",
-                        "type": "bool",
-                        "default_value": "False",
-                        "doc": "If True, the user cannot remove the status items from the list."
-                    }
-                ]
-            }
-        ],
-        [
             "table",
             {
                 "inherits": [
@@ -1363,6 +865,504 @@
                             [
                                 "compare_data_names",
                                 "list[str]"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        ],
+        [
+            "selector",
+            {
+                "inherits": [
+                    "lovComp",
+                    "propagate"
+                ],
+                "properties": [
+                    {
+                        "name": "filter",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, this control is combined with a filter input area."
+                    },
+                    {
+                        "name": "multiple",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the user can select multiple items."
+                    },
+                    {
+                        "name": "width",
+                        "type": "str|int",
+                        "default_value": "\"360px\"",
+                        "doc": "The width, in CSS units, of this element."
+                    },
+                    {
+                        "name": "height",
+                        "type": "str|int",
+                        "doc": "The height, in CSS units, of this element."
+                    },
+                    {
+                        "name": "dropdown",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the list of items is shown in a dropdown menu.<br/><br/>You cannot use the filter in that situation."
+                    },
+                    {
+                        "name": "label",
+                        "type": "str",
+                        "default_value": "None",
+                        "doc": "The label associated with the selector when in dropdown mode."
+                    },
+                    {
+                        "name": "mode",
+                        "type": "str",
+                        "doc": "Define the way the selector is displayed:<ul><li>&quot;radio&quot;: list of radio buttons</li><li>&quot;check&quot;: list of check buttons</li><li>any other value: selector as usual."
+                    }
+                ]
+            }
+        ],
+        [
+            "navbar",
+            {
+                "inherits": [
+                    "active",
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "lov",
+                        "default_property": true,
+                        "type": "dict[str, any]",
+                        "doc": "The list of pages. The keys should be:\n<ul>\n<li>page id (start with \"/\")</li>\n<li>or full URL</li>\n</ul>\nThe values are labels. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
+                    }
+                ]
+            }
+        ],
+        [
+            "image",
+            {
+                "inherits": [
+                    "active",
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "content",
+                        "default_property": true,
+                        "type": "dynamic(path|URL|file|ReadableBuffer)",
+                        "doc": "The image source.<br/>If a buffer is provided (string, array of bytes...), and in order to prevent the bandwidth to be consumed too much, the way the image data is transferred depends on the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the size of the buffer is smaller than this setting, then the raw content is generated as a\n  data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li>\n<li>If the size of the buffer is greater than this setting, then it is transferred through a temporary\n  file.</li>\n</ul>"
+                    },
+                    {
+                        "name": "label",
+                        "type": "dynamic(str)",
+                        "doc": "The label for this image."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "The name of a function that is triggered when the user clicks on the image.<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "width",
+                        "type": "str|int|float",
+                        "default_value": "\"300px\"",
+                        "doc": "The width, in CSS units, of this element."
+                    },
+                    {
+                        "name": "height",
+                        "type": "str|int|float",
+                        "doc": "The height, in CSS units, of this element."
+                    }
+                ]
+            }
+        ],
+        [
+            "indicator",
+            {
+                "inherits": [
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "display",
+                        "default_property": true,
+                        "type": "dynamic(any)",
+                        "doc": "The label to be displayed.<br/>This can be formatted if it is a numerical value."
+                    },
+                    {
+                        "name": "value",
+                        "type": "dynamic(int,float)",
+                        "default_value": "<i>min</i>",
+                        "doc": "The location of the label on the [<i>min</i>, <i>max</i>] range."
+                    },
+                    {
+                        "name": "min",
+                        "type": "int|float",
+                        "default_value": "0",
+                        "doc": "The minimum value of the range."
+                    },
+                    {
+                        "name": "max",
+                        "type": "int|float",
+                        "default_value": "100",
+                        "doc": "The maximum value of the range."
+                    },
+                    {
+                        "name": "format",
+                        "type": "str",
+                        "doc": "The format to use when displaying the value.<br/>This uses the <code>printf</code> syntax."
+                    },
+                    {
+                        "name": "orientation",
+                        "type": "str",
+                        "default_value": "\"horizontal\"",
+                        "doc": "The orientation of this slider."
+                    },
+                    {
+                        "name": "width",
+                        "type": "str",
+                        "default_value": "None",
+                        "doc": "The width, in CSS units, of the indicator (used when orientation is horizontal)."
+                    },
+                    {
+                        "name": "height",
+                        "type": "str",
+                        "default_value": "None",
+                        "doc": "The height, in CSS units, of the indicator (used when orientation is vertical)."
+                    }
+                ]
+            }
+        ],
+        [
+            "status",
+            {
+                "inherits": [
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "value",
+                        "default_property": true,
+                        "type": "tuple|dict|list[dict]|list[tuple]",
+                        "doc": "The different status items to represent. See below."
+                    },
+                    {
+                        "name": "without_close",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the user cannot remove the status items from the list."
+                    }
+                ]
+            }
+        ],
+        [
+            "file_download",
+            {
+                "inherits": [
+                    "active",
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "content",
+                        "default_property": true,
+                        "type": "dynamic(path|file|URL|ReadableBuffer|None)",
+                        "doc": "The content to transfer.<br/>If this is a string, a URL, or a file, then the content is read from this source.<br/>If a readable buffer is provided (such as an array of bytes...), and to prevent the bandwidth from being consumed too much, the way the data is transferred depends on the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the buffer size is smaller than this setting, then the raw content is generated as a data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li>\n<li>If the buffer size exceeds this setting, then it is transferred through a temporary file.</li>\n</ul>If this property is set to None, that indicates that dynamic content is generated. Please take a look at the examples below for details on dynamic generation."
+                    },
+                    {
+                        "name": "label",
+                        "type": "dynamic(str)",
+                        "doc": "The label of the button."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "The name of a function that is triggered when the download is terminated (or on user action if <i>content</i> is None).<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has two keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: A list of two elements: <i>args[0]</i> reflects the <i>name</i> property and <i>args[1]</i> holds the file URL.</li>\n</ul>\n</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "auto",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the download starts as soon as the page is loaded."
+                    },
+                    {
+                        "name": "render",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "If True, the control is displayed.<br/>If False, the control is not displayed."
+                    },
+                    {
+                        "name": "bypass_preview",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, allows the browser to try to show the content in a different tab.<br/>The file download is always performed."
+                    },
+                    {
+                        "name": "name",
+                        "type": "str",
+                        "doc": "A name proposition for the file to save, that the user can change."
+                    }
+                ]
+            }
+        ],
+        [
+            "file_selector",
+            {
+                "inherits": [
+                    "active",
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "content",
+                        "default_property": true,
+                        "type": "dynamic(str)",
+                        "doc": "The path or the list of paths of the uploaded files."
+                    },
+                    {
+                        "name": "label",
+                        "type": "str",
+                        "doc": "The label of the button."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "The name of the function that will be triggered.<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "multiple",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If set to True, multiple files can be uploaded."
+                    },
+                    {
+                        "name": "extensions",
+                        "type": "str",
+                        "default_value": "\".csv,.xlsx\"",
+                        "doc": "The list of file extensions that can be uploaded."
+                    },
+                    {
+                        "name": "drop_message",
+                        "type": "str",
+                        "default_value": "\"Drop here to Upload\"",
+                        "doc": "The message that is displayed when the user drags a file above the button."
+                    },
+                    {
+                        "name": "notify",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If set to False, the user won't be notified of upload finish."
+                    }
+                ]
+            }
+        ],
+        [
+            "login",
+            {
+                "inherits": [
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "title",
+                        "default_property": true,
+                        "type": "str",
+                        "default_value": "\"Log in\"",
+                        "doc": "The title of the login dialog."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "The name of the function that is triggered when the dialog button is pressed.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: a list with three elements:<ul><li>The first element is the username</li><li>The second element is the password</li><li>The third element is the current page name</li></ul></li></li>\n</ul>\n</li>\n</ul><br/>When the button is pressed, and if this property is not set, Taipy will try to find a callback function called <i>on_login()</i> and invoke it with the parameters listed above.",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "message",
+                        "type": "dynamic(str)",
+                        "doc": "The message shown in the dialog."
+                    }
+                ]
+            }
+        ],
+        [
+            "chat",
+            {
+                "inherits": [
+                    "active",
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "messages",
+                        "default_property": true,
+                        "required": true,
+                        "type": "dynamic(list[str])",
+                        "doc": "The list of messages. Each element is a list composed of an id, a message and an user identifier."
+                    },
+                    {
+                        "name": "users",
+                        "type": "dynamic(list[str|Icon])",
+                        "doc": "The list of users. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "The name of a function that is triggered when the user enters a new message.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the messages variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args (list): A list composed of a reason (click or Enter), variable name, message, sender id.</li></ul></li></ul>.",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "var_name",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "with_input",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "If True, the input field is visible."
+                    },
+                    {
+                        "name": "sender_id",
+                        "type": "str",
+                        "default_value": "\"taipy\"",
+                        "doc": "The user id associated with the message sent from the input"
+                    },
+                    {
+                        "name": "height",
+                        "type": "str|int|float",
+                        "doc": "The maximum height, in CSS units, of this element."
+                    },
+                    {
+                        "name": "page_size",
+                        "type": "int",
+                        "default_value": "50",
+                        "doc": "The number of rows retrieved on the frontend."
+                    }
+                ]
+            }
+        ],
+        [
+            "menu",
+            {
+                "inherits": [
+                    "active"
+                ],
+                "properties": [
+                    {
+                        "name": "lov",
+                        "default_property": true,
+                        "type": "dynamic(str|list[str|Icon|any])",
+                        "doc": "The list of menu option values."
+                    },
+                    {
+                        "name": "adapter",
+                        "type": "Function",
+                        "default_value": "`\"lambda x: str(x)\"`",
+                        "doc": "The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:str|Icon)</i>."
+                    },
+                    {
+                        "name": "type",
+                        "type": "str",
+                        "default_value": "<i>Type of the first lov element</i>",
+                        "doc": "Must be specified if <i>lov</i> contains a non specific type of data (ex: dict).<br/><i>value</i> must be of that type, <i>lov</i> must be an iterable on this type, and the adapter function will receive an object of this type."
+                    },
+                    {
+                        "name": "label",
+                        "type": "str",
+                        "doc": "The title of the menu."
+                    },
+                    {
+                        "name": "width",
+                        "type": "str",
+                        "default_value": "\"15vw\"",
+                        "doc": "The width, in CSS units, of the menu when unfolded.<br/>Note that when running on a mobile device, the property <i>width[active]</i> is used instead."
+                    },
+                    {
+                        "name": "width[mobile]",
+                        "type": "str",
+                        "default_value": "\"85vw\"",
+                        "doc": "The width, in CSS units, of the menu when unfolded, on a mobile device."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "The name of the function that is triggered when a menu option is selected.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: List where the first element contains the id of the selected option.</li>\n</ul>\n</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
                             ]
                         ]
                     }
