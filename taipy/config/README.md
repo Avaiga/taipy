@@ -40,7 +40,7 @@ Want to help build *Taipy Config*? Check out our [`CONTRIBUTING.md`](../../CONTR
 
 ## Code of conduct
 
-Want to be part of the *Taipy Config* community? Check out our [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) file.
+Want to be part of the *Taipy Config* community? Check out our [`CODE_OF_CONDUCT.md`](../../CODE_OF_CONDUCT.md) file.
 
 ## Directory Structure
 
@@ -53,7 +53,6 @@ Want to be part of the *Taipy Config* community? Check out our [`CODE_OF_CONDUCT
     - `exceptions/`: *taipy-config* exceptions.
     - `global_app/`: `GlobalAppConfig` implementation.
     - `stubs/`: Helper functions to create the `config.pyi` file.
-    - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of *taipy-config*.
     - `INSTALLATION.md`: Instructions to install *taipy-config*.
     - `LICENSE`: The Apache 2.0 License.
     - `README.md`: Current file.

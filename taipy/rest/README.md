@@ -59,7 +59,7 @@ Want to help build *Taipy REST*? Check out our [`CONTRIBUTING.md`](../../CONTRIB
 ## Code of conduct
 
 Want to be part of the *Taipy REST* community? Check out our
-[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) file.
+[`CODE_OF_CONDUCT.md`](../../CODE_OF_CONDUCT.md) file.
 
 ## Directory Structure
 
@@ -74,7 +74,6 @@ Want to be part of the *Taipy REST* community? Check out our
     - `app.py`: Flask app configuration and creation
     - `extensions.py`: Singletons used on the application factory
     - `rest.py`: Main python entrypoint for running *taipy-rest* application.
-    - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of *taipy-rest*.
     - `INSTALLATION.md`: Instructions to install *taipy-rest*.
     - `LICENSE`: The Apache 2.0 License.
     - `README.md`: Current file.

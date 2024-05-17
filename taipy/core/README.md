@@ -47,7 +47,7 @@ Want to help build *Taipy Core*? Check out our [`CONTRIBUTING.md`](../../CONTRIB
 ## Code of conduct
 
 Want to be part of the *Taipy Core* community? Check out our
-[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) file.
+[`CODE_OF_CONDUCT.md`](../../CODE_OF_CONDUCT.md) file.
 
 ## Directory Structure
 
@@ -70,7 +70,6 @@ Want to be part of the *Taipy Core* community? Check out our
     - `submission/`: Submission definition, management and implementation.
     - `task/`: Task definition, management and implementation.
     - `taipy.py`: Main entrypoint for *taipy-core* runtime features.
-    - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of *taipy-core*.
     - `INSTALLATION.md`: Instructions to install *taipy-core*.
     - `LICENSE`: The Apache 2.0 License.
     - `README.md`: Current file.
