@@ -158,7 +158,7 @@ const ChatRow = (props: ChatRowProps) => {
     );
 };
 
-const getChatKey = (start: number) => `Chat-${start}`
+const getChatKey = (start: number, page: number) => `Chat-${start}-${start+page}`
 
 const Chat = (props: ChatProps) => {
     const { id, updateVarName, senderId = "taipy", onAction, withInput = true, defaultKey = "", pageSize = 50 } = props;
@@ -250,7 +250,7 @@ const Chat = (props: ChatProps) => {
 
     const loadMoreItems = useCallback(
         (startIndex: number) => {
-            const key = getChatKey(startIndex);
+            const key = getChatKey(startIndex, pageSize);
             page.current = {
                 key: key,
             };
@@ -307,9 +307,9 @@ const Chat = (props: ChatProps) => {
                 const cols = Object.keys(nr[newValue.start]);
                 setColumns(cols.length > 2 ? cols : cols.length == 2 ? [...cols, ""] : ["", ...cols, "", ""]);
             }
-            page.current.key = getChatKey(0);
+            page.current.key = getChatKey(0, pageSize);
         }
-    }, [refresh, props.messages]);
+    }, [refresh, pageSize, props.messages]);
 
     useEffect(() => {
         if (showMessage && !isAnchorDivVisible) {
