@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import re
 import typing as t
 from abc import ABC, abstractmethod
 from os import path
@@ -22,7 +23,7 @@ from ..utils import _is_in_notebook, _varname_from_content
 from ._html import _TaipyHTMLParser
 
 if t.TYPE_CHECKING:
-    from watchdog.observers import BaseObserverSubclassCallable
+    from watchdog.observers.api import BaseObserver
 
     from ..gui import Gui
 
@@ -46,7 +47,8 @@ class _Renderer(Page, ABC):
         self._content = ""
         self._base_element: t.Optional[_Element] = None
         self._filepath = ""
-        self._observer: t.Optional["BaseObserverSubclassCallable"] = None
+        self._observer: t.Optional["BaseObserver"] = None
+        self._encoding: t.Optional[str] = kwargs.get("encoding", None)
         if isinstance(content, str):
             self.__process_content(content)
         elif isinstance(content, _Element):
@@ -68,7 +70,7 @@ class _Renderer(Page, ABC):
             if _is_in_notebook() and self._observer is None:
                 self.__observe_file_change(content)
             return
-        self._content = content
+        self._content = self.__sanitize_content(content)
 
     def __observe_file_change(self, file_path: str):
         from watchdog.observers import Observer
@@ -84,12 +86,24 @@ class _Renderer(Page, ABC):
         with open(t.cast(str, content), "rb") as f:
             file_content = f.read()
             encoding = "utf-8"
-            if (detected_encoding := detect(file_content)["encoding"]) is not None:
+            if self._encoding is not None:
+                encoding = self._encoding
+                _TaipyLogger._get_logger().info(f"'{encoding}' encoding was used to decode file '{content}'.")
+            elif (detected_encoding := detect(file_content)["encoding"]) is not None:
                 encoding = detected_encoding
                 _TaipyLogger._get_logger().info(f"Detected '{encoding}' encoding for file '{content}'.")
-            self._content = file_content.decode(encoding)
+            else:
+                _TaipyLogger._get_logger().info(f"Using default '{encoding}' encoding for file '{content}'.")
+            self._content = self.__sanitize_content(file_content.decode(encoding))
             # Save file path for error handling
             self._filepath = content
+
+    def __sanitize_content(self, content: str) -> str:
+        # replace all CRLF (\r\n) with LF (\n)
+        text = re.sub(r'\r\n', '\n', content)
+        # replace all remaining CR (\r) with LF (\n)
+        text = re.sub(r'\r', '\n', content)
+        return text
 
     def set_content(self, content: str) -> None:
         """Set a new page content.
