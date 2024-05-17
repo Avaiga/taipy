@@ -322,9 +322,9 @@ def invoke_state_callback(gui: Gui, state_id: str, callback: t.Callable, args: t
 def invoke_long_callback(
     state: State,
     user_function: t.Callable,
-    user_function_args: t.Union[t.Tuple, t.List] = None,
+    user_function_args: t.Optional[t.Union[t.Tuple, t.List]] = None,
     user_status_function: t.Optional[t.Callable] = None,
-    user_status_function_args: t.Union[t.Tuple, t.List] = None,
+    user_status_function_args: t.Optional[t.Union[t.Tuple, t.List]] = None,
     period=0,
 ):
     """Invoke a long running user callback.

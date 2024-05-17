@@ -13,6 +13,7 @@
 
 import { ComponentType } from "react";
 import Button from "./Button";
+import Chat from "./Chat";
 import Chart from "./Chart";
 import DateRange from "./DateRange";
 import DateSelector from "./DateSelector";
@@ -47,6 +48,7 @@ export const getRegisteredComponents = () => {
         Object.entries({
             a: Link,
             Button: Button,
+            Chat: Chat,
             Chart: Chart,
             DateRange: DateRange,
             DateSelector: DateSelector,
