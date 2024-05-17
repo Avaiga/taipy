@@ -11,11 +11,11 @@
  * specific language governing permissions and limitations under the License.
  */
 
-/** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
+/** @type {import('ts-jest/dist/types').JestConfigWithTsJest} */
 module.exports = {
  // testEnvironment: 'jest-environment-jsdom',
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
-  setupFiles: ['./test-config/jest.env.js', './test-config/createObjectUrl.js', './test-config/Canvas.js', './test-config/mockFileUpload.js'],
+  setupFiles: ['./test-config/jest.env.js', './test-config/createObjectUrl.js', './test-config/Canvas.js', './test-config/mockFileUpload.js', './test-config/intersectionObserver.js'],
   coverageReporters: ["json", "html", "text"],
 };
