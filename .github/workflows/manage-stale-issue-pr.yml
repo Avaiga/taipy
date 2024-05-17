@@ -26,7 +26,6 @@ jobs:
           days-before-issue-close: -1  # Never close an issue
           exempt-issue-labels: "❌ Blocked,💬 Discussion"  # Issues with label ❌ Blocked or 💬 Discussion are exempted from stale
           exempt-pr-labels: "❌ Blocked,💬 Discussion"  # PRs with label ❌ Blocked or 💬 Discussion are exempted from stale
-          exempt-assignees: "jrobinAV,FabienLelaquais"  # Assignees on issues/PRs exempted from stale
           remove-stale-when-updated: true
 
   unassign-issues-labeled-waiting-for-contributor-after-14-days-of-inactivity:
@@ -37,6 +36,5 @@ jobs:
         with:
           last-activity: 14
           labels: "🥶Waiting for contributor"
-          exempt-assignees: "jrobinAV,FabienLelaquais"  # Exempt specified assignees from being unassigned
           labels-to-remove: "🥶Waiting for contributor"
           message: "This issue has been unassigned automatically because it has been marked as \"🥶Waiting for contributor\" for more than 14 days with no activity."
