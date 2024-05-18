@@ -65,7 +65,7 @@ const Metric = (props: MetricProps) => {
                 return mode;
             })(),
             delta: {
-                reference: typeof threshold === 'number' && typeof delta === 'number' ? threshold - delta : undefined,
+                reference: typeof value === 'number' && typeof delta === 'number' ? value - delta : undefined,
             },
             gauge: {
                 axis: {range: [
@@ -81,12 +81,12 @@ const Metric = (props: MetricProps) => {
             },
         }
     ]), [
+        value,
+        delta,
+        threshold,
         props.min,
         props.max,
         props.type,
-        value,
-        threshold,
-        delta
     ]);
 
     const style = useMemo(
