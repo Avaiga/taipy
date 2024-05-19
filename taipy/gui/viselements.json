@@ -1344,7 +1344,7 @@
                     {
                         "name": "inactive_ids",
                         "type": "dynamic(str|list[str])",
-                        "doc": "Semicolon (';')-separated list or a list of menu items identifers that are disabled."
+                        "doc": "Semicolon (';')-separated list or a list of menu items identifiers that are disabled."
                     },
                     {
                         "name": "width",
