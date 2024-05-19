@@ -106,21 +106,6 @@ class _Renderer(Page, ABC):
         return text
 
     def set_content(self, content: str) -> None:
-        """Set a new page content.
-
-        Reads the new page content and reinitializes the `Page^` instance to reflect the change.
-
-        !!! important
-            This function can only be used in an IPython notebook context.
-
-        Arguments:
-            content (str): The text content or the path to the file holding the text to be transformed.
-                If *content* is a path to a readable file, the file is read entirely as the text
-                template.
-
-        Exceptions:
-            RuntimeError: If this method is called outside an IPython notebook context.
-        """
         if not _is_in_notebook():
             raise RuntimeError("'set_content()' must be used in an IPython notebook context")
         self.__process_content(content)
@@ -157,7 +142,7 @@ class Markdown(_Renderer):
     user interfaces.
 
     You can find details on the Taipy Markdown-specific syntax and how to add
-    Taipy Visual Elements in the [section on HTML](../gui/pages/index.md#using-markdown)
+    Taipy Visual Elements in the [section on Markdown](../gui/pages/markdown.md)
     of the User Manual.
     """
 
@@ -185,7 +170,7 @@ class Html(_Renderer):
     user interfaces.
 
     You can find details on HTML-specific constructs and how to add
-    Taipy Visual Elements in the [section on HTML](../gui/pages/index.md#using-html)
+    Taipy Visual Elements in the [section on HTML](../gui/pages/html.md)
     of the User Manual.
     """
 

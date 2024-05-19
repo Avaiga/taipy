@@ -236,6 +236,12 @@
                         "doc": "If set, this allows de-selection and the value is set to unselected_value."
                     },
                     {
+                        "name": "unselected_value",
+                        "type": "any",
+                        "default_value": "None",
+                        "doc": "Value assigned to <i>value</i> when no item is selected."
+                    },
+                    {
                         "name": "mode",
                         "type": "str",
                         "doc": "Define the way the toggle is displayed:<ul><li>&quot;theme&quot;: synonym for setting the *theme* property to True</li></ul>"
@@ -1334,6 +1340,11 @@
                         "name": "label",
                         "type": "str",
                         "doc": "The title of the menu."
+                    },
+                    {
+                        "name": "inactive_ids",
+                        "type": "dynamic(str|list[str])",
+                        "doc": "Semicolon (';')-separated list or a list of menu items identifers that are disabled."
                     },
                     {
                         "name": "width",
