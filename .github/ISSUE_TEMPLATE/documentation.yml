@@ -1,7 +1,7 @@
 name: "📋 Documentation"
 description: "Use this form to present your suggestions on how to improve our docs."
 title: "[DOCS] <write a small description here>"
-labels: ["documenation"]
+labels: ["📄 Documentation"]
 body:
   - type: markdown
     attributes:
