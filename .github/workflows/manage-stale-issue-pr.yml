@@ -1,0 +1,39 @@
+name: Manage Stale Issues and PRs
+
+on:
+  schedule:
+    # Run once every day at 9 AM UTC
+    - cron: 00 9 * * *
+
+jobs:
+  stale-issues-and-prs:
+    name: Comment on possible stable issues and PRs, and close stale PRs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          operations-per-run: 50  # Max number of operations per run (including fetch or close issues and PRs, set or update labels, add comments, delete branches, etc.)
+          include-only-assigned: true
+          days-before-stale: 14  # Idle number of days before marking issues/PRs stale
+          stale-issue-message: "This issue has been labelled as \"🥶Waiting for contributor\" because it has been inactive for more than 14 days. If you would like to continue working on this issue, please add another comment or create a PR that links to this issue. If a PR has already been created which refers to this issue, then you should explicitly mention this issue in the relevant PR. Otherwise, you will be unassigned in 14 days. For more information please refer to the contributing guidelines."
+          stale-issue-label: "🥶Waiting for contributor"
+          stale-pr-message: "This PR has been labelled as \"🥶Waiting for contributor\" because it has been inactive for more than 14 days. If you would like to continue working on this PR, then please add new commit or another comment, otherwise this PR will be closed in 14 days. For more information please refer to the contributing guidelines."
+          stale-pr-label: "🥶Waiting for contributor"
+          days-before-pr-close: 14
+          close-pr-message: "This PR has been closed because it has been marked as \"🥶Waiting for contributor\" for more than 14 days with no activity."
+          delete-branch: true  # Delete branch after closing a stale PR
+          days-before-issue-close: -1  # Never close an issue
+          exempt-issue-labels: "❌ Blocked,💬 Discussion"  # Issues with label ❌ Blocked or 💬 Discussion are exempted from stale
+          exempt-pr-labels: "❌ Blocked,💬 Discussion"  # PRs with label ❌ Blocked or 💬 Discussion are exempted from stale
+          remove-stale-when-updated: true
+
+  unassign-issues-labeled-waiting-for-contributor-after-14-days-of-inactivity:
+    name: Unassign issues labeled \"🥶Waiting for contributor\" after 14 days of inactivity.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: boundfoxstudios/action-unassign-contributor-after-days-of-inactivity@v1
+        with:
+          last-activity: 14
+          labels: "🥶Waiting for contributor"
+          labels-to-remove: "🥶Waiting for contributor"
+          message: "This issue has been unassigned automatically because it has been marked as \"🥶Waiting for contributor\" for more than 14 days with no activity."

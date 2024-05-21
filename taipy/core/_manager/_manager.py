@@ -28,6 +28,10 @@ class _Manager(Generic[EntityType]):
     _ENTITY_NAME: str = "Entity"
 
     @classmethod
+    def _build_not_submittable_entity_reason(cls, entity_id: str) -> str:
+        return f"Entity {entity_id} is not a submittable entity"
+
+    @classmethod
     def _delete_all(cls):
         """
         Deletes all entities.

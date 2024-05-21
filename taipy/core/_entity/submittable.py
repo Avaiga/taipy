@@ -17,6 +17,7 @@ import networkx as nx
 
 from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
+from ..common.reason import Reason
 from ..data.data_node import DataNode
 from ..job.job import Job
 from ..submission.submission import Submission
@@ -81,13 +82,22 @@ class Submittable:
         all_data_nodes_in_dag = {node for node in dag.nodes if isinstance(node, DataNode)}
         return all_data_nodes_in_dag - self.__get_inputs(dag) - self.__get_outputs(dag)
 
-    def is_ready_to_run(self) -> bool:
+    def is_ready_to_run(self) -> Reason:
         """Indicate if the entity is ready to be run.
 
         Returns:
-            True if the given entity is ready to be run. False otherwise.
+            A Reason object that can function as a Boolean value.
+            which is True if the given entity is ready to be run or there is no reason to be blocked, False otherwise.
         """
-        return all(dn.is_ready_for_reading for dn in self.get_inputs())
+        reason = Reason(self._submittable_id)
+
+        for node in self.get_inputs():
+            if node._edit_in_progress:
+                reason._add_reason(node.id, node._build_edit_in_progress_reason())
+            if not node._last_edit_date:
+                reason._add_reason(node.id, node._build_not_written_reason())
+
+        return reason
 
     def data_nodes_being_edited(self) -> Set[DataNode]:
         """Return the set of data nodes of the submittable entity that are being edited.

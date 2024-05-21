@@ -18,6 +18,7 @@ from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._version._version_mixin import _VersionMixin
 from ..common._utils import _Subscriber
+from ..common.reason import Reason
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..exceptions.exceptions import (
     InvalidSequenceId,
@@ -296,10 +297,17 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         Notifier.publish(_make_event(sequence, EventOperation.UPDATE, attribute_name="subscribers"))
 
     @classmethod
-    def _is_submittable(cls, sequence: Union[Sequence, SequenceId]) -> bool:
+    def _is_submittable(cls, sequence: Union[Sequence, SequenceId]) -> Reason:
         if isinstance(sequence, str):
             sequence = cls._get(sequence)
-        return isinstance(sequence, Sequence) and sequence.is_ready_to_run()
+
+        if not isinstance(sequence, Sequence):
+            sequence = str(sequence)
+            reason = Reason(sequence)
+            reason._add_reason(sequence, cls._build_not_submittable_entity_reason(sequence))
+            return reason
+
+        return sequence.is_ready_to_run()
 
     @classmethod
     def _submit(

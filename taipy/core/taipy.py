@@ -33,6 +33,7 @@ from .common._check_instance import (
     _is_task,
 )
 from .common._warnings import _warn_deprecated, _warn_no_core_service
+from .common.reason import Reason
 from .config.data_node_config import DataNodeConfig
 from .config.scenario_config import ScenarioConfig
 from .cycle._cycle_manager_factory import _CycleManagerFactory
@@ -89,7 +90,7 @@ def set(entity: Union[DataNode, Task, Sequence, Scenario, Cycle, Submission]):
         return _SubmissionManagerFactory._build_manager()._set(entity)
 
 
-def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Task, TaskId, str]) -> bool:
+def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Task, TaskId, str]) -> Reason:
     """Indicate if an entity can be submitted.
 
     This function checks if the given entity can be submitted for execution.
@@ -109,7 +110,7 @@ def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Tas
         return _TaskManagerFactory._build_manager()._is_submittable(entity)
     if isinstance(entity, str) and entity.startswith(Task._ID_PREFIX):
         return _TaskManagerFactory._build_manager()._is_submittable(TaskId(entity))
-    return False
+    return Reason(str(entity))._add_reason(str(entity), _Manager._build_not_submittable_entity_reason(str(entity)))
 
 
 def is_editable(
@@ -246,7 +247,7 @@ def submit(
             in asynchronous mode.
         timeout (Union[float, int]): The optional maximum number of seconds to wait
             for the jobs to be finished before returning.
-        **properties (dict[str, any]): A keyworded variable length list of user additional arguments
+        **properties (dict[str, any]): A key-worded variable length list of user additional arguments
             that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
 
     Returns:
@@ -530,7 +531,7 @@ def get_scenarios(
             The default value is False.
         descending (bool): If True, sort the output list of scenarios in descending order.
             The default value is False.
-        sort_key (Literal["name", "id", "creation_date", "tags"]): The optiononal sort_key to
+        sort_key (Literal["name", "id", "creation_date", "tags"]): The optional sort_key to
             decide upon what key scenarios are sorted. The sorting is in increasing order for
             dates, in alphabetical order for name and id, and in lexicographical order for tags.
             The default value is "name".<br/>
@@ -582,7 +583,7 @@ def get_primary_scenarios(
             The default value is False.
         descending (bool): If True, sort the output list of scenarios in descending order.
             The default value is False.
-        sort_key (Literal["name", "id", "creation_date", "tags"]): The optiononal sort_key to
+        sort_key (Literal["name", "id", "creation_date", "tags"]): The optional sort_key to
             decide upon what key scenarios are sorted. The sorting is in increasing order for
             dates, in alphabetical order for name and id, and in lexicographical order for tags.
             The default value is "name".<br/>
@@ -605,7 +606,7 @@ def is_promotable(scenario: Union[Scenario, ScenarioId]) -> bool:
     as a primary scenario.
 
     Parameters:
-        scenario (Union[Scenario, ScenarioId]): The scenario to be evaluated for promotability.
+        scenario (Union[Scenario, ScenarioId]): The scenario to be evaluated for promotion.
 
     Returns:
         True if the given scenario can be promoted to be a primary scenario. False otherwise.
@@ -987,7 +988,7 @@ def export_scenario(
     override: bool = False,
     include_data: bool = False,
 ):
-    """Export all related entities of a scenario to a archive zip file.
+    """Export all related entities of a scenario to an archive zip file.
 
     This function exports all related entities of the specified scenario to the
     specified archive zip file.
