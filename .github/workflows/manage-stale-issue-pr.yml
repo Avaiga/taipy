@@ -13,7 +13,6 @@ jobs:
       - uses: actions/stale@v9
         with:
           operations-per-run: 50  # Max number of operations per run (including fetch or close issues and PRs, set or update labels, add comments, delete branches, etc.)
-          start-date: "2024-05-05"  # Skip stale action for issues/PRs created before 5th May 2024
           include-only-assigned: true
           days-before-stale: 14  # Idle number of days before marking issues/PRs stale
           stale-issue-message: "This issue has been labelled as \"🥶Waiting for contributor\" because it has been inactive for more than 14 days. If you would like to continue working on this issue, please add another comment or create a PR that links to this issue. If a PR has already been created which refers to this issue, then you should explicitly mention this issue in the relevant PR. Otherwise, you will be unassigned in 14 days. For more information please refer to the contributing guidelines."
