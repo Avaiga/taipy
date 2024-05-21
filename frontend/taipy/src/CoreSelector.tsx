@@ -31,6 +31,7 @@ import {
     createSendUpdateAction,
     useDispatchRequestUpdateOnFirstRender,
     createRequestUpdateAction,
+    useDynamicProperty,
 } from "taipy-gui";
 
 import { Cycles, Cycle, DataNodes, NodeType, Scenarios, Scenario, DataNode, Sequence } from "./utils/types";
@@ -54,6 +55,7 @@ import {
 
 export interface EditProps {
     id: string;
+    active: boolean;
 }
 
 const treeSlots = { expandIcon: ChevronRight };
@@ -64,6 +66,8 @@ type Pinned = Record<string, boolean>;
 
 interface CoreSelectorProps {
     id?: string;
+    active?: boolean;
+    defaultActive?: boolean;
     updateVarName?: string;
     entities?: Entities;
     coreChanged?: Record<string, unknown>;
@@ -73,7 +77,7 @@ interface CoreSelectorProps {
     displayCycles?: boolean;
     showPrimaryFlag?: boolean;
     propagate?: boolean;
-    value?: string;
+    value?: string | string[];
     defaultValue?: string;
     height: string;
     libClassName?: string;
@@ -84,7 +88,7 @@ interface CoreSelectorProps {
     leafType: NodeType;
     editComponent?: ComponentType<EditProps>;
     showPins?: boolean;
-    onSelect?: (id: string) => void;
+    onSelect?: (id: string | string[]) => void;
 }
 
 const tinyPinIconButtonSx = (theme: Theme) => ({
@@ -109,6 +113,7 @@ const CoreItem = (props: {
     pins: [Pinned, Pinned];
     onPin?: (e: MouseEvent<HTMLElement>) => void;
     hideNonPinned: boolean;
+    active: boolean;
 }) => {
     const [id, label, items = EmptyArray, nodeType, primary] = props.item;
     const isPinned = props.pins[0][id];
@@ -126,6 +131,7 @@ const CoreItem = (props: {
                     pins={props.pins}
                     onPin={props.onPin}
                     hideNonPinned={props.hideNonPinned}
+                    active={props.active}
                 />
             ))}
         </>
@@ -161,7 +167,7 @@ const CoreItem = (props: {
                     </Grid>
                     {props.editComponent && nodeType === props.leafType ? (
                         <Grid item xs="auto">
-                            <props.editComponent id={id} />
+                            <props.editComponent id={id} active={props.active} />
                         </Grid>
                     ) : null}
                     {props.onPin ? (
@@ -194,6 +200,7 @@ const CoreItem = (props: {
                     pins={props.pins}
                     onPin={props.onPin}
                     hideNonPinned={props.hideNonPinned}
+                    active={props.active}
                 />
             ))}
         </TreeItem>
@@ -256,11 +263,12 @@ const CoreSelector = (props: CoreSelectorProps) => {
         coreChanged,
     } = props;
 
-    const [selected, setSelected] = useState("");
+    const [selectedItems, setSelectedItems] = useState<string[]>([]);
     const [pins, setPins] = useState<[Pinned, Pinned]>([{}, {}]);
     const [hideNonPinned, setShowPinned] = useState(false);
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
+    const active = useDynamicProperty(props.active, props.defaultActive, true);
     const dispatch = useDispatch();
     const module = useModule();
 
@@ -277,68 +285,62 @@ const CoreSelector = (props: CoreSelectorProps) => {
 
     const onNodeSelect = useCallback(
         (e: SyntheticEvent, nodeId: string, isSelected: boolean) => {
-            if (!isSelected) {
+            const { selectable = "false" } = e.currentTarget.parentElement?.dataset || {};
+            const isSelectable = selectable === "true";
+            if (!isSelectable && multiple) {
                 return;
             }
-            const { selectable = "false" } = e.currentTarget.parentElement?.dataset || {};
-            const scenariosVar = getUpdateVar(updateVars, lovPropertyName);
-            dispatch(
-                createSendUpdateAction(
-                    updateVarName,
-                    selectable === "true" ? nodeId : undefined,
-                    module,
-                    onChange,
-                    propagate,
-                    scenariosVar
-                )
-            );
-            setSelected(nodeId);
-            onSelect && selectable && onSelect(nodeId);
+            setSelectedItems((old) => {
+                const res = isSelected ? [...old, nodeId] : old.filter((id) => id !== nodeId);
+                const scenariosVar = getUpdateVar(updateVars, lovPropertyName);
+                const val = multiple ? res : isSelectable ? nodeId : "";
+                setTimeout(() => dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate, scenariosVar)), 1);
+                onSelect && isSelectable && onSelect(val);
+                return res;
+            });
         },
-        [updateVarName, updateVars, onChange, onSelect, propagate, dispatch, module, lovPropertyName]
+        [updateVarName, updateVars, onChange, onSelect, multiple, propagate, dispatch, module, lovPropertyName]
     );
-
-    const unselect = useCallback(() => {
-        setSelected((sel) => {
-            if (sel) {
-                const lovVar = getUpdateVar(updateVars, lovPropertyName);
-                dispatch(createSendUpdateAction(updateVarName, undefined, module, onChange, propagate, lovVar));
-                return "";
-            }
-            return sel;
-        });
-    }, [updateVarName, updateVars, onChange, propagate, dispatch, module, lovPropertyName]);
 
     useEffect(() => {
         if (value !== undefined && value !== null) {
-            setSelected(value);
-            setExpandedItems((exp) => getExpandedIds(value, exp, props.entities));
+            setSelectedItems(Array.isArray(value) ? value : value ? [value]: []);
+            setExpandedItems((exp) => typeof value === "string" ? getExpandedIds(value, exp, props.entities) : exp);
         } else if (defaultValue) {
             try {
                 const parsedValue = JSON.parse(defaultValue);
                 if (Array.isArray(parsedValue)) {
-                    if (parsedValue.length) {
-                        setSelected(parsedValue[0]);
+                    setSelectedItems(parsedValue);
+                    if (parsedValue.length > 1) {
                         setExpandedItems((exp) => getExpandedIds(parsedValue[0], exp, props.entities));
                     }
                 } else {
-                    setSelected(parsedValue);
+                    setSelectedItems([parsedValue]);
                     setExpandedItems((exp) => getExpandedIds(parsedValue, exp, props.entities));
                 }
             } catch {
-                setSelected(defaultValue);
+                setSelectedItems([defaultValue]);
                 setExpandedItems((exp) => getExpandedIds(defaultValue, exp, props.entities));
             }
         } else if (value === null) {
-            setSelected("");
+            setSelectedItems([]);
         }
     }, [defaultValue, value, props.entities]);
 
     useEffect(() => {
         if (entities && !entities.length) {
-            unselect();
-        }
-    }, [entities, unselect]);
+            setSelectedItems((old) => {
+                if (old.length) {
+                    const lovVar = getUpdateVar(updateVars, lovPropertyName);
+                    setTimeout(() => dispatch(
+                        createSendUpdateAction(updateVarName, multiple ? [] : "", module, onChange, propagate, lovVar)
+                    ), 1);
+                    return [];
+                }
+                return old;
+            });
+            }
+    }, [entities, updateVars, lovPropertyName, updateVarName, multiple, module, onChange, propagate, dispatch]);
 
     // Refresh on broadcast
     useEffect(() => {
@@ -426,8 +428,8 @@ const CoreSelector = (props: CoreSelectorProps) => {
                 slots={treeSlots}
                 sx={treeViewSx}
                 onItemSelectionToggle={onNodeSelect}
-                selectedItems={selected}
-                multiSelect={multiple && !multiple}
+                selectedItems={selectedItems}
+                multiSelect={multiple}
                 expandedItems={expandedItems}
                 onItemExpansionToggle={onItemExpand}
             >
@@ -443,6 +445,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                               onPin={showPins ? onPin : undefined}
                               pins={pins}
                               hideNonPinned={hideNonPinned}
+                              active={!!active}
                           />
                       ))
                     : null}

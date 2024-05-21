@@ -55,6 +55,40 @@ class Scenario(_Entity, Submittable, _Labeled):
     solve the Business case. It also holds a set of additional data nodes (instances of `DataNode` class)
     for extra data related to the scenario.
 
+    !!! note
+
+        It is not recommended to instantiate a `Scenario` directly. Instead, it should be
+        created with the `create_scenario()^` function.
+
+    !!! Example
+
+        ```python
+        import taipy as tp
+        from taipy import Config
+
+        def by_two(x: int):
+            return x * 2
+
+        # Configure scenarios
+        input_cfg = Config.configure_data_node("my_input")
+        result_cfg = Config.configure_data_node("my_result")
+        task_cfg = Config.configure_task("my_double", function=by_two, input=input_cfg, output=result_cfg)
+        scenario_cfg = Config.configure_scenario("my_scenario", task_configs=[task_cfg])
+
+        # Create a new scenario from the configuration
+        scenario = tp.create_scenario(scenario_cfg)
+
+        # Write the input data and submit the scenario
+        scenario.my_input.write(3)
+        scenario.submit()
+
+        # Read the result
+        print(scenario.my_result.read())  # Output: 6
+
+        # Retrieve all scenarios
+        all_scenarios = tp.get_scenarios()
+        ```
+
     Attributes:
         config_id (str): The identifier of the `ScenarioConfig^`.
         tasks (Set[Task^]): The set of tasks.
@@ -95,9 +129,9 @@ class Scenario(_Entity, Submittable, _Labeled):
         version: str = None,
         sequences: Optional[Dict[str, Dict]] = None,
     ):
-        super().__init__(subscribers or [])
         self._config_id = _validate_id(config_id)
         self.id: ScenarioId = scenario_id or self._new_id(self.config_id)
+        super().__init__(self.id, subscribers or [])
 
         self._tasks: Union[Set[TaskId], Set[Task], Set] = tasks or set()
         self._additional_data_nodes: Union[Set[DataNodeId], Set[DataNode], Set] = additional_data_nodes or set()

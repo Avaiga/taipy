@@ -74,6 +74,7 @@ from .state import State
 from .types import _WsType
 from .utils import (
     _delscopeattr,
+    _DoNotUpdate,
     _filter_locals,
     _get_broadcast_var_name,
     _get_client_var_name,
@@ -108,11 +109,6 @@ from .utils._evaluator import _Evaluator
 from .utils._variable_directory import _MODULE_ID, _VariableDirectory
 from .utils.chart_config_builder import _build_chart_config
 from .utils.table_col_builder import _enhance_columns
-
-
-class _DoNotUpdate:
-    def __repr__(self):
-        return "Taipy: Do not update"
 
 
 class Gui:
@@ -991,9 +987,7 @@ class Gui:
         for k, v in values.items():
             if isinstance(v, (_TaipyData, _TaipyContentHtml)) and v.get_name() in modified_vars:
                 modified_vars.remove(v.get_name())
-            elif isinstance(v, _DoNotUpdate) or (
-                isinstance(v, (list, tuple)) and next(isinstance(i, _DoNotUpdate) for i in v)
-            ):
+            elif isinstance(v, _DoNotUpdate):
                 modified_vars.remove(k)
         for _var in modified_vars:
             newvalue = values.get(_var)
@@ -1037,7 +1031,7 @@ class Gui:
                     json.dumps(newvalue, cls=_TaipyJsonEncoder)
                     if len(warns):
                         keep_value = True
-                        for w in list(warns):
+                        for w in warns:
                             if is_debugging():
                                 debug_warnings.append(w)
                             if w.category is not DeprecationWarning and w.category is not PendingDeprecationWarning:
@@ -1474,8 +1468,8 @@ class Gui:
             return False
 
     # Proxy methods for Evaluator
-    def _evaluate_expr(self, expr: str) -> t.Any:
-        return self.__evaluator.evaluate_expr(self, expr)
+    def _evaluate_expr(self, expr: str, lazy_declare: t.Optional[bool] = False) -> t.Any:
+        return self.__evaluator.evaluate_expr(self, expr, lazy_declare)
 
     def _re_evaluate_expr(self, var_name: str) -> t.Set[str]:
         return self.__evaluator.re_evaluate_expr(self, var_name)
@@ -2281,12 +2275,19 @@ class Gui:
 
     def __init_ngrok(self):
         app_config = self._config.config
-        if app_config["run_server"] and app_config["ngrok_token"]:  # pragma: no cover
+        if hasattr(self, "_ngrok"):
+            # Keep the ngrok instance if token has not changed
+            if app_config["ngrok_token"] == self._ngrok[1]:
+                _TaipyLogger._get_logger().info(f" * NGROK Public Url: {self._ngrok[0].public_url}")
+                return
+            # Close the old tunnel so new tunnel can open for new token
+            ngrok.disconnect(self._ngrok[0].public_url)
+        if app_config["run_server"] and (token := app_config["ngrok_token"]):  # pragma: no cover
             if not util.find_spec("pyngrok"):
                 raise RuntimeError("Cannot use ngrok as pyngrok package is not installed.")
-            ngrok.set_auth_token(app_config["ngrok_token"])
-            http_tunnel = ngrok.connect(app_config["port"], "http")
-            _TaipyLogger._get_logger().info(f" * NGROK Public Url: {http_tunnel.public_url}")
+            ngrok.set_auth_token(token)
+            self._ngrok = (ngrok.connect(app_config["port"], "http"), token)
+            _TaipyLogger._get_logger().info(f" * NGROK Public Url: {self._ngrok[0].public_url}")
 
     def __bind_default_function(self):
         with self.get_flask_app().app_context():
@@ -2331,13 +2332,13 @@ class Gui:
         extension_bp = Blueprint("taipy_extensions", __name__)
         extension_bp.add_url_rule(f"/{Gui._EXTENSION_ROOT}/<path:path>", view_func=self.__serve_extension)
         scripts = [
-            s if bool(urlparse(s).netloc) else f"/{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
+            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
             for name, libs in Gui.__extensions.items()
             for lib in libs
             for s in (lib.get_scripts() or [])
         ]
         styles = [
-            s if bool(urlparse(s).netloc) else f"/{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
+            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
             for name, libs in Gui.__extensions.items()
             for lib in libs
             for s in (lib.get_styles() or [])
@@ -2347,7 +2348,7 @@ class Gui:
         else:
             styles.append(Gui.__ROBOTO_FONT)
         if self.__css_file:
-            styles.append(f"/{self.__css_file}")
+            styles.append(f"{self.__css_file}")
 
         self._flask_blueprint.append(extension_bp)
 

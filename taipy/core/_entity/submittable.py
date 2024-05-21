@@ -33,7 +33,8 @@ class Submittable:
         subscribers (List[Callable]): The list of callbacks to be called on `Job^`'s status change.
     """
 
-    def __init__(self, subscribers: Optional[List[_Subscriber]] = None):
+    def __init__(self, submittable_id: str, subscribers: Optional[List[_Subscriber]] = None) -> None:
+        self._submittable_id = submittable_id
         self._subscribers = _ListAttributes(self, subscribers or [])
 
     @abc.abstractmethod

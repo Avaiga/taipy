@@ -14,7 +14,7 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import Avatar from "@mui/material/Avatar";
-import { SxProps, useTheme, Theme } from "@mui/system";
+import { SxProps, useTheme, Theme } from "@mui/material/styles";
 
 /**
  * An Icon representation.
@@ -39,7 +39,7 @@ interface IconProps {
     id?: string;
     img: Icon;
     className?: string;
-    sx?: SxProps;
+    sx?: SxProps<Theme>;
 }
 
 export const avatarSx = { bgcolor: (theme: Theme) => theme.palette.text.primary };

@@ -111,3 +111,5 @@ export const getSuffixedClassNames = (names: string | undefined, suffix: string)
         .join(" ");
 
 export const emptyStyle = {} as CSSProperties;
+
+export const disableColor = <T>(color: T, disabled: boolean) => (disabled ? ("disabled" as T) : color);

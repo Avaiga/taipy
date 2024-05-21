@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Theme, Tooltip, alpha } from "@mui/material";
 
 import Box from "@mui/material/Box";
@@ -35,10 +35,21 @@ import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useFormik } from "formik";
 
-import { useDispatch, useModule, createSendActionNameAction, getUpdateVar, createSendUpdateAction } from "taipy-gui";
+import {
+    useDispatch,
+    useModule,
+    createSendActionNameAction,
+    getUpdateVar,
+    createSendUpdateAction,
+    TableFilter,
+    ColumnDesc,
+    FilterDesc,
+    useDynamicProperty,
+    createRequestUpdateAction,
+} from "taipy-gui";
 
 import ConfirmDialog from "./utils/ConfirmDialog";
-import { MainTreeBoxSx, ScFProps, ScenarioFull, useClassNames, tinyIconButtonSx } from "./utils";
+import { MainTreeBoxSx, ScFProps, ScenarioFull, useClassNames, tinyIconButtonSx, getUpdateVarNames } from "./utils";
 import CoreSelector, { EditProps } from "./CoreSelector";
 import { Cycles, NodeType, Scenarios } from "./utils/types";
 
@@ -62,6 +73,8 @@ interface ScenarioDict {
 
 interface ScenarioSelectorProps {
     id?: string;
+    active?: boolean;
+    defaultActive?: boolean;
     showAddButton?: boolean;
     displayCycles?: boolean;
     showPrimaryFlag?: boolean;
@@ -85,6 +98,9 @@ interface ScenarioSelectorProps {
     dynamicClassName?: string;
     showPins?: boolean;
     showDialog?: boolean;
+    multiple?: boolean;
+    filterBy?: string;
+    updateScVars?: string;
 }
 
 interface ScenarioEditDialogProps {
@@ -413,14 +429,60 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
 };
 
 const ScenarioSelector = (props: ScenarioSelectorProps) => {
-    const { showAddButton = true, propagate = true, showPins = false, showDialog = true } = props;
+    const {
+        showAddButton = true,
+        propagate = true,
+        showPins = false,
+        showDialog = true,
+        multiple = false,
+        updateVars = "",
+        updateScVars = "",
+    } = props;
     const [open, setOpen] = useState(false);
     const [actionEdit, setActionEdit] = useState<boolean>(false);
 
+    const active = useDynamicProperty(props.active, props.defaultActive, true);
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     const dispatch = useDispatch();
     const module = useModule();
+
+    const colFilters = useMemo(() => {
+        try {
+            const res = props.filterBy ? (JSON.parse(props.filterBy) as Array<[string, string]>) : undefined;
+            return Array.isArray(res)
+                ? res.reduce((pv, [name, coltype], idx) => {
+                      pv[name] = { dfid: name, type: coltype, index: idx, filter: true };
+                      return pv;
+                  }, {} as Record<string, ColumnDesc>)
+                : undefined;
+        } catch (e) {
+            return undefined;
+        }
+    }, [props.filterBy]);
+    const [filters, setFilters] = useState<FilterDesc[]>([]);
+
+    const applyFilters = useCallback(
+        (filters: FilterDesc[]) => {
+            setFilters((old) => {
+                if (old.length != filters.length || JSON.stringify(old) != JSON.stringify(filters)) {
+                    const filterVar = getUpdateVar(updateScVars, "filter");
+                    dispatch(
+                        createRequestUpdateAction(
+                            props.id,
+                            module,
+                            getUpdateVarNames(updateVars, "innerScenarios"),
+                            true,
+                            filterVar ? { [filterVar]: filters } : undefined
+                        )
+                    );
+                    return filters;
+                }
+                return old;
+            });
+        },
+        [updateVars, dispatch, props.id, updateScVars, module]
+    );
 
     const onSubmit = useCallback(
         (...values: unknown[]) => {
@@ -428,7 +490,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                 createSendActionNameAction(
                     props.id,
                     module,
-                    props.onScenarioCrud,
+                    { action: props.onScenarioCrud, error_id: getUpdateVar(updateScVars, "error_id") },
                     props.onCreation,
                     props.updateVarName,
                     ...values
@@ -436,7 +498,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             );
             if (values.length > 1 && values[1]) {
                 // delete requested => unselect current node
-                const lovVar = getUpdateVar(props.updateVars, "innerScenarios");
+                const lovVar = getUpdateVar(updateVars, "innerScenarios");
                 dispatch(
                     createSendUpdateAction(props.updateVarName, undefined, module, props.onChange, propagate, lovVar)
                 );
@@ -450,8 +512,9 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             propagate,
             props.onChange,
             props.updateVarName,
-            props.updateVars,
+            updateVars,
             props.onCreation,
+            updateScVars,
         ]
     );
 
@@ -473,21 +536,29 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
         (e: React.MouseEvent<HTMLElement>) => {
             e.stopPropagation();
             const { id: scenId } = e.currentTarget?.dataset || {};
+            const varName = getUpdateVar(updateScVars, "sc_id");
             scenId &&
                 props.onScenarioSelect &&
-                dispatch(createSendActionNameAction(props.id, module, props.onScenarioSelect, scenId));
+                dispatch(createSendActionNameAction(props.id, module, props.onScenarioSelect, varName, scenId));
             setOpen(true);
             setActionEdit(true);
         },
-        [props.onScenarioSelect, props.id, dispatch, module]
+        [props.onScenarioSelect, props.id, dispatch, module, updateScVars]
     );
 
     const EditScenario = useCallback(
         (props: EditProps) => (
-            <Tooltip title="Edit Scenario">
-                <IconButton data-id={props.id} onClick={openEditDialog} sx={tinyEditIconButtonSx}>
-                    <EditOutlined />
-                </IconButton>
+            <Tooltip title={props.active ? "Edit Scenario" : "Can't edit Scenario"}>
+                <span>
+                    <IconButton
+                        data-id={props.id}
+                        onClick={openEditDialog}
+                        sx={tinyEditIconButtonSx}
+                        disabled={props.active}
+                    >
+                        <EditOutlined />
+                    </IconButton>
+                </span>
             </Tooltip>
         ),
         [openEditDialog]
@@ -496,6 +567,14 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     return (
         <>
             <Box sx={MainTreeBoxSx} id={props.id} className={className}>
+                {active && colFilters ? (
+                    <TableFilter
+                        columns={colFilters}
+                        appliedFilters={filters}
+                        filteredCount={0}
+                        onValidate={applyFilters}
+                    ></TableFilter>
+                ) : null}
                 <CoreSelector
                     {...props}
                     entities={props.innerScenarios}
@@ -503,9 +582,10 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                     lovPropertyName="innerScenarios"
                     editComponent={EditScenario}
                     showPins={showPins}
+                    multiple={multiple}
                 />
                 {showAddButton ? (
-                    <Button variant="outlined" onClick={onDialogOpen} fullWidth endIcon={<Add />}>
+                    <Button variant="outlined" onClick={onDialogOpen} fullWidth endIcon={<Add />} disabled={!active}>
                         Add scenario
                     </Button>
                 ) : null}

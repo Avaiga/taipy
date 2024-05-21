@@ -85,7 +85,7 @@ class SQLTableDataNode(_AbstractSQLDataNode):
         editor_id: Optional[str] = None,
         editor_expiration_date: Optional[datetime] = None,
         properties: Optional[Dict] = None,
-    ):
+    ) -> None:
         if properties is None:
             properties = {}
         if properties.get(self.__TABLE_KEY) is None:

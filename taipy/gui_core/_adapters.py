@@ -9,10 +9,13 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import inspect
+import json
 import math
 import typing as t
 from enum import Enum
 from numbers import Number
+from operator import attrgetter, contains, eq, ge, gt, le, lt, ne
 
 import pandas as pd
 
@@ -62,6 +65,8 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
 
     def get(self):
         data = super().get()
+        if isinstance(data, (list, tuple)) and len(data) == 1:
+            data = data[0]
         if isinstance(data, Scenario):
             try:
                 if scenario := core_get(data.id):
@@ -118,6 +123,8 @@ class _GuiCoreScenarioDagAdapter(_TaipyBase):
 
     def get(self):
         data = super().get()
+        if isinstance(data, (list, tuple)) and len(data) == 1:
+            data = data[0]
         if isinstance(data, Scenario):
             try:
                 if scenario := core_get(data.id):
@@ -163,45 +170,43 @@ class _GuiCoreScenarioNoUpdate(_TaipyBase, _DoNotUpdate):
 
 
 class _GuiCoreDatanodeAdapter(_TaipyBase):
-
     @staticmethod
     def _is_tabular_data(datanode: DataNode, value: t.Any):
-        if isinstance(datanode, _TabularDataNodeMixin):
-            return True
-        if datanode.is_ready_for_reading:
-            return isinstance(value, (pd.DataFrame, pd.Series, list, tuple, dict))
-        return False
+        return isinstance(datanode, _TabularDataNodeMixin) or isinstance(
+            value, (pd.DataFrame, pd.Series, list, tuple, dict)
+        )
 
     def __get_data(self, dn: DataNode):
-            if dn._last_edit_date:
-                if isinstance(dn, _TabularDataNodeMixin):
+        if dn._last_edit_date:
+            if isinstance(dn, _TabularDataNodeMixin):
+                return (None, None, True, None)
+            try:
+                value = dn.read()
+                if _GuiCoreDatanodeAdapter._is_tabular_data(dn, value):
                     return (None, None, True, None)
-                try:
-                    value = dn.read()
-                    if _GuiCoreDatanodeAdapter._is_tabular_data(dn, value):
-                        return (None, None, True, None)
-                    val_type = (
-                        "date"
-                        if "date" in type(value).__name__
-                        else type(value).__name__
-                        if isinstance(value, Number)
-                        else None
-                    )
-                    if isinstance(value, float):
-                        if math.isnan(value):
-                            value = None
-                    return (
-                        value,
-                        val_type,
-                        None,
-                        None,
-                    )
-                except Exception as e:
-                    return (None, None, None, f"read data_node: {e}")
-            return (None, None, None, f"Data unavailable for {dn.get_simple_label()}")
+                val_type = (
+                    "date"
+                    if "date" in type(value).__name__
+                    else type(value).__name__
+                    if isinstance(value, Number)
+                    else None
+                )
+                if isinstance(value, float) and math.isnan(value):
+                    value = None
+                return (
+                    value,
+                    val_type,
+                    None,
+                    None,
+                )
+            except Exception as e:
+                return (None, None, None, f"read data_node: {e}")
+        return (None, None, None, f"Data unavailable for {dn.get_simple_label()}")
 
     def get(self):
         data = super().get()
+        if isinstance(data, (list, tuple)) and len(data) == 1:
+            data = data[0]
         if isinstance(data, DataNode):
             try:
                 if datanode := core_get(data.id):
@@ -234,3 +239,58 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
     @staticmethod
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "Dn"
+
+
+def _attr_filter(attrVal: t.Any):
+    return not inspect.isroutine(attrVal)
+
+
+def _attr_type(attr: str):
+    return "date" if "date" in attr else "boolean" if attr.startswith("is_") else "string"
+
+
+_operators: t.Dict[str, t.Callable] = {
+    "==": eq,
+    "!=": ne,
+    "<": lt,
+    "<=": le,
+    ">": gt,
+    ">=": ge,
+    "contains": contains,
+}
+
+
+def _invoke_action(ent: t.Any, col: str, action: str, val: t.Any) -> bool:
+    try:
+        if op := _operators.get(action):
+            return op(attrgetter(col)(ent), val)
+    except Exception as e:
+        _warn(f"Error filtering with {col} {action} {val} on {ent}.", e)
+    return True
+
+
+class _GuiCoreScenarioProperties(_TaipyBase):
+    __SCENARIO_ATTRIBUTES = [a[0] for a in inspect.getmembers(Scenario, _attr_filter) if not a[0].startswith("_")]
+    __DATANODE_ATTRIBUTES = [a[0] for a in inspect.getmembers(DataNode, _attr_filter) if not a[0].startswith("_")]
+
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "ScP"
+
+    def get(self):
+        data = super().get()
+        if isinstance(data, str):
+            data = data.split(";")
+        if isinstance(data, (list, tuple)):
+            return json.dumps(
+                [
+                    (attr, _attr_type(attr))
+                    for attr in data
+                    if attr
+                    and isinstance(attr, str)
+                    and (parts := attr.split("."))
+                    and (len(parts) > 1 and parts[1] in _GuiCoreScenarioProperties.__DATANODE_ATTRIBUTES)
+                    or attr in _GuiCoreScenarioProperties.__SCENARIO_ATTRIBUTES
+                ]
+            )
+        return None

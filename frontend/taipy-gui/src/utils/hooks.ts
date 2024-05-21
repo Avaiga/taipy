@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { Dispatch, useContext, useEffect, useMemo, useRef } from "react";
+import { Dispatch, RefObject, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
 
 import { getUpdateVars } from "../components/Taipy/utils";
@@ -92,7 +92,7 @@ export const useDispatchRequestUpdateOnFirstRender = (
     forceRefresh?: boolean
 ) => {
     useEffect(() => {
-        const updateArray = getUpdateVars(updateVars).filter(uv => !uv.includes(","));
+        const updateArray = getUpdateVars(updateVars).filter((uv) => !uv.includes(","));
         varName && updateArray.push(varName);
         updateArray.length && dispatch(createRequestUpdateAction(id, context, updateArray, forceRefresh));
     }, [updateVars, dispatch, id, context, varName, forceRefresh]);
@@ -157,7 +157,7 @@ export const useClassNames = (libClassName?: string, dynamicClassName?: string, 
 export const useWhyDidYouUpdate = (name: string, props: Record<string, unknown>): void => {
     // Get a mutable ref object where we can store props ...
     // ... for comparison next time this hook runs.
-    const previousProps = useRef({} as Record<string, unknown>);
+    const previousProps = useRef<Record<string, unknown>>();
     useEffect(() => {
         if (previousProps.current) {
             // Get all keys from previous and current props
@@ -167,7 +167,7 @@ export const useWhyDidYouUpdate = (name: string, props: Record<string, unknown>)
             // Iterate through keys
             allKeys.forEach((key) => {
                 // If previous is different from current
-                if (previousProps.current[key] !== props[key]) {
+                if (previousProps.current && previousProps.current[key] !== props[key]) {
                     // Add to changesObj
                     changesObj[key] = {
                         from: previousProps.current[key],
@@ -184,3 +184,24 @@ export const useWhyDidYouUpdate = (name: string, props: Record<string, unknown>)
         previousProps.current = props;
     });
 };
+
+export const useElementVisible = (ref: RefObject<HTMLElement>) => {
+    const observerRef = useRef<IntersectionObserver | null>(null);
+    const [isOnScreen, setIsOnScreen] = useState(false);
+
+    useEffect(() => {
+        observerRef.current = new IntersectionObserver(([entry]) => setIsOnScreen(entry.isIntersecting));
+    }, []);
+
+    useEffect(() => {
+        observerRef.current && ref.current && observerRef.current.observe(ref.current);
+
+        return () => {
+            observerRef.current && observerRef.current.disconnect();
+        };
+    }, [ref]);
+
+    return isOnScreen;
+};
+
+export const useUniqueId = (id?: string) => useMemo(() => (id ? id : new Date().toISOString() + Math.random()), [id]);

@@ -310,7 +310,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                 createRequestUpdateAction(
                                     id,
                                     module,
-                                    getUpdateVarNames(updateVars, "properties"),
+                                    getUpdateVarNames(updateVars, "dnProperties"),
                                     true,
                                     idVar ? { [idVar]: dnId } : undefined
                                 )
@@ -354,6 +354,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             createSendActionNameAction(id, module, props.onLock, {
                                 id: oldId,
                                 lock: false,
+                                error_id: getUpdateVar(updateDnVars, "error_id"),
                             })
                         ),
                     1
@@ -442,9 +443,15 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         () => () => {
             dnId &&
                 editLock.current &&
-                dispatch(createSendActionNameAction(id, module, props.onLock, { id: dnId, lock: false }));
+                dispatch(
+                    createSendActionNameAction(id, module, props.onLock, {
+                        id: dnId,
+                        lock: false,
+                        error_id: getUpdateVar(updateDnVars, "error_id"),
+                    })
+                );
         },
-        [dnId, id, dispatch, module, props.onLock]
+        [dnId, id, dispatch, module, props.onLock, updateDnVars]
     );
 
     const active = useDynamicProperty(props.active, props.defaultActive, true) && dnReadable;
@@ -469,11 +476,17 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
             e.stopPropagation();
             setFocusName(e.currentTarget.dataset.focus || "");
             if (e.currentTarget.dataset.focus === dataValueFocus && !editLock.current) {
-                dispatch(createSendActionNameAction(id, module, props.onLock, { id: dnId, lock: true }));
+                dispatch(
+                    createSendActionNameAction(id, module, props.onLock, {
+                        id: dnId,
+                        lock: true,
+                        error_id: getUpdateVar(updateDnVars, "error_id"),
+                    })
+                );
                 editLock.current = true;
             }
         },
-        [dnId, props.onLock, id, dispatch, module]
+        [dnId, props.onLock, id, dispatch, module, updateDnVars]
     );
 
     // Label
@@ -482,11 +495,17 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
             if (valid) {
-                dispatch(createSendActionNameAction(id, module, props.onEdit, { id: dnId, name: label }));
+                dispatch(
+                    createSendActionNameAction(id, module, props.onEdit, {
+                        id: dnId,
+                        name: label,
+                        error_id: getUpdateVar(updateDnVars, "error_id"),
+                    })
+                );
                 setFocusName("");
             }
         },
-        [valid, props.onEdit, dnId, label, id, dispatch, module]
+        [valid, props.onEdit, dnId, label, id, dispatch, module, updateDnVars]
     );
     const cancelLabel = useCallback(
         (e: MouseEvent<HTMLElement>) => {
@@ -548,21 +567,29 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         value: dataValue,
                         type: dtType,
                         comment: comment,
+                        error_id: getUpdateVar(updateDnVars, "error_id"),
+                        data_id: getUpdateVar(updateDnVars, "data_id"),
                     })
                 );
                 setFocusName("");
             }
         },
-        [valid, props.onDataValue, dnId, dataValue, dtType, id, dispatch, module, comment]
+        [valid, props.onDataValue, dnId, dataValue, dtType, id, dispatch, module, comment, updateDnVars]
     );
     const cancelDataValue = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
             setDataValue(getDataValue(dtValue, dtType));
             setFocusName("");
-            dispatch(createSendActionNameAction(id, module, props.onLock, { id: dnId, lock: false }));
+            dispatch(
+                createSendActionNameAction(id, module, props.onLock, {
+                    id: dnId,
+                    lock: false,
+                    error_id: getUpdateVar(updateDnVars, "error_id"),
+                })
+            );
         },
-        [dtValue, dtType, dnId, id, dispatch, module, props.onLock]
+        [dtValue, dtType, dnId, id, dispatch, module, props.onLock, updateDnVars]
     );
     const onDataValueChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setDataValue(e.target.value), []);
     const onDataValueDateChange = useCallback((d: Date | null) => d && setDataValue(d), []);
@@ -831,6 +858,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     onFocus={onFocus}
                                     onEdit={props.onEdit}
                                     editable={dnEditable}
+                                    updatePropVars={updateDnVars}
                                 />
                             </Grid>
                         </div>
@@ -1031,7 +1059,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                                   format(dataValue as Date, "yyyy/MM/dd HH:mm:ss")
                                                                 : dtType == "float" && dtValue === null
                                                                 ? "NaN"
-                                                                : dtValue}
+                                                                : `${dtValue}`}
                                                         </Typography>
                                                     )}
                                                 </Grid>
@@ -1059,7 +1087,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                 editInProgress={dnEditInProgress && dnEditorId !== editorId}
                                                 editLock={editLock}
                                                 editable={dnEditable}
-                                                idVar={getUpdateVar(updateDnVars, "data_id")}
+                                                updateDnVars={updateDnVars}
                                             />
                                         ) : (
                                             <DataNodeChart

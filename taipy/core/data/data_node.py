@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import functools
 import os
 import uuid
 from abc import abstractmethod
@@ -24,6 +25,7 @@ from taipy.logger._taipy_logger import _TaipyLogger
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
+from .._entity._ready_to_run_property import _ReadyToRunProperty
 from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._warnings import _warn_deprecated
@@ -35,10 +37,27 @@ from .data_node_id import DataNodeId, Edit
 from .operator import JoinOperator
 
 
+def _update_ready_for_reading(fct):
+    # This decorator must be wrapped before self_setter decorator as self_setter will run the function twice.
+    @functools.wraps(fct)
+    def _recompute_is_ready_for_reading(dn: "DataNode", *args, **kwargs):
+        fct(dn, *args, **kwargs)
+        if dn._edit_in_progress:
+            _ReadyToRunProperty._add(dn, f"DataNode {dn.id} is being edited")
+        else:
+            _ReadyToRunProperty._remove(dn, f"DataNode {dn.id} is being edited")
+        if not dn._last_edit_date:
+            _ReadyToRunProperty._add(dn, f"DataNode {dn.id} is not written")
+        else:
+            _ReadyToRunProperty._remove(dn, f"DataNode {dn.id} is not written")
+
+    return _recompute_is_ready_for_reading
+
+
 class DataNode(_Entity, _Labeled):
     """Reference to a dataset.
 
-    A Data Node is an abstract class that holds metadata related to the dataset it refers to.
+    A Data Node is an abstract class that holds metadata related to the data it refers to.
     In particular, a data node holds the name, the scope, the owner identifier, the last
     edit date, and some additional properties of the data.<br/>
     A Data Node also contains information and methods needed to access the dataset. This
@@ -46,7 +65,37 @@ class DataNode(_Entity, _Labeled):
     SQL Data Node, CSV Data Node, ...).
 
     !!! note
-        It is recommended not to instantiate subclasses of `DataNode` directly.
+        It is not recommended to instantiate subclasses of `DataNode` directly. Instead,
+        you have two ways:
+
+        1. Create a Scenario using the `create_scenario()^` function. Related data nodes
+            will be created automatically. Please refer to the `Scenario^` class for more
+            information.
+        2. Configure a `DataNodeConfig^` with the various configuration methods form `Config^`
+            and use the `create_global_data_node()^` function as illustrated in the following
+            example.
+
+    !!! Example
+
+        ```python
+        import taipy as tp
+        from taipy import Config
+
+        # Configure a global data node
+        dataset_cfg = Config.configure_data_node("my_dataset", scope=tp.Scope.GLOBAL)
+
+        # Instantiate a global data node
+        dataset = tp.create_global_data_node(dataset_cfg)
+
+        # Retrieve the list of all data nodes
+        all_data_nodes = tp.get_data_nodes()
+
+        # Write the data
+        dataset.write("Hello, World!")
+
+        # Read the data
+        print(dataset.read())
+        ```
 
     Attributes:
         config_id (str): Identifier of the data node configuration. It must be a valid Python
@@ -59,10 +108,11 @@ class DataNode(_Entity, _Labeled):
         parent_ids (Optional[Set[str]]): The set of identifiers of the parent tasks.
         last_edit_date (datetime): The date and time of the last modification.
         edits (List[Edit^]): The list of Edits (an alias for dict) containing metadata about each
-            data edition including but not limited to timestamp, comments, job_id:
-            timestamp: The time instant of the writing
-            comments: Representation of a free text to explain or comment on a data change
-            job_id: Only populated when the data node is written by a task execution and corresponds to the job's id.
+            data edition including but not limited to:
+                <ul><li>timestamp: The time instant of the writing </li>
+                <li>comments: Representation of a free text to explain or comment on a data change</li>
+                <li>job_id: Only populated when the data node is written by a task execution and
+                    corresponds to the job's id.</li></ul>
             Additional metadata related to the edition made to the data node can also be provided in Edits.
         version (str): The string indicates the application version of the data node to
             instantiate. If not provided, the current version is used.
@@ -172,6 +222,7 @@ class DataNode(_Entity, _Labeled):
             return self._last_edit_date
 
     @last_edit_date.setter  # type: ignore
+    @_update_ready_for_reading
     @_self_setter(_MANAGER_NAME)
     def last_edit_date(self, val):
         self._last_edit_date = val
@@ -236,6 +287,7 @@ class DataNode(_Entity, _Labeled):
         return self._edit_in_progress
 
     @edit_in_progress.setter  # type: ignore
+    @_update_ready_for_reading
     @_self_setter(_MANAGER_NAME)
     def edit_in_progress(self, val):
         self._edit_in_progress = val
@@ -382,7 +434,7 @@ class DataNode(_Entity, _Labeled):
         """Creates and adds a new entry in the edits attribute without writing the data.
 
         Parameters:
-            options (dict[str, any)): track `timestamp`, `comments`, `job_id`. The others are user-custom, users can
+            options (dict[str, any]): track `timestamp`, `comments`, `job_id`. The others are user-custom, users can
                 use options to attach any information to an external edit of a data node.
         """
         edit = {k: v for k, v in options.items() if v is not None}
@@ -519,20 +571,21 @@ class DataNode(_Entity, _Labeled):
             or the selected data is invalid.<br/>
             True otherwise.
         """
+        if self.is_valid:
+            from ..scenario.scenario import Scenario
+            from ..taipy import get_parents
 
-        from ..scenario.scenario import Scenario
-        from ..taipy import get_parents
-
-        parent_scenarios: Set[Scenario] = get_parents(self)["scenario"]  # type: ignore
-        for parent_scenario in parent_scenarios:
-            for ancestor_node in nx.ancestors(parent_scenario._build_dag(), self):
-                if (
-                    isinstance(ancestor_node, DataNode)
-                    and ancestor_node.last_edit_date
-                    and ancestor_node.last_edit_date > self.last_edit_date
-                ):
-                    return False
-        return self.is_valid
+            parent_scenarios: Set[Scenario] = get_parents(self)["scenario"]  # type: ignore
+            for parent_scenario in parent_scenarios:
+                for ancestor_node in nx.ancestors(parent_scenario._build_dag(), self):
+                    if (
+                        isinstance(ancestor_node, DataNode)
+                        and ancestor_node.last_edit_date
+                        and ancestor_node.last_edit_date > self.last_edit_date
+                    ):
+                        return False
+            return True
+        return False
 
     @staticmethod
     def _class_map():

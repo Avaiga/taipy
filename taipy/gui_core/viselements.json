@@ -91,6 +91,17 @@
                         "name": "scenarios",
                         "type": "dynamic(list[Scenario|Cycle])",
                         "doc": "TODO: The list of Scenario/Cycle to show. Shows all Cycle/Scenario if value is None."
+                    },
+                    {
+                        "name": "multiple",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "TODO: If True, the user can select multiple scenarios."
+                    },
+                    {
+                        "name": "filter_by",
+                        "type": "str|list[str]",
+                        "doc": "TODO: a list of scenario attributes to filter on."
                     }
                 ]
             }
@@ -315,8 +326,14 @@
                     },
                     {
                         "name": "scenario",
-                        "type": "dynamic(Scenario)",
-                        "doc": "If the <code>Scenario^</code> is set, the selector will only show datanodes owned by this scenario."
+                        "type": "dynamic(Scenario|list[Scenario])",
+                        "doc": "TODO: If the <code>Scenario^</code> is set, the selector will only show datanodes owned by this scenario."
+                    },
+                    {
+                        "name": "multiple",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "TODO: If True, the user can select multiple datanodes."
                     }
                 ]
             }
