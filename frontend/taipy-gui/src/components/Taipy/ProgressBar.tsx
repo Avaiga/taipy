@@ -11,41 +11,59 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import * as React from "react";
+import React from "react";
+import { Box, CircularProgress, LinearProgress } from "@mui/material";
 import { useEffect, useState } from "react";
-import CircularProgress from "@mui/material/CircularProgress";
-import LinearProgress from "@mui/material/LinearProgress";
-import Box from "@mui/material/Box";
 
 interface ProgressBarProps {
-    linear?: boolean;
-    //showProgress?: boolean;
+    linear?: boolean; //by default - false
+    showProgress?: boolean; //by default - false
+    progressBarCount?: number; //by default - 1
 }
 
 const Progress = (props: ProgressBarProps) => {
-    const { linear } = props;
-    const [value, setValue] = useState(false); //By default the circular element will be rendered. If the user declares the `linear` param as true, then the linear element will be rendered otherwise circular.
+    const { linear, showProgress, progressBarCount } = props;
+
+    const [linearProgress, setLinearProgress] = useState(false);
+    const [progressVisible, setProgressVisible] = useState(false);
+    const [progressCount, setProgressCount] = useState(1);
 
     useEffect(() => {
-        setValue((val) => {
+        setLinearProgress((progress) => {
             if (props.linear !== undefined) return props.linear;
-            return val;
+            return progress;
         });
     }, [props.linear, linear]);
 
-    return (
-        <>
-            {value == true ? (
-                <Box sx={{ width: "100%" }}>
-                    <LinearProgress />
-                </Box>
-            ) : (
+    useEffect(() => {
+        setProgressVisible((progress_visible) => {
+            if (props.showProgress !== undefined) return props.showProgress;
+            return progress_visible;
+        });
+    }, [props.showProgress, showProgress]);
+
+    useEffect(() => {
+        setProgressCount((progress_count) => {
+            if (props.progressBarCount !== undefined) return props.progressBarCount;
+            return progress_count;
+        });
+    }, [props.progressBarCount, progressBarCount]);
+
+    for (let i = 0; i <= progressCount; i++) {
+        if (!progressVisible) {
+            if (linearProgress)
+                return (
+                    <Box sx={{ width: "100%" }}>
+                        <LinearProgress />
+                    </Box>
+                );
+            return (
                 <Box sx={{ display: "flex" }}>
                     <CircularProgress />
                 </Box>
-            )}
-        </>
-    );
+            );
+        } //else {}
+    }
 };
 
 export default Progress;
