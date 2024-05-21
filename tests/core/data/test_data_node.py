@@ -497,6 +497,8 @@ class TestDataNode:
         _DataManager._set(dn_2)
         assert dn_1.parent_ids == {"sc1"}
         assert dn_2.parent_ids == {"sc1"}
+        dn_2._parent_ids.clear()
+        _DataManager._set(dn_2)
 
         # auto set & reload on edit_in_progress attribute
         assert not dn_2.edit_in_progress

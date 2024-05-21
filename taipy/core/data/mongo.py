@@ -103,7 +103,7 @@ class MongoCollectionDataNode(DataNode):
         editor_id: Optional[str] = None,
         editor_expiration_date: Optional[datetime] = None,
         properties: Dict = None,
-    ):
+    ) -> None:
         _check_dependency_is_installed("Mongo Data Node", "pymongo")
         if properties is None:
             properties = {}

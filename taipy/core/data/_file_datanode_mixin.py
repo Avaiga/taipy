@@ -55,8 +55,8 @@ class _FileDataNodeMixin(object):
                 Edit(
                     {
                         "timestamp": self._last_edit_date,
-                        "writer_identifier": "TAIPY",
-                        "comments": "Default data written.",
+                        "editor": "TAIPY",
+                        "comment": "Default data written.",
                     }
                 )
             )

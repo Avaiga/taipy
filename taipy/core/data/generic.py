@@ -76,7 +76,7 @@ class GenericDataNode(DataNode):
         editor_id: Optional[str] = None,
         editor_expiration_date: Optional[datetime] = None,
         properties: Dict = None,
-    ):
+    ) -> None:
         if properties is None:
             properties = {}
         if missing := set(self._REQUIRED_PROPERTIES) - set(properties.keys()):

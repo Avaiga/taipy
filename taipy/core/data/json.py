@@ -80,7 +80,7 @@ class JSONDataNode(DataNode, _FileDataNodeMixin):
         editor_id: Optional[str] = None,
         editor_expiration_date: Optional[datetime] = None,
         properties: Optional[Dict] = None,
-    ):
+    ) -> None:
         self.id = id or self._new_id(config_id)
 
         if properties is None:

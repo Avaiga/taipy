@@ -33,6 +33,46 @@ class Task(_Entity, _Labeled):
     A `Task` brings together the user code as function, the inputs and the outputs as data nodes
     (instances of the `DataNode^` class).
 
+    !!! note
+        It is not recommended to instantiate a `Task` directly. Instead, it should be
+        created with the `create_scenario()^` function. When creating a `Scenario^`,
+        the related data nodes and tasks are created automatically. Please refer to
+        the `Scenario^` class for more information.
+
+    !!! Example
+
+        ```python
+        import taipy as tp
+        from taipy import Config
+
+        def by_two(x: int):
+            return x * 2
+
+        # Configure data nodes, tasks and scenarios
+        input_cfg = Config.configure_data_node("my_input", default_data=2)
+        result_cfg = Config.configure_data_node("my_result")
+        task_cfg = Config.configure_task("my_double", function=by_two, input=input_cfg, output=result_cfg)
+        scenario_cfg = Config.configure_scenario("my_scenario", task_configs=[task_cfg])
+
+        # Instantiate a task along with a scenario
+        sc = tp.create_scenario(scenario_cfg)
+
+        # Retrieve task and data nodes from scenario
+        task_input = sc.my_input
+        double_task = sc.my_double
+        task_result = sc.my_result
+
+        # Write the input data and submit the task
+        task_input.write(3)
+        double_task.submit()
+
+        # Read the result
+        print(task_result.read())  # Output: 6
+
+        # Retrieve the list of all tasks
+        all_tasks = tp.get_tasks()
+        ```
+
     Attributes:
         config_id (str): The identifier of the `TaskConfig^`.
         properties (dict[str, Any]): A dictionary of additional properties.

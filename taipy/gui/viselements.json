@@ -1,1524 +1,1807 @@
 {
-  "controls": [
-    [
-      "text",
-      {
-        "inherits": [
-          "shared"
-        ],
-        "properties": [
-          {
-            "name": "value",
-            "default_property": true,
-            "type": "dynamic(any)",
-            "default_value": "\"\"",
-            "doc": "The value displayed as text by this control."
-          },
-          {
-            "name": "raw",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If set to True, the component renders as an HTML &lt;span&gt; element without any default style."
-          },
-          {
-            "name": "mode",
-            "type": "str",
-            "doc": "Define the way the text is processed:<ul><li>&quot;raw&quot;: synonym for setting the *raw* property to True</li><li>&quot;pre&quot;: keeps spaces and new lines</li><li>&quot;markdown&quot; or &quot;md&quot;: basic support for Markdown."
-          },
-          {
-            "name": "format",
-            "type": "str",
-            "doc": "The format to apply to the value.<br/>See below."
-          }
-        ]
-      }
-    ],
-    [
-      "button",
-      {
-        "inherits": [
-          "active",
-          "shared"
-        ],
-        "properties": [
-          {
-            "name": "label",
-            "default_property": true,
-            "type": "dynamic(str|Icon)",
-            "default_value": "\"\"",
-            "doc": "The label displayed in the button."
-          },
-          {
-            "name": "on_action",
-            "type": "Callback",
-            "doc": "The name of a function that is triggered when the button is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
-            "signature": [["state", "State"], ["id", "str"], ["payload", "dict"]]
-          }
-        ]
-      }
-    ],
-    [
-      "input",
-      {
-        "inherits": [
-          "sharedInput",
-          "on_change",
-          "propagate"
-        ],
-        "properties": [
-          {
-            "name": "value",
-            "default_property": true,
-            "type": "dynamic(any)",
-            "default_value": "None",
-            "doc": "The value represented by this control."
-          },
-          {
-            "name": "password",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If True, the text is obscured: all input characters are displayed as an asterisk ('*')."
-          },
-          {
-            "name": "label",
-            "type": "str",
-            "default_value": "None",
-            "doc": "The label associated with the input."
-          },
-          {
-            "name": "multiline",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If True, the text is presented as a multi line input."
-          },
-          {
-            "name": "lines_shown",
-            "type": "int",
-            "default_value": "5",
-            "doc": "The height of the displayed element if multiline is True."
-          }
-        ]
-      }
-    ],
-    [
-      "number",
-      {
-        "inherits": [
-          "sharedInput",
-          "on_change",
-          "propagate"
-        ],
-        "properties": [
-          {
-            "name": "value",
-            "default_property": true,
-            "type": "dynamic(any)",
-            "doc": "The numerical value represented by this control."
-          },
-          {
-            "name": "label",
-            "type": "str",
-            "default_value": "None",
-            "doc": "The label associated with the input."
-          }
-        ]
-      }
-    ],
-    [
-      "slider",
-      {
-        "inherits": [
-          "lovComp",
-          "propagate"
-        ],
-        "properties": [
-          {
-            "name": "value",
-            "default_property": true,
-            "type": "dynamic(int|float|int[]|float[]|str|str[])",
-            "doc": "The value that is set for this slider.<br/>If this slider is based on a <i>lov</i> then this property can be set to the lov element.<br/>This value can also hold an array of numbers to indicate that the slider reflects a range (within the [<i>min</i>,<i>max</i>] domain) defined by several knobs that the user can set independently.<br/>If this slider is based on a <i>lov</i> then this property can be set to an array of lov elements. The slider is then represented with several knobs, one for each lov value."
-          },
-          {
-            "name": "min",
-            "type": "int|float",
-            "default_value": "0",
-            "doc": "The minimum value.<br/>This is ignored when <i>lov</i> is defined."
-          },
-          {
-            "name": "max",
-            "type": "int|float",
-            "default_value": "100",
-            "doc": "The maximum value.<br/>This is ignored when <i>lov</i> is defined."
-          },
-          {
-            "name": "step",
-            "type": "int|float",
-            "default_value": "1",
-            "doc": "The step value: the gap between two consecutive values the slider set. It is a good practice to have (<i>max</i>-<i>min</i>) being divisible by <i>step</i>.<br/>This property is ignored when <i>lov</i> is defined."
-          },
-          {
-            "name": "text_anchor",
-            "type": "str",
-            "default_value": "\"bottom\"",
-            "doc": "When the <i>lov</i> property is used, this property indicates the location of the label.<br/>Possible values are:\n<ul>\n<li>\"bottom\"</li>\n<li>\"top\"</li>\n<li>\"left\"</li>\n<li>\"right\"</li>\n<li>\"none\" (no label is displayed)</li>\n</ul>"
-          },
-          {
-            "name": "labels",
-            "type": "bool|dict",
-            "doc": "The labels for specific points of the slider.<br/>If set to True, this slider uses the labels of the <i>lov</i> if there are any.<br/>If set to a dictionary, the slider uses the dictionary keys as a <i>lov</i> key or index, and the associated value as the label."
-          },
-          {
-            "name": "continuous",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If set to False, the control emits an on_change notification only when the mouse button is released, otherwise notifications are emitted during the cursor movements.<br/>If <i>lov</i> is defined, the default value is False."
-          },
-          {
-            "name": "change_delay",
-            "type": "int",
-            "default_value": "<i>App config</i>",
-            "doc": "Minimum time between triggering two <i>on_change</i> calls.<br/>The default value is defined at the application configuration level by the <strong>change_delay</strong> configuration option. if None or 0, there's no delay."
-          },
-          {
-            "name": "width",
-            "type": "str",
-            "default_value": "\"300px\"",
-            "doc": "The width, in CSS units, of this element."
-          },
-          {
-            "name": "height",
-            "type": "str",
-            "doc": "The height, in CSS units, of this element.<br/>It defaults to the <i>width</i> value when using the vertical orientation."
-          },
-          {
-            "name": "orientation",
-            "type": "str",
-            "default_value": "\"horizontal\"",
-            "doc": "The orientation of this slider.<br/>Valid values are \"horizontal\" or \"vertical\"."
-          }
-        ]
-      }
-    ],
-    [
-      "toggle",
-      {
-        "inherits": [
-          "lovComp",
-          "propagate"
-        ],
-        "properties": [
-          {
-            "name": "value"
-          },
-          {
-            "name": "theme",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If set, this toggle control acts as a way to set the application Theme (dark or light)."
-          },
-          {
-            "name": "allow_unselect",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If set, this allows de-selection and the value is set to unselected_value."
-          },
-          {
-            "name": "mode",
-            "type": "str",
-            "doc": "Define the way the toggle is displayed:<ul><li>&quot;theme&quot;: synonym for setting the *theme* property to True</li></ul>"
-          }
-        ]
-      }
-    ],
-    [
-      "date",
-      {
-        "inherits": [
-          "on_change",
-          "propagate"
-        ],
-        "properties": [
-          {
-            "name": "date",
-            "default_property": true,
-            "type": "dynamic(datetime)",
-            "doc": "The date that this control represents and can modify.<br/>It is typically bound to a <code>datetime</code> object."
-          },
-          {
-            "name": "with_time",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "Whether or not to show the time part of the date."
-          },
-          {
-            "name": "format",
-            "type": "str",
-            "doc": "The format to apply to the value. See below."
-          },
-          {
-            "name": "editable",
-            "type": "dynamic(bool)",
-            "default_value": "True",
-            "doc": "Shows the date as a formatted string if not editable."
-          },
-          {
-            "name": "label",
-            "type": "str",
-            "doc": "The label associated with the input."
-          }
-        ]
-      }
-    ],
-    [
-        "date_range",
-        {
-          "inherits": [
-            "on_change",
-            "propagate"
-          ],
-          "properties": [
+    "controls": [
+        [
+            "text",
             {
-              "name": "dates",
-              "default_property": true,
-              "type": "dynamic(list(datetime))",
-              "doc": "The dates that this control represents and can modify.<br/>It is typically bound to a list of two <code>datetime</code> object."
-            },
-            {
-              "name": "with_time",
-              "type": "bool",
-              "default_value": "False",
-              "doc": "Whether or not to show the time part of the date."
-            },
-            {
-              "name": "format",
-              "type": "str",
-              "doc": "The format to apply to the value. See below."
-            },
-            {
-              "name": "editable",
-              "type": "dynamic(bool)",
-              "default_value": "True",
-              "doc": "Shows the date as a formatted string if not editable."
-            },
-            {
-              "name": "label_start",
-              "type": "str",
-              "doc": "The label associated with the first input."
-            },
-            {
-              "name": "label_end",
-              "type": "str",
-              "doc": "The label associated with the second input."
+                "inherits": [
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "value",
+                        "default_property": true,
+                        "type": "dynamic(any)",
+                        "default_value": "\"\"",
+                        "doc": "The value displayed as text by this control."
+                    },
+                    {
+                        "name": "raw",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If set to True, the component renders as an HTML &lt;span&gt; element without any default style."
+                    },
+                    {
+                        "name": "mode",
+                        "type": "str",
+                        "doc": "Define the way the text is processed:<ul><li>&quot;raw&quot;: synonym for setting the *raw* property to True</li><li>&quot;pre&quot;: keeps spaces and new lines</li><li>&quot;markdown&quot; or &quot;md&quot;: basic support for Markdown."
+                    },
+                    {
+                        "name": "format",
+                        "type": "str",
+                        "doc": "The format to apply to the value.<br/>See below."
+                    }
+                ]
             }
-          ]
-        }
-      ],
-      [
-      "chart",
-      {
-        "inherits": [
-          "on_change",
-          "propagate"
         ],
-        "properties": [
-          {
-            "name": "data",
-            "default_property": true,
-            "required": true,
-            "type": "dynamic(any)",
-            "doc": "The data object bound to this chart control.<br/>See the section on the <a href=\"#the-data-property\"><i>data</i> property</a> below for details."
-          },
-          {
-            "name": "type",
-            "type": "indexed(str)",
-            "default_value": "scatter",
-            "doc": "Chart type.<br/>See the Plotly <a href=\"https://plotly.com/javascript/reference/\">chart type</a> documentation for details."
-          },
-          {
-            "name": "mode",
-            "type": "indexed(str)",
-            "default_value": "lines+markers",
-            "doc": "Chart mode.<br/>See the Plotly <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-mode\">chart mode</a> documentation for details."
-          },
-          {
-            "name": "x",
-            "type": "indexed(str)",
-            "doc": "Column name for the <i>x</i> axis."
-          },
-          {
-            "name": "y",
-            "type": "indexed(str)",
-            "doc": "Column name for the <i>y</i> axis."
-          },
-          {
-            "name": "z",
-            "type": "indexed(str)",
-            "doc": "Column name for the <i>z</i> axis."
-          },
-          {
-            "name": "lon",
-            "type": "indexed(str)",
-            "doc": "Column name for the <i>longitude</i> value, for 'scattergeo' charts. See <a href=\"https://plotly.com/javascript/reference/scattergeo/#scattergeo-lon\">Plotly Map traces</a>."
-          },
-          {
-            "name": "lat",
-            "type": "indexed(str)",
-            "doc": "Column name for the <i>latitude</i> value, for 'scattergeo' charts. See <a href=\"https://plotly.com/javascript/reference/scattergeo/#scattergeo-lat\">Plotly Map traces</a>."
-          },
-          {
-            "name": "r",
-            "type": "indexed(str)",
-            "doc": "Column name for the <i>r</i> value, for 'scatterpolar' charts. See <a href=\"https://plotly.com/javascript/polar-chart/\">Plotly Polar charts</a>."
-          },
-          {
-            "name": "theta",
-            "type": "indexed(str)",
-            "doc": "Column name for the <i>theta</i> value, for 'scatterpolar' charts. See <a href=\"https://plotly.com/javascript/polar-chart/\">Plotly Polar charts</a>."
-          },
-          {
-            "name": "high",
-            "type": "indexed(str)",
-            "doc": "Column name for the <i>high</i> value, for 'candlestick' charts. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-high\">Plotly Candlestick charts</a>."
-          },
-          {
-            "name": "low",
-            "type": "indexed(str)",
-            "doc": "Column name for the <i>low</i> value, for 'candlestick' charts. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-low\">Ploty Candlestick charts</a>."
-          },
-          {
-            "name": "open",
-            "type": "indexed(str)",
-            "doc": "Column name for the <i>open</i> value, for 'candlestick' charts. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-open\">Plotly Candlestick charts</a>."
-          },
-          {
-            "name": "close",
-            "type": "indexed(str)",
-            "doc": "Column name for the <i>close</i> value, for 'candlestick' charts. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-close\">Plotly Candlestick charts</a>."
-          },
-          {
-            "name": "measure",
-            "type": "indexed(str)",
-            "doc": "Column name for the <i>measure</i> value, for 'waterfall' charts. See <a href=\"https://plotly.com/javascript/reference/waterfall/#waterfall-measure\">Plotly Waterfall charts</a>."
-          },
-          {
-            "name": "locations",
-            "type": "indexed(str)",
-            "doc": "Column name for the <i>locations</i> value. See <a href=\"https://plotly.com/javascript/choropleth-maps/\">Plotly Choropleth maps</a>."
-          },
-          {
-            "name": "values",
-            "type": "indexed(str)",
-            "doc": "Column name for the <i>values</i> value. See <a href=\"https://plotly.com/javascript/reference/pie/#pie-values\">Plotly Pie charts</a> or <a href=\"https://plotly.com/javascript/reference/funnelarea/#funnelarea-values\">Plotly Funnel Area charts</a>."
-          },
-          {
-            "name": "labels",
-            "type": "indexed(str)",
-            "doc": "Column name for the <i>labels</i> value. See <a href=\"https://plotly.com/javascript/reference/pie/#pie-labels\">Plotly Pie charts</a>."
-          },
-          {
-            "name": "parents",
-            "type": "indexed(str)",
-            "doc": "Column name for the <i>parents</i> value. See <a href=\"https://plotly.com/javascript/reference/treemap/#treemap-parents\">Plotly Treemap charts</a>."
-          },
-          {
-            "name": "text",
-            "type": "indexed(str)",
-            "doc": "Column name for the text associated to the point for the indicated trace.<br/>This is meaningful only when <i>mode</i> has the <i>text</i> option."
-          },
-          {
-            "name": "base",
-            "type": "indexed(str)",
-            "doc": "Column name for the <i>base</i> value. Used in bar charts only.<br/>See the Plotly <a href=\"https://plotly.com/javascript/reference/bar/#bar-base\">bar chart base</a> documentation for details.\""
-          },
-          {
-            "name": "title",
-            "type": "str",
-            "doc": "The title of this chart control."
-          },
-          {
-            "name": "render",
-            "type": "dynamic(bool)",
-            "default_value": "True",
-            "doc": "If True, this chart is visible on the page."
-          },
-          {
-            "name": "on_range_change",
-            "type": "Callback",
-            "doc": "The callback function that is invoked when the visible part of the x axis changes.<br/>The function receives three parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the chart control.</li>\n<li>payload (dict[str, any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">Plotly</a>.</li>\n</ul>",
-            "signature": [["state", "State"], ["id", "str"], ["payload", "dict"]]
-
-          },
-          {
-            "name": "columns",
-            "type": "str|list[str]|dict[str, dict[str, str]]",
-            "default_value": "<i>All columns</i>",
-            "doc": "The list of column names\n<ul>\n<li>str: ;-separated list of column names</li>\n<li>list[str]: list of names</li>\n<li>dict: {\"column_name\": {format: \"format\", index: 1}} if index is specified, it represents the display order of the columns.\nIf not, the list order defines the index</li>\n</ul>"
-          },
-          {
-            "name": "label",
-            "type": "indexed(str)",
-            "doc": "The label for the indicated trace.<br/>This is used when the mouse hovers over a trace."
-          },
-          {
-            "name": "name",
-            "type": "indexed(str)",
-            "doc": "The name of the indicated trace."
-          },
-          {
-            "name": "selected",
-            "type": "indexed(dynamic(list[int]|str))",
-            "doc": "The list of the selected point indices  ."
-          },
-          {
-            "name": "color",
-            "type": "indexed(str)",
-            "doc": "The color of the indicated trace (or a column name for scattered)."
-          },
-          {
-            "name": "selected_color",
-            "type": "indexed(str)",
-            "doc": "The color of the selected points for the indicated trace."
-          },
-          {
-            "name": "marker",
-            "type": "indexed(dict[str, any])",
-            "doc": "The type of markers used for the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-marker\">marker</a> for details.<br/>Color, opacity, size and symbol can be column name."
-          },
-          {
-            "name": "line",
-            "type": "indexed(str|dict[str, any])",
-            "doc": "The configuration of the line used for the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-line\">line</a> for details.<br/>If the value is a string, it must be a dash type or pattern (see <a href=\"https://plotly.com/python/reference/scatter/#scatter-line-dash\">dash style of lines</a> for details)."
-          },
-          {
-            "name": "selected_marker",
-            "type": "indexed(dict[str, any])",
-            "doc": "The type of markers used for selected points in the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-selected-marker\">selected marker for details."
-          },
-          {
-            "name": "layout",
-            "type": "dynamic(dict[str, any])",
-            "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/reference/layout/\">layout object</a>."
-          },
-          {
-            "name": "plot_config",
-            "type": "dict[str, any]",
-            "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/configuration-options/\"> configuration options object</a>."
-          },
-          {
-            "name": "options",
-            "type": "indexed(dict[str, any])",
-            "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/reference/\">data object where dynamic data will be overridden.</a>."
-          },
-          {
-            "name": "orientation",
-            "type": "indexed(str)",
-            "doc": "The orientation of the indicated trace."
-          },
-          {
-            "name": "text_anchor",
-            "type": "indexed(str)",
-            "doc": "Position of the text relative to the point.<br/>Valid values are: <i>top</i>, <i>bottom</i>, <i>left</i>, and <i>right</i>."
-          },
-          {
-            "name": "xaxis",
-            "type": "indexed(str)",
-            "doc": "The <i>x</i> axis identifier for the indicated trace."
-          },
-          {
-            "name": "yaxis",
-            "type": "indexed(str)",
-            "doc": "The <i>y</i> axis identifier for the indicated trace."
-          },
-          {
-            "name": "width",
-            "type": "str|int|float",
-            "default_value": "\"100%\"",
-            "doc": "The width, in CSS units, of this element."
-          },
-          {
-            "name": "height",
-            "type": "str|int|float",
-            "doc": "The height, in CSS units, of this element."
-          },
-          {
-            "name": "template",
-            "type": "dict",
-            "doc": "The Plotly layout <a href=\"https://plotly.com/javascript/layout-template/\">template</a>."
-          },
-          {
-            "name": "template[dark]",
-            "type": "dict",
-            "doc": "The Plotly layout <a href=\"https://plotly.com/javascript/layout-template/\">template</a> applied over the base template when theme is dark."
-          },
-          {
-            "name": "template[light]",
-            "type": "dict",
-            "doc": "The Plotly layout <a href=\"https://plotly.com/javascript/layout-template/\">template</a> applied over the base template when theme is not dark."
-          },
-          {
-            "name": "decimator",
-            "type": "indexed(taipy.gui.data.Decimator)",
-            "doc": "A decimator instance for the indicated trace that will reduce the size of the data being sent back and forth.<br>If defined as indexed, it will impact only the indicated trace; if not, it will apply only the first trace."
-          },
-          {
-            "name": "rebuild",
-            "type": "dynamic(bool)",
-            "default_value": "False",
-            "doc": "Allows dynamic config refresh if set to True."
-          },
-          {
-            "name": "figure",
-            "type": "dynamic(plotly.graph_objects.Figure)",
-            "doc": "A figure as produced by plotly."
-          }
-        ]
-      }
-    ],
-    [
-      "file_download",
-      {
-        "inherits": [
-          "active",
-          "shared"
-        ],
-        "properties": [
-          {
-            "name": "content",
-            "default_property": true,
-            "type": "dynamic(path|file|URL|ReadableBuffer|None)",
-            "doc": "The content to transfer.<br/>If this is a string, a URL, or a file, then the content is read from this source.<br/>If a readable buffer is provided (such as an array of bytes...), and to prevent the bandwidth from being consumed too much, the way the data is transferred depends on the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the buffer size is smaller than this setting, then the raw content is generated as a data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li>\n<li>If the buffer size exceeds this setting, then it is transferred through a temporary file.</li>\n</ul>If this property is set to None, that indicates that dynamic content is generated. Please take a look at the examples below for details on dynamic generation."
-          },
-          {
-            "name": "label",
-            "type": "dynamic(str)",
-            "doc": "The label of the button."
-          },
-          {
-            "name": "on_action",
-            "type": "Callback",
-            "doc": "The name of a function that is triggered when the download is terminated (or on user action if <i>content</i> is None).<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has two keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: A list of two elements: <i>args[0]</i> reflects the <i>name</i> property and <i>args[1]</i> holds the file URL.</li>\n</ul>\n</li>\n</ul>",
-            "signature": [["state", "State"], ["id", "str"], ["payload", "dict"]]
-          },
-          {
-            "name": "auto",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If True, the download starts as soon as the page is loaded."
-          },
-          {
-            "name": "render",
-            "type": "dynamic(bool)",
-            "default_value": "True",
-            "doc": "If True, the control is displayed.<br/>If False, the control is not displayed."
-          },
-          {
-            "name": "bypass_preview",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If False, allows the browser to try to show the content in a different tab.<br/>The file download is always performed."
-          },
-          {
-            "name": "name",
-            "type": "str",
-            "doc": "A name proposition for the file to save, that the user can change."
-          }
-        ]
-      }
-    ],
-    [
-      "file_selector",
-      {
-        "inherits": [
-          "active",
-          "shared"
-        ],
-        "properties": [
-          {
-            "name": "content",
-            "default_property": true,
-            "type": "dynamic(str)",
-            "doc": "The path or the list of paths of the uploaded files."
-          },
-          {
-            "name": "label",
-            "type": "str",
-            "doc": "The label of the button."
-          },
-          {
-            "name": "on_action",
-            "type": "Callback",
-            "doc": "The name of the function that will be triggered.<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
-            "signature": [["state", "State"], ["id", "str"], ["payload", "dict"]]
-          },
-          {
-            "name": "multiple",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If set to True, multiple files can be uploaded."
-          },
-          {
-            "name": "extensions",
-            "type": "str",
-            "default_value": "\".csv,.xlsx\"",
-            "doc": "The list of file extensions that can be uploaded."
-          },
-          {
-            "name": "drop_message",
-            "type": "str",
-            "default_value": "\"Drop here to Upload\"",
-            "doc": "The message that is displayed when the user drags a file above the button."
-          },
-          {
-            "name": "notify",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If set to False, the user won't be notified of upload finish."
-          }
-        ]
-      }
-    ],
-    [
-      "image",
-      {
-        "inherits": [
-          "active",
-          "shared"
-        ],
-        "properties": [
-          {
-            "name": "content",
-            "default_property": true,
-            "type": "dynamic(path|URL|file|ReadableBuffer)",
-            "doc": "The image source.<br/>If a buffer is provided (string, array of bytes...), and in order to prevent the bandwidth to be consumed too much, the way the image data is transferred depends on the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the size of the buffer is smaller than this setting, then the raw content is generated as a\n  data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li>\n<li>If the size of the buffer is greater than this setting, then it is transferred through a temporary\n  file.</li>\n</ul>"
-          },
-          {
-            "name": "label",
-            "type": "dynamic(str)",
-            "doc": "The label for this image."
-          },
-          {
-            "name": "on_action",
-            "type": "str",
-            "doc": "The name of a function that is triggered when the user clicks on the image.<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
-            "signature": [["state", "State"], ["id", "str"], ["payload", "dict"]]
-          },
-          {
-            "name": "width",
-            "type": "str|int|float",
-            "default_value": "\"300px\"",
-            "doc": "The width, in CSS units, of this element."
-          },
-          {
-            "name": "height",
-            "type": "str|int|float",
-            "doc": "The height, in CSS units, of this element."
-          }
-        ]
-      }
-    ],
-    [
-      "indicator",
-      {
-        "inherits": [
-          "shared"
-        ],
-        "properties": [
-          {
-            "name": "display",
-            "default_property": true,
-            "type": "dynamic(any)",
-            "doc": "The label to be displayed.<br/>This can be formatted if it is a numerical value."
-          },
-          {
-            "name": "value",
-            "type": "dynamic(int,float)",
-            "default_value": "<i>min</i>",
-            "doc": "The location of the label on the [<i>min</i>, <i>max</i>] range."
-          },
-          {
-            "name": "min",
-            "type": "int|float",
-            "default_value": "0",
-            "doc": "The minimum value of the range."
-          },
-          {
-            "name": "max",
-            "type": "int|float",
-            "default_value": "100",
-            "doc": "The maximum value of the range."
-          },
-          {
-            "name": "format",
-            "type": "str",
-            "doc": "The format to use when displaying the value.<br/>This uses the <code>printf</code> syntax."
-          },
-          {
-            "name": "orientation",
-            "type": "str",
-            "default_value": "\"horizontal\"",
-            "doc": "The orientation of this slider."
-          },
-          {
-            "name": "width",
-            "type": "str",
-            "default_value": "None",
-            "doc": "The width, in CSS units, of the indicator (used when orientation is horizontal)."
-          },
-          {
-            "name": "height",
-            "type": "str",
-            "default_value": "None",
-            "doc": "The height, in CSS units, of the indicator (used when orientation is vertical)."
-          }
-        ]
-      }
-    ],
-    ["login", {
-        "inherits": ["shared"],
-        "properties": [
+        [
+            "button",
             {
-                "name": "title",
-                "default_property": true,
-                "type": "str",
-                "default_value": "\"Log in\"",
-                "doc": "The title of the login dialog."
-            },
-            {
-                "name": "on_action",
-                "type": "Callback",
-                "doc": "The name of the function that is triggered when the dialog button is pressed.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: a list with three elements:<ul><li>The first element is the username</li><li>The second element is the password</li><li>The third element is the current page name</li></ul></li></li>\n</ul>\n</li>\n</ul><br/>When the button is pressed, and if this property is not set, Taipy will try to find a callback function called <i>on_login()</i> and invoke it with the parameters listed above.",
-                "signature": [["state", "State"], ["id", "str"], ["payload", "dict"]]
-              },
-              {
-                "name": "message",
-                "type": "dynamic(str)",
-                "doc": "The message shown in the dialog."
-              }
-
-        ]
-    }],
-    [
-      "menu",
-      {
-        "inherits": [
-          "active"
+                "inherits": [
+                    "active",
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "label",
+                        "default_property": true,
+                        "type": "dynamic(str|Icon)",
+                        "default_value": "\"\"",
+                        "doc": "The label displayed in the button."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "The name of a function that is triggered when the button is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    }
+                ]
+            }
         ],
-        "properties": [
-          {
-            "name": "lov",
-            "default_property": true,
-            "type": "dynamic(str|list[str|Icon|any])",
-            "doc": "The list of menu option values."
-          },
-          {
-            "name": "adapter",
-            "type": "Function",
-            "default_value": "`\"lambda x: str(x)\"`",
-            "doc": "The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:str|Icon)</i>."
-          },
-          {
-            "name": "type",
-            "type": "str",
-            "default_value": "<i>Type of the first lov element</i>",
-            "doc": "Must be specified if <i>lov</i> contains a non specific type of data (ex: dict).<br/><i>value</i> must be of that type, <i>lov</i> must be an iterable on this type, and the adapter function will receive an object of this type."
-          },
-          {
-            "name": "label",
-            "type": "str",
-            "doc": "The title of the menu."
-          },
-          {
-            "name": "width",
-            "type": "str",
-            "default_value": "\"15vw\"",
-            "doc": "The width, in CSS units, of the menu when unfolded.<br/>Note that when running on a mobile device, the property <i>width[active]</i> is used instead."
-          },
-          {
-            "name": "width[mobile]",
-            "type": "str",
-            "default_value": "\"85vw\"",
-            "doc": "The width, in CSS units, of the menu when unfolded, on a mobile device."
-          },
-          {
-            "name": "on_action",
-            "type": "Callback",
-            "doc": "The name of the function that is triggered when a menu option is selected.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: List where the first element contains the id of the selected option.</li>\n</ul>\n</li>\n</ul>",
-            "signature": [["state", "State"], ["id", "str"], ["payload", "dict"]]
-          }
+        [
+            "input",
+            {
+                "inherits": [
+                    "sharedInput",
+                    "on_change",
+                    "propagate"
+                ],
+                "properties": [
+                    {
+                        "name": "value",
+                        "default_property": true,
+                        "type": "dynamic(any)",
+                        "default_value": "None",
+                        "doc": "The value represented by this control."
+                    },
+                    {
+                        "name": "password",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the text is obscured: all input characters are displayed as an asterisk ('*')."
+                    },
+                    {
+                        "name": "label",
+                        "type": "str",
+                        "default_value": "None",
+                        "doc": "The label associated with the input."
+                    },
+                    {
+                        "name": "multiline",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the text is presented as a multi line input."
+                    },
+                    {
+                        "name": "lines_shown",
+                        "type": "int",
+                        "default_value": "5",
+                        "doc": "The height of the displayed element if multiline is True."
+                    }
+                ]
+            }
+        ],
+        [
+            "slider",
+            {
+                "inherits": [
+                    "lovComp",
+                    "propagate"
+                ],
+                "properties": [
+                    {
+                        "name": "value",
+                        "default_property": true,
+                        "type": "dynamic(int|float|int[]|float[]|str|str[])",
+                        "doc": "The value that is set for this slider.<br/>If this slider is based on a <i>lov</i> then this property can be set to the lov element.<br/>This value can also hold an array of numbers to indicate that the slider reflects a range (within the [<i>min</i>,<i>max</i>] domain) defined by several knobs that the user can set independently.<br/>If this slider is based on a <i>lov</i> then this property can be set to an array of lov elements. The slider is then represented with several knobs, one for each lov value."
+                    },
+                    {
+                        "name": "min",
+                        "type": "int|float",
+                        "default_value": "0",
+                        "doc": "The minimum value.<br/>This is ignored when <i>lov</i> is defined."
+                    },
+                    {
+                        "name": "max",
+                        "type": "int|float",
+                        "default_value": "100",
+                        "doc": "The maximum value.<br/>This is ignored when <i>lov</i> is defined."
+                    },
+                    {
+                        "name": "step",
+                        "type": "int|float",
+                        "default_value": "1",
+                        "doc": "The step value: the gap between two consecutive values the slider set. It is a good practice to have (<i>max</i>-<i>min</i>) being divisible by <i>step</i>.<br/>This property is ignored when <i>lov</i> is defined."
+                    },
+                    {
+                        "name": "text_anchor",
+                        "type": "str",
+                        "default_value": "\"bottom\"",
+                        "doc": "When the <i>lov</i> property is used, this property indicates the location of the label.<br/>Possible values are:\n<ul>\n<li>\"bottom\"</li>\n<li>\"top\"</li>\n<li>\"left\"</li>\n<li>\"right\"</li>\n<li>\"none\" (no label is displayed)</li>\n</ul>"
+                    },
+                    {
+                        "name": "labels",
+                        "type": "bool|dict",
+                        "doc": "The labels for specific points of the slider.<br/>If set to True, this slider uses the labels of the <i>lov</i> if there are any.<br/>If set to a dictionary, the slider uses the dictionary keys as a <i>lov</i> key or index, and the associated value as the label."
+                    },
+                    {
+                        "name": "continuous",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If set to False, the control emits an on_change notification only when the mouse button is released, otherwise notifications are emitted during the cursor movements.<br/>If <i>lov</i> is defined, the default value is False."
+                    },
+                    {
+                        "name": "change_delay",
+                        "type": "int",
+                        "default_value": "<i>App config</i>",
+                        "doc": "Minimum time between triggering two <i>on_change</i> calls.<br/>The default value is defined at the application configuration level by the <strong>change_delay</strong> configuration option. if None or 0, there's no delay."
+                    },
+                    {
+                        "name": "width",
+                        "type": "str",
+                        "default_value": "\"300px\"",
+                        "doc": "The width, in CSS units, of this element."
+                    },
+                    {
+                        "name": "height",
+                        "type": "str",
+                        "doc": "The height, in CSS units, of this element.<br/>It defaults to the <i>width</i> value when using the vertical orientation."
+                    },
+                    {
+                        "name": "orientation",
+                        "type": "str",
+                        "default_value": "\"horizontal\"",
+                        "doc": "The orientation of this slider.<br/>Valid values are \"horizontal\" or \"vertical\"."
+                    }
+                ]
+            }
+        ],
+        [
+            "number",
+            {
+                "inherits": [
+                    "sharedInput",
+                    "on_change",
+                    "propagate"
+                ],
+                "properties": [
+                    {
+                        "name": "value",
+                        "default_property": true,
+                        "type": "dynamic(any)",
+                        "doc": "The numerical value represented by this control."
+                    },
+                    {
+                        "name": "label",
+                        "type": "str",
+                        "default_value": "None",
+                        "doc": "The label associated with the input."
+                    }
+                ]
+            }
+        ],
+        [
+            "toggle",
+            {
+                "inherits": [
+                    "lovComp",
+                    "propagate"
+                ],
+                "properties": [
+                    {
+                        "name": "value"
+                    },
+                    {
+                        "name": "theme",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If set, this toggle control acts as a way to set the application Theme (dark or light)."
+                    },
+                    {
+                        "name": "allow_unselect",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If set, this allows de-selection and the value is set to unselected_value."
+                    },
+                    {
+                        "name": "unselected_value",
+                        "type": "any",
+                        "default_value": "None",
+                        "doc": "Value assigned to <i>value</i> when no item is selected."
+                    },
+                    {
+                        "name": "mode",
+                        "type": "str",
+                        "doc": "Define the way the toggle is displayed:<ul><li>&quot;theme&quot;: synonym for setting the *theme* property to True</li></ul>"
+                    }
+                ]
+            }
+        ],
+        [
+            "date",
+            {
+                "inherits": [
+                    "on_change",
+                    "propagate"
+                ],
+                "properties": [
+                    {
+                        "name": "date",
+                        "default_property": true,
+                        "type": "dynamic(datetime)",
+                        "doc": "The date that this control represents and can modify.<br/>It is typically bound to a <code>datetime</code> object."
+                    },
+                    {
+                        "name": "with_time",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "Whether or not to show the time part of the date."
+                    },
+                    {
+                        "name": "format",
+                        "type": "str",
+                        "doc": "The format to apply to the value. See below."
+                    },
+                    {
+                        "name": "editable",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "Shows the date as a formatted string if not editable."
+                    },
+                    {
+                        "name": "label",
+                        "type": "str",
+                        "doc": "The label associated with the input."
+                    }
+                ]
+            }
+        ],
+        [
+            "date_range",
+            {
+                "inherits": [
+                    "on_change",
+                    "propagate"
+                ],
+                "properties": [
+                    {
+                        "name": "dates",
+                        "default_property": true,
+                        "type": "dynamic(list(datetime))",
+                        "doc": "The dates that this control represents and can modify.<br/>It is typically bound to a list of two <code>datetime</code> object."
+                    },
+                    {
+                        "name": "with_time",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "Whether or not to show the time part of the date."
+                    },
+                    {
+                        "name": "format",
+                        "type": "str",
+                        "doc": "The format to apply to the value. See below."
+                    },
+                    {
+                        "name": "editable",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "Shows the date as a formatted string if not editable."
+                    },
+                    {
+                        "name": "label_start",
+                        "type": "str",
+                        "doc": "The label associated with the first input."
+                    },
+                    {
+                        "name": "label_end",
+                        "type": "str",
+                        "doc": "The label associated with the second input."
+                    }
+                ]
+            }
+        ],
+        [
+            "chart",
+            {
+                "inherits": [
+                    "on_change",
+                    "propagate"
+                ],
+                "properties": [
+                    {
+                        "name": "data",
+                        "default_property": true,
+                        "required": true,
+                        "type": "dynamic(any)",
+                        "doc": "The data object bound to this chart control.<br/>See the section on the <a href=\"#the-data-property\"><i>data</i> property</a> below for details."
+                    },
+                    {
+                        "name": "type",
+                        "type": "indexed(str)",
+                        "default_value": "scatter",
+                        "doc": "Chart type.<br/>See the Plotly <a href=\"https://plotly.com/javascript/reference/\">chart type</a> documentation for details."
+                    },
+                    {
+                        "name": "mode",
+                        "type": "indexed(str)",
+                        "default_value": "lines+markers",
+                        "doc": "Chart mode.<br/>See the Plotly <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-mode\">chart mode</a> documentation for details."
+                    },
+                    {
+                        "name": "x",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the <i>x</i> axis."
+                    },
+                    {
+                        "name": "y",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the <i>y</i> axis."
+                    },
+                    {
+                        "name": "z",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the <i>z</i> axis."
+                    },
+                    {
+                        "name": "lon",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the <i>longitude</i> value, for 'scattergeo' charts. See <a href=\"https://plotly.com/javascript/reference/scattergeo/#scattergeo-lon\">Plotly Map traces</a>."
+                    },
+                    {
+                        "name": "lat",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the <i>latitude</i> value, for 'scattergeo' charts. See <a href=\"https://plotly.com/javascript/reference/scattergeo/#scattergeo-lat\">Plotly Map traces</a>."
+                    },
+                    {
+                        "name": "r",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the <i>r</i> value, for 'scatterpolar' charts. See <a href=\"https://plotly.com/javascript/polar-chart/\">Plotly Polar charts</a>."
+                    },
+                    {
+                        "name": "theta",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the <i>theta</i> value, for 'scatterpolar' charts. See <a href=\"https://plotly.com/javascript/polar-chart/\">Plotly Polar charts</a>."
+                    },
+                    {
+                        "name": "high",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the <i>high</i> value, for 'candlestick' charts. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-high\">Plotly Candlestick charts</a>."
+                    },
+                    {
+                        "name": "low",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the <i>low</i> value, for 'candlestick' charts. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-low\">Ploty Candlestick charts</a>."
+                    },
+                    {
+                        "name": "open",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the <i>open</i> value, for 'candlestick' charts. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-open\">Plotly Candlestick charts</a>."
+                    },
+                    {
+                        "name": "close",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the <i>close</i> value, for 'candlestick' charts. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-close\">Plotly Candlestick charts</a>."
+                    },
+                    {
+                        "name": "measure",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the <i>measure</i> value, for 'waterfall' charts. See <a href=\"https://plotly.com/javascript/reference/waterfall/#waterfall-measure\">Plotly Waterfall charts</a>."
+                    },
+                    {
+                        "name": "locations",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the <i>locations</i> value. See <a href=\"https://plotly.com/javascript/choropleth-maps/\">Plotly Choropleth maps</a>."
+                    },
+                    {
+                        "name": "values",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the <i>values</i> value. See <a href=\"https://plotly.com/javascript/reference/pie/#pie-values\">Plotly Pie charts</a> or <a href=\"https://plotly.com/javascript/reference/funnelarea/#funnelarea-values\">Plotly Funnel Area charts</a>."
+                    },
+                    {
+                        "name": "labels",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the <i>labels</i> value. See <a href=\"https://plotly.com/javascript/reference/pie/#pie-labels\">Plotly Pie charts</a>."
+                    },
+                    {
+                        "name": "parents",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the <i>parents</i> value. See <a href=\"https://plotly.com/javascript/reference/treemap/#treemap-parents\">Plotly Treemap charts</a>."
+                    },
+                    {
+                        "name": "text",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the text associated to the point for the indicated trace.<br/>This is meaningful only when <i>mode</i> has the <i>text</i> option."
+                    },
+                    {
+                        "name": "base",
+                        "type": "indexed(str)",
+                        "doc": "Column name for the <i>base</i> value. Used in bar charts only.<br/>See the Plotly <a href=\"https://plotly.com/javascript/reference/bar/#bar-base\">bar chart base</a> documentation for details.\""
+                    },
+                    {
+                        "name": "title",
+                        "type": "str",
+                        "doc": "The title of this chart control."
+                    },
+                    {
+                        "name": "render",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "If True, this chart is visible on the page."
+                    },
+                    {
+                        "name": "on_range_change",
+                        "type": "Callback",
+                        "doc": "The callback function that is invoked when the visible part of the x axis changes.<br/>The function receives three parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the chart control.</li>\n<li>payload (dict[str, any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">Plotly</a>.</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "columns",
+                        "type": "str|list[str]|dict[str, dict[str, str]]",
+                        "default_value": "<i>All columns</i>",
+                        "doc": "The list of column names\n<ul>\n<li>str: ;-separated list of column names</li>\n<li>list[str]: list of names</li>\n<li>dict: {\"column_name\": {format: \"format\", index: 1}} if index is specified, it represents the display order of the columns.\nIf not, the list order defines the index</li>\n</ul>"
+                    },
+                    {
+                        "name": "label",
+                        "type": "indexed(str)",
+                        "doc": "The label for the indicated trace.<br/>This is used when the mouse hovers over a trace."
+                    },
+                    {
+                        "name": "name",
+                        "type": "indexed(str)",
+                        "doc": "The name of the indicated trace."
+                    },
+                    {
+                        "name": "selected",
+                        "type": "indexed(dynamic(list[int]|str))",
+                        "doc": "The list of the selected point indices  ."
+                    },
+                    {
+                        "name": "color",
+                        "type": "indexed(str)",
+                        "doc": "The color of the indicated trace (or a column name for scattered)."
+                    },
+                    {
+                        "name": "selected_color",
+                        "type": "indexed(str)",
+                        "doc": "The color of the selected points for the indicated trace."
+                    },
+                    {
+                        "name": "marker",
+                        "type": "indexed(dict[str, any])",
+                        "doc": "The type of markers used for the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-marker\">marker</a> for details.<br/>Color, opacity, size and symbol can be column name."
+                    },
+                    {
+                        "name": "line",
+                        "type": "indexed(str|dict[str, any])",
+                        "doc": "The configuration of the line used for the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-line\">line</a> for details.<br/>If the value is a string, it must be a dash type or pattern (see <a href=\"https://plotly.com/python/reference/scatter/#scatter-line-dash\">dash style of lines</a> for details)."
+                    },
+                    {
+                        "name": "selected_marker",
+                        "type": "indexed(dict[str, any])",
+                        "doc": "The type of markers used for selected points in the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-selected-marker\">selected marker for details."
+                    },
+                    {
+                        "name": "layout",
+                        "type": "dynamic(dict[str, any])",
+                        "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/reference/layout/\">layout object</a>."
+                    },
+                    {
+                        "name": "plot_config",
+                        "type": "dict[str, any]",
+                        "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/configuration-options/\"> configuration options object</a>."
+                    },
+                    {
+                        "name": "options",
+                        "type": "indexed(dict[str, any])",
+                        "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/reference/\">data object where dynamic data will be overridden.</a>."
+                    },
+                    {
+                        "name": "orientation",
+                        "type": "indexed(str)",
+                        "doc": "The orientation of the indicated trace."
+                    },
+                    {
+                        "name": "text_anchor",
+                        "type": "indexed(str)",
+                        "doc": "Position of the text relative to the point.<br/>Valid values are: <i>top</i>, <i>bottom</i>, <i>left</i>, and <i>right</i>."
+                    },
+                    {
+                        "name": "xaxis",
+                        "type": "indexed(str)",
+                        "doc": "The <i>x</i> axis identifier for the indicated trace."
+                    },
+                    {
+                        "name": "yaxis",
+                        "type": "indexed(str)",
+                        "doc": "The <i>y</i> axis identifier for the indicated trace."
+                    },
+                    {
+                        "name": "width",
+                        "type": "str|int|float",
+                        "default_value": "\"100%\"",
+                        "doc": "The width, in CSS units, of this element."
+                    },
+                    {
+                        "name": "height",
+                        "type": "str|int|float",
+                        "doc": "The height, in CSS units, of this element."
+                    },
+                    {
+                        "name": "template",
+                        "type": "dict",
+                        "doc": "The Plotly layout <a href=\"https://plotly.com/javascript/layout-template/\">template</a>."
+                    },
+                    {
+                        "name": "template[dark]",
+                        "type": "dict",
+                        "doc": "The Plotly layout <a href=\"https://plotly.com/javascript/layout-template/\">template</a> applied over the base template when theme is dark."
+                    },
+                    {
+                        "name": "template[light]",
+                        "type": "dict",
+                        "doc": "The Plotly layout <a href=\"https://plotly.com/javascript/layout-template/\">template</a> applied over the base template when theme is not dark."
+                    },
+                    {
+                        "name": "decimator",
+                        "type": "indexed(taipy.gui.data.Decimator)",
+                        "doc": "A decimator instance for the indicated trace that will reduce the size of the data being sent back and forth.<br>If defined as indexed, it will impact only the indicated trace; if not, it will apply only the first trace."
+                    },
+                    {
+                        "name": "rebuild",
+                        "type": "dynamic(bool)",
+                        "default_value": "False",
+                        "doc": "Allows dynamic config refresh if set to True."
+                    },
+                    {
+                        "name": "figure",
+                        "type": "dynamic(plotly.graph_objects.Figure)",
+                        "doc": "A figure as produced by plotly."
+                    }
+                ]
+            }
+        ],
+        [
+            "table",
+            {
+                "inherits": [
+                    "active",
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "data",
+                        "default_property": true,
+                        "required": true,
+                        "type": "dynamic(any)",
+                        "doc": "The data to be represented in this table. This property can be indexed to define other data for comparison."
+                    },
+                    {
+                        "name": "page_size",
+                        "type": "int",
+                        "default_value": "100",
+                        "doc": "For a paginated table, the number of visible rows."
+                    },
+                    {
+                        "name": "allow_all_rows",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "For a paginated table, adds an option to show all the rows."
+                    },
+                    {
+                        "name": "show_all",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "For a paginated table, show all the rows."
+                    },
+                    {
+                        "name": "auto_loading",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the data will be loaded on demand."
+                    },
+                    {
+                        "name": "width[<i>column_name</i>]",
+                        "type": "str",
+                        "doc": "The width, in CSS units, of the indicated column."
+                    },
+                    {
+                        "name": "selected",
+                        "type": "list[int]|str",
+                        "doc": "The list of the indices of the rows to be displayed as selected."
+                    },
+                    {
+                        "name": "page_size_options",
+                        "type": "list[int]|str",
+                        "default_value": "[50, 100, 500]",
+                        "doc": "The list of available page sizes that users can choose from."
+                    },
+                    {
+                        "name": "columns",
+                        "type": "str|list[str]|dict[str, dict[str, str|int]]",
+                        "default_value": "<i>shows all columns when empty</i>",
+                        "doc": "The list of the column names to display.\n<ul>\n<li>str: Semicolon (';')-separated list of column names.</li>\n<li>list[str]: The list of column names.</li>\n<li>dict: A dictionary with entries matching: {\"col name\": {format: \"format\", index: 1}}.<br/>\nif <i>index</i> is specified, it represents the display order of the columns.\nIf <i>index</i> is not specified, the list order defines the index.<br/>\nIf <i>format</i> is specified, it is used for numbers or dates.</li>\n</ul>"
+                    },
+                    {
+                        "name": "date_format",
+                        "type": "str",
+                        "default_value": "\"MM/dd/yyyy\"",
+                        "doc": "The date format used for all date columns when the format is not specifically defined."
+                    },
+                    {
+                        "name": "number_format",
+                        "type": "str",
+                        "doc": "The number format used for all number columns when the format is not specifically defined."
+                    },
+                    {
+                        "name": "group_by[<i>column_name</i>]",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "Indicates, if True, that the given column can be aggregated.<br/>See <a href=\"#aggregation\">below</a> for details."
+                    },
+                    {
+                        "name": "apply[<i>column_name</i>]",
+                        "type": "str",
+                        "default_value": "\"first\"",
+                        "doc": "The name of the aggregation function to use.<br/>This is used only if <i>group_by[column_name]</i> is set to True.<br/>See <a href=\"#aggregation\">below</a> for details."
+                    },
+                    {
+                        "name": "style",
+                        "type": "str",
+                        "doc": "Allows the styling of table lines.<br/>See <a href=\"#dynamic-styling\">below</a> for details."
+                    },
+                    {
+                        "name": "style[<i>column_name</i>]",
+                        "type": "str",
+                        "doc": "Allows the styling of table cells.<br/>See <a href=\"#dynamic-styling\">below</a> for details."
+                    },
+                    {
+                        "name": "tooltip",
+                        "type": "str",
+                        "doc": "The name of the function that must return a tooltip text for a cell.<br/>See <a href=\"#cell-tooltips\">below</a> for details."
+                    },
+                    {
+                        "name": "tooltip[<i>column_name</i>]",
+                        "type": "str",
+                        "doc": "The name of the function that must return a tooltip text for a cell.<br/>See <a href=\"#cell-tooltips\">below</a> for details."
+                    },
+                    {
+                        "name": "width",
+                        "type": "str",
+                        "default_value": "\"100%\"",
+                        "doc": "The width, in CSS units, of this table control."
+                    },
+                    {
+                        "name": "height",
+                        "type": "str",
+                        "default_value": "\"80vh\"",
+                        "doc": "The height, in CSS units, of this table control."
+                    },
+                    {
+                        "name": "filter",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "Indicates, if True, that all columns can be filtered."
+                    },
+                    {
+                        "name": "filter[<i>column_name</i>]",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "Indicates, if True, that the indicated column can be filtered."
+                    },
+                    {
+                        "name": "nan_value",
+                        "type": "str",
+                        "default_value": "\"\"",
+                        "doc": "The replacement text for NaN (not-a-number) values."
+                    },
+                    {
+                        "name": "nan_value[<i>column_name</i>]",
+                        "type": "str",
+                        "default_value": "\"\"",
+                        "doc": "The replacement text for NaN (not-a-number) values for the indicated column."
+                    },
+                    {
+                        "name": "editable",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "Indicates, if True, that all columns can be edited."
+                    },
+                    {
+                        "name": "editable[<i>column_name</i>]",
+                        "type": "bool",
+                        "default_value": "editable",
+                        "doc": "Indicates, if False, that the indicated column cannot be edited when editable is True."
+                    },
+                    {
+                        "name": "on_edit",
+                        "type": "Callback",
+                        "doc": "The name of a function that is triggered when a cell edition is validated.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>value (any): the new cell value cast to the type of the column.</li>\n<li>user_value (str): the new cell value, as it was provided by the user.</li>\n<li>tz (str): the timezone if the column type is date.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot edit cells.",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "var_name",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "on_delete",
+                        "type": "str",
+                        "doc": "The name of a function that is triggered when a row is deleted.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot delete rows.",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "var_name",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "on_add",
+                        "type": "str",
+                        "doc": "The name of a function that is triggered when the user requests a row to be added.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot add rows.",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "var_name",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "The name of a function that is triggered when the user selects a row.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>reason (str): the origin of the action: \"click\", or \"button\" if the cell contains a Markdown link syntax.</li>\n<li>value (str): the *link value* indicated in the cell when using a Markdown link syntax (that is, <i>reason</i> is set to \"button\").</li></ul></li></ul>.",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "var_name",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "size",
+                        "type": "str",
+                        "default_value": "\"small\"",
+                        "doc": "The size of the rows.<br/>Valid values are \"small\" and \"medium\"."
+                    },
+                    {
+                        "name": "rebuild",
+                        "type": "dynamic(bool)",
+                        "default_value": "False",
+                        "doc": "If set to True, this allows to dynamically refresh the  columns."
+                    },
+                    {
+                        "name": "lov[<i>column_name</i>]",
+                        "type": "list[str]|str",
+                        "doc": "The list of values of the indicated column."
+                    },
+                    {
+                        "name": "downloadable",
+                        "type": "boolean",
+                        "doc": "If True, a clickable icon is shown so the user can download the data as CSV."
+                    },
+                    {
+                        "name": "on_compare",
+                        "type": "str",
+                        "doc": "A data comparison function that would return a structure that identifies the differences between the different data passed as name. The default implementation compares the default data with the data[1] value.",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "main_data_name",
+                                "str"
+                            ],
+                            [
+                                "compare_data_names",
+                                "list[str]"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        ],
+        [
+            "selector",
+            {
+                "inherits": [
+                    "lovComp",
+                    "propagate"
+                ],
+                "properties": [
+                    {
+                        "name": "filter",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, this control is combined with a filter input area."
+                    },
+                    {
+                        "name": "multiple",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the user can select multiple items."
+                    },
+                    {
+                        "name": "width",
+                        "type": "str|int",
+                        "default_value": "\"360px\"",
+                        "doc": "The width, in CSS units, of this element."
+                    },
+                    {
+                        "name": "height",
+                        "type": "str|int",
+                        "doc": "The height, in CSS units, of this element."
+                    },
+                    {
+                        "name": "dropdown",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the list of items is shown in a dropdown menu.<br/><br/>You cannot use the filter in that situation."
+                    },
+                    {
+                        "name": "label",
+                        "type": "str",
+                        "default_value": "None",
+                        "doc": "The label associated with the selector when in dropdown mode."
+                    },
+                    {
+                        "name": "mode",
+                        "type": "str",
+                        "doc": "Define the way the selector is displayed:<ul><li>&quot;radio&quot;: list of radio buttons</li><li>&quot;check&quot;: list of check buttons</li><li>any other value: selector as usual."
+                    }
+                ]
+            }
+        ],
+        [
+            "navbar",
+            {
+                "inherits": [
+                    "active",
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "lov",
+                        "default_property": true,
+                        "type": "dict[str, any]",
+                        "doc": "The list of pages. The keys should be:\n<ul>\n<li>page id (start with \"/\")</li>\n<li>or full URL</li>\n</ul>\nThe values are labels. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
+                    }
+                ]
+            }
+        ],
+        [
+            "image",
+            {
+                "inherits": [
+                    "active",
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "content",
+                        "default_property": true,
+                        "type": "dynamic(path|URL|file|ReadableBuffer)",
+                        "doc": "The image source.<br/>If a buffer is provided (string, array of bytes...), and in order to prevent the bandwidth to be consumed too much, the way the image data is transferred depends on the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the size of the buffer is smaller than this setting, then the raw content is generated as a\n  data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li>\n<li>If the size of the buffer is greater than this setting, then it is transferred through a temporary\n  file.</li>\n</ul>"
+                    },
+                    {
+                        "name": "label",
+                        "type": "dynamic(str)",
+                        "doc": "The label for this image."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "The name of a function that is triggered when the user clicks on the image.<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "width",
+                        "type": "str|int|float",
+                        "default_value": "\"300px\"",
+                        "doc": "The width, in CSS units, of this element."
+                    },
+                    {
+                        "name": "height",
+                        "type": "str|int|float",
+                        "doc": "The height, in CSS units, of this element."
+                    }
+                ]
+            }
+        ],
+        [
+            "indicator",
+            {
+                "inherits": [
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "display",
+                        "default_property": true,
+                        "type": "dynamic(any)",
+                        "doc": "The label to be displayed.<br/>This can be formatted if it is a numerical value."
+                    },
+                    {
+                        "name": "value",
+                        "type": "dynamic(int,float)",
+                        "default_value": "<i>min</i>",
+                        "doc": "The location of the label on the [<i>min</i>, <i>max</i>] range."
+                    },
+                    {
+                        "name": "min",
+                        "type": "int|float",
+                        "default_value": "0",
+                        "doc": "The minimum value of the range."
+                    },
+                    {
+                        "name": "max",
+                        "type": "int|float",
+                        "default_value": "100",
+                        "doc": "The maximum value of the range."
+                    },
+                    {
+                        "name": "format",
+                        "type": "str",
+                        "doc": "The format to use when displaying the value.<br/>This uses the <code>printf</code> syntax."
+                    },
+                    {
+                        "name": "orientation",
+                        "type": "str",
+                        "default_value": "\"horizontal\"",
+                        "doc": "The orientation of this slider."
+                    },
+                    {
+                        "name": "width",
+                        "type": "str",
+                        "default_value": "None",
+                        "doc": "The width, in CSS units, of the indicator (used when orientation is horizontal)."
+                    },
+                    {
+                        "name": "height",
+                        "type": "str",
+                        "default_value": "None",
+                        "doc": "The height, in CSS units, of the indicator (used when orientation is vertical)."
+                    }
+                ]
+            }
+        ],
+        [
+            "status",
+            {
+                "inherits": [
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "value",
+                        "default_property": true,
+                        "type": "tuple|dict|list[dict]|list[tuple]",
+                        "doc": "The different status items to represent. See below."
+                    },
+                    {
+                        "name": "without_close",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the user cannot remove the status items from the list."
+                    }
+                ]
+            }
+        ],
+        [
+            "file_download",
+            {
+                "inherits": [
+                    "active",
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "content",
+                        "default_property": true,
+                        "type": "dynamic(path|file|URL|ReadableBuffer|None)",
+                        "doc": "The content to transfer.<br/>If this is a string, a URL, or a file, then the content is read from this source.<br/>If a readable buffer is provided (such as an array of bytes...), and to prevent the bandwidth from being consumed too much, the way the data is transferred depends on the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the buffer size is smaller than this setting, then the raw content is generated as a data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li>\n<li>If the buffer size exceeds this setting, then it is transferred through a temporary file.</li>\n</ul>If this property is set to None, that indicates that dynamic content is generated. Please take a look at the examples below for details on dynamic generation."
+                    },
+                    {
+                        "name": "label",
+                        "type": "dynamic(str)",
+                        "doc": "The label of the button."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "The name of a function that is triggered when the download is terminated (or on user action if <i>content</i> is None).<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has two keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: A list of two elements: <i>args[0]</i> reflects the <i>name</i> property and <i>args[1]</i> holds the file URL.</li>\n</ul>\n</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "auto",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the download starts as soon as the page is loaded."
+                    },
+                    {
+                        "name": "render",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "If True, the control is displayed.<br/>If False, the control is not displayed."
+                    },
+                    {
+                        "name": "bypass_preview",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, allows the browser to try to show the content in a different tab.<br/>The file download is always performed."
+                    },
+                    {
+                        "name": "name",
+                        "type": "str",
+                        "doc": "A name proposition for the file to save, that the user can change."
+                    }
+                ]
+            }
+        ],
+        [
+            "file_selector",
+            {
+                "inherits": [
+                    "active",
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "content",
+                        "default_property": true,
+                        "type": "dynamic(str)",
+                        "doc": "The path or the list of paths of the uploaded files."
+                    },
+                    {
+                        "name": "label",
+                        "type": "str",
+                        "doc": "The label of the button."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "The name of the function that will be triggered.<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "multiple",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If set to True, multiple files can be uploaded."
+                    },
+                    {
+                        "name": "extensions",
+                        "type": "str",
+                        "default_value": "\".csv,.xlsx\"",
+                        "doc": "The list of file extensions that can be uploaded."
+                    },
+                    {
+                        "name": "drop_message",
+                        "type": "str",
+                        "default_value": "\"Drop here to Upload\"",
+                        "doc": "The message that is displayed when the user drags a file above the button."
+                    },
+                    {
+                        "name": "notify",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If set to False, the user won't be notified of upload finish."
+                    }
+                ]
+            }
+        ],
+        [
+            "login",
+            {
+                "inherits": [
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "title",
+                        "default_property": true,
+                        "type": "str",
+                        "default_value": "\"Log in\"",
+                        "doc": "The title of the login dialog."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "The name of the function that is triggered when the dialog button is pressed.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: a list with three elements:<ul><li>The first element is the username</li><li>The second element is the password</li><li>The third element is the current page name</li></ul></li></li>\n</ul>\n</li>\n</ul><br/>When the button is pressed, and if this property is not set, Taipy will try to find a callback function called <i>on_login()</i> and invoke it with the parameters listed above.",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "message",
+                        "type": "dynamic(str)",
+                        "doc": "The message shown in the dialog."
+                    }
+                ]
+            }
+        ],
+        [
+            "chat",
+            {
+                "inherits": [
+                    "active",
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "messages",
+                        "default_property": true,
+                        "required": true,
+                        "type": "dynamic(list[str])",
+                        "doc": "The list of messages. Each element is a list composed of an id, a message and an user identifier."
+                    },
+                    {
+                        "name": "users",
+                        "type": "dynamic(list[str|Icon])",
+                        "doc": "The list of users. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "The name of a function that is triggered when the user enters a new message.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the messages variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args (list): A list composed of a reason (click or Enter), variable name, message, sender id.</li></ul></li></ul>.",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "var_name",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "with_input",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "If True, the input field is visible."
+                    },
+                    {
+                        "name": "sender_id",
+                        "type": "str",
+                        "default_value": "\"taipy\"",
+                        "doc": "The user id associated with the message sent from the input"
+                    },
+                    {
+                        "name": "height",
+                        "type": "str|int|float",
+                        "doc": "The maximum height, in CSS units, of this element."
+                    },
+                    {
+                        "name": "page_size",
+                        "type": "int",
+                        "default_value": "50",
+                        "doc": "The number of rows retrieved on the frontend."
+                    }
+                ]
+            }
+        ],
+        [
+            "menu",
+            {
+                "inherits": [
+                    "active"
+                ],
+                "properties": [
+                    {
+                        "name": "lov",
+                        "default_property": true,
+                        "type": "dynamic(str|list[str|Icon|any])",
+                        "doc": "The list of menu option values."
+                    },
+                    {
+                        "name": "adapter",
+                        "type": "Function",
+                        "default_value": "`\"lambda x: str(x)\"`",
+                        "doc": "The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:str|Icon)</i>."
+                    },
+                    {
+                        "name": "type",
+                        "type": "str",
+                        "default_value": "<i>Type of the first lov element</i>",
+                        "doc": "Must be specified if <i>lov</i> contains a non specific type of data (ex: dict).<br/><i>value</i> must be of that type, <i>lov</i> must be an iterable on this type, and the adapter function will receive an object of this type."
+                    },
+                    {
+                        "name": "label",
+                        "type": "str",
+                        "doc": "The title of the menu."
+                    },
+                    {
+                        "name": "inactive_ids",
+                        "type": "dynamic(str|list[str])",
+                        "doc": "Semicolon (';')-separated list or a list of menu items identifiers that are disabled."
+                    },
+                    {
+                        "name": "width",
+                        "type": "str",
+                        "default_value": "\"15vw\"",
+                        "doc": "The width, in CSS units, of the menu when unfolded.<br/>Note that when running on a mobile device, the property <i>width[active]</i> is used instead."
+                    },
+                    {
+                        "name": "width[mobile]",
+                        "type": "str",
+                        "default_value": "\"85vw\"",
+                        "doc": "The width, in CSS units, of the menu when unfolded, on a mobile device."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "The name of the function that is triggered when a menu option is selected.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: List where the first element contains the id of the selected option.</li>\n</ul>\n</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        ],
+        [
+            "dialog",
+            {
+                "inherits": [
+                    "partial",
+                    "active",
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "open",
+                        "default_property": true,
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the dialog is visible. If False, it is hidden."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "Name of a function triggered when a button is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the dialog.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: a list where the first element contains the index of the selected label.</li>\n</ul>\n</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "close_label",
+                        "type": "str",
+                        "default_value": "\"Close\"",
+                        "doc": "The tooltip of the top-right close icon button. In the <i>on_action</i> function, args will hold -1."
+                    },
+                    {
+                        "name": "labels",
+                        "type": " str|list[str]",
+                        "doc": "A list of labels to show in a row of buttons at the bottom of the dialog. The index of the button in the list is reported as args in the <i>on_action</i> function (-1 for the close icon)."
+                    },
+                    {
+                        "name": "width",
+                        "type": "str|int|float",
+                        "doc": "The width, in CSS units, of this dialog.<br/>(CSS property)"
+                    },
+                    {
+                        "name": "height",
+                        "type": "str|int|float",
+                        "doc": "The height, in CSS units, of this dialog.<br/>(CSS property)"
+                    }
+                ]
+            }
+        ],
+        [
+            "tree",
+            {
+                "inherits": [
+                    "selector"
+                ],
+                "properties": [
+                    {
+                        "name": "expanded",
+                        "type": "dynamic(bool|str[])",
+                        "default_value": "True",
+                        "doc": "If Boolean and False, only one node can be expanded at one given level. Otherwise this should be set to an array of the node identifiers that need to be expanded."
+                    },
+                    {
+                        "name": "multiple",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the user can select multiple items by holding the <code>Ctrl</code> key while clicking on items."
+                    },
+                    {
+                        "name": "select_leafs_only",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the user can only select leaf nodes."
+                    },
+                    {
+                        "name": "row_height",
+                        "type": "str",
+                        "doc": "The height, in CSS units, of each row."
+                    }
+                ]
+            }
         ]
-      }
     ],
-    [
-      "navbar",
-      {
-        "inherits": [
+    "blocks": [
+        [
+            "part",
+            {
+                "inherits": [
+                    "partial",
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "render",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "If True, this part is visible on the page.<br/>If False, the part is hidden and its content is not displayed."
+                    },
+                    {
+                        "name": "class_name",
+                        "default_property": true,
+                        "type": "dynamic(str)",
+                        "doc": "A list of CSS class names, separated by white spaces, that will be associated with the generated HTML Element.<br/>These class names are added to the default <code>taipy-part</code>."
+                    },
+                    {
+                        "name": "page",
+                        "type": "dynamic(str)",
+                        "doc": "The page to show as the content of the block (page name if defined or a URL in an <i>iframe</i>).<br/>This should not be defined if <i>partial</i> is set."
+                    },
+                    {
+                        "name": "height",
+                        "type": "dynamic(str)",
+                        "doc": "The height, in CSS units, of this block."
+                    },
+                    {
+                        "name": "content",
+                        "type": "dynamic(any)",
+                        "doc": "The content provided to the part. See the documentation section on content providers."
+                    }
+                ]
+            }
+        ],
+        [
+            "expandable",
+            {
+                "inherits": [
+                    "partial",
+                    "shared",
+                    "on_change"
+                ],
+                "properties": [
+                    {
+                        "name": "title",
+                        "default_property": true,
+                        "type": "dynamic(str)",
+                        "doc": "Title of this block element."
+                    },
+                    {
+                        "name": "expanded",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "If True, the block is expanded, and the content is displayed.<br/>If False, the block is collapsed and its content is hidden."
+                    }
+                ]
+            }
+        ],
+        [
+            "layout",
+            {
+                "inherits": [
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "columns",
+                        "default_property": true,
+                        "type": "str",
+                        "default_value": "\"1 1\"",
+                        "doc": "The list of weights for each column.<br/>For example, `\"1 2\"` creates a 2 column grid:\n<ul>\n<li>1fr</li>\n<li>2fr</li>\n</ul><br/>The creation of multiple same size columns can be simplified by using the multiply sign eg. \"5*1\" is equivalent to \"1 1 1 1 1\"."
+                    },
+                    {
+                        "name": "columns[mobile]",
+                        "type": "str",
+                        "default_value": "\"1\"",
+                        "doc": "The list of weights for each column, when displayed on a mobile device.<br/>The syntax is the same as for <i>columns</i>."
+                    },
+                    {
+                        "name": "gap",
+                        "type": "str",
+                        "default_value": "\"0.5rem\"",
+                        "doc": "The size of the gap between the columns."
+                    }
+                ]
+            }
+        ],
+        [
+            "pane",
+            {
+                "inherits": [
+                    "partial",
+                    "on_change",
+                    "active",
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "open",
+                        "default_property": true,
+                        "type": "dynamic(bool)",
+                        "default_value": "False",
+                        "doc": "If True, this pane is visible on the page.<br/>If False, the pane is hidden."
+                    },
+                    {
+                        "name": "on_close",
+                        "type": "Callback",
+                        "doc": "The name of a function that is triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n</ul><br/>If this property is not set, no function is called when this pane is closed.",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "anchor",
+                        "type": "str",
+                        "default_value": "\"left\"",
+                        "doc": "Anchor side of the pane.<br/>Valid values are \"left\", \"right\", \"top\", or \"bottom\"."
+                    },
+                    {
+                        "name": "width",
+                        "type": "str",
+                        "default_value": "\"30vw\"",
+                        "doc": "Width, in CSS units, of this pane.<br/>This is used only if <i>anchor</i> is \"left\" or \"right\"."
+                    },
+                    {
+                        "name": "height",
+                        "type": "str",
+                        "default_value": "\"30vh\"",
+                        "doc": "Height, in CSS units, of this pane.<br/>This is used only if <i>anchor</i> is \"top\" or \"bottom\"."
+                    },
+                    {
+                        "name": "persistent",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If False, the pane covers the page where it appeared and disappears if the user clicks in the page.<br/>If True, the pane appears next to the page. Note that the parent section of the pane must have the <i>flex</i> display mode set. See below for an example using the <code>persistent</code> property."
+                    }
+                ]
+            }
+        ]
+    ],
+    "undocumented": [
+        [
             "active",
-            "shared"
-          ],
-          "properties": [
             {
-                "name": "lov",
-                "default_property": true,
-                "type": "dict[str, any]",
-                "doc": "The list of pages. The keys should be:\n<ul>\n<li>page id (start with \"/\")</li>\n<li>or full URL</li>\n</ul>\nThe values are labels. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
+                "properties": [
+                    {
+                        "name": "active",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "Indicates if this component is active.<br/>An inactive component allows no user interaction."
+                    }
+                ]
+            }
+        ],
+        [
+            "lovComp",
+            {
+                "inherits": [
+                    "on_change"
+                ],
+                "properties": [
+                    {
+                        "name": "value",
+                        "default_property": true,
+                        "type": "dynamic(any)",
+                        "doc": "Bound to the selection value."
+                    },
+                    {
+                        "name": "lov",
+                        "type": "dict[str, any]",
+                        "doc": "The list of values. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
+                    },
+                    {
+                        "name": "adapter",
+                        "type": "Function",
+                        "default_value": "`lambda x: str(x)`",
+                        "doc": "The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:str|Icon)</i>."
+                    },
+                    {
+                        "name": "type",
+                        "type": "str",
+                        "default_value": "<i>Type name of the lov elements</i>",
+                        "doc": "Must be specified if <i>lov</i> contains a non-specific type of data (ex: dict).<br/><i>value</i> must be of that type, <i>lov</i> must be an iterable on this type, and the adapter function will receive an object of this type."
+                    },
+                    {
+                        "name": "value_by_id",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If False, the selection value (in <i>value</i>) is the selected element in <i>lov</i>. If set to True, then <i>value</i> is set to the id of the selected element in <i>lov</i>."
+                    }
+                ]
+            }
+        ],
+        [
+            "on_change",
+            {
+                "properties": [
+                    {
+                        "name": "on_change",
+                        "type": "Callback",
+                        "doc": "The name of a function that is triggered when the value is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (any): the new value.</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "var_name",
+                                "str"
+                            ],
+                            [
+                                "value",
+                                ""
+                            ]
+                        ]
+                    }
+                ]
+            }
+        ],
+        [
+            "partial",
+            {
+                "properties": [
+                    {
+                        "name": "partial",
+                        "type": "Partial",
+                        "doc": "A Partial object that holds the content of the block.<br/>This should not be defined if <i>page</i> is set."
+                    },
+                    {
+                        "name": "page",
+                        "type": "str",
+                        "doc": "The page name to show as the content of the block.<br/>This should not be defined if <i>partial</i> is set."
+                    }
+                ]
+            }
+        ],
+        [
+            "propagate",
+            {
+                "inherits": [
+                    "active",
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "propagate",
+                        "type": "bool",
+                        "default_value": "<i>App config</i>",
+                        "doc": "Allows the control's main value to be automatically propagated.<br/>The default value is defined at the application configuration level.<br/>If True, any change to the control's value is immediately reflected in the bound application variable."
+                    }
+                ]
+            }
+        ],
+        [
+            "sharedInput",
+            {
+                "properties": [
+                    {
+                        "name": "change_delay",
+                        "type": "int",
+                        "default_value": "<i>App config</i>",
+                        "doc": "Minimum time between triggering two calls to the <i>on_change</i> callback.<br/>The default value is defined at the application configuration level by the <strong>change_delay</strong> configuration option. if None, the delay is set to 300 ms.<br/>If set to -1, the input change is triggered only when the user presses the Enter key."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "Name of a function that is triggered when a specific key is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the input.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args (list):\n<ul><li>key name</li><li>variable name</li><li>current value</li></ul>\n</li>\n</ul>\n</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "action_keys",
+                        "type": "str",
+                        "default_value": "\"Enter\"",
+                        "doc": "Semicolon (';')-separated list of supported key names.<br/>Authorized values are Enter, Escape, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12."
+                    }
+                ]
+            }
+        ],
+        [
+            "shared",
+            {
+                "properties": [
+                    {
+                        "name": "id",
+                        "type": "str",
+                        "doc": "The identifier that will be assigned to the rendered HTML component."
+                    },
+                    {
+                        "name": "properties",
+                        "type": "dict[str, any]",
+                        "doc": "Bound to a dictionary that contains additional properties for this element."
+                    },
+                    {
+                        "name": "class_name",
+                        "type": "dynamic(str)",
+                        "doc": "The list of CSS class names that will be associated with the generated HTML Element.<br/>These class names will be added to the default <code>taipy-&lt;element_type&gt;</code>."
+                    },
+                    {
+                        "name": "hover_text",
+                        "type": "dynamic(str)",
+                        "doc": "The information that is displayed when the user hovers over this element."
+                    }
+                ]
             }
         ]
-      }
-    ],
-    [
-      "selector",
-      {
-        "inherits": [
-          "lovComp",
-          "propagate"
-        ],
-        "properties": [
-          {
-            "name": "filter",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If True, this control is combined with a filter input area."
-          },
-          {
-            "name": "multiple",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If True, the user can select multiple items."
-          },
-          {
-            "name": "width",
-            "type": "str|int",
-            "default_value": "\"360px\"",
-            "doc": "The width, in CSS units, of this element."
-          },
-          {
-            "name": "height",
-            "type": "str|int",
-            "doc": "The height, in CSS units, of this element."
-          },
-          {
-            "name": "dropdown",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If True, the list of items is shown in a dropdown menu.<br/><br/>You cannot use the filter in that situation."
-          },
-          {
-            "name": "label",
-            "type": "str",
-            "default_value": "None",
-            "doc": "The label associated with the selector when in dropdown mode."
-          },
-          {
-            "name": "mode",
-            "type": "str",
-            "doc": "Define the way the selector is displayed:<ul><li>&quot;radio&quot;: list of radio buttons</li><li>&quot;check&quot;: list of check buttons</li><li>any other value: selector as usual."
-          }
-        ]
-      }
-    ],
-    [
-      "status",
-      {
-        "inherits": [
-          "shared"
-        ],
-        "properties": [
-          {
-            "name": "value",
-            "default_property": true,
-            "type": "tuple|dict|list[dict]|list[tuple]",
-            "doc": "The different status items to represent. See below."
-          },
-          {
-            "name": "without_close",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If True, the user cannot remove the status items from the list."
-          }
-        ]
-      }
-    ],
-    [
-      "table",
-      {
-        "inherits": [
-          "active",
-          "shared"
-        ],
-        "properties": [
-          {
-            "name": "data",
-            "default_property": true,
-            "required": true,
-            "type": "dynamic(any)",
-            "doc": "The data to be represented in this table. This property can be indexed to define other data for comparison."
-          },
-          {
-            "name": "page_size",
-            "type": "int",
-            "default_value": "100",
-            "doc": "For a paginated table, the number of visible rows."
-          },
-          {
-            "name": "allow_all_rows",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "For a paginated table, adds an option to show all the rows."
-          },
-          {
-            "name": "show_all",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "For a paginated table, show all the rows."
-          },
-          {
-            "name": "auto_loading",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If True, the data will be loaded on demand."
-          },
-          {
-            "name": "width[<i>column_name</i>]",
-            "type": "str",
-            "doc": "The width, in CSS units, of the indicated column."
-          },
-          {
-            "name": "selected",
-            "type": "list[int]|str",
-            "doc": "The list of the indices of the rows to be displayed as selected."
-          },
-          {
-            "name": "page_size_options",
-            "type": "list[int]|str",
-            "default_value": "[50, 100, 500]",
-            "doc": "The list of available page sizes that users can choose from."
-          },
-          {
-            "name": "columns",
-            "type": "str|list[str]|dict[str, dict[str, str|int]]",
-            "default_value": "<i>shows all columns when empty</i>",
-            "doc": "The list of the column names to display.\n<ul>\n<li>str: Semicolon (';')-separated list of column names.</li>\n<li>list[str]: The list of column names.</li>\n<li>dict: A dictionary with entries matching: {\"col name\": {format: \"format\", index: 1}}.<br/>\nif <i>index</i> is specified, it represents the display order of the columns.\nIf <i>index</i> is not specified, the list order defines the index.<br/>\nIf <i>format</i> is specified, it is used for numbers or dates.</li>\n</ul>"
-          },
-          {
-            "name": "date_format",
-            "type": "str",
-            "default_value": "\"MM/dd/yyyy\"",
-            "doc": "The date format used for all date columns when the format is not specifically defined."
-          },
-          {
-            "name": "number_format",
-            "type": "str",
-            "doc": "The number format used for all number columns when the format is not specifically defined."
-          },
-          {
-            "name": "group_by[<i>column_name</i>]",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "Indicates, if True, that the given column can be aggregated.<br/>See <a href=\"#aggregation\">below</a> for details."
-          },
-          {
-            "name": "apply[<i>column_name</i>]",
-            "type": "str",
-            "default_value": "\"first\"",
-            "doc": "The name of the aggregation function to use.<br/>This is used only if <i>group_by[column_name]</i> is set to True.<br/>See <a href=\"#aggregation\">below</a> for details."
-          },
-          {
-            "name": "style",
-            "type": "str",
-            "doc": "Allows the styling of table lines.<br/>See <a href=\"#dynamic-styling\">below</a> for details."
-          },
-          {
-            "name": "style[<i>column_name</i>]",
-            "type": "str",
-            "doc": "Allows the styling of table cells.<br/>See <a href=\"#dynamic-styling\">below</a> for details."
-          },
-          {
-            "name": "tooltip",
-            "type": "str",
-            "doc": "The name of the function that must return a tooltip text for a cell.<br/>See <a href=\"#cell-tooltips\">below</a> for details."
-          },
-          {
-            "name": "tooltip[<i>column_name</i>]",
-            "type": "str",
-            "doc": "The name of the function that must return a tooltip text for a cell.<br/>See <a href=\"#cell-tooltips\">below</a> for details."
-          },
-          {
-            "name": "width",
-            "type": "str",
-            "default_value": "\"100%\"",
-            "doc": "The width, in CSS units, of this table control."
-          },
-          {
-            "name": "height",
-            "type": "str",
-            "default_value": "\"80vh\"",
-            "doc": "The height, in CSS units, of this table control."
-          },
-          {
-            "name": "filter",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "Indicates, if True, that all columns can be filtered."
-          },
-          {
-            "name": "filter[<i>column_name</i>]",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "Indicates, if True, that the indicated column can be filtered."
-          },
-          {
-            "name": "nan_value",
-            "type": "str",
-            "default_value": "\"\"",
-            "doc": "The replacement text for NaN (not-a-number) values."
-          },
-          {
-            "name": "nan_value[<i>column_name</i>]",
-            "type": "str",
-            "default_value": "\"\"",
-            "doc": "The replacement text for NaN (not-a-number) values for the indicated column."
-          },
-          {
-            "name": "editable",
-            "type": "dynamic(bool)",
-            "default_value": "True",
-            "doc": "Indicates, if True, that all columns can be edited."
-          },
-          {
-            "name": "editable[<i>column_name</i>]",
-            "type": "bool",
-            "default_value": "editable",
-            "doc": "Indicates, if False, that the indicated column cannot be edited when editable is True."
-          },
-          {
-            "name": "on_edit",
-            "type": "Callback",
-            "doc": "The name of a function that is triggered when a cell edition is validated.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>value (any): the new cell value cast to the type of the column.</li>\n<li>user_value (str): the new cell value, as it was provided by the user.</li>\n<li>tz (str): the timezone if the column type is date.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot edit cells.",
-            "signature": [["state", "State"], ["var_name", "str"], ["payload", "dict"]]
-          },
-          {
-            "name": "on_delete",
-            "type": "str",
-            "doc": "The name of a function that is triggered when a row is deleted.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot delete rows.",
-            "signature": [["state", "State"], ["var_name", "str"], ["payload", "dict"]]
-          },
-          {
-            "name": "on_add",
-            "type": "str",
-            "doc": "The name of a function that is triggered when the user requests a row to be added.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot add rows.",
-            "signature": [["state", "State"], ["var_name", "str"], ["payload", "dict"]]
-          },
-          {
-            "name": "on_action",
-            "type": "str",
-            "doc": "The name of a function that is triggered when the user selects a row.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>reason (str): the origin of the action: \"click\", or \"button\" if the cell contains a Markdown link syntax.</li>\n<li>value (str): the *link value* indicated in the cell when using a Markdown link syntax (that is, <i>reason</i> is set to \"button\").</li></ul></li></ul>.",
-            "signature": [["state", "State"], ["var_name", "str"], ["payload", "dict"]]
-          },
-          {
-            "name": "size",
-            "type": "str",
-            "default_value": "\"small\"",
-            "doc": "The size of the rows.<br/>Valid values are \"small\" and \"medium\"."
-          },
-          {
-            "name": "rebuild",
-            "type": "dynamic(bool)",
-            "default_value": "False",
-            "doc": "If set to True, this allows to dynamically refresh the  columns."
-          },
-          {
-            "name": "lov[<i>column_name</i>]",
-            "type": "list[str]|str",
-            "doc": "The list of values of the indicated column."
-          },
-          {
-            "name": "downloadable",
-            "type": "boolean",
-            "doc": "If True, a clickable icon is shown so the user can download the data as CSV."
-          },
-          {
-            "name": "on_compare",
-            "type": "str",
-            "doc": "A data comparison function that would return a structure that identifies the differences between the different data passed as name. The default implementation compares the default data with the data[1] value.",
-            "signature": [["state", "State"], ["main_data_name", "str"], ["compare_data_names", "list[str]"]]
-          }
-        ]
-      }
-    ],
-    [
-      "dialog",
-      {
-        "inherits": [
-          "partial",
-          "active",
-          "shared"
-        ],
-        "properties": [
-          {
-            "name": "open",
-            "default_property": true,
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If True, the dialog is visible. If False, it is hidden."
-          },
-          {
-            "name": "on_action",
-            "type": "Callback",
-            "doc": "Name of a function triggered when a button is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the dialog.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: a list where the first element contains the index of the selected label.</li>\n</ul>\n</li>\n</ul>",
-            "signature": [["state", "State"], ["id", "str"], ["payload", "dict"]]
-          },
-          {
-            "name": "close_label",
-            "type": "str",
-            "default_value": "\"Close\"",
-            "doc": "The tooltip of the top-right close icon button. In the <i>on_action</i> function, args will hold -1."
-          },
-          {
-            "name": "labels",
-            "type": " str|list[str]",
-            "doc": "A list of labels to show in a row of buttons at the bottom of the dialog. The index of the button in the list is reported as args in the <i>on_action</i> function (-1 for the close icon)."
-          },
-          {
-            "name": "width",
-            "type": "str|int|float",
-            "doc": "The width, in CSS units, of this dialog.<br/>(CSS property)"
-          },
-          {
-            "name": "height",
-            "type": "str|int|float",
-            "doc": "The height, in CSS units, of this dialog.<br/>(CSS property)"
-          }
-        ]
-      }
-    ],
-    [
-      "tree",
-      {
-        "inherits": [
-          "selector"
-        ],
-        "properties": [
-          {
-            "name": "expanded",
-            "type": "dynamic(bool|str[])",
-            "default_value": "True",
-            "doc": "If Boolean and False, only one node can be expanded at one given level. Otherwise this should be set to an array of the node identifiers that need to be expanded."
-          },
-          {
-            "name": "multiple",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If True, the user can select multiple items by holding the <code>Ctrl</code> key while clicking on items."
-          },
-          {
-            "name": "select_leafs_only",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If True, the user can only select leaf nodes."
-          },
-          {
-            "name": "row_height",
-            "type": "str",
-            "doc": "The height, in CSS units, of each row."
-          }
-        ]
-      }
     ]
-  ],
-  "blocks": [
-    [
-      "part",
-      {
-        "inherits": [
-          "partial",
-          "shared"
-        ],
-        "properties": [
-          {
-            "name": "render",
-            "type": "dynamic(bool)",
-            "default_value": "True",
-            "doc": "If True, this part is visible on the page.<br/>If False, the part is hidden and its content is not displayed."
-          },
-          {
-            "name": "class_name",
-            "default_property": true,
-            "type": "dynamic(str)",
-            "doc": "A list of CSS class names, separated by white spaces, that will be associated with the generated HTML Element.<br/>These class names are added to the default <code>taipy-part</code>."
-          },
-          {
-            "name": "page",
-            "type": "dynamic(str)",
-            "doc": "The page to show as the content of the block (page name if defined or a URL in an <i>iframe</i>).<br/>This should not be defined if <i>partial</i> is set."
-          },
-          {
-            "name": "height",
-            "type": "dynamic(str)",
-            "doc": "The height, in CSS units, of this block."
-          },
-          {
-            "name": "content",
-            "type": "dynamic(any)",
-            "doc": "The content provided to the part. See the documentation section on content providers."
-          }
-        ]
-      }
-    ],
-    [
-      "expandable",
-      {
-        "inherits": [
-          "partial",
-          "shared",
-          "on_change"
-        ],
-        "properties": [
-          {
-            "name": "title",
-            "default_property": true,
-            "type": "dynamic(str)",
-            "doc": "Title of this block element."
-          },
-          {
-            "name": "expanded",
-            "type": "dynamic(bool)",
-            "default_value": "True",
-            "doc": "If True, the block is expanded, and the content is displayed.<br/>If False, the block is collapsed and its content is hidden."
-          }
-        ]
-      }
-    ],
-    [
-      "layout",
-      {
-        "inherits": [
-          "shared"
-        ],
-        "properties": [
-          {
-            "name": "columns",
-            "default_property": true,
-            "type": "str",
-            "default_value": "\"1 1\"",
-            "doc": "The list of weights for each column.<br/>For example, `\"1 2\"` creates a 2 column grid:\n<ul>\n<li>1fr</li>\n<li>2fr</li>\n</ul><br/>The creation of multiple same size columns can be simplified by using the multiply sign eg. \"5*1\" is equivalent to \"1 1 1 1 1\"."
-          },
-          {
-            "name": "columns[mobile]",
-            "type": "str",
-            "default_value": "\"1\"",
-            "doc": "The list of weights for each column, when displayed on a mobile device.<br/>The syntax is the same as for <i>columns</i>."
-          },
-          {
-            "name": "gap",
-            "type": "str",
-            "default_value": "\"0.5rem\"",
-            "doc": "The size of the gap between the columns."
-          }
-        ]
-      }
-    ],
-    [
-      "pane",
-      {
-        "inherits": [
-          "partial",
-          "on_change",
-          "active",
-          "shared"
-        ],
-        "properties": [
-          {
-            "name": "open",
-            "default_property": true,
-            "type": "dynamic(bool)",
-            "default_value": "False",
-            "doc": "If True, this pane is visible on the page.<br/>If False, the pane is hidden."
-          },
-          {
-            "name": "on_close",
-            "type": "Callback",
-            "doc": "The name of a function that is triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n</ul><br/>If this property is not set, no function is called when this pane is closed.",
-            "signature": [["state", "State"], ["id", "str"]]
-          },
-          {
-            "name": "anchor",
-            "type": "str",
-            "default_value": "\"left\"",
-            "doc": "Anchor side of the pane.<br/>Valid values are \"left\", \"right\", \"top\", or \"bottom\"."
-          },
-          {
-            "name": "width",
-            "type": "str",
-            "default_value": "\"30vw\"",
-            "doc": "Width, in CSS units, of this pane.<br/>This is used only if <i>anchor</i> is \"left\" or \"right\"."
-          },
-          {
-            "name": "height",
-            "type": "str",
-            "default_value": "\"30vh\"",
-            "doc": "Height, in CSS units, of this pane.<br/>This is used only if <i>anchor</i> is \"top\" or \"bottom\"."
-          },
-          {
-            "name": "persistent",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If False, the pane covers the page where it appeared and disappears if the user clicks in the page.<br/>If True, the pane appears next to the page. Note that the parent section of the pane must have the <i>flex</i> display mode set. See below for an example using the <code>persistent</code> property."
-          }
-        ]
-      }
-    ]
-  ],
-  "undocumented": [
-    [
-      "active",
-      {
-        "properties": [
-          {
-            "name": "active",
-            "type": "dynamic(bool)",
-            "default_value": "True",
-            "doc": "Indicates if this component is active.<br/>An inactive component allows no user interaction."
-          }
-        ]
-      }
-    ],
-    [
-      "lovComp",
-      {
-        "inherits": [
-          "on_change"
-        ],
-        "properties": [
-          {
-            "name": "value",
-            "default_property": true,
-            "type": "dynamic(any)",
-            "doc": "Bound to the selection value."
-          },
-          {
-            "name": "lov",
-            "type": "dict[str, any]",
-            "doc": "The list of values. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
-          },
-          {
-            "name": "adapter",
-            "type": "Function",
-            "default_value": "`lambda x: str(x)`",
-            "doc": "The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:str|Icon)</i>."
-          },
-          {
-            "name": "type",
-            "type": "str",
-            "default_value": "<i>Type of first lov element</i>",
-            "doc": "Must be specified if <i>lov</i> contains a non-specific type of data (ex: dict).<br/><i>value</i> must be of that type, <i>lov</i> must be an iterable on this type, and the adapter function will receive an object of this type."
-          },
-          {
-            "name": "value_by_id",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If False, the selection value (in <i>value</i>) is the selected element in <i>lov</i>. If set to True, then <i>value</i> is set to the id of the selected element in <i>lov</i>."
-          }
-        ]
-      }
-    ],
-    [
-      "on_change",
-      {
-        "properties": [
-          {
-            "name": "on_change",
-            "type": "Callback",
-            "doc": "The name of a function that is triggered when the value is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (any): the new value.</li>\n</ul>",
-            "signature": [["state", "State"], ["var_name", "str"], ["value", ""]]
-          }
-        ]
-      }
-    ],
-    [
-      "partial",
-      {
-        "properties": [
-          {
-            "name": "partial",
-            "type": "Partial",
-            "doc": "A Partial object that holds the content of the block.<br/>This should not be defined if <i>page</i> is set."
-          },
-          {
-            "name": "page",
-            "type": "str",
-            "doc": "The page name to show as the content of the block.<br/>This should not be defined if <i>partial</i> is set."
-          }
-        ]
-      }
-    ],
-    [
-      "propagate",
-      {
-        "inherits": [
-          "active",
-          "shared"
-        ],
-        "properties": [
-          {
-            "name": "propagate",
-            "type": "bool",
-            "default_value": "<i>App config</i>",
-            "doc": "Allows the control's main value to be automatically propagated.<br/>The default value is defined at the application configuration level.<br/>If True, any change to the control's value is immediately reflected in the bound application variable."
-          }
-        ]
-      }
-    ],
-    [
-      "sharedInput",
-      {
-        "properties": [
-          {
-            "name": "change_delay",
-            "type": "int",
-            "default_value": "<i>App config</i>",
-            "doc": "Minimum time between triggering two calls to the <i>on_change</i> callback.<br/>The default value is defined at the application configuration level by the <strong>change_delay</strong> configuration option. if None, the delay is set to 300 ms.<br/>If set to -1, the input change is triggered only when the user presses the Enter key."
-          },
-          {
-            "name": "on_action",
-            "type": "Callback",
-            "doc": "Name of a function that is triggered when a specific key is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the input.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args (list):\n<ul><li>key name</li><li>variable name</li><li>current value</li></ul>\n</li>\n</ul>\n</li>\n</ul>",
-            "signature": [["state", "State"], ["id", "str"], ["payload", "dict"]]
-          },
-          {
-            "name": "action_keys",
-            "type": "str",
-            "default_value": "\"Enter\"",
-            "doc": "Semicolon (';')-separated list of supported key names.<br/>Authorized values are Enter, Escape, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12."
-          }
-        ]
-      }
-    ],
-    [
-      "shared",
-      {
-        "properties": [
-          {
-            "name": "id",
-            "type": "str",
-            "doc": "The identifier that will be assigned to the rendered HTML component."
-          },
-          {
-            "name": "properties",
-            "type": "dict[str, any]",
-            "doc": "Bound to a dictionary that contains additional properties for this element."
-          },
-          {
-            "name": "class_name",
-            "type": "dynamic(str)",
-            "doc": "The list of CSS class names that will be associated with the generated HTML Element.<br/>These class names will be added to the default <code>taipy-&lt;element_type&gt;</code>."
-          },
-          {
-            "name": "hover_text",
-            "type": "dynamic(str)",
-            "doc": "The information that is displayed when the user hovers over this element."
-          }
-        ]
-      }
-    ]
-  ]
 }
