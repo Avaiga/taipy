@@ -23,6 +23,7 @@ from .._manager._manager import _Manager
 from .._repository._abstract_repository import _AbstractRepository
 from .._version._version_manager_factory import _VersionManagerFactory
 from .._version._version_mixin import _VersionMixin
+from ..common.reason import Reason
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.scenario_config import ScenarioConfig
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
@@ -199,10 +200,17 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         return scenario
 
     @classmethod
-    def _is_submittable(cls, scenario: Union[Scenario, ScenarioId]) -> bool:
+    def _is_submittable(cls, scenario: Union[Scenario, ScenarioId]) -> Reason:
         if isinstance(scenario, str):
             scenario = cls._get(scenario)
-        return isinstance(scenario, Scenario) and scenario.is_ready_to_run()
+
+        if not isinstance(scenario, Scenario):
+            scenario = str(scenario)
+            reason = Reason((scenario))
+            reason._add_reason(scenario, cls._build_not_submittable_entity_reason(scenario))
+            return reason
+
+        return scenario.is_ready_to_run()
 
     @classmethod
     def _submit(

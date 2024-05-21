@@ -20,6 +20,7 @@ from .._orchestrator._abstract_orchestrator import _AbstractOrchestrator
 from .._repository._abstract_repository import _AbstractRepository
 from .._version._version_manager_factory import _VersionManagerFactory
 from .._version._version_mixin import _VersionMixin
+from ..common.reason import Reason
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.task_config import TaskConfig
 from ..cycle.cycle_id import CycleId
@@ -163,10 +164,24 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         return entity_ids
 
     @classmethod
-    def _is_submittable(cls, task: Union[Task, TaskId]) -> bool:
+    def _is_submittable(cls, task: Union[Task, TaskId]) -> Reason:
         if isinstance(task, str):
             task = cls._get(task)
-        return isinstance(task, Task) and all(input_dn.is_ready_for_reading for input_dn in task.input.values())
+        if not isinstance(task, Task):
+            task = str(task)
+            reason = Reason(task)
+            reason._add_reason(task, cls._build_not_submittable_entity_reason(task))
+        else:
+            reason = Reason(task.id)
+            data_manager = _DataManagerFactory._build_manager()
+            for node in task.input.values():
+                node = data_manager._get(node)
+                if node._edit_in_progress:
+                    reason._add_reason(node.id, node._build_edit_in_progress_reason())
+                if not node._last_edit_date:
+                    reason._add_reason(node.id, node._build_not_written_reason())
+
+        return reason
 
     @classmethod
     def _submit(

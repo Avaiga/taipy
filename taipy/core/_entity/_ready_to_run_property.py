@@ -11,6 +11,7 @@
 
 from typing import TYPE_CHECKING, Dict, Set, Union
 
+from ..common.reason import Reason
 from ..notification import EventOperation, Notifier, _make_event
 
 if TYPE_CHECKING:
@@ -28,7 +29,7 @@ class _ReadyToRunProperty:
 
     # A nested dictionary of the submittable entities (Scenario, Sequence, Task) and
     # the data nodes that make it not ready_to_run with the reason(s)
-    _submittable_id_datanodes: Dict[Union["ScenarioId", "SequenceId", "TaskId"], Dict["DataNodeId", Set[str]]] = {}
+    _submittable_id_datanodes: Dict[Union["ScenarioId", "SequenceId", "TaskId"], Reason] = {}
 
     @classmethod
     def _add(cls, dn: "DataNode", reason: str) -> None:
@@ -40,13 +41,13 @@ class _ReadyToRunProperty:
 
         for scenario_parent in parent_entities.get(Scenario._MANAGER_NAME, []):
             if dn in scenario_parent.get_inputs():
-                _ReadyToRunProperty.__add(scenario_parent, dn, reason)
+                cls.__add(scenario_parent, dn, reason)
         for sequence_parent in parent_entities.get(Sequence._MANAGER_NAME, []):
             if dn in sequence_parent.get_inputs():
-                _ReadyToRunProperty.__add(sequence_parent, dn, reason)
+                cls.__add(sequence_parent, dn, reason)
         for task_parent in parent_entities.get(Task._MANAGER_NAME, []):
             if dn in task_parent.input.values():
-                _ReadyToRunProperty.__add(task_parent, dn, reason)
+                cls.__add(task_parent, dn, reason)
 
     @classmethod
     def _remove(cls, datanode: "DataNode", reason: str) -> None:
@@ -58,18 +59,14 @@ class _ReadyToRunProperty:
         to_remove_dn = False
         for submittable_id in submittable_ids:
             # check remove the reason
-            if reason in cls._submittable_id_datanodes.get(submittable_id, {}).get(datanode.id, set()):
-                cls._submittable_id_datanodes[submittable_id][datanode.id].remove(reason)
-            if len(cls._submittable_id_datanodes.get(submittable_id, {}).get(datanode.id, set())) == 0:
-                to_remove_dn = True
-                cls._submittable_id_datanodes.get(submittable_id, {}).pop(datanode.id, None)
-                if (
-                    submittable_id in cls._submittable_id_datanodes
-                    and len(cls._submittable_id_datanodes[submittable_id]) == 0
-                ):
+            reason_entity = cls._submittable_id_datanodes.get(submittable_id)
+            if reason_entity is not None:
+                reason_entity._remove_reason(datanode.id, reason)
+                to_remove_dn = not reason_entity._entity_id_exists_in_reason(datanode.id)
+                if reason_entity:
                     submittable = tp_get(submittable_id)
                     cls.__publish_submittable_property_event(submittable, True)
-                    cls._submittable_id_datanodes.pop(submittable_id, None)
+                    cls._submittable_id_datanodes.pop(submittable_id)
 
         if to_remove_dn:
             cls._datanode_id_submittables.pop(datanode.id)
@@ -84,10 +81,8 @@ class _ReadyToRunProperty:
             cls.__publish_submittable_property_event(submittable, False)
 
         if submittable.id not in cls._submittable_id_datanodes:
-            cls._submittable_id_datanodes[submittable.id] = {}
-        if datanode.id not in cls._submittable_id_datanodes[submittable.id]:
-            cls._submittable_id_datanodes[submittable.id][datanode.id] = set()
-        cls._submittable_id_datanodes[submittable.id][datanode.id].add(reason)
+            cls._submittable_id_datanodes[submittable.id] = Reason(submittable.id)
+        cls._submittable_id_datanodes[submittable.id]._add_reason(datanode.id, reason)
 
     @staticmethod
     def __publish_submittable_property_event(
