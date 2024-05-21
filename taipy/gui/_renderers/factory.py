@@ -364,13 +364,13 @@ class _Factory:
                 ("layout", PropertyType.dynamic_dict),
                 ("style", PropertyType.dynamic_dict),
                 ("type", PropertyType.string, "circular"),
-                ("show_value", PropertyType.boolean, True),
                 ("min", PropertyType.number, 0),
                 ("max", PropertyType.number, 100),
                 ("delta", PropertyType.dynamic_number),
                 ("threshold", PropertyType.dynamic_number),
                 ("width", PropertyType.string_or_number),
                 ("height", PropertyType.string_or_number),
+                ("show_value", PropertyType.boolean, True),
             ]
         ),
         "navbar": lambda gui, control_type, attrs: _Builder(

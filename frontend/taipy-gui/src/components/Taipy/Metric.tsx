@@ -58,7 +58,8 @@ const defaultStyle = {position: "relative", display: "inline-block"};
 const Metric = (props: MetricProps) => {
     const {
         width = "100%",
-        height
+        height,
+        showValue = true
     } = props;
     const value = useDynamicProperty(props.value, props.defaultValue, 0)
     const threshold = useDynamicProperty(props.threshold, props.defaultThreshold, undefined)
@@ -72,7 +73,7 @@ const Metric = (props: MetricProps) => {
             domain: {x: [0, 1], y: [0, 1]},
             value: value,
             type: "indicator",
-            mode: "gauge" + (props.showValue ? "+number" : "")  + (delta !== undefined ? "+delta" : ""),
+            mode: "gauge" + (showValue ? "+number" : "")  + (delta !== undefined ? "+delta" : ""),
             delta: {
                 reference: typeof value === 'number' && typeof delta === 'number' ? value - delta : undefined,
             },
