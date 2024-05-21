@@ -94,11 +94,12 @@ const Metric = (props: MetricProps) => {
         }
     ]), [
         value,
+        showValue,
         delta,
-        threshold,
         props.min,
         props.max,
         props.type,
+        threshold
     ]);
 
     const style = useMemo(
