@@ -11,10 +11,22 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, {CSSProperties, lazy, Suspense, useMemo} from 'react';
+import React, {
+    CSSProperties,
+    lazy,
+    Suspense,
+    useMemo
+} from 'react';
 import {Data} from "plotly.js";
-import {useClassNames, useDynamicJsonProperty, useDynamicProperty} from "../../utils/hooks";
-import {TaipyBaseProps, TaipyHoverProps} from "./utils";
+import {
+    useClassNames,
+    useDynamicJsonProperty,
+    useDynamicProperty
+} from "../../utils/hooks";
+import {
+    TaipyBaseProps,
+    TaipyHoverProps
+} from "./utils";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 
@@ -32,11 +44,12 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     defaultThreshold?: number
     testId?: string
     defaultLayout?: string;
-    layout?: string;
+    layout?: Record<string, unknown>;
     defaultStyle?: string;
-    style?: string;
+    style?: Record<string, unknown>;
     width?: string | number;
     height?: string | number;
+    showValue?: boolean;
 }
 
 const emptyLayout = {} as Record<string, Record<string, unknown>>;
@@ -51,27 +64,25 @@ const Metric = (props: MetricProps) => {
     const threshold = useDynamicProperty(props.threshold, props.defaultThreshold, undefined)
     const delta = useDynamicProperty(props.delta, props.defaultDelta, undefined)
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
-    const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
-    const baseStyle = useDynamicJsonProperty(props.style, props.defaultStyle || "", defaultStyle);
+    const baseLayout = useDynamicJsonProperty(JSON.stringify(props.layout), props.defaultLayout || "", emptyLayout);
+    const baseStyle = useDynamicJsonProperty(JSON.stringify(props.style), props.defaultStyle || "", defaultStyle);
 
     const data = useMemo(() => ([
         {
             domain: {x: [0, 1], y: [0, 1]},
             value: value,
             type: "indicator",
-            mode: (() => {
-                let mode = "gauge+number";
-                if (delta !== undefined) mode += "+delta";
-                return mode;
-            })(),
+            mode: "gauge" + (props.showValue ? "+number" : "")  + (delta !== undefined ? "+delta" : ""),
             delta: {
                 reference: typeof value === 'number' && typeof delta === 'number' ? value - delta : undefined,
             },
             gauge: {
-                axis: {range: [
-                    typeof props.min === 'number' ? props.min : 0,
-                    typeof props.max === 'number' ? props.max : 100
-                    ]},
+                axis: {
+                    range: [
+                        typeof props.min === 'number' ? props.min : 0,
+                        typeof props.max === 'number' ? props.max : 100
+                    ]
+                },
                 shape: props.type === "linear" ? "bullet" : "angular",
                 threshold: {
                     line: {color: "red", width: 4},
@@ -97,9 +108,11 @@ const Metric = (props: MetricProps) => {
         [baseStyle, height, width]
     );
 
+    const skelStyle = useMemo(() => ({...style, minHeight: "7em"}), [style]);
+
     return (
         <Box data-testid={props.testId} className={className}>
-            <Suspense fallback={<Skeleton key="skeleton"/>}>
+            <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle}/>}>
                 <Plot
                     data={data as Data[]}
                     layout={baseLayout}

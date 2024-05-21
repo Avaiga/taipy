@@ -19,12 +19,12 @@ import Metric from "./Metric";
 
 describe("Metric Component", () => {
   it("renders", async () => {
-    const { getByTestId } = render(<Metric testId={'test-id'}/>);
+    const { getByTestId } = render(<Metric testId="test-id"/>);
     const elt = getByTestId("test-id");
     expect(elt.tagName).toBe("DIV");
   })
   it("displays the right info for class", async () => {
-    const { getByTestId } = render(<Metric testId={'test-id'} className={'taipy-gauge'}/>);
+    const { getByTestId } = render(<Metric testId="test-id" className={'taipy-gauge'}/>);
     const elt = getByTestId('test-id');
     expect(elt).toHaveClass('taipy-gauge');
   })

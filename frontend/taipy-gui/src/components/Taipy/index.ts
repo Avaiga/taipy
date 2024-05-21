@@ -29,6 +29,7 @@ import Login from "./Login";
 import Layout from "./Layout";
 import Link from "./Link";
 import MenuCtl from "./MenuCtl";
+import Metric from "./Metric";
 import NavBar from "./NavBar";
 import PageContent from "../pages/PageContent";
 import Pane from "./Pane";
@@ -39,7 +40,6 @@ import StatusList from "./StatusList";
 import Table from "./Table";
 import Toggle from "./Toggle";
 import TreeView from "./TreeView";
-import Metric from "./Metric";
 
 const registeredComponents: Record<string, ComponentType> = {};
 
