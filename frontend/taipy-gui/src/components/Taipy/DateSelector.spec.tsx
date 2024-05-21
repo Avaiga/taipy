@@ -96,6 +96,16 @@ describe("DateSelector Component", () => {
         expect(input).toBeInTheDocument();
         expect(cleanText(input?.value || "")).toEqual("01/01/2001");
     });
+    it("displays the default value with format", async () => {
+        render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DateSelector defaultDate="2011-01-01T00:00:01.001Z" date={undefined as unknown as string} format="yy-MM-dd" />
+            </LocalizationProvider>
+        );
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        expect(cleanText(input?.value || "")).toEqual("11-01-01");
+    });
     it("shows label", async () => {
         const { getByLabelText } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -198,6 +208,16 @@ describe("DateSelector with time Component", () => {
         const input = document.querySelector("input");
         expect(input).toBeInTheDocument();
         expect(cleanText(input?.value || "").toLocaleLowerCase()).toEqual("01/01/2001 01:01 am");
+    });
+    it("displays the default value with format", async () => {
+        render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DateSelector defaultDate="2011-01-01T00:10:01.001Z" date={undefined as unknown as string} format="yy-MM-dd mm" />
+            </LocalizationProvider>
+        );
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        expect(cleanText(input?.value || "")).toEqual("11-01-01 10");
     });
     it("is disabled", async () => {
         render(

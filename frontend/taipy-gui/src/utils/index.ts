@@ -160,6 +160,9 @@ export const formatWSValue = (
         case "datetime.time":
         case "datetime":
         case "time":
+            if (value == "") {
+                return "";
+            }
             try {
                 return getDateTimeString(value.toString(), dataFormat, formatConf);
             } catch (e) {
@@ -168,6 +171,9 @@ export const formatWSValue = (
             return getDateTimeString(value.toString(), undefined, formatConf);
         case "datetime.date":
         case "date":
+            if (value == "") {
+                return "";
+            }
             try {
                 return getDateTimeString(value.toString(), dataFormat, formatConf, undefined, false);
             } catch (e) {
@@ -178,15 +184,10 @@ export const formatWSValue = (
         case "float":
         case "number":
             if (typeof value === "string") {
-                try {
-                    if (dataType === "float") {
-                        value = parseFloat(value);
-                    } else {
-                        value = parseInt(value, 10);
-                    }
-                } catch (e) {
-                    console.error("number parse exception", e);
-                    value = NaN;
+                if (dataType === "float") {
+                    value = parseFloat(value);
+                } else {
+                    value = parseInt(value, 10);
                 }
             }
             return getNumberString(value, dataFormat, formatConf);
