@@ -14,8 +14,6 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Union
 
-from taipy.logger._taipy_logger import _TaipyLogger
-
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
@@ -45,7 +43,6 @@ class Submission(_Entity, _Labeled):
     _MANAGER_NAME = "submission"
     __SEPARATOR = "_"
     lock = threading.Lock()
-    __logger = _TaipyLogger._get_logger()
 
     def __init__(
         self,
