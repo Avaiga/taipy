@@ -44,9 +44,9 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     defaultThreshold?: number
     testId?: string
     defaultLayout?: string;
-    layout?: Record<string, unknown>;
+    layout?: string;
     defaultStyle?: string;
-    style?: Record<string, unknown>;
+    style?: string;
     width?: string | number;
     height?: string | number;
     showValue?: boolean;
@@ -65,8 +65,8 @@ const Metric = (props: MetricProps) => {
     const threshold = useDynamicProperty(props.threshold, props.defaultThreshold, undefined)
     const delta = useDynamicProperty(props.delta, props.defaultDelta, undefined)
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
-    const baseLayout = useDynamicJsonProperty(JSON.stringify(props.layout), props.defaultLayout || "", emptyLayout);
-    const baseStyle = useDynamicJsonProperty(JSON.stringify(props.style), props.defaultStyle || "", defaultStyle);
+    const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
+    const baseStyle = useDynamicJsonProperty(props.style, props.defaultStyle || "", defaultStyle);
 
     const data = useMemo(() => ([
         {
