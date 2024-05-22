@@ -20,6 +20,12 @@ body:
     validations:
       required: true
   - type: textarea
+    id: expected_behavior
+    attributes:
+      label: "Expected Behavior"
+      description: Please describe how you expected the system to behave when you encountered the issue.
+      placeholder: The description of the behavior that you expected to see when encountering the issue.
+  - type: textarea
     id: reproduction_steps
     attributes:
       label: "Steps to Reproduce Issue"
@@ -31,9 +37,9 @@ body:
   - type: textarea
     id: solution_proposed
     attributes:
-      label: "Expected behavior"
-      description: If you have any ideas of the expected behavior, please provide them in this section.
-      placeholder: The description of the expected behavior of the problem.
+      label: "Solution Proposed"
+      description: Any ideas on how this should be solved
+      placeholder: The potential solution to solve this issue
   - type: textarea
     id: screenshot
     attributes:
