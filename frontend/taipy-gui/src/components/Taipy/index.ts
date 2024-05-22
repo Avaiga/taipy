@@ -29,6 +29,7 @@ import Login from "./Login";
 import Layout from "./Layout";
 import Link from "./Link";
 import MenuCtl from "./MenuCtl";
+import Metric from "./Metric";
 import NavBar from "./NavBar";
 import PageContent from "../pages/PageContent";
 import Pane from "./Pane";
@@ -62,6 +63,7 @@ export const getRegisteredComponents = () => {
             Login: Login,
             Layout: Layout,
             MenuCtl: MenuCtl,
+            Metric: Metric,
             NavBar: NavBar,
             PageContent: PageContent,
             Pane: Pane,

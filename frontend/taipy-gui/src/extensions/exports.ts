@@ -17,6 +17,7 @@ import Login from "../components/Taipy/Login";
 import Router from "../components/Router";
 import Table from "../components/Taipy/Table";
 import TableFilter, { FilterDesc } from "../components/Taipy/TableFilter";
+import Metric from "../components/Taipy/Metric";
 import { useLovListMemo, LoV, LoVElt } from "../components/Taipy/lovUtils";
 import { LovItem } from "../utils/lov";
 import { getUpdateVar } from "../components/Taipy/utils";
@@ -45,6 +46,7 @@ export {
     Router,
     Table,
     TableFilter,
+    Metric,
     TaipyContext as Context,
     createRequestDataUpdateAction,
     createRequestUpdateAction,
