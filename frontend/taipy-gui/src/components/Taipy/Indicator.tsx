@@ -13,13 +13,12 @@
 
 import React, { useCallback, useMemo } from "react";
 import Slider from "@mui/material/Slider";
-import Tooltip from "@mui/material/Tooltip";
 import { sprintf } from "sprintf-js";
 
-import { TaipyBaseProps, TaipyHoverProps } from "./utils";
-import { useClassNames, useDynamicProperty } from "../../utils/hooks";
+import { TaipyBaseProps } from "./utils";
+import { useClassNames } from "../../utils/hooks";
 
-interface IndicatorProps extends TaipyBaseProps, TaipyHoverProps {
+interface IndicatorProps extends TaipyBaseProps {
     min?: number;
     max?: number;
     value?: number;
@@ -43,7 +42,6 @@ const Indicator = (props: IndicatorProps) => {
 
     const horizontalOrientation = props.orientation ? props.orientation.charAt(0).toLowerCase() !== "v" : true;
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
-    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const getLabel = useCallback(() => {
         const dsp = display === undefined ? (defaultDisplay === undefined ? "" : defaultDisplay) : display;
@@ -95,7 +93,6 @@ const Indicator = (props: IndicatorProps) => {
     );
 
     return (
-        <Tooltip title={hover || ""}>
             <Slider
                 id={props.id}
                 className={className}
@@ -109,7 +106,6 @@ const Indicator = (props: IndicatorProps) => {
                 orientation={horizontalOrientation ? undefined : "vertical"}
                 sx={sliderSx}
             ></Slider>
-        </Tooltip>
     );
 };
 
