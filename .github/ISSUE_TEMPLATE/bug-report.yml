@@ -20,12 +20,6 @@ body:
     validations:
       required: true
   - type: textarea
-    id: expected_behavior
-    attributes:
-      label: "Expected Behavior"
-      description: Please describe how you expected the system to behave when you encountered the issue.
-      placeholder: The description of the behavior that you expected to see when encountering the issue.
-  - type: textarea
     id: reproduction_steps
     attributes:
       label: "Steps to Reproduce Issue"
