@@ -21,17 +21,22 @@ import {
     Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useDynamicProperty } from "../../utils/hooks";
 
 interface ProgressBarProps {
     linear?: boolean; //by default - false
     showProgress?: boolean; //by default - false
+    value?: number; //progress value
+    defaultValue?: number; //default progress value
 }
 
 const Progress = (props: ProgressBarProps) => {
-    const { linear, showProgress } = props;
+    const { linear, showProgress, value, defaultValue } = props;
 
     const [linearProgress, setLinearProgress] = useState(false);
     const [progressVisible, setProgressVisible] = useState(false);
+
+    const val = useDynamicProperty(props.value, props.defaultValue, undefined);
 
     useEffect(() => {
         setLinearProgress((progress) => {
@@ -86,9 +91,9 @@ const Progress = (props: ProgressBarProps) => {
 
     if (progressVisible) {
         if (linearProgress) {
-            return <LinearProgressWithLabel value={0} />;
+            return <LinearProgressWithLabel value={val} />;
         } else {
-            return <CircularProgressWithLabel value={0} />;
+            return <CircularProgressWithLabel value={val} />;
         }
     } else {
         if (linearProgress) {
