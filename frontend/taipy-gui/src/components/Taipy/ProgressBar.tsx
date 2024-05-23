@@ -70,21 +70,6 @@ const Progress = (props: ProgressBarProps) => {
         );
     }
 
-    //render circular progress element
-    function CircularWithValueLabel() {
-        const [progress, setProgress] = useState(10);
-
-        useEffect(() => {
-            const timer = setInterval(() => {
-                setProgress((prevProgress) => (prevProgress >= 100 ? 0 : prevProgress + 10));
-            }, 800);
-            return () => {
-                clearInterval(timer);
-            };
-        }, []);
-        return <CircularProgressWithLabel value={progress} />;
-    }
-
     //linear progress element
     function LinearProgressWithLabel(props: LinearProgressProps & { value: number }) {
         return (
@@ -99,31 +84,11 @@ const Progress = (props: ProgressBarProps) => {
         );
     }
 
-    //render linear progress element
-    function LinearWithValueLabel() {
-        const [progress, setProgress] = useState(10);
-
-        useEffect(() => {
-            const timer = setInterval(() => {
-                setProgress((prevProgress) => (prevProgress >= 100 ? 10 : prevProgress + 10));
-            }, 800);
-            return () => {
-                clearInterval(timer);
-            };
-        }, []);
-
-        return (
-            <Box sx={{ width: "100%" }}>
-                <LinearProgressWithLabel value={progress} />
-            </Box>
-        );
-    }
-
     if (progressVisible) {
         if (linearProgress) {
-            return <LinearWithValueLabel />;
+            return <LinearProgressWithLabel value={0} />;
         } else {
-            return <CircularWithValueLabel />;
+            return <CircularProgressWithLabel value={0} />;
         }
     } else {
         if (linearProgress) {

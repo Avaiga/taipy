@@ -50,6 +50,7 @@ class _Factory:
         "number": "value",
         "pane": "open",
         "part": "class_name",
+        "progress": "value",
         "selector": "value",
         "slider": "value",
         "status": "value",
@@ -597,15 +598,16 @@ class _Factory:
             ]
         )
         ._set_propagate(),
-        "ProgressBar": lambda gui, control_type, attrs: _Builder(
+        "Progress": lambda gui, control_type, attrs: _Builder(
             gui=gui,
             control_type=control_type,
-            element_name="ProgressBar",
+            element_name="Progress",
             attributes=attrs,
         )
+        .set_value_and_default(var_type=PropertyType.dynamic_number)
         .set_attributes(
             [
-                ("linear", PropertyType.boolean, False)
+                ("linear", PropertyType.boolean, False),
                 ("showProgress", PropertyType.boolean, False),
             ]
         )

@@ -34,13 +34,13 @@ import NavBar from "./NavBar";
 import PageContent from "../pages/PageContent";
 import Pane from "./Pane";
 import Part from "./Part";
+import Progress from "./ProgressBar";
 import Selector from "./Selector";
 import Slider from "./Slider";
 import StatusList from "./StatusList";
 import Table from "./Table";
 import Toggle from "./Toggle";
 import TreeView from "./TreeView";
-import Progress from "./ProgressBar";
 
 const registeredComponents: Record<string, ComponentType> = {};
 
