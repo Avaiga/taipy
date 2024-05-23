@@ -25,15 +25,13 @@ import { useEffect, useState } from "react";
 interface ProgressBarProps {
     linear?: boolean; //by default - false
     showProgress?: boolean; //by default - false
-    progressBarCount?: number; //by default - 1
 }
 
 const Progress = (props: ProgressBarProps) => {
-    const { linear, showProgress, progressBarCount } = props;
+    const { linear, showProgress } = props;
 
     const [linearProgress, setLinearProgress] = useState(false);
     const [progressVisible, setProgressVisible] = useState(false);
-    const [progressCount, setProgressCount] = useState(1);
 
     useEffect(() => {
         setLinearProgress((progress) => {
@@ -46,12 +44,6 @@ const Progress = (props: ProgressBarProps) => {
             return props.showProgress !== undefined ? props.showProgress : progress_visible;
         });
     }, [props.showProgress, showProgress]);
-
-    useEffect(() => {
-        setProgressCount((progress_count) => {
-            return props.progressBarCount !== undefined ? props.progressBarCount : progress_count;
-        });
-    }, [props.progressBarCount, progressBarCount]);
 
     //circular progress element
     function CircularProgressWithLabel(props: CircularProgressProps & { value: number }) {
@@ -127,19 +119,17 @@ const Progress = (props: ProgressBarProps) => {
         );
     }
 
-    for (let i = 0; i <= progressCount; i++) {
-        if (progressVisible) {
-            if (linearProgress) {
-                return <LinearWithValueLabel />;
-            } else {
-                return <CircularWithValueLabel />;
-            }
+    if (progressVisible) {
+        if (linearProgress) {
+            return <LinearWithValueLabel />;
         } else {
-            if (linearProgress) {
-                return <LinearProgress />;
-            } else {
-                return <CircularProgress />;
-            }
+            return <CircularWithValueLabel />;
+        }
+    } else {
+        if (linearProgress) {
+            return <LinearProgress />;
+        } else {
+            return <CircularProgress />;
         }
     }
 };

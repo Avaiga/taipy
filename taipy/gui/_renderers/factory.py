@@ -597,6 +597,19 @@ class _Factory:
             ]
         )
         ._set_propagate(),
+        "ProgressBar": lambda gui, control_type, attrs: _Builder(
+            gui=gui,
+            control_type=control_type,
+            element_name="ProgressBar",
+            attributes=attrs,
+        )
+        .set_attributes(
+            [
+                ("linear", PropertyType.boolean, False)
+                ("showProgress", PropertyType.boolean, False),
+            ]
+        )
+        ._set_propagate(),
     }
 
     # TODO: process \" in property value
