@@ -178,7 +178,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                                     core_get(submission.id),
                                     {
                                         "submission_status": new_status.name,
-                                        "submittable_entity_id": core_get(submission.entity_id),
+                                        "submittable_entity": core_get(submission.entity_id),
                                         **(event.metadata if event else {}),
                                     },
                                 ],
