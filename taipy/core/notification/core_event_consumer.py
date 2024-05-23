@@ -32,10 +32,18 @@ class CoreEventConsumerBase(threading.Thread):
             print(f"Received event created at : {event.creation_date}")
             pass
 
-    consumer = MyEventConsumer("consumer_1", event_queue)
+    registration_id, registered_queue = Notifier.unregister(
+        entity_type=EventEntityType.CYCLE,
+        entity_id="CYCLE_cycle_1",
+        operation=EventOperation.CREATION
+    )
+
+    consumer = MyEventConsumer("consumer_1", registered_queue)
     consumer.start()
     # ...
     consumer.stop()
+
+    Notifier.unregister(registration_id)
     ```
 
     Subclasses should implement the `process_event` method to define their specific event handling behavior.

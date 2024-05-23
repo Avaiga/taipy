@@ -68,6 +68,16 @@ class Notifier:
         The topic is defined by the combination of the entity type, the entity id,
         the operation and the attribute name.
 
+        Example usage:
+
+        ```python
+        registration_id, registered_queue = Notifier.register(
+            entity_type=EventEntityType.CYCLE,
+            entity_id="CYCLE_cycle_1",
+            operation=EventOperation.CREATION
+        )
+        ```
+
         Parameters:
             entity_type (Optional[EventEntityType^]): If provided, the listener will
                 be notified for all events related to this entity type. Otherwise,
@@ -118,6 +128,18 @@ class Notifier:
     @classmethod
     def unregister(cls, registration_id: str):
         """Unregister a listener.
+
+        Example usage:
+
+        ```python
+        registration_id, registered_queue = Notifier.unregister(
+            entity_type=EventEntityType.CYCLE,
+            entity_id="CYCLE_cycle_1",
+            operation=EventOperation.CREATION
+        )
+
+        Notifier.unregister(registration_id)
+        ```
 
         Parameters:
             registration_id (RegistrationId^): The registration id returned by the `register` method.
