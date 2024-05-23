@@ -24,12 +24,12 @@ export type ScenarioFull = [
     string,     // label
     string[],   // tags
     Array<[string, string]>,    // properties
-    Array<[string, string[], boolean, boolean]>,   // sequences (label, task ids, submittable, editable)
+    Array<[string, string[], string, boolean]>,   // sequences (label, task ids, notSubmittableReason, editable)
     Record<string, string>, // tasks (id: label)
     string[],   // authorized_tags
     boolean,    // deletable
     boolean,    // promotable
-    boolean | string,    // submittable
+    string,     // notSubmittableReason
     boolean,    // readable
     boolean     // editable
 ];

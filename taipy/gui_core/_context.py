@@ -531,7 +531,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 _GuiCoreContext.__assign_var(
                     state,
                     error_var,
-                    f"{'Sequence' if sequence else 'Scenario'} {sequence or scenario_id} is not submittable. "
+                    f"{'Sequence' if sequence else 'Scenario'} {sequence or scenario_id} is not submittable: "
                     + reason.reasons,
                 )
                 return

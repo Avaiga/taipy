@@ -85,15 +85,23 @@ const actionsByType = {
 
 const gridSx = { p: "0.5em", minWidth: "36rem" };
 const autocompleteSx = { "& .MuiInputBase-root": { padding: "0" } };
+const badgeSx = {
+    "& .MuiBadge-badge": {
+        height: "10px",
+        minWidth: "10px",
+        width: "10px",
+        borderRadius: "5px",
+    },
+};
 
 const getActionsByType = (colType?: string) =>
     (colType && colType in actionsByType && actionsByType[colType]) ||
-    (colType == "any" ? { ...actionsByType.string, ...actionsByType.number } : actionsByType.string);
+    (colType === "any" ? { ...actionsByType.string, ...actionsByType.number } : actionsByType.string);
 
 const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?: string, val?: string) => {
     if (colId && act && val !== undefined) {
         const colType = getTypeFromDf(columns[colId].type);
-        if (!val && (colType == "date" || colType == "number" || colType == "boolean")) {
+        if (!val && (colType === "date" || colType === "number" || colType === "boolean")) {
             return;
         }
         try {
@@ -101,11 +109,11 @@ const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?
                 col: columns[colId].dfid,
                 action: act,
                 value:
-                    colType == "number"
+                    colType === "number"
                         ? parseFloat(val)
-                        : colType == "boolean"
-                        ? val == "1"
-                        : colType == "date"
+                        : colType === "boolean"
+                        ? val === "1"
+                        : colType === "date"
                         ? getDateTime(val)
                         : val,
             } as FilterDesc;
@@ -233,7 +241,7 @@ const FilterRow = (props: FilterRowProps) => {
                 {colType == "number" ? (
                     <TextField
                         type="number"
-                        value={typeof val == "number" ? val : val || ""}
+                        value={typeof val === "number" ? val : val || ""}
                         onChange={onValueChange}
                         label="Number"
                         margin="dense"
@@ -365,18 +373,7 @@ const TableFilter = (props: TableFilterProps) => {
                     sx={iconInRowSx}
                     className={getSuffixedClassNames(className, "-filter-icon")}
                 >
-                    <Badge
-                        badgeContent={filters.length}
-                        color="primary"
-                        sx={{
-                            "& .MuiBadge-badge": {
-                                height: "10px",
-                                minWidth: "10px",
-                                width: "10px",
-                                borderRadius: "5px",
-                            },
-                        }}
-                    >
+                    <Badge badgeContent={filters.length} color="primary" sx={badgeSx}>
                         <FilterListIcon fontSize="inherit" />
                     </Badge>
                 </IconButton>

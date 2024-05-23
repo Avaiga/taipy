@@ -83,4 +83,4 @@ class TestGuiCoreContext_is_submittable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert "is not submittable." in str(assign.call_args.args[1])
+                assert "is not submittable" in str(assign.call_args.args[1])

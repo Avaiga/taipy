@@ -34,11 +34,11 @@ from taipy.core.config import Config
 from taipy.core.data._tabular_datanode_mixin import _TabularDataNodeMixin
 from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
-from taipy.gui.utils import _is_boolean, _is_boolean_true, _TaipyBase
+from taipy.gui.utils import _is_boolean, _is_true, _TaipyBase
 
 
 # prevent gui from trying to push scenario instances to the front-end
-class _GCDoNotUpdate(_DoNotUpdate):
+class _GuiCoreDoNotUpdate(_DoNotUpdate):
     def __repr__(self):
         return self.get_label() if hasattr(self, "get_label") else super().__repr__()
 
@@ -79,7 +79,7 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                             (
                                 s.get_simple_label(),
                                 [t.id for t in s.tasks.values()] if hasattr(s, "tasks") else [],
-                                True if (reason := is_submittable(s)) else reason.reasons,
+                                "" if (reason := is_submittable(s)) else f"Sequence not submittable: {reason.reasons}",
                                 is_editable(s),
                             )
                             for s in scenario.sequences.values()
@@ -92,7 +92,7 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                         list(scenario.properties.get("authorized_tags", [])) if scenario.properties else [],
                         is_deletable(scenario),
                         is_promotable(scenario),
-                        True if (reason := is_submittable(scenario)) else reason.reasons,
+                        "" if (reason := is_submittable(scenario)) else f"Scenario not submittable: {reason.reasons}",
                         is_readable(scenario),
                         is_editable(scenario),
                     ]
@@ -265,27 +265,28 @@ def _get_datanode_property(attr: str):
 
 class _GuiCoreScenarioProperties(_TaipyBase):
     __SC_TYPES = {
-        "config id": "string",
-        "label": "string",
-        "creation date": "date",
-        "cycle label": "string",
-        "cycle start": "date",
-        "cycle end": "date",
-        "primary": "boolean",
-        "tags": "string",
+        "Config id": "string",
+        "Label": "string",
+        "Creation date": "date",
+        "Cycle label": "string",
+        "Cycle start": "date",
+        "Cycle end": "date",
+        "Primary": "boolean",
+        "Tags": "string",
     }
-    __SC_NAMES = {
-        "config id": "config_id",
-        "creation date": "creation_date",
-        "label": "name",
-        "cycle label": "cycle.name",
-        "cycle start": "cycle.start",
-        "cycle end": "cycle.end",
-        "primary": "is_primary",
+    __SC_LABELS = {
+        "Config id": "config_id",
+        "Creation date": "creation_date",
+        "Label": "name",
+        "Cycle label": "cycle.name",
+        "Cycle start": "cycle.start",
+        "Cycle end": "cycle.end",
+        "Primary": "is_primary",
+        "Tags": "tags",
     }
     DEFAULT = list(__SC_TYPES.keys())
-    __DN_TYPES = {"up to date": "boolean", "valid": "boolean", "last edit date": "date"}
-    __DN_NAMES = {"up to date": "is_up_to_date", "is_valid": "valid", "last edit date": "last_edit_date"}
+    __DN_TYPES = {"Up to date": "boolean", "Valid": "boolean", "Last edit date": "date"}
+    __DN_LABELS = {"Up to date": "is_up_to_date", "Valid": "is_valid", "Last edit date": "last_edit_date"}
     __ENUMS = None
 
     @staticmethod
@@ -301,13 +302,13 @@ class _GuiCoreScenarioProperties(_TaipyBase):
     @staticmethod
     def get_col_name(attr: str):
         if prop := _get_datanode_property(attr):
-            return f'{attr.split(".")[0]}.{_GuiCoreScenarioProperties.__DN_NAMES.get(prop, prop)}'
-        return _GuiCoreScenarioProperties.__SC_NAMES.get(attr, attr)
+            return f'{attr.split(".")[0]}.{_GuiCoreScenarioProperties.__DN_LABELS.get(prop, prop)}'
+        return _GuiCoreScenarioProperties.__SC_LABELS.get(attr, attr)
 
     def get(self):
         data = super().get()
         if _is_boolean(data):
-            if _is_boolean_true(data):
+            if _is_true(data):
                 data = _GuiCoreScenarioProperties.DEFAULT
             else:
                 return None
@@ -322,8 +323,8 @@ class _GuiCoreScenarioProperties(_TaipyBase):
                     flist.append(f)
             if _GuiCoreScenarioProperties.__ENUMS is None:
                 _GuiCoreScenarioProperties.__ENUMS = {
-                    "config id": [c for c in Config.scenarios.keys() if c != "default"],
-                    "tags": [t for s in Config.scenarios.values() for t in s.properties.get("authorized_tags", [])],
+                    "Config id": [c for c in Config.scenarios.keys() if c != "default"],
+                    "Tags": [t for s in Config.scenarios.values() for t in s.properties.get("authorized_tags", [])],
                 }
             return json.dumps(
                 [

@@ -18,20 +18,20 @@ from taipy.gui.extension import Element, ElementLibrary, ElementProperty, Proper
 
 from ..version import _get_version
 from ._adapters import (
-    _GCDoNotUpdate,
     _GuiCoreDatanodeAdapter,
+    _GuiCoreDoNotUpdate,
     _GuiCoreScenarioAdapter,
     _GuiCoreScenarioDagAdapter,
     _GuiCoreScenarioProperties,
 )
 from ._context import _GuiCoreContext
 
-Scenario.__bases__ += (_GCDoNotUpdate,)
-Sequence.__bases__ += (_GCDoNotUpdate,)
-DataNode.__bases__ += (_GCDoNotUpdate,)
-Cycle.__bases__ += (_GCDoNotUpdate,)
-Job.__bases__ += (_GCDoNotUpdate,)
-Task.__bases__ += (_GCDoNotUpdate,)
+Scenario.__bases__ += (_GuiCoreDoNotUpdate,)
+Sequence.__bases__ += (_GuiCoreDoNotUpdate,)
+DataNode.__bases__ += (_GuiCoreDoNotUpdate,)
+Cycle.__bases__ += (_GuiCoreDoNotUpdate,)
+Job.__bases__ += (_GuiCoreDoNotUpdate,)
+Task.__bases__ += (_GuiCoreDoNotUpdate,)
 
 
 class _GuiCore(ElementLibrary):
