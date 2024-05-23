@@ -60,7 +60,13 @@ from taipy.gui import Gui, State
 from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
 
-from ._adapters import _attr_type, _EntityType, _GuiCoreDatanodeAdapter, _invoke_action
+from ._adapters import (
+    _EntityType,
+    _get_datanode_property,
+    _GuiCoreDatanodeAdapter,
+    _GuiCoreScenarioProperties,
+    _invoke_action,
+)
 
 
 class _GuiCoreContext(CoreEventConsumerBase):
@@ -243,8 +249,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
             )
         return None
 
-    def filter_scenarios(self, cycle: t.List, col: str, action: str, val: t.Any):
-        cycle[2] = [e for e in cycle[2] if _invoke_action(e, col, action, val)]
+    def filter_scenarios(self, cycle: t.List, col: str, col_type: str, is_dn: bool, action: str, val: t.Any):
+        cycle[2] = [e for e in cycle[2] if _invoke_action(e, col, col_type, is_dn, action, val)]
         return cycle
 
     def adapt_scenarios(self, cycle: t.List):
@@ -276,18 +282,24 @@ class _GuiCoreContext(CoreEventConsumerBase):
             filtered_list = list(adapted_list)
             for fd in filters:
                 col = fd.get("col", "")
-                col_type = _attr_type(col)
+                is_datanode_prop = _get_datanode_property(col) is not None
+                col = _GuiCoreScenarioProperties.get_col_name(col)
+                col_type = _GuiCoreScenarioProperties.get_type(col)
                 val = fd.get("value")
                 action = fd.get("action", "")
                 if isinstance(val, str) and col_type == "date":
                     val = datetime.fromisoformat(val[:-1])
                 # level 1 filtering
                 filtered_list = [
-                    e for e in filtered_list if not isinstance(e, Scenario) or _invoke_action(e, col, action, val)
+                    e
+                    for e in filtered_list
+                    if not isinstance(e, Scenario) or _invoke_action(e, col, col_type, is_datanode_prop, action, val)
                 ]
                 # level 2 filtering
                 filtered_list = [
-                    self.filter_scenarios(e, col, action, val) if not isinstance(e, Scenario) else e
+                    self.filter_scenarios(e, col, col_type, is_datanode_prop, action, val)
+                    if not isinstance(e, Scenario)
+                    else e
                     for e in filtered_list
                 ]
             # remove empty cycles
@@ -515,11 +527,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if sequence := data.get("sequence"):
                 entity = entity.sequences.get(sequence)
 
-            if not is_submittable(entity):
+            if not (reason := is_submittable(entity)):
                 _GuiCoreContext.__assign_var(
                     state,
                     error_var,
-                    f"{'Sequence' if sequence else 'Scenario'} {sequence or scenario_id} is not submittable.",
+                    f"{'Sequence' if sequence else 'Scenario'} {sequence or scenario_id} is not submittable: "
+                    + reason.reasons,
                 )
                 return
             if entity:

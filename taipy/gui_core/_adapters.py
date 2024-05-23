@@ -9,10 +9,10 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import inspect
 import json
 import math
 import typing as t
+from datetime import date, datetime
 from enum import Enum
 from numbers import Number
 from operator import attrgetter, contains, eq, ge, gt, le, lt, ne
@@ -22,10 +22,7 @@ import pandas as pd
 from taipy.core import (
     Cycle,
     DataNode,
-    Job,
     Scenario,
-    Sequence,
-    Task,
     is_deletable,
     is_editable,
     is_promotable,
@@ -33,24 +30,17 @@ from taipy.core import (
     is_submittable,
 )
 from taipy.core import get as core_get
+from taipy.core.config import Config
 from taipy.core.data._tabular_datanode_mixin import _TabularDataNodeMixin
 from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
-from taipy.gui.utils import _TaipyBase
+from taipy.gui.utils import _is_boolean, _is_true, _TaipyBase
 
 
 # prevent gui from trying to push scenario instances to the front-end
-class _GCDoNotUpdate(_DoNotUpdate):
+class _GuiCoreDoNotUpdate(_DoNotUpdate):
     def __repr__(self):
         return self.get_label() if hasattr(self, "get_label") else super().__repr__()
-
-
-Scenario.__bases__ += (_GCDoNotUpdate,)
-Sequence.__bases__ += (_GCDoNotUpdate,)
-DataNode.__bases__ += (_GCDoNotUpdate,)
-Cycle.__bases__ += (_GCDoNotUpdate,)
-Job.__bases__ += (_GCDoNotUpdate,)
-Task.__bases__ += (_GCDoNotUpdate,)
 
 
 class _EntityType(Enum):
@@ -89,7 +79,7 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                             (
                                 s.get_simple_label(),
                                 [t.id for t in s.tasks.values()] if hasattr(s, "tasks") else [],
-                                is_submittable(s),
+                                "" if (reason := is_submittable(s)) else f"Sequence not submittable: {reason.reasons}",
                                 is_editable(s),
                             )
                             for s in scenario.sequences.values()
@@ -102,7 +92,7 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                         list(scenario.properties.get("authorized_tags", [])) if scenario.properties else [],
                         is_deletable(scenario),
                         is_promotable(scenario),
-                        is_submittable(scenario),
+                        "" if (reason := is_submittable(scenario)) else f"Scenario not submittable: {reason.reasons}",
                         is_readable(scenario),
                         is_editable(scenario),
                     ]
@@ -241,14 +231,6 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
         return _TaipyBase._HOLDER_PREFIX + "Dn"
 
 
-def _attr_filter(attrVal: t.Any):
-    return not inspect.isroutine(attrVal)
-
-
-def _attr_type(attr: str):
-    return "date" if "date" in attr else "boolean" if attr.startswith("is_") else "string"
-
-
 _operators: t.Dict[str, t.Callable] = {
     "==": eq,
     "!=": ne,
@@ -260,37 +242,95 @@ _operators: t.Dict[str, t.Callable] = {
 }
 
 
-def _invoke_action(ent: t.Any, col: str, action: str, val: t.Any) -> bool:
+def _invoke_action(ent: t.Any, col: str, col_type: str, is_dn: bool, action: str, val: t.Any) -> bool:
     try:
+        if col_type == "any":
+            # when a property is not found, return True only if action is not equals
+            entity = getattr(ent, col.split(".")[0]) if is_dn else ent
+            if not hasattr(entity, "properties") or not entity.properties.get(col):
+                return action == "!="
         if op := _operators.get(action):
-            return op(attrgetter(col)(ent), val)
+            cur_val = attrgetter(col)(ent)
+            return op(cur_val.isoformat() if isinstance(cur_val, (datetime, date)) else cur_val, val)
     except Exception as e:
         _warn(f"Error filtering with {col} {action} {val} on {ent}.", e)
     return True
 
 
+def _get_datanode_property(attr: str):
+    if (parts := attr.split(".")) and len(parts) > 1:
+        return parts[1]
+    return None
+
+
 class _GuiCoreScenarioProperties(_TaipyBase):
-    __SCENARIO_ATTRIBUTES = [a[0] for a in inspect.getmembers(Scenario, _attr_filter) if not a[0].startswith("_")]
-    __DATANODE_ATTRIBUTES = [a[0] for a in inspect.getmembers(DataNode, _attr_filter) if not a[0].startswith("_")]
+    __SC_TYPES = {
+        "Config id": "string",
+        "Label": "string",
+        "Creation date": "date",
+        "Cycle label": "string",
+        "Cycle start": "date",
+        "Cycle end": "date",
+        "Primary": "boolean",
+        "Tags": "string",
+    }
+    __SC_LABELS = {
+        "Config id": "config_id",
+        "Creation date": "creation_date",
+        "Label": "name",
+        "Cycle label": "cycle.name",
+        "Cycle start": "cycle.start",
+        "Cycle end": "cycle.end",
+        "Primary": "is_primary",
+        "Tags": "tags",
+    }
+    DEFAULT = list(__SC_TYPES.keys())
+    __DN_TYPES = {"Up to date": "boolean", "Valid": "boolean", "Last edit date": "date"}
+    __DN_LABELS = {"Up to date": "is_up_to_date", "Valid": "is_valid", "Last edit date": "last_edit_date"}
+    __ENUMS = None
 
     @staticmethod
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "ScP"
 
+    @staticmethod
+    def get_type(attr: str):
+        if prop := _get_datanode_property(attr):
+            return _GuiCoreScenarioProperties.__DN_TYPES.get(prop, "any")
+        return _GuiCoreScenarioProperties.__SC_TYPES.get(attr, "any")
+
+    @staticmethod
+    def get_col_name(attr: str):
+        if prop := _get_datanode_property(attr):
+            return f'{attr.split(".")[0]}.{_GuiCoreScenarioProperties.__DN_LABELS.get(prop, prop)}'
+        return _GuiCoreScenarioProperties.__SC_LABELS.get(attr, attr)
+
     def get(self):
         data = super().get()
+        if _is_boolean(data):
+            if _is_true(data):
+                data = _GuiCoreScenarioProperties.DEFAULT
+            else:
+                return None
         if isinstance(data, str):
             data = data.split(";")
         if isinstance(data, (list, tuple)):
+            flist = []
+            for f in data:
+                if f == "*":
+                    flist.extend(_GuiCoreScenarioProperties.DEFAULT)
+                else:
+                    flist.append(f)
+            if _GuiCoreScenarioProperties.__ENUMS is None:
+                _GuiCoreScenarioProperties.__ENUMS = {
+                    "Config id": [c for c in Config.scenarios.keys() if c != "default"],
+                    "Tags": [t for s in Config.scenarios.values() for t in s.properties.get("authorized_tags", [])],
+                }
             return json.dumps(
                 [
-                    (attr, _attr_type(attr))
-                    for attr in data
-                    if attr
-                    and isinstance(attr, str)
-                    and (parts := attr.split("."))
-                    and (len(parts) > 1 and parts[1] in _GuiCoreScenarioProperties.__DATANODE_ATTRIBUTES)
-                    or attr in _GuiCoreScenarioProperties.__SCENARIO_ATTRIBUTES
+                    (attr, _GuiCoreScenarioProperties.get_type(attr), _GuiCoreScenarioProperties.__ENUMS.get(attr))
+                    for attr in flist
+                    if attr and isinstance(attr, str)
                 ]
             )
         return None

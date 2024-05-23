@@ -13,7 +13,7 @@ import re
 import typing as t
 
 from .._warnings import _warn
-from .boolean import _is_boolean, _is_boolean_true
+from .boolean import _is_boolean, _is_true
 from .clientvarname import _to_camel_case
 
 
@@ -49,7 +49,7 @@ def _enhance_columns(  # noqa: C901
     _update_col_desc_from_indexed(attributes, columns, "width", elt_name)
     filters = _get_name_indexed_property(attributes, "filter")
     for k, v in filters.items():
-        if _is_boolean_true(v):
+        if _is_true(v):
             if col_desc := _get_column_desc(columns, k):
                 col_desc["filter"] = True
             else:
@@ -58,12 +58,12 @@ def _enhance_columns(  # noqa: C901
     for k, v in editables.items():
         if _is_boolean(v):
             if col_desc := _get_column_desc(columns, k):
-                col_desc["notEditable"] = not _is_boolean_true(v)
+                col_desc["notEditable"] = not _is_true(v)
             else:
                 _warn(f"{elt_name}: editable[{k}] is not in the list of displayed columns.")
     group_by = _get_name_indexed_property(attributes, "group_by")
     for k, v in group_by.items():
-        if _is_boolean_true(v):
+        if _is_true(v):
             if col_desc := _get_column_desc(columns, k):
                 col_desc["groupBy"] = True
             else:

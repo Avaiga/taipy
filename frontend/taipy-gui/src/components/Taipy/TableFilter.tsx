@@ -11,7 +11,8 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { ChangeEvent, SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Autocomplete from "@mui/material/Autocomplete";
 import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -82,30 +83,39 @@ const actionsByType = {
     },
 } as Record<string, Record<string, string>>;
 
-const gridSx = { p: "0.5em" };
+const gridSx = { p: "0.5em", minWidth: "36rem" };
+const autocompleteSx = { "& .MuiInputBase-root": { padding: "0" } };
+const badgeSx = {
+    "& .MuiBadge-badge": {
+        height: "10px",
+        minWidth: "10px",
+        width: "10px",
+        borderRadius: "5px",
+    },
+};
 
 const getActionsByType = (colType?: string) =>
-    (colType && colType in actionsByType && actionsByType[colType]) || actionsByType["string"];
+    (colType && colType in actionsByType && actionsByType[colType]) ||
+    (colType === "any" ? { ...actionsByType.string, ...actionsByType.number } : actionsByType.string);
 
 const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?: string, val?: string) => {
     if (colId && act && val !== undefined) {
         const colType = getTypeFromDf(columns[colId].type);
-        if (!val && (colType == "date" || colType == "number" || colType == "boolean")) {
+        if (!val && (colType === "date" || colType === "number" || colType === "boolean")) {
             return;
         }
         try {
-            const typedVal =
-                colType == "number"
-                    ? parseFloat(val)
-                    : colType == "boolean"
-                    ? val == "1"
-                    : colType == "date"
-                    ? getDateTime(val)
-                    : val;
             return {
                 col: columns[colId].dfid,
                 action: act,
-                value: typedVal,
+                value:
+                    colType === "number"
+                        ? parseFloat(val)
+                        : colType === "boolean"
+                        ? val === "1"
+                        : colType === "date"
+                        ? getDateTime(val)
+                        : val,
             } as FilterDesc;
         } catch (e) {
             console.info("could not parse value ", val, e);
@@ -140,6 +150,13 @@ const FilterRow = (props: FilterRowProps) => {
         (e: ChangeEvent<HTMLInputElement>) => {
             setVal(e.target.value);
             setEnableCheck(!!getFilterDesc(columns, colId, action, e.target.value));
+        },
+        [columns, colId, action]
+    );
+    const onValueAutoComp = useCallback(
+        (e: SyntheticEvent, value: string | null) => {
+            setVal(value || "");
+            setEnableCheck(!!getFilterDesc(columns, colId, action, value || ""));
         },
         [columns, colId, action]
     );
@@ -190,6 +207,7 @@ const FilterRow = (props: FilterRowProps) => {
 
     const colType = getTypeFromDf(colId in columns ? columns[colId].type : "");
     const colFormat = colId in columns && columns[colId].format ? columns[colId].format : defaultDateFormat;
+    const colLov = colId in columns && columns[colId].lov ? columns[colId].lov : undefined;
 
     return (
         <Grid container item xs={12} alignItems="center">
@@ -223,7 +241,7 @@ const FilterRow = (props: FilterRowProps) => {
                 {colType == "number" ? (
                     <TextField
                         type="number"
-                        value={typeof val == "number" ? val : val || ""}
+                        value={typeof val === "number" ? val : val || ""}
                         onChange={onValueChange}
                         label="Number"
                         margin="dense"
@@ -246,6 +264,23 @@ const FilterRow = (props: FilterRowProps) => {
                         onChange={onDateChange}
                         format={colFormat}
                         margin="dense"
+                    />
+                ) : colLov ? (
+                    <Autocomplete
+                        freeSolo
+                        disableClearable
+                        options={colLov}
+                        value={val || ""}
+                        onChange={onValueAutoComp}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                className="MuiAutocomplete-inputRootDense"
+                                label={`${val ? "" : "Empty "}String`}
+                                margin="dense"
+                            />
+                        )}
+                        sx={autocompleteSx}
                     />
                 ) : (
                     <TextField
@@ -285,7 +320,7 @@ const TableFilter = (props: TableFilterProps) => {
     const filterRef = useRef<HTMLButtonElement | null>(null);
     const [filters, setFilters] = useState<Array<FilterDesc>>([]);
 
-    const colsOrder = useMemo(()=> {
+    const colsOrder = useMemo(() => {
         if (props.colsOrder) {
             return props.colsOrder;
         }
@@ -338,18 +373,7 @@ const TableFilter = (props: TableFilterProps) => {
                     sx={iconInRowSx}
                     className={getSuffixedClassNames(className, "-filter-icon")}
                 >
-                    <Badge
-                        badgeContent={filters.length}
-                        color="primary"
-                        sx={{
-                            "& .MuiBadge-badge": {
-                                height: "10px",
-                                minWidth: "10px",
-                                width: "10px",
-                                borderRadius: "5px",
-                            },
-                        }}
-                    >
+                    <Badge badgeContent={filters.length} color="primary" sx={badgeSx}>
                         <FilterListIcon fontSize="inherit" />
                     </Badge>
                 </IconButton>

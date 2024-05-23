@@ -31,7 +31,7 @@ from ..utils import (
     _getscopeattr,
     _getscopeattr_drill,
     _is_boolean,
-    _is_boolean_true,
+    _is_true,
     _MapDict,
     _to_camel_case,
 )
@@ -206,7 +206,7 @@ class _Builder:
 
     def __get_boolean_attribute(self, name: str, default_value=False):
         boolattr = self.__attributes.get(name, default_value)
-        return _is_boolean_true(boolattr) if isinstance(boolattr, str) else bool(boolattr)
+        return _is_true(boolattr) if isinstance(boolattr, str) else bool(boolattr)
 
     def set_boolean_attribute(self, name: str, value: bool):
         """
@@ -481,7 +481,7 @@ class _Builder:
     def __build_rebuild_fn(self, fn_name: str, attribute_names: t.Iterable[str]):
         rebuild = self.__attributes.get("rebuild", False)
         rebuild_hash = self.__hashes.get("rebuild")
-        if rebuild_hash or _is_boolean_true(rebuild):
+        if rebuild_hash or _is_true(rebuild):
             attributes, hashes = self.__filter_attributes_hashes(self.__filter_attribute_names(attribute_names))
             rebuild_name = f"bool({self.__gui._get_real_var_name(rebuild_hash)[0]})" if rebuild_hash else "None"
             try:
@@ -825,7 +825,7 @@ class _Builder:
 
     def _set_labels(self, var_name: str = "labels"):
         if value := self.__attributes.get(var_name):
-            if _is_boolean_true(value):
+            if _is_true(value):
                 return self.__set_react_attribute(_to_camel_case(var_name), True)
             elif isinstance(value, (dict, _MapDict)):
                 return self.set_dict_attribute(var_name)

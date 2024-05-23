@@ -104,7 +104,7 @@ interface SequencesRowProps {
     onFocus: (e: MouseEvent<HTMLElement>) => void;
     focusName: string;
     setFocusName: (name: string) => void;
-    submittable: boolean;
+    notSubmittableReason: string;
     editable: boolean;
     isValid: (sLabel: string, label: string) => boolean;
 }
@@ -118,7 +118,7 @@ const tagsAutocompleteSx = {
     maxWidth: "none",
 };
 
-type SequenceFull = [string, string[], boolean, boolean];
+type SequenceFull = [string, string[], string, boolean];
 // enum SeFProps {
 //     label,
 //     tasks,
@@ -139,7 +139,7 @@ const SequenceRow = ({
     onFocus,
     focusName,
     setFocusName,
-    submittable,
+    notSubmittableReason,
     editable,
     isValid,
 }: SequencesRowProps) => {
@@ -197,7 +197,7 @@ const SequenceRow = ({
 
     const name = `sequence${number}`;
     const disabled = !enableScenarioFields || !active;
-    const disabledSubmit = disabled || !submittable;
+    const disabledSubmit = disabled || !!notSubmittableReason;
 
     return (
         <Grid item xs={12} container justifyContent="space-between" data-focus={name} onClick={onFocus} sx={hoverSx}>
@@ -285,7 +285,9 @@ const SequenceRow = ({
                         {pLabel && submit ? (
                             <Tooltip
                                 title={
-                                    disabledSubmit ? `Cannot submit Sequence '${label}'` : `Submit Sequence '${label}'`
+                                    disabledSubmit
+                                        ? notSubmittableReason || `Cannot submit Sequence '${label}'`
+                                        : `Submit Sequence '${label}'`
                                 }
                             >
                                 <span>
@@ -323,7 +325,7 @@ const invalidScenario: ScenarioFull = [
     [],
     false,
     false,
-    false,
+    "invalid",
     false,
     false,
 ];
@@ -380,7 +382,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         scAuthorizedTags,
         scDeletable,
         scPromotable,
-        scSubmittable,
+        scNotSubmittableReason,
         scReadable,
         scEditable,
     ] = scenario || invalidScenario;
@@ -430,7 +432,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         id: scId,
                         sequence: label,
                         on_submission_change: props.onSubmissionChange,
-                        error_id: getUpdateVar(updateScVar, "error_id")
+                        error_id: getUpdateVar(updateScVar, "error_id"),
                     })
                 );
         },
@@ -445,7 +447,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     createSendActionNameAction(id, module, props.onSubmit, {
                         id: scId,
                         on_submission_change: props.onSubmissionChange,
-                        error_id: getUpdateVar(updateScVar, "error_id")
+                        error_id: getUpdateVar(updateScVar, "error_id"),
                     })
                 );
             }
@@ -571,7 +573,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         [sequences]
     );
 
-    const addSequenceHandler = useCallback(() => setSequences((seq) => [...seq, ["", [], true, true]]), []);
+    const addSequenceHandler = useCallback(() => setSequences((seq) => [...seq, ["", [], "", true]]), []);
 
     // on scenario change
     useEffect(() => {
@@ -590,7 +592,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         }
     }, [props.coreChanged, props.updateVarName, id, module, dispatch, scId]);
 
-    const disabled = !valid || !active || !scSubmittable;
+    const disabled = !valid || !active || !!scNotSubmittableReason;
 
     return (
         <>
@@ -621,7 +623,13 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             </Grid>
                             <Grid item>
                                 {showSubmit ? (
-                                    <Tooltip title={disabled ? "Cannot submit Scenario" : "Submit Scenario"}>
+                                    <Tooltip
+                                        title={
+                                            disabled
+                                                ? scNotSubmittableReason || "Cannot submit Scenario"
+                                                : "Submit Scenario"
+                                        }
+                                    >
                                         <span>
                                             <Button
                                                 onClick={submitScenario}
@@ -840,7 +848,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     </Grid>
 
                                     {sequences.map((item, index) => {
-                                        const [label, taskIds, submittable, editable] = item;
+                                        const [label, taskIds, notSubmittableReason, editable] = item;
                                         return (
                                             <SequenceRow
                                                 active={active}
@@ -856,7 +864,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                 onFocus={onFocus}
                                                 focusName={focusName}
                                                 setFocusName={setFocusName}
-                                                submittable={submittable}
+                                                notSubmittableReason={notSubmittableReason}
                                                 editable={editable}
                                                 isValid={isValidSequence}
                                             />
