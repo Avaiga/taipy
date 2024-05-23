@@ -99,7 +99,7 @@ interface ScenarioSelectorProps {
     showPins?: boolean;
     showDialog?: boolean;
     multiple?: boolean;
-    filterBy?: string;
+    filter?: string;
     updateScVars?: string;
 }
 
@@ -449,17 +449,17 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
     const colFilters = useMemo(() => {
         try {
-            const res = props.filterBy ? (JSON.parse(props.filterBy) as Array<[string, string]>) : undefined;
+            const res = props.filter ? (JSON.parse(props.filter) as Array<[string, string, string[]]>) : undefined;
             return Array.isArray(res)
-                ? res.reduce((pv, [name, coltype], idx) => {
-                      pv[name] = { dfid: name, type: coltype, index: idx, filter: true };
+                ? res.reduce((pv, [name, coltype, lov], idx) => {
+                      pv[name] = { dfid: name, type: coltype, index: idx, filter: true, lov: lov, freeLov: !!lov };
                       return pv;
                   }, {} as Record<string, ColumnDesc>)
                 : undefined;
         } catch (e) {
             return undefined;
         }
-    }, [props.filterBy]);
+    }, [props.filter]);
     const [filters, setFilters] = useState<FilterDesc[]>([]);
 
     const applyFilters = useCallback(

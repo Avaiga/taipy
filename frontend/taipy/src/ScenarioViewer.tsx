@@ -104,7 +104,7 @@ interface SequencesRowProps {
     onFocus: (e: MouseEvent<HTMLElement>) => void;
     focusName: string;
     setFocusName: (name: string) => void;
-    submittable: boolean;
+    submittable: boolean | string;
     editable: boolean;
     isValid: (sLabel: string, label: string) => boolean;
 }
@@ -118,7 +118,7 @@ const tagsAutocompleteSx = {
     maxWidth: "none",
 };
 
-type SequenceFull = [string, string[], boolean, boolean];
+type SequenceFull = [string, string[], boolean | string, boolean];
 // enum SeFProps {
 //     label,
 //     tasks,
@@ -197,7 +197,7 @@ const SequenceRow = ({
 
     const name = `sequence${number}`;
     const disabled = !enableScenarioFields || !active;
-    const disabledSubmit = disabled || !submittable;
+    const disabledSubmit = disabled || typeof submittable === "string";
 
     return (
         <Grid item xs={12} container justifyContent="space-between" data-focus={name} onClick={onFocus} sx={hoverSx}>
@@ -285,7 +285,11 @@ const SequenceRow = ({
                         {pLabel && submit ? (
                             <Tooltip
                                 title={
-                                    disabledSubmit ? `Cannot submit Sequence '${label}'` : `Submit Sequence '${label}'`
+                                    disabledSubmit
+                                        ? typeof submittable === "string"
+                                            ? submittable
+                                            : `Cannot submit Sequence '${label}'`
+                                        : `Submit Sequence '${label}'`
                                 }
                             >
                                 <span>
@@ -430,7 +434,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         id: scId,
                         sequence: label,
                         on_submission_change: props.onSubmissionChange,
-                        error_id: getUpdateVar(updateScVar, "error_id")
+                        error_id: getUpdateVar(updateScVar, "error_id"),
                     })
                 );
         },
@@ -445,7 +449,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     createSendActionNameAction(id, module, props.onSubmit, {
                         id: scId,
                         on_submission_change: props.onSubmissionChange,
-                        error_id: getUpdateVar(updateScVar, "error_id")
+                        error_id: getUpdateVar(updateScVar, "error_id"),
                     })
                 );
             }
@@ -590,7 +594,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         }
     }, [props.coreChanged, props.updateVarName, id, module, dispatch, scId]);
 
-    const disabled = !valid || !active || !scSubmittable;
+    const disabled = !valid || !active || typeof scSubmittable == "string";
 
     return (
         <>
@@ -621,7 +625,15 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             </Grid>
                             <Grid item>
                                 {showSubmit ? (
-                                    <Tooltip title={disabled ? "Cannot submit Scenario" : "Submit Scenario"}>
+                                    <Tooltip
+                                        title={
+                                            disabled
+                                                ? typeof scSubmittable === "string"
+                                                    ? scSubmittable
+                                                    : "Cannot submit Scenario"
+                                                : "Submit Scenario"
+                                        }
+                                    >
                                         <span>
                                             <Button
                                                 onClick={submitScenario}

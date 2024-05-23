@@ -99,7 +99,7 @@
                         "doc": "TODO: If True, the user can select multiple scenarios."
                     },
                     {
-                        "name": "filter_by",
+                        "name": "filter",
                         "type": "str|list[str]",
                         "doc": "TODO: a list of scenario attributes to filter on."
                     }
