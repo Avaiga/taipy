@@ -91,9 +91,9 @@ const Progress = (props: ProgressBarProps) => {
 
     if (progressVisible) {
         if (linearProgress) {
-            return <LinearProgressWithLabel value={val} />;
+            return <LinearProgressWithLabel value={val as number} />;
         } else {
-            return <CircularProgressWithLabel value={val} />;
+            return <CircularProgressWithLabel value={val as number} />;
         }
     } else {
         if (linearProgress) {
