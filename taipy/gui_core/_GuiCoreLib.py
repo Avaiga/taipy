@@ -44,6 +44,7 @@ class _GuiCore(ElementLibrary):
     __SCENARIO_SELECTOR_ERROR_VAR = "__tpgc_sc_error"
     __SCENARIO_SELECTOR_ID_VAR = "__tpgc_sc_id"
     __SCENARIO_SELECTOR_FILTER_VAR = "__tpgc_sc_filter"
+    __SCENARIO_SELECTOR_SORT_VAR = "__tpgc_sc_sort"
     __SCENARIO_VIZ_ERROR_VAR = "__tpgc_sv_error"
     __JOB_SELECTOR_ERROR_VAR = "__tpgc_js_error"
     __DATANODE_VIZ_ERROR_VAR = "__tpgc_dv_error"
@@ -73,14 +74,16 @@ class _GuiCore(ElementLibrary):
                 "show_dialog": ElementProperty(PropertyType.boolean, True),
                 __SEL_SCENARIOS_PROP: ElementProperty(PropertyType.dynamic_list),
                 "multiple": ElementProperty(PropertyType.boolean, False),
-                "filter": ElementProperty(_GuiCoreScenarioProperties, _GuiCoreScenarioProperties.DEFAULT),
+                "filter": ElementProperty(_GuiCoreScenarioProperties, _GuiCoreScenarioProperties.FILTER_DEFAULT),
+                "sort": ElementProperty(_GuiCoreScenarioProperties, _GuiCoreScenarioProperties.SORT_DEFAULT),
                 "show_search": ElementProperty(PropertyType.boolean, True),
             },
             inner_properties={
                 "inner_scenarios": ElementProperty(
                     PropertyType.lov,
                     f"{{{__CTX_VAR_NAME}.get_scenarios(<tp:prop:{__SEL_SCENARIOS_PROP}>, "
-                    + f"{__SCENARIO_SELECTOR_FILTER_VAR}<tp:uniq:sc>)}}",
+                    + f"{__SCENARIO_SELECTOR_FILTER_VAR}<tp:uniq:sc>, "
+                    + f"{__SCENARIO_SELECTOR_SORT_VAR}<tp:uniq:sc>)}}",
                 ),
                 "on_scenario_crud": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.crud_scenario}}"),
                 "configs": ElementProperty(PropertyType.react, f"{{{__CTX_VAR_NAME}.get_scenario_configs()}}"),
@@ -95,6 +98,7 @@ class _GuiCore(ElementLibrary):
                 "update_sc_vars": ElementProperty(
                     PropertyType.string,
                     f"filter={__SCENARIO_SELECTOR_FILTER_VAR}<tp:uniq:sc>;"
+                    + f"sort={__SCENARIO_SELECTOR_SORT_VAR}<tp:uniq:sc>;"
                     + f"sc_id={__SCENARIO_SELECTOR_ID_VAR}<tp:uniq:sc>;"
                     + f"error_id={__SCENARIO_SELECTOR_ERROR_VAR}<tp:uniq:sc>",
                 ),

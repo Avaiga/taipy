@@ -284,7 +284,8 @@ class _GuiCoreScenarioProperties(_TaipyBase):
         "Primary": "is_primary",
         "Tags": "tags",
     }
-    DEFAULT = list(__SC_TYPES.keys())
+    FILTER_DEFAULT = list(__SC_TYPES.keys())
+    SORT_DEFAULT = ["Config id", "Label", "Creation date"]
     __DN_TYPES = {"Up to date": "boolean", "Valid": "boolean", "Last edit date": "date"}
     __DN_LABELS = {"Up to date": "is_up_to_date", "Valid": "is_valid", "Last edit date": "last_edit_date"}
     __ENUMS = None
@@ -309,7 +310,7 @@ class _GuiCoreScenarioProperties(_TaipyBase):
         data = super().get()
         if _is_boolean(data):
             if _is_true(data):
-                data = _GuiCoreScenarioProperties.DEFAULT
+                data = _GuiCoreScenarioProperties.FILTER_DEFAULT
             else:
                 return None
         if isinstance(data, str):
@@ -318,7 +319,7 @@ class _GuiCoreScenarioProperties(_TaipyBase):
             flist = []
             for f in data:
                 if f == "*":
-                    flist.extend(_GuiCoreScenarioProperties.DEFAULT)
+                    flist.extend(_GuiCoreScenarioProperties.FILTER_DEFAULT)
                 else:
                     flist.append(f)
             if _GuiCoreScenarioProperties.__ENUMS is None:
