@@ -121,7 +121,7 @@ const tinyPinIconButtonSx = (theme: Theme) => ({
     },
 });
 
-const switchBoxSx = { ml: 2, width: (theme:Theme) => `calc(100% - ${theme.spacing(2)})` };
+const switchBoxSx = { ml: 2, width: (theme: Theme) => `calc(100% - ${theme.spacing(2)})` };
 const iconInRowSx = { fontSize: "body2.fontSize" };
 
 const CoreItem = (props: {
@@ -520,7 +520,10 @@ const CoreSelector = (props: CoreSelectorProps) => {
         return filterTree(entities, searchValue.toLowerCase(), props.leafType);
     }, [entities, searchValue, props.leafType]);
     const [revealSearch, setRevealSearch] = useState(false);
-    const onRevealSearch = useCallback(() => setRevealSearch((r) => !r), []);
+    const onRevealSearch = useCallback(() => {
+        setRevealSearch((r) => !r);
+        setSearchValue("");
+    }, []);
 
     return (
         <>
