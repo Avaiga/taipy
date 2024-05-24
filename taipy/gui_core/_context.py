@@ -214,9 +214,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return [
                     cycle.id,
                     cycle.get_simple_label(),
-                    self.get_sorted_entity_list(
-                        self.scenario_by_cycle.get(cycle, []), sorts
-                    ),
+                    self.get_sorted_entity_list(self.scenario_by_cycle.get(cycle, []), sorts),
                     _EntityType.CYCLE.value,
                     False,
                 ]
@@ -257,11 +255,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return cycle
 
     def get_sorted_entity_list(
-        self, entities: t.Union[t.List[t.Union[Cycle, Scenario]], t.List[Scenario]], sorts: t.Optional[t.List[t.Dict[str, t.Any]]]
+        self,
+        entities: t.Union[t.List[t.Union[Cycle, Scenario]], t.List[Scenario]],
+        sorts: t.Optional[t.List[t.Dict[str, t.Any]]],
     ):
         if sorts:
             sorted_list = entities
-            for sd in reversed(sorts) :
+            for sd in reversed(sorts):
                 col = sd.get("col", "")
                 col = _GuiCoreScenarioProperties.get_col_name(col)
                 order = sd.get("order", True)
