@@ -68,7 +68,7 @@ const badgeSx = {
         borderRadius: "5px",
     },
 };
-const orderCaptionSx = {ml: 1};
+const orderCaptionSx = { ml: 1 };
 
 const getSortDesc = (columns: Record<string, ColumnDesc>, colId?: string, asc?: boolean) => {
     if (colId && asc !== undefined) {
@@ -91,7 +91,7 @@ const SortRow = (props: SortRowProps) => {
         if (!Array.isArray(appliedSorts) || appliedSorts.length == 0) {
             return colsOrder;
         }
-        return colsOrder.filter(col => col == sort?.col || !appliedSorts.some((fd) => col === fd.col));
+        return colsOrder.filter((col) => col == sort?.col || !appliedSorts.some((fd) => col === fd.col));
     }, [colsOrder, appliedSorts]);
 
     const onColSelect = useCallback(
@@ -130,7 +130,7 @@ const SortRow = (props: SortRowProps) => {
         }
     }, [columns, sort, idx]);
 
-    return (
+    return cols.length ? (
         <Grid container item xs={12} alignItems="center">
             <Grid item xs={6}>
                 <FormControl margin="dense">
@@ -150,7 +150,9 @@ const SortRow = (props: SortRowProps) => {
                     label="Order"
                     labelPlacement="start"
                 />
-                <Typography variant="caption" color="text.secondary" sx={orderCaptionSx}>{order ? "asc" : "desc"}</Typography>
+                <Typography variant="caption" color="text.secondary" sx={orderCaptionSx}>
+                    {order ? "asc" : "desc"}
+                </Typography>
             </Grid>
             <Grid item xs={1}>
                 <Tooltip title="Validate">
@@ -171,7 +173,7 @@ const SortRow = (props: SortRowProps) => {
                 </Tooltip>
             </Grid>
         </Grid>
-    );
+    ) : null;
 };
 
 const TableSort = (props: TableSortProps) => {
@@ -253,7 +255,13 @@ const TableSort = (props: TableSortProps) => {
                             appliedSorts={sorts}
                         />
                     ))}
-                    <SortRow idx={-(sorts.length + 1)} columns={columns} colsOrder={colsOrder} setSort={updateSort} appliedSorts={sorts} />
+                    <SortRow
+                        idx={-(sorts.length + 1)}
+                        columns={columns}
+                        colsOrder={colsOrder}
+                        setSort={updateSort}
+                        appliedSorts={sorts}
+                    />
                 </Grid>
             </Popover>
         </>
