@@ -555,7 +555,11 @@ const CoreSelector = (props: CoreSelectorProps) => {
                 {showSearch ? (
                     <Grid item>
                         <IconButton onClick={onRevealSearch} size="small" sx={iconInRowSx}>
-                            {revealSearch ? <SearchOffOutlined /> : <SearchOutlined />}
+                            {revealSearch ? (
+                                <SearchOffOutlined fontSize="inherit" />
+                            ) : (
+                                <SearchOutlined fontSize="inherit" />
+                            )}
                         </IconButton>
                     </Grid>
                 ) : null}
