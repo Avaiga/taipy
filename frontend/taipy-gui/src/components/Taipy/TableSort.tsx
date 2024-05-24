@@ -92,7 +92,7 @@ const SortRow = (props: SortRowProps) => {
             return colsOrder;
         }
         return colsOrder.filter((col) => col == sort?.col || !appliedSorts.some((fd) => col === fd.col));
-    }, [colsOrder, appliedSorts]);
+    }, [colsOrder, appliedSorts, sort?.col]);
 
     const onColSelect = useCallback(
         (e: SelectChangeEvent<string>) => {
