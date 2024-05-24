@@ -1,6 +1,6 @@
 name: 💡 Feature Request
 description: Have any new idea or new feature for Taipy? Please suggest!
-title: "[Feature] <write a small description here>"
+title: "<write a small description here>"
 labels: ["✨New feature"]
 body:
   - type: markdown
