@@ -74,6 +74,7 @@ class _GuiCore(ElementLibrary):
                 __SEL_SCENARIOS_PROP: ElementProperty(PropertyType.dynamic_list),
                 "multiple": ElementProperty(PropertyType.boolean, False),
                 "filter": ElementProperty(_GuiCoreScenarioProperties, _GuiCoreScenarioProperties.DEFAULT),
+                "show_search": ElementProperty(PropertyType.boolean, True),
             },
             inner_properties={
                 "inner_scenarios": ElementProperty(
