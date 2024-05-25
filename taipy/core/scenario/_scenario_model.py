@@ -12,7 +12,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import JSON, Boolean, Column, String, Table
+from sqlalchemy import JSON, TIMESTAMP, Boolean, Column, String, Table
 
 from .._repository._base_taipy_model import _BaseModel
 from .._repository.db._sql_base_model import mapper_registry
@@ -40,6 +40,7 @@ class _ScenarioModel(_BaseModel):
         Column("version", String),
         Column("sequences", JSON),
         Column("cycle", String),
+        Column("updated_at", TIMESTAMP),
     )
     id: ScenarioId
     config_id: str
@@ -85,4 +86,5 @@ class _ScenarioModel(_BaseModel):
             self.version,
             _BaseModel._serialize_attribute(self.sequences),
             self.cycle,
+            self.updated_at,
         ]

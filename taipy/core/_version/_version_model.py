@@ -12,7 +12,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict
 
-from sqlalchemy import Boolean, Column, String, Table
+from sqlalchemy import TIMESTAMP, Boolean, Column, String, Table
 
 from .._repository._base_taipy_model import _BaseModel
 from .._repository.db._sql_base_model import mapper_registry
@@ -30,6 +30,7 @@ class _VersionModel(_BaseModel):
         Column("is_production", Boolean),
         Column("is_development", Boolean),
         Column("is_latest", Boolean),
+        Column("updated_at", TIMESTAMP),
     )
     id: str
     config: str
@@ -55,4 +56,5 @@ class _VersionModel(_BaseModel):
             self.is_production,
             self.is_development,
             self.is_latest,
+            self.updated_at,
         ]

@@ -12,7 +12,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import JSON, Boolean, Column, String, Table
+from sqlalchemy import JSON, TIMESTAMP, Boolean, Column, String, Table
 
 from .._repository._base_taipy_model import _BaseModel
 from .._repository.db._sql_base_model import mapper_registry
@@ -35,6 +35,7 @@ class _TaskModel(_BaseModel):
         Column("version", String),
         Column("skippable", Boolean),
         Column("properties", JSON),
+        Column("updated_at", TIMESTAMP),
     )
     id: str
     owner_id: Optional[str]
@@ -77,4 +78,5 @@ class _TaskModel(_BaseModel):
             self.version,
             self.skippable,
             _BaseModel._serialize_attribute(self.properties),
+            self.updated_at,
         ]

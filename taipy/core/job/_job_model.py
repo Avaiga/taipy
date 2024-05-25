@@ -12,7 +12,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
-from sqlalchemy import JSON, Boolean, Column, Enum, String, Table
+from sqlalchemy import JSON, TIMESTAMP, Boolean, Column, Enum, String, Table
 
 from .._repository._base_taipy_model import _BaseModel
 from .._repository.db._sql_base_model import mapper_registry
@@ -36,6 +36,7 @@ class _JobModel(_BaseModel):
         Column("subscribers", JSON),
         Column("stacktrace", JSON),
         Column("version", String),
+        Column("updated_at", TIMESTAMP),
     )
     id: JobId
     task_id: str
@@ -75,4 +76,5 @@ class _JobModel(_BaseModel):
             _BaseModel._serialize_attribute(self.subscribers),
             _BaseModel._serialize_attribute(self.stacktrace),
             self.version,
+            self.updated_at,
         ]

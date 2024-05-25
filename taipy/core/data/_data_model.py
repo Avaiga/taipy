@@ -12,7 +12,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import JSON, Boolean, Column, Enum, Float, String, Table, UniqueConstraint
+from sqlalchemy import JSON, TIMESTAMP, Boolean, Column, Enum, Float, String, Table, UniqueConstraint
 
 from taipy.config.common.scope import Scope
 
@@ -42,6 +42,7 @@ class _DataNodeModel(_BaseModel):
         Column("editor_id", String),
         Column("editor_expiration_date", String),
         Column("data_node_properties", JSON),
+        Column("updated_at", TIMESTAMP),
     )
     __table_args__ = (UniqueConstraint("config_id", "owner_id", name="_config_owner_uc"),)
 
@@ -98,4 +99,5 @@ class _DataNodeModel(_BaseModel):
             self.editor_id,
             self.editor_expiration_date,
             _BaseModel._serialize_attribute(self.data_node_properties),
+            self.updated_at,
         ]

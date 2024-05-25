@@ -14,7 +14,7 @@ import pathlib
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
-from sqlalchemy import Column, String, Table
+from sqlalchemy import TIMESTAMP, Column, String, Table
 from sqlalchemy.dialects import sqlite
 from sqlalchemy.orm import declarative_base, registry
 from sqlalchemy.schema import CreateTable
@@ -53,6 +53,7 @@ class MockModel(Base):  # type: ignore
         Column("id", String(200), primary_key=True),
         Column("name", String(200)),
         Column("version", String(200)),
+        Column("updated_at", TIMESTAMP),
     )
     id: str
     name: str
@@ -73,7 +74,7 @@ class MockModel(Base):  # type: ignore
         return MockModel(id=entity.id, name=entity.name, version=entity._version)
 
     def to_list(self):
-        return [self.id, self.name, self.version]
+        return [self.id, self.name, self.version, self.updated_at]
 
 
 class MockConverter(_AbstractConverter):

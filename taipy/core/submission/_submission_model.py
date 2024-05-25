@@ -12,7 +12,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 
-from sqlalchemy import JSON, Boolean, Column, Enum, String, Table
+from sqlalchemy import JSON, TIMESTAMP, Boolean, Column, Enum, String, Table
 
 from .._repository._base_taipy_model import _BaseModel
 from .._repository.db._sql_base_model import mapper_registry
@@ -41,6 +41,7 @@ class _SubmissionModel(_BaseModel):
         Column("running_jobs", JSON),
         Column("blocked_jobs", JSON),
         Column("pending_jobs", JSON),
+        Column("updated_at", TIMESTAMP),
     )
     id: str
     entity_id: str
@@ -95,4 +96,5 @@ class _SubmissionModel(_BaseModel):
             _BaseModel._serialize_attribute(self.running_jobs),
             _BaseModel._serialize_attribute(self.blocked_jobs),
             _BaseModel._serialize_attribute(self.pending_jobs),
+            self.updated_at,
         ]

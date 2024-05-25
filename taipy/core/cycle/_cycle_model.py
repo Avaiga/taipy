@@ -12,7 +12,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict
 
-from sqlalchemy import JSON, Column, Enum, String, Table
+from sqlalchemy import JSON, TIMESTAMP, Column, Enum, String, Table
 
 from taipy.config.common.frequency import Frequency
 
@@ -34,6 +34,7 @@ class _CycleModel(_BaseModel):
         Column("creation_date", String),
         Column("start_date", String),
         Column("end_date", String),
+        Column("updated_at", TIMESTAMP),
     )
     id: CycleId
     name: str
@@ -64,4 +65,5 @@ class _CycleModel(_BaseModel):
             self.creation_date,
             self.start_date,
             self.end_date,
+            self.updated_at,
         ]

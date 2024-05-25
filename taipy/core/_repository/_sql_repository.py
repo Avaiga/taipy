@@ -11,9 +11,12 @@
 
 import json
 import pathlib
+import sqlite3
+from datetime import datetime
 from sqlite3 import DatabaseError
 from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
+from sqlalchemy import text
 from sqlalchemy.dialects import sqlite
 from sqlalchemy.exc import NoResultFound, OperationalError
 
@@ -26,7 +29,14 @@ from .db._sql_connection import _SQLConnection
 
 
 class _SQLRepository(_AbstractRepository[ModelType, Entity]):
-    __EXCEPTIONS_TO_RETRY = (OperationalError,)
+    __EXCEPTIONS_TO_RETRY = (
+        OperationalError,
+        sqlite3.OperationalError,
+        sqlite3.InterfaceError,
+        IndexError,
+        StopIteration,
+    )
+    MAX_MODEL_NOT_FOUND_RETRY = 30
     _logger = _TaipyLogger._get_logger()
 
     def __init__(self, model_type: Type[ModelType], converter: Type[Converter]):
@@ -73,11 +83,16 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
 
     @_retry_repository_operation(__EXCEPTIONS_TO_RETRY)
     def _load(self, entity_id: str) -> Entity:
-        query = self.table.select().filter_by(id=entity_id)
+        query = self.table.select().filter_by(id=entity_id).order_by(text("updated_at DESC"))
 
-        if entry := self.db.execute(str(query.compile(dialect=sqlite.dialect())), [entity_id]).fetchone():
-            entry = self.model_type.from_dict(entry)
-            return self.converter._model_to_entity(entry)
+        for _ in range(self.MAX_MODEL_NOT_FOUND_RETRY):
+            if entry := self.db.execute(str(query.compile(dialect=sqlite.dialect())), [entity_id]).fetchall():
+                entry = sorted(
+                    entry, key=lambda x: x["updated_at"] if x["updated_at"] is not None else "", reverse=True
+                )
+                entry = entry[0]
+                entry = self.model_type.from_dict(entry)
+                return self.converter._model_to_entity(entry)
         raise ModelNotFound(str(self.model_type.__name__), entity_id)
 
     def _load_all(self, filters: Optional[List[Dict]] = None) -> List[Entity]:
@@ -85,7 +100,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         entities: List[Entity] = []
 
         for f in filters or [{}]:
-            filtered_query = query.filter_by(**f)
+            filtered_query = query.filter_by(**f).order_by(text("updated_at DESC"))
             try:
                 entries = self.db.execute(
                     str(filtered_query.compile(dialect=sqlite.dialect())),
@@ -100,15 +115,16 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     def _delete(self, entity_id: str):
         delete_query = self.table.delete().filter_by(id=entity_id)
         cursor = self.db.execute(str(delete_query.compile(dialect=sqlite.dialect())), [entity_id])
-
         if cursor.rowcount == 0:
             raise ModelNotFound(str(self.model_type.__name__), entity_id)
 
         self.db.commit()
+        cursor.close()
 
     def _delete_all(self):
-        self.db.execute(str(self.table.delete().compile(dialect=sqlite.dialect())))
+        cursor = self.db.execute(str(self.table.delete().compile(dialect=sqlite.dialect())))
         self.db.commit()
+        cursor.close()
 
     def _delete_many(self, ids: Iterable[str]):
         for entity_id in ids:
@@ -116,9 +132,9 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
 
     def _delete_by(self, attribute: str, value: str):
         delete_by_query = self.table.delete().filter_by(**{attribute: value})
-
-        self.db.execute(str(delete_by_query.compile(dialect=sqlite.dialect())), [value])
+        cursor = self.db.execute(str(delete_by_query.compile(dialect=sqlite.dialect())), [value])
         self.db.commit()
+        cursor.close()
 
     def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> List[Entity]:
         query = self.table.select().filter_by(**{attribute: value})
@@ -216,15 +232,20 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     #############################
     # ##   Private methods   ## #
     #############################
-    @_retry_repository_operation(__EXCEPTIONS_TO_RETRY)
+    @_retry_repository_operation(__EXCEPTIONS_TO_RETRY, 0.5)
     def __insert_model(self, model: ModelType):
         query = self.table.insert()
-        self.db.execute(str(query.compile(dialect=sqlite.dialect())), model.to_list())
-        self.db.commit()
+        query_str = str(query.compile(dialect=sqlite.dialect()))
+        model.updated_at = datetime.now()  # type: ignore
 
-    @_retry_repository_operation(__EXCEPTIONS_TO_RETRY)
+        cursor = self.db.execute(query_str, model.to_list())
+        self.db.commit()
+        cursor.close()
+
+    @_retry_repository_operation(__EXCEPTIONS_TO_RETRY, 0.5)
     def _update_entry(self, model):
         query = self.table.update().filter_by(id=model.id)
+        model.updated_at = datetime.now()  # type: ignore
         cursor = self.db.execute(str(query.compile(dialect=sqlite.dialect())), model.to_list() + [model.id])
         self.db.commit()
         cursor.close()
