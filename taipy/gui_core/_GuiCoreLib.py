@@ -22,7 +22,8 @@ from ._adapters import (
     _GuiCoreDoNotUpdate,
     _GuiCoreScenarioAdapter,
     _GuiCoreScenarioDagAdapter,
-    _GuiCoreScenarioProperties,
+    _GuiCoreScenarioFilter,
+    _GuiCoreScenarioSort,
 )
 from ._context import _GuiCoreContext
 
@@ -74,8 +75,8 @@ class _GuiCore(ElementLibrary):
                 "show_dialog": ElementProperty(PropertyType.boolean, True),
                 __SEL_SCENARIOS_PROP: ElementProperty(PropertyType.dynamic_list),
                 "multiple": ElementProperty(PropertyType.boolean, False),
-                "filter": ElementProperty(_GuiCoreScenarioProperties, _GuiCoreScenarioProperties.FILTER_DEFAULT),
-                "sort": ElementProperty(_GuiCoreScenarioProperties, _GuiCoreScenarioProperties.SORT_DEFAULT),
+                "filter": ElementProperty(_GuiCoreScenarioFilter, _GuiCoreScenarioFilter.DEFAULT),
+                "sort": ElementProperty(_GuiCoreScenarioSort, _GuiCoreScenarioSort.DEFAULT),
                 "show_search": ElementProperty(PropertyType.boolean, True),
             },
             inner_properties={

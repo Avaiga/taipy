@@ -11,7 +11,9 @@
 
 import json
 import math
+import sys
 import typing as t
+from abc import abstractmethod
 from datetime import date, datetime
 from enum import Enum
 from numbers import Number
@@ -19,16 +21,7 @@ from operator import attrgetter, contains, eq, ge, gt, le, lt, ne
 
 import pandas as pd
 
-from taipy.core import (
-    Cycle,
-    DataNode,
-    Scenario,
-    is_deletable,
-    is_editable,
-    is_promotable,
-    is_readable,
-    is_submittable,
-)
+from taipy.core import Cycle, DataNode, Scenario, is_deletable, is_editable, is_promotable, is_readable, is_submittable
 from taipy.core import get as core_get
 from taipy.core.config import Config
 from taipy.core.data._tabular_datanode_mixin import _TabularDataNodeMixin
@@ -264,7 +257,7 @@ def _get_datanode_property(attr: str):
 
 
 class _GuiCoreScenarioProperties(_TaipyBase):
-    __SC_TYPES = {
+    _SC_TYPES = {
         "Config id": "string",
         "Label": "string",
         "Creation date": "date",
@@ -284,21 +277,15 @@ class _GuiCoreScenarioProperties(_TaipyBase):
         "Primary": "is_primary",
         "Tags": "tags",
     }
-    FILTER_DEFAULT = list(__SC_TYPES.keys())
-    SORT_DEFAULT = ["Config id", "Label", "Creation date"]
     __DN_TYPES = {"Up to date": "boolean", "Valid": "boolean", "Last edit date": "date"}
     __DN_LABELS = {"Up to date": "is_up_to_date", "Valid": "is_valid", "Last edit date": "last_edit_date"}
     __ENUMS = None
 
     @staticmethod
-    def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "ScP"
-
-    @staticmethod
     def get_type(attr: str):
         if prop := _get_datanode_property(attr):
             return _GuiCoreScenarioProperties.__DN_TYPES.get(prop, "any")
-        return _GuiCoreScenarioProperties.__SC_TYPES.get(attr, "any")
+        return _GuiCoreScenarioProperties._SC_TYPES.get(attr, "any")
 
     @staticmethod
     def get_col_name(attr: str):
@@ -306,11 +293,21 @@ class _GuiCoreScenarioProperties(_TaipyBase):
             return f'{attr.split(".")[0]}.{_GuiCoreScenarioProperties.__DN_LABELS.get(prop, prop)}'
         return _GuiCoreScenarioProperties.__SC_LABELS.get(attr, attr)
 
+    @staticmethod
+    @abstractmethod
+    def get_default_list():
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def full_desc():
+        raise NotImplementedError
+
     def get(self):
         data = super().get()
         if _is_boolean(data):
             if _is_true(data):
-                data = _GuiCoreScenarioProperties.FILTER_DEFAULT
+                data = self.get_default_list()
             else:
                 return None
         if isinstance(data, str):
@@ -319,10 +316,10 @@ class _GuiCoreScenarioProperties(_TaipyBase):
             flist = []
             for f in data:
                 if f == "*":
-                    flist.extend(_GuiCoreScenarioProperties.FILTER_DEFAULT)
+                    flist.extend(self.get_default_list())
                 else:
                     flist.append(f)
-            if _GuiCoreScenarioProperties.__ENUMS is None:
+            if _GuiCoreScenarioProperties.__ENUMS is None and self.full_desc():
                 _GuiCoreScenarioProperties.__ENUMS = {
                     "Config id": [c for c in Config.scenarios.keys() if c != "default"],
                     "Tags": [t for s in Config.scenarios.values() for t in s.properties.get("authorized_tags", [])],
@@ -330,8 +327,44 @@ class _GuiCoreScenarioProperties(_TaipyBase):
             return json.dumps(
                 [
                     (attr, _GuiCoreScenarioProperties.get_type(attr), _GuiCoreScenarioProperties.__ENUMS.get(attr))
+                    if self.full_desc()
+                    else (attr,)
                     for attr in flist
                     if attr and isinstance(attr, str)
                 ]
             )
         return None
+
+
+class _GuiCoreScenarioFilter(_GuiCoreScenarioProperties):
+    DEFAULT = list(_GuiCoreScenarioProperties._SC_TYPES.keys())
+
+    @staticmethod
+    def full_desc():
+        return True
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "ScF"
+
+    @staticmethod
+    def get_default_list():
+        return _GuiCoreScenarioFilter.DEFAULT
+
+
+class _GuiCoreScenarioSort(_GuiCoreScenarioProperties):
+    DEFAULT = ["Config id", "Label", "Creation date"]
+
+    @staticmethod
+    def full_desc():
+        return False
+
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "ScS"
+
+    @staticmethod
+    def get_default_list():
+        return _GuiCoreScenarioSort.DEFAULT
+
+def _is_debugging() -> bool:
+    return hasattr(sys, "gettrace") and sys.gettrace() is not None

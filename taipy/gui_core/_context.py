@@ -14,6 +14,7 @@ import typing as t
 from collections import defaultdict
 from datetime import date, datetime
 from numbers import Number
+from operator import attrgetter
 from threading import Lock
 
 try:
@@ -66,6 +67,7 @@ from ._adapters import (
     _GuiCoreDatanodeAdapter,
     _GuiCoreScenarioProperties,
     _invoke_action,
+    _is_debugging
 )
 
 
@@ -759,8 +761,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
     @staticmethod
     def get_entity_property(col: str):
         def sort_key(entity: t.Union[Scenario, Cycle]):
-            # we might be comparing naive and aware datetime ISO
-            val = getattr(entity, col) if hasattr(entity, col) else ""
+            # we compare only strings
+            try:
+                val = attrgetter(col)(entity)
+            except AttributeError as e:
+                if _is_debugging():
+                    _warn("Attribute", e)
+                val = ""
             return val.isoformat() if isinstance(val, (datetime, date)) else str(val)
 
         return sort_key

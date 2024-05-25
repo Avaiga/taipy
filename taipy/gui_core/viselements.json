@@ -100,8 +100,21 @@
                     },
                     {
                         "name": "filter",
-                        "type": "str|list[str]",
-                        "doc": "TODO: a list of scenario attributes to filter on."
+                        "type": "bool|str|list[str]",
+                        "default_value": "Config id;Label;Creation date;Cycle label;Cycle start;Cycle end;Primary;Tags",
+                        "doc": "TODO: a list of scenario attributes to filter on. If False, do not allow filter."
+                    },
+                    {
+                        "name": "show_search",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "TODO: If True, allows the user to search locally on label."
+                    },
+                    {
+                        "name": "sort",
+                        "type": "bool|str|list[str]",
+                        "default_value": "Config id;Label;Creation date",
+                        "doc": "TODO: a list of scenario attributes to sort on. If False, do not allow sort."
                     }
                 ]
             }
