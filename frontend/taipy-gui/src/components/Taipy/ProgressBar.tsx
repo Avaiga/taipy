@@ -12,49 +12,34 @@
  */
 
 import React from "react";
-import {
-    Box,
-    CircularProgress,
-    CircularProgressProps,
-    LinearProgress,
-    LinearProgressProps,
-    Typography,
-} from "@mui/material";
-import { useEffect, useState } from "react";
+import { Box, CircularProgress, LinearProgress, Typography } from "@mui/material";
 import { useDynamicProperty } from "../../utils/hooks";
 
 interface ProgressBarProps {
     linear?: boolean; //by default - false
-    showProgress?: boolean; //by default - false
+    showValue?: boolean; //by default - false
     value?: number; //progress value
     defaultValue?: number; //default progress value
 }
 
 const Progress = (props: ProgressBarProps) => {
-    const { linear, showProgress, value, defaultValue } = props;
+    const { linear, showValue } = props;
 
-    const [linearProgress, setLinearProgress] = useState(false);
-    const [progressVisible, setProgressVisible] = useState(false);
+    const value = useDynamicProperty(props.value, props.defaultValue, undefined);
 
-    const val = useDynamicProperty(props.value, props.defaultValue, undefined);
-
-    useEffect(() => {
-        setLinearProgress((progress) => {
-            return props.linear !== undefined ? props.linear : progress;
-        });
-    }, [props.linear, linear]);
-
-    useEffect(() => {
-        setProgressVisible((progress_visible) => {
-            return props.showProgress !== undefined ? props.showProgress : progress_visible;
-        });
-    }, [props.showProgress, showProgress]);
-
-    //circular progress element
-    function CircularProgressWithLabel(props: CircularProgressProps & { value: number }) {
-        return (
+    return showValue && value !== undefined ? (
+        linear ? (
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Box sx={{ width: "100%", mr: 1 }}>
+                    <LinearProgress variant="determinate" value={value} />
+                </Box>
+                <Box sx={{ minWidth: 35 }}>
+                    <Typography variant="body2" color="text.secondary">{`${Math.round(value)}%`}</Typography>
+                </Box>
+            </Box>
+        ) : (
             <Box sx={{ position: "relative", display: "inline-flex" }}>
-                <CircularProgress variant="determinate" {...props} />
+                <CircularProgress variant="determinate" value={value} />
                 <Box
                     sx={{
                         top: 0,
@@ -68,40 +53,16 @@ const Progress = (props: ProgressBarProps) => {
                     }}
                 >
                     <Typography variant="caption" component="div" color="text.secondary">
-                        {`${Math.round(props.value)}%`}
+                        {`${Math.round(value)}%`}
                     </Typography>
                 </Box>
             </Box>
-        );
-    }
-
-    //linear progress element
-    function LinearProgressWithLabel(props: LinearProgressProps & { value: number }) {
-        return (
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-                <Box sx={{ width: "100%", mr: 1 }}>
-                    <LinearProgress variant="determinate" {...props} />
-                </Box>
-                <Box sx={{ minWidth: 35 }}>
-                    <Typography variant="body2" color="text.secondary">{`${Math.round(props.value)}%`}</Typography>
-                </Box>
-            </Box>
-        );
-    }
-
-    if (progressVisible) {
-        if (linearProgress) {
-            return <LinearProgressWithLabel value={val as number} />;
-        } else {
-            return <CircularProgressWithLabel value={val as number} />;
-        }
-    } else {
-        if (linearProgress) {
-            return <LinearProgress />;
-        } else {
-            return <CircularProgress />;
-        }
-    }
+        )
+    ) : linear ? (
+        <LinearProgress variant={value === undefined ? "indeterminate" : "determinate"} value={value} />
+    ) : (
+        <CircularProgress variant={value === undefined ? "indeterminate" : "determinate"} value={value} />
+    );
 };
 
 export default Progress;
