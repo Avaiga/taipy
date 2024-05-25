@@ -67,7 +67,7 @@ from ._adapters import (
     _GuiCoreDatanodeAdapter,
     _GuiCoreScenarioProperties,
     _invoke_action,
-    _is_debugging
+    _is_debugging,
 )
 
 
