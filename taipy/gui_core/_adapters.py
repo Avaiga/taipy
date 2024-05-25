@@ -282,6 +282,10 @@ class _GuiCoreScenarioProperties(_TaipyBase):
     __ENUMS = None
 
     @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "ScP"
+
+    @staticmethod
     def get_type(attr: str):
         if prop := _get_datanode_property(attr):
             return _GuiCoreScenarioProperties.__DN_TYPES.get(prop, "any")
@@ -342,6 +346,7 @@ class _GuiCoreScenarioFilter(_GuiCoreScenarioProperties):
     @staticmethod
     def full_desc():
         return True
+
     @staticmethod
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "ScF"
@@ -365,6 +370,7 @@ class _GuiCoreScenarioSort(_GuiCoreScenarioProperties):
     @staticmethod
     def get_default_list():
         return _GuiCoreScenarioSort.DEFAULT
+
 
 def _is_debugging() -> bool:
     return hasattr(sys, "gettrace") and sys.gettrace() is not None
