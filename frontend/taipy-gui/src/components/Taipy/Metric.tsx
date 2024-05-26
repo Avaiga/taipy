@@ -11,22 +11,10 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, {
-    CSSProperties,
-    lazy,
-    Suspense,
-    useMemo
-} from 'react';
+import React, {CSSProperties, lazy, Suspense, useMemo} from 'react';
 import {Data} from "plotly.js";
-import {
-    useClassNames,
-    useDynamicJsonProperty,
-    useDynamicProperty
-} from "../../utils/hooks";
-import {
-    TaipyBaseProps,
-    TaipyHoverProps
-} from "./utils";
+import {useClassNames, useDynamicJsonProperty, useDynamicProperty} from "../../utils/hooks";
+import {TaipyBaseProps, TaipyHoverProps} from "./utils";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 
@@ -50,10 +38,14 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     width?: string | number;
     height?: string | number;
     showValue?: boolean;
+    format?: string;
+    formatDelta?: string;
 }
 
 const emptyLayout = {} as Record<string, Record<string, unknown>>;
 const defaultStyle = {position: "relative", display: "inline-block"};
+const FORMAT_MATCH_REGEX = /(?<=[bdieufgosxX])./;
+const FORMAT_REPLACE_REGEX = /%([0-9]*)([.][0-9]+)?([bdieufgosxX])/g;
 
 const Metric = (props: MetricProps) => {
     const {
@@ -68,37 +60,84 @@ const Metric = (props: MetricProps) => {
     const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
     const baseStyle = useDynamicJsonProperty(props.style, props.defaultStyle || "", defaultStyle);
 
-    const data = useMemo(() => ([
-        {
-            domain: {x: [0, 1], y: [0, 1]},
-            value: value,
-            type: "indicator",
-            mode: "gauge" + (showValue ? "+number" : "")  + (delta !== undefined ? "+delta" : ""),
-            delta: {
-                reference: typeof value === 'number' && typeof delta === 'number' ? value - delta : undefined,
-            },
-            gauge: {
-                axis: {
-                    range: [
-                        typeof props.min === 'number' ? props.min : 0,
-                        typeof props.max === 'number' ? props.max : 100
-                    ]
-                },
-                shape: props.type === "linear" ? "bullet" : "angular",
-                threshold: {
-                    line: {color: "red", width: 4},
-                    thickness: 0.75,
-                    value: threshold
+    const data = useMemo(() => {
+        const sprintfToD3Converter = (format: string) => {
+            return format?.replace(FORMAT_REPLACE_REGEX, (match, width, precision, type) => {
+                switch (type) {
+                    case "b":
+                        return "b";
+                    case "d":
+                        return "d";
+                    case "i":
+                        return "d";
+                    case "e":
+                        return "e";
+                    case "f":
+                        return "." + (precision?.slice(1) ?? "2") + "f";
+                    case "g":
+                        return "." + (precision?.slice(1) ?? "2") + "g";
+                    case "o":
+                        return "o";
+                    case "s":
+                        return "";
+                    case "x":
+                        return "x";
+                    case "X":
+                        return "X";
+                    default:
+                        return "";
                 }
-            },
+            });
         }
-    ]), [
-        value,
-        showValue,
-        delta,
+
+        const finalFormat = (input: string) => {
+            const regex = /([bdieufgosxX]).*/g;
+            return input ? input.replace(regex, '$1') : undefined;
+        }
+
+        const formattedNumberValue = props.format ? finalFormat(sprintfToD3Converter(props.format)) : undefined;
+        const formattedDeltaValue = props.formatDelta ? finalFormat(sprintfToD3Converter(props.formatDelta)) : undefined;
+
+        return [
+            {
+                domain: {x: [0, 1], y: [0, 1]},
+                value: value,
+                type: "indicator",
+                mode: "gauge" + (showValue ? "+number" : "") + (delta !== undefined ? "+delta" : ""),
+                number: {
+                    suffix: props.format?.match(FORMAT_MATCH_REGEX)?.[0] ?? "",
+                    valueformat: formattedNumberValue,
+                },
+                delta: {
+                    reference: typeof value === 'number' && typeof delta === 'number' ? value - delta : undefined,
+                    suffix: props.formatDelta?.match(FORMAT_MATCH_REGEX)?.[0] ?? "",
+                    valueformat: formattedDeltaValue
+                },
+                gauge: {
+                    axis: {
+                        range: [
+                            props.min ?? 0,
+                            props.max ?? 100
+                        ]
+                    },
+                    shape: props.type === "linear" ? "bullet" : "angular",
+                    threshold: {
+                        line: {color: "red", width: 4},
+                        thickness: 0.75,
+                        value: threshold
+                    }
+                },
+            }
+        ];
+    }, [
+        props.format,
+        props.formatDelta,
         props.min,
         props.max,
         props.type,
+        value,
+        showValue,
+        delta,
         threshold
     ]);
 
