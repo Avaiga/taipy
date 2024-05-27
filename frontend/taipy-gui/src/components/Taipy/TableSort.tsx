@@ -70,14 +70,13 @@ const badgeSx = {
 };
 const orderCaptionSx = { ml: 1 };
 
-const getSortDesc = (columns: Record<string, ColumnDesc>, colId?: string, asc?: boolean) => {
-    if (colId && asc !== undefined) {
-        return {
-            col: columns[colId].dfid,
-            order: !!asc,
-        } as SortDesc;
-    }
-};
+const getSortDesc = (columns: Record<string, ColumnDesc>, colId?: string, asc?: boolean) =>
+    colId && asc !== undefined
+        ? ({
+              col: columns[colId].dfid,
+              order: !!asc,
+          } as SortDesc)
+        : undefined;
 
 const SortRow = (props: SortRowProps) => {
     const { idx, setSort, columns, colsOrder, sort, appliedSorts } = props;
@@ -145,11 +144,7 @@ const SortRow = (props: SortRowProps) => {
                 </FormControl>
             </Grid>
             <Grid item xs={4}>
-                <FormControlLabel
-                    control={<Switch checked={order} onChange={onOrderSwitch} />}
-                    label="Order"
-                    labelPlacement="start"
-                />
+                <Switch checked={order} onChange={onOrderSwitch} />
                 <Typography variant="caption" color="text.secondary" sx={orderCaptionSx}>
                     {order ? "asc" : "desc"}
                 </Typography>
