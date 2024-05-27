@@ -23,7 +23,7 @@ const tableColumns = {
     StringCol: { dfid: "StringCol", type: "object", index: 0, format: "", filter: true },
     NumberCol: { dfid: "NumberCol", type: "int", index: 1, format: "", filter: true },
     BoolCol: { dfid: "BoolCol", type: "bool", index: 2, format: "", filter: true },
-    DateCol: { dfid: "DateCol", type: "datetime", index: 2, format: "", filter: true },
+    DateCol: { dfid: "DateCol", type: "datetime", index: 3, format: "", filter: true },
 } as Record<string, ColumnDesc>;
 const colsOrder = ["StringCol", "NumberCol", "BoolCol", "DateCol"];
 
