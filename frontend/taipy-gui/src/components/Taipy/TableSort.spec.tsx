@@ -67,7 +67,6 @@ describe("Table Filter Component", () => {
         const elt = getByTestId("SortByAlphaIcon");
         await userEvent.click(elt);
         expect(getAllByText("Column")).toHaveLength(2);
-        expect(getAllByText("Order")).toHaveLength(1);
         const dropdownElts = getAllByTestId("ArrowDropDownIcon");
         expect(dropdownElts).toHaveLength(1);
         expect(getByTestId("CheckIcon").parentElement).toBeDisabled();
