@@ -47,6 +47,8 @@ import {
     ColumnDesc,
     FilterDesc,
     TableFilter,
+    SortDesc,
+    TableSort,
 } from "taipy-gui";
 
 import { Cycles, Cycle, DataNodes, NodeType, Scenarios, Scenario, DataNode, Sequence, Sequences } from "./utils/types";
@@ -107,6 +109,7 @@ interface CoreSelectorProps {
     onSelect?: (id: string | string[]) => void;
     updateCoreVars: string;
     filter?: string;
+    sort?: string;
     showSearch: boolean;
 }
 
@@ -510,6 +513,44 @@ const CoreSelector = (props: CoreSelectorProps) => {
         [updateVars, dispatch, props.id, updateCoreVars, lovPropertyName, module]
     );
 
+        // sort
+        const colSorts = useMemo(() => {
+            try {
+                const res = props.sort ? (JSON.parse(props.sort) as Array<[string]>) : undefined;
+                return Array.isArray(res)
+                    ? res.reduce((pv, [name], idx) => {
+                          pv[name] = { dfid: name, type: "str", index: idx};
+                          return pv;
+                      }, {} as Record<string, ColumnDesc>)
+                    : undefined;
+            } catch (e) {
+                return undefined;
+            }
+        }, [props.sort]);
+        const [sorts, setSorts] = useState<SortDesc[]>([]);
+
+        const applySorts = useCallback(
+            (sorts: SortDesc[]) => {
+                setSorts((old) => {
+                    if (old.length != sorts.length || JSON.stringify(old) != JSON.stringify(sorts)) {
+                        const sortVar = getUpdateVar(updateCoreVars, "sort");
+                        dispatch(
+                            createRequestUpdateAction(
+                                props.id,
+                                module,
+                                getUpdateVarNames(updateVars, lovPropertyName),
+                                true,
+                                sortVar ? { [sortVar]: sorts } : undefined
+                            )
+                        );
+                        return sorts;
+                    }
+                    return old;
+                });
+            },
+            [updateVars, dispatch, props.id, updateCoreVars, lovPropertyName, module]
+        );
+
     // Search
     const [searchValue, setSearchValue] = useState("");
     const onSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => setSearchValue(e.currentTarget.value), []);
@@ -528,7 +569,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
     return (
         <>
             <Grid container sx={switchBoxSx} gap={1}>
-                {active && colFilters ? (
+            {active && colFilters ? (
                     <Grid item>
                         <TableFilter
                             columns={colFilters}
@@ -536,6 +577,15 @@ const CoreSelector = (props: CoreSelectorProps) => {
                             filteredCount={0}
                             onValidate={applyFilters}
                         ></TableFilter>
+                    </Grid>
+                ) : null}
+                {active && colSorts ? (
+                    <Grid item>
+                        <TableSort
+                            columns={colSorts}
+                            appliedSorts={sorts}
+                            onValidate={applySorts}
+                        ></TableSort>
                     </Grid>
                 ) : null}
                 {showPins ? (

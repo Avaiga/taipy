@@ -132,6 +132,21 @@ export interface TableFilterProps {
 }
 export declare const TableFilter: (props: TableFilterProps) => JSX.Element;
 
+export interface SortDesc {
+    col: string;
+    order: boolean;
+}
+
+export interface TableSortProps {
+    columns: Record<string, ColumnDesc>;
+    colsOrder?: Array<string>;
+    onValidate: (data: Array<SortDesc>) => void;
+    appliedSorts?: Array<SortDesc>;
+    className?: string;
+}
+
+export declare const TableSort: (props: TableSortProps) => JSX.Element;
+
 export declare const Router: () => JSX.Element;
 
 /**
