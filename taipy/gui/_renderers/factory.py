@@ -57,7 +57,7 @@ class _Factory:
         "text": "value",
         "toggle": "value",
         "tree": "value",
-        "metric": "value"
+        "metric": "value",
     }
 
     _TEXT_ATTRIBUTES = ["format", "id", "hover_text", "raw"]
@@ -280,7 +280,6 @@ class _Factory:
                 ("value", PropertyType.dynamic_number),
                 ("format",),
                 ("orientation"),
-                ("hover_text", PropertyType.dynamic_string),
                 ("width",),
                 ("height",),
             ]

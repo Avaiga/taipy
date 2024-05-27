@@ -833,6 +833,10 @@
                         "type": "str",
                         "default_value": "None",
                         "doc": "The height, in CSS units, of the indicator (used when orientation is vertical)."
+                    },
+                    {
+                        "name": "hover_text",
+                        "doc": "TODO not implemented"
                     }
                 ]
             }
