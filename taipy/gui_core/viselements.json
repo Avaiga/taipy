@@ -101,7 +101,7 @@
                     {
                         "name": "filter",
                         "type": "bool|str|list[str]",
-                        "default_value": "Config id;Label;Creation date;Cycle label;Cycle start;Cycle end;Primary;Tags",
+                        "default_value": "\"Config id;Label;Creation date;Cycle label;Cycle start;Cycle end;Primary;Tags\"",
                         "doc": "TODO: a list of scenario attributes to filter on. If False, do not allow filter."
                     },
                     {
@@ -113,7 +113,7 @@
                     {
                         "name": "sort",
                         "type": "bool|str|list[str]",
-                        "default_value": "Config id;Label;Creation date",
+                        "default_value": "\"Config id;Label;Creation date\"",
                         "doc": "TODO: a list of scenario attributes to sort on. If False, do not allow sort."
                     }
                 ]
