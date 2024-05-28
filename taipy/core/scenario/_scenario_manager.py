@@ -38,7 +38,6 @@ from ..exceptions.exceptions import (
     ImportScenarioDoesntHaveAVersion,
     InsufficientScenarioToCompare,
     InvalidScenario,
-    InvalidSequence,
     NonExistingComparator,
     NonExistingScenario,
     NonExistingScenarioConfig,
@@ -190,11 +189,9 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         if not scenario._is_consistent():
             raise InvalidScenario(scenario.id)
 
-        actual_sequences = scenario._get_sequences()
-        for sequence_name in sequences.keys():
-            if not actual_sequences[sequence_name]._is_consistent():
-                raise InvalidSequence(actual_sequences[sequence_name].id)
-            Notifier.publish(_make_event(actual_sequences[sequence_name], EventOperation.CREATION))
+        from ..sequence._sequence_manager_factory import _SequenceManagerFactory
+
+        _SequenceManagerFactory._build_manager()._bulk_create_from_scenario(scenario)
 
         Notifier.publish(_make_event(scenario, EventOperation.CREATION))
         return scenario

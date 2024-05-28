@@ -21,6 +21,7 @@ from ..common._utils import _Subscriber
 from ..common.reason import Reason
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..exceptions.exceptions import (
+    InvalidSequence,
     InvalidSequenceId,
     ModelNotFound,
     NonExistingSequence,
@@ -137,6 +138,65 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
             cls._logger.error(f"Sequence {sequence.id} belongs to a non-existing Scenario {scenario_id}.")
             raise SequenceBelongsToNonExistingScenario(sequence.id, scenario_id)
 
+    @staticmethod
+    def __get_sequence_tasks(tasks: Union[List[Task], List[TaskId]]) -> List[Task]:
+        task_manager = _TaskManagerFactory._build_manager()
+        _tasks: List[Task] = []
+        for task in tasks:
+            if isinstance(task, Task):
+                _tasks.append(task)
+            elif _task := task_manager._get(task):
+                _tasks.append(_task)
+            else:
+                raise NonExistingTask(task)
+        return _tasks
+
+    @classmethod
+    def _build_sequence(
+        cls,
+        sequence_name: str,
+        tasks: Union[List[Task], List[TaskId]],
+        subscribers: Optional[List[_Subscriber]] = None,
+        properties: Optional[Dict] = None,
+        scenario_id: Optional[ScenarioId] = None,
+        version: Optional[str] = None,
+    ) -> Sequence:
+        sequence_id = Sequence._new_id(sequence_name, scenario_id)
+        _tasks = cls.__get_sequence_tasks(tasks)
+        properties = properties if properties else {}
+        properties["name"] = sequence_name
+        version = version if version else cls._get_latest_version()
+        return Sequence(
+            properties=properties,
+            tasks=_tasks,
+            sequence_id=sequence_id,
+            owner_id=scenario_id,
+            parent_ids={scenario_id} if scenario_id else None,
+            subscribers=subscribers,
+            version=version,
+        )
+
+    @classmethod
+    def _bulk_create_from_scenario(cls, scenario: Scenario) -> Dict[str, Sequence]:
+        _sequences: Dict[str, Sequence] = {}
+
+        for sequence_name, sequence_data in scenario._sequences.items():
+            sequence = cls._create(
+                sequence_name,
+                sequence_data.get(scenario._SEQUENCE_TASKS_KEY, []),
+                sequence_data.get(scenario._SEQUENCE_SUBSCRIBERS_KEY, []),
+                sequence_data.get(scenario._SEQUENCE_PROPERTIES_KEY, {}),
+                scenario.id,
+                scenario.version,
+            )
+            if not isinstance(sequence, Sequence):
+                raise NonExistingSequence(sequence_name, scenario.id)
+            _sequences[sequence_name] = sequence
+
+            Notifier.publish(_make_event(sequence, EventOperation.CREATION))
+
+        return _sequences
+
     @classmethod
     def _create(
         cls,
@@ -147,34 +207,20 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         scenario_id: Optional[ScenarioId] = None,
         version: Optional[str] = None,
     ) -> Sequence:
-        sequence_id = Sequence._new_id(sequence_name, scenario_id)
-
         task_manager = _TaskManagerFactory._build_manager()
-        _tasks: List[Task] = []
-        for task in tasks:
-            if isinstance(task, Task):
-                _tasks.append(task)
-            elif _task := task_manager._get(task):
-                _tasks.append(_task)
-            else:
-                raise NonExistingTask(task)
+        _tasks = cls.__get_sequence_tasks(tasks)
 
-        properties = properties if properties else {}
-        properties["name"] = sequence_name
-        version = version if version else cls._get_latest_version()
-        sequence = Sequence(
-            properties=properties,
-            tasks=_tasks,
-            sequence_id=sequence_id,
-            owner_id=scenario_id,
-            parent_ids={scenario_id} if scenario_id else None,
-            subscribers=subscribers,
-            version=version,
-        )
+        sequence = cls._build_sequence(sequence_name, _tasks, subscribers, properties, scenario_id, version)
+        sequence_id = sequence.id
+
         for task in _tasks:
             if sequence_id not in task._parent_ids:
                 task._parent_ids.update([sequence_id])
                 task_manager._set(task)
+
+        if not sequence._is_consistent():
+            raise InvalidSequence(sequence.id)
+
         return sequence
 
     @classmethod

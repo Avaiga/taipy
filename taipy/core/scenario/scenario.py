@@ -268,12 +268,11 @@ class Scenario(_Entity, Submittable, _Labeled):
         _scenario_task_ids = {task.id if isinstance(task, Task) else task for task in _scenario._tasks}
         _sequence_task_ids: Set[TaskId] = {task.id if isinstance(task, Task) else task for task in tasks}
         self.__check_sequence_tasks_exist_in_scenario_tasks(name, _sequence_task_ids, self.id, _scenario_task_ids)
+
         from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
 
         seq_manager = _SequenceManagerFactory._build_manager()
         seq = seq_manager._create(name, tasks, subscribers or [], properties or {}, self.id, self.version)
-        if not seq._is_consistent():
-            raise InvalidSequence(name)
 
         _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
         _sequences.update(
@@ -391,7 +390,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         sequence_manager = _SequenceManagerFactory._build_manager()
 
         for sequence_name, sequence_data in self._sequences.items():
-            p = sequence_manager._create(
+            sequence = sequence_manager._build_sequence(
                 sequence_name,
                 sequence_data.get(self._SEQUENCE_TASKS_KEY, []),
                 sequence_data.get(self._SEQUENCE_SUBSCRIBERS_KEY, []),
@@ -399,9 +398,9 @@ class Scenario(_Entity, Submittable, _Labeled):
                 self.id,
                 self.version,
             )
-            if not isinstance(p, Sequence):
+            if not isinstance(sequence, Sequence):
                 raise NonExistingSequence(sequence_name, self.id)
-            _sequences[sequence_name] = p
+            _sequences[sequence_name] = sequence
         return _sequences
 
     @property  # type: ignore
