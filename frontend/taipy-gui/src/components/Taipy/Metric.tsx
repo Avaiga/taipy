@@ -14,6 +14,7 @@
 import React, {CSSProperties, lazy, Suspense, useMemo} from 'react';
 import {Data} from "plotly.js";
 import {useClassNames, useDynamicJsonProperty, useDynamicProperty} from "../../utils/hooks";
+import {extractPrefix, extractSuffix, extractFormatSpecifier} from "../../utils/formatConversion";
 import {TaipyBaseProps, TaipyHoverProps} from "./utils";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
@@ -44,8 +45,6 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
 
 const emptyLayout = {} as Record<string, Record<string, unknown>>;
 const defaultStyle = {position: "relative", display: "inline-block"};
-const FORMAT_MATCH_REGEX = /(?<=[bdieufgosxX])./;
-const FORMAT_REPLACE_REGEX = /%([0-9]*)([.][0-9]+)?([bdieufgosxX])/g;
 
 const Metric = (props: MetricProps) => {
     const {
@@ -61,43 +60,6 @@ const Metric = (props: MetricProps) => {
     const baseStyle = useDynamicJsonProperty(props.style, props.defaultStyle || "", defaultStyle);
 
     const data = useMemo(() => {
-        const sprintfToD3Converter = (format: string) => {
-            return format?.replace(FORMAT_REPLACE_REGEX, (match, width, precision, type) => {
-                switch (type) {
-                    case "b":
-                        return "b";
-                    case "d":
-                        return "d";
-                    case "i":
-                        return "d";
-                    case "e":
-                        return "e";
-                    case "f":
-                        return "." + (precision?.slice(1) ?? "2") + "f";
-                    case "g":
-                        return "." + (precision?.slice(1) ?? "2") + "g";
-                    case "o":
-                        return "o";
-                    case "s":
-                        return "";
-                    case "x":
-                        return "x";
-                    case "X":
-                        return "X";
-                    default:
-                        return "";
-                }
-            });
-        }
-
-        const finalFormat = (input: string) => {
-            const regex = /([bdieufgosxX]).*/g;
-            return input ? input.replace(regex, '$1') : undefined;
-        }
-
-        const formattedNumberValue = props.format ? finalFormat(sprintfToD3Converter(props.format)) : undefined;
-        const formattedDeltaValue = props.formatDelta ? finalFormat(sprintfToD3Converter(props.formatDelta)) : undefined;
-
         return [
             {
                 domain: {x: [0, 1], y: [0, 1]},
@@ -105,13 +67,15 @@ const Metric = (props: MetricProps) => {
                 type: "indicator",
                 mode: "gauge" + (showValue ? "+number" : "") + (delta !== undefined ? "+delta" : ""),
                 number: {
-                    suffix: props.format?.match(FORMAT_MATCH_REGEX)?.[0] ?? "",
-                    valueformat: formattedNumberValue,
+                    prefix: extractPrefix(props.format),
+                    suffix: extractSuffix(props.format),
+                    valueformat: extractFormatSpecifier(props.format),
                 },
                 delta: {
                     reference: typeof value === 'number' && typeof delta === 'number' ? value - delta : undefined,
-                    suffix: props.formatDelta?.match(FORMAT_MATCH_REGEX)?.[0] ?? "",
-                    valueformat: formattedDeltaValue
+                    prefix: extractPrefix(props.formatDelta),
+                    suffix: extractSuffix(props.formatDelta),
+                    valueformat: extractFormatSpecifier(props.formatDelta)
                 },
                 gauge: {
                     axis: {
