@@ -128,7 +128,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             with self.lock:
                 self.jobs_list = None
         elif event.entity_type == EventEntityType.SUBMISSION:
-            self.submission_status_callback(event.entity_id)
+            self.submission_status_callback(event.entity_id, event)
         elif event.entity_type == EventEntityType.DATA_NODE:
             with self.lock:
                 self.data_nodes_by_owner = None
@@ -146,7 +146,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             {"scenario": scenario_id or True},
         )
 
-    def submission_status_callback(self, submission_id: t.Optional[str]):
+    def submission_status_callback(self, submission_id: t.Optional[str] = None, event: t.Optional[Event] = None):
         if not submission_id or not is_readable(t.cast(SubmissionId, submission_id)):
             return
         try:
@@ -182,7 +182,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             self.gui._call_user_callback(
                                 client_id,
                                 submission_name,
-                                [core_get(submission.entity_id), {"submission_status": new_status.name}],
+                                [
+                                    core_get(submission.id),
+                                    {
+                                        "submission_status": new_status.name,
+                                        "submittable_entity": core_get(submission.entity_id),
+                                        **(event.metadata if event else {}),
+                                    },
+                                ],
                                 submission.properties.get("module_context"),
                             )
 
