@@ -13,14 +13,33 @@
 
 import React from "react";
 
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
+
 import Progress from "./Progress";
 
 describe("Progress component", () => {
     it("renders", async () => {
-        const { getByText } = render(<Progress />);
-        const elt = getByText("");
-        expect(elt.tagName).toBe("DIV");
+        render(<Progress />);
+        const progressElement = screen.getByRole("progressbar");
+        expect(progressElement).toBeInTheDocument();
+    });
+    it("renders circular element by default", () => {
+        render(<Progress />);
+        const progressElement = screen.getByRole("progressbar");
+        expect(progressElement).toBeInTheDocument();
+    });
+    it("renders a linear element on providing the parameter `linear`", () => {
+        render(<Progress linear={true} />);
+        const progressElement = screen.getByRole("progressbar");
+        expect(progressElement).toBeInTheDocument();
+    });
+    it("renders a circular element on providing the parameters `showValues` and `value`", () => {
+        const { getByDisplayValue } = render(<Progress showValue={true} value={50} />);
+        getByDisplayValue("50");
+    });
+    it("renders a linear element on providing the parameters `linear`, `showValue` and `value`", () => {
+        const { getByDisplayValue } = render(<Progress showValue={true} value={50} linear={true} />);
+        getByDisplayValue("50");
     });
 });
