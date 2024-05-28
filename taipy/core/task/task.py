@@ -30,14 +30,17 @@ from .task_id import TaskId
 class Task(_Entity, _Labeled):
     """Hold a user function that will be executed, its parameters and the results.
 
-    A `Task` brings together the user code as function, the inputs and the outputs as data nodes
-    (instances of the `DataNode^` class).
+    A `Task` brings together the user code as function, the inputs and the outputs
+    as data nodes (instances of the `DataNode^` class).
 
     !!! note
         It is not recommended to instantiate a `Task` directly. Instead, it should be
         created with the `create_scenario()^` function. When creating a `Scenario^`,
         the related data nodes and tasks are created automatically. Please refer to
         the `Scenario^` class for more information.
+
+    A task's attributes (the input data nodes, the output data nodes, the Python
+    function) are populated based on its task configuration `TaskConfig^`.
 
     !!! Example
 
