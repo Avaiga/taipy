@@ -293,6 +293,34 @@ const filterTree = (entities: Entities, search: string, leafType: NodeType, coun
     return filtered;
 };
 
+const localStoreSet = (val: string, ...ids: string[]) => {
+    const id = ids.filter(i => !!i).join(" ");
+    if (!id) {
+        return;
+    }
+    try {
+        id && localStorage && localStorage.setItem(id, val);
+    } catch (e) {
+        // Too bad
+    }
+};
+
+const localStoreGet = (...ids: string[]) => {
+    const id = ids.filter(i => !!i).join(" ");
+    if (!id) {
+        return undefined;
+    }
+    const val = localStorage && localStorage.getItem(id);
+    if (!val) {
+        return undefined;
+    }
+    try {
+        return JSON.parse(val);
+    } catch (e) {
+        return undefined;
+    }
+};
+
 const CoreSelector = (props: CoreSelectorProps) => {
     const {
         id = "",
@@ -494,11 +522,13 @@ const CoreSelector = (props: CoreSelectorProps) => {
     const applyFilters = useCallback(
         (filters: FilterDesc[]) => {
             setFilters((old) => {
-                if (old.length != filters.length || JSON.stringify(old) != JSON.stringify(filters)) {
+                const jsonFilters = JSON.stringify(filters);
+                if (old.length != filters.length || JSON.stringify(old) != jsonFilters) {
+                    localStoreSet(jsonFilters, id, lovPropertyName, "filter");
                     const filterVar = getUpdateVar(updateCoreVars, "filter");
                     dispatch(
                         createRequestUpdateAction(
-                            props.id,
+                            id,
                             module,
                             getUpdateVarNames(updateVars, lovPropertyName),
                             true,
@@ -510,46 +540,57 @@ const CoreSelector = (props: CoreSelectorProps) => {
                 return old;
             });
         },
-        [updateVars, dispatch, props.id, updateCoreVars, lovPropertyName, module]
+        [updateVars, dispatch, id, updateCoreVars, lovPropertyName, module]
     );
 
-        // sort
-        const colSorts = useMemo(() => {
-            try {
-                const res = props.sort ? (JSON.parse(props.sort) as Array<[string]>) : undefined;
-                return Array.isArray(res)
-                    ? res.reduce((pv, [name], idx) => {
-                          pv[name] = { dfid: name, type: "str", index: idx};
-                          return pv;
-                      }, {} as Record<string, ColumnDesc>)
-                    : undefined;
-            } catch (e) {
-                return undefined;
-            }
-        }, [props.sort]);
-        const [sorts, setSorts] = useState<SortDesc[]>([]);
+    // sort
+    const colSorts = useMemo(() => {
+        try {
+            const res = props.sort ? (JSON.parse(props.sort) as Array<[string]>) : undefined;
+            return Array.isArray(res)
+                ? res.reduce((pv, [name], idx) => {
+                      pv[name] = { dfid: name, type: "str", index: idx };
+                      return pv;
+                  }, {} as Record<string, ColumnDesc>)
+                : undefined;
+        } catch (e) {
+            return undefined;
+        }
+    }, [props.sort]);
+    const [sorts, setSorts] = useState<SortDesc[]>([]);
 
-        const applySorts = useCallback(
-            (sorts: SortDesc[]) => {
-                setSorts((old) => {
-                    if (old.length != sorts.length || JSON.stringify(old) != JSON.stringify(sorts)) {
-                        const sortVar = getUpdateVar(updateCoreVars, "sort");
-                        dispatch(
-                            createRequestUpdateAction(
-                                props.id,
-                                module,
-                                getUpdateVarNames(updateVars, lovPropertyName),
-                                true,
-                                sortVar ? { [sortVar]: sorts } : undefined
-                            )
-                        );
-                        return sorts;
-                    }
-                    return old;
-                });
-            },
-            [updateVars, dispatch, props.id, updateCoreVars, lovPropertyName, module]
-        );
+    const applySorts = useCallback(
+        (sorts: SortDesc[]) => {
+            setSorts((old) => {
+                const jsonSorts = JSON.stringify(sorts);
+                if (old.length != sorts.length || JSON.stringify(old) != jsonSorts) {
+                    localStoreSet(jsonSorts, id, lovPropertyName, "sort");
+                    const sortVar = getUpdateVar(updateCoreVars, "sort");
+                    dispatch(
+                        createRequestUpdateAction(
+                            id,
+                            module,
+                            getUpdateVarNames(updateVars, lovPropertyName),
+                            true,
+                            sortVar ? { [sortVar]: sorts } : undefined
+                        )
+                    );
+                    return sorts;
+                }
+                return old;
+            });
+        },
+        [updateVars, dispatch, id, updateCoreVars, lovPropertyName, module]
+    );
+
+    useEffect(() => {
+        if (lovPropertyName) {
+            const filters = localStoreGet(id, lovPropertyName, "filter");
+            filters && applyFilters(filters);
+            const sorts = localStoreGet(id, lovPropertyName, "sort");
+            sorts && applySorts(sorts);
+        }
+    }, [id, lovPropertyName, applyFilters, applySorts]);
 
     // Search
     const [searchValue, setSearchValue] = useState("");
@@ -569,7 +610,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
     return (
         <>
             <Grid container sx={switchBoxSx} gap={1}>
-            {active && colFilters ? (
+                {active && colFilters ? (
                     <Grid item>
                         <TableFilter
                             columns={colFilters}
@@ -581,11 +622,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                 ) : null}
                 {active && colSorts ? (
                     <Grid item>
-                        <TableSort
-                            columns={colSorts}
-                            appliedSorts={sorts}
-                            onValidate={applySorts}
-                        ></TableSort>
+                        <TableSort columns={colSorts} appliedSorts={sorts} onValidate={applySorts}></TableSort>
                     </Grid>
                 ) : null}
                 {showPins ? (
