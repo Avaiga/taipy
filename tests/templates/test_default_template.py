@@ -119,7 +119,7 @@ def test_with_both_core_rest_services(tmpdir):
         output_dir=str(tmpdir),
         no_input=True,
         extra_context={
-            "Does the application use scenario management or version management?": "n",
+            "Does the application use scenario management or version management?": "y",
             "Does the application use Rest API?": "yes",
         },
     )
