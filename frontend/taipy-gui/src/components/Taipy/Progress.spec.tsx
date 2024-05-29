@@ -13,34 +13,34 @@
 
 import React from "react";
 
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import Progress from "./Progress";
 
 describe("Progress component", () => {
     it("renders circular progress without value (indeterminate)", () => {
-        render(<Progress />);
-        const progressBar = screen.getByRole("progressbar");
-        expect(progressBar).toHaveClass("MuiCircularProgress-root");
+        const { getByRole } = render(<Progress />);
+        const elt = getByRole("progressbar");
+        expect(elt).toHaveClass("MuiCircularProgress-root");
     });
     it("renders circular progress with value (determinate)", () => {
-        render(<Progress showValue value={50} />);
-        const progressBar = screen.getByRole("progressbar");
-        const valueText = screen.getByText("50%");
-        expect(progressBar).toHaveClass("MuiCircularProgress-root");
+        const { getByRole, getByText } = render(<Progress showValue value={50} />);
+        const elt = getByRole("progressbar");
+        const valueText = getByText("50%");
+        expect(elt).toHaveClass("MuiCircularProgress-root");
         expect(valueText).toBeInTheDocument();
     });
     it("renders linear progress without value (inderminate)", () => {
-        render(<Progress linear />);
-        const progressBar = screen.getByRole("progressbar");
-        expect(progressBar).toHaveClass("MuiLinearProgress-root");
+        const { getByRole } = render(<Progress linear />);
+        const elt = getByRole("progressbar");
+        expect(elt).toHaveClass("MuiLinearProgress-root");
     });
     it("renders linear progress with value (determinate)", () => {
-        render(<Progress linear showValue value={50} />);
-        const progressBar = screen.getByRole("progressbar");
-        const valueText = screen.getByText("50%");
-        expect(progressBar).toHaveClass("MuiLinearProgress-root");
+        const { getByRole, getByText } = render(<Progress linear showValue value={50} />);
+        const elt = getByRole("progressbar");
+        const valueText = getByText("50%");
+        expect(elt).toHaveClass("MuiLinearProgress-root");
         expect(valueText).toBeInTheDocument();
     });
 });
