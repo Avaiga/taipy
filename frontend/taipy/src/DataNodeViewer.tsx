@@ -833,6 +833,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                             updateVarName={scenarioUpdateVars[0]}
                                                             updateVars={`scenarios=${scenarioUpdateVars[1]}`}
                                                             onSelect={handleClose}
+                                                            updateCoreVars=""
+                                                            showSearch={false}
                                                         />
                                                     </Popover>
                                                 </>
