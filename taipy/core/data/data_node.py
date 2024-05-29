@@ -75,6 +75,8 @@ class DataNode(_Entity, _Labeled):
             and use the `create_global_data_node()^` function as illustrated in the following
             example.
 
+    A data node's attributes are populated based on its configuration `DataNodeConfig^`.
+
     !!! Example
 
         ```python

@@ -42,7 +42,8 @@ def handle_services(use_rest, use_core):
         # Create and submit the placeholder scenario
         with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
             main_file.write("    core = Core()\n")
-            main_file.write("    core.run()\n")
+            if not use_rest:
+                main_file.write("    core.run()\n")
             main_file.write("    # #############################################################################\n")
             main_file.write("    # PLACEHOLDER: Create and submit your scenario here                           #\n")
             main_file.write("    #                                                                             #\n")
@@ -111,7 +112,7 @@ def handle_multi_page_app(pages):
 
     shutil.rmtree(os.path.join(os.getcwd(), "pages", "page_example"))
 
-    newline = ",\n\t"
+    newline = ",\n    "
     user_page_dict = newline.join(f'"{page_name}": {page_name}' for page_name in pages)
     page_dict = """
 pages = {
