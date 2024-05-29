@@ -28,11 +28,12 @@ from .cycle_id import CycleId
 class Cycle(_Entity, _Labeled):
     """An iteration of a recurrent work pattern.
 
-    Data applications are often used to solve business problems that operate periodically
-    (i.e. in time cycles) such as weekly predictions of sales data, monthly master planning
-    of supply chains, quarterly financial reports, yearly budgeting, etc.
+    Many business operations are periodic, such as weekly predictions of sales data, monthly
+    master planning of supply chains, quarterly financial reports, yearly budgeting, etc.
+    The data applications to solve these business problems often require modeling the
+    corresponding periods (i.e., cycles).
 
-    For this purpose, `Cycle^` represents a single iteration of such a time pattern.
+    For this purpose, a `Cycle^` represents a single iteration of such a time pattern.
     Each _cycle_ has a start date and a duration. Examples of cycles are:
 
     - Monday, 2. January 2023 as a daily cycle
