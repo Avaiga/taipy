@@ -82,6 +82,7 @@ class Notifier:
                     <li>TASK</li>
                     <li>DATA_NODE</li>
                     <li>JOB</li>
+                    <li>SUBMISSION</li>
                 </ul>
             entity_id (Optional[str]): If provided, the listener will be notified
                 for all events related to this entity. Otherwise, the listener
