@@ -597,8 +597,15 @@ class _Builder:
         return self
 
     def __set_list_attribute(
-        self, name: str, hash_name: t.Optional[str], val: t.Any, elt_type: t.Type, dynamic=True
+        self,
+        name: str,
+        hash_name: t.Optional[str],
+        val: t.Any,
+        elt_type: t.Type,
+        dynamic=True,
+        default_val: t.Optional[t.Any] = None,
     ) -> t.List[str]:
+        val = default_val if val is None else val
         if not hash_name and isinstance(val, str):
             val = [elt_type(t.strip()) for t in val.split(";")]
         if isinstance(val, list):
@@ -966,8 +973,15 @@ class _Builder:
                     attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, False)
                 )
             elif var_type == PropertyType.string_list:
-                self.__set_list_attribute(
-                    attr[0], self.__hashes.get(attr[0]), self.__attributes.get(attr[0]), str, False
+                self.__update_vars.extend(
+                    self.__set_list_attribute(
+                        attr[0],
+                        self.__hashes.get(attr[0]),
+                        self.__attributes.get(attr[0]),
+                        str,
+                        False,
+                        _get_tuple_val(attr, 2, None),
+                    )
                 )
             elif var_type == PropertyType.function:
                 self.__set_function_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
@@ -1013,7 +1027,10 @@ class _Builder:
                     self.__update_vars.append(f"{prop_name}={hash_name}")
                     self.__set_react_attribute(prop_name, hash_name)
                 else:
-                    self.set_attribute(prop_name, var_type(self.__attributes.get(attr[0]), "").get())
+                    val = self.__attributes.get(attr[0])
+                    self.set_attribute(
+                        prop_name, var_type(_get_tuple_val(attr, 2, None) if val is None else val, "").get()
+                    )
 
         self.__set_refresh_on_update()
         return self
