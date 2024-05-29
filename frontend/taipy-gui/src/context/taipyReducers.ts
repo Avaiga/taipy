@@ -11,19 +11,20 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { Dispatch } from "react";
 import { PaletteMode } from "@mui/material";
 import { createTheme, Theme } from "@mui/material/styles";
-import { io, Socket } from "socket.io-client";
 import merge from "lodash/merge";
+import { Dispatch } from "react";
+import { io, Socket } from "socket.io-client";
+import { v4 as uuidv4 } from "uuid";
 
-import { TAIPY_CLIENT_ID, WsMessage, sendWsMessage } from "./wsUtils";
+import { FilterDesc } from "../components/Taipy/TableFilter";
+import { stylekitModeThemes, stylekitTheme } from "../themes/stylekit";
 import { getBaseURL, TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 import { MenuProps } from "../utils/lov";
-import { FilterDesc } from "../components/Taipy/TableFilter";
-import { stylekitModeThemes, stylekitTheme } from "../themes/stylekit";
-import { getLocalStorageValue, storeClientId, IdMessage } from "./utils";
+import { getLocalStorageValue, IdMessage, storeClientId } from "./utils";
+import { ligthenPayload, sendWsMessage, TAIPY_CLIENT_ID, WsMessage } from "./wsUtils";
 
 enum Types {
     SocketConnected = "SOCKET_CONNECTED",
@@ -576,15 +577,6 @@ export const createRequestChartUpdateAction = (
         true
     );
 
-const ligtenPayload = (payload: Record<string, unknown>) => {
-    return Object.keys(payload || {}).reduce((pv, key) => {
-        if (payload[key] !== undefined) {
-            pv[key] = payload[key];
-        }
-        return pv;
-    }, {} as typeof payload);
-};
-
 export const createRequestTableUpdateAction = (
     name: string | undefined,
     id: string | undefined,
@@ -611,7 +603,7 @@ export const createRequestTableUpdateAction = (
         context,
         columns,
         pageKey,
-        ligtenPayload({
+        ligthenPayload({
             start: start,
             end: end,
             orderby: orderBy,
@@ -655,7 +647,7 @@ export const createRequestInfiniteTableUpdateAction = (
         context,
         columns,
         pageKey,
-        ligtenPayload({
+        ligthenPayload({
             infinite: true,
             start: start,
             end: end,
@@ -745,7 +737,7 @@ export const createRequestUpdateAction = (
     type: Types.RequestUpdate,
     name: "",
     context: context,
-    payload: ligtenPayload({
+    payload: ligthenPayload({
         id: id,
         names: names,
         refresh: forceRefresh,
