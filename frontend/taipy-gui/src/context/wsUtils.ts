@@ -39,8 +39,7 @@ export const sendWsMessage = (
     id: string,
     moduleContext = "",
     propagate = true,
-    serverAck?: (val: unknown) => void,
-    clientId?: string
+    serverAck?: (val: unknown) => void
 ): string => {
     const ackId = uuidv4();
     const msg: WsMessage = {

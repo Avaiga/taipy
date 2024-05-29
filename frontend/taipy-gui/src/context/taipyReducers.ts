@@ -16,7 +16,6 @@ import { createTheme, Theme } from "@mui/material/styles";
 import merge from "lodash/merge";
 import { Dispatch } from "react";
 import { io, Socket } from "socket.io-client";
-import { v4 as uuidv4 } from "uuid";
 
 import { FilterDesc } from "../components/Taipy/TableFilter";
 import { stylekitModeThemes, stylekitTheme } from "../themes/stylekit";
