@@ -28,7 +28,7 @@ from .submission_status import SubmissionStatus
 class Submission(_Entity, _Labeled):
     """ Submission of a submittable entity: `Task^`, a `Sequence^` or a `Scenario^`.
 
-    Tasks, Sequences, and Scenarios entities can be submitted for execution. The submission
+    Task, Sequence, and Scenario entities can be submitted for execution. The submission
     represents the unique request to execute a submittable entity. The submission is created
     at the time the entity is submitted.
 
