@@ -19,27 +19,28 @@ import "@testing-library/jest-dom";
 import Progress from "./Progress";
 
 describe("Progress component", () => {
-    it("renders", async () => {
+    it("renders circular progress without value (indeterminate)", () => {
         render(<Progress />);
-        const progressElement = screen.getByRole("progressbar");
-        expect(progressElement).toBeInTheDocument();
+        const progressBar = screen.getByRole("progressbar");
+        expect(progressBar).toHaveClass("MuiCircularProgress-root");
     });
-    it("renders circular element by default", () => {
-        render(<Progress />);
-        const progressElement = screen.getByRole("progressbar");
-        expect(progressElement).toBeInTheDocument();
+    it("renders circular progress with value (determinate)", () => {
+        render(<Progress showValue value={50} />);
+        const progressBar = screen.getByRole("progressbar");
+        const valueText = screen.getByText("50%");
+        expect(progressBar).toHaveClass("MuiCircularProgress-root");
+        expect(valueText).toBeInTheDocument();
     });
-    it("renders a linear element on providing the parameter `linear`", () => {
-        render(<Progress linear={true} />);
-        const progressElement = screen.getByRole("progressbar");
-        expect(progressElement).toBeInTheDocument();
+    it("renders linear progress without value (inderminate)", () => {
+        render(<Progress linear />);
+        const progressBar = screen.getByRole("progressbar");
+        expect(progressBar).toHaveClass("MuiLinearProgress-root");
     });
-    it("renders a circular element on providing the parameters `showValues` and `value`", () => {
-        const { getByDisplayValue } = render(<Progress showValue={true} value={50} />);
-        getByDisplayValue("50");
-    });
-    it("renders a linear element on providing the parameters `linear`, `showValue` and `value`", () => {
-        const { getByDisplayValue } = render(<Progress showValue={true} value={50} linear={true} />);
-        getByDisplayValue("50");
+    it("renders linear progress with value (determinate)", () => {
+        render(<Progress linear showValue value={50} />);
+        const progressBar = screen.getByRole("progressbar");
+        const valueText = screen.getByText("50%");
+        expect(progressBar).toHaveClass("MuiLinearProgress-root");
+        expect(valueText).toBeInTheDocument();
     });
 });
