@@ -11,51 +11,46 @@
  * specific language governing permissions and limitations under the License.
  */
 
-const FORMAT_REPLACE_REGEX = /%([0-9]*)([.][0-9]+)?([bdieufgosxX])/g;
-
 /**
- * Converts a sprintf format string to a D3 format string.
+ * Convert sprintf-like format string to D3 format string.
  *
- * This function takes a sprintf format string as input and returns a D3 format string.
- * The conversion is done by replacing each sprintf format specifier with the corresponding D3 format specifier.
- * If the input format string is undefined, the function returns undefined.
- * If an error occurs during the conversion, the function logs the error to the console and returns undefined.
- *
- * @param format - The sprintf format string to convert.
- * @returns The converted D3 format string, or undefined if the input is undefined or if an error occurs.
+ * @param format - The sprintf-like format string.
+ * @returns The converted D3 format string or undefined if an error occurs.
  */
 const sprintfToD3Converter = (format: string) => {
-    try {
-        return format?.replace(FORMAT_REPLACE_REGEX, (match, width, precision, type) => {
+    /**
+     * Helper function to handle precision formatting.
+     *
+     * @param precision - The precision part of the format string.
+     * @param specifier - The type of formatting.
+     * @returns The D3 precision format string.
+     */
+    const precisionFormat = (precision: string | undefined, specifier: string) => {
+        // Default to precision of 2 if not specified
+        return "." + (precision?.slice(1) ?? "2") + specifier;
+    }
+
+        return format?.replace(/%([0-9]*)([.][0-9]+)?([bdieufgoxX])/g, (match, width, precision, type) => {
+            console.log(`Match: ${match}, Width: ${width}, Precision: ${precision}, Type: ${type}`)
             switch (type) {
                 case "b":
-                    return "b";
                 case "d":
-                    return "d";
                 case "i":
-                    return "d";
                 case "e":
-                    return "e";
-                case "f":
-                    return "." + (precision?.slice(1) ?? "2") + "f";
-                case "g":
-                    return "." + (precision?.slice(1) ?? "2") + "g";
                 case "o":
-                    return "o";
-                case "s":
-                    return "";
                 case "x":
-                    return "x";
                 case "X":
-                    return "X";
+                    return type;
+                case "f":
+                    return precisionFormat(precision, "f");
+                case "g":
+                    return precisionFormat(precision, "g");
+                case "u":
+                    return "("
                 default:
                     return "";
             }
         });
-    } catch (error) {
-        console.error(`Failed to convert format "${format}" to D3 format: ${error}`);
-        return undefined;
-    }
 }
 
 /**
@@ -67,14 +62,8 @@ export const extractPrefix = (format: string | undefined): string | undefined =>
     if (format === undefined) {
         return undefined;
     }
-
-    try {
         const PREFIX_MATCH_REGEX: RegExp = /.*?(?=%)/;
         return format.match(PREFIX_MATCH_REGEX)?.[0] ?? "";
-    } catch (error) {
-        console.error(`Failed to extract prefix from format "${format}": ${error}`);
-        return undefined;
-    }
 }
 
 /**
@@ -86,20 +75,14 @@ export const extractSuffix = (format: string | undefined): string | undefined =>
     if (format === undefined) {
         return undefined;
     }
-
-    try {
-        const SURFIX_MATCH_REGEX: RegExp = /(?<=[bdieufgosxX])./;
+        const SURFIX_MATCH_REGEX: RegExp = /(?<=[bdieufgsxX])./;
         return format.match(SURFIX_MATCH_REGEX)?.[0] ?? "";
-    } catch (error) {
-        console.error(`Failed to extract suffix from format "${format}": ${error}`);
-        return undefined;
-    }
 }
 
 /**
  * Extracts the format specifier from the input string.
  * The input string is expected to be in sprintf format.
- * The function returns the format specifier (one of 'b', 'd', 'i', 'e', 'f', 'g', 'o', 's', 'x', 'X') if it exists, or undefined otherwise.
+ * The function returns the format specifier (one of 'b', 'd', 'i', 'e', 'u', 'f', 'g', 'o', 'x', 'X') if it exists, or undefined otherwise.
  * @param input - The input string in sprintf format.
  * @returns The extracted format specifier, or undefined if no specifier is found or if the input is undefined.
  */
@@ -107,13 +90,8 @@ export const extractFormatSpecifier = (input: string | undefined): string | unde
     if (input === undefined) {
         return undefined;
     }
-
-    try {
-        const regex: RegExp = /.*%?([bdieufgosxX]).*/g;
-        const convertedInput = sprintfToD3Converter(input);
-        return convertedInput ? convertedInput.replace(regex, '$1') : undefined;
-    } catch (error) {
-        console.error(`Failed to extract format specifier from input "${input}": ${error}`);
-        return undefined;
-    }
+        const regex: RegExp = /%.*\.?[bdieufgoxX]/;
+        const match = input.match(regex);
+        const format = match ? match[0] : undefined;
+        return format ? sprintfToD3Converter(format) : undefined;
 }

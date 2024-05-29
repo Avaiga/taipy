@@ -40,7 +40,7 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     height?: string | number;
     showValue?: boolean;
     format?: string;
-    formatDelta?: string;
+    deltaFormat?: string;
 }
 
 const emptyLayout = {} as Record<string, Record<string, unknown>>;
@@ -73,9 +73,9 @@ const Metric = (props: MetricProps) => {
                 },
                 delta: {
                     reference: typeof value === 'number' && typeof delta === 'number' ? value - delta : undefined,
-                    prefix: extractPrefix(props.formatDelta),
-                    suffix: extractSuffix(props.formatDelta),
-                    valueformat: extractFormatSpecifier(props.formatDelta)
+                    prefix: extractPrefix(props.deltaFormat),
+                    suffix: extractSuffix(props.deltaFormat),
+                    valueformat: extractFormatSpecifier(props.deltaFormat)
                 },
                 gauge: {
                     axis: {
@@ -95,7 +95,7 @@ const Metric = (props: MetricProps) => {
         ];
     }, [
         props.format,
-        props.formatDelta,
+        props.deltaFormat,
         props.min,
         props.max,
         props.type,
@@ -122,6 +122,7 @@ const Metric = (props: MetricProps) => {
                     data={data as Data[]}
                     layout={baseLayout}
                     style={style}
+                    useResizeHandler
                 />
             </Suspense>
         </Box>

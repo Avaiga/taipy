@@ -372,7 +372,7 @@ class _Factory:
                 ("height", PropertyType.string_or_number),
                 ("show_value", PropertyType.boolean, True),
                 ("format", PropertyType.string),
-                ("format_delta", PropertyType.string),
+                ("delta_format", PropertyType.string),
             ]
         ),
         "navbar": lambda gui, control_type, attrs: _Builder(
