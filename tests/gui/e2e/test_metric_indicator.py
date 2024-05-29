@@ -108,7 +108,7 @@ def test_format_converter_integer_to_binary(page: Page, gui: Gui, helpers):
 
 
 @pytest.mark.extension
-def test_format_converter_integer_to_signed_decimal(page: Page, gui: Gui, helpers):
+def test_format_converter_integer_to_signed_decimal_d_type(page: Page, gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|delta=20|format=%d|>
 """
@@ -123,7 +123,7 @@ def test_format_converter_integer_to_signed_decimal(page: Page, gui: Gui, helper
 
 
 @pytest.mark.extension
-def test_format_converter_integer_to_signed_decimal(page: Page, gui: Gui, helpers):
+def test_format_converter_integer_to_signed_decimal_i_type(page: Page, gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|delta=20|format=%i|>
 """
@@ -153,7 +153,7 @@ def test_format_converter_yields_float_using_science_notation(page: Page, gui: G
 
 
 @pytest.mark.extension
-def test_format_converter_yields_float_using_fixed_point_notation(page: Page, gui: Gui, helpers):
+def test_format_converter_yields_float_using_fixed_point_notation_f_type(page: Page, gui: Gui, helpers):
     page_md = """
 <|99.99|metric|show_value=True|delta=20|format=%.2f|>
 """
@@ -168,7 +168,7 @@ def test_format_converter_yields_float_using_fixed_point_notation(page: Page, gu
 
 
 @pytest.mark.extension
-def test_format_converter_yields_float_using_fixed_point_notation(page: Page, gui: Gui, helpers):
+def test_format_converter_yields_float_using_fixed_point_notation_g_type(page: Page, gui: Gui, helpers):
     page_md = """
 <|50.555|metric|show_value=True|delta=20|format=%.2g|>
 """
