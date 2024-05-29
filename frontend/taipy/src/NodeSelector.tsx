@@ -51,6 +51,8 @@ const NodeSelector = (props: NodeSelectorProps) => {
                 lovPropertyName="datanodes"
                 showPins={showPins}
                 multiple={multiple}
+                showSearch={false}
+                updateCoreVars=""
             />
             <Box>{props.error}</Box>
         </Box>
