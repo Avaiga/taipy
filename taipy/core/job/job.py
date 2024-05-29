@@ -42,7 +42,7 @@ def _run_callbacks(fn):
 class Job(_Entity, _Labeled):
     """Execution of a `Task^`.
 
-    Tasks, Sequences, and Scenarios entities can be submitted for execution. The submission
+    Task, Sequence, and Scenario entities can be submitted for execution. The submission
     of a scenario triggers the submission of all the contained tasks. Similarly, the submission
     of a sequence also triggers the execution of all the ordered tasks.
 
