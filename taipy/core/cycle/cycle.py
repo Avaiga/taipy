@@ -93,7 +93,7 @@ class Cycle(_Entity, _Labeled):
 
     !!! note
 
-        Note that cycles are optional. If a scenario has no Frequency, it will not be
+        For a scenario, cycles are optional. If a scenario has no Frequency, it will not be
         attached to any cycle.
 
     """
