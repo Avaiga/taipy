@@ -46,7 +46,7 @@ class Job(_Entity, _Labeled):
     of a scenario triggers the submission of all the contained tasks. Similarly, the submission
     of a sequence also triggers the execution of all the ordered tasks.
 
-    Every time a task is submitted for execution, a new _Job_ is created. A job represents a
+    Every time a task is submitted for execution, a new *Job* is created. A job represents a
     single execution of a task. It holds all the information related to the task execution,
     including the **creation date**, the execution `Status^`, and the **stacktrace** of any
     exception that may be raised by the user function.
