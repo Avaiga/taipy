@@ -12,86 +12,109 @@
  */
 
 /**
- * Convert sprintf-like format string to D3 format string.
- *
- * @param format - The sprintf-like format string.
- * @returns The converted D3 format string or undefined if an error occurs.
+ * Regular expressions used for parsing sprintf format strings.
  */
-const sprintfToD3Converter = (format: string) => {
-    /**
-     * Helper function to handle precision formatting.
-     *
-     * @param precision - The precision part of the format string.
-     * @param specifier - The type of formatting.
-     * @returns The D3 precision format string.
-     */
+const re = {
+    text: /^[^\x25]+/,                         // Matches non-placeholder text
+    modulo: /^\x25{2}/,                        // Matches the '%%' escape sequence
+    placeholder: /^\x25?(?:\.(\d+))?([b-giostuvxX])/, // Matches placeholders
+};
+
+/**
+ * Parses a sprintf format string and returns a parse tree.
+ * @param fmt The sprintf format string.
+ * @returns The parse tree representing the structure of the format string.
+ */
+const sprintf_parse = (fmt: string) => {
+    let _fmt = fmt;
+    let match;
+    const parse_tree = [];
+
+    while (_fmt) {
+        if ((match = re.text.exec(_fmt)) !== null) {
+            // Non-placeholder text
+            parse_tree.push(match[0]);
+        } else if ((match = re.modulo.exec(_fmt)) !== null) {
+            // '%%' escape sequence
+            parse_tree.push('%');
+        } else if ((match = re.placeholder.exec(_fmt)) !== null) {
+            // Placeholder
+            if (match && match[0]) {
+                parse_tree.push({
+                    placeholder: match[0],
+                });
+            }
+        }
+
+        if (match) {
+            _fmt = _fmt.substring(match[0].length);
+        }
+    }
+
+    return parse_tree;
+}
+
+/**
+ * Converts sprintf format string to a D3 format string.
+ * @param format The sprintf format string.
+ * @returns The D3 format string.
+ */
+export const sprintfToD3Converter = (format: string) => {
     const precisionFormat = (precision: string | undefined, specifier: string) => {
         // Default to precision of 2 if not specified
         return "." + (precision?.slice(1) ?? "2") + specifier;
     }
 
-        return format?.replace(/%([0-9]*)([.][0-9]+)?([bdieufgoxX])/g, (match, width, precision, type) => {
-            console.log(`Match: ${match}, Width: ${width}, Precision: ${precision}, Type: ${type}`)
-            switch (type) {
-                case "b":
-                case "d":
-                case "i":
-                case "e":
-                case "o":
-                case "x":
-                case "X":
-                    return type;
-                case "f":
-                    return precisionFormat(precision, "f");
-                case "g":
-                    return precisionFormat(precision, "g");
-                case "u":
-                    return "("
-                default:
-                    return "";
-            }
-        });
+    const sprintf_fmt_arr = sprintf_parse(format);
+    const objectIndex = sprintf_fmt_arr.findIndex((element) => typeof element === 'object');
+    let placeholderValue;
+
+    if (typeof sprintf_fmt_arr[objectIndex] === 'object' && sprintf_fmt_arr[objectIndex] !== null) {
+        placeholderValue = (sprintf_fmt_arr[objectIndex] as { placeholder: string }).placeholder;
+    }
+
+    return placeholderValue?.replace(/%([0-9]*)([.][0-9]+)?([bdieufgoxX])/g, (match, width, precision, type) => {
+        switch (type) {
+            case "b":
+            case "d":
+            case "e":
+            case "o":
+            case "x":
+            case "X":
+                return type;
+            case "i":
+                return "d";
+            case "f":
+                return precisionFormat(precision, "f");
+            case "g":
+                return precisionFormat(precision, "g");
+            case "u":
+                return "("
+            default:
+                return "";
+        }
+    });
 }
 
 /**
- * Extracts the prefix from the format string.
- * @param format - The format string.
- * @returns The extracted prefix, or undefined if the format is undefined.
+ * Extracts the prefix from a sprintf format string.
+ * @param format The sprintf format string.
+ * @returns The prefix.
  */
-export const extractPrefix = (format: string | undefined): string | undefined => {
-    if (format === undefined) {
-        return undefined;
-    }
-        const PREFIX_MATCH_REGEX: RegExp = /.*?(?=%)/;
-        return format.match(PREFIX_MATCH_REGEX)?.[0] ?? "";
+export const extractPrefix = (format: string) => {
+    const sprintf_fmt_arr = sprintf_parse(format);
+    const objectIndex = sprintf_fmt_arr.findIndex((element) => typeof element === 'object');
+    return sprintf_fmt_arr.slice(0, objectIndex).join('');
 }
 
 /**
- * Extracts the suffix from the format string.
- * @param format - The format string.
- * @returns The extracted suffix, or undefined if the format is undefined.
+ * Extracts the suffix from a sprintf format string.
+ * @param format The sprintf format string.
+ * @returns The suffix.
  */
-export const extractSuffix = (format: string | undefined): string | undefined => {
-    if (format === undefined) {
-        return undefined;
-    }
-        const SURFIX_MATCH_REGEX: RegExp = /(?<=[bdieufgsxX])./;
-        return format.match(SURFIX_MATCH_REGEX)?.[0] ?? "";
+export const extractSuffix = (format: string) => {
+    const sprintf_fmt_arr = sprintf_parse(format);
+    const objectIndex = sprintf_fmt_arr.findIndex((element) => typeof element === 'object');
+    return sprintf_fmt_arr.slice(objectIndex + 1).join('');
 }
 
-/**
- * Extracts the format specifier from the input string.
- * The input string is expected to be in sprintf format.
- * The function returns the format specifier (one of 'b', 'd', 'i', 'e', 'u', 'f', 'g', 'o', 'x', 'X') if it exists, or undefined otherwise.
- * @param input - The input string in sprintf format.
- * @returns The extracted format specifier, or undefined if no specifier is found or if the input is undefined.
- */
-export const extractFormatSpecifier = (input: string | undefined): string | undefined => {
-    if (input === undefined) {
-        return undefined;
-    }
-        const regex: RegExp = /%.*\.?[bdieufgoxX]/;
-        const match = input.match(regex);
-        const format = match ? match[0] : undefined;
-        return format ? sprintfToD3Converter(format) : undefined;
-}
