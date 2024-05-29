@@ -66,7 +66,7 @@ class Cycle(_Entity, _Labeled):
         ![cycles](../refmans/img/cycles_january_colored.svg){ align=left width="250" }
 
         Let's assume an end-user publishes production orders (i.e., a production plan) every
-        month. During each month (the cycle), he/she will be interested in "playing" with
+        month. During each month (the cycle), he/she will be interested in experimenting with
         different scenarios until only one of those scenarios is selected as the official
         production plan to be published. Each month is modeled as a cycle, and each cycle
         can contain one or more scenarios.
