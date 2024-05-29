@@ -40,7 +40,7 @@ class Cycle(_Entity, _Labeled):
     - January 2023 as a monthly cycle
     - etc.
 
-    `Cycles^` are created along with the `Scenarios^` that are attached to them.
+    `Cycle^`s are created along with the `Scenario^`s that are attached to them.
     At its creation, a new scenario is attached to a single cycle, the one that
     matches its optional _frequency_ and its _creation_date_.
 
