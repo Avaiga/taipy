@@ -22,26 +22,25 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/setup-python@v5
-      with:
-        python-version: ${{ inputs.python-version }}
-
-    - name: Install pipenv
-      run: pip install pipenv --upgrade
-      shell: bash
-
-    - name: Install minimum supported dependencies
-      if: inputs.pipfile-version == 'min'
-      run: pipenv install --dev --python=${{ inputs.python-version }}
-      shell: bash
-
-    - name: Install maximum version supported dependencies
+    - name: Replace Pipfile if pipfile-version = max
       if: inputs.pipfile-version == 'max'
       run: |
         # Override the current Pipfile with the Pipfile containing the max versions
         rm Pipfile
         mv tools/packages/pipfiles/Pipfile${{ inputs.python-version }}.max Pipfile
-        pipenv install --dev --python=${{ inputs.python-version }}
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: 'pipenv'
+        cache-dependency-path: '**/Pipfile'
+
+    - name: Install pipenv
+      run: pip install pipenv --upgrade
+      shell: bash
+
+    - name: Install pipenv dependencies
+      run: pipenv install --dev --python=${{ inputs.python-version }}
       shell: bash
 
     - name: Setup LibMagic (MacOS)
@@ -53,6 +52,11 @@ runs:
       if: inputs.install-gui
       with:
         node-version: 20
+        cache: 'npm'
+        cache-dependency-path: |
+          frontend/taipy/package-lock.json
+          frontend/taipy-gui/package-lock.json
+          frontend/taipy-gui/dom/package-lock.json
 
     - name: Frontend Bundle Build
       if: inputs.install-gui

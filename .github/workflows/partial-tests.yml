@@ -51,6 +51,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{matrix.python-version}}
+          cache: 'pipenv'
+          cache-dependency-path: '**/Pipfile'
       - name: Install Setuptools and wheel
         run: pip install --upgrade setuptools wheel
 
@@ -64,9 +66,17 @@ jobs:
         if: matrix.os == 'macos-13'
         run: brew install libmagic
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        if: steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true'
+        uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
+          cache-dependency-path: |
+            frontend/taipy/package-lock.json
+            frontend/taipy-gui/package-lock.json
+            frontend/taipy-gui/dom/package-lock.json
+
       - name: Frontend Bundle Build
         if: steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true'
         run: pipenv run python tools/frontend/bundle_build.py
@@ -128,7 +138,17 @@ jobs:
             core:
               - 'taipy/core/**'
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python with cache
+        if: steps.changes.outputs.core == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{matrix.python-version}}
+          cache: 'pipenv'
+          cache-dependency-path: '**/Pipfile'
+
+      - name: Setup Python without cache
+        if: steps.changes.outputs.core != 'true'
+        uses: actions/setup-python@v5
         with:
           python-version: ${{matrix.python-version}}
 
@@ -167,7 +187,17 @@ jobs:
             core:
               - 'taipy/core/**'
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python with cache
+        if: steps.changes.outputs.core == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{matrix.python-version}}
+          cache: 'pipenv'
+          cache-dependency-path: '**/Pipfile'
+
+      - name: Setup Python without cache
+        if: steps.changes.outputs.core != 'true'
+        uses: actions/setup-python@v5
         with:
           python-version: ${{matrix.python-version}}
 
