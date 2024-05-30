@@ -28,6 +28,7 @@ runs:
         # Override the current Pipfile with the Pipfile containing the max versions
         rm Pipfile
         mv tools/packages/pipfiles/Pipfile${{ inputs.python-version }}.max Pipfile
+      shell: bash
 
     - uses: actions/setup-python@v5
       with:
