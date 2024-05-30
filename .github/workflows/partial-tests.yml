@@ -146,12 +146,6 @@ jobs:
           cache: 'pipenv'
           cache-dependency-path: '**/Pipfile'
 
-      - name: Setup Python without cache
-        if: steps.changes.outputs.core != 'true'
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{matrix.python-version}}
-
       - name: Install pipenv
         if: steps.changes.outputs.core == 'true'
         run: pip install --upgrade pipenv
@@ -194,12 +188,6 @@ jobs:
           python-version: ${{matrix.python-version}}
           cache: 'pipenv'
           cache-dependency-path: '**/Pipfile'
-
-      - name: Setup Python without cache
-        if: steps.changes.outputs.core != 'true'
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{matrix.python-version}}
 
       - name: Install pipenv
         if: steps.changes.outputs.core == 'true'
