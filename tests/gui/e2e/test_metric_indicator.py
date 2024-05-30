@@ -240,3 +240,21 @@ def test_format_converter_yields_integer_as_unsigned_decimal(page: Page, gui: Gu
     number = page.locator(
         "//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
     assert number.text_content() == "(50)"
+
+
+@pytest.mark.extension
+def test_format_converter_yields_edge_cases(page: Page, gui: Gui, helpers):
+    page_md = """
+<|50|metric|show_value=True|format=a%%b%dc%%d|>
+"""
+    gui._set_frame(inspect.currentframe())
+    gui.add_page(name="test", page=page_md)
+    helpers.run_e2e(gui)
+    page.goto("./test")
+    page.wait_for_selector(".plot-container")
+    number = page.locator(
+        "//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
+    assert number.text_content() == "a%b50c%d"
+
+
+
