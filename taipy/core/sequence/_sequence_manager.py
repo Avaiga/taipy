@@ -219,7 +219,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
                 task_manager._set(task)
 
         if not sequence._is_consistent():
-            raise InvalidSequence(sequence.id)
+            raise InvalidSequence(sequence_id)
 
         return sequence
 
