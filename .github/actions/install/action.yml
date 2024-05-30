@@ -54,10 +54,7 @@ runs:
       with:
         node-version: 20
         cache: 'npm'
-        cache-dependency-path: |
-          frontend/taipy/package-lock.json
-          frontend/taipy-gui/package-lock.json
-          frontend/taipy-gui/dom/package-lock.json
+        cache-dependency-path: '**/package-lock.json'
 
     - name: Frontend Bundle Build
       if: inputs.install-gui
