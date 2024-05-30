@@ -23,7 +23,6 @@ from .._manager._manager import _Manager
 from .._repository._abstract_repository import _AbstractRepository
 from .._version._version_manager_factory import _VersionManagerFactory
 from .._version._version_mixin import _VersionMixin
-from ..common.reason import Reason
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.scenario_config import ScenarioConfig
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
@@ -47,6 +46,8 @@ from ..exceptions.exceptions import (
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
+from ..reason._reason_factory import _build_not_submittable_entity_reason
+from ..reason.reason import Reason
 from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from ..submission.submission import Submission
 from ..task._task_manager_factory import _TaskManagerFactory
@@ -204,7 +205,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         if not isinstance(scenario, Scenario):
             scenario = str(scenario)
             reason = Reason((scenario))
-            reason._add_reason(scenario, cls._build_not_submittable_entity_reason(scenario))
+            reason._add_reason(scenario, _build_not_submittable_entity_reason(scenario))
             return reason
 
         return scenario.is_ready_to_run()

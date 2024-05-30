@@ -33,7 +33,6 @@ from .common._check_instance import (
     _is_task,
 )
 from .common._warnings import _warn_deprecated, _warn_no_core_service
-from .common.reason import Reason
 from .config.data_node_config import DataNodeConfig
 from .config.scenario_config import ScenarioConfig
 from .cycle._cycle_manager_factory import _CycleManagerFactory
@@ -52,6 +51,8 @@ from .exceptions.exceptions import (
 from .job._job_manager_factory import _JobManagerFactory
 from .job.job import Job
 from .job.job_id import JobId
+from .reason._reason_factory import _build_not_submittable_entity_reason
+from .reason.reason import Reason
 from .scenario._scenario_manager_factory import _ScenarioManagerFactory
 from .scenario.scenario import Scenario
 from .scenario.scenario_id import ScenarioId
@@ -110,7 +111,7 @@ def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Tas
         return _TaskManagerFactory._build_manager()._is_submittable(entity)
     if isinstance(entity, str) and entity.startswith(Task._ID_PREFIX):
         return _TaskManagerFactory._build_manager()._is_submittable(TaskId(entity))
-    return Reason(str(entity))._add_reason(str(entity), _Manager._build_not_submittable_entity_reason(str(entity)))
+    return Reason(str(entity))._add_reason(str(entity), _build_not_submittable_entity_reason(str(entity)))
 
 
 def is_editable(

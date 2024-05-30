@@ -13,8 +13,8 @@ from unittest.mock import Mock, patch
 
 from taipy.config.common.scope import Scope
 from taipy.core import Job, JobId, Scenario, Task
-from taipy.core.common.reason import Reason
 from taipy.core.data.pickle import PickleDataNode
+from taipy.core.reason.reason import Reason
 from taipy.gui_core._context import _GuiCoreContext
 
 a_scenario = Scenario("scenario_config_id", None, {}, sequences={"sequence": {}})
@@ -22,6 +22,7 @@ a_task = Task("task_config_id", {}, print)
 a_job = Job(JobId("JOB_job_id"), a_task, "submit_id", a_scenario.id)
 a_job.isfinished = lambda s: True  # type: ignore[attr-defined]
 a_datanode = PickleDataNode("data_node_config_id", Scope.SCENARIO)
+
 
 def mock_is_submittable_reason(entity_id):
     reason = Reason(entity_id)

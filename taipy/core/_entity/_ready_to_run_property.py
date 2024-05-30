@@ -11,8 +11,8 @@
 
 from typing import TYPE_CHECKING, Dict, Set, Union
 
-from ..common.reason import Reason
 from ..notification import EventOperation, Notifier, _make_event
+from ..reason.reason import Reason
 
 if TYPE_CHECKING:
     from ..data.data_node import DataNode, DataNodeId

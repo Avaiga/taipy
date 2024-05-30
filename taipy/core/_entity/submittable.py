@@ -17,9 +17,10 @@ import networkx as nx
 
 from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
-from ..common.reason import Reason
 from ..data.data_node import DataNode
 from ..job.job import Job
+from ..reason._reason_factory import _build_data_node_is_being_edited_reason, _build_data_node_is_not_written
+from ..reason.reason import Reason
 from ..submission.submission import Submission
 from ..task.task import Task
 from ._dag import _DAG
@@ -93,9 +94,9 @@ class Submittable:
 
         for node in self.get_inputs():
             if node._edit_in_progress:
-                reason._add_reason(node.id, node._build_edit_in_progress_reason())
+                reason._add_reason(node.id, _build_data_node_is_being_edited_reason(node.id))
             if not node._last_edit_date:
-                reason._add_reason(node.id, node._build_not_written_reason())
+                reason._add_reason(node.id, _build_data_node_is_not_written(node.id))
 
         return reason
 
