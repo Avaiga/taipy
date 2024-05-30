@@ -34,7 +34,7 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
         cache: 'pipenv'
-        cache-dependency-path: '**/Pipfile'
+        cache-dependency-path: 'Pipfile'
 
     - name: Install pipenv
       run: pip install pipenv --upgrade

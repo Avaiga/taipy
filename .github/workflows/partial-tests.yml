@@ -52,7 +52,7 @@ jobs:
         with:
           python-version: ${{matrix.python-version}}
           cache: 'pipenv'
-          cache-dependency-path: '**/Pipfile'
+          cache-dependency-path: 'Pipfile'
       - name: Install Setuptools and wheel
         run: pip install --upgrade setuptools wheel
 
@@ -141,7 +141,7 @@ jobs:
         with:
           python-version: ${{matrix.python-version}}
           cache: 'pipenv'
-          cache-dependency-path: '**/Pipfile'
+          cache-dependency-path: 'Pipfile'
 
       - name: Install pipenv
         if: steps.changes.outputs.core == 'true'
@@ -184,7 +184,7 @@ jobs:
         with:
           python-version: ${{matrix.python-version}}
           cache: 'pipenv'
-          cache-dependency-path: '**/Pipfile'
+          cache-dependency-path: 'Pipfile'
 
       - name: Install pipenv
         if: steps.changes.outputs.core == 'true'
