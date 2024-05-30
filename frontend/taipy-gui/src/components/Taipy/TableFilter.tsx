@@ -28,7 +28,7 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import { DateField, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 
 import { ColumnDesc, defaultDateFormat, getsortByIndex, iconInRowSx } from "./tableUtils";
 import { getDateTime, getTypeFromDf } from "../../utils";

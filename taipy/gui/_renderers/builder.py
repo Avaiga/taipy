@@ -827,7 +827,10 @@ class _Builder:
                             value = float(value)
                     if isinstance(value, (int, float)):
                         return self.__set_react_attribute(_to_camel_case(var_name), value)
-                self.set_attribute(_to_camel_case(var_name), value)
+                if isinstance(value, (datetime, date, time)):
+                    return self.set_attribute(_to_camel_case(var_name), _date_to_string(value))
+                else:
+                    self.set_attribute(_to_camel_case(var_name), value)
         return self
 
     def _set_labels(self, var_name: str = "labels"):

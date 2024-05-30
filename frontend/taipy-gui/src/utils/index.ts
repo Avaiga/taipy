@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { utcToZonedTime, getTimezoneOffset, formatInTimeZone } from "date-fns-tz";
+import { toZonedTime, getTimezoneOffset, formatInTimeZone } from "date-fns-tz";
 import { format } from "date-fns";
 import { sprintf } from "sprintf-js";
 import { FormatConfig } from "../context/taipyReducers";
@@ -92,7 +92,7 @@ export const getDateTime = (value: string | null | undefined, tz?: string, withT
         return null;
     }
     try {
-        return tz && tz !== "Etc/Unknown" && withTime ? utcToZonedTime(value, tz) : new Date(value);
+        return tz && tz !== "Etc/Unknown" && withTime ? toZonedTime(value, tz) : new Date(value);
     } catch (e) {
         return null;
     }
