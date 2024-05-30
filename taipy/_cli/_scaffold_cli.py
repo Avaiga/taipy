@@ -11,6 +11,7 @@
 
 import pathlib
 import sys
+from typing import Dict, Optional
 
 from cookiecutter.exceptions import OutputDirExistsException
 from cookiecutter.main import cookiecutter
@@ -22,11 +23,24 @@ from ._base_cli._taipy_parser import _TaipyParser
 
 
 class _ScaffoldCLI(_AbstractCLI):
-    __TAIPY_PATH = pathlib.Path(taipy.__file__).parent.resolve() / "templates"
-    _TEMPLATE_MAP = {str(x.name): str(x) for x in __TAIPY_PATH.iterdir() if x.is_dir() and not x.name.startswith("_")}
+    _template_map: Dict[str, str] = {}
 
     _COMMAND_NAME = "create"
     _ARGUMENTS = ["--template"]
+
+    @classmethod
+    def generate_template_map(cls, template_path: Optional[pathlib.Path] = None):
+        if not template_path:
+            template_path = pathlib.Path(taipy.__file__).parent.resolve() / "templates"
+
+        # Update the template map with the new templates but do not override the existing ones
+        cls._template_map.update(
+            {
+                str(x.name): str(x)
+                for x in template_path.iterdir()
+                if x.is_dir() and not x.name.startswith("_") and x.name not in cls._template_map
+            }
+        )
 
     @classmethod
     def create_parser(cls):
@@ -36,7 +50,7 @@ class _ScaffoldCLI(_AbstractCLI):
         )
         create_parser.add_argument(
             "--template",
-            choices=list(cls._TEMPLATE_MAP.keys()),
+            choices=list(cls._template_map.keys()),
             default="default",
             help="The Taipy template to create new application.",
         )
@@ -47,7 +61,7 @@ class _ScaffoldCLI(_AbstractCLI):
         if not args:
             return
         try:
-            cookiecutter(cls._TEMPLATE_MAP[args.template])
+            cookiecutter(cls._template_map[args.template])
         except OutputDirExistsException as err:
             error_msg = f"{str(err)}. Please remove the existing directory or provide a new folder name."
             print(error_msg)  # noqa: T201
