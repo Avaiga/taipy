@@ -56,10 +56,39 @@ runs:
         cache: 'npm'
         cache-dependency-path: '**/package-lock.json'
 
-    - name: Frontend Bundle Build
+    - name: Hash frontend source code
       if: inputs.install-gui
+      id: hash-frontend
+      run: |
+        pipenv run python tools/frontend/hash_frontend.py
+        echo "HASH=$(hash.txt)" >> $GITHUB_OUTPUT
+        rm hash.txt
+      shell: bash
+
+    - name: Restore cached frontend build
+      if: inputs.install-gui
+      id: cache-fe-build-restore
+      uses: actions/cache@v4
+      with:
+        path: |
+          taipy/gui/webapp
+          taipy/gui_core/lib
+        key: ${{ inputs.os }}-frontend-build-${{ steps.hash-frontend.outputs.HASH }}
+
+    - name: Frontend Bundle Build
+      if: inputs.install-gui && steps.cache-fe-build-restore.outputs.cache-hit != 'true'
       run: pipenv run python tools/frontend/bundle_build.py
       shell: bash
+
+    - name: Save frontend build as cache
+      if: inputs.install-gui
+      id: cache-fe-build-save
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          taipy/gui/webapp
+          taipy/gui_core/lib
+        key: ${{ steps.cache-fe-build-restore.outputs.cache-primary-key }}
 
     - name: Install Playwright
       if: inputs.install-gui

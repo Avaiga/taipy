@@ -24,6 +24,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
       - name: npm build and test with node ${{ matrix.node-version }} on ${{ matrix.os }}
         uses: actions/setup-node@v4
         with:
@@ -31,12 +34,33 @@ jobs:
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
 
+      - name: Hash taipy-gui source code
+        id: hash-taipy-gui-fe
+        run: |
+          python tools/frontend/hash_frontend.py --taipy-gui-only
+          echo "HASH=$(hash.txt)" >> $GITHUB_OUTPUT
+          rm hash.txt
+      - name: Restore cached frontend build
+        id: cache-taipy-gui-fe-build-restore
+        uses: actions/cache@v4
+        with:
+          path: taipy/gui/webapp
+          key: ${{ matrix.os }}-taipy-gui-build-${{ steps.hash-taipy-gui-fe.outputs.HASH }}
+
       - name: Install dom dependencies
         working-directory: ./frontend/taipy-gui/dom
         run: npm ci
       - name: Install dependencies
         run: npm ci --omit=optional
       - run: npm run build --if-present
+
+      - name: Save frontend build as cache
+        id: cache-fe-build-save
+        uses: actions/cache/save@v4
+        with:
+          path: taipy/gui/webapp
+          key: ${{ steps.cache-taipy-gui-fe-build-restore.outputs.cache-primary-key }}
+
       - run: npm test
 
       - name: Code coverage
