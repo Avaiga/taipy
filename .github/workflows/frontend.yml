@@ -35,31 +35,28 @@ jobs:
           cache-dependency-path: '**/package-lock.json'
 
       - name: Hash taipy-gui source code
-        id: hash-taipy-gui-fe
+        id: hash-gui-fe
+        working-directory: ./
         run: |
           python tools/frontend/hash_source.py --taipy-gui-only
-          echo "HASH=$(hash.txt)" >> $GITHUB_OUTPUT
+          echo "HASH=$(cat hash.txt)" >> $GITHUB_OUTPUT
           rm hash.txt
       - name: Restore cached frontend build
-        id: cache-taipy-gui-fe-build-restore
+        id: cache-gui-fe-build
         uses: actions/cache@v4
         with:
           path: taipy/gui/webapp
-          key: ${{ matrix.os }}-taipy-gui-build-${{ steps.hash-taipy-gui-fe.outputs.HASH }}
+          key: ${{ matrix.os }}-taipy-gui-build-${{ steps.hash-gui-fe.outputs.HASH }}
 
       - name: Install dom dependencies
+        if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
         working-directory: ./frontend/taipy-gui/dom
         run: npm ci
       - name: Install dependencies
+        if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
         run: npm ci --omit=optional
-      - run: npm run build --if-present
-
-      - name: Save frontend build as cache
-        id: cache-fe-build-save
-        uses: actions/cache/save@v4
-        with:
-          path: taipy/gui/webapp
-          key: ${{ steps.cache-taipy-gui-fe-build-restore.outputs.cache-primary-key }}
+      - if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
+        run: npm run build --if-present
 
       - run: npm test
 
