@@ -46,7 +46,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         return _OrchestratorFactory._build_orchestrator()
 
     @classmethod
-    def _set(cls, task: Task):
+    def _set(cls, task: Task) -> None:
         cls.__save_data_nodes(task.input.values())
         cls.__save_data_nodes(task.output.values())
         super()._set(task)
@@ -130,20 +130,20 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         return cls._repository._load_all(filters)
 
     @classmethod
-    def __save_data_nodes(cls, data_nodes):
+    def __save_data_nodes(cls, data_nodes) -> None:
         data_manager = _DataManagerFactory._build_manager()
         for i in data_nodes:
             data_manager._set(i)
 
     @classmethod
-    def _hard_delete(cls, task_id: TaskId):
+    def _hard_delete(cls, task_id: TaskId) -> None:
         task = cls._get(task_id)
         entity_ids_to_delete = cls._get_children_entity_ids(task)
         entity_ids_to_delete.task_ids.add(task.id)
         cls._delete_entities_of_multiple_types(entity_ids_to_delete)
 
     @classmethod
-    def _get_children_entity_ids(cls, task: Task):
+    def _get_children_entity_ids(cls, task: Task) -> _EntityIds:
         entity_ids = _EntityIds()
 
         from ..job._job_manager_factory import _JobManagerFactory

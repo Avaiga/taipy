@@ -49,7 +49,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
     _model_name = "sequences"
 
     @classmethod
-    def _delete(cls, sequence_id: SequenceId):
+    def _delete(cls, sequence_id: SequenceId) -> None:
         """
         Deletes a Sequence by id.
         """
@@ -64,7 +64,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         raise ModelNotFound(cls._model_name, sequence_id)
 
     @classmethod
-    def _delete_all(cls):
+    def _delete_all(cls) -> None:
         """
         Deletes all Sequences.
         """
@@ -75,7 +75,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
             Notifier.publish(Event(cls._EVENT_ENTITY_TYPE, EventOperation.DELETION, metadata={"delete_all": True}))
 
     @classmethod
-    def _delete_many(cls, sequence_ids: Iterable[str]):
+    def _delete_many(cls, sequence_ids: Iterable[SequenceId]) -> None:
         """
         Deletes Sequence entities by a list of Sequence ids.
         """
@@ -104,7 +104,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
             raise ModelNotFound(cls._model_name, sequence_id) from None
 
     @classmethod
-    def _delete_by_version(cls, version_number: str):
+    def _delete_by_version(cls, version_number: str) -> None:
         """
         Deletes Sequences by version number.
         """
@@ -112,14 +112,14 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
             cls._delete_many(scenario.sequences.values())
 
     @classmethod
-    def _hard_delete(cls, sequence_id: SequenceId):
+    def _hard_delete(cls, sequence_id: SequenceId) -> None:
         sequence = cls._get(sequence_id)
         entity_ids_to_delete = cls._get_children_entity_ids(sequence)
         entity_ids_to_delete.sequence_ids.add(sequence.id)
         cls._delete_entities_of_multiple_types(entity_ids_to_delete)
 
     @classmethod
-    def _set(cls, sequence: Sequence):
+    def _set(cls, sequence: Sequence) -> None:
         """
         Save or update a Sequence.
         """
@@ -310,7 +310,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         callback: Callable[[Sequence, Job], None],
         params: Optional[List[Any]] = None,
         sequence: Optional[Sequence] = None,
-    ):
+    ) -> None:
         if sequence is None:
             sequences = cls._get_all()
             for pln in sequences:
@@ -324,7 +324,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         callback: Callable[[Sequence, Job], None],
         params: Optional[List[Any]] = None,
         sequence: Optional[Sequence] = None,
-    ):
+    ) -> None:
         if sequence is None:
             sequences = cls._get_all()
             for pln in sequences:
@@ -398,7 +398,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         return True if cls._get(entity_id) else False
 
     @classmethod
-    def _export(cls, id: str, folder_path: Union[str, pathlib.Path], **kwargs):
+    def _export(cls, id: str, folder_path: Union[str, pathlib.Path], **kwargs) -> None:
         """
         Export a Sequence entity.
         """

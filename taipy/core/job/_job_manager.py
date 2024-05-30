@@ -58,7 +58,7 @@ class _JobManager(_Manager[Job], _VersionMixin):
         return job
 
     @classmethod
-    def _delete(cls, job: Union[Job, JobId], force=False):
+    def _delete(cls, job: Union[Job, JobId], force=False) -> None:
         if isinstance(job, str):
             job = cls._get(job)
         if cls._is_deletable(job) or force:
@@ -69,7 +69,7 @@ class _JobManager(_Manager[Job], _VersionMixin):
             raise err
 
     @classmethod
-    def _cancel(cls, job: Union[str, Job]):
+    def _cancel(cls, job: Union[str, Job]) -> None:
         job = cls._get(job) if isinstance(job, str) else job
 
         from .._orchestrator._orchestrator_factory import _OrchestratorFactory
