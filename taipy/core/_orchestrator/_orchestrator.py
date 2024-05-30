@@ -35,7 +35,7 @@ class _Orchestrator(_AbstractOrchestrator):
     Handles the functional orchestrating.
     """
 
-    jobs_to_run: Queue[Job] = Queue()
+    jobs_to_run: Queue = Queue()
     blocked_jobs: List[Job] = []
 
     lock = Lock()
@@ -304,7 +304,7 @@ class _Orchestrator(_AbstractOrchestrator):
 
     @classmethod
     def __remove_jobs_to_run(cls, jobs: Set[Job]) -> None:
-        new_jobs_to_run: Queue[Job] = Queue()
+        new_jobs_to_run: Queue = Queue()
         while not cls.jobs_to_run.empty():
             current_job = cls.jobs_to_run.get()
             if current_job not in jobs:
