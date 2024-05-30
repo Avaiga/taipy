@@ -31,7 +31,7 @@ from ..reason._reason_factory import (
     _build_data_node_is_not_written,
     _build_not_submittable_entity_reason,
 )
-from ..reason.reason import Reason
+from ..reason.reason import Reasons
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
 from ..submission.submission import Submission
@@ -169,15 +169,15 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         return entity_ids
 
     @classmethod
-    def _is_submittable(cls, task: Union[Task, TaskId]) -> Reason:
+    def _is_submittable(cls, task: Union[Task, TaskId]) -> Reasons:
         if isinstance(task, str):
             task = cls._get(task)
         if not isinstance(task, Task):
             task = str(task)
-            reason = Reason(task)
+            reason = Reasons(task)
             reason._add_reason(task, _build_not_submittable_entity_reason(task))
         else:
-            reason = Reason(task.id)
+            reason = Reasons(task.id)
             data_manager = _DataManagerFactory._build_manager()
             for node in task.input.values():
                 node = data_manager._get(node)

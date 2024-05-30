@@ -20,7 +20,7 @@ from ..common._utils import _Subscriber
 from ..data.data_node import DataNode
 from ..job.job import Job
 from ..reason._reason_factory import _build_data_node_is_being_edited_reason, _build_data_node_is_not_written
-from ..reason.reason import Reason
+from ..reason.reason import Reasons
 from ..submission.submission import Submission
 from ..task.task import Task
 from ._dag import _DAG
@@ -83,14 +83,14 @@ class Submittable:
         all_data_nodes_in_dag = {node for node in dag.nodes if isinstance(node, DataNode)}
         return all_data_nodes_in_dag - self.__get_inputs(dag) - self.__get_outputs(dag)
 
-    def is_ready_to_run(self) -> Reason:
+    def is_ready_to_run(self) -> Reasons:
         """Indicate if the entity is ready to be run.
 
         Returns:
             A Reason object that can function as a Boolean value.
             which is True if the given entity is ready to be run or there is no reason to be blocked, False otherwise.
         """
-        reason = Reason(self._submittable_id)
+        reason = Reasons(self._submittable_id)
 
         for node in self.get_inputs():
             if node._edit_in_progress:

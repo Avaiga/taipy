@@ -32,7 +32,7 @@ from ..job.job import Job
 from ..notification import Event, EventEntityType, EventOperation, Notifier
 from ..notification.event import _make_event
 from ..reason._reason_factory import _build_not_submittable_entity_reason
-from ..reason.reason import Reason
+from ..reason.reason import Reasons
 from ..scenario._scenario_manager_factory import _ScenarioManagerFactory
 from ..scenario.scenario import Scenario
 from ..scenario.scenario_id import ScenarioId
@@ -344,13 +344,13 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         Notifier.publish(_make_event(sequence, EventOperation.UPDATE, attribute_name="subscribers"))
 
     @classmethod
-    def _is_submittable(cls, sequence: Union[Sequence, SequenceId]) -> Reason:
+    def _is_submittable(cls, sequence: Union[Sequence, SequenceId]) -> Reasons:
         if isinstance(sequence, str):
             sequence = cls._get(sequence)
 
         if not isinstance(sequence, Sequence):
             sequence = str(sequence)
-            reason = Reason(sequence)
+            reason = Reasons(sequence)
             reason._add_reason(sequence, _build_not_submittable_entity_reason(sequence))
             return reason
 

@@ -12,18 +12,18 @@
 from typing import Dict, Set
 
 
-class Reason:
+class Reasons:
     def __init__(self, entity_id: str) -> None:
         self.entity_id: str = entity_id
         self._reasons: Dict[str, Set[str]] = {}
 
-    def _add_reason(self, entity_id: str, reason: str) -> "Reason":
+    def _add_reason(self, entity_id: str, reason: str) -> "Reasons":
         if entity_id not in self._reasons:
             self._reasons[entity_id] = set()
         self._reasons[entity_id].add(reason)
         return self
 
-    def _remove_reason(self, entity_id: str, reason: str) -> "Reason":
+    def _remove_reason(self, entity_id: str, reason: str) -> "Reasons":
         if entity_id in self._reasons and reason in self._reasons[entity_id]:
             self._reasons[entity_id].remove(reason)
             if len(self._reasons[entity_id]) == 0:

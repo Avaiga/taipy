@@ -47,7 +47,7 @@ from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
 from ..reason._reason_factory import _build_not_submittable_entity_reason
-from ..reason.reason import Reason
+from ..reason.reason import Reasons
 from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from ..submission.submission import Submission
 from ..task._task_manager_factory import _TaskManagerFactory
@@ -198,13 +198,13 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         return scenario
 
     @classmethod
-    def _is_submittable(cls, scenario: Union[Scenario, ScenarioId]) -> Reason:
+    def _is_submittable(cls, scenario: Union[Scenario, ScenarioId]) -> Reasons:
         if isinstance(scenario, str):
             scenario = cls._get(scenario)
 
         if not isinstance(scenario, Scenario):
             scenario = str(scenario)
-            reason = Reason((scenario))
+            reason = Reasons((scenario))
             reason._add_reason(scenario, _build_not_submittable_entity_reason(scenario))
             return reason
 

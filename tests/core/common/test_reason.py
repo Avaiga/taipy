@@ -9,11 +9,11 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from taipy.core.reason.reason import Reason
+from taipy.core.reason.reason import Reasons
 
 
 def test_create_reason():
-    reason = Reason("entity_id")
+    reason = Reasons("entity_id")
     assert reason.entity_id == "entity_id"
     assert reason._reasons == {}
     assert reason
@@ -22,7 +22,7 @@ def test_create_reason():
 
 
 def test_add_and_remove_reason():
-    reason = Reason("entity_id")
+    reason = Reasons("entity_id")
     reason._add_reason("entity_id_1", "Some reason")
     assert reason._reasons == {"entity_id_1": {"Some reason"}}
     assert not reason
@@ -55,7 +55,7 @@ def test_add_and_remove_reason():
 
 
 def test_get_reason_string_from_reason():
-    reason = Reason("entity_id")
+    reason = Reasons("entity_id")
     reason._add_reason("entity_id_1", "Some reason")
     assert reason.reasons == "Some reason."
 
