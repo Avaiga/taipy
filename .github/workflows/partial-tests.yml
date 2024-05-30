@@ -78,7 +78,7 @@ jobs:
         if: steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true'
         id: hash-frontend
         run: |
-          pipenv run python tools/frontend/hash_frontend.py
+          pipenv run python tools/frontend/hash_source.py
           echo "HASH=$(hash.txt)" >> $GITHUB_OUTPUT
           rm hash.txt
 

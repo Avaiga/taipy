@@ -60,7 +60,7 @@ runs:
       if: inputs.install-gui
       id: hash-frontend
       run: |
-        pipenv run python tools/frontend/hash_frontend.py
+        pipenv run python tools/frontend/hash_source.py
         echo "HASH=$(hash.txt)" >> $GITHUB_OUTPUT
         rm hash.txt
       shell: bash

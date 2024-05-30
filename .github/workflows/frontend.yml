@@ -37,7 +37,7 @@ jobs:
       - name: Hash taipy-gui source code
         id: hash-taipy-gui-fe
         run: |
-          python tools/frontend/hash_frontend.py --taipy-gui-only
+          python tools/frontend/hash_source.py --taipy-gui-only
           echo "HASH=$(hash.txt)" >> $GITHUB_OUTPUT
           rm hash.txt
       - name: Restore cached frontend build
