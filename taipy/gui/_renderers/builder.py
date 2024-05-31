@@ -830,9 +830,6 @@ class _Builder:
                 if isinstance(value, (datetime, date, time)):
                     value = _date_to_string(value)
                 self.set_attribute(_to_camel_case(var_name), value)
-                    return self.set_attribute(_to_camel_case(var_name), _date_to_string(value))
-                else:
-                    self.set_attribute(_to_camel_case(var_name), value)
         return self
 
     def _set_labels(self, var_name: str = "labels"):
