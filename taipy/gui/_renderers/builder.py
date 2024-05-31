@@ -828,6 +828,8 @@ class _Builder:
                     if isinstance(value, (int, float)):
                         return self.__set_react_attribute(_to_camel_case(var_name), value)
                 if isinstance(value, (datetime, date, time)):
+                    value = _date_to_string(value)
+                self.set_attribute(_to_camel_case(var_name), value)
                     return self.set_attribute(_to_camel_case(var_name), _date_to_string(value))
                 else:
                     self.set_attribute(_to_camel_case(var_name), value)
