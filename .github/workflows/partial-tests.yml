@@ -81,7 +81,7 @@ jobs:
           pipenv run python tools/frontend/hash_source.py
           echo "HASH=$(cat hash.txt)" >> $GITHUB_OUTPUT
           rm hash.txt
-
+        shell: bash
       - name: Restore cached frontend build
         if: steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true'
         id: cache-fe-build
