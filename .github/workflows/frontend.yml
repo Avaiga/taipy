@@ -47,7 +47,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: taipy/gui/webapp
-          key: ${{ matrix.os }}-taipy-gui-build-${{ steps.hash-gui-fe.outputs.HASH }}
+          key: ${{ runner.os }}-taipy-gui-build-${{ steps.hash-gui-fe.outputs.HASH }}
 
       - name: Install dom dependencies
         if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
