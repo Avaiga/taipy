@@ -17,9 +17,10 @@ import networkx as nx
 
 from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
-from ..common.reason import Reason
 from ..data.data_node import DataNode
 from ..job.job import Job
+from ..reason._reason_factory import _build_data_node_is_being_edited_reason, _build_data_node_is_not_written
+from ..reason.reason import Reasons
 from ..submission.submission import Submission
 from ..task.task import Task
 from ._dag import _DAG
@@ -82,20 +83,20 @@ class Submittable:
         all_data_nodes_in_dag = {node for node in dag.nodes if isinstance(node, DataNode)}
         return all_data_nodes_in_dag - self.__get_inputs(dag) - self.__get_outputs(dag)
 
-    def is_ready_to_run(self) -> Reason:
+    def is_ready_to_run(self) -> Reasons:
         """Indicate if the entity is ready to be run.
 
         Returns:
             A Reason object that can function as a Boolean value.
             which is True if the given entity is ready to be run or there is no reason to be blocked, False otherwise.
         """
-        reason = Reason(self._submittable_id)
+        reason = Reasons(self._submittable_id)
 
         for node in self.get_inputs():
             if node._edit_in_progress:
-                reason._add_reason(node.id, node._build_edit_in_progress_reason())
+                reason._add_reason(node.id, _build_data_node_is_being_edited_reason(node.id))
             if not node._last_edit_date:
-                reason._add_reason(node.id, node._build_not_written_reason())
+                reason._add_reason(node.id, _build_data_node_is_not_written(node.id))
 
         return reason
 
