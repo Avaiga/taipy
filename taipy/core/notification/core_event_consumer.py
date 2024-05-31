@@ -23,6 +23,8 @@ class CoreEventConsumerBase(threading.Thread):
     It should be subclassed, and the `process_event` method should be implemented to define
     the custom logic for handling incoming events.
 
+    Subclasses should implement the `process_event` method to define their specific event handling behavior.
+
     Example usage:
 
     ```python
@@ -32,13 +34,12 @@ class CoreEventConsumerBase(threading.Thread):
             print(f"Received event created at : {event.creation_date}")
             pass
 
-    registration_id, registered_queue = Notifier.unregister(
-        entity_type=EventEntityType.CYCLE,
-        entity_id="CYCLE_cycle_1",
+    registration_id, registered_queue = Notifier.register(
+        entity_type=EventEntityType.SCENARIO,
         operation=EventOperation.CREATION
     )
 
-    consumer = MyEventConsumer("consumer_1", registered_queue)
+    consumer = MyEventConsumer(registration_id, registered_queue)
     consumer.start()
     # ...
     consumer.stop()
@@ -46,7 +47,11 @@ class CoreEventConsumerBase(threading.Thread):
     Notifier.unregister(registration_id)
     ```
 
-    Subclasses should implement the `process_event` method to define their specific event handling behavior.
+    Firstly, we would create a consumer class extending from CoreEventConsumerBase
+    and decide how to process the incoming events by defining the process_event.
+    Then, we would specify the type of event we want to receive by registering with the Notifier.
+    After that, we create an object of the consumer class by providing
+    the registration_id and registered_queue and start consuming the event.
 
     Attributes:
         queue (SimpleQueue): The queue from which events will be consumed.
