@@ -138,7 +138,7 @@ class Notifier:
         Example usage:
 
         ```python
-        registration_id, registered_queue = Notifier.unregister(
+        registration_id, registered_queue = Notifier.register(
             entity_type=EventEntityType.CYCLE,
             entity_id="CYCLE_cycle_1",
             operation=EventOperation.CREATION
