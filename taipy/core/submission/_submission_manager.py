@@ -54,7 +54,7 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
         return submission
 
     @classmethod
-    def _update_submission_status(cls, submission: Submission, job: Job):
+    def _update_submission_status(cls, submission: Submission, job: Job) -> None:
         with cls.__lock:
             submission = cls._get(submission)
 
@@ -95,25 +95,25 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
             # The submission_status is set later to make sure notification for updating
             # the submission_status attribute is triggered
             if submission._is_canceled:
-                cls._set_submission_status(submission, SubmissionStatus.CANCELED, job)
+                cls.__set_submission_status(submission, SubmissionStatus.CANCELED, job)
             elif submission._is_abandoned:
-                cls._set_submission_status(submission, SubmissionStatus.UNDEFINED, job)
+                cls.__set_submission_status(submission, SubmissionStatus.UNDEFINED, job)
             elif submission._running_jobs:
-                cls._set_submission_status(submission, SubmissionStatus.RUNNING, job)
+                cls.__set_submission_status(submission, SubmissionStatus.RUNNING, job)
             elif submission._pending_jobs:
-                cls._set_submission_status(submission, SubmissionStatus.PENDING, job)
+                cls.__set_submission_status(submission, SubmissionStatus.PENDING, job)
             elif submission._blocked_jobs:
-                cls._set_submission_status(submission, SubmissionStatus.BLOCKED, job)
+                cls.__set_submission_status(submission, SubmissionStatus.BLOCKED, job)
             elif submission._is_completed:
-                cls._set_submission_status(submission, SubmissionStatus.COMPLETED, job)
+                cls.__set_submission_status(submission, SubmissionStatus.COMPLETED, job)
             else:
-                cls._set_submission_status(submission, SubmissionStatus.UNDEFINED, job)
+                cls.__set_submission_status(submission, SubmissionStatus.UNDEFINED, job)
             cls.__logger.debug(
                 f"{job.id} status is {job_status}. Submission status set to `{submission._submission_status}`"
             )
 
     @classmethod
-    def _set_submission_status(cls, submission: Submission, new_submission_status: SubmissionStatus, job: Job):
+    def __set_submission_status(cls, submission: Submission, new_submission_status: SubmissionStatus, job: Job) -> None:
         if not submission._is_in_context:
             submission = cls._get(submission)
         _current_submission_status = submission._submission_status
@@ -147,7 +147,7 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
             return max(submissions_of_task)
 
     @classmethod
-    def _delete(cls, submission: Union[Submission, SubmissionId]):
+    def _delete(cls, submission: Union[Submission, SubmissionId]) -> None:
         if isinstance(submission, str):
             submission = cls._get(submission)
         if cls._is_deletable(submission):
@@ -158,14 +158,14 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
             raise err
 
     @classmethod
-    def _hard_delete(cls, submission_id: SubmissionId):
+    def _hard_delete(cls, submission_id: SubmissionId) -> None:
         submission = cls._get(submission_id)
         entity_ids_to_delete = cls._get_children_entity_ids(submission)
         entity_ids_to_delete.submission_ids.add(submission.id)
         cls._delete_entities_of_multiple_types(entity_ids_to_delete)
 
     @classmethod
-    def _get_children_entity_ids(cls, submission: Submission):
+    def _get_children_entity_ids(cls, submission: Submission) -> _EntityIds:
         entity_ids = _EntityIds()
 
         for job in submission.jobs:
@@ -174,7 +174,7 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
         return entity_ids
 
     @classmethod
-    def _is_deletable(cls, submission: Union[Submission, SubmissionId]) -> bool:  # type: ignore
+    def _is_deletable(cls, submission: Union[Submission, SubmissionId]) -> bool:
         if isinstance(submission, str):
             submission = cls._get(submission)
         return submission.is_finished() or submission.submission_status == SubmissionStatus.UNDEFINED
