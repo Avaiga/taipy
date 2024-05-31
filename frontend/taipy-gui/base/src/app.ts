@@ -40,6 +40,7 @@ export class TaipyApp {
         this.appId = "";
         this.path = path;
         this.socket = socket;
+        // Init socket io connection
         initSocket(socket, this);
     }
 
