@@ -73,7 +73,7 @@ runs:
         path: |
           taipy/gui/webapp
           taipy/gui_core/lib
-        key: ${{ runner.os }}-frontend-build-${{ steps.hash-frontend.outputs.HASH }}
+        key: frontend-build-${{ runner.os }}-${{ steps.hash-frontend.outputs.HASH }}
 
     - name: Frontend Bundle Build
       if: inputs.install-gui && steps.cache-fe-build.outputs.cache-hit != 'true'
