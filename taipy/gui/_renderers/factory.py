@@ -598,7 +598,7 @@ class _Factory:
             ]
         )
         ._set_propagate(),
-        "Progress": lambda gui, control_type, attrs: _Builder(
+        "progress": lambda gui, control_type, attrs: _Builder(
             gui=gui,
             control_type=control_type,
             element_name="Progress",
