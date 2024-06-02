@@ -10,52 +10,51 @@
 # specific language governing permissions and limitations under the License.
 
 from taipy.gui import Gui
-from tests.gui.helpers import Helpers
 
 
-def test_circular_progress_indeterminate_md(gui: Gui, helpers: type[Helpers]):
+def test_circular_progress_indeterminate_md(gui: Gui, helpers):
     md_string = "<|progress|>"
     expected_list = ["<Progress"]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_circular_progress_determinate_md(gui: Gui, helpers: type[Helpers]):
+def test_circular_progress_determinate_md(gui: Gui, helpers):
     md_string = "<|progress|value=50|showValue=True|>"
     expected_list = ["<Progress", 'value="50"']
     helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_linear_progress_indeterminate_md(gui: Gui, helpers: Helpers):
+def test_linear_progress_indeterminate_md(gui: Gui, helpers):
     md_string = "<|progress|linear=True|>"
     expected_list = ["<Progress", "linear"]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_linear_progress_determinate_md(gui: Gui, helpers: Helpers):
+def test_linear_progress_determinate_md(gui: Gui, helpers):
     md_string = "<|progress|value=50|showValue=True|linear=True|>"
     expected_list = ["<Progress", 'value="50"', "linear"]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_circular_progress_indeterminate_html(gui: Gui, helpers: Helpers):
+def test_circular_progress_indeterminate_html(gui: Gui, helpers):
     html_string = "<taipy:progress></taipy:progress>"
     expected_list = ["<Progress"]
     helpers.test_control_html(gui, html_string, expected_list)
 
 
-def test_circular_progress_determinate_html(gui: Gui, helpers: Helpers):
+def test_circular_progress_determinate_html(gui: Gui, helpers):
     html_string = '<taipy:progress showValue=True value="50"></taipy:progress>'
     expected_list = ["<Progress", 'value="50"']
     helpers.test_control_html(gui, html_string, expected_list)
 
 
-def test_linear_progress_indeterminate_html(gui: Gui, helpers: Helpers):
+def test_linear_progress_indeterminate_html(gui: Gui, helpers):
     html_string = "<taipy:progress linear=True></taipy:progress>"
     expected_list = ["<Progress", "linear"]
     helpers.test_control_html(gui, html_string, expected_list)
 
 
-def test_linear_progress_determinate_html(gui: Gui, helpers: Helpers):
+def test_linear_progress_determinate_html(gui: Gui, helpers):
     html_string = '<taipy:progress linear=True showValue=True value="50"></taipy:progress>'
     expected_list = ["<Progress", "linear", 'value="50"']
     helpers.test_control_html(gui, html_string, expected_list)

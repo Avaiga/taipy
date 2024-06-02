@@ -11,10 +11,9 @@
 
 import taipy.gui.builder as tgb
 from taipy.gui import Gui
-from tests.gui.helpers import Helpers
 
 
-def test_progress_builder(gui: Gui, helpers: type[Helpers]):
+def test_progress_builder(gui: Gui, helpers):
     with tgb.Page(frame=None) as page:
         tgb.progress()  # type: ignore[attr-defined]
     expected_list = ["<Progress"]
