@@ -1040,16 +1040,33 @@
                 ],
                 "properties": [
                     {
-                        "name": "filter",
+                        "name": "label",
+                        "type": "str",
+                        "default_value": "None",
+                        "doc": "The label associated with the selector when in dropdown mode."
+                    },
+                    {
+                        "name": "mode",
+                        "type": "str",
+                        "doc": "Define the way the selector is displayed:<ul><li>&quot;radio&quot;: list of radio buttons</li><li>&quot;check&quot;: list of check buttons</li><li>any other value: selector as usual."
+                    },
+                    {
+                        "name": "dropdown",
                         "type": "bool",
                         "default_value": "False",
-                        "doc": "If True, this control is combined with a filter input area."
+                        "doc": "If True, the list of items is shown in a dropdown menu.<br/><br/>You cannot use the filter in that situation."
                     },
                     {
                         "name": "multiple",
                         "type": "bool",
                         "default_value": "False",
                         "doc": "If True, the user can select multiple items."
+                    },
+                    {
+                        "name": "filter",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, this control is combined with a filter input area."
                     },
                     {
                         "name": "width",
@@ -1061,23 +1078,6 @@
                         "name": "height",
                         "type": "str|int",
                         "doc": "The height, in CSS units, of this element."
-                    },
-                    {
-                        "name": "dropdown",
-                        "type": "bool",
-                        "default_value": "False",
-                        "doc": "If True, the list of items is shown in a dropdown menu.<br/><br/>You cannot use the filter in that situation."
-                    },
-                    {
-                        "name": "label",
-                        "type": "str",
-                        "default_value": "None",
-                        "doc": "The label associated with the selector when in dropdown mode."
-                    },
-                    {
-                        "name": "mode",
-                        "type": "str",
-                        "doc": "Define the way the selector is displayed:<ul><li>&quot;radio&quot;: list of radio buttons</li><li>&quot;check&quot;: list of check buttons</li><li>any other value: selector as usual."
                     }
                 ]
             }
