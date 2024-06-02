@@ -64,7 +64,7 @@ def test_show_decrease_delta_value(page: Page, gui: Gui, helpers):
     assert delta_value == "▼−20"
 
 
-@pytest.mark.extension
+@pytest.mark.teste2e
 def test_show_linear_chart(page: Page, gui: Gui, helpers):
     page_md = """
 <|100|metric|delta=-20|type=linear|>
@@ -78,7 +78,7 @@ def test_show_linear_chart(page: Page, gui: Gui, helpers):
     assert chart.is_visible()
 
 
-@pytest.mark.extension
+@pytest.mark.teste2e
 def test_show_circular_chart_as_default_type(page: Page, gui: Gui, helpers):
     page_md = """
 <|100|metric|>
@@ -92,7 +92,7 @@ def test_show_circular_chart_as_default_type(page: Page, gui: Gui, helpers):
     assert chart.is_visible()
 
 
-@pytest.mark.extension
+@pytest.mark.teste2e
 def test_format_converter_integer_to_binary(page: Page, gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|delta=20|format=%b|>
@@ -107,7 +107,7 @@ def test_format_converter_integer_to_binary(page: Page, gui: Gui, helpers):
     assert number.text_content() == "110010"
 
 
-@pytest.mark.extension
+@pytest.mark.teste2e
 def test_format_converter_integer_to_signed_decimal_d_type(page: Page, gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|delta=20|format=%d|>
@@ -122,7 +122,7 @@ def test_format_converter_integer_to_signed_decimal_d_type(page: Page, gui: Gui,
     assert number.text_content() == "50"
 
 
-@pytest.mark.extension
+@pytest.mark.teste2e
 def test_format_converter_integer_to_signed_decimal_i_type(page: Page, gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|delta=20|format=%i|>
@@ -137,7 +137,7 @@ def test_format_converter_integer_to_signed_decimal_i_type(page: Page, gui: Gui,
     assert number.text_content() == "50"
 
 
-@pytest.mark.extension
+@pytest.mark.teste2e
 def test_format_converter_yields_float_using_science_notation(page: Page, gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|delta=20|format=%e|>
@@ -152,7 +152,7 @@ def test_format_converter_yields_float_using_science_notation(page: Page, gui: G
     assert number.text_content() == "5.000000e+1"
 
 
-@pytest.mark.extension
+@pytest.mark.teste2e
 def test_format_converter_yields_float_using_fixed_point_notation_f_type(page: Page, gui: Gui, helpers):
     page_md = """
 <|99.99|metric|show_value=True|delta=20|format=%.2f|>
@@ -167,7 +167,7 @@ def test_format_converter_yields_float_using_fixed_point_notation_f_type(page: P
     assert number.text_content() == "99.99"
 
 
-@pytest.mark.extension
+@pytest.mark.teste2e
 def test_format_converter_yields_float_using_fixed_point_notation_g_type(page: Page, gui: Gui, helpers):
     page_md = """
 <|50.555|metric|show_value=True|delta=20|format=%.2g|>
@@ -182,7 +182,7 @@ def test_format_converter_yields_float_using_fixed_point_notation_g_type(page: P
     assert number.text_content() == "51"
 
 
-@pytest.mark.extension
+@pytest.mark.teste2e
 def test_format_converter_yields_integer_as_octal(page: Page, gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|delta=20|format=%o|>
@@ -197,7 +197,7 @@ def test_format_converter_yields_integer_as_octal(page: Page, gui: Gui, helpers)
     assert number.text_content() == "62"
 
 
-@pytest.mark.extension
+@pytest.mark.teste2e
 def test_format_converter_yields_integer_as_hexadecimal(page: Page, gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|delta=20|format=%x|>
@@ -212,7 +212,7 @@ def test_format_converter_yields_integer_as_hexadecimal(page: Page, gui: Gui, he
     assert number.text_content() == "32"
 
 
-@pytest.mark.extension
+@pytest.mark.teste2e
 def test_format_converter_yields_integer_as_uppercase_hexadecimal(page: Page, gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|delta=20|format=%X|>
@@ -227,7 +227,7 @@ def test_format_converter_yields_integer_as_uppercase_hexadecimal(page: Page, gu
     assert number.text_content() == "32"
 
 
-@pytest.mark.extension
+@pytest.mark.teste2e
 def test_format_converter_yields_integer_as_unsigned_decimal(page: Page, gui: Gui, helpers):
     page_md = """
 <|-50|metric|show_value=True|delta=20|format=%u|>
@@ -242,7 +242,7 @@ def test_format_converter_yields_integer_as_unsigned_decimal(page: Page, gui: Gu
     assert number.text_content() == "(50)"
 
 
-@pytest.mark.extension
+@pytest.mark.teste2e
 def test_format_converter_yields_edge_cases(page: Page, gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|format=a%%b%dc%%d|>

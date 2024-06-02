@@ -13,11 +13,11 @@
 
 import React, {CSSProperties, lazy, Suspense, useMemo} from 'react';
 import {Data} from "plotly.js";
+import Box from "@mui/material/Box";
+import Skeleton from "@mui/material/Skeleton";
 import {useClassNames, useDynamicJsonProperty, useDynamicProperty} from "../../utils/hooks";
 import {extractPrefix, extractSuffix, sprintfToD3Converter} from "../../utils/formatConversion";
 import {TaipyBaseProps, TaipyHoverProps} from "./utils";
-import Box from "@mui/material/Box";
-import Skeleton from "@mui/material/Skeleton";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -67,15 +67,15 @@ const Metric = (props: MetricProps) => {
                 type: "indicator",
                 mode: "gauge" + (showValue ? "+number" : "") + (delta !== undefined ? "+delta" : ""),
                 number: {
-                    prefix: extractPrefix(props.format !== undefined ? props.format : ""),
-                    suffix: extractSuffix(props.format !== undefined ? props.format : ""),
-                    valueformat: sprintfToD3Converter(props.format !== undefined ? props.format : ""),
+                    prefix: extractPrefix(props.format),
+                    suffix: extractSuffix(props.format),
+                    valueformat: sprintfToD3Converter(props.format),
                 },
                 delta: {
                     reference: typeof value === 'number' && typeof delta === 'number' ? value - delta : undefined,
-                    prefix: extractPrefix(props.deltaFormat !== undefined ? props.deltaFormat : ""),
-                    suffix: extractSuffix(props.deltaFormat !== undefined ? props.deltaFormat : ""),
-                    valueformat: sprintfToD3Converter(props.deltaFormat !== undefined ? props.deltaFormat : "")
+                    prefix: extractPrefix(props.deltaFormat),
+                    suffix: extractSuffix(props.deltaFormat),
+                    valueformat: sprintfToD3Converter(props.deltaFormat)
                 },
                 gauge: {
                     axis: {

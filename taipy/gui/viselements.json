@@ -899,13 +899,11 @@
                     {
                         "name": "format",
                         "type": "str",
-                        "default_value": "None",
                         "doc": "The format to use when displaying the value.<br/>This uses the <code>printf</code> syntax."
                     },
                     {
                         "name": "delta_format",
                         "type": "str",
-                        "default_value": "None",
                         "doc": "The format to use when displaying the delta value.<br/>This uses the <code>printf</code> syntax."
                     }
                 ]
