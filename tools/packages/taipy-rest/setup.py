@@ -8,15 +8,17 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-import json
 
+"""The setup script for taipy-rest package"""
+
+import json
 from pathlib import Path
 
 from setuptools import find_packages, setup
 
 root_folder = Path(__file__).parent
 
-readme = Path(root_folder / "README.md").read_text("UTF-8")
+package_desc = Path(root_folder / "package_desc.md").read_text("UTF-8")
 
 version_path = "taipy/rest/version.json"
 
@@ -39,11 +41,12 @@ setup(
     author_email="dev@taipy.io",
     packages=find_packages(where=root_folder, include=["taipy", "taipy.rest", "taipy.rest.*"]),
     include_package_data=True,
-    long_description=readme,
+    long_description=package_desc,
     long_description_content_type="text/markdown",
     description="Library to expose taipy-core REST APIs.",
     license="Apache License 2.0",
     classifiers=[
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Natural Language :: English",
@@ -53,6 +56,21 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Topic :: Software Development",
+        "Topic :: Scientific/Engineering",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: POSIX",
+        "Operating System :: Unix",
+        "Operating System :: MacOS",
     ],
     install_requires=requirements,
+    project_urls={
+        "Homepage": "https://www.taipy.io",
+        "Documentation": "https://docs.taipy.io",
+        "Source": "https://github.com/Avaiga/taipy",
+        "Download": "https://pypi.org/project/taipy/#files",
+        "Tracker": "https://github.com/Avaiga/taipy/issues",
+        "Security": "https://github.com/Avaiga/taipy?tab=security-ov-file#readme",
+        f"Release notes": "https://docs.taipy.io/en/release-{version_string}/relnotes/",
+    },
 )

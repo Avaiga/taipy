@@ -12,10 +12,10 @@ You can install the development version of *taipy-config* with `pip` and `git` d
 pip install git+https://git@github.com/Avaiga/taipy
 ```
 
-This command installs the development version of _taipy_ package in the Python environment with all
-its dependencies, including the _taipy-config_ package.
+This command installs the development version of *taipy* package in the Python environment with all
+its dependencies, including the *taipy-config* package.
 
-If you need the source code for _taipy-config_ on your system so you can see how things are done or
+If you need the source code for *taipy-config* on your system so you can see how things are done or
 maybe participate in the improvement of the packages, you can clone the GitHub repository:
 
 ```bash
