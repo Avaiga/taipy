@@ -144,7 +144,7 @@ const FileSelector = (props: FileSelectorProps) => {
     }, [handleDrop, handleDragLeave, handleDragOverWithLabel]);
 
     return (
-        <label htmlFor={inputId}>
+        <label htmlFor={inputId} className={className}>
             <input
                 style={noDisplayStyle}
                 id={inputId}
@@ -163,7 +163,6 @@ const FileSelector = (props: FileSelectorProps) => {
                     disabled={!active || upload}
                     sx={dropSx}
                     ref={butRef}
-                    className={className}
                 >
                     <UploadFile /> {dropLabel || label || defaultLabel}
                 </Button>

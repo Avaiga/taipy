@@ -22,7 +22,7 @@
 **************************************************/
 
 /* fullwidth :  */
-.taipy-file-selector.fullwidth {
+.taipy-file-selector.fullwidth [role='button'] {
     display: flex;
     width: 100%;
 }

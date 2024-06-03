@@ -22,7 +22,7 @@
 **************************************************/
 
 /* fullwidth :  */
-.taipy-file-download.fullwidth {
+.taipy-file-download.fullwidth button {
     display: flex;
     width: 100%;
 }
