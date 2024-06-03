@@ -75,7 +75,7 @@ export const sprintfToD3Converter = (fmt?: string): string => {
         placeholderValue = (sprintf_fmt_arr[objectIndex] as { placeholder: string }).placeholder;
     }
 
-    if (placeholderValue === undefined) {
+    if (!placeholderValue) {
         return "";
     }
 
@@ -106,6 +106,7 @@ export const sprintfToD3Converter = (fmt?: string): string => {
  * a string that represents the prefix of the format string. If no format string is provided, it returns an empty string.
  */
 export const extractPrefix = (fmt?: string): string => {
+    if (!fmt) return "";
     const sprintf_fmt_arr = sprintfParse(fmt);
     const objectIndex = sprintf_fmt_arr.findIndex((element) => typeof element === 'object');
     return sprintf_fmt_arr.slice(0, objectIndex).join('');
@@ -116,6 +117,7 @@ export const extractPrefix = (fmt?: string): string => {
  * a string that represents the suffix of the format string. If no format string is provided, it returns an empty string.
  */
 export const extractSuffix = (fmt?: string): string => {
+    if (!fmt) return "";
     const sprintf_fmt_arr = sprintfParse(fmt);
     const objectIndex = sprintf_fmt_arr.findIndex((element) => typeof element === 'object');
     return sprintf_fmt_arr.slice(objectIndex + 1).join('');
