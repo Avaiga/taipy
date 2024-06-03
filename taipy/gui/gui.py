@@ -963,7 +963,7 @@ class Gui:
                                 part_file_path.unlink()
                     except EnvironmentError as ee:  # pragma: no cover
                         _warn("Cannot group file after chunk upload", ee)
-                        return
+                        return (f"Cannot group file after chunk upload for {file.filename}", 404)
                 # notify the file is uploaded
                 newvalue = str(file_path)
                 if multiple:
