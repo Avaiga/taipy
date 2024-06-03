@@ -93,11 +93,11 @@ const FileDownload = (props: FileDownloadProps) => {
     const aProps = useMemo(() => (bypassPreview ? {} : { target: "_blank", rel: "noreferrer" }), [bypassPreview]);
 
     return render ? (
-        <label htmlFor={linkId} className={className}>
+        <label htmlFor={linkId}>
             <a style={noDisplayStyle} id={linkId} download={download} {...aProps} ref={aRef} />
             {auto ? null : (
                 <Tooltip title={hover || ""}>
-                    <Button id={id} variant="outlined" aria-label="download" disabled={!active} onClick={clickHandler}>
+                    <Button id={id} variant="outlined" aria-label="download" disabled={!active} onClick={clickHandler} className={className}>
                         <FileDownloadIco /> {label || defaultLabel}
                     </Button>
                 </Tooltip>
