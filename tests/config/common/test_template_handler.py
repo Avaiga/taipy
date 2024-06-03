@@ -127,7 +127,7 @@ def test_to_bool():
     with pytest.raises(InconsistentEnvVariableError):
         _TemplateHandler._to_bool("no")
     with pytest.raises(InconsistentEnvVariableError):
-        _TemplateHandler._to_bool("tru")
+        _TemplateHandler._to_bool("tru") # codespell:ignore tru
     with pytest.raises(InconsistentEnvVariableError):
         _TemplateHandler._to_bool("tru_e")
 

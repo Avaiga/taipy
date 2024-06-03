@@ -17,6 +17,8 @@ import Login from "../components/Taipy/Login";
 import Router from "../components/Router";
 import Table from "../components/Taipy/Table";
 import TableFilter, { FilterDesc } from "../components/Taipy/TableFilter";
+import TableSort, { SortDesc } from "../components/Taipy/TableSort";
+import Metric from "../components/Taipy/Metric";
 import { useLovListMemo, LoV, LoVElt } from "../components/Taipy/lovUtils";
 import { LovItem } from "../utils/lov";
 import { getUpdateVar } from "../components/Taipy/utils";
@@ -27,6 +29,7 @@ import {
     useClassNames,
     useDispatchRequestUpdateOnFirstRender,
     useDispatch,
+    useDynamicJsonProperty,
     useDynamicProperty,
     useModule,
 } from "../utils/hooks";
@@ -44,6 +47,8 @@ export {
     Router,
     Table,
     TableFilter,
+    TableSort,
+    Metric,
     TaipyContext as Context,
     createRequestDataUpdateAction,
     createRequestUpdateAction,
@@ -53,6 +58,7 @@ export {
     useClassNames,
     useDispatchRequestUpdateOnFirstRender,
     useDispatch,
+    useDynamicJsonProperty,
     useDynamicProperty,
     useLovListMemo,
     useModule,
@@ -66,6 +72,7 @@ export type {
     LovItem,
     RowType,
     RowValue,
+    SortDesc,
     TaipyStore as Store,
     TaipyState as State,
     TaipyBaseAction as Action,

@@ -31,6 +31,7 @@ class _Factory:
 
     __CONTROL_DEFAULT_PROP_NAME = {
         "button": "label",
+        "chat": "messages",
         "chart": "data",
         "content": "value",
         "date": "date",
@@ -56,6 +57,7 @@ class _Factory:
         "text": "value",
         "toggle": "value",
         "tree": "value",
+        "metric": "value"
     }
 
     _TEXT_ATTRIBUTES = ["format", "id", "hover_text", "raw"]
@@ -79,6 +81,23 @@ class _Factory:
                 ("on_action", PropertyType.function),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
+            ]
+        ),
+        "chat": lambda gui, control_type, attrs: _Builder(
+            gui=gui, control_type=control_type, element_name="Chat", attributes=attrs, default_value=None
+        )
+        .set_value_and_default(with_update=True, with_default=False, var_type=PropertyType.data)
+        .set_attributes(
+            [
+                ("id",),
+                ("on_action", PropertyType.function),
+                ("active", PropertyType.dynamic_boolean, True),
+                ("hover_text", PropertyType.dynamic_string),
+                ("with_input", PropertyType.dynamic_boolean, True),
+                ("users", PropertyType.lov),
+                ("sender_id",),
+                ("height",),
+                ("page_size", PropertyType.number, 50),
             ]
         ),
         "chart": lambda gui, control_type, attrs: _Builder(
@@ -331,6 +350,29 @@ class _Factory:
             ]
         )
         ._set_propagate(),
+        "metric": lambda gui, control_type, attrs: _Builder(
+            gui=gui,
+            control_type=control_type,
+            element_name="Metric",
+            attributes=attrs,
+        )
+        .set_value_and_default(var_type=PropertyType.dynamic_number, native_type=True)
+        .set_attributes(
+            [
+                ("id",),
+                ("active", PropertyType.dynamic_boolean, True),
+                ("layout", PropertyType.dynamic_dict),
+                ("style", PropertyType.dynamic_dict),
+                ("type", PropertyType.string, "circular"),
+                ("min", PropertyType.number, 0),
+                ("max", PropertyType.number, 100),
+                ("delta", PropertyType.dynamic_number),
+                ("threshold", PropertyType.dynamic_number),
+                ("width", PropertyType.string_or_number),
+                ("height", PropertyType.string_or_number),
+                ("show_value", PropertyType.boolean, True),
+            ]
+        ),
         "navbar": lambda gui, control_type, attrs: _Builder(
             gui=gui, control_type=control_type, element_name="NavBar", attributes=attrs, default_value=None
         ).set_attributes(

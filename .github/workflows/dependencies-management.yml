@@ -12,8 +12,8 @@ name: Dependencies management
 
 on:
   schedule:
-    # Run each Sunday at mid day
-    - cron: 00 12 * * 0
+    # Run every 2 weeks on Sunday at mid day UTC
+    - cron: 00 12 */14 * 0
 
   workflow_dispatch:
 

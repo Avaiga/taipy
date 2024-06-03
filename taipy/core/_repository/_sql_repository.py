@@ -32,7 +32,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     def __init__(self, model_type: Type[ModelType], converter: Type[Converter]):
         """
         Holds common methods to be used and extended when the need for saving
-        dataclasses in a SqlLite database.
+        dataclasses in a sqlite database.
 
         Some lines have type: ignore because MyPy won't recognize some generic attributes. This
         should be revised in the future.

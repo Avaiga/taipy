@@ -55,6 +55,40 @@ class Scenario(_Entity, Submittable, _Labeled):
     solve the Business case. It also holds a set of additional data nodes (instances of `DataNode` class)
     for extra data related to the scenario.
 
+    !!! note
+
+        It is not recommended to instantiate a `Scenario` directly. Instead, it should be
+        created with the `create_scenario()^` function.
+
+    !!! Example
+
+        ```python
+        import taipy as tp
+        from taipy import Config
+
+        def by_two(x: int):
+            return x * 2
+
+        # Configure scenarios
+        input_cfg = Config.configure_data_node("my_input")
+        result_cfg = Config.configure_data_node("my_result")
+        task_cfg = Config.configure_task("my_double", function=by_two, input=input_cfg, output=result_cfg)
+        scenario_cfg = Config.configure_scenario("my_scenario", task_configs=[task_cfg])
+
+        # Create a new scenario from the configuration
+        scenario = tp.create_scenario(scenario_cfg)
+
+        # Write the input data and submit the scenario
+        scenario.my_input.write(3)
+        scenario.submit()
+
+        # Read the result
+        print(scenario.my_result.read())  # Output: 6
+
+        # Retrieve all scenarios
+        all_scenarios = tp.get_scenarios()
+        ```
+
     Attributes:
         config_id (str): The identifier of the `ScenarioConfig^`.
         tasks (Set[Task^]): The set of tasks.
@@ -234,12 +268,11 @@ class Scenario(_Entity, Submittable, _Labeled):
         _scenario_task_ids = {task.id if isinstance(task, Task) else task for task in _scenario._tasks}
         _sequence_task_ids: Set[TaskId] = {task.id if isinstance(task, Task) else task for task in tasks}
         self.__check_sequence_tasks_exist_in_scenario_tasks(name, _sequence_task_ids, self.id, _scenario_task_ids)
+
         from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
 
         seq_manager = _SequenceManagerFactory._build_manager()
         seq = seq_manager._create(name, tasks, subscribers or [], properties or {}, self.id, self.version)
-        if not seq._is_consistent():
-            raise InvalidSequence(name)
 
         _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
         _sequences.update(
@@ -357,7 +390,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         sequence_manager = _SequenceManagerFactory._build_manager()
 
         for sequence_name, sequence_data in self._sequences.items():
-            p = sequence_manager._create(
+            sequence = sequence_manager._build_sequence(
                 sequence_name,
                 sequence_data.get(self._SEQUENCE_TASKS_KEY, []),
                 sequence_data.get(self._SEQUENCE_SUBSCRIBERS_KEY, []),
@@ -365,9 +398,9 @@ class Scenario(_Entity, Submittable, _Labeled):
                 self.id,
                 self.version,
             )
-            if not isinstance(p, Sequence):
+            if not isinstance(sequence, Sequence):
                 raise NonExistingSequence(sequence_name, self.id)
-            _sequences[sequence_name] = p
+            _sequences[sequence_name] = sequence
         return _sequences
 
     @property  # type: ignore

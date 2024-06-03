@@ -182,12 +182,6 @@ And the final result:
 
 &nbsp;
 
-## ☁️ Taipy cloud
-With Taipy Cloud, you can deploy your Taipy applications in a few clicks and for free!
-To learn more about Taipy Cloud, please refer to the [Taipy Cloud Documentation](https://docs.taipy.io/en/latest/cloud/).
-
-![TaipyCloud](https://github.com/Avaiga/taipy/raw/develop/readme_img/readme_cloud_demo.gif)
-
 ## ⚒️ Contributing
 Want to help build Taipy? Check out our [Contributing Guide](https://github.com/Avaiga/taipy/blob/develop/CONTRIBUTING.md).
 

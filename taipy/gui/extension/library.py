@@ -184,14 +184,16 @@ class Element:
                             hash_value = "None"
                         val = val[: m.start()] + hash_value + val[m.end() :]
                     # handling unique id replacement in inner properties <tp:uniq:...>
+                    has_uniq = False
                     while m := Element.__RE_UNIQUE_VAR.search(val):
+                        has_uniq = True
                         id = uniques.get(m.group(1))
                         if id is None:
                             id = len(uniques) + 1
                             uniques[m.group(1)] = id
                         val = f"{val[: m.start()]}{counter}{id}{val[m.end() :]}"
-                        if gui._is_expression(val):
-                            gui._evaluate_expr(val, True)
+                    if has_uniq and gui._is_expression(val):
+                        gui._evaluate_expr(val, True)
 
                 attributes[prop] = val
         # this modifies attributes

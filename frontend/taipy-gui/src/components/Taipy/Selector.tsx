@@ -11,7 +11,18 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useCallback, useEffect, useMemo, CSSProperties, MouseEvent, ChangeEvent } from "react";
+import React, {
+    useState,
+    useCallback,
+    useEffect,
+    useMemo,
+    CSSProperties,
+    MouseEvent,
+    ChangeEvent,
+    SyntheticEvent,
+    HTMLAttributes,
+} from "react";
+import Autocomplete from "@mui/material/Autocomplete";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Checkbox from "@mui/material/Checkbox";
@@ -33,6 +44,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
+import TextField from "@mui/material/TextField";
 import { Theme, useTheme } from "@mui/material";
 
 import { doNotPropagateEvent, getSuffixedClassNames, getUpdateVar } from "./utils";
@@ -46,6 +58,7 @@ import {
     useModule,
 } from "../../utils/hooks";
 import { Icon } from "../../utils/icon";
+import { LovItem } from "../../utils/lov";
 
 const MultipleItem = ({ value, clickHandler, selectedValue, item, disabled }: ItemProps) => (
     <ListItemButton onClick={clickHandler} data-id={value} dense disabled={disabled}>
@@ -81,6 +94,26 @@ const getMenuProps = (height?: string | number) => ({
 const getStyles = (id: string, ids: readonly string[], theme: Theme) => ({
     fontWeight: ids.indexOf(id) === -1 ? theme.typography.fontWeightRegular : theme.typography.fontWeightMedium,
 });
+
+const getOptionLabel = (option: LovItem) => (typeof option.item === "string" ? option.item : option.item?.text) || "";
+const getOptionKey = (option: LovItem) => "" + option.id;
+const isOptionEqualToValue = (option: LovItem, value: LovItem) => option.id == value.id;
+const renderOption = (props: HTMLAttributes<HTMLLIElement>, option: LovItem) => (
+    <li {...props}>{typeof option.item === "string" ? option.item : <LovImage item={option.item} />}</li>
+);
+
+const getLovItemsFromStr = (value: string | string[] | undefined, lovList: LovItem[], multiple: boolean) => {
+    const val = multiple
+        ? Array.isArray(value)
+            ? value
+            : [value]
+        : Array.isArray(value) && value.length
+        ? value[0]
+        : value;
+    return Array.isArray(val)
+        ? (val.map((v) => lovList.find((item) => item.id == "" + v)).filter((i) => i) as LovItem[])
+        : (val && lovList.find((item) => item.id == "" + val)) || null;
+};
 
 const renderBoxSx = {
     display: "flex",
@@ -137,16 +170,17 @@ const Selector = (props: SelTreeProps) => {
         if (height !== undefined) {
             sx = { ...sx, maxHeight: height };
         }
-        if (width !== undefined) {
-            // sx = { ...sx, maxWidth: width };
-        }
         return sx;
-    }, [height, width]);
-    const controlSx = useMemo(() => ({ my: 1, mx: 0, width: width, display: "flex" }), [width]);
+    }, [height]);
+    const controlSx = useMemo(
+        () => ({ my: 1, mx: 0, maxWidth: width, display: "flex", "& .MuiFormControl-root": { maxWidth: "unset" } }),
+        [width]
+    );
 
     useEffect(() => {
         if (value !== undefined && value !== null) {
             setSelectedValue(Array.isArray(value) ? value.map((v) => "" + v) : ["" + value]);
+            setAutoValue(getLovItemsFromStr(value, lovList, multiple));
         } else if (defaultValue) {
             let parsedValue;
             try {
@@ -155,8 +189,9 @@ const Selector = (props: SelTreeProps) => {
                 parsedValue = defaultValue;
             }
             setSelectedValue(Array.isArray(parsedValue) ? parsedValue : [parsedValue]);
+            setAutoValue(getLovItemsFromStr(parsedValue, lovList, multiple));
         }
-    }, [defaultValue, value]);
+    }, [defaultValue, value, lovList, multiple]);
 
     const selectHandler = useCallback(
         (key: string) => {
@@ -238,12 +273,31 @@ const Selector = (props: SelTreeProps) => {
         [dispatch, updateVarName, propagate, updateVars, valueById, props.onChange, module]
     );
 
+    const [autoValue, setAutoValue] = useState<LovItem | LovItem[] | null>(() => (multiple ? [] : null));
+    const handleAutoChange = useCallback(
+        (e: SyntheticEvent, sel: LovItem | LovItem[] | null) => {
+            setAutoValue(sel);
+            setSelectedValue(Array.isArray(sel) ? sel.map((item) => item.id) : sel ? [sel.id] : []);
+            dispatch(
+                createSendUpdateAction(
+                    updateVarName,
+                    Array.isArray(sel) ? sel.map((item) => item.id) : sel?.id,
+                    module,
+                    props.onChange,
+                    propagate,
+                    valueById ? undefined : getUpdateVar(updateVars, "lov")
+                )
+            );
+        },
+        [dispatch, updateVarName, propagate, updateVars, valueById, props.onChange, module]
+    );
+
     const handleDelete = useCallback(
         (e: React.SyntheticEvent) => {
             const id = e.currentTarget?.parentElement?.getAttribute("data-id");
             id &&
-                setSelectedValue((vals) => {
-                    const keys = vals.filter((valId) => valId !== id);
+                setSelectedValue((oldKeys) => {
+                    const keys = oldKeys.filter((valId) => valId !== id);
                     dispatch(
                         createSendUpdateAction(
                             updateVarName,
@@ -263,20 +317,12 @@ const Selector = (props: SelTreeProps) => {
     const handleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value), []);
 
     const dropdownValue = ((dropdown || isRadio) &&
-        (multiple ? selectedValue : selectedValue.length > 0 ? selectedValue[0] : "")) as string[];
+        (multiple ? selectedValue : selectedValue.length ? selectedValue[0] : "")) as string[];
 
-    return (
+    return isRadio || isCheck ? (
         <FormControl sx={controlSx} className={className}>
-            {props.label ? (
-                isRadio || isCheck ? (
-                    <FormLabel>{props.label}</FormLabel>
-                ) : (
-                    <InputLabel disableAnimation className={!dropdown ? "static-label" : undefined}>
-                        {props.label}
-                    </InputLabel>
-                )
-            ) : null}
-            <Tooltip title={hover || ""} placement={dropdown ? "top" : undefined}>
+            {props.label ? <FormLabel>{props.label}</FormLabel> : null}
+            <Tooltip title={hover || ""}>
                 {isRadio ? (
                     <RadioGroup
                         value={dropdownValue}
@@ -296,7 +342,7 @@ const Selector = (props: SelTreeProps) => {
                             />
                         ))}
                     </RadioGroup>
-                ) : isCheck ? (
+                ) : (
                     <FormGroup className={getSuffixedClassNames(className, "-check-group")}>
                         {lovList.map((item) => (
                             <FormControlLabel
@@ -316,7 +362,32 @@ const Selector = (props: SelTreeProps) => {
                             ></FormControlLabel>
                         ))}
                     </FormGroup>
-                ) : dropdown ? (
+                )}
+            </Tooltip>
+        </FormControl>
+    ) : dropdown ? (
+        filter ? (
+            <Tooltip title={hover || ""} placement="top">
+                <Autocomplete
+                    id={id}
+                    disabled={!active}
+                    multiple={multiple}
+                    options={lovList}
+                    value={autoValue}
+                    onChange={handleAutoChange}
+                    getOptionLabel={getOptionLabel}
+                    getOptionKey={getOptionKey}
+                    isOptionEqualToValue={isOptionEqualToValue}
+                    sx={controlSx}
+                    className={className}
+                    renderInput={(params) => <TextField {...params} label={props.label} margin="dense" />}
+                    renderOption={renderOption}
+                />
+            </Tooltip>
+        ) : (
+            <FormControl sx={controlSx} className={className}>
+                {props.label ? <InputLabel disableAnimation>{props.label}</InputLabel> : null}
+                <Tooltip title={hover || ""} placement="top">
                     <Select
                         id={id}
                         multiple={multiple}
@@ -364,51 +435,65 @@ const Selector = (props: SelTreeProps) => {
                         MenuProps={getMenuProps(height)}
                     >
                         {lovList.map((item) => (
-                            <MenuItem key={item.id} value={item.id} style={getStyles(item.id, selectedValue, theme)} disabled={item.id === null}>
+                            <MenuItem
+                                key={item.id}
+                                value={item.id}
+                                style={getStyles(item.id, selectedValue, theme)}
+                                disabled={item.id === null}
+                            >
                                 {typeof item.item === "string" ? item.item : <LovImage item={item.item as Icon} />}
                             </MenuItem>
                         ))}
                     </Select>
-                ) : (
-                    <Paper sx={paperSx}>
-                        {filter && (
-                            <Box>
-                                <OutlinedInput
-                                    margin="dense"
-                                    placeholder="Search field"
-                                    value={searchValue}
-                                    onChange={handleInput}
-                                    disabled={!active}
-                                />
-                            </Box>
-                        )}
-                        <List sx={listSx} id={id}>
-                            {lovList
-                                .filter((elt) => showItem(elt, searchValue))
-                                .map((elt) =>
-                                    multiple ? (
-                                        <MultipleItem
-                                            key={elt.id}
-                                            value={elt.id}
-                                            item={elt.item}
-                                            selectedValue={selectedValue}
-                                            clickHandler={clickHandler}
-                                            disabled={!active}
-                                        />
-                                    ) : (
-                                        <SingleItem
-                                            key={elt.id}
-                                            value={elt.id}
-                                            item={elt.item}
-                                            selectedValue={selectedValue}
-                                            clickHandler={clickHandler}
-                                            disabled={!active}
-                                        />
-                                    )
-                                )}
-                        </List>
-                    </Paper>
-                )}
+                </Tooltip>
+            </FormControl>
+        )
+    ) : (
+        <FormControl sx={controlSx} className={className}>
+            {props.label ? (
+                <InputLabel disableAnimation className="static-label">
+                    {props.label}
+                </InputLabel>
+            ) : null}
+            <Tooltip title={hover || ""}>
+                <Paper sx={paperSx}>
+                    {filter && (
+                        <Box>
+                            <OutlinedInput
+                                margin="dense"
+                                placeholder="Search field"
+                                value={searchValue}
+                                onChange={handleInput}
+                                disabled={!active}
+                            />
+                        </Box>
+                    )}
+                    <List sx={listSx} id={id}>
+                        {lovList
+                            .filter((elt) => showItem(elt, searchValue))
+                            .map((elt) =>
+                                multiple ? (
+                                    <MultipleItem
+                                        key={elt.id}
+                                        value={elt.id}
+                                        item={elt.item}
+                                        selectedValue={selectedValue}
+                                        clickHandler={clickHandler}
+                                        disabled={!active}
+                                    />
+                                ) : (
+                                    <SingleItem
+                                        key={elt.id}
+                                        value={elt.id}
+                                        item={elt.item}
+                                        selectedValue={selectedValue}
+                                        clickHandler={clickHandler}
+                                        disabled={!active}
+                                    />
+                                )
+                            )}
+                    </List>
+                </Paper>
             </Tooltip>
         </FormControl>
     );

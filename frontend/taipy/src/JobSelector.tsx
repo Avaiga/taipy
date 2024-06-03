@@ -409,8 +409,7 @@ const JobSelectedTableRow = ({
     showCancel,
     showDelete
 }: JobSelectedTableRowProps) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [id, jobName, _, entityId, entityName, submitId, creationDate, status] = row;
+    const [id, jobName, , entityId, entityName, submitId, creationDate, status] = row;
 
     return (
         <TableRow

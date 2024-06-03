@@ -19,6 +19,8 @@ from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
 from ..data.data_node import DataNode
 from ..job.job import Job
+from ..reason._reason_factory import _build_data_node_is_being_edited_reason, _build_data_node_is_not_written
+from ..reason.reason import Reasons
 from ..submission.submission import Submission
 from ..task.task import Task
 from ._dag import _DAG
@@ -81,13 +83,22 @@ class Submittable:
         all_data_nodes_in_dag = {node for node in dag.nodes if isinstance(node, DataNode)}
         return all_data_nodes_in_dag - self.__get_inputs(dag) - self.__get_outputs(dag)
 
-    def is_ready_to_run(self) -> bool:
+    def is_ready_to_run(self) -> Reasons:
         """Indicate if the entity is ready to be run.
 
         Returns:
-            True if the given entity is ready to be run. False otherwise.
+            A Reason object that can function as a Boolean value.
+            which is True if the given entity is ready to be run or there is no reason to be blocked, False otherwise.
         """
-        return all(dn.is_ready_for_reading for dn in self.get_inputs())
+        reason = Reasons(self._submittable_id)
+
+        for node in self.get_inputs():
+            if node._edit_in_progress:
+                reason._add_reason(node.id, _build_data_node_is_being_edited_reason(node.id))
+            if not node._last_edit_date:
+                reason._add_reason(node.id, _build_data_node_is_not_written(node.id))
+
+        return reason
 
     def data_nodes_being_edited(self) -> Set[DataNode]:
         """Return the set of data nodes of the submittable entity that are being edited.

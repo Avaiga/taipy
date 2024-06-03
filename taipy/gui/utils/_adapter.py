@@ -119,8 +119,8 @@ class _Adapter:
                 result = adapter(result)
                 if result is None:
                     return result
-            elif isinstance(result, str):
-                return result
+            elif isinstance(result, (str, float, int)):
+                return str(result)
             tpl_res = self._get_valid_result(result, id_only)
             if tpl_res is None:
                 _warn(

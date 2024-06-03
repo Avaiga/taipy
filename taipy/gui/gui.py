@@ -1167,14 +1167,14 @@ class Gui:
             }
         )
 
-    def __send_ws(self, payload: dict, allow_grouping=True) -> None:
+    def __send_ws(self, payload: dict, allow_grouping=True, send_back_only=False) -> None:
         grouping_message = self.__get_message_grouping() if allow_grouping else None
         if grouping_message is None:
             try:
                 self._server._ws.emit(
                     "message",
                     payload,
-                    to=self.__get_ws_receiver(),
+                    to=self.__get_ws_receiver(send_back_only),
                 )
                 time.sleep(0.001)
             except Exception as e:  # pragma: no cover
@@ -1193,7 +1193,11 @@ class Gui:
     def __send_ack(self, ack_id: t.Optional[str]) -> None:
         if ack_id:
             try:
-                self._server._ws.emit("message", {"type": _WsType.ACKNOWLEDGEMENT.value, "id": ack_id})
+                self._server._ws.emit(
+                    "message",
+                    {"type": _WsType.ACKNOWLEDGEMENT.value, "id": ack_id},
+                    to=self.__get_ws_receiver(True),
+                )
                 time.sleep(0.001)
             except Exception as e:  # pragma: no cover
                 _warn(f"Exception raised in WebSocket communication (send ack) in '{self.__frame.f_code.co_name}'", e)
@@ -1208,7 +1212,10 @@ class Gui:
         )
 
     def __send_ws_download(self, content: str, name: str, on_action: str) -> None:
-        self.__send_ws({"type": _WsType.DOWNLOAD_FILE.value, "content": content, "name": name, "onAction": on_action})
+        self.__send_ws(
+            {"type": _WsType.DOWNLOAD_FILE.value, "content": content, "name": name, "onAction": on_action},
+            send_back_only=True,
+        )
 
     def __send_ws_alert(self, type: str, message: str, system_notification: bool, duration: int) -> None:
         self.__send_ws(
@@ -1272,13 +1279,15 @@ class Gui:
             client_id,
         )
 
-    def __get_ws_receiver(self) -> t.Union[t.List[str], t.Any, None]:
+    def __get_ws_receiver(self, send_back_only=False) -> t.Union[t.List[str], t.Any, None]:
         if self._bindings()._is_single_client():
             return None
         sid = getattr(request, "sid", None) if request else None
         sids = self.__get_sids(self._get_client_id())
         if sid:
             sids.add(sid)
+            if send_back_only:
+                return sid
         return list(sids)
 
     def __get_sids(self, client_id: str) -> t.Set[str]:
@@ -2275,12 +2284,19 @@ class Gui:
 
     def __init_ngrok(self):
         app_config = self._config.config
-        if app_config["run_server"] and app_config["ngrok_token"]:  # pragma: no cover
+        if hasattr(self, "_ngrok"):
+            # Keep the ngrok instance if token has not changed
+            if app_config["ngrok_token"] == self._ngrok[1]:
+                _TaipyLogger._get_logger().info(f" * NGROK Public Url: {self._ngrok[0].public_url}")
+                return
+            # Close the old tunnel so new tunnel can open for new token
+            ngrok.disconnect(self._ngrok[0].public_url)
+        if app_config["run_server"] and (token := app_config["ngrok_token"]):  # pragma: no cover
             if not util.find_spec("pyngrok"):
                 raise RuntimeError("Cannot use ngrok as pyngrok package is not installed.")
-            ngrok.set_auth_token(app_config["ngrok_token"])
-            http_tunnel = ngrok.connect(app_config["port"], "http")
-            _TaipyLogger._get_logger().info(f" * NGROK Public Url: {http_tunnel.public_url}")
+            ngrok.set_auth_token(token)
+            self._ngrok = (ngrok.connect(app_config["port"], "http"), token)
+            _TaipyLogger._get_logger().info(f" * NGROK Public Url: {self._ngrok[0].public_url}")
 
     def __bind_default_function(self):
         with self.get_flask_app().app_context():
@@ -2325,13 +2341,13 @@ class Gui:
         extension_bp = Blueprint("taipy_extensions", __name__)
         extension_bp.add_url_rule(f"/{Gui._EXTENSION_ROOT}/<path:path>", view_func=self.__serve_extension)
         scripts = [
-            s if bool(urlparse(s).netloc) else f"/{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
+            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
             for name, libs in Gui.__extensions.items()
             for lib in libs
             for s in (lib.get_scripts() or [])
         ]
         styles = [
-            s if bool(urlparse(s).netloc) else f"/{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
+            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
             for name, libs in Gui.__extensions.items()
             for lib in libs
             for s in (lib.get_styles() or [])
@@ -2341,7 +2357,7 @@ class Gui:
         else:
             styles.append(Gui.__ROBOTO_FONT)
         if self.__css_file:
-            styles.append(f"/{self.__css_file}")
+            styles.append(f"{self.__css_file}")
 
         self._flask_blueprint.append(extension_bp)
 

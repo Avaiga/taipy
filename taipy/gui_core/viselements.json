@@ -99,9 +99,22 @@
                         "doc": "TODO: If True, the user can select multiple scenarios."
                     },
                     {
-                        "name": "filter_by",
-                        "type": "str|list[str]",
-                        "doc": "TODO: a list of scenario attributes to filter on."
+                        "name": "filter",
+                        "type": "bool|str|list[str]",
+                        "default_value": "\"Config id;Label;Creation date;Cycle label;Cycle start;Cycle end;Primary;Tags\"",
+                        "doc": "TODO: a list of scenario attributes to filter on. If False, do not allow filter."
+                    },
+                    {
+                        "name": "show_search",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "TODO: If True, allows the user to search locally on label."
+                    },
+                    {
+                        "name": "sort",
+                        "type": "bool|str|list[str]",
+                        "default_value": "\"Config id;Label;Creation date\"",
+                        "doc": "TODO: a list of scenario attributes to sort on. If False, do not allow sort."
                     }
                 ]
             }
@@ -194,15 +207,15 @@
                     {
                         "name": "on_submission_change",
                         "type": "Callback",
-                        "doc": "The name of the function that is triggered when a submission status is changed.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>submittable (Submittable): the entity (usually a Scenario) that was submitted.</li>\n<li>details (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>submission_status (str): the new status of the submission (possible values: SUBMITTED, COMPLETED, CANCELED, FAILED, BLOCKED, WAITING, RUNNING).</li>\n<li>job: the Job (if any) that is at the origin of the submission status change.</li>\n</ul>",
+                        "doc": "The name of the function that is triggered when a submission status is changed.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>submission (Submission): the submission entity containing submission information.</li>\n<li>details (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>submission_status (str): the new status of the submission (possible values: SUBMITTED, COMPLETED, CANCELED, FAILED, BLOCKED, WAITING, RUNNING).</li>\n<li>job: the Job (if any) that is at the origin of the submission status change.</li>\n<li>submittable_entity: submittable (Submittable): the entity (usually a Scenario) that was submitted.</li>\n</ul>",
                         "signature": [
                             [
                                 "state",
                                 "State"
                             ],
                             [
-                                "submittable",
-                                "Submittable"
+                                "submission",
+                                "Submission"
                             ],
                             [
                                 "details",

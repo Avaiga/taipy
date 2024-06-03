@@ -166,6 +166,7 @@ const DateRange = (props: DateRangeProps) => {
                                     disabled={!active}
                                     slotProps={textFieldProps}
                                     label={props.labelStart}
+                                    format={props.format}
                                 />
                                 -
                                 <DateTimePicker
@@ -180,6 +181,7 @@ const DateRange = (props: DateRangeProps) => {
                                     disabled={!active}
                                     slotProps={textFieldProps}
                                     label={props.labelEnd}
+                                    format={props.format}
                                 />
                             </>
                         ) : (
@@ -196,6 +198,7 @@ const DateRange = (props: DateRangeProps) => {
                                     disabled={!active}
                                     slotProps={textFieldProps}
                                     label={props.labelStart}
+                                    format={props.format}
                                 />
                                 -
                                 <DatePicker
@@ -210,6 +213,7 @@ const DateRange = (props: DateRangeProps) => {
                                     disabled={!active}
                                     slotProps={textFieldProps}
                                     label={props.labelEnd}
+                                    format={props.format}
                                 />
                             </>
                         )

@@ -17,7 +17,7 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 
 import DateRange from "./DateRange";
 import { TaipyContext } from "../../context/taipyContext";
@@ -120,6 +120,24 @@ describe("DateRange Component", () => {
         const input2 = document.querySelector(".taipy-date-range-picker-end input") as HTMLInputElement;
         expect(input2).toBeInTheDocument();
         expect(cleanText(input2?.value || "")).toEqual("01/31/2001");
+    });
+    it("displays the default value with format", async () => {
+        render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DateRange
+                    defaultDates={defaultDates}
+                    dates={undefined as unknown as string[]}
+                    className="taipy-date-range"
+                    format="dd-MM-yyyy"
+                />
+            </LocalizationProvider>
+        );
+        const input = document.querySelector(".taipy-date-range-picker-start input") as HTMLInputElement;
+        expect(input).toBeInTheDocument();
+        expect(cleanText(input?.value || "")).toEqual("01-01-2001");
+        const input2 = document.querySelector(".taipy-date-range-picker-end input") as HTMLInputElement;
+        expect(input2).toBeInTheDocument();
+        expect(cleanText(input2?.value || "")).toEqual("31-01-2001");
     });
     it("shows labels", async () => {
         const { getByLabelText } = render(
@@ -251,6 +269,25 @@ describe("DateRange with time Component", () => {
         const input2 = document.querySelector(".tp-dt-picker-end input") as HTMLInputElement;
         expect(input2).toBeInTheDocument();
         expect(cleanText(input2?.value || "").toLocaleLowerCase()).toEqual("01/31/2001 12:00 am");
+    });
+    it("displays the default value with format", async () => {
+        render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DateRange
+                    defaultDates="[&quot;2001-01-01T00:10:01.001Z&quot;,&quot;2001-01-31T00:11:01.001Z&quot;]"
+                    withTime={true}
+                    dates={undefined as unknown as string[]}
+                    className="tp-dt"
+                    format="dd-MM-yyyy mm"
+                />
+            </LocalizationProvider>
+        );
+        const input = document.querySelector(".tp-dt-picker-start input") as HTMLInputElement;
+        expect(input).toBeInTheDocument();
+        expect(cleanText(input?.value || "").toLocaleLowerCase()).toEqual("01-01-2001 10");
+        const input2 = document.querySelector(".tp-dt-picker-end input") as HTMLInputElement;
+        expect(input2).toBeInTheDocument();
+        expect(cleanText(input2?.value || "").toLocaleLowerCase()).toEqual("31-01-2001 11");
     });
     it("shows labels", async () => {
         const { getByLabelText } = render(

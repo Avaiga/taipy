@@ -37,7 +37,6 @@ from ..exceptions.exceptions import (
     ImportScenarioDoesntHaveAVersion,
     InsufficientScenarioToCompare,
     InvalidScenario,
-    InvalidSequence,
     NonExistingComparator,
     NonExistingScenario,
     NonExistingScenarioConfig,
@@ -47,6 +46,8 @@ from ..exceptions.exceptions import (
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
+from ..reason._reason_factory import _build_not_submittable_entity_reason
+from ..reason.reason import Reasons
 from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from ..submission.submission import Submission
 from ..task._task_manager_factory import _TaskManagerFactory
@@ -75,7 +76,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         callback: Callable[[Scenario, Job], None],
         params: Optional[List[Any]] = None,
         scenario: Optional[Scenario] = None,
-    ):
+    ) -> None:
         if scenario is None:
             scenarios = cls._get_all()
             for scn in scenarios:
@@ -90,7 +91,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         callback: Callable[[Scenario, Job], None],
         params: Optional[List[Any]] = None,
         scenario: Optional[Scenario] = None,
-    ):
+    ) -> None:
         if scenario is None:
             scenarios = cls._get_all()
             for scn in scenarios:
@@ -100,14 +101,14 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         cls.__remove_subscriber(callback, params, scenario)
 
     @classmethod
-    def __add_subscriber(cls, callback, params, scenario: Scenario):
+    def __add_subscriber(cls, callback, params, scenario: Scenario) -> None:
         scenario._add_subscriber(callback, params)
         Notifier.publish(
             _make_event(scenario, EventOperation.UPDATE, attribute_name="subscribers", attribute_value=params)
         )
 
     @classmethod
-    def __remove_subscriber(cls, callback, params, scenario: Scenario):
+    def __remove_subscriber(cls, callback, params, scenario: Scenario) -> None:
         scenario._remove_subscriber(callback, params)
         Notifier.publish(
             _make_event(scenario, EventOperation.UPDATE, attribute_name="subscribers", attribute_value=params)
@@ -189,20 +190,25 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         if not scenario._is_consistent():
             raise InvalidScenario(scenario.id)
 
-        actual_sequences = scenario._get_sequences()
-        for sequence_name in sequences.keys():
-            if not actual_sequences[sequence_name]._is_consistent():
-                raise InvalidSequence(actual_sequences[sequence_name].id)
-            Notifier.publish(_make_event(actual_sequences[sequence_name], EventOperation.CREATION))
+        from ..sequence._sequence_manager_factory import _SequenceManagerFactory
+
+        _SequenceManagerFactory._build_manager()._bulk_create_from_scenario(scenario)
 
         Notifier.publish(_make_event(scenario, EventOperation.CREATION))
         return scenario
 
     @classmethod
-    def _is_submittable(cls, scenario: Union[Scenario, ScenarioId]) -> bool:
+    def _is_submittable(cls, scenario: Union[Scenario, ScenarioId]) -> Reasons:
         if isinstance(scenario, str):
             scenario = cls._get(scenario)
-        return isinstance(scenario, Scenario) and scenario.is_ready_to_run()
+
+        if not isinstance(scenario, Scenario):
+            scenario = str(scenario)
+            reason = Reasons((scenario))
+            reason._add_reason(scenario, _build_not_submittable_entity_reason(scenario))
+            return reason
+
+        return scenario.is_ready_to_run()
 
     @classmethod
     def _submit(
@@ -305,7 +311,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         return False
 
     @classmethod
-    def _set_primary(cls, scenario: Scenario):
+    def _set_primary(cls, scenario: Scenario) -> None:
         if not scenario.cycle:
             raise DoesNotBelongToACycle(
                 f"Can't set scenario {scenario.id} to primary because it doesn't belong to a cycle."
@@ -318,7 +324,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         scenario.is_primary = True  # type: ignore
 
     @classmethod
-    def _tag(cls, scenario: Scenario, tag: str):
+    def _tag(cls, scenario: Scenario, tag: str) -> None:
         tags = scenario.properties.get(cls._AUTHORIZED_TAGS_KEY, set())
         if len(tags) > 0 and tag not in tags:
             raise UnauthorizedTagError(f"Tag `{tag}` not authorized by scenario configuration `{scenario.config_id}`")
@@ -333,7 +339,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         )
 
     @classmethod
-    def _untag(cls, scenario: Scenario, tag: str):
+    def _untag(cls, scenario: Scenario, tag: str) -> None:
         scenario._remove_tag(tag)
         cls._set(scenario)
         Notifier.publish(
@@ -341,14 +347,14 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         )
 
     @classmethod
-    def _compare(cls, *scenarios: Scenario, data_node_config_id: Optional[str] = None):
+    def _compare(cls, *scenarios: Scenario, data_node_config_id: Optional[str] = None) -> Dict:
         if len(scenarios) < 2:
             raise InsufficientScenarioToCompare("At least two scenarios are required to compare.")
 
         if not all(scenarios[0].config_id == scenario.config_id for scenario in scenarios):
             raise DifferentScenarioConfigs("Scenarios to compare must have the same configuration.")
 
-        if scenario_config := _ScenarioManager.__get_config(scenarios[0]):
+        if scenario_config := cls.__get_config(scenarios[0]):
             results = {}
             if data_node_config_id:
                 if data_node_config_id in scenario_config.comparators.keys():
@@ -383,7 +389,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         return True
 
     @classmethod
-    def _delete(cls, scenario_id: ScenarioId):
+    def _delete(cls, scenario_id: ScenarioId) -> None:
         scenario = cls._get(scenario_id)
         if not cls._is_deletable(scenario):
             raise DeletingPrimaryScenario(
@@ -395,7 +401,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         super()._delete(scenario_id)
 
     @classmethod
-    def _hard_delete(cls, scenario_id: ScenarioId):
+    def _hard_delete(cls, scenario_id: ScenarioId) -> None:
         scenario = cls._get(scenario_id)
         if not cls._is_deletable(scenario):
             raise DeletingPrimaryScenario(
@@ -410,7 +416,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             cls._delete_entities_of_multiple_types(entity_ids_to_delete)
 
     @classmethod
-    def _delete_by_version(cls, version_number: str):
+    def _delete_by_version(cls, version_number: str) -> None:
         """
         Deletes scenario by the version number.
 

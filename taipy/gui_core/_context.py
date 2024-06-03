@@ -12,8 +12,9 @@
 import json
 import typing as t
 from collections import defaultdict
-from datetime import datetime
+from datetime import date, datetime
 from numbers import Number
+from operator import attrgetter
 from threading import Lock
 
 try:
@@ -60,7 +61,14 @@ from taipy.gui import Gui, State
 from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
 
-from ._adapters import _attr_type, _EntityType, _GuiCoreDatanodeAdapter, _invoke_action
+from ._adapters import (
+    _EntityType,
+    _get_datanode_property,
+    _GuiCoreDatanodeAdapter,
+    _GuiCoreScenarioProperties,
+    _invoke_action,
+    _is_debugging,
+)
 
 
 class _GuiCoreContext(CoreEventConsumerBase):
@@ -120,7 +128,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             with self.lock:
                 self.jobs_list = None
         elif event.entity_type == EventEntityType.SUBMISSION:
-            self.submission_status_callback(event.entity_id)
+            self.submission_status_callback(event.entity_id, event)
         elif event.entity_type == EventEntityType.DATA_NODE:
             with self.lock:
                 self.data_nodes_by_owner = None
@@ -138,7 +146,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             {"scenario": scenario_id or True},
         )
 
-    def submission_status_callback(self, submission_id: t.Optional[str]):
+    def submission_status_callback(self, submission_id: t.Optional[str] = None, event: t.Optional[Event] = None):
         if not submission_id or not is_readable(t.cast(SubmissionId, submission_id)):
             return
         try:
@@ -174,7 +182,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             self.gui._call_user_callback(
                                 client_id,
                                 submission_name,
-                                [core_get(submission.entity_id), {"submission_status": new_status.name}],
+                                [
+                                    core_get(submission.id),
+                                    {
+                                        "submission_status": new_status.name,
+                                        "submittable_entity": core_get(submission.entity_id),
+                                        **(event.metadata if event else {}),
+                                    },
+                                ],
                                 submission.properties.get("module_context"),
                             )
 
@@ -197,7 +212,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def no_change_adapter(self, entity: t.List):
         return entity
 
-    def cycle_adapter(self, cycle: Cycle):
+    def cycle_adapter(self, cycle: Cycle, sorts: t.Optional[t.List[t.Dict[str, t.Any]]] = None):
         try:
             if (
                 isinstance(cycle, Cycle)
@@ -208,10 +223,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return [
                     cycle.id,
                     cycle.get_simple_label(),
-                    sorted(
-                        self.scenario_by_cycle.get(cycle, []),
-                        key=_GuiCoreContext.get_entity_creation_date_iso,
-                    ),
+                    self.get_sorted_entity_list(self.scenario_by_cycle.get(cycle, []), sorts),
                     _EntityType.CYCLE.value,
                     False,
                 ]
@@ -243,16 +255,35 @@ class _GuiCoreContext(CoreEventConsumerBase):
             )
         return None
 
-    def filter_scenarios(self, cycle: t.List, col: str, action: str, val: t.Any):
-        cycle[2] = [e for e in cycle[2] if _invoke_action(e, col, action, val)]
+    def filter_scenarios(self, cycle: t.List, col: str, col_type: str, is_dn: bool, action: str, val: t.Any):
+        cycle[2] = [e for e in cycle[2] if _invoke_action(e, col, col_type, is_dn, action, val)]
         return cycle
 
     def adapt_scenarios(self, cycle: t.List):
         cycle[2] = [self.scenario_adapter(e) for e in cycle[2]]
         return cycle
 
+    def get_sorted_entity_list(
+        self,
+        entities: t.Union[t.List[t.Union[Cycle, Scenario]], t.List[Scenario]],
+        sorts: t.Optional[t.List[t.Dict[str, t.Any]]],
+    ):
+        if sorts:
+            sorted_list = entities
+            for sd in reversed(sorts):
+                col = sd.get("col", "")
+                col = _GuiCoreScenarioProperties.get_col_name(col)
+                order = sd.get("order", True)
+                sorted_list = sorted(sorted_list, key=_GuiCoreContext.get_entity_property(col), reverse=not order)
+        else:
+            sorted_list = sorted(entities, key=_GuiCoreContext.get_entity_property("creation_date"))
+        return [self.cycle_adapter(e, sorts) if isinstance(e, Cycle) else e for e in sorted_list]
+
     def get_scenarios(
-        self, scenarios: t.Optional[t.List[t.Union[Cycle, Scenario]]], filters: t.Optional[t.List[t.Dict[str, t.Any]]]
+        self,
+        scenarios: t.Optional[t.List[t.Union[Cycle, Scenario]]],
+        filters: t.Optional[t.List[t.Dict[str, t.Any]]],
+        sorts: t.Optional[t.List[t.Dict[str, t.Any]]],
     ):
         cycles_scenarios: t.List[t.Union[Cycle, Scenario]] = []
         with self.lock:
@@ -266,28 +297,30 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         cycles_scenarios.append(cycle)
         if scenarios is not None:
             cycles_scenarios = scenarios
-        # sorting
-        adapted_list = [
-            self.cycle_adapter(e) if isinstance(e, Cycle) else e
-            for e in sorted(cycles_scenarios, key=_GuiCoreContext.get_entity_creation_date_iso)
-        ]
+        adapted_list = self.get_sorted_entity_list(cycles_scenarios, sorts)
         if filters:
             # filtering
             filtered_list = list(adapted_list)
             for fd in filters:
                 col = fd.get("col", "")
-                col_type = _attr_type(col)
+                is_datanode_prop = _get_datanode_property(col) is not None
+                col = _GuiCoreScenarioProperties.get_col_name(col)
+                col_type = _GuiCoreScenarioProperties.get_type(col)
                 val = fd.get("value")
                 action = fd.get("action", "")
                 if isinstance(val, str) and col_type == "date":
                     val = datetime.fromisoformat(val[:-1])
                 # level 1 filtering
                 filtered_list = [
-                    e for e in filtered_list if not isinstance(e, Scenario) or _invoke_action(e, col, action, val)
+                    e
+                    for e in filtered_list
+                    if not isinstance(e, Scenario) or _invoke_action(e, col, col_type, is_datanode_prop, action, val)
                 ]
                 # level 2 filtering
                 filtered_list = [
-                    self.filter_scenarios(e, col, action, val) if not isinstance(e, Scenario) else e
+                    self.filter_scenarios(e, col, col_type, is_datanode_prop, action, val)
+                    if not isinstance(e, Scenario)
+                    else e
                     for e in filtered_list
                 ]
             # remove empty cycles
@@ -515,11 +548,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if sequence := data.get("sequence"):
                 entity = entity.sequences.get(sequence)
 
-            if not is_submittable(entity):
+            if not (reason := is_submittable(entity)):
                 _GuiCoreContext.__assign_var(
                     state,
                     error_var,
-                    f"{'Sequence' if sequence else 'Scenario'} {sequence or scenario_id} is not submittable.",
+                    f"{'Sequence' if sequence else 'Scenario'} {sequence or scenario_id} is not submittable: "
+                    + reason.reasons,
                 )
                 return
             if entity:
@@ -552,7 +586,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             self.__do_datanodes_tree()
         if scenarios is None:
             return (self.data_nodes_by_owner.get(None, []) if self.data_nodes_by_owner else []) + (
-                self.get_scenarios(None, None) or []
+                self.get_scenarios(None, None, None) or []
             )
         if not self.data_nodes_by_owner:
             return []
@@ -732,9 +766,18 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         ent.properties.pop(key, None)
 
     @staticmethod
-    def get_entity_creation_date_iso(entity: t.Union[Scenario, Cycle]):
-        # we might be comparing naive and aware datetime ISO
-        return entity.creation_date.isoformat()
+    def get_entity_property(col: str):
+        def sort_key(entity: t.Union[Scenario, Cycle]):
+            # we compare only strings
+            try:
+                val = attrgetter(col)(entity)
+            except AttributeError as e:
+                if _is_debugging():
+                    _warn("Attribute", e)
+                val = ""
+            return val.isoformat() if isinstance(val, (datetime, date)) else str(val)
+
+        return sort_key
 
     def get_scenarios_for_owner(self, owner_id: str):
         cycles_scenarios: t.List[t.Union[Scenario, Cycle]] = []
@@ -754,7 +797,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         cycles_scenarios.extend(scenarios_cycle)
                     elif isinstance(entity, Scenario):
                         cycles_scenarios.append(entity)
-        return sorted(cycles_scenarios, key=_GuiCoreContext.get_entity_creation_date_iso)
+        return sorted(cycles_scenarios, key=_GuiCoreContext.get_entity_property("creation_date"))
 
     def get_data_node_history(self, id: str):
         if id and (dn := core_get(id)) and isinstance(dn, DataNode):

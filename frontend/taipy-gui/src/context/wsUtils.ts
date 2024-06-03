@@ -51,6 +51,15 @@ export const sendWsMessage = (
         ack_id: ackId,
         module_context: moduleContext,
     };
-    socket?.emit("message", msg, serverAck);
+    socket?.emit("message", ligthenPayload(msg as unknown as Record<string, unknown>), serverAck);
     return ackId;
+};
+
+export const ligthenPayload = (payload: Record<string, unknown>) => {
+    return Object.keys(payload || {}).reduce((pv, key) => {
+        if (payload[key] !== undefined) {
+            pv[key] = payload[key];
+        }
+        return pv;
+    }, {} as typeof payload);
 };
