@@ -869,12 +869,6 @@
                         "doc": "The maximum value of the metric indicator"
                     },
                     {
-                        "name": "show_value",
-                        "type": "bool",
-                        "default_value": "True",
-                        "doc": "If set to False, the value is not displayed."
-                    },
-                    {
                         "name": "delta",
                         "type": "dynamic(int|float)",
                         "doc": "The delta value to display."
@@ -883,6 +877,22 @@
                         "name": "threshold",
                         "type": "dynamic(int|float)",
                         "doc": "The threshold value to display."
+                    },
+                    {
+                        "name": "show_value",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If set to False, the value is not displayed."
+                    },
+                    {
+                        "name": "format",
+                        "type": "str",
+                        "doc": "The format to use when displaying the value.<br/>This uses the <code>printf</code> syntax."
+                    },
+                    {
+                        "name": "delta_format",
+                        "type": "str",
+                        "doc": "The format to use when displaying the delta value.<br/>This uses the <code>printf</code> syntax."
                     },
                     {
                         "name": "width",
@@ -895,16 +905,6 @@
                         "type": "str|number",
                         "default_value": "None",
                         "doc": "The height, in CSS units, of the metric."
-                    },
-                    {
-                        "name": "format",
-                        "type": "str",
-                        "doc": "The format to use when displaying the value.<br/>This uses the <code>printf</code> syntax."
-                    },
-                    {
-                        "name": "delta_format",
-                        "type": "str",
-                        "doc": "The format to use when displaying the delta value.<br/>This uses the <code>printf</code> syntax."
                     }
                 ]
             }

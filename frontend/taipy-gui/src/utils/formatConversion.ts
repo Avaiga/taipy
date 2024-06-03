@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-/**
+/*
  * Regular expressions used for parsing sprintf format strings.
  */
 const re = {
@@ -20,11 +20,19 @@ const re = {
     placeholder: /^\x25?(?:\.(\d+))?([b-giostuvxX])/, // Matches placeholders
 };
 
+/*
+ * This function formats a precision specifier for a number. It takes an optional precision and specifier string.
+ * If no precision is provided, it defaults to 2. The function returns a string that represents the formatted precision.
+ */
 const precisionFormat = (precision?: string, specifier?: string): string => {
     // Default to precision of 2 if not specified
     return "." + (precision?.slice(1) ?? "2") + specifier;
 }
 
+/*
+ * This function parses a sprintf format string and returns an array of strings and objects. Each object has a single
+ * key, 'placeholder', that contains the placeholder string.
+ */
 const sprintfParse = (fmt?: string): (string | { placeholder: string; })[] => {
     let _fmt = fmt;
     let match;
@@ -54,6 +62,10 @@ const sprintfParse = (fmt?: string): (string | { placeholder: string; })[] => {
     return parse_tree;
 }
 
+/*
+ * This function converts a sprintf format string to a D3 format string. It takes an optional sprintf format string and
+ * returns a D3 format string. If no format string is provided, it returns an empty string.
+ */
 export const sprintfToD3Converter = (fmt?: string): string => {
     const sprintf_fmt_arr = sprintfParse(fmt);
     const objectIndex = sprintf_fmt_arr.findIndex((element) => typeof element === 'object');
@@ -79,9 +91,8 @@ export const sprintfToD3Converter = (fmt?: string): string => {
             case "i":
                 return "d";
             case "f":
-                return precisionFormat(precision, "f");
             case "g":
-                return precisionFormat(precision, "g");
+                return precisionFormat(precision, type);
             case "u":
                 return "("
             default:
@@ -90,12 +101,20 @@ export const sprintfToD3Converter = (fmt?: string): string => {
     });
 }
 
+/*
+ * This function extracts the prefix from a sprintf format string. It takes an optional sprintf format string and returns
+ * a string that represents the prefix of the format string. If no format string is provided, it returns an empty string.
+ */
 export const extractPrefix = (fmt?: string): string => {
     const sprintf_fmt_arr = sprintfParse(fmt);
     const objectIndex = sprintf_fmt_arr.findIndex((element) => typeof element === 'object');
     return sprintf_fmt_arr.slice(0, objectIndex).join('');
 }
 
+/*
+ * This function extracts the suffix from a sprintf format string. It takes an optional sprintf format string and returns
+ * a string that represents the suffix of the format string. If no format string is provided, it returns an empty string.
+ */
 export const extractSuffix = (fmt?: string): string => {
     const sprintf_fmt_arr = sprintfParse(fmt);
     const objectIndex = sprintf_fmt_arr.findIndex((element) => typeof element === 'object');
