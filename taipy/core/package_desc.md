@@ -42,32 +42,3 @@ git clone https://github.com/Avaiga/taipy.git
 
 This creates the 'taipy' directory holding all the package's source code, and the 'taipy-core'
 source code is in the 'taipy/core' directory.
-
-## Running the tests
-
-To run the tests on the package, you need to install the required development packages.
-We recommend using [Pipenv](https://pipenv.pypa.io/en/latest/) to create a virtual environment
-and install the development packages.
-
-```bash
-pip install pipenv
-pipenv install --dev
-```
-
-Then you can run *taipy-core* tests with the following command:
-
-```bash
-pipenv run pytest tests/core
-```
-
-## Contributing
-
-Want to help build *Taipy Core*? Check out our
- [Contributing Guide](https://docs.taipy.io/en/latest/contributing/contributing/).
-
-## Code of conduct
-
-Taipy is an open source project developed by the Taipy development team and a community of
-[contributors](https://docs.taipy.io/en/latest/contributing/contributors/). Please check out the
-[Taipy Code of Conduct](https://docs.taipy.io/en/latest/contributing/code_of_conduct/) for guidance
-on how to interact with others in a way that makes our community thrive.

@@ -46,7 +46,7 @@ built-in scheduling, and deployment tools.
   or production planning.
 
 - **Version Management and Pipeline Orchestration:** It includes tools for managing
-  application versions, pipeline versions, and data versions, which are beneficial 
+  application versions, pipeline versions, and data versions, which are beneficial
   for multi-user environments.
 
 ## Installation
@@ -59,27 +59,3 @@ pip install taipy
 To install Taipy on a Conda Environment or from source code, please refer to the
 [Installation Guide](https://docs.taipy.io/en/latest/installation/).<br />
 To get started with Taipy, please refer to the [Getting Started Guide](https://docs.taipy.io/en/latest/getting_started/).
-
-## Contributing
-
-Writing code isn’t the only way to contribute to Taipy. You can also:
-- help us stay on top of new and old issues
-- develop tutorials, presentations, and other educational materials
-- maintain and improve [our website](https://www.taipy.io) and [documentation](https://docs.taipy.io/en/latest/)
-- review pull requests
-- help with outreach and onboard new contributors
-
-For more information about the ways you can contribute to Taipy, visit our
-[Contributing Guide](https://docs.taipy.io/en/latest/contributing/contributing/).
-If you’re unsure where to start or how your skills fit in, reach out on Discord. You can also ask on
-GitHub, by opening a new issue or leaving a comment on a relevant issue that is already open.
-
-If you are new to contributing to open source projects, [this guide](https://opensource.guide/how-to-contribute/)
-helps explain why, what, and how to successfully get involved.
-
-## Code of conduct
-
-Taipy is an open source project developed by the Taipy development team and a community of
-[contributors](https://docs.taipy.io/en/latest/contributing/contributors/). Please check out the
-[Taipy Code of Conduct](https://docs.taipy.io/en/latest/contributing/code_of_conduct/) for guidance
-on how to interact with others in a way that makes our community thrive.

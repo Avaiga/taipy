@@ -108,32 +108,3 @@ pip install -e . --user
 ```
 
 This should install the dev version of Taipy GUI as editable. You are now ready to use it.
-
-## Running the tests
-
-To run the tests on the package, you need to install the required development packages.
-We recommend using [Pipenv](https://pipenv.pypa.io/en/latest/) to create a virtual environment
-and install the development packages.
-
-```bash
-pip install pipenv
-pipenv install --dev
-```
-
-Then you can run *taipy-gui* tests with the following command:
-
-```bash
-pipenv run pytest tests/gui
-```
-
-## Contributing
-
-Want to help build *Taipy GUI*? Check out our
- [Contributing Guide](https://docs.taipy.io/en/latest/contributing/contributing/).
-
-## Code of conduct
-
-Taipy is an open source project developed by the Taipy development team and a community of
-[contributors](https://docs.taipy.io/en/latest/contributing/contributors/). Please check out the
-[Taipy Code of Conduct](https://docs.taipy.io/en/latest/contributing/code_of_conduct/) for guidance
-on how to interact with others in a way that makes our community thrive.
