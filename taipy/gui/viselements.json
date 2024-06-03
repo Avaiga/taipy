@@ -836,7 +836,8 @@
                     },
                     {
                         "name": "hover_text",
-                        "doc": "TODO not implemented"
+                        "doc": "TODO not implemented",
+                        "hide": true
                     }
                 ]
             }
