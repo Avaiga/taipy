@@ -15,6 +15,7 @@ import React, {CSSProperties, lazy, Suspense, useMemo} from 'react';
 import {Data} from "plotly.js";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
+import Tooltip from "@mui/material/Tooltip";
 import {useClassNames, useDynamicJsonProperty, useDynamicProperty} from "../../utils/hooks";
 import {extractPrefix, extractSuffix, sprintfToD3Converter} from "../../utils/formatConversion";
 import {TaipyBaseProps, TaipyHoverProps} from "./utils";
@@ -58,6 +59,7 @@ const Metric = (props: MetricProps) => {
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
     const baseStyle = useDynamicJsonProperty(props.style, props.defaultStyle || "", defaultStyle);
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const data = useMemo(() => {
         return [
@@ -117,14 +119,16 @@ const Metric = (props: MetricProps) => {
 
     return (
         <Box data-testid={props.testId} className={className}>
-            <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle}/>}>
-                <Plot
-                    data={data as Data[]}
-                    layout={baseLayout}
-                    style={style}
-                    useResizeHandler
-                />
-            </Suspense>
+            <Tooltip title={hover || ""}>
+                <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle}/>}>
+                    <Plot
+                        data={data as Data[]}
+                        layout={baseLayout}
+                        style={style}
+                        useResizeHandler
+                    />
+                </Suspense>
+            </Tooltip>
         </Box>
     );
 }
