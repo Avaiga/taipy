@@ -236,6 +236,14 @@ const TaipyPlotlyButtons: ModeBarButtonAny[] = [
     },
 ];
 
+const updateArrays = (sel: number[][], val: number[], idx: number) => {
+    if (idx >= sel.length || val.length !== sel[idx].length || val.some((v, i) => sel[idx][i] != v)) {
+        sel = sel.concat();
+        sel[idx] = val;
+    }
+    return sel;
+};
+
 const Chart = (props: ChartProp) => {
     const {
         title = "",
@@ -286,13 +294,12 @@ const Chart = (props: ChartProp) => {
                         if (!Array.isArray(val)) {
                             val = [];
                         }
-                        if (
-                            idx >= sel.length ||
-                            val.length !== sel[idx].length ||
-                            val.some((v, i) => sel[idx][i] != v)
-                        ) {
-                            sel = sel.concat();
-                            sel[idx] = val;
+                        if (idx === 0 && val.length && Array.isArray(val[0])) {
+                            for (let i = 0; i < val.length; i++) {
+                                sel = updateArrays(sel, val[i] as unknown as number[], i);
+                            }
+                        } else {
+                            sel = updateArrays(sel, val, idx);
                         }
                     }
                 }
@@ -584,10 +591,14 @@ const Chart = (props: ChartProp) => {
                     return tr;
                 }, [] as number[][]);
                 if (traces.length) {
+                    const upvars = traces.map((_, idx) => getUpdateVar(updateVars, `selected${idx}`));
+                    if (traces.length > 1 && new Set(upvars).size === 1) {
+                        dispatch(createSendUpdateAction(upvars[0], traces, module, props.onChange, propagate));
+                        return;
+                    }
                     traces.forEach((tr, idx) => {
-                        const upvar = getUpdateVar(updateVars, `selected${idx}`);
-                        if (upvar && tr && tr.length) {
-                            dispatch(createSendUpdateAction(upvar, tr, module, props.onChange, propagate));
+                        if (upvars[idx] && tr && tr.length) {
+                            dispatch(createSendUpdateAction(upvars[idx], tr, module, props.onChange, propagate));
                         }
                     });
                 } else if (config.traces.length === 1) {
