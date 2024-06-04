@@ -29,6 +29,7 @@ import {
 } from "./utils";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
+import Tooltip from "@mui/material/Tooltip";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -67,13 +68,14 @@ const Metric = (props: MetricProps) => {
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
     const baseStyle = useDynamicJsonProperty(props.style, props.defaultStyle || "", defaultStyle);
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const data = useMemo(() => ([
         {
             domain: {x: [0, 1], y: [0, 1]},
             value: value,
             type: "indicator",
-            mode: "gauge" + (showValue ? "+number" : "")  + (delta !== undefined ? "+delta" : ""),
+            mode: "gauge" + (showValue ? "+number" : "") + (delta !== undefined ? "+delta" : ""),
             delta: {
                 reference: typeof value === 'number' && typeof delta === 'number' ? value - delta : undefined,
             },
@@ -114,13 +116,15 @@ const Metric = (props: MetricProps) => {
 
     return (
         <Box data-testid={props.testId} className={className}>
-            <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle}/>}>
-                <Plot
-                    data={data as Data[]}
-                    layout={baseLayout}
-                    style={style}
-                />
-            </Suspense>
+            <Tooltip title={hover || ""}>
+                <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle}/>}>
+                    <Plot
+                        data={data as Data[]}
+                        layout={baseLayout}
+                        style={style}
+                    />
+                </Suspense>
+            </Tooltip>
         </Box>
     );
 }
