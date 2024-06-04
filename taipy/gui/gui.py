@@ -962,8 +962,8 @@ class Gui:
                                 # remove file_path after it is merged
                                 part_file_path.unlink()
                     except EnvironmentError as ee:  # pragma: no cover
-                        _warn("Cannot group file after chunk upload", ee)
-                        return
+                        _warn(f"Cannot group file after chunk upload for {file.filename}", ee)
+                        return (f"Cannot group file after chunk upload for {file.filename}", 500)
                 # notify the file is uploaded
                 newvalue = str(file_path)
                 if multiple:

@@ -11,16 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, {
-    CSSProperties,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-    lazy,
-    Suspense,
-} from "react";
+import React, { CSSProperties, useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
 import {
     Config,
     Data,
@@ -214,7 +205,7 @@ const defaultConfig = {
     addIndex: [],
 } as ChartConfig;
 
-const emptyLayout = {} as Record<string, Record<string, unknown>>;
+const emptyLayout = {} as Partial<Layout>;
 const emptyData = {} as Record<string, TraceValueType>;
 
 const TaipyPlotlyButtons: ModeBarButtonAny[] = [
@@ -227,15 +218,20 @@ const TaipyPlotlyButtons: ModeBarButtonAny[] = [
             path: "M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z",
         },
         click: function (gd: HTMLElement, evt: Event) {
-            const title = gd.classList.toggle("full-screen") ? "Exit Full screen" : "Full screen";
-            (evt.currentTarget as HTMLElement).setAttribute("data-title", title);
-            const {height} = gd.dataset;
-            if (height) {
-                gd.attributeStyleMap.set("height", height);
-            } else {
-                gd.setAttribute("data-height", getComputedStyle(gd).height)
+            const div = gd.querySelector("div.svg-container") as HTMLDivElement;
+            if (!div) {
+                return;
             }
-            window.dispatchEvent(new Event('resize'));
+            const { height } = gd.dataset;
+            if (!height) {
+                gd.setAttribute("data-height", getComputedStyle(div).height);
+            }
+            const fs = gd.classList.toggle("full-screen");
+            (evt.currentTarget as HTMLElement).setAttribute("data-title", fs ? "Exit Full screen" : "Full screen");
+            if (height && !fs) {
+                div.attributeStyleMap.set("height", height);
+            }
+            window.dispatchEvent(new Event("resize"));
         },
     },
 ];
@@ -421,16 +417,20 @@ const Chart = (props: ChartProp) => {
                           getArrayValue(config.names, idx) ||
                           (config.columns[trace[1]] ? getColNameFromIndexed(config.columns[trace[1]].dfid) : undefined),
                   } as Record<string, unknown>;
-                  ret.marker = {...getArrayValue(config.markers, idx, ret.marker || {})};
-                  MARKER_TO_COL.forEach((prop) => {
-                      const val = (ret.marker as Record<string, unknown>)[prop];
-                      if (typeof val === "string") {
-                          const arr = getValueFromCol(datum, val as string);
-                          if (arr.length) {
-                              (ret.marker as Record<string, unknown>)[prop] = arr;
+                  ret.marker = { ...getArrayValue(config.markers, idx, ret.marker || {}) };
+                  if (Object.keys(ret.marker as object).length) {
+                      MARKER_TO_COL.forEach((prop) => {
+                          const val = (ret.marker as Record<string, unknown>)[prop];
+                          if (typeof val === "string") {
+                              const arr = getValueFromCol(datum, val as string);
+                              if (arr.length) {
+                                  (ret.marker as Record<string, unknown>)[prop] = arr;
+                              }
                           }
-                      }
-                  });
+                      });
+                  } else {
+                      delete ret.marker;
+                  }
                   const xs = getValue(datum, trace, 0) || [];
                   const ys = getValue(datum, trace, 1) || [];
                   const addIndex = getArrayValue(config.addIndex, idx, true) && !ys.length;
@@ -504,7 +504,7 @@ const Chart = (props: ChartProp) => {
             }
         }
         plconf.modeBarButtonsToAdd = TaipyPlotlyButtons;
-        plconf.responsive = true;
+        // plconf.responsive = true; // this is the source of the on/off height ...
         plconf.autosizable = true;
         if (!active) {
             plconf.staticPlot = true;
