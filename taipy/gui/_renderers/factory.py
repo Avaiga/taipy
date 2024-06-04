@@ -362,7 +362,6 @@ class _Factory:
                 ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("layout", PropertyType.dynamic_dict),
-                ("style", PropertyType.dynamic_dict),
                 ("type", PropertyType.string, "circular"),
                 ("min", PropertyType.number, 0),
                 ("max", PropertyType.number, 100),

@@ -58,7 +58,6 @@ const Metric = (props: MetricProps) => {
     const delta = useDynamicProperty(props.delta, props.defaultDelta, undefined)
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
-    const baseStyle = useDynamicJsonProperty(props.style, props.defaultStyle || "", defaultStyle);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const data = useMemo(() => {
@@ -110,9 +109,9 @@ const Metric = (props: MetricProps) => {
     const style = useMemo(
         () =>
             height === undefined
-                ? ({...baseStyle, width: width} as CSSProperties)
-                : ({...baseStyle, width: width, height: height} as CSSProperties),
-        [baseStyle, height, width]
+                ? ({...defaultStyle, width: width} as CSSProperties)
+                : ({...defaultStyle, width: width, height: height} as CSSProperties),
+        [height, width]
     );
 
     const skelStyle = useMemo(() => ({...style, minHeight: "7em"}), [style]);
