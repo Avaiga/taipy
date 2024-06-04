@@ -1,11 +1,41 @@
-# Installation
+# Taipy REST
+
+## License
+
+Copyright 2021-2024 Avaiga Private Limited
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+except in compliance with the License. You may obtain a copy of the License at
+[http://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+Unless required by applicable law or agreed to in writing, software distributed under the
+License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+either express or implied. See the License for the specific language governing permissions
+and limitations under the License.
+
+## What is Taipy REST
+
+Taipy is a Python library for creating Business Applications. More information on our
+[website](https://www.taipy.io). Taipy is split into multiple repositories including
+*taipy-core* and *taipy-rest* to let users install the minimum they need.
+
+Taipy Core mostly includes business-oriented
+features. It helps users create and manage business applications and improve analyses
+capability through time, conditions and hypothesis.
+
+Taipy REST is a set of APIs built on top of the
+*taipy-core* library developed by Avaiga. This project is meant to be used as a complement
+for Taipy and its goal is to enable automation through rest APIs of processes built
+on Taipy.
+
+## Installation
 
 The latest stable version of *taipy-rest* is available through *pip*:
 ```bash
 pip install taipy-rest
 ```
 
-## Development version
+### Development version
 
 You can install the development version of *taipy-rest* with *pip* and *git* via the taipy repository:
 ```bash
@@ -25,7 +55,7 @@ git clone https://github.com/Avaiga/taipy.git
 This creates the 'taipy' directory holding all the package's source code, and the 'taipy-rest'
 source code is in the 'taipy/rest' directory.
 
-# Configuration
+## Configuration
 
 Before running, we need to define some variables. Taipy REST APIs depend on pre-configuration of taipy config objects,
 i.e, is mandatory to define all configuration of DataNodes, Tasks, Sequences, etc. The file containing this
@@ -35,7 +65,7 @@ configuration needs to be passed to the application at runtime. The following va
 If using Docker, the folder containing the file needs to be mapped as a volume for it to be accessible to the
 application.
 
-# Running
+## Running
 
 To run taipy-rest, you need to install the required development packages.
 We recommend using [Pipenv](https://pipenv.pypa.io/en/latest/) to create a virtual environment
@@ -58,7 +88,7 @@ docker-compose up
 
 You can also run with a Gunicorn or wsgi server.
 
-## Running with Gunicorn
+### Running with Gunicorn
 
 This project provide a simple wsgi entry point to run gunicorn or uwsgi for example.
 
@@ -73,7 +103,7 @@ And that's it! Gunicorn is running on port 8000.
 
 If you chose gunicorn as your wsgi server, the proper commands should be in your docker-compose file.
 
-## Running with uwsgi
+### Running with uwsgi
 
 Pretty much the same as gunicorn here
 
@@ -86,7 +116,7 @@ And that's it! Uwsgi is running on port 5000.
 
 If you chose uwsgi as your wsgi server, the proper commands should be in your docker-compose file.
 
-## Deploying on Heroku
+### Deploying on Heroku
 
 Make sure you have a working Docker installation (e.g. docker ps) and that you’re logged in to Heroku (heroku login).
 
@@ -112,9 +142,3 @@ heroku container:release web
 ```
 
 You can now access *taipy-rest* on the URL that was returned on the `heroku create` command.
-
-# Documentation
-
-All the API Documentation can be found, after running the application in the following URL:
- - ```/redoc-ui``` ReDoc UI configured to hit OpenAPI yaml file
- - ```/openapi.yml``` return OpenAPI specification file in yaml format
