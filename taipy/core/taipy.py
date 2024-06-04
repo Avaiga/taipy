@@ -396,7 +396,7 @@ def get(
 
     This function allows you to retrieve an entity by specifying its identifier.
     The identifier must match the pattern of one of the supported entity types:
-    Task^, DataNode^, Sequence^, Job^, Cycle^, Submission^, or Scenario^.
+    `Task^`, `DataNode^`, `Sequence^`, `Job^`, `Cycle^`, `Submission^`, or `Scenario^`.
 
 
     Parameters:
