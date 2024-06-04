@@ -80,8 +80,8 @@ const Metric = (props: MetricProps) => {
                 gauge: {
                     axis: {
                         range: [
-                            props.min ?? 0,
-                            props.max ?? 100
+                            props.min || 0,
+                            props.max || 100
                         ]
                     },
                     shape: props.type === "linear" ? "bullet" : "angular",

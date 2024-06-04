@@ -36,19 +36,19 @@ const precisionFormat = (precision?: string, specifier?: string): string => {
 const sprintfParse = (fmt?: string): (string | { placeholder: string; })[] => {
     let _fmt = fmt;
     let match;
-    const parse_tree = [];
+    const parseTree = [];
 
     while (_fmt) {
         if ((match = re.text.exec(_fmt)) !== null) {
             // Non-placeholder text
-            parse_tree.push(match[0]);
+            parseTree.push(match[0]);
         } else if ((match = re.modulo.exec(_fmt)) !== null) {
             // '%%' escape sequence
-            parse_tree.push('%');
+            parseTree.push('%');
         } else if ((match = re.placeholder.exec(_fmt)) !== null) {
             // Placeholder
             if (match && match[0]) {
-                parse_tree.push({
+                parseTree.push({
                     placeholder: match[0],
                 });
             }
@@ -59,7 +59,7 @@ const sprintfParse = (fmt?: string): (string | { placeholder: string; })[] => {
         }
     }
 
-    return parse_tree;
+    return parseTree;
 }
 
 /*
@@ -67,12 +67,12 @@ const sprintfParse = (fmt?: string): (string | { placeholder: string; })[] => {
  * returns a D3 format string. If no format string is provided, it returns an empty string.
  */
 export const sprintfToD3Converter = (fmt?: string): string => {
-    const sprintf_fmt_arr = sprintfParse(fmt);
-    const objectIndex = sprintf_fmt_arr.findIndex((element) => typeof element === 'object');
+    const sprintfFmtArr = sprintfParse(fmt);
+    const objectIndex = sprintfFmtArr.findIndex((element) => typeof element === 'object');
     let placeholderValue;
 
-    if (typeof sprintf_fmt_arr[objectIndex] === 'object' && sprintf_fmt_arr[objectIndex] !== null) {
-        placeholderValue = (sprintf_fmt_arr[objectIndex] as { placeholder: string }).placeholder;
+    if (typeof sprintfFmtArr[objectIndex] === 'object' && sprintfFmtArr[objectIndex] !== null) {
+        placeholderValue = (sprintfFmtArr[objectIndex] as { placeholder: string }).placeholder;
     }
 
     if (!placeholderValue) {
@@ -107,9 +107,9 @@ export const sprintfToD3Converter = (fmt?: string): string => {
  */
 export const extractPrefix = (fmt?: string): string => {
     if (!fmt) return "";
-    const sprintf_fmt_arr = sprintfParse(fmt);
-    const objectIndex = sprintf_fmt_arr.findIndex((element) => typeof element === 'object');
-    return sprintf_fmt_arr.slice(0, objectIndex).join('');
+    const sprintfFmtArr = sprintfParse(fmt);
+    const objectIndex = sprintfFmtArr.findIndex((element) => typeof element === 'object');
+    return sprintfFmtArr.slice(0, objectIndex).join('');
 }
 
 /*
@@ -118,8 +118,8 @@ export const extractPrefix = (fmt?: string): string => {
  */
 export const extractSuffix = (fmt?: string): string => {
     if (!fmt) return "";
-    const sprintf_fmt_arr = sprintfParse(fmt);
-    const objectIndex = sprintf_fmt_arr.findIndex((element) => typeof element === 'object');
-    return sprintf_fmt_arr.slice(objectIndex + 1).join('');
+    const sprintfFmtArr = sprintfParse(fmt);
+    const objectIndex = sprintfFmtArr.findIndex((element) => typeof element === 'object');
+    return sprintfFmtArr.slice(objectIndex + 1).join('');
 }
 
