@@ -238,7 +238,7 @@ const TaipyPlotlyButtons: ModeBarButtonAny[] = [
 
 const updateArrays = (sel: number[][], val: number[], idx: number) => {
     if (idx >= sel.length || val.length !== sel[idx].length || val.some((v, i) => sel[idx][i] != v)) {
-        sel = sel.concat();
+        sel = sel.concat(); // shallow copy
         sel[idx] = val;
     }
     return sel;
