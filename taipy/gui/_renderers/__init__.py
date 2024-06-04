@@ -100,9 +100,9 @@ class _Renderer(Page, ABC):
 
     def __sanitize_content(self, content: str) -> str:
         # replace all CRLF (\r\n) with LF (\n)
-        text = re.sub(r'\r\n', '\n', content)
+        text = re.sub(r"\r\n", "\n", content)
         # replace all remaining CR (\r) with LF (\n)
-        text = re.sub(r'\r', '\n', content)
+        text = re.sub(r"\r", "\n", text)
         return text
 
     def set_content(self, content: str) -> None:
