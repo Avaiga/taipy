@@ -75,8 +75,8 @@ class _GuiCore(ElementLibrary):
                 "show_dialog": ElementProperty(PropertyType.boolean, True),
                 __SEL_SCENARIOS_PROP: ElementProperty(PropertyType.dynamic_list),
                 "multiple": ElementProperty(PropertyType.boolean, False),
-                "filter": ElementProperty(_GuiCoreScenarioFilter, _GuiCoreScenarioFilter.DEFAULT),
-                "sort": ElementProperty(_GuiCoreScenarioSort, _GuiCoreScenarioSort.DEFAULT),
+                "filter": ElementProperty(_GuiCoreScenarioFilter, "*"),
+                "sort": ElementProperty(_GuiCoreScenarioSort, "*"),
                 "show_search": ElementProperty(PropertyType.boolean, True),
             },
             inner_properties={

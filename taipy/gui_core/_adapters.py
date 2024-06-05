@@ -257,17 +257,17 @@ def _get_datanode_property(attr: str):
 
 
 class _GuiCoreScenarioProperties(_TaipyBase):
-    _SC_TYPES = {
-        "Config id": "string",
-        "Label": "string",
-        "Creation date": "date",
-        "Cycle label": "string",
-        "Cycle start": "date",
-        "Cycle end": "date",
-        "Primary": "boolean",
-        "Tags": "string",
+    _SC_TYPES: t.Dict[str, t.Dict[str, t.Union[str, bool]]] = {
+        "Config id": {"type": "string"},
+        "Label": {"type": "string"},
+        "Creation date": {"type": "date"},
+        "Cycle label": {"type": "string", "cycle": True},
+        "Cycle start": {"type": "date", "cycle": True},
+        "Cycle end": {"type": "date", "cycle": True},
+        "Primary": {"type": "boolean", "cycle": True},
+        "Tags": {"type": "string"},
     }
-    __SC_LABELS = {
+    __SC_LABELS: t.Dict[str, str] = {
         "Config id": "config_id",
         "Creation date": "creation_date",
         "Label": "name",
@@ -289,7 +289,7 @@ class _GuiCoreScenarioProperties(_TaipyBase):
     def get_type(attr: str):
         if prop := _get_datanode_property(attr):
             return _GuiCoreScenarioProperties.__DN_TYPES.get(prop, "any")
-        return _GuiCoreScenarioProperties._SC_TYPES.get(attr, "any")
+        return _GuiCoreScenarioProperties._SC_TYPES.get(attr, {"type": "any"}).get("type", "any")
 
     @staticmethod
     def get_col_name(attr: str):
@@ -342,6 +342,9 @@ class _GuiCoreScenarioProperties(_TaipyBase):
 
 class _GuiCoreScenarioFilter(_GuiCoreScenarioProperties):
     DEFAULT = list(_GuiCoreScenarioProperties._SC_TYPES.keys())
+    DEFAULT_NO_CYCLE = [
+        p[0] for p in filter(lambda prop: not prop[1].get("cycle", False), _GuiCoreScenarioProperties._SC_TYPES.items())
+    ]
 
     @staticmethod
     def full_desc():
@@ -353,7 +356,8 @@ class _GuiCoreScenarioFilter(_GuiCoreScenarioProperties):
 
     @staticmethod
     def get_default_list():
-        return _GuiCoreScenarioFilter.DEFAULT
+        has_cycle = next(filter(lambda sc: sc.frequency is not None, Config.scenarios.values()), None) is not None
+        return _GuiCoreScenarioFilter.DEFAULT if has_cycle else _GuiCoreScenarioFilter.DEFAULT_NO_CYCLE
 
 
 class _GuiCoreScenarioSort(_GuiCoreScenarioProperties):
