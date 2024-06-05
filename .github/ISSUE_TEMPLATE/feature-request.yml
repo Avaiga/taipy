@@ -9,7 +9,7 @@ body:
         - Thank you for using Taipy and taking the time to suggest a new feature! 😄 
         - Take a look at our template and try to add as much detail as possible. 
         - If any heading is not applicable, please set it to `NA`.
-        
+
   - type: textarea
     id: description_feature
     attributes:
@@ -41,19 +41,15 @@ body:
     validations:
       required: false
 
-  - type: checkboxes
-    id: acceptance_criteria
+  - type: markdown
     attributes:
-      label: Acceptance Criteria
-      options:
-        - label: "Ensure new code is unit tested, and check code coverage is at least 90%."
-          required: false
-        - label: "Create related issue in taipy-doc for documentation and Release Notes."
-          required: false
-        - label: "Check if a new demo could be provided based on this, or if legacy demos could be benefit from it."
-          required: false
-        - label: "Ensure any change is well documented."
-          required: false
+      value: |
+        ## Acceptance Criteria
+        
+        - [ ] Ensure new code is unit tested, and check code coverage is at least 90%.
+        - [ ] Create related issue in taipy-doc for documentation and Release Notes.
+        - [ ] Check if a new demo could be provided based on this, or if legacy demos could be benefit from it.
+        - [ ] Ensure any change is well documented.      
 
   - type: checkboxes
     id: terms_checklist_feature
