@@ -581,7 +581,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
             for dn in get_data_nodes():
                 self.data_nodes_by_owner[dn.owner_id].append(dn)
 
-    def get_datanodes_tree(self, scenarios: t.Optional[t.Union[Scenario, t.List[Scenario]]]):
+    def get_datanodes_tree(
+        self,
+        scenarios: t.Optional[t.Union[Scenario, t.List[Scenario]]],
+        datanodes: t.Optional[t.List[DataNode]],
+        filters: t.Optional[t.List[t.Dict[str, t.Any]]],
+        sorts: t.Optional[t.List[t.Dict[str, t.Any]]],
+    ):
         with self.lock:
             self.__do_datanodes_tree()
         if scenarios is None:

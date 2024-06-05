@@ -19,6 +19,8 @@ from taipy.gui.extension import Element, ElementLibrary, ElementProperty, Proper
 from ..version import _get_version
 from ._adapters import (
     _GuiCoreDatanodeAdapter,
+    _GuiCoreDataNodeFilter,
+    _GuiCoreDataNodeSort,
     _GuiCoreDoNotUpdate,
     _GuiCoreScenarioAdapter,
     _GuiCoreScenarioDagAdapter,
@@ -57,6 +59,10 @@ class _GuiCore(ElementLibrary):
     __DATANODE_VIZ_DATA_NODE_PROP = "data_node"
     __DATANODE_SEL_SCENARIO_PROP = "scenario"
     __SEL_SCENARIOS_PROP = "scenarios"
+    __SEL_DATANODES_PROP = "datanodes"
+    __DATANODE_SELECTOR_FILTER_VAR = "__tpgc_dn_filter"
+    __DATANODE_SELECTOR_SORT_VAR = "__tpgc_dn_sort"
+    __DATANODE_SELECTOR_ERROR_VAR = "__tpgc_dn_error"
 
     __elts = {
         "scenario_selector": Element(
@@ -165,15 +171,29 @@ class _GuiCore(ElementLibrary):
                 "class_name": ElementProperty(PropertyType.dynamic_string),
                 "show_pins": ElementProperty(PropertyType.boolean, True),
                 __DATANODE_SEL_SCENARIO_PROP: ElementProperty(PropertyType.dynamic_list),
+                __SEL_DATANODES_PROP: ElementProperty(PropertyType.dynamic_list),
                 "multiple": ElementProperty(PropertyType.boolean, False),
+                "filter": ElementProperty(_GuiCoreDataNodeFilter, "*"),
+                "sort": ElementProperty(_GuiCoreDataNodeSort, "*"),
+                "show_search": ElementProperty(PropertyType.boolean, True),
             },
             inner_properties={
-                "datanodes": ElementProperty(
+                "inner_datanodes": ElementProperty(
                     PropertyType.lov,
-                    f"{{{__CTX_VAR_NAME}.get_datanodes_tree(<tp:prop:{__DATANODE_SEL_SCENARIO_PROP}>)}}",
+                    f"{{{__CTX_VAR_NAME}.get_datanodes_tree(<tp:prop:{__DATANODE_SEL_SCENARIO_PROP}>, "
+                    + f"<tp:prop:{__SEL_DATANODES_PROP}>, "
+                    + f"{__DATANODE_SELECTOR_FILTER_VAR}<tp:uniq:dns>, "
+                    + f"{__DATANODE_SELECTOR_SORT_VAR}<tp:uniq:dns>)}}",
                 ),
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
                 "type": ElementProperty(PropertyType.inner, __DATANODE_ADAPTER),
+                "error": ElementProperty(PropertyType.react, f"{{{__DATANODE_SELECTOR_ERROR_VAR}<tp:uniq:dns>}}"),
+                "update_dn_vars": ElementProperty(
+                    PropertyType.string,
+                    f"filter={__DATANODE_SELECTOR_FILTER_VAR}<tp:uniq:dns>;"
+                    + f"sort={__DATANODE_SELECTOR_SORT_VAR}<tp:uniq:dns>;"
+                    + f"error_id={__DATANODE_SELECTOR_ERROR_VAR}<tp:uniq:dns>",
+                ),
             },
         ),
         "data_node": Element(

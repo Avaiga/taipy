@@ -126,6 +126,7 @@ const tinyPinIconButtonSx = (theme: Theme) => ({
 
 const switchBoxSx = { ml: 2, width: (theme: Theme) => `calc(100% - ${theme.spacing(2)})` };
 const iconInRowSx = { fontSize: "body2.fontSize" };
+const labelInRowSx = {"& .MuiFormControlLabel-label": iconInRowSx};
 
 const CoreItem = (props: {
     item: Entity;
@@ -526,15 +527,16 @@ const CoreSelector = (props: CoreSelectorProps) => {
                 if (old.length != filters.length || JSON.stringify(old) != jsonFilters) {
                     localStoreSet(jsonFilters, id, lovPropertyName, "filter");
                     const filterVar = getUpdateVar(updateCoreVars, "filter");
-                    dispatch(
+                    const lovVar = getUpdateVarNames(updateVars, lovPropertyName);
+                    setTimeout(() => dispatch(
                         createRequestUpdateAction(
                             id,
                             module,
-                            getUpdateVarNames(updateVars, lovPropertyName),
+                            lovVar,
                             true,
                             filterVar ? { [filterVar]: filters } : undefined
                         )
-                    );
+                    ), 1);
                     return filters;
                 }
                 return old;
@@ -625,20 +627,6 @@ const CoreSelector = (props: CoreSelectorProps) => {
                         <TableSort columns={colSorts} appliedSorts={sorts} onValidate={applySorts}></TableSort>
                     </Grid>
                 ) : null}
-                {showPins ? (
-                    <Grid item>
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    onChange={onShowPinsChange}
-                                    checked={hideNonPinned}
-                                    disabled={!hideNonPinned && !Object.keys(pins[0]).length}
-                                />
-                            }
-                            label="Pinned only"
-                        />
-                    </Grid>
-                ) : null}
                 {showSearch ? (
                     <Grid item>
                         <IconButton onClick={onRevealSearch} size="small" sx={iconInRowSx}>
@@ -648,6 +636,22 @@ const CoreSelector = (props: CoreSelectorProps) => {
                                 <SearchOutlined fontSize="inherit" />
                             )}
                         </IconButton>
+                    </Grid>
+                ) : null}
+                {showPins ? (
+                    <Grid item>
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    onChange={onShowPinsChange}
+                                    checked={hideNonPinned}
+                                    disabled={!hideNonPinned && !Object.keys(pins[0]).length}
+                                    size="small"
+                                />
+                            }
+                            label="Pinned only"
+                            sx={labelInRowSx}
+                        />
                     </Grid>
                 ) : null}
                 {showSearch && revealSearch ? (

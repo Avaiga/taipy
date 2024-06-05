@@ -21,7 +21,7 @@ import CoreSelector from "./CoreSelector";
 interface NodeSelectorProps {
     id?: string;
     updateVarName?: string;
-    datanodes?: Cycles | Scenarios | DataNodes;
+    innerDatanodes?: Cycles | Scenarios | DataNodes;
     coreChanged?: Record<string, unknown>;
     updateVars: string;
     onChange?: string;
@@ -37,22 +37,26 @@ interface NodeSelectorProps {
     dynamicClassName?: string;
     showPins?: boolean;
     multiple?: boolean;
+    updateDnVars?: string;
+    filter?: string;
+    sort?: string;
+    showSearch?: boolean;
 }
 
 const NodeSelector = (props: NodeSelectorProps) => {
-    const { showPins = true, multiple = false } = props;
+    const { showPins = true, multiple = false, updateDnVars = "", showSearch = true } = props;
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     return (
         <Box sx={MainTreeBoxSx} id={props.id} className={className}>
             <CoreSelector
                 {...props}
-                entities={props.datanodes}
+                entities={props.innerDatanodes}
                 leafType={NodeType.NODE}
                 lovPropertyName="datanodes"
                 showPins={showPins}
                 multiple={multiple}
-                showSearch={false}
-                updateCoreVars=""
+                showSearch={showSearch}
+                updateCoreVars={updateDnVars}
             />
             <Box>{props.error}</Box>
         </Box>
