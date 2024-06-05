@@ -38,6 +38,8 @@
 @import 'controls/slider.css';
 @import 'controls/selector.css';
 @import 'controls/toggle.css';
+@import 'controls/file_download.css';
+@import 'controls/file_selector.css';
 
 /* Blocks */
 @import 'blocks/layout.css';
