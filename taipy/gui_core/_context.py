@@ -304,8 +304,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
             for fd in filters:
                 col = fd.get("col", "")
                 is_datanode_prop = _get_datanode_property(col) is not None
-                col = _GuiCoreScenarioProperties.get_col_name(col)
                 col_type = _GuiCoreScenarioProperties.get_type(col)
+                col = _GuiCoreScenarioProperties.get_col_name(col)
                 val = fd.get("value")
                 action = fd.get("action", "")
                 if isinstance(val, str) and col_type == "date":
