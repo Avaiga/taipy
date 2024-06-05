@@ -47,7 +47,6 @@ body:
       description: If applicable, add screenshots to help explain your problem.
       value: |
         ![DESCRIPTION](LINK.png)
-      render: bash
     validations:
       required: false
   - type: input
@@ -112,9 +111,9 @@ body:
       label: Acceptance Criteria
       options:
         - label: "Ensure new code is unit tested, and check code coverage is at least 90%."
-          required: true
+          required: false
         - label: "Create a related issue in taipy-doc for documentation and Release Notes if relevant."
-          required: true
+          required: false
   - type: checkboxes
     id: terms_checklist_bug
     attributes:
