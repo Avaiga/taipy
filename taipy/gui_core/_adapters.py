@@ -257,28 +257,21 @@ def _get_datanode_property(attr: str):
 
 
 class _GuiCoreScenarioProperties(_TaipyBase):
-    _SC_TYPES: t.Dict[str, t.Dict[str, t.Union[str, bool]]] = {
-        "Config id": {"type": "string"},
-        "Label": {"type": "string"},
-        "Creation date": {"type": "date"},
-        "Cycle label": {"type": "string", "cycle": True},
-        "Cycle start": {"type": "date", "cycle": True},
-        "Cycle end": {"type": "date", "cycle": True},
-        "Primary": {"type": "boolean", "cycle": True},
-        "Tags": {"type": "string"},
+    _SC_PROPS: t.Dict[str, t.Dict[str, t.Union[str, bool]]] = {
+        "Config id": {"attr": "config_id", "type": "string"},
+        "Label": {"attr": "name", "type": "string"},
+        "Creation date": {"attr": "creation_date", "type": "date"},
+        "Cycle label": {"attr": "cycle.name", "type": "string", "for_cycle": True},
+        "Cycle start": {"attr": "cycle.start", "type": "date", "for_cycle": True},
+        "Cycle end": {"attr": "cycle.end", "type": "date", "for_cycle": True},
+        "Primary": {"attr": "is_primary", "type": "boolean", "for_cycle": True},
+        "Tags": {"attr": "tags", "type": "string"},
     }
-    __SC_LABELS: t.Dict[str, str] = {
-        "Config id": "config_id",
-        "Creation date": "creation_date",
-        "Label": "name",
-        "Cycle label": "cycle.name",
-        "Cycle start": "cycle.start",
-        "Cycle end": "cycle.end",
-        "Primary": "is_primary",
-        "Tags": "tags",
+    __DN_PROPS = {
+        "Up to date": {"attr": "is_up_to_date", "type": "boolean"},
+        "Valid": {"attr": "is_valid", "type": "boolean"},
+        "Last edit date": {"attr": "last_edit_date", "type": "date"},
     }
-    __DN_TYPES = {"Up to date": "boolean", "Valid": "boolean", "Last edit date": "date"}
-    __DN_LABELS = {"Up to date": "is_up_to_date", "Valid": "is_valid", "Last edit date": "last_edit_date"}
     __ENUMS = None
 
     @staticmethod
@@ -288,14 +281,17 @@ class _GuiCoreScenarioProperties(_TaipyBase):
     @staticmethod
     def get_type(attr: str):
         if prop := _get_datanode_property(attr):
-            return _GuiCoreScenarioProperties.__DN_TYPES.get(prop, "any")
-        return _GuiCoreScenarioProperties._SC_TYPES.get(attr, {"type": "any"}).get("type", "any")
+            return _GuiCoreScenarioProperties.__DN_PROPS.get(prop, {"type": "any"}).get("type", "any")
+        return _GuiCoreScenarioProperties._SC_PROPS.get(attr, {"type": "any"}).get("type", "any")
 
     @staticmethod
     def get_col_name(attr: str):
         if prop := _get_datanode_property(attr):
-            return f'{attr.split(".")[0]}.{_GuiCoreScenarioProperties.__DN_LABELS.get(prop, prop)}'
-        return _GuiCoreScenarioProperties.__SC_LABELS.get(attr, attr)
+            return (
+                attr.split(".")[0]
+                + f'.{_GuiCoreScenarioProperties.__DN_PROPS.get(prop, {"attr": prop}).get("attr", prop)}'
+            )
+        return _GuiCoreScenarioProperties._SC_PROPS.get(attr, {"attr": attr}).get("attr", attr)
 
     @staticmethod
     @abstractmethod
@@ -326,7 +322,9 @@ class _GuiCoreScenarioProperties(_TaipyBase):
             if _GuiCoreScenarioProperties.__ENUMS is None and self.full_desc():
                 _GuiCoreScenarioProperties.__ENUMS = {
                     "Config id": [c for c in Config.scenarios.keys() if c != "default"],
-                    "Tags": [t for s in Config.scenarios.values() for t in s.properties.get("authorized_tags", [])],
+                    "Tags": list(
+                        {t for s in Config.scenarios.values() for t in s.properties.get("authorized_tags", [])}
+                    ),
                 }
             return json.dumps(
                 [
@@ -341,9 +339,10 @@ class _GuiCoreScenarioProperties(_TaipyBase):
 
 
 class _GuiCoreScenarioFilter(_GuiCoreScenarioProperties):
-    DEFAULT = list(_GuiCoreScenarioProperties._SC_TYPES.keys())
+    DEFAULT = list(_GuiCoreScenarioProperties._SC_PROPS.keys())
     DEFAULT_NO_CYCLE = [
-        p[0] for p in filter(lambda prop: not prop[1].get("cycle", False), _GuiCoreScenarioProperties._SC_TYPES.items())
+        p[0]
+        for p in filter(lambda prop: not prop[1].get("for_cycle", False), _GuiCoreScenarioProperties._SC_PROPS.items())
     ]
 
     @staticmethod
