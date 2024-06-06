@@ -19,8 +19,8 @@ from taipy.gui.extension import Element, ElementLibrary, ElementProperty, Proper
 from ..version import _get_version
 from ._adapters import (
     _GuiCoreDatanodeAdapter,
-    _GuiCoreDataNodeFilter,
-    _GuiCoreDataNodeSort,
+    _GuiCoreDatanodeFilter,
+    _GuiCoreDatanodeSort,
     _GuiCoreDoNotUpdate,
     _GuiCoreScenarioAdapter,
     _GuiCoreScenarioDagAdapter,
@@ -173,8 +173,8 @@ class _GuiCore(ElementLibrary):
                 __DATANODE_SEL_SCENARIO_PROP: ElementProperty(PropertyType.dynamic_list),
                 __SEL_DATANODES_PROP: ElementProperty(PropertyType.dynamic_list),
                 "multiple": ElementProperty(PropertyType.boolean, False),
-                "filter": ElementProperty(_GuiCoreDataNodeFilter, "*"),
-                "sort": ElementProperty(_GuiCoreDataNodeSort, "*"),
+                "filter": ElementProperty(_GuiCoreDatanodeFilter, "*"),
+                "sort": ElementProperty(_GuiCoreDatanodeSort, "*"),
                 "show_search": ElementProperty(PropertyType.boolean, True),
             },
             inner_properties={
