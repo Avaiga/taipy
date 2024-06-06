@@ -11,25 +11,14 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, {
-    CSSProperties,
-    lazy,
-    Suspense,
-    useMemo
-} from 'react';
+import React, {CSSProperties, lazy, Suspense, useMemo} from 'react';
 import {Data} from "plotly.js";
-import {
-    useClassNames,
-    useDynamicJsonProperty,
-    useDynamicProperty
-} from "../../utils/hooks";
-import {
-    TaipyBaseProps,
-    TaipyHoverProps
-} from "./utils";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import Tooltip from "@mui/material/Tooltip";
+import {useClassNames, useDynamicJsonProperty, useDynamicProperty} from "../../utils/hooks";
+import {extractPrefix, extractSuffix, sprintfToD3Converter} from "../../utils/formatConversion";
+import {TaipyBaseProps, TaipyHoverProps} from "./utils";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -51,6 +40,8 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     width?: string | number;
     height?: string | number;
     showValue?: boolean;
+    format?: string;
+    deltaFormat?: string;
 }
 
 const emptyLayout = {} as Record<string, Record<string, unknown>>;
@@ -67,49 +58,60 @@ const Metric = (props: MetricProps) => {
     const delta = useDynamicProperty(props.delta, props.defaultDelta, undefined)
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
-    const baseStyle = useDynamicJsonProperty(props.style, props.defaultStyle || "", defaultStyle);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
-    const data = useMemo(() => ([
-        {
-            domain: {x: [0, 1], y: [0, 1]},
-            value: value,
-            type: "indicator",
-            mode: "gauge" + (showValue ? "+number" : "") + (delta !== undefined ? "+delta" : ""),
-            delta: {
-                reference: typeof value === 'number' && typeof delta === 'number' ? value - delta : undefined,
-            },
-            gauge: {
-                axis: {
-                    range: [
-                        typeof props.min === 'number' ? props.min : 0,
-                        typeof props.max === 'number' ? props.max : 100
-                    ]
+    const data = useMemo(() => {
+        return [
+            {
+                domain: {x: [0, 1], y: [0, 1]},
+                value: value,
+                type: "indicator",
+                mode: "gauge" + (showValue ? "+number" : "") + (delta !== undefined ? "+delta" : ""),
+                number: {
+                    prefix: extractPrefix(props.format),
+                    suffix: extractSuffix(props.format),
+                    valueformat: sprintfToD3Converter(props.format),
                 },
-                shape: props.type === "linear" ? "bullet" : "angular",
-                threshold: {
-                    line: {color: "red", width: 4},
-                    thickness: 0.75,
-                    value: threshold
-                }
-            },
-        }
-    ]), [
-        value,
-        showValue,
-        delta,
+                delta: {
+                    reference: typeof value === 'number' && typeof delta === 'number' ? value - delta : undefined,
+                    prefix: extractPrefix(props.deltaFormat),
+                    suffix: extractSuffix(props.deltaFormat),
+                    valueformat: sprintfToD3Converter(props.deltaFormat)
+                },
+                gauge: {
+                    axis: {
+                        range: [
+                            props.min || 0,
+                            props.max || 100
+                        ]
+                    },
+                    shape: props.type === "linear" ? "bullet" : "angular",
+                    threshold: {
+                        line: {color: "red", width: 4},
+                        thickness: 0.75,
+                        value: threshold
+                    }
+                },
+            }
+        ];
+    }, [
+        props.format,
+        props.deltaFormat,
         props.min,
         props.max,
         props.type,
+        value,
+        showValue,
+        delta,
         threshold
     ]);
 
     const style = useMemo(
         () =>
             height === undefined
-                ? ({...baseStyle, width: width} as CSSProperties)
-                : ({...baseStyle, width: width, height: height} as CSSProperties),
-        [baseStyle, height, width]
+                ? ({...defaultStyle, width: width} as CSSProperties)
+                : ({...defaultStyle, width: width, height: height} as CSSProperties),
+        [height, width]
     );
 
     const skelStyle = useMemo(() => ({...style, minHeight: "7em"}), [style]);
@@ -122,6 +124,7 @@ const Metric = (props: MetricProps) => {
                         data={data as Data[]}
                         layout={baseLayout}
                         style={style}
+                        useResizeHandler
                     />
                 </Suspense>
             </Tooltip>
