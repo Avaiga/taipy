@@ -905,6 +905,21 @@
                         "type": "str|number",
                         "default_value": "None",
                         "doc": "The height, in CSS units, of the metric."
+                    },
+                    {
+                        "name": "template",
+                        "type": "dict",
+                        "doc": "The Plotly layout <a href=\"https://plotly.com/javascript/layout-template/\">template</a>."
+                    },
+                    {
+                        "name": "template[dark]",
+                        "type": "dict",
+                        "doc": "The Plotly layout <a href=\"https://plotly.com/javascript/layout-template/\">template</a> applied over the base template when theme is dark."
+                    },
+                    {
+                        "name": "template[light]",
+                        "type": "dict",
+                        "doc": "The Plotly layout <a href=\"https://plotly.com/javascript/layout-template/\">template</a> applied over the base template when theme is not dark."
                     }
                 ]
             }
