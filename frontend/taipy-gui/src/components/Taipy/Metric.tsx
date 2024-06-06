@@ -16,10 +16,11 @@ import {Data} from "plotly.js";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import Tooltip from "@mui/material/Tooltip";
+import {useTheme} from "@mui/material";
 import {useClassNames, useDynamicJsonProperty, useDynamicProperty} from "../../utils/hooks";
 import {extractPrefix, extractSuffix, sprintfToD3Converter} from "../../utils/formatConversion";
 import {TaipyBaseProps, TaipyHoverProps} from "./utils";
-import {useTheme} from "@mui/material";
+import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -167,62 +168,12 @@ const Metric = (props: MetricProps) => {
 
 export default Metric;
 
+const { colorscale, colorway, font} = darkThemeTemplate.layout;
 const darkTemplate = {
     layout: {
-        colorscale: {
-            diverging: [
-                [0, "#8e0152"],
-                [0.1, "#c51b7d"],
-                [0.2, "#de77ae"],
-                [0.3, "#f1b6da"],
-                [0.4, "#fde0ef"],
-                [0.5, "#f7f7f7"],
-                [0.6, "#e6f5d0"],
-                [0.7, "#b8e186"],
-                [0.8, "#7fbc41"],
-                [0.9, "#4d9221"],
-                [1, "#276419"],
-            ],
-            sequential: [
-                [0.0, "#0d0887"],
-                [0.1111111111111111, "#46039f"],
-                [0.2222222222222222, "#7201a8"],
-                [0.3333333333333333, "#9c179e"],
-                [0.4444444444444444, "#bd3786"],
-                [0.5555555555555556, "#d8576b"],
-                [0.6666666666666666, "#ed7953"],
-                [0.7777777777777778, "#fb9f3a"],
-                [0.8888888888888888, "#fdca26"],
-                [1.0, "#f0f921"],
-            ],
-            sequentialminus: [
-                [0.0, "#0d0887"],
-                [0.1111111111111111, "#46039f"],
-                [0.2222222222222222, "#7201a8"],
-                [0.3333333333333333, "#9c179e"],
-                [0.4444444444444444, "#bd3786"],
-                [0.5555555555555556, "#d8576b"],
-                [0.6666666666666666, "#ed7953"],
-                [0.7777777777777778, "#fb9f3a"],
-                [0.8888888888888888, "#fdca26"],
-                [1.0, "#f0f921"],
-            ],
-        },
-        colorway: [
-            "#636efa",
-            "#EF553B",
-            "#00cc96",
-            "#ab63fa",
-            "#FFA15A",
-            "#19d3f3",
-            "#FF6692",
-            "#B6E880",
-            "#FF97FF",
-            "#FECB52",
-        ],
-        font: {
-            color: "#f2f5fa",
-        },
+        colorscale,
+        colorway,
+        font,
         paper_bgcolor: "rgb(31,47,68)",
     },
-};
+}
