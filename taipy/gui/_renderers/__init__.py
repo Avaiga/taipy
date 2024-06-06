@@ -99,11 +99,8 @@ class _Renderer(Page, ABC):
             self._filepath = content
 
     def __sanitize_content(self, content: str) -> str:
-        # replace all CRLF (\r\n) with LF (\n)
-        text = re.sub(r"\r\n", "\n", content)
-        # replace all remaining CR (\r) with LF (\n)
-        text = re.sub(r"\r", "\n", text)
-        return text
+        # Replace all CRLF (\r\n) and CR (\r) by LF (\n)
+        return re.sub(r"\r", "\n", re.sub(r"\r\n", "\n", content))
 
     def set_content(self, content: str) -> None:
         if not _is_in_notebook():
