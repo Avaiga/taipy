@@ -201,7 +201,7 @@ class TestGuiCoreContext_is_readable:
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
             gui_core_context = _GuiCoreContext(Mock())
             outcome = gui_core_context.data_node_adapter(a_datanode)
-            assert isinstance(outcome, tuple)
+            assert isinstance(outcome, list)
             assert outcome[0] == a_datanode.id
 
             with patch("taipy.gui_core._context.is_readable", side_effect=mock_is_readable_false):
