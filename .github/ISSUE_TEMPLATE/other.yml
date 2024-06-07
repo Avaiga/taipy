@@ -8,6 +8,7 @@ body:
       value: |
         - Thank you for using Taipy and taking the time to submit this issue! 😄 
         - This is for discussion or any questions you may have.
+
   - type: textarea
     id: issuedescription
     attributes:
@@ -15,6 +16,7 @@ body:
       description: Provide a clear and concise explanation of your issue.
     validations:
       required: true
+
   - type: checkboxes
     id: terms_checklist_discussion
     attributes:
@@ -25,6 +27,7 @@ body:
           required: true
         - label: "I am willing to work on this issue (optional)"
           required: false
+          
   - type: markdown
     attributes:
       value: Thank you for taking the time to report the issue! 😄
