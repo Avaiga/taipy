@@ -369,8 +369,8 @@ class _GuiCoreScenarioProperties(_GuiCoreProperties):
         "Label": _GuiCorePropDesc("get_simple_label()", "string", for_sort=True),
         "Creation date": _GuiCorePropDesc("creation_date", "date", for_sort=True),
         "Cycle label": _GuiCorePropDesc("cycle.name", "string", extended=True),
-        "Cycle start": _GuiCorePropDesc("cycle.start", "date", extended=True),
-        "Cycle end": _GuiCorePropDesc("cycle.end", "date", extended=True),
+        "Cycle start": _GuiCorePropDesc("cycle.start_date", "date", extended=True),
+        "Cycle end": _GuiCorePropDesc("cycle.end_date", "date", extended=True),
         "Primary": _GuiCorePropDesc("is_primary", "boolean", extended=True),
         "Tags": _GuiCorePropDesc("tags", "string"),
     }
