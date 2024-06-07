@@ -52,7 +52,7 @@ const NodeSelector = (props: NodeSelectorProps) => {
                 {...props}
                 entities={props.innerDatanodes}
                 leafType={NodeType.NODE}
-                lovPropertyName="datanodes"
+                lovPropertyName="innerDatanodes"
                 showPins={showPins}
                 multiple={multiple}
                 showSearch={showSearch}
