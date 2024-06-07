@@ -5,11 +5,12 @@ import { uploadFile } from "../../src/workers/fileupload";
 import { Socket, io } from "socket.io-client";
 import { DataManager, ModuleData } from "./dataManager";
 import { initSocket } from "./utils";
+import { WsAdapter } from "./wsAdapter";
 
-export type OnInitHandler = (appManager: TaipyApp) => void;
-export type OnChangeHandler = (appManager: TaipyApp, encodedName: string, value: unknown) => void;
-export type OnNotifyHandler = (appManager: TaipyApp, type: string, message: string) => void;
-export type onReloadHandler = (appManager: TaipyApp, removedChanges: ModuleData) => void;
+export type OnInitHandler = (taipyApp: TaipyApp) => void;
+export type OnChangeHandler = (taipyApp: TaipyApp, encodedName: string, value: unknown) => void;
+export type OnNotifyHandler = (taipyApp: TaipyApp, type: string, message: string) => void;
+export type onReloadHandler = (taipyApp: TaipyApp, removedChanges: ModuleData) => void;
 
 export class TaipyApp {
     socket: Socket;
@@ -23,12 +24,14 @@ export class TaipyApp {
     clientId: string;
     context: string;
     path: string | undefined;
+    wsAdapters: WsAdapter[];
 
     constructor(
         onInit: OnInitHandler | undefined = undefined,
         onChange: OnChangeHandler | undefined = undefined,
         path: string | undefined = undefined,
-        socket: Socket | undefined = undefined
+        socket: Socket | undefined = undefined,
+        wsAdapters: WsAdapter[] | undefined = undefined,
     ) {
         socket = socket || io("/", { autoConnect: false });
         this.onInit = onInit;
@@ -40,6 +43,7 @@ export class TaipyApp {
         this.appId = "";
         this.path = path;
         this.socket = socket;
+        this.wsAdapters = wsAdapters || [];
         initSocket(socket, this);
     }
 
@@ -47,6 +51,7 @@ export class TaipyApp {
     get onInit() {
         return this._onInit;
     }
+
     set onInit(handler: OnInitHandler | undefined) {
         if (handler !== undefined && handler.length !== 1) {
             throw new Error("onInit() requires one parameter");
@@ -57,6 +62,7 @@ export class TaipyApp {
     get onChange() {
         return this._onChange;
     }
+
     set onChange(handler: OnChangeHandler | undefined) {
         if (handler !== undefined && handler.length !== 3) {
             throw new Error("onChange() requires three parameters");
@@ -67,6 +73,7 @@ export class TaipyApp {
     get onNotify() {
         return this._onNotify;
     }
+
     set onNotify(handler: OnNotifyHandler | undefined) {
         if (handler !== undefined && handler.length !== 3) {
             throw new Error("onNotify() requires three parameters");
@@ -77,6 +84,7 @@ export class TaipyApp {
     get onReload() {
         return this._onReload;
     }
+
     set onReload(handler: onReloadHandler | undefined) {
         if (handler !== undefined && handler?.length !== 2) {
             throw new Error("_onReload() requires two parameters");
