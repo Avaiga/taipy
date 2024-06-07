@@ -472,7 +472,6 @@ class _GuiCoreDatanodeProperties(_GuiCoreProperties):
         "Input": _GuiCorePropDesc("is_input", "boolean"),
         "Output": _GuiCorePropDesc("is_output", "boolean"),
         "Intermediate": _GuiCorePropDesc("is_intermediate", "boolean"),
-        "Tags": _GuiCorePropDesc("tags", "string"),
         "Expiration date": _GuiCorePropDesc("expiration_date", "date", extended=True, for_sort=True),
         "Expired": _GuiCorePropDesc("is_expired", "boolean", extended=True),
     }
