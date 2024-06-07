@@ -300,8 +300,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
             col_fn = cp[0] if (cp := col.split("(")) and len(cp) > 1 else None
             val = fd.get("value")
             action = fd.get("action", "")
-            if isinstance(val, str) and col_type == "date":
-                val = datetime.fromisoformat(val[:-1])
             # level 1 filtering
             filtered_list = [
                 e
