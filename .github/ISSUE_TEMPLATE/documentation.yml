@@ -9,6 +9,7 @@ body:
         - Thank you for using Taipy and taking the time to suggest improvements in documentation! 😄 
         - Take a look at our template and try to add as much detail as possible.
         - If any heading is not applicable, please set it to `NA`.
+        
   - type: textarea
     id: docs_description
     attributes:
@@ -39,6 +40,7 @@ body:
           required: true
         - label: "I am willing to work on this issue (optional)"
           required: false
+
   - type: markdown
     attributes:
       value: Thank you for taking the time to report the issue! 😄
