@@ -15,14 +15,9 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-default_value = 50
-
-# Initial value
-value = 50
-
 page = """
-<|{value}|metric|type=linear|delta=-20|format=%%|delta_format=%%|>
-<|{value}|metric|type=circular|delta=-20|format=%%|delta_format=%%|>
+<|50|metric|type=linear|>
+<|50|metric|type=circular|>
 """
 
 Gui(page).run()
