@@ -15,6 +15,7 @@ import math
 import sys
 import typing as t
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from datetime import date, datetime
 from enum import Enum
 from numbers import Number
@@ -268,7 +269,7 @@ def _invoke_action(
 
 
 def _get_entity_property(col: str, a_type: t.Type):
-    col_parts = col.split("(")
+    col_parts = col.split("(")  # handle the case where the col is a method (ie get_simple_label())
     col_fn = (
         next(
             (col_parts[0] for i in inspect.getmembers(a_type, predicate=inspect.isfunction) if i[0] == col_parts[0]),
@@ -352,12 +353,12 @@ class _GuiCoreProperties(ABC):
         return None
 
 
+@dataclass(frozen=True)
 class _GuiCorePropDesc:
-    def __init__(self, attr: str, type: str, extended=False, for_sort=False):
-        self.attr = attr
-        self.type = type
-        self.extended = extended
-        self.for_sort = for_sort
+    attr: str
+    type: str
+    extended: bool = False
+    for_sort: bool = False
 
 
 _EMPTY_PROP_DESC = _GuiCorePropDesc("", "any")

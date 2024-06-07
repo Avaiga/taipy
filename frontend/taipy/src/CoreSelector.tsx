@@ -374,7 +374,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
             setSelectedItems(() => {
                 const lovVar = getUpdateVar(updateVars, lovPropertyName);
                 const val = multiple ? nodeId : isSelectable ? nodeId : "";
-                setTimeout(
+                setTimeout( // to avoid set state while render react errors
                     () => dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate, lovVar)),
                     1
                 );
