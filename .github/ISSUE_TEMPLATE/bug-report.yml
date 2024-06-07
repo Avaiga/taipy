@@ -116,20 +116,10 @@ body:
     validations:
       required: false
 
-  - type: checkboxes
-    id: acceptance_criteria
-    attributes:
-      label: Acceptance Criteria
-      options:
-        - label: "Ensure new code is unit tested, and check code coverage is at least 90%."
-          required: false
-        - label: "Create a related issue in taipy-doc for documentation and Release Notes if relevant."
-          required: false
-
   - type: markdown
     attributes:
       value: |
-        ## Acceptance Criteria
+        ### Acceptance Criteria
         
         - [ ] Ensure new code is unit tested, and check code coverage is at least 90%.
         - [ ] Create related issue in taipy-doc for documentation and Release Notes.
