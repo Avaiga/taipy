@@ -16,9 +16,11 @@ import {Data} from "plotly.js";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import Tooltip from "@mui/material/Tooltip";
+import {useTheme} from "@mui/material";
 import {useClassNames, useDynamicJsonProperty, useDynamicProperty} from "../../utils/hooks";
 import {extractPrefix, extractSuffix, sprintfToD3Converter} from "../../utils/formatConversion";
 import {TaipyBaseProps, TaipyHoverProps} from "./utils";
+import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -42,6 +44,9 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     showValue?: boolean;
     format?: string;
     deltaFormat?: string;
+    template?: string;
+    template_Dark_?: string;
+    template_Light_?: string;
 }
 
 const emptyLayout = {} as Record<string, Record<string, unknown>>;
@@ -59,6 +64,7 @@ const Metric = (props: MetricProps) => {
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
+    const theme = useTheme();
 
     const data = useMemo(() => {
         return [
@@ -116,13 +122,41 @@ const Metric = (props: MetricProps) => {
 
     const skelStyle = useMemo(() => ({...style, minHeight: "7em"}), [style]);
 
+    const layout = useMemo(() => {
+        const layout = {...baseLayout};
+        let template = undefined;
+        try {
+            const tpl = props.template && JSON.parse(props.template);
+            const tplTheme =
+                theme.palette.mode === "dark"
+                    ? props.template_Dark_
+                        ? JSON.parse(props.template_Dark_)
+                        : darkTemplate
+                    : props.template_Light_ && JSON.parse(props.template_Light_);
+            template = tpl ? (tplTheme ? {...tpl, ...tplTheme} : tpl) : tplTheme ? tplTheme : undefined;
+        } catch (e) {
+            console.info(`Error while parsing Metric.template\n${(e as Error).message || e}`);
+        }
+        if (template) {
+            layout.template = template;
+        }
+
+        return layout
+    }, [
+        props.template,
+        props.template_Dark_,
+        props.template_Light_,
+        theme.palette.mode,
+        baseLayout
+    ])
+
     return (
         <Box data-testid={props.testId} className={className}>
             <Tooltip title={hover || ""}>
                 <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle}/>}>
                     <Plot
                         data={data as Data[]}
-                        layout={baseLayout}
+                        layout={layout}
                         style={style}
                         useResizeHandler
                     />
@@ -133,3 +167,13 @@ const Metric = (props: MetricProps) => {
 }
 
 export default Metric;
+
+const { colorscale, colorway, font} = darkThemeTemplate.layout;
+const darkTemplate = {
+    layout: {
+        colorscale,
+        colorway,
+        font,
+        paper_bgcolor: "rgb(31,47,68)",
+    },
+}

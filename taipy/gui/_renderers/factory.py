@@ -372,6 +372,9 @@ class _Factory:
                 ("show_value", PropertyType.boolean, True),
                 ("format", PropertyType.string),
                 ("delta_format", PropertyType.string),
+                ("template", PropertyType.dict),
+                ("template[dark]", PropertyType.dict),
+                ("template[light]", PropertyType.dict),
             ]
         ),
         "navbar": lambda gui, control_type, attrs: _Builder(
