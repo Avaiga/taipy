@@ -846,7 +846,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if isinstance(ent, Scenario):
                 tags = data.get(_GuiCoreContext.__PROP_SCENARIO_TAGS)
                 if isinstance(tags, (list, tuple)):
-                    ent.tags = dict(tags)
+                    ent.tags = set(tags)
             name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
             if isinstance(name, str):
                 if hasattr(ent, _GuiCoreContext.__PROP_ENTITY_NAME):
