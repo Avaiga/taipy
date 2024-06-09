@@ -270,6 +270,7 @@ const FilterRow = (props: FilterRowProps) => {
                 ) : colLov ? (
                     <Autocomplete
                         freeSolo
+                        autoSelect
                         disableClearable
                         options={colLov}
                         value={val || ""}
