@@ -401,9 +401,16 @@ class _GuiCoreScenarioProperties(_GuiCoreProperties):
     def get_enums(self):
         if _GuiCoreScenarioProperties.__ENUMS is None:
             _GuiCoreScenarioProperties.__ENUMS = {
-                "Config id": [c for c in Config.scenarios.keys() if c != "default"],
-                "Tags": list({t for s in Config.scenarios.values() for t in s.properties.get("authorized_tags", [])}),
+                k: v
+                for k, v in {
+                    "Config id": [c for c in Config.scenarios.keys() if c != "default"],
+                    "Tags": list(
+                        {t for s in Config.scenarios.values() for t in s.properties.get("authorized_tags", [])}
+                    ),
+                }.items()
+                if len(v)
             }
+
         return _GuiCoreScenarioProperties.__ENUMS if self.full_desc() else {}
 
     @staticmethod
