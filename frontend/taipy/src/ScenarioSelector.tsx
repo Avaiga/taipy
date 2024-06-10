@@ -96,6 +96,7 @@ interface ScenarioSelectorProps {
     showDialog?: boolean;
     multiple?: boolean;
     filter?: string;
+    sort?: string;
     updateScVars?: string;
     showSearch?: boolean;
 }
