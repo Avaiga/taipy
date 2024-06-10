@@ -631,6 +631,8 @@ class Gui:
                         self.__handle_ws_get_data_tree()
                     elif msg_type == _WsType.APP_ID.value:
                         self.__handle_ws_app_id(message)
+                    elif msg_type == _WsType.GET_ROUTES.value:
+                        self.__handle_ws_get_routes()
                 self.__send_ack(message.get("ack_id"))
         except Exception as e:  # pragma: no cover
             if isinstance(e, AttributeError) and (name := message.get("name")):
@@ -1156,6 +1158,24 @@ class Gui:
             {
                 "type": _WsType.APP_ID.value,
                 "payload": {"name": name, "id": app_id},
+            }
+        )
+
+    def __handle_ws_get_routes(self):
+        routes = (
+            [[self._config.root_page._route, self._config.root_page._renderer.page_type]]
+            if self._config.root_page
+            else []
+        )
+        routes += [
+            [page._route, page._renderer.page_type]
+            for page in self._config.pages
+            if page._route != Gui.__root_page_name
+        ]
+        self.__send_ws(
+            {
+                "type": _WsType.GET_ROUTES.value,
+                "payload": routes,
             }
         )
 
