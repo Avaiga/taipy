@@ -15,6 +15,7 @@ import math
 import sys
 import typing as t
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date, datetime
 from enum import Enum
@@ -246,6 +247,8 @@ _operators: t.Dict[str, t.Callable] = {
     "contains": contains,
 }
 
+def _filter_iterable(lval: Iterable, op: t.Callable, val: t.Any):
+    return next(filter(lambda v: op(v, val), lval), None) is not None
 
 def _invoke_action(
     ent: t.Any, col: str, col_type: str, is_dn: bool, action: str, val: t.Any, col_fn: t.Optional[str]
@@ -260,6 +263,8 @@ def _invoke_action(
         if op := _operators.get(action):
             cur_val = attrgetter(col_fn or col)(ent)
             cur_val = cur_val() if col_fn else cur_val
+            if isinstance(cur_val, Iterable):
+                return _filter_iterable(cur_val, op, val)
             return op(cur_val.isoformat() if isinstance(cur_val, (datetime, date)) else cur_val, val)
     except Exception as e:
         if _is_debugging():
