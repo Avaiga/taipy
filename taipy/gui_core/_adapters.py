@@ -247,8 +247,8 @@ _operators: t.Dict[str, t.Callable] = {
     "contains": contains,
 }
 
-def _filter_iterable(lval: Iterable, op: t.Callable, val: t.Any):
-    return next(filter(lambda v: op(v, val), lval), None) is not None
+def _filter_iterable(list_val: Iterable, operator: t.Callable, val: t.Any):
+    return next(filter(lambda v: operator(v, val), list_val), None) is not None
 
 def _invoke_action(
     ent: t.Any, col: str, col_type: str, is_dn: bool, action: str, val: t.Any, col_fn: t.Optional[str]
