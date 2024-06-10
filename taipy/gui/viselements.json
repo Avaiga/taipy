@@ -1028,12 +1028,14 @@
                     {
                         "name": "linear",
                         "type": "bool",
-                        "doc": "If True, then a linear element is rendered instead of a circular one."
+                        "doc": "If True, then a linear element is rendered instead of a circular one.",
+                        "default_value": "False"
                     },
                     {
                         "name": "show_value",
                         "type": "bool",
-                        "doc": "If True, then showValue is set to true."
+                        "doc": "If True, then showValue is set to true.",
+                        "default_value": "False"
                     },
                     {
                         "name": "value",
