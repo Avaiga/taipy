@@ -22,3 +22,11 @@ def _build_data_node_is_not_written(dn_id: DataNodeId) -> str:
 
 def _build_not_submittable_entity_reason(entity_id: str) -> str:
     return f"Entity {entity_id} is not a submittable entity"
+
+
+def _build_config_can_not_create_reason(config_id: str) -> str:
+    return f'Object "{config_id}" is not a valid config to be created'
+
+
+def _build_not_global_datanode_config_reason(config_id: str) -> str:
+    return f'Data node config "{config_id}" does not have GLOBAL scope'

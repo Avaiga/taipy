@@ -365,6 +365,29 @@ def test_create_and_delete_scenario():
     assert len(_ScenarioManager._get_all()) == 0
 
 
+def test_can_create():
+    dn_config = Config.configure_in_memory_data_node("dn", 10)
+    task_config = Config.configure_task("task", print, [dn_config])
+    scenario_config = Config.configure_scenario("sc", {task_config}, [], Frequency.DAILY)
+
+    reasons = _ScenarioManager._can_create(scenario_config)
+    assert bool(reasons) is True
+    assert reasons._reasons == {}
+    _ScenarioManager._create(scenario_config)
+
+    reasons = _ScenarioManager._can_create(task_config)
+    assert bool(reasons) is False
+    assert reasons._reasons == {task_config.id: {'Object "task" is not a valid config to be created'}}
+    with pytest.raises(AttributeError):
+        _ScenarioManager._create(task_config)
+
+    reasons = _ScenarioManager._can_create(1)
+    assert bool(reasons) is False
+    assert reasons._reasons == {"1": {'Object "1" is not a valid config to be created'}}
+    with pytest.raises(AttributeError):
+        _ScenarioManager._create(1)
+
+
 def test_is_deletable():
     assert len(_ScenarioManager._get_all()) == 0
     scenario_config = Config.configure_scenario("sc", None, None, Frequency.DAILY)

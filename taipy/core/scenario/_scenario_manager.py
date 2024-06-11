@@ -46,7 +46,7 @@ from ..exceptions.exceptions import (
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
-from ..reason._reason_factory import _build_not_submittable_entity_reason
+from ..reason._reason_factory import _build_config_can_not_create_reason, _build_not_submittable_entity_reason
 from ..reason.reason import Reasons
 from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from ..submission.submission import Submission
@@ -113,6 +113,16 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         Notifier.publish(
             _make_event(scenario, EventOperation.UPDATE, attribute_name="subscribers", attribute_value=params)
         )
+
+    @classmethod
+    def _can_create(cls, config: ScenarioConfig) -> Reasons:
+        config_id = getattr(config, "id", None) or str(config)
+        reason = Reasons(config_id)
+
+        if not isinstance(config, ScenarioConfig):
+            reason._add_reason(config_id, _build_config_can_not_create_reason(config_id))
+
+        return reason
 
     @classmethod
     def _create(

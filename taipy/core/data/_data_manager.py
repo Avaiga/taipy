@@ -24,6 +24,8 @@ from ..config.data_node_config import DataNodeConfig
 from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import InvalidDataNodeType
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
+from ..reason._reason_factory import _build_config_can_not_create_reason, _build_not_global_datanode_config_reason
+from ..reason.reason import Reasons
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
 from ._data_fs_repository import _DataFSRepository
@@ -67,6 +69,18 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
             dn_config: data_nodes.get((dn_config, owner_id)) or cls._create_and_set(dn_config, owner_id, None)
             for dn_config, owner_id in dn_configs_and_owner_id
         }
+
+    @classmethod
+    def _can_create(cls, config: DataNodeConfig) -> Reasons:
+        config_id = getattr(config, "id", None) or str(config)
+        reason = Reasons(config_id)
+
+        if not isinstance(config, DataNodeConfig):
+            reason._add_reason(config_id, _build_config_can_not_create_reason(config_id))
+        elif config.scope is not Scope.GLOBAL:
+            reason._add_reason(config_id, _build_not_global_datanode_config_reason(config_id))
+
+        return reason
 
     @classmethod
     def _create_and_set(

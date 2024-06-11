@@ -51,7 +51,7 @@ from .exceptions.exceptions import (
 from .job._job_manager_factory import _JobManagerFactory
 from .job.job import Job
 from .job.job_id import JobId
-from .reason._reason_factory import _build_not_submittable_entity_reason
+from .reason._reason_factory import _build_config_can_not_create_reason, _build_not_submittable_entity_reason
 from .reason.reason import Reasons
 from .scenario._scenario_manager_factory import _ScenarioManagerFactory
 from .scenario.scenario import Scenario
@@ -871,6 +871,23 @@ def get_cycles() -> List[Cycle]:
         The list of all cycles.
     """
     return _CycleManagerFactory._build_manager()._get_all()
+
+
+def can_create(config: Union[ScenarioConfig, DataNodeConfig]) -> Reasons:
+    """Indicate if a config can be created.
+
+    This function checks if the given scenario or data node config can be created.
+
+    Returns:
+        True if the given config can be created. False otherwise.
+    """
+    if isinstance(config, ScenarioConfig):
+        return _ScenarioManagerFactory._build_manager()._can_create(config)
+    elif isinstance(config, DataNodeConfig):
+        return _DataManagerFactory._build_manager()._can_create(config)
+    else:
+        config_id = getattr(config, "id", None) or str(config)
+        return Reasons(config_id)._add_reason(config_id, _build_config_can_not_create_reason(config_id))
 
 
 def create_scenario(
