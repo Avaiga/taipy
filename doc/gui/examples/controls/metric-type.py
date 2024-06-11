@@ -15,9 +15,11 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
+value = 50
+
 page = """
-<|50|metric|type=linear|>
-<|50|metric|type=circular|>
+<|{value}|metric|type=linear|>
+<|{value}|metric|type=circular|>
 """
 
 Gui(page).run()

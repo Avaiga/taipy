@@ -17,6 +17,7 @@ from taipy.gui import Gui
 
 # Layout reference can be found in the documentation: https://plotly.com/python/reference/layout/
 
+value = 50
 layout = {
     "width": "1000",
     "height": "500",
@@ -35,7 +36,7 @@ layout = {
 }
 
 page = """
-<|30|metric|layout={layout}|>
+<|{value}|metric|layout={layout}|>
 """
 
 Gui(page).run()

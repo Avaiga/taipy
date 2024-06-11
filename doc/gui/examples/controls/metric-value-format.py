@@ -22,7 +22,7 @@ delta_value = 20
 # They use the printf syntax.
 
 page = """
-<|{value}|metric|delta={delta_value}|format=%d km/h|delta_format=%dkm/h|>
+<|{value}|metric|delta={delta_value}|format=%d km/h|delta_format=%d km/h|>
 """
 
 
