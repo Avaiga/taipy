@@ -1124,7 +1124,7 @@
                     },
                     {
                         "name": "type",
-                        "default_value": "circular",
+                        "default_value": "\"circular\"",
                         "type": "str",
                         "doc": "The type of the gauge.<br/>Possible values are:\n<ul>\n<li>\"none\"</li>\n<li>\"circular\"</li>\n<li>\"linear\"</li></ul>."
                     },
