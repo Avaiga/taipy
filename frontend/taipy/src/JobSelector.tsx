@@ -48,7 +48,7 @@ import {
 } from "taipy-gui";
 
 import { disableColor, popoverOrigin, useClassNames } from "./utils";
-import ChipStatus, { Status } from "./ChipStatus";
+import StatusChip, { Status } from "./StatusChip";
 
 interface JobSelectorProps {
     updateVarName?: string;
@@ -414,7 +414,7 @@ const JobSelectedTableRow = ({
             ) : null}
             {showDate ? <TableCell>{creationDate ? new Date(creationDate).toLocaleString() : ""}</TableCell> : null}
             <TableCell>
-                <ChipStatus status={status} />
+                <StatusChip status={status} />
             </TableCell>
             {showCancel || showDelete ? (
                 <TableCell>

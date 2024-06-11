@@ -60,7 +60,7 @@ import {
 } from "./utils";
 import ConfirmDialog from "./utils/ConfirmDialog";
 import PropertiesEditor from "./PropertiesEditor";
-import ChipStatus, { Status } from "./ChipStatus";
+import StatusChip, { Status } from "./StatusChip";
 
 interface ScenarioViewerProps {
     id?: string;
@@ -452,7 +452,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         error_id: getUpdateVar(updateScVar, "error_id"),
                     })
                 );
-                setSubmissionStatus(Status.RUNNING);
+                setSubmissionStatus(Status.SUBMITTED);
             }
         },
         [valid, props.onSubmit, props.onSubmissionChange, id, scId, dispatch, module, updateScVar]
@@ -629,7 +629,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         sx={ChipSx}
                                     />
                                 ) : null}
-                                {submissionStatus ? <ChipStatus status={submissionStatus} sx={ChipSx} /> : null}
+                                {submissionStatus ? <StatusChip status={submissionStatus} sx={ChipSx} /> : null}
                             </Grid>
                             <Grid item>
                                 {showSubmit ? (

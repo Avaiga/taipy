@@ -14,7 +14,7 @@ export enum Status {
     ABANDONED = 9,
 }
 
-const ChipStatus = ({ status, sx }: { status: number; sx?: SxProps<Theme> }) => {
+const StatusChip = ({ status, sx }: { status: number; sx?: SxProps<Theme> }) => {
     const statusText = Status[status];
     let colorFill: "warning" | "default" | "success" | "error" = "warning";
 
@@ -31,4 +31,4 @@ const ChipStatus = ({ status, sx }: { status: number; sx?: SxProps<Theme> }) => 
     return statusText ? <Chip label={statusText} variant={variant} color={colorFill} sx={sx} /> : null;
 };
 
-export default ChipStatus;
+export default StatusChip;
