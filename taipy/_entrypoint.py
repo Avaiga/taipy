@@ -36,19 +36,25 @@ def _entrypoint():
         help="Print the current Taipy version and exit.",
     )
 
+    if find_spec("taipy.enterprise"):
+        from taipy.enterprise._entrypoint import _entrypoint_initialize as _enterprise_entrypoint_initialize
+
+        _enterprise_entrypoint_initialize()
+
     _RunCLI.create_parser()
     _GuiCLI.create_run_parser()
     _CoreCLI.create_run_parser()
 
     _VersionCLI.create_parser()
+    _ScaffoldCLI.generate_template_map()
     _ScaffoldCLI.create_parser()
     _MigrateCLI.create_parser()
     _HelpCLI.create_parser()
 
     if find_spec("taipy.enterprise"):
-        from taipy.enterprise._entrypoint import _entrypoint as _enterprise_entrypoint
+        from taipy.enterprise._entrypoint import _entrypoint_handling as _enterprise_entrypoint_handling
 
-        _enterprise_entrypoint()
+        _enterprise_entrypoint_handling()
 
     args, _ = _TaipyParser._parser.parse_known_args()
     if args.version:

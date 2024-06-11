@@ -11,16 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, {
-    CSSProperties,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-    lazy,
-    Suspense,
-} from "react";
+import React, { CSSProperties, useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
 import {
     Config,
     Data,
@@ -52,6 +43,7 @@ import {
     useDynamicProperty,
     useModule,
 } from "../../utils/hooks";
+import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -214,7 +206,7 @@ const defaultConfig = {
     addIndex: [],
 } as ChartConfig;
 
-const emptyLayout = {} as Record<string, Record<string, unknown>>;
+const emptyLayout = {} as Partial<Layout>;
 const emptyData = {} as Record<string, TraceValueType>;
 
 const TaipyPlotlyButtons: ModeBarButtonAny[] = [
@@ -227,18 +219,31 @@ const TaipyPlotlyButtons: ModeBarButtonAny[] = [
             path: "M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z",
         },
         click: function (gd: HTMLElement, evt: Event) {
-            const title = gd.classList.toggle("full-screen") ? "Exit Full screen" : "Full screen";
-            (evt.currentTarget as HTMLElement).setAttribute("data-title", title);
-            const {height} = gd.dataset;
-            if (height) {
-                gd.attributeStyleMap.set("height", height);
-            } else {
-                gd.setAttribute("data-height", getComputedStyle(gd).height)
+            const div = gd.querySelector("div.svg-container") as HTMLDivElement;
+            if (!div) {
+                return;
             }
-            window.dispatchEvent(new Event('resize'));
+            const { height } = gd.dataset;
+            if (!height) {
+                gd.setAttribute("data-height", getComputedStyle(div).height);
+            }
+            const fs = gd.classList.toggle("full-screen");
+            (evt.currentTarget as HTMLElement).setAttribute("data-title", fs ? "Exit Full screen" : "Full screen");
+            if (height && !fs) {
+                div.attributeStyleMap.set("height", height);
+            }
+            window.dispatchEvent(new Event("resize"));
         },
     },
 ];
+
+const updateArrays = (sel: number[][], val: number[], idx: number) => {
+    if (idx >= sel.length || val.length !== sel[idx].length || val.some((v, i) => sel[idx][i] != v)) {
+        sel = sel.concat(); // shallow copy
+        sel[idx] = val;
+    }
+    return sel;
+};
 
 const Chart = (props: ChartProp) => {
     const {
@@ -290,13 +295,12 @@ const Chart = (props: ChartProp) => {
                         if (!Array.isArray(val)) {
                             val = [];
                         }
-                        if (
-                            idx >= sel.length ||
-                            val.length !== sel[idx].length ||
-                            val.some((v, i) => sel[idx][i] != v)
-                        ) {
-                            sel = sel.concat();
-                            sel[idx] = val;
+                        if (idx === 0 && val.length && Array.isArray(val[0])) {
+                            for (let i = 0; i < val.length; i++) {
+                                sel = updateArrays(sel, val[i] as unknown as number[], i);
+                            }
+                        } else {
+                            sel = updateArrays(sel, val, idx);
                         }
                     }
                 }
@@ -345,7 +349,7 @@ const Chart = (props: ChartProp) => {
                 theme.palette.mode === "dark"
                     ? props.template_Dark_
                         ? JSON.parse(props.template_Dark_)
-                        : darkTemplate
+                        : darkThemeTemplate
                     : props.template_Light_ && JSON.parse(props.template_Light_);
             template = tpl ? (tplTheme ? { ...tpl, ...tplTheme } : tpl) : tplTheme ? tplTheme : undefined;
         } catch (e) {
@@ -421,16 +425,20 @@ const Chart = (props: ChartProp) => {
                           getArrayValue(config.names, idx) ||
                           (config.columns[trace[1]] ? getColNameFromIndexed(config.columns[trace[1]].dfid) : undefined),
                   } as Record<string, unknown>;
-                  ret.marker = {...getArrayValue(config.markers, idx, ret.marker || {})};
-                  MARKER_TO_COL.forEach((prop) => {
-                      const val = (ret.marker as Record<string, unknown>)[prop];
-                      if (typeof val === "string") {
-                          const arr = getValueFromCol(datum, val as string);
-                          if (arr.length) {
-                              (ret.marker as Record<string, unknown>)[prop] = arr;
+                  ret.marker = { ...getArrayValue(config.markers, idx, ret.marker || {}) };
+                  if (Object.keys(ret.marker as object).length) {
+                      MARKER_TO_COL.forEach((prop) => {
+                          const val = (ret.marker as Record<string, unknown>)[prop];
+                          if (typeof val === "string") {
+                              const arr = getValueFromCol(datum, val as string);
+                              if (arr.length) {
+                                  (ret.marker as Record<string, unknown>)[prop] = arr;
+                              }
                           }
-                      }
-                  });
+                      });
+                  } else {
+                      delete ret.marker;
+                  }
                   const xs = getValue(datum, trace, 0) || [];
                   const ys = getValue(datum, trace, 1) || [];
                   const addIndex = getArrayValue(config.addIndex, idx, true) && !ys.length;
@@ -504,7 +512,7 @@ const Chart = (props: ChartProp) => {
             }
         }
         plconf.modeBarButtonsToAdd = TaipyPlotlyButtons;
-        plconf.responsive = true;
+        // plconf.responsive = true; // this is the source of the on/off height ...
         plconf.autosizable = true;
         if (!active) {
             plconf.staticPlot = true;
@@ -584,10 +592,14 @@ const Chart = (props: ChartProp) => {
                     return tr;
                 }, [] as number[][]);
                 if (traces.length) {
+                    const upvars = traces.map((_, idx) => getUpdateVar(updateVars, `selected${idx}`));
+                    if (traces.length > 1 && new Set(upvars).size === 1) {
+                        dispatch(createSendUpdateAction(upvars[0], traces, module, props.onChange, propagate));
+                        return;
+                    }
                     traces.forEach((tr, idx) => {
-                        const upvar = getUpdateVar(updateVars, `selected${idx}`);
-                        if (upvar && tr && tr.length) {
-                            dispatch(createSendUpdateAction(upvar, tr, module, props.onChange, propagate));
+                        if (upvars[idx] && tr && tr.length) {
+                            dispatch(createSendUpdateAction(upvars[idx], tr, module, props.onChange, propagate));
                         }
                     });
                 } else if (config.traces.length === 1) {
@@ -638,353 +650,3 @@ const Chart = (props: ChartProp) => {
 };
 
 export default Chart;
-
-const darkTemplate = {
-    data: {
-        barpolar: [
-            {
-                marker: {
-                    line: {
-                        color: "rgb(17,17,17)",
-                    },
-                    pattern: {
-                        solidity: 0.2,
-                    },
-                },
-                type: "barpolar",
-            },
-        ],
-        bar: [
-            {
-                error_x: {
-                    color: "#f2f5fa",
-                },
-                error_y: {
-                    color: "#f2f5fa",
-                },
-                marker: {
-                    line: {
-                        color: "rgb(17,17,17)",
-                    },
-                    pattern: {
-                        solidity: 0.2,
-                    },
-                },
-                type: "bar",
-            },
-        ],
-        carpet: [
-            {
-                aaxis: {
-                    endlinecolor: "#A2B1C6",
-                    gridcolor: "#506784",
-                    linecolor: "#506784",
-                    minorgridcolor: "#506784",
-                    startlinecolor: "#A2B1C6",
-                },
-                baxis: {
-                    endlinecolor: "#A2B1C6",
-                    gridcolor: "#506784",
-                    linecolor: "#506784",
-                    minorgridcolor: "#506784",
-                    startlinecolor: "#A2B1C6",
-                },
-                type: "carpet",
-            },
-        ],
-        contour: [
-            {
-                colorscale: [
-                    [0.0, "#0d0887"],
-                    [0.1111111111111111, "#46039f"],
-                    [0.2222222222222222, "#7201a8"],
-                    [0.3333333333333333, "#9c179e"],
-                    [0.4444444444444444, "#bd3786"],
-                    [0.5555555555555556, "#d8576b"],
-                    [0.6666666666666666, "#ed7953"],
-                    [0.7777777777777778, "#fb9f3a"],
-                    [0.8888888888888888, "#fdca26"],
-                    [1.0, "#f0f921"],
-                ],
-                type: "contour",
-            },
-        ],
-        heatmapgl: [
-            {
-                colorscale: [
-                    [0.0, "#0d0887"],
-                    [0.1111111111111111, "#46039f"],
-                    [0.2222222222222222, "#7201a8"],
-                    [0.3333333333333333, "#9c179e"],
-                    [0.4444444444444444, "#bd3786"],
-                    [0.5555555555555556, "#d8576b"],
-                    [0.6666666666666666, "#ed7953"],
-                    [0.7777777777777778, "#fb9f3a"],
-                    [0.8888888888888888, "#fdca26"],
-                    [1.0, "#f0f921"],
-                ],
-                type: "heatmapgl",
-            },
-        ],
-        heatmap: [
-            {
-                colorscale: [
-                    [0.0, "#0d0887"],
-                    [0.1111111111111111, "#46039f"],
-                    [0.2222222222222222, "#7201a8"],
-                    [0.3333333333333333, "#9c179e"],
-                    [0.4444444444444444, "#bd3786"],
-                    [0.5555555555555556, "#d8576b"],
-                    [0.6666666666666666, "#ed7953"],
-                    [0.7777777777777778, "#fb9f3a"],
-                    [0.8888888888888888, "#fdca26"],
-                    [1.0, "#f0f921"],
-                ],
-                type: "heatmap",
-            },
-        ],
-        histogram2dcontour: [
-            {
-                colorscale: [
-                    [0.0, "#0d0887"],
-                    [0.1111111111111111, "#46039f"],
-                    [0.2222222222222222, "#7201a8"],
-                    [0.3333333333333333, "#9c179e"],
-                    [0.4444444444444444, "#bd3786"],
-                    [0.5555555555555556, "#d8576b"],
-                    [0.6666666666666666, "#ed7953"],
-                    [0.7777777777777778, "#fb9f3a"],
-                    [0.8888888888888888, "#fdca26"],
-                    [1.0, "#f0f921"],
-                ],
-                type: "histogram2dcontour",
-            },
-        ],
-        histogram2d: [
-            {
-                colorscale: [
-                    [0.0, "#0d0887"],
-                    [0.1111111111111111, "#46039f"],
-                    [0.2222222222222222, "#7201a8"],
-                    [0.3333333333333333, "#9c179e"],
-                    [0.4444444444444444, "#bd3786"],
-                    [0.5555555555555556, "#d8576b"],
-                    [0.6666666666666666, "#ed7953"],
-                    [0.7777777777777778, "#fb9f3a"],
-                    [0.8888888888888888, "#fdca26"],
-                    [1.0, "#f0f921"],
-                ],
-                type: "histogram2d",
-            },
-        ],
-        histogram: [
-            {
-                marker: {
-                    pattern: {
-                        solidity: 0.2,
-                    },
-                },
-                type: "histogram",
-            },
-        ],
-        scatter: [
-            {
-                marker: {
-                    line: {
-                        color: "#283442",
-                    },
-                },
-                type: "scatter",
-            },
-        ],
-        scattergl: [
-            {
-                marker: {
-                    line: {
-                        color: "#283442",
-                    },
-                },
-                type: "scattergl",
-            },
-        ],
-        surface: [
-            {
-                colorscale: [
-                    [0.0, "#0d0887"],
-                    [0.1111111111111111, "#46039f"],
-                    [0.2222222222222222, "#7201a8"],
-                    [0.3333333333333333, "#9c179e"],
-                    [0.4444444444444444, "#bd3786"],
-                    [0.5555555555555556, "#d8576b"],
-                    [0.6666666666666666, "#ed7953"],
-                    [0.7777777777777778, "#fb9f3a"],
-                    [0.8888888888888888, "#fdca26"],
-                    [1.0, "#f0f921"],
-                ],
-                type: "surface",
-            },
-        ],
-        table: [
-            {
-                cells: {
-                    fill: {
-                        color: "#506784",
-                    },
-                    line: {
-                        color: "rgb(17,17,17)",
-                    },
-                },
-                header: {
-                    fill: {
-                        color: "#2a3f5f",
-                    },
-                    line: {
-                        color: "rgb(17,17,17)",
-                    },
-                },
-                type: "table",
-            },
-        ],
-    },
-    layout: {
-        annotationdefaults: {
-            arrowcolor: "#f2f5fa",
-        },
-        colorscale: {
-            diverging: [
-                [0, "#8e0152"],
-                [0.1, "#c51b7d"],
-                [0.2, "#de77ae"],
-                [0.3, "#f1b6da"],
-                [0.4, "#fde0ef"],
-                [0.5, "#f7f7f7"],
-                [0.6, "#e6f5d0"],
-                [0.7, "#b8e186"],
-                [0.8, "#7fbc41"],
-                [0.9, "#4d9221"],
-                [1, "#276419"],
-            ],
-            sequential: [
-                [0.0, "#0d0887"],
-                [0.1111111111111111, "#46039f"],
-                [0.2222222222222222, "#7201a8"],
-                [0.3333333333333333, "#9c179e"],
-                [0.4444444444444444, "#bd3786"],
-                [0.5555555555555556, "#d8576b"],
-                [0.6666666666666666, "#ed7953"],
-                [0.7777777777777778, "#fb9f3a"],
-                [0.8888888888888888, "#fdca26"],
-                [1.0, "#f0f921"],
-            ],
-            sequentialminus: [
-                [0.0, "#0d0887"],
-                [0.1111111111111111, "#46039f"],
-                [0.2222222222222222, "#7201a8"],
-                [0.3333333333333333, "#9c179e"],
-                [0.4444444444444444, "#bd3786"],
-                [0.5555555555555556, "#d8576b"],
-                [0.6666666666666666, "#ed7953"],
-                [0.7777777777777778, "#fb9f3a"],
-                [0.8888888888888888, "#fdca26"],
-                [1.0, "#f0f921"],
-            ],
-        },
-        colorway: [
-            "#636efa",
-            "#EF553B",
-            "#00cc96",
-            "#ab63fa",
-            "#FFA15A",
-            "#19d3f3",
-            "#FF6692",
-            "#B6E880",
-            "#FF97FF",
-            "#FECB52",
-        ],
-        font: {
-            color: "#f2f5fa",
-        },
-        geo: {
-            bgcolor: "rgb(17,17,17)",
-            lakecolor: "rgb(17,17,17)",
-            landcolor: "rgb(17,17,17)",
-            subunitcolor: "#506784",
-        },
-        mapbox: {
-            style: "dark",
-        },
-        paper_bgcolor: "rgb(17,17,17)",
-        plot_bgcolor: "rgb(17,17,17)",
-        polar: {
-            angularaxis: {
-                gridcolor: "#506784",
-                linecolor: "#506784",
-            },
-            bgcolor: "rgb(17,17,17)",
-            radialaxis: {
-                gridcolor: "#506784",
-                linecolor: "#506784",
-            },
-        },
-        scene: {
-            xaxis: {
-                backgroundcolor: "rgb(17,17,17)",
-                gridcolor: "#506784",
-                linecolor: "#506784",
-                zerolinecolor: "#C8D4E3",
-            },
-            yaxis: {
-                backgroundcolor: "rgb(17,17,17)",
-                gridcolor: "#506784",
-                linecolor: "#506784",
-                zerolinecolor: "#C8D4E3",
-            },
-            zaxis: {
-                backgroundcolor: "rgb(17,17,17)",
-                gridcolor: "#506784",
-                linecolor: "#506784",
-                showbackground: true,
-                zerolinecolor: "#C8D4E3",
-            },
-        },
-        shapedefaults: {
-            line: {
-                color: "#f2f5fa",
-            },
-        },
-        sliderdefaults: {
-            bgcolor: "#C8D4E3",
-            bordercolor: "rgb(17,17,17)",
-        },
-        ternary: {
-            aaxis: {
-                gridcolor: "#506784",
-                linecolor: "#506784",
-            },
-            baxis: {
-                gridcolor: "#506784",
-                linecolor: "#506784",
-            },
-            bgcolor: "rgb(17,17,17)",
-            caxis: {
-                gridcolor: "#506784",
-                linecolor: "#506784",
-            },
-        },
-        updatemenudefaults: {
-            bgcolor: "#506784",
-        },
-        xaxis: {
-            gridcolor: "#283442",
-            linecolor: "#506784",
-            tickcolor: "#506784",
-            zerolinecolor: "#283442",
-        },
-        yaxis: {
-            gridcolor: "#283442",
-            linecolor: "#506784",
-            tickcolor: "#506784",
-            zerolinecolor: "#283442",
-        },
-    },
-};

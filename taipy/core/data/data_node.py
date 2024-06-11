@@ -75,6 +75,8 @@ class DataNode(_Entity, _Labeled):
             and use the `create_global_data_node()^` function as illustrated in the following
             example.
 
+    A data node's attributes are populated based on its configuration `DataNodeConfig^`.
+
     !!! Example
 
         ```python
@@ -227,9 +229,6 @@ class DataNode(_Entity, _Labeled):
     def last_edit_date(self, val):
         self._last_edit_date = val
 
-    def _build_not_written_reason(self) -> str:
-        return f"DataNode {self.id} is not written"
-
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def scope(self):
@@ -294,9 +293,6 @@ class DataNode(_Entity, _Labeled):
     @_self_setter(_MANAGER_NAME)
     def edit_in_progress(self, val):
         self._edit_in_progress = val
-
-    def _build_edit_in_progress_reason(self) -> str:
-        return f"DataNode {self.id} is being edited"
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

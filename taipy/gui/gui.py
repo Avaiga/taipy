@@ -630,6 +630,8 @@ class Gui:
                         self.__handle_ws_get_data_tree()
                     elif msg_type == _WsType.APP_ID.value:
                         self.__handle_ws_app_id(message)
+                    elif msg_type == _WsType.GET_ROUTES.value:
+                        self.__handle_ws_get_routes()
                 self.__send_ack(message.get("ack_id"))
         except Exception as e:  # pragma: no cover
             if isinstance(e, AttributeError) and (name := message.get("name")):
@@ -962,8 +964,8 @@ class Gui:
                                 # remove file_path after it is merged
                                 part_file_path.unlink()
                     except EnvironmentError as ee:  # pragma: no cover
-                        _warn("Cannot group file after chunk upload", ee)
-                        return
+                        _warn(f"Cannot group file after chunk upload for {file.filename}", ee)
+                        return (f"Cannot group file after chunk upload for {file.filename}", 500)
                 # notify the file is uploaded
                 newvalue = str(file_path)
                 if multiple:
@@ -1167,14 +1169,32 @@ class Gui:
             }
         )
 
-    def __send_ws(self, payload: dict, allow_grouping=True) -> None:
+    def __handle_ws_get_routes(self):
+        routes = (
+            [[self._config.root_page._route, self._config.root_page._renderer.page_type]]
+            if self._config.root_page
+            else []
+        )
+        routes += [
+            [page._route, page._renderer.page_type]
+            for page in self._config.pages
+            if page._route != Gui.__root_page_name
+        ]
+        self.__send_ws(
+            {
+                "type": _WsType.GET_ROUTES.value,
+                "payload": routes,
+            }
+        )
+
+    def __send_ws(self, payload: dict, allow_grouping=True, send_back_only=False) -> None:
         grouping_message = self.__get_message_grouping() if allow_grouping else None
         if grouping_message is None:
             try:
                 self._server._ws.emit(
                     "message",
                     payload,
-                    to=self.__get_ws_receiver(),
+                    to=self.__get_ws_receiver(send_back_only),
                 )
                 time.sleep(0.001)
             except Exception as e:  # pragma: no cover
@@ -1193,7 +1213,11 @@ class Gui:
     def __send_ack(self, ack_id: t.Optional[str]) -> None:
         if ack_id:
             try:
-                self._server._ws.emit("message", {"type": _WsType.ACKNOWLEDGEMENT.value, "id": ack_id})
+                self._server._ws.emit(
+                    "message",
+                    {"type": _WsType.ACKNOWLEDGEMENT.value, "id": ack_id},
+                    to=self.__get_ws_receiver(True),
+                )
                 time.sleep(0.001)
             except Exception as e:  # pragma: no cover
                 _warn(f"Exception raised in WebSocket communication (send ack) in '{self.__frame.f_code.co_name}'", e)
@@ -1208,7 +1232,10 @@ class Gui:
         )
 
     def __send_ws_download(self, content: str, name: str, on_action: str) -> None:
-        self.__send_ws({"type": _WsType.DOWNLOAD_FILE.value, "content": content, "name": name, "onAction": on_action})
+        self.__send_ws(
+            {"type": _WsType.DOWNLOAD_FILE.value, "content": content, "name": name, "onAction": on_action},
+            send_back_only=True,
+        )
 
     def __send_ws_alert(self, type: str, message: str, system_notification: bool, duration: int) -> None:
         self.__send_ws(
@@ -1272,13 +1299,15 @@ class Gui:
             client_id,
         )
 
-    def __get_ws_receiver(self) -> t.Union[t.List[str], t.Any, None]:
+    def __get_ws_receiver(self, send_back_only=False) -> t.Union[t.List[str], t.Any, None]:
         if self._bindings()._is_single_client():
             return None
         sid = getattr(request, "sid", None) if request else None
         sids = self.__get_sids(self._get_client_id())
         if sid:
             sids.add(sid)
+            if send_back_only:
+                return sid
         return list(sids)
 
     def __get_sids(self, client_id: str) -> t.Set[str]:

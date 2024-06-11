@@ -12,8 +12,6 @@ you plan to use it:
 - [Debugging the JavaScript bundle](#debugging-the-javascript-bundle)
 - [Running the tests](#running-the-tests)
 
-
-
 Taipy GUI needs your system to have **Python 3.8** or above installed.
 
 ## Installing the latest release
@@ -129,7 +127,7 @@ pip install pipenv
 pipenv install --dev
 ```
 
-Then you can run _taipy-gui_ tests with the following command:
+Then you can run *taipy-gui* tests with the following command:
 
 ```bash
 pipenv run pytest tests/gui

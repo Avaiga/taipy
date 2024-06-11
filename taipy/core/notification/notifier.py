@@ -25,7 +25,7 @@ def _publish_event(
     attribute_name: Optional[str] = None,
     attribute_value: Optional[Any] = None,
     **kwargs,
-):
+) -> None:
     """Internal helper function to send events.
 
     It basically creates an event corresponding to the given arguments
@@ -65,8 +65,24 @@ class Notifier:
     ) -> Tuple[str, SimpleQueue]:
         """Register a listener for a specific event topic.
 
-        The topic is defined by the combination of the entity type, the entity id,
-        the operation and the attribute name.
+        The topic is defined by the combination of an optional entity type, an optional
+        entity id, an optional operation, and an optional attribute name. The purpose is
+        to be as flexible as possible. For example, we can register to:
+
+        - All scenario creations
+        - A specific data node update
+        - A sequence submission
+        - A Scenario deletion
+        - Job failures
+
+        Example usage:
+
+        ```python
+        registration_id, registered_queue = Notifier.register(
+            entity_type=EventEntityType.SCENARIO,
+            operation=EventOperation.CREATION
+        )
+        ```
 
         Parameters:
             entity_type (Optional[EventEntityType^]): If provided, the listener will
@@ -82,6 +98,7 @@ class Notifier:
                     <li>TASK</li>
                     <li>DATA_NODE</li>
                     <li>JOB</li>
+                    <li>SUBMISSION</li>
                 </ul>
             entity_id (Optional[str]): If provided, the listener will be notified
                 for all events related to this entity. Otherwise, the listener
@@ -115,8 +132,20 @@ class Notifier:
         return registration.registration_id, registration.queue
 
     @classmethod
-    def unregister(cls, registration_id: str):
+    def unregister(cls, registration_id: str) -> None:
         """Unregister a listener.
+
+        Example usage:
+
+        ```python
+        registration_id, registered_queue = Notifier.register(
+            entity_type=EventEntityType.CYCLE,
+            entity_id="CYCLE_cycle_1",
+            operation=EventOperation.CREATION
+        )
+
+        Notifier.unregister(registration_id)
+        ```
 
         Parameters:
             registration_id (RegistrationId^): The registration id returned by the `register` method.
@@ -136,7 +165,7 @@ class Notifier:
                 del cls._topics_registrations_list[to_remove_registration.topic]
 
     @classmethod
-    def publish(cls, event):
+    def publish(cls, event) -> None:
         """Publish a `Core^` service event to all registered listeners whose topic matches the event.
 
         Parameters:

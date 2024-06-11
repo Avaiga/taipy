@@ -24,12 +24,12 @@ export type ScenarioFull = [
     string,     // label
     string[],   // tags
     Array<[string, string]>,    // properties
-    Array<[string, string[], boolean, boolean]>,   // sequences (label, task ids, submittable, editable)
+    Array<[string, string[], string, boolean]>,   // sequences (label, task ids, notSubmittableReason, editable)
     Record<string, string>, // tasks (id: label)
     string[],   // authorized_tags
     boolean,    // deletable
     boolean,    // promotable
-    boolean,    // submittable
+    string,     // notSubmittableReason
     boolean,    // readable
     boolean     // editable
 ];
@@ -215,7 +215,6 @@ export const MenuProps = {
 export const selectSx = { m: 1, width: 300 };
 
 export const DeleteIconSx = { height: 50, width: 50, p: 0 };
-
 
 export const EmptyArray = [];
 

@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Theme, Tooltip, alpha } from "@mui/material";
 
 import Box from "@mui/material/Box";
@@ -32,7 +32,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { Close, DeleteOutline, Add, EditOutlined } from "@mui/icons-material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { useFormik } from "formik";
 
 import {
@@ -41,15 +41,11 @@ import {
     createSendActionNameAction,
     getUpdateVar,
     createSendUpdateAction,
-    TableFilter,
-    ColumnDesc,
-    FilterDesc,
     useDynamicProperty,
-    createRequestUpdateAction,
 } from "taipy-gui";
 
 import ConfirmDialog from "./utils/ConfirmDialog";
-import { MainTreeBoxSx, ScFProps, ScenarioFull, useClassNames, tinyIconButtonSx, getUpdateVarNames } from "./utils";
+import { MainTreeBoxSx, ScFProps, ScenarioFull, useClassNames, tinyIconButtonSx } from "./utils";
 import CoreSelector, { EditProps } from "./CoreSelector";
 import { Cycles, NodeType, Scenarios } from "./utils/types";
 
@@ -99,8 +95,10 @@ interface ScenarioSelectorProps {
     showPins?: boolean;
     showDialog?: boolean;
     multiple?: boolean;
-    filterBy?: string;
+    filter?: string;
+    sort?: string;
     updateScVars?: string;
+    showSearch?: boolean;
 }
 
 interface ScenarioEditDialogProps {
@@ -437,6 +435,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
         multiple = false,
         updateVars = "",
         updateScVars = "",
+        showSearch = true
     } = props;
     const [open, setOpen] = useState(false);
     const [actionEdit, setActionEdit] = useState<boolean>(false);
@@ -446,43 +445,6 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
     const dispatch = useDispatch();
     const module = useModule();
-
-    const colFilters = useMemo(() => {
-        try {
-            const res = props.filterBy ? (JSON.parse(props.filterBy) as Array<[string, string]>) : undefined;
-            return Array.isArray(res)
-                ? res.reduce((pv, [name, coltype], idx) => {
-                      pv[name] = { dfid: name, type: coltype, index: idx, filter: true };
-                      return pv;
-                  }, {} as Record<string, ColumnDesc>)
-                : undefined;
-        } catch (e) {
-            return undefined;
-        }
-    }, [props.filterBy]);
-    const [filters, setFilters] = useState<FilterDesc[]>([]);
-
-    const applyFilters = useCallback(
-        (filters: FilterDesc[]) => {
-            setFilters((old) => {
-                if (old.length != filters.length || JSON.stringify(old) != JSON.stringify(filters)) {
-                    const filterVar = getUpdateVar(updateScVars, "filter");
-                    dispatch(
-                        createRequestUpdateAction(
-                            props.id,
-                            module,
-                            getUpdateVarNames(updateVars, "innerScenarios"),
-                            true,
-                            filterVar ? { [filterVar]: filters } : undefined
-                        )
-                    );
-                    return filters;
-                }
-                return old;
-            });
-        },
-        [updateVars, dispatch, props.id, updateScVars, module]
-    );
 
     const onSubmit = useCallback(
         (...values: unknown[]) => {
@@ -567,14 +529,6 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     return (
         <>
             <Box sx={MainTreeBoxSx} id={props.id} className={className}>
-                {active && colFilters ? (
-                    <TableFilter
-                        columns={colFilters}
-                        appliedFilters={filters}
-                        filteredCount={0}
-                        onValidate={applyFilters}
-                    ></TableFilter>
-                ) : null}
                 <CoreSelector
                     {...props}
                     entities={props.innerScenarios}
@@ -583,6 +537,8 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                     editComponent={EditScenario}
                     showPins={showPins}
                     multiple={multiple}
+                    updateCoreVars={updateScVars}
+                    showSearch={showSearch}
                 />
                 {showAddButton ? (
                     <Button variant="outlined" onClick={onDialogOpen} fullWidth endIcon={<Add />} disabled={!active}>

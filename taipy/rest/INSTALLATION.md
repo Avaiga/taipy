@@ -1,21 +1,21 @@
 # Installation
 
-The latest stable version of _taipy-rest_ is available through _pip_:
+The latest stable version of *taipy-rest* is available through *pip*:
 ```bash
 pip install taipy-rest
 ```
 
 ## Development version
 
-You can install the development version of _taipy-rest_ with _pip_ and _git_ via the taipy repository:
+You can install the development version of *taipy-rest* with *pip* and *git* via the taipy repository:
 ```bash
 pip install git+https://git@github.com/Avaiga/taipy
 ```
 
-This command installs the development version of _taipy_ package in the Python environment with all
-its dependencies, including the _taipy-rest_ package.
+This command installs the development version of *taipy* package in the Python environment with all
+its dependencies, including the *taipy-rest* package.
 
-If you need the source code for _taipy-rest_ on your system so you can see how things are done or
+If you need the source code for *taipy-rest* on your system so you can see how things are done or
 maybe participate in the improvement of the packages, you can clone the GitHub repository:
 
 ```bash
@@ -27,7 +27,7 @@ source code is in the 'taipy/rest' directory.
 
 # Configuration
 
-Before running, we need to define some variables. Taipy rest APIs depend on pre-configuration of taipy config objects,
+Before running, we need to define some variables. Taipy REST APIs depend on pre-configuration of taipy config objects,
 i.e, is mandatory to define all configuration of DataNodes, Tasks, Sequences, etc. The file containing this
 configuration needs to be passed to the application at runtime. The following variable needs to be defined:
  - TAIPY_SETUP_FILE: the path to the file containing all of taipy object configuration
@@ -69,7 +69,7 @@ pip install gunicorn
 
 gunicorn myapi.wsgi:app
 ```
-And that's it ! Gunicorn is running on port 8000
+And that's it! Gunicorn is running on port 8000.
 
 If you chose gunicorn as your wsgi server, the proper commands should be in your docker-compose file.
 
@@ -82,7 +82,7 @@ pip install uwsgi
 uwsgi --http 127.0.0.1:5000 --module myapi.wsgi:app
 ```
 
-And that's it ! Uwsgi is running on port 5000
+And that's it! Uwsgi is running on port 5000.
 
 If you chose uwsgi as your wsgi server, the proper commands should be in your docker-compose file.
 
@@ -111,7 +111,7 @@ Then release the image:
 heroku container:release web
 ```
 
-You can now access **taipy rest** on the URL that was returned on the `heroku create` command.
+You can now access *taipy-rest* on the URL that was returned on the `heroku create` command.
 
 # Documentation
 

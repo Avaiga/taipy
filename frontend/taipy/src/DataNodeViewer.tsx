@@ -49,7 +49,7 @@ import LockOutlined from "@mui/icons-material/LockOutlined";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { format } from "date-fns";
 import deepEqual from "fast-deep-equal/es6";
 
@@ -833,6 +833,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                             updateVarName={scenarioUpdateVars[0]}
                                                             updateVars={`scenarios=${scenarioUpdateVars[1]}`}
                                                             onSelect={handleClose}
+                                                            updateCoreVars=""
+                                                            showSearch={false}
                                                         />
                                                     </Popover>
                                                 </>

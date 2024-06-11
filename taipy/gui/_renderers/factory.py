@@ -58,7 +58,7 @@ class _Factory:
         "text": "value",
         "toggle": "value",
         "tree": "value",
-        "metric": "value"
+        "metric": "value",
     }
 
     _TEXT_ATTRIBUTES = ["format", "id", "hover_text", "raw"]
@@ -281,7 +281,6 @@ class _Factory:
                 ("value", PropertyType.dynamic_number),
                 ("format",),
                 ("orientation"),
-                ("hover_text", PropertyType.dynamic_string),
                 ("width",),
                 ("height",),
             ]
@@ -363,7 +362,6 @@ class _Factory:
                 ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("layout", PropertyType.dynamic_dict),
-                ("style", PropertyType.dynamic_dict),
                 ("type", PropertyType.string, "circular"),
                 ("min", PropertyType.number, 0),
                 ("max", PropertyType.number, 100),
@@ -372,6 +370,11 @@ class _Factory:
                 ("width", PropertyType.string_or_number),
                 ("height", PropertyType.string_or_number),
                 ("show_value", PropertyType.boolean, True),
+                ("format", PropertyType.string),
+                ("delta_format", PropertyType.string),
+                ("template", PropertyType.dict),
+                ("template[dark]", PropertyType.dict),
+                ("template[light]", PropertyType.dict),
             ]
         ),
         "navbar": lambda gui, control_type, attrs: _Builder(

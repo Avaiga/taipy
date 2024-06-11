@@ -124,7 +124,7 @@ def __test_update_submission_status(job_ids, expected_submission_status):
     submission.jobs = [jobs[job_id] for job_id in job_ids]
     for job_id in job_ids:
         job = jobs[job_id]
-        submission._update_submission_status(job)
+        _SubmissionManagerFactory._build_manager()._update_submission_status(submission, job)
     assert submission.submission_status == expected_submission_status
 
 
@@ -470,29 +470,33 @@ def test_auto_set_and_reload_properties():
     ],
 )
 def test_update_submission_status_with_single_job_completed(job_statuses, expected_submission_statuses):
+    submission_manager = _SubmissionManagerFactory._build_manager()
+
     job = MockJob("job_id", Status.SUBMITTED)
     submission = Submission("submission_id", "ENTITY_TYPE", "entity_config_id")
-    _SubmissionManagerFactory._build_manager()._set(submission)
+    submission_manager._set(submission)
 
     assert submission.submission_status == SubmissionStatus.SUBMITTED
 
     for job_status, submission_status in zip(job_statuses, expected_submission_statuses):
         job.status = job_status
-        submission._update_submission_status(job)
+        submission_manager._update_submission_status(submission, job)
         assert submission.submission_status == submission_status
 
 
 def __test_update_submission_status_with_two_jobs(job_ids, job_statuses, expected_submission_statuses):
+    submission_manager = _SubmissionManagerFactory._build_manager()
+
     jobs = {job_id: MockJob(job_id, Status.SUBMITTED) for job_id in job_ids}
     submission = Submission("submission_id", "ENTITY_TYPE", "entity_config_id")
-    _SubmissionManagerFactory._build_manager()._set(submission)
+    submission_manager._set(submission)
 
     assert submission.submission_status == SubmissionStatus.SUBMITTED
 
     for (job_id, job_status), submission_status in zip(job_statuses, expected_submission_statuses):
         job = jobs[job_id]
         job.status = job_status
-        submission._update_submission_status(job)
+        submission_manager._update_submission_status(submission, job)
         assert submission.submission_status == submission_status
 
 

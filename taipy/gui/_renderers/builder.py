@@ -31,7 +31,7 @@ from ..utils import (
     _getscopeattr,
     _getscopeattr_drill,
     _is_boolean,
-    _is_boolean_true,
+    _is_true,
     _MapDict,
     _to_camel_case,
 )
@@ -206,7 +206,7 @@ class _Builder:
 
     def __get_boolean_attribute(self, name: str, default_value=False):
         boolattr = self.__attributes.get(name, default_value)
-        return _is_boolean_true(boolattr) if isinstance(boolattr, str) else bool(boolattr)
+        return _is_true(boolattr) if isinstance(boolattr, str) else bool(boolattr)
 
     def set_boolean_attribute(self, name: str, value: bool):
         """
@@ -481,7 +481,7 @@ class _Builder:
     def __build_rebuild_fn(self, fn_name: str, attribute_names: t.Iterable[str]):
         rebuild = self.__attributes.get("rebuild", False)
         rebuild_hash = self.__hashes.get("rebuild")
-        if rebuild_hash or _is_boolean_true(rebuild):
+        if rebuild_hash or _is_true(rebuild):
             attributes, hashes = self.__filter_attributes_hashes(self.__filter_attribute_names(attribute_names))
             rebuild_name = f"bool({self.__gui._get_real_var_name(rebuild_hash)[0]})" if rebuild_hash else "None"
             try:
@@ -597,8 +597,15 @@ class _Builder:
         return self
 
     def __set_list_attribute(
-        self, name: str, hash_name: t.Optional[str], val: t.Any, elt_type: t.Type, dynamic=True
+        self,
+        name: str,
+        hash_name: t.Optional[str],
+        val: t.Any,
+        elt_type: t.Type,
+        dynamic=True,
+        default_val: t.Optional[t.Any] = None,
     ) -> t.List[str]:
+        val = default_val if val is None else val
         if not hash_name and isinstance(val, str):
             val = [elt_type(t.strip()) for t in val.split(";")]
         if isinstance(val, list):
@@ -820,12 +827,14 @@ class _Builder:
                             value = float(value)
                     if isinstance(value, (int, float)):
                         return self.__set_react_attribute(_to_camel_case(var_name), value)
+                if isinstance(value, (datetime, date, time)):
+                    value = _date_to_string(value)
                 self.set_attribute(_to_camel_case(var_name), value)
         return self
 
     def _set_labels(self, var_name: str = "labels"):
         if value := self.__attributes.get(var_name):
-            if _is_boolean_true(value):
+            if _is_true(value):
                 return self.__set_react_attribute(_to_camel_case(var_name), True)
             elif isinstance(value, (dict, _MapDict)):
                 return self.set_dict_attribute(var_name)
@@ -966,8 +975,15 @@ class _Builder:
                     attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, False)
                 )
             elif var_type == PropertyType.string_list:
-                self.__set_list_attribute(
-                    attr[0], self.__hashes.get(attr[0]), self.__attributes.get(attr[0]), str, False
+                self.__update_vars.extend(
+                    self.__set_list_attribute(
+                        attr[0],
+                        self.__hashes.get(attr[0]),
+                        self.__attributes.get(attr[0]),
+                        str,
+                        False,
+                        _get_tuple_val(attr, 2, None),
+                    )
                 )
             elif var_type == PropertyType.function:
                 self.__set_function_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
@@ -1013,7 +1029,10 @@ class _Builder:
                     self.__update_vars.append(f"{prop_name}={hash_name}")
                     self.__set_react_attribute(prop_name, hash_name)
                 else:
-                    self.set_attribute(prop_name, var_type(self.__attributes.get(attr[0]), "").get())
+                    val = self.__attributes.get(attr[0])
+                    self.set_attribute(
+                        prop_name, var_type(_get_tuple_val(attr, 2, None) if val is None else val, "").get()
+                    )
 
         self.__set_refresh_on_update()
         return self
