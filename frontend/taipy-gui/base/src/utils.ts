@@ -17,16 +17,16 @@ interface AlertMessage extends WsMessage {
 
 const initWsMessageTypes = ["ID", "AID", "GMC"];
 
-export const initSocket = (socket: Socket, appManager: TaipyApp) => {
+export const initSocket = (socket: Socket, taipyApp: TaipyApp) => {
     socket.on("connect", () => {
-        if (appManager.clientId === "" || appManager.appId === "") {
-            appManager.init();
+        if (taipyApp.clientId === "" || taipyApp.appId === "") {
+            taipyApp.init();
         }
     });
     // Send a request to get App ID to verify that the app has not been reloaded
     socket.io.on("reconnect", () => {
         console.log("WebSocket reconnected")
-        sendWsMessage(socket, "AID", "reconnect", appManager.appId, appManager.clientId, appManager.context);
+        sendWsMessage(socket, "AID", "reconnect", taipyApp.appId, taipyApp.clientId, taipyApp.context);
     });
     // try to reconnect on connect_error
     socket.on("connect_error", (err) => {
@@ -44,7 +44,7 @@ export const initSocket = (socket: Socket, appManager: TaipyApp) => {
     });
     // handle message data from backend
     socket.on("message", (message: WsMessage) => {
-        processWsMessage(message, appManager);
+        processWsMessage(message, taipyApp);
     });
     // only now does the socket tries to open/connect
     if (!socket.connected) {
@@ -52,62 +52,66 @@ export const initSocket = (socket: Socket, appManager: TaipyApp) => {
     }
 };
 
-const processWsMessage = (message: WsMessage, appManager: TaipyApp) => {
+const processWsMessage = (message: WsMessage, taipyApp: TaipyApp) => {
     if (message.type) {
         if (message.type === "MU" && Array.isArray(message.payload)) {
             for (const muPayload of message.payload as [MultipleUpdatePayload]) {
                 const encodedName = muPayload.name;
                 const { value } = muPayload.payload;
-                appManager.variableData?.update(encodedName, value);
-                appManager.onChange && appManager.onChange(appManager, encodedName, value);
+                taipyApp.variableData?.update(encodedName, value);
+                taipyApp.onChange && taipyApp.onChange(taipyApp, encodedName, value);
             }
         } else if (message.type === "ID") {
             const { id } = message as unknown as IdMessage;
             storeClientId(id);
-            appManager.clientId = id;
-            appManager.updateContext(appManager.path);
+            taipyApp.clientId = id;
+            taipyApp.updateContext(taipyApp.path);
         } else if (message.type === "GMC") {
             const mc = (message.payload as Record<string, unknown>).data as string;
             window.localStorage.setItem("ModuleContext", mc);
-            appManager.context = mc;
+            taipyApp.context = mc;
         } else if (message.type === "GDT") {
             const payload = message.payload as Record<string, ModuleData>;
             const variableData = payload.variable;
             const functionData = payload.function;
-            if (appManager.variableData && appManager.functionData) {
-                const varChanges = appManager.variableData.init(variableData);
-                const functionChanges = appManager.functionData.init(functionData);
+            if (taipyApp.variableData && taipyApp.functionData) {
+                const varChanges = taipyApp.variableData.init(variableData);
+                const functionChanges = taipyApp.functionData.init(functionData);
                 const changes = merge(varChanges, functionChanges);
                 if (varChanges || functionChanges) {
-                    appManager.onReload && appManager.onReload(appManager, changes);
+                    taipyApp.onReload && taipyApp.onReload(taipyApp, changes);
                 }
             } else {
-                appManager.variableData = new DataManager(variableData);
-                appManager.functionData = new DataManager(functionData);
-                appManager.onInit && appManager.onInit(appManager);
+                taipyApp.variableData = new DataManager(variableData);
+                taipyApp.functionData = new DataManager(functionData);
+                taipyApp.onInit && taipyApp.onInit(taipyApp);
             }
         } else if (message.type === "AID") {
             const payload = message.payload as Record<string, unknown>;
             if (payload.name === "reconnect") {
-                return appManager.init();
+                return taipyApp.init();
             }
-            appManager.appId = payload.id as string;
-        } else if (message.type === "AL" && appManager.onNotify) {
+            taipyApp.appId = payload.id as string;
+        } else if (message.type === "GR") {
+            const payload = message.payload as [string, string][];
+            taipyApp.routes = payload;
+        } else if (message.type === "AL" && taipyApp.onNotify) {
             const payload = message as AlertMessage;
-            appManager.onNotify(appManager, payload.atype, payload.message);
+            taipyApp.onNotify(taipyApp, payload.atype, payload.message);
         }
-        postWsMessageProcessing(message, appManager);
+        postWsMessageProcessing(message, taipyApp);
     }
 };
 
-const postWsMessageProcessing = (message: WsMessage, appManager: TaipyApp) => {
+const postWsMessageProcessing = (message: WsMessage, taipyApp: TaipyApp) => {
     // perform data population only when all necessary metadata is ready
     if (
         initWsMessageTypes.includes(message.type) &&
-        appManager.clientId !== "" &&
-        appManager.appId !== "" &&
-        appManager.context !== ""
+        taipyApp.clientId !== "" &&
+        taipyApp.appId !== "" &&
+        taipyApp.context !== "" &&
+        taipyApp.routes !== undefined
     ) {
-        sendWsMessage(appManager.socket, "GDT", "get_data_tree", {}, appManager.clientId, appManager.context);
+        sendWsMessage(taipyApp.socket, "GDT", "get_data_tree", {}, taipyApp.clientId, taipyApp.context);
     }
 };
