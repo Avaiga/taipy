@@ -106,7 +106,7 @@ interface CoreSelectorProps {
     leafType: NodeType;
     editComponent?: ComponentType<EditProps>;
     showPins?: boolean;
-    onSelect?: (id: string | string[]) => void;
+    onSelect?: (id: string | string[] | null) => void;
     updateCoreVars: string;
     filter?: string;
     sort?: string;
@@ -126,6 +126,7 @@ const tinyPinIconButtonSx = (theme: Theme) => ({
 
 const switchBoxSx = { ml: 2, width: (theme: Theme) => `calc(100% - ${theme.spacing(2)})` };
 const iconInRowSx = { fontSize: "body2.fontSize" };
+const labelInRowSx = {"& .MuiFormControlLabel-label": iconInRowSx};
 
 const CoreItem = (props: {
     item: Entity;
@@ -294,7 +295,7 @@ const filterTree = (entities: Entities, search: string, leafType: NodeType, coun
 };
 
 const localStoreSet = (val: string, ...ids: string[]) => {
-    const id = ids.filter(i => !!i).join(" ");
+    const id = ids.filter((i) => !!i).join(" ");
     if (!id) {
         return;
     }
@@ -306,7 +307,7 @@ const localStoreSet = (val: string, ...ids: string[]) => {
 };
 
 const localStoreGet = (...ids: string[]) => {
-    const id = ids.filter(i => !!i).join(" ");
+    const id = ids.filter((i) => !!i).join(" ");
     if (!id) {
         return undefined;
     }
@@ -364,23 +365,21 @@ const CoreSelector = (props: CoreSelectorProps) => {
     }, []);
 
     const onNodeSelect = useCallback(
-        (e: SyntheticEvent, nodeId: string, isSelected: boolean) => {
+        (e: SyntheticEvent, nodeId: string | string[] | null) => {
             const { selectable = "false" } = e.currentTarget.parentElement?.dataset || {};
             const isSelectable = selectable === "true";
             if (!isSelectable && multiple) {
                 return;
             }
-            setSelectedItems((old) => {
-                const res = isSelected ? [...old, nodeId] : old.filter((id) => id !== nodeId);
-                const scenariosVar = getUpdateVar(updateVars, lovPropertyName);
-                const val = multiple ? res : isSelectable ? nodeId : "";
-                setTimeout(
-                    () =>
-                        dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate, scenariosVar)),
+            setSelectedItems(() => {
+                const lovVar = getUpdateVar(updateVars, lovPropertyName);
+                const val = multiple ? nodeId : isSelectable ? nodeId : "";
+                setTimeout( // to avoid set state while render react errors
+                    () => dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate, lovVar)),
                     1
                 );
                 onSelect && isSelectable && onSelect(val);
-                return res;
+                return Array.isArray(nodeId) ? nodeId : nodeId ? [nodeId] : [];
             });
         },
         [updateVarName, updateVars, onChange, onSelect, multiple, propagate, dispatch, module, lovPropertyName]
@@ -526,15 +525,16 @@ const CoreSelector = (props: CoreSelectorProps) => {
                 if (old.length != filters.length || JSON.stringify(old) != jsonFilters) {
                     localStoreSet(jsonFilters, id, lovPropertyName, "filter");
                     const filterVar = getUpdateVar(updateCoreVars, "filter");
-                    dispatch(
+                    const lovVar = getUpdateVarNames(updateVars, lovPropertyName);
+                    setTimeout(() => dispatch(
                         createRequestUpdateAction(
                             id,
                             module,
-                            getUpdateVarNames(updateVars, lovPropertyName),
+                            lovVar,
                             true,
                             filterVar ? { [filterVar]: filters } : undefined
                         )
-                    );
+                    ), 1);
                     return filters;
                 }
                 return old;
@@ -625,20 +625,6 @@ const CoreSelector = (props: CoreSelectorProps) => {
                         <TableSort columns={colSorts} appliedSorts={sorts} onValidate={applySorts}></TableSort>
                     </Grid>
                 ) : null}
-                {showPins ? (
-                    <Grid item>
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    onChange={onShowPinsChange}
-                                    checked={hideNonPinned}
-                                    disabled={!hideNonPinned && !Object.keys(pins[0]).length}
-                                />
-                            }
-                            label="Pinned only"
-                        />
-                    </Grid>
-                ) : null}
                 {showSearch ? (
                     <Grid item>
                         <IconButton onClick={onRevealSearch} size="small" sx={iconInRowSx}>
@@ -648,6 +634,22 @@ const CoreSelector = (props: CoreSelectorProps) => {
                                 <SearchOutlined fontSize="inherit" />
                             )}
                         </IconButton>
+                    </Grid>
+                ) : null}
+                {showPins ? (
+                    <Grid item>
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    onChange={onShowPinsChange}
+                                    checked={hideNonPinned}
+                                    disabled={!hideNonPinned && !Object.keys(pins[0]).length}
+                                    size="small"
+                                />
+                            }
+                            label="Pinned only"
+                            sx={labelInRowSx}
+                        />
                     </Grid>
                 ) : null}
                 {showSearch && revealSearch ? (
@@ -665,7 +667,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
             <SimpleTreeView
                 slots={treeSlots}
                 sx={treeViewSx}
-                onItemSelectionToggle={onNodeSelect}
+                onSelectedItemsChange={onNodeSelect}
                 selectedItems={selectedItems}
                 multiSelect={multiple}
                 expandedItems={expandedItems}

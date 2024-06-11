@@ -34,6 +34,8 @@ class Page:
     your application variables and interact with them.
     """
 
+    page_type: str = "Taipy"
+
     def __init__(self, **kwargs) -> None:
         from .custom import Page as CustomPage
 

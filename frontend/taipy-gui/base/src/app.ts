@@ -10,20 +10,22 @@ import { WsAdapter } from "./wsAdapter";
 export type OnInitHandler = (taipyApp: TaipyApp) => void;
 export type OnChangeHandler = (taipyApp: TaipyApp, encodedName: string, value: unknown) => void;
 export type OnNotifyHandler = (taipyApp: TaipyApp, type: string, message: string) => void;
-export type onReloadHandler = (taipyApp: TaipyApp, removedChanges: ModuleData) => void;
+export type OnReloadHandler = (taipyApp: TaipyApp, removedChanges: ModuleData) => void;
+type Route = [string, string];
 
 export class TaipyApp {
     socket: Socket;
     _onInit: OnInitHandler | undefined;
     _onChange: OnChangeHandler | undefined;
     _onNotify: OnNotifyHandler | undefined;
-    _onReload: onReloadHandler | undefined;
+    _onReload: OnReloadHandler | undefined;
     variableData: DataManager | undefined;
     functionData: DataManager | undefined;
     appId: string;
     clientId: string;
     context: string;
     path: string | undefined;
+    routes: Route[] | undefined;
     wsAdapters: WsAdapter[];
 
     constructor(
@@ -41,6 +43,7 @@ export class TaipyApp {
         this.clientId = "";
         this.context = "";
         this.appId = "";
+        this.routes = undefined;
         this.path = path;
         this.socket = socket;
         this.wsAdapters = wsAdapters || [];
@@ -84,8 +87,7 @@ export class TaipyApp {
     get onReload() {
         return this._onReload;
     }
-
-    set onReload(handler: onReloadHandler | undefined) {
+    set onReload(handler: OnReloadHandler | undefined) {
         if (handler !== undefined && handler?.length !== 2) {
             throw new Error("_onReload() requires two parameters");
         }
@@ -97,9 +99,11 @@ export class TaipyApp {
         this.clientId = "";
         this.context = "";
         this.appId = "";
+        this.routes = undefined;
         const id = getLocalStorageValue(TAIPY_CLIENT_ID, "");
         sendWsMessage(this.socket, "ID", TAIPY_CLIENT_ID, id, id, undefined, false);
         sendWsMessage(this.socket, "AID", "connect", "", id, undefined, false);
+        sendWsMessage(this.socket, "GR", "", "", id, undefined, false);
         if (id !== "") {
             this.clientId = id;
             this.updateContext(this.path);
@@ -134,6 +138,10 @@ export class TaipyApp {
     getFunctionList() {
         const functionData = this.functionData?.getDataTree()[this.context];
         return Object.keys(functionData || {});
+    }
+
+    getRoutes() {
+        return this.routes;
     }
 
     // This update will only send the request to Taipy Gui backend

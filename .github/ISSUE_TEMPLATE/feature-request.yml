@@ -9,6 +9,7 @@ body:
         - Thank you for using Taipy and taking the time to suggest a new feature! 😄 
         - Take a look at our template and try to add as much detail as possible. 
         - If any heading is not applicable, please set it to `NA`.
+
   - type: textarea
     id: description_feature
     attributes:
@@ -17,18 +18,21 @@ body:
       placeholder: A detailed description of the new feature request.
     validations:
       required: true
+
   - type: textarea
     id: feature_solution_proposed
     attributes:
       label: "Solution Proposed"
       description: A precise description of how you would like to see this functionality implemented.
       placeholder: Including any relevant materials such as sketches, wireframes, or flowcharts to illustrate your proposal is highly welcomed.
+
   - type: textarea
     id: feature_impact_solution
     attributes:
       label: "Impact of Solution"
       description: What impact could that feature have on the rest of the product, and should be taken special care of?
       placeholder: Including any relevant info to understand the impact of solution on the rest of the product.
+
   - type: textarea
     id: additional_context_feature
     attributes:
@@ -36,19 +40,17 @@ body:
       description: If you have any additional context or information that may help us to implement this feature, please provide it here. (workaround, third-party...)
     validations:
       required: false
-  - type: checkboxes
-    id: acceptance_criteria
+
+  - type: markdown
     attributes:
-      label: Acceptance Criteria
-      options:
-        - label: "Ensure new code is unit tested, and check code coverage is at least 90%."
-          required: true
-        - label: "Create related issue in taipy-doc for documentation and Release Notes."
-          required: true
-        - label: "Check if a new demo could be provided based on this, or if legacy demos could be benefit from it."
-          required: true
-        - label: "Ensure any change is well documented."
-          required: true
+      value: |
+        ### Acceptance Criteria
+        
+        - [ ] Ensure new code is unit tested, and check code coverage is at least 90%.
+        - [ ] Create related issue in taipy-doc for documentation and Release Notes.
+        - [ ] Check if a new demo could be provided based on this, or if legacy demos could be benefit from it.
+        - [ ] Ensure any change is well documented.      
+
   - type: checkboxes
     id: terms_checklist_feature
     attributes:
@@ -59,6 +61,7 @@ body:
           required: true
         - label: "I am willing to work on this issue (optional)"
           required: false
+
   - type: markdown
     attributes:
       value: Thank you for taking the time to suggest a feature request! 😄

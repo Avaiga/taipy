@@ -92,6 +92,9 @@ const processWsMessage = (message: WsMessage, taipyApp: TaipyApp) => {
                 return taipyApp.init();
             }
             taipyApp.appId = payload.id as string;
+        } else if (message.type === "GR") {
+            const payload = message.payload as [string, string][];
+            taipyApp.routes = payload;
         } else if (message.type === "AL" && taipyApp.onNotify) {
             const payload = message as AlertMessage;
             taipyApp.onNotify(taipyApp, payload.atype, payload.message);
@@ -106,7 +109,8 @@ const postWsMessageProcessing = (message: WsMessage, taipyApp: TaipyApp) => {
         initWsMessageTypes.includes(message.type) &&
         taipyApp.clientId !== "" &&
         taipyApp.appId !== "" &&
-        taipyApp.context !== ""
+        taipyApp.context !== "" &&
+        taipyApp.routes !== undefined
     ) {
         sendWsMessage(taipyApp.socket, "GDT", "get_data_tree", {}, taipyApp.clientId, taipyApp.context);
     }

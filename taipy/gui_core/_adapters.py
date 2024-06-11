@@ -9,11 +9,14 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import inspect
 import json
 import math
 import sys
 import typing as t
-from abc import abstractmethod
+from abc import ABC, abstractmethod
+from collections.abc import Iterable
+from dataclasses import dataclass
 from datetime import date, datetime
 from enum import Enum
 from numbers import Number
@@ -21,7 +24,17 @@ from operator import attrgetter, contains, eq, ge, gt, le, lt, ne
 
 import pandas as pd
 
-from taipy.core import Cycle, DataNode, Scenario, is_deletable, is_editable, is_promotable, is_readable, is_submittable
+from taipy.core import (
+    Cycle,
+    DataNode,
+    Scenario,
+    Sequence,
+    is_deletable,
+    is_editable,
+    is_promotable,
+    is_readable,
+    is_submittable,
+)
 from taipy.core import get as core_get
 from taipy.core.config import Config
 from taipy.core.data._tabular_datanode_mixin import _TabularDataNodeMixin
@@ -234,20 +247,59 @@ _operators: t.Dict[str, t.Callable] = {
     "contains": contains,
 }
 
+def _filter_iterable(list_val: Iterable, operator: t.Callable, val: t.Any):
+    return next(filter(lambda v: operator(v, val), list_val), None) is not None
 
-def _invoke_action(ent: t.Any, col: str, col_type: str, is_dn: bool, action: str, val: t.Any) -> bool:
+def _invoke_action(
+    ent: t.Any, col: str, col_type: str, is_dn: bool, action: str, val: t.Any, col_fn: t.Optional[str]
+) -> bool:
+    if ent is None:
+        return False
     try:
         if col_type == "any":
             # when a property is not found, return True only if action is not equals
-            entity = getattr(ent, col.split(".")[0]) if is_dn else ent
-            if not hasattr(entity, "properties") or not entity.properties.get(col):
+            if not is_dn and not hasattr(ent, "properties") or not ent.properties.get(col_fn or col):
                 return action == "!="
         if op := _operators.get(action):
-            cur_val = attrgetter(col)(ent)
+            cur_val = attrgetter(col_fn or col)(ent)
+            cur_val = cur_val() if col_fn else cur_val
+            if isinstance(cur_val, Iterable):
+                return _filter_iterable(cur_val, op, val)
             return op(cur_val.isoformat() if isinstance(cur_val, (datetime, date)) else cur_val, val)
     except Exception as e:
-        _warn(f"Error filtering with {col} {action} {val} on {ent}.", e)
+        if _is_debugging():
+            _warn(f"Error filtering with {col} {action} {val} on {ent}.", e)
+        return col_type == "any" and action == "!="
     return True
+
+
+def _get_entity_property(col: str, a_type: t.Type):
+    col_parts = col.split("(")  # handle the case where the col is a method (ie get_simple_label())
+    col_fn = (
+        next(
+            (col_parts[0] for i in inspect.getmembers(a_type, predicate=inspect.isfunction) if i[0] == col_parts[0]),
+            None,
+        )
+        if len(col_parts) > 1
+        else None
+    )
+
+    def sort_key(entity: t.Union[Scenario, Cycle, Sequence, DataNode]):
+        # we compare only strings
+        if isinstance(entity, a_type):
+            try:
+                val = attrgetter(col_fn or col)(entity)
+                if col_fn:
+                    val = val()
+            except AttributeError as e:
+                if _is_debugging():
+                    _warn("Attribute", e)
+                val = ""
+        else:
+            val = ""
+        return val.isoformat() if isinstance(val, (datetime, date)) else str(val)
+
+    return sort_key
 
 
 def _get_datanode_property(attr: str):
@@ -256,42 +308,16 @@ def _get_datanode_property(attr: str):
     return None
 
 
-class _GuiCoreScenarioProperties(_TaipyBase):
-    _SC_PROPS: t.Dict[str, t.Dict[str, t.Union[str, bool]]] = {
-        "Config id": {"attr": "config_id", "type": "string"},
-        "Label": {"attr": "name", "type": "string"},
-        "Creation date": {"attr": "creation_date", "type": "date"},
-        "Cycle label": {"attr": "cycle.name", "type": "string", "for_cycle": True},
-        "Cycle start": {"attr": "cycle.start", "type": "date", "for_cycle": True},
-        "Cycle end": {"attr": "cycle.end", "type": "date", "for_cycle": True},
-        "Primary": {"attr": "is_primary", "type": "boolean", "for_cycle": True},
-        "Tags": {"attr": "tags", "type": "string"},
-    }
-    __DN_PROPS = {
-        "Up to date": {"attr": "is_up_to_date", "type": "boolean"},
-        "Valid": {"attr": "is_valid", "type": "boolean"},
-        "Last edit date": {"attr": "last_edit_date", "type": "date"},
-    }
-    __ENUMS = None
-
+class _GuiCoreProperties(ABC):
     @staticmethod
-    def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "ScP"
-
-    @staticmethod
+    @abstractmethod
     def get_type(attr: str):
-        if prop := _get_datanode_property(attr):
-            return _GuiCoreScenarioProperties.__DN_PROPS.get(prop, {"type": "any"}).get("type", "any")
-        return _GuiCoreScenarioProperties._SC_PROPS.get(attr, {"type": "any"}).get("type", "any")
+        raise NotImplementedError
 
     @staticmethod
+    @abstractmethod
     def get_col_name(attr: str):
-        if prop := _get_datanode_property(attr):
-            return (
-                attr.split(".")[0]
-                + f'.{_GuiCoreScenarioProperties.__DN_PROPS.get(prop, {"attr": prop}).get("attr", prop)}'
-            )
-        return _GuiCoreScenarioProperties._SC_PROPS.get(attr, {"attr": attr}).get("attr", attr)
+        raise NotImplementedError
 
     @staticmethod
     @abstractmethod
@@ -302,6 +328,9 @@ class _GuiCoreScenarioProperties(_TaipyBase):
     @abstractmethod
     def full_desc():
         raise NotImplementedError
+
+    def get_enums(self):
+        return {}
 
     def get(self):
         data = super().get()
@@ -319,18 +348,9 @@ class _GuiCoreScenarioProperties(_TaipyBase):
                     flist.extend(self.get_default_list())
                 else:
                     flist.append(f)
-            if _GuiCoreScenarioProperties.__ENUMS is None and self.full_desc():
-                _GuiCoreScenarioProperties.__ENUMS = {
-                    "Config id": [c for c in Config.scenarios.keys() if c != "default"],
-                    "Tags": list(
-                        {t for s in Config.scenarios.values() for t in s.properties.get("authorized_tags", [])}
-                    ),
-                }
             return json.dumps(
                 [
-                    (attr, _GuiCoreScenarioProperties.get_type(attr), _GuiCoreScenarioProperties.__ENUMS.get(attr))
-                    if self.full_desc()
-                    else (attr,)
+                    (attr, self.get_type(attr), self.get_enums().get(attr)) if self.full_desc() else (attr,)
                     for attr in flist
                     if attr and isinstance(attr, str)
                 ]
@@ -338,11 +358,79 @@ class _GuiCoreScenarioProperties(_TaipyBase):
         return None
 
 
-class _GuiCoreScenarioFilter(_GuiCoreScenarioProperties):
+@dataclass(frozen=True)
+class _GuiCorePropDesc:
+    attr: str
+    type: str
+    extended: bool = False
+    for_sort: bool = False
+
+
+_EMPTY_PROP_DESC = _GuiCorePropDesc("", "any")
+
+
+class _GuiCoreScenarioProperties(_GuiCoreProperties):
+    _SC_PROPS: t.Dict[str, _GuiCorePropDesc] = {
+        "Config id": _GuiCorePropDesc("config_id", "string", for_sort=True),
+        "Label": _GuiCorePropDesc("get_simple_label()", "string", for_sort=True),
+        "Creation date": _GuiCorePropDesc("creation_date", "date", for_sort=True),
+        "Cycle label": _GuiCorePropDesc("cycle.name", "string", extended=True),
+        "Cycle start": _GuiCorePropDesc("cycle.start_date", "date", extended=True),
+        "Cycle end": _GuiCorePropDesc("cycle.end_date", "date", extended=True),
+        "Primary": _GuiCorePropDesc("is_primary", "boolean", extended=True),
+        "Tags": _GuiCorePropDesc("tags", "string"),
+    }
+    __DN_PROPS = {
+        "Up to date": _GuiCorePropDesc("is_up_to_date", "boolean"),
+        "Valid": _GuiCorePropDesc("is_valid", "boolean"),
+        "Last edit date": _GuiCorePropDesc("last_edit_date", "date"),
+    }
+    __ENUMS = None
+    __SC_CYCLE = None
+
+    @staticmethod
+    def get_type(attr: str):
+        if prop := _get_datanode_property(attr):
+            return _GuiCoreScenarioProperties.__DN_PROPS.get(prop, _EMPTY_PROP_DESC).type
+        return _GuiCoreScenarioProperties._SC_PROPS.get(attr, _EMPTY_PROP_DESC).type
+
+    @staticmethod
+    def get_col_name(attr: str):
+        if prop := _get_datanode_property(attr):
+            return (
+                attr.split(".")[0]
+                + f".{_GuiCoreScenarioProperties.__DN_PROPS.get(prop, _EMPTY_PROP_DESC).attr or prop}"
+            )
+        return _GuiCoreScenarioProperties._SC_PROPS.get(attr, _EMPTY_PROP_DESC).attr or attr
+
+    def get_enums(self):
+        if _GuiCoreScenarioProperties.__ENUMS is None:
+            _GuiCoreScenarioProperties.__ENUMS = {
+                k: v
+                for k, v in {
+                    "Config id": [c for c in Config.scenarios.keys() if c != "default"],
+                    "Tags": list(
+                        {t for s in Config.scenarios.values() for t in s.properties.get("authorized_tags", [])}
+                    ),
+                }.items()
+                if len(v)
+            }
+
+        return _GuiCoreScenarioProperties.__ENUMS if self.full_desc() else {}
+
+    @staticmethod
+    def has_cycle():
+        if _GuiCoreScenarioProperties.__SC_CYCLE is None:
+            _GuiCoreScenarioProperties.__SC_CYCLE = (
+                next(filter(lambda sc: sc.frequency is not None, Config.scenarios.values()), None) is not None
+            )
+        return _GuiCoreScenarioProperties.__SC_CYCLE
+
+
+class _GuiCoreScenarioFilter(_GuiCoreScenarioProperties, _TaipyBase):
     DEFAULT = list(_GuiCoreScenarioProperties._SC_PROPS.keys())
     DEFAULT_NO_CYCLE = [
-        p[0]
-        for p in filter(lambda prop: not prop[1].get("for_cycle", False), _GuiCoreScenarioProperties._SC_PROPS.items())
+        p[0] for p in filter(lambda prop: not prop[1].extended, _GuiCoreScenarioProperties._SC_PROPS.items())
     ]
 
     @staticmethod
@@ -355,12 +443,21 @@ class _GuiCoreScenarioFilter(_GuiCoreScenarioProperties):
 
     @staticmethod
     def get_default_list():
-        has_cycle = next(filter(lambda sc: sc.frequency is not None, Config.scenarios.values()), None) is not None
-        return _GuiCoreScenarioFilter.DEFAULT if has_cycle else _GuiCoreScenarioFilter.DEFAULT_NO_CYCLE
+        return (
+            _GuiCoreScenarioFilter.DEFAULT
+            if _GuiCoreScenarioProperties.has_cycle()
+            else _GuiCoreScenarioFilter.DEFAULT_NO_CYCLE
+        )
 
 
-class _GuiCoreScenarioSort(_GuiCoreScenarioProperties):
-    DEFAULT = ["Config id", "Label", "Creation date"]
+class _GuiCoreScenarioSort(_GuiCoreScenarioProperties, _TaipyBase):
+    DEFAULT = [p[0] for p in filter(lambda prop: prop[1].for_sort, _GuiCoreScenarioProperties._SC_PROPS.items())]
+    DEFAULT_NO_CYCLE = [
+        p[0]
+        for p in filter(
+            lambda prop: prop[1].for_sort and not prop[1].extended, _GuiCoreScenarioProperties._SC_PROPS.items()
+        )
+    ]
 
     @staticmethod
     def full_desc():
@@ -372,7 +469,91 @@ class _GuiCoreScenarioSort(_GuiCoreScenarioProperties):
 
     @staticmethod
     def get_default_list():
-        return _GuiCoreScenarioSort.DEFAULT
+        return (
+            _GuiCoreScenarioSort.DEFAULT
+            if _GuiCoreScenarioProperties.has_cycle()
+            else _GuiCoreScenarioSort.DEFAULT_NO_CYCLE
+        )
+
+
+class _GuiCoreDatanodeProperties(_GuiCoreProperties):
+    _DN_PROPS: t.Dict[str, _GuiCorePropDesc] = {
+        "Config id": _GuiCorePropDesc("config_id", "string", for_sort=True),
+        "Label": _GuiCorePropDesc("get_simple_label()", "string", for_sort=True),
+        "Up to date": _GuiCorePropDesc("is_up_to_date", "boolean"),
+        "Last edit date": _GuiCorePropDesc("last_edit_date", "date", for_sort=True),
+        "Input": _GuiCorePropDesc("is_input", "boolean"),
+        "Output": _GuiCorePropDesc("is_output", "boolean"),
+        "Intermediate": _GuiCorePropDesc("is_intermediate", "boolean"),
+        "Expiration date": _GuiCorePropDesc("expiration_date", "date", extended=True, for_sort=True),
+        "Expired": _GuiCorePropDesc("is_expired", "boolean", extended=True),
+    }
+    __DN_VALIDITY = None
+
+    @staticmethod
+    def get_type(attr: str):
+        return _GuiCoreDatanodeProperties._DN_PROPS.get(attr, _EMPTY_PROP_DESC).type
+
+    @staticmethod
+    def get_col_name(attr: str):
+        return _GuiCoreDatanodeProperties._DN_PROPS.get(attr, _EMPTY_PROP_DESC).attr or attr
+
+    @staticmethod
+    def has_validity():
+        if _GuiCoreDatanodeProperties.__DN_VALIDITY is None:
+            _GuiCoreDatanodeProperties.__DN_VALIDITY = (
+                next(filter(lambda dn: dn.validity_period is not None, Config.data_nodes.values()), None) is not None
+            )
+        return _GuiCoreDatanodeProperties.__DN_VALIDITY
+
+
+class _GuiCoreDatanodeFilter(_GuiCoreDatanodeProperties, _TaipyBase):
+    DEFAULT = list(_GuiCoreDatanodeProperties._DN_PROPS.keys())
+    DEFAULT_NO_VALIDITY = [
+        p[0] for p in filter(lambda prop: not prop[1].extended, _GuiCoreDatanodeProperties._DN_PROPS.items())
+    ]
+
+    @staticmethod
+    def full_desc():
+        return True
+
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "DnF"
+
+    @staticmethod
+    def get_default_list():
+        return (
+            _GuiCoreDatanodeFilter.DEFAULT
+            if _GuiCoreDatanodeProperties.has_validity()
+            else _GuiCoreDatanodeFilter.DEFAULT_NO_VALIDITY
+        )
+
+
+class _GuiCoreDatanodeSort(_GuiCoreDatanodeProperties, _TaipyBase):
+    DEFAULT = [p[0] for p in filter(lambda prop: prop[1].for_sort, _GuiCoreDatanodeProperties._DN_PROPS.items())]
+    DEFAULT_NO_VALIDITY = [
+        p[0]
+        for p in filter(
+            lambda prop: prop[1].for_sort and not prop[1].extended, _GuiCoreDatanodeProperties._DN_PROPS.items()
+        )
+    ]
+
+    @staticmethod
+    def full_desc():
+        return False
+
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "DnS"
+
+    @staticmethod
+    def get_default_list():
+        return (
+            _GuiCoreDatanodeSort.DEFAULT
+            if _GuiCoreDatanodeProperties.has_validity()
+            else _GuiCoreDatanodeSort.DEFAULT_NO_VALIDITY
+        )
 
 
 def _is_debugging() -> bool:
