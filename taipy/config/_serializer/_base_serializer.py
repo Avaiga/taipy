@@ -81,6 +81,8 @@ class _BaseSerializer(object):
             return [cls._stringify(val) for val in as_dict]
         if isinstance(as_dict, tuple):
             return [cls._stringify(val) for val in as_dict]
+        if isinstance(as_dict, set):
+            return [cls._stringify(val) for val in as_dict]
         return as_dict
 
     @staticmethod
