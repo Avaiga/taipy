@@ -15,9 +15,13 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
+custom_layout = {
+    "width": "1000",
+    "height": "500",
+}
+
 page = """
-<|50|metric|type=linear|>
-<|50|metric|type=circular|>
+<|30|metric|layout={custom_layout}|>
 """
 
 Gui(page).run()
