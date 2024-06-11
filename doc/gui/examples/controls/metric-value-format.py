@@ -15,13 +15,14 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
+value = 50
 delta_value = 20
 
 # format & delta_format are used to format the value and delta value respectively.
 # They use the printf syntax.
 
 page = """
-<|90|metric|delta={delta_value}|format=%d km/h|delta_format=%dkm/h|>
+<|{value}|metric|delta={delta_value}|format=%d km/h|delta_format=%dkm/h|>
 """
 
 

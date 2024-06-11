@@ -17,13 +17,20 @@ from taipy.gui import Gui
 
 # Layout reference can be found in the documentation: https://plotly.com/python/reference/layout/
 
-custom_layout = {
+layout = {
     "width": "1000",
     "height": "500",
+    "paper_bgcolor": "lightgray",
+    "margin": {
+        "l": 100,
+        "r": 100,
+        "b": 100,
+        "t": 100,
+    },
 }
 
 page = """
-<|30|metric|layout={custom_layout}|>
+<|30|metric|layout={layout}|>
 """
 
 Gui(page).run()

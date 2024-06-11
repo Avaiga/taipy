@@ -15,15 +15,13 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-delta_value = 20
-min_value = 50
+value = 50
 max_value = 150
+delta_value = 20
 threshold = 100
 
 page = """
-<|90|metric|show_value=true|min={min_value}|max={max_value}|delta={delta_value}|threshold={threshold}|format=%d km/h|delta_format=%dkm/h|width=800px|height=500px|>
+<|{value}|metric|max={max_value}|delta={delta_value}|threshold={threshold}|>
 """
 
-
 Gui(page).run()
-
