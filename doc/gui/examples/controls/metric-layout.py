@@ -27,6 +27,11 @@ layout = {
         "b": 100,
         "t": 100,
     },
+    "font": {
+        "size": 20,
+        "color": "black",
+        "family": "Arial",
+    },
 }
 
 page = """
