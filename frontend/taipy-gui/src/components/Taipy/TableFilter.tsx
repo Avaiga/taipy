@@ -101,7 +101,7 @@ const getActionsByType = (colType?: string) =>
 const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?: string, val?: string) => {
     if (colId && act && val !== undefined) {
         const colType = getTypeFromDf(columns[colId].type);
-        if (!val && (colType === "date" || colType === "number" || colType === "boolean")) {
+        if (val === "" && (colType === "date" || colType === "number" || colType === "boolean")) {
             return;
         }
         try {
@@ -109,12 +109,14 @@ const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?
                 col: columns[colId].dfid,
                 action: act,
                 value:
-                    colType === "number"
-                        ? parseFloat(val)
-                        : colType === "boolean"
-                        ? val === "1"
-                        : colType === "date"
-                        ? getDateTime(val)
+                    typeof val === "string"
+                        ? colType === "number"
+                            ? parseFloat(val)
+                            : colType === "boolean"
+                            ? val === "1"
+                            : colType === "date"
+                            ? getDateTime(val)
+                            : val
                         : val,
             } as FilterDesc;
         } catch (e) {
@@ -268,6 +270,7 @@ const FilterRow = (props: FilterRowProps) => {
                 ) : colLov ? (
                     <Autocomplete
                         freeSolo
+                        autoSelect
                         disableClearable
                         options={colLov}
                         value={val || ""}

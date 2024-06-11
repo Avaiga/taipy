@@ -12,9 +12,8 @@
 import json
 import typing as t
 from collections import defaultdict
-from datetime import date, datetime
+from datetime import datetime
 from numbers import Number
-from operator import attrgetter
 from threading import Lock
 
 try:
@@ -64,10 +63,11 @@ from taipy.gui.gui import _DoNotUpdate
 from ._adapters import (
     _EntityType,
     _get_datanode_property,
+    _get_entity_property,
     _GuiCoreDatanodeAdapter,
+    _GuiCoreDatanodeProperties,
     _GuiCoreScenarioProperties,
     _invoke_action,
-    _is_debugging,
 )
 
 
@@ -223,7 +223,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return [
                     cycle.id,
                     cycle.get_simple_label(),
-                    self.get_sorted_entity_list(self.scenario_by_cycle.get(cycle, []), sorts),
+                    self.get_sorted_scenario_list(self.scenario_by_cycle.get(cycle, []), sorts),
                     _EntityType.CYCLE.value,
                     False,
                 ]
@@ -255,15 +255,19 @@ class _GuiCoreContext(CoreEventConsumerBase):
             )
         return None
 
-    def filter_scenarios(self, cycle: t.List, col: str, col_type: str, is_dn: bool, action: str, val: t.Any):
-        cycle[2] = [e for e in cycle[2] if _invoke_action(e, col, col_type, is_dn, action, val)]
-        return cycle
+    def filter_entities(
+        self, cycle_scenario: t.List, col: str, col_type: str, is_dn: bool, action: str, val: t.Any, col_fn=None
+    ):
+        cycle_scenario[2] = [
+            e for e in cycle_scenario[2] if _invoke_action(e, col, col_type, is_dn, action, val, col_fn)
+        ]
+        return cycle_scenario
 
     def adapt_scenarios(self, cycle: t.List):
         cycle[2] = [self.scenario_adapter(e) for e in cycle[2]]
         return cycle
 
-    def get_sorted_entity_list(
+    def get_sorted_scenario_list(
         self,
         entities: t.Union[t.List[t.Union[Cycle, Scenario]], t.List[Scenario]],
         sorts: t.Optional[t.List[t.Dict[str, t.Any]]],
@@ -274,10 +278,44 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 col = sd.get("col", "")
                 col = _GuiCoreScenarioProperties.get_col_name(col)
                 order = sd.get("order", True)
-                sorted_list = sorted(sorted_list, key=_GuiCoreContext.get_entity_property(col), reverse=not order)
+                sorted_list = sorted(sorted_list, key=_get_entity_property(col, Scenario), reverse=not order)
         else:
-            sorted_list = sorted(entities, key=_GuiCoreContext.get_entity_property("creation_date"))
+            sorted_list = sorted(entities, key=_get_entity_property("creation_date", Scenario))
         return [self.cycle_adapter(e, sorts) if isinstance(e, Cycle) else e for e in sorted_list]
+
+    def get_filtered_scenario_list(
+        self,
+        entities: t.List[t.Union[t.List, Scenario]],
+        filters: t.Optional[t.List[t.Dict[str, t.Any]]],
+    ):
+        if not filters:
+            return entities
+        # filtering
+        filtered_list = list(entities)
+        for fd in filters:
+            col = fd.get("col", "")
+            is_datanode_prop = _get_datanode_property(col) is not None
+            col_type = _GuiCoreScenarioProperties.get_type(col)
+            col = _GuiCoreScenarioProperties.get_col_name(col)
+            col_fn = cp[0] if (cp := col.split("(")) and len(cp) > 1 else None
+            val = fd.get("value")
+            action = fd.get("action", "")
+            # level 1 filtering
+            filtered_list = [
+                e
+                for e in filtered_list
+                if not isinstance(e, Scenario)
+                or _invoke_action(e, col, col_type, is_datanode_prop, action, val, col_fn)
+            ]
+            # level 2 filtering
+            filtered_list = [
+                e
+                if isinstance(e, Scenario)
+                else self.filter_entities(e, col, col_type, is_datanode_prop, action, val, col_fn)
+                for e in filtered_list
+            ]
+        # remove empty cycles
+        return [e for e in filtered_list if isinstance(e, Scenario) or (isinstance(e, (tuple, list)) and len(e[2]))]
 
     def get_scenarios(
         self,
@@ -287,6 +325,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
     ):
         cycles_scenarios: t.List[t.Union[Cycle, Scenario]] = []
         with self.lock:
+            # always needed to get scenarios for a cycle in cycle_adapter
             if self.scenario_by_cycle is None:
                 self.scenario_by_cycle = get_cycles_scenarios()
             if scenarios is None:
@@ -297,36 +336,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         cycles_scenarios.append(cycle)
         if scenarios is not None:
             cycles_scenarios = scenarios
-        adapted_list = self.get_sorted_entity_list(cycles_scenarios, sorts)
-        if filters:
-            # filtering
-            filtered_list = list(adapted_list)
-            for fd in filters:
-                col = fd.get("col", "")
-                is_datanode_prop = _get_datanode_property(col) is not None
-                col_type = _GuiCoreScenarioProperties.get_type(col)
-                col = _GuiCoreScenarioProperties.get_col_name(col)
-                val = fd.get("value")
-                action = fd.get("action", "")
-                if isinstance(val, str) and col_type == "date":
-                    val = datetime.fromisoformat(val[:-1])
-                # level 1 filtering
-                filtered_list = [
-                    e
-                    for e in filtered_list
-                    if not isinstance(e, Scenario) or _invoke_action(e, col, col_type, is_datanode_prop, action, val)
-                ]
-                # level 2 filtering
-                filtered_list = [
-                    self.filter_scenarios(e, col, col_type, is_datanode_prop, action, val)
-                    if not isinstance(e, Scenario)
-                    else e
-                    for e in filtered_list
-                ]
-            # remove empty cycles
-            adapted_list = [
-                e for e in filtered_list if isinstance(e, Scenario) or (isinstance(e, (tuple, list)) and len(e[2]))
-            ]
+        adapted_list = self.get_sorted_scenario_list(cycles_scenarios, sorts)
+        adapted_list = self.get_filtered_scenario_list(adapted_list, filters)
         return adapted_list
 
     def select_scenario(self, state: State, id: str, payload: t.Dict[str, str]):
@@ -575,62 +586,152 @@ class _GuiCoreContext(CoreEventConsumerBase):
         except Exception as e:
             _GuiCoreContext.__assign_var(state, error_var, f"Error submitting entity. {e}")
 
+    def get_filtered_datanode_list(
+        self,
+        entities: t.List[t.Union[t.List, DataNode]],
+        filters: t.Optional[t.List[t.Dict[str, t.Any]]],
+    ):
+        if not filters or not entities:
+            return entities
+        # filtering
+        filtered_list = list(entities)
+        for fd in filters:
+            col = fd.get("col", "")
+            col_type = _GuiCoreDatanodeProperties.get_type(col)
+            col = _GuiCoreDatanodeProperties.get_col_name(col)
+            col_fn = cp[0] if (cp := col.split("(")) and len(cp) > 1 else None
+            val = fd.get("value")
+            action = fd.get("action", "")
+            if isinstance(val, str) and col_type == "date":
+                val = datetime.fromisoformat(val[:-1])
+            # level 1 filtering
+            filtered_list = [
+                e
+                for e in filtered_list
+                if not isinstance(e, DataNode) or _invoke_action(e, col, col_type, False, action, val, col_fn)
+            ]
+            # level 3 filtering
+            filtered_list = [
+                e if isinstance(e, DataNode) else self.filter_entities(d, col, col_type, False, action, val, col_fn)
+                for e in filtered_list
+                for d in e[2]
+            ]
+        # remove empty cycles
+        return [e for e in filtered_list if isinstance(e, DataNode) or (isinstance(e, (tuple, list)) and len(e[2]))]
+
+    def get_sorted_datanode_list(
+        self,
+        entities: t.Union[
+            t.List[t.Union[Cycle, Scenario, DataNode]], t.List[t.Union[Scenario, DataNode]], t.List[DataNode]
+        ],
+        sorts: t.Optional[t.List[t.Dict[str, t.Any]]],
+        adapt_dn=False,
+    ):
+        if not entities:
+            return entities
+        if sorts:
+            sorted_list = entities
+            for sd in reversed(sorts):
+                col = sd.get("col", "")
+                col = _GuiCoreDatanodeProperties.get_col_name(col)
+                order = sd.get("order", True)
+                sorted_list = sorted(sorted_list, key=_get_entity_property(col, DataNode), reverse=not order)
+        else:
+            sorted_list = entities
+        return [self.data_node_adapter(e, sorts, adapt_dn) for e in sorted_list]
+
     def __do_datanodes_tree(self):
         if self.data_nodes_by_owner is None:
             self.data_nodes_by_owner = defaultdict(list)
             for dn in get_data_nodes():
                 self.data_nodes_by_owner[dn.owner_id].append(dn)
 
-    def get_datanodes_tree(self, scenarios: t.Optional[t.Union[Scenario, t.List[Scenario]]]):
+    def get_datanodes_tree(
+        self,
+        scenarios: t.Optional[t.Union[Scenario, t.List[Scenario]]],
+        datanodes: t.Optional[t.List[DataNode]],
+        filters: t.Optional[t.List[t.Dict[str, t.Any]]],
+        sorts: t.Optional[t.List[t.Dict[str, t.Any]]],
+    ):
+        base_list = []
         with self.lock:
             self.__do_datanodes_tree()
-        if scenarios is None:
-            return (self.data_nodes_by_owner.get(None, []) if self.data_nodes_by_owner else []) + (
-                self.get_scenarios(None, None, None) or []
-            )
-        if not self.data_nodes_by_owner:
-            return []
-        if isinstance(scenarios, (list, tuple)) and len(scenarios) > 1:
-            return scenarios
-        owners = scenarios if isinstance(scenarios, (list, tuple)) else [scenarios]
-        return [d for owner in owners for d in self.data_nodes_by_owner.get(owner.id, [])]
+        if datanodes is None:
+            if scenarios is None:
+                base_list = (self.data_nodes_by_owner or {}).get(None, []) + (
+                    self.get_scenarios(None, None, None) or []
+                )
+            else:
+                if isinstance(scenarios, (list, tuple)) and len(scenarios) > 1:
+                    base_list = scenarios
+                else:
+                    if self.data_nodes_by_owner:
+                        owners = scenarios if isinstance(scenarios, (list, tuple)) else [scenarios]
+                        base_list = [d for owner in owners for d in (self.data_nodes_by_owner).get(owner.id, [])]
+                    else:
+                        base_list = []
+        else:
+            base_list = datanodes
+        adapted_list = self.get_sorted_datanode_list(base_list, sorts)
+        return self.get_filtered_datanode_list(adapted_list, filters)
 
-    def data_node_adapter(self, data):
-        if isinstance(data, (tuple, list)):
+    def data_node_adapter(
+        self,
+        data: t.Union[Cycle, Scenario, Sequence, DataNode],
+        sorts: t.Optional[t.List[t.Dict[str, t.Any]]] = None,
+        adapt_dn=True,
+    ):
+        if isinstance(data, tuple):
+            raise NotImplementedError
+        if isinstance(data, list):
+            if data[2] and isinstance(data[2][0], (Cycle, Scenario, Sequence, DataNode)):
+                data[2] = self.get_sorted_datanode_list(data[2], sorts, adapt_dn)
             return data
         try:
             if hasattr(data, "id") and is_readable(data.id) and core_get(data.id) is not None:
                 if isinstance(data, DataNode):
-                    return (data.id, data.get_simple_label(), None, _EntityType.DATANODE.value, False)
+                    return (
+                        [data.id, data.get_simple_label(), None, _EntityType.DATANODE.value, False]
+                        if adapt_dn
+                        else data
+                    )
 
                 with self.lock:
                     self.__do_datanodes_tree()
-                    if self.data_nodes_by_owner:
-                        if isinstance(data, Cycle):
-                            return (
+                if self.data_nodes_by_owner:
+                    if isinstance(data, Cycle):
+                        return [
+                            data.id,
+                            data.get_simple_label(),
+                            self.get_sorted_datanode_list(
+                                self.data_nodes_by_owner.get(data.id, [])
+                                + (self.scenario_by_cycle or {}).get(data, []),
+                                sorts,
+                                adapt_dn,
+                            ),
+                            _EntityType.CYCLE.value,
+                            False,
+                        ]
+                    elif isinstance(data, Scenario):
+                        return [
+                            data.id,
+                            data.get_simple_label(),
+                            self.get_sorted_datanode_list(
+                                self.data_nodes_by_owner.get(data.id, []) + list(data.sequences.values()),
+                                sorts,
+                                adapt_dn,
+                            ),
+                            _EntityType.SCENARIO.value,
+                            data.is_primary,
+                        ]
+                    elif isinstance(data, Sequence):
+                        if datanodes := self.data_nodes_by_owner.get(data.id):
+                            return [
                                 data.id,
                                 data.get_simple_label(),
-                                self.data_nodes_by_owner[data.id] + self.scenario_by_cycle.get(data, []),
-                                _EntityType.CYCLE.value,
-                                False,
-                            )
-                        elif isinstance(data, Scenario):
-                            return (
-                                data.id,
-                                data.get_simple_label(),
-                                self.data_nodes_by_owner[data.id] + list(data.sequences.values()),
-                                _EntityType.SCENARIO.value,
-                                data.is_primary,
-                            )
-                        elif isinstance(data, Sequence):
-                            if datanodes := self.data_nodes_by_owner.get(data.id):
-                                return (
-                                    data.id,
-                                    data.get_simple_label(),
-                                    datanodes,
-                                    _EntityType.SEQUENCE.value,
-                                    False,
-                                )
+                                self.get_sorted_datanode_list(datanodes, sorts, adapt_dn),
+                                _EntityType.SEQUENCE.value,
+                            ]
         except Exception as e:
             _warn(
                 f"Access to {type(data)} ({data.id if hasattr(data, 'id') else 'No_id'}) failed",
@@ -745,7 +846,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if isinstance(ent, Scenario):
                 tags = data.get(_GuiCoreContext.__PROP_SCENARIO_TAGS)
                 if isinstance(tags, (list, tuple)):
-                    ent.tags = dict(tags)
+                    ent.tags = set(tags)
             name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
             if isinstance(name, str):
                 if hasattr(ent, _GuiCoreContext.__PROP_ENTITY_NAME):
@@ -765,20 +866,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     if key and key not in _GuiCoreContext.__ENTITY_PROPS:
                         ent.properties.pop(key, None)
 
-    @staticmethod
-    def get_entity_property(col: str):
-        def sort_key(entity: t.Union[Scenario, Cycle]):
-            # we compare only strings
-            try:
-                val = attrgetter(col)(entity)
-            except AttributeError as e:
-                if _is_debugging():
-                    _warn("Attribute", e)
-                val = ""
-            return val.isoformat() if isinstance(val, (datetime, date)) else str(val)
-
-        return sort_key
-
     def get_scenarios_for_owner(self, owner_id: str):
         cycles_scenarios: t.List[t.Union[Scenario, Cycle]] = []
         with self.lock:
@@ -797,7 +884,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         cycles_scenarios.extend(scenarios_cycle)
                     elif isinstance(entity, Scenario):
                         cycles_scenarios.append(entity)
-        return sorted(cycles_scenarios, key=_GuiCoreContext.get_entity_property("creation_date"))
+        return sorted(cycles_scenarios, key=_get_entity_property("creation_date", Scenario))
 
     def get_data_node_history(self, id: str):
         if id and (dn := core_get(id)) and isinstance(dn, DataNode):
