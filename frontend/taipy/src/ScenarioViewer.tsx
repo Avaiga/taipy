@@ -60,6 +60,7 @@ import {
 } from "./utils";
 import ConfirmDialog from "./utils/ConfirmDialog";
 import PropertiesEditor from "./PropertiesEditor";
+import StatusChip, { Status } from "./StatusChip";
 
 interface ScenarioViewerProps {
     id?: string;
@@ -365,6 +366,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
             }
         }
         setValid(!!sc);
+        setSubmissionStatus(0);
         setScenario((oldSc) => (oldSc === sc ? oldSc : sc ? (deepEqual(oldSc, sc) ? oldSc : sc) : invalidScenario));
     }, [props.scenario, props.defaultScenario]);
 
@@ -450,6 +452,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         error_id: getUpdateVar(updateScVar, "error_id"),
                     })
                 );
+                setSubmissionStatus(Status.SUBMITTED);
             }
         },
         [valid, props.onSubmit, props.onSubmissionChange, id, scId, dispatch, module, updateScVar]
@@ -575,6 +578,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
     const addSequenceHandler = useCallback(() => setSequences((seq) => [...seq, ["", [], "", true]]), []);
 
+    // Submission status
+    const [submissionStatus, setSubmissionStatus] = useState(0);
+
     // on scenario change
     useEffect(() => {
         showTags && setTags(scTags);
@@ -589,6 +595,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         const ids = props.coreChanged?.scenario;
         if (typeof ids === "string" ? ids === scId : Array.isArray(ids) ? ids.includes(scId) : ids) {
             props.updateVarName && dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
+            if (props.coreChanged?.submission !== undefined) {
+                setSubmissionStatus(props.coreChanged?.submission as number);
+            }
         }
     }, [props.coreChanged, props.updateVarName, id, module, dispatch, scId]);
 
@@ -620,6 +629,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         sx={ChipSx}
                                     />
                                 ) : null}
+                                {submissionStatus ? <StatusChip status={submissionStatus} sx={ChipSx} /> : null}
                             </Grid>
                             <Grid item>
                                 {showSubmit ? (
