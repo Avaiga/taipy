@@ -16,7 +16,6 @@ import { DeleteOutline, StopCircleOutlined, Add, FilterList } from "@mui/icons-m
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
-import Chip from "@mui/material/Chip";
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
@@ -49,6 +48,7 @@ import {
 } from "taipy-gui";
 
 import { disableColor, popoverOrigin, useClassNames } from "./utils";
+import ChipStatus, { Status } from "./ChipStatus";
 
 interface JobSelectorProps {
     updateVarName?: string;
@@ -93,40 +93,11 @@ enum JobProps {
 }
 const JobLength = Object.keys(JobProps).length / 2;
 
-enum JobStatus {
-    SUBMITTED = 1,
-    BLOCKED = 2,
-    PENDING = 3,
-    RUNNING = 4,
-    CANCELED = 5,
-    FAILED = 6,
-    COMPLETED = 7,
-    SKIPPED = 8,
-    ABANDONED = 9,
-}
-
 const containerSx = { width: "100%", mb: 2 };
 const selectSx = { height: 50 };
 const containerPopupSx = { width: "619px" };
 const tableWidthSx = { minWidth: 750 };
 const toolbarRightSx = { mr: 6 };
-
-const ChipStatus = ({ status }: { status: number }) => {
-    const statusText = JobStatus[status];
-    let colorFill: "warning" | "default" | "success" | "error" = "warning";
-
-    if (status === JobStatus.COMPLETED || status === JobStatus.SKIPPED) {
-        colorFill = "success";
-    } else if (status === JobStatus.FAILED) {
-        colorFill = "error";
-    } else if (status === JobStatus.CANCELED || status === JobStatus.ABANDONED) {
-        colorFill = "default";
-    }
-
-    const variant = status === JobStatus.FAILED || status === JobStatus.RUNNING ? "filled" : "outlined";
-
-    return <Chip label={statusText} variant={variant} color={colorFill} />;
-};
 
 type JobSelectorColumns = {
     id: string;
@@ -447,9 +418,9 @@ const JobSelectedTableRow = ({
             </TableCell>
             {showCancel || showDelete ? (
                 <TableCell>
-                    {status === JobStatus.RUNNING ? null : status === JobStatus.BLOCKED ||
-                      status === JobStatus.PENDING ||
-                      status === JobStatus.SUBMITTED ? (
+                    {status === Status.RUNNING ? null : status === Status.BLOCKED ||
+                      status === Status.PENDING ||
+                      status === Status.SUBMITTED ? (
                         showCancel ? (
                             <Tooltip title="Cancel Job">
                                 <IconButton data-id={id} onClick={handleCancelJobs}>
@@ -648,9 +619,9 @@ const JobSelector = (props: JobSelectorProps) => {
                 .filter((job) => checked.includes(job[JobProps.id]))
                 .every(
                     (job) =>
-                        job[JobProps.status] === JobStatus.SUBMITTED ||
-                        job[JobProps.status] === JobStatus.BLOCKED ||
-                        job[JobProps.status] === JobStatus.PENDING
+                        job[JobProps.status] === Status.SUBMITTED ||
+                        job[JobProps.status] === Status.BLOCKED ||
+                        job[JobProps.status] === Status.PENDING
                 ),
         [jobRows, checked]
     );
@@ -662,11 +633,11 @@ const JobSelector = (props: JobSelectorProps) => {
                 .filter((job) => checked.includes(job[JobProps.id]))
                 .every(
                     (job) =>
-                        job[JobProps.status] === JobStatus.CANCELED ||
-                        job[JobProps.status] === JobStatus.FAILED ||
-                        job[JobProps.status] === JobStatus.COMPLETED ||
-                        job[JobProps.status] === JobStatus.SKIPPED ||
-                        job[JobProps.status] === JobStatus.ABANDONED
+                        job[JobProps.status] === Status.CANCELED ||
+                        job[JobProps.status] === Status.FAILED ||
+                        job[JobProps.status] === Status.COMPLETED ||
+                        job[JobProps.status] === Status.SKIPPED ||
+                        job[JobProps.status] === Status.ABANDONED
                 ),
         [jobRows, checked]
     );
@@ -689,7 +660,7 @@ const JobSelector = (props: JobSelectorProps) => {
                     filteredJobRows = filteredJobRows.filter((job) => {
                         let rowColumnValue = "";
                         if (filter.data === JobProps.status) {
-                            rowColumnValue = JobStatus[job[JobProps.status]].toLowerCase();
+                            rowColumnValue = Status[job[JobProps.status]].toLowerCase();
                         } else if (filter.data === JobProps.id) {
                             rowColumnValue = `${job[JobProps.id].toLowerCase()}${job[JobProps.name].toLowerCase()}`;
                         } else if (filter.data === JobProps.submitted_id) {

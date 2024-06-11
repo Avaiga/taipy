@@ -149,6 +149,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def submission_status_callback(self, submission_id: t.Optional[str] = None, event: t.Optional[Event] = None):
         if not submission_id or not is_readable(t.cast(SubmissionId, submission_id)):
             return
+        submission = None
+        new_status = None
         try:
             last_status = self.client_submission.get(submission_id)
             if not last_status:
@@ -158,7 +160,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if not submission or not submission.entity_id:
                 return
 
-            new_status = submission.submission_status
+            new_status = t.cast(SubmissionStatus, submission.submission_status)
 
             client_id = submission.properties.get("client_id")
             if client_id:
@@ -207,7 +209,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
             _warn(f"Submission ({submission_id}) is not available", e)
 
         finally:
-            self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"jobs": True})
+            self.gui._broadcast(
+                _GuiCoreContext._CORE_CHANGED_NAME,
+                {
+                    "jobs": True,
+                    "scenario": (submission.entity_id if submission else None) or False,
+                    "submission": new_status.value if new_status else None,
+                },
+            )
 
     def no_change_adapter(self, entity: t.List):
         return entity
@@ -575,13 +584,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     client_id=self.gui._get_client_id(),
                     module_context=self.gui._get_locals_context(),
                 )
-                if on_submission:
+                with self.submissions_lock:
+                    self.client_submission[submission_entity.id] = submission_entity.submission_status
+                if Config.core.mode == "development":
                     with self.submissions_lock:
-                        self.client_submission[submission_entity.id] = submission_entity.submission_status
-                    if Config.core.mode == "development":
-                        with self.submissions_lock:
-                            self.client_submission[submission_entity.id] = SubmissionStatus.SUBMITTED
-                        self.submission_status_callback(submission_entity.id)
+                        self.client_submission[submission_entity.id] = SubmissionStatus.SUBMITTED
+                    self.submission_status_callback(submission_entity.id)
                 _GuiCoreContext.__assign_var(state, error_var, "")
         except Exception as e:
             _GuiCoreContext.__assign_var(state, error_var, f"Error submitting entity. {e}")
