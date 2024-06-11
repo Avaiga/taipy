@@ -608,7 +608,7 @@ class _Factory:
         .set_attributes(
             [
                 ("linear", PropertyType.boolean, False),
-                ("showValue", PropertyType.boolean, False),
+                ("show_value", PropertyType.boolean, False),
             ]
         )
         ._set_propagate(),

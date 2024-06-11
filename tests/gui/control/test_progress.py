@@ -19,20 +19,20 @@ def test_circular_progress_indeterminate_md(gui: Gui, helpers):
 
 
 def test_circular_progress_determinate_md(gui: Gui, helpers):
-    md_string = "<|progress|value=50|showValue=True|>"
+    md_string = "<|progress|value=50|show_value=True|defaultValue={50}|>"
     expected_list = ["<Progress", 'value="50"']
     helpers.test_control_md(gui, md_string, expected_list)
 
 
 def test_linear_progress_indeterminate_md(gui: Gui, helpers):
     md_string = "<|progress|linear=True|>"
-    expected_list = ["<Progress", "linear"]
+    expected_list = ["<Progress", "linear={true}"]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
 def test_linear_progress_determinate_md(gui: Gui, helpers):
-    md_string = "<|progress|value=50|showValue=True|linear=True|>"
-    expected_list = ["<Progress", 'value="50"', "linear"]
+    md_string = "<|progress|value=50|show_value=True|linear=True|>"
+    expected_list = ["<Progress", 'value="50"', "linear={true}"]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -43,18 +43,18 @@ def test_circular_progress_indeterminate_html(gui: Gui, helpers):
 
 
 def test_circular_progress_determinate_html(gui: Gui, helpers):
-    html_string = '<taipy:progress showValue=True value="50"></taipy:progress>'
+    html_string = '<taipy:progress show_value=True value="50"></taipy:progress>'
     expected_list = ["<Progress", 'value="50"']
     helpers.test_control_html(gui, html_string, expected_list)
 
 
 def test_linear_progress_indeterminate_html(gui: Gui, helpers):
     html_string = "<taipy:progress linear=True></taipy:progress>"
-    expected_list = ["<Progress", "linear"]
+    expected_list = ["<Progress", 'linear={true}']
     helpers.test_control_html(gui, html_string, expected_list)
 
 
 def test_linear_progress_determinate_html(gui: Gui, helpers):
-    html_string = '<taipy:progress linear=True showValue=True value="50"></taipy:progress>'
-    expected_list = ["<Progress", "linear", 'value="50"']
+    html_string = '<taipy:progress linear=True show_value=True value="50"></taipy:progress>'
+    expected_list = ["<Progress", "linear={true}", 'value="50"']
     helpers.test_control_html(gui, html_string, expected_list)
