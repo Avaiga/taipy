@@ -15,6 +15,8 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
+# Layout reference can be found in the documentation: https://plotly.com/python/reference/layout/
+
 custom_layout = {
     "width": "1000",
     "height": "500",
