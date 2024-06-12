@@ -16,7 +16,7 @@
 from taipy.gui import Gui
 
 page = """
-<|90|metric|show_value=false|>
+<|90|metric|don't show_value|>
 """
 
 
