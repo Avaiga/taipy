@@ -9,37 +9,36 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import taipy.gui.builder as tgb
+
+
 # build partial content for a specific data node
 def build_dn_partial(dn, dn_label):
-    partial_content = "<|part|render={selected_scenario}|\n\n"
+    with tgb.Page() as partial_content:
+        with tgb.part(render="{selected_scenario}"):
+            # ##################################################################################################################
+            # PLACEHOLDER: data node specific content before automatic content                                                 #
+            #                                                                                                                  #
+            # Example:                                                                                                         #
+            if dn_label == "replacement_type":
+                tgb.text("All missing values will be replaced by the data node value.")
+            # Comment, remove or replace the previous lines with your own use case                                             #
+            # ##################################################################################################################
 
-    # ##################################################################################################################
-    # PLACEHOLDER: data node specific content before automatic content                                                 #
-    #                                                                                                                  #
-    # Example:                                                                                                         #
-    if dn_label == "replacement_type":
-        partial_content += "All missing values will be replaced by the data node value."
-    # Comment, remove or replace the previous lines with your own use case                                             #
-    # ##################################################################################################################
+            # Automatic data node content
+            tgb.data_node("{selected_scenario.data_nodes['" + dn.config_id + "']}", scenario="{selected_scenario}")
 
-    # Automatic data node content
-    partial_content += (
-        "<|{selected_scenario.data_nodes['" + dn.config_id + "']}|data_node|scenario={" "selected_scenario}|>\n\n "
-    )
+            # ##################################################################################################################
+            # PLACEHOLDER: data node specific content after automatic content                                                  #
+            #                                                                                                                  #
+            # Example:                                                                                                         #
+            if dn_label == "initial_dataset":
+                tgb.text("Select your  CSV file:")
+                tgb.file_selector("{selected_data_node.path}", extensions=".csv", on_action="{lambda s: s.refresh('selected_scenario')}")
 
-    # ##################################################################################################################
-    # PLACEHOLDER: data node specific content after automatic content                                                  #
-    #                                                                                                                  #
-    # Example:                                                                                                         #
-    if dn_label == "initial_dataset":
-        partial_content += (
-            "Select your CSV file: <|{selected_data_node.path}|file_selector|extensions=.csv|on_action"
-            "={lambda s: s.refresh('selected_scenario')}|>\n\n "
-        )
-    # Comment, remove or replace the previous lines with your own use case                                             #
-    # ##################################################################################################################
+            # Comment, remove or replace the previous lines with your own use case                                             #
+            # ##################################################################################################################
 
-    partial_content += "|>\n\n"
     return partial_content
 
 
