@@ -23,7 +23,7 @@ import { getRegisteredComponents } from "../Taipy";
 import { unregisteredRender, renderError } from "../Taipy/Unregistered";
 import { createPartialAction } from "../../context/taipyReducers";
 import ErrorFallback from "../../utils/ErrorBoundary";
-import { getBaseURL } from "../../utils";
+import { emptyArray, getBaseURL } from "../../utils";
 
 interface TaipyRenderedProps {
     path?: string;
@@ -60,8 +60,6 @@ const setStyle = (id: string, styleString: string): void => {
         style.textContent = styleString;
     }
 };
-
-const emptyArray: string[] = [];
 
 interface PageState {
     jsx?: string;
@@ -101,16 +99,15 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                         Array.isArray(result.data.head) && setHead(result.data.head);
                     }
                 })
-                .catch((error) =>
+                .catch((error) => {
+                    const res =
+                        error.response?.data && /<p\sclass=\"errormsg\">([\s\S]*?)<\/p>/gm.exec(error.response?.data);
                     setPageState({
-                        jsx: `<h1>${
-                            error.response?.data ||
-                            `No data fetched from backend from ${
-                                path === "/TaiPy_root_page" ? baseURL : baseURL + path
-                            }`
-                        }</h1><br></br>${error}`,
-                    })
-                );
+                        jsx: `<h1>${res ? res[0] : "Unknown Error"}</h1><h2>No data fetched from backend from ${
+                            path === "/TaiPy_root_page" ? baseURL : baseURL + path
+                        }</h2><br></br>${res[0] ? "" : error}`,
+                    });
+                });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [path, state.id, dispatch, partial, fromBlock, baseURL]);

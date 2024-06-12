@@ -34,6 +34,8 @@ class Page:
     your application variables and interact with them.
     """
 
+    page_type: str = "Taipy"
+
     def __init__(self, **kwargs) -> None:
         from .custom import Page as CustomPage
 
@@ -87,6 +89,25 @@ class Page:
             The page content for this Page subclass, making it a page module.
         """
         return None
+
+    def set_content(self, content: str) -> None:
+        """Set a new page content.
+
+        Reads the new page content and reinitializes the `Page^` instance to reflect the change.
+
+        !!! important
+            This function can only be used in an IPython notebook context.
+
+        Arguments:
+            content (str): The text content or the path to the file holding the text to be transformed.
+                If *content* is a path to a readable file, the file is read entirely as the text
+                template.
+
+        Exceptions:
+            RuntimeError: If this method is called outside an IPython notebook context.
+        """
+        # Implemented in the private _Renderer class
+        raise NotImplementedError("Not in a valid Page class.")
 
     def _get_locals(self) -> t.Optional[t.Dict[str, t.Any]]:
         return (

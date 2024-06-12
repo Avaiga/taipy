@@ -9,7 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import os
 from datetime import datetime, timedelta
 from os.path import isdir, isfile
 from typing import Any, Dict, List, Optional, Set
@@ -19,12 +18,11 @@ import pandas as pd
 
 from taipy.config.common.scope import Scope
 
-from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..exceptions.exceptions import UnknownCompressionAlgorithm, UnknownParquetEngine
 from ..job.job_id import JobId
-from ._abstract_file import _FileDataNodeMixin
-from ._abstract_tabular import _TabularDataNodeMixin
+from ._file_datanode_mixin import _FileDataNodeMixin
+from ._tabular_datanode_mixin import _TabularDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
@@ -75,9 +73,6 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     """
 
     __STORAGE_TYPE = "parquet"
-    __PATH_KEY = "path"
-    __DEFAULT_DATA_KEY = "default_data"
-    __DEFAULT_PATH_KEY = "default_path"
     __ENGINE_PROPERTY = "engine"
     __VALID_PARQUET_ENGINES = ["pyarrow", "fastparquet"]
     __COMPRESSION_PROPERTY = "compression"
@@ -101,11 +96,11 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         editor_id: Optional[str] = None,
         editor_expiration_date: Optional[datetime] = None,
         properties: Optional[Dict] = None,
-    ):
+    ) -> None:
+        self.id = id or self._new_id(config_id)
+
         if properties is None:
             properties = {}
-
-        default_value = properties.pop(self.__DEFAULT_DATA_KEY, None)
 
         if self.__ENGINE_PROPERTY not in properties.keys():
             properties[self.__ENGINE_PROPERTY] = "pyarrow"
@@ -137,11 +132,15 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         properties[self._EXPOSED_TYPE_PROPERTY] = _TabularDataNodeMixin._get_valid_exposed_type(properties)
         self._check_exposed_type(properties[self._EXPOSED_TYPE_PROPERTY])
 
+        default_value = properties.pop(self._DEFAULT_DATA_KEY, None)
+        _FileDataNodeMixin.__init__(self, properties)
+        _TabularDataNodeMixin.__init__(self, **properties)
+
         DataNode.__init__(
             self,
             config_id,
             scope,
-            id,
+            self.id,
             owner_id,
             parent_ids,
             last_edit_date,
@@ -153,39 +152,18 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             editor_expiration_date,
             **properties,
         )
-        _TabularDataNodeMixin.__init__(self, **properties)
 
-        self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
-
-        if self._path and ".data" in self._path:
-            self._path = self._migrate_path(self.storage_type(), self._path)
-        if not self._path:
-            self._path = self._build_path(self.storage_type())
-
-        properties[self.__PATH_KEY] = self._path
-
-        if default_value is not None and not os.path.exists(self._path):
-            self._write(default_value)
-            self._last_edit_date = datetime.now()
-            self._edits.append(
-                Edit(
-                    {
-                        "timestamp": self._last_edit_date,
-                        "writer_identifier": "TAIPY",
-                        "comments": "Default data written.",
-                    }
-                )
-            )
+        self._write_default_data(default_value)
 
         if not self._last_edit_date and (isfile(self._path) or isdir(self._path)):
             self._last_edit_date = datetime.now()
-
         self._TAIPY_PROPERTIES.update(
             {
                 self._EXPOSED_TYPE_PROPERTY,
-                self.__PATH_KEY,
-                self.__DEFAULT_PATH_KEY,
-                self.__DEFAULT_DATA_KEY,
+                self._PATH_KEY,
+                self._DEFAULT_PATH_KEY,
+                self._DEFAULT_DATA_KEY,
+                self._IS_GENERATED_KEY,
                 self.__ENGINE_PROPERTY,
                 self.__COMPRESSION_PROPERTY,
                 self.__READ_KWARGS_PROPERTY,
@@ -196,16 +174,6 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     @classmethod
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
-
-    @property  # type: ignore
-    @_self_reload(DataNode._MANAGER_NAME)
-    def path(self):
-        return self._path
-
-    @path.setter
-    def path(self, value):
-        self._path = value
-        self.properties[self.__PATH_KEY] = value
 
     def _read(self):
         return self.read_with_kwargs()

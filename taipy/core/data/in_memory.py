@@ -75,7 +75,7 @@ class InMemoryDataNode(DataNode):
         editor_id: Optional[str] = None,
         editor_expiration_date: Optional[datetime] = None,
         properties=None,
-    ):
+    ) -> None:
         if properties is None:
             properties = {}
         default_value = properties.pop(self.__DEFAULT_DATA_VALUE, None)
@@ -92,7 +92,7 @@ class InMemoryDataNode(DataNode):
             edit_in_progress,
             editor_id,
             editor_expiration_date,
-            **properties
+            **properties,
         )
         if default_value is not None and self.id not in in_memory_storage:
             self._write(default_value)
@@ -101,8 +101,8 @@ class InMemoryDataNode(DataNode):
                 Edit(
                     {
                         "timestamp": self._last_edit_date,
-                        "writer_identifier": "TAIPY",
-                        "comments": "Default data written.",
+                        "editor": "TAIPY",
+                        "comment": "Default data written.",
                     }
                 )
             )

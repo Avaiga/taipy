@@ -26,11 +26,10 @@ from ..exceptions.exceptions import InvalidDataNodeType
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
-from ._abstract_file import _FileDataNodeMixin
 from ._data_fs_repository import _DataFSRepository
+from ._file_datanode_mixin import _FileDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId
-from .pickle import PickleDataNode
 
 
 class _DataManager(_Manager[DataNode], _VersionMixin):
@@ -112,42 +111,42 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         return cls._repository._load_all(filters)
 
     @classmethod
-    def _clean_pickle_file(cls, data_node: DataNode):
-        if not isinstance(data_node, PickleDataNode):
+    def _clean_generated_file(cls, data_node: DataNode) -> None:
+        if not isinstance(data_node, _FileDataNodeMixin):
             return
         if data_node.is_generated and os.path.exists(data_node.path):
             os.remove(data_node.path)
 
     @classmethod
-    def _clean_pickle_files(cls, data_nodes: Iterable[DataNode]):
+    def _clean_generated_files(cls, data_nodes: Iterable[DataNode]) -> None:
         for data_node in data_nodes:
-            cls._clean_pickle_file(data_node)
+            cls._clean_generated_file(data_node)
 
     @classmethod
-    def _delete(cls, data_node_id: DataNodeId):
+    def _delete(cls, data_node_id: DataNodeId) -> None:
         if data_node := cls._get(data_node_id, None):
-            cls._clean_pickle_file(data_node)
+            cls._clean_generated_file(data_node)
         super()._delete(data_node_id)
 
     @classmethod
-    def _delete_many(cls, data_node_ids: Iterable[DataNodeId]):
+    def _delete_many(cls, data_node_ids: Iterable[DataNodeId]) -> None:
         data_nodes = []
         for data_node_id in data_node_ids:
             if data_node := cls._get(data_node_id):
                 data_nodes.append(data_node)
-        cls._clean_pickle_files(data_nodes)
+        cls._clean_generated_files(data_nodes)
         super()._delete_many(data_node_ids)
 
     @classmethod
-    def _delete_all(cls):
+    def _delete_all(cls) -> None:
         data_nodes = cls._get_all()
-        cls._clean_pickle_files(data_nodes)
+        cls._clean_generated_files(data_nodes)
         super()._delete_all()
 
     @classmethod
-    def _delete_by_version(cls, version_number: str):
+    def _delete_by_version(cls, version_number: str) -> None:
         data_nodes = cls._get_all(version_number)
-        cls._clean_pickle_files(data_nodes)
+        cls._clean_generated_files(data_nodes)
         cls._repository._delete_by(attribute="version", value=version_number)
         Notifier.publish(
             Event(EventEntityType.DATA_NODE, EventOperation.DELETION, metadata={"delete_by_version": version_number})
@@ -166,7 +165,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         return cls._repository._load_all(filters)
 
     @classmethod
-    def _export(cls, id: str, folder_path: Union[str, pathlib.Path], **kwargs):
+    def _export(cls, id: str, folder_path: Union[str, pathlib.Path], **kwargs) -> None:
         cls._repository._export(id, folder_path)
 
         if not kwargs.get("include_data"):
@@ -182,10 +181,28 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         else:
             folder = folder_path
 
-        data_export_dir = folder / Config.core.storage_folder
+        data_export_dir = folder / Config.core.storage_folder / os.path.dirname(data_node.path)
         if not data_export_dir.exists():
             data_export_dir.mkdir(parents=True)
 
         data_export_path = data_export_dir / os.path.basename(data_node.path)
         if os.path.exists(data_node.path):
-            shutil.copy(data_node.path, data_export_path)
+            shutil.copy2(data_node.path, data_export_path)
+
+    @classmethod
+    def _import(cls, entity_file: pathlib.Path, version: str, **kwargs) -> DataNode:
+        imported_data_node = cls._repository._import(entity_file)
+        imported_data_node._version = version
+        cls._set(imported_data_node)
+
+        if not (isinstance(imported_data_node, _FileDataNodeMixin) and isinstance(imported_data_node, DataNode)):
+            return imported_data_node
+
+        data_folder: pathlib.Path = pathlib.Path(str(kwargs.get("data_folder")))
+        if not data_folder.exists():
+            return imported_data_node
+
+        if (data_folder / imported_data_node.path).exists():
+            shutil.copy2(data_folder / imported_data_node.path, imported_data_node.path)
+
+        return imported_data_node

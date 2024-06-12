@@ -27,11 +27,13 @@ from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.config.job_config import JobConfig
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.job._job_manager import _JobManager
+from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.job.job import Job
 from taipy.core.job.status import Status
 from taipy.core.scenario.scenario import Scenario
 from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from taipy.core.task._task_manager import _TaskManager
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
 
 
@@ -81,6 +83,22 @@ def _foo():
 
 def _error():
     raise RuntimeError("Something bad has happened")
+
+
+def test_job_equals(job):
+    _TaskManagerFactory._build_manager()._set(job.task)
+    job_manager = _JobManagerFactory()._build_manager()
+
+    job_id = job.id
+    job_manager._set(job)
+
+    # To test if instance is same type
+    task = Task("task", {}, print, [], [], job_id)
+
+    job_2 = job_manager._get(job_id)
+    assert job == job_2
+    assert job != job_id
+    assert job != task
 
 
 def test_create_job(scenario, task, job):

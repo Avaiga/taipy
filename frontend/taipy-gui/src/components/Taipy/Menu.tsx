@@ -27,6 +27,7 @@ import { SingleItem } from "./lovUtils";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { MenuProps } from "../../utils/lov";
 import { useClassNames, useDispatch, useModule } from "../../utils/hooks";
+import { emptyArray } from "../../utils";
 
 const boxDrawerStyle = { overflowX: "hidden" } as CSSProperties;
 const headerSx = { padding: 0 };
@@ -34,7 +35,7 @@ const avatarSx = { bgcolor: (theme: Theme) => theme.palette.text.primary };
 const baseTitleProps = { noWrap: true, variant: "h6" } as const;
 
 const Menu = (props: MenuProps) => {
-    const { label, onAction = "", lov, width, inactiveIds = [], active = true } = props;
+    const { label, onAction = "", lov, width, inactiveIds = emptyArray, active = true } = props;
     const [selectedValue, setSelectedValue] = useState("");
     const [opened, setOpened] = useState(false);
     const dispatch = useDispatch();

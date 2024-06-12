@@ -14,6 +14,7 @@ from unittest.mock import Mock, patch
 from taipy.config.common.scope import Scope
 from taipy.core import Job, JobId, Scenario, Task
 from taipy.core.data.pickle import PickleDataNode
+from taipy.core.reason.reason import Reasons
 from taipy.gui_core._context import _GuiCoreContext
 
 a_scenario = Scenario("scenario_config_id", None, {}, sequences={"sequence": {}})
@@ -23,12 +24,14 @@ a_job.isfinished = lambda s: True  # type: ignore[attr-defined]
 a_datanode = PickleDataNode("data_node_config_id", Scope.SCENARIO)
 
 
-def mock_is_submittable_false(entity_id):
-    return False
+def mock_is_submittable_reason(entity_id):
+    reason = Reasons(entity_id)
+    reason._add_reason(entity_id, "a reason")
+    return reason
 
 
-def mock_is_true(entity_id):
-    return True
+def mock_has_no_reason(entity_id):
+    return Reasons(entity_id)
 
 
 def mock_core_get(entity_id):
@@ -49,7 +52,7 @@ class MockState:
 class TestGuiCoreContext_is_submittable:
     def test_submit_entity(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get), patch(
-            "taipy.gui_core._context.is_submittable", side_effect=mock_is_true
+            "taipy.gui_core._context.is_submittable", side_effect=mock_has_no_reason
         ):
             gui_core_context = _GuiCoreContext(Mock())
             assign = Mock()
@@ -59,14 +62,15 @@ class TestGuiCoreContext_is_submittable:
                 {
                     "args": [
                         {"name": "name", "id": a_scenario.id},
-                    ]
+                    ],
+                    "error_id": "error_var",
                 },
             )
             assign.assert_called_once()
-            assert assign.call_args.args[0] == "gui_core_sv_error"
+            assert assign.call_args.args[0] == "error_var"
             assert str(assign.call_args.args[1]).startswith("Error submitting entity.")
 
-            with patch("taipy.gui_core._context.is_submittable", side_effect=mock_is_submittable_false):
+            with patch("taipy.gui_core._context.is_submittable", side_effect=mock_is_submittable_reason):
                 assign.reset_mock()
                 gui_core_context.submit_entity(
                     MockState(assign=assign),
@@ -74,9 +78,10 @@ class TestGuiCoreContext_is_submittable:
                     {
                         "args": [
                             {"name": "name", "id": a_scenario.id},
-                        ]
+                        ],
+                        "error_id": "error_var",
                     },
                 )
                 assign.assert_called_once()
-                assert assign.call_args.args[0] == "gui_core_sv_error"
-                assert str(assign.call_args.args[1]).endswith("is not submittable.")
+                assert assign.call_args.args[0] == "error_var"
+                assert "is not submittable" in str(assign.call_args.args[1])

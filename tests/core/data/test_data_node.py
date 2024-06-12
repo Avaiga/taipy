@@ -21,11 +21,13 @@ from taipy.config import Config
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 from taipy.core.data._data_manager import _DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.exceptions.exceptions import DataNodeIsBeingEdited, NoData
 from taipy.core.job.job_id import JobId
+from taipy.core.task.task import Task
 
 from .utils import FakeDataNode
 
@@ -46,6 +48,20 @@ def funct_b_d(input: str):
 
 
 class TestDataNode:
+    def test_dn_equals(self, data_node):
+        data_manager = _DataManagerFactory()._build_manager()
+
+        dn_id = data_node.id
+        data_manager._set(data_node)
+
+        # # To test if instance is same type
+        task = Task("task", {}, print, [], [], dn_id)
+
+        dn_2 = data_manager._get(dn_id)
+        assert data_node == dn_2
+        assert data_node != dn_id
+        assert data_node != task
+
     def test_create_with_default_values(self):
         dn = DataNode("foo_bar")
         assert dn.config_id == "foo_bar"
@@ -58,6 +74,21 @@ class TestDataNode:
         assert dn.job_ids == []
         assert not dn.is_ready_for_reading
         assert len(dn.properties) == 0
+
+    def test_is_up_to_date_when_not_written(self):
+        dn_confg_1 = Config.configure_in_memory_data_node("dn_1", default_data="a")
+        dn_confg_2 = Config.configure_in_memory_data_node("dn_2")
+        task_config_1 = Config.configure_task("t1", funct_a_b, [dn_confg_1], [dn_confg_2])
+        scenario_config = Config.configure_scenario("sc", [task_config_1])
+
+        scenario = tp.create_scenario(scenario_config)
+
+        assert scenario.dn_1.is_up_to_date is True
+        assert scenario.dn_2.is_up_to_date is False
+
+        tp.submit(scenario)
+        assert scenario.dn_1.is_up_to_date is True
+        assert scenario.dn_2.is_up_to_date is True
 
     def test_create(self):
         a_date = datetime.now()
@@ -466,6 +497,8 @@ class TestDataNode:
         _DataManager._set(dn_2)
         assert dn_1.parent_ids == {"sc1"}
         assert dn_2.parent_ids == {"sc1"}
+        dn_2._parent_ids.clear()
+        _DataManager._set(dn_2)
 
         # auto set & reload on edit_in_progress attribute
         assert not dn_2.edit_in_progress

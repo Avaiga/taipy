@@ -32,11 +32,14 @@
 @import 'controls/expandable.css';
 @import 'controls/image.css';
 @import 'controls/input.css';
+@import 'controls/metric.css';
 @import 'controls/navbar.css';
 @import 'controls/number.css';
 @import 'controls/slider.css';
 @import 'controls/selector.css';
 @import 'controls/toggle.css';
+@import 'controls/file_download.css';
+@import 'controls/file_selector.css';
 
 /* Blocks */
 @import 'blocks/layout.css';

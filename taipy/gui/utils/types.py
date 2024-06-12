@@ -12,12 +12,17 @@
 
 import json
 import typing as t
-from abc import ABC
+from abc import ABC, abstractmethod
 from datetime import datetime
 from importlib.util import find_spec
 
 from .._warnings import _warn
 from . import _date_to_string, _MapDict, _string_to_date, _variable_decode
+
+
+class _DoNotUpdate:
+    def __repr__(self):
+        return "Taipy: Do not update"
 
 
 class _TaipyBase(ABC):
@@ -50,8 +55,9 @@ class _TaipyBase(ABC):
             return self.__hash_name
 
     @staticmethod
+    @abstractmethod
     def get_hash():
-        return NotImplementedError
+        raise NotImplementedError
 
     @staticmethod
     def _get_holder_prefixes() -> t.List[str]:

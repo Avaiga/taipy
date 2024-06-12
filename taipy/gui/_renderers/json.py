@@ -22,7 +22,7 @@ from flask.json.provider import DefaultJSONProvider
 
 from .._warnings import _warn
 from ..icon import Icon
-from ..utils import _date_to_string, _MapDict, _TaipyBase
+from ..utils import _date_to_string, _DoNotUpdate, _MapDict, _TaipyBase
 from ..utils.singleton import _Singleton
 
 
@@ -51,6 +51,8 @@ class _DefaultJsonAdapter(JsonAdapter):
             return str(o)
         if isinstance(o, numpy.generic):
             return getattr(o, "tolist", lambda: o)()
+        if isinstance(o, _DoNotUpdate):
+            return None
 
 
 class _TaipyJsonAdapter(object, metaclass=_Singleton):
@@ -66,7 +68,7 @@ class _TaipyJsonAdapter(object, metaclass=_Singleton):
             for adapter in reversed(self._adapters):
                 if (output := adapter.parse(o)) is not None:
                     return output
-            raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
+            raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable (value: {o}).")
         except Exception as e:
             _warn("Exception while resolving JSON", e)
             return None

@@ -73,14 +73,15 @@ def test_raise_sequence_does_not_belong_to_scenario():
 def __init():
     input_dn = InMemoryDataNode("foo", Scope.SCENARIO)
     output_dn = InMemoryDataNode("foo", Scope.SCENARIO)
-    task = Task("task", {}, print, [input_dn], [output_dn], TaskId("task_id"))
+    task = Task("task", {}, print, [input_dn], [output_dn], TaskId("Task_task_id"))
+    _TaskManager._set(task)
     scenario = Scenario("scenario", {task}, {}, set())
     _ScenarioManager._set(scenario)
     return scenario, task
 
 
 def test_set_and_get_sequence_no_existing_sequence():
-    scenario, task = __init()
+    scenario, _ = __init()
     sequence_name_1 = "p1"
     sequence_id_1 = SequenceId(f"SEQUENCE_{sequence_name_1}_{scenario.id}")
     sequence_name_2 = "p2"
@@ -133,6 +134,19 @@ def test_set_and_get():
     assert _SequenceManager._get(sequence_2).id == sequence_2.id
     assert len(_SequenceManager._get(sequence_2).tasks) == 1
     assert _TaskManager._get(task.id).id == task.id
+
+
+def test_task_parent_id_set_only_when_create():
+    scenario, task = __init()
+    sequence_name_1 = "p1"
+
+    with mock.patch("taipy.core.task._task_manager._TaskManager._set") as mck:
+        scenario.add_sequences({sequence_name_1: [task]})
+        mck.assert_called_once()
+
+    with mock.patch("taipy.core.task._task_manager._TaskManager._set") as mck:
+        scenario.sequences[sequence_name_1]
+        mck.assert_not_called()
 
 
 def test_get_all_on_multiple_versions_environment():
@@ -471,7 +485,11 @@ def test_sequence_notification_subscribe(mocker):
     notify_2.__module__ = "notify_2"
     # Mocking this because NotifyMock is a class that does not loads correctly when getting the sequence
     # from the storage.
-    mocker.patch.object(_utils, "_load_fct", side_effect=[notify_1, notify_1, notify_2, notify_2, notify_2, notify_2])
+    mocker.patch.object(
+        _utils,
+        "_load_fct",
+        side_effect=[notify_1, notify_1, notify_2, notify_2, notify_2, notify_2],
+    )
 
     # test subscription
     callback = mock.MagicMock()

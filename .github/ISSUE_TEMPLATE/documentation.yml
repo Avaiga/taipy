@@ -1,0 +1,46 @@
+name: "📋 Documentation"
+description: "Use this form to present your suggestions on how to improve our docs."
+title: "[DOCS] <write a small description here>"
+labels: ["📄 Documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        - Thank you for using Taipy and taking the time to suggest improvements in documentation! 😄 
+        - Take a look at our template and try to add as much detail as possible.
+        - If any heading is not applicable, please set it to `NA`.
+        
+  - type: textarea
+    id: docs_description
+    attributes:
+      label: "Issue Description"
+      description: "Please provide a brief summary of the documentation issue you are experiencing or would like to address."
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots_examples_docs
+    attributes:
+      label: "Screenshots or Examples (if applicable)"
+      description: "Please include relevant screenshots or examples to help illustrate the problem."
+
+  - type: textarea
+    id: proposed_solution_docs
+    attributes:
+      label: "Proposed Solution (optional)"
+      description: "If you have a proposed solution for the documentation issue, please provide it here. This can be helpful for speeding up the resolution process."
+
+  - type: checkboxes
+    id: terms_checklist_docs
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/Avaiga/taipy/blob/develop/CODE_OF_CONDUCT.md) and [Contributing Guidelines](https://github.com/Avaiga/taipy/blob/develop/CONTRIBUTING.md).
+      options:
+        - label: "I have checked the [existing issues](https://github.com/Avaiga/taipy/issues?q=is%3Aissue+)."
+          required: true
+        - label: "I am willing to work on this issue (optional)"
+          required: false
+
+  - type: markdown
+    attributes:
+      value: Thank you for taking the time to report the issue! 😄

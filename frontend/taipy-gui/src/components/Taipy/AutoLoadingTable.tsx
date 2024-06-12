@@ -75,6 +75,7 @@ import {
 } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
 import { getSuffixedClassNames, getUpdateVar } from "./utils";
+import { emptyArray } from "../../utils";
 
 interface RowData {
     colsOrder: string[];
@@ -177,7 +178,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         height = "80vh",
         width = "100%",
         updateVars,
-        selected = [],
+        selected = emptyArray,
         pageSize = 100,
         defaultKey = "",
         onEdit = "",
@@ -405,7 +406,8 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         handleNan,
                         afs,
                         compare ? onCompare : undefined,
-                        updateVars && getUpdateVar(updateVars, "comparedatas")
+                        updateVars && getUpdateVar(updateVars, "comparedatas"),
+                        typeof userData == "object" ? (userData as Record<string, Record<string, unknown>>).context : undefined
                     )
                 );
             });
@@ -427,6 +429,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             onCompare,
             dispatch,
             module,
+            userData
         ]
     );
 

@@ -16,13 +16,17 @@ from types import SimpleNamespace
 
 from .._warnings import _warn
 
+if t.TYPE_CHECKING:
+    from ..gui import Gui
+
 
 class _DataScopes:
     _GLOBAL_ID = "global"
     _META_PRE_RENDER = "pre_render"
     _DEFAULT_METADATA = {_META_PRE_RENDER: False}
 
-    def __init__(self) -> None:
+    def __init__(self, gui: "Gui") -> None:
+        self.__gui = gui
         self.__scopes: t.Dict[str, SimpleNamespace] = {_DataScopes._GLOBAL_ID: SimpleNamespace()}
         # { scope_name: { metadata: value } }
         self.__scopes_metadata: t.Dict[str, t.Dict[str, t.Any]] = {
@@ -63,6 +67,10 @@ class _DataScopes:
         if id not in self.__scopes:
             self.__scopes[id] = SimpleNamespace()
             self.__scopes_metadata[id] = _DataScopes._DEFAULT_METADATA.copy()
+            # Propagate shared variables to the new scope from the global scope
+            for var in self.__gui._get_shared_variables():
+                if hasattr(self.__scopes[_DataScopes._GLOBAL_ID], var):
+                    setattr(self.__scopes[id], var, getattr(self.__scopes[_DataScopes._GLOBAL_ID], var, None))
 
     def delete_scope(self, id: str) -> None:  # pragma: no cover
         if self.__single_client:

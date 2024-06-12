@@ -32,6 +32,21 @@ from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task, TaskId
 
 
+def test_scenario_equals(scenario):
+    scenario_manager = _ScenarioManagerFactory()._build_manager()
+
+    scenario_id = scenario.id
+    scenario_manager._set(scenario)
+
+    # To test if instance is same type
+    task = Task("task", {}, print, [], [], scenario_id)
+
+    scenario_2 = scenario_manager._get(scenario_id)
+    assert scenario == scenario_2
+    assert scenario != scenario_id
+    assert scenario != task
+
+
 def test_create_primary_scenario(cycle):
     scenario = Scenario("foo", set(), {"key": "value"}, is_primary=True, cycle=cycle)
     assert scenario.id is not None
@@ -966,34 +981,55 @@ def test_get_inputs_outputs_intermediate_data_nodes():
 
 
 def test_is_ready_to_run():
-    data_node_1 = PickleDataNode("foo", Scope.SCENARIO, "s1", properties={"default_data": 1})
-    data_node_2 = PickleDataNode("bar", Scope.SCENARIO, "s2", properties={"default_data": 2})
-    data_node_4 = PickleDataNode("qux", Scope.SCENARIO, "s4", properties={"default_data": 4})
-    data_node_5 = PickleDataNode("quux", Scope.SCENARIO, "s5", properties={"default_data": 5})
-    data_node_6 = PickleDataNode("quuz", Scope.SCENARIO, "s6", properties={"default_data": 6})
-    data_node_7 = PickleDataNode("corge", Scope.SCENARIO, "s7", properties={"default_data": 7})
-    data_node_8 = PickleDataNode("d8", Scope.SCENARIO, "s8", properties={"default_data": 8})
-    data_node_9 = PickleDataNode("d9", Scope.SCENARIO, "s9", properties={"default_data": 9})
-    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
-    task_2 = Task("garply", {}, print, [data_node_6], [data_node_5], TaskId("t2"))
-    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], id=TaskId("t3"))
-    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
-    task_5 = Task("t5", {}, print, [data_node_8], [data_node_9], TaskId("t5"))
-    task_6 = Task("t6", {}, print, [data_node_7, data_node_9], id=TaskId("t6"))
-    scenario = Scenario("scenario", {task_1, task_2, task_3, task_4, task_5, task_6}, {}, set(), ScenarioId("s1"))
-    # s1 ---      s6 ---> t2 ---> s5
+    task_1_id, task_2_id, task_3_id, task_4_id, task_5_id, task_6_id = (
+        TaskId("TASK_t1"),
+        TaskId("TASK_t2"),
+        TaskId("TASK_t3"),
+        TaskId("TASK_t4"),
+        TaskId("TASK_t5"),
+        TaskId("TASK_t6"),
+    )
+    sc_id = ScenarioId("SCENARIO_s1")
+    data_node_1 = PickleDataNode("foo", Scope.SCENARIO, "d1", parent_ids={task_1_id}, properties={"default_data": 1})
+    data_node_2 = PickleDataNode("bar", Scope.SCENARIO, "d2", parent_ids={task_1_id}, properties={"default_data": 2})
+    data_node_4 = PickleDataNode(
+        "qux", Scope.SCENARIO, "d4", parent_ids={task_1_id, task_4_id, task_3_id}, properties={"default_data": 4}
+    )
+    data_node_5 = PickleDataNode(
+        "quux", Scope.SCENARIO, "d5", parent_ids={task_2_id, task_3_id}, properties={"default_data": 5}
+    )
+    data_node_6 = PickleDataNode("quuz", Scope.SCENARIO, "d6", parent_ids={task_2_id}, properties={"default_data": 6})
+    data_node_7 = PickleDataNode(
+        "corge", Scope.SCENARIO, "d7", parent_ids={task_4_id, task_6_id}, properties={"default_data": 7}
+    )
+    data_node_8 = PickleDataNode("d8", Scope.SCENARIO, "d8", parent_ids={task_5_id}, properties={"default_data": 8})
+    data_node_9 = PickleDataNode(
+        "d9", Scope.SCENARIO, "d9", parent_ids={task_5_id, task_6_id}, properties={"default_data": 9}
+    )
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], id=task_1_id, parent_ids={sc_id})
+    task_2 = Task("garply", {}, print, [data_node_6], [data_node_5], id=task_2_id, parent_ids={sc_id})
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], id=task_3_id, parent_ids={sc_id})
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], id=task_4_id, parent_ids={sc_id})
+    task_5 = Task("t5", {}, print, [data_node_8], [data_node_9], id=task_5_id, parent_ids={sc_id})
+    task_6 = Task("t6", {}, print, [data_node_7, data_node_9], id=task_6_id, parent_ids={sc_id})
+    scenario = Scenario("scenario", {task_1, task_2, task_3, task_4, task_5, task_6}, {}, set(), scenario_id=sc_id)
+    # d1 ---      d6 ---> t2 ---> d5
     #       |                     |
     #       |---> t1 ---|      -----> t3
     #       |           |      |
-    # s2 ---             ---> s4 ---> t4 ---> s7 ---> t6
+    # d2 ---             ---> d4 ---> t4 ---> d7 ---> t6
     #                                              |
-    # s8 -------> t5 -------> s9 ------------------
+    # d8 -------> t5 -------> d9 ------------------
     assert scenario.get_inputs() == {data_node_1, data_node_2, data_node_6, data_node_8}
 
     data_manager = _DataManagerFactory._build_manager()
     data_manager._delete_all()
     for dn in [data_node_1, data_node_2, data_node_4, data_node_5, data_node_6, data_node_7, data_node_8, data_node_9]:
         data_manager._set(dn)
+    task_manager = _TaskManagerFactory._build_manager()
+    for task in [task_1, task_2, task_3, task_4, task_5, task_6]:
+        task_manager._set(task)
+    _ScenarioManagerFactory._build_manager()._set(scenario)
 
     assert scenario.is_ready_to_run()
 

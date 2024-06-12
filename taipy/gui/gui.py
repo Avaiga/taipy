@@ -74,6 +74,7 @@ from .state import State
 from .types import _WsType
 from .utils import (
     _delscopeattr,
+    _DoNotUpdate,
     _filter_locals,
     _get_broadcast_var_name,
     _get_client_var_name,
@@ -108,11 +109,6 @@ from .utils._evaluator import _Evaluator
 from .utils._variable_directory import _MODULE_ID, _VariableDirectory
 from .utils.chart_config_builder import _build_chart_config
 from .utils.table_col_builder import _enhance_columns
-
-
-class _DoNotUpdate:
-    def __repr__(self):
-        return "Taipy: Do not update"
 
 
 class Gui:
@@ -634,6 +630,8 @@ class Gui:
                         self.__handle_ws_get_data_tree()
                     elif msg_type == _WsType.APP_ID.value:
                         self.__handle_ws_app_id(message)
+                    elif msg_type == _WsType.GET_ROUTES.value:
+                        self.__handle_ws_get_routes()
                 self.__send_ack(message.get("ack_id"))
         except Exception as e:  # pragma: no cover
             if isinstance(e, AttributeError) and (name := message.get("name")):
@@ -691,6 +689,7 @@ class Gui:
         propagate=True,
         holder: t.Optional[_TaipyBase] = None,
         on_change: t.Optional[str] = None,
+        forward: t.Optional[bool] = True,
     ) -> None:
         if holder:
             var_name = holder.get_name()
@@ -707,17 +706,22 @@ class Gui:
                 derived_vars.update(self._re_evaluate_expr(var_name))
         elif holder:
             derived_vars.update(self._evaluate_holders(hash_expr))
-        # if the variable has been evaluated then skip updating to prevent infinite loop
-        var_modified = self.__is_var_modified_in_context(hash_expr, derived_vars)
-        if not var_modified:
-            self._call_on_change(
-                var_name,
-                value.get() if isinstance(value, _TaipyBase) else value._dict if isinstance(value, _MapDict) else value,
-                on_change,
-            )
-        derived_modified = self.__clean_vars_on_exit()
-        if derived_modified is not None:
-            self.__send_var_list_update(list(derived_modified), var_name)
+        if forward:
+            # if the variable has been evaluated then skip updating to prevent infinite loop
+            var_modified = self.__is_var_modified_in_context(hash_expr, derived_vars)
+            if not var_modified:
+                self._call_on_change(
+                    var_name,
+                    value.get()
+                    if isinstance(value, _TaipyBase)
+                    else value._dict
+                    if isinstance(value, _MapDict)
+                    else value,
+                    on_change,
+                )
+            derived_modified = self.__clean_vars_on_exit()
+            if derived_modified is not None:
+                self.__send_var_list_update(list(derived_modified), var_name)
 
     def _get_real_var_name(self, var_name: str) -> t.Tuple[str, str]:
         if not var_name:
@@ -960,8 +964,8 @@ class Gui:
                                 # remove file_path after it is merged
                                 part_file_path.unlink()
                     except EnvironmentError as ee:  # pragma: no cover
-                        _warn("Cannot group file after chunk upload", ee)
-                        return
+                        _warn(f"Cannot group file after chunk upload for {file.filename}", ee)
+                        return (f"Cannot group file after chunk upload for {file.filename}", 500)
                 # notify the file is uploaded
                 newvalue = str(file_path)
                 if multiple:
@@ -1006,16 +1010,10 @@ class Gui:
                     newvalue = self._get_user_content_url(
                         None, {"variable_name": str(_var), Gui._HTML_CONTENT_KEY: str(time.time())}
                     )
-                elif isinstance(newvalue, _TaipyLov):
-                    newvalue = [self.__adapter._run_for_var(newvalue.get_name(), elt) for elt in newvalue.get()]
-                elif isinstance(newvalue, _TaipyLovValue):
-                    if isinstance(newvalue.get(), list):
-                        newvalue = [
-                            self.__adapter._run_for_var(newvalue.get_name(), elt, id_only=True)
-                            for elt in newvalue.get()
-                        ]
-                    else:
-                        newvalue = self.__adapter._run_for_var(newvalue.get_name(), newvalue.get(), id_only=True)
+                elif isinstance(newvalue, (_TaipyLov, _TaipyLovValue)):
+                    newvalue = self.__adapter.run(
+                        newvalue.get_name(), newvalue.get(), id_only=isinstance(newvalue, _TaipyLovValue)
+                    )
                 elif isinstance(newvalue, _TaipyToJson):
                     newvalue = newvalue.get()
                 if isinstance(newvalue, (dict, _MapDict)):
@@ -1035,7 +1033,7 @@ class Gui:
                     json.dumps(newvalue, cls=_TaipyJsonEncoder)
                     if len(warns):
                         keep_value = True
-                        for w in list(warns):
+                        for w in warns:
                             if is_debugging():
                                 debug_warnings.append(w)
                             if w.category is not DeprecationWarning and w.category is not PendingDeprecationWarning:
@@ -1050,12 +1048,20 @@ class Gui:
         # TODO: What if value == newvalue?
         self.__send_ws_update_with_dict(ws_dict)
 
+    def __update_state_context(self, payload: dict):
+        # apply state context if any
+        state_context = payload.get("state_context")
+        if isinstance(state_context, dict):
+            for var, val in state_context.items():
+                self._update_var(var, val, True, forward=False)
+
     def __request_data_update(self, var_name: str, payload: t.Any) -> None:
         # Use custom attrgetter function to allow value binding for _MapDict
         newvalue = _getscopeattr_drill(self, var_name)
         if isinstance(newvalue, _TaipyData):
             ret_payload = None
             if isinstance(payload, dict):
+                self.__update_state_context(payload)
                 lib_name = payload.get("library")
                 if isinstance(lib_name, str):
                     libs = self.__extensions.get(lib_name, [])
@@ -1079,6 +1085,7 @@ class Gui:
 
     def __request_var_update(self, payload: t.Any):
         if isinstance(payload, dict) and isinstance(payload.get("names"), list):
+            self.__update_state_context(payload)
             if payload.get("refresh", False):
                 # refresh vars
                 for _var in t.cast(list, payload.get("names")):
@@ -1162,14 +1169,32 @@ class Gui:
             }
         )
 
-    def __send_ws(self, payload: dict, allow_grouping=True) -> None:
+    def __handle_ws_get_routes(self):
+        routes = (
+            [[self._config.root_page._route, self._config.root_page._renderer.page_type]]
+            if self._config.root_page
+            else []
+        )
+        routes += [
+            [page._route, page._renderer.page_type]
+            for page in self._config.pages
+            if page._route != Gui.__root_page_name
+        ]
+        self.__send_ws(
+            {
+                "type": _WsType.GET_ROUTES.value,
+                "payload": routes,
+            }
+        )
+
+    def __send_ws(self, payload: dict, allow_grouping=True, send_back_only=False) -> None:
         grouping_message = self.__get_message_grouping() if allow_grouping else None
         if grouping_message is None:
             try:
                 self._server._ws.emit(
                     "message",
                     payload,
-                    to=self.__get_ws_receiver(),
+                    to=self.__get_ws_receiver(send_back_only),
                 )
                 time.sleep(0.001)
             except Exception as e:  # pragma: no cover
@@ -1188,7 +1213,11 @@ class Gui:
     def __send_ack(self, ack_id: t.Optional[str]) -> None:
         if ack_id:
             try:
-                self._server._ws.emit("message", {"type": _WsType.ACKNOWLEDGEMENT.value, "id": ack_id})
+                self._server._ws.emit(
+                    "message",
+                    {"type": _WsType.ACKNOWLEDGEMENT.value, "id": ack_id},
+                    to=self.__get_ws_receiver(True),
+                )
                 time.sleep(0.001)
             except Exception as e:  # pragma: no cover
                 _warn(f"Exception raised in WebSocket communication (send ack) in '{self.__frame.f_code.co_name}'", e)
@@ -1203,7 +1232,10 @@ class Gui:
         )
 
     def __send_ws_download(self, content: str, name: str, on_action: str) -> None:
-        self.__send_ws({"type": _WsType.DOWNLOAD_FILE.value, "content": content, "name": name, "onAction": on_action})
+        self.__send_ws(
+            {"type": _WsType.DOWNLOAD_FILE.value, "content": content, "name": name, "onAction": on_action},
+            send_back_only=True,
+        )
 
     def __send_ws_alert(self, type: str, message: str, system_notification: bool, duration: int) -> None:
         self.__send_ws(
@@ -1267,13 +1299,15 @@ class Gui:
             client_id,
         )
 
-    def __get_ws_receiver(self) -> t.Union[t.List[str], t.Any, None]:
+    def __get_ws_receiver(self, send_back_only=False) -> t.Union[t.List[str], t.Any, None]:
         if self._bindings()._is_single_client():
             return None
         sid = getattr(request, "sid", None) if request else None
         sids = self.__get_sids(self._get_client_id())
         if sid:
             sids.add(sid)
+            if send_back_only:
+                return sid
         return list(sids)
 
     def __get_sids(self, client_id: str) -> t.Set[str]:
@@ -1463,8 +1497,8 @@ class Gui:
             return False
 
     # Proxy methods for Evaluator
-    def _evaluate_expr(self, expr: str) -> t.Any:
-        return self.__evaluator.evaluate_expr(self, expr)
+    def _evaluate_expr(self, expr: str, lazy_declare: t.Optional[bool] = False) -> t.Any:
+        return self.__evaluator.evaluate_expr(self, expr, lazy_declare)
 
     def _re_evaluate_expr(self, var_name: str) -> t.Set[str]:
         return self.__evaluator.re_evaluate_expr(self, var_name)
@@ -1493,7 +1527,7 @@ class Gui:
     def __is_building(self):
         return hasattr(self, "_building") and self._building
 
-    def _get_rebuild_fn_name(self, name: str):
+    def _get_call_method_name(self, name: str):
         return f"{Gui.__SELF_VAR}.{name}"
 
     def __get_attributes(self, attr_json: str, hash_json: str, args_dict: t.Dict[str, t.Any]):
@@ -1504,6 +1538,9 @@ class Gui:
 
     def _compare_data(self, *data):
         return data[0]
+
+    def _get_adapted_lov(self, lov: list, var_type: str):
+        return self.__adapter._get_adapted_lov(lov, var_type)
 
     def _tbl_cols(
         self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs
@@ -2267,12 +2304,19 @@ class Gui:
 
     def __init_ngrok(self):
         app_config = self._config.config
-        if app_config["run_server"] and app_config["ngrok_token"]:  # pragma: no cover
+        if hasattr(self, "_ngrok"):
+            # Keep the ngrok instance if token has not changed
+            if app_config["ngrok_token"] == self._ngrok[1]:
+                _TaipyLogger._get_logger().info(f" * NGROK Public Url: {self._ngrok[0].public_url}")
+                return
+            # Close the old tunnel so new tunnel can open for new token
+            ngrok.disconnect(self._ngrok[0].public_url)
+        if app_config["run_server"] and (token := app_config["ngrok_token"]):  # pragma: no cover
             if not util.find_spec("pyngrok"):
                 raise RuntimeError("Cannot use ngrok as pyngrok package is not installed.")
-            ngrok.set_auth_token(app_config["ngrok_token"])
-            http_tunnel = ngrok.connect(app_config["port"], "http")
-            _TaipyLogger._get_logger().info(f" * NGROK Public Url: {http_tunnel.public_url}")
+            ngrok.set_auth_token(token)
+            self._ngrok = (ngrok.connect(app_config["port"], "http"), token)
+            _TaipyLogger._get_logger().info(f" * NGROK Public Url: {self._ngrok[0].public_url}")
 
     def __bind_default_function(self):
         with self.get_flask_app().app_context():
@@ -2317,13 +2361,13 @@ class Gui:
         extension_bp = Blueprint("taipy_extensions", __name__)
         extension_bp.add_url_rule(f"/{Gui._EXTENSION_ROOT}/<path:path>", view_func=self.__serve_extension)
         scripts = [
-            s if bool(urlparse(s).netloc) else f"/{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
+            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
             for name, libs in Gui.__extensions.items()
             for lib in libs
             for s in (lib.get_scripts() or [])
         ]
         styles = [
-            s if bool(urlparse(s).netloc) else f"/{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
+            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
             for name, libs in Gui.__extensions.items()
             for lib in libs
             for s in (lib.get_styles() or [])
@@ -2333,7 +2377,7 @@ class Gui:
         else:
             styles.append(Gui.__ROBOTO_FONT)
         if self.__css_file:
-            styles.append(f"/{self.__css_file}")
+            styles.append(f"{self.__css_file}")
 
         self._flask_blueprint.append(extension_bp)
 

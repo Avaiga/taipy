@@ -28,6 +28,31 @@ from .cycle_id import CycleId
 class Cycle(_Entity, _Labeled):
     """An iteration of a recurrent work pattern.
 
+    Many business operations are periodic, such as weekly predictions of sales data, monthly
+    master planning of supply chains, quarterly financial reports, yearly budgeting, etc.
+    The data applications to solve these business problems often require modeling the
+    corresponding periods (i.e., cycles).
+
+    For this purpose, a `Cycle^` represents a single iteration of such a time pattern.
+    Each _cycle_ has a start date and a duration. Examples of cycles are:
+
+    - Monday, 2. January 2023 as a daily cycle
+    - Week 01 2023, from 2. January as a weekly cycle
+    - January 2023 as a monthly cycle
+    - etc.
+
+    `Cycle^`s are created along with the `Scenario^`s that are attached to them.
+    At its creation, a new scenario is attached to a single cycle, the one that
+    matches its optional _frequency_ and its _creation_date_.
+
+    The possible frequencies are:
+
+    - `Frequency.DAILY`
+    - `Frequency.WEEKLY`
+    - `Frequency.MONTHLY`
+    - `Frequency.QUARTERLY`
+    - `Frequency.YEARLY`
+
     Attributes:
         id (str): The unique identifier of the cycle.
         frequency (Frequency^): The frequency of this cycle.
@@ -36,6 +61,42 @@ class Cycle(_Entity, _Labeled):
         end_date (datetime): The date and time of the end of this cycle.
         name (str): The name of this cycle.
         properties (dict[str, Any]): A dictionary of additional properties.
+
+    !!! example "Example for January cycle"
+
+        ![cycles](../refmans/img/cycles_january_colored.svg){ align=left width="250" }
+
+        Let's assume an end-user publishes production orders (i.e., a production plan) every
+        month. During each month (the cycle), he/she will be interested in experimenting with
+        different scenarios until only one of those scenarios is selected as the official
+        production plan to be published. Each month is modeled as a cycle, and each cycle
+        can contain one or more scenarios.
+
+        The picture on the left shows the tree of entities: Cycles, Scenarios, and their
+        associated Sequence(s). There is an existing past cycle for December and a current
+        cycle for January containing a single scenario.
+
+    When comes the end of a _cycle_ (start date + duration), only one of the scenarios is
+    applied in production. This "official" scenario is called the _**primary scenario**_.
+    Only one _**primary scenario**_ per cycle is allowed.
+
+    !!! example "Example for February cycle"
+
+        ![cycles](../pic/cycles_colored.svg){ align=left width="250" }
+        Now the user starts working on the February work cycle. He or she creates two
+        scenarios for the February cycle (one with a low capacity assumption and one with
+        a high capacity assumption). The user can then decide to elect the low capacity
+        scenario as the "official" scenario for February. To accomplish that, he just
+        needs to promote the low capacity scenario as _**primary**_ for the February cycle.
+
+        The tree of entities resulting from the various scenarios created is represented
+        in the picture on the left. The underlined scenarios are _**primary**_.
+
+    !!! note
+
+        For a scenario, cycles are optional. If a scenario has no Frequency, it will not be
+        attached to any cycle.
+
     """
 
     _ID_PREFIX = "CYCLE"
@@ -51,7 +112,7 @@ class Cycle(_Entity, _Labeled):
         end_date: datetime,
         name: Optional[str] = None,
         id: Optional[CycleId] = None,
-    ):
+    ) -> None:
         self._frequency = frequency
         self._creation_date = creation_date
         self._start_date = start_date
@@ -157,7 +218,7 @@ class Cycle(_Entity, _Labeled):
         raise AttributeError(f"{attribute_name} is not an attribute of cycle {self.id}")
 
     def __eq__(self, other):
-        return self.id == other.id
+        return isinstance(other, Cycle) and self.id == other.id
 
     def __hash__(self):
         return hash(self.id)

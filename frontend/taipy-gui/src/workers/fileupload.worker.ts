@@ -82,8 +82,8 @@ const process = (files: FileList, uploadUrl: string, varName: string, id: string
 
                 start = end;
                 end = start + BYTES_PER_CHUNK;
-                uploadedFiles.push(blob.name);
             }
+            uploadedFiles.push(blob.name);
         }
         self.postMessage({
             progress: 100,

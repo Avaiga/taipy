@@ -1,8 +1,11 @@
+[![Taipy Designer](https://github.com/nevo-david/taipy/assets/100117126/e787ba7b-ec7a-4d3f-a7e4-0f195daadce7)
+](https://taipy.io/enterprise)
+
 <div align="center">
   <a href="https://taipy.io?utm_source=github" target="_blank">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Avaiga/taipy/assets/100117126/f59f70e9-1905-4abc-8760-8631b57c14c2">
-    <img alt="Taipy" src="readme_img/readme_logo.png" width="200" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Avaiga/taipy/assets/100117126/509bf101-54c2-4321-adaf-a2af63af9682">
+    <img alt="Taipy" src="https://github.com/Avaiga/taipy/assets/100117126/4df8a733-d8d0-4893-acf0-d24ef9e8b58a" width="400" />
   </picture>
   </a>
 </div>
@@ -178,12 +181,6 @@ And the final result:
 <img src="readme_img/readme_app.gif" />
 
 &nbsp;
-
-## ☁️ Taipy cloud
-With Taipy Cloud, you can deploy your Taipy applications in a few clicks and for free!
-To learn more about Taipy Cloud, please refer to the [Taipy Cloud Documentation](https://docs.taipy.io/en/latest/cloud/).
-
-![TaipyCloud](https://github.com/Avaiga/taipy/raw/develop/readme_img/readme_cloud_demo.gif)
 
 ## ⚒️ Contributing
 Want to help build Taipy? Check out our [Contributing Guide](https://github.com/Avaiga/taipy/blob/develop/CONTRIBUTING.md).

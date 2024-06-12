@@ -37,8 +37,79 @@ from .sequence_id import SequenceId
 
 
 class Sequence(_Entity, Submittable, _Labeled):
-    """List of `Task^`s and additional attributes representing a set of data processing
-    elements connected as a direct acyclic graph.
+    """A subset of scenario tasks grouped to be executed together independently of the others.
+
+    A sequence is attached to a `Scenario^`. It represents a subset of its tasks that need to
+    be executed together, independently of the other tasks in the scenario. They must form a
+    connected subgraph of the scenario's task graph. A scenario can hold multiple sequences.
+
+    For instance, in a typical machine learning scenario, we may have several sequences:
+    a sequence dedicated to preprocessing and preparing data, a sequence for computing a
+    training model, and a sequence dedicated to scoring.
+
+    !!! Example
+
+        Let's assume we have a scenario configuration modelling a manufacturer that is
+        training an ML model, predicting sales forecasts, and finally, based on
+        the forecasts, planning its production. Three task are configured and linked
+        together through data nodes.
+
+        ![sequences](../refmans/img/sequences.svg){ align=left }
+
+        First, the sales sequence (boxed in green in the picture) contains **training**
+        and **predict** tasks. Second, a production sequence (boxed in dark gray in the
+        picture) contains the **planning** task.
+
+        This problem has been modeled in two sequences - one sequence for the forecasting
+        part and one for the production planning part. As a consequence, the two algorithms
+        can have two different life cycles. They can run independently, under different
+        schedules. For example, one on a fixed schedule (e.g. every week) and one on demand,
+        interactively triggered by end-users.
+
+        ```python
+        import taipy as tp
+        from taipy import Config
+
+        def training(history):
+            ...
+
+        def predict(model, month):
+            ...
+
+        def planning(forecast, capacity):
+            ...
+
+        # Configure data nodes
+        sales_history_cfg = Config.configure_csv_data_node("sales_history")
+        trained_model_cfg = Config.configure_data_node("trained_model")
+        current_month_cfg = Config.configure_data_node("current_month")
+        forecasts_cfg = Config.configure_data_node("sales_predictions")
+        capacity_cfg = Config.configure_data_node("capacity")
+        production_orders_cfg = Config.configure_sql_data_node("production_orders")
+
+        # Configure tasks and scenarios
+        train_cfg = Config.configure_task("train", function=training, input=sales_history_cfg, output=trained_model_cfg)
+        predict_cfg = Config.configure_task("predict", function=predict,
+                                            input=[trained_model_cfg, current_month_cfg],
+                                            output=forecasts_cfg)
+        plan_cfg = Config.configure_task("planning", function=planning,
+                                         input=[forecasts_cfg, capacity_cfg],
+                                         output=production_orders_cfg)
+        scenario_cfg = Config.configure_scenario("scenario", task_configs=[train_cfg, predict_cfg, plan_cfg])
+
+        # Create a new scenario and sequences
+        scenario = tp.create_scenario(scenario_cfg)
+        scenario.add_sequence("sales_sequence", [train_cfg, predict_cfg])
+        scenario.add_sequence("production_sequence", [plan_cfg])
+
+        # Get all sequences
+        all_sequences = tp.get_sequences()
+
+        # Submit one sequence only
+        tp.submit(scenario.sales_sequence)
+        ```
+
+    Note that the sequences are not necessarily disjoint and may share some tasks.
 
     Attributes:
         properties (dict[str, Any]): A dictionary of additional properties.
@@ -64,8 +135,8 @@ class Sequence(_Entity, Submittable, _Labeled):
         subscribers: Optional[List[_Subscriber]] = None,
         version: Optional[str] = None,
     ):
-        super().__init__(subscribers)
         self.id: SequenceId = sequence_id
+        super().__init__(self.id, subscribers)
         self._tasks = tasks
         self._owner_id = owner_id
         self._parent_ids = parent_ids or set()
@@ -81,7 +152,7 @@ class Sequence(_Entity, Submittable, _Labeled):
         return hash(self.id)
 
     def __eq__(self, other):
-        return self.id == other.id
+        return isinstance(other, Sequence) and self.id == other.id
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = _validate_id(attribute_name)

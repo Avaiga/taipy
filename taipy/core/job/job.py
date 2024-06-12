@@ -42,8 +42,16 @@ def _run_callbacks(fn):
 class Job(_Entity, _Labeled):
     """Execution of a `Task^`.
 
-    A job handles the status of the execution, contains the stacktrace of exceptions that were
-    raised during the execution, and notifies subscribers on status change.
+    Task, Sequence, and Scenario entities can be submitted for execution. The submission
+    of a scenario triggers the submission of all the contained tasks. Similarly, the submission
+    of a sequence also triggers the execution of all the ordered tasks.
+
+    Every time a task is submitted for execution, a new *Job* is created. A job represents a
+    single execution of a task. It holds all the information related to the task execution,
+    including the **creation date**, the execution `Status^`, and the **stacktrace** of any
+    exception that may be raised by the user function.
+
+    In addition, a job notifies scenario or sequence subscribers on its status change.
 
     Attributes:
         id (str): The identifier of this job.
@@ -52,9 +60,10 @@ class Job(_Entity, _Labeled):
             not.
         status (Status^): The current status of this job.
         creation_date (datetime): The date of this job's creation.
-        stacktrace (List[str]): The list of stacktraces of the exceptions raised during the execution.
-        version (str): The string indicates the application version of the job to instantiate. If not provided,
-            the latest version is used.
+        stacktrace (List[str]): The list of stacktraces of the exceptions raised during the
+            execution.
+        version (str): The string indicates the application version of the job to instantiate.
+            If not provided, the latest version is used.
     """
 
     _MANAGER_NAME = "job"
@@ -164,7 +173,7 @@ class Job(_Entity, _Labeled):
         return self.creation_date.timestamp() >= other.creation_date.timestamp()
 
     def __eq__(self, other):
-        return self.id == other.id
+        return isinstance(other, Job) and self.id == other.id
 
     @_run_callbacks
     def blocked(self):

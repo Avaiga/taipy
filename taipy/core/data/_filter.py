@@ -135,7 +135,7 @@ class _FilterDataNode:
         elif join_operator == JoinOperator.OR:
             how = "outer"
         else:
-            return NotImplementedError
+            raise NotImplementedError
 
         filtered_df_data = [
             _FilterDataNode.__filter_dataframe_per_key_value(df_data, key, value, operator)
@@ -177,7 +177,7 @@ class _FilterDataNode:
         elif join_operator == JoinOperator.OR:
             join_conditions = reduce(or_, conditions)
         else:
-            return NotImplementedError
+            raise NotImplementedError
 
         return data[join_conditions]
 
@@ -199,7 +199,7 @@ class _FilterDataNode:
         if operator == Operator.GREATER_OR_EQUAL:
             return array_data[:, key] >= value
 
-        return NotImplementedError
+        raise NotImplementedError
 
     @staticmethod
     def __filter_list(list_data: List, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
@@ -218,7 +218,7 @@ class _FilterDataNode:
                 return list({frozenset(item.items()) for item in merged_list})
             return list(set(merged_list))
         else:
-            return NotImplementedError
+            raise NotImplementedError
 
     @staticmethod
     def __filter_list_per_key_value(list_data: List, key: str, value, operator: Operator):

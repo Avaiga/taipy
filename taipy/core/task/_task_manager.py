@@ -26,6 +26,12 @@ from ..cycle.cycle_id import CycleId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import NonExistingTask
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
+from ..reason._reason_factory import (
+    _build_data_node_is_being_edited_reason,
+    _build_data_node_is_not_written,
+    _build_not_submittable_entity_reason,
+)
+from ..reason.reason import Reasons
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
 from ..submission.submission import Submission
@@ -45,7 +51,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         return _OrchestratorFactory._build_orchestrator()
 
     @classmethod
-    def _set(cls, task: Task):
+    def _set(cls, task: Task) -> None:
         cls.__save_data_nodes(task.input.values())
         cls.__save_data_nodes(task.output.values())
         super()._set(task)
@@ -129,20 +135,20 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         return cls._repository._load_all(filters)
 
     @classmethod
-    def __save_data_nodes(cls, data_nodes):
+    def __save_data_nodes(cls, data_nodes) -> None:
         data_manager = _DataManagerFactory._build_manager()
         for i in data_nodes:
             data_manager._set(i)
 
     @classmethod
-    def _hard_delete(cls, task_id: TaskId):
+    def _hard_delete(cls, task_id: TaskId) -> None:
         task = cls._get(task_id)
         entity_ids_to_delete = cls._get_children_entity_ids(task)
         entity_ids_to_delete.task_ids.add(task.id)
         cls._delete_entities_of_multiple_types(entity_ids_to_delete)
 
     @classmethod
-    def _get_children_entity_ids(cls, task: Task):
+    def _get_children_entity_ids(cls, task: Task) -> _EntityIds:
         entity_ids = _EntityIds()
 
         from ..job._job_manager_factory import _JobManagerFactory
@@ -163,10 +169,24 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         return entity_ids
 
     @classmethod
-    def _is_submittable(cls, task: Union[Task, TaskId]) -> bool:
+    def _is_submittable(cls, task: Union[Task, TaskId]) -> Reasons:
         if isinstance(task, str):
             task = cls._get(task)
-        return isinstance(task, Task) and all(input_dn.is_ready_for_reading for input_dn in task.input.values())
+        if not isinstance(task, Task):
+            task = str(task)
+            reason = Reasons(task)
+            reason._add_reason(task, _build_not_submittable_entity_reason(task))
+        else:
+            reason = Reasons(task.id)
+            data_manager = _DataManagerFactory._build_manager()
+            for node in task.input.values():
+                node = data_manager._get(node)
+                if node._edit_in_progress:
+                    reason._add_reason(node.id, _build_data_node_is_being_edited_reason(node.id))
+                if not node._last_edit_date:
+                    reason._add_reason(node.id, _build_data_node_is_not_written(node.id))
+
+        return reason
 
     @classmethod
     def _submit(

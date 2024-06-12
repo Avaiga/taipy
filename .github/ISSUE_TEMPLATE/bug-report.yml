@@ -1,0 +1,140 @@
+name: "🐛 Bug Report"
+description: I would like to report a bug.
+title: "[🐛 BUG] <write a small description here>"
+labels: ["💥Malfunction"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        - Thank you for using Taipy and taking the time to report a bug! 😄 
+        - Please try to spend some time to understand the bug and reproduce it.
+        - Take a look at our template and try to add as much detail as possible.
+        - The more details we have, the easier it would be to fix it. 
+        - If any heading is not applicable, please set it to `NA`.
+
+  - type: textarea
+    id: something_wrong
+    attributes:
+      label: "What went wrong? 🤔"
+      description: Please provide a detailed description of the issue you encountered. Be clear and concise in explaining what is not working as expected.
+      placeholder: The description of the issue you experienced in detail, including any relevant information or context.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: "Expected Behavior"
+      description: Please describe how you expected the system to behave when you encountered the issue.
+      placeholder: The description of the behavior that you expected to see when encountering the issue.
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: "Steps to Reproduce Issue"
+      description: If possible, please share the steps to reproduce the issue.
+      value: |
+        1. A code fragment
+        2. And/or configuration files or code
+        3. And/or Taipy GUI Markdown or HTML files
+
+  - type: textarea
+    id: solution_proposed
+    attributes:
+      label: "Solution Proposed"
+      description: Any ideas on how this should be solved
+      placeholder: The potential solution to solve this issue
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: "Screenshots"
+      description: If applicable, add screenshots to help explain your problem.
+      value: |
+        ![DESCRIPTION](LINK.png)
+    validations:
+      required: false
+
+  - type: input
+    id: environment
+    attributes:
+      label: "Runtime Environment"
+      description: You can specify your operating system and version, web browser and version, or any other software that may be related to the issue.
+      placeholder: ex. Windows 10, Chrome 91.0.4472.124
+    validations:
+      required: false
+
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: "Browsers"
+      description: What browser(s) are you seeing the problem on?
+      multiple: true
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Microsoft Edge
+        - Opera
+        - Brave
+        - Other
+    validations:
+      required: false
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: "OS"
+      description: Please select the operating system(s) on which you are experiencing the issue from the dropdown list provided.
+      multiple: true
+      options:
+        - Windows
+        - Linux
+        - Mac
+        - iOS
+        - Android
+        - Other
+    validations:
+      required: false
+
+  - type: input
+    id: version_taipy
+    attributes:
+      label: "Version of Taipy"
+      description: Please provide the version number of taipy you are using (if applicable) in the text field provided. This can help developers determine if the issue has already been solved in a newer version of the software.
+      placeholder: ex. 3.0.1
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: "Additional Context"
+      description: If you have any additional context or information that may help us understand the problem better, please provide it here.
+      placeholder: This can include any relevant logs, error messages, or other information that may be useful in diagnosing the issue.
+      render: bash
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ### Acceptance Criteria
+        
+        - [ ] Ensure new code is unit tested, and check code coverage is at least 90%.
+        - [ ] Create related issue in taipy-doc for documentation and Release Notes.
+
+  - type: checkboxes
+    id: terms_checklist_bug
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/Avaiga/taipy/blob/develop/CODE_OF_CONDUCT.md) and [Contributing Guidelines](https://github.com/Avaiga/taipy/blob/develop/CONTRIBUTING.md).
+      options:
+        - label: "I have checked the [existing issues](https://github.com/Avaiga/taipy/issues?q=is%3Aissue+)."
+          required: true
+        - label: "I am willing to work on this issue (optional)"
+          required: false
+
+  - type: markdown
+    attributes:
+      value: Thank you for taking the time to report the issue! 😄

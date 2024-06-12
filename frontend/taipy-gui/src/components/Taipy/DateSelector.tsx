@@ -92,6 +92,7 @@ const DateSelector = (props: DateSelectorProps) => {
                                 disabled={!active}
                                 slotProps={textFieldProps}
                                 label={props.label}
+                                format={props.format}
                             />
                         ) : (
                             <DatePicker
@@ -101,6 +102,7 @@ const DateSelector = (props: DateSelectorProps) => {
                                 disabled={!active}
                                 slotProps={textFieldProps}
                                 label={props.label}
+                                format={props.format}
                             />
                         )
                     ) : (

@@ -117,6 +117,36 @@ export interface TableProps extends TaipyPaginatedTableProps {
 }
 export declare const Table: (props: TableProps) => JSX.Element;
 
+export interface FilterDesc {
+    col: string;
+    action: string;
+    value: string | number | boolean | Date;
+}
+export interface TableFilterProps {
+    columns: Record<string, ColumnDesc>;
+    colsOrder?: Array<string>;
+    onValidate: (data: Array<FilterDesc>) => void;
+    appliedFilters?: Array<FilterDesc>;
+    className?: string;
+    filteredCount: number;
+}
+export declare const TableFilter: (props: TableFilterProps) => JSX.Element;
+
+export interface SortDesc {
+    col: string;
+    order: boolean;
+}
+
+export interface TableSortProps {
+    columns: Record<string, ColumnDesc>;
+    colsOrder?: Array<string>;
+    onValidate: (data: Array<SortDesc>) => void;
+    appliedSorts?: Array<SortDesc>;
+    className?: string;
+}
+
+export declare const TableSort: (props: TableSortProps) => JSX.Element;
+
 export declare const Router: () => JSX.Element;
 
 /**
@@ -272,7 +302,8 @@ export declare const createRequestUpdateAction: (
     id: string | undefined,
     context: string | undefined,
     names: string[],
-    forceRefresh?: boolean
+    forceRefresh?: boolean,
+    stateContext?: Record<string, unknown>
 ) => Action;
 /**
  * A column description as received by the backend.
@@ -288,23 +319,31 @@ export interface ColumnDesc {
     title?: string;
     /** The order of the column. */
     index: number;
-    /** The width. */
+    /** The column width. */
     width?: number | string;
-    /** If set to true, the column should not be editable. */
+    /** If true, the column cannot be edited. */
     notEditable?: boolean;
-    /** The column name that would hold the css classname to apply to the cell. */
+    /** The name of the column that holds the CSS classname to
+     *  apply to the cells. */
     style?: string;
+    /** The name of the column that holds the tooltip to
+     *  show on the cells. */
+    tooltip?: string;
     /** The value that would replace a NaN value. */
     nanValue?: string;
-    /** The TimeZone identifier used if the type is Date. */
+    /** The TimeZone identifier used if the type is `date`. */
     tz?: string;
     /** The flag that allows filtering. */
     filter?: boolean;
-    /** The identifier for the aggregation function. */
+    /** The name of the aggregation function. */
     apply?: string;
-    /** The flag that would allow the user to aggregate the column. */
+    /** The flag that allows the user to aggregate the column. */
     groupBy?: boolean;
     widthHint?: number;
+    /** The list of values that can be used on edit. */
+    lov?: string[];
+    /** If true the user can enter any value besides the lov values. */
+    freeLov?: boolean;
 }
 /**
  * A cell value type.

@@ -38,6 +38,7 @@ import deepEqual from "fast-deep-equal/es6";
 import {
     createRequestUpdateAction,
     createSendActionNameAction,
+    getUpdateVar,
     useDispatch,
     useDynamicProperty,
     useModule,
@@ -59,6 +60,7 @@ import {
 } from "./utils";
 import ConfirmDialog from "./utils/ConfirmDialog";
 import PropertiesEditor from "./PropertiesEditor";
+import StatusChip, { Status } from "./StatusChip";
 
 interface ScenarioViewerProps {
     id?: string;
@@ -87,6 +89,7 @@ interface ScenarioViewerProps {
     className?: string;
     dynamicClassName?: string;
     onSubmissionChange?: string;
+    updateScVar?: string;
 }
 
 interface SequencesRowProps {
@@ -102,7 +105,7 @@ interface SequencesRowProps {
     onFocus: (e: MouseEvent<HTMLElement>) => void;
     focusName: string;
     setFocusName: (name: string) => void;
-    submittable: boolean;
+    notSubmittableReason: string;
     editable: boolean;
     isValid: (sLabel: string, label: string) => boolean;
 }
@@ -116,7 +119,7 @@ const tagsAutocompleteSx = {
     maxWidth: "none",
 };
 
-type SequenceFull = [string, string[], boolean, boolean];
+type SequenceFull = [string, string[], string, boolean];
 // enum SeFProps {
 //     label,
 //     tasks,
@@ -137,7 +140,7 @@ const SequenceRow = ({
     onFocus,
     focusName,
     setFocusName,
-    submittable,
+    notSubmittableReason,
     editable,
     isValid,
 }: SequencesRowProps) => {
@@ -195,7 +198,7 @@ const SequenceRow = ({
 
     const name = `sequence${number}`;
     const disabled = !enableScenarioFields || !active;
-    const disabledSubmit = disabled || !submittable;
+    const disabledSubmit = disabled || !!notSubmittableReason;
 
     return (
         <Grid item xs={12} container justifyContent="space-between" data-focus={name} onClick={onFocus} sx={hoverSx}>
@@ -283,7 +286,9 @@ const SequenceRow = ({
                         {pLabel && submit ? (
                             <Tooltip
                                 title={
-                                    disabledSubmit ? `Cannot submit Sequence '${label}'` : `Submit Sequence '${label}'`
+                                    disabledSubmit
+                                        ? notSubmittableReason || `Cannot submit Sequence '${label}'`
+                                        : `Submit Sequence '${label}'`
                                 }
                             >
                                 <span>
@@ -321,7 +326,7 @@ const invalidScenario: ScenarioFull = [
     [],
     false,
     false,
-    false,
+    "invalid",
     false,
     false,
 ];
@@ -340,6 +345,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         showSubmit = true,
         showSubmitSequences = true,
         showTags = true,
+        updateScVar = "",
     } = props;
 
     const dispatch = useDispatch();
@@ -360,6 +366,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
             }
         }
         setValid(!!sc);
+        setSubmissionStatus(0);
         setScenario((oldSc) => (oldSc === sc ? oldSc : sc ? (deepEqual(oldSc, sc) ? oldSc : sc) : invalidScenario));
     }, [props.scenario, props.defaultScenario]);
 
@@ -377,7 +384,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         scAuthorizedTags,
         scDeletable,
         scPromotable,
-        scSubmittable,
+        scNotSubmittableReason,
         scReadable,
         scEditable,
     ] = scenario || invalidScenario;
@@ -401,9 +408,15 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const onPromote = useCallback(() => {
         setPrimaryDialog(false);
         if (valid) {
-            dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scId, primary: true }));
+            dispatch(
+                createSendActionNameAction(id, module, props.onEdit, {
+                    id: scId,
+                    primary: true,
+                    error_id: getUpdateVar(updateScVar, "error_id"),
+                })
+            );
         }
-    }, [valid, props.onEdit, scId, id, dispatch, module]);
+    }, [valid, props.onEdit, scId, id, dispatch, module, updateScVar]);
 
     // userExpanded
     const [userExpanded, setUserExpanded] = useState(valid && expanded);
@@ -421,10 +434,11 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         id: scId,
                         sequence: label,
                         on_submission_change: props.onSubmissionChange,
+                        error_id: getUpdateVar(updateScVar, "error_id"),
                     })
                 );
         },
-        [scId, props.onSubmit, props.onSubmissionChange, id, dispatch, module]
+        [scId, props.onSubmit, props.onSubmissionChange, id, dispatch, module, updateScVar]
     );
 
     const submitScenario = useCallback(
@@ -435,11 +449,13 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     createSendActionNameAction(id, module, props.onSubmit, {
                         id: scId,
                         on_submission_change: props.onSubmissionChange,
+                        error_id: getUpdateVar(updateScVar, "error_id"),
                     })
                 );
+                setSubmissionStatus(Status.SUBMITTED);
             }
         },
-        [valid, props.onSubmit, props.onSubmissionChange, id, scId, dispatch, module]
+        [valid, props.onSubmit, props.onSubmissionChange, id, scId, dispatch, module, updateScVar]
     );
 
     // focus
@@ -455,11 +471,17 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         (e?: MouseEvent<HTMLElement>) => {
             e && e.stopPropagation();
             if (valid) {
-                dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scId, name: label }));
+                dispatch(
+                    createSendActionNameAction(id, module, props.onEdit, {
+                        id: scId,
+                        name: label,
+                        error_id: getUpdateVar(updateScVar, "error_id"),
+                    })
+                );
                 setFocusName("");
             }
         },
-        [valid, props.onEdit, scId, label, id, dispatch, module]
+        [valid, props.onEdit, scId, label, id, dispatch, module, updateScVar]
     );
     const cancelLabel = useCallback(
         (e?: MouseEvent<HTMLElement>) => {
@@ -493,11 +515,17 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         (e?: MouseEvent<HTMLElement>) => {
             e && e.stopPropagation();
             if (valid) {
-                dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scId, tags: tags }));
+                dispatch(
+                    createSendActionNameAction(id, module, props.onEdit, {
+                        id: scId,
+                        tags: tags,
+                        error_id: getUpdateVar(updateScVar, "error_id"),
+                    })
+                );
                 setFocusName("");
             }
         },
-        [valid, props.onEdit, scId, tags, id, dispatch, module]
+        [valid, props.onEdit, scId, tags, id, dispatch, module, updateScVar]
     );
     const cancelTags = useCallback(
         (e?: MouseEvent<HTMLElement>) => {
@@ -532,6 +560,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             name: label,
                             task_ids: taskIds,
                             del: !!del,
+                            error_id: getUpdateVar(updateScVar, "error_id"),
                         })
                     );
                 } else {
@@ -540,14 +569,17 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 setFocusName("");
             }
         },
-        [valid, id, scId, props.onEdit, dispatch, module]
+        [valid, id, scId, props.onEdit, dispatch, module, updateScVar]
     );
     const isValidSequence = useCallback(
         (sLabel: string, label: string) => !!label && (sLabel == label || !sequences.find((seq) => seq[0] === label)),
         [sequences]
     );
 
-    const addSequenceHandler = useCallback(() => setSequences((seq) => [...seq, ["", [], true, true]]), []);
+    const addSequenceHandler = useCallback(() => setSequences((seq) => [...seq, ["", [], "", true]]), []);
+
+    // Submission status
+    const [submissionStatus, setSubmissionStatus] = useState(0);
 
     // on scenario change
     useEffect(() => {
@@ -563,10 +595,13 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         const ids = props.coreChanged?.scenario;
         if (typeof ids === "string" ? ids === scId : Array.isArray(ids) ? ids.includes(scId) : ids) {
             props.updateVarName && dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
+            if (props.coreChanged?.submission !== undefined) {
+                setSubmissionStatus(props.coreChanged?.submission as number);
+            }
         }
     }, [props.coreChanged, props.updateVarName, id, module, dispatch, scId]);
 
-    const disabled = !valid || !active || !scSubmittable;
+    const disabled = !valid || !active || !!scNotSubmittableReason;
 
     return (
         <>
@@ -594,10 +629,17 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         sx={ChipSx}
                                     />
                                 ) : null}
+                                {submissionStatus ? <StatusChip status={submissionStatus} sx={ChipSx} /> : null}
                             </Grid>
                             <Grid item>
                                 {showSubmit ? (
-                                    <Tooltip title={disabled ? "Cannot submit Scenario" : "Submit Scenario"}>
+                                    <Tooltip
+                                        title={
+                                            disabled
+                                                ? scNotSubmittableReason || "Cannot submit Scenario"
+                                                : "Submit Scenario"
+                                        }
+                                    >
                                         <span>
                                             <Button
                                                 onClick={submitScenario}
@@ -800,6 +842,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 onFocus={onFocus}
                                 onEdit={props.onEdit}
                                 editable={scEditable}
+                                updatePropVars={updateScVar}
                             />
                             {showSequences ? (
                                 <>
@@ -815,7 +858,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     </Grid>
 
                                     {sequences.map((item, index) => {
-                                        const [label, taskIds, submittable, editable] = item;
+                                        const [label, taskIds, notSubmittableReason, editable] = item;
                                         return (
                                             <SequenceRow
                                                 active={active}
@@ -831,7 +874,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                 onFocus={onFocus}
                                                 focusName={focusName}
                                                 setFocusName={setFocusName}
-                                                submittable={submittable}
+                                                notSubmittableReason={notSubmittableReason}
                                                 editable={editable}
                                                 isValid={isValidSequence}
                                             />

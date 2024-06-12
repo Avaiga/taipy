@@ -6,7 +6,14 @@ Every little help and credit will always be given.
 There are multiple ways to contribute to Taipy: code, but also reporting bugs, creating feature requests, helping
 other users in our forums, [stack**overflow**](https://stackoverflow.com/), etc.
 
-Today the only way to communicate with the Taipy team is by GitHub issues.
+For questions, please get in touch on [Discord](https://discord.com/invite/SJyz2VJGxV) or on GitHub with a discussion or an issue.
+
+## Code organisation
+
+Taipy is organised in two main repositories:
+
+- [taipy](https://github.com/Avaiga/taipy) is the main repository that containing the code of Taipy packages.
+- [taipy-doc](https://github.com/Avaiga/taipy-doc) is the documentation repository.
 
 ## Never contributed on an open source project before ?
 
@@ -36,18 +43,54 @@ Do not hesitate to create an issue or pull request directly on the
 
 ## Implement Features
 
-The Taipy team manages its backlog in private. Each issue that will be done during our current sprint is
-attached to the `current sprint`. Please, do not work on it, the Taipy team is on it.
+The Taipy team manages its backlog in private. Each issue that is or is going to be engaged by the
+Taipy team is attached to the "🔒 Staff only" label or has already assigned to a Taipy team member.
+Please, do not work on it, the Taipy team is on it.
 
-## Code organisation
+All other issues are sorted by labels and are available for a contribution. If you are new to the
+project, you can start with the "good first issue" or "🆘 Help wanted" label. You can also start with
+issue with higher priority like "Critical" or "High". The higher the priority, the more value it
+will bring to Taipy.
 
-Taipy is organised in five main repositories:
+If you want to work on an issue, please add a comment and wait to be assigned to the issue to inform
+the community that you are working on it.
 
-- [taipy-config](https://github.com/Avaiga/taipy-config).
-- [taipy-core](https://github.com/Avaiga/taipy-core).
-- [taipy-gui](https://github.com/Avaiga/taipy-gui).
-- [taipy-rest](https://github.com/Avaiga/taipy-rest).
-- [taipy](https://github.com/Avaiga/taipy) brings previous packages in a single one.
+### Contribution workflow
+
+1. Make your [own fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) of the repository
+   target by the issue. Clone it on our local machine, then go inside the directory.
+
+2. We are working with [Pipenv](https://github.com/pypa/pipenv) for our virtualenv.
+   Create a local env and install development package by running `$ pipenv install --dev`, then run tests with
+   `$ pipenv run pytest` to verify your setup.
+
+3. For convention help, we provide a [pre-commit](https://pre-commit.com/hooks.html) file.
+   This tool will run before each commit and will automatically reformat code or raise warnings and errors based on the
+   code format or Python typing.
+   You can install and setup it up by doing:
+   ```bash
+   $ pipenv install pre-commit
+   $ pipenv run python -m pre-commit install
+   ```
+
+4. Make the changes.<br/>
+   You may want to also add your GitHub login as a new line of the `contributors.txt` file located at the root
+   of this repository. We are using it to list our contributors in the Taipy documentation
+   (see the "Contributing > Contributors" section) and thank them.
+
+5. Create a [pull request from your fork](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork).<br/>
+   Keep your pull request as __draft__ until your work is finished.
+   Do not hesitate to add a comment for help or questions.
+   Before you submit a pull request for review from your forked repo, check that it meets these guidelines:
+     - The code and the branch name follow the [Taipy coding style](#coding-style-and-best-practices).
+     - Include tests.
+     - Code is [rebase](http://stackoverflow.com/a/7244456/1110993).
+     - License is present.
+     - pre-commit works - without mypy error.
+     - Taipy tests are passing.
+
+6. The Taipy team will have a look at your Pull Request and will give feedback. If every requirement is valid, your
+   work will be added in the next release, congratulation!
 
 ## Coding style and best practices
 
@@ -80,46 +123,16 @@ Where:
 - `[IssueSummary]` is a short summary of the issue topic, not including spaces, using Camel case or lower-case,
   dash-separated words. This summary, with its dash (‘-’) symbol prefix, is optional.
 
+## Important Notes
 
-## Contribution workflow
+- If your PR is not created or there is no other activity within 14 days of being assigned to the issue, a warning message will appear on the issue, and the issue will be marked as "🥶Waiting for contributor".
+- If your issue is marked as "🥶Waiting for contributor", you will be unassigned after 14 days of inactivity.
+- Similarly, if there is no activity within 14 days of your PR, the PR will be marked as "🥶Waiting for contributor".
+- If your PR is marked as "🥶Waiting for contributor", it will be closed after 14 days of inactivity.
 
-Find an issue without the label `current sprint` and add a comment on it to inform the community that you are
-working on it.
-
-1. Make your [own fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) of the repository
-   target by the issue. Clone it on our local machine, then go inside the directory.
-
-2. We are working with [Pipenv](https://github.com/pypa/pipenv) for our virtualenv.
-   Create a local env and install development package by running `pipenv install --dev`, then run tests with `pipenv
-   run pytest` to verify your setup.
-
-3. For convention help, we provide a [pre-commit](https://pre-commit.com/hooks.html) file.
-   This tool will run before each commit and will automatically reformat code or raise warnings and errors based on the
-   code format or Python typing.
-   You can install and setup it up by doing:
-   ```bash
-   pipenv install pre-commit
-   pipenv run python -m pre-commit install
-   ```
-
-4. Make the changes.<br/>
-   You may want to also add your GitHub login as a new line of the `contributors.txt` file located at the root
-   of this repository. We are using it to list our contributors in the Taipy documentation
-   (see the "Contributing > Contributors" section) and thank them.
-
-5. Create a [pull request from your fork](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork).<br/>
-   Keep your pull request as __draft__ until your work is finished.
-   Do not hesitate to add a comment for help or questions.
-   Before you submit a pull request for review from your forked repo, check that it meets these guidelines:
-    - Include tests.
-    - Code is [rebase](http://stackoverflow.com/a/7244456/1110993).
-    - License is present.
-    - pre-commit works - without mypy error.
-    - GitHub's actions are passing.
-
-6. The taipy team will have a look at your Pull Request and will give feedback. If every requirement is valid, your
-   work will be added in the next release, congratulation!
-
+We do this in order to keep our backlog moving quickly. Please don't take it personally if your issue or PR gets closed
+because of this 14-day inactivity time limit. You can always reopen the issue or PR if you're still interested in working
+on it.
 
 ## Dependency management
 

@@ -432,6 +432,53 @@ class TestTaipy:
             tp.get_scenarios(tag="tag")
             mck.assert_called_once_with("tag")
 
+    def test_get_scenarios_sorted(self):
+        scenario_1_cfg = Config.configure_scenario(id="scenario_1")
+        scenario_2_cfg = Config.configure_scenario(id="scenario_2")
+
+        now = datetime.datetime.now() + datetime.timedelta(seconds=1)
+        scenario_1 = _ScenarioManager._create(scenario_1_cfg, now, "B_scenario")
+        scenario_2 = _ScenarioManager._create(scenario_2_cfg, now + datetime.timedelta(seconds=1), "C_scenario")
+        scenario_3 = _ScenarioManager._create(scenario_2_cfg, now + datetime.timedelta(seconds=2), "A_scenario")
+        scenario_4 = _ScenarioManager._create(scenario_2_cfg, now + datetime.timedelta(seconds=3), "D_scenario")
+
+        _ScenarioManager._tag(scenario_1, "banana")
+        _ScenarioManager._tag(scenario_1, "kiwi")  # scenario_1 now has tags {"banana", "kiwi"}
+        _ScenarioManager._tag(scenario_2, "apple")
+        _ScenarioManager._tag(scenario_2, "banana")  # scenario_2 now has tags {"banana", "apple"}
+        _ScenarioManager._tag(scenario_3, "apple")
+        _ScenarioManager._tag(scenario_3, "kiwi")  # scenario_3 now has tags {"kiwi", "apple"}
+
+        scenarios_sorted_by_name = [scenario_3, scenario_1, scenario_2, scenario_4]
+        assert scenarios_sorted_by_name == tp.get_scenarios(is_sorted=True, sort_key="name")
+        assert scenarios_sorted_by_name == tp.get_scenarios(is_sorted=True, sort_key="wrong_sort_key")
+
+        scenarios_with_same_config_id = [scenario_2, scenario_3, scenario_4]
+        scenarios_with_same_config_id.sort(key=lambda x: x.id)
+        scenarios_sorted_by_config_id = [
+            scenario_1,
+            scenarios_with_same_config_id[0],
+            scenarios_with_same_config_id[1],
+            scenarios_with_same_config_id[2],
+        ]
+        assert scenarios_sorted_by_config_id == tp.get_scenarios(is_sorted=True, sort_key="config_id")
+
+        scenarios_sorted_by_id = [scenario_1, scenario_2, scenario_3, scenario_4]
+        scenarios_sorted_by_id.sort(key=lambda x: x.id)
+        assert scenarios_sorted_by_id == tp.get_scenarios(is_sorted=True, sort_key="id")
+
+        scenarios_sorted_by_creation_date = [scenario_1, scenario_2, scenario_3, scenario_4]
+        assert scenarios_sorted_by_creation_date == tp.get_scenarios(is_sorted=True, sort_key="creation_date")
+
+        # Note: the scenario without any tags comes first.
+        scenarios_sorted_by_tag = [scenario_4, scenario_2, scenario_3, scenario_1]
+        assert scenarios_sorted_by_tag == tp.get_scenarios(is_sorted=True, sort_key="tags")
+
+        scenarios_sorted_by_name_descending_order = [scenario_4, scenario_2, scenario_1, scenario_3]
+        assert scenarios_sorted_by_name_descending_order == tp.get_scenarios(
+            is_sorted=True, descending=True, sort_key="name"
+        )
+
     def test_get_scenario(self, scenario):
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._get") as mck:
             scenario_id = ScenarioId("SCENARIO_id")

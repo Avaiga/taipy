@@ -117,7 +117,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> List[Entity]:
         return list(self.__search(attribute, value, filters))
 
-    def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
+    def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]) -> None:
         if isinstance(folder_path, str):
             folder: pathlib.Path = pathlib.Path(folder_path)
         else:

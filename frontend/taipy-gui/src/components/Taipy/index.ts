@@ -13,6 +13,7 @@
 
 import { ComponentType } from "react";
 import Button from "./Button";
+import Chat from "./Chat";
 import Chart from "./Chart";
 import DateRange from "./DateRange";
 import DateSelector from "./DateSelector";
@@ -28,6 +29,7 @@ import Login from "./Login";
 import Layout from "./Layout";
 import Link from "./Link";
 import MenuCtl from "./MenuCtl";
+import Metric from "./Metric";
 import NavBar from "./NavBar";
 import PageContent from "../pages/PageContent";
 import Pane from "./Pane";
@@ -46,6 +48,7 @@ export const getRegisteredComponents = () => {
         Object.entries({
             a: Link,
             Button: Button,
+            Chat: Chat,
             Chart: Chart,
             DateRange: DateRange,
             DateSelector: DateSelector,
@@ -60,6 +63,7 @@ export const getRegisteredComponents = () => {
             Login: Login,
             Layout: Layout,
             MenuCtl: MenuCtl,
+            Metric: Metric,
             NavBar: NavBar,
             PageContent: PageContent,
             Pane: Pane,

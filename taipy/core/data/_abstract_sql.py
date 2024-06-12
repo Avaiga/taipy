@@ -25,7 +25,7 @@ from taipy.config.common.scope import Scope
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..data.operator import JoinOperator, Operator
 from ..exceptions.exceptions import MissingRequiredProperty, UnknownDatabaseEngine
-from ._abstract_tabular import _TabularDataNodeMixin
+from ._tabular_datanode_mixin import _TabularDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
@@ -90,7 +90,7 @@ class _AbstractSQLDataNode(DataNode, _TabularDataNodeMixin):
         editor_id: Optional[str] = None,
         editor_expiration_date: Optional[datetime] = None,
         properties: Optional[Dict] = None,
-    ):
+    ) -> None:
         if properties is None:
             properties = {}
         self._check_required_properties(properties)

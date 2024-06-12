@@ -31,6 +31,7 @@ class _Factory:
 
     __CONTROL_DEFAULT_PROP_NAME = {
         "button": "label",
+        "chat": "messages",
         "chart": "data",
         "content": "value",
         "date": "date",
@@ -56,6 +57,7 @@ class _Factory:
         "text": "value",
         "toggle": "value",
         "tree": "value",
+        "metric": "value",
     }
 
     _TEXT_ATTRIBUTES = ["format", "id", "hover_text", "raw"]
@@ -79,6 +81,23 @@ class _Factory:
                 ("on_action", PropertyType.function),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
+            ]
+        ),
+        "chat": lambda gui, control_type, attrs: _Builder(
+            gui=gui, control_type=control_type, element_name="Chat", attributes=attrs, default_value=None
+        )
+        .set_value_and_default(with_update=True, with_default=False, var_type=PropertyType.data)
+        .set_attributes(
+            [
+                ("id",),
+                ("on_action", PropertyType.function),
+                ("active", PropertyType.dynamic_boolean, True),
+                ("hover_text", PropertyType.dynamic_string),
+                ("with_input", PropertyType.dynamic_boolean, True),
+                ("users", PropertyType.lov),
+                ("sender_id",),
+                ("height",),
+                ("page_size", PropertyType.number, 50),
             ]
         ),
         "chart": lambda gui, control_type, attrs: _Builder(
@@ -261,7 +280,6 @@ class _Factory:
                 ("value", PropertyType.dynamic_number),
                 ("format",),
                 ("orientation"),
-                ("hover_text", PropertyType.dynamic_string),
                 ("width",),
                 ("height",),
             ]
@@ -317,31 +335,55 @@ class _Factory:
             element_name="MenuCtl",
             attributes=attrs,
         )
-        ._get_adapter("lov")  # need to be called before set_lov
-        ._set_lov()
         .set_attributes(
             [
                 ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
-                ("label"),
-                ("width"),
+                ("label",),
+                ("width",),
                 ("width[mobile]",),
                 ("on_action", PropertyType.function),
                 ("inactive_ids", PropertyType.dynamic_list),
                 ("hover_text", PropertyType.dynamic_string),
+                ("lov", PropertyType.lov),
             ]
         )
         ._set_propagate(),
-        "navbar": lambda gui, control_type, attrs: _Builder(
-            gui=gui, control_type=control_type, element_name="NavBar", attributes=attrs, default_value=None
+        "metric": lambda gui, control_type, attrs: _Builder(
+            gui=gui,
+            control_type=control_type,
+            element_name="Metric",
+            attributes=attrs,
         )
-        ._get_adapter("lov", multi_selection=False)  # need to be called before set_lov
-        ._set_lov()
+        .set_value_and_default(var_type=PropertyType.dynamic_number, native_type=True)
         .set_attributes(
             [
                 ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
+                ("layout", PropertyType.dynamic_dict),
+                ("type", PropertyType.string, "circular"),
+                ("min", PropertyType.number, 0),
+                ("max", PropertyType.number, 100),
+                ("delta", PropertyType.dynamic_number),
+                ("threshold", PropertyType.dynamic_number),
+                ("width", PropertyType.string_or_number),
+                ("height", PropertyType.string_or_number),
+                ("show_value", PropertyType.boolean, True),
+                ("format", PropertyType.string),
+                ("delta_format", PropertyType.string),
+                ("template", PropertyType.dict),
+                ("template[dark]", PropertyType.dict),
+                ("template[light]", PropertyType.dict),
+            ]
+        ),
+        "navbar": lambda gui, control_type, attrs: _Builder(
+            gui=gui, control_type=control_type, element_name="NavBar", attributes=attrs, default_value=None
+        ).set_attributes(
+            [
+                ("id",),
+                ("active", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
+                ("lov", PropertyType.single_lov),
             ]
         ),
         "number": lambda gui, control_type, attrs: _Builder(
@@ -402,8 +444,6 @@ class _Factory:
             gui=gui, control_type=control_type, element_name="Selector", attributes=attrs, default_value=None
         )
         .set_value_and_default(with_default=False, var_type=PropertyType.lov_value)
-        ._get_adapter("lov")  # need to be called before set_lov
-        ._set_lov()
         .set_attributes(
             [
                 ("active", PropertyType.dynamic_boolean, True),
@@ -418,6 +458,7 @@ class _Factory:
                 ("on_change", PropertyType.function),
                 ("label",),
                 ("mode",),
+                ("lov", PropertyType.lov),
             ]
         )
         ._set_propagate(),
@@ -432,14 +473,14 @@ class _Factory:
         .set_attributes(
             [
                 ("active", PropertyType.dynamic_boolean, True),
-                ("height"),
+                ("height",),
                 ("hover_text", PropertyType.dynamic_string),
                 ("id",),
                 ("value_by_id", PropertyType.boolean),
                 ("max", PropertyType.number, 100),
                 ("min", PropertyType.number, 0),
                 ("step", PropertyType.number, 1),
-                ("orientation"),
+                ("orientation",),
                 ("width", PropertyType.string, "300px"),
                 ("on_change", PropertyType.function),
                 ("continuous", PropertyType.boolean, True),
@@ -518,8 +559,6 @@ class _Factory:
             gui=gui, control_type=control_type, element_name="Toggle", attributes=attrs, default_value=None
         )
         .set_value_and_default(with_default=False, var_type=PropertyType.toggle_value)
-        ._get_adapter("lov", multi_selection=False)  # need to be called before set_lov
-        ._set_lov()
         .set_attributes(
             [
                 ("active", PropertyType.dynamic_boolean, True),
@@ -531,6 +570,7 @@ class _Factory:
                 ("allow_unselect", PropertyType.boolean),
                 ("on_change", PropertyType.function),
                 ("mode",),
+                ("lov", PropertyType.single_lov),
             ]
         )
         ._set_kind()
@@ -564,6 +604,8 @@ class _Factory:
 
     # TODO: process \" in property value
     _PROPERTY_RE = re.compile(r"\s+([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)=\"((?:(?:(?<=\\)\")|[^\"])*)\"")
+
+    __COUNTER = 0
 
     @staticmethod
     def set_library(library: "ElementLibrary"):
@@ -624,6 +666,7 @@ class _Factory:
         name = name[len(_Factory.__TAIPY_NAME_SPACE) :] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
         builder = _Factory.__CONTROL_BUILDERS.get(name)
         built = None
+        _Factory.__COUNTER += 1
         with gui._get_autorization():
             if builder is None:
                 lib, element_name, element = _Factory.__get_library_element(name)
@@ -631,7 +674,9 @@ class _Factory:
                     from ..extension.library import Element
 
                     if isinstance(element, Element):
-                        return element._call_builder(element_name, gui, all_properties, lib, is_html)
+                        return element._call_builder(
+                            element_name, gui, all_properties, lib, is_html, counter=_Factory.__COUNTER
+                        )
             else:
                 built = builder(gui, name, all_properties)
             if isinstance(built, _Builder):

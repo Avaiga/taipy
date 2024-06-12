@@ -1,4 +1,4 @@
-# Taipy-REST
+# Taipy REST
 
 ## License
 Copyright 2021-2024 Avaiga Private Limited
@@ -27,16 +27,16 @@ and limitations under the License.
 
 Taipy is a Python library for creating Business Applications. More information on our
 [website](https://www.taipy.io). Taipy is split into multiple repositories including
-_taipy-core_ and _taipy-rest_ to let users install the minimum they need.
+*taipy-core* and *taipy-rest* to let users install the minimum they need.
 
 Taipy Core mostly includes business-oriented
 features. It helps users create and manage business applications and improve analyses
 capability through time, conditions and hypothesis.
 
 Taipy REST is a set of APIs built on top of the
-_taipy-core_ library developed by Avaiga. This project is meant to be used as a complement
-for **taipy** and its goal is to enable automation through rest APIs of processes built
-on taipy.
+*taipy-core* library developed by Avaiga. This project is meant to be used as a complement
+for Taipy and its goal is to enable automation through rest APIs of processes built
+on Taipy.
 
 The project comes with rest APIs that provide interaction with all of taipy modules:
  - DataNodes
@@ -50,16 +50,16 @@ A more in depth documentation of taipy can be found [here](https://docs.taipy.io
 
 ## Installation
 
-Want to install and try _Taipy REST_? Check out our [`INSTALLATION.md`](INSTALLATION.md) file.
+Want to install and try *Taipy REST*? Check out our [`INSTALLATION.md`](INSTALLATION.md) file.
 
 ## Contributing
 
-Want to help build _Taipy REST_? Check out our [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
+Want to help build *Taipy REST*? Check out our [`CONTRIBUTING.md`](../../CONTRIBUTING.md) file.
 
 ## Code of conduct
 
-Want to be part of the _Taipy REST_ community? Check out our
-[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) file.
+Want to be part of the *Taipy REST* community? Check out our
+[`CODE_OF_CONDUCT.md`](../../CODE_OF_CONDUCT.md) file.
 
 ## Directory Structure
 
@@ -73,12 +73,10 @@ Want to be part of the _Taipy REST_ community? Check out our
       - `templates/`: Swagger and redoc templates for generating the documentation
     - `app.py`: Flask app configuration and creation
     - `extensions.py`: Singletons used on the application factory
-    - `rest.py`: Main python entrypoint for running _taipy-rest_ application.
-    - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy-rest_.
-    - `CONTRIBUTING.md`: Instructions to contribute to _taipy-rest_.
-    - `INSTALLATION.md`: Instructions to install _taipy-rest_.
+    - `rest.py`: Main python entrypoint for running *taipy-rest* application.
+    - `INSTALLATION.md`: Instructions to install *taipy-rest*.
     - `LICENSE`: The Apache 2.0 License.
     - `README.md`: Current file.
-    - `setup.py`: The setup script managing building, distributing, and installing _taipy-rest_.
+    - `setup.py`: The setup script managing building, distributing, and installing *taipy-rest*.
 - `tests/`:
   - `rest/`: Unit tests following the `taipy/rest/` structure.

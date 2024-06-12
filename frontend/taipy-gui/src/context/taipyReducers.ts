@@ -11,19 +11,19 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { Dispatch } from "react";
 import { PaletteMode } from "@mui/material";
 import { createTheme, Theme } from "@mui/material/styles";
-import { io, Socket } from "socket.io-client";
 import merge from "lodash/merge";
+import { Dispatch } from "react";
+import { io, Socket } from "socket.io-client";
 
-import { TAIPY_CLIENT_ID, WsMessage, sendWsMessage } from "./wsUtils";
+import { FilterDesc } from "../components/Taipy/TableFilter";
+import { stylekitModeThemes, stylekitTheme } from "../themes/stylekit";
 import { getBaseURL, TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 import { MenuProps } from "../utils/lov";
-import { FilterDesc } from "../components/Taipy/TableFilter";
-import { stylekitModeThemes, stylekitTheme } from "../themes/stylekit";
-import { getLocalStorageValue, storeClientId, IdMessage } from "./utils";
+import { getLocalStorageValue, IdMessage, storeClientId } from "./utils";
+import { ligthenPayload, sendWsMessage, TAIPY_CLIENT_ID, WsMessage } from "./wsUtils";
 
 enum Types {
     SocketConnected = "SOCKET_CONNECTED",
@@ -593,22 +593,31 @@ export const createRequestTableUpdateAction = (
     handleNan?: boolean,
     filters?: Array<FilterDesc>,
     compare?: string,
-    compareDatas?: string
+    compareDatas?: string,
+    stateContext?: Record<string, unknown>
 ): TaipyAction =>
-    createRequestDataUpdateAction(name, id, context, columns, pageKey, {
-        start: start,
-        end: end,
-        orderby: orderBy,
-        sort: sort,
-        aggregates: aggregates,
-        applies: applies,
-        styles: styles,
-        tooltips: tooltips,
-        handlenan: handleNan,
-        filters: filters,
-        compare: compare,
-        compare_datas: compareDatas,
-    });
+    createRequestDataUpdateAction(
+        name,
+        id,
+        context,
+        columns,
+        pageKey,
+        ligthenPayload({
+            start: start,
+            end: end,
+            orderby: orderBy,
+            sort: sort,
+            aggregates: aggregates,
+            applies: applies,
+            styles: styles,
+            tooltips: tooltips,
+            handlenan: handleNan,
+            filters: filters,
+            compare: compare,
+            compare_datas: compareDatas,
+            state_context: stateContext,
+        })
+    );
 
 export const createRequestInfiniteTableUpdateAction = (
     name: string | undefined,
@@ -627,23 +636,34 @@ export const createRequestInfiniteTableUpdateAction = (
     handleNan?: boolean,
     filters?: Array<FilterDesc>,
     compare?: string,
-    compareDatas?: string
+    compareDatas?: string,
+    stateContext?: Record<string, unknown>,
+    reverse?: boolean
 ): TaipyAction =>
-    createRequestDataUpdateAction(name, id, context, columns, pageKey, {
-        infinite: true,
-        start: start,
-        end: end,
-        orderby: orderBy,
-        sort: sort,
-        aggregates: aggregates,
-        applies: applies,
-        styles: styles,
-        tooltips: tooltips,
-        handlenan: handleNan,
-        filters: filters,
-        compare: compare,
-        compare_datas: compareDatas,
-    });
+    createRequestDataUpdateAction(
+        name,
+        id,
+        context,
+        columns,
+        pageKey,
+        ligthenPayload({
+            infinite: true,
+            start: start,
+            end: end,
+            orderby: orderBy,
+            sort: sort,
+            aggregates: aggregates,
+            applies: applies,
+            styles: styles,
+            tooltips: tooltips,
+            handlenan: handleNan,
+            filters: filters,
+            compare: compare,
+            compare_datas: compareDatas,
+            state_context: stateContext,
+            reverse: !!reverse,
+        })
+    );
 
 /**
  * Create a *request data update* `Action` that will be used to update the `Context`.
@@ -710,16 +730,18 @@ export const createRequestUpdateAction = (
     id: string | undefined,
     context: string | undefined,
     names: string[],
-    forceRefresh = false
+    forceRefresh = false,
+    stateContext?: Record<string, unknown>
 ): TaipyAction => ({
     type: Types.RequestUpdate,
     name: "",
     context: context,
-    payload: {
+    payload: ligthenPayload({
         id: id,
         names: names,
         refresh: forceRefresh,
-    },
+        state_context: stateContext,
+    }),
 });
 
 export const createSetLocationsAction = (locations: Record<string, string>): TaipyAction => ({
