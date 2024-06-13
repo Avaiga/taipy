@@ -16,28 +16,32 @@ import taipy.gui.builder as tgb
 def build_dn_partial(dn, dn_label):
     with tgb.Page() as partial_content:
         with tgb.part(render="{selected_scenario}"):
-            # ##################################################################################################################
-            # PLACEHOLDER: data node specific content before automatic content                                                 #
-            #                                                                                                                  #
-            # Example:                                                                                                         #
+            # ##########################################################################################################
+            # PLACEHOLDER: data node specific content before automatic content                                         #
+            #                                                                                                          #
+            # Example:                                                                                                 #
             if dn_label == "replacement_type":
                 tgb.text("All missing values will be replaced by the data node value.")
-            # Comment, remove or replace the previous lines with your own use case                                             #
-            # ##################################################################################################################
+            # Comment, remove or replace the previous lines with your own use case                                     #
+            # ##########################################################################################################
 
             # Automatic data node content
             tgb.data_node("{selected_scenario.data_nodes['" + dn.config_id + "']}", scenario="{selected_scenario}")
 
-            # ##################################################################################################################
-            # PLACEHOLDER: data node specific content after automatic content                                                  #
-            #                                                                                                                  #
-            # Example:                                                                                                         #
+            # ##########################################################################################################
+            # PLACEHOLDER: data node specific content after automatic content                                          #
+            #                                                                                                          #
+            # Example:                                                                                                 #
             if dn_label == "initial_dataset":
                 tgb.text("Select your  CSV file:")
-                tgb.file_selector("{selected_data_node.path}", extensions=".csv", on_action="{lambda s: s.refresh('selected_scenario')}")
+                tgb.file_selector(
+                    "{selected_data_node.path}",
+                    extensions=".csv",
+                    on_action="{lambda s: s.refresh('selected_scenario')}",
+                )
 
-            # Comment, remove or replace the previous lines with your own use case                                             #
-            # ##################################################################################################################
+            # Comment, remove or replace the previous lines with your own use case                                     #
+            # ##########################################################################################################
 
     return partial_content
 
