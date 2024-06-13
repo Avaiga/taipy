@@ -62,7 +62,6 @@ import {
     BadgePos,
     BadgeSx,
     BaseTreeViewSx,
-    EmptyArray,
     FlagSx,
     ParentItemSx,
     getUpdateVarNames,
@@ -139,13 +138,13 @@ const CoreItem = (props: {
     hideNonPinned: boolean;
     active: boolean;
 }) => {
-    const [id, label, items = EmptyArray, nodeType, primary] = props.item;
+    const [id, label, items, nodeType, primary] = props.item;
     const isPinned = props.pins[0][id];
     const isShown = props.hideNonPinned ? props.pins[1][id] : true;
 
     return !props.displayCycles && nodeType === NodeType.CYCLE ? (
         <>
-            {items.map((item) => (
+            {items && items.map((item) => (
                 <CoreItem
                     key={item[0]}
                     item={item}
@@ -213,7 +212,7 @@ const CoreItem = (props: {
             }
             sx={nodeType === NodeType.NODE ? undefined : ParentItemSx}
         >
-            {items.map((item) => (
+            {items && items.map((item) => (
                 <CoreItem
                     key={item[0]}
                     item={item}
@@ -675,8 +674,8 @@ const CoreSelector = (props: CoreSelectorProps) => {
             >
                 {foundEntities
                     ? foundEntities.map((item) => (
-                          <CoreItem
-                              key={item ? item[0] : ""}
+                          item ? <CoreItem
+                              key={item[0]}
                               item={item}
                               displayCycles={displayCycles}
                               showPrimaryFlag={showPrimaryFlag}
@@ -686,7 +685,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                               pins={pins}
                               hideNonPinned={hideNonPinned}
                               active={!!active}
-                          />
+                          />: null
                       ))
                     : null}
             </SimpleTreeView>
