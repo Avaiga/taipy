@@ -14,7 +14,9 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
+import polars as pl
 from openpyxl import load_workbook
+from xlsxwriter import Workbook
 
 from taipy.config.common.scope import Scope
 
@@ -152,6 +154,8 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             return self._read_as_pandas_dataframe()
         if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy()
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_POLARS:
+            return self._read_as_polars_dataframe()
         return self._read_as()
 
     def _read_as(self):
@@ -193,6 +197,8 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                             work_books[sheet_name] = self._read_as_pandas_dataframe(sheet_name).to_numpy()
                         elif sheet_exposed_type == self._EXPOSED_TYPE_PANDAS:
                             work_books[sheet_name] = self._read_as_pandas_dataframe(sheet_name)
+                        elif sheet_exposed_type == self._EXPOSED_TYPE_POLARS:
+                            work_books[sheet_name] = self._read_as_polars_dataframe(sheet_name)
                         continue
 
                 res = [[col.value for col in row] for row in work_sheet.rows]
@@ -228,6 +234,16 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         if not self.properties[self._HAS_HEADER_PROPERTY]:
             kwargs["header"] = None
         return sheet_names, kwargs
+
+    def _read_as_polars_dataframe(self, sheet_names=None) -> Union[Dict[Union[int, str], pl.DataFrame], pl.DataFrame]:
+        sheet_names, kwargs = self.__get_sheet_names_and_header(sheet_names)
+        try:
+            if sheet_names:
+                return pl.read_excel(self._path, sheet_name=sheet_names, **kwargs)
+            else:
+                return pl.read_excel(self._path, sheet_id=0, **kwargs)
+        except pl.exceptions.NoDataError:
+            return pl.DataFrame()
 
     def _read_as_pandas_dataframe(self, sheet_names=None) -> Union[Dict[Union[int, str], pd.DataFrame], pd.DataFrame]:
         sheet_names, kwargs = self.__get_sheet_names_and_header(sheet_names)
@@ -272,6 +288,8 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         if version("pandas") < "1.4":
             raise ImportError("The append method is only available for pandas version 1.4 or higher.")
 
+        # TODO: added polars append
+
         if isinstance(data, Dict) and all(isinstance(x, (pd.DataFrame, np.ndarray)) for x in data.values()):
             self.__append_excel_with_multiple_sheets(data)
         elif isinstance(data, pd.DataFrame):
@@ -280,7 +298,10 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             self.__append_excel_with_single_sheet(pd.DataFrame(data).to_excel, index=False, header=False)
 
     def __write_excel_with_single_sheet(self, write_excel_fct, *args, **kwargs):
-        if sheet_name := self.properties.get(self.__SHEET_NAME_PROPERTY):
+        if (
+            sheet_name := self.properties.get(self.__SHEET_NAME_PROPERTY)
+            and self.properties[self._EXPOSED_TYPE_PROPERTY] != self._EXPOSED_TYPE_POLARS
+        ):
             if not isinstance(sheet_name, str):
                 if len(sheet_name) > 1:
                     raise SheetNameLengthMismatch
@@ -290,25 +311,41 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         else:
             write_excel_fct(*args, **kwargs)
 
-    def __write_excel_with_multiple_sheets(self, data: Any, columns: List[str] = None):
-        with pd.ExcelWriter(self._path) as writer:
-            # Each key stands for a sheet name
-            for key in data.keys():
-                df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data[key])
+    def __write_excel_with_multiple_sheets(self, data: Dict, columns: List[str] = None):
+        exposed_type = self.properties[self._EXPOSED_TYPE_PROPERTY]
 
-                if columns:
-                    data[key].columns = columns
+        if exposed_type == self._EXPOSED_TYPE_POLARS and all(
+            isinstance(x, (pl.DataFrame, pl.Series)) for x in data.values()
+        ):
+            with Workbook(self._path) as wb:
+                for key, df in data.items():
+                    if columns:
+                        df.columns = columns
+                    df.write_excel(wb, worksheet=key)
+        else:
+            with pd.ExcelWriter(self._path) as writer:
+                # Each key stands for a sheet name
+                for key in data.keys():
+                    df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data[key])
 
-                df.to_excel(writer, key, index=False, header=self.properties[self._HAS_HEADER_PROPERTY] or None)
+                    if columns:
+                        df.columns = columns
+
+                    df.to_excel(writer, key, index=False, header=self.properties[self._HAS_HEADER_PROPERTY] or None)
 
     def _write(self, data: Any):
         if isinstance(data, Dict):
             return self.__write_excel_with_multiple_sheets(data)
         else:
             data = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
-            self.__write_excel_with_single_sheet(
-                data.to_excel, self._path, index=False, header=self.properties[self._HAS_HEADER_PROPERTY] or None
-            )
+            if isinstance(data, pl.DataFrame):
+                self.__write_excel_with_single_sheet(
+                    data.write_excel, self._path, include_header=self.properties[self._HAS_HEADER_PROPERTY] or False
+                )
+            else:
+                self.__write_excel_with_single_sheet(
+                    data.to_excel, self._path, index=False, header=self.properties[self._HAS_HEADER_PROPERTY] or None
+                )
 
     def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None):
         """Write a set of columns.
@@ -324,5 +361,12 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             df = pd.DataFrame(data)
             if columns:
                 df.columns = pd.Index(columns, dtype="object")
-            self.__write_excel_with_single_sheet(df.to_excel, self.path, index=False)
+            if isinstance(data, pl.DataFrame):
+                self.__write_excel_with_single_sheet(
+                    data.write_excel, self._path, include_header=self.properties[self._HAS_HEADER_PROPERTY] or False
+                )
+            else:
+                self.__write_excel_with_single_sheet(
+                    df.to_excel, self.path, index=False, has_header=self.properties[self._HAS_HEADER_PROPERTY] or None
+                )
         self.track_edit(timestamp=datetime.now(), job_id=job_id)

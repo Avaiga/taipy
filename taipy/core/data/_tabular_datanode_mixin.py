@@ -13,6 +13,7 @@ from typing import Any, Callable, Dict, List, Union
 
 import numpy as np
 import pandas as pd
+import polars as pl
 
 from ..exceptions.exceptions import InvalidExposedType
 
@@ -25,8 +26,9 @@ class _TabularDataNodeMixin(object):
     _EXPOSED_TYPE_PROPERTY = "exposed_type"
     _EXPOSED_TYPE_NUMPY = "numpy"
     _EXPOSED_TYPE_PANDAS = "pandas"
+    _EXPOSED_TYPE_POLARS = "polars"
     _EXPOSED_TYPE_MODIN = "modin"  # Deprecated in favor of pandas since 3.1.0
-    __VALID_STRING_EXPOSED_TYPES = [_EXPOSED_TYPE_PANDAS, _EXPOSED_TYPE_NUMPY]
+    __VALID_STRING_EXPOSED_TYPES = [_EXPOSED_TYPE_PANDAS, _EXPOSED_TYPE_NUMPY, _EXPOSED_TYPE_POLARS]
 
     def __init__(self, **kwargs) -> None:
         self._decoder: Union[Callable[[List[Any]], Any], Callable[[Dict[Any, Any]], Any]]
@@ -49,6 +51,8 @@ class _TabularDataNodeMixin(object):
             return data
         elif exposed_type == self._EXPOSED_TYPE_NUMPY and isinstance(data, np.ndarray):
             return pd.DataFrame(data)
+        elif exposed_type == self._EXPOSED_TYPE_POLARS and isinstance(data, (pl.DataFrame, pl.Series)):
+            return data
         elif isinstance(data, list) and not isinstance(exposed_type, str):
             return pd.DataFrame.from_records([self._encoder(row) for row in data])
         return pd.DataFrame(data)

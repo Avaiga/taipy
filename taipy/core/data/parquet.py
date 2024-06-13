@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Optional, Set
 
 import numpy as np
 import pandas as pd
+import polars as pl
 
 from taipy.config.common.scope import Scope
 
@@ -155,7 +156,7 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
         self._write_default_data(default_value)
 
-        if not self._last_edit_date and (isfile(self._path) or isdir(self._path)):
+        if not self._last_edit_date and (isfile(self._path) or isdir(self._path)):  # type: ignore
             self._last_edit_date = datetime.now()
         self._TAIPY_PROPERTIES.update(
             {
@@ -189,6 +190,9 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     def _read_as_pandas_dataframe(self, read_kwargs: Dict) -> pd.DataFrame:
         return pd.read_parquet(self._path, **read_kwargs)
 
+    def _read_as_polars_dataframe(self, read_kwargs: Dict) -> pl.DataFrame:
+        return pl.read_parquet(self._path, **read_kwargs)
+
     def _append(self, data: Any):
         self.write_with_kwargs(data, engine="fastparquet", append=True)
 
@@ -206,20 +210,24 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             **write_kwargs (dict[str, any]): The keyword arguments passed to the function
                 `pandas.DataFrame.to_parquet()`.
         """
-        kwargs = {
-            self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
-            self.__COMPRESSION_PROPERTY: self.properties[self.__COMPRESSION_PROPERTY],
-        }
-        kwargs.update(self.properties[self.__WRITE_KWARGS_PROPERTY])
-        kwargs.update(write_kwargs)
         if isinstance(data, pd.Series):
             df = pd.DataFrame(data)
         else:
             df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
 
-        # Ensure that the columns are strings, otherwise writing will fail with pandas 1.3.5
-        df.columns = df.columns.astype(str)
-        df.to_parquet(self._path, **kwargs)
+        if isinstance(df, (pl.DataFrame, pl.Series)):
+            df.write_parquet(self._path)
+        else:
+            kwargs = {
+                self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
+                self.__COMPRESSION_PROPERTY: self.properties[self.__COMPRESSION_PROPERTY],
+            }
+            kwargs.update(self.properties[self.__WRITE_KWARGS_PROPERTY])
+            kwargs.update(write_kwargs)
+
+            # Ensure that the columns are strings, otherwise writing will fail with pandas 1.3.5
+            df.columns = df.columns.astype(str)
+            df.to_parquet(self._path, **kwargs)
         self.track_edit(timestamp=datetime.now(), job_id=job_id)
 
     def read_with_kwargs(self, **read_kwargs):
@@ -239,15 +247,19 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             return None
 
         kwargs = self.properties[self.__READ_KWARGS_PROPERTY]
-        kwargs.update(
-            {
-                self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
-            }
-        )
-        kwargs.update(read_kwargs)
 
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
-            return self._read_as_pandas_dataframe(kwargs)
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
-            return self._read_as_numpy(kwargs)
-        return self._read_as(kwargs)
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_POLARS:
+            return self._read_as_polars_dataframe(kwargs)
+        else:
+            kwargs.update(
+                {
+                    self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
+                }
+            )
+            kwargs.update(read_kwargs)
+
+            if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
+                return self._read_as_pandas_dataframe(kwargs)
+            if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
+                return self._read_as_numpy(kwargs)
+            return self._read_as(kwargs)

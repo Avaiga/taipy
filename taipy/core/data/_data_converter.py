@@ -39,7 +39,12 @@ class _DataNodeConverter(_AbstractConverter):
     # While in practice, each data nodes might have different exposed type possibilities.
     # The previous implementation used tabular datanode but it's no longer suitable so
     # new proposal is needed.
-    _VALID_STRING_EXPOSED_TYPES = ["numpy", "pandas", "modin"]  # Modin is deprecated in favor of pandas since 3.1.0
+    _VALID_STRING_EXPOSED_TYPES = [
+        "numpy",
+        "pandas",
+        "polars",
+        "modin",
+    ]  # Modin is deprecated in favor of pandas since 3.1.0
 
     @classmethod
     def __serialize_generic_dn_properties(cls, datanode_properties: dict):

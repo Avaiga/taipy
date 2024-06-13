@@ -10,9 +10,10 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Union
 
 import pandas as pd
+import polars as pl
 from sqlalchemy import MetaData, Table
 
 from taipy.config.common.scope import Scope
@@ -146,8 +147,13 @@ class SQLTableDataNode(_AbstractSQLDataNode):
         connection.execute(table.insert(), data)
 
     @classmethod
-    def __insert_dataframe(cls, df: pd.DataFrame, table: Any, connection: Any, delete_table: bool) -> None:
-        cls.__insert_dicts(df.to_dict(orient="records"), table, connection, delete_table)
+    def __insert_dataframe(
+        cls, df: Union[pd.DataFrame, pl.DataFrame], table: Any, connection: Any, delete_table: bool
+    ) -> None:
+        if isinstance(df, pl.DataFrame):
+            cls.__insert_dicts(df.to_dicts(), table, connection, delete_table)
+        else:
+            cls.__insert_dicts(df.to_dict(orient="records"), table, connection, delete_table)
 
     @classmethod
     def __delete_all_rows(cls, table: Any, connection: Any, delete_table: bool) -> None:

@@ -18,6 +18,7 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
+import polars as pl
 from sqlalchemy import create_engine, text
 
 from taipy.config.common.scope import Scope
@@ -204,6 +205,8 @@ class _AbstractSQLDataNode(DataNode, _TabularDataNodeMixin):
             return self._read_as_pandas_dataframe()
         if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy()
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_POLARS:
+            return self._read_as_polars_dataframe()
         return self._read_as()
 
     def _read_as(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
@@ -232,6 +235,9 @@ class _AbstractSQLDataNode(DataNode, _TabularDataNodeMixin):
             if columns:
                 return pd.DataFrame(result, columns=keys)[columns]
             return pd.DataFrame(result, columns=keys)
+
+    def _read_as_polars_dataframe(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
+        return pl.read_database(self._get_engine().connect(), self._get_read_query(operators, join_operator))
 
     @abstractmethod
     def _get_read_query(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
