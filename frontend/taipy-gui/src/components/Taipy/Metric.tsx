@@ -69,7 +69,7 @@ const Metric = (props: MetricProps) => {
 
     const colorMap = useMemo(() => {
         try {
-            const obj = props.colorMap && JSON.parse(props.colorMap);
+            const obj = props.colorMap ? JSON.parse(props.colorMap) : null;
             if (obj && typeof obj === 'object') {
                 const keys = Object.keys(obj);
                 return keys.sort((a, b) => Number(a) - Number(b)).map((key, index) => {
