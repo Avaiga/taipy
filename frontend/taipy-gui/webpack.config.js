@@ -34,6 +34,7 @@ const webAppPath = resolveApp(basePath);
 const reactManifestPath = resolveApp(basePath + "/" + reactBundle + "-manifest.json");
 const reactDllPath = resolveApp(basePath + "/" + reactBundle + ".dll.js")
 const taipyDllPath = resolveApp(basePath + "/" + taipyBundle + ".js")
+const taipyGuiBaseExportPath = resolveApp(basePath + "/taipy-gui-base-export");
 
 module.exports = (env, options) => {
     const envVariables = {
@@ -217,5 +218,28 @@ module.exports = (env, options) => {
         //         root: "_",
         //     },
         // },
+    },
+    {
+        entry: "./base/src/exports.ts",
+        output: { filename: "taipy-gui-base.js", path: taipyGuiBaseExportPath },
+        module: {
+            rules: [
+                {
+                    test: /\.tsx?$/,
+                    use: "ts-loader",
+                    exclude: /node_modules/,
+                },
+            ],
+        },
+        resolve: {
+            extensions: [".tsx", ".ts", ".js", ".tsx"],
+        },
+        plugins: [
+            new CopyWebpackPlugin({
+                patterns: [
+                    { from: "./base/src/packaging", to: taipyGuiBaseExportPath },
+                ],
+            }),
+        ],
     }];
 };
