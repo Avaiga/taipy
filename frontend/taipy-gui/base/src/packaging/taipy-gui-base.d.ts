@@ -35,6 +35,7 @@ export interface WsMessage {
     module_context: string;
     ack_id?: string;
 }
+export declare const sendWsMessage: (socket: Socket | undefined, type: WsMessageType | str, name: string, payload: Record<string, unknown> | unknown, id: string, moduleContext?: string, propagate?: boolean, serverAck?: (val: unknown) => void) => string;
 export declare abstract class WsAdapter {
     abstract supportedMessageTypes: string[];
     abstract handleWsMessage(message: WsMessage, app: TaipyApp): void;
@@ -61,7 +62,7 @@ export declare class TaipyApp {
     path: string | undefined;
     routes: Route[] | undefined;
     wsAdapters: WsAdapter[];
-    constructor(onInit?: OnInitHandler | undefined, onChange?: OnChangeHandler | undefined, path?: string | undefined, socket?: Socket | undefined, wsAdapters?: WsAdapter[] | undefined);
+    constructor(onInit?: OnInitHandler | undefined, onChange?: OnChangeHandler | undefined, path?: string | undefined, socket?: Socket | undefined);
     get onInit(): OnInitHandler | undefined;
     set onInit(handler: OnInitHandler | undefined);
     get onChange(): OnChangeHandler | undefined;
@@ -71,6 +72,7 @@ export declare class TaipyApp {
     get onReload(): OnReloadHandler | undefined;
     set onReload(handler: OnReloadHandler | undefined);
     init(): void;
+    registerWsAdapter(wsAdapter: WsAdapter): void;
     getEncodedName(varName: string, module: string): string | undefined;
     getName(encodedName: string): [
         string,
