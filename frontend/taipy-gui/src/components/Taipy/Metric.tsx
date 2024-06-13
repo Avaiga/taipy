@@ -20,7 +20,7 @@ import {useTheme} from "@mui/material";
 import {useClassNames, useDynamicJsonProperty, useDynamicProperty} from "../../utils/hooks";
 import {extractPrefix, extractSuffix, sprintfToD3Converter} from "../../utils/formatConversion";
 import {TaipyBaseProps, TaipyHoverProps} from "./utils";
-import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
+import {darkThemeTemplate} from "../../themes/darkThemeTemplate";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -44,6 +44,7 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     showValue?: boolean;
     format?: string;
     deltaFormat?: string;
+    colorMap?: string;
     template?: string;
     template_Dark_?: string;
     template_Light_?: string;
@@ -91,6 +92,14 @@ const Metric = (props: MetricProps) => {
                             props.max || 100
                         ]
                     },
+                    steps: props.colorMap ? (() => {
+                        const obj = JSON.parse(props.colorMap);
+                        const keys = Object.keys(obj);
+                        return keys.sort((a, b) => parseFloat(a) - parseFloat(b)).map((key, index) => {
+                            const nextKey = keys[index + 1] !== undefined ? parseFloat(keys[index + 1]) : props.max;
+                            return {range: [parseFloat(key), nextKey], color: obj[key]};
+                        }).filter(item => item.color !== null);
+                    })() : undefined,
                     shape: props.type === "linear" ? "bullet" : "angular",
                     threshold: {
                         line: {color: "red", width: 4},
@@ -102,6 +111,7 @@ const Metric = (props: MetricProps) => {
         ];
     }, [
         props.format,
+        props.colorMap,
         props.deltaFormat,
         props.min,
         props.max,
@@ -168,7 +178,7 @@ const Metric = (props: MetricProps) => {
 
 export default Metric;
 
-const { colorscale, colorway, font} = darkThemeTemplate.layout;
+const {colorscale, colorway, font} = darkThemeTemplate.layout;
 const darkTemplate = {
     layout: {
         colorscale,

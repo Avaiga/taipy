@@ -371,6 +371,7 @@ class _Factory:
                 ("show_value", PropertyType.boolean, True),
                 ("format", PropertyType.string),
                 ("delta_format", PropertyType.string),
+                ("color_map", PropertyType.dict),
                 ("template", PropertyType.dict),
                 ("template[dark]", PropertyType.dict),
                 ("template[light]", PropertyType.dict),
