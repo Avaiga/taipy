@@ -4,8 +4,8 @@ import { uploadFile } from "../../src/workers/fileupload";
 
 import { Socket, io } from "socket.io-client";
 import { DataManager, ModuleData } from "./dataManager";
-import { initSocket } from "./utils";
-import { WsAdapter } from "./wsAdapter";
+import { initSocket } from "./socket";
+import { TaipyWsAdapter, WsAdapter } from "./wsAdapter";
 
 export type OnInitHandler = (taipyApp: TaipyApp) => void;
 export type OnChangeHandler = (taipyApp: TaipyApp, encodedName: string, value: unknown) => void;
@@ -33,7 +33,6 @@ export class TaipyApp {
         onChange: OnChangeHandler | undefined = undefined,
         path: string | undefined = undefined,
         socket: Socket | undefined = undefined,
-        wsAdapters: WsAdapter[] | undefined = undefined,
     ) {
         socket = socket || io("/", { autoConnect: false });
         this.onInit = onInit;
@@ -46,7 +45,7 @@ export class TaipyApp {
         this.routes = undefined;
         this.path = path;
         this.socket = socket;
-        this.wsAdapters = wsAdapters || [];
+        this.wsAdapters = [new TaipyWsAdapter()];
         initSocket(socket, this);
     }
 
@@ -111,6 +110,10 @@ export class TaipyApp {
     }
 
     // Public methods
+    registerWsAdapter(wsAdapter: WsAdapter) {
+        this.wsAdapters.push(wsAdapter);
+    }
+
     getEncodedName(varName: string, module: string) {
         return this.variableData?.getEncodedName(varName, module);
     }
