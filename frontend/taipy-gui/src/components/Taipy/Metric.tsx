@@ -67,6 +67,22 @@ const Metric = (props: MetricProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const theme = useTheme();
 
+    const colorMap = useMemo(() => {
+        try {
+            const obj = props.colorMap && JSON.parse(props.colorMap);
+            if (obj && typeof obj === 'object') {
+                const keys = Object.keys(obj);
+                return keys.sort((a, b) => Number(a) - Number(b)).map((key, index) => {
+                    const nextKey = keys[index + 1] !== undefined ? Number(keys[index + 1]) : props.max || 100;
+                    return {range: [Number(key), nextKey], color: obj[key]};
+                }).filter(item => item !== null && item.color !== null)
+            }
+        } catch (e) {
+            console.info(`Error while parsing Metric.colorMap\n${(e as Error).message || e}`);
+        }
+        return undefined;
+    }, [props.colorMap, props.max])
+
     const data = useMemo(() => {
         return [
             {
@@ -92,14 +108,7 @@ const Metric = (props: MetricProps) => {
                             props.max || 100
                         ]
                     },
-                    steps: props.colorMap ? (() => {
-                        const obj = JSON.parse(props.colorMap);
-                        const keys = Object.keys(obj);
-                        return keys.sort((a, b) => parseFloat(a) - parseFloat(b)).map((key, index) => {
-                            const nextKey = keys[index + 1] !== undefined ? parseFloat(keys[index + 1]) : props.max;
-                            return {range: [parseFloat(key), nextKey], color: obj[key]};
-                        }).filter(item => item.color !== null);
-                    })() : undefined,
+                    steps: colorMap,
                     shape: props.type === "linear" ? "bullet" : "angular",
                     threshold: {
                         line: {color: "red", width: 4},
@@ -111,7 +120,6 @@ const Metric = (props: MetricProps) => {
         ];
     }, [
         props.format,
-        props.colorMap,
         props.deltaFormat,
         props.min,
         props.max,
@@ -119,7 +127,8 @@ const Metric = (props: MetricProps) => {
         value,
         showValue,
         delta,
-        threshold
+        threshold,
+        colorMap
     ]);
 
     const style = useMemo(
