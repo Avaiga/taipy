@@ -51,7 +51,7 @@ from .exceptions.exceptions import (
 from .job._job_manager_factory import _JobManagerFactory
 from .job.job import Job
 from .job.job_id import JobId
-from .reason._reason_factory import _build_config_can_not_create_reason, _build_not_submittable_entity_reason
+from .reason._reason_factory import _build_not_submittable_entity_reason, _build_wrong_config_type_reason
 from .reason.reason import Reasons
 from .scenario._scenario_manager_factory import _ScenarioManagerFactory
 from .scenario.scenario import Scenario
@@ -887,7 +887,7 @@ def can_create(config: Union[ScenarioConfig, DataNodeConfig]) -> Reasons:
         return _DataManagerFactory._build_manager()._can_create(config)
     else:
         config_id = getattr(config, "id", None) or str(config)
-        return Reasons(config_id)._add_reason(config_id, _build_config_can_not_create_reason(config_id))
+        return Reasons(config_id)._add_reason(config_id, _build_wrong_config_type_reason(config_id))
 
 
 def create_scenario(

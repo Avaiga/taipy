@@ -24,7 +24,7 @@ from ..config.data_node_config import DataNodeConfig
 from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import InvalidDataNodeType
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
-from ..reason._reason_factory import _build_config_can_not_create_reason, _build_not_global_datanode_config_reason
+from ..reason._reason_factory import _build_not_global_scope_reason, _build_wrong_config_type_reason
 from ..reason.reason import Reasons
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
@@ -76,9 +76,9 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         reason = Reasons(config_id)
 
         if not isinstance(config, DataNodeConfig):
-            reason._add_reason(config_id, _build_config_can_not_create_reason(config_id))
+            reason._add_reason(config_id, _build_wrong_config_type_reason(config_id))
         elif config.scope is not Scope.GLOBAL:
-            reason._add_reason(config_id, _build_not_global_datanode_config_reason(config_id))
+            reason._add_reason(config_id, _build_not_global_scope_reason(config_id))
 
         return reason
 

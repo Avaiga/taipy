@@ -46,7 +46,7 @@ from ..exceptions.exceptions import (
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
-from ..reason._reason_factory import _build_config_can_not_create_reason, _build_not_submittable_entity_reason
+from ..reason._reason_factory import _build_not_submittable_entity_reason, _build_wrong_config_type_reason
 from ..reason.reason import Reasons
 from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from ..submission.submission import Submission
@@ -120,7 +120,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         reason = Reasons(config_id)
 
         if not isinstance(config, ScenarioConfig):
-            reason._add_reason(config_id, _build_config_can_not_create_reason(config_id))
+            reason._add_reason(config_id, _build_wrong_config_type_reason(config_id))
 
         return reason
 
