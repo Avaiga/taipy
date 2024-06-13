@@ -693,7 +693,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             raise NotImplementedError
         if isinstance(data, list):
             if data[2] and isinstance(data[2][0], (Cycle, Scenario, Sequence, DataNode)):
-                data[2] = self.get_sorted_datanode_list(data[2], sorts, adapt_dn)
+                data[2] = self.get_sorted_datanode_list(data[2], sorts, False)
             return data
         try:
             if hasattr(data, "id") and is_readable(data.id) and core_get(data.id) is not None:
@@ -715,7 +715,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                                 self.data_nodes_by_owner.get(data.id, [])
                                 + (self.scenario_by_cycle or {}).get(data, []),
                                 sorts,
-                                adapt_dn,
+                                False,
                             ),
                             _EntityType.CYCLE.value,
                             False,
@@ -727,7 +727,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             self.get_sorted_datanode_list(
                                 self.data_nodes_by_owner.get(data.id, []) + list(data.sequences.values()),
                                 sorts,
-                                adapt_dn,
+                                False,
                             ),
                             _EntityType.SCENARIO.value,
                             data.is_primary,
@@ -737,7 +737,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             return [
                                 data.id,
                                 data.get_simple_label(),
-                                self.get_sorted_datanode_list(datanodes, sorts, adapt_dn),
+                                self.get_sorted_datanode_list(datanodes, sorts, False),
                                 _EntityType.SEQUENCE.value,
                             ]
         except Exception as e:
