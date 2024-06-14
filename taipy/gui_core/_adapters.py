@@ -182,10 +182,8 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                     return (None, None, True, None)
                 val_type = (
                     "date"
-                    if "date" in type(value).__name__
+                    if "date" in type(value).__name__.lower() or "timestamp" in type(value).__name__.lower()
                     else type(value).__name__
-                    if isinstance(value, Number)
-                    else None
                 )
                 if isinstance(value, float) and math.isnan(value):
                     value = None
