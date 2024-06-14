@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Point } from '@projectstorm/geometry';
 import { CanvasWidget } from "@projectstorm/react-canvas-core";
 import Box from "@mui/material/Box";
 import AppBar from "@mui/material/AppBar";
@@ -11,7 +12,13 @@ import createEngine from "@projectstorm/react-diagrams";
 import deepEqual from "fast-deep-equal/es6";
 
 import { DisplayModel, TaskStatuses } from "./utils/types";
-import { addStatusToDisplayModel, createDagreEngine, initDiagram, populateModel, relayoutDiagram } from "./utils/diagram";
+import {
+    addStatusToDisplayModel,
+    createDagreEngine,
+    initDiagram,
+    populateModel,
+    relayoutDiagram,
+} from "./utils/diagram";
 import {
     createRequestUpdateAction,
     createSendActionNameAction,
@@ -116,7 +123,6 @@ const ScenarioDag = (props: ScenarioDagProps) => {
                 // Do nothing
             }
         }
-        dm = addStatusToDisplayModel(dm, taskStatuses);
         setDisplayModel((oldDm) => (deepEqual(oldDm, dm) ? oldDm : dm));
     }, [props.scenario, props.defaultScenario, taskStatuses]);
 
@@ -124,7 +130,10 @@ const ScenarioDag = (props: ScenarioDagProps) => {
 
     const zoomToFit = useCallback(() => engine.zoomToFit(), [engine]);
 
-    const onClick = useCallback((id: string) => onAction && dispatch(createSendActionNameAction(props.id, module, onSelect, id, onAction)), [props.id, onAction, onSelect, module, dispatch]);
+    const onClick = useCallback(
+        (id: string) => onAction && dispatch(createSendActionNameAction(props.id, module, onSelect, id, onAction)),
+        [props.id, onAction, onSelect, module, dispatch]
+    );
 
     useEffect(() => {
         const model = new TaipyDiagramModel(onClick);
@@ -133,14 +142,23 @@ const ScenarioDag = (props: ScenarioDagProps) => {
         if (displayModel) {
             setScenarioId(displayModel[0]);
             // populate model
-            doLayout = populateModel(displayModel, model);
+            doLayout = populateModel(addStatusToDisplayModel(displayModel, taskStatuses), model);
+        }
+        const rects = engine.getModel() && engine
+            .getModel()
+            .getNodes()
+            .reduce((pv, nm) => {
+                pv[nm.getID()] = nm.getPosition();
+                return pv;
+            }, {} as Record<string, Point>);
+        const hasPos = rects && Object.keys(rects).length;
+        if (hasPos) {
+            model.getNodes().forEach(nm => rects[nm.getID()] && nm.setPosition(rects[nm.getID()]));
         }
         engine.setModel(model);
-        // Block deletion
-        //engine.getActionEventBus().registerAction(new DeleteItemsAction({ keyCodes: [1] }));
         model.setLocked(true);
-        doLayout && setTimeout(relayout, 500);
-    }, [displayModel, engine, relayout, onClick]);
+        doLayout && !hasPos && setTimeout(relayout, 500);
+    }, [displayModel, taskStatuses, engine, relayout, onClick]);
 
     useEffect(() => {
         const showVar = getUpdateVar(props.updateVars, "show");
