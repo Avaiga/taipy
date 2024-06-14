@@ -896,6 +896,12 @@
                         "type": "dynamic(int)",
                         "doc": "If Int, then the value is progress percentage is shown.",
                         "default_property": "true"
+                    },
+                    {
+                        "name": "render",
+                        "type": "bool",
+                        "doc": "If False, then it will not render the progress element.",
+                        "default_property": "true"
                     }
                 ]
             }
