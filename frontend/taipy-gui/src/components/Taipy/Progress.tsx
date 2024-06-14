@@ -33,7 +33,7 @@ const Progress = (props: ProgressBarProps) => {
     const { linear, showValue } = props;
 
     const value = useDynamicProperty(props.value, props.defaultValue, undefined);
-    const render = useDynamicProperty(props.render, props.defaultRender, undefined);
+    const render = useDynamicProperty(props.render, props.defaultRender, true);
 
     if (!render) {
         return null;
