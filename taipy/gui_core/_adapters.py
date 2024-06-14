@@ -19,7 +19,6 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date, datetime
 from enum import Enum
-from numbers import Number
 from operator import attrgetter, contains, eq, ge, gt, le, lt, ne
 
 import pandas as pd
