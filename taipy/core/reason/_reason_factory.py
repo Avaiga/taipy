@@ -9,6 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from typing import Optional
+
 from ..data.data_node import DataNodeId
 
 
@@ -24,7 +26,10 @@ def _build_not_submittable_entity_reason(entity_id: str) -> str:
     return f"Entity {entity_id} is not a submittable entity"
 
 
-def _build_wrong_config_type_reason(config_id: str) -> str:
+def _build_wrong_config_type_reason(config_id: str, config_type: Optional[str]) -> str:
+    if config_type:
+        return f'Object "{config_id}" must be a valid {config_type}'
+
     return f'Object "{config_id}" is not a valid config to be created'
 
 

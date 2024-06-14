@@ -370,6 +370,10 @@ def test_can_create():
     task_config = Config.configure_task("task", print, [dn_config])
     scenario_config = Config.configure_scenario("sc", {task_config}, [], Frequency.DAILY)
 
+    reasons = _ScenarioManager._can_create()
+    assert bool(reasons) is True
+    assert reasons._reasons == {}
+
     reasons = _ScenarioManager._can_create(scenario_config)
     assert bool(reasons) is True
     assert reasons._reasons == {}
@@ -377,13 +381,13 @@ def test_can_create():
 
     reasons = _ScenarioManager._can_create(task_config)
     assert bool(reasons) is False
-    assert reasons._reasons == {task_config.id: {'Object "task" is not a valid config to be created'}}
+    assert reasons._reasons == {task_config.id: {'Object "task" must be a valid ScenarioConfig'}}
     with pytest.raises(AttributeError):
         _ScenarioManager._create(task_config)
 
     reasons = _ScenarioManager._can_create(1)
     assert bool(reasons) is False
-    assert reasons._reasons == {"1": {'Object "1" is not a valid config to be created'}}
+    assert reasons._reasons == {"1": {'Object "1" must be a valid ScenarioConfig'}}
     with pytest.raises(AttributeError):
         _ScenarioManager._create(1)
 

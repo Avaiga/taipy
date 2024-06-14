@@ -115,12 +115,13 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         )
 
     @classmethod
-    def _can_create(cls, config: ScenarioConfig) -> Reasons:
+    def _can_create(cls, config: Optional[ScenarioConfig] = None) -> Reasons:
         config_id = getattr(config, "id", None) or str(config)
         reason = Reasons(config_id)
 
-        if not isinstance(config, ScenarioConfig):
-            reason._add_reason(config_id, _build_wrong_config_type_reason(config_id))
+        if config is not None:
+            if not isinstance(config, ScenarioConfig):
+                reason._add_reason(config_id, _build_wrong_config_type_reason(config_id, "ScenarioConfig"))
 
         return reason
 

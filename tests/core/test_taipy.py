@@ -683,6 +683,7 @@ class TestTaipy:
         task_config = Config.configure_task("task", print, [dn_config])
         scenario_config = Config.configure_scenario("sc", {task_config}, [], Frequency.DAILY)
 
+        assert tp.can_create()
         assert tp.can_create(scenario_config)
         assert tp.can_create(global_dn_config)
         assert not tp.can_create(dn_config)

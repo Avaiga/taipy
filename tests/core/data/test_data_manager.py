@@ -46,10 +46,14 @@ class TestDataManager:
         assert dn.properties.get("baz") == "qux"
 
     def test_can_create(self):
-        dn_config = Config.configure_in_memory_data_node("dn", 10, scope=Scope.SCENARIO)
+        dn_config = Config.configure_data_node("dn", 10, scope=Scope.SCENARIO)
         global_dn_config = Config.configure_data_node(
             id="global_dn", storage_type="in_memory", scope=Scope.GLOBAL, data=10
         )
+
+        reasons = _DataManager._can_create()
+        assert bool(reasons) is True
+        assert reasons._reasons == {}
 
         reasons = _DataManager._can_create(global_dn_config)
         assert bool(reasons) is True
@@ -61,7 +65,7 @@ class TestDataManager:
 
         reasons = _DataManager._can_create(1)
         assert bool(reasons) is False
-        assert reasons._reasons == {"1": {'Object "1" is not a valid config to be created'}}
+        assert reasons._reasons == {"1": {'Object "1" must be a valid DataNodeConfig'}}
 
     def test_create_data_node_with_name_provided(self):
         dn_config = Config.configure_data_node(id="dn", foo="bar", name="acb")
