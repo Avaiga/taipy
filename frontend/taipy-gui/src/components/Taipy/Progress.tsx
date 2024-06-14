@@ -25,12 +25,19 @@ interface ProgressBarProps {
     showValue?: boolean; //by default - false
     value?: number; //progress value
     defaultValue?: number; //default progress value
+    render?: boolean;
+    defaultRender?: boolean;
 }
 
 const Progress = (props: ProgressBarProps) => {
     const { linear, showValue } = props;
 
     const value = useDynamicProperty(props.value, props.defaultValue, undefined);
+    const render = useDynamicProperty(props.render, props.defaultRender, undefined);
+
+    if (!render) {
+        return null;
+    }
 
     return showValue && value !== undefined ? (
         linear ? (

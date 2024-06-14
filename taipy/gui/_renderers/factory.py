@@ -612,6 +612,7 @@ class _Factory:
             [
                 ("linear", PropertyType.boolean, False),
                 ("show_value", PropertyType.boolean, False),
+                ("render", PropertyType.dynamic_boolean, True)
             ]
         )
         ._set_propagate(),
