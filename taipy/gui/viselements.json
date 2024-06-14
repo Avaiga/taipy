@@ -1169,7 +1169,7 @@
                     {
                         "name": "color_map",
                         "type": "dict",
-                        "doc": "The color_map is used to display different colors for different ranges of the metric. The color_map's keys represent the starting point of each range, which is a number, while the values represent the corresponding color for that range. If the value associated with a key is set to None, it implies that the corresponding range will not be assigned any color."
+                        "doc": "TODO The color_map is used to display different colors for different ranges of the metric. The color_map's keys represent the starting point of each range, which is a number, while the values represent the corresponding color for that range. If the value associated with a key is set to None, it implies that the corresponding range will not be assigned any color."
                     },
                     {
                         "name": "width",
