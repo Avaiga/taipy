@@ -899,7 +899,7 @@
                     },
                     {
                         "name": "render",
-                        "type": "bool",
+                        "type": "dynamic(bool)",
                         "doc": "If False, then it will not render the progress element.",
                         "default_property": "true"
                     }
