@@ -878,6 +878,29 @@
             }
         ],
         [
+            "progress",
+            {
+                "properties": [
+                    {
+                        "name": "linear",
+                        "type": "bool",
+                        "doc": "If True, then a linear element is rendered instead of a circular one."
+                    },
+                    {
+                        "name": "show_value",
+                        "type": "bool",
+                        "doc": "If True, then showValue is set to true."
+                    },
+                    {
+                        "name": "value",
+                        "type": "dynamic(int)",
+                        "doc": "If Int, then the value is progress percentage is shown.",
+                        "default_property": "true"
+                    }
+                ]
+            }
+        ],
+        [
             "selector",
             {
                 "inherits": [
