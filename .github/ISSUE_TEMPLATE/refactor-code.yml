@@ -15,12 +15,13 @@ body:
       description: "Describe what improvements can be made(performance, API...) in the codebase without introducing breaking changes."
     validations:
       required: true
-
-  - type: markdown
-    attributes:
-      value: |
-        ### Acceptance Criteria
         
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: "Acceptance Criteria"
+      description: Do not edit the text area below.
+      value: |
         - [ ] Ensure new code is unit tested, and check code coverage is at least 90%.
         - [ ] Propagate any change on the demos and run all of them to ensure there is no breaking change.
         - [ ] Ensure any change is well documented.
