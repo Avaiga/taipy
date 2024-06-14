@@ -639,7 +639,7 @@ class Gui:
                     elif msg_type == _WsType.GET_ROUTES.value:
                         self.__handle_ws_get_routes()
                     else:
-                        self._manage_external_message(message)
+                        self._manage_external_message(msg_type, message)
                 self.__send_ack(message.get("ack_id"))
         except Exception as e:  # pragma: no cover
             if isinstance(e, AttributeError) and (name := message.get("name")):
@@ -661,7 +661,7 @@ class Gui:
                 _warn(f"Decoding Message has failed: {message}", e)
 
     # To be expanded by inheriting classes
-    def _manage_external_message(self, message: dict) -> None:
+    def _manage_external_message(self, msg_type: _WsType, message: dict) -> None:
         pass
 
     def __front_end_update(
