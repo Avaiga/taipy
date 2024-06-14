@@ -11,52 +11,59 @@
 </div>
 
 <h1 align="center">
-Data and AI algorithms into production-ready web apps
+Build Python Data & AI web applications
 </h1>
 
 <div align="center">
-Taipy is an open-source Python library for easy, end-to-end application development,<br />featuring what-if analyses, smart pipeline execution, built-in scheduling, and deployment tools.
+From simple pilots to production-ready web applications in no time. No more compromise on performance, customization, and scalability.
 </div>
 
-  <p align="center">
+<br />
+
+<div align="center">
+
+**Go beyond existing libraries**
+</div>
+
+
+
+  <p align="left">
     <br />
-    <a href="https://docs.taipy.io/en/latest/"><strong>Explore the docs »</strong></a>
-    <br/><br/>
-    <a href="https://discord.com/invite/SJyz2VJGxV">Discord support</a>
-    ·
-    <a href="https://docs.taipy.io/en/latest/gallery/">Demos & Examples</a>
+    <a href="https://docs.taipy.io/en/latest/"><strong>📚 Explore the docs </strong></a>
+    <br />
+    <a href="https://discord.com/invite/SJyz2VJGxV">  🫱🏼‍🫲🏼 Discord support</a>
+    <br />
+    <a href="https://docs.taipy.io/en/latest/gallery/"> 👀 Demos & Examples</a>
   </p>
 
 &nbsp;
 
 ## ⭐️ What's Taipy?
-
-Taipy is designed for data scientists and machine learning engineers to build full-stack apps.
+Taipy is designed for data scientists and machine learning engineers to build data & AI web applications.
 &nbsp;
 
-⭐️ Enables building production-ready web applications.<br />
-⭐️ No need to learn new languages or full-stack frameworks.<br />
+⭐️ Enables building production-ready web applications. <br />
+⭐️ No need to learn new languages. Only Python is needed.<br />
 ⭐️ Concentrate on Data and AI algorithms without development and deployment complexities.
 
 &nbsp;
 
+<h4 align="left">
+Taipy is a Two-in-One Tool for UI Generation and Scenario/Data Management
+</h4>
+
+ <br />
+
 | User Interface Generation  | Scenario and Data Management |
 | --------  | -------- |
-|<img src="readme_img/gui_creation.webp" alt="Interface Animation"  width="850px" height="250px" /> | <img src="readme_img/scenario_and_data_mgt.gif" alt="Back-End Animation"  width="100%"/>
+|<img src="readme_img/taipy_github_GUI_video.gif" alt="Interface Animation"  width="100%" /> | <img src="readme_img/taipy_github_scenarios_video.gif" alt="Back-End Animation"  width="100%"/>
 
 &nbsp;
 
 ## ✨ Features
-- **Python-Based UI Framework:** Taipy is designed for Python users, particularly those working in AI and data science. It allows them to create full stack applications without needing to learn additional skills like HTML, CSS, or JavaScript.
+<img src="readme_img/taipy_github_scenario.png" alt="Scenario Banner"  width="49%" />  <img src="readme_img/taipy-github-optimized.png" alt="Back-End Animation"  width="49.7%"/>
+<img src="readme_img/taipy_github_data_support.png" alt="Back-End Animation"  width="49.7%" />
 
-
-- **Pre-Built Components for Data Pipelines:** Taipy includes pre-built components that allow users to interact with data pipelines, including visualization and management tools.
-
-
-- **Scenario and Data Management Features:** Taipy offers features for managing different business scenarios and data, which can be useful for applications like demand forecasting or production planning.
-
-
-- **Version Management and Pipeline Orchestration:** It includes tools for managing application versions, pipeline versions, and data versions, which are beneficial for multi-user environments.
 
 &nbsp;
 
