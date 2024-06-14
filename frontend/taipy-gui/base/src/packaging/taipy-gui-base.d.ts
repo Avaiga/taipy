@@ -27,7 +27,7 @@ declare class DataManager {
 }
 export type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID" | "MS" | "DF" | "PR" | "ACK" | "GMC" | "GDT" | "AID" | "GR";
 export interface WsMessage {
-    type: WsMessageType;
+    type: WsMessageType | str;
     name: string;
     payload: Record<string, unknown> | unknown;
     propagate: boolean;
