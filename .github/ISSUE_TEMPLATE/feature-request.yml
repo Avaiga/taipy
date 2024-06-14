@@ -41,15 +41,16 @@ body:
     validations:
       required: false
 
-  - type: markdown
+  - type: textarea
+    id: acceptance_criteria
     attributes:
-      value: |
-        ### Acceptance Criteria
-        
+      label: "Acceptance Criteria"
+      description: Do not edit the text area below.
+      value: |     
         - [ ] Ensure new code is unit tested, and check code coverage is at least 90%.
         - [ ] Create related issue in taipy-doc for documentation and Release Notes.
         - [ ] Check if a new demo could be provided based on this, or if legacy demos could be benefit from it.
-        - [ ] Ensure any change is well documented.      
+        - [ ] Ensure any change is well documented.
 
   - type: checkboxes
     id: terms_checklist_feature

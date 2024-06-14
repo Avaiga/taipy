@@ -149,6 +149,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def submission_status_callback(self, submission_id: t.Optional[str] = None, event: t.Optional[Event] = None):
         if not submission_id or not is_readable(t.cast(SubmissionId, submission_id)):
             return
+        submission = None
+        new_status = None
         try:
             last_status = self.client_submission.get(submission_id)
             if not last_status:
@@ -158,7 +160,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if not submission or not submission.entity_id:
                 return
 
-            new_status = submission.submission_status
+            new_status = t.cast(SubmissionStatus, submission.submission_status)
 
             client_id = submission.properties.get("client_id")
             if client_id:
@@ -207,7 +209,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
             _warn(f"Submission ({submission_id}) is not available", e)
 
         finally:
-            self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"jobs": True})
+            self.gui._broadcast(
+                _GuiCoreContext._CORE_CHANGED_NAME,
+                {
+                    "jobs": True,
+                    "scenario": (submission.entity_id if submission else None) or False,
+                    "submission": new_status.value if new_status else None,
+                },
+            )
 
     def no_change_adapter(self, entity: t.List):
         return entity
@@ -575,13 +584,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     client_id=self.gui._get_client_id(),
                     module_context=self.gui._get_locals_context(),
                 )
-                if on_submission:
+                with self.submissions_lock:
+                    self.client_submission[submission_entity.id] = submission_entity.submission_status
+                if Config.core.mode == "development":
                     with self.submissions_lock:
-                        self.client_submission[submission_entity.id] = submission_entity.submission_status
-                    if Config.core.mode == "development":
-                        with self.submissions_lock:
-                            self.client_submission[submission_entity.id] = SubmissionStatus.SUBMITTED
-                        self.submission_status_callback(submission_entity.id)
+                        self.client_submission[submission_entity.id] = SubmissionStatus.SUBMITTED
+                    self.submission_status_callback(submission_entity.id)
                 _GuiCoreContext.__assign_var(state, error_var, "")
         except Exception as e:
             _GuiCoreContext.__assign_var(state, error_var, f"Error submitting entity. {e}")
@@ -685,7 +693,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             raise NotImplementedError
         if isinstance(data, list):
             if data[2] and isinstance(data[2][0], (Cycle, Scenario, Sequence, DataNode)):
-                data[2] = self.get_sorted_datanode_list(data[2], sorts, adapt_dn)
+                data[2] = self.get_sorted_datanode_list(data[2], sorts, False)
             return data
         try:
             if hasattr(data, "id") and is_readable(data.id) and core_get(data.id) is not None:
@@ -707,7 +715,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                                 self.data_nodes_by_owner.get(data.id, [])
                                 + (self.scenario_by_cycle or {}).get(data, []),
                                 sorts,
-                                adapt_dn,
+                                False,
                             ),
                             _EntityType.CYCLE.value,
                             False,
@@ -719,7 +727,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             self.get_sorted_datanode_list(
                                 self.data_nodes_by_owner.get(data.id, []) + list(data.sequences.values()),
                                 sorts,
-                                adapt_dn,
+                                False,
                             ),
                             _EntityType.SCENARIO.value,
                             data.is_primary,
@@ -729,7 +737,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             return [
                                 data.id,
                                 data.get_simple_label(),
-                                self.get_sorted_datanode_list(datanodes, sorts, adapt_dn),
+                                self.get_sorted_datanode_list(datanodes, sorts, False),
                                 _EntityType.SEQUENCE.value,
                             ]
         except Exception as e:
