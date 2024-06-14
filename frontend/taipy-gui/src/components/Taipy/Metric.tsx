@@ -78,7 +78,7 @@ const Metric = (props: MetricProps) => {
                 }).filter(item => item !== null && item.color !== null)
             }
         } catch (e) {
-            console.info(`Error while parsing Metric.colorMap\n${(e as Error).message || e}`);
+            console.info(`Error parsing color_map value (metric).\n${(e as Error).message || e}`);
         }
         return undefined;
     }, [props.colorMap, props.max])

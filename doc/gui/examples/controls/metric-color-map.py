@@ -15,11 +15,19 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-# Layout reference can be found in the documentation: https://plotly.com/python/reference/layout/
+# color_map definition:
+# - A dictionary mapping metric values to display colors.
+# - Keys: Starting point of each range (number)
+# - Values: Corresponding color for that range (None implies no color assignment)
+# Example:
+# - 20.5 maps to "#fd2020"
+# - 40 maps to None (default color)
+# - 60 maps to "#f3ff26"
+# - 80 maps to None
 
 value = 50
 color_map = {
-    20: "#fd2020",
+    20.5: "#fd2020",
     40: None,
     60: "#f3ff26",
     80: None
