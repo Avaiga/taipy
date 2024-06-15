@@ -130,8 +130,8 @@ export const relayoutDiagram = (engine: DiagramEngine, dagreEngine: DagreEngine)
     engine.repaintCanvas();
 };
 
-export const addStatusToDisplayModel = (dm?: DisplayModel, taskStatuses?: TaskStatuses) => {
-    if (dm && taskStatuses) {
+export const addStatusToDisplayModel = (dm: DisplayModel, taskStatuses?: TaskStatuses) => {
+    if (taskStatuses) {
         Object.values(dm[1]).forEach((node) =>
             Object.entries(node).forEach(([id, detail]) => {
                 detail.status = taskStatuses[id];

@@ -366,7 +366,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
             }
         }
         setValid(!!sc);
-        setSubmissionStatus(0);
+        // setSubmissionStatus(0);
         setScenario((oldSc) => (oldSc === sc ? oldSc : sc ? (deepEqual(oldSc, sc) ? oldSc : sc) : invalidScenario));
     }, [props.scenario, props.defaultScenario]);
 
