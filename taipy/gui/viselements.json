@@ -882,25 +882,26 @@
             {
                 "properties": [
                     {
-                        "name": "linear",
-                        "type": "bool",
-                        "doc": "If True, then a linear element is rendered instead of a circular one."
-                    },
-                    {
                         "name": "show_value",
                         "type": "bool",
-                        "doc": "If True, then showValue is set to true."
+                        "doc": "If set to True, the progress value is shown."
+                    },
+                    {
+                        "name": "linear",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If set to False, the control displays a circular progress indicator instead of a linear one."
                     },
                     {
                         "name": "value",
                         "type": "dynamic(int)",
-                        "doc": "If Int, then the value is progress percentage is shown.",
+                        "doc": "If set, then the value represents the progress percentage that is shown.",
                         "default_property": "true"
                     },
                     {
                         "name": "render",
                         "type": "dynamic(bool)",
-                        "doc": "If False, then it will not render the progress element.",
+                        "doc": "If False, this progress indicator is hidden from the page.",
                         "default_property": "true"
                     }
                 ]
