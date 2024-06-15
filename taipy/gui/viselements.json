@@ -889,8 +889,8 @@
                     {
                         "name": "linear",
                         "type": "bool",
-                        "default_value": "True",
-                        "doc": "If set to False, the control displays a circular progress indicator instead of a linear one."
+                        "default_value": "False",
+                        "doc": "If set to True, the control displays a linear progress indicator instead of a circular one."
                     },
                     {
                         "name": "value",
