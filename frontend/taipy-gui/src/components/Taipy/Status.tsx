@@ -14,6 +14,10 @@
 import React, { MouseEvent, ReactNode, useMemo } from "react";
 import Chip from "@mui/material/Chip";
 import Avatar from "@mui/material/Avatar";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import WarningIcon from '@mui/icons-material/Warning';
+import InfoIcon from '@mui/icons-material/Info';
 
 import { getInitials } from "../../utils";
 import { TaipyBaseProps } from "./utils";
@@ -44,6 +48,22 @@ const status2Color = (status: string): "error" | "info" | "success" | "warning" 
     return "info";
 };
 
+const getStatusIcon = (status:string) => {
+  switch (status) {
+    case 'S':
+      return <CheckCircleIcon />;
+    case 'E':
+      return <ErrorIcon />;
+    case 'W':
+      return <WarningIcon />;
+    case 'I':
+      return <InfoIcon />;
+    default:
+      return '❓';
+  }
+}
+
+
 const chipSx = { alignSelf: "flex-start" };
 
 const Status = (props: StatusProps) => {
@@ -54,7 +74,7 @@ const Status = (props: StatusProps) => {
     const chipProps = useMemo(() => {
         const cp: Record<string, unknown> = {};
         cp.color = status2Color(value.status);
-        cp.avatar = <Avatar sx={{ bgcolor: `${cp.color}.main` }}>{getInitials(value.status)}</Avatar>;
+        cp.avatar = <Avatar sx={{ bgcolor: `${cp.color}.main` }}>{getStatusIcon(getInitials(value.status))}</Avatar>;
         if (props.onClose) {
             cp.onDelete = props.onClose;
         }
