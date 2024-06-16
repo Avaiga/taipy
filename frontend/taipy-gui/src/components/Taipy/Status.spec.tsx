@@ -15,12 +15,29 @@ import React from "react";
 import {render} from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
+import { CheckCircle, Error, Warning, Info } from '@mui/icons-material';
 
 import { PlusOneOutlined } from "@mui/icons-material";
 
 import Status, { StatusType } from './Status';
 
 const status: StatusType = {status: "status", message: "message"};
+
+const getStatusIcon = (status: string) => {
+  switch (status) {
+    case 'S':
+      return <CheckCircle data-testid="CheckCircleIcon" />;
+    case 'E':
+      return <Error data-testid="ErrorIcon" />;
+    case 'W':
+      return <Warning data-testid="WarningIcon" />;
+    case 'I':
+      return <Info data-testid="InfoIcon" />;
+    default:
+      return '❓';
+  }
+};
+
 
 describe("Status Component", () => {
     it("renders", async () => {
@@ -46,4 +63,31 @@ describe("Status Component", () => {
         const {getByTestId} = render(<Status value={status} icon={<PlusOneOutlined/>} onClose={jest.fn()} />);
         getByTestId("PlusOneOutlinedIcon");
     })
+});
+
+describe("StatusAvatar Icon Rendering", () => {
+    it("renders the correct icon for 'S' status", () => {
+        const { getByTestId } = render(getStatusIcon('S'));
+        getByTestId("CheckCircleIcon");
+    });
+
+    it("renders the correct icon for 'E' status", () => {
+        const { getByTestId } = render(getStatusIcon('E'));
+        getByTestId("ErrorIcon");
+    });
+
+    it("renders the correct icon for 'W' status", () => {
+        const { getByTestId } = render(getStatusIcon('W'));
+        getByTestId("WarningIcon");
+    });
+
+    it("renders the correct icon for 'I' status", () => {
+        const { getByTestId } = render(getStatusIcon('I'));
+        getByTestId("InfoIcon");
+    });
+
+    it("renders the default emoji for unknown status", () => {
+        const { getByText } = render(getStatusIcon('unknown'));
+        getByText("❓");
+    });
 });
