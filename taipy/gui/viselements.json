@@ -1197,6 +1197,37 @@
             }
         ],
         [
+            "progress",
+            {
+                "properties": [
+                    {
+                        "name": "value",
+                        "type": "dynamic(int)",
+                        "doc": "If set, then the value represents the progress percentage that is shown.TODO - if unset?",
+                        "default_property": "true"
+                    },
+                    {
+                        "name": "linear",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If set to True, the control displays a linear progress indicator instead of a circular one."
+                    },
+                    {
+                        "name": "show_value",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If set to True, the progress value is shown."
+                    },
+                    {
+                        "name": "render",
+                        "type": "dynamic(bool)",
+                        "doc": "If False, this progress indicator is hidden from the page.",
+                        "default_property": "true"
+                    }
+                ]
+            }
+        ],
+        [
             "indicator",
             {
                 "inherits": [

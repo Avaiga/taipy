@@ -185,9 +185,21 @@ class _Adapter:
 
     def __get_children(self, value: t.Any) -> t.Optional[t.List[t.Any]]:
         if isinstance(value, (tuple, list)) and len(value) > 2:
-            return value[2] if isinstance(value[2], list) else [value[2]]
+            return value[2] if isinstance(value[2], list) else None if value[2] is None else [value[2]]
         elif hasattr(value, "children"):
-            return value.children if isinstance(value.children, list) else [value.children]
+            return (
+                value.children
+                if isinstance(value.children, list)
+                else None
+                if value.children is None
+                else [value.children]
+            )
         elif hasattr(value, "__getitem__") and "children" in value:
-            return value["children"] if isinstance(value["children"], list) else [value["children"]]
+            return (
+                value["children"]
+                if isinstance(value["children"], list)
+                else None
+                if value["children"] is None
+                else [value["children"]]
+            )
         return None

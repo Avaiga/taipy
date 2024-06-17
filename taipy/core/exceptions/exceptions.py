@@ -369,6 +369,10 @@ class FileCannotBeRead(Exception):
     """Raised when a file cannot be read."""
 
 
+class FileEmpty(Exception):
+    """Raised when a file is empty."""
+
+
 class ExportPathAlreadyExists(Exception):
     """Raised when the export folder already exists."""
 
