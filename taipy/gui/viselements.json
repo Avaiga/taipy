@@ -878,36 +878,6 @@
             }
         ],
         [
-            "progress",
-            {
-                "properties": [
-                    {
-                        "name": "show_value",
-                        "type": "bool",
-                        "doc": "If set to True, the progress value is shown."
-                    },
-                    {
-                        "name": "linear",
-                        "type": "bool",
-                        "default_value": "False",
-                        "doc": "If set to True, the control displays a linear progress indicator instead of a circular one."
-                    },
-                    {
-                        "name": "value",
-                        "type": "dynamic(int)",
-                        "doc": "If set, then the value represents the progress percentage that is shown.",
-                        "default_property": "true"
-                    },
-                    {
-                        "name": "render",
-                        "type": "dynamic(bool)",
-                        "doc": "If False, this progress indicator is hidden from the page.",
-                        "default_property": "true"
-                    }
-                ]
-            }
-        ],
-        [
             "selector",
             {
                 "inherits": [
@@ -1222,6 +1192,37 @@
                         "name": "template[light]",
                         "type": "dict",
                         "doc": "The Plotly <a href=\"https://plotly.com/javascript/layout-template/\">layout template</a> applied over the base template when theme is not dark."
+                    }
+                ]
+            }
+        ],
+        [
+            "progress",
+            {
+                "properties": [
+                    {
+                        "name": "value",
+                        "type": "dynamic(int)",
+                        "doc": "If set, then the value represents the progress percentage that is shown.TODO - if unset?",
+                        "default_property": "true"
+                    },
+                    {
+                        "name": "linear",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If set to True, the control displays a linear progress indicator instead of a circular one."
+                    },
+                    {
+                        "name": "show_value",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If set to True, the progress value is shown."
+                    },
+                    {
+                        "name": "render",
+                        "type": "dynamic(bool)",
+                        "doc": "If False, this progress indicator is hidden from the page.",
+                        "default_property": "true"
                     }
                 ]
             }
