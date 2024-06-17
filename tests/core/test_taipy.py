@@ -677,6 +677,18 @@ class TestTaipy:
             tp.exists(cycle_id)
             mck.assert_called_once_with(cycle_id)
 
+    def test_can_create(self):
+        global_dn_config = Config.configure_in_memory_data_node("global_dn", 10, scope=Scope.GLOBAL)
+        dn_config = Config.configure_in_memory_data_node("dn", 10)
+        task_config = Config.configure_task("task", print, [dn_config])
+        scenario_config = Config.configure_scenario("sc", {task_config}, [], Frequency.DAILY)
+
+        assert tp.can_create()
+        assert tp.can_create(scenario_config)
+        assert tp.can_create(global_dn_config)
+        assert not tp.can_create(dn_config)
+        assert not tp.can_create("1")
+
     def test_create_global_data_node(self):
         dn_cfg_global = DataNodeConfig("id", "pickle", Scope.GLOBAL)
         dn_cfg_scenario = DataNodeConfig("id", "pickle", Scope.SCENARIO)
