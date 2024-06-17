@@ -15,21 +15,23 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-# color_map definition:
-# - A dictionary mapping metric values to display colors.
-# - Keys: Starting point of each range (number)
-# - Values: Corresponding color for that range (None implies no color assignment)
-# Example:
-# - 20.5 maps to "#fd2020"
-# - 40 maps to None (default color)
-# - 60 maps to "#f3ff26"
-# - 80 maps to None
+# color_map = {
+#     # 0-20 - Let Taipy decide
+#     # 20-40 - red
+#     20: "red",
+#     # 40-60 - Let Taipy decide
+#     40: None,
+#     # 60-80 - blue
+#     60: "blue",
+#     # 80-100 - Let Taipy decide
+#     80: None
+# }
 
 value = 50
 color_map = {
-    20.5: "#fd2020",
+    20: "red",
     40: None,
-    60: "#f3ff26",
+    60: "blue",
     80: None
 }
 

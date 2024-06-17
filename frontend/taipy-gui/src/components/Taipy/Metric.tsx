@@ -75,7 +75,7 @@ const Metric = (props: MetricProps) => {
                 return keys.sort((a, b) => Number(a) - Number(b)).map((key, index) => {
                     const nextKey = keys[index + 1] !== undefined ? Number(keys[index + 1]) : props.max || 100;
                     return {range: [Number(key), nextKey], color: obj[key]};
-                }).filter(item => item !== null && item.color !== null)
+                }).filter(item => item.color !== null)
             }
         } catch (e) {
             console.info(`Error parsing color_map value (metric).\n${(e as Error).message || e}`);
