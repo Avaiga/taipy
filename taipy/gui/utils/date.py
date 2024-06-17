@@ -23,6 +23,8 @@ def _date_to_string(date_val: t.Union[datetime, date, time]) -> str:
     if isinstance(date_val, datetime):
         # return date.isoformat() + 'Z', if possible
         try:
+            if date_val.tzinfo is None:
+                return date_val.isoformat()
             return date_val.astimezone(utc).isoformat()
         except Exception as e:
             # astimezone() fails on Windows for pre-epoch times

@@ -19,7 +19,6 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date, datetime
 from enum import Enum
-from numbers import Number
 from operator import attrgetter, contains, eq, ge, gt, le, lt, ne
 
 import pandas as pd
@@ -182,10 +181,8 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                     return (None, None, True, None)
                 val_type = (
                     "date"
-                    if "date" in type(value).__name__
+                    if "date" in type(value).__name__.lower() or "timestamp" in type(value).__name__.lower()
                     else type(value).__name__
-                    if isinstance(value, Number)
-                    else None
                 )
                 if isinstance(value, float) and math.isnan(value):
                     value = None
