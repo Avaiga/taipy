@@ -91,5 +91,3 @@ export declare class TaipyApp {
     upload(encodedName: string, files: FileList, progressCallback: (val: number) => void): Promise<string>;
     getPageMetadata(): any;
 }
-
-export {};
