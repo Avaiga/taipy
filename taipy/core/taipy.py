@@ -873,6 +873,20 @@ def get_cycles() -> List[Cycle]:
     return _CycleManagerFactory._build_manager()._get_all()
 
 
+def can_create(config: Optional[Union[ScenarioConfig, DataNodeConfig]] = None) -> Reasons:
+    """Indicate if a config can be created. The config should be a scenario or data node config.
+
+    If no config is provided, the function indicates if any scenario or data node config can be created.
+
+    Returns:
+        True if the given config can be created. False otherwise.
+    """
+    if isinstance(config, DataNodeConfig):
+        return _DataManagerFactory._build_manager()._can_create(config)
+
+    return _ScenarioManagerFactory._build_manager()._can_create(config)
+
+
 def create_scenario(
     config: ScenarioConfig,
     creation_date: Optional[datetime] = None,
