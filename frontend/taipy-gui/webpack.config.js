@@ -221,7 +221,15 @@ module.exports = (env, options) => {
     },
     {
         entry: "./base/src/exports.ts",
-        output: { filename: "taipy-gui-base.js", path: taipyGuiBaseExportPath },
+        output: {
+            filename: "taipy-gui-base.js",
+            path: taipyGuiBaseExportPath,
+            library: {
+                name: taipyGuiBaseBundleName,
+                type: "umd",
+            },
+            publicPath: "",
+        },
         module: {
             rules: [
                 {

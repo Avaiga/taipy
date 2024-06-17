@@ -59,7 +59,15 @@ module.exports = [
     },
     {
         entry: "./base/src/exports.ts",
-        output: { filename: "taipy-gui-base.js", path: taipyGuiBaseExportPath },
+        output: {
+            filename: "taipy-gui-base.js",
+            path: taipyGuiBaseExportPath,
+            library: {
+                name: moduleName,
+                type: "umd",
+            },
+            publicPath: "",
+        },
         module: {
             rules: [
                 {
@@ -74,9 +82,7 @@ module.exports = [
         },
         plugins: [
             new CopyWebpackPlugin({
-                patterns: [
-                    { from: "./base/src/packaging", to: taipyGuiBaseExportPath },
-                ],
+                patterns: [{ from: "./base/src/packaging", to: taipyGuiBaseExportPath }],
             }),
         ],
     },
