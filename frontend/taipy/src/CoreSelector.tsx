@@ -62,7 +62,6 @@ import {
     BadgePos,
     BadgeSx,
     BaseTreeViewSx,
-    EmptyArray,
     FlagSx,
     ParentItemSx,
     getUpdateVarNames,
@@ -126,7 +125,7 @@ const tinyPinIconButtonSx = (theme: Theme) => ({
 
 const switchBoxSx = { ml: 2, width: (theme: Theme) => `calc(100% - ${theme.spacing(2)})` };
 const iconInRowSx = { fontSize: "body2.fontSize" };
-const labelInRowSx = {"& .MuiFormControlLabel-label": iconInRowSx};
+const labelInRowSx = { "& .MuiFormControlLabel-label": iconInRowSx };
 
 const CoreItem = (props: {
     item: Entity;
@@ -139,25 +138,27 @@ const CoreItem = (props: {
     hideNonPinned: boolean;
     active: boolean;
 }) => {
-    const [id, label, items = EmptyArray, nodeType, primary] = props.item;
+    const [id, label, items, nodeType, primary] = props.item;
     const isPinned = props.pins[0][id];
     const isShown = props.hideNonPinned ? props.pins[1][id] : true;
 
     return !props.displayCycles && nodeType === NodeType.CYCLE ? (
         <>
-            {items.map((item) => (
-                <CoreItem
-                    key={item[0]}
-                    item={item}
-                    displayCycles={false}
-                    showPrimaryFlag={props.showPrimaryFlag}
-                    leafType={props.leafType}
-                    pins={props.pins}
-                    onPin={props.onPin}
-                    hideNonPinned={props.hideNonPinned}
-                    active={props.active}
-                />
-            ))}
+            {items
+                ? items.map((item) => (
+                      <CoreItem
+                          key={item[0]}
+                          item={item}
+                          displayCycles={false}
+                          showPrimaryFlag={props.showPrimaryFlag}
+                          leafType={props.leafType}
+                          pins={props.pins}
+                          onPin={props.onPin}
+                          hideNonPinned={props.hideNonPinned}
+                          active={props.active}
+                      />
+                  ))
+                : null}
         </>
     ) : isShown ? (
         <TreeItem
@@ -213,20 +214,21 @@ const CoreItem = (props: {
             }
             sx={nodeType === NodeType.NODE ? undefined : ParentItemSx}
         >
-            {items.map((item) => (
-                <CoreItem
-                    key={item[0]}
-                    item={item}
-                    displayCycles={true}
-                    showPrimaryFlag={props.showPrimaryFlag}
-                    leafType={props.leafType}
-                    editComponent={props.editComponent}
-                    pins={props.pins}
-                    onPin={props.onPin}
-                    hideNonPinned={props.hideNonPinned}
-                    active={props.active}
-                />
-            ))}
+            {items ?
+                items.map((item) => (
+                    <CoreItem
+                        key={item[0]}
+                        item={item}
+                        displayCycles={true}
+                        showPrimaryFlag={props.showPrimaryFlag}
+                        leafType={props.leafType}
+                        editComponent={props.editComponent}
+                        pins={props.pins}
+                        onPin={props.onPin}
+                        hideNonPinned={props.hideNonPinned}
+                        active={props.active}
+                    />
+                )) : null}
         </TreeItem>
     ) : null;
 };
@@ -374,7 +376,8 @@ const CoreSelector = (props: CoreSelectorProps) => {
             setSelectedItems(() => {
                 const lovVar = getUpdateVar(updateVars, lovPropertyName);
                 const val = multiple ? nodeId : isSelectable ? nodeId : "";
-                setTimeout( // to avoid set state while render react errors
+                setTimeout(
+                    // to avoid set state while render react errors
                     () => dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate, lovVar)),
                     1
                 );
@@ -526,15 +529,19 @@ const CoreSelector = (props: CoreSelectorProps) => {
                     localStoreSet(jsonFilters, id, lovPropertyName, "filter");
                     const filterVar = getUpdateVar(updateCoreVars, "filter");
                     const lovVar = getUpdateVarNames(updateVars, lovPropertyName);
-                    setTimeout(() => dispatch(
-                        createRequestUpdateAction(
-                            id,
-                            module,
-                            lovVar,
-                            true,
-                            filterVar ? { [filterVar]: filters } : undefined
-                        )
-                    ), 1);
+                    setTimeout(
+                        () =>
+                            dispatch(
+                                createRequestUpdateAction(
+                                    id,
+                                    module,
+                                    lovVar,
+                                    true,
+                                    filterVar ? { [filterVar]: filters } : undefined
+                                )
+                            ),
+                        1
+                    );
                     return filters;
                 }
                 return old;
@@ -674,20 +681,22 @@ const CoreSelector = (props: CoreSelectorProps) => {
                 onItemExpansionToggle={onItemExpand}
             >
                 {foundEntities
-                    ? foundEntities.map((item) => (
-                          <CoreItem
-                              key={item ? item[0] : ""}
-                              item={item}
-                              displayCycles={displayCycles}
-                              showPrimaryFlag={showPrimaryFlag}
-                              leafType={leafType}
-                              editComponent={props.editComponent}
-                              onPin={showPins ? onPin : undefined}
-                              pins={pins}
-                              hideNonPinned={hideNonPinned}
-                              active={!!active}
-                          />
-                      ))
+                    ? foundEntities.map((item) =>
+                          item ? (
+                              <CoreItem
+                                  key={item[0]}
+                                  item={item}
+                                  displayCycles={displayCycles}
+                                  showPrimaryFlag={showPrimaryFlag}
+                                  leafType={leafType}
+                                  editComponent={props.editComponent}
+                                  onPin={showPins ? onPin : undefined}
+                                  pins={pins}
+                                  hideNonPinned={hideNonPinned}
+                                  active={!!active}
+                              />
+                          ) : null
+                      )
                     : null}
             </SimpleTreeView>
         </>
