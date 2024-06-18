@@ -51,12 +51,10 @@ def hash_files_in_frontend_folder(frontend_folder):
                 continue
             # Sort before looping to ensure consistent cache key
             for file in sorted(files):
-                for ignore in ignore_file_name:
-                    if ignore in file:
-                        continue
-                for ignore in ignore_file_extension:
-                    if file.endswith(ignore):
-                        continue
+                if any(ignore in file for ignore in ignore_file_name):
+                    continue
+                if any(file.endswith(ignore) for ignore in ignore_file_extension):
+                    continue
                 file_path = os.path.join(root, file)
                 file_hash = hash_file(file_path)
                 file_hashes[file_path] = file_hash
