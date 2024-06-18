@@ -210,11 +210,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
             _warn(f"Submission ({submission_id}) is not available", e)
 
         finally:
+            entity_id = submission.entity_id if submission else None
             self.gui._broadcast(
                 _GuiCoreContext._CORE_CHANGED_NAME,
                 {
                     "jobs": True,
-                    "scenario": (submission.entity_id if submission else None) or False,
+                    "scenario": entity_id or False,
                     "submission": new_status.value if new_status else None,
                 },
             )
