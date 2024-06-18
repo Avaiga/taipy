@@ -607,7 +607,7 @@ class _Factory:
             element_name="Progress",
             attributes=attrs,
         )
-        .set_value_and_default(var_type=PropertyType.dynamic_number)
+        .set_value_and_default(var_type=PropertyType.dynamic_number, native_type=True)
         .set_attributes(
             [
                 ("linear", PropertyType.boolean, False),
