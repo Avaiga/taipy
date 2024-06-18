@@ -1062,7 +1062,7 @@ def export_scenario(
 def import_scenario(input_path: Union[str, pathlib.Path], override: bool = False) -> Optional[Scenario]:
     """Import from an archive zip file containing an exported scenario into the current Taipy application.
 
-    The zip file should be created by the `taipy.import()^` method, which contains all related entities
+    The zip file should be created by the `taipy.export_scenario()^` method, which contains all related entities
     of the scenario.
     All entities should belong to the same version that is compatible with the current Taipy application version.
 
