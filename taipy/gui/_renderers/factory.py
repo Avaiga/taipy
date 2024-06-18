@@ -50,6 +50,7 @@ class _Factory:
         "number": "value",
         "pane": "open",
         "part": "class_name",
+        "progress": "value",
         "selector": "value",
         "slider": "value",
         "status": "value",
@@ -598,6 +599,21 @@ class _Factory:
                 ("select_leafs_only", PropertyType.boolean),
                 ("row_height", PropertyType.string),
                 ("lov", PropertyType.lov),
+            ]
+        )
+        ._set_propagate(),
+        "progress": lambda gui, control_type, attrs: _Builder(
+            gui=gui,
+            control_type=control_type,
+            element_name="Progress",
+            attributes=attrs,
+        )
+        .set_value_and_default(var_type=PropertyType.dynamic_number, native_type=True)
+        .set_attributes(
+            [
+                ("linear", PropertyType.boolean, False),
+                ("show_value", PropertyType.boolean, False),
+                ("render", PropertyType.dynamic_boolean, True)
             ]
         )
         ._set_propagate(),

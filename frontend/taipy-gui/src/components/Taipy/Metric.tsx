@@ -84,12 +84,15 @@ const Metric = (props: MetricProps) => {
     }, [props.colorMap, props.max])
 
     const data = useMemo(() => {
+        const mode = (props.type === "none") ? [] : ["gauge"];
+        showValue && mode.push("number");
+        (delta !== undefined) && mode.push("delta");
         return [
             {
                 domain: {x: [0, 1], y: [0, 1]},
                 value: value,
                 type: "indicator",
-                mode: "gauge" + (showValue ? "+number" : "") + (delta !== undefined ? "+delta" : ""),
+                mode: mode.join("+"),
                 number: {
                     prefix: extractPrefix(props.format),
                     suffix: extractSuffix(props.format),

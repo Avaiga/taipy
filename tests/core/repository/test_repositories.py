@@ -16,10 +16,28 @@ import shutil
 
 import pytest
 
+from taipy.core.exceptions.exceptions import ModelNotFound
+
 from .mocks import MockConverter, MockFSRepository, MockModel, MockObj, MockSQLRepository
 
 
 class TestRepositoriesStorage:
+    def test_load_from_non_existent_file_on_fs_repo(self):
+        r = MockFSRepository(model_type=MockModel, dir_name="mock_model", converter=MockConverter)
+
+        # The file does not exist should raise ModelNotFound exception
+        with pytest.raises(ModelNotFound):
+            r._load("non_existent_file")
+
+        # The file exists but is empty should also raise ModelNotFound exception
+        os.makedirs(r.dir_path)
+        with open(r.dir_path / "empty_file.json", "w") as f:
+            f.write("")
+
+        assert r._exists("empty_file")
+        with pytest.raises(ModelNotFound):
+            r._load("empty_file")
+
     @pytest.mark.parametrize(
         "mock_repo,params",
         [
