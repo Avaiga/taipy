@@ -18,9 +18,10 @@ import CircularProgress from "@mui/material/CircularProgress";
 import LinearProgress from "@mui/material/LinearProgress";
 import Typography from "@mui/material/Typography";
 
-import { useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
+import { TaipyBaseProps } from "./utils";
 
-interface ProgressBarProps {
+interface ProgressBarProps extends TaipyBaseProps {
     linear?: boolean; //by default - false
     showValue?: boolean; //by default - false
     value?: number; //progress value
@@ -29,10 +30,26 @@ interface ProgressBarProps {
     defaultRender?: boolean;
 }
 
-const Progress = (props: ProgressBarProps) => {
-    const { linear, showValue } = props;
+const linearSx = { display: "flex", alignItems: "center" };
+const linearPrgSx = { width: "100%", mr: 1 };
+const linearTxtSx = { minWidth: 35 };
+const circularSx = { position: "relative", display: "inline-flex" };
+const circularPrgSx = {
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+    position: "absolute",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+};
 
-    const value = useDynamicProperty(props.value, props.defaultValue, undefined);
+const Progress = (props: ProgressBarProps) => {
+    const { linear = false, showValue = false } = props;
+
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
+    const value = useDynamicProperty(props.value, props.defaultValue, undefined, "number");
     const render = useDynamicProperty(props.render, props.defaultRender, true);
 
     if (!render) {
@@ -41,29 +58,18 @@ const Progress = (props: ProgressBarProps) => {
 
     return showValue && value !== undefined ? (
         linear ? (
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-                <Box sx={{ width: "100%", mr: 1 }}>
+            <Box sx={linearSx} className={className} id={props.id}>
+                <Box sx={linearPrgSx}>
                     <LinearProgress variant="determinate" value={value} />
                 </Box>
-                <Box sx={{ minWidth: 35 }}>
+                <Box sx={linearTxtSx}>
                     <Typography variant="body2" color="text.secondary">{`${Math.round(value)}%`}</Typography>
                 </Box>
             </Box>
         ) : (
-            <Box sx={{ position: "relative", display: "inline-flex" }}>
+            <Box sx={circularSx} className={className} id={props.id}>
                 <CircularProgress variant="determinate" value={value} />
-                <Box
-                    sx={{
-                        top: 0,
-                        left: 0,
-                        bottom: 0,
-                        right: 0,
-                        position: "absolute",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                    }}
-                >
+                <Box sx={circularPrgSx}>
                     <Typography variant="caption" component="div" color="text.secondary">
                         {`${Math.round(value)}%`}
                     </Typography>
@@ -71,9 +77,19 @@ const Progress = (props: ProgressBarProps) => {
             </Box>
         )
     ) : linear ? (
-        <LinearProgress variant={value === undefined ? "indeterminate" : "determinate"} value={value} />
+        <LinearProgress
+            id={props.id}
+            variant={value === undefined ? "indeterminate" : "determinate"}
+            value={value}
+            className={className}
+        />
     ) : (
-        <CircularProgress variant={value === undefined ? "indeterminate" : "determinate"} value={value} />
+        <CircularProgress
+            id={props.id}
+            variant={value === undefined ? "indeterminate" : "determinate"}
+            value={value}
+            className={className}
+        />
     );
 };
 
