@@ -12,7 +12,7 @@
  */
 
 import React, {CSSProperties, lazy, Suspense, useMemo} from 'react';
-import {Data} from "plotly.js";
+import {Data, Delta, Layout} from "plotly.js";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import Tooltip from "@mui/material/Tooltip";
@@ -20,7 +20,7 @@ import {useTheme} from "@mui/material";
 import {useClassNames, useDynamicJsonProperty, useDynamicProperty} from "../../utils/hooks";
 import {extractPrefix, extractSuffix, sprintfToD3Converter} from "../../utils/formatConversion";
 import {TaipyBaseProps, TaipyHoverProps} from "./utils";
-import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
+import {darkThemeTemplate} from "../../themes/darkThemeTemplate";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -73,9 +73,6 @@ const Metric = (props: MetricProps) => {
         (delta !== undefined) && mode.push("delta");
         return [
             {
-                title: {
-                  text: props.title
-                },
                 domain: {x: [0, 1], y: [0, 1]},
                 value: value,
                 type: "indicator",
@@ -90,7 +87,7 @@ const Metric = (props: MetricProps) => {
                     prefix: extractPrefix(props.deltaFormat),
                     suffix: extractSuffix(props.deltaFormat),
                     valueformat: sprintfToD3Converter(props.deltaFormat)
-                },
+                } as Partial<Delta>,
                 gauge: {
                     axis: {
                         range: [
@@ -106,7 +103,7 @@ const Metric = (props: MetricProps) => {
                     }
                 },
             }
-        ];
+        ] as Data[];
     }, [
         props.format,
         props.deltaFormat,
@@ -148,26 +145,32 @@ const Metric = (props: MetricProps) => {
             layout.template = template;
         }
 
-        return layout
+        return {
+            title: props.title || layout.title,
+            ...layout
+        } as Partial<Layout>
     }, [
+        props.title,
         props.template,
         props.template_Dark_,
         props.template_Light_,
         theme.palette.mode,
-        baseLayout
+        baseLayout,
     ])
 
     return (
         <Box data-testid={props.testId} className={className}>
             <Tooltip title={hover || ""}>
-                <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle}/>}>
-                    <Plot
-                        data={data as Data[]}
-                        layout={layout}
-                        style={style}
-                        useResizeHandler
-                    />
-                </Suspense>
+                <div>
+                    <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle}/>}>
+                        <Plot
+                            data={data}
+                            layout={layout}
+                            style={style}
+                            useResizeHandler
+                        />
+                    </Suspense>
+                </div>
             </Tooltip>
         </Box>
     );
@@ -175,7 +178,7 @@ const Metric = (props: MetricProps) => {
 
 export default Metric;
 
-const { colorscale, colorway, font} = darkThemeTemplate.layout;
+const {colorscale, colorway, font} = darkThemeTemplate.layout;
 const darkTemplate = {
     layout: {
         colorscale,

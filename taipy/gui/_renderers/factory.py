@@ -373,6 +373,7 @@ class _Factory:
                 ("show_value", PropertyType.boolean, True),
                 ("format", PropertyType.string),
                 ("delta_format", PropertyType.string),
+                ("hover_text", PropertyType.dynamic_string),
                 ("template", PropertyType.dict),
                 ("template[dark]", PropertyType.dict),
                 ("template[light]", PropertyType.dict),

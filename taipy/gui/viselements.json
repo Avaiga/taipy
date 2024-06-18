@@ -1117,11 +1117,6 @@
                 ],
                 "properties": [
                     {
-                        "name": "title",
-                        "type": "str",
-                        "doc": "The title of the metric."
-                    },
-                    {
                         "name": "value",
                         "default_property": true,
                         "type": "dynamic(int|float)",
@@ -1132,6 +1127,12 @@
                         "default_value": "\"circular\"",
                         "type": "str",
                         "doc": "The type of the gauge.<br/>Possible values are:\n<ul>\n<li>\"none\"</li>\n<li>\"circular\"</li>\n<li>\"linear\"</li></ul>."
+                    },
+                    {
+                        "name": "title",
+                        "default_value": "None",
+                        "type": "str",
+                        "doc": "The title of the metric."
                     },
                     {
                         "name": "min",
@@ -1197,6 +1198,11 @@
                         "name": "template[light]",
                         "type": "dict",
                         "doc": "The Plotly <a href=\"https://plotly.com/javascript/layout-template/\">layout template</a> applied over the base template when theme is not dark."
+                    },
+                    {
+                        "name": "hover_text",
+                        "type": "dynamic(str)",
+                        "doc": "The information that is displayed when the user hovers over this element."
                     }
                 ]
             }
