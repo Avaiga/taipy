@@ -52,6 +52,7 @@ from .taipy import (
     get_sequences,
     get_submissions,
     get_tasks,
+    import_scenario,
     is_deletable,
     is_editable,
     is_promotable,

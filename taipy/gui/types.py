@@ -49,6 +49,7 @@ class _WsType(Enum):
     ACKNOWLEDGEMENT = "ACK"
     GET_MODULE_CONTEXT = "GMC"
     GET_DATA_TREE = "GDT"
+    GET_ROUTES = "GR"
 
 
 NumberTypes = {"int", "int64", "float", "float64"}

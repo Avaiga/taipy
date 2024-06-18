@@ -50,6 +50,7 @@ class _Factory:
         "number": "value",
         "pane": "open",
         "part": "class_name",
+        "progress": "value",
         "selector": "value",
         "slider": "value",
         "status": "value",
@@ -57,7 +58,7 @@ class _Factory:
         "text": "value",
         "toggle": "value",
         "tree": "value",
-        "metric": "value"
+        "metric": "value",
     }
 
     _TEXT_ATTRIBUTES = ["format", "id", "hover_text", "raw"]
@@ -280,7 +281,6 @@ class _Factory:
                 ("value", PropertyType.dynamic_number),
                 ("format",),
                 ("orientation"),
-                ("hover_text", PropertyType.dynamic_string),
                 ("width",),
                 ("height",),
             ]
@@ -362,7 +362,6 @@ class _Factory:
                 ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("layout", PropertyType.dynamic_dict),
-                ("style", PropertyType.dynamic_dict),
                 ("type", PropertyType.string, "circular"),
                 ("min", PropertyType.number, 0),
                 ("max", PropertyType.number, 100),
@@ -371,6 +370,11 @@ class _Factory:
                 ("width", PropertyType.string_or_number),
                 ("height", PropertyType.string_or_number),
                 ("show_value", PropertyType.boolean, True),
+                ("format", PropertyType.string),
+                ("delta_format", PropertyType.string),
+                ("template", PropertyType.dict),
+                ("template[dark]", PropertyType.dict),
+                ("template[light]", PropertyType.dict),
             ]
         ),
         "navbar": lambda gui, control_type, attrs: _Builder(
@@ -594,6 +598,21 @@ class _Factory:
                 ("select_leafs_only", PropertyType.boolean),
                 ("row_height", PropertyType.string),
                 ("lov", PropertyType.lov),
+            ]
+        )
+        ._set_propagate(),
+        "progress": lambda gui, control_type, attrs: _Builder(
+            gui=gui,
+            control_type=control_type,
+            element_name="Progress",
+            attributes=attrs,
+        )
+        .set_value_and_default(var_type=PropertyType.dynamic_number)
+        .set_attributes(
+            [
+                ("linear", PropertyType.boolean, False),
+                ("show_value", PropertyType.boolean, False),
+                ("render", PropertyType.dynamic_boolean, True)
             ]
         )
         ._set_propagate(),

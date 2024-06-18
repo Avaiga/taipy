@@ -34,6 +34,7 @@ import NavBar from "./NavBar";
 import PageContent from "../pages/PageContent";
 import Pane from "./Pane";
 import Part from "./Part";
+import Progress from "./Progress";
 import Selector from "./Selector";
 import Slider from "./Slider";
 import StatusList from "./StatusList";
@@ -74,6 +75,7 @@ export const getRegisteredComponents = () => {
             Table: Table,
             Toggle: Toggle,
             TreeView: TreeView,
+            Progress: Progress,
         }).forEach(([name, comp]) => (registeredComponents[name] = comp  as ComponentType));
         if (window.taipyConfig?.extensions) {
             Object.entries(window.taipyConfig.extensions).forEach(([libName, elts]) => {

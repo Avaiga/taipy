@@ -7,6 +7,7 @@ body:
     attributes:
       value: |
         - Thank you for using Taipy and taking the time to suggest feature improvements! 😄
+
   - type: textarea
     id: refactor_description
     attributes:
@@ -14,17 +15,17 @@ body:
       description: "Describe what improvements can be made(performance, API...) in the codebase without introducing breaking changes."
     validations:
       required: true
-  - type: checkboxes
+        
+  - type: textarea
     id: acceptance_criteria
     attributes:
-      label: Acceptance Criteria
-      options:
-        - label: "Ensure new code is unit tested, and check code coverage is at least 90%."
-          required: true
-        - label: "Propagate any change on the demos and run all of them to ensure there is no breaking change."
-          required: true
-        - label: "Ensure any change is well documented."
-          required: true
+      label: "Acceptance Criteria"
+      description: Do not edit the text area below.
+      value: |
+        - [ ] Ensure new code is unit tested, and check code coverage is at least 90%.
+        - [ ] Propagate any change on the demos and run all of them to ensure there is no breaking change.
+        - [ ] Ensure any change is well documented.
+
   - type: checkboxes
     id: terms_checklist_refactor
     attributes:
@@ -35,6 +36,7 @@ body:
           required: true
         - label: "I am willing to work on this issue (optional)"
           required: false
+
   - type: markdown
     attributes:
       value: Thank you for taking the time to report the issue! 😄

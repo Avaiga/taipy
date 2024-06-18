@@ -24,6 +24,8 @@ from ..config.data_node_config import DataNodeConfig
 from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import InvalidDataNodeType
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
+from ..reason._reason_factory import _build_not_global_scope_reason, _build_wrong_config_type_reason
+from ..reason.reason import Reasons
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
 from ._data_fs_repository import _DataFSRepository
@@ -69,6 +71,19 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         }
 
     @classmethod
+    def _can_create(cls, config: Optional[DataNodeConfig] = None) -> Reasons:
+        config_id = getattr(config, "id", None) or str(config)
+        reason = Reasons(config_id)
+
+        if config is not None:
+            if not isinstance(config, DataNodeConfig):
+                reason._add_reason(config_id, _build_wrong_config_type_reason(config_id, "DataNodeConfig"))
+            elif config.scope is not Scope.GLOBAL:
+                reason._add_reason(config_id, _build_not_global_scope_reason(config_id))
+
+        return reason
+
+    @classmethod
     def _create_and_set(
         cls, data_node_config: DataNodeConfig, owner_id: Optional[str], parent_ids: Optional[Set[str]]
     ) -> DataNode:
@@ -111,25 +126,25 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         return cls._repository._load_all(filters)
 
     @classmethod
-    def _clean_generated_file(cls, data_node: DataNode):
+    def _clean_generated_file(cls, data_node: DataNode) -> None:
         if not isinstance(data_node, _FileDataNodeMixin):
             return
         if data_node.is_generated and os.path.exists(data_node.path):
             os.remove(data_node.path)
 
     @classmethod
-    def _clean_generated_files(cls, data_nodes: Iterable[DataNode]):
+    def _clean_generated_files(cls, data_nodes: Iterable[DataNode]) -> None:
         for data_node in data_nodes:
             cls._clean_generated_file(data_node)
 
     @classmethod
-    def _delete(cls, data_node_id: DataNodeId):
+    def _delete(cls, data_node_id: DataNodeId) -> None:
         if data_node := cls._get(data_node_id, None):
             cls._clean_generated_file(data_node)
         super()._delete(data_node_id)
 
     @classmethod
-    def _delete_many(cls, data_node_ids: Iterable[DataNodeId]):
+    def _delete_many(cls, data_node_ids: Iterable[DataNodeId]) -> None:
         data_nodes = []
         for data_node_id in data_node_ids:
             if data_node := cls._get(data_node_id):
@@ -138,13 +153,13 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         super()._delete_many(data_node_ids)
 
     @classmethod
-    def _delete_all(cls):
+    def _delete_all(cls) -> None:
         data_nodes = cls._get_all()
         cls._clean_generated_files(data_nodes)
         super()._delete_all()
 
     @classmethod
-    def _delete_by_version(cls, version_number: str):
+    def _delete_by_version(cls, version_number: str) -> None:
         data_nodes = cls._get_all(version_number)
         cls._clean_generated_files(data_nodes)
         cls._repository._delete_by(attribute="version", value=version_number)
@@ -165,7 +180,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         return cls._repository._load_all(filters)
 
     @classmethod
-    def _export(cls, id: str, folder_path: Union[str, pathlib.Path], **kwargs):
+    def _export(cls, id: str, folder_path: Union[str, pathlib.Path], **kwargs) -> None:
         cls._repository._export(id, folder_path)
 
         if not kwargs.get("include_data"):

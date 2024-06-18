@@ -90,7 +90,7 @@
                     {
                         "name": "scenarios",
                         "type": "dynamic(list[Scenario|Cycle])",
-                        "doc": "TODO: The list of Scenario/Cycle to show. Shows all Cycle/Scenario if value is None."
+                        "doc": "TODO: The list of <code>Scenario^</code>/<code>Cycle^</code> to show. Shows all Cycle/Scenario if value is None."
                     },
                     {
                         "name": "multiple",
@@ -102,7 +102,7 @@
                         "name": "filter",
                         "type": "bool|str|list[str]",
                         "default_value": "\"Config id;Label;Creation date;Cycle label;Cycle start;Cycle end;Primary;Tags\"",
-                        "doc": "TODO: a list of scenario attributes to filter on. If False, do not allow filter."
+                        "doc": "TODO: a list of <code>Scenario^</code> attributes to filter on. If False, do not allow filter."
                     },
                     {
                         "name": "show_search",
@@ -114,7 +114,7 @@
                         "name": "sort",
                         "type": "bool|str|list[str]",
                         "default_value": "\"Config id;Label;Creation date\"",
-                        "doc": "TODO: a list of scenario attributes to sort on. If False, do not allow sort."
+                        "doc": "TODO: a list of <code>Scenario^</code> attributes to sort on. If False, do not allow sort."
                     }
                 ]
             }
@@ -343,10 +343,33 @@
                         "doc": "TODO: If the <code>Scenario^</code> is set, the selector will only show datanodes owned by this scenario."
                     },
                     {
+                        "name": "datanodes",
+                        "type": "dynamic(list[DataNode|Scenario|Cycle])",
+                        "doc": "TODO: The list of <code>DataNode^</code>/<code>Scenario^</code>/<code>Cycle^</code> to show. Shows all Cycle/Scenario/DataNode if value is None."
+                    },
+                    {
                         "name": "multiple",
                         "type": "bool",
                         "default_value": "False",
                         "doc": "TODO: If True, the user can select multiple datanodes."
+                    },
+                    {
+                        "name": "filter",
+                        "type": "bool|str|list[str]",
+                        "default_value": "\"Config id;Label;Up to date;Last edit date;Input;Output;Intermediate;Expiration date;Expired\"",
+                        "doc": "TODO: a list of <code>DataNode^</code> attributes to filter on. If False, do not allow filter."
+                    },
+                    {
+                        "name": "show_search",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "TODO: If True, allows the user to search locally on label."
+                    },
+                    {
+                        "name": "sort",
+                        "type": "bool|str|list[str]",
+                        "default_value": "\"Config id;Label;Last edit date;Expiration date\"",
+                        "doc": "TODO: a list of <code>DataNode^</code> attributes to sort on. If False, do not allow sort."
                     }
                 ]
             }

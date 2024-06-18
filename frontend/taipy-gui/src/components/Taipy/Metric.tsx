@@ -11,24 +11,16 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, {
-    CSSProperties,
-    lazy,
-    Suspense,
-    useMemo
-} from 'react';
+import React, {CSSProperties, lazy, Suspense, useMemo} from 'react';
 import {Data} from "plotly.js";
-import {
-    useClassNames,
-    useDynamicJsonProperty,
-    useDynamicProperty
-} from "../../utils/hooks";
-import {
-    TaipyBaseProps,
-    TaipyHoverProps
-} from "./utils";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
+import Tooltip from "@mui/material/Tooltip";
+import {useTheme} from "@mui/material";
+import {useClassNames, useDynamicJsonProperty, useDynamicProperty} from "../../utils/hooks";
+import {extractPrefix, extractSuffix, sprintfToD3Converter} from "../../utils/formatConversion";
+import {TaipyBaseProps, TaipyHoverProps} from "./utils";
+import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -50,6 +42,11 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     width?: string | number;
     height?: string | number;
     showValue?: boolean;
+    format?: string;
+    deltaFormat?: string;
+    template?: string;
+    template_Dark_?: string;
+    template_Light_?: string;
 }
 
 const emptyLayout = {} as Record<string, Record<string, unknown>>;
@@ -66,63 +63,120 @@ const Metric = (props: MetricProps) => {
     const delta = useDynamicProperty(props.delta, props.defaultDelta, undefined)
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
-    const baseStyle = useDynamicJsonProperty(props.style, props.defaultStyle || "", defaultStyle);
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
+    const theme = useTheme();
 
-    const data = useMemo(() => ([
-        {
-            domain: {x: [0, 1], y: [0, 1]},
-            value: value,
-            type: "indicator",
-            mode: "gauge" + (showValue ? "+number" : "")  + (delta !== undefined ? "+delta" : ""),
-            delta: {
-                reference: typeof value === 'number' && typeof delta === 'number' ? value - delta : undefined,
-            },
-            gauge: {
-                axis: {
-                    range: [
-                        typeof props.min === 'number' ? props.min : 0,
-                        typeof props.max === 'number' ? props.max : 100
-                    ]
+    const data = useMemo(() => {
+        const mode = (props.type === "none") ? [] : ["gauge"];
+        showValue && mode.push("number");
+        (delta !== undefined) && mode.push("delta");
+        return [
+            {
+                domain: {x: [0, 1], y: [0, 1]},
+                value: value,
+                type: "indicator",
+                mode: mode.join("+"),
+                number: {
+                    prefix: extractPrefix(props.format),
+                    suffix: extractSuffix(props.format),
+                    valueformat: sprintfToD3Converter(props.format),
                 },
-                shape: props.type === "linear" ? "bullet" : "angular",
-                threshold: {
-                    line: {color: "red", width: 4},
-                    thickness: 0.75,
-                    value: threshold
-                }
-            },
-        }
-    ]), [
-        value,
-        showValue,
-        delta,
+                delta: {
+                    reference: typeof value === 'number' && typeof delta === 'number' ? value - delta : undefined,
+                    prefix: extractPrefix(props.deltaFormat),
+                    suffix: extractSuffix(props.deltaFormat),
+                    valueformat: sprintfToD3Converter(props.deltaFormat)
+                },
+                gauge: {
+                    axis: {
+                        range: [
+                            props.min || 0,
+                            props.max || 100
+                        ]
+                    },
+                    shape: props.type === "linear" ? "bullet" : "angular",
+                    threshold: {
+                        line: {color: "red", width: 4},
+                        thickness: 0.75,
+                        value: threshold
+                    }
+                },
+            }
+        ];
+    }, [
+        props.format,
+        props.deltaFormat,
         props.min,
         props.max,
         props.type,
+        value,
+        showValue,
+        delta,
         threshold
     ]);
 
     const style = useMemo(
         () =>
             height === undefined
-                ? ({...baseStyle, width: width} as CSSProperties)
-                : ({...baseStyle, width: width, height: height} as CSSProperties),
-        [baseStyle, height, width]
+                ? ({...defaultStyle, width: width} as CSSProperties)
+                : ({...defaultStyle, width: width, height: height} as CSSProperties),
+        [height, width]
     );
 
     const skelStyle = useMemo(() => ({...style, minHeight: "7em"}), [style]);
 
+    const layout = useMemo(() => {
+        const layout = {...baseLayout};
+        let template = undefined;
+        try {
+            const tpl = props.template && JSON.parse(props.template);
+            const tplTheme =
+                theme.palette.mode === "dark"
+                    ? props.template_Dark_
+                        ? JSON.parse(props.template_Dark_)
+                        : darkTemplate
+                    : props.template_Light_ && JSON.parse(props.template_Light_);
+            template = tpl ? (tplTheme ? {...tpl, ...tplTheme} : tpl) : tplTheme ? tplTheme : undefined;
+        } catch (e) {
+            console.info(`Error while parsing Metric.template\n${(e as Error).message || e}`);
+        }
+        if (template) {
+            layout.template = template;
+        }
+
+        return layout
+    }, [
+        props.template,
+        props.template_Dark_,
+        props.template_Light_,
+        theme.palette.mode,
+        baseLayout
+    ])
+
     return (
         <Box data-testid={props.testId} className={className}>
-            <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle}/>}>
-                <Plot
-                    data={data as Data[]}
-                    layout={baseLayout}
-                    style={style}
-                />
-            </Suspense>
+            <Tooltip title={hover || ""}>
+                <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle}/>}>
+                    <Plot
+                        data={data as Data[]}
+                        layout={layout}
+                        style={style}
+                        useResizeHandler
+                    />
+                </Suspense>
+            </Tooltip>
         </Box>
     );
 }
 
 export default Metric;
+
+const { colorscale, colorway, font} = darkThemeTemplate.layout;
+const darkTemplate = {
+    layout: {
+        colorscale,
+        colorway,
+        font,
+        paper_bgcolor: "rgb(31,47,68)",
+    },
+}

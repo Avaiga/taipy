@@ -14,7 +14,7 @@ from taipy import ScenarioId, SequenceId, TaskId
 from taipy.config.common.frequency import Frequency
 from taipy.config.config import Config
 from taipy.core._entity._ready_to_run_property import _ReadyToRunProperty
-from taipy.core.common.reason import Reason
+from taipy.core.reason.reason import Reasons
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
@@ -33,7 +33,7 @@ def test_scenario_without_input_is_ready_to_run():
     scenario = scenario_manager._create(scenario_config)
 
     assert scenario_manager._is_submittable(scenario)
-    assert isinstance(scenario_manager._is_submittable(scenario), Reason)
+    assert isinstance(scenario_manager._is_submittable(scenario), Reasons)
     assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
 
 
@@ -46,7 +46,7 @@ def test_scenario_submittable_with_inputs_is_ready_to_run():
     scenario = scenario_manager._create(scenario_config)
 
     assert scenario_manager._is_submittable(scenario)
-    assert isinstance(scenario_manager._is_submittable(scenario), Reason)
+    assert isinstance(scenario_manager._is_submittable(scenario), Reasons)
     assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
 
 
@@ -61,7 +61,7 @@ def test_scenario_submittable_even_with_output_not_ready_to_run():
     dn_3 = scenario.dn_3
 
     assert not dn_3.is_ready_for_reading
-    assert isinstance(scenario_manager._is_submittable(scenario), Reason)
+    assert isinstance(scenario_manager._is_submittable(scenario), Reasons)
     assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
 
 
@@ -78,7 +78,7 @@ def test_scenario_not_submittable_not_in_property_because_it_is_lazy():
     assert dn_1.is_ready_for_reading
     assert not dn_2.is_ready_for_reading
     assert not scenario_manager._is_submittable(scenario)
-    assert isinstance(scenario_manager._is_submittable(scenario), Reason)
+    assert isinstance(scenario_manager._is_submittable(scenario), Reasons)
 
     # Since it is a lazy property, the scenario and the datanodes is not yet in the dictionary
     assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
@@ -97,7 +97,7 @@ def test_scenario_not_submittable_if_one_input_edit_in_progress():
 
     assert not dn_1.is_ready_for_reading
     assert not scenario_manager._is_submittable(scenario)
-    assert isinstance(scenario_manager._is_submittable(scenario), Reason)
+    assert isinstance(scenario_manager._is_submittable(scenario), Reasons)
 
     assert scenario.id in _ReadyToRunProperty._submittable_id_datanodes
     assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]._reasons
@@ -125,7 +125,7 @@ def test_scenario_not_submittable_for_multiple_reasons():
     assert not dn_1.is_ready_for_reading
     assert not dn_2.is_ready_for_reading
     assert not scenario_manager._is_submittable(scenario)
-    assert isinstance(scenario_manager._is_submittable(scenario), Reason)
+    assert isinstance(scenario_manager._is_submittable(scenario), Reasons)
 
     assert scenario.id in _ReadyToRunProperty._submittable_id_datanodes
     assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]._reasons
@@ -156,7 +156,7 @@ def test_writing_input_remove_reasons():
 
     assert not dn_1.is_ready_for_reading
     assert not scenario_manager._is_submittable(scenario)
-    assert isinstance(scenario_manager._is_submittable(scenario), Reason)
+    assert isinstance(scenario_manager._is_submittable(scenario), Reasons)
     # Since it is a lazy property, the scenario is not yet in the dictionary
     assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
 
@@ -171,7 +171,7 @@ def test_writing_input_remove_reasons():
 
     dn_1.write(10)
     assert scenario_manager._is_submittable(scenario)
-    assert isinstance(scenario_manager._is_submittable(scenario), Reason)
+    assert isinstance(scenario_manager._is_submittable(scenario), Reasons)
     assert scenario.id not in _ReadyToRunProperty._submittable_id_datanodes
     assert dn_1.id not in _ReadyToRunProperty._datanode_id_submittables
 
@@ -197,7 +197,7 @@ def __assert_not_submittable_becomes_submittable_when_dn_edited(entity, manager,
 
     dn.write("ANY VALUE")
     assert manager._is_submittable(entity)
-    assert isinstance(manager._is_submittable(entity), Reason)
+    assert isinstance(manager._is_submittable(entity), Reasons)
     assert entity.id not in _ReadyToRunProperty._submittable_id_datanodes
     assert dn.id not in _ReadyToRunProperty._datanode_id_submittables
 
