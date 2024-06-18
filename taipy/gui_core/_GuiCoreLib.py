@@ -102,6 +102,7 @@ class _GuiCore(ElementLibrary):
                     f"{{{__CTX_VAR_NAME}.get_scenario_by_id({__SCENARIO_SELECTOR_ID_VAR}<tp:uniq:sc>)}}",
                 ),
                 "on_scenario_select": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.select_scenario}}"),
+                "creation_not_allowed": ElementProperty(PropertyType.string, f"{{{__CTX_VAR_NAME}.get_creation_reason()}}"),
                 "update_sc_vars": ElementProperty(
                     PropertyType.string,
                     f"filter={__SCENARIO_SELECTOR_FILTER_VAR}<tp:uniq:sc>;"
