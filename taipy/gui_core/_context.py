@@ -1107,4 +1107,4 @@ class _GuiCoreContext(CoreEventConsumerBase):
             _warn(f"dag.on_action(): Invalid function '{args[1]}()'.")
 
     def get_creation_reason(self):
-        return f"Cannot create scenario: {reason.reasons}" if not (reason := can_create()) else ""
+        return "" if (reason := can_create()) else f"Cannot create scenario: {reason.reasons}"
