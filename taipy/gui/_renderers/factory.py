@@ -360,6 +360,7 @@ class _Factory:
         .set_attributes(
             [
                 ("id",),
+                ("title",),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("layout", PropertyType.dynamic_dict),
                 ("type", PropertyType.string, "circular"),

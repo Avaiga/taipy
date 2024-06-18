@@ -25,6 +25,7 @@ import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
 const Plot = lazy(() => import("react-plotly.js"));
 
 interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
+    title?: string
     type?: string
     min?: number
     max?: number
@@ -72,6 +73,9 @@ const Metric = (props: MetricProps) => {
         (delta !== undefined) && mode.push("delta");
         return [
             {
+                title: {
+                  text: props.title
+                },
                 domain: {x: [0, 1], y: [0, 1]},
                 value: value,
                 type: "indicator",

@@ -1117,6 +1117,11 @@
                 ],
                 "properties": [
                     {
+                        "name": "title",
+                        "type": "str",
+                        "doc": "The title of the metric."
+                    },
+                    {
                         "name": "value",
                         "default_property": true,
                         "type": "dynamic(int|float)",
