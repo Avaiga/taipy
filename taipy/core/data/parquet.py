@@ -18,6 +18,7 @@ import pandas as pd
 
 from taipy.config.common.scope import Scope
 
+from .._entity._reload import _Reloader
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..exceptions.exceptions import UnknownCompressionAlgorithm, UnknownParquetEngine
 from ..job.job_id import JobId
@@ -153,7 +154,8 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             **properties,
         )
 
-        self._write_default_data(default_value)
+        with _Reloader():
+            self._write_default_data(default_value)
 
         if not self._last_edit_date and (isfile(self._path) or isdir(self._path)):
             self._last_edit_date = datetime.now()
