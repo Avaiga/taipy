@@ -38,7 +38,7 @@ export const useDynamicProperty = <T>(value: T, defaultValue: T, defaultStatic: 
             return defaultValue;
         }
         return defaultStatic;
-    }, [value, defaultValue, defaultStatic]);
+    }, [value, defaultValue, defaultStatic, check_type]);
 };
 
 /**
