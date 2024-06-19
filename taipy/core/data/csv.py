@@ -180,15 +180,19 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                 self._path, mode="a", index=False, encoding=self.properties[self.__ENCODING_KEY], header=False
             )
 
-    def _write(self, data: Any):
-        exposed_type = self.properties[self._EXPOSED_TYPE_PROPERTY]
-        if self.properties[self._HAS_HEADER_PROPERTY]:
-            self._convert_data_to_dataframe(exposed_type, data).to_csv(
-                self._path, index=False, encoding=self.properties[self.__ENCODING_KEY]
-            )
-        else:
-            self._convert_data_to_dataframe(exposed_type, data).to_csv(
-                self._path, index=False, encoding=self.properties[self.__ENCODING_KEY], header=False
+    def _write(self, data: Any, columns: Optional[List[str]] = None):
+        properties = self.properties
+        exposed_type = properties[self._EXPOSED_TYPE_PROPERTY]
+        data = self._convert_data_to_dataframe(exposed_type, data)
+
+        if columns and isinstance(data, pd.DataFrame):
+            data.columns = pd.Index(columns, dtype="object")
+
+        data.to_csv(
+            self._path,
+            index=False,
+            encoding=properties[self.__ENCODING_KEY],
+            header=properties[self._HAS_HEADER_PROPERTY]
             )
 
     def write_with_column_names(self, data: Any, columns: Optional[List[str]] = None, job_id: Optional[JobId] = None):
@@ -199,8 +203,5 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             columns (Optional[List[str]]): The list of column names to write.
             job_id (JobId^): An optional identifier of the writer.
         """
-        df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
-        if columns and isinstance(df, pd.DataFrame):
-            df.columns = pd.Index(columns, dtype="object")
-        df.to_csv(self._path, index=False, encoding=self.properties[self.__ENCODING_KEY])
+        self._write(data, columns)
         self.track_edit(timestamp=datetime.now(), job_id=job_id)
