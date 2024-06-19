@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { CSSProperties, useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
+import React, {CSSProperties, useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense} from "react";
 import {
     Config,
     Data,
@@ -26,15 +26,15 @@ import {
 import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
-import { useTheme } from "@mui/material";
+import {useTheme} from "@mui/material";
 
-import { getArrayValue, getUpdateVar, TaipyActiveProps, TaipyChangeProps } from "./utils";
+import {getArrayValue, getUpdateVar, TaipyActiveProps, TaipyChangeProps} from "./utils";
 import {
     createRequestChartUpdateAction,
     createSendActionNameAction,
     createSendUpdateAction,
 } from "../../context/taipyReducers";
-import { ColumnDesc } from "./tableUtils";
+import {ColumnDesc} from "./tableUtils";
 import {
     useClassNames,
     useDispatch,
@@ -43,7 +43,7 @@ import {
     useDynamicProperty,
     useModule,
 } from "../../utils/hooks";
-import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
+import {darkThemeTemplate} from "../../themes/darkThemeTemplate";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -91,7 +91,7 @@ interface ChartConfig {
 
 export type TraceValueType = Record<string, (string | number)[]>;
 
-const defaultStyle = { position: "relative", display: "inline-block" };
+const defaultStyle = {position: "relative", display: "inline-block"};
 
 const indexedData = /^(\d+)\/(.*)/;
 
@@ -105,7 +105,7 @@ const getColNameFromIndexed = (colName: string): string => {
     return colName;
 };
 
-const getValue = <T,>(
+const getValue = <T, >(
     values: TraceValueType | undefined,
     arr: T[],
     idx: number,
@@ -150,21 +150,21 @@ const getDecimatorsPayload = (
 ) => {
     return decimators
         ? {
-              width: plotDiv?.clientWidth,
-              height: plotDiv?.clientHeight,
-              decimators: decimators.map((d, i) =>
-                  d
-                      ? {
-                            decimator: d,
-                            xAxis: getAxis(traces, i, columns, 0),
-                            yAxis: getAxis(traces, i, columns, 1),
-                            zAxis: getAxis(traces, i, columns, 2),
-                            chartMode: modes[i],
-                        }
-                      : undefined
-              ),
-              relayoutData: relayoutData,
-          }
+            width: plotDiv?.clientWidth,
+            height: plotDiv?.clientHeight,
+            decimators: decimators.map((d, i) =>
+                d
+                    ? {
+                        decimator: d,
+                        xAxis: getAxis(traces, i, columns, 0),
+                        yAxis: getAxis(traces, i, columns, 1),
+                        zAxis: getAxis(traces, i, columns, 2),
+                        chartMode: modes[i],
+                    }
+                    : undefined
+            ),
+            relayoutData: relayoutData,
+        }
         : undefined;
 };
 
@@ -177,6 +177,7 @@ const isOnClick = (types: string[]) => (types?.length ? types.every((t) => t ===
 interface WithpointNumbers {
     pointNumbers: number[];
 }
+
 const getPlotIndex = (pt: PlotDatum) =>
     pt.pointIndex === undefined
         ? pt.pointNumber === undefined
@@ -223,7 +224,7 @@ const TaipyPlotlyButtons: ModeBarButtonAny[] = [
             if (!div) {
                 return;
             }
-            const { height } = gd.dataset;
+            const {height} = gd.dataset;
             if (!height) {
                 gd.setAttribute("data-height", getComputedStyle(div).height);
             }
@@ -341,7 +342,7 @@ const Chart = (props: ChartProp) => {
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
 
     const layout = useMemo(() => {
-        const layout = { ...baseLayout };
+        const layout = {...baseLayout};
         let template = undefined;
         try {
             const tpl = props.template && JSON.parse(props.template);
@@ -351,7 +352,7 @@ const Chart = (props: ChartProp) => {
                         ? JSON.parse(props.template_Dark_)
                         : darkThemeTemplate
                     : props.template_Light_ && JSON.parse(props.template_Light_);
-            template = tpl ? (tplTheme ? { ...tpl, ...tplTheme } : tpl) : tplTheme ? tplTheme : undefined;
+            template = tpl ? (tplTheme ? {...tpl, ...tplTheme} : tpl) : tplTheme ? tplTheme : undefined;
         } catch (e) {
             console.info(`Error while parsing Chart.template\n${(e as Error).message || e}`);
         }
@@ -401,11 +402,11 @@ const Chart = (props: ChartProp) => {
     const style = useMemo(
         () =>
             height === undefined
-                ? ({ ...defaultStyle, width: width } as CSSProperties)
-                : ({ ...defaultStyle, width: width, height: height } as CSSProperties),
+                ? ({...defaultStyle, width: width} as CSSProperties)
+                : ({...defaultStyle, width: width, height: height} as CSSProperties),
         [width, height]
     );
-    const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
+    const skelStyle = useMemo(() => ({...style, minHeight: "7em"}), [style]);
 
     const dataPl = useMemo(() => {
         if (props.figure) {
@@ -417,83 +418,83 @@ const Chart = (props: ChartProp) => {
         const datum = data[dataKey];
         lastDataPl.current = datum
             ? config.traces.map((trace, idx) => {
-                  const ret = {
-                      ...getArrayValue(config.options, idx, {}),
-                      type: config.types[idx],
-                      mode: config.modes[idx],
-                      name:
-                          getArrayValue(config.names, idx) ||
-                          (config.columns[trace[1]] ? getColNameFromIndexed(config.columns[trace[1]].dfid) : undefined),
-                  } as Record<string, unknown>;
-                  ret.marker = { ...getArrayValue(config.markers, idx, ret.marker || {}) };
-                  if (Object.keys(ret.marker as object).length) {
-                      MARKER_TO_COL.forEach((prop) => {
-                          const val = (ret.marker as Record<string, unknown>)[prop];
-                          if (typeof val === "string") {
-                              const arr = getValueFromCol(datum, val as string);
-                              if (arr.length) {
-                                  (ret.marker as Record<string, unknown>)[prop] = arr;
-                              }
-                          }
-                      });
-                  } else {
-                      delete ret.marker;
-                  }
-                  const xs = getValue(datum, trace, 0) || [];
-                  const ys = getValue(datum, trace, 1) || [];
-                  const addIndex = getArrayValue(config.addIndex, idx, true) && !ys.length;
-                  const baseX = addIndex ? Array.from(Array(xs.length).keys()) : xs;
-                  const baseY = addIndex ? xs : ys;
-                  const axisNames = config.axisNames.length > idx ? config.axisNames[idx] : ([] as string[]);
-                  if (baseX.length) {
-                      if (axisNames.length > 0) {
-                          ret[axisNames[0]] = baseX;
-                      } else {
-                          ret.x = baseX;
-                      }
-                  }
-                  if (baseY.length) {
-                      if (axisNames.length > 1) {
-                          ret[axisNames[1]] = baseY;
-                      } else {
-                          ret.y = baseY;
-                      }
-                  }
-                  const baseZ = getValue(datum, trace, 2, true);
-                  if (baseZ) {
-                      if (axisNames.length > 2) {
-                          ret[axisNames[2]] = baseZ;
-                      } else {
-                          ret.z = baseZ;
-                      }
-                  }
-                  // Hack for treemap charts: create a fallback 'parents' column if needed
-                  // This works ONLY because 'parents' is the third named axis
-                  // (see __CHART_AXIS in gui/utils/chart_config_builder.py)
-                  else if (config.types[idx] === "treemap" && Array.isArray(ret.labels)) {
-                      ret.parents = Array(ret.labels.length).fill("");
-                  }
-                  // Other axis
-                  for (let i = 3; i < axisNames.length; i++) {
-                      ret[axisNames[i]] = getValue(datum, trace, i, true);
-                  }
-                  ret.text = getValue(datum, config.texts, idx, true);
-                  ret.xaxis = config.xaxis[idx];
-                  ret.yaxis = config.yaxis[idx];
-                  ret.hovertext = getValue(datum, config.labels, idx, true);
-                  const selPoints = getArrayValue(selected, idx, []);
-                  if (selPoints?.length) {
-                      ret.selectedpoints = selPoints;
-                  }
-                  ret.orientation = getArrayValue(config.orientations, idx);
-                  ret.line = getArrayValue(config.lines, idx);
-                  ret.textposition = getArrayValue(config.textAnchors, idx);
-                  const selectedMarker = getArrayValue(config.selectedMarkers, idx);
-                  if (selectedMarker) {
-                      ret.selected = { marker: selectedMarker };
-                  }
-                  return ret as Data;
-              })
+                const ret = {
+                    ...getArrayValue(config.options, idx, {}),
+                    type: config.types[idx],
+                    mode: config.modes[idx],
+                    name:
+                        getArrayValue(config.names, idx) ||
+                        (config.columns[trace[1]] ? getColNameFromIndexed(config.columns[trace[1]].dfid) : undefined),
+                } as Record<string, unknown>;
+                ret.marker = {...getArrayValue(config.markers, idx, ret.marker || {})};
+                if (Object.keys(ret.marker as object).length) {
+                    MARKER_TO_COL.forEach((prop) => {
+                        const val = (ret.marker as Record<string, unknown>)[prop];
+                        if (typeof val === "string") {
+                            const arr = getValueFromCol(datum, val as string);
+                            if (arr.length) {
+                                (ret.marker as Record<string, unknown>)[prop] = arr;
+                            }
+                        }
+                    });
+                } else {
+                    delete ret.marker;
+                }
+                const xs = getValue(datum, trace, 0) || [];
+                const ys = getValue(datum, trace, 1) || [];
+                const addIndex = getArrayValue(config.addIndex, idx, true) && !ys.length;
+                const baseX = addIndex ? Array.from(Array(xs.length).keys()) : xs;
+                const baseY = addIndex ? xs : ys;
+                const axisNames = config.axisNames.length > idx ? config.axisNames[idx] : ([] as string[]);
+                if (baseX.length) {
+                    if (axisNames.length > 0) {
+                        ret[axisNames[0]] = baseX;
+                    } else {
+                        ret.x = baseX;
+                    }
+                }
+                if (baseY.length) {
+                    if (axisNames.length > 1) {
+                        ret[axisNames[1]] = baseY;
+                    } else {
+                        ret.y = baseY;
+                    }
+                }
+                const baseZ = getValue(datum, trace, 2, true);
+                if (baseZ) {
+                    if (axisNames.length > 2) {
+                        ret[axisNames[2]] = baseZ;
+                    } else {
+                        ret.z = baseZ;
+                    }
+                }
+                    // Hack for treemap charts: create a fallback 'parents' column if needed
+                    // This works ONLY because 'parents' is the third named axis
+                // (see __CHART_AXIS in gui/utils/chart_config_builder.py)
+                else if (config.types[idx] === "treemap" && Array.isArray(ret.labels)) {
+                    ret.parents = Array(ret.labels.length).fill("");
+                }
+                // Other axis
+                for (let i = 3; i < axisNames.length; i++) {
+                    ret[axisNames[i]] = getValue(datum, trace, i, true);
+                }
+                ret.text = getValue(datum, config.texts, idx, true);
+                ret.xaxis = config.xaxis[idx];
+                ret.yaxis = config.yaxis[idx];
+                ret.hovertext = getValue(datum, config.labels, idx, true);
+                const selPoints = getArrayValue(selected, idx, []);
+                if (selPoints?.length) {
+                    ret.selectedpoints = selPoints;
+                }
+                ret.orientation = getArrayValue(config.orientations, idx);
+                ret.line = getArrayValue(config.lines, idx);
+                ret.textposition = getArrayValue(config.textAnchors, idx);
+                const selectedMarker = getArrayValue(config.selectedMarkers, idx);
+                if (selectedMarker) {
+                    ret.selected = {marker: selectedMarker};
+                }
+                return ret as Data;
+            })
             : [];
         return lastDataPl.current;
     }, [props.figure, selected, data, config, dataKey]);
@@ -522,7 +523,7 @@ const Chart = (props: ChartProp) => {
 
     const onRelayout = useCallback(
         (eventData: PlotRelayoutEvent) => {
-            onRangeChange && dispatch(createSendActionNameAction(id, module, { action: onRangeChange, ...eventData }));
+            onRangeChange && dispatch(createSendActionNameAction(id, module, {action: onRangeChange, ...eventData}));
             if (config.decimators && !config.types.includes("scatter3d")) {
                 const backCols = Object.values(config.columns).map((col) => col.dfid);
                 const eventDataKey = Object.entries(eventData)
@@ -577,8 +578,8 @@ const Chart = (props: ChartProp) => {
                 ? props.figure
                     ? index
                     : data[dataKey].tp_index
-                    ? (data[dataKey].tp_index[index] as number)
-                    : index
+                        ? (data[dataKey].tp_index[index] as number)
+                        : index
                 : 0,
         [data, dataKey, props.figure]
     );
@@ -616,34 +617,36 @@ const Chart = (props: ChartProp) => {
     return render ? (
         <Box id={id} data-testid={props.testId} className={className} ref={plotRef}>
             <Tooltip title={hover || ""}>
-                <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
-                    {Array.isArray(props.figure) && props.figure.length && props.figure[0].data !== undefined ? (
-                        <Plot
-                            data={props.figure[0].data as Data[]}
-                            layout={layout}
-                            style={style}
-                            onRelayout={onRelayout}
-                            onAfterPlot={onAfterPlot}
-                            onSelected={onSelect}
-                            onDeselect={onSelect}
-                            config={plotConfig}
-                            useResizeHandler
-                        />
-                    ) : (
-                        <Plot
-                            data={dataPl}
-                            layout={layout}
-                            style={style}
-                            onRelayout={onRelayout}
-                            onAfterPlot={onAfterPlot}
-                            onSelected={isOnClick(config.types) ? undefined : onSelect}
-                            onDeselect={isOnClick(config.types) ? undefined : onSelect}
-                            onClick={isOnClick(config.types) ? onSelect : undefined}
-                            config={plotConfig}
-                            useResizeHandler
-                        />
-                    )}
-                </Suspense>
+                <div>
+                    <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle}/>}>
+                        {Array.isArray(props.figure) && props.figure.length && props.figure[0].data !== undefined ? (
+                            <Plot
+                                data={props.figure[0].data as Data[]}
+                                layout={layout}
+                                style={style}
+                                onRelayout={onRelayout}
+                                onAfterPlot={onAfterPlot}
+                                onSelected={onSelect}
+                                onDeselect={onSelect}
+                                config={plotConfig}
+                                useResizeHandler
+                            />
+                        ) : (
+                            <Plot
+                                data={dataPl}
+                                layout={layout}
+                                style={style}
+                                onRelayout={onRelayout}
+                                onAfterPlot={onAfterPlot}
+                                onSelected={isOnClick(config.types) ? undefined : onSelect}
+                                onDeselect={isOnClick(config.types) ? undefined : onSelect}
+                                onClick={isOnClick(config.types) ? onSelect : undefined}
+                                config={plotConfig}
+                                useResizeHandler
+                            />
+                        )}
+                    </Suspense>
+                </div>
             </Tooltip>
         </Box>
     ) : null;
