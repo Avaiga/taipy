@@ -9,8 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import json
-import pathlib
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
@@ -397,32 +395,6 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         Returns True if the entity id exists.
         """
         return True if cls._get(entity_id) else False
-
-    @classmethod
-    def _export(cls, id: str, folder_path: Union[str, pathlib.Path], **kwargs) -> None:
-        """
-        Export a Sequence entity.
-        """
-        if isinstance(folder_path, str):
-            folder: pathlib.Path = pathlib.Path(folder_path)
-        else:
-            folder = folder_path
-
-        export_dir = folder / cls._model_name
-        if not export_dir.exists():
-            export_dir.mkdir(parents=True)
-
-        export_path = export_dir / f"{id}.json"
-        sequence_name, scenario_id = cls._breakdown_sequence_id(id)
-        sequence = {"id": id, "owner_id": scenario_id, "parent_ids": [scenario_id], "name": sequence_name}
-
-        scenario = _ScenarioManagerFactory._build_manager()._get(scenario_id)
-        if sequence_data := scenario._sequences.get(sequence_name, None):
-            sequence.update(sequence_data)
-            with open(export_path, "w", encoding="utf-8") as export_file:
-                export_file.write(json.dumps(sequence))
-        else:
-            raise ModelNotFound(cls._model_name, id)
 
     @classmethod
     def __log_error_entity_not_found(cls, sequence_id: Union[SequenceId, str]):

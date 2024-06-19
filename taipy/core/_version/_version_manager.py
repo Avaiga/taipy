@@ -9,7 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import pathlib
 import uuid
 from typing import List, Optional, Union
 
@@ -231,17 +230,3 @@ class _VersionManager(_Manager[_Version]):
     @classmethod
     def _delete_entities_of_multiple_types(cls, _entity_ids):
         raise NotImplementedError
-
-    @classmethod
-    def _import(cls, entity_file: pathlib.Path, version: str, **kwargs) -> _Version:
-        imported_version = cls._repository._import(entity_file)
-
-        comparator_result = Config._comparator._find_conflict_config(  # type: ignore[attr-defined]
-            imported_version.config,
-            Config._applied_config,  # type: ignore[attr-defined]
-            imported_version.id,
-        )
-        if comparator_result.get(_ComparatorResult.CONFLICTED_SECTION_KEY):
-            raise ConflictedConfigurationError()
-
-        return imported_version

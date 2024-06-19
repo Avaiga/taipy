@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 from __future__ import annotations
 
-import pathlib
 import uuid
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set, Union
@@ -614,30 +613,6 @@ class Scenario(_Entity, Submittable, _Labeled):
         from ._scenario_manager_factory import _ScenarioManagerFactory
 
         return _ScenarioManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout, **properties)
-
-    def export(
-        self,
-        folder_path: Union[str, pathlib.Path],
-        override: bool = False,
-        include_data: bool = False,
-    ):
-        """Export all related entities of this scenario to a folder.
-
-        Parameters:
-            folder_path (Union[str, pathlib.Path]): The folder path to export the scenario to.
-                If the path exists and the override parameter is False, an exception is raised.
-            override (bool): If True, the existing folder will be overridden. Default is False.
-            include_data (bool): If True, the file-based data nodes are exported as well.
-                This includes Pickle, CSV, Excel, Parquet, and JSON data nodes.
-                If the scenario has a data node that is not file-based, a warning will be logged, and the data node
-                will not be exported. The default value is False.
-
-        Raises:
-            ExportPathAlreadyExists^: If the `folder_path` already exists and the override parameter is False.
-        """
-        from ... import core as tp
-
-        return tp.export_scenario(self.id, folder_path, override, include_data)
 
     def set_primary(self):
         """Promote the scenario as the primary scenario of its cycle.
