@@ -1198,11 +1198,6 @@
                         "name": "template[light]",
                         "type": "dict",
                         "doc": "The Plotly <a href=\"https://plotly.com/javascript/layout-template/\">layout template</a> applied over the base template when theme is not dark."
-                    },
-                    {
-                        "name": "hover_text",
-                        "type": "dynamic(str)",
-                        "doc": "The information that is displayed when the user hovers over this element."
                     }
                 ]
             }

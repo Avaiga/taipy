@@ -50,7 +50,7 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     template_Light_?: string;
 }
 
-const emptyLayout = {} as Record<string, Record<string, unknown>>;
+const emptyLayout = {} as Partial<Layout>;
 const defaultStyle = {position: "relative", display: "inline-block"};
 
 const Metric = (props: MetricProps) => {
@@ -145,10 +145,11 @@ const Metric = (props: MetricProps) => {
             layout.template = template;
         }
 
-        return {
-            title: props.title || layout.title,
-            ...layout
-        } as Partial<Layout>
+        if (props.title) {
+            layout.title = props.title;
+        }
+
+        return layout as Partial<Layout>;
     }, [
         props.title,
         props.template,
