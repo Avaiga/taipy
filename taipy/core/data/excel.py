@@ -68,6 +68,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
     __STORAGE_TYPE = "excel"
     __SHEET_NAME_PROPERTY = "sheet_name"
+    __EXCEL_ENGINE = "openpyxl"
 
     _REQUIRED_PROPERTIES: List[str] = []
 
@@ -229,9 +230,10 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
     def __get_sheet_names_and_header(self, sheet_names):
         kwargs = {}
+        properties = self.properties
         if sheet_names is None:
-            sheet_names = self.properties[self.__SHEET_NAME_PROPERTY]
-        if not self.properties[self._HAS_HEADER_PROPERTY]:
+            sheet_names = properties[self.__SHEET_NAME_PROPERTY]
+        if not properties[self._HAS_HEADER_PROPERTY]:
             kwargs["header"] = None
         return sheet_names, kwargs
 
@@ -239,9 +241,11 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         sheet_names, kwargs = self.__get_sheet_names_and_header(sheet_names)
         try:
             if sheet_names:
-                return pl.read_excel(self._path, sheet_name=sheet_names, **kwargs)
+                return pl.read_excel(
+                    self._path, sheet_name=sheet_names, engine=self.__EXCEL_ENGINE, read_options=kwargs
+                )
             else:
-                return pl.read_excel(self._path, sheet_id=0, **kwargs)
+                return pl.read_excel(self._path, sheet_id=0, engine=self.__EXCEL_ENGINE, read_options=kwargs)
         except pl.exceptions.NoDataError:
             return pl.DataFrame()
 
@@ -255,7 +259,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     def __append_excel_with_single_sheet(self, append_excel_fct, *args, **kwargs):
         sheet_name = self.properties.get(self.__SHEET_NAME_PROPERTY)
 
-        with pd.ExcelWriter(self._path, mode="a", engine="openpyxl", if_sheet_exists="overlay") as writer:
+        with pd.ExcelWriter(self._path, mode="a", engine=self.__EXCEL_ENGINE, if_sheet_exists="overlay") as writer:
             if sheet_name:
                 if not isinstance(sheet_name, str):
                     sheet_name = sheet_name[0]
@@ -267,7 +271,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                 append_excel_fct(writer, *args, **kwargs, startrow=writer.sheets[sheet_name].max_row)
 
     def __append_excel_with_multiple_sheets(self, data: Any, columns: List[str] = None):
-        with pd.ExcelWriter(self._path, mode="a", engine="openpyxl", if_sheet_exists="overlay") as writer:
+        with pd.ExcelWriter(self._path, mode="a", engine=self.__EXCEL_ENGINE, if_sheet_exists="overlay") as writer:
             # Each key stands for a sheet name
             for sheet_name in data.keys():
                 if isinstance(data[sheet_name], np.ndarray):
@@ -298,9 +302,9 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             self.__append_excel_with_single_sheet(pd.DataFrame(data).to_excel, index=False, header=False)
 
     def __write_excel_with_single_sheet(self, write_excel_fct, *args, **kwargs):
-        if (
-            sheet_name := self.properties.get(self.__SHEET_NAME_PROPERTY)
-            and self.properties[self._EXPOSED_TYPE_PROPERTY] != self._EXPOSED_TYPE_POLARS
+        properties = self.properties
+        if (sheet_name := properties.get(self.__SHEET_NAME_PROPERTY)) and (
+            properties[self._EXPOSED_TYPE_PROPERTY] != self._EXPOSED_TYPE_POLARS
         ):
             if not isinstance(sheet_name, str):
                 if len(sheet_name) > 1:
@@ -319,6 +323,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         ):
             with Workbook(self._path) as wb:
                 for key, df in data.items():
+                    df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data[key])
                     if columns:
                         df.columns = columns
                     df.write_excel(wb, worksheet=key)
@@ -337,10 +342,15 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         if isinstance(data, Dict):
             return self.__write_excel_with_multiple_sheets(data)
         else:
-            data = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
+            properties = self.properties
+            data = self._convert_data_to_dataframe(properties[self._EXPOSED_TYPE_PROPERTY], data)
             if isinstance(data, pl.DataFrame):
+                work_sheet = properties[self.__SHEET_NAME_PROPERTY] or "Sheet1"
                 self.__write_excel_with_single_sheet(
-                    data.write_excel, self._path, include_header=self.properties[self._HAS_HEADER_PROPERTY] or False
+                    data.write_excel,
+                    self._path,
+                    worksheet=work_sheet,
+                    include_header=self.properties[self._HAS_HEADER_PROPERTY] or False,
                 )
             else:
                 self.__write_excel_with_single_sheet(

@@ -15,6 +15,7 @@ import pathlib
 
 import numpy as np
 import pandas as pd
+import polars as pl
 import pytest
 from pandas.testing import assert_frame_equal
 
@@ -35,6 +36,7 @@ def cleanup(tmp_excel_file):
             os.remove(tmp_excel_file)
         except Exception as e:
             from taipy.logger._taipy_logger import _TaipyLogger
+
             logger = _TaipyLogger._get_logger()
             logger.error(f"Failed to delete {tmp_excel_file}. {e}")
 
@@ -166,6 +168,66 @@ def test_write_with_header_multiple_sheet_numpy_without_sheet_name(tmp_excel_fil
         assert np.array_equal(excel_dn_data[sheet_name], sheet_data[sheet_name])
 
 
+def test_write_with_header_multiple_sheet_polars_with_sheet_name(tmp_excel_file):
+    excel_dn = ExcelDataNode(
+        "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "sheet_name": sheet_names, "exposed_type": "polars"}
+    )
+
+    df_1 = pl.DataFrame([{"a": 1, "b": 2, "c": 3}])
+    df_2 = pl.DataFrame([{"a": 4, "b": 5, "c": 6}])
+    sheet_data = {"Sheet1": df_1, "Sheet2": df_2}
+
+    excel_dn.write(sheet_data)
+    excel_dn_data = excel_dn.read()
+    assert len(excel_dn_data) == len(sheet_data) == 2
+    for sheet_name in sheet_data.keys():
+        assert pl.DataFrame.equals(excel_dn_data[sheet_name], sheet_data[sheet_name])
+
+    sheet_data = {"Sheet1": df_1[["a"]], "Sheet2": df_2[["a"]]}
+
+    excel_dn.write(sheet_data)
+    excel_dn_data = excel_dn.read()
+    assert len(excel_dn_data) == len(sheet_data) == 2
+    for sheet_name in sheet_data.keys():
+        assert pl.DataFrame.equals(excel_dn_data[sheet_name], sheet_data[sheet_name])
+
+    sheet_data = {"Sheet1": pl.Series([1, 2, 3]), "Sheet2": pl.Series([4, 5, 6])}
+    excel_dn.write(sheet_data)
+    excel_dn_data = excel_dn.read()
+    assert len(excel_dn_data) == len(sheet_data) == 2
+    for sheet_name in sheet_data.keys():
+        assert np.array_equal(excel_dn_data[sheet_name].to_numpy(), pl.DataFrame(sheet_data[sheet_name]).to_numpy())
+
+
+def test_write_with_header_multiple_sheet_polars_without_sheet_name(tmp_excel_file):
+    excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": "polars"})
+
+    df_1 = pl.DataFrame([{"a": 1, "b": 2, "c": 3}])
+    df_2 = pl.DataFrame([{"a": 4, "b": 5, "c": 6}])
+    sheet_data = {"Sheet1": df_1, "Sheet2": df_2}
+
+    excel_dn.write(sheet_data)
+    excel_dn_data = excel_dn.read()
+    assert len(excel_dn_data) == len(sheet_data) == 2
+    for sheet_name in sheet_data.keys():
+        assert pl.DataFrame.equals(excel_dn_data[sheet_name], sheet_data[sheet_name])
+
+    sheet_data = {"Sheet1": df_1[["a"]], "Sheet2": df_2[["a"]]}
+
+    excel_dn.write(sheet_data)
+    excel_dn_data = excel_dn.read()
+    assert len(excel_dn_data) == len(sheet_data) == 2
+    for sheet_name in sheet_data.keys():
+        assert pl.DataFrame.equals(excel_dn_data[sheet_name], sheet_data[sheet_name])
+
+    sheet_data = {"Sheet1": pl.Series([1, 2, 3]), "Sheet2": pl.Series([4, 5, 6])}
+    excel_dn.write(sheet_data)
+    excel_dn_data = excel_dn.read()
+    assert len(excel_dn_data) == len(sheet_data) == 2
+    for sheet_name in sheet_data.keys():
+        assert np.array_equal(excel_dn_data[sheet_name].to_numpy(), pl.DataFrame(sheet_data[sheet_name]).to_numpy())
+
+
 def test_write_with_header_multiple_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode(
         "foo",
@@ -184,10 +246,7 @@ def test_write_with_header_multiple_sheet_custom_exposed_type_with_sheet_name(tm
 
 
 def test_write_with_header_multiple_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file):
-    excel_dn = ExcelDataNode(
-        "foo",
-        Scope.SCENARIO,
-        properties={"path": tmp_excel_file, "exposed_type": MyCustomObject})
+    excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": MyCustomObject})
 
     row_1 = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
     row_2 = [MyCustomObject(0, 4, "hello"), MyCustomObject(1, 5, "abc"), MyCustomObject(2, 6, ".")]
@@ -202,9 +261,7 @@ def test_write_with_header_multiple_sheet_custom_exposed_type_without_sheet_name
 
 def test_write_without_header_multiple_sheet_pandas_with_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode(
-        "foo",
-        Scope.SCENARIO,
-        properties={"path": tmp_excel_file, "sheet_name": sheet_names, "has_header": False}
+        "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "sheet_name": sheet_names, "has_header": False}
     )
 
     df_1 = pd.DataFrame([*zip([1, 2, 3])])
@@ -292,9 +349,7 @@ def test_write_without_header_multiple_sheet_numpy_with_sheet_name(tmp_excel_fil
 
 def test_write_without_header_multiple_sheet_numpy_without_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode(
-        "foo",
-        Scope.SCENARIO,
-        properties={"path": tmp_excel_file, "exposed_type": "numpy", "has_header": False}
+        "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": "numpy", "has_header": False}
     )
 
     arr_1 = np.array([[1], [2], [3]])
@@ -316,6 +371,70 @@ def test_write_without_header_multiple_sheet_numpy_without_sheet_name(tmp_excel_
     assert len(excel_dn_data) == len(sheet_data) == 2
     for sheet_name in sheet_data.keys():
         assert np.array_equal(excel_dn_data[sheet_name], sheet_data[sheet_name])
+
+
+def test_write_without_header_multiple_sheet_polars_with_sheet_name(tmp_excel_file):
+    excel_dn = ExcelDataNode(
+        "foo",
+        Scope.SCENARIO,
+        properties={"path": tmp_excel_file, "sheet_name": sheet_names, "has_header": False, "exposed_type": "polars"},
+    )
+
+    df_1 = pl.DataFrame([*zip([1, 2, 3])])
+    df_2 = pl.DataFrame([*zip([4, 5, 6])])
+    sheet_data = {"Sheet1": df_1, "Sheet2": df_2}
+
+    excel_dn.write(sheet_data)
+    excel_dn_data = excel_dn.read()
+    assert len(excel_dn_data) == len(sheet_data) == 2
+    for sheet_name in sheet_data.keys():
+        assert pl.DataFrame.equals(excel_dn_data[sheet_name], sheet_data[sheet_name])
+
+    sheet_data = {"Sheet1": df_1[[0]], "Sheet2": df_2[[0]]}
+
+    excel_dn.write(sheet_data)
+    excel_dn_data = excel_dn.read()
+    assert len(excel_dn_data) == len(sheet_data) == 2
+    for sheet_name in sheet_data.keys():
+        assert pl.DataFrame.equals(excel_dn_data[sheet_name], sheet_data[sheet_name])
+
+    sheet_data = {"Sheet1": pl.Series([1, 2, 3]), "Sheet2": pl.Series([4, 5, 6])}
+    excel_dn.write(sheet_data)
+    excel_dn_data = excel_dn.read()
+    assert len(excel_dn_data) == len(sheet_data) == 2
+    for sheet_name in sheet_data.keys():
+        assert np.array_equal(excel_dn_data[sheet_name].to_numpy(), pl.DataFrame(sheet_data[sheet_name]).to_numpy())
+
+
+def test_write_without_header_multiple_sheet_polars_without_sheet_name(tmp_excel_file):
+    excel_dn = ExcelDataNode(
+        "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "has_header": False, "exposed_type": "polars"}
+    )
+
+    df_1 = pl.DataFrame([*zip([1, 2, 3])])
+    df_2 = pl.DataFrame([*zip([4, 5, 6])])
+    sheet_data = {"Sheet1": df_1, "Sheet2": df_2}
+
+    excel_dn.write(sheet_data)
+    excel_dn_data = excel_dn.read()
+    assert len(excel_dn_data) == len(sheet_data) == 2
+    for sheet_name in sheet_data.keys():
+        assert pl.DataFrame.equals(excel_dn_data[sheet_name], sheet_data[sheet_name])
+
+    sheet_data = {"Sheet1": df_1[[0]], "Sheet2": df_2[[0]]}
+
+    excel_dn.write(sheet_data)
+    excel_dn_data = excel_dn.read()
+    assert len(excel_dn_data) == len(sheet_data) == 2
+    for sheet_name in sheet_data.keys():
+        assert pl.DataFrame.equals(excel_dn_data[sheet_name], sheet_data[sheet_name])
+
+    sheet_data = {"Sheet1": pl.Series([1, 2, 3]), "Sheet2": pl.Series([4, 5, 6])}
+    excel_dn.write(sheet_data)
+    excel_dn_data = excel_dn.read()
+    assert len(excel_dn_data) == len(sheet_data) == 2
+    for sheet_name in sheet_data.keys():
+        assert np.array_equal(excel_dn_data[sheet_name].to_numpy(), pl.DataFrame(sheet_data[sheet_name]).to_numpy())
 
 
 def test_write_without_header_multiple_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file):
@@ -343,9 +462,7 @@ def test_write_without_header_multiple_sheet_custom_exposed_type_with_sheet_name
 
 def test_write_without_header_multiple_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode(
-        "foo",
-        Scope.SCENARIO,
-        properties={"path": tmp_excel_file, "exposed_type": MyCustomObject, "has_header": False}
+        "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": MyCustomObject, "has_header": False}
     )
 
     row_1 = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]

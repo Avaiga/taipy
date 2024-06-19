@@ -156,7 +156,12 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
         self._write_default_data(default_value)
 
-        if not self._last_edit_date and (isfile(self._path) or isdir(self._path)):  # type: ignore
+        if (
+            not self._last_edit_date
+            and (  # type: ignore
+                isfile(self._path) or isdir(self._path[:-1] if self._path.endswith("*") else self._path)
+            )
+        ):
             self._last_edit_date = datetime.now()
         self._TAIPY_PROPERTIES.update(
             {
@@ -191,6 +196,8 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         return pd.read_parquet(self._path, **read_kwargs)
 
     def _read_as_polars_dataframe(self, read_kwargs: Dict) -> pl.DataFrame:
+        if read_kwargs.pop(self.__ENGINE_PROPERTY) == "pyarrow":
+            return pl.read_parquet(self._path, use_pyarrow=True, **read_kwargs)
         return pl.read_parquet(self._path, **read_kwargs)
 
     def _append(self, data: Any):
@@ -215,8 +222,10 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         else:
             df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
 
-        if isinstance(df, (pl.DataFrame, pl.Series)):
+        if isinstance(df, pl.DataFrame):
             df.write_parquet(self._path)
+        elif isinstance(df, pl.Series):
+            df.to_frame().write_parquet(self._path)
         else:
             kwargs = {
                 self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
@@ -247,19 +256,17 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             return None
 
         kwargs = self.properties[self.__READ_KWARGS_PROPERTY]
+        kwargs.update(
+            {
+                self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
+            }
+        )
+        kwargs.update(read_kwargs)
 
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
+            return self._read_as_pandas_dataframe(kwargs)
         if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_POLARS:
             return self._read_as_polars_dataframe(kwargs)
-        else:
-            kwargs.update(
-                {
-                    self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
-                }
-            )
-            kwargs.update(read_kwargs)
-
-            if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
-                return self._read_as_pandas_dataframe(kwargs)
-            if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
-                return self._read_as_numpy(kwargs)
-            return self._read_as(kwargs)
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
+            return self._read_as_numpy(kwargs)
+        return self._read_as(kwargs)

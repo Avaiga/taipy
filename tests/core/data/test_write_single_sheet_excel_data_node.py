@@ -14,6 +14,7 @@ import pathlib
 
 import numpy as np
 import pandas as pd
+import polars as pl
 import pytest
 from pandas.testing import assert_frame_equal
 
@@ -245,6 +246,107 @@ def test_write_without_header_single_sheet_numpy_without_sheet_name(tmp_excel_fi
     excel_data = excel_dn.read()
     assert isinstance(excel_data, dict) and "Sheet1" in excel_data.keys()
     assert excel_dn.read()["Sheet1"].size == 0
+
+
+def test_write_with_header_single_sheet_polars_with_sheet_name(tmp_excel_file):
+    excel_dn = ExcelDataNode(
+        "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "sheet_name": "Sheet1", "exposed_type": "polars"}
+    )
+
+    df = pl.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
+
+    excel_dn.write(df)
+    assert pl.DataFrame.equals(excel_dn.read(), df)
+
+    excel_dn.write(None)
+    assert len(excel_dn.read()) == 0
+
+    excel_dn.write(df["a"])
+    assert pl.DataFrame.equals(excel_dn.read(), df[["a"]])
+
+    series = pl.Series([1, 2, 3])
+    excel_dn.write(series)
+    assert np.array_equal(excel_dn.read().to_numpy(), series.to_frame().to_numpy())
+
+    excel_dn.write(None)
+    assert excel_dn.read().is_empty()
+
+
+def test_write_with_header_single_sheet_polars_without_sheet_name(tmp_excel_file):
+    excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": "polars"})
+
+    df = pl.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
+
+    excel_dn.write(df)
+    excel_data = excel_dn.read()
+
+    assert isinstance(excel_data, dict) and "Sheet1" in excel_data.keys()
+    assert pl.DataFrame.equals(excel_data["Sheet1"], df)
+
+    excel_dn.write(df["a"])
+    excel_data = excel_dn.read()
+    assert isinstance(excel_data, dict) and "Sheet1" in excel_data.keys()
+    assert pl.DataFrame.equals(excel_dn.read()["Sheet1"], df[["a"]])
+
+    series = pl.Series([1, 2, 3])
+    excel_dn.write(series)
+    excel_data = excel_dn.read()
+    assert isinstance(excel_data, dict) and "Sheet1" in excel_data.keys()
+    assert np.array_equal(excel_dn.read()["Sheet1"].to_numpy(), series.to_frame().to_numpy())
+
+    excel_dn.write(None)
+    assert excel_dn.read().is_empty()
+
+
+# TODO: Failed due to cannot read without header by openpyxl
+# def test_write_without_header_single_sheet_polars_with_sheet_name(tmp_excel_file):
+#     excel_dn = ExcelDataNode(
+#         "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "sheet_name": "Sheet1", "has_header": False, "exposed_type": "polars"}
+#     )
+
+#     df = pl.DataFrame([*zip([1, 2, 3], [4, 5, 6])])
+
+#     excel_dn.write(df)
+#     assert pl.DataFrame.equals(excel_dn.read(), df)
+
+#     excel_dn.write(None)
+#     assert len(excel_dn.read()) == 0
+
+#     excel_dn.write(df[0])
+#     assert pl.DataFrame.equals(excel_dn.read(), df[[0]])
+
+#     series = pl.Series([1, 2, 3])
+#     excel_dn.write(series)
+#     assert np.array_equal(excel_dn.read().to_numpy(), pl.DataFrame(series).to_numpy())
+
+#     excel_dn.write(None)
+#     assert excel_dn.read().is_empty()
+
+
+# TODO: Failed due to cannot read without header by openpyxl
+# def test_write_without_header_single_sheet_polars_without_sheet_name(tmp_excel_file):
+#     excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "has_header": False, "exposed_type": "polars"})
+
+#     df = pl.DataFrame([*zip([1, 2, 3], [4, 5, 6])])
+
+#     excel_dn.write(df)
+#     excel_data = excel_dn.read()
+#     assert isinstance(excel_data, dict) and "Sheet1" in excel_data.keys()
+#     assert pl.DataFrame.equals(excel_data["Sheet1"], df)
+
+#     excel_dn.write(df[0])
+#     excel_data = excel_dn.read()
+#     assert isinstance(excel_data, dict) and "Sheet1" in excel_data.keys()
+#     assert pl.DataFrame.equals(excel_dn.read()["Sheet1"], df[[0]])
+
+#     series = pl.Series([1, 2, 3])
+#     excel_dn.write(series)
+#     excel_data = excel_dn.read()
+#     assert isinstance(excel_data, dict) and "Sheet1" in excel_data.keys()
+#     assert np.array_equal(excel_dn.read()["Sheet1"].to_numpy(), pl.DataFrame(series).to_numpy())
+
+#     excel_dn.write(None)
+#     assert excel_dn.read().is_empty()
 
 
 def test_write_with_header_single_sheet_custom_exposed_type_with_sheet_name(tmp_excel_file):

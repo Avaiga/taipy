@@ -33,11 +33,10 @@ from .data_node_id import DataNodeId
 
 
 class _DataManager(_Manager[DataNode], _VersionMixin):
-    __DATA_NODE_CLASS_MAP = DataNode._class_map()  # type: ignore
+    _DATA_NODE_CLASS_MAP = DataNode._class_map()  # type: ignore
     _ENTITY_NAME = DataNode.__name__
     _EVENT_ENTITY_TYPE = EventEntityType.DATA_NODE
     _repository: _DataFSRepository
-    __NAME_KEY = "name"
 
     @classmethod
     def _bulk_get_or_create(
@@ -90,7 +89,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
             else:
                 storage_type = Config.sections[DataNodeConfig.name][_Config.DEFAULT_KEY].storage_type
 
-            return cls.__DATA_NODE_CLASS_MAP[storage_type](
+            return cls._DATA_NODE_CLASS_MAP[storage_type](
                 config_id=data_node_config.id,
                 scope=data_node_config.scope or DataNodeConfig._DEFAULT_SCOPE,
                 validity_period=data_node_config.validity_period,

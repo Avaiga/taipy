@@ -15,6 +15,7 @@ import pathlib
 
 import numpy as np
 import pandas as pd
+import polars as pl
 import pytest
 
 from taipy.config.common.scope import Scope
@@ -54,6 +55,16 @@ def test_read_with_header_numpy():
     assert isinstance(data_numpy, np.ndarray)
     assert len(data_numpy) == 10
     assert np.array_equal(data_numpy, pd.read_csv(csv_file_path).to_numpy())
+
+
+def test_read_with_header_polars():
+    csv_data_node_as_polars = CSVDataNode(
+        "bar", Scope.SCENARIO, properties={"path": csv_file_path, "has_header": True, "exposed_type": "polars"}
+    )
+    data_polars = csv_data_node_as_polars.read()
+    assert isinstance(data_polars, pl.DataFrame)
+    assert len(data_polars) == 10
+    assert np.array_equal(data_polars, pl.read_csv(csv_file_path))
 
 
 def test_read_with_header_custom_exposed_type():
@@ -98,6 +109,16 @@ def test_read_without_header_numpy():
     assert isinstance(data_numpy, np.ndarray)
     assert len(data_numpy) == 11
     assert np.array_equal(data_numpy, pd.read_csv(csv_file_path, header=None).to_numpy())
+
+
+def test_read_without_header_polars():
+    csv_data_node_as_polars = CSVDataNode(
+        "bar", Scope.SCENARIO, properties={"path": csv_file_path, "has_header": False, "exposed_type": "polars"}
+    )
+    data_polars = csv_data_node_as_polars.read()
+    assert isinstance(data_polars, pl.DataFrame)
+    assert len(data_polars) == 11
+    assert pl.DataFrame.equals(data_polars, pl.read_csv(csv_file_path, has_header=False))
 
 
 def test_read_without_header_custom_exposed_type():

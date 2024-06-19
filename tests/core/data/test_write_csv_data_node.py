@@ -15,6 +15,7 @@ import pathlib
 
 import numpy as np
 import pandas as pd
+import polars as pl
 import pytest
 from pandas.testing import assert_frame_equal
 
@@ -102,6 +103,24 @@ def test_write_with_header_numpy(tmp_csv_file):
     assert csv_dn.read().size == 0
 
 
+def test_write_with_header_polars(tmp_csv_file):
+    csv_dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": tmp_csv_file, "exposed_type": "polars"})
+
+    df = pl.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
+    csv_dn.write(df)
+    assert pl.DataFrame.equals(csv_dn.read(), df)
+
+    csv_dn.write(df["a"])
+    assert pl.DataFrame.equals(csv_dn.read(), df[["a"]])
+
+    series = pl.Series([1, 2, 3])
+    csv_dn.write(series)
+    assert np.array_equal(csv_dn.read().to_numpy(), series.to_frame().to_numpy())
+
+    csv_dn.write(None)
+    assert csv_dn.read().is_empty()
+
+
 def test_write_with_header_custom_exposed_type(tmp_csv_file):
     csv_dn = CSVDataNode("bar", Scope.SCENARIO, properties={"path": tmp_csv_file, "exposed_type": MyCustomObject})
 
@@ -146,6 +165,31 @@ def test_write_without_header_numpy(tmp_csv_file):
 
     csv_dn.write(None)
     assert csv_dn.read().size == 0
+
+
+def test_write_without_header_polars(tmp_csv_file):
+    csv_dn = CSVDataNode(
+        "foo", Scope.SCENARIO, properties={"path": tmp_csv_file, "exposed_type": "polars", "has_header": False}
+    )
+
+    df = pl.DataFrame([*zip([1, 2, 3], [4, 5, 6])])
+
+    csv_dn.write(df)
+    read_csv_df = csv_dn.read()
+    read_csv_df.columns = df.columns
+    assert pl.DataFrame.equals(read_csv_df, df)
+
+    csv_dn.write(df[:, 0])
+    read_csv_df = csv_dn.read()
+    read_csv_df.columns = df[:, [0]].columns
+    assert pl.DataFrame.equals(read_csv_df, df[:, [0]])
+
+    series = pl.Series([1, 2, 3])
+    csv_dn.write(series)
+    assert np.array_equal(csv_dn.read().to_numpy(), series.to_frame().to_numpy())
+
+    csv_dn.write(None)
+    assert csv_dn.read().is_empty()
 
 
 def test_write_without_header_custom_exposed_type(tmp_csv_file):

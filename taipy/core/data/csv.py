@@ -15,7 +15,6 @@ from typing import Any, Dict, List, Optional, Set
 
 import numpy as np
 import pandas as pd
-import polars as pl
 
 from taipy.config.common.scope import Scope
 
@@ -136,11 +135,12 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         return cls.__STORAGE_TYPE
 
     def _read(self):
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
+        exposed_type = self.properties[self._EXPOSED_TYPE_PROPERTY]
+        if exposed_type == self._EXPOSED_TYPE_PANDAS:
             return self._read_as_pandas_dataframe()
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_POLARS:
-            return self._read_as_polars_dataframe()
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
+        # if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_POLARS:
+        #     return self._read_as_polars_dataframe()
+        if exposed_type == self._EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy()
         return self._read_as()
 
@@ -173,22 +173,26 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 
-    def _read_as_polars_dataframe(
-        self, usecols: Optional[List[int]] = None, column_names: Optional[List[str]] = None
-    ) -> pd.DataFrame:
-        try:
-            if self.properties[self._HAS_HEADER_PROPERTY]:
-                if column_names:
-                    return pl.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY], columns=column_names)
-                return pl.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY])
-            else:
-                if usecols:
-                    return pl.read_csv(
-                        self._path, encoding=self.properties[self.__ENCODING_KEY], header=None, usecols=usecols
-                    )
-                return pl.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY], header=None)
-        except pl.exceptions.NoDataError:
-            return pl.DataFrame()
+    # def _read_as_polars_dataframe(
+    #     self, usecols: Optional[List[int]] = None, column_names: Optional[List[str]] = None
+    # ) -> pd.DataFrame:
+    #     properties = self.properties
+
+    #     try:
+    #         if properties[self._HAS_HEADER_PROPERTY]:
+    #             if column_names:
+    #                 return pl.read_csv(
+    #                     self._path, encoding=properties[self.__ENCODING_KEY], columns=column_names, has_header=True
+    #                 )
+    #             return pl.read_csv(self._path, encoding=properties[self.__ENCODING_KEY], has_header=True)
+    #         else:
+    #             if usecols:
+    #                 return pl.read_csv(
+    #                     self._path, encoding=properties[self.__ENCODING_KEY], has_header=False, usecols=usecols
+    #                 )
+    #             return pl.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY], has_header=False)
+    #     except pl.exceptions.NoDataError:
+    #         return pl.DataFrame()
 
     def _append(self, data: Any):
         if isinstance(data, pd.DataFrame):
@@ -198,16 +202,15 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                 self._path, mode="a", index=False, encoding=self.properties[self.__ENCODING_KEY], header=False
             )
 
-    def _write(self, data: Any):
+    def _write(self, data: Any, columns: Optional[List[str]] = None):
         exposed_type = self.properties[self._EXPOSED_TYPE_PROPERTY]
-        header = True if self.properties[self._HAS_HEADER_PROPERTY] else None
-
-        if exposed_type == self._EXPOSED_TYPE_POLARS and isinstance(data, (pl.DataFrame, pl.Series)):
-            data.write_csv(self._path, include_header=header or False)
-        else:
+        if self.properties[self._HAS_HEADER_PROPERTY]:
             self._convert_data_to_dataframe(exposed_type, data).to_csv(
                 self._path, index=False, encoding=self.properties[self.__ENCODING_KEY]
             )
+        self._convert_data_to_dataframe(exposed_type, data).to_csv(
+            self._path, index=False, encoding=self.properties[self.__ENCODING_KEY], header=None
+        )
 
     def write_with_column_names(self, data: Any, columns: Optional[List[str]] = None, job_id: Optional[JobId] = None):
         """Write a selection of columns.
@@ -217,8 +220,5 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             columns (Optional[List[str]]): The list of column names to write.
             job_id (JobId^): An optional identifier of the writer.
         """
-        df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
-        if columns and isinstance(df, pd.DataFrame):
-            df.columns = columns
-        df.to_csv(self._path, index=False, encoding=self.properties[self.__ENCODING_KEY])
+        self._write(data, columns)
         self.track_edit(timestamp=datetime.now(), job_id=job_id)

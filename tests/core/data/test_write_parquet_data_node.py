@@ -15,6 +15,7 @@ from importlib import util
 
 import numpy as np
 import pandas as pd
+import polars as pl
 import pytest
 from pandas.testing import assert_frame_equal
 
@@ -108,6 +109,32 @@ class TestWriteParquetDataNode:
 
         parquet_dn.write(None)
         assert parquet_dn.read().size == 0
+
+    def test_write_polars(self, tmpdir_factory):
+        temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.parquet"))
+        parquet_dn = ParquetDataNode(
+            "foo", Scope.SCENARIO, properties={"path": temp_file_path, "exposed_type": "polars"}
+        )
+
+        df = pl.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}])
+        parquet_dn.write(df)
+
+        assert pathlib.Path(temp_file_path).exists()
+
+        dn_data = parquet_dn.read()
+
+        assert isinstance(dn_data, pl.DataFrame)
+        assert dn_data.equals(df)
+
+        parquet_dn.write(df["a"])
+        assert pl.DataFrame.equals(parquet_dn.read(), df[["a"]])
+
+        series = pl.Series([1, 2, 3])
+        parquet_dn.write(series)
+        assert np.array_equal(parquet_dn.read().to_numpy(), pl.DataFrame(series).to_numpy())
+
+        parquet_dn.write(None)
+        assert parquet_dn.read().is_empty()
 
     def test_write_custom_exposed_type(self, tmpdir_factory):
         temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.parquet"))

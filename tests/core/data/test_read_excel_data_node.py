@@ -15,6 +15,7 @@ from typing import Dict
 
 import numpy as np
 import pandas as pd
+import polars as pl
 import pytest
 
 from taipy.config.common.scope import Scope
@@ -163,6 +164,17 @@ def test_read_with_header_numpy():
     assert np.array_equal(data_numpy, pd.read_excel(excel_file_path).to_numpy())
 
 
+def test_read_with_header_polars():
+    excel_data_node_as_polars = ExcelDataNode(
+        "bar", Scope.SCENARIO, properties={"path": excel_file_path, "sheet_name": "Sheet1", "exposed_type": "polars"}
+    )
+
+    data_polars = excel_data_node_as_polars.read()
+    assert isinstance(data_polars, pl.DataFrame)
+    assert len(data_polars) == 5
+    assert pl.DataFrame.equals(data_polars, pl.read_excel(excel_file_path, engine="openpyxl"))
+
+
 def test_read_with_header_custom_exposed_type():
     excel_data_node_as_custom_object = ExcelDataNode(
         "bar",
@@ -203,6 +215,16 @@ def test_read_without_header_numpy():
     assert isinstance(data_numpy, np.ndarray)
     assert len(data_numpy) == 6
     assert np.array_equal(data_numpy, pd.read_excel(excel_file_path, header=None).to_numpy())
+
+
+# def test_read_without_header_polars():
+#     excel_data_node_as_polars = ExcelDataNode(
+#         "bar", Scope.SCENARIO, properties={"path": excel_file_path, "has_header": False, "sheet_name": "Sheet1", "exposed_type": "polars"}
+#     )
+#     data_polars = excel_data_node_as_polars.read()
+#     assert isinstance(data_polars, pl.DataFrame)
+#     assert len(data_polars) == 6
+#     assert pl.DataFrame.equals(data_polars, pl.read_excel(excel_file_path, engine="openpyxl", read_options={"has_header": False}))
 
 
 def test_read_without_header_exposed_custom_type():
@@ -300,7 +322,7 @@ def test_read_multi_sheet_with_header_pandas():
     assert isinstance(data_pandas, Dict)
     assert len(data_pandas) == 2
     assert all(
-        len(data_pandas[sheet_name] == 5) and isinstance(data_pandas[sheet_name], pd.DataFrame)
+        len(data_pandas[sheet_name]) == 5 and isinstance(data_pandas[sheet_name], pd.DataFrame)
         for sheet_name in sheet_names
     )
     assert list(data_pandas.keys()) == sheet_names
@@ -331,7 +353,7 @@ def test_read_multi_sheet_with_header_numpy():
     assert isinstance(data_numpy, Dict)
     assert len(data_numpy) == 2
     assert all(
-        len(data_numpy[sheet_name] == 5) and isinstance(data_numpy[sheet_name], np.ndarray)
+        len(data_numpy[sheet_name]) == 5 and isinstance(data_numpy[sheet_name], np.ndarray)
         for sheet_name in sheet_names
     )
     assert list(data_numpy.keys()) == sheet_names
@@ -350,6 +372,37 @@ def test_read_multi_sheet_with_header_numpy():
     for key in data_numpy_no_sheet_name.keys():
         assert isinstance(data_numpy_no_sheet_name[key], np.ndarray)
         assert np.array_equal(data_numpy[key], data_numpy_no_sheet_name[key])
+
+
+def test_read_multi_sheet_with_header_polars():
+    # With sheet name
+    excel_data_node_as_polars = ExcelDataNode(
+        "bar", Scope.SCENARIO, properties={"path": excel_file_path, "sheet_name": sheet_names, "exposed_type": "polars"}
+    )
+
+    data_polars = excel_data_node_as_polars.read()
+    assert isinstance(data_polars, Dict)
+    assert len(data_polars) == 2
+    assert all(
+        len(data_polars[sheet_name]) == 5 and isinstance(data_polars[sheet_name], pl.DataFrame)
+        for sheet_name in sheet_names
+    )
+    assert list(data_polars.keys()) == sheet_names
+    for sheet_name in sheet_names:
+        assert pl.DataFrame.equals(
+            data_polars[sheet_name], pl.read_excel(excel_file_path, sheet_name=sheet_name, engine="openpyxl")
+        )
+
+    # Without sheet name
+    excel_data_node_as_polars_no_sheet_name = ExcelDataNode(
+        "bar", Scope.SCENARIO, properties={"path": excel_file_path, "exposed_type": "polars"}
+    )
+
+    data_polars_no_sheet_name = excel_data_node_as_polars_no_sheet_name.read()
+    assert isinstance(data_polars_no_sheet_name, Dict)
+    for key in data_polars_no_sheet_name.keys():
+        assert isinstance(data_polars_no_sheet_name[key], pl.DataFrame)
+        assert data_polars[key].equals(data_polars_no_sheet_name[key])
 
 
 def test_read_multi_sheet_with_header_single_custom_exposed_type():
@@ -523,6 +576,33 @@ def test_read_multi_sheet_without_header_numpy():
     for key in data_numpy_no_sheet_name.keys():
         assert isinstance(data_numpy_no_sheet_name[key], np.ndarray)
         assert np.array_equal(data_numpy[key], data_numpy_no_sheet_name[key])
+
+
+# def test_read_multi_sheet_without_header_polars():
+#     # With sheet name
+#     excel_data_node_as_polars = ExcelDataNode(
+#         "bar", Scope.SCENARIO, properties={"path": excel_file_path, "has_header": False, "sheet_name": sheet_names, "exposed_type": "polars"}
+#     )
+#     data_polars = excel_data_node_as_polars.read()
+#     assert isinstance(data_polars, Dict)
+#     assert len(data_polars) == 2
+#     assert all(len(data_polars[sheet_name]) == 6 for sheet_name in sheet_names)
+#     assert list(data_polars.keys()) == sheet_names
+#     for sheet_name in sheet_names:
+#         assert isinstance(data_polars[sheet_name], pl.DataFrame)
+#         assert pl.DataFrame.equals(
+#             data_polars[sheet_name], pd.read_excel(excel_file_path, header=None, sheet_name=sheet_name, engine="openpyxl")
+#         )
+
+#     # Without sheet name
+#     excel_data_node_as_pandas_no_sheet_name = ExcelDataNode(
+#         "bar", Scope.SCENARIO, properties={"path": excel_file_path, "has_header": False, "exposed_type": "polars"}
+#     )
+#     data_pandas_no_sheet_name = excel_data_node_as_pandas_no_sheet_name.read()
+#     assert isinstance(data_pandas_no_sheet_name, Dict)
+#     for key in data_pandas_no_sheet_name.keys():
+#         assert isinstance(data_pandas_no_sheet_name[key], pl.DataFrame)
+#         assert pl.DataFrame.equals(data_polars[key], data_pandas_no_sheet_name[key])
 
 
 def test_read_multi_sheet_without_header_single_custom_exposed_type():

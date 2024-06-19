@@ -28,7 +28,7 @@ class _TabularDataNodeMixin(object):
     _EXPOSED_TYPE_PANDAS = "pandas"
     _EXPOSED_TYPE_POLARS = "polars"
     _EXPOSED_TYPE_MODIN = "modin"  # Deprecated in favor of pandas since 3.1.0
-    __VALID_STRING_EXPOSED_TYPES = [_EXPOSED_TYPE_PANDAS, _EXPOSED_TYPE_NUMPY, _EXPOSED_TYPE_POLARS]
+    _VALID_STRING_EXPOSED_TYPES = [_EXPOSED_TYPE_PANDAS, _EXPOSED_TYPE_NUMPY, _EXPOSED_TYPE_POLARS]
 
     def __init__(self, **kwargs) -> None:
         self._decoder: Union[Callable[[List[Any]], Any], Callable[[Dict[Any, Any]], Any]]
@@ -46,13 +46,11 @@ class _TabularDataNodeMixin(object):
         if callable(custom_encoder):
             self._encoder = custom_encoder
 
-    def _convert_data_to_dataframe(self, exposed_type: Any, data: Any) -> Union[pd.DataFrame, pd.Series]:
+    def _convert_data_to_dataframe(self, exposed_type: Any, data: Any) -> Union[pd.DataFrame, pd.Series, pl.DataFrame]:
         if exposed_type == self._EXPOSED_TYPE_PANDAS and isinstance(data, (pd.DataFrame, pd.Series)):
             return data
         elif exposed_type == self._EXPOSED_TYPE_NUMPY and isinstance(data, np.ndarray):
             return pd.DataFrame(data)
-        elif exposed_type == self._EXPOSED_TYPE_POLARS and isinstance(data, (pl.DataFrame, pl.Series)):
-            return data
         elif isinstance(data, list) and not isinstance(exposed_type, str):
             return pd.DataFrame.from_records([self._encoder(row) for row in data])
         return pd.DataFrame(data)
@@ -70,7 +68,7 @@ class _TabularDataNodeMixin(object):
 
     @classmethod
     def _check_exposed_type(cls, exposed_type):
-        valid_string_exposed_types = cls.__VALID_STRING_EXPOSED_TYPES
+        valid_string_exposed_types = cls._VALID_STRING_EXPOSED_TYPES
         if isinstance(exposed_type, str) and exposed_type not in valid_string_exposed_types:
             raise InvalidExposedType(
                 f"Invalid string exposed type {exposed_type}. Supported values are "

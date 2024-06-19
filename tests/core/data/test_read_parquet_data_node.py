@@ -15,6 +15,7 @@ from importlib import util
 
 import numpy as np
 import pandas as pd
+import polars as pl
 import pytest
 
 from taipy.config.common.scope import Scope
@@ -93,6 +94,16 @@ class TestReadParquetDataNode:
         assert len(data_numpy) == 2
         assert np.array_equal(data_numpy, df.to_numpy())
 
+    def test_read_parquet_file_polars(self, parquet_file_path):
+        df = pl.read_parquet(parquet_file_path)
+        parquet_data_node_as_polars = ParquetDataNode(
+            "bar", Scope.SCENARIO, properties={"path": parquet_file_path, "exposed_type": "polars"}
+        )
+        data_polars = parquet_data_node_as_polars.read()
+        assert isinstance(data_polars, pl.DataFrame)
+        assert len(data_polars) == 2
+        assert data_polars.equals(df)
+
     def test_read_custom_exposed_type(self):
         example_parquet_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.parquet")
 
@@ -131,6 +142,31 @@ class TestReadParquetDataNode:
         assert isinstance(data_numpy, np.ndarray)
         assert len(data_numpy) == 5
         assert np.array_equal(data_numpy, df.to_numpy())
+
+    def test_read_parquet_folder_polars(self):
+        parquet_folder_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/parquet_example")
+
+        df = pl.read_parquet(parquet_folder_path, use_pyarrow=True)
+        parquet_data_node_as_polars = ParquetDataNode(
+            "bar", Scope.SCENARIO, properties={"path": parquet_folder_path, "exposed_type": "polars"}
+        )
+        data_polars = parquet_data_node_as_polars.read()
+        assert isinstance(data_polars, pl.DataFrame)
+        assert len(data_polars) == 5
+        assert data_polars.equals(df)
+
+        parquet_folder_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/parquet_example/*")
+        df = pl.read_parquet(parquet_folder_path, use_pyarrow=False)
+        parquet_data_node_as_polars = ParquetDataNode(
+            "tmp",
+            Scope.SCENARIO,
+            properties={"path": parquet_folder_path, "exposed_type": "polars", "engine": "fastparquet"},
+        )
+        data_polars = parquet_data_node_as_polars.read()
+
+        assert isinstance(data_polars, pl.DataFrame)
+        assert len(data_polars) == 5
+        assert data_polars.equals(df)
 
     def test_read_folder_custom_exposed_type(self):
         example_parquet_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/parquet_example")
