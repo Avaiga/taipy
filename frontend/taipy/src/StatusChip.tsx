@@ -3,7 +3,8 @@ import { SxProps, Theme } from "@mui/material";
 import Chip from "@mui/material/Chip";
 
 export enum Status {
-    SUBMITTED = 1,
+    SUBMITTED = 0,
+    UNDEFINED = 1,
     BLOCKED = 2,
     PENDING = 3,
     RUNNING = 4,

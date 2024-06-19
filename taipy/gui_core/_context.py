@@ -119,10 +119,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         else None
                     )
                     if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:  # type: ignore
-                        self.gui._broadcast(
-                            _GuiCoreContext._CORE_CHANGED_NAME,
-                            {"scenario": list(sequence.parent_ids)},  # type: ignore
-                        )
+                        self.broadcast_core_changed({"scenario": list(sequence.parent_ids)})
             except Exception as e:
                 _warn(f"Access to sequence {event.entity_id} failed", e)
         elif event.entity_type == EventEntityType.JOB:
@@ -133,25 +130,26 @@ class _GuiCoreContext(CoreEventConsumerBase):
         elif event.entity_type == EventEntityType.DATA_NODE:
             with self.lock:
                 self.data_nodes_by_owner = None
-            self.gui._broadcast(
-                _GuiCoreContext._CORE_CHANGED_NAME,
-                {"datanode": event.entity_id if event.operation != EventOperation.DELETION else True},
+            self.broadcast_core_changed(
+                {"datanode": event.entity_id if event.operation != EventOperation.DELETION else True}
             )
+
+    def broadcast_core_changed(self, payload: t.Dict[str, t.Any], client_id: t.Optional[str] = None):
+        self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, payload, client_id)
 
     def scenario_refresh(self, scenario_id: t.Optional[str]):
         with self.lock:
             self.scenario_by_cycle = None
             self.data_nodes_by_owner = None
-        self.gui._broadcast(
-            _GuiCoreContext._CORE_CHANGED_NAME,
-            {"scenario": scenario_id or True},
-        )
+        self.broadcast_core_changed({"scenario": scenario_id or True})
 
     def submission_status_callback(self, submission_id: t.Optional[str] = None, event: t.Optional[Event] = None):
         if not submission_id or not is_readable(t.cast(SubmissionId, submission_id)):
             return
         submission = None
         new_status = None
+        payload: t.Optional[t.Dict[str, t.Any]] = None
+        client_id: t.Optional[str] = None
         try:
             last_status = self.client_submission.get(submission_id)
             if not last_status:
@@ -161,6 +159,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if not submission or not submission.entity_id:
                 return
 
+            payload = {}
             new_status = t.cast(SubmissionStatus, submission.submission_status)
 
             client_id = submission.properties.get("client_id")
@@ -176,7 +175,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             if job.is_pending()
                             else None
                         )
-                    self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"tasks": running_tasks}, client_id)
+                    payload.update(tasks=running_tasks)
 
                     if last_status != new_status:
                         # callback
@@ -210,15 +209,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
             _warn(f"Submission ({submission_id}) is not available", e)
 
         finally:
-            entity_id = submission.entity_id if submission else None
-            self.gui._broadcast(
-                _GuiCoreContext._CORE_CHANGED_NAME,
-                {
-                    "jobs": True,
-                    "scenario": entity_id or False,
-                    "submission": new_status.value if new_status else None,
-                },
-            )
+            if payload is not None:
+                payload.update(jobs=True)
+                entity_id = submission.entity_id if submission else None
+                if entity_id:
+                    payload.update(scenario=entity_id)
+                    if new_status:
+                        payload.update(submission=new_status.value)
+                self.broadcast_core_changed(payload, client_id)
 
     def no_change_adapter(self, entity: t.List):
         return entity
