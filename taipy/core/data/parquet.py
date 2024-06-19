@@ -157,7 +157,10 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         with _Reloader():
             self._write_default_data(default_value)
 
-        if not self._last_edit_date and (isfile(self._path) or isdir(self._path)):
+        if (
+            not self._last_edit_date  # type: ignore
+            and (isfile(self._path) or isdir(self._path[:-1] if self._path.endswith("*") else self._path))
+        ):
             self._last_edit_date = datetime.now()
         self._TAIPY_PROPERTIES.update(
             {
