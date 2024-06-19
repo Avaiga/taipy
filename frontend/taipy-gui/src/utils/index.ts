@@ -128,7 +128,11 @@ export const getNumberString = (value: number, numberformat: string | undefined,
             : value.toLocaleString();
     } catch (e) {
         console.warn("Invalid number format:", (e as Error).message || e);
-        return `${value}`;
+        return (
+            (typeof value === "number" && value.toLocaleString()) ||
+            (typeof value === "string" && (value as string)) ||
+            ""
+        );
     }
 };
 
