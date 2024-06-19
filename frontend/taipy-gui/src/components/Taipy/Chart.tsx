@@ -615,40 +615,38 @@ const Chart = (props: ChartProp) => {
     );
 
     return render ? (
-        <Box id={id} data-testid={props.testId} className={className} ref={plotRef}>
-            <Tooltip title={hover || ""}>
-                <div>
-                    <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle}/>}>
-                        {Array.isArray(props.figure) && props.figure.length && props.figure[0].data !== undefined ? (
-                            <Plot
-                                data={props.figure[0].data as Data[]}
-                                layout={layout}
-                                style={style}
-                                onRelayout={onRelayout}
-                                onAfterPlot={onAfterPlot}
-                                onSelected={onSelect}
-                                onDeselect={onSelect}
-                                config={plotConfig}
-                                useResizeHandler
-                            />
-                        ) : (
-                            <Plot
-                                data={dataPl}
-                                layout={layout}
-                                style={style}
-                                onRelayout={onRelayout}
-                                onAfterPlot={onAfterPlot}
-                                onSelected={isOnClick(config.types) ? undefined : onSelect}
-                                onDeselect={isOnClick(config.types) ? undefined : onSelect}
-                                onClick={isOnClick(config.types) ? onSelect : undefined}
-                                config={plotConfig}
-                                useResizeHandler
-                            />
-                        )}
-                    </Suspense>
-                </div>
-            </Tooltip>
-        </Box>
+        <Tooltip title={hover || ""}>
+            <Box id={id} data-testid={props.testId} className={className} ref={plotRef}>
+                <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle}/>}>
+                    {Array.isArray(props.figure) && props.figure.length && props.figure[0].data !== undefined ? (
+                        <Plot
+                            data={props.figure[0].data as Data[]}
+                            layout={layout}
+                            style={style}
+                            onRelayout={onRelayout}
+                            onAfterPlot={onAfterPlot}
+                            onSelected={onSelect}
+                            onDeselect={onSelect}
+                            config={plotConfig}
+                            useResizeHandler
+                        />
+                    ) : (
+                        <Plot
+                            data={dataPl}
+                            layout={layout}
+                            style={style}
+                            onRelayout={onRelayout}
+                            onAfterPlot={onAfterPlot}
+                            onSelected={isOnClick(config.types) ? undefined : onSelect}
+                            onDeselect={isOnClick(config.types) ? undefined : onSelect}
+                            onClick={isOnClick(config.types) ? onSelect : undefined}
+                            config={plotConfig}
+                            useResizeHandler
+                        />
+                    )}
+                </Suspense>
+            </Box>
+        </Tooltip>
     ) : null;
 };
 

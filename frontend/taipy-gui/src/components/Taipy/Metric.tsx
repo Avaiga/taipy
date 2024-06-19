@@ -159,20 +159,18 @@ const Metric = (props: MetricProps) => {
     ])
 
     return (
-        <Box data-testid={props.testId} className={className}>
-            <Tooltip title={hover || ""}>
-                <div>
-                    <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle}/>}>
-                        <Plot
-                            data={data}
-                            layout={layout}
-                            style={style}
-                            useResizeHandler
-                        />
-                    </Suspense>
-                </div>
-            </Tooltip>
-        </Box>
+        <Tooltip title={hover || ""}>
+            <Box data-testid={props.testId} className={className}>
+                <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle}/>}>
+                    <Plot
+                        data={data}
+                        layout={layout}
+                        style={style}
+                        useResizeHandler
+                    />
+                </Suspense>
+            </Box>
+        </Tooltip>
     );
 }
 
