@@ -12,7 +12,7 @@
 import dataclasses
 import pathlib
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 from taipy.config.config import Config
 from taipy.core._manager._manager import _Manager
@@ -93,6 +93,9 @@ class MockRepository(_AbstractRepository):  # type: ignore
 
     def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> List[MockEntity]:
         return self.repo._search(attribute, value, filters)
+
+    def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
+        return self.repo._export(self, entity_id, folder_path)
 
     @property
     def _storage_folder(self) -> pathlib.Path:
