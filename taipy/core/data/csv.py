@@ -18,6 +18,7 @@ import pandas as pd
 
 from taipy.config.common.scope import Scope
 
+from .._entity._reload import _Reloader
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..job.job_id import JobId
 from ._file_datanode_mixin import _FileDataNodeMixin
@@ -116,7 +117,8 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             **properties,
         )
 
-        self._write_default_data(default_value)
+        with _Reloader():
+            self._write_default_data(default_value)
 
         self._TAIPY_PROPERTIES.update(
             {

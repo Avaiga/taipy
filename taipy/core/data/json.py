@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from taipy.config.common.scope import Scope
 
-from .._entity._reload import _self_reload
+from .._entity._reload import _Reloader, _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
 from ._file_datanode_mixin import _FileDataNodeMixin
 from .data_node import DataNode
@@ -112,7 +112,8 @@ class JSONDataNode(DataNode, _FileDataNodeMixin):
         self._decoder = self._properties.get(self._DECODER_KEY, _DefaultJSONDecoder)
         self._encoder = self._properties.get(self._ENCODER_KEY, _DefaultJSONEncoder)
 
-        self._write_default_data(default_value)
+        with _Reloader():
+            self._write_default_data(default_value)
 
         self._TAIPY_PROPERTIES.update(
             {
