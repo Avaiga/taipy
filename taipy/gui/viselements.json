@@ -1129,6 +1129,12 @@
                         "doc": "The type of the gauge.<br/>Possible values are:\n<ul>\n<li>\"none\"</li>\n<li>\"circular\"</li>\n<li>\"linear\"</li></ul>."
                     },
                     {
+                        "name": "title",
+                        "default_value": "None",
+                        "type": "str",
+                        "doc": "The title of the metric."
+                    },
+                    {
                         "name": "min",
                         "type": "int|float",
                         "default_value": "0",
