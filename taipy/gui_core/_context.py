@@ -56,6 +56,7 @@ from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event, EventOperation
 from taipy.core.notification.notifier import Notifier
 from taipy.core.submission.submission_status import SubmissionStatus
+from taipy.core.taipy import can_create
 from taipy.gui import Gui, State
 from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
@@ -209,11 +210,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
             _warn(f"Submission ({submission_id}) is not available", e)
 
         finally:
+            entity_id = submission.entity_id if submission else None
             self.gui._broadcast(
                 _GuiCoreContext._CORE_CHANGED_NAME,
                 {
                     "jobs": True,
-                    "scenario": (submission.entity_id if submission else None) or False,
+                    "scenario": entity_id or False,
                     "submission": new_status.value if new_status else None,
                 },
             )
@@ -1104,3 +1106,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     _warn(f"dag.on_action(): Exception raised in '{args[1]}()' with '{args[0]}'", e)
         elif args[1]:
             _warn(f"dag.on_action(): Invalid function '{args[1]}()'.")
+
+    def get_creation_reason(self):
+        return "" if (reason := can_create()) else f"Cannot create scenario: {reason.reasons}"
