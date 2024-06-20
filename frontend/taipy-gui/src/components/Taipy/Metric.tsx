@@ -12,7 +12,7 @@
  */
 
 import React, {CSSProperties, lazy, Suspense, useMemo} from 'react';
-import {Data} from "plotly.js";
+import {Data, Delta, Layout} from "plotly.js";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import Tooltip from "@mui/material/Tooltip";
@@ -25,6 +25,7 @@ import {darkThemeTemplate} from "../../themes/darkThemeTemplate";
 const Plot = lazy(() => import("react-plotly.js"));
 
 interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
+    title?: string
     type?: string
     min?: number
     max?: number
@@ -50,7 +51,7 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     template_Light_?: string;
 }
 
-const emptyLayout = {} as Record<string, Record<string, unknown>>;
+const emptyLayout = {} as Partial<Layout>;
 const defaultStyle = {position: "relative", display: "inline-block"};
 
 const Metric = (props: MetricProps) => {
@@ -103,7 +104,7 @@ const Metric = (props: MetricProps) => {
                     prefix: extractPrefix(props.deltaFormat),
                     suffix: extractSuffix(props.deltaFormat),
                     valueformat: sprintfToD3Converter(props.deltaFormat)
-                },
+                } as Partial<Delta>,
                 gauge: {
                     axis: {
                         range: [
@@ -120,7 +121,7 @@ const Metric = (props: MetricProps) => {
                     }
                 },
             }
-        ];
+        ] as Data[];
     }, [
         props.format,
         props.deltaFormat,
@@ -163,28 +164,33 @@ const Metric = (props: MetricProps) => {
             layout.template = template;
         }
 
-        return layout
+        if (props.title) {
+            layout.title = props.title;
+        }
+
+        return layout as Partial<Layout>;
     }, [
+        props.title,
         props.template,
         props.template_Dark_,
         props.template_Light_,
         theme.palette.mode,
-        baseLayout
+        baseLayout,
     ])
 
     return (
-        <Box data-testid={props.testId} className={className}>
-            <Tooltip title={hover || ""}>
+        <Tooltip title={hover || ""}>
+            <Box data-testid={props.testId} className={className}>
                 <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle}/>}>
                     <Plot
-                        data={data as Data[]}
+                        data={data}
                         layout={layout}
                         style={style}
                         useResizeHandler
                     />
                 </Suspense>
-            </Tooltip>
-        </Box>
+            </Box>
+        </Tooltip>
     );
 }
 
