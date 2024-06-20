@@ -173,22 +173,16 @@ def on_init(state):
 # User interface definition
 my_page = """
 # Film recommendation
-
 ## Choose your favorite genre
 <|{selected_genre}|selector|lov={genres}|on_change=on_genre_selected|dropdown|>
-
 ## Here are the top seven picks by popularity
 <|{df}|chart|x=Title|y=Popularity %|type=bar|title=Film Popularity|>
 """
-
 Gui(page=my_page).run()
 ```
-
 And the final result:
 <img src="readme_img/readme_app.gif" />
-
 &nbsp;
-
 ## ⚒️ Contributing
 Want to help build Taipy? Check out our [Contributing Guide](https://github.com/Avaiga/taipy/blob/develop/CONTRIBUTING.md).
 
