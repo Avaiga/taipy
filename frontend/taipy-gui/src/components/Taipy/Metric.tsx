@@ -45,6 +45,7 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     showValue?: boolean;
     format?: string;
     deltaFormat?: string;
+    colorMap?: string;
     template?: string;
     template_Dark_?: string;
     template_Light_?: string;
@@ -66,6 +67,22 @@ const Metric = (props: MetricProps) => {
     const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const theme = useTheme();
+
+    const colorMap = useMemo(() => {
+        try {
+            const obj = props.colorMap ? JSON.parse(props.colorMap) : null;
+            if (obj && typeof obj === 'object') {
+                const keys = Object.keys(obj);
+                return keys.sort((a, b) => Number(a) - Number(b)).map((key, index) => {
+                    const nextKey = keys[index + 1] !== undefined ? Number(keys[index + 1]) : props.max || 100;
+                    return {range: [Number(key), nextKey], color: obj[key]};
+                }).filter(item => item.color !== null)
+            }
+        } catch (e) {
+            console.info(`Error parsing color_map value (metric).\n${(e as Error).message || e}`);
+        }
+        return undefined;
+    }, [props.colorMap, props.max])
 
     const data = useMemo(() => {
         const mode = (props.type === "none") ? [] : ["gauge"];
@@ -95,6 +112,7 @@ const Metric = (props: MetricProps) => {
                             props.max || 100
                         ]
                     },
+                    steps: colorMap,
                     shape: props.type === "linear" ? "bullet" : "angular",
                     threshold: {
                         line: {color: "red", width: 4},
@@ -113,7 +131,8 @@ const Metric = (props: MetricProps) => {
         value,
         showValue,
         delta,
-        threshold
+        threshold,
+        colorMap
     ]);
 
     const style = useMemo(
