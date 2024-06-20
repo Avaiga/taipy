@@ -78,7 +78,6 @@ class _Factory:
         .set_value_and_default(with_update=False)
         .set_attributes(
             [
-                ("id",),
                 ("on_action", PropertyType.function),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
@@ -90,7 +89,6 @@ class _Factory:
         .set_value_and_default(with_update=True, with_default=False, var_type=PropertyType.data)
         .set_attributes(
             [
-                ("id",),
                 ("on_action", PropertyType.function),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
@@ -107,7 +105,6 @@ class _Factory:
         .set_value_and_default(with_default=False, var_type=PropertyType.data)
         .set_attributes(
             [
-                ("id",),
                 ("title",),
                 ("width", PropertyType.string_or_number),
                 ("height", PropertyType.string_or_number),
@@ -140,7 +137,6 @@ class _Factory:
         .set_attributes(
             [
                 ("with_time", PropertyType.boolean),
-                ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("editable", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
@@ -160,7 +156,6 @@ class _Factory:
         .set_attributes(
             [
                 ("with_time", PropertyType.boolean),
-                ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("editable", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
@@ -181,7 +176,6 @@ class _Factory:
         ._set_partial()  # partial should be set before page
         .set_attributes(
             [
-                ("id",),
                 ("page",),
                 ("title",),
                 ("on_action", PropertyType.function),
@@ -201,7 +195,6 @@ class _Factory:
         ._set_partial()  # partial should be set before page
         .set_attributes(
             [
-                ("id",),
                 ("page",),
                 ("expanded", PropertyType.dynamic_boolean, True, True, False),
                 ("hover_text", PropertyType.dynamic_string),
@@ -218,7 +211,6 @@ class _Factory:
         ._set_content("content", image=False)
         .set_attributes(
             [
-                ("id",),
                 ("on_action", PropertyType.function),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("render", PropertyType.dynamic_boolean, True),
@@ -238,7 +230,6 @@ class _Factory:
         ._set_file_content()
         .set_attributes(
             [
-                ("id",),
                 ("on_action", PropertyType.function),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("multiple", PropertyType.boolean, False),
@@ -258,7 +249,6 @@ class _Factory:
         ._set_content("content")
         .set_attributes(
             [
-                ("id",),
                 ("on_action", PropertyType.function),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("width",),
@@ -275,7 +265,6 @@ class _Factory:
         .set_value_and_default(with_update=False, native_type=True)
         .set_attributes(
             [
-                ("id",),
                 ("min", PropertyType.number),
                 ("max", PropertyType.number),
                 ("value", PropertyType.dynamic_number),
@@ -296,7 +285,6 @@ class _Factory:
         ._set_propagate()
         .set_attributes(
             [
-                ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
                 ("on_change", PropertyType.function),
@@ -314,7 +302,6 @@ class _Factory:
         .set_value_and_default(with_default=False)
         .set_attributes(
             [
-                ("id",),
                 ("columns[mobile]",),
                 ("gap",),
             ]
@@ -325,7 +312,6 @@ class _Factory:
         .set_value_and_default(default_val="Log-in")
         .set_attributes(
             [
-                ("id",),
                 ("message", PropertyType.dynamic_string),
                 ("on_action", PropertyType.function, "on_login"),
             ]
@@ -338,7 +324,6 @@ class _Factory:
         )
         .set_attributes(
             [
-                ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("label",),
                 ("width",),
@@ -359,7 +344,7 @@ class _Factory:
         .set_value_and_default(var_type=PropertyType.dynamic_number, native_type=True)
         .set_attributes(
             [
-                ("id",),
+                ("title",),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("layout", PropertyType.dynamic_dict),
                 ("type", PropertyType.string, "circular"),
@@ -372,6 +357,8 @@ class _Factory:
                 ("show_value", PropertyType.boolean, True),
                 ("format", PropertyType.string),
                 ("delta_format", PropertyType.string),
+                ("color_map", PropertyType.dict),
+                ("hover_text", PropertyType.dynamic_string),
                 ("template", PropertyType.dict),
                 ("template[dark]", PropertyType.dict),
                 ("template[light]", PropertyType.dict),
@@ -381,7 +368,6 @@ class _Factory:
             gui=gui, control_type=control_type, element_name="NavBar", attributes=attrs, default_value=None
         ).set_attributes(
             [
-                ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
                 ("lov", PropertyType.single_lov),
@@ -399,7 +385,6 @@ class _Factory:
         ._set_propagate()
         .set_attributes(
             [
-                ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
                 ("on_change", PropertyType.function),
@@ -415,7 +400,6 @@ class _Factory:
         ._set_partial()  # partial should be set before page
         .set_attributes(
             [
-                ("id",),
                 ("page",),
                 ("anchor", PropertyType.string, "left"),
                 ("on_close", PropertyType.function),
@@ -434,7 +418,6 @@ class _Factory:
         ._set_partial()  # partial should be set before page
         .set_attributes(
             [
-                ("id",),
                 ("page", PropertyType.dynamic_string),
                 ("render", PropertyType.dynamic_boolean, True),
                 ("height", PropertyType.dynamic_string),
@@ -452,7 +435,6 @@ class _Factory:
                 ("filter", PropertyType.boolean),
                 ("height", PropertyType.string_or_number),
                 ("hover_text", PropertyType.dynamic_string),
-                ("id",),
                 ("value_by_id", PropertyType.boolean),
                 ("multiple", PropertyType.boolean),
                 ("width", PropertyType.string_or_number),
@@ -476,7 +458,6 @@ class _Factory:
                 ("active", PropertyType.dynamic_boolean, True),
                 ("height",),
                 ("hover_text", PropertyType.dynamic_string),
-                ("id",),
                 ("value_by_id", PropertyType.boolean),
                 ("max", PropertyType.number, 100),
                 ("min", PropertyType.number, 0),
@@ -501,7 +482,6 @@ class _Factory:
         .set_value_and_default(with_update=False)
         .set_attributes(
             [
-                ("id",),
                 ("without_close", PropertyType.boolean, False),
                 ("hover_text", PropertyType.dynamic_string),
             ]
@@ -522,7 +502,6 @@ class _Factory:
                 ("auto_loading", PropertyType.boolean),
                 ("width", PropertyType.string_or_number, "100%"),
                 ("height", PropertyType.string_or_number, "80vh"),
-                ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("editable", PropertyType.dynamic_boolean, True),
                 ("on_edit", PropertyType.function),
@@ -550,7 +529,6 @@ class _Factory:
         .set_attributes(
             [
                 ("format",),
-                ("id",),
                 ("hover_text", PropertyType.dynamic_string),
                 ("raw", PropertyType.boolean, False),
                 ("mode",),
@@ -564,7 +542,6 @@ class _Factory:
             [
                 ("active", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
-                ("id",),
                 ("label",),
                 ("value_by_id", PropertyType.boolean),
                 ("unselected_value", PropertyType.string, ""),
@@ -590,7 +567,6 @@ class _Factory:
                 ("filter", PropertyType.boolean),
                 ("hover_text", PropertyType.dynamic_string),
                 ("height", PropertyType.string_or_number),
-                ("id",),
                 ("value_by_id", PropertyType.boolean),
                 ("multiple", PropertyType.boolean),
                 ("width", PropertyType.string_or_number),
@@ -607,7 +583,7 @@ class _Factory:
             element_name="Progress",
             attributes=attrs,
         )
-        .set_value_and_default(var_type=PropertyType.dynamic_number)
+        .set_value_and_default(var_type=PropertyType.dynamic_number, native_type=True)
         .set_attributes(
             [
                 ("linear", PropertyType.boolean, False),

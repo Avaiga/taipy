@@ -1129,6 +1129,12 @@
                         "doc": "The type of the gauge.<br/>Possible values are:\n<ul>\n<li>\"none\"</li>\n<li>\"circular\"</li>\n<li>\"linear\"</li></ul>."
                     },
                     {
+                        "name": "title",
+                        "default_value": "None",
+                        "type": "str",
+                        "doc": "The title of the metric."
+                    },
+                    {
                         "name": "min",
                         "type": "int|float",
                         "default_value": "0",
@@ -1165,6 +1171,11 @@
                         "name": "delta_format",
                         "type": "str",
                         "doc": "The format to use when displaying the delta value.<br/>This uses the <code>printf</code> syntax."
+                    },
+                    {
+                        "name": "color_map",
+                        "type": "dict",
+                        "doc": "TODO The color_map is used to display different colors for different ranges of the metric. The color_map's keys represent the starting point of each range, which is a number, while the values represent the corresponding color for that range. If the value associated with a key is set to None, it implies that the corresponding range will not be assigned any color."
                     },
                     {
                         "name": "width",
