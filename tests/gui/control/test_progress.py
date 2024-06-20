@@ -20,7 +20,7 @@ def test_circular_progress_indeterminate_md(gui: Gui, helpers):
 
 def test_circular_progress_determinate_md(gui: Gui, helpers):
     md_string = "<|progress|value=50|show_value|>"
-    expected_list = ["<Progress", 'value="50"']
+    expected_list = ["<Progress", 'value={50.0}']
     helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -32,7 +32,7 @@ def test_linear_progress_indeterminate_md(gui: Gui, helpers):
 
 def test_linear_progress_determinate_md(gui: Gui, helpers):
     md_string = "<|progress|value=50|show_value|linear|>"
-    expected_list = ["<Progress", 'value="50"', "linear={true}"]
+    expected_list = ["<Progress", 'value={50.0}', "linear={true}"]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -44,7 +44,7 @@ def test_circular_progress_indeterminate_html(gui: Gui, helpers):
 
 def test_circular_progress_determinate_html(gui: Gui, helpers):
     html_string = '<taipy:progress show_value value="50"/>'
-    expected_list = ["<Progress", 'value="50"']
+    expected_list = ["<Progress", 'value={50.0}']
     helpers.test_control_html(gui, html_string, expected_list)
 
 
@@ -56,5 +56,5 @@ def test_linear_progress_indeterminate_html(gui: Gui, helpers):
 
 def test_linear_progress_determinate_html(gui: Gui, helpers):
     html_string = '<taipy:progress linear show_value value="50"/>'
-    expected_list = ["<Progress", "linear={true}", 'value="50"']
+    expected_list = ["<Progress", "linear={true}", 'value={50.0}']
     helpers.test_control_html(gui, html_string, expected_list)

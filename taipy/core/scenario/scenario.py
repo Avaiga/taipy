@@ -633,7 +633,7 @@ class Scenario(_Entity, Submittable, _Labeled):
                 will not be exported. The default value is False.
 
         Raises:
-            ExportFolderAlreadyExist^: If the `folder_path` already exists and the override parameter is False.
+            ExportPathAlreadyExists^: If the `folder_path` already exists and the override parameter is False.
         """
         from ... import core as tp
 

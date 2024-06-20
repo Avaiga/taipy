@@ -99,6 +99,7 @@ interface ScenarioSelectorProps {
     sort?: string;
     updateScVars?: string;
     showSearch?: boolean;
+    creationNotAllowed?: string;
 }
 
 interface ScenarioEditDialogProps {
@@ -435,7 +436,8 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
         multiple = false,
         updateVars = "",
         updateScVars = "",
-        showSearch = true
+        showSearch = true,
+        creationNotAllowed = "",
     } = props;
     const [open, setOpen] = useState(false);
     const [actionEdit, setActionEdit] = useState<boolean>(false);
@@ -541,9 +543,19 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                     showSearch={showSearch}
                 />
                 {showAddButton ? (
-                    <Button variant="outlined" onClick={onDialogOpen} fullWidth endIcon={<Add />} disabled={!active}>
-                        Add scenario
-                    </Button>
+                    <Tooltip title={creationNotAllowed ? creationNotAllowed : "Create a new Scenario"}>
+                        <span>
+                            <Button
+                                variant="outlined"
+                                onClick={onDialogOpen}
+                                fullWidth
+                                endIcon={<Add />}
+                                disabled={!active || !!creationNotAllowed}
+                            >
+                                Add scenario
+                            </Button>
+                        </span>
+                    </Tooltip>
                 ) : null}
                 <Box>{props.error}</Box>
             </Box>
