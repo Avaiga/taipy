@@ -93,11 +93,11 @@ describe("getDateTimeString", () => {
         expect(myWarn).toHaveBeenCalledWith("Invalid date format:", "Invalid time value")
     });
     it("returns for bad format", async () => {
-        expect(getDateTimeString("2024-10-05", "D", getDateFormatConfig())).toContain("05 2024");
+        expect(getDateTimeString("2024-10-05", "ABCDEF", getDateFormatConfig())).toContain("05 2024");
         expect(myWarn).toHaveBeenCalled()
         expect(myWarn.mock.lastCall).toHaveLength(2)
         expect(myWarn.mock.lastCall[0]).toBe("Invalid date format:")
-        expect(myWarn.mock.lastCall[1]).toContain("Use `d` instead of `D`")
+        expect(myWarn.mock.lastCall[1]).toContain("Format string contains an unescaped latin alphabet character `A`")
     });
     it("returns for null", async () => {
         expect(getDateTimeString(null as unknown as string, "dd-MM-yy", getDateFormatConfig())).toBe("null");

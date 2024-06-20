@@ -111,10 +111,10 @@ export const getDateTimeString = (
             return formatInTimeZone(
                 dateVal || "",
                 formatConf.forceTZ || !tz ? formatConf.timeZone : tz,
-                datetimeformat || formatConf.dateTime
+                datetimeformat || formatConf.dateTime,  {useAdditionalDayOfYearTokens: true}
             );
         }
-        return format(dateVal || 0, datetimeformat || formatConf.date);
+        return format(dateVal || 0, datetimeformat || formatConf.date,  {useAdditionalDayOfYearTokens: true});
     } catch (e) {
         console.warn("Invalid date format:", (e as Error).message || e);
         return `${dateVal}`;
