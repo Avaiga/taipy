@@ -7,7 +7,7 @@ import { DataManager, ModuleData } from "./dataManager";
 export abstract class WsAdapter {
     abstract supportedMessageTypes: string[];
 
-    abstract handleWsMessage(message: WsMessage, app: TaipyApp): void;
+    abstract handleWsMessage(message: WsMessage, app: TaipyApp): boolean;
 }
 
 interface MultipleUpdatePayload {
@@ -28,7 +28,7 @@ export class TaipyWsAdapter extends WsAdapter {
         this.supportedMessageTypes = ["MU", "ID", "GMC", "GDT", "AID", "GR", "AL"];
         this.initWsMessageTypes = ["ID", "AID", "GMC"];
     }
-    handleWsMessage(message: WsMessage, taipyApp: TaipyApp) {
+    handleWsMessage(message: WsMessage, taipyApp: TaipyApp): boolean {
         if (message.type) {
             if (message.type === "MU" && Array.isArray(message.payload)) {
                 for (const muPayload of message.payload as [MultipleUpdatePayload]) {
@@ -65,7 +65,8 @@ export class TaipyWsAdapter extends WsAdapter {
             } else if (message.type === "AID") {
                 const payload = message.payload as Record<string, unknown>;
                 if (payload.name === "reconnect") {
-                    return taipyApp.init();
+                    taipyApp.init();
+                    return true;
                 }
                 taipyApp.appId = payload.id as string;
             } else if (message.type === "GR") {
@@ -76,7 +77,9 @@ export class TaipyWsAdapter extends WsAdapter {
                 taipyApp.onNotify(taipyApp, payload.atype, payload.message);
             }
             this.postWsMessageProcessing(message, taipyApp);
+            return true;
         }
+        return false;
     }
     postWsMessageProcessing(message: WsMessage, taipyApp: TaipyApp) {
         // perform data population only when all necessary metadata is ready

@@ -32,7 +32,10 @@ export const initSocket = (socket: Socket, taipyApp: TaipyApp) => {
         // handle messages with registered websocket adapters
         for (const adapter of taipyApp.wsAdapters) {
             if (adapter.supportedMessageTypes.includes(message.type)) {
-                adapter.handleWsMessage(message, taipyApp);
+                const messageResolved = adapter.handleWsMessage(message, taipyApp);
+                if (messageResolved) {
+                    return;
+                }
             }
         }
     });

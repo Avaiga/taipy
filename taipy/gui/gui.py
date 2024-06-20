@@ -661,6 +661,7 @@ class Gui:
                 _warn(f"Decoding Message has failed: {message}", e)
 
     # To be expanded by inheriting classes
+    # this will be used to handle ws messages that is not handled by the base Gui class
     def _manage_external_message(self, msg_type: _WsType, message: dict) -> None:
         pass
 

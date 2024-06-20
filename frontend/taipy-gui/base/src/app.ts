@@ -111,7 +111,7 @@ export class TaipyApp {
 
     // Public methods
     registerWsAdapter(wsAdapter: WsAdapter) {
-        this.wsAdapters.push(wsAdapter);
+        this.wsAdapters.unshift(wsAdapter);
     }
 
     getEncodedName(varName: string, module: string) {
