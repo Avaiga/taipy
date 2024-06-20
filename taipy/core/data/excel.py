@@ -156,6 +156,15 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             return self._read_as_numpy()
         return self._read_as()
 
+    def _read_sheet_with_exposed_type(
+        self, sheet_exposed_type: str, sheet_name: str
+    ) -> Optional[Union[np.ndarray, pd.DataFrame]]:
+        if sheet_exposed_type == self._EXPOSED_TYPE_NUMPY:
+            return self._read_as_pandas_dataframe(sheet_name).to_numpy()  # type: ignore
+        elif sheet_exposed_type == self._EXPOSED_TYPE_PANDAS:
+            return self._read_as_pandas_dataframe(sheet_name)
+        return None
+
     def _read_as(self):
         try:
             excel_file = load_workbook(self._path)
@@ -191,10 +200,8 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                         sheet_exposed_type = exposed_type[i]
 
                     if isinstance(sheet_exposed_type, str):
-                        if sheet_exposed_type == self._EXPOSED_TYPE_NUMPY:
-                            work_books[sheet_name] = self._read_as_pandas_dataframe(sheet_name).to_numpy()
-                        elif sheet_exposed_type == self._EXPOSED_TYPE_PANDAS:
-                            work_books[sheet_name] = self._read_as_pandas_dataframe(sheet_name)
+                        if sheet_data := self._read_sheet_with_exposed_type(sheet_exposed_type, sheet_name):
+                            work_books[sheet_name] = sheet_data
                         continue
 
                 res = [[col.value for col in row] for row in work_sheet.rows]
@@ -225,9 +232,10 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
     def __get_sheet_names_and_header(self, sheet_names):
         kwargs = {}
+        properties = self.properties
         if sheet_names is None:
-            sheet_names = self.properties[self.__SHEET_NAME_PROPERTY]
-        if not self.properties[self._HAS_HEADER_PROPERTY]:
+            sheet_names = properties[self.__SHEET_NAME_PROPERTY]
+        if not properties[self._HAS_HEADER_PROPERTY]:
             kwargs["header"] = None
         return sheet_names, kwargs
 
@@ -281,7 +289,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         else:
             self.__append_excel_with_single_sheet(pd.DataFrame(data).to_excel, index=False, header=False)
 
-    def __write_excel_with_single_sheet(self, write_excel_fct, *args, **kwargs):
+    def _write_excel_with_single_sheet(self, write_excel_fct, *args, **kwargs):
         if sheet_name := self.properties.get(self.__SHEET_NAME_PROPERTY):
             if not isinstance(sheet_name, str):
                 if len(sheet_name) > 1:
@@ -292,7 +300,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         else:
             write_excel_fct(*args, **kwargs)
 
-    def __write_excel_with_multiple_sheets(self, data: Any, columns: List[str] = None):
+    def _write_excel_with_multiple_sheets(self, data: Any, columns: List[str] = None):
         with pd.ExcelWriter(self._path) as writer:
             # Each key stands for a sheet name
             for key in data.keys():
@@ -305,10 +313,10 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
     def _write(self, data: Any):
         if isinstance(data, Dict):
-            return self.__write_excel_with_multiple_sheets(data)
+            return self._write_excel_with_multiple_sheets(data)
         else:
             data = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
-            self.__write_excel_with_single_sheet(
+            self._write_excel_with_single_sheet(
                 data.to_excel, self._path, index=False, header=self.properties[self._HAS_HEADER_PROPERTY] or None
             )
 
@@ -321,10 +329,10 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             job_id (JobId^): An optional identifier of the writer.
         """
         if isinstance(data, Dict) and all(isinstance(x, (pd.DataFrame, np.ndarray)) for x in data.values()):
-            self.__write_excel_with_multiple_sheets(data, columns=columns)
+            self._write_excel_with_multiple_sheets(data, columns=columns)
         else:
             df = pd.DataFrame(data)
             if columns:
                 df.columns = pd.Index(columns, dtype="object")
-            self.__write_excel_with_single_sheet(df.to_excel, self.path, index=False)
+            self._write_excel_with_single_sheet(df.to_excel, self.path, index=False)
         self.track_edit(timestamp=datetime.now(), job_id=job_id)

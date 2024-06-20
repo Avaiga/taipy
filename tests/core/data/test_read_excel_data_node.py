@@ -300,7 +300,7 @@ def test_read_multi_sheet_with_header_pandas():
     assert isinstance(data_pandas, Dict)
     assert len(data_pandas) == 2
     assert all(
-        len(data_pandas[sheet_name] == 5) and isinstance(data_pandas[sheet_name], pd.DataFrame)
+        len(data_pandas[sheet_name]) == 5 and isinstance(data_pandas[sheet_name], pd.DataFrame)
         for sheet_name in sheet_names
     )
     assert list(data_pandas.keys()) == sheet_names
@@ -331,7 +331,7 @@ def test_read_multi_sheet_with_header_numpy():
     assert isinstance(data_numpy, Dict)
     assert len(data_numpy) == 2
     assert all(
-        len(data_numpy[sheet_name] == 5) and isinstance(data_numpy[sheet_name], np.ndarray)
+        len(data_numpy[sheet_name]) == 5 and isinstance(data_numpy[sheet_name], np.ndarray)
         for sheet_name in sheet_names
     )
     assert list(data_numpy.keys()) == sheet_names
