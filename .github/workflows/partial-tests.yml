@@ -51,6 +51,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{matrix.python-version}}
+          cache: 'pipenv'
+          cache-dependency-path: 'Pipfile'
       - name: Install Setuptools and wheel
         run: pip install --upgrade setuptools wheel
 
@@ -64,11 +66,34 @@ jobs:
         if: matrix.os == 'macos-13'
         run: brew install libmagic
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        if: steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true'
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Frontend Bundle Build
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: Hash frontend source code
         if: steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true'
+        id: hash-frontend
+        run: |
+          pipenv run python tools/frontend/hash_source.py
+          echo "HASH=$(cat hash.txt)" >> $GITHUB_OUTPUT
+          rm hash.txt
+        shell: bash
+      - name: Restore cached frontend build
+        if: steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true'
+        id: cache-fe-build
+        uses: actions/cache@v4
+        with:
+          path: |
+            taipy/gui/webapp
+            taipy/gui_core/lib
+          key: frontend-build-${{ runner.os }}-${{ steps.hash-frontend.outputs.HASH }}
+
+      - name: Frontend Bundle Build
+        if: (steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true') && steps.cache-fe-build.outputs.cache-hit != 'true'
         run: pipenv run python tools/frontend/bundle_build.py
 
       - name: Install Playwright
@@ -128,9 +153,13 @@ jobs:
             core:
               - 'taipy/core/**'
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python with cache
+        if: steps.changes.outputs.core == 'true'
+        uses: actions/setup-python@v5
         with:
           python-version: ${{matrix.python-version}}
+          cache: 'pipenv'
+          cache-dependency-path: 'Pipfile'
 
       - name: Install pipenv
         if: steps.changes.outputs.core == 'true'
@@ -167,9 +196,13 @@ jobs:
             core:
               - 'taipy/core/**'
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python with cache
+        if: steps.changes.outputs.core == 'true'
+        uses: actions/setup-python@v5
         with:
           python-version: ${{matrix.python-version}}
+          cache: 'pipenv'
+          cache-dependency-path: 'Pipfile'
 
       - name: Install pipenv
         if: steps.changes.outputs.core == 'true'
