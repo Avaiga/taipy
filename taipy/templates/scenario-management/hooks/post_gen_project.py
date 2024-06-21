@@ -50,6 +50,8 @@ else:
 git_init_message = ""
 if "{{ cookiecutter.__git }}".upper() in ["YES", "Y"]:
     git_init_message = initialize_as_git_project(os.getcwd())
+else:
+    os.remove(os.path.join(os.getcwd(), ".gitignore"))
 
 main_file_name = "{{cookiecutter.__main_file}}.py"
 print(
