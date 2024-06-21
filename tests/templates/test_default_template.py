@@ -26,9 +26,7 @@ def test_default_answer(tmpdir):
     )
 
     assert os.listdir(tmpdir) == ["taipy_application"]
-    assert sorted(os.listdir(os.path.join(tmpdir, "taipy_application"))) == sorted(
-        ["requirements.txt", "main.py", "images"]
-    )
+    assert sorted(os.listdir(os.path.join(tmpdir, "taipy_application"))) == sorted(["requirements.txt", "main.py"])
 
     taipy_path = os.getcwd()
     stdout = _run_template(taipy_path, os.path.join(tmpdir, "taipy_application"), "main.py")
@@ -46,9 +44,7 @@ def test_main_file_with_and_without_extension(tmpdir):
             "Application main Python file": "app.py",
         },
     )
-    assert sorted(os.listdir(os.path.join(tmpdir, "taipy_application"))) == sorted(
-        ["requirements.txt", "app.py", "images"]
-    )
+    assert sorted(os.listdir(os.path.join(tmpdir, "taipy_application"))) == sorted(["requirements.txt", "app.py"])
 
     cookiecutter(
         template="taipy/templates/default",
@@ -59,7 +55,7 @@ def test_main_file_with_and_without_extension(tmpdir):
             "Application main Python file": "app",
         },
     )
-    assert sorted(os.listdir(os.path.join(tmpdir, "foo_app"))) == sorted(["requirements.txt", "app.py", "images"])
+    assert sorted(os.listdir(os.path.join(tmpdir, "foo_app"))) == sorted(["requirements.txt", "app.py"])
 
 
 def test_with_core_service(tmpdir):
@@ -74,7 +70,7 @@ def test_with_core_service(tmpdir):
     )
 
     assert sorted(os.listdir(os.path.join(tmpdir, "taipy_application"))) == sorted(
-        ["requirements.txt", "main.py", "images", "configuration", "algorithms"]
+        ["requirements.txt", "main.py", "configuration", "algorithms"]
     )
     with open(os.path.join(tmpdir, "taipy_application", "main.py")) as main_file:
         assert "core = Core()" in main_file.read()
@@ -98,9 +94,7 @@ def test_with_rest_service(tmpdir):
         },
     )
 
-    assert sorted(os.listdir(os.path.join(tmpdir, "taipy_application"))) == sorted(
-        ["requirements.txt", "main.py", "images"]
-    )
+    assert sorted(os.listdir(os.path.join(tmpdir, "taipy_application"))) == sorted(["requirements.txt", "main.py"])
     with open(os.path.join(tmpdir, "taipy_application", "main.py")) as main_file:
         assert "rest = Rest()" in main_file.read()
 
@@ -124,7 +118,7 @@ def test_with_both_core_rest_services(tmpdir):
     )
 
     assert sorted(os.listdir(os.path.join(tmpdir, "taipy_application"))) == sorted(
-        ["requirements.txt", "main.py", "images", "configuration", "algorithms"]
+        ["requirements.txt", "main.py", "configuration", "algorithms"]
     )
     with open(os.path.join(tmpdir, "taipy_application", "main.py")) as main_file:
         assert "rest = Rest()" in main_file.read()
@@ -149,9 +143,7 @@ def test_multipage_gui_template(tmpdir):
         },
     )
 
-    assert sorted(os.listdir(os.path.join(tmpdir, "foo_app"))) == sorted(
-        ["requirements.txt", "main.py", "pages", "images"]
-    )
+    assert sorted(os.listdir(os.path.join(tmpdir, "foo_app"))) == sorted(["requirements.txt", "main.py", "pages"])
     assert sorted(os.listdir(os.path.join(tmpdir, "foo_app", "pages"))) == sorted(
         ["name_1", "name_2", "name_3", "root.md", "root.py", "__init__.py"]
     )

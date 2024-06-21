@@ -31,7 +31,7 @@ def test_scenario_management_with_toml_config(tmpdir):
 
     assert os.listdir(tmpdir) == ["foo_app"]
     assert sorted(os.listdir(os.path.join(tmpdir, "foo_app"))) == sorted(
-        ["requirements.txt", "main.py", "algos", "config", "pages"]
+        ["requirements.txt", ".taipyignore", "main.py", "algos", "config", "pages"]
     )
 
     assert sorted(os.listdir(os.path.join(tmpdir, "foo_app", "config"))) == sorted(
@@ -63,7 +63,7 @@ def test_scenario_management_without_toml_config(tmpdir):
 
     assert os.listdir(tmpdir) == ["foo_app"]
     assert sorted(os.listdir(os.path.join(tmpdir, "foo_app"))) == sorted(
-        ["requirements.txt", "main.py", "algos", "config", "pages"]
+        ["requirements.txt", ".taipyignore", "main.py", "algos", "config", "pages"]
     )
 
     assert sorted(os.listdir(os.path.join(tmpdir, "foo_app", "config"))) == sorted(["__init__.py", "config.py"])
