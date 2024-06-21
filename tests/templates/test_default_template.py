@@ -26,8 +26,8 @@ def test_default_answer(tmpdir):
     )
 
     assert os.listdir(tmpdir) == ["taipy_application"]
-    assert (
-        os.listdir(os.path.join(tmpdir, "taipy_application")).sort() == ["requirements.txt", "main.py", "images"].sort()
+    assert sorted(os.listdir(os.path.join(tmpdir, "taipy_application"))) == sorted(
+        ["requirements.txt", "main.py", "images"]
     )
 
     taipy_path = os.getcwd()
@@ -46,8 +46,8 @@ def test_main_file_with_and_without_extension(tmpdir):
             "Application main Python file": "app.py",
         },
     )
-    assert (
-        os.listdir(os.path.join(tmpdir, "taipy_application")).sort() == ["requirements.txt", "app.py", "images"].sort()
+    assert sorted(os.listdir(os.path.join(tmpdir, "taipy_application"))) == sorted(
+        ["requirements.txt", "app.py", "images"]
     )
 
     cookiecutter(
@@ -59,7 +59,7 @@ def test_main_file_with_and_without_extension(tmpdir):
             "Application main Python file": "app",
         },
     )
-    assert os.listdir(os.path.join(tmpdir, "foo_app")).sort() == ["requirements.txt", "app.py", "images"].sort()
+    assert sorted(os.listdir(os.path.join(tmpdir, "foo_app"))) == sorted(["requirements.txt", "app.py", "images"])
 
 
 def test_with_core_service(tmpdir):
@@ -73,9 +73,8 @@ def test_with_core_service(tmpdir):
         },
     )
 
-    assert (
-        os.listdir(os.path.join(tmpdir, "taipy_application")).sort()
-        == ["requirements.txt", "main.py", "images", "configuration", "algorithms"].sort()
+    assert sorted(os.listdir(os.path.join(tmpdir, "taipy_application"))) == sorted(
+        ["requirements.txt", "main.py", "images", "configuration", "algorithms"]
     )
     with open(os.path.join(tmpdir, "taipy_application", "main.py")) as main_file:
         assert "core = Core()" in main_file.read()
@@ -99,8 +98,8 @@ def test_with_rest_service(tmpdir):
         },
     )
 
-    assert (
-        os.listdir(os.path.join(tmpdir, "taipy_application")).sort() == ["requirements.txt", "main.py", "images"].sort()
+    assert sorted(os.listdir(os.path.join(tmpdir, "taipy_application"))) == sorted(
+        ["requirements.txt", "main.py", "images"]
     )
     with open(os.path.join(tmpdir, "taipy_application", "main.py")) as main_file:
         assert "rest = Rest()" in main_file.read()
@@ -124,9 +123,8 @@ def test_with_both_core_rest_services(tmpdir):
         },
     )
 
-    assert (
-        os.listdir(os.path.join(tmpdir, "taipy_application")).sort()
-        == ["requirements.txt", "main.py", "images", "configuration", "algorithms"].sort()
+    assert sorted(os.listdir(os.path.join(tmpdir, "taipy_application"))) == sorted(
+        ["requirements.txt", "main.py", "images", "configuration", "algorithms"]
     )
     with open(os.path.join(tmpdir, "taipy_application", "main.py")) as main_file:
         assert "rest = Rest()" in main_file.read()
@@ -151,12 +149,11 @@ def test_multipage_gui_template(tmpdir):
         },
     )
 
-    assert (
-        os.listdir(os.path.join(tmpdir, "foo_app")).sort() == ["requirements.txt", "main.py", "pages", "images"].sort()
+    assert sorted(os.listdir(os.path.join(tmpdir, "foo_app"))) == sorted(
+        ["requirements.txt", "main.py", "pages", "images"]
     )
-    assert (
-        os.listdir(os.path.join(tmpdir, "foo_app", "pages")).sort()
-        == ["name_1", "name_2", "name_3", "root.md", "root.py", "__init__.py"].sort()
+    assert sorted(os.listdir(os.path.join(tmpdir, "foo_app", "pages"))) == sorted(
+        ["name_1", "name_2", "name_3", "root.md", "root.py", "__init__.py"]
     )
 
     taipy_path = os.getcwd()
@@ -180,3 +177,20 @@ def test_multipage_gui_template_with_invalid_page_name(tmpdir, capfd):
     assert 'Page name "1_invalid_var_name" is not a valid Python identifier' in stderr
 
     assert not os.path.exists(os.path.join(tmpdir, "foo_app"))
+
+
+def test_with_git(tmpdir):
+    cookiecutter(
+        template="taipy/templates/default",
+        output_dir=str(tmpdir),
+        no_input=True,
+        extra_context={
+            "Application root folder name": "foo_app",
+            "Do you want to initialize a new Git repository?": "y",
+        },
+    )
+
+    assert os.listdir(tmpdir) == ["foo_app"]
+    assert sorted(os.listdir(os.path.join(tmpdir, "foo_app"))) == sorted(
+        ["requirements.txt", "main.py", ".git", ".gitignore"]
+    )

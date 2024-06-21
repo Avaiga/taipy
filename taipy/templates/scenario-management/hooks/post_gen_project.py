@@ -10,6 +10,30 @@
 # specific language governing permissions and limitations under the License.
 
 import os
+import shutil
+import subprocess
+
+
+def initialize_as_git_project(project_dir: str) -> str:
+    if shutil.which("git") is None:
+        msg = "\nERROR: Git executable not found, skipping git initialisation"
+        return msg
+
+    try:
+        subprocess.run(
+            ["git", "init", "."],
+            cwd=project_dir,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True,
+        )
+        msg = f"\nInitialized Git repository in {project_dir}"
+
+    except subprocess.CalledProcessError:
+        msg = f"\nERROR: Failed to initialise Git repository in {project_dir}"
+
+    return msg
+
 
 # Use TOML config file or not
 use_toml_config = "{{ cookiecutter.__use_toml_config }}".upper()
@@ -22,9 +46,15 @@ else:
     os.remove(os.path.join(os.getcwd(), "config", "config_with_toml.py"))
     os.remove(os.path.join(os.getcwd(), "config", "config.toml"))
 
+# Initialize the project as a git repository
+git_init_message = ""
+if "{{ cookiecutter.__git }}".upper() in ["YES", "Y"]:
+    git_init_message = initialize_as_git_project(os.getcwd())
+
 main_file_name = "{{cookiecutter.__main_file}}.py"
 print(
     f"New Taipy application has been created at {os.path.join(os.getcwd())}"
+    f"{git_init_message}"
     f"\n\nTo start the application, change directory to the newly created folder:"
     f"\n\tcd {os.path.join(os.getcwd())}"
     f"\nand run the application as follows:"
