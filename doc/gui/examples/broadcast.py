@@ -15,9 +15,9 @@
 # -----------------------------------------------------------------------------------------
 # Demonstrate how to share variable values across multiple clients.
 # This application creates a thread that increments a value every few seconds.
-# The value is updated for every client using the state.broadcast() method.
+# The value is updated for every client using the broadcast_callback() method.
 # The text of the button that starts or stops the thread is updated on every client's browser
-# using a direct assignment of the state property because the variable is declared 'shared'.
+# using the broadcast_callback() method.
 # -----------------------------------------------------------------------------------------
 from threading import Event, Thread
 from time import sleep
@@ -35,17 +35,15 @@ button_texts = ["Start", "Stop"]
 button_text = button_texts[0]
 
 
-# Invoked by the timer
-def update_counter(state: State, c):
+def update_state_var(state: State, var_name: str, val):
     # Update each clients
-    state.assign("counter", c)
-
+    state.assign(var_name, val)
 
 def count(event, gui):
     while not event.is_set():
         global counter
         counter = counter + 1
-        broadcast_callback(gui, update_counter, [counter])
+        broadcast_callback(gui, update_state_var, ["counter", counter])
         sleep(2)
 
 
@@ -59,9 +57,8 @@ def start_or_stop(state):
         thread_event.clear()
         thread = Thread(target=count, args=[thread_event, state.get_gui()])
         thread.start()
-    # Update button status.
-    # Because "button_text" is shared, all clients are updated
-    state.button_text = button_texts[1 if thread else 0]
+    # Update button status for all states.
+    broadcast_callback(state.get_gui(), update_state_var, ["button_text", button_texts[1 if thread else 0]])
 
 
 page = """# Broadcasting values
@@ -75,4 +72,4 @@ Timer: <|{button_text}|button|on_action=start_or_stop|>
 # Assigning a value to a state's 'button_text' property is propagated to all clients
 Gui.add_shared_variable("button_text")
 
-Gui(page).run()
+Gui(page).run(debug=True)
