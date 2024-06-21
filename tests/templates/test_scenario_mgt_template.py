@@ -30,14 +30,12 @@ def test_scenario_management_with_toml_config(tmpdir):
     )
 
     assert os.listdir(tmpdir) == ["foo_app"]
-    assert (
-        os.listdir(os.path.join(tmpdir, "foo_app")).sort()
-        == ["requirements.txt", "main.py", "algos", "config", "pages"].sort()
+    assert sorted(os.listdir(os.path.join(tmpdir, "foo_app"))) == sorted(
+        ["requirements.txt", ".taipyignore", "main.py", "algos", "config", "pages"]
     )
 
-    assert (
-        os.listdir(os.path.join(tmpdir, "foo_app", "config")).sort()
-        == ["__init__.py", "config.py", "config.toml"].sort()
+    assert sorted(os.listdir(os.path.join(tmpdir, "foo_app", "config"))) == sorted(
+        ["__init__.py", "config.py", "config.toml"]
     )
     with open(os.path.join(tmpdir, "foo_app", "config", "config.py")) as config_file:
         assert 'Config.load("config/config.toml")' in config_file.read()
@@ -64,12 +62,11 @@ def test_scenario_management_without_toml_config(tmpdir):
     )
 
     assert os.listdir(tmpdir) == ["foo_app"]
-    assert (
-        os.listdir(os.path.join(tmpdir, "foo_app")).sort()
-        == ["requirements.txt", "main.py", "algos", "config", "pages"].sort()
+    assert sorted(os.listdir(os.path.join(tmpdir, "foo_app"))) == sorted(
+        ["requirements.txt", ".taipyignore", "main.py", "algos", "config", "pages"]
     )
 
-    assert os.listdir(os.path.join(tmpdir, "foo_app", "config")).sort() == ["__init__.py", "config.py"].sort()
+    assert sorted(os.listdir(os.path.join(tmpdir, "foo_app", "config"))) == sorted(["__init__.py", "config.py"])
     with open(os.path.join(tmpdir, "foo_app", "config", "config.py")) as config_file:
         config_content = config_file.read()
         assert 'Config.load("config/config.toml")' not in config_content
@@ -80,3 +77,20 @@ def test_scenario_management_without_toml_config(tmpdir):
 
     # Assert the message when the application is run successfully is in the stdout
     assert "[Taipy][INFO]  * Server starting on" in stdout
+
+
+def test_with_git(tmpdir):
+    cookiecutter(
+        template="taipy/templates/scenario-management",
+        output_dir=str(tmpdir),
+        no_input=True,
+        extra_context={
+            "Application root folder name": "foo_app",
+            "Do you want to initialize a new Git repository?": "y",
+        },
+    )
+
+    assert os.listdir(tmpdir) == ["foo_app"]
+    assert sorted(os.listdir(os.path.join(tmpdir, "foo_app"))) == sorted(
+        ["requirements.txt", "main.py", ".git", ".gitignore", ".taipyignore", "algos", "config", "pages"]
+    )
