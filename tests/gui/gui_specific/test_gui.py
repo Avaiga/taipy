@@ -42,16 +42,42 @@ def test__get_user_instance(gui: Gui):
             gui._get_user_instance("", type(None))
 
 
-def test__call_broadcast_callback(gui: Gui):
+def test__call_broadcast_callback_on_shared(gui: Gui):
     gui.run(run_server=False)
     with gui.get_flask_app().app_context():
-        res = gui._call_broadcast_callback(lambda s, t: t, ["Hello World"], "mine")
+        res = gui._call_broadcast_callback_on_shared(lambda s, t: t, ["Hello World"], "mine")
         assert res == "Hello World"
 
     with gui.get_flask_app().app_context():
         with pytest.warns(UserWarning):
-            res = gui._call_broadcast_callback(print, ["Hello World"], "mine")
+            res = gui._call_broadcast_callback_on_shared(print, ["Hello World"], "mine")
             assert res is None
+
+
+def test__call_broadcast_callback(gui: Gui):
+    gui.run(run_server=False)
+
+    res = gui._call_broadcast_callback(lambda s, t: t, ["Hello World"], "mine")
+    assert isinstance(res, dict)
+    assert not res
+
+    gui._bindings()._get_or_create_scope("mon scope")
+
+    res = gui._call_broadcast_callback(lambda s, t: t, ["Hello World"], "mine")
+    assert len(res) == 1
+    assert res.get("mon scope", None) == "Hello World"
+
+    with pytest.warns(UserWarning):
+        res = gui._call_broadcast_callback(print, ["Hello World"], "mine")
+        assert isinstance(res, dict)
+        assert res.get("mon scope", "Hello World") is None
+
+    gui._bindings()._get_or_create_scope("another scope")
+    res = gui._call_broadcast_callback(lambda s, t: t, ["Hello World"], "mine")
+    assert len(res) == 2
+    assert res.get("mon scope", None) == "Hello World"
+    assert res.get("another scope", None) == "Hello World"
+
 
 
 def test__refresh_expr(gui: Gui):

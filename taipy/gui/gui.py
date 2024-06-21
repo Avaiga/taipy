@@ -1436,15 +1436,16 @@ class Gui:
         return False
 
     def _call_function_with_state(self, user_function: t.Callable, args: t.List[t.Any]) -> t.Any:
-        args.insert(0, self.__get_state())
+        cp_args = args.copy()
+        cp_args.insert(0, self.__get_state())
         argcount = user_function.__code__.co_argcount
         if argcount > 0 and inspect.ismethod(user_function):
             argcount -= 1
-        if argcount > len(args):
-            args += (argcount - len(args)) * [None]
+        if argcount > len(cp_args):
+            cp_args += (argcount - len(args)) * [None]
         else:
-            args = args[:argcount]
-        return user_function(*args)
+            cp_args = cp_args[:argcount]
+        return user_function(*cp_args)
 
     def _set_module_context(self, module_context: t.Optional[str]) -> t.ContextManager[None]:
         return self._set_locals_context(module_context) if module_context is not None else contextlib.nullcontext()
@@ -1475,20 +1476,30 @@ class Gui:
                 )
         return None
 
-    def _call_broadcast_callback(
+    def _call_broadcast_callback_on_shared(
         self, user_callback: t.Callable, args: t.List[t.Any], module_context: t.Optional[str]
     ) -> t.Any:
         @contextlib.contextmanager
-        def _broadcast_callback() -> t.Iterator[None]:
+        def _broadcast_callback_on_shared() -> t.Iterator[None]:
             try:
                 setattr(g, Gui.__BRDCST_CALLBACK_G_ID, True)
                 yield
             finally:
                 setattr(g, Gui.__BRDCST_CALLBACK_G_ID, False)
 
-        with _broadcast_callback():
+        with _broadcast_callback_on_shared():
             # Use global scopes for broadcast callbacks
             return self._call_user_callback(_DataScopes._GLOBAL_ID, user_callback, args, module_context)
+
+    def _call_broadcast_callback(
+        self, user_callback: t.Callable, args: t.List[t.Any], module_context: t.Optional[str]
+    ) -> t.Dict[str, t.Any]:
+        # get scopes
+        res = {}
+        for id in [id for id in self.__bindings._get_all_scopes() if id != _DataScopes._GLOBAL_ID]:
+            ret = self._call_user_callback(id, user_callback, args, module_context)
+            res[id] = ret
+        return res
 
     def _is_in_brdcst_callback(self):
         try:
