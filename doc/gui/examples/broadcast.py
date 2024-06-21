@@ -22,7 +22,7 @@
 from threading import Event, Thread
 from time import sleep
 
-from taipy.gui import Gui, State, broadcast_callback_on_shared
+from taipy.gui import Gui, State, broadcast_callback
 
 counter = 0
 
@@ -37,15 +37,15 @@ button_text = button_texts[0]
 
 # Invoked by the timer
 def update_counter(state: State, c):
-    # Update all clients
-    state.broadcast("counter", c)
+    # Update each clients
+    state.assign("counter", c)
 
 
 def count(event, gui):
     while not event.is_set():
         global counter
         counter = counter + 1
-        broadcast_callback_on_shared(gui, update_counter, [counter])
+        broadcast_callback(gui, update_counter, [counter])
         sleep(2)
 
 
