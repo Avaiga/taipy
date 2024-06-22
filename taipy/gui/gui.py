@@ -599,6 +599,12 @@ class Gui:
             setattr(g, "update_count", update_count)  # noqa: B010
             return None
 
+    def _handle_connect(self):
+        pass
+
+    def _handle_disconnect(self):
+        pass
+
     def _manage_message(self, msg_type: _WsType, message: dict) -> None:
         try:
             client_id = None
@@ -633,6 +639,8 @@ class Gui:
                         self.__handle_ws_app_id(message)
                     elif msg_type == _WsType.GET_ROUTES.value:
                         self.__handle_ws_get_routes()
+                    else:
+                        self._manage_external_message(msg_type, message)
                 self.__send_ack(message.get("ack_id"))
         except Exception as e:  # pragma: no cover
             if isinstance(e, AttributeError) and (name := message.get("name")):
@@ -652,6 +660,11 @@ class Gui:
                     _warn(f"Resolving  name '{name}' failed", e1)
             else:
                 _warn(f"Decoding Message has failed: {message}", e)
+
+    # To be expanded by inheriting classes
+    # this will be used to handle ws messages that is not handled by the base Gui class
+    def _manage_external_message(self, msg_type: _WsType, message: dict) -> None:
+        pass
 
     def __front_end_update(
         self,
