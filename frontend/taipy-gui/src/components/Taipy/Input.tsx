@@ -11,13 +11,13 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useEffect, useCallback, useRef, KeyboardEvent } from "react";
+import React, {useState, useEffect, useCallback, useRef, KeyboardEvent} from "react";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 
-import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
-import { TaipyInputProps } from "./utils";
-import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
+import {createSendActionNameAction, createSendUpdateAction} from "../../context/taipyReducers";
+import {TaipyInputProps} from "./utils";
+import {useClassNames, useDispatch, useDynamicProperty, useModule} from "../../utils/hooks";
 
 const AUTHORIZED_KEYS = ["Enter", "Escape", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"];
 
@@ -25,9 +25,9 @@ const getActionKeys = (keys?: string): string[] => {
     const ak = (
         keys
             ? keys
-                  .split(";")
-                  .map((v) => v.trim().toLowerCase())
-                  .filter((v) => AUTHORIZED_KEYS.some((k) => k.toLowerCase() === v))
+                .split(";")
+                .map((v) => v.trim().toLowerCase())
+                .filter((v) => AUTHORIZED_KEYS.some((k) => k.toLowerCase() === v))
             : []
     ).map((v) => AUTHORIZED_KEYS.find((k) => k.toLowerCase() == v) as string);
     return ak.length > 0 ? ak : [AUTHORIZED_KEYS[0]];
@@ -79,6 +79,12 @@ const Input = (props: TaipyInputProps) => {
 
     const handleAction = useCallback(
         (evt: KeyboardEvent<HTMLDivElement>) => {
+            if (evt.shiftKey && evt.key === 'ArrowUp') {
+                setValue(((Number(evt.currentTarget.querySelector("input")?.value || 0) + (props.step || 1) * (props.stepMultiplier || 10) - (props.step || 1)).toString()));
+            }
+            if (evt.shiftKey && evt.key === 'ArrowDown') {
+                setValue(((Number(evt.currentTarget.querySelector("input")?.value || 0) - (props.step || 1) * (props.stepMultiplier || 10) + (props.step || 1)).toString()));
+            }
             if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
                 const val = evt.currentTarget.querySelector("input")?.value;
                 if (changeDelay > 0 && delayCall.current > 0) {
@@ -92,7 +98,7 @@ const Input = (props: TaipyInputProps) => {
                 evt.preventDefault();
             }
         },
-        [actionKeys, updateVarName, onAction, id, dispatch, onChange, changeDelay, propagate, module]
+        [actionKeys, props.step, props.stepMultiplier, changeDelay, onAction, dispatch, id, module, updateVarName, onChange, propagate]
     );
 
     useEffect(() => {
@@ -106,12 +112,16 @@ const Input = (props: TaipyInputProps) => {
             <TextField
                 margin="dense"
                 hiddenLabel
-                value={value ?? ""}
+                value={value}
                 className={className}
                 type={type}
                 id={id}
+                inputProps={{
+                    step: props.step ? props.step : 1,
+                }}
                 label={props.label}
                 onChange={handleInput}
+                onClick={handleClick}
                 disabled={!active}
                 onKeyDown={handleAction}
                 multiline={multiline}
