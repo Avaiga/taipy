@@ -11,15 +11,26 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, {useState, useEffect, useCallback, useRef, KeyboardEvent} from "react";
+import React, {useState, useEffect, useCallback, useRef, KeyboardEvent, useMemo} from "react";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
+import {styled} from '@mui/material/styles';
+import IconButton from "@mui/material/IconButton";
 
 import {createSendActionNameAction, createSendUpdateAction} from "../../context/taipyReducers";
 import {TaipyInputProps} from "./utils";
 import {useClassNames, useDispatch, useDynamicProperty, useModule} from "../../utils/hooks";
 
 const AUTHORIZED_KEYS = ["Enter", "Escape", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"];
+
+const StyledTextField = styled(TextField)({
+    '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+        display: 'none',
+    },
+    '& input[type=number]': {
+        '-moz-appearance': 'textfield',
+    },
+});
 
 const getActionKeys = (keys?: string): string[] => {
     const ak = (
@@ -101,6 +112,29 @@ const Input = (props: TaipyInputProps) => {
         [actionKeys, props.step, props.stepMultiplier, changeDelay, onAction, dispatch, id, module, updateVarName, onChange, propagate]
     );
 
+    const roundBasedOnStep = useMemo(() => {
+        const stepString = (props.step || 1).toString();
+        const decimalPlaces = stepString.includes('.') ? stepString.split('.')[1].length : 0;
+        const multiplier = Math.pow(10, decimalPlaces);
+        return (value: number) => Math.round(value * multiplier) / multiplier;
+    }, [props.step]);
+
+    const handleUpStepperMouseDown = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+        if (event.shiftKey) {
+            setValue(prevValue => roundBasedOnStep(Number(prevValue) + (props.step || 1) * (props.stepMultiplier || 10)).toString());
+        } else {
+            setValue(prevValue => roundBasedOnStep(Number(prevValue) + (props.step || 1)).toString())
+        }
+    }, [props.step, props.stepMultiplier, roundBasedOnStep])
+
+    const handleDownStepperMouseDown = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+        if (event.shiftKey) {
+            setValue(prevValue => roundBasedOnStep(Number(prevValue) - (props.step || 1) * (props.stepMultiplier || 10)).toString());
+        } else {
+            setValue(prevValue => roundBasedOnStep(Number(prevValue) - (props.step || 1)).toString())
+        }
+    }, [props.step, props.stepMultiplier, roundBasedOnStep])
+
     useEffect(() => {
         if (props.value !== undefined) {
             setValue(props.value);
@@ -109,7 +143,7 @@ const Input = (props: TaipyInputProps) => {
 
     return (
         <Tooltip title={hover || ""}>
-            <TextField
+            <StyledTextField
                 margin="dense"
                 hiddenLabel
                 value={value}
@@ -119,9 +153,26 @@ const Input = (props: TaipyInputProps) => {
                 inputProps={{
                     step: props.step ? props.step : 1,
                 }}
+                InputProps={{
+                    endAdornment: (
+                        <>
+                            <IconButton
+                                size="small"
+                                onMouseDown={handleUpStepperMouseDown}
+                            >
+                                ▲
+                            </IconButton>
+                            <IconButton
+                                size="small"
+                                onMouseDown={handleDownStepperMouseDown}
+                            >
+                                ▼
+                            </IconButton>
+                        </>
+                    ),
+                }}
                 label={props.label}
                 onChange={handleInput}
-                onClick={handleClick}
                 disabled={!active}
                 onKeyDown={handleAction}
                 multiline={multiline}

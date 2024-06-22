@@ -133,6 +133,18 @@
                         "type": "str",
                         "default_value": "None",
                         "doc": "The label associated with the input."
+                    },
+                    {
+                        "name": "step",
+                        "type": "int|float",
+                        "default_value": "1",
+                        "doc": "The amount that the value changes on each increment or decrement."
+                    },
+                    {
+                        "name": "step_multiplier",
+                        "type": "int|float",
+                        "default_value": "10",
+                        "doc": "The amount that the value changes on each increment or decrement when the shift key is pressed."
                     }
                 ]
             }
