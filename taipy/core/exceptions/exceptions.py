@@ -373,47 +373,6 @@ class FileEmpty(Exception):
     """Raised when a file is empty."""
 
 
-class ExportPathAlreadyExists(Exception):
-    """Raised when the export folder already exists."""
-
-    def __init__(self, export_path: str, scenario_id: str):
-        self.message = (
-            f"The path '{export_path}' already exists and can not be used to export scenario '{scenario_id}'."
-            " Please use the 'override' parameter to override it."
-        )
-
-
-class EntitiesToBeImportAlredyExist(Exception):
-    """Raised when entities in the scenario to be imported have already exists"""
-
-    def __init__(self, import_path):
-        self.message = f"The import archive file {import_path} contains entities that have already existed."
-
-
-class DataToBeImportAlredyExist(Exception):
-    """Raised when data files in the scenario to be imported have already exists"""
-
-    def __init__(self, import_path):
-        self.message = (
-            f"The import archive file {import_path} contains data files that have already existed."
-            " Please use the 'override' parameter to override those."
-        )
-
-
-class ImportArchiveDoesntContainAnyScenario(Exception):
-    """Raised when the import archive file doesn't contain any scenario"""
-
-    def __init__(self, import_path):
-        self.message = f"The import archive file {import_path} doesn't contain any scenario."
-
-
-class ImportScenarioDoesntHaveAVersion(Exception):
-    """Raised when the import scenario doesn't have a version"""
-
-    def __init__(self, import_path):
-        self.message = f"The import scenario in the import archive file {import_path} doesn't have a version."
-
-
 class SQLQueryCannotBeExecuted(Exception):
     """Raised when an SQL Query cannot be executed."""
 

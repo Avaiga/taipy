@@ -9,19 +9,14 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import os
-import pathlib
-import shutil
-import tempfile
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Literal, Optional, Set, Type, Union, overload
+from typing import Any, Callable, Dict, List, Literal, Optional, Set, Union, overload
 
 from taipy.config import Scope
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._core import Core
 from ._entity._entity import _Entity
-from ._manager._manager import _Manager
 from ._version._version_manager_factory import _VersionManagerFactory
 from .common._check_instance import (
     _is_cycle,
@@ -43,7 +38,6 @@ from .data.data_node import DataNode
 from .data.data_node_id import DataNodeId
 from .exceptions.exceptions import (
     DataNodeConfigIsNotGlobal,
-    ExportPathAlreadyExists,
     ModelNotFound,
     NonExistingVersion,
     VersionIsNotProductionVersion,
@@ -995,116 +989,6 @@ def clean_all_entities(version_number: str) -> bool:
         pass
 
     return True
-
-
-def export_scenario(
-    scenario_id: ScenarioId,
-    output_path: Union[str, pathlib.Path],
-    override: bool = False,
-    include_data: bool = False,
-):
-    """Export all related entities of a scenario to an archive zip file.
-
-    This function exports all related entities of the specified scenario to the
-    specified archive zip file.
-
-    Parameters:
-        scenario_id (ScenarioId): The ID of the scenario to export.
-        output_path (Union[str, pathlib.Path]): The path to export the scenario to.
-            The path should include the file name without the extension or with the `.zip` extension.
-            If the path exists and the override parameter is False, an exception is raised.
-        override (bool): If True, the existing folder will be overridden. The default value is False.
-        include_data (bool): If True, the file-based data nodes are exported as well.
-            This includes Pickle, CSV, Excel, Parquet, and JSON data nodes.
-            If the scenario has a data node that is not file-based, a warning will be logged, and the data node
-            will not be exported. The default value is False.
-
-    Raises:
-        ExportPathAlreadyExists^: If the `output_path` already exists and the override parameter is False.
-    """
-    manager = _ScenarioManagerFactory._build_manager()
-    scenario = manager._get(scenario_id)
-    entity_ids = manager._get_children_entity_ids(scenario)
-    entity_ids.scenario_ids = {scenario_id}
-    if scenario.cycle:
-        entity_ids.cycle_ids = {scenario.cycle.id}
-
-    output_filename = os.path.splitext(output_path)[0] if str(output_path).endswith(".zip") else str(output_path)
-    output_zip_path = pathlib.Path(output_filename + ".zip")
-
-    if output_zip_path.exists():
-        if override:
-            __logger.warning(f"Override the existing path '{output_zip_path}' to export scenario {scenario_id}.")
-            output_zip_path.unlink()
-        else:
-            raise ExportPathAlreadyExists(str(output_zip_path), scenario_id)
-
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        for data_node_id in entity_ids.data_node_ids:
-            _DataManagerFactory._build_manager()._export(data_node_id, tmp_dir, include_data=include_data)
-        for task_id in entity_ids.task_ids:
-            _TaskManagerFactory._build_manager()._export(task_id, tmp_dir)
-        for sequence_id in entity_ids.sequence_ids:
-            _SequenceManagerFactory._build_manager()._export(sequence_id, tmp_dir)
-        for cycle_id in entity_ids.cycle_ids:
-            _CycleManagerFactory._build_manager()._export(cycle_id, tmp_dir)
-        for scenario_id in entity_ids.scenario_ids:
-            _ScenarioManagerFactory._build_manager()._export(scenario_id, tmp_dir)
-        for job_id in entity_ids.job_ids:
-            _JobManagerFactory._build_manager()._export(job_id, tmp_dir)
-        for submission_id in entity_ids.submission_ids:
-            _SubmissionManagerFactory._build_manager()._export(submission_id, tmp_dir)
-        _VersionManagerFactory._build_manager()._export(scenario.version, tmp_dir)
-
-        shutil.make_archive(output_filename, "zip", tmp_dir)
-
-
-def import_scenario(input_path: Union[str, pathlib.Path], override: bool = False) -> Optional[Scenario]:
-    """Import from an archive zip file containing an exported scenario into the current Taipy application.
-
-    The zip file should be created by the `taipy.export_scenario()^` method, which contains all related entities
-    of the scenario.
-    All entities should belong to the same version that is compatible with the current Taipy application version.
-
-    Parameters:
-        input_path (Union[str, pathlib.Path]): The path to the archive scenario to import.
-            If the path doesn't exist, an exception is raised.
-        override (bool): If True, override the entities if existed. The default value is False.
-
-    Return:
-        The imported scenario.
-
-    Raises:
-        FileNotFoundError: If the import path does not exist.
-        ImportArchiveDoesntContainAnyScenario: If the unzip folder doesn't contain any scenario.
-        ConflictedConfigurationError: If the configuration of the imported scenario is conflicted with the current one.
-    """
-    if isinstance(input_path, str):
-        zip_file_path: pathlib.Path = pathlib.Path(input_path)
-    else:
-        zip_file_path = input_path
-
-    if not zip_file_path.exists():
-        raise FileNotFoundError(f"The import archive path '{zip_file_path}' does not exist.")
-
-    entity_managers: Dict[str, Type[_Manager]] = {
-        "cycles": _CycleManagerFactory._build_manager(),
-        "cycle": _CycleManagerFactory._build_manager(),
-        "data_nodes": _DataManagerFactory._build_manager(),
-        "data_node": _DataManagerFactory._build_manager(),
-        "tasks": _TaskManagerFactory._build_manager(),
-        "task": _TaskManagerFactory._build_manager(),
-        "scenarios": _ScenarioManagerFactory._build_manager(),
-        "scenario": _ScenarioManagerFactory._build_manager(),
-        "jobs": _JobManagerFactory._build_manager(),
-        "job": _JobManagerFactory._build_manager(),
-        "submission": _SubmissionManagerFactory._build_manager(),
-        "version": _VersionManagerFactory._build_manager(),
-    }
-
-    return _ScenarioManagerFactory._build_manager()._import_scenario_and_children_entities(
-        zip_file_path, override, entity_managers
-    )
 
 
 def get_parents(

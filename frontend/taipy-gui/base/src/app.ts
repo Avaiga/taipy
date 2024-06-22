@@ -46,6 +46,7 @@ export class TaipyApp {
         this.path = path;
         this.socket = socket;
         this.wsAdapters = [new TaipyWsAdapter()];
+        // Init socket io connection
         initSocket(socket, this);
     }
 
