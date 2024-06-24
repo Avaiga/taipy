@@ -14,6 +14,8 @@ from __future__ import annotations
 import typing as t
 from operator import add
 
+import pandas as pd
+
 from .._warnings import _warn
 from ..icon import Icon
 from . import _MapDict
@@ -60,6 +62,8 @@ class _Adapter:
 
     def run(self, var_name: str, value: t.Any, id_only=False) -> t.Any:
         lov = _AdaptedLov.get_lov(value)
+        if isinstance(lov, pd.Series):
+            lov = lov.tolist()
         adapter = self.__get_for_var(var_name, value)
         if isinstance(lov, (list, tuple)):
             res = []
@@ -80,6 +84,8 @@ class _Adapter:
         if not isinstance(type_name, str):
             adapter = self.__adapter_for_type.get(var_name)
             lov = _AdaptedLov.get_lov(value)
+            if isinstance(lov, pd.Series):
+                lov = lov.tolist()
             elt = lov[0] if isinstance(lov, (list, tuple)) and len(lov) else None
             type_name = var_name if callable(adapter) else type(elt).__name__
         if adapter is None:
@@ -92,6 +98,8 @@ class _Adapter:
         dict_res = {}
         type_name = _AdaptedLov.get_type(lov)
         lov = _AdaptedLov.get_lov(lov)
+        if isinstance(lov, pd.Series):
+            lov = lov.tolist()
         if not adapter and type_name:
             adapter = self.__adapter_for_type.get(type_name)
         if not adapter:
