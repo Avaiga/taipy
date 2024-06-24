@@ -72,4 +72,4 @@ Timer: <|{button_text}|button|on_action=start_or_stop|>
 # Assigning a value to a state's 'button_text' property is propagated to all clients
 Gui.add_shared_variable("button_text")
 
-Gui(page).run(debug=True)
+Gui(page).run()
