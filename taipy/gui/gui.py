@@ -1455,7 +1455,7 @@ class Gui:
         if argcount > 0 and inspect.ismethod(user_function):
             argcount -= 1
         if argcount > len(cp_args):
-            cp_args += (argcount - len(args)) * [None]
+            cp_args += (argcount - len(cp_args)) * [None]
         else:
             cp_args = cp_args[:argcount]
         return user_function(*cp_args)
