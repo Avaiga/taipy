@@ -111,6 +111,14 @@ class _Server:
             elif "type" in message:
                 gui._manage_message(message["type"], message)
 
+        @self._ws.on("connect")
+        def handle_connect():
+            gui._handle_connect()
+
+        @self._ws.on("disconnect")
+        def handle_disconnect():
+            gui._handle_disconnect()
+
     def __is_ignored(self, file_path: str) -> bool:
         if not hasattr(self, "_ignore_matches"):
             __IGNORE_FILE = ".taipyignore"

@@ -4,7 +4,8 @@ import { uploadFile } from "../../src/workers/fileupload";
 
 import { Socket, io } from "socket.io-client";
 import { DataManager, ModuleData } from "./dataManager";
-import { initSocket } from "./utils";
+import { initSocket } from "./socket";
+import { TaipyWsAdapter, WsAdapter } from "./wsAdapter";
 
 export type OnInitHandler = (taipyApp: TaipyApp) => void;
 export type OnChangeHandler = (taipyApp: TaipyApp, encodedName: string, value: unknown) => void;
@@ -25,6 +26,7 @@ export class TaipyApp {
     context: string;
     path: string | undefined;
     routes: Route[] | undefined;
+    wsAdapters: WsAdapter[];
 
     constructor(
         onInit: OnInitHandler | undefined = undefined,
@@ -43,6 +45,7 @@ export class TaipyApp {
         this.routes = undefined;
         this.path = path;
         this.socket = socket;
+        this.wsAdapters = [new TaipyWsAdapter()];
         // Init socket io connection
         initSocket(socket, this);
     }
@@ -51,6 +54,7 @@ export class TaipyApp {
     get onInit() {
         return this._onInit;
     }
+
     set onInit(handler: OnInitHandler | undefined) {
         if (handler !== undefined && handler.length !== 1) {
             throw new Error("onInit() requires one parameter");
@@ -61,6 +65,7 @@ export class TaipyApp {
     get onChange() {
         return this._onChange;
     }
+
     set onChange(handler: OnChangeHandler | undefined) {
         if (handler !== undefined && handler.length !== 3) {
             throw new Error("onChange() requires three parameters");
@@ -71,6 +76,7 @@ export class TaipyApp {
     get onNotify() {
         return this._onNotify;
     }
+
     set onNotify(handler: OnNotifyHandler | undefined) {
         if (handler !== undefined && handler.length !== 3) {
             throw new Error("onNotify() requires three parameters");
@@ -105,6 +111,10 @@ export class TaipyApp {
     }
 
     // Public methods
+    registerWsAdapter(wsAdapter: WsAdapter) {
+        this.wsAdapters.unshift(wsAdapter);
+    }
+
     getEncodedName(varName: string, module: string) {
         return this.variableData?.getEncodedName(varName, module);
     }
