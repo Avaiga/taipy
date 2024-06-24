@@ -29,7 +29,7 @@ class MyCustomObject:
 
 
 class TestReadSQLTableDataNode:
-    __pandas_properties = [
+    __sql_properties = [
         {
             "db_name": "taipy",
             "db_engine": "sqlite",
@@ -42,7 +42,7 @@ class TestReadSQLTableDataNode:
     ]
 
     if util.find_spec("pyodbc"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -56,7 +56,7 @@ class TestReadSQLTableDataNode:
         )
 
     if util.find_spec("pymysql"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -70,7 +70,7 @@ class TestReadSQLTableDataNode:
         )
 
     if util.find_spec("psycopg2"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -87,9 +87,9 @@ class TestReadSQLTableDataNode:
     def mock_read_value():
         return {"foo": ["baz", "quux", "corge"], "bar": ["quux", "quuz", None]}
 
-    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    def test_read_pandas(self, pandas_properties):
-        custom_properties = pandas_properties.copy()
+    @pytest.mark.parametrize("sql_properties", __sql_properties)
+    def test_read_pandas(self, sql_properties):
+        custom_properties = sql_properties.copy()
 
         sql_data_node_as_pandas = SQLTableDataNode(
             "foo",
@@ -105,9 +105,9 @@ class TestReadSQLTableDataNode:
             assert isinstance(pandas_data, pd.DataFrame)
             assert pandas_data.equals(pd.DataFrame(self.mock_read_value()))
 
-    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    def test_read_numpy(self, pandas_properties):
-        custom_properties = pandas_properties.copy()
+    @pytest.mark.parametrize("sql_properties", __sql_properties)
+    def test_read_numpy(self, sql_properties):
+        custom_properties = sql_properties.copy()
         custom_properties["exposed_type"] = "numpy"
 
         sql_data_node_as_pandas = SQLTableDataNode(
@@ -124,9 +124,9 @@ class TestReadSQLTableDataNode:
             assert isinstance(numpy_data, np.ndarray)
             assert np.array_equal(numpy_data, pd.DataFrame(self.mock_read_value()).to_numpy())
 
-    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    def test_read_custom_exposed_type(self, pandas_properties):
-        custom_properties = pandas_properties.copy()
+    @pytest.mark.parametrize("sql_properties", __sql_properties)
+    def test_read_custom_exposed_type(self, sql_properties):
+        custom_properties = sql_properties.copy()
 
         custom_properties.pop("db_extra_args")
         custom_properties["exposed_type"] = MyCustomObject

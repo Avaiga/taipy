@@ -30,7 +30,7 @@ class MyCustomObject:
 
 
 class TestFilterSQLTableDataNode:
-    __pandas_properties = [
+    __sql_properties = [
         {
             "db_name": "taipy",
             "db_engine": "sqlite",
@@ -43,7 +43,7 @@ class TestFilterSQLTableDataNode:
     ]
 
     if util.find_spec("pyodbc"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -57,7 +57,7 @@ class TestFilterSQLTableDataNode:
         )
 
     if util.find_spec("pymysql"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -71,7 +71,7 @@ class TestFilterSQLTableDataNode:
         )
 
     if util.find_spec("psycopg2"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",

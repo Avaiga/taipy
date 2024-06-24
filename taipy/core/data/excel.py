@@ -200,7 +200,8 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                         sheet_exposed_type = exposed_type[i]
 
                     if isinstance(sheet_exposed_type, str):
-                        if sheet_data := self._read_sheet_with_exposed_type(sheet_exposed_type, sheet_name):
+                        sheet_data = self._read_sheet_with_exposed_type(sheet_exposed_type, sheet_name)
+                        if sheet_data is not None:
                             work_books[sheet_name] = sheet_data
                         continue
 

@@ -36,6 +36,7 @@ def my_write_query_builder_with_pandas(data: pd.DataFrame):
     insert_data = data.to_dict("records")
     return ["DELETE FROM example", ("INSERT INTO example VALUES (:foo, :bar)", insert_data)]
 
+
 def my_append_query_builder_with_pandas(data: pd.DataFrame):
     insert_data = data.to_dict("records")
     return [("INSERT INTO example VALUES (:foo, :bar)", insert_data)]
@@ -46,7 +47,7 @@ def single_write_query_builder(data):
 
 
 class TestSQLDataNode:
-    __pandas_properties = [
+    __sql_properties = [
         {
             "db_name": "taipy.sqlite3",
             "db_engine": "sqlite",
@@ -60,7 +61,7 @@ class TestSQLDataNode:
     ]
 
     if util.find_spec("pyodbc"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -74,9 +75,8 @@ class TestSQLDataNode:
             },
         )
 
-
     if util.find_spec("pymysql"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -90,9 +90,8 @@ class TestSQLDataNode:
             },
         )
 
-
     if util.find_spec("psycopg2"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -106,13 +105,12 @@ class TestSQLDataNode:
             },
         )
 
-
-    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    def test_create(self, pandas_properties):
+    @pytest.mark.parametrize("properties", __sql_properties)
+    def test_create(self, properties):
         dn = SQLDataNode(
             "foo_bar",
             Scope.SCENARIO,
-            properties=pandas_properties,
+            properties=properties,
         )
         assert isinstance(dn, SQLDataNode)
         assert dn.storage_type() == "sql"
@@ -126,8 +124,7 @@ class TestSQLDataNode:
         assert dn.read_query == "SELECT * FROM example"
         assert dn.write_query_builder == my_write_query_builder_with_pandas
 
-
-    @pytest.mark.parametrize("properties", __pandas_properties)
+    @pytest.mark.parametrize("properties", __sql_properties)
     def test_get_user_properties(self, properties):
         custom_properties = properties.copy()
         custom_properties["foo"] = "bar"
@@ -157,9 +154,9 @@ class TestSQLDataNode:
         with pytest.raises(MissingRequiredProperty):
             SQLDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
 
-    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    def test_write_query_builder(self, pandas_properties):
-        custom_properties = pandas_properties.copy()
+    @pytest.mark.parametrize("properties", __sql_properties)
+    def test_write_query_builder(self, properties):
+        custom_properties = properties.copy()
         custom_properties.pop("db_extra_args")
         dn = SQLDataNode("foo_bar", Scope.SCENARIO, properties=custom_properties)
         with patch("sqlalchemy.engine.Engine.connect") as engine_mock:
@@ -183,7 +180,6 @@ class TestSQLDataNode:
             dn.write(pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
             assert len(engine_mock.mock_calls[4].args) == 1
             assert engine_mock.mock_calls[4].args[0].text == "DELETE FROM example"
-
 
     @pytest.mark.parametrize(
         "tmp_sqlite_path",
