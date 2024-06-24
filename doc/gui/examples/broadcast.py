@@ -15,7 +15,7 @@
 # -----------------------------------------------------------------------------------------
 # Demonstrate how to share variable values across multiple clients.
 # This application creates a thread that increments a value every few seconds.
-# The value is updated for every client using the broadcast_callback() method.
+# The value is updated for every client in a function invoked by broadcast_callback().
 # The text of the button that starts or stops the thread is updated on every client's browser
 # using the broadcast_callback() method.
 # -----------------------------------------------------------------------------------------
