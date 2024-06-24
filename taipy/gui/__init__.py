@@ -75,7 +75,6 @@ from ._renderers import Html, Markdown
 from ._renderers.json import JsonAdapter
 from .gui_actions import (
     broadcast_callback,
-    broadcast_callback_on_shared,
     download,
     get_module_context,
     get_module_name_from_state,

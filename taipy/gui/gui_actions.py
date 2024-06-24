@@ -289,31 +289,6 @@ def invoke_callback(
     _warn("'invoke_callback()' must be called with a valid Gui instance.")
 
 
-def broadcast_callback_on_shared(
-    gui: Gui,
-    callback: t.Callable,
-    args: t.Optional[t.Union[t.Tuple, t.List]] = None,
-    module_context: t.Optional[str] = None,
-) -> t.Any:
-    """TODO: Invoke a callback for every client on shared variables.
-
-    This callback gets invoked for every client connected to the application with the appropriate
-    `State^` instance. You can then perform client-specific tasks, such as updating the state
-    variable reflected in the user interface.
-
-    Arguments:
-        gui (Gui^): The current Gui instance.
-        callback: The user-defined function to be invoked.<br/>
-            The first parameter of this function must be a `State^` object representing the
-            client for which it is invoked.<br/>
-            The other parameters should reflect the ones provided in the *args* collection.
-        args: The parameters to send to *callback*, if any.
-    """
-    if isinstance(gui, Gui):
-        return gui._call_broadcast_callback_on_shared(callback, list(args) if args else [], module_context)
-    _warn("'broadcast_callback_on_shared()' must be called with a valid Gui instance.")
-
-
 def broadcast_callback(
     gui: Gui,
     callback: t.Callable,

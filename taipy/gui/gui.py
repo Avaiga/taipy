@@ -1476,21 +1476,6 @@ class Gui:
                 )
         return None
 
-    def _call_broadcast_callback_on_shared(
-        self, user_callback: t.Callable, args: t.List[t.Any], module_context: t.Optional[str]
-    ) -> t.Any:
-        @contextlib.contextmanager
-        def _broadcast_callback_on_shared() -> t.Iterator[None]:
-            try:
-                setattr(g, Gui.__BRDCST_CALLBACK_G_ID, True)
-                yield
-            finally:
-                setattr(g, Gui.__BRDCST_CALLBACK_G_ID, False)
-
-        with _broadcast_callback_on_shared():
-            # Use global scopes for broadcast callbacks
-            return self._call_user_callback(_DataScopes._GLOBAL_ID, user_callback, args, module_context)
-
     def _call_broadcast_callback(
         self, user_callback: t.Callable, args: t.List[t.Any], module_context: t.Optional[str]
     ) -> t.Dict[str, t.Any]:
@@ -2526,8 +2511,9 @@ class Gui:
 
         # Base global ctx is TaipyHolder classes + script modules and callables
         glob_ctx: t.Dict[str, t.Any] = {t.__name__: t for t in _TaipyBase.__subclasses__()}
-        glob_ctx.update({k: v for k, v in locals_bind.items() if inspect.ismodule(v) or callable(v)})
         glob_ctx[Gui.__SELF_VAR] = self
+        glob_ctx["state"] = self.__state
+        glob_ctx.update({k: v for k, v in locals_bind.items() if inspect.ismodule(v) or callable(v)})
 
         # Call on_init on each library
         for name, libs in self.__extensions.items():
