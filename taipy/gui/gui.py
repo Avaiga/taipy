@@ -1529,6 +1529,39 @@ class Gui:
             res[id] = ret
         return res
 
+    def broadcast_change(self, var_name: str, value: t.Any):
+        """Propagates a new value for a given variable to all states.
+
+        This callback gets invoked for every client connected to the application to update the value
+        of the variable called *var_name* to the new value *value*, in their specific `State^`
+        instance. All user intefaces reflect the change.
+
+        Arguments:
+            gui (Gui^): The current Gui instance.
+            var_name: The name of the variable to change.
+            value: The new value for the variable.
+        """
+        self.broadcast_callback(lambda s, n, v: s.assign(n, v), [var_name, value])
+
+    def __broadcast_changes_fn(state: State, values: dict[str, t.Any]) -> None:
+        with state:
+            for n, v in enumerate(values):
+                state.assign(n, v)
+
+    def broadcast_changes(self, values: dict[str, t.Any]):
+        """Propagates new values for several variables to all states.
+
+        This callback gets invoked for every client connected to the application to update the value
+        of all the variables that are keys in *values*, in their specific `State^` instance. All
+        user intefaces reflect the change.
+
+        Arguments:
+            values: A dictionary where each key is the name of a variable to change, and where the
+                associated value is the new value to set for that variable, in each state for
+                the application.
+        """
+        self.broadcast_callback(Gui.__broadcast_changes_fn, [values])
+
     def _is_in_brdcst_callback(self):
         try:
             return getattr(g, Gui.__BRDCST_CALLBACK_G_ID, False)
