@@ -38,6 +38,7 @@ From simple pilots to production-ready web applications in no time. No more comp
 
 &nbsp;
 
+
 ## ⭐️ What's Taipy?
 Taipy is designed for data scientists and machine learning engineers to build data & AI web applications.
 &nbsp;
