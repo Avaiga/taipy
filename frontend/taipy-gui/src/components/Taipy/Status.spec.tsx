@@ -19,24 +19,9 @@ import { CheckCircle, Error, Warning, Info } from '@mui/icons-material';
 
 import { PlusOneOutlined } from "@mui/icons-material";
 
-import Status, { StatusType } from './Status';
+import Status, { StatusType, getStatusIcon } from './Status';
 
 const status: StatusType = {status: "status", message: "message"};
-
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case 'S':
-      return <CheckCircle data-testid="CheckCircleIcon" />;
-    case 'E':
-      return <Error data-testid="ErrorIcon" />;
-    case 'W':
-      return <Warning data-testid="WarningIcon" />;
-    case 'I':
-      return <Info data-testid="InfoIcon" />;
-    default:
-      return '❓';
-  }
-};
 
 
 describe("Status Component", () => {
