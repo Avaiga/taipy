@@ -9,11 +9,11 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from contextlib import closing
 import json
 import os
 import shutil
 import sqlite3
+from contextlib import closing
 from typing import Dict, Tuple
 
 from taipy.logger._taipy_logger import _TaipyLogger

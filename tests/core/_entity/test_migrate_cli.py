@@ -12,7 +12,6 @@
 import filecmp
 import os
 import shutil
-import sys
 from sqlite3 import OperationalError
 from unittest.mock import patch
 
