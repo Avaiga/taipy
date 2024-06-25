@@ -1124,10 +1124,11 @@ class Gui:
                 metadata: t.Dict[str, t.Any] = {}
                 if hasattr(page_renderer, "_metadata"):
                     metadata = getattr(page_renderer, "_metadata", {})
+                meta_return = json.dumps(metadata, cls=_TaipyJsonEncoder) if metadata else None
                 self.__send_ws(
                     {
                         "type": _WsType.GET_MODULE_CONTEXT.value,
-                        "payload": {"context": mc, "metadata": json.dumps(metadata, cls=_TaipyJsonEncoder)},
+                        "payload": {"context": mc, "metadata": meta_return},
                     }
                 )
 

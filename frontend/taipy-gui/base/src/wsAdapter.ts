@@ -45,10 +45,12 @@ export class TaipyWsAdapter extends WsAdapter {
             } else if (message.type === "GMC") {
                 const payload = message.payload as Record<string, unknown>;
                 taipyApp.context = payload.context as string;
-                try {
-                    taipyApp.metadata = JSON.parse((payload.metadata as string) || "{}");
-                } catch (e) {
-                    console.error("Error parsing metadata from Taipy Designer", e);
+                if (payload?.metadata) {
+                    try {
+                        taipyApp.metadata = JSON.parse((payload.metadata as string) || "{}");
+                    } catch (e) {
+                        console.error("Error parsing metadata from Taipy Designer", e);
+                    }
                 }
             } else if (message.type === "GDT") {
                 const payload = message.payload as Record<string, ModuleData>;
