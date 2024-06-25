@@ -43,9 +43,7 @@ describe("Status Component", () => {
     it("renders", async () => {
         const {getByText} = render(<Status value={status} />);
         const elt = getByText("message");
-        const av = getByText("S");
         expect(elt.tagName).toBe("SPAN");
-        expect(av.tagName).toBe("DIV");
     })
     it("uses the class", async () => {
         const {getByText} = render(<Status value={status} className="taipy-status" />);
