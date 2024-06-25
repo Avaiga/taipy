@@ -48,7 +48,7 @@ const status2Color = (status: string): "error" | "info" | "success" | "warning" 
     return "info";
 };
 
-const getStatusIcon = (status:string) => {
+export const getStatusIcon = (status:string) => {
   switch (status) {
     case 'S':
       return <CheckCircleIcon />;
