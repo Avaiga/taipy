@@ -1,5 +1,6 @@
-[![Taipy Designer](https://github.com/nevo-david/taipy/assets/100117126/e787ba7b-ec7a-4d3f-a7e4-0f195daadce7)
-](https://taipy.io/enterprise)
+[<img src="readme_img/taipy-banner-github.png" alt="Taipy Designer Banner"  width="100%" />
+](https://taipy.io/designer)
+&nbsp;
 
 <div align="center">
   <a href="https://taipy.io?utm_source=github" target="_blank">
