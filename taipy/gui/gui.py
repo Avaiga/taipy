@@ -1116,14 +1116,14 @@ class Gui:
                 page_path = Gui.__root_page_name
             # Get Module Context
             if mc := self._get_page_context(page_path):
+                page_renderer = self._get_page(page_path)._renderer
                 self._bind_custom_page_variables(
-                    self._get_page(page_path)._renderer, self._get_client_id()
+                    page_renderer, self._get_client_id()
                 )
                 # get metadata if there is one
                 metadata: t.Dict[str, t.Any] = {}
-                page = self._get_page(str(payload.get("path")))
-                if hasattr(page._renderer, "_metadata"):
-                    metadata = getattr(page._renderer, "_metadata", {})
+                if hasattr(page_renderer, "_metadata"):
+                    metadata = getattr(page_renderer, "_metadata", {})
                 self.__send_ws(
                     {
                         "type": _WsType.GET_MODULE_CONTEXT.value,
