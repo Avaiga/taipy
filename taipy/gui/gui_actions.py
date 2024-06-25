@@ -267,39 +267,37 @@ def invoke_callback(
     gui: Gui,
     state_id: str,
     callback: t.Callable,
-    args: t.Union[t.Tuple, t.List],
+    args: t.Optional[t.Sequence[t.Any]] = None,
     module_context: t.Optional[str] = None,
 ) -> t.Any:
     """Invoke a user callback for a given state.
 
-    See the
-    [User Manual section on Long Running Callbacks in a Thread](../gui/callbacks.md#long-running-callbacks-in-a-thread)
-    for details on when and how this function can be used.
+    Calling this function is equivalent to calling
+    *gui*.[Gui.]invoke_callback(state_id, callback, args, module_context)^`.
 
     Arguments:
         gui (Gui^): The current Gui instance.
         state_id: The identifier of the state to use, as returned by `get_state_id()^`.
         callback (Callable[[State^, ...], None]): The user-defined function that is invoked.<br/>
             The first parameter of this function **must** be a `State^`.
-        args (Union[Tuple, List]): The remaining arguments, as a List or a Tuple.
+        args (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
         module_context (Optional[str]): the name of the module that will be used.
     """
     if isinstance(gui, Gui):
-        return gui._call_user_callback(state_id, callback, list(args), module_context)
+        return gui.invoke_callback(state_id, callback, args, module_context)
     _warn("'invoke_callback()' must be called with a valid Gui instance.")
 
 
 def broadcast_callback(
     gui: Gui,
     callback: t.Callable,
-    args: t.Optional[t.Union[t.Tuple, t.List]] = None,
+    args: t.Optional[t.Sequence[t.Any]] = None,
     module_context: t.Optional[str] = None,
 ) -> t.Dict[str, t.Any]:
     """Invoke a callback for every client.
 
-    This callback gets invoked for every client connected to the application with the appropriate
-    `State^` instance. You can then perform client-specific tasks, such as updating the state
-    variable reflected in the user interface.
+    Calling this function is equivalent to calling
+    *gui*.[Gui.]broadcast_callback(callback, args, module_context)^`.
 
     Arguments:
         gui (Gui^): The current Gui instance.
@@ -310,13 +308,13 @@ def broadcast_callback(
         args: The parameters to send to *callback*, if any.
     """
     if isinstance(gui, Gui):
-        return gui._call_broadcast_callback(callback, list(args) if args else [], module_context)
+        return gui.broadcast_callback(callback, args, module_context)
     _warn("'broadcast_callback()' must be called with a valid Gui instance.")
 
 
 def invoke_state_callback(gui: Gui, state_id: str, callback: t.Callable, args: t.Union[t.Tuple, t.List]) -> t.Any:
-    _warn("'invoke_state_callback()' was deprecated in Taipy GUI 2.0. Use 'invoke_callback()' instead.")
-    return invoke_callback(gui, state_id, callback, args)
+    _warn("'invoke_state_callback()' was deprecated in Taipy GUI 2.0. Use 'Gui.invoke_callback()' instead.")
+    return gui.invoke_callback(state_id, callback, args)
 
 
 def invoke_long_callback(
@@ -393,16 +391,14 @@ def invoke_long_callback(
         function_result: t.Optional[t.Any] = None,
     ):
         if callable(user_status_function):
-            invoke_callback(
-                this_gui,
+            this_gui.invoke_callback(
                 str(state_id),
                 user_status_function,
                 [status] + list(user_status_function_args) + [function_result],  # type: ignore
                 str(module_context),
             )
         if e:
-            invoke_callback(
-                this_gui,
+            this_gui.invoke_callback(
                 str(state_id),
                 callback_on_exception,
                 (

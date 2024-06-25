@@ -42,28 +42,28 @@ def test__get_user_instance(gui: Gui):
             gui._get_user_instance("", type(None))
 
 
-def test__call_broadcast_callback(gui: Gui):
+def test__broadcast_callback(gui: Gui):
     gui.run(run_server=False)
 
-    res = gui._call_broadcast_callback(lambda s, t: t, ["Hello World"], "mine")
+    res = gui.broadcast_callback(lambda _, t: t, ["Hello World"], "mine")
     assert isinstance(res, dict)
     assert not res
 
-    gui._bindings()._get_or_create_scope("mon scope")
+    gui._bindings()._get_or_create_scope("test scope")
 
-    res = gui._call_broadcast_callback(lambda s, t: t, ["Hello World"], "mine")
+    res = gui.broadcast_callback(lambda _, t: t, ["Hello World"], "mine")
     assert len(res) == 1
-    assert res.get("mon scope", None) == "Hello World"
+    assert res.get("test scope", None) == "Hello World"
 
     with pytest.warns(UserWarning):
-        res = gui._call_broadcast_callback(print, ["Hello World"], "mine")
+        res = gui.broadcast_callback(print, ["Hello World"], "mine")
         assert isinstance(res, dict)
-        assert res.get("mon scope", "Hello World") is None
+        assert res.get("test scope", "Hello World") is None
 
     gui._bindings()._get_or_create_scope("another scope")
-    res = gui._call_broadcast_callback(lambda s, t: t, ["Hello World"], "mine")
+    res = gui.broadcast_callback(lambda s, t: t, ["Hello World"], "mine")
     assert len(res) == 2
-    assert res.get("mon scope", None) == "Hello World"
+    assert res.get("test scope", None) == "Hello World"
     assert res.get("another scope", None) == "Hello World"
 
 

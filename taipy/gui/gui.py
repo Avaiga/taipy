@@ -49,7 +49,7 @@ import __main__  # noqa: F401
 from taipy.logger._taipy_logger import _TaipyLogger
 
 if util.find_spec("pyngrok"):
-    from pyngrok import ngrok
+    from pyngrok import ngrok  # type: ignore
 
 from ._default_config import _default_stylekit, default_config
 from ._page import _Page
@@ -435,7 +435,7 @@ class Gui:
             if provider_fn is None:
                 # try plotly
                 if find_spec("plotly") and find_spec("plotly.graph_objs"):
-                    from plotly.graph_objs import Figure as PlotlyFigure
+                    from plotly.graph_objs import Figure as PlotlyFigure  # type: ignore
 
                     if isinstance(content, PlotlyFigure):
 
@@ -1448,8 +1448,8 @@ class Gui:
                     _warn(f"on_action(): Exception raised in '{action_function.__name__}()'", e)
         return False
 
-    def _call_function_with_state(self, user_function: t.Callable, args: t.List[t.Any]) -> t.Any:
-        cp_args = args.copy()
+    def _call_function_with_state(self, user_function: t.Callable, args: t.Optional[t.List[t.Any]] = None) -> t.Any:
+        cp_args = [] if args is None else args.copy()
         cp_args.insert(0, self.__get_state())
         argcount = user_function.__code__.co_argcount
         if argcount > 0 and inspect.ismethod(user_function):
@@ -1463,39 +1463,69 @@ class Gui:
     def _set_module_context(self, module_context: t.Optional[str]) -> t.ContextManager[None]:
         return self._set_locals_context(module_context) if module_context is not None else contextlib.nullcontext()
 
-    def _call_user_callback(
+    def invoke_callback(
         self,
-        state_id: t.Optional[str],
-        user_callback: t.Union[t.Callable, str],
-        args: t.List[t.Any],
-        module_context: t.Optional[str],
+        state_id: str,
+        callback: t.Callable,
+        args: t.Optional[t.Sequence[t.Any]] = None,
+        module_context: t.Optional[str] = None,
     ) -> t.Any:
+        """Invoke a user callback for a given state.
+
+        See the
+        [section on Long Running Callbacks in a Thread](../gui/callbacks.md#long-running-callbacks-in-a-thread)
+        in the User Manual for details on when and how this function can be used.
+
+        Arguments:
+            state_id: The identifier of the state to use, as returned by `get_state_id()^`.
+            callback (Callable[[State^, ...], None]): The user-defined function that is invoked.<br/>
+                The first parameter of this function **must** be a `State^`.
+            args (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
+            module_context (Optional[str]): the name of the module that will be used.
+        """
         try:
             with self.get_flask_app().app_context():
                 self.__set_client_id_in_context(state_id)
                 with self._set_module_context(module_context):
-                    if not callable(user_callback):
-                        user_callback = self._get_user_function(user_callback)
-                    if not callable(user_callback):
-                        _warn(f"invoke_callback(): {user_callback} is not callable.")
+                    if not callable(callback):
+                        callback = self._get_user_function(callback)
+                    if not callable(callback):
+                        _warn(f"invoke_callback(): {callback} is not callable.")
                         return None
-                    return self._call_function_with_state(user_callback, args)
+                    return self._call_function_with_state(callback, args)
         except Exception as e:  # pragma: no cover
-            if not self._call_on_exception(user_callback.__name__ if callable(user_callback) else user_callback, e):
+            if not self._call_on_exception(callback.__name__ if callable(callback) else callback, e):
                 _warn(
-                    "invoke_callback(): Exception raised in "
-                    + f"'{user_callback.__name__ if callable(user_callback) else user_callback}()'",
+                    "Gui.invoke_callback(): Exception raised in "
+                    + f"'{callback.__name__ if callable(callback) else callback}()'",
                     e,
                 )
         return None
 
-    def _call_broadcast_callback(
-        self, user_callback: t.Callable, args: t.List[t.Any], module_context: t.Optional[str]
+    def broadcast_callback(
+        self,
+        callback: t.Callable,
+        args: t.Optional[t.Sequence[t.Any]] = None,
+        module_context: t.Optional[str] = None,
     ) -> t.Dict[str, t.Any]:
-        # get scopes
+        """Invoke a callback for every client.
+
+        This callback gets invoked for every client connected to the application with the appropriate
+        `State^` instance. You can then perform client-specific tasks, such as updating the state
+        variable reflected in the user interface.
+
+        Arguments:
+            gui (Gui^): The current Gui instance.
+            callback: The user-defined function to be invoked.<br/>
+                The first parameter of this function must be a `State^` object representing the
+                client for which it is invoked.<br/>
+                The other parameters should reflect the ones provided in the *args* collection.
+            args: The parameters to send to *callback*, if any.
+        """
+        # Iterate over all the scopes
         res = {}
         for id in [id for id in self.__bindings._get_all_scopes() if id != _DataScopes._GLOBAL_ID]:
-            ret = self._call_user_callback(id, user_callback, args, module_context)
+            ret = self.invoke_callback(id, callback, args, module_context)
             res[id] = ret
         return res
 
@@ -2065,7 +2095,7 @@ class Gui:
                 if not isinstance(lib, ElementLibrary):
                     continue
                 try:
-                    self._call_function_with_state(lib.on_user_init, [])
+                    self._call_function_with_state(lib.on_user_init)
                 except Exception as e:  # pragma: no cover
                     if not self._call_on_exception(f"{name}.on_user_init", e):
                         _warn(f"Exception raised in {name}.on_user_init()", e)
@@ -2078,7 +2108,7 @@ class Gui:
             self.__init_libs()
             if hasattr(self, "on_init") and callable(self.on_init):
                 try:
-                    self._call_function_with_state(self.on_init, [])
+                    self._call_function_with_state(self.on_init)
                 except Exception as e:  # pragma: no cover
                     if not self._call_on_exception("on_init", e):
                         _warn("Exception raised in on_init()", e)
