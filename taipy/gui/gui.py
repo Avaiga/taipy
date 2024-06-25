@@ -1111,10 +1111,13 @@ class Gui:
 
     def __handle_ws_get_module_context(self, payload: t.Any):
         if isinstance(payload, dict):
+            page_path = str(payload.get("path"))
+            if page_path in {"/", ""}:
+                page_path = Gui.__root_page_name
             # Get Module Context
-            if mc := self._get_page_context(str(payload.get("path"))):
+            if mc := self._get_page_context(page_path):
                 self._bind_custom_page_variables(
-                    self._get_page(str(payload.get("path")))._renderer, self._get_client_id()
+                    self._get_page(page_path)._renderer, self._get_client_id()
                 )
                 # get metadata if there is one
                 metadata: t.Dict[str, t.Any] = {}
@@ -2154,6 +2157,8 @@ class Gui:
 
     def _bind_custom_page_variables(self, page: CustomPage, client_id: t.Optional[str]):
         """Handle the bindings of custom page variables"""
+        if not isinstance(page, CustomPage):
+            return
         with self.get_flask_app().app_context() if has_app_context() else contextlib.nullcontext():  # type: ignore[attr-defined]
             self.__set_client_id_in_context(client_id)
             with self._set_locals_context(page._get_module_name()):

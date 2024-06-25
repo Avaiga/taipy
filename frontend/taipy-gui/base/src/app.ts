@@ -164,7 +164,7 @@ export class TaipyApp {
         if (!path || path === "") {
             path = window.location.pathname.slice(1);
         }
-        sendWsMessage(this.socket, "GMC", "get_module_context", { path: path }, this.clientId);
+        sendWsMessage(this.socket, "GMC", "get_module_context", { path: path || "/" }, this.clientId);
     }
 
     trigger(actionName: string, triggerId: string, payload: Record<string, unknown> = {}) {
