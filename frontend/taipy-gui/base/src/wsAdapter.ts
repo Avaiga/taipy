@@ -43,9 +43,15 @@ export class TaipyWsAdapter extends WsAdapter {
                 taipyApp.clientId = id;
                 taipyApp.updateContext(taipyApp.path);
             } else if (message.type === "GMC") {
-                const mc = (message.payload as Record<string, unknown>).data as string;
-                window.localStorage.setItem("ModuleContext", mc);
-                taipyApp.context = mc;
+                const payload = message.payload as Record<string, unknown>;
+                taipyApp.context = payload.context as string;
+                if (payload?.metadata) {
+                    try {
+                        taipyApp.metadata = JSON.parse((payload.metadata as string) || "{}");
+                    } catch (e) {
+                        console.error("Error parsing metadata from Taipy Designer", e);
+                    }
+                }
             } else if (message.type === "GDT") {
                 const payload = message.payload as Record<string, ModuleData>;
                 const variableData = payload.variable;

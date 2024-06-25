@@ -1108,13 +1108,19 @@ class Gui:
                 page_path = Gui.__root_page_name
             # Get Module Context
             if mc := self._get_page_context(page_path):
+                page_renderer = self._get_page(page_path)._renderer
                 self._bind_custom_page_variables(
-                    self._get_page(page_path)._renderer, self._get_client_id()
+                    page_renderer, self._get_client_id()
                 )
+                # get metadata if there is one
+                metadata: t.Dict[str, t.Any] = {}
+                if hasattr(page_renderer, "_metadata"):
+                    metadata = getattr(page_renderer, "_metadata", {})
+                meta_return = json.dumps(metadata, cls=_TaipyJsonEncoder) if metadata else None
                 self.__send_ws(
                     {
                         "type": _WsType.GET_MODULE_CONTEXT.value,
-                        "payload": {"data": mc},
+                        "payload": {"context": mc, "metadata": meta_return},
                     }
                 )
 
@@ -2132,7 +2138,6 @@ class Gui:
                 to=page_name,
                 params={
                     _Server._RESOURCE_HANDLER_ARG: pr._resource_handler.get_id(),
-                    _Server._CUSTOM_PAGE_META_ARG: json.dumps(pr._metadata, cls=_TaipyJsonEncoder)
                 },
             ):
                 # Proactively handle the bindings of custom page variables
