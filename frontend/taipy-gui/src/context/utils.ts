@@ -1,3 +1,4 @@
+import axios from "axios";
 import { TAIPY_CLIENT_ID } from "./wsUtils";
 
 export const getLocalStorageValue = <T = string>(key: string, defaultValue: T, values?: T[]) => {
@@ -10,3 +11,22 @@ export const storeClientId = (id: string) => localStorage && localStorage.setIte
 export interface IdMessage {
     id: string;
 }
+
+export const changeFavicon = (url?: string) => {
+    const link: HTMLLinkElement | null = document.querySelector("link.__taipy_favicon");
+    if (link) {
+        const { url: taipyUrl } = link.dataset;
+        const fetchUrl = url || (taipyUrl as string);
+        axios
+            .get(fetchUrl)
+            .then(() => {
+                link.href = fetchUrl;
+            })
+            .catch((error) => {
+                if (fetchUrl !== taipyUrl) {
+                    link.href = taipyUrl as string;
+                }
+                console.log(error);
+            });
+    }
+};
