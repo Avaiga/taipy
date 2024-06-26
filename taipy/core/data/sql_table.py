@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Union
 
 import pandas as pd
 from sqlalchemy import MetaData, Table
@@ -146,8 +146,14 @@ class SQLTableDataNode(_AbstractSQLDataNode):
         connection.execute(table.insert(), data)
 
     @classmethod
-    def __insert_dataframe(cls, df: pd.DataFrame, table: Any, connection: Any, delete_table: bool) -> None:
-        cls.__insert_dicts(df.to_dict(orient="records"), table, connection, delete_table)
+    def __insert_dataframe(
+        cls, df: Union[pd.DataFrame, pd.Series], table: Any, connection: Any, delete_table: bool
+    ) -> None:
+        if isinstance(df, pd.Series):
+            data = [df.to_dict()]
+        elif isinstance(df, pd.DataFrame):
+            data = df.to_dict(orient="records")
+        cls.__insert_dicts(data, table, connection, delete_table)
 
     @classmethod
     def __delete_all_rows(cls, table: Any, connection: Any, delete_table: bool) -> None:
