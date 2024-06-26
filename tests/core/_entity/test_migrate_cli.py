@@ -207,7 +207,6 @@ def test_migrate_sql_backup_and_remove(caplog, tmp_sqlite):
     assert not os.path.exists(backup_sqlite)
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="Does not run on windows due to PermissionError: [WinError 32]")
 def test_migrate_sql_backup_and_restore(caplog, tmp_sqlite):
     _MigrateCLI.create_parser()
 
