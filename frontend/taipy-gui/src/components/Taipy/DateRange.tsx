@@ -11,19 +11,19 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, {useState, useEffect, useCallback} from "react";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
-import { DatePicker, DatePickerProps } from "@mui/x-date-pickers/DatePicker";
-import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
-import { DateTimePicker, DateTimePickerProps } from "@mui/x-date-pickers/DateTimePicker";
-import { isValid } from "date-fns";
-import { ErrorBoundary } from "react-error-boundary";
+import {DatePicker, DatePickerProps} from "@mui/x-date-pickers/DatePicker";
+import {BaseDateTimePickerSlotProps} from "@mui/x-date-pickers/DateTimePicker/shared";
+import {DateTimePicker, DateTimePickerProps} from "@mui/x-date-pickers/DateTimePicker";
+import {isValid, subDays} from "date-fns";
+import {ErrorBoundary} from "react-error-boundary";
 
-import { createSendUpdateAction } from "../../context/taipyReducers";
-import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps } from "./utils";
-import { dateToString, getDateTime, getTimeZonedDate } from "../../utils";
-import { useClassNames, useDispatch, useDynamicProperty, useFormatConfig, useModule } from "../../utils/hooks";
+import {createSendUpdateAction} from "../../context/taipyReducers";
+import {getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps} from "./utils";
+import {dateToString, getDateTime, getTimeZonedDate} from "../../utils";
+import {useClassNames, useDispatch, useDynamicProperty, useFormatConfig, useModule} from "../../utils/hooks";
 import Field from "./Field";
 import ErrorFallback from "../../utils/ErrorBoundary";
 
@@ -38,8 +38,8 @@ interface DateRangeProps extends TaipyActiveProps, TaipyChangeProps {
     labelEnd?: string;
 }
 
-const boxSx = { display: "inline-flex", alignItems: "center", gap: "0.5em" };
-const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotProps<Date>;
+const boxSx = {display: "inline-flex", alignItems: "center", gap: "0.5em"};
+const textFieldProps = {textField: {margin: "dense"}} as BaseDateTimePickerSlotProps<Date>;
 
 const getRangeDateTime = (
     json: string | string[] | undefined,
@@ -50,7 +50,8 @@ const getRangeDateTime = (
     if (typeof json == "string") {
         try {
             dates = JSON.parse(json);
-        } catch (e) {}
+        } catch (e) {
+        }
     } else {
         dates = json as string[];
     }
@@ -78,20 +79,21 @@ const getProps = (p: DateProps, start: boolean, val: Date | null, withTime: bool
             ? "minDateTime"
             : "maxDateTime"
         : start
-        ? "minDate"
-        : "maxDate";
+            ? "minDate"
+            : "maxDate";
     if (p[propName] == val) {
         return p;
     }
-    return { ...p, [propName]: val };
+    return {...p, [propName]: val};
 };
 
 const DateRange = (props: DateRangeProps) => {
-    const { updateVarName, withTime = false, id, propagate = true } = props;
+    const {updateVarName, withTime = false, id, propagate = true} = props;
     const dispatch = useDispatch();
     const formatConfig = useFormatConfig();
     const tz = formatConfig.timeZone;
     const [value, setValue] = useState<[Date | null, Date | null]>([null, null]);
+    const [selectedDateRange, setSelectedDateRange] = useState<[Date | null, Date | null]>([null, null]);
     const [startProps, setStartProps] = useState<DateProps>({});
     const [endProps, setEndProps] = useState<DateProps>({});
     const module = useModule();
@@ -136,6 +138,32 @@ const DateRange = (props: DateRangeProps) => {
 
     const handleChangeStart = useCallback((v: Date | null) => handleChange(v, true), [handleChange]);
     const handleChangeEnd = useCallback((v: Date | null) => handleChange(v, false), [handleChange]);
+
+    useEffect(() => {
+        if (props.defaultDates) {
+            const dates = JSON.parse(props.defaultDates);
+            const latestDate = dates[dates.length - 1];
+            const earliestDate = dates[0];
+            setSelectedDateRange([new Date(earliestDate), new Date(latestDate)]);
+        }
+    }, [props.defaultDates]);
+
+    const handleDisableMaxDate = useCallback((date: Date) => {
+        const maxDate = selectedDateRange[1];
+        if (maxDate) {
+            return date > maxDate;
+        }
+        return false;
+    }, [selectedDateRange]);
+
+    const handleDisableMinDate = useCallback((date: Date) => {
+        const minDate = selectedDateRange[0];
+        if (minDate) {
+            return date < subDays(minDate, 1);
+        }
+        return false;
+    }, [selectedDateRange]);
+
 
     // Run every time props.value get updated
     useEffect(() => {
@@ -197,6 +225,7 @@ const DateRange = (props: DateRangeProps) => {
                                     }
                                     disabled={!active}
                                     slotProps={textFieldProps}
+                                    shouldDisableDate={handleDisableMinDate}
                                     label={props.labelStart}
                                     format={props.format}
                                 />
@@ -212,6 +241,7 @@ const DateRange = (props: DateRangeProps) => {
                                     }
                                     disabled={!active}
                                     slotProps={textFieldProps}
+                                    shouldDisableDate={handleDisableMaxDate}
                                     label={props.labelEnd}
                                     format={props.format}
                                 />
