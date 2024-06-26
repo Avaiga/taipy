@@ -27,7 +27,7 @@ const Navigate = ({ to, params, tab, force }: NavigateProps) => {
     const { dispatch, state } = useContext(TaipyContext);
     const navigate = useNavigate();
     const location = useLocation();
-    const SPECIAL_PARAMS = ["tp_reload_all", "tp_reload_same_route_only", "tprh", "tp_cp_meta"];
+    const SPECIAL_PARAMS = ["tp_reload_all", "tp_reload_same_route_only", "tprh"];
 
     useEffect(() => {
         if (to) {
@@ -65,10 +65,6 @@ const Navigate = ({ to, params, tab, force }: NavigateProps) => {
                     if (tprh !== undefined) {
                         // Add a session cookie for the resource handler id
                         document.cookie = `tprh=${tprh};path=/;`;
-                        const meta = params?.tp_cp_meta;
-                        if (meta !== undefined) {
-                            localStorage.setItem("tp_cp_meta", meta);
-                        }
                         navigate(0);
                     }
                 }
