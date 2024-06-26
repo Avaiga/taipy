@@ -40,6 +40,9 @@ def test_broadcast(gui: Gui, helpers):
 
 def test_broadcast_changes(gui: Gui, helpers):
     # Bind test variables
+    v1 = ""  # noqa: F841
+    v2 = 0  # noqa: F841
+    v3 = False  # noqa: F841
     variables = ["v1", "v2", "v3"]  # noqa: F841
     values = ["tested", 1234, True]  # noqa: F841
 

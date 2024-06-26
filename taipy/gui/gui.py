@@ -1543,6 +1543,7 @@ class Gui:
         """
         self.broadcast_callback(lambda s, n, v: s.assign(n, v), [var_name, value])
 
+    @staticmethod
     def __broadcast_changes_fn(state: State, values: dict[str, t.Any]) -> None:
         with state:
             for n, v in enumerate(values):

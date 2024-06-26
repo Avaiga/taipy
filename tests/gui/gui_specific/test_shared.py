@@ -17,5 +17,5 @@ def test_add_shared_variables(gui: Gui):
     assert isinstance(gui._Gui__shared_variables, list)  # type: ignore[attr-defined]
     assert len(gui._Gui__shared_variables) == 2  # type: ignore[attr-defined]
 
-    Gui.add_shared_variables("var1", "var2")
-    assert len(gui._Gui__shared_variables) == 2  # type: ignore[attr-defined]
+    Gui.add_shared_variables("var1", "var3")
+    assert len(gui._Gui__shared_variables) == 3  # type: ignore[attr-defined]
