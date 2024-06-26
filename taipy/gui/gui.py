@@ -2643,6 +2643,7 @@ class Gui:
         Change the favicon for all clients.
 
         This function Allows to change dynamically the favicon for all connected client.
+        favicon_path can be an URL (relative or not) or a file path.
         The *favicon* parameter to the `(Gui.)run^` can also be used to change the favicon at start.
         """
         if self.__favicon != favicon_path:
