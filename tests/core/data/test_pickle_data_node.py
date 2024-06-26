@@ -49,7 +49,9 @@ class TestPickleDataNodeEntity:
         assert isinstance(parquet_dn, PickleDataNode)
 
     def test_create(self):
-        pickle_dn_config = Config.configure_pickle_data_node(id="foobar_bazxyxea", default_path="Data")
+        pickle_dn_config = Config.configure_pickle_data_node(
+            id="foobar_bazxyxea", default_path="Data", default_data="Data"
+        )
         dn = _DataManagerFactory._build_manager()._create_and_set(pickle_dn_config, None, None)
 
         assert isinstance(dn, PickleDataNode)
