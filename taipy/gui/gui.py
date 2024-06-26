@@ -2639,6 +2639,12 @@ class Gui:
         return contextlib.nullcontext()
 
     def set_favicon(self, favicon_path: t.Union[str, Path]):
+        """
+        Change the favicon for all clients.
+
+        This function Allows to change dynamically the favicon for all connected client.
+        The *favicon* parameter to the `(Gui.)run^` can also be used to change the favicon at start.
+        """
         if self.__favicon != favicon_path:
             self.__favicon = favicon_path
             url = self._get_content("__taipy_favicon", favicon_path, True)
