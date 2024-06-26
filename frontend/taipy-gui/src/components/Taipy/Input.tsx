@@ -66,6 +66,8 @@ const Input = (props: TaipyInputProps) => {
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
+    const step = useDynamicProperty(props.step, props.defaultStep, 1);
+    const stepMultiplier = useDynamicProperty(props.stepMultiplier, props.defaultStepMultiplier, 10);
 
     const handleInput = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,10 +93,10 @@ const Input = (props: TaipyInputProps) => {
     const handleAction = useCallback(
         (evt: KeyboardEvent<HTMLDivElement>) => {
             if (evt.shiftKey && evt.key === 'ArrowUp') {
-                setValue(((Number(evt.currentTarget.querySelector("input")?.value || 0) + (props.step || 1) * (props.stepMultiplier || 10) - (props.step || 1)).toString()));
+                setValue(((Number(evt.currentTarget.querySelector("input")?.value || 0) + (step || 1) * (stepMultiplier || 10) - (step || 1)).toString()));
             }
             if (evt.shiftKey && evt.key === 'ArrowDown') {
-                setValue(((Number(evt.currentTarget.querySelector("input")?.value || 0) - (props.step || 1) * (props.stepMultiplier || 10) + (props.step || 1)).toString()));
+                setValue(((Number(evt.currentTarget.querySelector("input")?.value || 0) - (step || 1) * (stepMultiplier || 10) + (step || 1)).toString()));
             }
             if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
                 const val = evt.currentTarget.querySelector("input")?.value;
@@ -109,31 +111,35 @@ const Input = (props: TaipyInputProps) => {
                 evt.preventDefault();
             }
         },
-        [actionKeys, props.step, props.stepMultiplier, changeDelay, onAction, dispatch, id, module, updateVarName, onChange, propagate]
+        [actionKeys, step, stepMultiplier, changeDelay, onAction, dispatch, id, module, updateVarName, onChange, propagate]
     );
 
     const roundBasedOnStep = useMemo(() => {
-        const stepString = (props.step || 1).toString();
+        const stepString = (step || 1).toString();
         const decimalPlaces = stepString.includes('.') ? stepString.split('.')[1].length : 0;
         const multiplier = Math.pow(10, decimalPlaces);
         return (value: number) => Math.round(value * multiplier) / multiplier;
-    }, [props.step]);
+    }, [step]);
+
+    const calculateNewValue = useMemo(() => {
+        return (prevValue: string, step: number, stepMultiplier: number, shiftKey: boolean, increment: boolean) => {
+            const multiplier = shiftKey ? stepMultiplier : 1;
+            const change = step * multiplier * (increment ? 1 : -1);
+            return roundBasedOnStep(Number(prevValue) + change).toString();
+        };
+    }, [roundBasedOnStep]);
+
+    const handleStepperMouseDown = useCallback((event: React.MouseEvent<HTMLButtonElement>, increment: boolean) => {
+        setValue(prevValue => calculateNewValue(prevValue, step || 1, stepMultiplier || 10, event.shiftKey, increment));
+    }, [step, stepMultiplier, calculateNewValue]);
 
     const handleUpStepperMouseDown = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-        if (event.shiftKey) {
-            setValue(prevValue => roundBasedOnStep(Number(prevValue) + (props.step || 1) * (props.stepMultiplier || 10)).toString());
-        } else {
-            setValue(prevValue => roundBasedOnStep(Number(prevValue) + (props.step || 1)).toString())
-        }
-    }, [props.step, props.stepMultiplier, roundBasedOnStep])
+        handleStepperMouseDown(event, true);
+    }, [handleStepperMouseDown]);
 
     const handleDownStepperMouseDown = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-        if (event.shiftKey) {
-            setValue(prevValue => roundBasedOnStep(Number(prevValue) - (props.step || 1) * (props.stepMultiplier || 10)).toString());
-        } else {
-            setValue(prevValue => roundBasedOnStep(Number(prevValue) - (props.step || 1)).toString())
-        }
-    }, [props.step, props.stepMultiplier, roundBasedOnStep])
+        handleStepperMouseDown(event, false);
+    }, [handleStepperMouseDown]);
 
     useEffect(() => {
         if (props.value !== undefined) {
@@ -151,7 +157,7 @@ const Input = (props: TaipyInputProps) => {
                 type={type}
                 id={id}
                 inputProps={{
-                    step: props.step ? props.step : 1,
+                    step: step ? step : 1,
                 }}
                 InputProps={{
                     endAdornment: (

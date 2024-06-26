@@ -136,15 +136,15 @@
                     },
                     {
                         "name": "step",
-                        "type": "int|float",
+                        "type": "dynamic(int|float)",
                         "default_value": "1",
-                        "doc": "The amount that the value changes on each increment or decrement."
+                        "doc": "The amount by which the value is incremented or decremented when the user clicks one of the arrow buttons."
                     },
                     {
                         "name": "step_multiplier",
-                        "type": "int|float",
+                        "type": "dynamic(int|float)",
                         "default_value": "10",
-                        "doc": "The amount that the value changes on each increment or decrement when the shift key is pressed."
+                        "doc": "A factor that multiplies <i>step</i> when the user presses the Shift key while clicking one of the arrow buttons."
                     }
                 ]
             }

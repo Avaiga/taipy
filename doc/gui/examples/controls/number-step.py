@@ -18,7 +18,7 @@ from taipy.gui import Gui
 value = 50
 
 page = """
-<|{value}|number|step=1|step_multiplier=6|>
+<|{value}|number|step=2|>
 """
 
 Gui(page).run()
