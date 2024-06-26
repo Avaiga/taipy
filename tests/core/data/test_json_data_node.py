@@ -26,6 +26,7 @@ from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 from taipy.core.data._data_manager import _DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.json import JSONDataNode
 from taipy.core.data.operator import JoinOperator, Operator
@@ -87,21 +88,40 @@ class MyCustomDecoder(json.JSONDecoder):
 class TestJSONDataNode:
     def test_create(self):
         path = "data/node/path"
-        dn = JSONDataNode("foo_bar", Scope.SCENARIO, properties={"default_path": path, "name": "super name"})
-        assert isinstance(dn, JSONDataNode)
-        assert dn.storage_type() == "json"
-        assert dn.config_id == "foo_bar"
-        assert dn.name == "super name"
-        assert dn.scope == Scope.SCENARIO
-        assert dn.id is not None
-        assert dn.owner_id is None
-        assert dn.last_edit_date is None
-        assert dn.job_ids == []
-        assert not dn.is_ready_for_reading
-        assert dn.path == path
+        json_dn_config = Config.configure_json_data_node(id="foo_bar", default_path=path, name="super name")
+        dn_1 = _DataManagerFactory._build_manager()._create_and_set(json_dn_config, None, None)
+        assert isinstance(dn_1, JSONDataNode)
+        assert dn_1.storage_type() == "json"
+        assert dn_1.config_id == "foo_bar"
+        assert dn_1.name == "super name"
+        assert dn_1.scope == Scope.SCENARIO
+        assert dn_1.id is not None
+        assert dn_1.owner_id is None
+        assert dn_1.last_edit_date is None
+        assert dn_1.job_ids == []
+        assert not dn_1.is_ready_for_reading
+        assert dn_1.path == path
+
+        json_dn_config_2 = Config.configure_json_data_node(id="foo", default_path=path, encoding="utf-16")
+        dn_2 = _DataManagerFactory._build_manager()._create_and_set(json_dn_config_2, None, None)
+        assert isinstance(dn_2, JSONDataNode)
+        assert dn_2.storage_type() == "json"
+        assert dn_2.properties["encoding"] == "utf-16"
+        assert dn_2.encoding == "utf-16"
+
+        json_dn_config_3 = Config.configure_json_data_node(
+            id="foo", default_path=path, encoder=MyCustomEncoder, decoder=MyCustomDecoder
+        )
+        dn_3 = _DataManagerFactory._build_manager()._create_and_set(json_dn_config_3, None, None)
+        assert isinstance(dn_3, JSONDataNode)
+        assert dn_3.storage_type() == "json"
+        assert dn_3.properties["encoder"] == MyCustomEncoder
+        assert dn_3.encoder == MyCustomEncoder
+        assert dn_3.properties["decoder"] == MyCustomDecoder
+        assert dn_3.decoder == MyCustomDecoder
 
         with pytest.raises(InvalidConfigurationId):
-            dn = JSONDataNode(
+            _ = JSONDataNode(
                 "foo bar", Scope.SCENARIO, properties={"default_path": path, "has_header": False, "name": "super name"}
             )
 

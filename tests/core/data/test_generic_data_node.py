@@ -11,8 +11,10 @@
 
 import pytest
 
+from taipy.config import Config
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.generic import GenericDataNode
@@ -53,9 +55,11 @@ class TestGenericDataNode:
     data = list(range(10))
 
     def test_create(self):
-        dn = GenericDataNode(
-            "foo_bar", Scope.SCENARIO, properties={"read_fct": read_fct, "write_fct": write_fct, "name": "super name"}
+        data_manager = _DataManagerFactory._build_manager()
+        generic_dn_config = Config.configure_generic_data_node(
+            id="foo_bar", read_fct=read_fct, write_fct=write_fct, name="super name"
         )
+        dn = data_manager._create_and_set(generic_dn_config, None, None)
         assert isinstance(dn, GenericDataNode)
         assert dn.storage_type() == "generic"
         assert dn.config_id == "foo_bar"
@@ -69,9 +73,10 @@ class TestGenericDataNode:
         assert dn.properties["read_fct"] == read_fct
         assert dn.properties["write_fct"] == write_fct
 
-        dn_1 = GenericDataNode(
-            "foo", Scope.SCENARIO, properties={"read_fct": read_fct, "write_fct": None, "name": "foo"}
+        generic_dn_config_1 = Config.configure_generic_data_node(
+            id="foo", read_fct=read_fct, write_fct=None, name="foo"
         )
+        dn_1 = data_manager._create_and_set(generic_dn_config_1, None, None)
         assert isinstance(dn, GenericDataNode)
         assert dn_1.storage_type() == "generic"
         assert dn_1.config_id == "foo"
@@ -85,9 +90,10 @@ class TestGenericDataNode:
         assert dn_1.properties["read_fct"] == read_fct
         assert dn_1.properties["write_fct"] is None
 
-        dn_2 = GenericDataNode(
-            "xyz", Scope.SCENARIO, properties={"read_fct": None, "write_fct": write_fct, "name": "xyz"}
+        generic_dn_config_2 = Config.configure_generic_data_node(
+            id="xyz", read_fct=None, write_fct=write_fct, name="xyz"
         )
+        dn_2 = data_manager._create_and_set(generic_dn_config_2, None, None)
         assert isinstance(dn, GenericDataNode)
         assert dn_2.storage_type() == "generic"
         assert dn_2.config_id == "xyz"
@@ -101,11 +107,12 @@ class TestGenericDataNode:
         assert dn_2.properties["read_fct"] is None
         assert dn_2.properties["write_fct"] == write_fct
 
-        dn_3 = GenericDataNode("xyz", Scope.SCENARIO, properties={"read_fct": read_fct, "name": "xyz"})
+        generic_dn_config_3 = Config.configure_generic_data_node(id="acb", read_fct=read_fct, name="acb")
+        dn_3 = data_manager._create_and_set(generic_dn_config_3, None, None)
         assert isinstance(dn, GenericDataNode)
         assert dn_3.storage_type() == "generic"
-        assert dn_3.config_id == "xyz"
-        assert dn_3.name == "xyz"
+        assert dn_3.config_id == "acb"
+        assert dn_3.name == "acb"
         assert dn_3.scope == Scope.SCENARIO
         assert dn_3.id is not None
         assert dn_3.owner_id is None
@@ -115,11 +122,12 @@ class TestGenericDataNode:
         assert dn_3.properties["read_fct"] == read_fct
         assert dn_3.properties["write_fct"] is None
 
-        dn_4 = GenericDataNode("xyz", Scope.SCENARIO, properties={"write_fct": write_fct, "name": "xyz"})
+        generic_dn_config_4 = Config.configure_generic_data_node(id="mno", write_fct=write_fct, name="mno")
+        dn_4 = data_manager._create_and_set(generic_dn_config_4, None, None)
         assert isinstance(dn, GenericDataNode)
         assert dn_4.storage_type() == "generic"
-        assert dn_4.config_id == "xyz"
-        assert dn_4.name == "xyz"
+        assert dn_4.config_id == "mno"
+        assert dn_4.name == "mno"
         assert dn_4.scope == Scope.SCENARIO
         assert dn_4.id is not None
         assert dn_4.owner_id is None

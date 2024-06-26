@@ -14,7 +14,9 @@ from unittest.mock import patch
 
 import pytest
 
+from taipy.config import Config
 from taipy.config.common.scope import Scope
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.sql_table import SQLTableDataNode
 from taipy.core.exceptions.exceptions import InvalidExposedType, MissingRequiredProperty
@@ -85,11 +87,8 @@ class TestSQLTableDataNode:
 
     @pytest.mark.parametrize("properties", __sql_properties)
     def test_create(self, properties):
-        dn = SQLTableDataNode(
-            "foo_bar",
-            Scope.SCENARIO,
-            properties=properties,
-        )
+        sql_table_dn_config = Config.configure_sql_table_data_node("foo_bar", **properties)
+        dn = _DataManagerFactory._build_manager()._create_and_set(sql_table_dn_config, None, None)
         assert isinstance(dn, SQLTableDataNode)
         assert dn.storage_type() == "sql_table"
         assert dn.config_id == "foo_bar"
@@ -101,6 +100,13 @@ class TestSQLTableDataNode:
         assert dn.exposed_type == "pandas"
         assert dn.table_name == "example"
         assert dn._get_base_read_query() == "SELECT * FROM example"
+
+        sql_table_dn_config_1 = Config.configure_sql_table_data_node(
+            "foo_bar", **properties, exposed_type=MyCustomObject
+        )
+        dn_1 = _DataManagerFactory._build_manager()._create_and_set(sql_table_dn_config_1, None, None)
+        assert isinstance(dn_1, SQLTableDataNode)
+        assert dn_1.exposed_type == MyCustomObject
 
     @pytest.mark.parametrize("properties", __sql_properties)
     def test_get_user_properties(self, properties):

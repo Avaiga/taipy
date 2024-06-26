@@ -23,6 +23,7 @@ from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 from taipy.core.data._data_manager import _DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.parquet import ParquetDataNode
 from taipy.core.exceptions.exceptions import (
@@ -65,9 +66,10 @@ class TestParquetDataNode:
     def test_create(self):
         path = "data/node/path"
         compression = "snappy"
-        dn = ParquetDataNode(
-            "foo_bar", Scope.SCENARIO, properties={"path": path, "compression": compression, "name": "super name"}
+        parquet_dn_config = Config.configure_parquet_data_node(
+            id="foo_bar", default_path=path, compression=compression, name="super name"
         )
+        dn = _DataManagerFactory._build_manager()._create_and_set(parquet_dn_config, None, None)
         assert isinstance(dn, ParquetDataNode)
         assert dn.storage_type() == "parquet"
         assert dn.config_id == "foo_bar"
@@ -82,6 +84,13 @@ class TestParquetDataNode:
         assert dn.exposed_type == "pandas"
         assert dn.compression == "snappy"
         assert dn.engine == "pyarrow"
+
+        parquet_dn_config_1 = Config.configure_parquet_data_node(
+            id="bar", default_path=path, compression=compression, exposed_type=MyCustomObject
+        )
+        dn_1 = _DataManagerFactory._build_manager()._create_and_set(parquet_dn_config_1, None, None)
+        assert isinstance(dn_1, ParquetDataNode)
+        assert dn_1.exposed_type == MyCustomObject
 
         with pytest.raises(InvalidConfigurationId):
             dn = ParquetDataNode("foo bar", Scope.SCENARIO, properties={"path": path, "name": "super name"})

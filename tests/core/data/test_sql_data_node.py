@@ -17,7 +17,9 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
+from taipy.config import Config
 from taipy.config.common.scope import Scope
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.operator import JoinOperator, Operator
 from taipy.core.data.sql import SQLDataNode
@@ -107,11 +109,8 @@ class TestSQLDataNode:
 
     @pytest.mark.parametrize("properties", __sql_properties)
     def test_create(self, properties):
-        dn = SQLDataNode(
-            "foo_bar",
-            Scope.SCENARIO,
-            properties=properties,
-        )
+        sql_dn_config = Config.configure_sql_data_node(id="foo_bar", **properties)
+        dn = _DataManagerFactory._build_manager()._create_and_set(sql_dn_config, None, None)
         assert isinstance(dn, SQLDataNode)
         assert dn.storage_type() == "sql"
         assert dn.config_id == "foo_bar"
@@ -123,6 +122,17 @@ class TestSQLDataNode:
         assert dn.exposed_type == "pandas"
         assert dn.read_query == "SELECT * FROM example"
         assert dn.write_query_builder == my_write_query_builder_with_pandas
+
+        sql_dn_config_1 = Config.configure_sql_data_node(
+            id="foo",
+            **properties,
+            append_query_builder=my_append_query_builder_with_pandas,
+            exposed_type=MyCustomObject,
+        )
+        dn_1 = _DataManagerFactory._build_manager()._create_and_set(sql_dn_config_1, None, None)
+        assert isinstance(dn, SQLDataNode)
+        assert dn_1.exposed_type == MyCustomObject
+        assert dn_1.append_query_builder == my_append_query_builder_with_pandas
 
     @pytest.mark.parametrize("properties", __sql_properties)
     def test_get_user_properties(self, properties):
