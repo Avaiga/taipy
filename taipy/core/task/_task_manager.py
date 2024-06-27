@@ -26,11 +26,7 @@ from ..cycle.cycle_id import CycleId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import NonExistingTask
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
-from ..reason._reason_factory import (
-    _build_data_node_is_being_edited_reason,
-    _build_data_node_is_not_written,
-    _build_not_submittable_entity_reason,
-)
+from ..reason import Reasons, DataNodeEditInProgress, DataNodeIsNotWritten, _build_not_submittable_entity_reason
 from ..reason.reason import Reasons
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
