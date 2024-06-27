@@ -1227,7 +1227,7 @@ class Gui:
     def __broadcast_ws(self, payload: dict, client_id: t.Optional[str] = None):
         try:
             to = list(self.__get_sids(client_id)) if client_id else []
-            self._server._ws.emit("message", payload, to=to if to else None, include_self=not to)
+            self._server._ws.emit("message", payload, to=to if to else None, include_self=True)
             time.sleep(0.001)
         except Exception as e:  # pragma: no cover
             _warn(f"Exception raised in WebSocket communication in '{self.__frame.f_code.co_name}'", e)
@@ -2635,14 +2635,15 @@ class Gui:
     def _get_autorization(self, client_id: t.Optional[str] = None, system: t.Optional[bool] = False):
         return contextlib.nullcontext()
 
-    def set_favicon(self, favicon_path: t.Union[str, Path]):
+    def set_favicon(self, favicon_path: t.Union[str, Path], state: t.Optional[State] = None):
         """Change the favicon for all clients.
 
         This function dynamically changes the favicon of Taipy GUI pages for all connected client.
         favicon_path can be an URL (relative or not) or a file path.
         The *favicon* parameter to `(Gui.)run()^` can also be used to change the favicon when the application starts.
         """
-        if self.__favicon != favicon_path:
-            self.__favicon = favicon_path
+        if state or self.__favicon != favicon_path:
+            if not state:
+                self.__favicon = favicon_path
             url = self._get_content("__taipy_favicon", favicon_path, True)
-            self._broadcast("taipy_favicon", url, message_type=_WsType.FAVICON)
+            self._broadcast("taipy_favicon", url, self._get_client_id() if state else None, message_type=_WsType.FAVICON)
