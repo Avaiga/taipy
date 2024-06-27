@@ -2,8 +2,7 @@
 class {{name}}(_Block):
     _ELEMENT_NAME: str
     def __init__(self, {{properties}}) -> None:
-        """
-        Arguments:
-            {{doc_arguments}}
+        """### Arguments:
+{{doc_arguments}}
         """
         ...

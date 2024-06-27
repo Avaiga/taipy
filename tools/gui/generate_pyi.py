@@ -11,6 +11,7 @@
 
 import json
 import os
+import re
 import typing as t
 
 from markdownify import markdownify
@@ -82,10 +83,21 @@ def get_properties(element, viselements) -> t.List[t.Dict[str, t.Any]]:
     return properties
 
 
-def build_doc(element: t.Dict[str, t.Any]):
+def build_doc(name: str, element: t.Dict[str, t.Any]):
     if "doc" not in element:
         return ""
-    doc = markdownify(str(element["doc"]).replace("\n", f'\n{16*" "}'))
+    doc = str(element["doc"]).replace("\n", f'\n{16*" "}')
+    doc = re.sub(
+        r"^(.*\..*\shref=\")([^h].*)(\".*\..*)$",
+        r"\1https://docs.taipy.io/en/latest/manuals/gui/viselements/" + name + r"/\2\3",
+        doc,
+    )
+    doc = re.sub(
+        r"^(.*\.)(<br/>|\s)(See below((?!href=).)*\.)(.*)$",
+        r"\1\3",
+        doc,
+    )
+    doc = markdownify(doc, strip=['br'])
     return f"{element['name']} ({element['type']}): {doc} {'(default: '+markdownify(element['default_value']) + ')' if 'default_value' in element else ''}"  # noqa: E501
 
 
@@ -102,7 +114,7 @@ for control_element in viselements["controls"]:
             property_list.append(property)
             property_names.append(property["name"])
     properties = ", ".join([f"{p} = ..." for p in property_names])
-    doc_arguments = f"\n{12*' '}".join([build_doc(p) for p in property_list])
+    doc_arguments = "\n".join([build_doc(name, p) for p in property_list])
     # append properties to __init__.pyi
     with open(builder_pyi_file, "a") as file:
         file.write(
@@ -120,7 +132,7 @@ for block_element in viselements["blocks"]:
             property_list.append(property)
             property_names.append(property["name"])
     properties = ", ".join([f"{p} = ..." for p in property_names])
-    doc_arguments = f"{8*' '}".join([build_doc(p) for p in property_list])
+    doc_arguments = "\n".join([build_doc(name, p) for p in property_list])
     # append properties to __init__.pyi
     with open(builder_pyi_file, "a") as file:
         file.write(
