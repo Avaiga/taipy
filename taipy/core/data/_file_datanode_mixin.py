@@ -77,8 +77,9 @@ class _FileDataNodeMixin(object):
     @path.setter
     def path(self, value):
         self._path = value
-        self.properties[self._PATH_KEY] = value
-        self.properties[self._IS_GENERATED_KEY] = False
+        properties = self.properties
+        properties[self._PATH_KEY] = value
+        properties[self._IS_GENERATED_KEY] = False
 
     def _build_path(self, storage_type) -> str:
         folder = f"{storage_type}s"

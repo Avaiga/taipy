@@ -137,15 +137,17 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         return cls.__STORAGE_TYPE
 
     def _read(self):
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
+        properties = self.properties
+        if properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
             return self._read_as_pandas_dataframe()
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
+        if properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy()
         return self._read_as()
 
     def _read_as(self):
-        with open(self._path, encoding=self.properties[self.__ENCODING_KEY]) as csvFile:
-            if self.properties[self._HAS_HEADER_PROPERTY]:
+        properties = self.properties
+        with open(self._path, encoding=properties[self.__ENCODING_KEY]) as csvFile:
+            if properties[self._HAS_HEADER_PROPERTY]:
                 reader = csv.DictReader(csvFile)
             else:
                 reader = csv.reader(csvFile)
@@ -159,16 +161,17 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         self, usecols: Optional[List[int]] = None, column_names: Optional[List[str]] = None
     ) -> pd.DataFrame:
         try:
-            if self.properties[self._HAS_HEADER_PROPERTY]:
+            properties = self.properties
+            if properties[self._HAS_HEADER_PROPERTY]:
                 if column_names:
-                    return pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY])[column_names]
-                return pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY])
+                    return pd.read_csv(self._path, encoding=properties[self.__ENCODING_KEY])[column_names]
+                return pd.read_csv(self._path, encoding=properties[self.__ENCODING_KEY])
             else:
                 if usecols:
                     return pd.read_csv(
-                        self._path, encoding=self.properties[self.__ENCODING_KEY], header=None, usecols=usecols
+                        self._path, encoding=properties[self.__ENCODING_KEY], header=None, usecols=usecols
                     )
-                return pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY], header=None)
+                return pd.read_csv(self._path, encoding=properties[self.__ENCODING_KEY], header=None)
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 
@@ -192,7 +195,7 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             self._path,
             index=False,
             encoding=properties[self.__ENCODING_KEY],
-            header=properties[self._HAS_HEADER_PROPERTY]
+            header=properties[self._HAS_HEADER_PROPERTY],
         )
 
     def write_with_column_names(self, data: Any, columns: Optional[List[str]] = None, job_id: Optional[JobId] = None):

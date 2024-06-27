@@ -154,24 +154,25 @@ class _AbstractSQLDataNode(DataNode, _TabularDataNodeMixin):
         return self._engine
 
     def _conn_string(self) -> str:
-        engine = self.properties.get(self.__DB_ENGINE_KEY)
+        properties = self.properties
+        engine = properties.get(self.__DB_ENGINE_KEY)
 
         if self.__DB_USERNAME_KEY in self._ENGINE_REQUIRED_PROPERTIES[engine]:
-            username = self.properties.get(self.__DB_USERNAME_KEY)
+            username = properties.get(self.__DB_USERNAME_KEY)
             username = urllib.parse.quote_plus(username)
 
         if self.__DB_PASSWORD_KEY in self._ENGINE_REQUIRED_PROPERTIES[engine]:
-            password = self.properties.get(self.__DB_PASSWORD_KEY)
+            password = properties.get(self.__DB_PASSWORD_KEY)
             password = urllib.parse.quote_plus(password)
 
         if self.__DB_NAME_KEY in self._ENGINE_REQUIRED_PROPERTIES[engine]:
-            db_name = self.properties.get(self.__DB_NAME_KEY)
+            db_name = properties.get(self.__DB_NAME_KEY)
             db_name = urllib.parse.quote_plus(db_name)
 
-        host = self.properties.get(self.__DB_HOST_KEY, self.__DB_HOST_DEFAULT)
-        port = self.properties.get(self.__DB_PORT_KEY, self.__DB_PORT_DEFAULT)
-        driver = self.properties.get(self.__DB_DRIVER_KEY, self.__DB_DRIVER_DEFAULT)
-        extra_args = self.properties.get(self.__DB_EXTRA_ARGS_KEY, {})
+        host = properties.get(self.__DB_HOST_KEY, self.__DB_HOST_DEFAULT)
+        port = properties.get(self.__DB_PORT_KEY, self.__DB_PORT_DEFAULT)
+        driver = properties.get(self.__DB_DRIVER_KEY, self.__DB_DRIVER_DEFAULT)
+        extra_args = properties.get(self.__DB_EXTRA_ARGS_KEY, {})
 
         if driver:
             extra_args = {**extra_args, "driver": driver}
@@ -186,23 +187,25 @@ class _AbstractSQLDataNode(DataNode, _TabularDataNodeMixin):
         elif engine == self.__ENGINE_POSTGRESQL:
             return f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{db_name}?{extra_args_str}"
         elif engine == self.__ENGINE_SQLITE:
-            folder_path = self.properties.get(self.__SQLITE_FOLDER_PATH, self.__SQLITE_FOLDER_PATH_DEFAULT)
-            file_extension = self.properties.get(self.__SQLITE_FILE_EXTENSION, self.__SQLITE_FILE_EXTENSION_DEFAULT)
+            folder_path = properties.get(self.__SQLITE_FOLDER_PATH, self.__SQLITE_FOLDER_PATH_DEFAULT)
+            file_extension = properties.get(self.__SQLITE_FILE_EXTENSION, self.__SQLITE_FILE_EXTENSION_DEFAULT)
             return "sqlite:///" + os.path.join(folder_path, f"{db_name}{file_extension}")
 
         raise UnknownDatabaseEngine(f"Unknown engine: {engine}")
 
     def filter(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
+        properties = self.properties
+        if properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
             return self._read_as_pandas_dataframe(operators=operators, join_operator=join_operator)
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
+        if properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy(operators=operators, join_operator=join_operator)
         return self._read_as(operators=operators, join_operator=join_operator)
 
     def _read(self):
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
+        properties = self.properties
+        if properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
             return self._read_as_pandas_dataframe()
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
+        if properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy()
         return self._read_as()
 

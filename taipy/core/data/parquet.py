@@ -211,14 +211,15 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             **write_kwargs (dict[str, any]): The keyword arguments passed to the function
                 `pandas.DataFrame.to_parquet()`.
         """
+        properties = self.properties
         kwargs = {
-            self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
-            self.__COMPRESSION_PROPERTY: self.properties[self.__COMPRESSION_PROPERTY],
+            self.__ENGINE_PROPERTY: properties[self.__ENGINE_PROPERTY],
+            self.__COMPRESSION_PROPERTY: properties[self.__COMPRESSION_PROPERTY],
         }
-        kwargs.update(self.properties[self.__WRITE_KWARGS_PROPERTY])
+        kwargs.update(properties[self.__WRITE_KWARGS_PROPERTY])
         kwargs.update(write_kwargs)
 
-        df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
+        df = self._convert_data_to_dataframe(properties[self._EXPOSED_TYPE_PROPERTY], data)
         if isinstance(df, pd.Series):
             df = pd.DataFrame(df)
 
@@ -243,16 +244,18 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             )
             return None
 
-        kwargs = self.properties[self.__READ_KWARGS_PROPERTY]
+        properties = self.properties
+        exposed_type = properties[self._EXPOSED_TYPE_PROPERTY]
+        kwargs = properties[self.__READ_KWARGS_PROPERTY]
         kwargs.update(
             {
-                self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
+                self.__ENGINE_PROPERTY: properties[self.__ENGINE_PROPERTY],
             }
         )
         kwargs.update(read_kwargs)
 
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
+        if exposed_type == self._EXPOSED_TYPE_PANDAS:
             return self._read_as_pandas_dataframe(kwargs)
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
+        if exposed_type == self._EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy(kwargs)
         return self._read_as(kwargs)

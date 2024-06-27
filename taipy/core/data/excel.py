@@ -150,9 +150,10 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                 _TabularDataNodeMixin._check_exposed_type(t)
 
     def _read(self):
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
+        exposed_type = self.properties[self._EXPOSED_TYPE_PROPERTY]
+        if exposed_type == self._EXPOSED_TYPE_PANDAS:
             return self._read_as_pandas_dataframe()
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
+        if exposed_type == self._EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy()
         return self._read_as()
 
@@ -167,12 +168,13 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
     def _read_as(self):
         try:
+            properties = self.properties
             excel_file = load_workbook(self._path)
-            exposed_type = self.properties[self._EXPOSED_TYPE_PROPERTY]
+            exposed_type = properties[self._EXPOSED_TYPE_PROPERTY]
             work_books = {}
             sheet_names = excel_file.sheetnames
 
-            user_provided_sheet_names = self.properties.get(self.__SHEET_NAME_PROPERTY) or []
+            user_provided_sheet_names = properties.get(self.__SHEET_NAME_PROPERTY) or []
             if not isinstance(user_provided_sheet_names, (List, Set, Tuple)):
                 user_provided_sheet_names = [user_provided_sheet_names]
 
@@ -183,10 +185,9 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                     raise NonExistingExcelSheet(sheet_name, self._path)
 
             if isinstance(exposed_type, List):
-                if len(provided_sheet_names) != len(self.properties[self._EXPOSED_TYPE_PROPERTY]):
+                if len(provided_sheet_names) != len(exposed_type):
                     raise ExposedTypeLengthMismatch(
-                        f"Expected {len(provided_sheet_names)} exposed types, got "
-                        f"{len(self.properties[self._EXPOSED_TYPE_PROPERTY])}"
+                        f"Expected {len(provided_sheet_names)} exposed types, got " f"{len(exposed_type)}"
                     )
 
             for i, sheet_name in enumerate(provided_sheet_names):
@@ -206,7 +207,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                         continue
 
                 res = [[col.value for col in row] for row in work_sheet.rows]
-                if self.properties[self._HAS_HEADER_PROPERTY] and res:
+                if properties[self._HAS_HEADER_PROPERTY] and res:
                     header = res.pop(0)
                     for i, row in enumerate(res):
                         res[i] = sheet_exposed_type(**dict([[h, r] for h, r in zip(header, row)]))
@@ -304,21 +305,23 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     def _write_excel_with_multiple_sheets(self, data: Any, columns: List[str] = None):
         with pd.ExcelWriter(self._path) as writer:
             # Each key stands for a sheet name
+            properties = self.properties
             for key in data.keys():
-                df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data[key])
+                df = self._convert_data_to_dataframe(properties[self._EXPOSED_TYPE_PROPERTY], data[key])
 
                 if columns:
                     data[key].columns = columns
 
-                df.to_excel(writer, key, index=False, header=self.properties[self._HAS_HEADER_PROPERTY] or False)
+                df.to_excel(writer, key, index=False, header=properties[self._HAS_HEADER_PROPERTY] or False)
 
     def _write(self, data: Any):
         if isinstance(data, Dict):
             return self._write_excel_with_multiple_sheets(data)
         else:
-            data = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
+            properties = self.properties
+            data = self._convert_data_to_dataframe(properties[self._EXPOSED_TYPE_PROPERTY], data)
             self._write_excel_with_single_sheet(
-                data.to_excel, self._path, index=False, header=self.properties[self._HAS_HEADER_PROPERTY] or None
+                data.to_excel, self._path, index=False, header=properties[self._HAS_HEADER_PROPERTY] or None
             )
 
     def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None):
