@@ -49,6 +49,19 @@ with open(gui_pyi_file, "r") as file:
 with open(gui_pyi_file, "w") as write_file:
     write_file.write(replaced_content)
 
+# ################
+# Read the version
+# ################
+current_version = "latest"
+with open("./taipy/gui/version.json", "r") as vfile:
+    version = json.load(vfile)
+    if "dev" in version.get("ext", ""):
+        current_version = "develop"
+    else:
+        current_version = f'release{version.get("major", 0)}-{version.get("minor", 0)}'
+taipy_doc_url = f"https://docs.taipy.io/en/{current_version}/manuals/gui/viselements/"
+
+
 # ############################################################
 # Generate Page Builder pyi file (gui/builder/__init__.pyi)
 # ############################################################
@@ -89,7 +102,7 @@ def build_doc(name: str, element: t.Dict[str, t.Any]):
     doc = str(element["doc"]).replace("\n", f'\n{16*" "}')
     doc = re.sub(
         r"^(.*\..*\shref=\")([^h].*)(\".*\..*)$",
-        r"\1https://docs.taipy.io/en/latest/manuals/gui/viselements/" + name + r"/\2\3",
+        r"\1" + taipy_doc_url + name + r"/\2\3",
         doc,
     )
     doc = re.sub(
