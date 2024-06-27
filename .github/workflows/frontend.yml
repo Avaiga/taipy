@@ -59,7 +59,8 @@ jobs:
       - if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
         run: npm run build --if-present
 
-      - run: npm test
+      - if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
+        run: npm test
 
       - name: Code coverage
         if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request'
@@ -68,4 +69,5 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           threshold: "80"
           working-directory: "./frontend/taipy-gui"
+          skip-step: install
           annotations: failed-tests
