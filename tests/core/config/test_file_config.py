@@ -193,9 +193,9 @@ def test_read_configuration_file():
     Config.override(file_config.filename)
 
     assert len(Config.data_nodes) == 4
-    assert type(Config.data_nodes["my_datanode"]) == DataNodeConfig
-    assert type(Config.data_nodes["my_datanode2"]) == DataNodeConfig
-    assert type(Config.data_nodes["my_datanode3"]) == DataNodeConfig
+    assert type(Config.data_nodes["my_datanode"]) is DataNodeConfig
+    assert type(Config.data_nodes["my_datanode2"]) is DataNodeConfig
+    assert type(Config.data_nodes["my_datanode3"]) is DataNodeConfig
     assert Config.data_nodes["my_datanode"].path == "/data/csv"
     assert Config.data_nodes["my_datanode2"].path == "/data2/csv"
     assert Config.data_nodes["my_datanode3"].path == "/data3/csv"
@@ -206,27 +206,27 @@ def test_read_configuration_file():
     assert Config.data_nodes["my_datanode3"].source == "local"
 
     assert len(Config.tasks) == 2
-    assert type(Config.tasks["my_task"]) == TaskConfig
+    assert type(Config.tasks["my_task"]) is TaskConfig
     assert Config.tasks["my_task"].id == "my_task"
     assert Config.tasks["my_task"].description == "task description"
     assert Config.tasks["my_task"].function == print
     assert len(Config.tasks["my_task"].inputs) == 1
-    assert type(Config.tasks["my_task"].inputs[0]) == DataNodeConfig
+    assert type(Config.tasks["my_task"].inputs[0]) is DataNodeConfig
     assert Config.tasks["my_task"].inputs[0].path == "/data/csv"
     assert Config.tasks["my_task"].inputs[0].id == "my_datanode"
     assert len(Config.tasks["my_task"].outputs) == 1
-    assert type(Config.tasks["my_task"].outputs[0]) == DataNodeConfig
+    assert type(Config.tasks["my_task"].outputs[0]) is DataNodeConfig
     assert Config.tasks["my_task"].outputs[0].path == "/data2/csv"
     assert Config.tasks["my_task"].outputs[0].id == "my_datanode2"
 
     assert len(Config.scenarios) == 2
-    assert type(Config.scenarios["my_scenario"]) == ScenarioConfig
+    assert type(Config.scenarios["my_scenario"]) is ScenarioConfig
     assert Config.scenarios["my_scenario"].id == "my_scenario"
     assert Config.scenarios["my_scenario"].owner == "John Doe"
     assert len(Config.scenarios["my_scenario"].tasks) == 1
-    assert type(Config.scenarios["my_scenario"].tasks[0]) == TaskConfig
+    assert type(Config.scenarios["my_scenario"].tasks[0]) is TaskConfig
     assert len(Config.scenarios["my_scenario"].additional_data_nodes) == 1
-    assert type(Config.scenarios["my_scenario"].additional_data_nodes[0]) == DataNodeConfig
+    assert type(Config.scenarios["my_scenario"].additional_data_nodes[0]) is DataNodeConfig
     assert Config.scenarios["my_scenario"].tasks[0].id == "my_task"
     assert Config.scenarios["my_scenario"].tasks[0].description == "task description"
     assert Config.scenarios["my_scenario"].additional_data_nodes[0].id == "my_datanode3"
