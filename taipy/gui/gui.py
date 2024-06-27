@@ -2640,7 +2640,7 @@ class Gui:
 
         This function dynamically changes the favicon of Taipy GUI pages for all connected client.
         favicon_path can be an URL (relative or not) or a file path.
-        TODO The *favicon_url* parameter to `(Gui.)run()^` can also be used to change
+        TODO The *favicon* parameter to `(Gui.)run()^` can also be used to change
          the favicon when the application starts.
 
         """
