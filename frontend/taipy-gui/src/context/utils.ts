@@ -13,7 +13,7 @@ export interface IdMessage {
 }
 
 export const changeFavicon = (url?: string) => {
-    const link: HTMLLinkElement | null = document.querySelector("link.__taipy_favicon");
+    const link: HTMLLinkElement | null = document.querySelector("link.taipy-favicon");
     if (link) {
         const { url: taipyUrl } = link.dataset;
         const fetchUrl = url || (taipyUrl as string);
