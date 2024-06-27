@@ -4,31 +4,36 @@ import { uploadFile } from "../../src/workers/fileupload";
 
 import { Socket, io } from "socket.io-client";
 import { DataManager, ModuleData } from "./dataManager";
-import { initSocket } from "./utils";
+import { initSocket } from "./socket";
+import { TaipyWsAdapter, WsAdapter } from "./wsAdapter";
 
-export type OnInitHandler = (appManager: TaipyApp) => void;
-export type OnChangeHandler = (appManager: TaipyApp, encodedName: string, value: unknown) => void;
-export type OnNotifyHandler = (appManager: TaipyApp, type: string, message: string) => void;
-export type onReloadHandler = (appManager: TaipyApp, removedChanges: ModuleData) => void;
+export type OnInitHandler = (taipyApp: TaipyApp) => void;
+export type OnChangeHandler = (taipyApp: TaipyApp, encodedName: string, value: unknown) => void;
+export type OnNotifyHandler = (taipyApp: TaipyApp, type: string, message: string) => void;
+export type OnReloadHandler = (taipyApp: TaipyApp, removedChanges: ModuleData) => void;
+type Route = [string, string];
 
 export class TaipyApp {
     socket: Socket;
     _onInit: OnInitHandler | undefined;
     _onChange: OnChangeHandler | undefined;
     _onNotify: OnNotifyHandler | undefined;
-    _onReload: onReloadHandler | undefined;
+    _onReload: OnReloadHandler | undefined;
     variableData: DataManager | undefined;
     functionData: DataManager | undefined;
     appId: string;
     clientId: string;
     context: string;
+    metadata: Record<string, unknown>;
     path: string | undefined;
+    routes: Route[] | undefined;
+    wsAdapters: WsAdapter[];
 
     constructor(
         onInit: OnInitHandler | undefined = undefined,
         onChange: OnChangeHandler | undefined = undefined,
         path: string | undefined = undefined,
-        socket: Socket | undefined = undefined
+        socket: Socket | undefined = undefined,
     ) {
         socket = socket || io("/", { autoConnect: false });
         this.onInit = onInit;
@@ -37,9 +42,13 @@ export class TaipyApp {
         this.functionData = undefined;
         this.clientId = "";
         this.context = "";
+        this.metadata = {};
         this.appId = "";
+        this.routes = undefined;
         this.path = path;
         this.socket = socket;
+        this.wsAdapters = [new TaipyWsAdapter()];
+        // Init socket io connection
         initSocket(socket, this);
     }
 
@@ -47,6 +56,7 @@ export class TaipyApp {
     get onInit() {
         return this._onInit;
     }
+
     set onInit(handler: OnInitHandler | undefined) {
         if (handler !== undefined && handler.length !== 1) {
             throw new Error("onInit() requires one parameter");
@@ -57,6 +67,7 @@ export class TaipyApp {
     get onChange() {
         return this._onChange;
     }
+
     set onChange(handler: OnChangeHandler | undefined) {
         if (handler !== undefined && handler.length !== 3) {
             throw new Error("onChange() requires three parameters");
@@ -67,6 +78,7 @@ export class TaipyApp {
     get onNotify() {
         return this._onNotify;
     }
+
     set onNotify(handler: OnNotifyHandler | undefined) {
         if (handler !== undefined && handler.length !== 3) {
             throw new Error("onNotify() requires three parameters");
@@ -77,7 +89,7 @@ export class TaipyApp {
     get onReload() {
         return this._onReload;
     }
-    set onReload(handler: onReloadHandler | undefined) {
+    set onReload(handler: OnReloadHandler | undefined) {
         if (handler !== undefined && handler?.length !== 2) {
             throw new Error("_onReload() requires two parameters");
         }
@@ -89,9 +101,11 @@ export class TaipyApp {
         this.clientId = "";
         this.context = "";
         this.appId = "";
+        this.routes = undefined;
         const id = getLocalStorageValue(TAIPY_CLIENT_ID, "");
         sendWsMessage(this.socket, "ID", TAIPY_CLIENT_ID, id, id, undefined, false);
         sendWsMessage(this.socket, "AID", "connect", "", id, undefined, false);
+        sendWsMessage(this.socket, "GR", "", "", id, undefined, false);
         if (id !== "") {
             this.clientId = id;
             this.updateContext(this.path);
@@ -99,6 +113,10 @@ export class TaipyApp {
     }
 
     // Public methods
+    registerWsAdapter(wsAdapter: WsAdapter) {
+        this.wsAdapters.unshift(wsAdapter);
+    }
+
     getEncodedName(varName: string, module: string) {
         return this.variableData?.getEncodedName(varName, module);
     }
@@ -128,6 +146,10 @@ export class TaipyApp {
         return Object.keys(functionData || {});
     }
 
+    getRoutes() {
+        return this.routes;
+    }
+
     // This update will only send the request to Taipy Gui backend
     // the actual update will be handled when the backend responds
     update(encodedName: string, value: unknown) {
@@ -142,7 +164,7 @@ export class TaipyApp {
         if (!path || path === "") {
             path = window.location.pathname.slice(1);
         }
-        sendWsMessage(this.socket, "GMC", "get_module_context", { path: path }, this.clientId);
+        sendWsMessage(this.socket, "GMC", "get_module_context", { path: path || "/" }, this.clientId);
     }
 
     trigger(actionName: string, triggerId: string, payload: Record<string, unknown> = {}) {
@@ -155,7 +177,7 @@ export class TaipyApp {
     }
 
     getPageMetadata() {
-        return JSON.parse(localStorage.getItem("tp_cp_meta") || "{}");
+        return this.metadata;
     }
 }
 

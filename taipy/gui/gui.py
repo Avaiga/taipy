@@ -599,6 +599,12 @@ class Gui:
             setattr(g, "update_count", update_count)  # noqa: B010
             return None
 
+    def _handle_connect(self):
+        pass
+
+    def _handle_disconnect(self):
+        pass
+
     def _manage_message(self, msg_type: _WsType, message: dict) -> None:
         try:
             client_id = None
@@ -631,6 +637,10 @@ class Gui:
                         self.__handle_ws_get_data_tree()
                     elif msg_type == _WsType.APP_ID.value:
                         self.__handle_ws_app_id(message)
+                    elif msg_type == _WsType.GET_ROUTES.value:
+                        self.__handle_ws_get_routes()
+                    else:
+                        self._manage_external_message(msg_type, message)
                 self.__send_ack(message.get("ack_id"))
         except Exception as e:  # pragma: no cover
             if isinstance(e, AttributeError) and (name := message.get("name")):
@@ -650,6 +660,11 @@ class Gui:
                     _warn(f"Resolving  name '{name}' failed", e1)
             else:
                 _warn(f"Decoding Message has failed: {message}", e)
+
+    # To be expanded by inheriting classes
+    # this will be used to handle ws messages that is not handled by the base Gui class
+    def _manage_external_message(self, msg_type: _WsType, message: dict) -> None:
+        pass
 
     def __front_end_update(
         self,
@@ -1088,15 +1103,24 @@ class Gui:
 
     def __handle_ws_get_module_context(self, payload: t.Any):
         if isinstance(payload, dict):
+            page_path = str(payload.get("path"))
+            if page_path in {"/", ""}:
+                page_path = Gui.__root_page_name
             # Get Module Context
-            if mc := self._get_page_context(str(payload.get("path"))):
+            if mc := self._get_page_context(page_path):
+                page_renderer = self._get_page(page_path)._renderer
                 self._bind_custom_page_variables(
-                    self._get_page(str(payload.get("path")))._renderer, self._get_client_id()
+                    page_renderer, self._get_client_id()
                 )
+                # get metadata if there is one
+                metadata: t.Dict[str, t.Any] = {}
+                if hasattr(page_renderer, "_metadata"):
+                    metadata = getattr(page_renderer, "_metadata", {})
+                meta_return = json.dumps(metadata, cls=_TaipyJsonEncoder) if metadata else None
                 self.__send_ws(
                     {
                         "type": _WsType.GET_MODULE_CONTEXT.value,
-                        "payload": {"data": mc},
+                        "payload": {"context": mc, "metadata": meta_return},
                     }
                 )
 
@@ -1159,14 +1183,32 @@ class Gui:
             }
         )
 
-    def __send_ws(self, payload: dict, allow_grouping=True) -> None:
+    def __handle_ws_get_routes(self):
+        routes = (
+            [[self._config.root_page._route, self._config.root_page._renderer.page_type]]
+            if self._config.root_page
+            else []
+        )
+        routes += [
+            [page._route, page._renderer.page_type]
+            for page in self._config.pages
+            if page._route != Gui.__root_page_name
+        ]
+        self.__send_ws(
+            {
+                "type": _WsType.GET_ROUTES.value,
+                "payload": routes,
+            }
+        )
+
+    def __send_ws(self, payload: dict, allow_grouping=True, send_back_only=False) -> None:
         grouping_message = self.__get_message_grouping() if allow_grouping else None
         if grouping_message is None:
             try:
                 self._server._ws.emit(
                     "message",
                     payload,
-                    to=self.__get_ws_receiver(),
+                    to=self.__get_ws_receiver(send_back_only),
                 )
                 time.sleep(0.001)
             except Exception as e:  # pragma: no cover
@@ -1185,7 +1227,11 @@ class Gui:
     def __send_ack(self, ack_id: t.Optional[str]) -> None:
         if ack_id:
             try:
-                self._server._ws.emit("message", {"type": _WsType.ACKNOWLEDGEMENT.value, "id": ack_id})
+                self._server._ws.emit(
+                    "message",
+                    {"type": _WsType.ACKNOWLEDGEMENT.value, "id": ack_id},
+                    to=self.__get_ws_receiver(True),
+                )
                 time.sleep(0.001)
             except Exception as e:  # pragma: no cover
                 _warn(f"Exception raised in WebSocket communication (send ack) in '{self.__frame.f_code.co_name}'", e)
@@ -1200,7 +1246,10 @@ class Gui:
         )
 
     def __send_ws_download(self, content: str, name: str, on_action: str) -> None:
-        self.__send_ws({"type": _WsType.DOWNLOAD_FILE.value, "content": content, "name": name, "onAction": on_action})
+        self.__send_ws(
+            {"type": _WsType.DOWNLOAD_FILE.value, "content": content, "name": name, "onAction": on_action},
+            send_back_only=True,
+        )
 
     def __send_ws_alert(self, type: str, message: str, system_notification: bool, duration: int) -> None:
         self.__send_ws(
@@ -1264,13 +1313,15 @@ class Gui:
             client_id,
         )
 
-    def __get_ws_receiver(self) -> t.Union[t.List[str], t.Any, None]:
+    def __get_ws_receiver(self, send_back_only=False) -> t.Union[t.List[str], t.Any, None]:
         if self._bindings()._is_single_client():
             return None
         sid = getattr(request, "sid", None) if request else None
         sids = self.__get_sids(self._get_client_id())
         if sid:
             sids.add(sid)
+            if send_back_only:
+                return sid
         return list(sids)
 
     def __get_sids(self, client_id: str) -> t.Set[str]:
@@ -2056,6 +2107,8 @@ class Gui:
 
     def _bind_custom_page_variables(self, page: CustomPage, client_id: t.Optional[str]):
         """Handle the bindings of custom page variables"""
+        if not isinstance(page, CustomPage):
+            return
         with self.get_flask_app().app_context() if has_app_context() else contextlib.nullcontext():  # type: ignore[attr-defined]
             self.__set_client_id_in_context(client_id)
             with self._set_locals_context(page._get_module_name()):
@@ -2085,7 +2138,6 @@ class Gui:
                 to=page_name,
                 params={
                     _Server._RESOURCE_HANDLER_ARG: pr._resource_handler.get_id(),
-                    _Server._CUSTOM_PAGE_META_ARG: json.dumps(pr._metadata, cls=_TaipyJsonEncoder)
                 },
             ):
                 # Proactively handle the bindings of custom page variables

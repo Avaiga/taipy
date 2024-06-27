@@ -46,6 +46,7 @@
     "lint:fix": "npm run lint -- --fix",
     "coverage": "npm test -- --coverage",
     "types": "dts-bundle-generator -o packaging/taipy-gui.gen.d.ts src/extensions/exports.ts",
+    "types-base": "dts-bundle-generator -o base/src/packaging/taipy-gui-base.gen.d.ts base/src/exports.ts",
     "doc": "typedoc --plugin typedoc-plugin-markdown --excludeNotDocumented --disableSources src/extensions/exports.ts",
     "doc.json": "typedoc --json docs/taipy-gui.json src/extensions/exports.ts",
     "mkdocs": "typedoc --options typedoc-mkdocs.json"
@@ -97,8 +98,8 @@
     "css-loader": "^6.5.0",
     "css-mediaquery": "^0.1.2",
     "dotenv-webpack": "^8.0.0",
-    "dts-bundle-generator": "^9.2.1",
-    "eslint": "^8.3.0",
+    "dts-bundle-generator": "^7.2.0",
+    "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^4.2.0",
     "eslint-plugin-tsdoc": "^0.2.16",

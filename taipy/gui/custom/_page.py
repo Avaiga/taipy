@@ -46,13 +46,13 @@ class ResourceHandler(ABC):
     User can implement this class to provide custom resources for the custom pages
     """
 
-    id: str = ""
+    rh_id: str = ""
 
     def __init__(self) -> None:
         _ExternalResourceHandlerManager().register(self)
 
     def get_id(self) -> str:
-        return self.id if id != "" else str(id(self))
+        return self.rh_id if self.rh_id != "" else str(id(self))
 
     @abstractmethod
     def get_resources(self, path: str, taipy_resource_path: str) -> t.Any:

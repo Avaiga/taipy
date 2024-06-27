@@ -12,7 +12,6 @@
 
 import json
 import typing as t
-from abc import ABC
 from datetime import datetime
 from importlib.util import find_spec
 
@@ -20,7 +19,7 @@ from .._warnings import _warn
 from . import _date_to_string, _MapDict, _string_to_date, _variable_decode
 
 
-class _TaipyBase(ABC):
+class _TaipyBase:
     __HOLDER_PREFIXES: t.Optional[t.List[str]] = None
     _HOLDER_PREFIX = "_Tp"
 

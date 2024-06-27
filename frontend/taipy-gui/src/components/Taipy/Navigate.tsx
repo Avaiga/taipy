@@ -27,34 +27,44 @@ const Navigate = ({ to, params, tab, force }: NavigateProps) => {
     const { dispatch, state } = useContext(TaipyContext);
     const navigate = useNavigate();
     const location = useLocation();
+    const SPECIAL_PARAMS = ["tp_reload_all", "tp_reload_same_route_only", "tprh"];
 
     useEffect(() => {
         if (to) {
             const tos = to === "/" ? to : "/" + to;
-            const searchParams = new URLSearchParams(params || "");
-            // Handle Resource Handler Id
-            let tprh: string | null = null;
-            let meta: string | null = null;
-            if (searchParams.has("tprh")) {
-                tprh = searchParams.get("tprh");
-                searchParams.delete("tprh");
-                if (searchParams.has("tp_cp_meta")) {
-                    meta = searchParams.get("tp_cp_meta");
-                    searchParams.delete("tp_cp_meta");
-                }
+            const filteredParams = params
+                ? Object.keys(params).reduce((acc, key) => {
+                      if (!SPECIAL_PARAMS.includes(key)) {
+                          acc[key] = params[key];
+                      }
+                      return acc;
+                  }, {} as Record<string, string>)
+                : {};
+            const searchParams = new URLSearchParams(filteredParams);
+            // Special case for notebook reload
+            const reloadAll = params?.tp_reload_all === "true";
+            const reloadSameRouteOnly = params?.tp_reload_same_route_only === "true";
+            if (reloadAll) {
+                return navigate(0);
             }
+            if (reloadSameRouteOnly) {
+                if (location.pathname === tos) {
+                    navigate(0);
+                }
+                return;
+            }
+            // Regular navigate cases
             if (Object.keys(state.locations || {}).some((route) => tos === route)) {
                 const searchParamsLocation = new URLSearchParams(location.search);
                 if (force && location.pathname === tos && searchParamsLocation.toString() === searchParams.toString()) {
                     navigate(0);
                 } else {
                     navigate({ pathname: to, search: `?${searchParams.toString()}` });
-                    if (tprh !== null) {
+                    // Handle Resource Handler Id
+                    const tprh = params?.tprh;
+                    if (tprh !== undefined) {
                         // Add a session cookie for the resource handler id
                         document.cookie = `tprh=${tprh};path=/;`;
-                        if (meta !== null) {
-                            localStorage.setItem("tp_cp_meta", meta);
-                        }
                         navigate(0);
                     }
                 }

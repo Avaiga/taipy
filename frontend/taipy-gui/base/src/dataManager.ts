@@ -2,7 +2,7 @@ export type ModuleData = Record<string, VarName>;
 
 export type VarName = Record<string, VarData>;
 
-interface VarData {
+export interface VarData {
     type: string;
     value: unknown;
     encoded_name: string;
