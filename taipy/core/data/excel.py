@@ -301,7 +301,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                 if columns:
                     data[key].columns = columns
 
-                df.to_excel(writer, key, index=False, header=self.properties[self._HAS_HEADER_PROPERTY] or None)
+                df.to_excel(writer, key, index=False, header=self.properties[self._HAS_HEADER_PROPERTY] or False)
 
     def _write(self, data: Any):
         if isinstance(data, Dict):
