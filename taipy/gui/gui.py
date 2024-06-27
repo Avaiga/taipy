@@ -223,7 +223,7 @@ class Gui:
     __ROBOTO_FONT = "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
     __DOWNLOAD_ACTION = "__Taipy__download_csv"
     __DOWNLOAD_DELETE_ACTION = "__Taipy__download_delete_csv"
-    __FAVICON_URL = "https://raw.githubusercontent.com/Avaiga/taipy-assets/develop/favicon.png"
+    __DEFAULT_FAVICON_URL = "https://raw.githubusercontent.com/Avaiga/taipy-assets/develop/favicon.png"
 
     __RE_HTML = re.compile(r"(.*?)\.html$")
     __RE_MD = re.compile(r"(.*?)\.md$")
@@ -2427,7 +2427,7 @@ class Gui:
                 static_folder=_webapp_path,
                 template_folder=_webapp_path,
                 title=self._get_config("title", "Taipy App"),
-                favicon=self._get_config("favicon", Gui.__FAVICON_URL),
+                favicon=self._get_config("favicon", Gui.__DEFAULT_FAVICON_URL),
                 root_margin=self._get_config("margin", None),
                 scripts=scripts,
                 styles=styles,
@@ -2456,8 +2456,7 @@ class Gui:
         async_mode: str = "gevent",
         **kwargs,
     ) -> t.Optional[Flask]:
-        """
-        Start the server that delivers pages to web clients.
+        """Start the server that delivers pages to web clients.
 
         Once you enter `run()`, users can run web browsers and point to the web server
         URL that `Gui` serves. The default is to listen to the *localhost* address
@@ -2609,8 +2608,7 @@ class Gui:
         )
 
     def reload(self):  # pragma: no cover
-        """
-        Reload the web server.
+        """Reload the web server.
 
         This function reloads the underlying web server only in the situation where
         it was run in a separated thread: the *run_in_thread* parameter to the
@@ -2623,8 +2621,7 @@ class Gui:
             _TaipyLogger._get_logger().info("Gui server has been reloaded.")
 
     def stop(self):
-        """
-        Stop the web server.
+        """Stop the web server.
 
         This function stops the underlying web server only in the situation where
         it was run in a separated thread: the *run_in_thread* parameter to the
@@ -2639,12 +2636,11 @@ class Gui:
         return contextlib.nullcontext()
 
     def set_favicon(self, favicon_path: t.Union[str, Path]):
-        """
-        Change the favicon for all clients.
+        """Change the favicon for all clients.
 
-        This function Allows to change dynamically the favicon for all connected client.
+        This function dynamically changes the favicon of Taipy GUI pages for all connected client.
         favicon_path can be an URL (relative or not) or a file path.
-        The *favicon* parameter to the `(Gui.)run^` can also be used to change the favicon at start.
+        The *favicon* parameter to `(Gui.)run()^` can also be used to change the favicon when the application starts.
         """
         if self.__favicon != favicon_path:
             self.__favicon = favicon_path
