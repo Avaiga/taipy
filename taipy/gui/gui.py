@@ -2648,4 +2648,6 @@ class Gui:
             if not state:
                 self.__favicon = favicon_path
             url = self._get_content("__taipy_favicon", favicon_path, True)
-            self._broadcast("taipy_favicon", url, self._get_client_id() if state else None, message_type=_WsType.FAVICON)
+            self._broadcast(
+                "taipy_favicon", url, self._get_client_id() if state else None, message_type=_WsType.FAVICON
+            )
