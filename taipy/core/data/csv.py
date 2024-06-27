@@ -193,7 +193,7 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             index=False,
             encoding=properties[self.__ENCODING_KEY],
             header=properties[self._HAS_HEADER_PROPERTY]
-            )
+        )
 
     def write_with_column_names(self, data: Any, columns: Optional[List[str]] = None, job_id: Optional[JobId] = None):
         """Write a selection of columns.
