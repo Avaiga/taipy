@@ -13,6 +13,8 @@ import json
 import os
 import typing as t
 
+from markdownify import markdownify
+
 # ############################################################
 # Generate Python interface definition files
 # ############################################################
@@ -83,8 +85,8 @@ def get_properties(element, viselements) -> t.List[t.Dict[str, t.Any]]:
 def build_doc(element: t.Dict[str, t.Any]):
     if "doc" not in element:
         return ""
-    doc = str(element["doc"]).replace("\n", f'\n{16*" "}')
-    return f"{element['name']} ({element['type']}): {doc} {'(default: '+element['default_value'] + ')' if 'default_value' in element else ''}"  # noqa: E501
+    doc = markdownify(str(element["doc"]).replace("\n", f'\n{16*" "}'))
+    return f"{element['name']} ({element['type']}): {doc} {'(default: '+markdownify(element['default_value']) + ')' if 'default_value' in element else ''}"  # noqa: E501
 
 
 for control_element in viselements["controls"]:
