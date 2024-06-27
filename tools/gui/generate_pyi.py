@@ -11,7 +11,10 @@
 
 import json
 import os
+import re
 import typing as t
+
+from markdownify import markdownify
 
 # ############################################################
 # Generate Python interface definition files
@@ -45,6 +48,19 @@ with open(gui_pyi_file, "r") as file:
 
 with open(gui_pyi_file, "w") as write_file:
     write_file.write(replaced_content)
+
+# ################
+# Read the version
+# ################
+current_version = "latest"
+with open("./taipy/gui/version.json", "r") as vfile:
+    version = json.load(vfile)
+    if "dev" in version.get("ext", ""):
+        current_version = "develop"
+    else:
+        current_version = f'release-{version.get("major", 0)}.{version.get("minor", 0)}'
+taipy_doc_url = f"https://docs.taipy.io/en/{current_version}/manuals/gui/viselements/"
+
 
 # ############################################################
 # Generate Page Builder pyi file (gui/builder/__init__.pyi)
@@ -80,11 +96,22 @@ def get_properties(element, viselements) -> t.List[t.Dict[str, t.Any]]:
     return properties
 
 
-def build_doc(element: t.Dict[str, t.Any]):
+def build_doc(name: str, element: t.Dict[str, t.Any]):
     if "doc" not in element:
         return ""
     doc = str(element["doc"]).replace("\n", f'\n{16*" "}')
-    return f"{element['name']} ({element['type']}): {doc} {'(default: '+element['default_value'] + ')' if 'default_value' in element else ''}"  # noqa: E501
+    doc = re.sub(
+        r"^(.*\..*\shref=\")([^h].*)(\".*\..*)$",
+        r"\1" + taipy_doc_url + name + r"/\2\3",
+        doc,
+    )
+    doc = re.sub(
+        r"^(.*\.)(<br/>|\s)(See below((?!href=).)*\.)(.*)$",
+        r"\1\3",
+        doc,
+    )
+    doc = markdownify(doc, strip=['br'])
+    return f"{element['name']} ({element['type']}): {doc} {'(default: '+markdownify(element['default_value']) + ')' if 'default_value' in element else ''}"  # noqa: E501
 
 
 for control_element in viselements["controls"]:
@@ -100,7 +127,7 @@ for control_element in viselements["controls"]:
             property_list.append(property)
             property_names.append(property["name"])
     properties = ", ".join([f"{p} = ..." for p in property_names])
-    doc_arguments = f"\n{12*' '}".join([build_doc(p) for p in property_list])
+    doc_arguments = "\n".join([build_doc(name, p) for p in property_list])
     # append properties to __init__.pyi
     with open(builder_pyi_file, "a") as file:
         file.write(
@@ -118,7 +145,7 @@ for block_element in viselements["blocks"]:
             property_list.append(property)
             property_names.append(property["name"])
     properties = ", ".join([f"{p} = ..." for p in property_names])
-    doc_arguments = f"{8*' '}".join([build_doc(p) for p in property_list])
+    doc_arguments = "\n".join([build_doc(name, p) for p in property_list])
     # append properties to __init__.pyi
     with open(builder_pyi_file, "a") as file:
         file.write(
