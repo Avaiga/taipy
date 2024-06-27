@@ -33,18 +33,18 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
             types = {type(x) for x in value}
             if len(types) == 1:
                 type_elt = next(iter(types), None)
-                if type_elt == list:
+                if type_elt is list:
                     lengths = {len(x) for x in value}
                     return (
                         pd.DataFrame(value)
                         if len(lengths) == 1
                         else [pd.DataFrame({f"{i}/0": v}) for i, v in enumerate(value)]
                     )
-                elif type_elt == dict:
+                elif type_elt is dict:
                     return [pd.DataFrame(v) for v in value]
-                elif type_elt == _MapDict:
+                elif type_elt is _MapDict:
                     return [pd.DataFrame(v._dict) for v in value]
-                elif type_elt == pd.DataFrame:
+                elif type_elt is pd.DataFrame:
                     return value
 
             elif len(types) == 2 and list in types and pd.DataFrame in types:
