@@ -63,9 +63,9 @@ jobs:
 
       - name: Code coverage
         if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request'
-        uses: artiomtr/jest-coverage-report-action@v2.2.6
+        uses: artiomtr/jest-coverage-report-action@v2.3.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           threshold: "80"
           working-directory: "./frontend/taipy-gui"
-          #skip-step: "install"
+          annotations: failed-tests
