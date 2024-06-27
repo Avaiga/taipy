@@ -223,6 +223,7 @@ class Gui:
     __ROBOTO_FONT = "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
     __DOWNLOAD_ACTION = "__Taipy__download_csv"
     __DOWNLOAD_DELETE_ACTION = "__Taipy__download_delete_csv"
+    __DEFAULT_FAVICON_URL = "https://raw.githubusercontent.com/Avaiga/taipy-assets/develop/favicon.png"
 
     __RE_HTML = re.compile(r"(.*?)\.html$")
     __RE_MD = re.compile(r"(.*?)\.md$")
@@ -322,6 +323,7 @@ class Gui:
         self.__evaluator: _Evaluator = None  # type: ignore
         self.__adapter = _Adapter()
         self.__directory_name_of_pages: t.List[str] = []
+        self.__favicon: t.Optional[t.Union[str, Path]] = None
 
         # default actions
         self.on_action: t.Optional[t.Callable] = None
@@ -1117,9 +1119,7 @@ class Gui:
             # Get Module Context
             if mc := self._get_page_context(page_path):
                 page_renderer = self._get_page(page_path)._renderer
-                self._bind_custom_page_variables(
-                    page_renderer, self._get_client_id()
-                )
+                self._bind_custom_page_variables(page_renderer, self._get_client_id())
                 # get metadata if there is one
                 metadata: t.Dict[str, t.Any] = {}
                 if hasattr(page_renderer, "_metadata"):
@@ -1227,7 +1227,7 @@ class Gui:
     def __broadcast_ws(self, payload: dict, client_id: t.Optional[str] = None):
         try:
             to = list(self.__get_sids(client_id)) if client_id else []
-            self._server._ws.emit("message", payload, to=to if to else None)
+            self._server._ws.emit("message", payload, to=to if to else None, include_self=True)
             time.sleep(0.001)
         except Exception as e:  # pragma: no cover
             _warn(f"Exception raised in WebSocket communication in '{self.__frame.f_code.co_name}'", e)
@@ -1315,9 +1315,19 @@ class Gui:
         else:
             self.__send_ws({"type": _WsType.MULTIPLE_UPDATE.value, "payload": payload})
 
-    def __send_ws_broadcast(self, var_name: str, var_value: t.Any, client_id: t.Optional[str] = None):
+    def __send_ws_broadcast(
+        self,
+        var_name: str,
+        var_value: t.Any,
+        client_id: t.Optional[str] = None,
+        message_type: t.Optional[_WsType] = None,
+    ):
         self.__broadcast_ws(
-            {"type": _WsType.UPDATE.value, "name": _get_broadcast_var_name(var_name), "payload": {"value": var_value}},
+            {
+                "type": _WsType.UPDATE.value if message_type is None else message_type.value,
+                "name": _get_broadcast_var_name(var_name),
+                "payload": {"value": var_value},
+            },
             client_id,
         )
 
@@ -1977,7 +1987,13 @@ class Gui:
     def load_config(self, config: Config) -> None:
         self._config._load(config)
 
-    def _broadcast(self, name: str, value: t.Any, client_id: t.Optional[str] = None):
+    def _broadcast(
+        self,
+        name: str,
+        value: t.Any,
+        client_id: t.Optional[str] = None,
+        message_type: t.Optional[_WsType] = None,
+    ):
         """NOT DOCUMENTED
         Send the new value of a variable to all connected clients.
 
@@ -1986,7 +2002,7 @@ class Gui:
             value: The value (must be serializable to the JSON format).
             client_id: The client id (broadcast to all client if None)
         """
-        self.__send_ws_broadcast(name, value, client_id)
+        self.__send_ws_broadcast(name, value, client_id, message_type)
 
     def _broadcast_all_clients(self, name: str, value: t.Any):
         try:
@@ -2411,7 +2427,7 @@ class Gui:
                 static_folder=_webapp_path,
                 template_folder=_webapp_path,
                 title=self._get_config("title", "Taipy App"),
-                favicon=self._get_config("favicon", "favicon.png"),
+                favicon=self._get_config("favicon", Gui.__DEFAULT_FAVICON_URL),
                 root_margin=self._get_config("margin", None),
                 scripts=scripts,
                 styles=styles,
@@ -2440,8 +2456,7 @@ class Gui:
         async_mode: str = "gevent",
         **kwargs,
     ) -> t.Optional[Flask]:
-        """
-        Start the server that delivers pages to web clients.
+        """Start the server that delivers pages to web clients.
 
         Once you enter `run()`, users can run web browsers and point to the web server
         URL that `Gui` serves. The default is to listen to the *localhost* address
@@ -2593,8 +2608,7 @@ class Gui:
         )
 
     def reload(self):  # pragma: no cover
-        """
-        Reload the web server.
+        """Reload the web server.
 
         This function reloads the underlying web server only in the situation where
         it was run in a separated thread: the *run_in_thread* parameter to the
@@ -2607,8 +2621,7 @@ class Gui:
             _TaipyLogger._get_logger().info("Gui server has been reloaded.")
 
     def stop(self):
-        """
-        Stop the web server.
+        """Stop the web server.
 
         This function stops the underlying web server only in the situation where
         it was run in a separated thread: the *run_in_thread* parameter to the
@@ -2621,3 +2634,20 @@ class Gui:
 
     def _get_autorization(self, client_id: t.Optional[str] = None, system: t.Optional[bool] = False):
         return contextlib.nullcontext()
+
+    def set_favicon(self, favicon_path: t.Union[str, Path], state: t.Optional[State] = None):
+        """Change the favicon for all clients.
+
+        This function dynamically changes the favicon of Taipy GUI pages for all connected client.
+        favicon_path can be an URL (relative or not) or a file path.
+        TODO The *favicon* parameter to `(Gui.)run()^` can also be used to change
+         the favicon when the application starts.
+
+        """
+        if state or self.__favicon != favicon_path:
+            if not state:
+                self.__favicon = favicon_path
+            url = self._get_content("__taipy_favicon", favicon_path, True)
+            self._broadcast(
+                "taipy_favicon", url, self._get_client_id() if state else None, message_type=_WsType.FAVICON
+            )
