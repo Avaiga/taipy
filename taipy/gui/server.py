@@ -169,7 +169,7 @@ class _Server:
                     return render_template(
                         "index.html",
                         title=title,
-                        favicon=f"{favicon}?{version}",
+                        favicon=f"{favicon}?version={version}",
                         root_margin=root_margin,
                         watermark=watermark,
                         config=client_config,
