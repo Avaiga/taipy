@@ -262,6 +262,11 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                 sheet_name = list(writer.sheets.keys())[0]
                 append_excel_fct(writer, *args, **kwargs, startrow=writer.sheets[sheet_name].max_row)
 
+    def _set_column_if_dataframe(self, data: Any, columns) -> Union[pd.DataFrame, Any]:
+        if isinstance(data, pd.DataFrame):
+            data.columns = pd.Index(columns, dtype="object")
+        return data
+
     def __append_excel_with_multiple_sheets(self, data: Any, columns: List[str] = None):
         with pd.ExcelWriter(self._path, mode="a", engine="openpyxl", if_sheet_exists="overlay") as writer:
             # Each key stands for a sheet name
@@ -272,7 +277,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                     df = data[sheet_name]
 
                 if columns:
-                    data[sheet_name].columns = columns
+                    df = self._set_column_if_dataframe(df, columns)
 
                 df.to_excel(
                     writer, sheet_name=sheet_name, index=False, header=False, startrow=writer.sheets[sheet_name].max_row
@@ -310,7 +315,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                 df = self._convert_data_to_dataframe(properties[self._EXPOSED_TYPE_PROPERTY], data[key])
 
                 if columns:
-                    data[key].columns = columns
+                    df = self._set_column_if_dataframe(df, columns)
 
                 df.to_excel(writer, key, index=False, header=properties[self._HAS_HEADER_PROPERTY] or False)
 
@@ -337,6 +342,6 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         else:
             df = pd.DataFrame(data)
             if columns:
-                df.columns = pd.Index(columns, dtype="object")
+                df = self._set_column_if_dataframe(df, columns)
             self._write_excel_with_single_sheet(df.to_excel, self.path, index=False)
         self.track_edit(timestamp=datetime.now(), job_id=job_id)

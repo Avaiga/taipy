@@ -11,7 +11,7 @@
 
 from datetime import datetime, timedelta
 from os.path import isdir, isfile
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Union
 
 import numpy as np
 import pandas as pd
@@ -254,8 +254,11 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         )
         kwargs.update(read_kwargs)
 
+        return self._do_read_with_kwargs(exposed_type, kwargs)
+
+    def _do_read_with_kwargs(self, exposed_type, read_kwargs) -> Union[pd.DataFrame, np.ndarray, List]:
         if exposed_type == self._EXPOSED_TYPE_PANDAS:
-            return self._read_as_pandas_dataframe(kwargs)
+            return self._read_as_pandas_dataframe(read_kwargs)
         if exposed_type == self._EXPOSED_TYPE_NUMPY:
-            return self._read_as_numpy(kwargs)
-        return self._read_as(kwargs)
+            return self._read_as_numpy(read_kwargs)
+        return self._read_as(read_kwargs)
