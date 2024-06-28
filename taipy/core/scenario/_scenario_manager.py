@@ -39,8 +39,7 @@ from ..exceptions.exceptions import (
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
-from ..reason._reason_factory import _build_not_submittable_entity_reason, _build_wrong_config_type_reason
-from ..reason.reason import Reasons
+from ..reason import EntityIsNotSubmittableEntity, Reasons, WrongConfigType
 from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from ..submission.submission import Submission
 from ..task._task_manager_factory import _TaskManagerFactory
@@ -114,7 +113,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
 
         if config is not None:
             if not isinstance(config, ScenarioConfig):
-                reason._add_reason(config_id, _build_wrong_config_type_reason(config_id, "ScenarioConfig"))
+                reason._add_reason(config_id, WrongConfigType(config_id, "ScenarioConfig"))
 
         return reason
 
@@ -209,7 +208,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         if not isinstance(scenario, Scenario):
             scenario = str(scenario)
             reason = Reasons((scenario))
-            reason._add_reason(scenario, _build_not_submittable_entity_reason(scenario))
+            reason._add_reason(scenario, EntityIsNotSubmittableEntity(scenario))
             return reason
 
         return scenario.is_ready_to_run()

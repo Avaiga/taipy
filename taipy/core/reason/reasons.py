@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from typing import Dict, Set
+
 from .reason import Reason
 
 
@@ -19,17 +20,18 @@ class Reasons:
 
     TODO - Add more details about the class.
     """
+
     def __init__(self, entity_id: str) -> None:
         self.entity_id: str = entity_id
         self._reasons: Dict[str, Set[Reason]] = {}
 
-    def _add_reason(self, entity_id: str, reason: str) -> "Reasons":
+    def _add_reason(self, entity_id: str, reason: Reason) -> "Reasons":
         if entity_id not in self._reasons:
             self._reasons[entity_id] = set()
         self._reasons[entity_id].add(reason)
         return self
 
-    def _remove_reason(self, entity_id: str, reason: str) -> "Reasons":
+    def _remove_reason(self, entity_id: str, reason: Reason) -> "Reasons":
         if entity_id in self._reasons and reason in self._reasons[entity_id]:
             self._reasons[entity_id].remove(reason)
             if len(self._reasons[entity_id]) == 0:
@@ -44,4 +46,4 @@ class Reasons:
 
     @property
     def reasons(self) -> str:
-        return "; ".join("; ".join(reason) for reason in self._reasons.values()) + "." if self._reasons else ""
+        return "; ".join("; ".join(str(reason)) for reason in self._reasons.values()) + "." if self._reasons else ""

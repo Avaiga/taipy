@@ -14,7 +14,7 @@ from taipy import ScenarioId, SequenceId, TaskId
 from taipy.config.common.frequency import Frequency
 from taipy.config.config import Config
 from taipy.core._entity._ready_to_run_property import _ReadyToRunProperty
-from taipy.core.reason.reason import Reasons
+from taipy.core.reason import Reasons
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
 from taipy.core.task._task_manager_factory import _TaskManagerFactory

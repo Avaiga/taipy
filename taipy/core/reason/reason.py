@@ -11,30 +11,37 @@
 
 from typing import Optional
 
-from ..data.data_node import DataNodeId
-
 
 class Reason:
     """
     TODO - NOT DOCUMENTED
     """
+
     def __init__(self, reason: str):
-        self.reason = reason
+        self._reason = reason
+
+    @property
+    def reason(self):
+        return self._reason
 
     def __str__(self):
-        return self.reason
+        return self._reason
 
     def __repr__(self):
-        return self.reason
+        return self._reason
+
+    def __hash__(self) -> int:
+        return hash(self._reason)
 
 
 class _DataNodeReasonMixin:
-    def __init__(self, datanode_id: DataNodeId):
+    def __init__(self, datanode_id: str):
         self.datanode_id = datanode_id
 
     @property
     def datanode(self):
         from ..data._data_manager_factory import _DataManagerFactory
+
         return _DataManagerFactory._build_manager()._get(self.datanode_id)
 
 
@@ -42,7 +49,8 @@ class DataNodeEditInProgress(Reason, _DataNodeReasonMixin):
     """
     TODO - NOT DOCUMENTED
     """
-    def __init__(self, datanode_id: DataNodeId):
+
+    def __init__(self, datanode_id: str):
         Reason.__init__(self, f"DataNode {datanode_id} is being edited")
         _DataNodeReasonMixin.__init__(self, datanode_id)
 
@@ -51,29 +59,39 @@ class DataNodeIsNotWritten(Reason, _DataNodeReasonMixin):
     """
     TODO - NOT DOCUMENTED
     """
-    def __init__(self, datanode_id: DataNodeId):
+
+    def __init__(self, datanode_id: str):
         Reason.__init__(self, f"DataNode {datanode_id} is not written")
         _DataNodeReasonMixin.__init__(self, datanode_id)
 
 
-def _build_data_node_is_being_edited_reason(dn_id: DataNodeId) -> str:
-    return f"DataNode {dn_id} is not written"
+class EntityIsNotSubmittableEntity(Reason):
+    """
+    TODO - NOT DOCUMENTED
+    """
+
+    def __init__(self, entity_id: str):
+        Reason.__init__(self, f"Entity {entity_id} is not a submittable entity")
 
 
-def _build_data_node_is_not_written(dn_id: DataNodeId) -> str:
-    return f"DataNode {dn_id} is not written"
+class WrongConfigType(Reason):
+    """
+    TODO - NOT DOCUMENTED
+    """
+
+    def __init__(self, config_id: str, config_type: Optional[str]):
+        if config_type:
+            reason = f'Object "{config_id}" must be a valid {config_type}'
+        else:
+            reason = f'Object "{config_id}" is not a valid config to be created'
+
+        Reason.__init__(self, reason)
 
 
-def _build_not_submittable_entity_reason(entity_id: str) -> str:
-    return f"Entity {entity_id} is not a submittable entity"
+class NotGlobalScope(Reason):
+    """
+    TODO - NOT DOCUMENTED
+    """
 
-
-def _build_wrong_config_type_reason(config_id: str, config_type: Optional[str]) -> str:
-    if config_type:
-        return f'Object "{config_id}" must be a valid {config_type}'
-
-    return f'Object "{config_id}" is not a valid config to be created'
-
-
-def _build_not_global_scope_reason(config_id: str) -> str:
-    return f'Data node config "{config_id}" does not have GLOBAL scope'
+    def __init__(self, config_id: str):
+        Reason.__init__(self, f'Data node config "{config_id}" does not have GLOBAL scope')

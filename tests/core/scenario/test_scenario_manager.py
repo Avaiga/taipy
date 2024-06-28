@@ -39,6 +39,7 @@ from taipy.core.exceptions.exceptions import (
     UnauthorizedTagError,
 )
 from taipy.core.job._job_manager import _JobManager
+from taipy.core.reason import WrongConfigType
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from taipy.core.scenario.scenario import Scenario
@@ -381,13 +382,15 @@ def test_can_create():
 
     reasons = _ScenarioManager._can_create(task_config)
     assert bool(reasons) is False
-    assert reasons._reasons == {task_config.id: {'Object "task" must be a valid ScenarioConfig'}}
+    assert isinstance(list(reasons._reasons[task_config.id])[0], WrongConfigType)
+    assert list(reasons._reasons[task_config.id])[0].reason == 'Object "task" must be a valid ScenarioConfig'
     with pytest.raises(AttributeError):
         _ScenarioManager._create(task_config)
 
     reasons = _ScenarioManager._can_create(1)
     assert bool(reasons) is False
-    assert reasons._reasons == {"1": {'Object "1" must be a valid ScenarioConfig'}}
+    assert isinstance(list(reasons._reasons["1"])[0], WrongConfigType)
+    assert list(reasons._reasons["1"])[0].reason == 'Object "1" must be a valid ScenarioConfig'
     with pytest.raises(AttributeError):
         _ScenarioManager._create(1)
 

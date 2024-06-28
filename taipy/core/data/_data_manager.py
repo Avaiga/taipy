@@ -22,8 +22,7 @@ from ..config.data_node_config import DataNodeConfig
 from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import InvalidDataNodeType
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
-from ..reason._reason_factory import _build_not_global_scope_reason, _build_wrong_config_type_reason
-from ..reason.reason import Reasons
+from ..reason import NotGlobalScope, Reasons, WrongConfigType
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
 from ._data_fs_repository import _DataFSRepository
@@ -75,9 +74,9 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
 
         if config is not None:
             if not isinstance(config, DataNodeConfig):
-                reason._add_reason(config_id, _build_wrong_config_type_reason(config_id, "DataNodeConfig"))
+                reason._add_reason(config_id, WrongConfigType(config_id, "DataNodeConfig"))
             elif config.scope is not Scope.GLOBAL:
-                reason._add_reason(config_id, _build_not_global_scope_reason(config_id))
+                reason._add_reason(config_id, NotGlobalScope(config_id))
 
         return reason
 
