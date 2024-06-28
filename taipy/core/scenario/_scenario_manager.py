@@ -113,7 +113,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
 
         if config is not None:
             if not isinstance(config, ScenarioConfig):
-                reason._add_reason(config_id, WrongConfigType(config_id, "ScenarioConfig"))
+                reason._add_reason(config_id, WrongConfigType(config_id, ScenarioConfig.__name__))
 
         return reason
 

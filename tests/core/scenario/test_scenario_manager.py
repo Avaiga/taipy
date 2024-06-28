@@ -24,6 +24,7 @@ from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core.common import _utils
 from taipy.core.common._utils import _Subscriber
+from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
@@ -382,14 +383,14 @@ def test_can_create():
 
     reasons = _ScenarioManager._can_create(task_config)
     assert bool(reasons) is False
-    assert isinstance(list(reasons._reasons[task_config.id])[0], WrongConfigType)
+    assert reasons._reasons[task_config.id] == {WrongConfigType(task_config.id, ScenarioConfig.__name__)}
     assert list(reasons._reasons[task_config.id])[0].reason == 'Object "task" must be a valid ScenarioConfig'
     with pytest.raises(AttributeError):
         _ScenarioManager._create(task_config)
 
     reasons = _ScenarioManager._can_create(1)
     assert bool(reasons) is False
-    assert isinstance(list(reasons._reasons["1"])[0], WrongConfigType)
+    assert reasons._reasons["1"] == {WrongConfigType(1, ScenarioConfig.__name__)}
     assert list(reasons._reasons["1"])[0].reason == 'Object "1" must be a valid ScenarioConfig'
     with pytest.raises(AttributeError):
         _ScenarioManager._create(1)

@@ -12,7 +12,7 @@
 from typing import TYPE_CHECKING, Dict, Set, Union
 
 from ..notification import EventOperation, Notifier, _make_event
-from ..reason import Reasons
+from ..reason import Reason, Reasons
 
 if TYPE_CHECKING:
     from ..data.data_node import DataNode, DataNodeId
@@ -32,7 +32,7 @@ class _ReadyToRunProperty:
     _submittable_id_datanodes: Dict[Union["ScenarioId", "SequenceId", "TaskId"], Reasons] = {}
 
     @classmethod
-    def _add(cls, dn: "DataNode", reason: str) -> None:
+    def _add(cls, dn: "DataNode", reason: Reason) -> None:
         from ..scenario.scenario import Scenario
         from ..sequence.sequence import Sequence
         from ..task.task import Task
@@ -50,7 +50,7 @@ class _ReadyToRunProperty:
                 cls.__add(task_parent, dn, reason)
 
     @classmethod
-    def _remove(cls, datanode: "DataNode", reason: str) -> None:
+    def _remove(cls, datanode: "DataNode", reason: Reason) -> None:
         from ..taipy import get as tp_get
 
         # check the data node status to determine the reason to be removed
@@ -72,7 +72,7 @@ class _ReadyToRunProperty:
             cls._datanode_id_submittables.pop(datanode.id)
 
     @classmethod
-    def __add(cls, submittable: Union["Scenario", "Sequence", "Task"], datanode: "DataNode", reason: str) -> None:
+    def __add(cls, submittable: Union["Scenario", "Sequence", "Task"], datanode: "DataNode", reason: Reason) -> None:
         if datanode.id not in cls._datanode_id_submittables:
             cls._datanode_id_submittables[datanode.id] = set()
         cls._datanode_id_submittables[datanode.id].add(submittable.id)

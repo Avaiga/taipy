@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from typing import Optional
+from typing import Any, Optional
 
 
 class Reason:
@@ -21,17 +21,20 @@ class Reason:
         self._reason = reason
 
     @property
-    def reason(self):
+    def reason(self) -> str:
         return self._reason
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self._reason
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self._reason
 
     def __hash__(self) -> int:
         return hash(self._reason)
+
+    def __eq__(self, value: Any) -> bool:
+        return isinstance(value, Reason) and value._reason == self._reason
 
 
 class _DataNodeReasonMixin:

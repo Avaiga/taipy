@@ -74,7 +74,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
 
         if config is not None:
             if not isinstance(config, DataNodeConfig):
-                reason._add_reason(config_id, WrongConfigType(config_id, "DataNodeConfig"))
+                reason._add_reason(config_id, WrongConfigType(config_id, DataNodeConfig.__name__))
             elif config.scope is not Scope.GLOBAL:
                 reason._add_reason(config_id, NotGlobalScope(config_id))
 

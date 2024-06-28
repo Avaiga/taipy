@@ -46,4 +46,6 @@ class Reasons:
 
     @property
     def reasons(self) -> str:
-        return "; ".join("; ".join(str(reason)) for reason in self._reasons.values()) + "." if self._reasons else ""
+        if self._reasons:
+            return "; ".join("; ".join([str(reason) for reason in reasons]) for reasons in self._reasons.values()) + "."
+        return ""
