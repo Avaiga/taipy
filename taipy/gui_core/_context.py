@@ -125,6 +125,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         elif event.entity_type == EventEntityType.JOB:
             with self.lock:
                 self.jobs_list = None
+            self.broadcast_core_changed({"jobs": True})
         elif event.entity_type == EventEntityType.SUBMISSION:
             self.submission_status_callback(event.entity_id, event)
         elif event.entity_type == EventEntityType.DATA_NODE:
