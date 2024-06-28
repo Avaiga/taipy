@@ -9,7 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import pathlib
 from typing import Dict, Generic, Iterable, List, Optional, TypeVar, Union
 
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -152,17 +151,6 @@ class _Manager(Generic[EntityType]):
         _JobManagerFactory._build_manager()._delete_many(_entity_ids.job_ids)
         _DataManagerFactory._build_manager()._delete_many(_entity_ids.data_node_ids)
         _SubmissionManagerFactory._build_manager()._delete_many(_entity_ids.submission_ids)
-
-    @classmethod
-    def _export(cls, id: str, folder_path: Union[str, pathlib.Path], **kwargs):
-        return cls._repository._export(id, folder_path)
-
-    @classmethod
-    def _import(cls, entity_file: pathlib.Path, version: str, **kwargs) -> EntityType:
-        imported_entity = cls._repository._import(entity_file)
-        imported_entity._version = version
-        cls._set(imported_entity)
-        return imported_entity
 
     @classmethod
     def _is_editable(cls, entity: Union[EntityType, str]) -> bool:

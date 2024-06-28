@@ -9,8 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import json
-from pathlib import Path
 from typing import Callable, Iterable, Optional
 from unittest import mock
 from unittest.mock import ANY
@@ -735,54 +733,6 @@ def test_exists():
     assert not _SequenceManager._exists("SEQUENCE_sequence_SCENARIO_scenario_id")
     assert _SequenceManager._exists("SEQUENCE_sequence_SCENARIO_scenario")
     assert _SequenceManager._exists(scenario.sequences["sequence"])
-
-
-def test_export(tmpdir_factory):
-    path = tmpdir_factory.mktemp("data")
-    task = Task("task", {}, print, id=TaskId("task_id"))
-    scenario = Scenario(
-        "scenario",
-        {task},
-        {},
-        set(),
-        version="1.0",
-        sequences={"sequence_1": {}, "sequence_2": {"tasks": [task], "properties": {"xyz": "acb"}}},
-    )
-    _TaskManager._set(task)
-    _ScenarioManager._set(scenario)
-
-    sequence_1 = scenario.sequences["sequence_1"]
-    sequence_2 = scenario.sequences["sequence_2"]
-
-    _SequenceManager._export(sequence_1.id, Path(path))
-    export_sequence_json_file_path = f"{path}/sequences/{sequence_1.id}.json"
-    with open(export_sequence_json_file_path, "rb") as f:
-        sequence_json_file = json.load(f)
-        expected_json = {
-            "id": sequence_1.id,
-            "owner_id": scenario.id,
-            "parent_ids": [scenario.id],
-            "name": "sequence_1",
-            "tasks": [],
-            "properties": {},
-            "subscribers": [],
-        }
-        assert expected_json == sequence_json_file
-
-    _SequenceManager._export(sequence_2.id, Path(path))
-    export_sequence_json_file_path = f"{path}/sequences/{sequence_2.id}.json"
-    with open(export_sequence_json_file_path, "rb") as f:
-        sequence_json_file = json.load(f)
-        expected_json = {
-            "id": sequence_2.id,
-            "owner_id": scenario.id,
-            "parent_ids": [scenario.id],
-            "name": "sequence_2",
-            "tasks": [task.id],
-            "properties": {"xyz": "acb"},
-            "subscribers": [],
-        }
-        assert expected_json == sequence_json_file
 
 
 def test_hard_delete_one_single_sequence_with_scenario_data_nodes():

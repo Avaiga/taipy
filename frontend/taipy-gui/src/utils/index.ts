@@ -105,14 +105,21 @@ export const getDateTimeString = (
     tz?: string,
     withTime: boolean = true
 ): string => {
-    if (withTime) {
-        return formatInTimeZone(
-            getDateTime(value) || "",
-            formatConf.forceTZ || !tz ? formatConf.timeZone : tz,
-            datetimeformat || formatConf.dateTime
-        );
+    const dateVal = getDateTime(value);
+    try {
+        if (withTime) {
+            return formatInTimeZone(
+                dateVal || "",
+                formatConf.forceTZ || !tz ? formatConf.timeZone : tz,
+                datetimeformat || formatConf.dateTime,
+                { useAdditionalDayOfYearTokens: true }
+            );
+        }
+        return format(dateVal || 0, datetimeformat || formatConf.date, { useAdditionalDayOfYearTokens: true });
+    } catch (e) {
+        console.warn("Invalid date format:", (e as Error).message || e);
+        return `${dateVal}`;
     }
-    return format(getDateTime(value) || 0, datetimeformat || formatConf.date);
 };
 
 export const getNumberString = (value: number, numberformat: string | undefined, formatConf: FormatConfig): string => {
@@ -121,7 +128,7 @@ export const getNumberString = (value: number, numberformat: string | undefined,
             ? sprintf(numberformat || formatConf.number, value)
             : value.toLocaleString();
     } catch (e) {
-        console.warn("getNumberString: " + (e as Error).message || e);
+        console.warn("Invalid number format:", (e as Error).message || e);
         return (
             (typeof value === "number" && value.toLocaleString()) ||
             (typeof value === "string" && (value as string)) ||

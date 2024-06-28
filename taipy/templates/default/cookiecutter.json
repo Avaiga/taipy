@@ -5,11 +5,13 @@
     "Page names in multi-page application?": "",
     "Does the application use scenario management or version management?": "No",
     "Does the application use Rest API?": "No",
+    "Do you want to initialize a new Git repository?": "No",
 
     "__root_folder_name": "{{ cookiecutter['Application root folder name'] | replace(' ','-') }}",
     "__main_file": "{{ cookiecutter['Application main Python file'][:-3] if cookiecutter['Application main Python file'].endswith('.py') else cookiecutter['Application main Python file'] }}",
     "__application_title": "{{ cookiecutter['Application title'] }}",
     "__pages": "{{ cookiecutter['Page names in multi-page application?'] }}",
     "__core": "{{ cookiecutter['Does the application use scenario management or version management?'] }}",
-    "__rest": "{{ cookiecutter['Does the application use Rest API?'] }}"
+    "__rest": "{{ cookiecutter['Does the application use Rest API?'] }}",
+    "__git": "{{ cookiecutter['Do you want to initialize a new Git repository?']}}"
 }

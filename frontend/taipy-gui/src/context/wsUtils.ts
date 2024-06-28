@@ -20,7 +20,8 @@ export type WsMessageType =
     | "GMC"
     | "GDT"
     | "AID"
-    | "GR";
+    | "GR"
+    | "FV";
 
 export interface WsMessage {
     type: WsMessageType;

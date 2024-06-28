@@ -18,6 +18,7 @@ import pandas as pd
 
 from taipy.config.common.scope import Scope
 
+from .._entity._reload import _Reloader
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..job.job_id import JobId
 from ._file_datanode_mixin import _FileDataNodeMixin
@@ -116,7 +117,8 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             **properties,
         )
 
-        self._write_default_data(default_value)
+        with _Reloader():
+            self._write_default_data(default_value)
 
         self._TAIPY_PROPERTIES.update(
             {
@@ -186,7 +188,7 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             )
         else:
             self._convert_data_to_dataframe(exposed_type, data).to_csv(
-                self._path, index=False, encoding=self.properties[self.__ENCODING_KEY], header=None
+                self._path, index=False, encoding=self.properties[self.__ENCODING_KEY], header=False
             )
 
     def write_with_column_names(self, data: Any, columns: Optional[List[str]] = None, job_id: Optional[JobId] = None):
@@ -199,6 +201,6 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         """
         df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
         if columns and isinstance(df, pd.DataFrame):
-            df.columns = columns
+            df.columns = pd.Index(columns, dtype="object")
         df.to_csv(self._path, index=False, encoding=self.properties[self.__ENCODING_KEY])
         self.track_edit(timestamp=datetime.now(), job_id=job_id)

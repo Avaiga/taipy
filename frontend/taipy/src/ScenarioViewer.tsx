@@ -366,7 +366,6 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
             }
         }
         setValid(!!sc);
-        // setSubmissionStatus(0);
         setScenario((oldSc) => (oldSc === sc ? oldSc : sc ? (deepEqual(oldSc, sc) ? oldSc : sc) : invalidScenario));
     }, [props.scenario, props.defaultScenario]);
 
@@ -579,7 +578,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const addSequenceHandler = useCallback(() => setSequences((seq) => [...seq, ["", [], "", true]]), []);
 
     // Submission status
-    const [submissionStatus, setSubmissionStatus] = useState(0);
+    const [submissionStatus, setSubmissionStatus] = useState(-1);
 
     // on scenario change
     useEffect(() => {
@@ -594,10 +593,10 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     useEffect(() => {
         const ids = props.coreChanged?.scenario;
         if (typeof ids === "string" ? ids === scId : Array.isArray(ids) ? ids.includes(scId) : ids) {
-            props.updateVarName && dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
-            if (props.coreChanged?.submission !== undefined) {
+            if (typeof props.coreChanged?.submission === "number") {
                 setSubmissionStatus(props.coreChanged?.submission as number);
             }
+            props.updateVarName && dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
         }
     }, [props.coreChanged, props.updateVarName, id, module, dispatch, scId]);
 
@@ -629,7 +628,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         sx={ChipSx}
                                     />
                                 ) : null}
-                                {submissionStatus ? <StatusChip status={submissionStatus} sx={ChipSx} /> : null}
+                                {submissionStatus > -1 ? <StatusChip status={submissionStatus} sx={ChipSx} /> : null}
                             </Grid>
                             <Grid item>
                                 {showSubmit ? (

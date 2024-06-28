@@ -48,7 +48,6 @@ class _Server:
     __OPENING_CURLY = r"\1&#x7B;"
     __CLOSING_CURLY = r"&#x7D;\2"
     _RESOURCE_HANDLER_ARG = "tprh"
-    _CUSTOM_PAGE_META_ARG = "tp_cp_meta"
 
     def __init__(
         self,
@@ -110,6 +109,14 @@ class _Server:
                 _TaipyLogger._get_logger().info(message["status"])
             elif "type" in message:
                 gui._manage_message(message["type"], message)
+
+        @self._ws.on("connect")
+        def handle_connect():
+            gui._handle_connect()
+
+        @self._ws.on("disconnect")
+        def handle_disconnect():
+            gui._handle_disconnect()
 
     def __is_ignored(self, file_path: str) -> bool:
         if not hasattr(self, "_ignore_matches"):

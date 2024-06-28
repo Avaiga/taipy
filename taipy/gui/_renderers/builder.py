@@ -946,6 +946,7 @@ class _Builder:
 
             attributes (list(tuple)): The list of attributes as (property name, property type, default value).
         """
+        attributes.append(("id",)) # Every element should have an id attribute
         for attr in attributes:
             if not isinstance(attr, tuple):
                 attr = (attr,)

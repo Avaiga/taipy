@@ -24,6 +24,11 @@ describe("Progress component", () => {
         const elt = getByRole("progressbar");
         expect(elt).toHaveClass("MuiCircularProgress-root");
     });
+    it("uses the class", async () => {
+        const { getByRole } = render(<Progress className="taipy-progress" />);
+        const elt = getByRole("progressbar");
+        expect(elt).toHaveClass("taipy-progress");
+    });
     it("renders circular progress with value (determinate)", () => {
         const { getByRole, getByText } = render(<Progress showValue value={50} />);
         const elt = getByRole("progressbar");
