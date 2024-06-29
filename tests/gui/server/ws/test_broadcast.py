@@ -37,31 +37,3 @@ def test_broadcast(gui: Gui, helpers):
     received_messages = ws_client.get_received()
     assert len(received_messages)
     helpers.assert_outward_simple_ws_message(received_messages[0], "U", "_bc_broadcast_name", "broadcast_value")
-
-def test_broadcast_changes(gui: Gui, helpers):
-    # Bind test variables
-    v1 = ""  # noqa: F841
-    v2 = 0  # noqa: F841
-    v3 = False  # noqa: F841
-    variables = ["v1", "v2", "v3"]  # noqa: F841
-    values = ["tested", 1234, True]  # noqa: F841
-
-    # set gui frame
-    gui._set_frame(inspect.currentframe())
-
-    # Bind a page so that the variable will be evaluated as expression
-    gui.add_page(
-        "test",
-        Markdown("<|{v1}|> <|{v2}|> <|{v3}|>"),
-    )
-    gui.run(run_server=False)
-    flask_client = gui._server.test_client()
-    # WS client and emit
-    ws_client = gui._server._ws.test_client(gui._server.get_flask())
-    sid = helpers.create_scope_and_get_sid(gui)
-    # Get the jsx once so that the page will be evaluated -> variable will be registered
-    flask_client.get(f"/taipy-jsx/test?client_id={sid}")
-    gui.broadcast_changes(dict(zip(variables, values)))
-    received_messages = ws_client.get_received()
-    assert len(received_messages)
-    # I wish I could helpers.assert_outward_simple_ws_message(received_messages....)

@@ -1546,10 +1546,10 @@ class Gui:
     @staticmethod
     def __broadcast_changes_fn(state: State, values: dict[str, t.Any]) -> None:
         with state:
-            for n, v in enumerate(values):
+            for n, v in values.items():
                 state.assign(n, v)
 
-    def broadcast_changes(self, values: dict[str, t.Any]):
+    def broadcast_changes(self, values: t.Optional[dict[str, t.Any]] = None, **kwargs):
         """Propagates new values for several variables to all states.
 
         This callback gets invoked for every client connected to the application to update the value
@@ -1557,10 +1557,17 @@ class Gui:
         user intefaces reflect the change.
 
         Arguments:
-            values: A dictionary where each key is the name of a variable to change, and where the
-                associated value is the new value to set for that variable, in each state for
-                the application.
+            values: An optional dictionary where each key is the name of a variable to change, and
+                where the associated value is the new value to set for that variable, in each state
+                for the application.
+            **kwargs: A collection of variable name-value pairs that are updated for each state of
+                the application. Name-value pairs overload the ones in *values* if the name exists
+                as a key in the dictionary.
         """
+        if kwargs:
+            values = values.copy() if values else {}
+            for n, v in kwargs.items():
+                values[n] = v
         self.broadcast_callback(Gui.__broadcast_changes_fn, [values])
 
     def _is_in_brdcst_callback(self):
