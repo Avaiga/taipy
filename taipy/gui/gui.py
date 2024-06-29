@@ -1492,7 +1492,7 @@ class Gui:
                     if not callable(callback):
                         _warn(f"invoke_callback(): {callback} is not callable.")
                         return None
-                    return self._call_function_with_state(callback, args)
+                    return self._call_function_with_state(callback, list(args))
         except Exception as e:  # pragma: no cover
             if not self._call_on_exception(callback.__name__ if callable(callback) else callback, e):
                 _warn(
