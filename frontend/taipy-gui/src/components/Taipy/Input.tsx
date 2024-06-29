@@ -16,6 +16,8 @@ import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import {styled} from '@mui/material/styles';
 import IconButton from "@mui/material/IconButton";
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 import {createSendActionNameAction, createSendUpdateAction} from "../../context/taipyReducers";
 import {TaipyInputProps} from "./utils";
@@ -28,7 +30,7 @@ const StyledTextField = styled(TextField)({
         display: 'none',
     },
     '& input[type=number]': {
-        '-moz-appearance': 'textfield',
+        'MozAppearance': 'textfield',
     },
 });
 
@@ -152,7 +154,7 @@ const Input = (props: TaipyInputProps) => {
             <StyledTextField
                 margin="dense"
                 hiddenLabel
-                value={value}
+                value={value ?? ""}
                 className={className}
                 type={type}
                 id={id}
@@ -166,13 +168,13 @@ const Input = (props: TaipyInputProps) => {
                                 size="small"
                                 onMouseDown={handleUpStepperMouseDown}
                             >
-                                ▲
+                                <ArrowDropUpIcon />
                             </IconButton>
                             <IconButton
                                 size="small"
                                 onMouseDown={handleDownStepperMouseDown}
                             >
-                                ▼
+                                <ArrowDropDownIcon />
                             </IconButton>
                         </>
                     ),
