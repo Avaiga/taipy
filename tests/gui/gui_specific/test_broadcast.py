@@ -65,13 +65,13 @@ def test_broadcast_change(gui: Gui):
     gui._set_frame(inspect.currentframe())
     gui.add_page("test", " <|{v1}|><|{v2}|>")
     gui.run(run_server=False)
-    gui._bindings()._get_or_create_scope("s1")
-    gui._bindings()._get_or_create_scope("s2")
+    s1, _ = gui._bindings()._get_or_create_scope("s1")
+    s2, _ = gui._bindings()._get_or_create_scope("s2")
     gui.broadcast_change("v2", 2)
-    with get_state(gui, "s1") as state1:
+    with get_state(gui, s1) as state1:
         assert state1.v1 == "none"
         assert state1.v2 == 2
-    with get_state(gui, "v2") as state2:
+    with get_state(gui, s2) as state2:
         assert state2.v1 == "none"
         assert state2.v2 == 2
 
@@ -82,36 +82,36 @@ def test_broadcast_changes(gui: Gui):
     gui._set_frame(inspect.currentframe())
     gui.add_page("test", " <|{v1}|><|{v2}|>")
     gui.run(run_server=False)
-    gui._bindings()._get_or_create_scope("s1")
-    gui._bindings()._get_or_create_scope("s2")
+    s1, _ = gui._bindings()._get_or_create_scope("s1")
+    s2, _ = gui._bindings()._get_or_create_scope("s2")
 
-    changes = { "v1": "some", v2: 2}
+    changes = { "v1": "some", "v2": 2}
     gui.broadcast_changes(changes)
-    with get_state(gui, "s1") as state1:
+    with get_state(gui, s1) as state1:
         assert state1.v1 == "some"
         assert state1.v2 == 2
-    with get_state(gui, "v2") as state2:
+    with get_state(gui, s2) as state2:
         assert state2.v1 == "some"
         assert state2.v2 == 2
 
     gui.broadcast_changes(v1="more", v2=3)
-    with get_state(gui, "s1") as state1:
+    with get_state(gui, s1) as state1:
         assert state1.v1 == "more"
         assert state1.v2 == 3
-    with get_state(gui, "v2") as state2:
+    with get_state(gui, s2) as state2:
         assert state2.v1 == "more"
         assert state2.v2 == 3
 
     gui.broadcast_changes({ "v1": "more yet"}, v2=4)
-    with get_state(gui, "s1") as state1:
+    with get_state(gui, s1) as state1:
         assert state1.v1 == "more yet"
         assert state1.v2 == 4
-    with get_state(gui, "v2") as state2:
+    with get_state(gui, s2) as state2:
         assert state2.v1 == "more yet"
         assert state2.v2 == 4
 
 
-def test__broadcast_callback(gui: Gui):
+def test_broadcast_callback(gui: Gui):
     gui.run(run_server=False)
 
     res = gui.broadcast_callback(lambda _, t: t, ["Hello World"], "mine")
