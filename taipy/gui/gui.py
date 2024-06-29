@@ -1534,7 +1534,7 @@ class Gui:
 
         This callback gets invoked for every client connected to the application to update the value
         of the variable called *var_name* to the new value *value*, in their specific `State^`
-        instance. All user intefaces reflect the change.
+        instance. All user interfaces reflect the change.
 
         Arguments:
             gui (Gui^): The current Gui instance.
@@ -1554,7 +1554,7 @@ class Gui:
 
         This callback gets invoked for every client connected to the application to update the value
         of all the variables that are keys in *values*, in their specific `State^` instance. All
-        user intefaces reflect the change.
+        user interfaces reflect the change.
 
         Arguments:
             values: An optional dictionary where each key is the name of a variable to change, and
