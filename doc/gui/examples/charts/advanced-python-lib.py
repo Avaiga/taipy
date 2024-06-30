@@ -25,19 +25,19 @@ from taipy.gui import Gui
 figure = go.Figure()
 
 # Add trace for Normal Distribution
-figure.add_trace(go.Violin(name="Normal",
-                           y=np.random.normal(loc=0, scale=1, size=1000),
-                           box_visible=True, meanline_visible=True))
+figure.add_trace(
+    go.Violin(name="Normal", y=np.random.normal(loc=0, scale=1, size=1000), box_visible=True, meanline_visible=True)
+)
 
 # Add trace for Exponential Distribution
-figure.add_trace(go.Violin(name="Exponential",
-                           y=np.random.exponential(scale=1, size=1000),
-                           box_visible=True, meanline_visible=True))
+figure.add_trace(
+    go.Violin(name="Exponential", y=np.random.exponential(scale=1, size=1000), box_visible=True, meanline_visible=True)
+)
 
 # Add trace for Uniform Distribution
-figure.add_trace(go.Violin(name="Uniform",
-                           y=np.random.uniform(low=0, high=1, size=1000),
-                           box_visible=True, meanline_visible=True))
+figure.add_trace(
+    go.Violin(name="Uniform", y=np.random.uniform(low=0, high=1, size=1000), box_visible=True, meanline_visible=True)
+)
 
 # Updating layout for better visualization
 figure.update_layout(title="Different Probability Distributions")

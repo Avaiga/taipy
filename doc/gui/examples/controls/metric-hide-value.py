@@ -21,4 +21,3 @@ page = """
 
 
 Gui(page).run()
-

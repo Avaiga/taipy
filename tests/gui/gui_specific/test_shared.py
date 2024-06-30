@@ -13,6 +13,8 @@ from taipy.gui import Gui
 
 
 def test_add_shared_variables(gui: Gui):
+    assert len(gui._Gui__shared_variables) == 0  # type: ignore[attr-defined]
+
     Gui.add_shared_variable("var1", "var2")
     assert isinstance(gui._Gui__shared_variables, list)  # type: ignore[attr-defined]
     assert len(gui._Gui__shared_variables) == 2  # type: ignore[attr-defined]
@@ -20,3 +22,4 @@ def test_add_shared_variables(gui: Gui):
     Gui.add_shared_variables("var1", "var3")
     assert len(gui._Gui__shared_variables) == 3  # type: ignore[attr-defined]
 
+    gui._Gui__shared_variables.clear()
