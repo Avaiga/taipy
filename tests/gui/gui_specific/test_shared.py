@@ -22,4 +22,4 @@ def test_add_shared_variables(gui: Gui):
     Gui.add_shared_variables("var1", "var3")
     assert len(gui._Gui__shared_variables) == 3  # type: ignore[attr-defined]
 
-    Gui._Gui__shared_variables.clear()
+    Gui._clear_shared_variable()

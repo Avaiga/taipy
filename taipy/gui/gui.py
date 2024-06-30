@@ -507,6 +507,10 @@ class Gui:
     def _get_shared_variables(self) -> t.List[str]:
         return self.__evaluator.get_shared_variables()
 
+    @staticmethod
+    def _clear_shared_variable() -> None:
+        Gui.__shared_variables.clear()
+
     def __get_content_accessor(self):
         if self.__content_accessor is None:
             self.__content_accessor = _ContentAccessor(self._get_config("data_url_max_size", 50 * 1024))
