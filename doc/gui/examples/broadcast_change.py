@@ -25,12 +25,14 @@ from taipy.gui import Gui
 
 current_time = datetime.now()
 
+
 # The function that executes in its own thread.
 # Update the current time every second.
 def update_time(gui):
     while True:
         gui.broadcast_change("current_time", datetime.now())
         sleep(1)
+
 
 page = """
 Current time is: <|{current_time}|format=HH:mm:ss|>

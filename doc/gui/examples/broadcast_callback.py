@@ -26,10 +26,12 @@ from taipy.gui import Gui
 current_time = datetime.now()
 update = False
 
+
 # Update the 'current_time' state variable if 'update' is True
 def update_state(state, updated_time):
     if state.update:
         state.current_time = updated_time
+
 
 # The function that executes in its own thread.
 # Call 'update_state()` every second.
@@ -37,6 +39,7 @@ def update_time(gui):
     while True:
         gui.broadcast_callback(update_state, [datetime.now()])
         sleep(1)
+
 
 page = """
 Current time is: <|{current_time}|format=HH:mm:ss|>
