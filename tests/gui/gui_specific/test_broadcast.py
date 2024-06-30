@@ -14,7 +14,8 @@ import inspect
 
 import pytest
 
-from taipy.gui import Gui, Markdown, State
+from taipy.gui import Gui
+
 
 @contextlib.contextmanager
 def get_state(gui: Gui, state_id: str):
