@@ -57,7 +57,7 @@ def test_shared_variable(gui: Gui):
     with get_state(gui, "s2") as state2:
         assert state2.var == 1
         assert state1.s_var == 20
-    gui._Gui__shared_variables.clear()
+    Gui._Gui__shared_variables.clear()
 
 
 def test_broadcast_change(gui: Gui):
