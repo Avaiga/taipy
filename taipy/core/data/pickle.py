@@ -11,7 +11,7 @@
 
 import pickle
 from datetime import datetime, timedelta
-from typing import List, Optional, Set
+from typing import Any, List, Optional, Set
 
 from taipy.config.common.scope import Scope
 
@@ -22,7 +22,7 @@ from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class PickleDataNode(DataNode, _FileDataNodeMixin):
+class PickleDataNode(_FileDataNodeMixin, DataNode):
     """Data Node stored as a pickle file.
 
     Attributes:
@@ -116,7 +116,13 @@ class PickleDataNode(DataNode, _FileDataNodeMixin):
         return cls.__STORAGE_TYPE
 
     def _read(self):
-        with open(self._path, "rb") as pf:
+        return self._read_from_path()
+
+    def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
+        if not path:
+            path = self._path
+
+        with open(path, "rb") as pf:
             return pickle.load(pf)
 
     def _write(self, data):

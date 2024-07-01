@@ -14,7 +14,7 @@ import pathlib
 import shutil
 from datetime import datetime
 from os.path import isfile
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 from taipy.config.config import Config
 
@@ -92,3 +92,50 @@ class _FileDataNodeMixin(object):
         if os.path.exists(old_path):
             shutil.move(old_path, new_path)
         return new_path
+
+    def _get_downloadable_path(self) -> str:
+        """Get the downloadable path of the file data of the data node.
+
+        Returns:
+            The downloadable path of the file data of the data node if it exists, otherwise an empty string.
+        """
+        if os.path.exists(self.path) and isfile(self._path):
+            return self.path
+
+        return ""
+
+    def _upload(self, path: str, upload_checker: Optional[Callable[[str, Any], bool]] = None) -> bool:
+        """Upload a csv file data to the data node.
+
+        Parameters:
+            path (str): The path of the file to upload to the data node.
+            upload_checker (Optional[Callable[[str, Any], bool]]): A function to check if the upload is allowed.
+                The function takes the title of the upload data and the data itself as arguments and returns
+                True if the upload is allowed, otherwise False.
+
+        Returns:
+            True if the upload was successful, otherwise False.
+        """
+        from ._data_manager_factory import _DataManagerFactory
+
+        upload_path = pathlib.Path(path)
+
+        if upload_checker is not None:
+            try:
+                upload_data = self._read_from_path(upload_path.name)
+            except Exception:
+                return False
+
+            if not upload_checker(upload_path.name, upload_data):
+                return False
+
+        shutil.copy(upload_path, self.path)
+
+        self.track_edit(timestamp=datetime.now())  # type: ignore[attr-defined]
+        self.unlock_edit()  # type: ignore[attr-defined]
+        _DataManagerFactory._build_manager()._set(self)  # type: ignore[arg-type]
+
+        return True
+
+    def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
+        raise NotImplementedError

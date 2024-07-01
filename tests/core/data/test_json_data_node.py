@@ -370,3 +370,58 @@ class TestJSONDataNode:
 
         assert ".data" not in dn.path
         assert os.path.exists(dn.path)
+
+    def test_get_download_path(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/json/example_dict.json")
+        dn = JSONDataNode("foo", Scope.SCENARIO, properties={"path": path})
+        assert dn._get_downloadable_path() == path
+
+    def test_get_download_path_with_not_existed_file(self):
+        dn = JSONDataNode("foo", Scope.SCENARIO, properties={"path": "NOT_EXISTED.json"})
+        assert dn._get_downloadable_path() == ""
+
+    def test_upload(self, json_file, tmpdir_factory):
+        old_json_path = tmpdir_factory.mktemp("data").join("df.json").strpath
+        old_data = [{"a": 0, "b": 1, "c": 2}, {"a": 3, "b": 4, "c": 5}]
+
+        dn = JSONDataNode("foo", Scope.SCENARIO, properties={"path": old_json_path})
+        dn.write(old_data)
+        old_last_edit_date = dn.last_edit_date
+
+        with open(json_file, "r") as f:
+            upload_content = json.load(f)
+        dn._upload(json_file)
+
+        assert dn.read() == upload_content  # The content of the dn should change to the uploaded content
+        assert dn.last_edit_date > old_last_edit_date
+        assert dn.path == old_json_path  # The path of the dn should not change
+
+    def test_upload_with_upload_check(self, json_file, tmpdir_factory):
+        old_json_path = tmpdir_factory.mktemp("data").join("df.json").strpath
+        old_data = [{"a": 0, "b": 1, "c": 2}, {"a": 3, "b": 4, "c": 5}]
+
+        dn = JSONDataNode("foo", Scope.SCENARIO, properties={"path": old_json_path})
+        dn.write(old_data)
+        old_last_edit_date = dn.last_edit_date
+
+        def check_data_keys(upload_path, upload_data):
+            all_column_is_abc = all(data.keys() == {"a", "b", "c"} for data in upload_data)
+            return upload_path.endswith(".json") and all_column_is_abc
+
+        wrong_format_not_json_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_json").strpath
+        wrong_format_json_path = tmpdir_factory.mktemp("data").join("wrong_format_df.json").strpath
+        with open(wrong_format_not_json_path, "w") as f:
+            json.dump([{"a": 1, "b": 2, "d": 3}, {"a": 4, "b": 5, "d": 6}], f)
+
+        # The upload should fail when the file is not a json
+        assert not dn._upload(wrong_format_not_json_path, upload_checker=check_data_keys)
+
+        # The upload should fail when check_data_keys() return False
+        assert not dn._upload(wrong_format_json_path, upload_checker=check_data_keys)
+
+        assert dn.read() == old_data  # The content of the dn should not change when upload fails
+        assert dn.last_edit_date == old_last_edit_date  # The last edit date should not change when upload fails
+        assert dn.path == old_json_path  # The path of the dn should not change
+
+        # The upload should succeed when check_data_keys() return True
+        assert dn._upload(json_file, upload_checker=check_data_keys)

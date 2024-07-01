@@ -28,7 +28,7 @@ from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
+class ExcelDataNode(_FileDataNodeMixin, DataNode, _TabularDataNodeMixin):
     """Data Node stored as an Excel file.
 
     The Excel file format is _xlsx_.
@@ -150,15 +150,21 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                 _TabularDataNodeMixin._check_exposed_type(t)
 
     def _read(self):
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
-            return self._read_as_pandas_dataframe()
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
-            return self._read_as_numpy()
-        return self._read_as()
+        return self._read_from_path()
 
-    def _read_as(self):
+    def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
+        if not path:
+            path = self._path
+
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
+            return self._read_as_pandas_dataframe(path=path)
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
+            return self._read_as_numpy(path=path)
+        return self._read_as(path=path)
+
+    def _read_as(self, path: str):
         try:
-            excel_file = load_workbook(self._path)
+            excel_file = load_workbook(path)
             exposed_type = self.properties[self._EXPOSED_TYPE_PROPERTY]
             work_books = {}
             sheet_names = excel_file.sheetnames
@@ -171,7 +177,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
             for sheet_name in provided_sheet_names:
                 if sheet_name not in sheet_names:
-                    raise NonExistingExcelSheet(sheet_name, self._path)
+                    raise NonExistingExcelSheet(sheet_name, path)
 
             if isinstance(exposed_type, List):
                 if len(provided_sheet_names) != len(self.properties[self._EXPOSED_TYPE_PROPERTY]):
@@ -192,9 +198,9 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
                     if isinstance(sheet_exposed_type, str):
                         if sheet_exposed_type == self._EXPOSED_TYPE_NUMPY:
-                            work_books[sheet_name] = self._read_as_pandas_dataframe(sheet_name).to_numpy()
+                            work_books[sheet_name] = self._read_as_pandas_dataframe(path, sheet_name).to_numpy()
                         elif sheet_exposed_type == self._EXPOSED_TYPE_PANDAS:
-                            work_books[sheet_name] = self._read_as_pandas_dataframe(sheet_name)
+                            work_books[sheet_name] = self._read_as_pandas_dataframe(path, sheet_name)
                         continue
 
                 res = [[col.value for col in row] for row in work_sheet.rows]
@@ -214,14 +220,16 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
         return work_books
 
-    def _read_as_numpy(self):
-        sheets = self._read_as_pandas_dataframe()
+    def _read_as_numpy(self, path: str):
+        sheets = self._read_as_pandas_dataframe(path=path)
         if isinstance(sheets, dict):
             return {sheet_name: df.to_numpy() for sheet_name, df in sheets.items()}
         return sheets.to_numpy()
 
-    def _do_read_excel(self, sheet_names, kwargs) -> Union[Dict[Union[int, str], pd.DataFrame], pd.DataFrame]:
-        return pd.read_excel(self._path, sheet_name=sheet_names, **kwargs)
+    def _do_read_excel(
+        self, path: str, sheet_names, kwargs
+    ) -> Union[Dict[Union[int, str], pd.DataFrame], pd.DataFrame]:
+        return pd.read_excel(path, sheet_name=sheet_names, **kwargs)
 
     def __get_sheet_names_and_header(self, sheet_names):
         kwargs = {}
@@ -231,10 +239,12 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             kwargs["header"] = None
         return sheet_names, kwargs
 
-    def _read_as_pandas_dataframe(self, sheet_names=None) -> Union[Dict[Union[int, str], pd.DataFrame], pd.DataFrame]:
+    def _read_as_pandas_dataframe(
+        self, path: str, sheet_names=None
+    ) -> Union[Dict[Union[int, str], pd.DataFrame], pd.DataFrame]:
         sheet_names, kwargs = self.__get_sheet_names_and_header(sheet_names)
         try:
-            return self._do_read_excel(sheet_names, kwargs)
+            return self._do_read_excel(path, sheet_names, kwargs)
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 

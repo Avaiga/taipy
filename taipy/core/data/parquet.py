@@ -28,7 +28,7 @@ from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
+class ParquetDataNode(_FileDataNodeMixin, DataNode, _TabularDataNodeMixin):
     """Data Node stored as a Parquet file.
 
     Attributes:
@@ -178,18 +178,43 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         return cls.__STORAGE_TYPE
 
     def _read(self):
-        return self.read_with_kwargs()
+        return self._read_from_path()
 
-    def _read_as(self, read_kwargs: Dict):
+    def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
+        if not path:
+            path = self._path
+
+        # return None if data was never written
+        if not self.last_edit_date:
+            self._DataNode__logger.warning(
+                f"Data node {self.id} from config {self.config_id} is being read but has never been written."
+            )
+            return None
+
+        kwargs = self.properties[self.__READ_KWARGS_PROPERTY]
+        kwargs.update(
+            {
+                self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
+            }
+        )
+        kwargs.update(read_kwargs)
+
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
+            return self._read_as_pandas_dataframe(path, kwargs)
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
+            return self._read_as_numpy(path, kwargs)
+        return self._read_as(path, kwargs)
+
+    def _read_as(self, path: str, read_kwargs: Dict):
         custom_class = self.properties[self._EXPOSED_TYPE_PROPERTY]
-        list_of_dicts = self._read_as_pandas_dataframe(read_kwargs).to_dict(orient="records")
+        list_of_dicts = self._read_as_pandas_dataframe(path, read_kwargs).to_dict(orient="records")
         return [custom_class(**dct) for dct in list_of_dicts]
 
-    def _read_as_numpy(self, read_kwargs: Dict) -> np.ndarray:
-        return self._read_as_pandas_dataframe(read_kwargs).to_numpy()
+    def _read_as_numpy(self, path: str, read_kwargs: Dict) -> np.ndarray:
+        return self._read_as_pandas_dataframe(path, read_kwargs).to_numpy()
 
-    def _read_as_pandas_dataframe(self, read_kwargs: Dict) -> pd.DataFrame:
-        return pd.read_parquet(self._path, **read_kwargs)
+    def _read_as_pandas_dataframe(self, path: str, read_kwargs: Dict) -> pd.DataFrame:
+        return pd.read_parquet(path, **read_kwargs)
 
     def _append(self, data: Any):
         self.write_with_kwargs(data, engine="fastparquet", append=True)
@@ -233,23 +258,4 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             **read_kwargs (dict[str, any]): The keyword arguments passed to the function
                 `pandas.read_parquet()`.
         """
-        # return None if data was never written
-        if not self.last_edit_date:
-            self._DataNode__logger.warning(
-                f"Data node {self.id} from config {self.config_id} is being read but has never been written."
-            )
-            return None
-
-        kwargs = self.properties[self.__READ_KWARGS_PROPERTY]
-        kwargs.update(
-            {
-                self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
-            }
-        )
-        kwargs.update(read_kwargs)
-
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
-            return self._read_as_pandas_dataframe(kwargs)
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
-            return self._read_as_numpy(kwargs)
-        return self._read_as(kwargs)
+        return self._read_from_path(**read_kwargs)

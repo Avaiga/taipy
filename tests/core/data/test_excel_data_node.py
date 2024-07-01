@@ -19,6 +19,7 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 import pytest
+from pandas.testing import assert_frame_equal
 
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
@@ -365,3 +366,90 @@ class TestExcelDataNode:
 
         assert ".data" not in dn.path
         assert os.path.exists(dn.path)
+
+    def test_get_download_path(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+        assert dn._get_downloadable_path() == path
+
+    def test_get_downloadable_path_with_not_existing_file(self):
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": "NOT_EXISTING.xlsx", "exposed_type": "pandas"})
+        assert dn._get_downloadable_path() == ""
+
+    def test_upload(self, excel_file, tmpdir_factory):
+        old_xlsx_path = tmpdir_factory.mktemp("data").join("df.xlsx").strpath
+        old_data = pd.DataFrame([{"a": 0, "b": 1, "c": 2}, {"a": 3, "b": 4, "c": 5}])
+
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": old_xlsx_path, "exposed_type": "pandas"})
+        dn.write(old_data)
+        old_last_edit_date = dn.last_edit_date
+
+        upload_content = pd.read_excel(excel_file)
+        dn._upload(excel_file)
+
+        assert_frame_equal(dn.read()["Sheet1"], upload_content)  # The data of dn should change to the uploaded content
+        assert dn.last_edit_date > old_last_edit_date
+        assert dn.path == old_xlsx_path  # The path of the dn should not change
+
+    def test_upload_with_upload_check_pandas(self, excel_file, tmpdir_factory):
+        old_xlsx_path = tmpdir_factory.mktemp("data").join("df.xlsx").strpath
+        old_data = pd.DataFrame([{"a": 0, "b": 1, "c": 2}, {"a": 3, "b": 4, "c": 5}])
+
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": old_xlsx_path, "exposed_type": "pandas"})
+        dn.write(old_data)
+        old_last_edit_date = dn.last_edit_date
+
+        def check_data_column(upload_path, upload_data):
+            """Check if the uploaded data has the correct file format and
+            the sheet named "Sheet1" has the correct columns.
+            """
+            return upload_path.endswith(".xlsx") and upload_data["Sheet1"].columns.tolist() == ["a", "b", "c"]
+
+        wrong_format_not_xlsx_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_xlsx").strpath
+        wrong_format_xlsx_path = tmpdir_factory.mktemp("data").join("wrong_format_df.xlsx").strpath
+        pd.DataFrame([{"a": 1, "b": 2, "d": 3}, {"a": 4, "b": 5, "d": 6}]).to_excel(wrong_format_xlsx_path, index=False)
+
+        # The upload should fail when the file is not a xlsx
+        assert not dn._upload(wrong_format_not_xlsx_path, upload_checker=check_data_column)
+
+        # The upload should fail when check_data_column() return False
+        assert not dn._upload(wrong_format_xlsx_path, upload_checker=check_data_column)
+
+        assert_frame_equal(dn.read()["Sheet1"], old_data)  # The content of the dn should not change when upload fails
+        assert dn.last_edit_date == old_last_edit_date  # The last edit date should not change when upload fails
+        assert dn.path == old_xlsx_path  # The path of the dn should not change
+
+        # The upload should succeed when check_data_column() return True
+        assert dn._upload(excel_file, upload_checker=check_data_column)
+
+    def test_upload_with_upload_check_numpy(self, tmpdir_factory):
+        old_excel_path = tmpdir_factory.mktemp("data").join("df.xlsx").strpath
+        old_data = np.array([[1, 2, 3], [4, 5, 6]])
+
+        new_excel_path = tmpdir_factory.mktemp("data").join("new_upload_data.xlsx").strpath
+        new_data = np.array([[1, 2, 3], [4, 5, 6]])
+        pd.DataFrame(new_data).to_excel(new_excel_path, index=False)
+
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": old_excel_path, "exposed_type": "numpy"})
+        dn.write(old_data)
+        old_last_edit_date = dn.last_edit_date
+
+        def check_data_is_positive(upload_path, upload_data):
+            return upload_path.endswith(".xlsx") and np.all(upload_data["Sheet1"] > 0)
+
+        wrong_format_not_excel_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_excel").strpath
+        wrong_format_excel_path = tmpdir_factory.mktemp("data").join("wrong_format_df.xlsx").strpath
+        pd.DataFrame(np.array([[-1, 2, 3], [-4, -5, -6]])).to_excel(wrong_format_excel_path, index=False)
+
+        # The upload should fail when the file is not a excel
+        assert not dn._upload(wrong_format_not_excel_path, upload_checker=check_data_is_positive)
+
+        # The upload should fail when check_data_is_positive() return False
+        assert not dn._upload(wrong_format_excel_path, upload_checker=check_data_is_positive)
+
+        np.array_equal(dn.read()["Sheet1"], old_data)  # The content of the dn should not change when upload fails
+        assert dn.last_edit_date == old_last_edit_date  # The last edit date should not change when upload fails
+        assert dn.path == old_excel_path  # The path of the dn should not change
+
+        # The upload should succeed when check_data_is_positive() return True
+        assert dn._upload(new_excel_path, upload_checker=check_data_is_positive)

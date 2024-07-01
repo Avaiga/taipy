@@ -11,11 +11,13 @@
 
 import os
 import pathlib
+import pickle
 from datetime import datetime
 from time import sleep
 
 import pandas as pd
 import pytest
+from pandas.testing import assert_frame_equal
 
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
@@ -192,3 +194,56 @@ class TestPickleDataNodeEntity:
 
         assert ".data" not in dn.path
         assert os.path.exists(dn.path)
+
+    def test_get_download_path(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.p")
+        dn = PickleDataNode("foo", Scope.SCENARIO, properties={"path": path})
+        assert dn._get_downloadable_path() == path
+
+    def test_get_download_path_with_not_existed_file(self):
+        dn = PickleDataNode("foo", Scope.SCENARIO, properties={"path": "NOT_EXISTED.p"})
+        assert dn._get_downloadable_path() == ""
+
+    def test_upload(self, pickle_file_path, tmpdir_factory):
+        old_pickle_path = tmpdir_factory.mktemp("data").join("df.p").strpath
+        old_data = pd.DataFrame([{"a": 0, "b": 1, "c": 2}, {"a": 3, "b": 4, "c": 5}])
+
+        dn = PickleDataNode("foo", Scope.SCENARIO, properties={"path": old_pickle_path})
+        dn.write(old_data)
+        old_last_edit_date = dn.last_edit_date
+
+        upload_content = pd.read_pickle(pickle_file_path)
+        dn._upload(pickle_file_path)
+
+        assert_frame_equal(dn.read(), upload_content)  # The content of the dn should change to the uploaded content
+        assert dn.last_edit_date > old_last_edit_date
+        assert dn.path == old_pickle_path  # The path of the dn should not change
+
+    def test_upload_with_upload_check(self, pickle_file_path, tmpdir_factory):
+        old_pickle_path = tmpdir_factory.mktemp("data").join("df.p").strpath
+        old_data = pd.DataFrame([{"a": 0, "b": 1, "c": 2}, {"a": 3, "b": 4, "c": 5}])
+
+        dn = PickleDataNode("foo", Scope.SCENARIO, properties={"path": old_pickle_path})
+        dn.write(old_data)
+        old_last_edit_date = dn.last_edit_date
+
+        def check_data_column(upload_path, upload_data):
+            return upload_path.endswith(".p") and upload_data.columns.tolist() == ["a", "b", "c"]
+
+        wrong_format_not_pickle_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_pickle").strpath
+        wrong_format_pickle_path = tmpdir_factory.mktemp("data").join("wrong_format_df.p").strpath
+        with open(str(wrong_format_pickle_path), "wb") as f:
+            pickle.dump(pd.DataFrame([{"a": 1, "b": 2, "d": 3}, {"a": 4, "b": 5, "d": 6}]), f)
+
+        # The upload should fail when the file is not a pickle
+        assert not dn._upload(wrong_format_not_pickle_path, upload_checker=check_data_column)
+
+        # The upload should fail when check_data_column() return False
+        assert not dn._upload(wrong_format_pickle_path, upload_checker=check_data_column)
+
+        assert_frame_equal(dn.read(), old_data)  # The content of the dn should not change when upload fails
+        assert dn.last_edit_date == old_last_edit_date  # The last edit date should not change when upload fails
+        assert dn.path == old_pickle_path  # The path of the dn should not change
+
+        # The upload should succeed when check_data_column() return True
+        assert dn._upload(pickle_file_path, upload_checker=check_data_column)

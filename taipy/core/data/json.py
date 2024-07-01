@@ -25,7 +25,7 @@ from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class JSONDataNode(DataNode, _FileDataNodeMixin):
+class JSONDataNode(_FileDataNodeMixin, DataNode):
     """Data Node stored as a JSON file.
 
     Attributes:
@@ -150,7 +150,13 @@ class JSONDataNode(DataNode, _FileDataNodeMixin):
         self.properties[self._DECODER_KEY] = decoder
 
     def _read(self):
-        with open(self._path, "r", encoding=self.properties[self.__ENCODING_KEY]) as f:
+        return self._read_from_path()
+
+    def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
+        if not path:
+            path = self._path
+
+        with open(path, "r", encoding=self.properties[self.__ENCODING_KEY]) as f:
             return json.load(f, cls=self._decoder)
 
     def _append(self, data: Any):

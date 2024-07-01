@@ -27,7 +27,7 @@ from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
+class CSVDataNode(_FileDataNodeMixin, DataNode, _TabularDataNodeMixin):
     """Data Node stored as a CSV file.
 
     Attributes:
@@ -137,14 +137,20 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         return cls.__STORAGE_TYPE
 
     def _read(self):
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
-            return self._read_as_pandas_dataframe()
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
-            return self._read_as_numpy()
-        return self._read_as()
+        return self._read_from_path()
 
-    def _read_as(self):
-        with open(self._path, encoding=self.properties[self.__ENCODING_KEY]) as csvFile:
+    def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
+        if not path:
+            path = self._path
+
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
+            return self._read_as_pandas_dataframe(path=path)
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
+            return self._read_as_numpy(path=path)
+        return self._read_as(path=path)
+
+    def _read_as(self, path: str):
+        with open(path, encoding=self.properties[self.__ENCODING_KEY]) as csvFile:
             if self.properties[self._HAS_HEADER_PROPERTY]:
                 reader = csv.DictReader(csvFile)
             else:
@@ -152,23 +158,26 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
             return [self._decoder(line) for line in reader]
 
-    def _read_as_numpy(self) -> np.ndarray:
-        return self._read_as_pandas_dataframe().to_numpy()
+    def _read_as_numpy(self, path: str) -> np.ndarray:
+        return self._read_as_pandas_dataframe(path=path).to_numpy()
 
     def _read_as_pandas_dataframe(
-        self, usecols: Optional[List[int]] = None, column_names: Optional[List[str]] = None
+        self,
+        path: str,
+        usecols: Optional[List[int]] = None,
+        column_names: Optional[List[str]] = None,
     ) -> pd.DataFrame:
         try:
             if self.properties[self._HAS_HEADER_PROPERTY]:
                 if column_names:
-                    return pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY])[column_names]
-                return pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY])
+                    return pd.read_csv(path, encoding=self.properties[self.__ENCODING_KEY])[column_names]
+                return pd.read_csv(path, encoding=self.properties[self.__ENCODING_KEY])
             else:
                 if usecols:
                     return pd.read_csv(
-                        self._path, encoding=self.properties[self.__ENCODING_KEY], header=None, usecols=usecols
+                        path, encoding=self.properties[self.__ENCODING_KEY], header=None, usecols=usecols
                     )
-                return pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY], header=None)
+                return pd.read_csv(path, encoding=self.properties[self.__ENCODING_KEY], header=None)
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 
