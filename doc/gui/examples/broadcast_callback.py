@@ -13,40 +13,45 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-# This script needs to run in a Python environment where the plotly-express package is
-# installed.
+# Demonstrate how to update the value of a variable across multiple clients.
+# This application creates a thread that sets a variable to the current time.
+# The value is updated for every client when Gui.broadcast_change() is invoked.
 # -----------------------------------------------------------------------------------------
-import numpy as np
-import plotly.graph_objects as go
+from datetime import datetime
+from threading import Thread
+from time import sleep
 
 from taipy.gui import Gui
 
-# Create the Plotly figure object
-figure = go.Figure()
+current_time = datetime.now()
+update = False
 
-# Add trace for Normal Distribution
-figure.add_trace(
-    go.Violin(name="Normal", y=np.random.normal(loc=0, scale=1, size=1000), box_visible=True, meanline_visible=True)
-)
 
-# Add trace for Exponential Distribution
-figure.add_trace(
-    go.Violin(name="Exponential", y=np.random.exponential(scale=1, size=1000), box_visible=True, meanline_visible=True)
-)
+# Update the 'current_time' state variable if 'update' is True
+def update_state(state, updated_time):
+    if state.update:
+        state.current_time = updated_time
 
-# Add trace for Uniform Distribution
-figure.add_trace(
-    go.Violin(name="Uniform", y=np.random.uniform(low=0, high=1, size=1000), box_visible=True, meanline_visible=True)
-)
 
-# Updating layout for better visualization
-figure.update_layout(title="Different Probability Distributions")
+# The function that executes in its own thread.
+# Call 'update_state()` every second.
+def update_time(gui):
+    while True:
+        gui.broadcast_callback(update_state, [datetime.now()])
+        sleep(1)
+
 
 page = """
-# Plotly Python
-<|toggle|theme|>
+Current time is: <|{current_time}|format=HH:mm:ss|>
 
-<|chart|figure={figure}|>
+Update: <|{update}|toggle|>
 """
 
-Gui(page).run()
+gui = Gui(page)
+
+# Run thread that regularly updates the current time
+thread = Thread(target=update_time, args=[gui], name="clock")
+thread.daemon = True
+thread.start()
+
+gui.run()

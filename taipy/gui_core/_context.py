@@ -182,7 +182,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         # callback
                         submission_name = submission.properties.get("on_submission")
                         if submission_name:
-                            self.gui._call_user_callback(
+                            self.gui.invoke_callback(
                                 client_id,
                                 submission_name,
                                 [

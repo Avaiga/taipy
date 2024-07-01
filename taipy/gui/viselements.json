@@ -1536,65 +1536,6 @@
             }
         ],
         [
-            "dialog",
-            {
-                "inherits": [
-                    "partial",
-                    "active",
-                    "shared"
-                ],
-                "properties": [
-                    {
-                        "name": "open",
-                        "default_property": true,
-                        "type": "bool",
-                        "default_value": "False",
-                        "doc": "If True, the dialog is visible. If False, it is hidden."
-                    },
-                    {
-                        "name": "on_action",
-                        "type": "Callback",
-                        "doc": "Name of a function triggered when a button is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the dialog.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: a list where the first element contains the index of the selected label.</li>\n</ul>\n</li>\n</ul>",
-                        "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
-                        ]
-                    },
-                    {
-                        "name": "close_label",
-                        "type": "str",
-                        "default_value": "\"Close\"",
-                        "doc": "The tooltip of the top-right close icon button. In the <tt>on_action</tt> callback, args will hold -1."
-                    },
-                    {
-                        "name": "labels",
-                        "type": " str|list[str]",
-                        "doc": "A list of labels to show in a row of buttons at the bottom of the dialog. The index of the button in the list is reported as args in the <tt>on_action</tt> callback (that index is -1 for the <i>close</i> icon)."
-                    },
-                    {
-                        "name": "width",
-                        "type": "str|int|float",
-                        "doc": "The width, in CSS units, of this dialog.<br/>(CSS property)"
-                    },
-                    {
-                        "name": "height",
-                        "type": "str|int|float",
-                        "doc": "The height, in CSS units, of this dialog.<br/>(CSS property)"
-                    }
-                ]
-            }
-        ],
-        [
             "tree",
             {
                 "inherits": [
@@ -1687,6 +1628,65 @@
                         "type": "dynamic(bool)",
                         "default_value": "True",
                         "doc": "If True, the block is expanded, and the content is displayed.<br/>If False, the block is collapsed and its content is hidden."
+                    }
+                ]
+            }
+        ],
+        [
+            "dialog",
+            {
+                "inherits": [
+                    "partial",
+                    "active",
+                    "shared"
+                ],
+                "properties": [
+                    {
+                        "name": "open",
+                        "default_property": true,
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the dialog is visible. If False, it is hidden."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Callback",
+                        "doc": "Name of a function triggered when a button is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the dialog.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: a list where the first element contains the index of the selected label.</li>\n</ul>\n</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "close_label",
+                        "type": "str",
+                        "default_value": "\"Close\"",
+                        "doc": "The tooltip of the top-right close icon button. In the <tt>on_action</tt> callback, args will hold -1."
+                    },
+                    {
+                        "name": "labels",
+                        "type": " str|list[str]",
+                        "doc": "A list of labels to show in a row of buttons at the bottom of the dialog. The index of the button in the list is reported as args in the <tt>on_action</tt> callback (that index is -1 for the <i>close</i> icon)."
+                    },
+                    {
+                        "name": "width",
+                        "type": "str|int|float",
+                        "doc": "The width, in CSS units, of this dialog.<br/>(CSS property)"
+                    },
+                    {
+                        "name": "height",
+                        "type": "str|int|float",
+                        "doc": "The height, in CSS units, of this dialog.<br/>(CSS property)"
                     }
                 ]
             }
