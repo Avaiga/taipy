@@ -57,8 +57,6 @@ const Input = (props: TaipyInputProps) => {
         onChange,
         multiline = false,
         linesShown = 5,
-        min,
-        max,
     } = props;
     const [value, setValue] = useState(defaultValue);
     const dispatch = useDispatch();
@@ -72,6 +70,8 @@ const Input = (props: TaipyInputProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const step = useDynamicProperty(props.step, props.defaultStep, 1);
     const stepMultiplier = useDynamicProperty(props.stepMultiplier, props.defaultStepMultiplier, 10);
+    const min = useDynamicProperty(props.min, props.defaultMin, undefined);
+    const max = useDynamicProperty(props.max, props.defaultMax, undefined);
 
     const handleInput = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,25 +96,25 @@ const Input = (props: TaipyInputProps) => {
 
     const handleAction = useCallback(
         (evt: KeyboardEvent<HTMLDivElement>) => {
-            if (evt.shiftKey && evt.key === "ArrowUp") {
-                setValue(
-                    (
-                        Number(evt.currentTarget.querySelector("input")?.value || 0) +
-                        (step || 1) * (stepMultiplier || 10) -
-                        (step || 1)
-                    ).toString(),
-                );
-            }
-            if (evt.shiftKey && evt.key === "ArrowDown") {
-                setValue(
-                    (
-                        Number(evt.currentTarget.querySelector("input")?.value || 0) -
-                        (step || 1) * (stepMultiplier || 10) +
-                        (step || 1)
-                    ).toString(),
-                );
-            }
-            if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
+            if (evt.shiftKey) {
+                if (evt.key === "ArrowUp") {
+                    setValue(
+                        (
+                            Number(evt.currentTarget.querySelector("input")?.value || 0) +
+                            (step || 1) * (stepMultiplier || 10) -
+                            (step || 1)
+                        ).toString(),
+                    );
+                } else if (evt.key === "ArrowDown") {
+                    setValue(
+                        (
+                            Number(evt.currentTarget.querySelector("input")?.value || 0) -
+                            (step || 1) * (stepMultiplier || 10) +
+                            (step || 1)
+                        ).toString(),
+                    );
+                }
+            } else if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
                 const val = evt.currentTarget.querySelector("input")?.value;
                 if (changeDelay > 0 && delayCall.current > 0) {
                     clearTimeout(delayCall.current);
