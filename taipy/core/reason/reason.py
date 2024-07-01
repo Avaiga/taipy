@@ -14,7 +14,10 @@ from typing import Any, Optional
 
 class Reason:
     """
-    TODO - NOT DOCUMENTED
+    A reason holds the reason why specific actions cannot be performed.
+
+    Attributes:
+        reason (str): The reason why the action cannot be performed.
     """
 
     def __init__(self, reason: str):
@@ -50,7 +53,11 @@ class _DataNodeReasonMixin:
 
 class DataNodeEditInProgress(Reason, _DataNodeReasonMixin):
     """
-    TODO - NOT DOCUMENTED
+    DataNodeEditInProgress holds the reason a `DataNode^` is being edited,
+    which prevents specific actions from being performed.
+
+    Attributes:
+        datanode_id (str): The identifier of the `DataNode^`.
     """
 
     def __init__(self, datanode_id: str):
@@ -60,7 +67,11 @@ class DataNodeEditInProgress(Reason, _DataNodeReasonMixin):
 
 class DataNodeIsNotWritten(Reason, _DataNodeReasonMixin):
     """
-    TODO - NOT DOCUMENTED
+    DataNodeIsNotWritten holds the reason a `DataNode^` is not yet written,
+    which prevents specific actions from being performed.
+
+    Attributes:
+        datanode_id (str): The identifier of the `DataNode^`.
     """
 
     def __init__(self, datanode_id: str):
@@ -70,7 +81,10 @@ class DataNodeIsNotWritten(Reason, _DataNodeReasonMixin):
 
 class EntityIsNotSubmittableEntity(Reason):
     """
-    TODO - NOT DOCUMENTED
+    EntityIsNotSubmittableEntity holds the reason an entity is not submittable.
+
+    Attributes:
+        entity_id (str): The identifier of the `Entity^`.
     """
 
     def __init__(self, entity_id: str):
@@ -79,7 +93,11 @@ class EntityIsNotSubmittableEntity(Reason):
 
 class WrongConfigType(Reason):
     """
-    TODO - NOT DOCUMENTED
+    WrongConfigType holds the reason the provided config is not the valid config expected.
+
+    Attributes:
+        config_id (str): The identifier of the config.
+        config_type (str): The expected config type.
     """
 
     def __init__(self, config_id: str, config_type: Optional[str]):
@@ -93,7 +111,11 @@ class WrongConfigType(Reason):
 
 class NotGlobalScope(Reason):
     """
-    TODO - NOT DOCUMENTED
+    NotGlobalScope holds the reason the data node config does not have a GLOBAL scope,
+    which prevents certain actions from being performed.
+
+    Attributes:
+        config_id (str): The identifier of the config.
     """
 
     def __init__(self, config_id: str):
