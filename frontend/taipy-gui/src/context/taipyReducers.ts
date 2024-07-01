@@ -22,7 +22,7 @@ import { stylekitModeThemes, stylekitTheme } from "../themes/stylekit";
 import { getBaseURL, TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 import { MenuProps } from "../utils/lov";
-import { getLocalStorageValue, IdMessage, storeClientId } from "./utils";
+import { changeFavicon, getLocalStorageValue, IdMessage, storeClientId } from "./utils";
 import { ligthenPayload, sendWsMessage, TAIPY_CLIENT_ID, WsMessage } from "./wsUtils";
 
 enum Types {
@@ -228,6 +228,8 @@ const messageToAction = (message: WsMessage) => {
             return createPartialAction((message as unknown as Record<string, string>).name, true);
         } else if (message.type === "ACK") {
             return createAckAction((message as unknown as IdMessage).id);
+        } else if (message.type === "FV") {
+            changeFavicon((message.payload as Record<string, string>)?.value);
         }
     }
     return {} as TaipyBaseAction;
@@ -278,6 +280,7 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
         socket.on("message", getWsMessageListener(dispatch));
         // only now does the socket tries to open/connect
         socket.connect();
+        changeFavicon();
     }
 };
 

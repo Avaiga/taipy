@@ -50,6 +50,7 @@ class _WsType(Enum):
     GET_MODULE_CONTEXT = "GMC"
     GET_DATA_TREE = "GDT"
     GET_ROUTES = "GR"
+    FAVICON = "FV"
 
 
 NumberTypes = {"int", "int64", "float", "float64"}
