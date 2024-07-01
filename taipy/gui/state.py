@@ -13,6 +13,7 @@ import inspect
 import typing as t
 from contextlib import nullcontext
 from operator import attrgetter
+from pathlib import Path
 from types import FrameType
 
 from flask import has_app_context
@@ -83,6 +84,7 @@ class State:
         "broadcast",
         "get_gui",
         "refresh",
+        "set_favicon",
         "_set_context",
         "_notebook_context",
         "_get_placeholder",
@@ -243,3 +245,13 @@ class State:
 
     def __exit__(self, exc_type, exc_value, traceback):
         return super().__getattribute__(State.__attrs[0]).__exit__(exc_type, exc_value, traceback)
+
+    def set_favicon(self, favicon_path: t.Union[str, Path]):
+        """Change the favicon for the client of this state.
+
+        This function dynamically changes the favicon of Taipy GUI pages for a specific client.
+        favicon_path can be an URL (relative or not) or a file path.
+        TODO The *favicon* parameter to `(Gui.)run()^` can also be used to change
+         the favicon when the application starts.
+        """
+        super().__getattribute__(State.__gui_attr).set_favicon(favicon_path, self)
