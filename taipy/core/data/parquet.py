@@ -214,10 +214,10 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         }
         kwargs.update(self.properties[self.__WRITE_KWARGS_PROPERTY])
         kwargs.update(write_kwargs)
-        if isinstance(data, pd.Series):
-            df = pd.DataFrame(data)
-        else:
-            df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
+
+        df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
+        if isinstance(df, pd.Series):
+            df = pd.DataFrame(df)
 
         # Ensure that the columns are strings, otherwise writing will fail with pandas 1.3.5
         df.columns = df.columns.astype(str)

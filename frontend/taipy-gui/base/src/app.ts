@@ -24,6 +24,7 @@ export class TaipyApp {
     appId: string;
     clientId: string;
     context: string;
+    metadata: Record<string, unknown>;
     path: string | undefined;
     routes: Route[] | undefined;
     wsAdapters: WsAdapter[];
@@ -41,6 +42,7 @@ export class TaipyApp {
         this.functionData = undefined;
         this.clientId = "";
         this.context = "";
+        this.metadata = {};
         this.appId = "";
         this.routes = undefined;
         this.path = path;
@@ -162,7 +164,7 @@ export class TaipyApp {
         if (!path || path === "") {
             path = window.location.pathname.slice(1);
         }
-        sendWsMessage(this.socket, "GMC", "get_module_context", { path: path }, this.clientId);
+        sendWsMessage(this.socket, "GMC", "get_module_context", { path: path || "/" }, this.clientId);
     }
 
     trigger(actionName: string, triggerId: string, payload: Record<string, unknown> = {}) {
@@ -175,7 +177,7 @@ export class TaipyApp {
     }
 
     getPageMetadata() {
-        return JSON.parse(localStorage.getItem("tp_cp_meta") || "{}");
+        return this.metadata;
     }
 }
 
