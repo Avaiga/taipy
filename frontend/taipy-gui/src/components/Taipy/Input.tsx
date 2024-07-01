@@ -11,26 +11,26 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, {useState, useEffect, useCallback, useRef, KeyboardEvent, useMemo} from "react";
+import React, { useState, useEffect, useCallback, useRef, KeyboardEvent, useMemo } from "react";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
-import {styled} from '@mui/material/styles';
+import { styled } from "@mui/material/styles";
 import IconButton from "@mui/material/IconButton";
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
-import {createSendActionNameAction, createSendUpdateAction} from "../../context/taipyReducers";
-import {TaipyInputProps} from "./utils";
-import {useClassNames, useDispatch, useDynamicProperty, useModule} from "../../utils/hooks";
+import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
+import { TaipyInputProps } from "./utils";
+import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 
 const AUTHORIZED_KEYS = ["Enter", "Escape", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"];
 
 const StyledTextField = styled(TextField)({
-    '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
-        display: 'none',
+    "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button": {
+        display: "none",
     },
-    '& input[type=number]': {
-        'MozAppearance': 'textfield',
+    "& input[type=number]": {
+        MozAppearance: "textfield",
     },
 });
 
@@ -38,9 +38,9 @@ const getActionKeys = (keys?: string): string[] => {
     const ak = (
         keys
             ? keys
-                .split(";")
-                .map((v) => v.trim().toLowerCase())
-                .filter((v) => AUTHORIZED_KEYS.some((k) => k.toLowerCase() === v))
+                  .split(";")
+                  .map((v) => v.trim().toLowerCase())
+                  .filter((v) => AUTHORIZED_KEYS.some((k) => k.toLowerCase() === v))
             : []
     ).map((v) => AUTHORIZED_KEYS.find((k) => k.toLowerCase() == v) as string);
     return ak.length > 0 ? ak : [AUTHORIZED_KEYS[0]];
@@ -57,6 +57,8 @@ const Input = (props: TaipyInputProps) => {
         onChange,
         multiline = false,
         linesShown = 5,
+        min,
+        max,
     } = props;
     const [value, setValue] = useState(defaultValue);
     const dispatch = useDispatch();
@@ -89,16 +91,28 @@ const Input = (props: TaipyInputProps) => {
                 }, changeDelay);
             }
         },
-        [updateVarName, dispatch, propagate, onChange, changeDelay, module]
+        [updateVarName, dispatch, propagate, onChange, changeDelay, module],
     );
 
     const handleAction = useCallback(
         (evt: KeyboardEvent<HTMLDivElement>) => {
-            if (evt.shiftKey && evt.key === 'ArrowUp') {
-                setValue(((Number(evt.currentTarget.querySelector("input")?.value || 0) + (step || 1) * (stepMultiplier || 10) - (step || 1)).toString()));
+            if (evt.shiftKey && evt.key === "ArrowUp") {
+                setValue(
+                    (
+                        Number(evt.currentTarget.querySelector("input")?.value || 0) +
+                        (step || 1) * (stepMultiplier || 10) -
+                        (step || 1)
+                    ).toString(),
+                );
             }
-            if (evt.shiftKey && evt.key === 'ArrowDown') {
-                setValue(((Number(evt.currentTarget.querySelector("input")?.value || 0) - (step || 1) * (stepMultiplier || 10) + (step || 1)).toString()));
+            if (evt.shiftKey && evt.key === "ArrowDown") {
+                setValue(
+                    (
+                        Number(evt.currentTarget.querySelector("input")?.value || 0) -
+                        (step || 1) * (stepMultiplier || 10) +
+                        (step || 1)
+                    ).toString(),
+                );
             }
             if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
                 const val = evt.currentTarget.querySelector("input")?.value;
@@ -113,12 +127,24 @@ const Input = (props: TaipyInputProps) => {
                 evt.preventDefault();
             }
         },
-        [actionKeys, step, stepMultiplier, changeDelay, onAction, dispatch, id, module, updateVarName, onChange, propagate]
+        [
+            actionKeys,
+            step,
+            stepMultiplier,
+            changeDelay,
+            onAction,
+            dispatch,
+            id,
+            module,
+            updateVarName,
+            onChange,
+            propagate,
+        ],
     );
 
     const roundBasedOnStep = useMemo(() => {
         const stepString = (step || 1).toString();
-        const decimalPlaces = stepString.includes('.') ? stepString.split('.')[1].length : 0;
+        const decimalPlaces = stepString.includes(".") ? stepString.split(".")[1].length : 0;
         const multiplier = Math.pow(10, decimalPlaces);
         return (value: number) => Math.round(value * multiplier) / multiplier;
     }, [step]);
@@ -131,17 +157,41 @@ const Input = (props: TaipyInputProps) => {
         };
     }, [roundBasedOnStep]);
 
-    const handleStepperMouseDown = useCallback((event: React.MouseEvent<HTMLButtonElement>, increment: boolean) => {
-        setValue(prevValue => calculateNewValue(prevValue, step || 1, stepMultiplier || 10, event.shiftKey, increment));
-    }, [step, stepMultiplier, calculateNewValue]);
+    const handleStepperMouseDown = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>, increment: boolean) => {
+            setValue((prevValue) => {
+                const newValue = calculateNewValue(
+                    prevValue,
+                    step || 1,
+                    stepMultiplier || 10,
+                    event.shiftKey,
+                    increment,
+                );
+                if (min !== undefined && Number(newValue) < min) {
+                    return min.toString();
+                }
+                if (max !== undefined && Number(newValue) > max) {
+                    return max.toString();
+                }
+                return newValue;
+            });
+        },
+        [min, max, step, stepMultiplier, calculateNewValue],
+    );
 
-    const handleUpStepperMouseDown = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-        handleStepperMouseDown(event, true);
-    }, [handleStepperMouseDown]);
+    const handleUpStepperMouseDown = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>) => {
+            handleStepperMouseDown(event, true);
+        },
+        [handleStepperMouseDown],
+    );
 
-    const handleDownStepperMouseDown = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-        handleStepperMouseDown(event, false);
-    }, [handleStepperMouseDown]);
+    const handleDownStepperMouseDown = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>) => {
+            handleStepperMouseDown(event, false);
+        },
+        [handleStepperMouseDown],
+    );
 
     useEffect(() => {
         if (props.value !== undefined) {
@@ -164,16 +214,10 @@ const Input = (props: TaipyInputProps) => {
                 InputProps={{
                     endAdornment: (
                         <>
-                            <IconButton
-                                size="small"
-                                onMouseDown={handleUpStepperMouseDown}
-                            >
+                            <IconButton size="small" onMouseDown={handleUpStepperMouseDown}>
                                 <ArrowDropUpIcon />
                             </IconButton>
-                            <IconButton
-                                size="small"
-                                onMouseDown={handleDownStepperMouseDown}
-                            >
+                            <IconButton size="small" onMouseDown={handleDownStepperMouseDown}>
                                 <ArrowDropDownIcon />
                             </IconButton>
                         </>
@@ -189,5 +233,4 @@ const Input = (props: TaipyInputProps) => {
         </Tooltip>
     );
 };
-
 export default Input;

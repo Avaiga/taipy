@@ -145,6 +145,16 @@
                         "type": "dynamic(int|float)",
                         "default_value": "10",
                         "doc": "A factor that multiplies <i>step</i> when the user presses the Shift key while clicking one of the arrow buttons."
+                    },
+                    {
+                        "name": "min",
+                        "type": "int|float",
+                        "doc": "The minimum value to accept for this input."
+                    },
+                    {
+                        "name": "max",
+                        "type": "int|float",
+                        "doc": "The maximum value to accept for this input."
                     }
                 ]
             }

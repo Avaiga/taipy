@@ -388,6 +388,8 @@ class _Factory:
                 ("active", PropertyType.dynamic_boolean, True),
                 ("step", PropertyType.dynamic_number, 1),
                 ("step_multiplier", PropertyType.dynamic_number, 10),
+                ("min", PropertyType.number),
+                ("max", PropertyType.number),
                 ("hover_text", PropertyType.dynamic_string),
                 ("on_change", PropertyType.function),
                 ("on_action", PropertyType.function),
