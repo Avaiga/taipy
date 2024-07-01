@@ -36,7 +36,7 @@ def test_multiple_scopes(gui: Gui):
     with get_state(gui, "s1") as state1:
         state1.var = 2
         assert state1.var == 2
-    with get_state(gui, "s2") as state1:
+    with get_state(gui, "s2") as state2:
         assert state2.var == 1
 
 
