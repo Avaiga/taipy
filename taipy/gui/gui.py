@@ -49,7 +49,7 @@ import __main__  # noqa: F401
 from taipy.logger._taipy_logger import _TaipyLogger
 
 if util.find_spec("pyngrok"):
-    from pyngrok import ngrok  # type: ignore
+    from pyngrok import ngrok  # type: ignore[reportMissingImports]
 
 from ._default_config import _default_stylekit, default_config
 from ._page import _Page
@@ -319,7 +319,7 @@ class Gui:
         self.__locals_context = _LocalsContext()
         self.__var_dir = _VariableDirectory(self.__locals_context)
 
-        self.__evaluator: _Evaluator = None  # type: ignore
+        self.__evaluator: _Evaluator = None  # type: ignore[assignment]
         self.__adapter = _Adapter()
         self.__directory_name_of_pages: t.List[str] = []
 
@@ -435,7 +435,7 @@ class Gui:
             if provider_fn is None:
                 # try plotly
                 if find_spec("plotly") and find_spec("plotly.graph_objs"):
-                    from plotly.graph_objs import Figure as PlotlyFigure  # type: ignore
+                    from plotly.graph_objs import Figure as PlotlyFigure  # type: ignore[reportMissingImports]
 
                     if isinstance(content, PlotlyFigure):
 
@@ -1391,7 +1391,7 @@ class Gui:
             try:
                 fd, temp_path = mkstemp(".csv", var_name, text=True)
                 with os.fdopen(fd, "wt", newline="") as csv_file:
-                    df.to_csv(csv_file, index=False)  # type:ignore
+                    df.to_csv(csv_file, index=False)  # type: ignore[union-attr]
                 self._download(temp_path, "data.csv", Gui.__DOWNLOAD_DELETE_ACTION)
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception("download_csv", e):
@@ -1487,9 +1487,14 @@ class Gui:
             args (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
             module_context (Optional[str]): the name of the module that will be used.
         """
+        this_sid = None
+        if request:
+            # avoid messing with the client_id => Set(ws id)
+            this_sid = getattr(request, "sid", None)
+            request.sid = None  # type: ignore[attr-defined]
         try:
             with self.get_flask_app().app_context():
-                self.__set_client_id_in_context(state_id)
+                setattr(g, Gui.__ARG_CLIENT_ID, state_id)
                 with self._set_module_context(module_context):
                     if not callable(callback):
                         callback = self._get_user_function(callback)
@@ -1504,6 +1509,9 @@ class Gui:
                     + f"'{callback.__name__ if callable(callback) else callback}()'",
                     e,
                 )
+        finally:
+            if this_sid and request:
+                request.sid = this_sid  # type: ignore[attr-defined]
         return None
 
     def broadcast_callback(
@@ -2343,7 +2351,7 @@ class Gui:
             config["extensions"] = {}
             for libs in self.__extensions.values():
                 for lib in libs:
-                    config["extensions"][f"./{Gui._EXTENSION_ROOT}/{lib.get_js_module_name()}"] = [  # type: ignore
+                    config["extensions"][f"./{Gui._EXTENSION_ROOT}/{lib.get_js_module_name()}"] = [
                         e._get_js_name(n)
                         for n, e in lib.get_elements().items()
                         if isinstance(e, Element) and not e._is_server_only()
