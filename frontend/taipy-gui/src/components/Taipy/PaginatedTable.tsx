@@ -173,7 +173,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 }
                 return [colsOrder, baseColumns, styTt.styles, styTt.tooltips, hNan, filter];
             } catch (e) {
-                console.info("PTable.columns: " + ((e as Error).message || e));
+                console.info("PaginatedTable.columns: ", (e as Error).message || e);
             }
         }
         return [

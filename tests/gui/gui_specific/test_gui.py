@@ -42,18 +42,6 @@ def test__get_user_instance(gui: Gui):
             gui._get_user_instance("", type(None))
 
 
-def test__call_broadcast_callback(gui: Gui):
-    gui.run(run_server=False)
-    with gui.get_flask_app().app_context():
-        res = gui._call_broadcast_callback(lambda s, t: t, ["Hello World"], "mine")
-        assert res == "Hello World"
-
-    with gui.get_flask_app().app_context():
-        with pytest.warns(UserWarning):
-            res = gui._call_broadcast_callback(print, ["Hello World"], "mine")
-            assert res is None
-
-
 def test__refresh_expr(gui: Gui):
     gui.run(run_server=False)
     with gui.get_flask_app().app_context():

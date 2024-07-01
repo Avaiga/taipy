@@ -13,7 +13,7 @@ import inspect
 
 from flask import g
 
-from taipy.gui import Gui, Markdown, State, invoke_callback
+from taipy.gui import Gui, Markdown, State
 
 
 def test_invoke_callback(gui: Gui, helpers):
@@ -37,5 +37,5 @@ def test_invoke_callback(gui: Gui, helpers):
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
     with gui.get_flask_app().app_context():
         g.client_id = cid
-        invoke_callback(gui, cid, user_callback, [])
+        gui.invoke_callback(cid, user_callback, [])
         assert gui._Gui__state.val == 10  # type: ignore[attr-defined]

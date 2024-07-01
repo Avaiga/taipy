@@ -170,23 +170,13 @@ export const formatWSValue = (
             if (value == "") {
                 return "";
             }
-            try {
-                return getDateTimeString(value.toString(), dataFormat, formatConf);
-            } catch (e) {
-                console.error(`wrong dateformat "${dataFormat || formatConf.dateTime}"`, e);
-            }
-            return getDateTimeString(value.toString(), undefined, formatConf);
+            return getDateTimeString(value.toString(), dataFormat, formatConf);
         case "datetime.date":
         case "date":
             if (value == "") {
                 return "";
             }
-            try {
-                return getDateTimeString(value.toString(), dataFormat, formatConf, undefined, false);
-            } catch (e) {
-                console.error(`wrong dateformat "${dataFormat || formatConf.date}"`, e);
-            }
-            return getDateTimeString(value.toString(), undefined, formatConf, undefined, false);
+            return getDateTimeString(value.toString(), dataFormat, formatConf, undefined, false);
         case "int":
         case "float":
         case "number":
