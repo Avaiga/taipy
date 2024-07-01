@@ -13,8 +13,9 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
 import datetime
+
+from taipy.gui import Gui
 
 date = datetime.date(2024, 6, 15)
 min_date = datetime.date(2024, 5, 15)
