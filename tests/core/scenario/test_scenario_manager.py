@@ -384,7 +384,7 @@ def test_can_create():
     reasons = _ScenarioManager._can_create(task_config)
     assert bool(reasons) is False
     assert reasons._reasons[task_config.id] == {WrongConfigType(task_config.id, ScenarioConfig.__name__)}
-    assert list(reasons._reasons[task_config.id])[0].reason == 'Object "task" must be a valid ScenarioConfig'
+    assert str(list(reasons._reasons[task_config.id])[0]) == 'Object "task" must be a valid ScenarioConfig'
     with pytest.raises(AttributeError):
         _ScenarioManager._create(task_config)
 
