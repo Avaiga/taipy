@@ -391,7 +391,7 @@ def test_can_create():
     reasons = _ScenarioManager._can_create(1)
     assert bool(reasons) is False
     assert reasons._reasons["1"] == {WrongConfigType(1, ScenarioConfig.__name__)}
-    assert list(reasons._reasons["1"])[0].reason == 'Object "1" must be a valid ScenarioConfig'
+    assert str(list(reasons._reasons["1"])[0]) == 'Object "1" must be a valid ScenarioConfig'
     with pytest.raises(AttributeError):
         _ScenarioManager._create(1)
 

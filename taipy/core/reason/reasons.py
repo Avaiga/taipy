@@ -46,6 +46,11 @@ class Reasons:
 
     @property
     def reasons(self) -> str:
+        """Retrieves a collections of reasons as a string that explains why the action cannot be performed.
+
+        Returns:
+            A string that contains all the reasons why the action cannot be performed.
+        """
         if self._reasons:
             return "; ".join("; ".join([str(reason) for reason in reasons]) for reasons in self._reasons.values()) + "."
         return ""

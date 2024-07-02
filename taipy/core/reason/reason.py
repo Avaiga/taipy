@@ -14,18 +14,24 @@ from typing import Any, Optional
 
 class Reason:
     """
-    A reason holds the reason why specific actions cannot be performed.
+    A reason explains why a specific action cannot be performed.
+
+    This is a parent class aiming at being implemented by specific sub-classes.
+
+    Because Taipy applications are natively multiuser, asynchronous, and dynamic,
+    some functions might not be called in some specific contexts. You can protect
+    such calls by calling other methods that return a Reasons object. It acts like a
+    boolean: True if the operation can be performed and False otherwise.
+    If the action cannot be performed, the Reasons object holds all the `reasons as a list
+    of `Reason` objects. Each `Reason` holds an explanation of why the operation cannot be
+    performed.
 
     Attributes:
-        reason (str): The reason why the action cannot be performed.
+        reason (str): The English representation of the reason why the action cannot be performed.
     """
 
     def __init__(self, reason: str):
         self._reason = reason
-
-    @property
-    def reason(self) -> str:
-        return self._reason
 
     def __str__(self) -> str:
         return self._reason
@@ -53,8 +59,7 @@ class _DataNodeReasonMixin:
 
 class DataNodeEditInProgress(Reason, _DataNodeReasonMixin):
     """
-    DataNodeEditInProgress holds the reason a `DataNode^` is being edited,
-    which prevents specific actions from being performed.
+    A `DataNode^` is being edited, which prevents specific actions from being performed.
 
     Attributes:
         datanode_id (str): The identifier of the `DataNode^`.
@@ -67,8 +72,7 @@ class DataNodeEditInProgress(Reason, _DataNodeReasonMixin):
 
 class DataNodeIsNotWritten(Reason, _DataNodeReasonMixin):
     """
-    DataNodeIsNotWritten holds the reason a `DataNode^` is not yet written,
-    which prevents specific actions from being performed.
+    A `DataNode^` has never been written, which prevents specific actions from being performed.
 
     Attributes:
         datanode_id (str): The identifier of the `DataNode^`.
@@ -81,7 +85,7 @@ class DataNodeIsNotWritten(Reason, _DataNodeReasonMixin):
 
 class EntityIsNotSubmittableEntity(Reason):
     """
-    EntityIsNotSubmittableEntity holds the reason an entity is not submittable.
+    An entity is not a submittable entity, which prevents specific actions from being performed.
 
     Attributes:
         entity_id (str): The identifier of the `Entity^`.
@@ -93,7 +97,7 @@ class EntityIsNotSubmittableEntity(Reason):
 
 class WrongConfigType(Reason):
     """
-    WrongConfigType holds the reason the provided config is not the valid config expected.
+    A config id is not a valid expected config, which prevents specific actions from being performed.
 
     Attributes:
         config_id (str): The identifier of the config.
@@ -111,8 +115,7 @@ class WrongConfigType(Reason):
 
 class NotGlobalScope(Reason):
     """
-    NotGlobalScope holds the reason the data node config does not have a GLOBAL scope,
-    which prevents certain actions from being performed.
+    A data node config does not have a GLOBAL scope, which prevents specific actions from being performed.
 
     Attributes:
         config_id (str): The identifier of the config.

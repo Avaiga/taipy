@@ -64,14 +64,14 @@ class TestDataManager:
         assert bool(reasons) is False
         assert reasons._reasons[dn_config.id] == {NotGlobalScope(dn_config.id)}
         assert (
-            list(reasons._reasons[dn_config.id])[0].reason
+            str(list(reasons._reasons[dn_config.id])[0])
             == f'Data node config "{dn_config.id}" does not have GLOBAL scope'
         )
 
         reasons = _DataManager._can_create(1)
         assert bool(reasons) is False
         assert reasons._reasons["1"] == {WrongConfigType("1", DataNodeConfig.__name__)}
-        assert list(reasons._reasons["1"])[0].reason == 'Object "1" must be a valid DataNodeConfig'
+        assert str(list(reasons._reasons["1"])[0]) == 'Object "1" must be a valid DataNodeConfig'
 
     def test_create_data_node_with_name_provided(self):
         dn_config = Config.configure_data_node(id="dn", foo="bar", name="acb")
