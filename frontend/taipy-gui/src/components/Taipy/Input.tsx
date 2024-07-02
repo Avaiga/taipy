@@ -96,23 +96,25 @@ const Input = (props: TaipyInputProps) => {
 
     const handleAction = useCallback(
         (evt: KeyboardEvent<HTMLDivElement>) => {
-            if (evt.shiftKey) {
+            if (evt.shiftKey && type === "number") {
                 if (evt.key === "ArrowUp") {
-                    setValue(
-                        (
-                            Number(evt.currentTarget.querySelector("input")?.value || 0) +
-                            (step || 1) * (stepMultiplier || 10) -
-                            (step || 1)
-                        ).toString(),
-                    );
+                    let val =
+                        Number(evt.currentTarget.querySelector("input")?.value || 0) +
+                        (step || 1) * (stepMultiplier || 10) -
+                        (step || 1);
+                    if (max !== undefined && val > max) {
+                        val = max - (step || 1);
+                    }
+                    setValue(val.toString());
                 } else if (evt.key === "ArrowDown") {
-                    setValue(
-                        (
-                            Number(evt.currentTarget.querySelector("input")?.value || 0) -
-                            (step || 1) * (stepMultiplier || 10) +
-                            (step || 1)
-                        ).toString(),
-                    );
+                    let val =
+                        Number(evt.currentTarget.querySelector("input")?.value || 0) -
+                        (step || 1) * (stepMultiplier || 10) +
+                        (step || 1);
+                    if (min !== undefined && val < min) {
+                        val = min + (step || 1);
+                    }
+                    setValue(val.toString());
                 }
             } else if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
                 const val = evt.currentTarget.querySelector("input")?.value;
@@ -128,9 +130,12 @@ const Input = (props: TaipyInputProps) => {
             }
         },
         [
+            type,
             actionKeys,
             step,
             stepMultiplier,
+            max,
+            min,
             changeDelay,
             onAction,
             dispatch,
@@ -208,21 +213,31 @@ const Input = (props: TaipyInputProps) => {
                 className={className}
                 type={type}
                 id={id}
-                inputProps={{
-                    step: step ? step : 1,
-                }}
-                InputProps={{
-                    endAdornment: (
-                        <>
-                            <IconButton size="small" onMouseDown={handleUpStepperMouseDown}>
-                                <ArrowDropUpIcon />
-                            </IconButton>
-                            <IconButton size="small" onMouseDown={handleDownStepperMouseDown}>
-                                <ArrowDropDownIcon />
-                            </IconButton>
-                        </>
-                    ),
-                }}
+                inputProps={
+                    type !== "text"
+                        ? {
+                              step: step ? step : 1,
+                              min: min,
+                              max: max,
+                          }
+                        : {}
+                }
+                InputProps={
+                    type !== "text"
+                        ? {
+                              endAdornment: (
+                                  <>
+                                      <IconButton size="small" onMouseDown={handleUpStepperMouseDown}>
+                                          <ArrowDropUpIcon />
+                                      </IconButton>
+                                      <IconButton size="small" onMouseDown={handleDownStepperMouseDown}>
+                                          <ArrowDropDownIcon />
+                                      </IconButton>
+                                  </>
+                              ),
+                          }
+                        : {}
+                }
                 label={props.label}
                 onChange={handleInput}
                 disabled={!active}
