@@ -13,11 +13,36 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
+# Demonstrate how to invoke a callback for different clients.
+# This application creates a thread that, every second, invokes a callback for every client
+# so the current time may be updated, under a state-dependant condition.
+# -----------------------------------------------------------------------------------------
+from datetime import datetime
+from threading import Thread
+from time import sleep
+
 from taipy.gui import Gui
 
+current_time = datetime.now()
+
+
+# The function that executes in its own thread.
+# Update the current time every second.
+def update_time(gui):
+    while True:
+        gui.broadcast_change("current_time", datetime.now())
+        sleep(1)
+
+
 page = """
-<|90|metric|don't show_value|>
+Current time is: <|{current_time}|format=HH:mm:ss|>
 """
 
+gui = Gui(page)
 
-Gui(page).run()
+# Run thread that regularly updates the current time
+thread = Thread(target=update_time, args=[gui], name="clock")
+thread.daemon = True
+thread.start()
+
+gui.run()
