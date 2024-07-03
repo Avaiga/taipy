@@ -15,7 +15,9 @@ import ast
 import builtins
 import copy
 import inspect
+import io
 import re
+import sys
 import typing as t
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
@@ -23,6 +25,9 @@ from operator import attrgetter
 from types import FrameType, FunctionType
 
 from .._warnings import _warn
+
+if sys.version_info < (3, 9):
+    from ..utils.unparse import Unparser
 from ._context_manager import _BuilderContextManager
 from ._factory import _BuilderFactory
 
@@ -53,7 +58,7 @@ class _TransformVarToValue(ast.NodeTransformer):
         value = _get_value_in_frame(self.frame, var_name)
         if var_name != node.id:
             value = attrgetter(node.id.split(".", 2)[1])(value)
-        return ast.Constant(value=value)
+        return ast.Constant(value=value, kind=None)
 
 
 class _Element(ABC):
@@ -124,7 +129,14 @@ class _Element(ABC):
                             lambda_fn
                         )
                         ast.fix_missing_locations(tree)
-                        new_code = compile("new_lambda = " + ast.unparse(tree), "<ast>", "exec")
+                        if sys.version_info < (3, 9): # python 3.8 ast has no unparse
+                            string_fd = io.StringIO()
+                            Unparser(tree, string_fd)
+                            string_fd.seek(0)
+                            lambda_text = string_fd.read()
+                        else:
+                            lambda_text = ast.unparse(tree)
+                        new_code = compile("new_lambda = " + lambda_text, "<ast>", "exec")
                         namespace: t.Dict[str, FunctionType] = {}
                         exec(new_code, namespace)
                         var_name = f"__lambda_{id(namespace['new_lambda'])}"
