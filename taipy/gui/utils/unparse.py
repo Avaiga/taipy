@@ -17,10 +17,10 @@ import sys
 
 # Large float and imaginary literals get turned into infinities in the AST.
 # We unparse those infinities to INFSTR.
-INFSTR = "1e" + repr(sys.float_info.max_10_exp + 1)
+_INFSTR = "1e" + repr(sys.float_info.max_10_exp + 1)
 
 
-def interleave(inter, f, seq):
+def _interleave(inter, f, seq):
     """Call f on each item in seq, calling inter() in between."""
     seq = iter(seq)
     try:
@@ -33,7 +33,7 @@ def interleave(inter, f, seq):
             f(x)
 
 
-class Unparser:
+class _Unparser:
     """Methods in this class recursively traverse an AST and
     output source code for the abstract syntax; original formatting
     is disregarded."""
@@ -98,7 +98,7 @@ class Unparser:
 
     def _Import(self, t):
         self.fill("import ")
-        interleave(lambda: self.write(", "), self.dispatch, t.names)
+        _interleave(lambda: self.write(", "), self.dispatch, t.names)
 
     def _ImportFrom(self, t):
         self.fill("from ")
@@ -106,7 +106,7 @@ class Unparser:
         if t.module:
             self.write(t.module)
         self.write(" import ")
-        interleave(lambda: self.write(", "), self.dispatch, t.names)
+        _interleave(lambda: self.write(", "), self.dispatch, t.names)
 
     def _Assign(self, t):
         self.fill()
@@ -151,7 +151,7 @@ class Unparser:
 
     def _Delete(self, t):
         self.fill("del ")
-        interleave(lambda: self.write(", "), self.dispatch, t.targets)
+        _interleave(lambda: self.write(", "), self.dispatch, t.targets)
 
     def _Assert(self, t):
         self.fill("assert ")
@@ -162,11 +162,11 @@ class Unparser:
 
     def _Global(self, t):
         self.fill("global ")
-        interleave(lambda: self.write(", "), self.write, t.names)
+        _interleave(lambda: self.write(", "), self.write, t.names)
 
     def _Nonlocal(self, t):
         self.fill("nonlocal ")
-        interleave(lambda: self.write(", "), self.write, t.names)
+        _interleave(lambda: self.write(", "), self.write, t.names)
 
     def _Await(self, t):
         self.write("(")
@@ -336,14 +336,14 @@ class Unparser:
 
     def _With(self, t):
         self.fill("with ")
-        interleave(lambda: self.write(", "), self.dispatch, t.items)
+        _interleave(lambda: self.write(", "), self.dispatch, t.items)
         self.enter()
         self.dispatch(t.body)
         self.leave()
 
     def _AsyncWith(self, t):
         self.fill("async with ")
-        interleave(lambda: self.write(", "), self.dispatch, t.items)
+        _interleave(lambda: self.write(", "), self.dispatch, t.items)
         self.enter()
         self.dispatch(t.body)
         self.leave()
@@ -374,7 +374,7 @@ class Unparser:
     def _fstring_FormattedValue(self, t, write):
         write("{")
         expr = io.StringIO()
-        Unparser(t.value, expr)
+        _Unparser(t.value, expr)
         expr = expr.getvalue().rstrip("\n")
         if expr.startswith("{"):
             write(" ")  # Separate pair of opening brackets as "{ {"
@@ -395,7 +395,7 @@ class Unparser:
     def _write_constant(self, value):
         if isinstance(value, (float, complex)):
             # Substitute overflowing decimal literal for AST infinities.
-            self.write(repr(value).replace("inf", INFSTR))
+            self.write(repr(value).replace("inf", _INFSTR))
         else:
             self.write(repr(value))
 
@@ -407,7 +407,7 @@ class Unparser:
                 self._write_constant(value[0])
                 self.write(",")
             else:
-                interleave(lambda: self.write(", "), self._write_constant, value)
+                _interleave(lambda: self.write(", "), self._write_constant, value)
             self.write(")")
         elif value is ...:
             self.write("...")
@@ -418,7 +418,7 @@ class Unparser:
 
     def _List(self, t):
         self.write("[")
-        interleave(lambda: self.write(", "), self.dispatch, t.elts)
+        _interleave(lambda: self.write(", "), self.dispatch, t.elts)
         self.write("]")
 
     def _ListComp(self, t):
@@ -475,7 +475,7 @@ class Unparser:
     def _Set(self, t):
         assert t.elts  # should be at least one element
         self.write("{")
-        interleave(lambda: self.write(", "), self.dispatch, t.elts)
+        _interleave(lambda: self.write(", "), self.dispatch, t.elts)
         self.write("}")
 
     def _Dict(self, t):
@@ -496,7 +496,7 @@ class Unparser:
             else:
                 write_key_value_pair(k, v)
 
-        interleave(lambda: self.write(", "), write_item, zip(t.keys, t.values))
+        _interleave(lambda: self.write(", "), write_item, zip(t.keys, t.values))
         self.write("}")
 
     def _Tuple(self, t):
@@ -506,7 +506,7 @@ class Unparser:
             self.dispatch(elt)
             self.write(",")
         else:
-            interleave(lambda: self.write(", "), self.dispatch, t.elts)
+            _interleave(lambda: self.write(", "), self.dispatch, t.elts)
         self.write(")")
 
     unop = {"Invert": "~", "Not": "not", "UAdd": "+", "USub": "-"}
@@ -567,7 +567,7 @@ class Unparser:
     def _BoolOp(self, t):
         self.write("(")
         s = " %s " % self.boolops[t.op.__class__]
-        interleave(lambda: self.write(s), self.dispatch, t.values)
+        _interleave(lambda: self.write(s), self.dispatch, t.values)
         self.write(")")
 
     def _Attribute(self, t):
@@ -607,7 +607,7 @@ class Unparser:
                 self.dispatch(elt)
                 self.write(",")
             else:
-                interleave(lambda: self.write(", "), self.dispatch, t.slice.value.elts)
+                _interleave(lambda: self.write(", "), self.dispatch, t.slice.value.elts)
         else:
             self.dispatch(t.slice)
         self.write("]")
@@ -639,7 +639,7 @@ class Unparser:
             self.dispatch(elt)
             self.write(",")
         else:
-            interleave(lambda: self.write(", "), self.dispatch, t.dims)
+            _interleave(lambda: self.write(", "), self.dispatch, t.dims)
 
     # argument
     def _arg(self, t):

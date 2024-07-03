@@ -27,7 +27,7 @@ from types import FrameType, FunctionType
 from .._warnings import _warn
 
 if sys.version_info < (3, 9):
-    from ..utils.unparse import Unparser
+    from ..utils.unparse import _Unparser
 from ._context_manager import _BuilderContextManager
 from ._factory import _BuilderFactory
 
@@ -131,7 +131,7 @@ class _Element(ABC):
                         ast.fix_missing_locations(tree)
                         if sys.version_info < (3, 9): # python 3.8 ast has no unparse
                             string_fd = io.StringIO()
-                            Unparser(tree, string_fd)
+                            _Unparser(tree, string_fd)
                             string_fd.seek(0)
                             lambda_text = string_fd.read()
                         else:
