@@ -140,7 +140,7 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         return self._read_from_path()
 
     def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
-        if not path:
+        if path is None:
             path = self._path
 
         if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
@@ -152,11 +152,11 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     def _read_as(self, path: str):
         with open(path, encoding=self.properties[self.__ENCODING_KEY]) as csvFile:
             if self.properties[self._HAS_HEADER_PROPERTY]:
-                reader = csv.DictReader(csvFile)
-            else:
-                reader = csv.reader(csvFile)
+                reader_with_header = csv.DictReader(csvFile)
+                return [self._decoder(line) for line in reader_with_header]
 
-            return [self._decoder(line) for line in reader]
+            reader_without_header = csv.reader(csvFile)
+            return [self._decoder(line) for line in reader_without_header]
 
     def _read_as_numpy(self, path: str) -> np.ndarray:
         return self._read_as_pandas_dataframe(path=path).to_numpy()
