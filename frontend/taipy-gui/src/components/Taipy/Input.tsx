@@ -14,7 +14,7 @@
 import React, { useState, useEffect, useCallback, useRef, KeyboardEvent, useMemo } from "react";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
-import { styled } from "@mui/material/styles";
+import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -24,15 +24,6 @@ import { TaipyInputProps } from "./utils";
 import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 
 const AUTHORIZED_KEYS = ["Enter", "Escape", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"];
-
-const StyledTextField = styled(TextField)({
-    "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button": {
-        display: "none",
-    },
-    "& input[type=number]": {
-        MozAppearance: "textfield",
-    },
-});
 
 const getActionKeys = (keys?: string): string[] => {
     const ak = (
@@ -100,21 +91,21 @@ const Input = (props: TaipyInputProps) => {
                 if (evt.key === "ArrowUp") {
                     let val =
                         Number(evt.currentTarget.querySelector("input")?.value || 0) +
-                        (step || 1) * (stepMultiplier || 10) -
-                        (step || 1);
+                        (step || 1) * (stepMultiplier || 10);
                     if (max !== undefined && val > max) {
-                        val = max - (step || 1);
+                        val = max;
                     }
                     setValue(val.toString());
+                    evt.preventDefault();
                 } else if (evt.key === "ArrowDown") {
                     let val =
                         Number(evt.currentTarget.querySelector("input")?.value || 0) -
-                        (step || 1) * (stepMultiplier || 10) +
-                        (step || 1);
+                        (step || 1) * (stepMultiplier || 10);
                     if (min !== undefined && val < min) {
-                        val = min + (step || 1);
+                        val = min;
                     }
                     setValue(val.toString());
+                    evt.preventDefault();
                 }
             } else if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
                 const val = evt.currentTarget.querySelector("input")?.value;
@@ -206,7 +197,16 @@ const Input = (props: TaipyInputProps) => {
 
     return (
         <Tooltip title={hover || ""}>
-            <StyledTextField
+            <TextField
+                sx={{
+                    "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button":
+                        {
+                            display: "none",
+                        },
+                    "& input[type=number]": {
+                        MozAppearance: "textfield",
+                    },
+                }}
                 margin="dense"
                 hiddenLabel
                 value={value ?? ""}
@@ -226,14 +226,28 @@ const Input = (props: TaipyInputProps) => {
                     type !== "text"
                         ? {
                               endAdornment: (
-                                  <>
-                                      <IconButton size="small" onMouseDown={handleUpStepperMouseDown}>
-                                          <ArrowDropUpIcon />
+                                  <div
+                                      style={{
+                                          display: "flex",
+                                          flexDirection: "column",
+                                          gap: 0,
+                                      }}
+                                  >
+                                      <IconButton
+                                          data-testid="stepper-up-spinner"
+                                          size="small"
+                                          onMouseDown={handleUpStepperMouseDown}
+                                      >
+                                          <ArrowDropUpIcon fontSize="inherit" />
                                       </IconButton>
-                                      <IconButton size="small" onMouseDown={handleDownStepperMouseDown}>
-                                          <ArrowDropDownIcon />
+                                      <IconButton
+                                          data-testid="stepper-down-spinner"
+                                          size="small"
+                                          onMouseDown={handleDownStepperMouseDown}
+                                      >
+                                          <ArrowDropDownIcon fontSize="inherit" />
                                       </IconButton>
-                                  </>
+                                  </div>
                               ),
                           }
                         : {}
