@@ -176,12 +176,10 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             return pd.DataFrame()
 
     def _append(self, data: Any):
-        if isinstance(data, pd.DataFrame):
-            data.to_csv(self._path, mode="a", index=False, encoding=self.properties[self.__ENCODING_KEY], header=False)
-        else:
-            pd.DataFrame(data).to_csv(
-                self._path, mode="a", index=False, encoding=self.properties[self.__ENCODING_KEY], header=False
-            )
+        properties = self.properties
+        exposed_type = properties[self._EXPOSED_TYPE_PROPERTY]
+        data = self._convert_data_to_dataframe(exposed_type, data)
+        data.to_csv(self._path, mode="a", index=False, encoding=properties[self.__ENCODING_KEY], header=False)
 
     def _write(self, data: Any, columns: Optional[List[str]] = None):
         properties = self.properties
