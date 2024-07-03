@@ -290,7 +290,7 @@ class TestParquetDataNode:
 
         new_parquet_path = tmpdir_factory.mktemp("data").join("new_upload_data.parquet").strpath
         new_data = np.array([[1, 2, 3], [4, 5, 6]])
-        pd.DataFrame(new_data).to_parquet(new_parquet_path, index=False)
+        pd.DataFrame(new_data, columns=["a", "b", "c"]).to_parquet(new_parquet_path, index=False)
 
         dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": old_parquet_path, "exposed_type": "numpy"})
         dn.write(old_data)
@@ -300,9 +300,11 @@ class TestParquetDataNode:
             return upload_path.endswith(".parquet") and np.all(upload_data > 0)
 
         wrong_format_not_parquet_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_parquet").strpath
-        pd.DataFrame(old_data).to_parquet(wrong_format_not_parquet_path, index=False)
+        pd.DataFrame(old_data, columns=["a", "b", "c"]).to_parquet(wrong_format_not_parquet_path, index=False)
         wrong_format_parquet_path = tmpdir_factory.mktemp("data").join("wrong_format_df.parquet").strpath
-        pd.DataFrame(np.array([[-1, 2, 3], [-4, -5, -6]])).to_parquet(wrong_format_parquet_path, index=False)
+        pd.DataFrame(np.array([[-1, 2, 3], [-4, -5, -6]]), columns=["a", "b", "c"]).to_parquet(
+            wrong_format_parquet_path, index=False
+        )
 
         # The upload should fail when the file is not a parquet
         assert not dn._upload(wrong_format_not_parquet_path, upload_checker=check_data_is_positive)
