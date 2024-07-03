@@ -247,6 +247,8 @@ class TestParquetDataNode:
         old_last_edit_date = dn.last_edit_date
 
         upload_content = pd.read_parquet(parquet_file_path)
+
+        sleep(0.1)
         dn._upload(parquet_file_path)
 
         assert_frame_equal(dn.read(), upload_content)  # The content of the dn should change to the uploaded content

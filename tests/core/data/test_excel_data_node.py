@@ -385,6 +385,8 @@ class TestExcelDataNode:
         old_last_edit_date = dn.last_edit_date
 
         upload_content = pd.read_excel(excel_file)
+
+        sleep(0.1)
         dn._upload(excel_file)
 
         assert_frame_equal(dn.read()["Sheet1"], upload_content)  # The data of dn should change to the uploaded content

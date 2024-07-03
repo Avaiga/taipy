@@ -213,6 +213,8 @@ class TestPickleDataNodeEntity:
         old_last_edit_date = dn.last_edit_date
 
         upload_content = pd.read_pickle(pickle_file_path)
+
+        sleep(0.1)
         dn._upload(pickle_file_path)
 
         assert_frame_equal(dn.read(), upload_content)  # The content of the dn should change to the uploaded content

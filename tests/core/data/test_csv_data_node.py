@@ -190,6 +190,8 @@ class TestCSVDataNode:
         old_last_edit_date = dn.last_edit_date
 
         upload_content = pd.read_csv(csv_file)
+
+        sleep(0.1)
         dn._upload(csv_file)
 
         assert_frame_equal(dn.read(), upload_content)  # The content of the dn should change to the uploaded content

@@ -390,6 +390,8 @@ class TestJSONDataNode:
 
         with open(json_file, "r") as f:
             upload_content = json.load(f)
+
+        sleep(0.1)
         dn._upload(json_file)
 
         assert dn.read() == upload_content  # The content of the dn should change to the uploaded content
