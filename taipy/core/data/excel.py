@@ -248,7 +248,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 
-    def __append_excel_with_single_sheet(self, append_excel_fct, *args, **kwargs):
+    def _append_excel_with_single_sheet(self, append_excel_fct, *args, **kwargs):
         sheet_name = self.properties.get(self.__SHEET_NAME_PROPERTY)
 
         with pd.ExcelWriter(self._path, mode="a", engine="openpyxl", if_sheet_exists="overlay") as writer:
@@ -267,7 +267,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             data.columns = pd.Index(columns, dtype="object")
         return data
 
-    def __append_excel_with_multiple_sheets(self, data: Any, columns: List[str] = None):
+    def _append_excel_with_multiple_sheets(self, data: Any, columns: List[str] = None):
         with pd.ExcelWriter(self._path, mode="a", engine="openpyxl", if_sheet_exists="overlay") as writer:
             # Each key stands for a sheet name
             for sheet_name in data.keys():
@@ -290,11 +290,11 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             raise ImportError("The append method is only available for pandas version 1.4 or higher.")
 
         if isinstance(data, Dict) and all(isinstance(x, (pd.DataFrame, np.ndarray)) for x in data.values()):
-            self.__append_excel_with_multiple_sheets(data)
+            self._append_excel_with_multiple_sheets(data)
         elif isinstance(data, pd.DataFrame):
-            self.__append_excel_with_single_sheet(data.to_excel, index=False, header=False)
+            self._append_excel_with_single_sheet(data.to_excel, index=False, header=False)
         else:
-            self.__append_excel_with_single_sheet(pd.DataFrame(data).to_excel, index=False, header=False)
+            self._append_excel_with_single_sheet(pd.DataFrame(data).to_excel, index=False, header=False)
 
     def _write_excel_with_single_sheet(self, write_excel_fct, *args, **kwargs):
         if sheet_name := self.properties.get(self.__SHEET_NAME_PROPERTY):
