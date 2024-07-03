@@ -11,17 +11,45 @@
 
 from __future__ import annotations
 
+import ast
+import builtins
 import copy
+import inspect
 import re
 import typing as t
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
+from types import FrameType, FunctionType
 
+from .._warnings import _warn
 from ._context_manager import _BuilderContextManager
 from ._factory import _BuilderFactory
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
+
+python_builtins = dir(builtins)
+
+
+def _get_value_in_frame(frame: FrameType, name: str):
+    if not frame:
+        return None
+    if name in frame.f_locals:
+        return frame.f_locals.get(name)
+    return _get_value_in_frame(t.cast(FrameType, frame.f_back), name)
+
+
+class TransformVarToValue(ast.NodeTransformer):
+    def __init__(self, frame: FrameType, non_vars: t.List[str]) -> None:
+        super().__init__()
+        self.frame = frame
+        self.non_vars = non_vars
+
+    def visit_Name(self, node):
+        var_name = node.id.split(sep=".")[0]
+        if var_name in self.non_vars:
+            return node
+        return ast.Constant(value=_get_value_in_frame(self.frame, node.id))
 
 
 class _Element(ABC):
@@ -39,7 +67,12 @@ class _Element(ABC):
         return obj
 
     def __init__(self, *args, **kwargs) -> None:
+        self.__variables: t.Dict[str, FunctionType] = {}
         self._properties: t.Dict[str, t.Any] = {}
+        self.__calling_frame = t.cast(
+            FrameType, t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_back
+        )
+
         if args and self._DEFAULT_PROPERTY != "":
             self._properties = {self._DEFAULT_PROPERTY: args[0]}
         self._properties.update(kwargs)
@@ -49,10 +82,10 @@ class _Element(ABC):
         self._properties.update(kwargs)
         self.parse_properties()
 
-    # Convert property value to string
+    # Convert property value to string/function
     def parse_properties(self):
         self._properties = {
-            _Element._parse_property_key(k): _Element._parse_property(v) for k, v in self._properties.items()
+            _Element._parse_property_key(k): self._parse_property(k, v) for k, v in self._properties.items()
         }
 
     # Get a deepcopy version of the properties
@@ -65,13 +98,42 @@ class _Element(ABC):
             return f"{match.group(1)}[{match.group(2)}]"
         return key
 
-    @staticmethod
-    def _parse_property(value: t.Any) -> t.Any:
+    def _parse_property(self, key: str, value: t.Any) -> t.Any:
         if isinstance(value, (str, dict, Iterable)):
             return value
+        if isinstance(value, FunctionType):
+            if key.startswith("on_"):
+                return value
+            else:
+                try:
+                    st = ast.parse(inspect.getsource(value).strip())
+                    lambda_fn = next((node for node in ast.walk(st) if isinstance(node, ast.Lambda)), None)
+                    if lambda_fn is not None:
+                        args = [arg.arg for arg in lambda_fn.args.args]
+                        targets = [
+                            compr.target.id  # type: ignore[attr-defined]
+                            for node in ast.walk(lambda_fn.body)
+                            if isinstance(node, ast.ListComp)
+                            for compr in node.generators
+                        ]
+                        tree = TransformVarToValue(self.__calling_frame, args + targets + python_builtins).visit(lambda_fn)
+                        ast.fix_missing_locations(tree)
+                        new_code = compile("new_lambda = " + ast.unparse(tree), "<ast>", "exec")
+                        namespace: t.Dict[str, FunctionType] = {}
+                        exec(new_code, namespace)
+                        var_name = f"__lambda_{id(namespace['new_lambda'])}"
+                        self.__variables[var_name] = namespace["new_lambda"]
+                        signature = ", ".join(args)
+                        return f"{{{var_name}({signature})}}"
+                except Exception as e:
+                    _warn("Error managing lambda", e)
         if hasattr(value, "__name__"):
             return str(getattr(value, "__name__"))  # noqa: B009
         return str(value)
+
+    def _bind_variables(self, gui: "Gui"):
+        for var_name, var_value in self.__variables.items():
+            gui._bind_var_val(var_name, var_value)
 
     @abstractmethod
     def _render(self, gui: "Gui") -> str:
@@ -99,6 +161,7 @@ class _Block(_Element):
         _BuilderContextManager().pop()
 
     def _render(self, gui: "Gui") -> str:
+        self._bind_variables(gui)
         el = _BuilderFactory.create_element(gui, self._ELEMENT_NAME, self._deepcopy_properties())
         return f"{el[0]}{self._render_children(gui)}</{el[1]}>"
 
@@ -162,6 +225,7 @@ class html(_Block):
         self._content = args[1] if len(args) > 1 else ""
 
     def _render(self, gui: "Gui") -> str:
+        self._bind_variables(gui)
         if self._ELEMENT_NAME:
             attrs = ""
             if self._properties:
@@ -178,6 +242,7 @@ class _Control(_Element):
         super().__init__(*args, **kwargs)
 
     def _render(self, gui: "Gui") -> str:
+        self._bind_variables(gui)
         el = _BuilderFactory.create_element(gui, self._ELEMENT_NAME, self._deepcopy_properties())
         return (
             f"<div>{el[0]}</{el[1]}></div>"
