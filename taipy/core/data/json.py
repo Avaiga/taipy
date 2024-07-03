@@ -25,7 +25,7 @@ from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class JSONDataNode(_FileDataNodeMixin, DataNode):
+class JSONDataNode(DataNode, _FileDataNodeMixin):
     """Data Node stored as a JSON file.
 
     Attributes:

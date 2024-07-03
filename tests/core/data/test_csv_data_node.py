@@ -208,6 +208,7 @@ class TestCSVDataNode:
             return upload_path.endswith(".csv") and upload_data.columns.tolist() == ["a", "b", "c"]
 
         wrong_format_not_csv_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_csv").strpath
+        old_data.to_csv(wrong_format_not_csv_path, index=False)
         wrong_format_csv_path = tmpdir_factory.mktemp("data").join("wrong_format_df.csv").strpath
         pd.DataFrame([{"a": 1, "b": 2, "d": 3}, {"a": 4, "b": 5, "d": 6}]).to_csv(wrong_format_csv_path, index=False)
 
@@ -240,6 +241,7 @@ class TestCSVDataNode:
             return upload_path.endswith(".csv") and np.all(upload_data > 0)
 
         wrong_format_not_csv_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_csv").strpath
+        pd.DataFrame(old_data).to_csv(wrong_format_not_csv_path, index=False)
         wrong_format_csv_path = tmpdir_factory.mktemp("data").join("wrong_format_df.csv").strpath
         pd.DataFrame(np.array([[-1, 2, 3], [-4, -5, -6]])).to_csv(wrong_format_csv_path, index=False)
 

@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Union
 
 import numpy as np
 import pandas as pd
@@ -28,7 +28,7 @@ from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class ExcelDataNode(_FileDataNodeMixin, DataNode, _TabularDataNodeMixin):
+class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     """Data Node stored as an Excel file.
 
     The Excel file format is _xlsx_.
@@ -170,7 +170,7 @@ class ExcelDataNode(_FileDataNodeMixin, DataNode, _TabularDataNodeMixin):
             sheet_names = excel_file.sheetnames
 
             user_provided_sheet_names = self.properties.get(self.__SHEET_NAME_PROPERTY) or []
-            if not isinstance(user_provided_sheet_names, (List, Set, Tuple)):
+            if not isinstance(user_provided_sheet_names, (list, set, tuple)):
                 user_provided_sheet_names = [user_provided_sheet_names]
 
             provided_sheet_names = user_provided_sheet_names or sheet_names

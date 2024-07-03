@@ -265,6 +265,7 @@ class TestParquetDataNode:
             return upload_path.endswith(".parquet") and upload_data.columns.tolist() == ["a", "b", "c"]
 
         wrong_format_not_parquet_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_parquet").strpath
+        old_data.to_parquet(wrong_format_not_parquet_path, index=False)
         wrong_format_parquet_path = tmpdir_factory.mktemp("data").join("wrong_format_df.parquet").strpath
         pd.DataFrame([{"a": 1, "b": 2, "d": 3}, {"a": 4, "b": 5, "d": 6}]).to_parquet(
             wrong_format_parquet_path, index=False
@@ -299,6 +300,7 @@ class TestParquetDataNode:
             return upload_path.endswith(".parquet") and np.all(upload_data > 0)
 
         wrong_format_not_parquet_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_parquet").strpath
+        pd.DataFrame(old_data).to_parquet(wrong_format_not_parquet_path, index=False)
         wrong_format_parquet_path = tmpdir_factory.mktemp("data").join("wrong_format_df.parquet").strpath
         pd.DataFrame(np.array([[-1, 2, 3], [-4, -5, -6]])).to_parquet(wrong_format_parquet_path, index=False)
 

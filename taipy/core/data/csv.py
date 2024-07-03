@@ -27,7 +27,7 @@ from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class CSVDataNode(_FileDataNodeMixin, DataNode, _TabularDataNodeMixin):
+class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     """Data Node stored as a CSV file.
 
     Attributes:

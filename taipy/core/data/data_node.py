@@ -14,7 +14,7 @@ import os
 import uuid
 from abc import abstractmethod
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import networkx as nx
 
@@ -371,28 +371,6 @@ class DataNode(_Entity, _Labeled):
     @classmethod
     @abstractmethod
     def storage_type(cls) -> str:
-        raise NotImplementedError
-
-    def _get_downloadable_path(self) -> str:
-        """Get the downloadable path of the file data of the data node.
-
-        Returns:
-            The downloadable path of the file data of the data node.
-        """
-        raise NotImplementedError
-
-    def _upload(self, path: str, upload_checker: Optional[Callable[[str, Any], bool]] = None) -> bool:
-        """Upload the file data of the data node.
-
-        Parameters:
-            path (str): The path of the file to upload to the data node.
-            upload_checker (Optional[Callable[[str, Any], bool]]): A function to check if the upload is allowed.
-                The function takes the title of the upload data and the data itself as arguments and returns
-                True if the upload is allowed, otherwise False.
-
-        Returns:
-            True if the upload was successful, otherwise False.
-        """
         raise NotImplementedError
 
     def read_or_raise(self) -> Any:

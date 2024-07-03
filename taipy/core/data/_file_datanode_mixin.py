@@ -105,7 +105,7 @@ class _FileDataNodeMixin(object):
         return ""
 
     def _upload(self, path: str, upload_checker: Optional[Callable[[str, Any], bool]] = None) -> bool:
-        """Upload a csv file data to the data node.
+        """Upload a file data to the data node.
 
         Parameters:
             path (str): The path of the file to upload to the data node.
@@ -122,7 +122,7 @@ class _FileDataNodeMixin(object):
 
         if upload_checker is not None:
             try:
-                upload_data = self._read_from_path(upload_path.name)
+                upload_data = self._read_from_path(str(upload_path))
             except Exception:
                 return False
 

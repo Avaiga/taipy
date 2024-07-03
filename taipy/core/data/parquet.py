@@ -28,7 +28,7 @@ from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class ParquetDataNode(_FileDataNodeMixin, DataNode, _TabularDataNodeMixin):
+class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     """Data Node stored as a Parquet file.
 
     Attributes:

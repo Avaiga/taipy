@@ -406,6 +406,7 @@ class TestExcelDataNode:
             return upload_path.endswith(".xlsx") and upload_data["Sheet1"].columns.tolist() == ["a", "b", "c"]
 
         wrong_format_not_xlsx_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_xlsx").strpath
+        old_data.to_csv(wrong_format_not_xlsx_path, index=False)
         wrong_format_xlsx_path = tmpdir_factory.mktemp("data").join("wrong_format_df.xlsx").strpath
         pd.DataFrame([{"a": 1, "b": 2, "d": 3}, {"a": 4, "b": 5, "d": 6}]).to_excel(wrong_format_xlsx_path, index=False)
 
@@ -438,6 +439,7 @@ class TestExcelDataNode:
             return upload_path.endswith(".xlsx") and np.all(upload_data["Sheet1"] > 0)
 
         wrong_format_not_excel_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_excel").strpath
+        pd.DataFrame(old_data).to_csv(wrong_format_not_excel_path, index=False)
         wrong_format_excel_path = tmpdir_factory.mktemp("data").join("wrong_format_df.xlsx").strpath
         pd.DataFrame(np.array([[-1, 2, 3], [-4, -5, -6]])).to_excel(wrong_format_excel_path, index=False)
 
