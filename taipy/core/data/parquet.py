@@ -181,7 +181,7 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         return self._read_from_path()
 
     def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
-        if not path:
+        if path is None:
             path = self._path
 
         # return None if data was never written

@@ -153,7 +153,7 @@ class JSONDataNode(DataNode, _FileDataNodeMixin):
         return self._read_from_path()
 
     def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
-        if not path:
+        if path is None:
             path = self._path
 
         with open(path, "r", encoding=self.properties[self.__ENCODING_KEY]) as f:
