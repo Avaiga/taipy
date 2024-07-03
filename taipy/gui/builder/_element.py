@@ -19,6 +19,7 @@ import re
 import typing as t
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
+from operator import attrgetter
 from types import FrameType, FunctionType
 
 from .._warnings import _warn
@@ -39,17 +40,20 @@ def _get_value_in_frame(frame: FrameType, name: str):
     return _get_value_in_frame(t.cast(FrameType, frame.f_back), name)
 
 
-class TransformVarToValue(ast.NodeTransformer):
+class _TransformVarToValue(ast.NodeTransformer):
     def __init__(self, frame: FrameType, non_vars: t.List[str]) -> None:
         super().__init__()
         self.frame = frame
         self.non_vars = non_vars
 
     def visit_Name(self, node):
-        var_name = node.id.split(sep=".")[0]
+        var_name = node.id.split(".", 2)[0]
         if var_name in self.non_vars:
             return node
-        return ast.Constant(value=_get_value_in_frame(self.frame, node.id))
+        value = _get_value_in_frame(self.frame, var_name)
+        if var_name != node.id:
+            value = attrgetter(node.id.split(".", 2)[1])(value)
+        return ast.Constant(value=value)
 
 
 class _Element(ABC):
@@ -116,17 +120,18 @@ class _Element(ABC):
                             if isinstance(node, ast.ListComp)
                             for compr in node.generators
                         ]
-                        tree = TransformVarToValue(self.__calling_frame, args + targets + python_builtins).visit(lambda_fn)
+                        tree = _TransformVarToValue(self.__calling_frame, args + targets + python_builtins).visit(
+                            lambda_fn
+                        )
                         ast.fix_missing_locations(tree)
                         new_code = compile("new_lambda = " + ast.unparse(tree), "<ast>", "exec")
                         namespace: t.Dict[str, FunctionType] = {}
                         exec(new_code, namespace)
                         var_name = f"__lambda_{id(namespace['new_lambda'])}"
                         self.__variables[var_name] = namespace["new_lambda"]
-                        signature = ", ".join(args)
-                        return f"{{{var_name}({signature})}}"
+                        return f'{{{var_name}({", ".join(args)})}}'
                 except Exception as e:
-                    _warn("Error managing lambda", e)
+                    _warn("Error in lambda expression", e)
         if hasattr(value, "__name__"):
             return str(getattr(value, "__name__"))  # noqa: B009
         return str(value)
