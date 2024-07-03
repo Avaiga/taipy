@@ -18,7 +18,13 @@ class Reasons:
     """
     This class is used to store all the reasons to explain why some Taipy operations are not allowed.
 
-    TODO - Add more details about the class.
+    Because Taipy applications are natively multiuser, asynchronous, and dynamic,
+    some functions might not be called in some specific contexts. You can protect
+    such calls by calling other methods that return a Reasons object. It acts like a
+    boolean: True if the operation can be performed and False otherwise.
+    If the action cannot be performed, the Reasons object holds all the `reasons as a list
+    of `Reason` objects. Each `Reason` holds an explanation of why the operation cannot be
+    performed.
     """
 
     def __init__(self, entity_id: str) -> None:
