@@ -153,7 +153,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         return self._read_from_path()
 
     def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
-        if not path:
+        if path is None:
             path = self._path
 
         if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
@@ -198,7 +198,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
                     if isinstance(sheet_exposed_type, str):
                         if sheet_exposed_type == self._EXPOSED_TYPE_NUMPY:
-                            work_books[sheet_name] = self._read_as_pandas_dataframe(path, sheet_name).to_numpy()
+                            work_books[sheet_name] = self._read_as_numpy(path, sheet_name)
                         elif sheet_exposed_type == self._EXPOSED_TYPE_PANDAS:
                             work_books[sheet_name] = self._read_as_pandas_dataframe(path, sheet_name)
                         continue
@@ -220,8 +220,8 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
         return work_books
 
-    def _read_as_numpy(self, path: str):
-        sheets = self._read_as_pandas_dataframe(path=path)
+    def _read_as_numpy(self, path: str, sheet_names=None):
+        sheets = self._read_as_pandas_dataframe(path=path, sheet_names=sheet_names)
         if isinstance(sheets, dict):
             return {sheet_name: df.to_numpy() for sheet_name, df in sheets.items()}
         return sheets.to_numpy()
