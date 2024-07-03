@@ -18,7 +18,7 @@ def test_builder_lambda(gui: Gui, test_client, helpers):
     gui._bind_var_val("message", message)
     with tgb.Page(frame=None) as page:
         for key in message:
-            tgb.text(lambda message: str(message.get(key)))
+            tgb.text(lambda message: str(message.get(key))) # type: ignore[attr-defined]
     expected_list = ['defaultValue="value A"', 'defaultValue="value B"']
     helpers.test_control_builder(gui, page, expected_list)
 
