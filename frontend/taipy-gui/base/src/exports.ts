@@ -1,7 +1,7 @@
 import { WsAdapter } from "./wsAdapter";
-import { TaipyApp } from "./app";
+// import { TaipyApp } from "./app";
 
 export {
     WsAdapter,
-    TaipyApp,
+    // TaipyApp,
 };
