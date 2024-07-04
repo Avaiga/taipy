@@ -48,6 +48,14 @@ export interface TaipyInputProps extends TaipyActiveProps, TaipyChangeProps, Tai
     type: string;
     value: string;
     defaultValue?: string;
+    step?: number;
+    defaultStep?: number;
+    stepMultiplier?: number;
+    defaultStepMultiplier?: number;
+    min?: number;
+    defaultMin?: number;
+    max?: number;
+    defaultMax?: number;
     changeDelay?: number;
     onAction?: string;
     actionKeys?: string;

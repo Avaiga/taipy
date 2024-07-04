@@ -11,9 +11,12 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useEffect, useCallback, useRef, KeyboardEvent } from "react";
+import React, { useState, useEffect, useCallback, useRef, KeyboardEvent, useMemo } from "react";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
 import { TaipyInputProps } from "./utils";
@@ -55,6 +58,10 @@ const Input = (props: TaipyInputProps) => {
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
+    const step = useDynamicProperty(props.step, props.defaultStep, 1);
+    const stepMultiplier = useDynamicProperty(props.stepMultiplier, props.defaultStepMultiplier, 10);
+    const min = useDynamicProperty(props.min, props.defaultMin, undefined);
+    const max = useDynamicProperty(props.max, props.defaultMax, undefined);
 
     const handleInput = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,12 +81,32 @@ const Input = (props: TaipyInputProps) => {
                 }, changeDelay);
             }
         },
-        [updateVarName, dispatch, propagate, onChange, changeDelay, module]
+        [updateVarName, dispatch, propagate, onChange, changeDelay, module],
     );
 
     const handleAction = useCallback(
         (evt: KeyboardEvent<HTMLDivElement>) => {
-            if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
+            if (evt.shiftKey && type === "number") {
+                if (evt.key === "ArrowUp") {
+                    let val =
+                        Number(evt.currentTarget.querySelector("input")?.value || 0) +
+                        (step || 1) * (stepMultiplier || 10);
+                    if (max !== undefined && val > max) {
+                        val = max;
+                    }
+                    setValue(val.toString());
+                    evt.preventDefault();
+                } else if (evt.key === "ArrowDown") {
+                    let val =
+                        Number(evt.currentTarget.querySelector("input")?.value || 0) -
+                        (step || 1) * (stepMultiplier || 10);
+                    if (min !== undefined && val < min) {
+                        val = min;
+                    }
+                    setValue(val.toString());
+                    evt.preventDefault();
+                }
+            } else if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
                 const val = evt.currentTarget.querySelector("input")?.value;
                 if (changeDelay > 0 && delayCall.current > 0) {
                     clearTimeout(delayCall.current);
@@ -92,7 +119,73 @@ const Input = (props: TaipyInputProps) => {
                 evt.preventDefault();
             }
         },
-        [actionKeys, updateVarName, onAction, id, dispatch, onChange, changeDelay, propagate, module]
+        [
+            type,
+            actionKeys,
+            step,
+            stepMultiplier,
+            max,
+            min,
+            changeDelay,
+            onAction,
+            dispatch,
+            id,
+            module,
+            updateVarName,
+            onChange,
+            propagate,
+        ],
+    );
+
+    const roundBasedOnStep = useMemo(() => {
+        const stepString = (step || 1).toString();
+        const decimalPlaces = stepString.includes(".") ? stepString.split(".")[1].length : 0;
+        const multiplier = Math.pow(10, decimalPlaces);
+        return (value: number) => Math.round(value * multiplier) / multiplier;
+    }, [step]);
+
+    const calculateNewValue = useMemo(() => {
+        return (prevValue: string, step: number, stepMultiplier: number, shiftKey: boolean, increment: boolean) => {
+            const multiplier = shiftKey ? stepMultiplier : 1;
+            const change = step * multiplier * (increment ? 1 : -1);
+            return roundBasedOnStep(Number(prevValue) + change).toString();
+        };
+    }, [roundBasedOnStep]);
+
+    const handleStepperMouseDown = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>, increment: boolean) => {
+            setValue((prevValue) => {
+                const newValue = calculateNewValue(
+                    prevValue,
+                    step || 1,
+                    stepMultiplier || 10,
+                    event.shiftKey,
+                    increment,
+                );
+                if (min !== undefined && Number(newValue) < min) {
+                    return min.toString();
+                }
+                if (max !== undefined && Number(newValue) > max) {
+                    return max.toString();
+                }
+                return newValue;
+            });
+        },
+        [min, max, step, stepMultiplier, calculateNewValue],
+    );
+
+    const handleUpStepperMouseDown = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>) => {
+            handleStepperMouseDown(event, true);
+        },
+        [handleStepperMouseDown],
+    );
+
+    const handleDownStepperMouseDown = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>) => {
+            handleStepperMouseDown(event, false);
+        },
+        [handleStepperMouseDown],
     );
 
     useEffect(() => {
@@ -104,12 +197,60 @@ const Input = (props: TaipyInputProps) => {
     return (
         <Tooltip title={hover || ""}>
             <TextField
+                sx={{
+                    "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button":
+                        {
+                            display: "none",
+                        },
+                    "& input[type=number]": {
+                        MozAppearance: "textfield",
+                    },
+                }}
                 margin="dense"
                 hiddenLabel
                 value={value ?? ""}
                 className={className}
                 type={type}
                 id={id}
+                inputProps={
+                    type !== "text"
+                        ? {
+                              step: step ? step : 1,
+                              min: min,
+                              max: max,
+                          }
+                        : {}
+                }
+                InputProps={
+                    type !== "text"
+                        ? {
+                              endAdornment: (
+                                  <div
+                                      style={{
+                                          display: "flex",
+                                          flexDirection: "column",
+                                          gap: 0,
+                                      }}
+                                  >
+                                      <IconButton
+                                          data-testid="stepper-up-spinner"
+                                          size="small"
+                                          onMouseDown={handleUpStepperMouseDown}
+                                      >
+                                          <ArrowDropUpIcon fontSize="inherit" />
+                                      </IconButton>
+                                      <IconButton
+                                          data-testid="stepper-down-spinner"
+                                          size="small"
+                                          onMouseDown={handleDownStepperMouseDown}
+                                      >
+                                          <ArrowDropDownIcon fontSize="inherit" />
+                                      </IconButton>
+                                  </div>
+                              ),
+                          }
+                        : {}
+                }
                 label={props.label}
                 onChange={handleInput}
                 disabled={!active}
@@ -120,5 +261,4 @@ const Input = (props: TaipyInputProps) => {
         </Tooltip>
     );
 };
-
 export default Input;

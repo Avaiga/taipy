@@ -386,6 +386,10 @@ class _Factory:
         .set_attributes(
             [
                 ("active", PropertyType.dynamic_boolean, True),
+                ("step", PropertyType.dynamic_number, 1),
+                ("step_multiplier", PropertyType.dynamic_number, 10),
+                ("min", PropertyType.dynamic_number),
+                ("max", PropertyType.dynamic_number),
                 ("hover_text", PropertyType.dynamic_string),
                 ("on_change", PropertyType.function),
                 ("on_action", PropertyType.function),

@@ -133,6 +133,28 @@
                         "type": "str",
                         "default_value": "None",
                         "doc": "The label associated with the input."
+                    },
+                    {
+                        "name": "step",
+                        "type": "dynamic(int|float)",
+                        "default_value": "1",
+                        "doc": "The amount by which the value is incremented or decremented when the user clicks one of the arrow buttons."
+                    },
+                    {
+                        "name": "step_multiplier",
+                        "type": "dynamic(int|float)",
+                        "default_value": "10",
+                        "doc": "A factor that multiplies <i>step</i> when the user presses the Shift key while clicking one of the arrow buttons."
+                    },
+                    {
+                        "name": "min",
+                        "type": "dynamic(int|float)",
+                        "doc": "The minimum value to accept for this input."
+                    },
+                    {
+                        "name": "max",
+                        "type": "dynamic(int|float)",
+                        "doc": "The maximum value to accept for this input."
                     }
                 ]
             }
