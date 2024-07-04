@@ -148,12 +148,12 @@
                     },
                     {
                         "name": "min",
-                        "type": "int|float",
+                        "type": "dynamic(int|float)",
                         "doc": "The minimum value to accept for this input."
                     },
                     {
                         "name": "max",
-                        "type": "int|float",
+                        "type": "dynamic(int|float)",
                         "doc": "The maximum value to accept for this input."
                     }
                 ]
