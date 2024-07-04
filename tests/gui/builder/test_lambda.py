@@ -18,7 +18,16 @@ def test_builder_lambda(gui: Gui, test_client, helpers):
     gui._bind_var_val("message", message)
     with tgb.Page(frame=None) as page:
         for key in message:
-            tgb.text(lambda message: str(message.get(key))) # type: ignore[attr-defined] # noqa: B023
+            tgb.text(lambda message: str(message.get(key)))  # type: ignore[attr-defined] # noqa: B023
     expected_list = ['defaultValue="value A"', 'defaultValue="value B"']
     helpers.test_control_builder(gui, page, expected_list)
 
+
+def test_builder_lambda_2(gui: Gui, test_client, helpers):
+    message = {"a": "value A", "b": "value B"}
+    gui._bind_var_val("message", message)
+    with tgb.Page(frame=None) as page:
+        for key in message:
+            tgb.text(lambda message: str(message.get(key)), mode=lambda message: "mode " + str(message.get(key)))  # type: ignore[attr-defined] # noqa: B023
+    expected_list = ['defaultValue="value A"', 'defaultValue="value B"', 'mode="mode value A"', 'mode="mode value B"']
+    helpers.test_control_builder(gui, page, expected_list)

@@ -12,7 +12,6 @@
 from __future__ import annotations
 
 import ast
-import builtins
 import copy
 import inspect
 import io
@@ -21,7 +20,6 @@ import sys
 import typing as t
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from operator import attrgetter
 from types import FrameType, FunctionType
 
 from .._warnings import _warn
@@ -30,35 +28,10 @@ if sys.version_info < (3, 9):
     from ..utils.unparse import _Unparser
 from ._context_manager import _BuilderContextManager
 from ._factory import _BuilderFactory
+from ._utils import _LambdaByName, _python_builtins, _TransformVarToValue
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
-
-python_builtins = dir(builtins)
-
-
-def _get_value_in_frame(frame: FrameType, name: str):
-    if not frame:
-        return None
-    if name in frame.f_locals:
-        return frame.f_locals.get(name)
-    return _get_value_in_frame(t.cast(FrameType, frame.f_back), name)
-
-
-class _TransformVarToValue(ast.NodeTransformer):
-    def __init__(self, frame: FrameType, non_vars: t.List[str]) -> None:
-        super().__init__()
-        self.frame = frame
-        self.non_vars = non_vars
-
-    def visit_Name(self, node):
-        var_name = node.id.split(".", 2)[0]
-        if var_name in self.non_vars:
-            return node
-        value = _get_value_in_frame(self.frame, var_name)
-        if var_name != node.id:
-            value = attrgetter(node.id.split(".", 2)[1])(value)
-        return ast.Constant(value=value, kind=None)
 
 
 class _Element(ABC):
@@ -115,8 +88,12 @@ class _Element(ABC):
                 return value
             else:
                 try:
-                    st = ast.parse(inspect.getsource(value).strip())
-                    lambda_fn = next((node for node in ast.walk(st) if isinstance(node, ast.Lambda)), None)
+                    st = ast.parse(inspect.getsource(value.__code__).strip())
+                    lambda_by_name: t.Dict[str, ast.Lambda] = {}
+                    _LambdaByName(self._ELEMENT_NAME, lambda_by_name).visit(st)
+                    lambda_fn = lambda_by_name.get(
+                        key, lambda_by_name.get("<default>", None) if key == self._DEFAULT_PROPERTY else None
+                    )
                     if lambda_fn is not None:
                         args = [arg.arg for arg in lambda_fn.args.args]
                         targets = [
@@ -125,11 +102,11 @@ class _Element(ABC):
                             if isinstance(node, ast.ListComp)
                             for compr in node.generators
                         ]
-                        tree = _TransformVarToValue(self.__calling_frame, args + targets + python_builtins).visit(
+                        tree = _TransformVarToValue(self.__calling_frame, args + targets + _python_builtins).visit(
                             lambda_fn
                         )
                         ast.fix_missing_locations(tree)
-                        if sys.version_info < (3, 9): # python 3.8 ast has no unparse
+                        if sys.version_info < (3, 9):  # python 3.8 ast has no unparse
                             string_fd = io.StringIO()
                             _Unparser(tree, string_fd)
                             string_fd.seek(0)
