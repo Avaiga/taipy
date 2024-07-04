@@ -45,6 +45,8 @@ class _TransformVarToValue(ast.NodeTransformer):
 
 
 class _LambdaByName(ast.NodeVisitor):
+    _DEFAULT_NAME = "<default>"
+
     def __init__(self, element_name: str, lambdas: t.Dict[str, ast.Lambda]) -> None:
         super().__init__()
         self.element_name = element_name
@@ -52,8 +54,10 @@ class _LambdaByName(ast.NodeVisitor):
 
     def visit_Call(self, node):
         if node.func.attr == self.element_name:
-            if self.lambdas.get("<default>", None) is None:
-                self.lambdas["<default>"] = next((arg for arg in node.args if isinstance(arg, ast.Lambda)), None)
+            if self.lambdas.get(_LambdaByName._DEFAULT_NAME, None) is None:
+                self.lambdas[_LambdaByName._DEFAULT_NAME] = next(
+                    (arg for arg in node.args if isinstance(arg, ast.Lambda)), None
+                )
             for kwd in node.keywords:
                 if isinstance(kwd.value, ast.Lambda):
                     self.lambdas[kwd.arg] = kwd.value

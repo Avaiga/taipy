@@ -40,6 +40,7 @@ class _Element(ABC):
     _ELEMENT_NAME = ""
     _DEFAULT_PROPERTY = ""
     __RE_INDEXED_PROPERTY = re.compile(r"^(.*?)__([\w\d]+)$")
+    _NEW_LAMBDA_NAME = "new_lambda"
 
     def __new__(cls, *args, **kwargs):
         obj = super(_Element, cls).__new__(cls)
@@ -92,7 +93,10 @@ class _Element(ABC):
                     lambda_by_name: t.Dict[str, ast.Lambda] = {}
                     _LambdaByName(self._ELEMENT_NAME, lambda_by_name).visit(st)
                     lambda_fn = lambda_by_name.get(
-                        key, lambda_by_name.get("<default>", None) if key == self._DEFAULT_PROPERTY else None
+                        key,
+                        lambda_by_name.get(_LambdaByName._DEFAULT_NAME, None)
+                        if key == self._DEFAULT_PROPERTY
+                        else None,
                     )
                     if lambda_fn is not None:
                         args = [arg.arg for arg in lambda_fn.args.args]
@@ -113,11 +117,11 @@ class _Element(ABC):
                             lambda_text = string_fd.read()
                         else:
                             lambda_text = ast.unparse(tree)
-                        new_code = compile("new_lambda = " + lambda_text, "<ast>", "exec")
+                        new_code = compile(f"{_Element._NEW_LAMBDA_NAME} = {lambda_text}", "<ast>", "exec")
                         namespace: t.Dict[str, FunctionType] = {}
                         exec(new_code, namespace)
-                        var_name = f"__lambda_{id(namespace['new_lambda'])}"
-                        self.__variables[var_name] = namespace["new_lambda"]
+                        var_name = f"__lambda_{id(namespace[_Element._NEW_LAMBDA_NAME])}"
+                        self.__variables[var_name] = namespace[_Element._NEW_LAMBDA_NAME]
                         return f'{{{var_name}({", ".join(args)})}}'
                 except Exception as e:
                     _warn("Error in lambda expression", e)
