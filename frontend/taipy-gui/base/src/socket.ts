@@ -1,5 +1,5 @@
 import { Socket } from "socket.io-client";
-import { WsMessage, sendWsMessage } from "../../src/context/wsUtils";
+import { WsMessage } from "../../src/context/wsUtils";
 import { TaipyApp } from "./app";
 
 export const initSocket = (socket: Socket, taipyApp: TaipyApp) => {
@@ -11,7 +11,7 @@ export const initSocket = (socket: Socket, taipyApp: TaipyApp) => {
     // Send a request to get App ID to verify that the app has not been reloaded
     socket.io.on("reconnect", () => {
         console.log("WebSocket reconnected");
-        sendWsMessage(socket, "AID", "reconnect", taipyApp.appId, taipyApp.clientId, taipyApp.context);
+        taipyApp.sendWsMessage("AID", "reconnect", taipyApp.appId);
     });
     // try to reconnect on connect_error
     socket.on("connect_error", (err) => {
