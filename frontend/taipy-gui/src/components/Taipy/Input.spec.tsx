@@ -251,7 +251,7 @@ describe("Number Component", () => {
         const elt = getByDisplayValue("20") as HTMLInputElement;
         await user.click(elt);
         await user.keyboard("[ShiftLeft>]");
-        // Press the arrow up twice to validate that the value will not exceed the minimum value when reached
+        // Press the arrow down twice to validate that the value will not exceed the minimum value when reached
         await user.keyboard("[ArrowDown]");
         await user.keyboard("[ArrowDown]");
         expect(elt.value).toBe("0");
