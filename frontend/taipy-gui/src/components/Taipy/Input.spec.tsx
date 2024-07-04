@@ -234,4 +234,26 @@ describe("Number Component", () => {
         await user.keyboard('[ArrowUp]');
         expect(elt.value).toBe("20");
     })
+    it("Validate value when reaching max value", async () => {
+        const user = userEvent.setup();
+        const {getByDisplayValue} = render(<Input value={"0"} type="number" step={2} max={20}/>);
+        const elt = getByDisplayValue("0") as HTMLInputElement;
+        await user.click(elt);
+        await user.keyboard('[ShiftLeft>]');
+        // Press the arrow up twice to validate that the value will not exceed the maximum value when reached
+        await user.keyboard('[ArrowUp]');
+        await user.keyboard('[ArrowUp]');
+        expect(elt.value).toBe("20")
+    })
+    it("Validate value when reaching min value", async () => {
+        const user = userEvent.setup();
+        const {getByDisplayValue} = render(<Input value={"20"} type="number" step={2} min={0}/>);
+        const elt = getByDisplayValue("20") as HTMLInputElement;
+        await user.click(elt);
+        await user.keyboard('[ShiftLeft>]');
+        // Press the arrow up twice to validate that the value will not exceed the minimum value when reached
+        await user.keyboard('[ArrowDown]');
+        await user.keyboard('[ArrowDown]');
+        expect(elt.value).toBe("0")
+    })
 });
