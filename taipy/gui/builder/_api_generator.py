@@ -120,7 +120,6 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
             classname,
             (ElementBaseClass,),
             {
-                "__init__": lambda self, *args, **kwargs: ElementBaseClass.__init__(self, *args, **kwargs),
                 "_ELEMENT_NAME": element_name,
                 "_DEFAULT_PROPERTY": default_property,
             },
