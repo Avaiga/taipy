@@ -1121,7 +1121,8 @@ class Gui:
                     {
                         "type": _WsType.GET_MODULE_CONTEXT.value,
                         "payload": {"context": mc, "metadata": meta_return},
-                    }
+                    },
+                    send_back_only=True,
                 )
 
     def __get_variable_tree(self, data: t.Dict[str, t.Any]):
@@ -1165,7 +1166,8 @@ class Gui:
                     "variable": self.__get_variable_tree(data),
                     "function": self.__get_variable_tree(function_data),
                 },
-            }
+            },
+            send_back_only=True,
         )
 
     def __handle_ws_app_id(self, message: t.Any):
@@ -1180,7 +1182,8 @@ class Gui:
             {
                 "type": _WsType.APP_ID.value,
                 "payload": {"name": name, "id": app_id},
-            }
+            },
+            send_back_only=True,
         )
 
     def __handle_ws_get_routes(self):
@@ -1198,7 +1201,8 @@ class Gui:
             {
                 "type": _WsType.GET_ROUTES.value,
                 "payload": routes,
-            }
+            },
+            send_back_only=True,
         )
 
     def __send_ws(self, payload: dict, allow_grouping=True, send_back_only=False) -> None:
