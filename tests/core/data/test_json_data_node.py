@@ -18,6 +18,7 @@ from dataclasses import dataclass
 from enum import Enum
 from time import sleep
 
+import freezegun
 import numpy as np
 import pandas as pd
 import pytest
@@ -391,8 +392,8 @@ class TestJSONDataNode:
         with open(json_file, "r") as f:
             upload_content = json.load(f)
 
-        sleep(0.1)
-        dn._upload(json_file)
+        with freezegun.freeze_time(old_last_edit_date + datetime.timedelta(seconds=1)):
+            dn._upload(json_file)
 
         assert dn.read() == upload_content  # The content of the dn should change to the uploaded content
         assert dn.last_edit_date > old_last_edit_date

@@ -12,9 +12,10 @@
 import os
 import pathlib
 import pickle
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import sleep
 
+import freezegun
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
@@ -214,8 +215,8 @@ class TestPickleDataNodeEntity:
 
         upload_content = pd.read_pickle(pickle_file_path)
 
-        sleep(0.1)
-        dn._upload(pickle_file_path)
+        with freezegun.freeze_time(old_last_edit_date + timedelta(seconds=1)):
+            dn._upload(pickle_file_path)
 
         assert_frame_equal(dn.read(), upload_content)  # The content of the dn should change to the uploaded content
         assert dn.last_edit_date > old_last_edit_date

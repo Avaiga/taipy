@@ -12,10 +12,11 @@
 import os
 import pathlib
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import sleep
 from typing import Dict
 
+import freezegun
 import numpy as np
 import pandas as pd
 import pytest
@@ -386,8 +387,8 @@ class TestExcelDataNode:
 
         upload_content = pd.read_excel(excel_file)
 
-        sleep(0.1)
-        dn._upload(excel_file)
+        with freezegun.freeze_time(old_last_edit_date + timedelta(seconds=1)):
+            dn._upload(excel_file)
 
         assert_frame_equal(dn.read()["Sheet1"], upload_content)  # The data of dn should change to the uploaded content
         assert dn.last_edit_date > old_last_edit_date
