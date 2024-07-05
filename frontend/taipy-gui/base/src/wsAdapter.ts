@@ -1,7 +1,7 @@
 import merge from "lodash/merge";
 import { TaipyApp } from "./app";
 import { IdMessage, storeClientId } from "../../src/context/utils";
-import { WsMessage, sendWsMessage } from "../../src/context/wsUtils";
+import { WsMessage } from "../../src/context/wsUtils";
 import { DataManager, ModuleData } from "./dataManager";
 
 export abstract class WsAdapter {
@@ -25,7 +25,7 @@ export class TaipyWsAdapter extends WsAdapter {
     initWsMessageTypes: string[];
     constructor() {
         super();
-        this.supportedMessageTypes = ["MU", "ID", "GMC", "GDT", "AID", "GR", "AL"];
+        this.supportedMessageTypes = ["MU", "ID", "GMC", "GDT", "AID", "GR", "AL", "ACK"];
         this.initWsMessageTypes = ["ID", "AID", "GMC"];
     }
     handleWsMessage(message: WsMessage, taipyApp: TaipyApp): boolean {
@@ -81,6 +81,10 @@ export class TaipyWsAdapter extends WsAdapter {
             } else if (message.type === "AL" && taipyApp.onNotify) {
                 const payload = message as AlertMessage;
                 taipyApp.onNotify(taipyApp, payload.atype, payload.message);
+            } else if (message.type === "ACK") {
+                const {id} = message as unknown as Record<string, string>;
+                taipyApp._ackList = taipyApp._ackList.filter((v) => v !== id);
+                taipyApp.onWsStatusUpdate && taipyApp.onWsStatusUpdate(taipyApp, taipyApp._ackList);
             }
             this.postWsMessageProcessing(message, taipyApp);
             return true;
@@ -96,7 +100,7 @@ export class TaipyWsAdapter extends WsAdapter {
             taipyApp.context !== "" &&
             taipyApp.routes !== undefined
         ) {
-            sendWsMessage(taipyApp.socket, "GDT", "get_data_tree", {}, taipyApp.clientId, taipyApp.context);
+            taipyApp.sendWsMessage("GDT", "get_data_tree", {});
         }
     }
 }
