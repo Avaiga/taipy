@@ -6,7 +6,7 @@ import { Socket, io } from "socket.io-client";
 import { DataManager, ModuleData } from "./dataManager";
 import { initSocket } from "./socket";
 import { TaipyWsAdapter, WsAdapter } from "./wsAdapter";
-import { WsMessageType } from "./packaging/taipy-gui-base";
+import { WsMessageType } from "../../src/context/wsUtils";
 
 export type OnInitHandler = (taipyApp: TaipyApp) => void;
 export type OnChangeHandler = (taipyApp: TaipyApp, encodedName: string, value: unknown) => void;
@@ -96,7 +96,7 @@ export class TaipyApp {
     }
     set onReload(handler: OnReloadHandler | undefined) {
         if (handler !== undefined && handler?.length !== 2) {
-            throw new Error("_onReload() requires two parameters");
+            throw new Error("onReload() requires two parameters");
         }
         this._onReload = handler;
     }
@@ -106,7 +106,7 @@ export class TaipyApp {
     }
     set onWsStatusUpdate(handler: OnWsStatusUpdate | undefined) {
         if (handler !== undefined && handler?.length !== 2) {
-            throw new Error("_onWsStatusUpdate() requires two parameters");
+            throw new Error("onWsStatusUpdate() requires two parameters");
         }
         this._onWsStatusUpdate = handler;
     }
