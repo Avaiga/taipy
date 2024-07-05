@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import datetime
+from datetime import datetime
 from functools import partial
 from typing import Any, Callable, Dict, List, Literal, Optional, Union
 
@@ -122,7 +122,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     def _create(
         cls,
         config: ScenarioConfig,
-        creation_date: Optional[datetime.datetime] = None,
+        creation_date: Optional[datetime] = None,
         name: Optional[str] = None,
     ) -> Scenario:
         _task_manager = _TaskManagerFactory._build_manager()
@@ -468,3 +468,25 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         for fil in filters:
             fil.update({"config_id": config_id})
         return cls._repository._load_all(filters)
+
+    @classmethod
+    def _get_by_creation_time(
+        cls, start_time: datetime, end_time: datetime, version_number: Optional[str] = None
+    ) -> List[Scenario]:
+        """
+        Get all scenarios by a given creation time period.
+        The time period is inclusive.
+
+        Parameters:
+            start_time (datetime): Start time of the period.
+            end_time (datetime): End time of the period.
+
+        Returns:
+            List[Scenario]: List of scenarios created in the given time period.
+        """
+        filters = cls._build_filters_with_version(version_number)
+        if not filters:
+            filters = [{}]
+
+        scenarios = cls._repository._load_all(filters)
+        return [scenario for scenario in scenarios if start_time <= scenario.creation_date <= end_time]
