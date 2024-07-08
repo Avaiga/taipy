@@ -82,26 +82,33 @@ class PropertyType(Enum):
     """
     The property holds a dictionary.
     """
+    dynamic_date = "dynamicdate"
+    """
+    The property is dynamic and holds a date.
+    """
     dynamic_dict = _TaipyDict
     """
-    The property holds a dynamic dictionary.
+    The property is dynamic and holds a dictionary.
     """
     dynamic_number = _TaipyNumber
     """
-    The property holds a dynamic number.
+    The property is dynamic and holds a number.
     """
     dynamic_lo_numbers = _TaipyLoNumbers
     """
-    The property holds a dynamic list of numbers.
+    The property is dynamic and holds a list of numbers.
     """
     dynamic_boolean = _TaipyBool
     """
-    The property holds a dynamic Boolean value.
+    The property is dynamic and holds a Boolean value.
     """
     dynamic_list = "dynamiclist"
+    """
+    The property is dynamic and holds a list.
+    """
     dynamic_string = "dynamicstring"
     """
-    The property holds a dynamic string.
+    The property is dynamic and holds a string.
     """
     function = "function"
     """
