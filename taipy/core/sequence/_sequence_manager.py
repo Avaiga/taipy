@@ -347,9 +347,9 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
 
         if not isinstance(sequence, Sequence):
             sequence = str(sequence)
-            reason = Reasons(sequence)
-            reason._add_reason(sequence, EntityIsNotSubmittableEntity(sequence))
-            return reason
+            reasons = Reasons(sequence)
+            reasons._add_reason(sequence, EntityIsNotSubmittableEntity(sequence))
+            return reasons
 
         return sequence.is_ready_to_run()
 

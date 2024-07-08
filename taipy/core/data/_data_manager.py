@@ -70,15 +70,15 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
     @classmethod
     def _can_create(cls, config: Optional[DataNodeConfig] = None) -> Reasons:
         config_id = getattr(config, "id", None) or str(config)
-        reason = Reasons(config_id)
+        reasons = Reasons(config_id)
 
         if config is not None:
             if not isinstance(config, DataNodeConfig):
-                reason._add_reason(config_id, WrongConfigType(config_id, DataNodeConfig.__name__))
+                reasons._add_reason(config_id, WrongConfigType(config_id, DataNodeConfig.__name__))
             elif config.scope is not Scope.GLOBAL:
-                reason._add_reason(config_id, NotGlobalScope(config_id))
+                reasons._add_reason(config_id, NotGlobalScope(config_id))
 
-        return reason
+        return reasons
 
     @classmethod
     def _create_and_set(

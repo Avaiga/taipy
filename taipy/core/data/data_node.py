@@ -397,7 +397,7 @@ class DataNode(_Entity, _Labeled):
             return self.read_or_raise()
         except NoData:
             self.__logger.warning(
-                f"Data node {self.id} from config {self.config_id} is being read but has never been " f"written."
+                f"Data node {self.id} from config {self.config_id} is being read but has never been written."
             )
             return None
 

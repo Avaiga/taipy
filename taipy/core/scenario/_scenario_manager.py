@@ -109,13 +109,13 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     @classmethod
     def _can_create(cls, config: Optional[ScenarioConfig] = None) -> Reasons:
         config_id = getattr(config, "id", None) or str(config)
-        reason = Reasons(config_id)
+        reasons = Reasons(config_id)
 
         if config is not None:
             if not isinstance(config, ScenarioConfig):
-                reason._add_reason(config_id, WrongConfigType(config_id, ScenarioConfig.__name__))
+                reasons._add_reason(config_id, WrongConfigType(config_id, ScenarioConfig.__name__))
 
-        return reason
+        return reasons
 
     @classmethod
     def _create(
@@ -207,9 +207,9 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
 
         if not isinstance(scenario, Scenario):
             scenario = str(scenario)
-            reason = Reasons((scenario))
-            reason._add_reason(scenario, EntityIsNotSubmittableEntity(scenario))
-            return reason
+            reasons = Reasons((scenario))
+            reasons._add_reason(scenario, EntityIsNotSubmittableEntity(scenario))
+            return reasons
 
         return scenario.is_ready_to_run()
 

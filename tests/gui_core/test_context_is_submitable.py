@@ -25,9 +25,9 @@ a_datanode = PickleDataNode("data_node_config_id", Scope.SCENARIO)
 
 
 def mock_is_submittable_reason(entity_id):
-    reason = Reasons(entity_id)
-    reason._add_reason(entity_id, "a reason")
-    return reason
+    reasons = Reasons(entity_id)
+    reasons._add_reason(entity_id, "a reason")
+    return reasons
 
 
 def mock_has_no_reason(entity_id):
