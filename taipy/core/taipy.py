@@ -510,6 +510,8 @@ def get_scenarios(
     tag: Optional[str] = None,
     is_sorted: bool = False,
     descending: bool = False,
+    created_start_time: Optional[datetime] = None,
+    created_end_time: Optional[datetime] = None,
     sort_key: Literal["name", "id", "config_id", "creation_date", "tags"] = "name",
 ) -> List[Scenario]:
     """Retrieve a list of existing scenarios filtered by cycle or tag.
@@ -526,6 +528,8 @@ def get_scenarios(
             The default value is False.
         descending (bool): If True, sort the output list of scenarios in descending order.
             The default value is False.
+        created_start_time (Optional[datetime]): The optional inclusive start date to filter scenarios by creation date.
+        created_end_time (Optional[datetime]): The optional inclusive end date to filter scenarios by creation date.
         sort_key (Literal["name", "id", "creation_date", "tags"]): The optional sort_key to
             decide upon what key scenarios are sorted. The sorting is in increasing order for
             dates, in alphabetical order for name and id, and in lexicographical order for tags.
@@ -548,6 +552,8 @@ def get_scenarios(
     else:
         scenarios = []
 
+    if created_start_time or created_end_time:
+        scenarios = scenario_manager._filter_by_creation_time(scenarios, created_start_time, created_end_time)
     if is_sorted:
         scenario_manager._sort_scenarios(scenarios, descending, sort_key)
     return scenarios
@@ -569,6 +575,8 @@ def get_primary(cycle: Cycle) -> Optional[Scenario]:
 def get_primary_scenarios(
     is_sorted: bool = False,
     descending: bool = False,
+    created_start_time: Optional[datetime] = None,
+    created_end_time: Optional[datetime] = None,
     sort_key: Literal["name", "id", "config_id", "creation_date", "tags"] = "name",
 ) -> List[Scenario]:
     """Retrieve a list of all primary scenarios.
@@ -578,6 +586,8 @@ def get_primary_scenarios(
             The default value is False.
         descending (bool): If True, sort the output list of scenarios in descending order.
             The default value is False.
+        created_start_time (Optional[datetime]): The optional inclusive start date to filter scenarios by creation date.
+        created_end_time (Optional[datetime]): The optional inclusive end date to filter scenarios by creation date.
         sort_key (Literal["name", "id", "creation_date", "tags"]): The optional sort_key to
             decide upon what key scenarios are sorted. The sorting is in increasing order for
             dates, in alphabetical order for name and id, and in lexicographical order for tags.
@@ -589,6 +599,9 @@ def get_primary_scenarios(
     """
     scenario_manager = _ScenarioManagerFactory._build_manager()
     scenarios = scenario_manager._get_primary_scenarios()
+
+    if created_start_time or created_end_time:
+        scenarios = scenario_manager._filter_by_creation_time(scenarios, created_start_time, created_end_time)
     if is_sorted:
         scenario_manager._sort_scenarios(scenarios, descending, sort_key)
     return scenarios

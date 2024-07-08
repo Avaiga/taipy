@@ -307,6 +307,35 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         return scenarios
 
     @classmethod
+    def _filter_by_creation_time(
+        cls,
+        scenarios: List[Scenario],
+        created_start_time: Optional[datetime] = None,
+        created_end_time: Optional[datetime] = None,
+    ) -> List[Scenario]:
+        """
+        Filter a list of scenarios by a given creation time period.
+        The time period is inclusive.
+
+        Parameters:
+            created_start_time (Optional[datetime]): Start time of the period.
+            created_end_time (Optional[datetime]): End time of the period.
+
+        Returns:
+            List[Scenario]: List of scenarios created in the given time period.
+        """
+        if not created_start_time and not created_end_time:
+            return scenarios
+
+        if not created_start_time:
+            return [scenario for scenario in scenarios if scenario.creation_date <= created_end_time]
+
+        if not created_end_time:
+            return [scenario for scenario in scenarios if created_start_time <= scenario.creation_date]
+
+        return [scenario for scenario in scenarios if created_start_time <= scenario.creation_date <= created_end_time]
+
+    @classmethod
     def _is_promotable_to_primary(cls, scenario: Union[Scenario, ScenarioId]) -> bool:
         if isinstance(scenario, str):
             scenario = cls._get(scenario)
@@ -468,25 +497,3 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         for fil in filters:
             fil.update({"config_id": config_id})
         return cls._repository._load_all(filters)
-
-    @classmethod
-    def _get_by_creation_time(
-        cls, start_time: datetime, end_time: datetime, version_number: Optional[str] = None
-    ) -> List[Scenario]:
-        """
-        Get all scenarios by a given creation time period.
-        The time period is inclusive.
-
-        Parameters:
-            start_time (datetime): Start time of the period.
-            end_time (datetime): End time of the period.
-
-        Returns:
-            List[Scenario]: List of scenarios created in the given time period.
-        """
-        filters = cls._build_filters_with_version(version_number)
-        if not filters:
-            filters = [{}]
-
-        scenarios = cls._repository._load_all(filters)
-        return [scenario for scenario in scenarios if start_time <= scenario.creation_date <= end_time]

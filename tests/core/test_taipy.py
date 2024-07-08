@@ -431,6 +431,9 @@ class TestTaipy:
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._get_all_by_tag") as mck:
             tp.get_scenarios(tag="tag")
             mck.assert_called_once_with("tag")
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._filter_by_creation_time") as mck:
+            tp.get_scenarios(created_start_time=datetime.datetime(2021, 1, 1))
+            mck.assert_called_once_with([], datetime.datetime(2021, 1, 1), None)
 
     def test_get_scenarios_sorted(self):
         scenario_1_cfg = Config.configure_scenario(id="scenario_1")
@@ -500,6 +503,9 @@ class TestTaipy:
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._get_primary_scenarios") as mck:
             tp.get_primary_scenarios()
             mck.assert_called_once_with()
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._filter_by_creation_time") as mck:
+            tp.get_scenarios(created_end_time=datetime.datetime(2021, 1, 1))
+            mck.assert_called_once_with([], None, datetime.datetime(2021, 1, 1))
 
     def test_set_primary(self, scenario):
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._set_primary") as mck:
