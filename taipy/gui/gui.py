@@ -2668,6 +2668,7 @@ class Gui:
         # Initiate the Evaluator with the right context
         self.__evaluator = _Evaluator(glob_ctx, self.__shared_variables)
 
+        # Load Flask Blueprint
         self.__register_blueprint()
 
         # Register data accessor communication data format (JSON, Apache Arrow)
