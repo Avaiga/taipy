@@ -306,6 +306,16 @@
                         "name": "label",
                         "type": "str",
                         "doc": "The label associated with the input."
+                    },
+                    {
+                        "name": "min",
+                        "type": "dynamic(datetime)",
+                        "doc": "The minimum date to accept for this input."
+                    },
+                    {
+                        "name": "max",
+                        "type": "dynamic(datetime)",
+                        "doc": "The maximum date to accept for this input."
                     }
                 ]
             }

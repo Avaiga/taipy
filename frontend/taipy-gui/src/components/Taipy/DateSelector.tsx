@@ -31,8 +31,10 @@ interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
     withTime?: boolean;
     format?: string;
     date: string;
-    minDate?: string;
-    maxDate?: string;
+    min?: string;
+    defaultMin?: string;
+    max?: string;
+    defaultMax?: string;
     defaultDate?: string;
     defaultEditable?: boolean;
     editable?: boolean;
@@ -56,6 +58,8 @@ const DateSelector = (props: DateSelectorProps) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
+    const min = useDynamicProperty(props.min, props.defaultMin, undefined);
+    const max = useDynamicProperty(props.max, props.defaultMax, undefined);
 
     const handleChange = useCallback(
         (v: Date | null) => {
@@ -78,16 +82,22 @@ const DateSelector = (props: DateSelectorProps) => {
 
     // Run every time props.value get updated
     useEffect(() => {
-        if (props.date !== undefined) {
-            setValue(getDateTime(props.date, tz, withTime));
+        try {
+            if (props.date !== undefined) {
+                setValue(getDateTime(props.date, tz, withTime));
+            }
+
+            if (min !== undefined) {
+                setStartProps((p) => getProps(p, true, getDateTime(min, tz, withTime), withTime));
+            }
+
+            if (max !== undefined) {
+                setEndProps((p) => getProps(p, false, getDateTime(max, tz, withTime), withTime));
+            }
+        } catch (error) {
+            console.error(error);
         }
-        if (props.minDate !== null) {
-            setStartProps((p) => getProps(p, true, getDateTime(props.minDate, tz, withTime), withTime));
-        }
-        if (props.maxDate !== null) {
-            setEndProps((p) => getProps(p, false, getDateTime(props.maxDate, tz, withTime), withTime));
-        }
-    }, [props.date, props.minDate, props.maxDate, tz, withTime]);
+    }, [props.date, tz, withTime, max, min]);
 
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>

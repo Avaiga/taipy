@@ -312,14 +312,14 @@ class _Builder:
             return self
         return self.set_attribute(_to_camel_case(name), str(strattr))
 
-    def __set_date_attribute(self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True):
-        dateattr = self.__attributes.get(name, default_value)
-        if dateattr is None:
-            if not optional:
-                _warn(f"Property {name} is required for control {self.__control_type}.")
-            return self
-        value = _date_to_string(dateattr)
-        return self.set_attribute(_to_camel_case(name), value)
+    def __set_dynamic_date_attribute(self, var_name: str, default_value: t.Optional[str] = None):
+        date_attr = self.__attributes.get(var_name, default_value)
+        if date_attr is None:
+            date_attr = default_value
+        if isinstance(date_attr, (datetime, date, time)):
+            value = _date_to_string(date_attr)
+            self.set_attribute(_to_camel_case(var_name), value)
+        return self
 
     def __set_dynamic_string_attribute(
         self,
@@ -1021,8 +1021,8 @@ class _Builder:
                     self.__set_dynamic_bool_attribute(attr[0], _get_tuple_val(attr, 2, False), True, update_main=False)
                 else:
                     self.__set_dynamic_string_list(attr[0], _get_tuple_val(attr, 2, None))
-            elif var_type == PropertyType.date:
-                self.__set_date_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
+            elif var_type == PropertyType.dynamic_date:
+                self.__set_dynamic_date_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == PropertyType.data:
                 self.__set_dynamic_property_without_default(attr[0], var_type)
             elif var_type == PropertyType.lov or var_type == PropertyType.single_lov:

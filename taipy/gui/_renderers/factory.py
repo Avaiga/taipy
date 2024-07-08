@@ -138,8 +138,8 @@ class _Factory:
             [
                 ("with_time", PropertyType.boolean),
                 ("active", PropertyType.dynamic_boolean, True),
-                ("min_date", PropertyType.date),
-                ("max_date", PropertyType.date),
+                ("min", PropertyType.dynamic_date),
+                ("max", PropertyType.dynamic_date),
                 ("editable", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
                 ("label",),
