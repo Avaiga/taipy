@@ -22,7 +22,7 @@ min_date = datetime.date(2024, 5, 15)
 max_date = datetime.date(2024, 7, 15)
 
 page = """
-<|{date}|date|min_date={min_date}|max_date={max_date}|>
+<|{date}|date|min={min_date}|max={max_date}|>
 """
 
 Gui(page).run()
