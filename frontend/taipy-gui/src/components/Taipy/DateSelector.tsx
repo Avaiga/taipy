@@ -14,14 +14,14 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { DatePicker, DatePickerProps } from "@mui/x-date-pickers/DatePicker";
 import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
-import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { DateTimePicker, DateTimePickerProps } from "@mui/x-date-pickers/DateTimePicker";
 import { isValid } from "date-fns";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps } from "./utils";
+import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps, DateProps, getProps } from "./utils";
 import { dateToString, getDateTime, getTimeZonedDate } from "../../utils";
 import { useClassNames, useDispatch, useDynamicProperty, useFormatConfig, useModule } from "../../utils/hooks";
 import Field from "./Field";
@@ -31,6 +31,10 @@ interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
     withTime?: boolean;
     format?: string;
     date: string;
+    min?: string;
+    defaultMin?: string;
+    max?: string;
+    defaultMax?: string;
     defaultDate?: string;
     defaultEditable?: boolean;
     editable?: boolean;
@@ -46,12 +50,16 @@ const DateSelector = (props: DateSelectorProps) => {
     const formatConfig = useFormatConfig();
     const tz = formatConfig.timeZone;
     const [value, setValue] = useState(() => getDateTime(props.defaultDate, tz, withTime));
+    const [startProps, setStartProps] = useState<DateProps>({});
+    const [endProps, setEndProps] = useState<DateProps>({});
     const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
+    const min = useDynamicProperty(props.min, props.defaultMin, undefined);
+    const max = useDynamicProperty(props.max, props.defaultMax, undefined);
 
     const handleChange = useCallback(
         (v: Date | null) => {
@@ -64,20 +72,32 @@ const DateSelector = (props: DateSelectorProps) => {
                         dateToString(newDate, withTime),
                         module,
                         props.onChange,
-                        propagate
-                    )
+                        propagate,
+                    ),
                 );
             }
         },
-        [updateVarName, dispatch, withTime, propagate, tz, props.onChange, module]
+        [updateVarName, dispatch, withTime, propagate, tz, props.onChange, module],
     );
 
     // Run every time props.value get updated
     useEffect(() => {
-        if (props.date !== undefined) {
-            setValue(getDateTime(props.date, tz, withTime));
+        try {
+            if (props.date !== undefined) {
+                setValue(getDateTime(props.date, tz, withTime));
+            }
+
+            if (min !== undefined) {
+                setStartProps((p) => getProps(p, true, getDateTime(min, tz, withTime), withTime));
+            }
+
+            if (max !== undefined) {
+                setEndProps((p) => getProps(p, false, getDateTime(max, tz, withTime), withTime));
+            }
+        } catch (error) {
+            console.error(error);
         }
-    }, [props.date, tz, withTime]);
+    }, [props.date, tz, withTime, max, min]);
 
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -86,6 +106,8 @@ const DateSelector = (props: DateSelectorProps) => {
                     {editable ? (
                         withTime ? (
                             <DateTimePicker
+                                {...(startProps as DateTimePickerProps<Date>)}
+                                {...(endProps as DateTimePickerProps<Date>)}
                                 value={value}
                                 onChange={handleChange}
                                 className={getSuffixedClassNames(className, "-picker")}
@@ -96,6 +118,8 @@ const DateSelector = (props: DateSelectorProps) => {
                             />
                         ) : (
                             <DatePicker
+                                {...(startProps as DatePickerProps<Date>)}
+                                {...(endProps as DatePickerProps<Date>)}
                                 value={value}
                                 onChange={handleChange}
                                 className={getSuffixedClassNames(className, "-picker")}

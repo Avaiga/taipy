@@ -82,6 +82,10 @@ class PropertyType(Enum):
     """
     The property holds a dictionary.
     """
+    dynamic_date = "dynamicdate"
+    """
+    The property holds a dynamic date.
+    """
     dynamic_dict = _TaipyDict
     """
     The property holds a dynamic dictionary.
