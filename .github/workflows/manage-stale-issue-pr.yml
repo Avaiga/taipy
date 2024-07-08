@@ -9,6 +9,9 @@ jobs:
   stale-issues-and-prs:
     name: Comment on possible stable issues and PRs, and close stale PRs
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - uses: actions/stale@v9
         with:
@@ -30,6 +33,8 @@ jobs:
   unassign-issues-labeled-waiting-for-contributor-after-14-days-of-inactivity:
     name: Unassign issues labeled \"🥶Waiting for contributor\" after 14 days of inactivity.
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - uses: boundfoxstudios/action-unassign-contributor-after-days-of-inactivity@v1
         with:
