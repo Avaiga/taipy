@@ -7,6 +7,9 @@ on:
     branches: [ develop, dev/*, release/* ]
   workflow_dispatch:
 
+permissions:
+  pull-requests: write
+
 jobs:
   partial-tests:
     uses: ./.github/workflows/partial-tests.yml
