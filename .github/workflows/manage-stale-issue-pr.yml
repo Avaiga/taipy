@@ -4,6 +4,7 @@ on:
   schedule:
     # Run once every day at 9 AM UTC
     - cron: 00 9 * * *
+  workflow_dispatch:
 
 jobs:
   stale-issues-and-prs:
