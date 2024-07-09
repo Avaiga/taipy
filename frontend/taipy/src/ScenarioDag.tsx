@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Point } from '@projectstorm/geometry';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import { Point } from "@projectstorm/geometry";
 import { CanvasWidget } from "@projectstorm/react-canvas-core";
 import Box from "@mui/material/Box";
 import AppBar from "@mui/material/AppBar";
@@ -76,6 +76,8 @@ const getValidScenario = (scenar: DisplayModel | DisplayModel[]) =>
         ? (scenar[0] as DisplayModel)
         : undefined;
 
+const preventWheel = (e: Event) => e.preventDefault();
+
 const ScenarioDag = (props: ScenarioDagProps) => {
     const { showToolbar = true, onSelect, onAction } = props;
     const [scenarioId, setScenarioId] = useState("");
@@ -85,6 +87,7 @@ const ScenarioDag = (props: ScenarioDagProps) => {
     const [taskStatuses, setTaskStatuses] = useState<TaskStatuses>();
     const dispatch = useDispatch();
     const module = useModule();
+    const canvasRef = useRef<CanvasWidget>(null);
 
     const render = useDynamicProperty(props.render, props.defaultRender, true);
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
@@ -144,16 +147,18 @@ const ScenarioDag = (props: ScenarioDagProps) => {
             // populate model
             doLayout = populateModel(addStatusToDisplayModel(displayModel, taskStatuses), model);
         }
-        const rects = engine.getModel() && engine
-            .getModel()
-            .getNodes()
-            .reduce((pv, nm) => {
-                pv[nm.getID()] = nm.getPosition();
-                return pv;
-            }, {} as Record<string, Point>);
+        const rects =
+            engine.getModel() &&
+            engine
+                .getModel()
+                .getNodes()
+                .reduce((pv, nm) => {
+                    pv[nm.getID()] = nm.getPosition();
+                    return pv;
+                }, {} as Record<string, Point>);
         const hasPos = rects && Object.keys(rects).length;
         if (hasPos) {
-            model.getNodes().forEach(nm => rects[nm.getID()] && nm.setPosition(rects[nm.getID()]));
+            model.getNodes().forEach((nm) => rects[nm.getID()] && nm.setPosition(rects[nm.getID()]));
         }
         engine.setModel(model);
         model.setLocked(true);
@@ -165,10 +170,20 @@ const ScenarioDag = (props: ScenarioDagProps) => {
         showVar && dispatch(createSendUpdateAction(showVar, render, module));
     }, [render, props.updateVars, dispatch, module]);
 
+    useEffect(() => {
+        setTimeout(() => {
+            // wait for div to be referenced and then set a non passive listener on wheel event
+            canvasRef.current?.ref.current?.addEventListener("wheel", preventWheel, { passive: false });
+        }, 300);
+        // remove the listener
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        return () => canvasRef.current?.ref.current?.removeEventListener("wheel", preventWheel);
+    }, []);
+
     return render && scenarioId ? (
         <Paper sx={sizeSx} id={props.id} className={className}>
             {showToolbar ? <DagTitle zoomToFit={zoomToFit} /> : null}
-            <CanvasWidget engine={engine} />
+            <CanvasWidget engine={engine} ref={canvasRef} />
         </Paper>
     ) : null;
 };
