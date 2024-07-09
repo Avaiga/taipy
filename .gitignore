@@ -86,7 +86,6 @@ dist/
 .taipy/
 user_data/
 .my_data/
-Data
 
 # demo files
 demo-*
