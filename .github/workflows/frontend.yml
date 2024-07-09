@@ -9,6 +9,9 @@ on:
         - 'frontend/taipy-gui/**'
   workflow_dispatch:
 
+permissions:
+  pull-requests: write
+
 jobs:
   frontend-jest:
     timeout-minutes: 20
