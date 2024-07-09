@@ -113,8 +113,8 @@
                     {
                         "name": "type",
                         "type": "str",
-                        "default_value": "text",
-                        "doc": "The type of input: text, tel, email ..."
+                        "default_value": "\"text\"",
+                        "doc": "TODO: The type of input: text, tel, email ... as defined in HTML standards https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#input_types "
                     }
                 ]
             }
