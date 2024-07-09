@@ -110,7 +110,7 @@ def build_doc(name: str, element: t.Dict[str, t.Any]):
         r"\1\3",
         doc,
     )
-    doc = markdownify(doc, strip=['br'])
+    doc = markdownify(doc, strip=["br"])
     return f"{element['name']} ({element['type']}): {doc} {'(default: '+markdownify(element['default_value']) + ')' if 'default_value' in element else ''}"  # noqa: E501
 
 
@@ -118,16 +118,24 @@ for control_element in viselements["controls"]:
     name = control_element[0]
     property_list: t.List[t.Dict[str, t.Any]] = []
     property_names: t.List[str] = []
+    hidden_properties: t.List[str] = []
     for property in get_properties(control_element[1], viselements):
-        if property["name"] not in property_names and "[" not in property["name"]:
+        if "hide" in property and property["hide"] is True:
+            hidden_properties.append(property["name"])
+            continue
+        if (
+            property["name"] not in property_names
+            and "[" not in property["name"]
+            and property["name"] not in hidden_properties
+        ):
             if "default_property" in property and property["default_property"] is True:
                 property_list.insert(0, property)
                 property_names.insert(0, property["name"])
                 continue
             property_list.append(property)
             property_names.append(property["name"])
-    properties = ", ".join([f"{p} = ..." for p in property_names])
-    doc_arguments = "\n".join([build_doc(name, p) for p in property_list])
+    properties = ", ".join([f"{p} = ..." for p in property_names if p not in hidden_properties])
+    doc_arguments = "\n".join([build_doc(name, p) for p in property_list if p["name"] not in hidden_properties])
     # append properties to __init__.pyi
     with open(builder_pyi_file, "a") as file:
         file.write(

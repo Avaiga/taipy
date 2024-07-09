@@ -109,6 +109,12 @@
                         "type": "int",
                         "default_value": "5",
                         "doc": "The height of the displayed element if multiline is True."
+                    },
+                    {
+                        "name": "type",
+                        "type": "str",
+                        "default_value": "text",
+                        "doc": "The type of input: text, tel, email ..."
                     }
                 ]
             }
