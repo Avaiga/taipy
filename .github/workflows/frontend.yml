@@ -12,6 +12,9 @@ on:
 permissions:
   pull-requests: write
 
+env:
+  NODE_OPTIONS: --max-old-space-size=4096
+
 jobs:
   frontend-jest:
     timeout-minutes: 20
