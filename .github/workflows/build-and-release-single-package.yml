@@ -18,6 +18,9 @@ on:
         description: "The package to be released (gui, config, core, rest, templates, taipy)"
         required: true
 
+env:
+  NODE_OPTIONS: --max-old-space-size=4096
+
 jobs:
   fetch-versions:
     runs-on: ubuntu-latest
