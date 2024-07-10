@@ -12,7 +12,7 @@ jobs:
     timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: 3.8
@@ -43,7 +43,7 @@ jobs:
     environment: publish
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           sparse-checkout: taipy/${{ matrix.package }}
           sparse-checkout-cone-mode: false
@@ -76,7 +76,7 @@ jobs:
     environment: publish
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Checks if package is already on on Pypi
         id: check-version
@@ -108,7 +108,7 @@ jobs:
         os: [ubuntu-latest,windows-latest,macos-13]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-versions }}

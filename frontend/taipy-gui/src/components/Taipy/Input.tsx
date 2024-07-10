@@ -11,10 +11,13 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useEffect, useCallback, useRef, KeyboardEvent, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useRef, KeyboardEvent, useMemo, CSSProperties } from "react";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
-import IconButton from "@mui/material/IconButton";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
@@ -36,6 +39,20 @@ const getActionKeys = (keys?: string): string[] => {
     return ak.length > 0 ? ak : [AUTHORIZED_KEYS[0]];
 };
 
+const numberSx = {
+    "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button": {
+        display: "none",
+    },
+    "& input[type=number]": {
+        MozAppearance: "textfield",
+    },
+};
+const verticalDivStyle: CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    gap: 0,
+};
+
 const Input = (props: TaipyInputProps) => {
     const {
         type,
@@ -48,6 +65,7 @@ const Input = (props: TaipyInputProps) => {
         multiline = false,
         linesShown = 5,
     } = props;
+
     const [value, setValue] = useState(defaultValue);
     const dispatch = useDispatch();
     const delayCall = useRef(-1);
@@ -81,7 +99,7 @@ const Input = (props: TaipyInputProps) => {
                 }, changeDelay);
             }
         },
-        [updateVarName, dispatch, propagate, onChange, changeDelay, module],
+        [updateVarName, dispatch, propagate, onChange, changeDelay, module]
     );
 
     const handleAction = useCallback(
@@ -134,7 +152,7 @@ const Input = (props: TaipyInputProps) => {
             updateVarName,
             onChange,
             propagate,
-        ],
+        ]
     );
 
     const roundBasedOnStep = useMemo(() => {
@@ -160,7 +178,7 @@ const Input = (props: TaipyInputProps) => {
                     step || 1,
                     stepMultiplier || 10,
                     event.shiftKey,
-                    increment,
+                    increment
                 );
                 if (min !== undefined && Number(newValue) < min) {
                     return min.toString();
@@ -171,21 +189,89 @@ const Input = (props: TaipyInputProps) => {
                 return newValue;
             });
         },
-        [min, max, step, stepMultiplier, calculateNewValue],
+        [min, max, step, stepMultiplier, calculateNewValue]
     );
 
     const handleUpStepperMouseDown = useCallback(
         (event: React.MouseEvent<HTMLButtonElement>) => {
             handleStepperMouseDown(event, true);
         },
-        [handleStepperMouseDown],
+        [handleStepperMouseDown]
     );
 
     const handleDownStepperMouseDown = useCallback(
         (event: React.MouseEvent<HTMLButtonElement>) => {
             handleStepperMouseDown(event, false);
         },
-        [handleStepperMouseDown],
+        [handleStepperMouseDown]
+    );
+
+    // password
+    const [showPassword, setShowPassword] = useState(false);
+    const handleClickShowPassword = useCallback(() => setShowPassword((show) => !show), []);
+    const handleMouseDownPassword = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault(),
+        []
+    );
+    const muiInputProps = useMemo(
+        () =>
+            type == "password"
+                ? {
+                      endAdornment: (
+                          <InputAdornment position="end">
+                              <IconButton
+                                  aria-label="toggle password visibility"
+                                  onClick={handleClickShowPassword}
+                                  onMouseDown={handleMouseDownPassword}
+                                  edge="end"
+                              >
+                                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                              </IconButton>
+                          </InputAdornment>
+                      ),
+                  }
+                : type == "number"
+                ? {
+                      endAdornment: (
+                          <div style={verticalDivStyle}>
+                              <IconButton
+                                  data-testid="stepper-up-spinner"
+                                  size="small"
+                                  onMouseDown={handleUpStepperMouseDown}
+                              >
+                                  <ArrowDropUpIcon fontSize="inherit" />
+                              </IconButton>
+                              <IconButton
+                                  data-testid="stepper-down-spinner"
+                                  size="small"
+                                  onMouseDown={handleDownStepperMouseDown}
+                              >
+                                  <ArrowDropDownIcon fontSize="inherit" />
+                              </IconButton>
+                          </div>
+                      ),
+                  }
+                : undefined,
+        [
+            type,
+            showPassword,
+            handleClickShowPassword,
+            handleMouseDownPassword,
+            handleUpStepperMouseDown,
+            handleDownStepperMouseDown,
+        ]
+    );
+
+    const inputProps = useMemo(
+        () =>
+            type == "number"
+                ? {
+                      step: step ? step : 1,
+                      min: min,
+                      max: max,
+                  }
+                : undefined,
+        [type, step, min, max]
     );
 
     useEffect(() => {
@@ -197,60 +283,15 @@ const Input = (props: TaipyInputProps) => {
     return (
         <Tooltip title={hover || ""}>
             <TextField
-                sx={{
-                    "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button":
-                        {
-                            display: "none",
-                        },
-                    "& input[type=number]": {
-                        MozAppearance: "textfield",
-                    },
-                }}
+                sx={numberSx}
                 margin="dense"
                 hiddenLabel
                 value={value ?? ""}
                 className={className}
-                type={type}
+                type={showPassword && type == "password" ? "text" : type}
                 id={id}
-                inputProps={
-                    type !== "text"
-                        ? {
-                              step: step ? step : 1,
-                              min: min,
-                              max: max,
-                          }
-                        : {}
-                }
-                InputProps={
-                    type !== "text"
-                        ? {
-                              endAdornment: (
-                                  <div
-                                      style={{
-                                          display: "flex",
-                                          flexDirection: "column",
-                                          gap: 0,
-                                      }}
-                                  >
-                                      <IconButton
-                                          data-testid="stepper-up-spinner"
-                                          size="small"
-                                          onMouseDown={handleUpStepperMouseDown}
-                                      >
-                                          <ArrowDropUpIcon fontSize="inherit" />
-                                      </IconButton>
-                                      <IconButton
-                                          data-testid="stepper-down-spinner"
-                                          size="small"
-                                          onMouseDown={handleDownStepperMouseDown}
-                                      >
-                                          <ArrowDropDownIcon fontSize="inherit" />
-                                      </IconButton>
-                                  </div>
-                              ),
-                          }
-                        : {}
-                }
+                inputProps={inputProps}
+                InputProps={muiInputProps}
                 label={props.label}
                 onChange={handleInput}
                 disabled={!active}

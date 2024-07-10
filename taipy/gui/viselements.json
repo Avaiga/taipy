@@ -109,6 +109,12 @@
                         "type": "int",
                         "default_value": "5",
                         "doc": "The height of the displayed element if multiline is True."
+                    },
+                    {
+                        "name": "type",
+                        "type": "str",
+                        "default_value": "\"text\"",
+                        "doc": "TODO: The type of input: text, tel, email ... as defined in HTML standards https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#input_types "
                     }
                 ]
             }
