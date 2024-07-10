@@ -15,6 +15,9 @@ on:
         description: "The version of the package to be released"
         required: true
 
+env:
+  NODE_OPTIONS: --max-old-space-size=4096
+
 jobs:
   fetch-versions:
     runs-on: ubuntu-latest
