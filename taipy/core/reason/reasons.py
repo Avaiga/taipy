@@ -14,7 +14,7 @@ from typing import Dict, Set
 from .reason import Reason
 
 
-class Reasons:
+class ReasonCollection:
     """
     This class is used to store all the reasons to explain why some Taipy operations are not allowed.
 
@@ -27,17 +27,16 @@ class Reasons:
     performed.
     """
 
-    def __init__(self, entity_id: str) -> None:
-        self.entity_id: str = entity_id
+    def __init__(self) -> None:
         self._reasons: Dict[str, Set[Reason]] = {}
 
-    def _add_reason(self, entity_id: str, reason: Reason) -> "Reasons":
+    def _add_reason(self, entity_id: str, reason: Reason) -> "ReasonCollection":
         if entity_id not in self._reasons:
             self._reasons[entity_id] = set()
         self._reasons[entity_id].add(reason)
         return self
 
-    def _remove_reason(self, entity_id: str, reason: Reason) -> "Reasons":
+    def _remove_reason(self, entity_id: str, reason: Reason) -> "ReasonCollection":
         if entity_id in self._reasons and reason in self._reasons[entity_id]:
             self._reasons[entity_id].remove(reason)
             if len(self._reasons[entity_id]) == 0:

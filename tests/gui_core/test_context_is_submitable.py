@@ -14,7 +14,7 @@ from unittest.mock import Mock, patch
 from taipy.config.common.scope import Scope
 from taipy.core import Job, JobId, Scenario, Task
 from taipy.core.data.pickle import PickleDataNode
-from taipy.core.reason import Reasons
+from taipy.core.reason import ReasonCollection
 from taipy.gui_core._context import _GuiCoreContext
 
 a_scenario = Scenario("scenario_config_id", None, {}, sequences={"sequence": {}})
@@ -25,13 +25,13 @@ a_datanode = PickleDataNode("data_node_config_id", Scope.SCENARIO)
 
 
 def mock_is_submittable_reason(entity_id):
-    reasons = Reasons(entity_id)
+    reasons = ReasonCollection()
     reasons._add_reason(entity_id, "a reason")
     return reasons
 
 
-def mock_has_no_reason(entity_id):
-    return Reasons(entity_id)
+def mock_has_no_reason():
+    return ReasonCollection()
 
 
 def mock_core_get(entity_id):

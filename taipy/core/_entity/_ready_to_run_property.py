@@ -12,7 +12,7 @@
 from typing import TYPE_CHECKING, Dict, Set, Union
 
 from ..notification import EventOperation, Notifier, _make_event
-from ..reason import Reason, Reasons
+from ..reason import Reason, ReasonCollection
 
 if TYPE_CHECKING:
     from ..data.data_node import DataNode, DataNodeId
@@ -29,7 +29,7 @@ class _ReadyToRunProperty:
 
     # A nested dictionary of the submittable entities (Scenario, Sequence, Task) and
     # the data nodes that make it not ready_to_run with the reason(s)
-    _submittable_id_datanodes: Dict[Union["ScenarioId", "SequenceId", "TaskId"], Reasons] = {}
+    _submittable_id_datanodes: Dict[Union["ScenarioId", "SequenceId", "TaskId"], ReasonCollection] = {}
 
     @classmethod
     def _add(cls, dn: "DataNode", reason: Reason) -> None:
@@ -81,7 +81,7 @@ class _ReadyToRunProperty:
             cls.__publish_submittable_property_event(submittable, False)
 
         if submittable.id not in cls._submittable_id_datanodes:
-            cls._submittable_id_datanodes[submittable.id] = Reasons(submittable.id)
+            cls._submittable_id_datanodes[submittable.id] = ReasonCollection()
         cls._submittable_id_datanodes[submittable.id]._add_reason(datanode.id, reason)
 
     @staticmethod

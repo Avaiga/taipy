@@ -45,7 +45,7 @@ from .exceptions.exceptions import (
 from .job._job_manager_factory import _JobManagerFactory
 from .job.job import Job
 from .job.job_id import JobId
-from .reason import EntityIsNotSubmittableEntity, Reasons
+from .reason import EntityIsNotSubmittableEntity, ReasonCollection
 from .scenario._scenario_manager_factory import _ScenarioManagerFactory
 from .scenario.scenario import Scenario
 from .scenario.scenario_id import ScenarioId
@@ -84,7 +84,7 @@ def set(entity: Union[DataNode, Task, Sequence, Scenario, Cycle, Submission]):
         return _SubmissionManagerFactory._build_manager()._set(entity)
 
 
-def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Task, TaskId, str]) -> Reasons:
+def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Task, TaskId, str]) -> ReasonCollection:
     """Indicate if an entity can be submitted.
 
     This function checks if the given entity can be submitted for execution.
@@ -104,7 +104,7 @@ def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Tas
         return _TaskManagerFactory._build_manager()._is_submittable(entity)
     if isinstance(entity, str) and entity.startswith(Task._ID_PREFIX):
         return _TaskManagerFactory._build_manager()._is_submittable(TaskId(entity))
-    return Reasons(str(entity))._add_reason(str(entity), EntityIsNotSubmittableEntity(str(entity)))
+    return ReasonCollection()._add_reason(str(entity), EntityIsNotSubmittableEntity(str(entity)))
 
 
 def is_editable(
@@ -866,7 +866,7 @@ def get_cycles() -> List[Cycle]:
     return _CycleManagerFactory._build_manager()._get_all()
 
 
-def can_create(config: Optional[Union[ScenarioConfig, DataNodeConfig]] = None) -> Reasons:
+def can_create(config: Optional[Union[ScenarioConfig, DataNodeConfig]] = None) -> ReasonCollection:
     """Indicate if a config can be created. The config should be a scenario or data node config.
 
     If no config is provided, the function indicates if any scenario or data node config can be created.

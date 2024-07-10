@@ -9,61 +9,63 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from taipy.core.reason import Reasons
+from taipy.core.reason import ReasonCollection
 
 
 def test_create_reason():
-    reasons = Reasons("entity_id")
-    assert reasons.entity_id == "entity_id"
-    assert reasons._reasons == {}
-    assert reasons
-    assert not reasons._entity_id_exists_in_reason("entity_id")
-    assert reasons.reasons == ""
+    reason_collection = ReasonCollection()
+    assert reason_collection._reasons == {}
+    assert reason_collection
+    assert not reason_collection._entity_id_exists_in_reason("entity_id")
+    assert reason_collection.reasons == ""
 
 
 def test_add_and_remove_reason():
-    reasons = Reasons("entity_id")
-    reasons._add_reason("entity_id_1", "Some reason")
-    assert reasons._reasons == {"entity_id_1": {"Some reason"}}
-    assert not reasons
-    assert reasons._entity_id_exists_in_reason("entity_id_1")
-    assert reasons.reasons == "Some reason."
+    reason_collection = ReasonCollection()
+    reason_collection._add_reason("entity_id_1", "Some reason")
+    assert reason_collection._reasons == {"entity_id_1": {"Some reason"}}
+    assert not reason_collection
+    assert reason_collection._entity_id_exists_in_reason("entity_id_1")
+    assert reason_collection.reasons == "Some reason."
 
-    reasons._add_reason("entity_id_1", "Another reason")
-    reasons._add_reason("entity_id_2", "Some more reason")
-    assert reasons._reasons == {"entity_id_1": {"Some reason", "Another reason"}, "entity_id_2": {"Some more reason"}}
-    assert not reasons
-    assert reasons._entity_id_exists_in_reason("entity_id_1")
-    assert reasons._entity_id_exists_in_reason("entity_id_2")
+    reason_collection._add_reason("entity_id_1", "Another reason")
+    reason_collection._add_reason("entity_id_2", "Some more reason")
+    assert reason_collection._reasons == {
+        "entity_id_1": {"Some reason", "Another reason"},
+        "entity_id_2": {"Some more reason"},
+    }
+    assert not reason_collection
+    assert reason_collection._entity_id_exists_in_reason("entity_id_1")
+    assert reason_collection._entity_id_exists_in_reason("entity_id_2")
 
-    reasons._remove_reason("entity_id_1", "Some reason")
-    assert reasons._reasons == {"entity_id_1": {"Another reason"}, "entity_id_2": {"Some more reason"}}
-    assert not reasons
-    assert reasons._entity_id_exists_in_reason("entity_id_1")
-    assert reasons._entity_id_exists_in_reason("entity_id_2")
+    reason_collection._remove_reason("entity_id_1", "Some reason")
+    assert reason_collection._reasons == {"entity_id_1": {"Another reason"}, "entity_id_2": {"Some more reason"}}
+    assert not reason_collection
+    assert reason_collection._entity_id_exists_in_reason("entity_id_1")
+    assert reason_collection._entity_id_exists_in_reason("entity_id_2")
 
-    reasons._remove_reason("entity_id_2", "Some more reason")
-    assert reasons._reasons == {"entity_id_1": {"Another reason"}}
-    assert not reasons
-    assert reasons._entity_id_exists_in_reason("entity_id_1")
-    assert not reasons._entity_id_exists_in_reason("entity_id_2")
+    reason_collection._remove_reason("entity_id_2", "Some more reason")
+    assert reason_collection._reasons == {"entity_id_1": {"Another reason"}}
+    assert not reason_collection
+    assert reason_collection._entity_id_exists_in_reason("entity_id_1")
+    assert not reason_collection._entity_id_exists_in_reason("entity_id_2")
 
-    reasons._remove_reason("entity_id_1", "Another reason")
-    assert reasons._reasons == {}
-    assert reasons
-    assert not reasons._entity_id_exists_in_reason("entity_id_1")
+    reason_collection._remove_reason("entity_id_1", "Another reason")
+    assert reason_collection._reasons == {}
+    assert reason_collection
+    assert not reason_collection._entity_id_exists_in_reason("entity_id_1")
 
 
 def test_get_reason_string_from_reason():
-    reasons = Reasons("entity_id")
-    reasons._add_reason("entity_id_1", "Some reason")
-    assert reasons.reasons == "Some reason."
+    reason_collection = ReasonCollection()
+    reason_collection._add_reason("entity_id_1", "Some reason")
+    assert reason_collection.reasons == "Some reason."
 
-    reasons._add_reason("entity_id_2", "Some more reason")
-    assert reasons.reasons == "Some reason; Some more reason."
+    reason_collection._add_reason("entity_id_2", "Some more reason")
+    assert reason_collection.reasons == "Some reason; Some more reason."
 
-    reasons._add_reason("entity_id_1", "Another reason")
-    assert reasons.reasons.count(";") == 2
-    assert "Some reason" in reasons.reasons
-    assert "Another reason" in reasons.reasons
-    assert "Some more reason" in reasons.reasons
+    reason_collection._add_reason("entity_id_1", "Another reason")
+    assert reason_collection.reasons.count(";") == 2
+    assert "Some reason" in reason_collection.reasons
+    assert "Another reason" in reason_collection.reasons
+    assert "Some more reason" in reason_collection.reasons
