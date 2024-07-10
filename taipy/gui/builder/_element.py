@@ -86,45 +86,47 @@ class _Element(ABC):
             return value
         if isinstance(value, FunctionType):
             if key.startswith("on_"):
-                return value
-            else:
-                try:
-                    st = ast.parse(inspect.getsource(value.__code__).strip())
-                    lambda_by_name: t.Dict[str, ast.Lambda] = {}
-                    _LambdaByName(self._ELEMENT_NAME, lambda_by_name).visit(st)
-                    lambda_fn = lambda_by_name.get(
-                        key,
-                        lambda_by_name.get(_LambdaByName._DEFAULT_NAME, None)
-                        if key == self._DEFAULT_PROPERTY
-                        else None,
+                if value.__name__.startswith("<"):
+                    return value
+                return value.__name__
+
+            try:
+                st = ast.parse(inspect.getsource(value.__code__).strip())
+                lambda_by_name: t.Dict[str, ast.Lambda] = {}
+                _LambdaByName(self._ELEMENT_NAME, lambda_by_name).visit(st)
+                lambda_fn = lambda_by_name.get(
+                    key,
+                    lambda_by_name.get(_LambdaByName._DEFAULT_NAME, None)
+                    if key == self._DEFAULT_PROPERTY
+                    else None,
+                )
+                if lambda_fn is not None:
+                    args = [arg.arg for arg in lambda_fn.args.args]
+                    targets = [
+                        compr.target.id  # type: ignore[attr-defined]
+                        for node in ast.walk(lambda_fn.body)
+                        if isinstance(node, ast.ListComp)
+                        for compr in node.generators
+                    ]
+                    tree = _TransformVarToValue(self.__calling_frame, args + targets + _python_builtins).visit(
+                        lambda_fn
                     )
-                    if lambda_fn is not None:
-                        args = [arg.arg for arg in lambda_fn.args.args]
-                        targets = [
-                            compr.target.id  # type: ignore[attr-defined]
-                            for node in ast.walk(lambda_fn.body)
-                            if isinstance(node, ast.ListComp)
-                            for compr in node.generators
-                        ]
-                        tree = _TransformVarToValue(self.__calling_frame, args + targets + _python_builtins).visit(
-                            lambda_fn
-                        )
-                        ast.fix_missing_locations(tree)
-                        if sys.version_info < (3, 9):  # python 3.8 ast has no unparse
-                            string_fd = io.StringIO()
-                            _Unparser(tree, string_fd)
-                            string_fd.seek(0)
-                            lambda_text = string_fd.read()
-                        else:
-                            lambda_text = ast.unparse(tree)
-                        new_code = compile(f"{_Element._NEW_LAMBDA_NAME} = {lambda_text}", "<ast>", "exec")
-                        namespace: t.Dict[str, FunctionType] = {}
-                        exec(new_code, namespace)
-                        var_name = f"__lambda_{id(namespace[_Element._NEW_LAMBDA_NAME])}"
-                        self.__variables[var_name] = namespace[_Element._NEW_LAMBDA_NAME]
-                        return f'{{{var_name}({", ".join(args)})}}'
-                except Exception as e:
-                    _warn("Error in lambda expression", e)
+                    ast.fix_missing_locations(tree)
+                    if sys.version_info < (3, 9):  # python 3.8 ast has no unparse
+                        string_fd = io.StringIO()
+                        _Unparser(tree, string_fd)
+                        string_fd.seek(0)
+                        lambda_text = string_fd.read()
+                    else:
+                        lambda_text = ast.unparse(tree)
+                    new_code = compile(f"{_Element._NEW_LAMBDA_NAME} = {lambda_text}", "<ast>", "exec")
+                    namespace: t.Dict[str, FunctionType] = {}
+                    exec(new_code, namespace)
+                    var_name = f"__lambda_{id(namespace[_Element._NEW_LAMBDA_NAME])}"
+                    self.__variables[var_name] = namespace[_Element._NEW_LAMBDA_NAME]
+                    return f'{{{var_name}({", ".join(args)})}}'
+            except Exception as e:
+                _warn("Error in lambda expression", e)
         if hasattr(value, "__name__"):
             return str(getattr(value, "__name__"))  # noqa: B009
         return str(value)
