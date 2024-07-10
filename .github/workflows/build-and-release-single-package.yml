@@ -30,8 +30,7 @@ jobs:
         gui_VERSION: ${{ steps.version-setup.outputs.gui_VERSION }}
         rest_VERSION: ${{ steps.version-setup.outputs.rest_VERSION }}
         templates_VERSION: ${{ steps.version-setup.outputs.templates_VERSION }}
-        VERSION: ${{ steps.version-setup.outputs.VERSION }}
-        NEW_VERSION: ${{ steps.version-setup.outputs.NEW_VERSION }}
+        taipy_VERSION: ${{ steps.version-setup.outputs.taipy_VERSION }}
     steps:
       - uses: actions/checkout@v4
       - name: Extract branch name
@@ -165,6 +164,13 @@ jobs:
            else
             gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --title ${{ steps.set-variables.outputs.release_name }} --notes "Release ${{ steps.set-variables.outputs.release_name }}"
            fi
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Ensure Taipy release is marked as latest
+        run: |
+           gh release edit ${{needs.fetch-versions.outputs.taipy_VERSION}} --latest
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
