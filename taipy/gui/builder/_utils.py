@@ -39,6 +39,8 @@ class _TransformVarToValue(ast.NodeTransformer):
         if var_parts[0] in self.non_vars:
             return node
         value = _get_value_in_frame(self.frame, var_parts[0])
+        if callable(value):
+            return node
         if len(var_parts) > 1:
             value = attrgetter(var_parts[1])(value)
         return ast.Constant(value=value, kind=None)
