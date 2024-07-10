@@ -170,7 +170,7 @@ class _Block(_Element):
 class _DefaultBlock(_Block):
     _ELEMENT_NAME = "part"
 
-    def __init__(self, *args, **kwargs):  # do not remove as it could break the serach in frames
+    def __init__(self, *args, **kwargs):  # do not remove as it could break the search in frames
         super().__init__(*args, **kwargs)
 
 
@@ -236,7 +236,7 @@ class html(_Block):
 class _Control(_Element):
     """NOT DOCUMENTED"""
 
-    def __init__(self, *args, **kwargs):  # do not remove as it could break the serach in frames
+    def __init__(self, *args, **kwargs):  # do not remove as it could break the search in frames
         super().__init__(*args, **kwargs)
 
     def _render(self, gui: "Gui") -> str:
