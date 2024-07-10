@@ -288,9 +288,8 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     def _get_primary_scenarios(cls) -> List[Scenario]:
         return [scenario for scenario in cls._get_all() if scenario.is_primary]
 
-    @classmethod
+    @staticmethod
     def _sort_scenarios(
-        cls,
         scenarios: List[Scenario],
         descending: bool = False,
         sort_key: Literal["name", "id", "config_id", "creation_date", "tags"] = "name",
@@ -306,9 +305,8 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             scenarios.sort(key=lambda x: (x.name, x.id), reverse=descending)
         return scenarios
 
-    @classmethod
+    @staticmethod
     def _filter_by_creation_time(
-        cls,
         scenarios: List[Scenario],
         created_start_time: Optional[datetime] = None,
         created_end_time: Optional[datetime] = None,
