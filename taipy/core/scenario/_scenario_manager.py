@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import datetime
+from datetime import datetime
 from functools import partial
 from typing import Any, Callable, Dict, List, Literal, Optional, Union
 
@@ -122,7 +122,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     def _create(
         cls,
         config: ScenarioConfig,
-        creation_date: Optional[datetime.datetime] = None,
+        creation_date: Optional[datetime] = None,
         name: Optional[str] = None,
     ) -> Scenario:
         _task_manager = _TaskManagerFactory._build_manager()
@@ -288,9 +288,8 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     def _get_primary_scenarios(cls) -> List[Scenario]:
         return [scenario for scenario in cls._get_all() if scenario.is_primary]
 
-    @classmethod
+    @staticmethod
     def _sort_scenarios(
-        cls,
         scenarios: List[Scenario],
         descending: bool = False,
         sort_key: Literal["name", "id", "config_id", "creation_date", "tags"] = "name",
@@ -305,6 +304,34 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         else:
             scenarios.sort(key=lambda x: (x.name, x.id), reverse=descending)
         return scenarios
+
+    @staticmethod
+    def _filter_by_creation_time(
+        scenarios: List[Scenario],
+        created_start_time: Optional[datetime] = None,
+        created_end_time: Optional[datetime] = None,
+    ) -> List[Scenario]:
+        """
+        Filter a list of scenarios by a given creation time period.
+        The time period is inclusive.
+
+        Parameters:
+            created_start_time (Optional[datetime]): Start time of the period.
+            created_end_time (Optional[datetime]): End time of the period.
+
+        Returns:
+            List[Scenario]: List of scenarios created in the given time period.
+        """
+        if not created_start_time and not created_end_time:
+            return scenarios
+
+        if not created_start_time:
+            return [scenario for scenario in scenarios if scenario.creation_date <= created_end_time]
+
+        if not created_end_time:
+            return [scenario for scenario in scenarios if created_start_time <= scenario.creation_date]
+
+        return [scenario for scenario in scenarios if created_start_time <= scenario.creation_date <= created_end_time]
 
     @classmethod
     def _is_promotable_to_primary(cls, scenario: Union[Scenario, ScenarioId]) -> bool:
