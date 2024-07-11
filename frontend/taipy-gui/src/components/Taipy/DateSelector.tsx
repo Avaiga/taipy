@@ -80,16 +80,6 @@ const DateSelector = (props: DateSelectorProps) => {
         [updateVarName, dispatch, withTime, propagate, tz, props.onChange, module],
     );
 
-    const handleConsoleLog = () => {
-        console.log("DateSelector: ", value);
-    };
-
-    // Run only once
-
-    useEffect(() => {
-        handleConsoleLog();
-    }, []);
-
     // Run every time props.value get updated
     useEffect(() => {
         try {
