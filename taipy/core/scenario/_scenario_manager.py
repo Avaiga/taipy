@@ -39,8 +39,7 @@ from ..exceptions.exceptions import (
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
-from ..reason._reason_factory import _build_not_submittable_entity_reason, _build_wrong_config_type_reason
-from ..reason.reason import Reasons
+from ..reason import EntityIsNotSubmittableEntity, ReasonCollection, WrongConfigType
 from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from ..submission.submission import Submission
 from ..task._task_manager_factory import _TaskManagerFactory
@@ -108,15 +107,15 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         )
 
     @classmethod
-    def _can_create(cls, config: Optional[ScenarioConfig] = None) -> Reasons:
+    def _can_create(cls, config: Optional[ScenarioConfig] = None) -> ReasonCollection:
         config_id = getattr(config, "id", None) or str(config)
-        reason = Reasons(config_id)
+        reason_collector = ReasonCollection()
 
         if config is not None:
             if not isinstance(config, ScenarioConfig):
-                reason._add_reason(config_id, _build_wrong_config_type_reason(config_id, "ScenarioConfig"))
+                reason_collector._add_reason(config_id, WrongConfigType(config_id, ScenarioConfig.__name__))
 
-        return reason
+        return reason_collector
 
     @classmethod
     def _create(
@@ -202,15 +201,15 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         return scenario
 
     @classmethod
-    def _is_submittable(cls, scenario: Union[Scenario, ScenarioId]) -> Reasons:
+    def _is_submittable(cls, scenario: Union[Scenario, ScenarioId]) -> ReasonCollection:
         if isinstance(scenario, str):
             scenario = cls._get(scenario)
 
         if not isinstance(scenario, Scenario):
             scenario = str(scenario)
-            reason = Reasons((scenario))
-            reason._add_reason(scenario, _build_not_submittable_entity_reason(scenario))
-            return reason
+            reason_collector = ReasonCollection()
+            reason_collector._add_reason(scenario, EntityIsNotSubmittableEntity(scenario))
+            return reason_collector
 
         return scenario.is_ready_to_run()
 

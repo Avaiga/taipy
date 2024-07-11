@@ -12,7 +12,7 @@
 from typing import TYPE_CHECKING, Dict, Set, Union
 
 from ..notification import EventOperation, Notifier, _make_event
-from ..reason.reason import Reasons
+from ..reason import Reason, ReasonCollection
 
 if TYPE_CHECKING:
     from ..data.data_node import DataNode, DataNodeId
@@ -29,10 +29,10 @@ class _ReadyToRunProperty:
 
     # A nested dictionary of the submittable entities (Scenario, Sequence, Task) and
     # the data nodes that make it not ready_to_run with the reason(s)
-    _submittable_id_datanodes: Dict[Union["ScenarioId", "SequenceId", "TaskId"], Reasons] = {}
+    _submittable_id_datanodes: Dict[Union["ScenarioId", "SequenceId", "TaskId"], ReasonCollection] = {}
 
     @classmethod
-    def _add(cls, dn: "DataNode", reason: str) -> None:
+    def _add(cls, dn: "DataNode", reason: Reason) -> None:
         from ..scenario.scenario import Scenario
         from ..sequence.sequence import Sequence
         from ..task.task import Task
@@ -50,7 +50,7 @@ class _ReadyToRunProperty:
                 cls.__add(task_parent, dn, reason)
 
     @classmethod
-    def _remove(cls, datanode: "DataNode", reason: str) -> None:
+    def _remove(cls, datanode: "DataNode", reason: Reason) -> None:
         from ..taipy import get as tp_get
 
         # check the data node status to determine the reason to be removed
@@ -72,7 +72,7 @@ class _ReadyToRunProperty:
             cls._datanode_id_submittables.pop(datanode.id)
 
     @classmethod
-    def __add(cls, submittable: Union["Scenario", "Sequence", "Task"], datanode: "DataNode", reason: str) -> None:
+    def __add(cls, submittable: Union["Scenario", "Sequence", "Task"], datanode: "DataNode", reason: Reason) -> None:
         if datanode.id not in cls._datanode_id_submittables:
             cls._datanode_id_submittables[datanode.id] = set()
         cls._datanode_id_submittables[datanode.id].add(submittable.id)
@@ -81,7 +81,7 @@ class _ReadyToRunProperty:
             cls.__publish_submittable_property_event(submittable, False)
 
         if submittable.id not in cls._submittable_id_datanodes:
-            cls._submittable_id_datanodes[submittable.id] = Reasons(submittable.id)
+            cls._submittable_id_datanodes[submittable.id] = ReasonCollection()
         cls._submittable_id_datanodes[submittable.id]._add_reason(datanode.id, reason)
 
     @staticmethod

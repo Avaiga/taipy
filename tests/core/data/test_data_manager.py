@@ -24,6 +24,7 @@ from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.exceptions.exceptions import InvalidDataNodeType, ModelNotFound
+from taipy.core.reason import NotGlobalScope, WrongConfigType
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 
@@ -61,11 +62,16 @@ class TestDataManager:
 
         reasons = _DataManager._can_create(dn_config)
         assert bool(reasons) is False
-        assert reasons._reasons == {dn_config.id: {'Data node config "dn" does not have GLOBAL scope'}}
+        assert reasons._reasons[dn_config.id] == {NotGlobalScope(dn_config.id)}
+        assert (
+            str(list(reasons._reasons[dn_config.id])[0])
+            == f'Data node config "{dn_config.id}" does not have GLOBAL scope'
+        )
 
         reasons = _DataManager._can_create(1)
         assert bool(reasons) is False
-        assert reasons._reasons == {"1": {'Object "1" must be a valid DataNodeConfig'}}
+        assert reasons._reasons["1"] == {WrongConfigType("1", DataNodeConfig.__name__)}
+        assert str(list(reasons._reasons["1"])[0]) == 'Object "1" must be a valid DataNodeConfig'
 
     def test_create_data_node_with_name_provided(self):
         dn_config = Config.configure_data_node(id="dn", foo="bar", name="acb")
