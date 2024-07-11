@@ -35,7 +35,7 @@ export class TaipyWsAdapter extends WsAdapter {
                     const encodedName = muPayload.name;
                     const { value } = muPayload.payload;
                     taipyApp.variableData?.update(encodedName, value);
-                    taipyApp.useEvent(taipyApp.onChange, encodedName, value);
+                    taipyApp.onChangeEvent(encodedName, value);
                 }
             } else if (message.type === "ID") {
                 const { id } = message as unknown as IdMessage;
@@ -61,12 +61,12 @@ export class TaipyWsAdapter extends WsAdapter {
                     const functionChanges = taipyApp.functionData.init(functionData);
                     const changes = merge(varChanges, functionChanges);
                     if (varChanges || functionChanges) {
-                        taipyApp.useEvent(taipyApp.onReload, changes);
+                        taipyApp.onReloadEvent(changes);
                     }
                 } else {
                     taipyApp.variableData = new DataManager(variableData);
                     taipyApp.functionData = new DataManager(functionData);
-                    taipyApp.useEvent(taipyApp.onInit);
+                    taipyApp.onInitEvent();
                 }
             } else if (message.type === "AID") {
                 const payload = message.payload as Record<string, unknown>;
@@ -80,11 +80,11 @@ export class TaipyWsAdapter extends WsAdapter {
                 taipyApp.routes = payload;
             } else if (message.type === "AL") {
                 const payload = message as AlertMessage;
-                taipyApp.useEvent(taipyApp.onNotify, payload.atype, payload.message);
+                taipyApp.onNotifyEvent(payload.atype, payload.message);
             } else if (message.type === "ACK") {
-                const {id} = message as unknown as Record<string, string>;
+                const { id } = message as unknown as Record<string, string>;
                 taipyApp._ackList = taipyApp._ackList.filter((v) => v !== id);
-                taipyApp.useEvent(taipyApp.onWsStatusUpdate, taipyApp._ackList);
+                taipyApp.onWsStatusUpdateEvent(taipyApp._ackList);
             }
             this.postWsMessageProcessing(message, taipyApp);
             return true;

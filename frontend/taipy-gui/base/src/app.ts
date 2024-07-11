@@ -14,7 +14,13 @@ export type OnNotifyHandler = (taipyApp: TaipyApp, type: string, message: string
 export type OnReloadHandler = (taipyApp: TaipyApp, removedChanges: ModuleData) => void;
 export type OnWsMessage = (taipyApp: TaipyApp, event: string, payload: unknown) => void;
 export type OnWsStatusUpdate = (taipyApp: TaipyApp, messageQueue: string[]) => void;
-export type OnEvent = OnInitHandler | OnChangeHandler | OnNotifyHandler | OnReloadHandler | OnWsMessage | OnWsStatusUpdate;
+export type OnEvent =
+    | OnInitHandler
+    | OnChangeHandler
+    | OnNotifyHandler
+    | OnReloadHandler
+    | OnWsMessage
+    | OnWsStatusUpdate;
 type Route = [string, string];
 
 export class TaipyApp {
@@ -72,6 +78,10 @@ export class TaipyApp {
         this._onInit = handler;
     }
 
+    onInitEvent() {
+        this.onInit && this.onInit(this);
+    }
+
     get onChange() {
         return this._onChange;
     }
@@ -81,6 +91,10 @@ export class TaipyApp {
             throw new Error("onChange() requires three parameters");
         }
         this._onChange = handler;
+    }
+
+    onChangeEvent(encodedName: string, value: unknown) {
+        this.onChange && this.onChange(this, encodedName, value);
     }
 
     get onNotify() {
@@ -94,6 +108,10 @@ export class TaipyApp {
         this._onNotify = handler;
     }
 
+    onNotifyEvent(type: string, message: string) {
+        this.onNotify && this.onNotify(this, type, message);
+    }
+
     get onReload() {
         return this._onReload;
     }
@@ -102,6 +120,10 @@ export class TaipyApp {
             throw new Error("onReload() requires two parameters");
         }
         this._onReload = handler;
+    }
+
+    onReloadEvent(removedChanges: ModuleData) {
+        this.onReload && this.onReload(this, removedChanges);
     }
 
     get onWsMessage() {
@@ -114,6 +136,10 @@ export class TaipyApp {
         this._onWsMessage = handler;
     }
 
+    onWsMessageEvent(event: string, payload: unknown) {
+        this.onWsMessage && this.onWsMessage(this, event, payload);
+    }
+
     get onWsStatusUpdate() {
         return this._onWsStatusUpdate;
     }
@@ -124,28 +150,8 @@ export class TaipyApp {
         this._onWsStatusUpdate = handler;
     }
 
-    useEvent(event: OnEvent | undefined, ...args: unknown[]) {
-        if (!event) {
-            return
-        }
-        if (event === this.onInit) {
-            return this.onInit(this);
-        }
-        if (event === this.onChange) {
-            return this.onChange(this, args[0] as string, args[1]);
-        }
-        if (event === this.onNotify) {
-            return this.onNotify(this, args[0] as string, args[1] as string);
-        }
-        if (event === this.onReload) {
-            return this.onReload(this, args[0] as ModuleData);
-        }
-        if (event === this.onWsMessage) {
-            return this.onWsMessage(this, args[0] as string, args[1]);
-        }
-        if (event === this.onWsStatusUpdate) {
-            return this.onWsStatusUpdate(this, args[0] as string[]);
-        }
+    onWsStatusUpdateEvent(messageQueue: string[]) {
+        this.onWsStatusUpdate && this.onWsStatusUpdate(this, messageQueue);
     }
 
     // Utility methods
@@ -171,7 +177,7 @@ export class TaipyApp {
         const ackId = sendWsMessage(this.socket, type, id, payload, this.clientId, context);
         if (ackId) {
             this._ackList.push(ackId);
-            this.useEvent(this.onWsStatusUpdate, this._ackList);
+            this.onWsStatusUpdateEvent(this._ackList);
         }
     }
 
