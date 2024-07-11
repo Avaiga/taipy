@@ -11,6 +11,7 @@
 
 from datetime import datetime, timedelta
 
+import freezegun
 import pytest
 
 from taipy.config.common.frequency import Frequency
@@ -435,3 +436,55 @@ def test_get_scenarios_by_config_id_in_multiple_versions_environment(init_sql_re
 
     assert len(_ScenarioManager._get_by_config_id(scenario_config_1.id)) == 3
     assert len(_ScenarioManager._get_by_config_id(scenario_config_2.id)) == 2
+
+
+def test_filter_scenarios_by_creation_datetime(init_sql_repo):
+    scenario_config_1 = Config.configure_scenario("s1", sequence_configs=[])
+
+    with freezegun.freeze_time("2024-01-01"):
+        s_1_1 = _ScenarioManager._create(scenario_config_1)
+    with freezegun.freeze_time("2024-01-03"):
+        s_1_2 = _ScenarioManager._create(scenario_config_1)
+    with freezegun.freeze_time("2024-02-01"):
+        s_1_3 = _ScenarioManager._create(scenario_config_1)
+
+    all_scenarios = _ScenarioManager._get_all()
+
+    filtered_scenarios = _ScenarioManager._filter_by_creation_time(
+        scenarios=all_scenarios,
+        created_start_time=datetime(2024, 1, 1),
+        created_end_time=datetime(2024, 1, 2),
+    )
+    assert len(filtered_scenarios) == 1
+    assert [s_1_1] == filtered_scenarios
+
+    # The time period is inclusive
+    filtered_scenarios = _ScenarioManager._filter_by_creation_time(
+        scenarios=all_scenarios,
+        created_start_time=datetime(2024, 1, 1),
+        created_end_time=datetime(2024, 1, 3),
+    )
+    assert len(filtered_scenarios) == 2
+    assert sorted([s_1_1.id, s_1_2.id]) == sorted([scenario.id for scenario in filtered_scenarios])
+
+    filtered_scenarios = _ScenarioManager._filter_by_creation_time(
+        scenarios=all_scenarios,
+        created_start_time=datetime(2023, 1, 1),
+        created_end_time=datetime(2025, 1, 1),
+    )
+    assert len(filtered_scenarios) == 3
+    assert sorted([s_1_1.id, s_1_2.id, s_1_3.id]) == sorted([scenario.id for scenario in filtered_scenarios])
+
+    filtered_scenarios = _ScenarioManager._filter_by_creation_time(
+        scenarios=all_scenarios,
+        created_start_time=datetime(2024, 2, 1),
+    )
+    assert len(filtered_scenarios) == 1
+    assert [s_1_3] == filtered_scenarios
+
+    filtered_scenarios = _ScenarioManager._filter_by_creation_time(
+        scenarios=all_scenarios,
+        created_end_time=datetime(2024, 1, 2),
+    )
+    assert len(filtered_scenarios) == 1
+    assert [s_1_1] == filtered_scenarios
