@@ -23,7 +23,7 @@ from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.operator import JoinOperator, Operator
 from taipy.core.data.sql import SQLDataNode
-from taipy.core.exceptions.exceptions import MissingAppendQueryBuilder, MissingRequiredProperty
+from taipy.core.exceptions.exceptions import MissingAppendQueryBuilder, MissingRequiredProperty, UnknownDatabaseEngine
 
 
 class MyCustomObject:
@@ -149,20 +149,50 @@ class TestSQLDataNode:
         "properties",
         [
             {},
-            {"db_username": "foo"},
-            {"db_username": "foo", "db_password": "foo"},
-            {"db_username": "foo", "db_password": "foo", "db_name": "foo"},
-            {"engine": "sqlite"},
-            {"engine": "mssql", "db_name": "foo"},
-            {"engine": "mysql", "db_username": "foo"},
-            {"engine": "postgresql", "db_username": "foo", "db_password": "foo"},
+            {"read_query": "ready query"},
+            {"read_query": "ready query", "write_query_builder": "write query"},
+            {"read_query": "ready query", "write_query_builder": "write query", "db_username": "foo"},
+            {
+                "read_query": "ready query",
+                "write_query_builder": "write query",
+                "db_username": "foo",
+                "db_password": "foo",
+            },
+            {
+                "read_query": "ready query",
+                "write_query_builder": "write query",
+                "db_username": "foo",
+                "db_password": "foo",
+                "db_name": "foo",
+            },
+            {"read_query": "ready query", "write_query_builder": "write query", "db_engine": "some engine"},
+            {"read_query": "ready query", "write_query_builder": "write query", "db_engine": "sqlite"},
+            {"read_query": "ready query", "write_query_builder": "write query", "db_engine": "mssql", "db_name": "foo"},
+            {
+                "read_query": "ready query",
+                "write_query_builder": "write query",
+                "db_engine": "mysql",
+                "db_username": "foo",
+            },
+            {
+                "read_query": "ready query",
+                "write_query_builder": "write query",
+                "db_engine": "postgresql",
+                "db_username": "foo",
+                "db_password": "foo",
+            },
         ],
     )
     def test_create_with_missing_parameters(self, properties):
         with pytest.raises(MissingRequiredProperty):
             SQLDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"))
-        with pytest.raises(MissingRequiredProperty):
-            SQLDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
+        engine = properties.get("db_engine")
+        if engine is not None and engine not in ["sqlite", "mssql", "mysql", "postgresql"]:
+            with pytest.raises(UnknownDatabaseEngine):
+                SQLDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
+        else:
+            with pytest.raises(MissingRequiredProperty):
+                SQLDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
 
     @pytest.mark.parametrize("properties", __sql_properties)
     def test_write_query_builder(self, properties):

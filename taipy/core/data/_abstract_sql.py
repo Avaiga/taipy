@@ -190,7 +190,6 @@ class _AbstractSQLDataNode(DataNode, _TabularDataNodeMixin):
             folder_path = properties.get(self.__SQLITE_FOLDER_PATH, self.__SQLITE_FOLDER_PATH_DEFAULT)
             file_extension = properties.get(self.__SQLITE_FILE_EXTENSION, self.__SQLITE_FILE_EXTENSION_DEFAULT)
             return "sqlite:///" + os.path.join(folder_path, f"{db_name}{file_extension}")
-
         raise UnknownDatabaseEngine(f"Unknown engine: {engine}")
 
     def filter(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
