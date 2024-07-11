@@ -138,6 +138,8 @@ class _Factory:
             [
                 ("with_time", PropertyType.boolean),
                 ("active", PropertyType.dynamic_boolean, True),
+                ("min", PropertyType.dynamic_date),
+                ("max", PropertyType.dynamic_date),
                 ("editable", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
                 ("label",),
@@ -386,6 +388,10 @@ class _Factory:
         .set_attributes(
             [
                 ("active", PropertyType.dynamic_boolean, True),
+                ("step", PropertyType.dynamic_number, 1),
+                ("step_multiplier", PropertyType.dynamic_number, 10),
+                ("min", PropertyType.dynamic_number),
+                ("max", PropertyType.dynamic_number),
                 ("hover_text", PropertyType.dynamic_string),
                 ("on_change", PropertyType.function),
                 ("on_action", PropertyType.function),

@@ -28,16 +28,10 @@ from taipy.gui import Gui
 # }
 
 value = 50
-color_map = {
-    20: "red",
-    40: None,
-    60: "blue",
-    80: None
-}
+color_map = {20: "red", 40: None, 60: "blue", 80: None}
 
 page = """
 <|{value}|metric|color_map={color_map}|>
 """
 
 Gui(page).run()
-

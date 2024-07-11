@@ -159,7 +159,7 @@ class _Builder:
             if hashname is None:
                 if callable(v):
                     if v.__name__ == "<lambda>":
-                        hashname = _get_expr_var_name(v.__code__)
+                        hashname = f"__lambda_{id(v)}"
                         gui._bind_var_val(hashname, v)
                     else:
                         hashname = _get_expr_var_name(v.__name__)
@@ -312,6 +312,15 @@ class _Builder:
             return self
         return self.set_attribute(_to_camel_case(name), str(strattr))
 
+    def __set_dynamic_date_attribute(self, var_name: str, default_value: t.Optional[str] = None):
+        date_attr = self.__attributes.get(var_name, default_value)
+        if date_attr is None:
+            date_attr = default_value
+        if isinstance(date_attr, (datetime, date, time)):
+            value = _date_to_string(date_attr)
+            self.set_attribute(_to_camel_case(var_name), value)
+        return self
+
     def __set_dynamic_string_attribute(
         self,
         name: str,
@@ -395,7 +404,7 @@ class _Builder:
                 adapter = self.__gui._get_adapter_for_type(var_type)
             elif var_type == str.__name__ and callable(adapter):
                 var_type += (
-                    _get_expr_var_name(str(adapter.__code__))
+                    f"__lambda_{id(adapter)}"
                     if adapter.__name__ == "<lambda>"
                     else _get_expr_var_name(adapter.__name__)
                 )
@@ -879,7 +888,7 @@ class _Builder:
     def _set_input_type(self, type_name: str, allow_password=False):
         if allow_password and self.__get_boolean_attribute("password", False):
             return self.set_attribute("type", "password")
-        return self.set_attribute("type", type_name)
+        return self.set_attribute("type", self.__attributes.get("type", type_name))
 
     def _set_kind(self):
         if self.__attributes.get("theme", False):
@@ -1012,6 +1021,8 @@ class _Builder:
                     self.__set_dynamic_bool_attribute(attr[0], _get_tuple_val(attr, 2, False), True, update_main=False)
                 else:
                     self.__set_dynamic_string_list(attr[0], _get_tuple_val(attr, 2, None))
+            elif var_type == PropertyType.dynamic_date:
+                self.__set_dynamic_date_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == PropertyType.data:
                 self.__set_dynamic_property_without_default(attr[0], var_type)
             elif var_type == PropertyType.lov or var_type == PropertyType.single_lov:

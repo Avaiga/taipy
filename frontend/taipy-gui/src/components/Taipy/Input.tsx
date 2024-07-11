@@ -11,9 +11,15 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useEffect, useCallback, useRef, KeyboardEvent } from "react";
+import React, { useState, useEffect, useCallback, useRef, KeyboardEvent, useMemo, CSSProperties } from "react";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
 import { TaipyInputProps } from "./utils";
@@ -33,6 +39,20 @@ const getActionKeys = (keys?: string): string[] => {
     return ak.length > 0 ? ak : [AUTHORIZED_KEYS[0]];
 };
 
+const numberSx = {
+    "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button": {
+        display: "none",
+    },
+    "& input[type=number]": {
+        MozAppearance: "textfield",
+    },
+};
+const verticalDivStyle: CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    gap: 0,
+};
+
 const Input = (props: TaipyInputProps) => {
     const {
         type,
@@ -45,6 +65,7 @@ const Input = (props: TaipyInputProps) => {
         multiline = false,
         linesShown = 5,
     } = props;
+
     const [value, setValue] = useState(defaultValue);
     const dispatch = useDispatch();
     const delayCall = useRef(-1);
@@ -55,6 +76,10 @@ const Input = (props: TaipyInputProps) => {
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
+    const step = useDynamicProperty(props.step, props.defaultStep, 1);
+    const stepMultiplier = useDynamicProperty(props.stepMultiplier, props.defaultStepMultiplier, 10);
+    const min = useDynamicProperty(props.min, props.defaultMin, undefined);
+    const max = useDynamicProperty(props.max, props.defaultMax, undefined);
 
     const handleInput = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,7 +104,27 @@ const Input = (props: TaipyInputProps) => {
 
     const handleAction = useCallback(
         (evt: KeyboardEvent<HTMLDivElement>) => {
-            if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
+            if (evt.shiftKey && type === "number") {
+                if (evt.key === "ArrowUp") {
+                    let val =
+                        Number(evt.currentTarget.querySelector("input")?.value || 0) +
+                        (step || 1) * (stepMultiplier || 10);
+                    if (max !== undefined && val > max) {
+                        val = max;
+                    }
+                    setValue(val.toString());
+                    evt.preventDefault();
+                } else if (evt.key === "ArrowDown") {
+                    let val =
+                        Number(evt.currentTarget.querySelector("input")?.value || 0) -
+                        (step || 1) * (stepMultiplier || 10);
+                    if (min !== undefined && val < min) {
+                        val = min;
+                    }
+                    setValue(val.toString());
+                    evt.preventDefault();
+                }
+            } else if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
                 const val = evt.currentTarget.querySelector("input")?.value;
                 if (changeDelay > 0 && delayCall.current > 0) {
                     clearTimeout(delayCall.current);
@@ -92,7 +137,141 @@ const Input = (props: TaipyInputProps) => {
                 evt.preventDefault();
             }
         },
-        [actionKeys, updateVarName, onAction, id, dispatch, onChange, changeDelay, propagate, module]
+        [
+            type,
+            actionKeys,
+            step,
+            stepMultiplier,
+            max,
+            min,
+            changeDelay,
+            onAction,
+            dispatch,
+            id,
+            module,
+            updateVarName,
+            onChange,
+            propagate,
+        ]
+    );
+
+    const roundBasedOnStep = useMemo(() => {
+        const stepString = (step || 1).toString();
+        const decimalPlaces = stepString.includes(".") ? stepString.split(".")[1].length : 0;
+        const multiplier = Math.pow(10, decimalPlaces);
+        return (value: number) => Math.round(value * multiplier) / multiplier;
+    }, [step]);
+
+    const calculateNewValue = useMemo(() => {
+        return (prevValue: string, step: number, stepMultiplier: number, shiftKey: boolean, increment: boolean) => {
+            const multiplier = shiftKey ? stepMultiplier : 1;
+            const change = step * multiplier * (increment ? 1 : -1);
+            return roundBasedOnStep(Number(prevValue) + change).toString();
+        };
+    }, [roundBasedOnStep]);
+
+    const handleStepperMouseDown = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>, increment: boolean) => {
+            setValue((prevValue) => {
+                const newValue = calculateNewValue(
+                    prevValue,
+                    step || 1,
+                    stepMultiplier || 10,
+                    event.shiftKey,
+                    increment
+                );
+                if (min !== undefined && Number(newValue) < min) {
+                    return min.toString();
+                }
+                if (max !== undefined && Number(newValue) > max) {
+                    return max.toString();
+                }
+                return newValue;
+            });
+        },
+        [min, max, step, stepMultiplier, calculateNewValue]
+    );
+
+    const handleUpStepperMouseDown = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>) => {
+            handleStepperMouseDown(event, true);
+        },
+        [handleStepperMouseDown]
+    );
+
+    const handleDownStepperMouseDown = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>) => {
+            handleStepperMouseDown(event, false);
+        },
+        [handleStepperMouseDown]
+    );
+
+    // password
+    const [showPassword, setShowPassword] = useState(false);
+    const handleClickShowPassword = useCallback(() => setShowPassword((show) => !show), []);
+    const handleMouseDownPassword = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault(),
+        []
+    );
+    const muiInputProps = useMemo(
+        () =>
+            type == "password"
+                ? {
+                      endAdornment: (
+                          <InputAdornment position="end">
+                              <IconButton
+                                  aria-label="toggle password visibility"
+                                  onClick={handleClickShowPassword}
+                                  onMouseDown={handleMouseDownPassword}
+                                  edge="end"
+                              >
+                                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                              </IconButton>
+                          </InputAdornment>
+                      ),
+                  }
+                : type == "number"
+                ? {
+                      endAdornment: (
+                          <div style={verticalDivStyle}>
+                              <IconButton
+                                  data-testid="stepper-up-spinner"
+                                  size="small"
+                                  onMouseDown={handleUpStepperMouseDown}
+                              >
+                                  <ArrowDropUpIcon fontSize="inherit" />
+                              </IconButton>
+                              <IconButton
+                                  data-testid="stepper-down-spinner"
+                                  size="small"
+                                  onMouseDown={handleDownStepperMouseDown}
+                              >
+                                  <ArrowDropDownIcon fontSize="inherit" />
+                              </IconButton>
+                          </div>
+                      ),
+                  }
+                : undefined,
+        [
+            type,
+            showPassword,
+            handleClickShowPassword,
+            handleMouseDownPassword,
+            handleUpStepperMouseDown,
+            handleDownStepperMouseDown,
+        ]
+    );
+
+    const inputProps = useMemo(
+        () =>
+            type == "number"
+                ? {
+                      step: step ? step : 1,
+                      min: min,
+                      max: max,
+                  }
+                : undefined,
+        [type, step, min, max]
     );
 
     useEffect(() => {
@@ -104,12 +283,15 @@ const Input = (props: TaipyInputProps) => {
     return (
         <Tooltip title={hover || ""}>
             <TextField
+                sx={numberSx}
                 margin="dense"
                 hiddenLabel
                 value={value ?? ""}
                 className={className}
-                type={type}
+                type={showPassword && type == "password" ? "text" : type}
                 id={id}
+                inputProps={inputProps}
+                InputProps={muiInputProps}
                 label={props.label}
                 onChange={handleInput}
                 disabled={!active}
@@ -120,5 +302,4 @@ const Input = (props: TaipyInputProps) => {
         </Tooltip>
     );
 };
-
 export default Input;

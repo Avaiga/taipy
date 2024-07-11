@@ -125,6 +125,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         elif event.entity_type == EventEntityType.JOB:
             with self.lock:
                 self.jobs_list = None
+            self.broadcast_core_changed({"jobs": event.entity_id})
         elif event.entity_type == EventEntityType.SUBMISSION:
             self.submission_status_callback(event.entity_id, event)
         elif event.entity_type == EventEntityType.DATA_NODE:
@@ -181,7 +182,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         # callback
                         submission_name = submission.properties.get("on_submission")
                         if submission_name:
-                            self.gui._call_user_callback(
+                            self.gui.invoke_callback(
                                 client_id,
                                 submission_name,
                                 [

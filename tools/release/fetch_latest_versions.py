@@ -35,6 +35,8 @@ def fetch_latest_releases_from_github(dev=False, target_version="", target_packa
             releases["rest"] = releases.get("rest") or tag.split("-")[0]
         elif "templates" in tag:
             releases["templates"] = releases.get("templates") or tag.split("-")[0]
+        elif "-" not in tag:
+            releases["taipy"] = releases.get("taipy") or tag
     releases[target_package] = target_version
     return releases
 

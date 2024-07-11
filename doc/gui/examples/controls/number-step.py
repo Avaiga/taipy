@@ -15,9 +15,11 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
+value = 50
+
 page = """
-<|90|metric|don't show_value|>
+<|{value}|number|step=2|>
 """
 
-
 Gui(page).run()
+

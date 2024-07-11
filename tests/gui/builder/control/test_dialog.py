@@ -74,3 +74,13 @@ def test_dialog_labels_builder(gui: Gui, helpers):
         "open={_TpB_tpec_TpExPr_dialog_open_TPMDL_0}",
     ]
     helpers.test_control_builder(gui, page, expected_list)
+
+def test_dialog_builder_block(gui: Gui, helpers):
+    with tgb.dialog(title="Another Dialog") as content:  # type: ignore[attr-defined]
+        tgb.text(value="This is in a dialog")  # type: ignore[attr-defined]
+    expected_list = [
+        "<Dialog",
+        'title="Another Dialog"',
+        "This is in a dialog",
+    ]
+    helpers.test_control_builder(gui, tgb.Page(content, frame=None), expected_list)

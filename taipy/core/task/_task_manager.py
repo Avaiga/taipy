@@ -26,12 +26,7 @@ from ..cycle.cycle_id import CycleId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import NonExistingTask
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
-from ..reason._reason_factory import (
-    _build_data_node_is_being_edited_reason,
-    _build_data_node_is_not_written,
-    _build_not_submittable_entity_reason,
-)
-from ..reason.reason import Reasons
+from ..reason import DataNodeEditInProgress, DataNodeIsNotWritten, EntityIsNotSubmittableEntity, ReasonCollection
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
 from ..submission.submission import Submission
@@ -169,24 +164,24 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         return entity_ids
 
     @classmethod
-    def _is_submittable(cls, task: Union[Task, TaskId]) -> Reasons:
+    def _is_submittable(cls, task: Union[Task, TaskId]) -> ReasonCollection:
         if isinstance(task, str):
             task = cls._get(task)
+
+        reason_collection = ReasonCollection()
         if not isinstance(task, Task):
             task = str(task)
-            reason = Reasons(task)
-            reason._add_reason(task, _build_not_submittable_entity_reason(task))
+            reason_collection._add_reason(task, EntityIsNotSubmittableEntity(task))
         else:
-            reason = Reasons(task.id)
             data_manager = _DataManagerFactory._build_manager()
             for node in task.input.values():
                 node = data_manager._get(node)
                 if node._edit_in_progress:
-                    reason._add_reason(node.id, _build_data_node_is_being_edited_reason(node.id))
+                    reason_collection._add_reason(node.id, DataNodeEditInProgress(node.id))
                 if not node._last_edit_date:
-                    reason._add_reason(node.id, _build_data_node_is_not_written(node.id))
+                    reason_collection._add_reason(node.id, DataNodeIsNotWritten(node.id))
 
-        return reason
+        return reason_collection
 
     @classmethod
     def _submit(

@@ -13,11 +13,16 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
+import datetime
+
 from taipy.gui import Gui
 
-page = """
-<|90|metric|don't show_value|>
-"""
+date = datetime.date(2024, 6, 15)
+start = datetime.date(2024, 5, 15)
+end = datetime.date(2024, 7, 15)
 
+page = """
+<|{date}|date|min={start}|max={end}|>
+"""
 
 Gui(page).run()

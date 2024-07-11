@@ -45,8 +45,7 @@ from .exceptions.exceptions import (
 from .job._job_manager_factory import _JobManagerFactory
 from .job.job import Job
 from .job.job_id import JobId
-from .reason._reason_factory import _build_not_submittable_entity_reason
-from .reason.reason import Reasons
+from .reason import EntityIsNotSubmittableEntity, ReasonCollection
 from .scenario._scenario_manager_factory import _ScenarioManagerFactory
 from .scenario.scenario import Scenario
 from .scenario.scenario_id import ScenarioId
@@ -85,7 +84,7 @@ def set(entity: Union[DataNode, Task, Sequence, Scenario, Cycle, Submission]):
         return _SubmissionManagerFactory._build_manager()._set(entity)
 
 
-def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Task, TaskId, str]) -> Reasons:
+def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Task, TaskId, str]) -> ReasonCollection:
     """Indicate if an entity can be submitted.
 
     This function checks if the given entity can be submitted for execution.
@@ -105,7 +104,7 @@ def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Tas
         return _TaskManagerFactory._build_manager()._is_submittable(entity)
     if isinstance(entity, str) and entity.startswith(Task._ID_PREFIX):
         return _TaskManagerFactory._build_manager()._is_submittable(TaskId(entity))
-    return Reasons(str(entity))._add_reason(str(entity), _build_not_submittable_entity_reason(str(entity)))
+    return ReasonCollection()._add_reason(str(entity), EntityIsNotSubmittableEntity(str(entity)))
 
 
 def is_editable(
@@ -510,6 +509,8 @@ def get_scenarios(
     tag: Optional[str] = None,
     is_sorted: bool = False,
     descending: bool = False,
+    created_start_time: Optional[datetime] = None,
+    created_end_time: Optional[datetime] = None,
     sort_key: Literal["name", "id", "config_id", "creation_date", "tags"] = "name",
 ) -> List[Scenario]:
     """Retrieve a list of existing scenarios filtered by cycle or tag.
@@ -526,6 +527,8 @@ def get_scenarios(
             The default value is False.
         descending (bool): If True, sort the output list of scenarios in descending order.
             The default value is False.
+        created_start_time (Optional[datetime]): The optional inclusive start date to filter scenarios by creation date.
+        created_end_time (Optional[datetime]): The optional inclusive end date to filter scenarios by creation date.
         sort_key (Literal["name", "id", "creation_date", "tags"]): The optional sort_key to
             decide upon what key scenarios are sorted. The sorting is in increasing order for
             dates, in alphabetical order for name and id, and in lexicographical order for tags.
@@ -548,6 +551,8 @@ def get_scenarios(
     else:
         scenarios = []
 
+    if created_start_time or created_end_time:
+        scenarios = scenario_manager._filter_by_creation_time(scenarios, created_start_time, created_end_time)
     if is_sorted:
         scenario_manager._sort_scenarios(scenarios, descending, sort_key)
     return scenarios
@@ -569,6 +574,8 @@ def get_primary(cycle: Cycle) -> Optional[Scenario]:
 def get_primary_scenarios(
     is_sorted: bool = False,
     descending: bool = False,
+    created_start_time: Optional[datetime] = None,
+    created_end_time: Optional[datetime] = None,
     sort_key: Literal["name", "id", "config_id", "creation_date", "tags"] = "name",
 ) -> List[Scenario]:
     """Retrieve a list of all primary scenarios.
@@ -578,6 +585,8 @@ def get_primary_scenarios(
             The default value is False.
         descending (bool): If True, sort the output list of scenarios in descending order.
             The default value is False.
+        created_start_time (Optional[datetime]): The optional inclusive start date to filter scenarios by creation date.
+        created_end_time (Optional[datetime]): The optional inclusive end date to filter scenarios by creation date.
         sort_key (Literal["name", "id", "creation_date", "tags"]): The optional sort_key to
             decide upon what key scenarios are sorted. The sorting is in increasing order for
             dates, in alphabetical order for name and id, and in lexicographical order for tags.
@@ -589,6 +598,9 @@ def get_primary_scenarios(
     """
     scenario_manager = _ScenarioManagerFactory._build_manager()
     scenarios = scenario_manager._get_primary_scenarios()
+
+    if created_start_time or created_end_time:
+        scenarios = scenario_manager._filter_by_creation_time(scenarios, created_start_time, created_end_time)
     if is_sorted:
         scenario_manager._sort_scenarios(scenarios, descending, sort_key)
     return scenarios
@@ -867,7 +879,7 @@ def get_cycles() -> List[Cycle]:
     return _CycleManagerFactory._build_manager()._get_all()
 
 
-def can_create(config: Optional[Union[ScenarioConfig, DataNodeConfig]] = None) -> Reasons:
+def can_create(config: Optional[Union[ScenarioConfig, DataNodeConfig]] = None) -> ReasonCollection:
     """Indicate if a config can be created. The config should be a scenario or data node config.
 
     If no config is provided, the function indicates if any scenario or data node config can be created.

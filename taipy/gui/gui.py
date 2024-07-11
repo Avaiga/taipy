@@ -49,7 +49,7 @@ import __main__  # noqa: F401
 from taipy.logger._taipy_logger import _TaipyLogger
 
 if util.find_spec("pyngrok"):
-    from pyngrok import ngrok
+    from pyngrok import ngrok  # type: ignore[reportMissingImports]
 
 from ._default_config import _default_stylekit, default_config
 from ._page import _Page
@@ -320,7 +320,7 @@ class Gui:
         self.__locals_context = _LocalsContext()
         self.__var_dir = _VariableDirectory(self.__locals_context)
 
-        self.__evaluator: _Evaluator = None  # type: ignore
+        self.__evaluator: _Evaluator = None  # type: ignore[assignment]
         self.__adapter = _Adapter()
         self.__directory_name_of_pages: t.List[str] = []
         self.__favicon: t.Optional[t.Union[str, Path]] = None
@@ -437,7 +437,7 @@ class Gui:
             if provider_fn is None:
                 # try plotly
                 if find_spec("plotly") and find_spec("plotly.graph_objs"):
-                    from plotly.graph_objs import Figure as PlotlyFigure
+                    from plotly.graph_objs import Figure as PlotlyFigure  # type: ignore[reportMissingImports]
 
                     if isinstance(content, PlotlyFigure):
 
@@ -508,6 +508,10 @@ class Gui:
 
     def _get_shared_variables(self) -> t.List[str]:
         return self.__evaluator.get_shared_variables()
+
+    @staticmethod
+    def _clear_shared_variable() -> None:
+        Gui.__shared_variables.clear()
 
     def __get_content_accessor(self):
         if self.__content_accessor is None:
@@ -1129,7 +1133,8 @@ class Gui:
                     {
                         "type": _WsType.GET_MODULE_CONTEXT.value,
                         "payload": {"context": mc, "metadata": meta_return},
-                    }
+                    },
+                    send_back_only=True,
                 )
 
     def __get_variable_tree(self, data: t.Dict[str, t.Any]):
@@ -1173,7 +1178,8 @@ class Gui:
                     "variable": self.__get_variable_tree(data),
                     "function": self.__get_variable_tree(function_data),
                 },
-            }
+            },
+            send_back_only=True,
         )
 
     def __handle_ws_app_id(self, message: t.Any):
@@ -1188,7 +1194,8 @@ class Gui:
             {
                 "type": _WsType.APP_ID.value,
                 "payload": {"name": name, "id": app_id},
-            }
+            },
+            send_back_only=True,
         )
 
     def __handle_ws_get_routes(self):
@@ -1206,7 +1213,8 @@ class Gui:
             {
                 "type": _WsType.GET_ROUTES.value,
                 "payload": routes,
-            }
+            },
+            send_back_only=True,
         )
 
     def __send_ws(self, payload: dict, allow_grouping=True, send_back_only=False) -> None:
@@ -1406,7 +1414,7 @@ class Gui:
             try:
                 fd, temp_path = mkstemp(".csv", var_name, text=True)
                 with os.fdopen(fd, "wt", newline="") as csv_file:
-                    df.to_csv(csv_file, index=False)  # type:ignore
+                    df.to_csv(csv_file, index=False)  # type: ignore[union-attr]
                 self._download(temp_path, "data.csv", Gui.__DOWNLOAD_DELETE_ACTION)
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception("download_csv", e):
@@ -1467,60 +1475,135 @@ class Gui:
                     _warn(f"on_action(): Exception raised in '{action_function.__name__}()'", e)
         return False
 
-    def _call_function_with_state(self, user_function: t.Callable, args: t.List[t.Any]) -> t.Any:
-        args.insert(0, self.__get_state())
+    def _call_function_with_state(self, user_function: t.Callable, args: t.Optional[t.List[t.Any]] = None) -> t.Any:
+        cp_args = [] if args is None else args.copy()
+        cp_args.insert(0, self.__get_state())
         argcount = user_function.__code__.co_argcount
         if argcount > 0 and inspect.ismethod(user_function):
             argcount -= 1
-        if argcount > len(args):
-            args += (argcount - len(args)) * [None]
+        if argcount > len(cp_args):
+            cp_args += (argcount - len(cp_args)) * [None]
         else:
-            args = args[:argcount]
-        return user_function(*args)
+            cp_args = cp_args[:argcount]
+        return user_function(*cp_args)
 
     def _set_module_context(self, module_context: t.Optional[str]) -> t.ContextManager[None]:
         return self._set_locals_context(module_context) if module_context is not None else contextlib.nullcontext()
 
-    def _call_user_callback(
+    def invoke_callback(
         self,
-        state_id: t.Optional[str],
-        user_callback: t.Union[t.Callable, str],
-        args: t.List[t.Any],
-        module_context: t.Optional[str],
+        state_id: str,
+        callback: t.Callable,
+        args: t.Optional[t.Sequence[t.Any]] = None,
+        module_context: t.Optional[str] = None,
     ) -> t.Any:
+        """Invoke a user callback for a given state.
+
+        See the
+        [section on Long Running Callbacks in a Thread](../gui/callbacks.md#long-running-callbacks-in-a-thread)
+        in the User Manual for details on when and how this function can be used.
+
+        Arguments:
+            state_id: The identifier of the state to use, as returned by `get_state_id()^`.
+            callback (Callable[[State^, ...], None]): The user-defined function that is invoked.<br/>
+                The first parameter of this function **must** be a `State^`.
+            args (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
+            module_context (Optional[str]): the name of the module that will be used.
+        """
+        this_sid = None
+        if request:
+            # avoid messing with the client_id => Set(ws id)
+            this_sid = getattr(request, "sid", None)
+            request.sid = None  # type: ignore[attr-defined]
         try:
             with self.get_flask_app().app_context():
-                self.__set_client_id_in_context(state_id)
+                setattr(g, Gui.__ARG_CLIENT_ID, state_id)
                 with self._set_module_context(module_context):
-                    if not callable(user_callback):
-                        user_callback = self._get_user_function(user_callback)
-                    if not callable(user_callback):
-                        _warn(f"invoke_callback(): {user_callback} is not callable.")
+                    if not callable(callback):
+                        callback = self._get_user_function(callback)
+                    if not callable(callback):
+                        _warn(f"invoke_callback(): {callback} is not callable.")
                         return None
-                    return self._call_function_with_state(user_callback, args)
+                    return self._call_function_with_state(callback, list(args) if args else None)
         except Exception as e:  # pragma: no cover
-            if not self._call_on_exception(user_callback.__name__ if callable(user_callback) else user_callback, e):
+            if not self._call_on_exception(callback.__name__ if callable(callback) else callback, e):
                 _warn(
-                    "invoke_callback(): Exception raised in "
-                    + f"'{user_callback.__name__ if callable(user_callback) else user_callback}()'",
+                    "Gui.invoke_callback(): Exception raised in "
+                    + f"'{callback.__name__ if callable(callback) else callback}()'",
                     e,
                 )
+        finally:
+            if this_sid and request:
+                request.sid = this_sid  # type: ignore[attr-defined]
         return None
 
-    def _call_broadcast_callback(
-        self, user_callback: t.Callable, args: t.List[t.Any], module_context: t.Optional[str]
-    ) -> t.Any:
-        @contextlib.contextmanager
-        def _broadcast_callback() -> t.Iterator[None]:
-            try:
-                setattr(g, Gui.__BRDCST_CALLBACK_G_ID, True)
-                yield
-            finally:
-                setattr(g, Gui.__BRDCST_CALLBACK_G_ID, False)
+    def broadcast_callback(
+        self,
+        callback: t.Callable,
+        args: t.Optional[t.Sequence[t.Any]] = None,
+        module_context: t.Optional[str] = None,
+    ) -> t.Dict[str, t.Any]:
+        """Invoke a callback for every client.
 
-        with _broadcast_callback():
-            # Use global scopes for broadcast callbacks
-            return self._call_user_callback(_DataScopes._GLOBAL_ID, user_callback, args, module_context)
+        This callback gets invoked for every client connected to the application with the appropriate
+        `State^` instance. You can then perform client-specific tasks, such as updating the state
+        variable reflected in the user interface.
+
+        Arguments:
+            gui (Gui^): The current Gui instance.
+            callback: The user-defined function to be invoked.<br/>
+                The first parameter of this function must be a `State^` object representing the
+                client for which it is invoked.<br/>
+                The other parameters should reflect the ones provided in the *args* collection.
+            args: The parameters to send to *callback*, if any.
+        """
+        # Iterate over all the scopes
+        res = {}
+        for id in [id for id in self.__bindings._get_all_scopes() if id != _DataScopes._GLOBAL_ID]:
+            ret = self.invoke_callback(id, callback, args, module_context)
+            res[id] = ret
+        return res
+
+    def broadcast_change(self, var_name: str, value: t.Any):
+        """Propagates a new value for a given variable to all states.
+
+        This callback gets invoked for every client connected to the application to update the value
+        of the variable called *var_name* to the new value *value*, in their specific `State^`
+        instance. All user interfaces reflect the change.
+
+        Arguments:
+            gui (Gui^): The current Gui instance.
+            var_name: The name of the variable to change.
+            value: The new value for the variable.
+        """
+        self.broadcast_callback(lambda s, n, v: s.assign(n, v), [var_name, value])
+
+    @staticmethod
+    def __broadcast_changes_fn(state: State, values: dict[str, t.Any]) -> None:
+        with state:
+            for n, v in values.items():
+                state.assign(n, v)
+
+    def broadcast_changes(self, values: t.Optional[dict[str, t.Any]] = None, **kwargs):
+        """Propagates new values for several variables to all states.
+
+        This callback gets invoked for every client connected to the application to update the value
+        of all the variables that are keys in *values*, in their specific `State^` instance. All
+        user interfaces reflect the change.
+
+        Arguments:
+            values: An optional dictionary where each key is the name of a variable to change, and
+                where the associated value is the new value to set for that variable, in each state
+                for the application.
+            **kwargs: A collection of variable name-value pairs that are updated for each state of
+                the application. Name-value pairs overload the ones in *values* if the name exists
+                as a key in the dictionary.
+        """
+        if kwargs:
+            values = values.copy() if values else {}
+            for n, v in kwargs.items():
+                values[n] = v
+        self.broadcast_callback(Gui.__broadcast_changes_fn, [values])
 
     def _is_in_brdcst_callback(self):
         try:
@@ -2094,7 +2177,7 @@ class Gui:
                 if not isinstance(lib, ElementLibrary):
                     continue
                 try:
-                    self._call_function_with_state(lib.on_user_init, [])
+                    self._call_function_with_state(lib.on_user_init)
                 except Exception as e:  # pragma: no cover
                     if not self._call_on_exception(f"{name}.on_user_init", e):
                         _warn(f"Exception raised in {name}.on_user_init()", e)
@@ -2107,7 +2190,7 @@ class Gui:
             self.__init_libs()
             if hasattr(self, "on_init") and callable(self.on_init):
                 try:
-                    self._call_function_with_state(self.on_init, [])
+                    self._call_function_with_state(self.on_init)
                 except Exception as e:  # pragma: no cover
                     if not self._call_on_exception("on_init", e):
                         _warn("Exception raised in on_init()", e)
@@ -2298,7 +2381,7 @@ class Gui:
             config["extensions"] = {}
             for libs in self.__extensions.values():
                 for lib in libs:
-                    config["extensions"][f"./{Gui._EXTENSION_ROOT}/{lib.get_js_module_name()}"] = [  # type: ignore
+                    config["extensions"][f"./{Gui._EXTENSION_ROOT}/{lib.get_js_module_name()}"] = [
                         e._get_js_name(n)
                         for n, e in lib.get_elements().items()
                         if isinstance(e, Element) and not e._is_server_only()
@@ -2553,8 +2636,9 @@ class Gui:
 
         # Base global ctx is TaipyHolder classes + script modules and callables
         glob_ctx: t.Dict[str, t.Any] = {t.__name__: t for t in _TaipyBase.__subclasses__()}
-        glob_ctx.update({k: v for k, v in locals_bind.items() if inspect.ismodule(v) or callable(v)})
         glob_ctx[Gui.__SELF_VAR] = self
+        glob_ctx["state"] = self.__state
+        glob_ctx.update({k: v for k, v in locals_bind.items() if inspect.ismodule(v) or callable(v)})
 
         # Call on_init on each library
         for name, libs in self.__extensions.items():

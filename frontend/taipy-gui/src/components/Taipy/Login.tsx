@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { ChangeEvent, KeyboardEvent, MouseEvent, useCallback, useEffect, useState } from "react";
+import React, { ChangeEvent, KeyboardEvent, MouseEvent, useCallback, useEffect, useMemo, useState } from "react";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -19,10 +19,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
-import FormControl from "@mui/material/FormControl";
 import InputAdornment from "@mui/material/InputAdornment";
-import InputLabel from "@mui/material/InputLabel";
-import OutlinedInput from "@mui/material/OutlinedInput";
 import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
@@ -51,6 +48,8 @@ const closeSx: SxProps<Theme> = {
     alignSelf: "start",
 };
 const titleSx = { m: 0, p: 2, display: "flex", paddingRight: "0.1em" };
+const userProps = { autocomplete: "username" };
+const pwdProps = { autocomplete: "current-password" };
 
 const Login = (props: LoginProps) => {
     const { id, title = "Log-in", onAction = "on_login", message, defaultMessage } = props;
@@ -81,13 +80,6 @@ const Login = (props: LoginProps) => {
         input == "user" ? setUser(evt.currentTarget.value) : setPassword(evt.currentTarget.value);
     }, []);
 
-    const handleClickShowPassword = useCallback(() => setShowPassword((show) => !show), []);
-
-    const handleMouseDownPassword = useCallback(
-        (event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault(),
-        []
-    );
-
     const handleEnter = useCallback(
         (evt: KeyboardEvent<HTMLInputElement>) => {
             if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && evt.key == "Enter") {
@@ -96,6 +88,30 @@ const Login = (props: LoginProps) => {
             }
         },
         [handleAction]
+    );
+
+    // password
+    const handleClickShowPassword = useCallback(() => setShowPassword((show) => !show), []);
+    const handleMouseDownPassword = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault(),
+        []
+    );
+    const passwordProps = useMemo(
+        () => ({
+            endAdornment: (
+                <InputAdornment position="end">
+                    <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                    >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                </InputAdornment>
+            ),
+        }),
+        [showPassword, handleClickShowPassword, handleMouseDownPassword]
     );
 
     useEffect(() => {
@@ -129,30 +145,23 @@ const Login = (props: LoginProps) => {
                     onChange={changeInput}
                     data-input="user"
                     onKeyDown={handleEnter}
+                    inputProps={userProps}
                 ></TextField>
-                <FormControl variant="outlined" data-input="password" required>
-                    <InputLabel htmlFor="taipy-login-password">Password</InputLabel>
-                    <OutlinedInput
-                        id="taipy-login-password"
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={changeInput}
-                        endAdornment={
-                            <InputAdornment position="end">
-                                <IconButton
-                                    aria-label="toggle password visibility"
-                                    onClick={handleClickShowPassword}
-                                    onMouseDown={handleMouseDownPassword}
-                                    edge="end"
-                                >
-                                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                                </IconButton>
-                            </InputAdornment>
-                        }
-                        label="Password"
-                        onKeyDown={handleEnter}
-                    />
-                </FormControl>
+                <TextField
+                    variant="outlined"
+                    label="Password"
+                    required
+                    fullWidth
+                    margin="dense"
+                    className={getSuffixedClassNames(className, "-password")}
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={changeInput}
+                    data-input="password"
+                    onKeyDown={handleEnter}
+                    inputProps={pwdProps}
+                    InputProps={passwordProps}
+                />
                 <DialogContentText>{message || defaultMessage}</DialogContentText>
             </DialogContent>
             <DialogActions>

@@ -11,14 +11,26 @@
 
 from __future__ import annotations
 
+import ast
 import copy
+import inspect
+import io
 import re
+import sys
 import typing as t
+import uuid
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
+from types import FrameType, FunctionType
 
+from .._warnings import _warn
+from ..utils import _getscopeattr
+
+if sys.version_info < (3, 9):
+    from ..utils.unparse import _Unparser
 from ._context_manager import _BuilderContextManager
 from ._factory import _BuilderFactory
+from ._utils import _LambdaByName, _python_builtins, _TransformVarToValue
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
@@ -30,6 +42,7 @@ class _Element(ABC):
     _ELEMENT_NAME = ""
     _DEFAULT_PROPERTY = ""
     __RE_INDEXED_PROPERTY = re.compile(r"^(.*?)__([\w\d]+)$")
+    _NEW_LAMBDA_NAME = "new_lambda"
 
     def __new__(cls, *args, **kwargs):
         obj = super(_Element, cls).__new__(cls)
@@ -40,6 +53,11 @@ class _Element(ABC):
 
     def __init__(self, *args, **kwargs) -> None:
         self._properties: t.Dict[str, t.Any] = {}
+        self._lambdas: t.Dict[str, str] = {}
+        self.__calling_frame = t.cast(
+            FrameType, t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_back
+        )
+
         if args and self._DEFAULT_PROPERTY != "":
             self._properties = {self._DEFAULT_PROPERTY: args[0]}
         self._properties.update(kwargs)
@@ -49,10 +67,15 @@ class _Element(ABC):
         self._properties.update(kwargs)
         self.parse_properties()
 
-    # Convert property value to string
+    def _evaluate_lambdas(self, gui: Gui):
+        for k, lmbd in self._lambdas.items():
+            expr = gui._evaluate_expr(f"{{{lmbd}}}")
+            gui._bind_var_val(k, _getscopeattr(gui, expr))
+
+    # Convert property value to string/function
     def parse_properties(self):
         self._properties = {
-            _Element._parse_property_key(k): _Element._parse_property(v) for k, v in self._properties.items()
+            _Element._parse_property_key(k): self._parse_property(k, v) for k, v in self._properties.items()
         }
 
     # Get a deepcopy version of the properties
@@ -65,10 +88,47 @@ class _Element(ABC):
             return f"{match.group(1)}[{match.group(2)}]"
         return key
 
-    @staticmethod
-    def _parse_property(value: t.Any) -> t.Any:
+    def _parse_property(self, key: str, value: t.Any) -> t.Any:
         if isinstance(value, (str, dict, Iterable)):
             return value
+        if isinstance(value, FunctionType):
+            if key.startswith("on_"):
+                if value.__name__.startswith("<"):
+                    return value
+                return value.__name__
+
+            try:
+                st = ast.parse(inspect.getsource(value.__code__).strip())
+                lambda_by_name: t.Dict[str, ast.Lambda] = {}
+                _LambdaByName(self._ELEMENT_NAME, lambda_by_name).visit(st)
+                lambda_fn = lambda_by_name.get(
+                    key,
+                    lambda_by_name.get(_LambdaByName._DEFAULT_NAME, None) if key == self._DEFAULT_PROPERTY else None,
+                )
+                if lambda_fn is not None:
+                    args = [arg.arg for arg in lambda_fn.args.args]
+                    targets = [
+                        compr.target.id  # type: ignore[attr-defined]
+                        for node in ast.walk(lambda_fn.body)
+                        if isinstance(node, ast.ListComp)
+                        for compr in node.generators
+                    ]
+                    tree = _TransformVarToValue(self.__calling_frame, args + targets + _python_builtins).visit(
+                        lambda_fn
+                    )
+                    ast.fix_missing_locations(tree)
+                    if sys.version_info < (3, 9):  # python 3.8 ast has no unparse
+                        string_fd = io.StringIO()
+                        _Unparser(tree, string_fd)
+                        string_fd.seek(0)
+                        lambda_text = string_fd.read()
+                    else:
+                        lambda_text = ast.unparse(tree)
+                    lambda_name = f"__lambda_{uuid.uuid4().hex}"
+                    self._lambdas[lambda_name] = lambda_text
+                    return f'{{{lambda_name}({", ".join(args)})}}'
+            except Exception as e:
+                _warn("Error in lambda expression", e)
         if hasattr(value, "__name__"):
             return str(getattr(value, "__name__"))  # noqa: B009
         return str(value)
@@ -99,6 +159,7 @@ class _Block(_Element):
         _BuilderContextManager().pop()
 
     def _render(self, gui: "Gui") -> str:
+        self._evaluate_lambdas(gui)
         el = _BuilderFactory.create_element(gui, self._ELEMENT_NAME, self._deepcopy_properties())
         return f"{el[0]}{self._render_children(gui)}</{el[1]}>"
 
@@ -109,7 +170,7 @@ class _Block(_Element):
 class _DefaultBlock(_Block):
     _ELEMENT_NAME = "part"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # do not remove as it could break the search in frames
         super().__init__(*args, **kwargs)
 
 
@@ -162,6 +223,7 @@ class html(_Block):
         self._content = args[1] if len(args) > 1 else ""
 
     def _render(self, gui: "Gui") -> str:
+        self._evaluate_lambdas(gui)
         if self._ELEMENT_NAME:
             attrs = ""
             if self._properties:
@@ -174,10 +236,11 @@ class html(_Block):
 class _Control(_Element):
     """NOT DOCUMENTED"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # do not remove as it could break the search in frames
         super().__init__(*args, **kwargs)
 
     def _render(self, gui: "Gui") -> str:
+        self._evaluate_lambdas(gui)
         el = _BuilderFactory.create_element(gui, self._ELEMENT_NAME, self._deepcopy_properties())
         return (
             f"<div>{el[0]}</{el[1]}></div>"

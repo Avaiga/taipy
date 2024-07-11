@@ -48,6 +48,14 @@ export interface TaipyInputProps extends TaipyActiveProps, TaipyChangeProps, Tai
     type: string;
     value: string;
     defaultValue?: string;
+    step?: number;
+    defaultStep?: number;
+    stepMultiplier?: number;
+    defaultStepMultiplier?: number;
+    min?: number;
+    defaultMin?: number;
+    max?: number;
+    defaultMax?: number;
     changeDelay?: number;
     onAction?: string;
     actionKeys?: string;
@@ -57,6 +65,15 @@ export interface TaipyInputProps extends TaipyActiveProps, TaipyChangeProps, Tai
 
 export interface TaipyLabelProps {
     label?: string;
+}
+
+export interface DateProps {
+    maxDate?: unknown;
+    maxDateTime?: unknown;
+    maxTime?: unknown;
+    minDate?: unknown;
+    minDateTime?: unknown;
+    minTime?: unknown;
 }
 
 export const getArrayValue = <T>(arr: T[], idx: number, defVal?: T): T | undefined => {
@@ -113,3 +130,20 @@ export const getSuffixedClassNames = (names: string | undefined, suffix: string)
 export const emptyStyle = {} as CSSProperties;
 
 export const disableColor = <T>(color: T, disabled: boolean) => (disabled ? ("disabled" as T) : color);
+
+export const getProps = (p: DateProps, start: boolean, val: Date | null, withTime: boolean): DateProps => {
+    if (!val) {
+        return {};
+    }
+    const propName: keyof DateProps = withTime
+        ? start
+            ? "minDateTime"
+            : "maxDateTime"
+        : start
+            ? "minDate"
+            : "maxDate";
+    if (p[propName] == val) {
+        return p;
+    }
+    return {...p, [propName]: val};
+};

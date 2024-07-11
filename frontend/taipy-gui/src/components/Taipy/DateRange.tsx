@@ -21,7 +21,7 @@ import { isValid } from "date-fns";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps } from "./utils";
+import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps, DateProps, getProps } from "./utils";
 import { dateToString, getDateTime, getTimeZonedDate } from "../../utils";
 import { useClassNames, useDispatch, useDynamicProperty, useFormatConfig, useModule } from "../../utils/hooks";
 import Field from "./Field";
@@ -58,32 +58,6 @@ const getRangeDateTime = (
         return dates.map((d) => getDateTime(d, tz, withTime)) as [Date, Date];
     }
     return [null, null];
-};
-
-interface DateProps {
-    maxDate?: unknown;
-    maxDateTime?: unknown;
-    maxTime?: unknown;
-    minDate?: unknown;
-    minDateTime?: unknown;
-    minTime?: unknown;
-}
-
-const getProps = (p: DateProps, start: boolean, val: Date | null, withTime: boolean): DateProps => {
-    if (!val) {
-        return {};
-    }
-    const propName: keyof DateProps = withTime
-        ? start
-            ? "minDateTime"
-            : "maxDateTime"
-        : start
-        ? "minDate"
-        : "maxDate";
-    if (p[propName] == val) {
-        return p;
-    }
-    return { ...p, [propName]: val };
 };
 
 const DateRange = (props: DateRangeProps) => {

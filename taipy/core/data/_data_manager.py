@@ -22,8 +22,7 @@ from ..config.data_node_config import DataNodeConfig
 from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import InvalidDataNodeType
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
-from ..reason._reason_factory import _build_not_global_scope_reason, _build_wrong_config_type_reason
-from ..reason.reason import Reasons
+from ..reason import NotGlobalScope, ReasonCollection, WrongConfigType
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
 from ._data_fs_repository import _DataFSRepository
@@ -69,17 +68,17 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         }
 
     @classmethod
-    def _can_create(cls, config: Optional[DataNodeConfig] = None) -> Reasons:
+    def _can_create(cls, config: Optional[DataNodeConfig] = None) -> ReasonCollection:
         config_id = getattr(config, "id", None) or str(config)
-        reason = Reasons(config_id)
+        reason_collection = ReasonCollection()
 
         if config is not None:
             if not isinstance(config, DataNodeConfig):
-                reason._add_reason(config_id, _build_wrong_config_type_reason(config_id, "DataNodeConfig"))
+                reason_collection._add_reason(config_id, WrongConfigType(config_id, DataNodeConfig.__name__))
             elif config.scope is not Scope.GLOBAL:
-                reason._add_reason(config_id, _build_not_global_scope_reason(config_id))
+                reason_collection._add_reason(config_id, NotGlobalScope(config_id))
 
-        return reason
+        return reason_collection
 
     @classmethod
     def _create_and_set(

@@ -1,5 +1,5 @@
-[![Taipy Designer](https://github.com/nevo-david/taipy/assets/100117126/e787ba7b-ec7a-4d3f-a7e4-0f195daadce7)
-](https://taipy.io/enterprise)
+[![Taipy Designer banner](https://github.com/Avaiga/taipy/assets/31435778/6378ffd4-438a-498f-9385-10394f7d53fb)](https://links.taipy.io/306TwUH)
+
 
 <div align="center">
   <a href="https://taipy.io?utm_source=github" target="_blank">

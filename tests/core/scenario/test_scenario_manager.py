@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from typing import Callable, Iterable, Optional
 from unittest.mock import ANY, patch
 
+import freezegun
 import pytest
 
 from taipy.config.common.frequency import Frequency
@@ -24,6 +25,7 @@ from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core.common import _utils
 from taipy.core.common._utils import _Subscriber
+from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
@@ -39,6 +41,7 @@ from taipy.core.exceptions.exceptions import (
     UnauthorizedTagError,
 )
 from taipy.core.job._job_manager import _JobManager
+from taipy.core.reason import WrongConfigType
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from taipy.core.scenario.scenario import Scenario
@@ -381,13 +384,15 @@ def test_can_create():
 
     reasons = _ScenarioManager._can_create(task_config)
     assert bool(reasons) is False
-    assert reasons._reasons == {task_config.id: {'Object "task" must be a valid ScenarioConfig'}}
+    assert reasons._reasons[task_config.id] == {WrongConfigType(task_config.id, ScenarioConfig.__name__)}
+    assert str(list(reasons._reasons[task_config.id])[0]) == 'Object "task" must be a valid ScenarioConfig'
     with pytest.raises(AttributeError):
         _ScenarioManager._create(task_config)
 
     reasons = _ScenarioManager._can_create(1)
     assert bool(reasons) is False
-    assert reasons._reasons == {"1": {'Object "1" must be a valid ScenarioConfig'}}
+    assert reasons._reasons["1"] == {WrongConfigType(1, ScenarioConfig.__name__)}
+    assert str(list(reasons._reasons["1"])[0]) == 'Object "1" must be a valid ScenarioConfig'
     with pytest.raises(AttributeError):
         _ScenarioManager._create(1)
 
@@ -1481,3 +1486,55 @@ def test_get_scenarios_by_config_id_in_multiple_versions_environment():
 
     assert len(_ScenarioManager._get_by_config_id(scenario_config_1.id)) == 3
     assert len(_ScenarioManager._get_by_config_id(scenario_config_2.id)) == 2
+
+
+def test_filter_scenarios_by_creation_datetime():
+    scenario_config_1 = Config.configure_scenario("s1", sequence_configs=[])
+
+    with freezegun.freeze_time("2024-01-01"):
+        s_1_1 = _ScenarioManager._create(scenario_config_1)
+    with freezegun.freeze_time("2024-01-03"):
+        s_1_2 = _ScenarioManager._create(scenario_config_1)
+    with freezegun.freeze_time("2024-02-01"):
+        s_1_3 = _ScenarioManager._create(scenario_config_1)
+
+    all_scenarios = _ScenarioManager._get_all()
+
+    filtered_scenarios = _ScenarioManager._filter_by_creation_time(
+        scenarios=all_scenarios,
+        created_start_time=datetime(2024, 1, 1),
+        created_end_time=datetime(2024, 1, 2),
+    )
+    assert len(filtered_scenarios) == 1
+    assert [s_1_1] == filtered_scenarios
+
+    # The time period is inclusive
+    filtered_scenarios = _ScenarioManager._filter_by_creation_time(
+        scenarios=all_scenarios,
+        created_start_time=datetime(2024, 1, 1),
+        created_end_time=datetime(2024, 1, 3),
+    )
+    assert len(filtered_scenarios) == 2
+    assert sorted([s_1_1.id, s_1_2.id]) == sorted([scenario.id for scenario in filtered_scenarios])
+
+    filtered_scenarios = _ScenarioManager._filter_by_creation_time(
+        scenarios=all_scenarios,
+        created_start_time=datetime(2023, 1, 1),
+        created_end_time=datetime(2025, 1, 1),
+    )
+    assert len(filtered_scenarios) == 3
+    assert sorted([s_1_1.id, s_1_2.id, s_1_3.id]) == sorted([scenario.id for scenario in filtered_scenarios])
+
+    filtered_scenarios = _ScenarioManager._filter_by_creation_time(
+        scenarios=all_scenarios,
+        created_start_time=datetime(2024, 2, 1),
+    )
+    assert len(filtered_scenarios) == 1
+    assert [s_1_3] == filtered_scenarios
+
+    filtered_scenarios = _ScenarioManager._filter_by_creation_time(
+        scenarios=all_scenarios,
+        created_end_time=datetime(2024, 1, 2),
+    )
+    assert len(filtered_scenarios) == 1
+    assert [s_1_1] == filtered_scenarios
