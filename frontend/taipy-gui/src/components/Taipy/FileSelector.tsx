@@ -76,25 +76,27 @@ const FileSelector = (props: FileSelectorProps) => {
                     (value) => {
                         setUpload(false);
                         onAction && dispatch(createSendActionNameAction(id, module, onAction));
-                        notify && dispatch(
-                            createAlertAction({ atype: "success", message: value, system: false, duration: 3000 })
-                        );
+                        notify &&
+                            dispatch(
+                                createAlertAction({ atype: "success", message: value, system: false, duration: 3000 }),
+                            );
                     },
                     (reason) => {
                         setUpload(false);
-                        notify && dispatch(
-                            createAlertAction({ atype: "error", message: reason, system: false, duration: 3000 })
-                        );
-                    }
+                        notify &&
+                            dispatch(
+                                createAlertAction({ atype: "error", message: reason, system: false, duration: 3000 }),
+                            );
+                    },
                 );
             }
         },
-        [state.id, id, onAction, notify, updateVarName, dispatch, module]
+        [state.id, id, onAction, notify, updateVarName, dispatch, module],
     );
 
     const handleChange = useCallback(
         (e: ChangeEvent<HTMLInputElement>) => handleFiles(e.target.files, e),
-        [handleFiles]
+        [handleFiles],
     );
 
     const handleDrop = useCallback(
@@ -103,7 +105,7 @@ const FileSelector = (props: FileSelectorProps) => {
             setDropSx(defaultSx);
             handleFiles(e.dataTransfer?.files, e);
         },
-        [handleFiles]
+        [handleFiles],
     );
 
     const handleDragLeave = useCallback(() => {
@@ -116,14 +118,12 @@ const FileSelector = (props: FileSelectorProps) => {
             console.log(evt);
             const target = evt.currentTarget as HTMLElement;
             setDropSx((sx) =>
-                sx.minWidth === defaultSx.minWidth && target
-                    ? { minWidth: target.clientWidth + "px" }
-                    : sx
+                sx.minWidth === defaultSx.minWidth && target ? { minWidth: target.clientWidth + "px" } : sx,
             );
             setDropLabel(dropMessage);
             handleDragOver(evt);
         },
-        [dropMessage]
+        [dropMessage],
     );
 
     useEffect(() => {
@@ -144,7 +144,7 @@ const FileSelector = (props: FileSelectorProps) => {
     }, [handleDrop, handleDragLeave, handleDragOverWithLabel]);
 
     return (
-        <label htmlFor={inputId} className={className}>
+        <label data-testid="file-selector" htmlFor={inputId} className={className}>
             <input
                 style={noDisplayStyle}
                 id={inputId}
@@ -157,6 +157,7 @@ const FileSelector = (props: FileSelectorProps) => {
             <Tooltip title={hover || ""}>
                 <Button
                     id={id}
+                    data-testid="upload-button"
                     component="span"
                     aria-label="upload"
                     variant="outlined"
