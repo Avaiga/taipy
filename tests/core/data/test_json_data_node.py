@@ -411,16 +411,35 @@ class TestJSONDataNode:
             all_column_is_abc = all(data.keys() == {"a", "b", "c"} for data in upload_data)
             return upload_path.endswith(".json") and all_column_is_abc
 
-        wrong_format_not_json_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_json").strpath
-        wrong_format_json_path = tmpdir_factory.mktemp("data").join("wrong_format_df.json").strpath
-        with open(wrong_format_not_json_path, "w") as f:
+        not_exists_json_path = tmpdir_factory.mktemp("data").join("not_exists.json").strpath
+        reasons = dn._upload(not_exists_json_path, upload_checker=check_data_keys)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file not_exists.json can not be read,"
+            f' therefore is not a valid data file for data node "{dn.id}"'
+        )
+
+        not_json_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_json").strpath
+        with open(not_json_path, "w") as f:
             json.dump([{"a": 1, "b": 2, "d": 3}, {"a": 4, "b": 5, "d": 6}], f)
-
         # The upload should fail when the file is not a json
-        assert not dn._upload(wrong_format_not_json_path, upload_checker=check_data_keys)
+        reasons = dn._upload(not_json_path, upload_checker=check_data_keys)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0])
+            == f'The uploaded file wrong_format_df.not_json has invalid data for data node "{dn.id}"'
+        )
 
+        wrong_format_json_path = tmpdir_factory.mktemp("data").join("wrong_format_df.json").strpath
+        with open(wrong_format_json_path, "w") as f:
+            json.dump([{"a": 1, "b": 2, "d": 3}, {"a": 4, "b": 5, "d": 6}], f)
         # The upload should fail when check_data_keys() return False
-        assert not dn._upload(wrong_format_json_path, upload_checker=check_data_keys)
+        reasons = dn._upload(wrong_format_json_path, upload_checker=check_data_keys)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0])
+            == f'The uploaded file wrong_format_df.json has invalid data for data node "{dn.id}"'
+        )
 
         assert dn.read() == old_data  # The content of the dn should not change when upload fails
         assert dn.last_edit_date == old_last_edit_date  # The last edit date should not change when upload fails

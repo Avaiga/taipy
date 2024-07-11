@@ -17,8 +17,10 @@ from os.path import isfile
 from typing import Any, Callable, Dict, Optional
 
 from taipy.config.config import Config
+from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._entity._reload import _self_reload
+from ..reason import InvalidUploadFile, ReasonCollection, UploadFileCanNotBeRead
 from .data_node import DataNode
 from .data_node_id import Edit
 
@@ -33,6 +35,8 @@ class _FileDataNodeMixin(object):
     _PATH_KEY = "path"
     _DEFAULT_PATH_KEY = "default_path"
     _IS_GENERATED_KEY = "is_generated"
+
+    __logger = _TaipyLogger._get_logger()
 
     def __init__(self, properties: Dict) -> None:
         self._path: str = properties.get(self._PATH_KEY, properties.get(self._DEFAULT_PATH_KEY))
@@ -104,7 +108,7 @@ class _FileDataNodeMixin(object):
 
         return ""
 
-    def _upload(self, path: str, upload_checker: Optional[Callable[[str, Any], bool]] = None) -> bool:
+    def _upload(self, path: str, upload_checker: Optional[Callable[[str, Any], bool]] = None) -> ReasonCollection:
         """Upload a file data to the data node.
 
         Parameters:
@@ -118,16 +122,22 @@ class _FileDataNodeMixin(object):
         """
         from ._data_manager_factory import _DataManagerFactory
 
+        reason_collection = ReasonCollection()
+
         upload_path = pathlib.Path(path)
 
-        if upload_checker is not None:
-            try:
-                upload_data = self._read_from_path(str(upload_path))
-            except Exception:
-                return False
+        try:
+            upload_data = self._read_from_path(str(upload_path))
+        except Exception as err:
+            self.__logger.error(f"Error while uploading {upload_path.name} to data node {self.id}:")  # type: ignore[attr-defined]
+            self.__logger.error(f"Error: {err}")
+            reason_collection._add_reason(self.id, UploadFileCanNotBeRead(upload_path.name, self.id))  # type: ignore[attr-defined]
+            return reason_collection
 
+        if upload_checker is not None:
             if not upload_checker(upload_path.name, upload_data):
-                return False
+                reason_collection._add_reason(self.id, InvalidUploadFile(upload_path.name, self.id))  # type: ignore[attr-defined]
+                return reason_collection
 
         shutil.copy(upload_path, self.path)
 
@@ -135,7 +145,7 @@ class _FileDataNodeMixin(object):
         self.unlock_edit()  # type: ignore[attr-defined]
         _DataManagerFactory._build_manager()._set(self)  # type: ignore[arg-type]
 
-        return True
+        return reason_collection
 
     def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
         raise NotImplementedError

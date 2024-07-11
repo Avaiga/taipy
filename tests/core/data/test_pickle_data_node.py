@@ -233,16 +233,35 @@ class TestPickleDataNodeEntity:
         def check_data_column(upload_path, upload_data):
             return upload_path.endswith(".p") and upload_data.columns.tolist() == ["a", "b", "c"]
 
-        wrong_format_not_pickle_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_pickle").strpath
+        not_exists_json_path = tmpdir_factory.mktemp("data").join("not_exists.json").strpath
+        reasons = dn._upload(not_exists_json_path, upload_checker=check_data_column)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file not_exists.json can not be read,"
+            f' therefore is not a valid data file for data node "{dn.id}"'
+        )
+
+        not_pickle_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_pickle").strpath
+        with open(str(not_pickle_path), "wb") as f:
+            pickle.dump(pd.DataFrame([{"a": 1, "b": 2, "d": 3}, {"a": 4, "b": 5, "d": 6}]), f)
+        # The upload should fail when the file is not a pickle
+        reasons = dn._upload(not_pickle_path, upload_checker=check_data_column)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0])
+            == f'The uploaded file wrong_format_df.not_pickle has invalid data for data node "{dn.id}"'
+        )
+
         wrong_format_pickle_path = tmpdir_factory.mktemp("data").join("wrong_format_df.p").strpath
         with open(str(wrong_format_pickle_path), "wb") as f:
             pickle.dump(pd.DataFrame([{"a": 1, "b": 2, "d": 3}, {"a": 4, "b": 5, "d": 6}]), f)
-
-        # The upload should fail when the file is not a pickle
-        assert not dn._upload(wrong_format_not_pickle_path, upload_checker=check_data_column)
-
         # The upload should fail when check_data_column() return False
-        assert not dn._upload(wrong_format_pickle_path, upload_checker=check_data_column)
+        reasons = dn._upload(wrong_format_pickle_path, upload_checker=check_data_column)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0])
+            == f'The uploaded file wrong_format_df.p has invalid data for data node "{dn.id}"'
+        )
 
         assert_frame_equal(dn.read(), old_data)  # The content of the dn should not change when upload fails
         assert dn.last_edit_date == old_last_edit_date  # The last edit date should not change when upload fails

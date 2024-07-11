@@ -123,3 +123,33 @@ class NotGlobalScope(Reason):
 
     def __init__(self, config_id: str):
         Reason.__init__(self, f'Data node config "{config_id}" does not have GLOBAL scope')
+
+
+class UploadFileCanNotBeRead(Reason):
+    """
+    The uploaded file can not be read, therefore is not a valid data file for the data node.
+
+    Attributes:
+        file_name (str): The name of the file that was uploaded.
+        datanode_id (str): The datanode id that the file is intended to upload to.
+    """
+
+    def __init__(self, file_name: str, datanode_id: str):
+        Reason.__init__(
+            self,
+            f"The uploaded file {file_name} can not be read, "
+            f'therefore is not a valid data file for data node "{datanode_id}"',
+        )
+
+
+class InvalidUploadFile(Reason):
+    """
+    The uploaded file has invalid data, therefore is not a valid data file for the data node.
+
+    Attributes:
+        file_name (str): The name of the file that was uploaded.
+        datanode_id (str): The datanode id that the file is intended to upload to.
+    """
+
+    def __init__(self, file_name: str, datanode_id: str):
+        Reason.__init__(self, f'The uploaded file {file_name} has invalid data for data node "{datanode_id}"')
