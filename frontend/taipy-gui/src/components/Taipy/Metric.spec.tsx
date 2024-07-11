@@ -11,8 +11,8 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { act } from "react";
-import { render, waitFor, RenderResult } from "@testing-library/react";
+import React from "react";
+import { render, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import { createTheme } from "@mui/material/styles";
@@ -60,6 +60,7 @@ const template = {
                 [1, "#f0f921"],
             ],
         },
+        paper_bgcolor: "rgb(255,0,0)",
     },
 };
 
@@ -175,10 +176,9 @@ describe("Metric Component", () => {
 
     it("sets the title when provided", async () => {
         const title = "Test Title";
-        let container: RenderResult | null = null;
-        container = render(<Metric title={title} />);
+        const { container } = render(<Metric title={title} />);
         await waitFor(() => {
-            const titleElement = container!.container.querySelector(".gtitle");
+            const titleElement = container.querySelector(".gtitle");
             if (!titleElement) {
                 throw new Error("Title element not found");
             }
@@ -203,11 +203,12 @@ describe("Metric Component", () => {
     });
 
     it("sets the template when provided", async () => {
-        let container: RenderResult | null = null;
-        container = render(<Metric template={JSON.stringify(template)} />);
+        render(<Metric template={JSON.stringify(template)} />);
         await waitFor(() => {
-            const elmWithTpl = container!.container.querySelector(".user-select-none");
-            expect(elmWithTpl).toBeInTheDocument();
+            const elt = document.querySelector(".main-svg");
+            expect(elt).toHaveStyle({
+                backgroundColor: "rgb(255, 0, 0)",
+            });
         });
     });
 
