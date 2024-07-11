@@ -12,6 +12,7 @@ export type OnInitHandler = (taipyApp: TaipyApp) => void;
 export type OnChangeHandler = (taipyApp: TaipyApp, encodedName: string, value: unknown) => void;
 export type OnNotifyHandler = (taipyApp: TaipyApp, type: string, message: string) => void;
 export type OnReloadHandler = (taipyApp: TaipyApp, removedChanges: ModuleData) => void;
+export type OnWsMessage = (taipyApp: TaipyApp, event: string, payload: unknown) => void;
 export type OnWsStatusUpdate = (taipyApp: TaipyApp, messageQueue: string[]) => void;
 type Route = [string, string];
 
@@ -21,6 +22,7 @@ export class TaipyApp {
     _onChange: OnChangeHandler | undefined;
     _onNotify: OnNotifyHandler | undefined;
     _onReload: OnReloadHandler | undefined;
+    _onWsMessage: OnWsMessage | undefined;
     _onWsStatusUpdate: OnWsStatusUpdate | undefined;
     _ackList: string[];
     variableData: DataManager | undefined;
@@ -99,6 +101,16 @@ export class TaipyApp {
             throw new Error("onReload() requires two parameters");
         }
         this._onReload = handler;
+    }
+
+    get onWsMessage() {
+        return this._onWsMessage;
+    }
+    set onWsMessage(handler: OnWsMessage | undefined) {
+        if (handler !== undefined && handler?.length !== 3) {
+            throw new Error("onWsMessage() requires three parameters");
+        }
+        this._onWsMessage = handler;
     }
 
     get onWsStatusUpdate() {
