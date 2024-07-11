@@ -14,6 +14,7 @@ export type OnNotifyHandler = (taipyApp: TaipyApp, type: string, message: string
 export type OnReloadHandler = (taipyApp: TaipyApp, removedChanges: ModuleData) => void;
 export type OnWsMessage = (taipyApp: TaipyApp, event: string, payload: unknown) => void;
 export type OnWsStatusUpdate = (taipyApp: TaipyApp, messageQueue: string[]) => void;
+export type OnEvent = OnInitHandler | OnChangeHandler | OnNotifyHandler | OnReloadHandler | OnWsMessage | OnWsStatusUpdate;
 type Route = [string, string];
 
 export class TaipyApp {
@@ -123,6 +124,30 @@ export class TaipyApp {
         this._onWsStatusUpdate = handler;
     }
 
+    useEvent(event: OnEvent | undefined, ...args: unknown[]) {
+        if (!event) {
+            return
+        }
+        if (event === this.onInit) {
+            return this.onInit(this);
+        }
+        if (event === this.onChange) {
+            return this.onChange(this, args[0] as string, args[1]);
+        }
+        if (event === this.onNotify) {
+            return this.onNotify(this, args[0] as string, args[1] as string);
+        }
+        if (event === this.onReload) {
+            return this.onReload(this, args[0] as ModuleData);
+        }
+        if (event === this.onWsMessage) {
+            return this.onWsMessage(this, args[0] as string, args[1]);
+        }
+        if (event === this.onWsStatusUpdate) {
+            return this.onWsStatusUpdate(this, args[0] as string[]);
+        }
+    }
+
     // Utility methods
     init() {
         this.clientId = "";
@@ -146,7 +171,7 @@ export class TaipyApp {
         const ackId = sendWsMessage(this.socket, type, id, payload, this.clientId, context);
         if (ackId) {
             this._ackList.push(ackId);
-            this.onWsStatusUpdate && this.onWsStatusUpdate(this, this._ackList);
+            this.useEvent(this.onWsStatusUpdate, this._ackList);
         }
     }
 
