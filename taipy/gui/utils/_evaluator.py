@@ -210,15 +210,17 @@ class _Evaluator:
             _warn(f"Cannot evaluate expression {holder.__name__}({expr_hash},'{expr_hash}') for {expr}", e)
         return None
 
-    def evaluate_expr(self, gui: Gui, expr: str, lazy_declare: t.Optional[bool] = False) -> t.Any:
-        if not self._is_expression(expr):
+    def evaluate_expr(
+        self, gui: Gui, expr: str, lazy_declare: t.Optional[bool] = False, lambda_expr: t.Optional[bool] = False
+    ) -> t.Any:
+        if not self._is_expression(expr) and not lambda_expr:
             return expr
-        var_val, var_map = self._analyze_expression(gui, expr, lazy_declare)
+        var_val, var_map = ({}, {}) if lambda_expr else self._analyze_expression(gui, expr, lazy_declare)
         expr_hash = None
         is_edge_case = False
 
         # The expr_string is placed here in case expr get replaced by edge case
-        expr_string = 'f"' + expr.replace('"', '\\"') + '"'
+        expr_string = expr if lambda_expr else 'f"' + expr.replace('"', '\\"') + '"'
         # simplify expression if it only contains var_name
         m = _Evaluator.__EXPR_IS_EDGE_CASE.match(expr)
         if m and not _Evaluator.__EXPR_EDGE_CASE_F_STRING.match(expr):
