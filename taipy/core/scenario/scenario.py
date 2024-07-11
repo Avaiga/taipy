@@ -50,9 +50,12 @@ from .scenario_id import ScenarioId
 class Scenario(_Entity, Submittable, _Labeled):
     """Instance of a Business case to solve.
 
-    A scenario holds a set of tasks (instances of `Task^` class) to submit for execution in order to
-    solve the Business case. It also holds a set of additional data nodes (instances of `DataNode` class)
-    for extra data related to the scenario.
+    A scenario holds a set of tasks (instances of `Task^` class) to submit for execution in order
+    to solve the Business case. Each task can be connected to some data nodes as input or output
+    forming an execution graph. The scenario can be submitted for execution, and the tasks will
+    be orchestrated to solve the Business case.<br>
+    A scenario also holds a set of additional data nodes (instances of `DataNode^` class) for
+    extra data related to the scenario.
 
     !!! note
 
