@@ -32,6 +32,7 @@ from ..common._warnings import _warn_deprecated
 from ..exceptions.exceptions import DataNodeIsBeingEdited, NoData
 from ..job.job_id import JobId
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
+from ..reason import DataNodeEditInProgress, DataNodeIsNotWritten
 from ._filter import _FilterDataNode
 from .data_node_id import DataNodeId, Edit
 from .operator import JoinOperator
@@ -43,13 +44,13 @@ def _update_ready_for_reading(fct):
     def _recompute_is_ready_for_reading(dn: "DataNode", *args, **kwargs):
         fct(dn, *args, **kwargs)
         if dn._edit_in_progress:
-            _ReadyToRunProperty._add(dn, f"DataNode {dn.id} is being edited")
+            _ReadyToRunProperty._add(dn, DataNodeEditInProgress(dn.id))
         else:
-            _ReadyToRunProperty._remove(dn, f"DataNode {dn.id} is being edited")
+            _ReadyToRunProperty._remove(dn, DataNodeEditInProgress(dn.id))
         if not dn._last_edit_date:
-            _ReadyToRunProperty._add(dn, f"DataNode {dn.id} is not written")
+            _ReadyToRunProperty._add(dn, DataNodeIsNotWritten(dn.id))
         else:
-            _ReadyToRunProperty._remove(dn, f"DataNode {dn.id} is not written")
+            _ReadyToRunProperty._remove(dn, DataNodeIsNotWritten(dn.id))
 
     return _recompute_is_ready_for_reading
 
@@ -396,7 +397,7 @@ class DataNode(_Entity, _Labeled):
             return self.read_or_raise()
         except NoData:
             self.__logger.warning(
-                f"Data node {self.id} from config {self.config_id} is being read but has never been " f"written."
+                f"Data node {self.id} from config {self.config_id} is being read but has never been written."
             )
             return None
 
