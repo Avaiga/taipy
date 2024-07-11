@@ -31,3 +31,19 @@ def test_builder_lambda_2(gui: Gui, test_client, helpers):
             tgb.text(lambda message: str(message.get(key)), mode=lambda message: "mode " + str(message.get(key)))  # type: ignore[attr-defined] # noqa: B023
     expected_list = ['defaultValue="value A"', 'defaultValue="value B"', 'mode="mode value A"', 'mode="mode value B"']
     helpers.test_control_builder(gui, page, expected_list)
+
+def test_builder_lambda_f_string(gui: Gui, test_client, helpers):
+    value = 10
+    gui._bind_var_val("value", value)
+    with tgb.Page(frame=None) as page:
+        tgb.text(lambda value: f"value is {value}")  # type: ignore[attr-defined] # noqa: B023
+    expected_list = ['defaultValue="value is 10"']
+    helpers.test_control_builder(gui, page, expected_list)
+
+def test_builder_simple_lambda(gui: Gui, test_client, helpers):
+    value = 10
+    gui._bind_var_val("value", value)
+    with tgb.Page(frame=None) as page:
+        tgb.text(lambda value: value)  # type: ignore[attr-defined] # noqa: B023
+    expected_list = ['defaultValue="10"']
+    helpers.test_control_builder(gui, page, expected_list)
