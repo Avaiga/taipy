@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import multiprocessing as mp
 from concurrent.futures import Executor, ProcessPoolExecutor
 from functools import partial
 from threading import Lock
@@ -33,8 +34,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         super().__init__(orchestrator)
         max_workers = Config.job_config.max_nb_of_workers or self._DEFAULT_MAX_NB_OF_WORKERS
         self._executor: Executor = ProcessPoolExecutor(
-            max_workers=max_workers,
-            initializer=subproc_initializer,
+            max_workers=max_workers, initializer=subproc_initializer, mp_context=mp.get_context("spawn")
         )  # type: ignore
         self._nb_available_workers = self._executor._max_workers  # type: ignore
 
