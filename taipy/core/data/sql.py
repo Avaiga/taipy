@@ -131,10 +131,11 @@ class SQLDataNode(_AbstractSQLDataNode):
         return self.properties.get(self.__READ_QUERY_KEY)
 
     def _do_append(self, data, engine, connection) -> None:
-        if not self.properties.get(self._APPEND_QUERY_BUILDER_KEY):
+        append_query_builder_fct = self.properties.get(self._APPEND_QUERY_BUILDER_KEY)
+        if not append_query_builder_fct:
             raise MissingAppendQueryBuilder
 
-        queries = self.properties.get(self._APPEND_QUERY_BUILDER_KEY)(data)
+        queries = append_query_builder_fct(data)
         self.__execute_queries(queries, connection)
 
     def _do_write(self, data, engine, connection) -> None:

@@ -155,4 +155,3 @@ class InvalidUploadFile(Reason, _DataNodeReasonMixin):
     def __init__(self, file_name: str, datanode_id: str):
         Reason.__init__(self, f'The uploaded file {file_name} has invalid data for data node "{datanode_id}"')
         _DataNodeReasonMixin.__init__(self, datanode_id)
-        

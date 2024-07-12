@@ -157,7 +157,10 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         with _Reloader():
             self._write_default_data(default_value)
 
-        if not self._last_edit_date and (isfile(self._path) or isdir(self._path)):
+        if (
+            not self._last_edit_date  # type: ignore
+            and (isfile(self._path) or isdir(self._path[:-1] if self._path.endswith("*") else self._path))
+        ):
             self._last_edit_date = datetime.now()
         self._TAIPY_PROPERTIES.update(
             {
@@ -233,14 +236,15 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             **write_kwargs (dict[str, any]): The keyword arguments passed to the function
                 `pandas.DataFrame.to_parquet()`.
         """
+        properties = self.properties
         kwargs = {
-            self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
-            self.__COMPRESSION_PROPERTY: self.properties[self.__COMPRESSION_PROPERTY],
+            self.__ENGINE_PROPERTY: properties[self.__ENGINE_PROPERTY],
+            self.__COMPRESSION_PROPERTY: properties[self.__COMPRESSION_PROPERTY],
         }
-        kwargs.update(self.properties[self.__WRITE_KWARGS_PROPERTY])
+        kwargs.update(properties[self.__WRITE_KWARGS_PROPERTY])
         kwargs.update(write_kwargs)
 
-        df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
+        df = self._convert_data_to_dataframe(properties[self._EXPOSED_TYPE_PROPERTY], data)
         if isinstance(df, pd.Series):
             df = pd.DataFrame(df)
 

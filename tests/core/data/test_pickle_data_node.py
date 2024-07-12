@@ -24,6 +24,7 @@ from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 from taipy.core.data._data_manager import _DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.exceptions.exceptions import NoData
 
@@ -45,9 +46,17 @@ class TestPickleDataNodeEntity:
         for f in glob.glob("*.p"):
             os.remove(f)
 
+    def test_create_with_manager(self, pickle_file_path):
+        parquet_dn_config = Config.configure_pickle_data_node(id="baz", default_path=pickle_file_path)
+        parquet_dn = _DataManagerFactory._build_manager()._create_and_set(parquet_dn_config, None, None)
+        assert isinstance(parquet_dn, PickleDataNode)
+
     def test_create(self):
-        dn = PickleDataNode("foobar_bazxyxea", Scope.SCENARIO, properties={"default_data": "Data"})
-        assert os.path.isfile(os.path.join(Config.core.storage_folder.strip("/"), "pickles", dn.id + ".p"))
+        pickle_dn_config = Config.configure_pickle_data_node(
+            id="foobar_bazxyxea", default_path="Data", default_data="Data"
+        )
+        dn = _DataManagerFactory._build_manager()._create_and_set(pickle_dn_config, None, None)
+
         assert isinstance(dn, PickleDataNode)
         assert dn.storage_type() == "pickle"
         assert dn.config_id == "foobar_bazxyxea"

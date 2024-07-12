@@ -13,7 +13,9 @@ import boto3
 import pytest
 from moto import mock_s3
 
+from taipy.config import Config
 from taipy.config.common.scope import Scope
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.aws_s3 import S3ObjectDataNode
 
 
@@ -29,14 +31,10 @@ class TestS3ObjectDataNode:
         }
     ]
 
-    @mock_s3
     @pytest.mark.parametrize("properties", __properties)
     def test_create(self, properties):
-        aws_s3_object_dn = S3ObjectDataNode(
-            "foo_bar_aws_s3",
-            Scope.SCENARIO,
-            properties=properties,
-        )
+        s3_object_dn_config = Config.configure_s3_object_data_node(id="foo_bar_aws_s3", **properties)
+        aws_s3_object_dn = _DataManagerFactory._build_manager()._create_and_set(s3_object_dn_config, None, None)
         assert isinstance(aws_s3_object_dn, S3ObjectDataNode)
         assert aws_s3_object_dn.storage_type() == "s3_object"
         assert aws_s3_object_dn.config_id == "foo_bar_aws_s3"

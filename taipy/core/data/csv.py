@@ -143,15 +143,17 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         if path is None:
             path = self._path
 
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
+        properties = self.properties
+        if properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
             return self._read_as_pandas_dataframe(path=path)
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
+        if properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy(path=path)
         return self._read_as(path=path)
 
     def _read_as(self, path: str):
-        with open(path, encoding=self.properties[self.__ENCODING_KEY]) as csvFile:
-            if self.properties[self._HAS_HEADER_PROPERTY]:
+        properties = self.properties
+        with open(path, encoding=properties[self.__ENCODING_KEY]) as csvFile:
+            if properties[self._HAS_HEADER_PROPERTY]:
                 reader_with_header = csv.DictReader(csvFile)
                 return [self._decoder(line) for line in reader_with_header]
 
@@ -168,37 +170,38 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         column_names: Optional[List[str]] = None,
     ) -> pd.DataFrame:
         try:
-            if self.properties[self._HAS_HEADER_PROPERTY]:
+            properties = self.properties
+            if properties[self._HAS_HEADER_PROPERTY]:
                 if column_names:
-                    return pd.read_csv(path, encoding=self.properties[self.__ENCODING_KEY])[column_names]
-                return pd.read_csv(path, encoding=self.properties[self.__ENCODING_KEY])
+                    return pd.read_csv(path, encoding=properties[self.__ENCODING_KEY])[column_names]
+                return pd.read_csv(path, encoding=properties[self.__ENCODING_KEY])
             else:
                 if usecols:
-                    return pd.read_csv(
-                        path, encoding=self.properties[self.__ENCODING_KEY], header=None, usecols=usecols
-                    )
-                return pd.read_csv(path, encoding=self.properties[self.__ENCODING_KEY], header=None)
+                    return pd.read_csv(path, encoding=properties[self.__ENCODING_KEY], header=None, usecols=usecols)
+                return pd.read_csv(path, encoding=properties[self.__ENCODING_KEY], header=None)
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 
     def _append(self, data: Any):
-        if isinstance(data, pd.DataFrame):
-            data.to_csv(self._path, mode="a", index=False, encoding=self.properties[self.__ENCODING_KEY], header=False)
-        else:
-            pd.DataFrame(data).to_csv(
-                self._path, mode="a", index=False, encoding=self.properties[self.__ENCODING_KEY], header=False
-            )
+        properties = self.properties
+        exposed_type = properties[self._EXPOSED_TYPE_PROPERTY]
+        data = self._convert_data_to_dataframe(exposed_type, data)
+        data.to_csv(self._path, mode="a", index=False, encoding=properties[self.__ENCODING_KEY], header=False)
 
-    def _write(self, data: Any):
-        exposed_type = self.properties[self._EXPOSED_TYPE_PROPERTY]
-        if self.properties[self._HAS_HEADER_PROPERTY]:
-            self._convert_data_to_dataframe(exposed_type, data).to_csv(
-                self._path, index=False, encoding=self.properties[self.__ENCODING_KEY]
-            )
-        else:
-            self._convert_data_to_dataframe(exposed_type, data).to_csv(
-                self._path, index=False, encoding=self.properties[self.__ENCODING_KEY], header=False
-            )
+    def _write(self, data: Any, columns: Optional[List[str]] = None):
+        properties = self.properties
+        exposed_type = properties[self._EXPOSED_TYPE_PROPERTY]
+        data = self._convert_data_to_dataframe(exposed_type, data)
+
+        if columns and isinstance(data, pd.DataFrame):
+            data.columns = pd.Index(columns, dtype="object")
+
+        data.to_csv(
+            self._path,
+            index=False,
+            encoding=properties[self.__ENCODING_KEY],
+            header=properties[self._HAS_HEADER_PROPERTY],
+        )
 
     def write_with_column_names(self, data: Any, columns: Optional[List[str]] = None, job_id: Optional[JobId] = None):
         """Write a selection of columns.
@@ -208,8 +211,5 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             columns (Optional[List[str]]): The list of column names to write.
             job_id (JobId^): An optional identifier of the writer.
         """
-        df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
-        if columns and isinstance(df, pd.DataFrame):
-            df.columns = pd.Index(columns, dtype="object")
-        df.to_csv(self._path, index=False, encoding=self.properties[self.__ENCODING_KEY])
+        self._write(data, columns)
         self.track_edit(timestamp=datetime.now(), job_id=job_id)

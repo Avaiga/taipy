@@ -25,6 +25,7 @@ from pandas.testing import assert_frame_equal
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.core.data._data_manager import _DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.excel import ExcelDataNode
 from taipy.core.exceptions.exceptions import (
@@ -77,11 +78,10 @@ class TestExcelDataNode:
     def test_create(self):
         path = "data/node/path"
         sheet_names = ["sheet_name_1", "sheet_name_2"]
-        dn = ExcelDataNode(
-            "foo_bar",
-            Scope.SCENARIO,
-            properties={"path": path, "has_header": False, "sheet_name": sheet_names, "name": "super name"},
+        excel_dn_config = Config.configure_excel_data_node(
+            id="foo_bar", default_path=path, has_header=False, sheet_name="Sheet1", name="super name"
         )
+        dn = _DataManagerFactory._build_manager()._create_and_set(excel_dn_config, None, None)
         assert isinstance(dn, ExcelDataNode)
         assert dn.storage_type() == "excel"
         assert dn.config_id == "foo_bar"
@@ -95,7 +95,48 @@ class TestExcelDataNode:
         assert not dn.is_ready_for_reading
         assert dn.path == path
         assert dn.has_header is False
-        assert dn.sheet_name == sheet_names
+        assert dn.sheet_name == "Sheet1"
+
+        excel_dn_config_1 = Config.configure_excel_data_node(
+            id="baz", default_path=path, has_header=True, sheet_name="Sheet1", exposed_type=MyCustomObject
+        )
+        dn_1 = _DataManagerFactory._build_manager()._create_and_set(excel_dn_config_1, None, None)
+        assert isinstance(dn_1, ExcelDataNode)
+        assert dn_1.has_header is True
+        assert dn_1.sheet_name == "Sheet1"
+        assert dn_1.exposed_type == MyCustomObject
+
+        excel_dn_config_2 = Config.configure_excel_data_node(
+            id="baz",
+            default_path=path,
+            has_header=True,
+            sheet_name=sheet_names,
+            exposed_type={"Sheet1": "pandas", "Sheet2": "numpy"},
+        )
+        dn_2 = _DataManagerFactory._build_manager()._create_and_set(excel_dn_config_2, None, None)
+        assert isinstance(dn_2, ExcelDataNode)
+        assert dn_2.sheet_name == sheet_names
+        assert dn_2.exposed_type == {"Sheet1": "pandas", "Sheet2": "numpy"}
+
+        excel_dn_config_3 = Config.configure_excel_data_node(
+            id="baz", default_path=path, has_header=True, sheet_name=sheet_names, exposed_type=MyCustomObject
+        )
+        dn_3 = _DataManagerFactory._build_manager()._create_and_set(excel_dn_config_3, None, None)
+        assert isinstance(dn_3, ExcelDataNode)
+        assert dn_3.sheet_name == sheet_names
+        assert dn_3.exposed_type == MyCustomObject
+
+        excel_dn_config_4 = Config.configure_excel_data_node(
+            id="baz",
+            default_path=path,
+            has_header=True,
+            sheet_name=sheet_names,
+            exposed_type={"Sheet1": MyCustomObject, "Sheet2": MyCustomObject2},
+        )
+        dn_4 = _DataManagerFactory._build_manager()._create_and_set(excel_dn_config_4, None, None)
+        assert isinstance(dn_4, ExcelDataNode)
+        assert dn_4.sheet_name == sheet_names
+        assert dn_4.exposed_type == {"Sheet1": MyCustomObject, "Sheet2": MyCustomObject2}
 
     def test_get_user_properties(self, excel_file):
         dn_1 = ExcelDataNode("dn_1", Scope.SCENARIO, properties={"path": "data/node/path"})

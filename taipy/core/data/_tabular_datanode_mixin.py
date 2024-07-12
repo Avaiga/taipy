@@ -26,7 +26,7 @@ class _TabularDataNodeMixin(object):
     _EXPOSED_TYPE_NUMPY = "numpy"
     _EXPOSED_TYPE_PANDAS = "pandas"
     _EXPOSED_TYPE_MODIN = "modin"  # Deprecated in favor of pandas since 3.1.0
-    __VALID_STRING_EXPOSED_TYPES = [_EXPOSED_TYPE_PANDAS, _EXPOSED_TYPE_NUMPY]
+    _VALID_STRING_EXPOSED_TYPES = [_EXPOSED_TYPE_PANDAS, _EXPOSED_TYPE_NUMPY]
 
     def __init__(self, **kwargs) -> None:
         self._decoder: Union[Callable, Any]
@@ -67,7 +67,7 @@ class _TabularDataNodeMixin(object):
 
     @classmethod
     def _check_exposed_type(cls, exposed_type):
-        valid_string_exposed_types = cls.__VALID_STRING_EXPOSED_TYPES
+        valid_string_exposed_types = cls._VALID_STRING_EXPOSED_TYPES
         if isinstance(exposed_type, str) and exposed_type not in valid_string_exposed_types:
             raise InvalidExposedType(
                 f"Invalid string exposed type {exposed_type}. Supported values are "

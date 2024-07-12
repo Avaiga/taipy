@@ -69,7 +69,7 @@ class _Element(ABC):
 
     def _evaluate_lambdas(self, gui: Gui):
         for k, lmbd in self._lambdas.items():
-            expr = gui._evaluate_expr(f"{{{lmbd}}}")
+            expr = gui._evaluate_expr(lmbd, lambda_expr=True)
             gui._bind_var_val(k, _getscopeattr(gui, expr))
 
     # Convert property value to string/function

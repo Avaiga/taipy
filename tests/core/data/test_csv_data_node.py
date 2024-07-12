@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import dataclasses
 import os
 import pathlib
 import uuid
@@ -25,6 +26,7 @@ from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 from taipy.core.data._data_manager import _DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.exceptions.exceptions import InvalidExposedType
@@ -38,12 +40,20 @@ def cleanup():
         os.remove(path)
 
 
+@dataclasses.dataclass
+class MyCustomObject:
+    id: int
+    integer: int
+    text: str
+
+
 class TestCSVDataNode:
     def test_create(self):
-        path = "data/node/path"
-        dn = CSVDataNode(
-            "foo_bar", Scope.SCENARIO, properties={"path": path, "has_header": False, "name": "super name"}
+        default_path = "data/node/path"
+        csv_dn_config = Config.configure_csv_data_node(
+            id="foo_bar", default_path=default_path, has_header=False, name="super name"
         )
+        dn = _DataManagerFactory._build_manager()._create_and_set(csv_dn_config, None, None)
         assert isinstance(dn, CSVDataNode)
         assert dn.storage_type() == "csv"
         assert dn.config_id == "foo_bar"
@@ -54,12 +64,23 @@ class TestCSVDataNode:
         assert dn.last_edit_date is None
         assert dn.job_ids == []
         assert not dn.is_ready_for_reading
-        assert dn.path == path
+        assert dn.path == default_path
         assert dn.has_header is False
         assert dn.exposed_type == "pandas"
 
+        csv_dn_config = Config.configure_csv_data_node(
+            id="foo", default_path=default_path, has_header=True, exposed_type=MyCustomObject
+        )
+        dn = _DataManagerFactory._build_manager()._create_and_set(csv_dn_config, None, None)
+        assert dn.storage_type() == "csv"
+        assert dn.config_id == "foo"
+        assert dn.has_header is True
+        assert dn.exposed_type == MyCustomObject
+
         with pytest.raises(InvalidConfigurationId):
-            CSVDataNode("foo bar", Scope.SCENARIO, properties={"path": path, "has_header": False, "name": "super name"})
+            CSVDataNode(
+                "foo bar", Scope.SCENARIO, properties={"path": default_path, "has_header": False, "name": "super name"}
+            )
 
     def test_modin_deprecated_in_favor_of_pandas(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")

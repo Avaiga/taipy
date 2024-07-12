@@ -122,7 +122,7 @@ class SQLTableDataNode(_AbstractSQLDataNode):
 
     def __insert_data(self, data, engine, connection, delete_table: bool = False) -> None:
         table = self._create_table(engine)
-        self.__insert_dataframe(
+        self._insert_dataframe(
             self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data),
             table,
             connection,
@@ -137,7 +137,7 @@ class SQLTableDataNode(_AbstractSQLDataNode):
         )
 
     @classmethod
-    def __insert_dicts(cls, data: List[Dict], table: Any, connection: Any, delete_table: bool) -> None:
+    def _insert_dicts(cls, data: List[Dict], table: Any, connection: Any, delete_table: bool) -> None:
         """
         This method will insert the data contained in a list of dictionaries into a table. The query itself is handled
         by SQLAlchemy, so it's only needed to pass the correct data type.
@@ -146,14 +146,14 @@ class SQLTableDataNode(_AbstractSQLDataNode):
         connection.execute(table.insert(), data)
 
     @classmethod
-    def __insert_dataframe(
+    def _insert_dataframe(
         cls, df: Union[pd.DataFrame, pd.Series], table: Any, connection: Any, delete_table: bool
-    ) -> None:
+        ) -> None:
         if isinstance(df, pd.Series):
             data = [df.to_dict()]
         elif isinstance(df, pd.DataFrame):
             data = df.to_dict(orient="records")
-        cls.__insert_dicts(data, table, connection, delete_table)
+        cls._insert_dicts(data, table, connection, delete_table)
 
     @classmethod
     def __delete_all_rows(cls, table: Any, connection: Any, delete_table: bool) -> None:
