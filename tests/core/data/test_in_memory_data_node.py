@@ -11,8 +11,10 @@
 
 import pytest
 
+from taipy.config import Config
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.exceptions.exceptions import NoData
@@ -20,18 +22,14 @@ from taipy.core.exceptions.exceptions import NoData
 
 class TestInMemoryDataNodeEntity:
     def test_create(self):
-        dn = InMemoryDataNode(
-            "foobar_bazy",
-            Scope.SCENARIO,
-            DataNodeId("id_uio"),
-            "owner_id",
-            properties={"default_data": "In memory Data Node", "name": "my name"},
+        in_memory_dn_config = Config.configure_in_memory_data_node(
+            id="foobar_bazy", default_data="In memory Data Node", name="my name"
         )
+        dn = _DataManagerFactory._build_manager()._create_and_set(in_memory_dn_config, "owner_id", None)
         assert isinstance(dn, InMemoryDataNode)
         assert dn.storage_type() == "in_memory"
         assert dn.config_id == "foobar_bazy"
         assert dn.scope == Scope.SCENARIO
-        assert dn.id == "id_uio"
         assert dn.name == "my name"
         assert dn.owner_id == "owner_id"
         assert dn.last_edit_date is not None
@@ -39,7 +37,8 @@ class TestInMemoryDataNodeEntity:
         assert dn.is_ready_for_reading
         assert dn.read() == "In memory Data Node"
 
-        dn_2 = InMemoryDataNode("foo", Scope.SCENARIO)
+        in_memory_dn_config_2 = Config.configure_in_memory_data_node(id="foo")
+        dn_2 = _DataManagerFactory._build_manager()._create_and_set(in_memory_dn_config_2, None, None)
         assert dn_2.last_edit_date is None
         assert not dn_2.is_ready_for_reading
 

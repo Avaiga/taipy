@@ -147,15 +147,17 @@ class S3ObjectDataNode(DataNode):
         return cls.__STORAGE_TYPE
 
     def _read(self):
+        properties = self.properties
         aws_s3_object = self._s3_client.get_object(
-            Bucket=self.properties[self.__AWS_STORAGE_BUCKET_NAME],
-            Key=self.properties[self.__AWS_S3_OBJECT_KEY],
+            Bucket=properties[self.__AWS_STORAGE_BUCKET_NAME],
+            Key=properties[self.__AWS_S3_OBJECT_KEY],
         )
         return aws_s3_object["Body"].read().decode("utf-8")
 
     def _write(self, data: Any):
+        properties = self.properties
         self._s3_client.put_object(
-            Bucket=self.properties[self.__AWS_STORAGE_BUCKET_NAME],
-            Key=self.properties[self.__AWS_S3_OBJECT_KEY],
+            Bucket=properties[self.__AWS_STORAGE_BUCKET_NAME],
+            Key=properties[self.__AWS_S3_OBJECT_KEY],
             Body=data,
         )

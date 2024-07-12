@@ -17,6 +17,7 @@ import pandas as pd
 import pytest
 
 from taipy.config.common.scope import Scope
+from taipy.core.data.operator import JoinOperator, Operator
 from taipy.core.data.sql_table import SQLTableDataNode
 
 
@@ -29,7 +30,7 @@ class MyCustomObject:
 
 
 class TestReadSQLTableDataNode:
-    __pandas_properties = [
+    __sql_properties = [
         {
             "db_name": "taipy",
             "db_engine": "sqlite",
@@ -42,7 +43,7 @@ class TestReadSQLTableDataNode:
     ]
 
     if util.find_spec("pyodbc"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -56,7 +57,7 @@ class TestReadSQLTableDataNode:
         )
 
     if util.find_spec("pymysql"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -70,7 +71,7 @@ class TestReadSQLTableDataNode:
         )
 
     if util.find_spec("psycopg2"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -87,9 +88,9 @@ class TestReadSQLTableDataNode:
     def mock_read_value():
         return {"foo": ["baz", "quux", "corge"], "bar": ["quux", "quuz", None]}
 
-    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    def test_read_pandas(self, pandas_properties):
-        custom_properties = pandas_properties.copy()
+    @pytest.mark.parametrize("sql_properties", __sql_properties)
+    def test_read_pandas(self, sql_properties):
+        custom_properties = sql_properties.copy()
 
         sql_data_node_as_pandas = SQLTableDataNode(
             "foo",
@@ -105,9 +106,106 @@ class TestReadSQLTableDataNode:
             assert isinstance(pandas_data, pd.DataFrame)
             assert pandas_data.equals(pd.DataFrame(self.mock_read_value()))
 
-    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    def test_read_numpy(self, pandas_properties):
-        custom_properties = pandas_properties.copy()
+    def test_build_connection_string(self):
+        sql_properties = {
+            "db_username": "sa",
+            "db_password": "Passw0rd",
+            "db_name": "taipy",
+            "db_engine": "mssql",
+            "table_name": "example",
+            "db_driver": "default server",
+            "db_extra_args": {
+                "TrustServerCertificate": "yes",
+                "other": "value",
+            },
+        }
+        custom_properties = sql_properties.copy()
+        mssql_sql_data_node = SQLTableDataNode(
+            "foo",
+            Scope.SCENARIO,
+            properties=custom_properties,
+        )
+        assert (
+            mssql_sql_data_node._conn_string()
+            == "mssql+pyodbc://sa:Passw0rd@localhost:1433/taipy?TrustServerCertificate=yes&other=value&driver=default+server"
+        )
+
+        custom_properties["db_engine"] = "mysql"
+        mysql_sql_data_node = SQLTableDataNode(
+            "foo",
+            Scope.SCENARIO,
+            properties=custom_properties,
+        )
+        assert (
+            mysql_sql_data_node._conn_string()
+            == "mysql+pymysql://sa:Passw0rd@localhost:1433/taipy?TrustServerCertificate=yes&other=value&driver=default+server"
+        )
+
+        custom_properties["db_engine"] = "postgresql"
+        postgresql_sql_data_node = SQLTableDataNode(
+            "foo",
+            Scope.SCENARIO,
+            properties=custom_properties,
+        )
+        assert (
+            postgresql_sql_data_node._conn_string()
+            == "postgresql+psycopg2://sa:Passw0rd@localhost:1433/taipy?TrustServerCertificate=yes&other=value&driver=default+server"
+        )
+
+        custom_properties["db_engine"] = "sqlite"
+        sqlite_sql_data_node = SQLTableDataNode(
+            "foo",
+            Scope.SCENARIO,
+            properties=custom_properties,
+        )
+        assert sqlite_sql_data_node._conn_string() == "sqlite:///taipy.db"
+
+    @pytest.mark.parametrize("sql_properties", __sql_properties)
+    def test_get_read_query(self, sql_properties):
+        custom_properties = sql_properties.copy()
+
+        sql_data_node = SQLTableDataNode(
+            "foo",
+            Scope.SCENARIO,
+            properties=custom_properties,
+        )
+
+        assert sql_data_node._get_read_query(("key", 1, Operator.EQUAL)) == "SELECT * FROM example WHERE key = '1'"
+        assert sql_data_node._get_read_query(("key", 1, Operator.NOT_EQUAL)) == "SELECT * FROM example WHERE key <> '1'"
+        assert (
+            sql_data_node._get_read_query(("key", 1, Operator.GREATER_THAN)) == "SELECT * FROM example WHERE key > '1'"
+        )
+        assert (
+            sql_data_node._get_read_query(("key", 1, Operator.GREATER_OR_EQUAL))
+            == "SELECT * FROM example WHERE key >= '1'"
+        )
+        assert sql_data_node._get_read_query(("key", 1, Operator.LESS_THAN)) == "SELECT * FROM example WHERE key < '1'"
+        assert (
+            sql_data_node._get_read_query(("key", 1, Operator.LESS_OR_EQUAL))
+            == "SELECT * FROM example WHERE key <= '1'"
+        )
+
+        with pytest.raises(NotImplementedError):
+            sql_data_node._get_read_query(
+                [("key", 1, Operator.EQUAL), ("key2", 2, Operator.GREATER_THAN)], "SOME JoinOperator"
+            )
+
+        assert (
+            sql_data_node._get_read_query(
+                [("key", 1, Operator.EQUAL), ("key2", 2, Operator.GREATER_THAN)], JoinOperator.AND
+            )
+            == "SELECT * FROM example WHERE key = '1' AND key2 > '2'"
+        )
+        assert (
+            sql_data_node._get_read_query(
+                [("key", 1, Operator.EQUAL), ("key2", 2, Operator.GREATER_THAN)], JoinOperator.OR
+            )
+            == "SELECT * FROM example WHERE key = '1' OR key2 > '2'"
+        )
+
+    @pytest.mark.parametrize("sql_properties", __sql_properties)
+    def test_read_numpy(self, sql_properties):
+        custom_properties = sql_properties.copy()
         custom_properties["exposed_type"] = "numpy"
 
         sql_data_node_as_pandas = SQLTableDataNode(
@@ -124,9 +222,9 @@ class TestReadSQLTableDataNode:
             assert isinstance(numpy_data, np.ndarray)
             assert np.array_equal(numpy_data, pd.DataFrame(self.mock_read_value()).to_numpy())
 
-    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    def test_read_custom_exposed_type(self, pandas_properties):
-        custom_properties = pandas_properties.copy()
+    @pytest.mark.parametrize("sql_properties", __sql_properties)
+    def test_read_custom_exposed_type(self, sql_properties):
+        custom_properties = sql_properties.copy()
 
         custom_properties.pop("db_extra_args")
         custom_properties["exposed_type"] = MyCustomObject
