@@ -191,6 +191,11 @@ class _Builder:
         lof = self.__attributes.get(name)
         if isinstance(lof, str):
             lof = list(lof.split(";"))
+        if not isinstance(lof, list) and hasattr(lof, "tolist"):
+            try:
+                return lof.tolist()  # type: ignore[union-attr]
+            except Exception as e:
+                _warn("Error accessing List of values", e)
         return lof
 
     def get_name_indexed_property(self, name: str) -> t.Dict[str, t.Any]:
@@ -955,7 +960,7 @@ class _Builder:
 
             attributes (list(tuple)): The list of attributes as (property name, property type, default value).
         """
-        attributes.append(("id",)) # Every element should have an id attribute
+        attributes.append(("id",))  # Every element should have an id attribute
         for attr in attributes:
             if not isinstance(attr, tuple):
                 attr = (attr,)

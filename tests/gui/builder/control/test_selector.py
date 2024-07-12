@@ -78,7 +78,7 @@ def test_selector_builder_4(gui: Gui, test_client, helpers):
     gui._bind_var_val("selected_val", "l1")
     gui._bind_var_val("selector_properties", pd_series)
     with tgb.Page(frame=None) as page:
-        tgb.selector(value="{selected_val}", lov="{selector_properties}")
+        tgb.selector(value="{selected_val}", lov="{selector_properties}")  # type: ignore[attr-defined]
     expected_list = [
         "<Selector",
         'defaultLov="[&quot;l1&quot;, &quot;l2&quot;, &quot;l3&quot;]"',
