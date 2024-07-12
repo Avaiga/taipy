@@ -20,9 +20,11 @@ import pytest
 from bson import ObjectId
 from bson.errors import InvalidDocument
 
+from taipy.config import Config
 from taipy.config.common.scope import Scope
 from taipy.core import MongoDefaultDocument
 from taipy.core.common._mongo_connector import _connect_mongodb
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.mongo import MongoCollectionDataNode
 from taipy.core.data.operator import JoinOperator, Operator
@@ -76,11 +78,8 @@ class TestMongoCollectionDataNode:
 
     @pytest.mark.parametrize("properties", __properties)
     def test_create(self, properties):
-        mongo_dn = MongoCollectionDataNode(
-            "foo_bar",
-            Scope.SCENARIO,
-            properties=properties,
-        )
+        mongo_dn_config = Config.configure_mongo_collection_data_node("foo_bar", **properties)
+        mongo_dn = _DataManagerFactory._build_manager()._create_and_set(mongo_dn_config, None, None)
         assert isinstance(mongo_dn, MongoCollectionDataNode)
         assert mongo_dn.storage_type() == "mongo_collection"
         assert mongo_dn.config_id == "foo_bar"

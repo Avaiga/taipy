@@ -9,19 +9,24 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import dataclasses
 import os
 import pathlib
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import sleep
 
+import freezegun
+import numpy as np
 import pandas as pd
 import pytest
+from pandas.testing import assert_frame_equal
 
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 from taipy.core.data._data_manager import _DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.exceptions.exceptions import InvalidExposedType
@@ -35,12 +40,20 @@ def cleanup():
         os.remove(path)
 
 
+@dataclasses.dataclass
+class MyCustomObject:
+    id: int
+    integer: int
+    text: str
+
+
 class TestCSVDataNode:
     def test_create(self):
-        path = "data/node/path"
-        dn = CSVDataNode(
-            "foo_bar", Scope.SCENARIO, properties={"path": path, "has_header": False, "name": "super name"}
+        default_path = "data/node/path"
+        csv_dn_config = Config.configure_csv_data_node(
+            id="foo_bar", default_path=default_path, has_header=False, name="super name"
         )
+        dn = _DataManagerFactory._build_manager()._create_and_set(csv_dn_config, None, None)
         assert isinstance(dn, CSVDataNode)
         assert dn.storage_type() == "csv"
         assert dn.config_id == "foo_bar"
@@ -51,12 +64,23 @@ class TestCSVDataNode:
         assert dn.last_edit_date is None
         assert dn.job_ids == []
         assert not dn.is_ready_for_reading
-        assert dn.path == path
+        assert dn.path == default_path
         assert dn.has_header is False
         assert dn.exposed_type == "pandas"
 
+        csv_dn_config = Config.configure_csv_data_node(
+            id="foo", default_path=default_path, has_header=True, exposed_type=MyCustomObject
+        )
+        dn = _DataManagerFactory._build_manager()._create_and_set(csv_dn_config, None, None)
+        assert dn.storage_type() == "csv"
+        assert dn.config_id == "foo"
+        assert dn.has_header is True
+        assert dn.exposed_type == MyCustomObject
+
         with pytest.raises(InvalidConfigurationId):
-            CSVDataNode("foo bar", Scope.SCENARIO, properties={"path": path, "has_header": False, "name": "super name"})
+            CSVDataNode(
+                "foo bar", Scope.SCENARIO, properties={"path": default_path, "has_header": False, "name": "super name"}
+            )
 
     def test_modin_deprecated_in_favor_of_pandas(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
@@ -169,3 +193,125 @@ class TestCSVDataNode:
 
         assert ".data" not in dn.path
         assert os.path.exists(dn.path)
+
+    def test_get_downloadable_path(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
+        dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+        assert dn._get_downloadable_path() == path
+
+    def test_get_downloadable_path_with_not_existing_file(self):
+        dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": "NOT_EXISTING.csv", "exposed_type": "pandas"})
+        assert dn._get_downloadable_path() == ""
+
+    def test_upload(self, csv_file, tmpdir_factory):
+        old_csv_path = tmpdir_factory.mktemp("data").join("df.csv").strpath
+        old_data = pd.DataFrame([{"a": 0, "b": 1, "c": 2}, {"a": 3, "b": 4, "c": 5}])
+
+        dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": old_csv_path, "exposed_type": "pandas"})
+        dn.write(old_data)
+        old_last_edit_date = dn.last_edit_date
+
+        upload_content = pd.read_csv(csv_file)
+
+        with freezegun.freeze_time(old_last_edit_date + timedelta(seconds=1)):
+            dn._upload(csv_file)
+
+        assert_frame_equal(dn.read(), upload_content)  # The content of the dn should change to the uploaded content
+        assert dn.last_edit_date > old_last_edit_date
+        assert dn.path == old_csv_path  # The path of the dn should not change
+
+    def test_upload_with_upload_check_pandas(self, csv_file, tmpdir_factory):
+        old_csv_path = tmpdir_factory.mktemp("data").join("df.csv").strpath
+        old_data = pd.DataFrame([{"a": 0, "b": 1, "c": 2}, {"a": 3, "b": 4, "c": 5}])
+
+        dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": old_csv_path, "exposed_type": "pandas"})
+        dn.write(old_data)
+        old_last_edit_date = dn.last_edit_date
+
+        def check_data_column(upload_path, upload_data):
+            return upload_path.endswith(".csv") and upload_data.columns.tolist() == ["a", "b", "c"]
+
+        not_exists_csv_path = tmpdir_factory.mktemp("data").join("not_exists.csv").strpath
+        reasons = dn._upload(not_exists_csv_path, upload_checker=check_data_column)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file not_exists.csv can not be read,"
+            f' therefore is not a valid data file for data node "{dn.id}"'
+        )
+
+        not_csv_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_csv").strpath
+        old_data.to_csv(not_csv_path, index=False)
+        # The upload should fail when the file is not a csv
+        reasons = dn._upload(not_csv_path, upload_checker=check_data_column)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0])
+            == f'The uploaded file wrong_format_df.not_csv has invalid data for data node "{dn.id}"'
+        )
+
+        wrong_format_csv_path = tmpdir_factory.mktemp("data").join("wrong_format_df.csv").strpath
+        pd.DataFrame([{"a": 1, "b": 2, "d": 3}, {"a": 4, "b": 5, "d": 6}]).to_csv(wrong_format_csv_path, index=False)
+        # The upload should fail when check_data_column() return False
+        reasons = dn._upload(wrong_format_csv_path, upload_checker=check_data_column)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0])
+            == f'The uploaded file wrong_format_df.csv has invalid data for data node "{dn.id}"'
+        )
+
+        assert_frame_equal(dn.read(), old_data)  # The content of the dn should not change when upload fails
+        assert dn.last_edit_date == old_last_edit_date  # The last edit date should not change when upload fails
+        assert dn.path == old_csv_path  # The path of the dn should not change
+
+        # The upload should succeed when check_data_column() return True
+        assert dn._upload(csv_file, upload_checker=check_data_column)
+
+    def test_upload_with_upload_check_numpy(self, tmpdir_factory):
+        old_csv_path = tmpdir_factory.mktemp("data").join("df.csv").strpath
+        old_data = np.array([[1, 2, 3], [4, 5, 6]])
+
+        new_csv_path = tmpdir_factory.mktemp("data").join("new_upload_data.csv").strpath
+        new_data = np.array([[1, 2, 3], [4, 5, 6]])
+        pd.DataFrame(new_data).to_csv(new_csv_path, index=False)
+
+        dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": old_csv_path, "exposed_type": "numpy"})
+        dn.write(old_data)
+        old_last_edit_date = dn.last_edit_date
+
+        def check_data_is_positive(upload_path, upload_data):
+            return upload_path.endswith(".csv") and np.all(upload_data > 0)
+
+        not_exists_csv_path = tmpdir_factory.mktemp("data").join("not_exists.csv").strpath
+        reasons = dn._upload(not_exists_csv_path, upload_checker=check_data_is_positive)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file not_exists.csv can not be read"
+            f', therefore is not a valid data file for data node "{dn.id}"'
+        )
+
+        not_csv_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_csv").strpath
+        pd.DataFrame(old_data).to_csv(not_csv_path, index=False)
+        # The upload should fail when the file is not a csv
+        reasons = dn._upload(not_csv_path, upload_checker=check_data_is_positive)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0])
+            == f'The uploaded file wrong_format_df.not_csv has invalid data for data node "{dn.id}"'
+        )
+
+        wrong_format_csv_path = tmpdir_factory.mktemp("data").join("wrong_format_df.csv").strpath
+        pd.DataFrame(np.array([[-1, 2, 3], [-4, -5, -6]])).to_csv(wrong_format_csv_path, index=False)
+        # The upload should fail when check_data_is_positive() return False
+        reasons = dn._upload(wrong_format_csv_path, upload_checker=check_data_is_positive)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0])
+            == f'The uploaded file wrong_format_df.csv has invalid data for data node "{dn.id}"'
+        )
+
+        np.array_equal(dn.read(), old_data)  # The content of the dn should not change when upload fails
+        assert dn.last_edit_date == old_last_edit_date  # The last edit date should not change when upload fails
+        assert dn.path == old_csv_path  # The path of the dn should not change
+
+        # The upload should succeed when check_data_is_positive() return True
+        assert dn._upload(new_csv_path, upload_checker=check_data_is_positive)

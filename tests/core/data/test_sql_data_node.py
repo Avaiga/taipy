@@ -17,11 +17,13 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
+from taipy.config import Config
 from taipy.config.common.scope import Scope
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.operator import JoinOperator, Operator
 from taipy.core.data.sql import SQLDataNode
-from taipy.core.exceptions.exceptions import MissingAppendQueryBuilder, MissingRequiredProperty
+from taipy.core.exceptions.exceptions import MissingAppendQueryBuilder, MissingRequiredProperty, UnknownDatabaseEngine
 
 
 class MyCustomObject:
@@ -36,6 +38,7 @@ def my_write_query_builder_with_pandas(data: pd.DataFrame):
     insert_data = data.to_dict("records")
     return ["DELETE FROM example", ("INSERT INTO example VALUES (:foo, :bar)", insert_data)]
 
+
 def my_append_query_builder_with_pandas(data: pd.DataFrame):
     insert_data = data.to_dict("records")
     return [("INSERT INTO example VALUES (:foo, :bar)", insert_data)]
@@ -46,7 +49,7 @@ def single_write_query_builder(data):
 
 
 class TestSQLDataNode:
-    __pandas_properties = [
+    __sql_properties = [
         {
             "db_name": "taipy.sqlite3",
             "db_engine": "sqlite",
@@ -60,7 +63,7 @@ class TestSQLDataNode:
     ]
 
     if util.find_spec("pyodbc"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -74,9 +77,8 @@ class TestSQLDataNode:
             },
         )
 
-
     if util.find_spec("pymysql"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -90,9 +92,8 @@ class TestSQLDataNode:
             },
         )
 
-
     if util.find_spec("psycopg2"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -106,14 +107,10 @@ class TestSQLDataNode:
             },
         )
 
-
-    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    def test_create(self, pandas_properties):
-        dn = SQLDataNode(
-            "foo_bar",
-            Scope.SCENARIO,
-            properties=pandas_properties,
-        )
+    @pytest.mark.parametrize("properties", __sql_properties)
+    def test_create(self, properties):
+        sql_dn_config = Config.configure_sql_data_node(id="foo_bar", **properties)
+        dn = _DataManagerFactory._build_manager()._create_and_set(sql_dn_config, None, None)
         assert isinstance(dn, SQLDataNode)
         assert dn.storage_type() == "sql"
         assert dn.config_id == "foo_bar"
@@ -126,8 +123,18 @@ class TestSQLDataNode:
         assert dn.read_query == "SELECT * FROM example"
         assert dn.write_query_builder == my_write_query_builder_with_pandas
 
+        sql_dn_config_1 = Config.configure_sql_data_node(
+            id="foo",
+            **properties,
+            append_query_builder=my_append_query_builder_with_pandas,
+            exposed_type=MyCustomObject,
+        )
+        dn_1 = _DataManagerFactory._build_manager()._create_and_set(sql_dn_config_1, None, None)
+        assert isinstance(dn, SQLDataNode)
+        assert dn_1.exposed_type == MyCustomObject
+        assert dn_1.append_query_builder == my_append_query_builder_with_pandas
 
-    @pytest.mark.parametrize("properties", __pandas_properties)
+    @pytest.mark.parametrize("properties", __sql_properties)
     def test_get_user_properties(self, properties):
         custom_properties = properties.copy()
         custom_properties["foo"] = "bar"
@@ -142,24 +149,54 @@ class TestSQLDataNode:
         "properties",
         [
             {},
-            {"db_username": "foo"},
-            {"db_username": "foo", "db_password": "foo"},
-            {"db_username": "foo", "db_password": "foo", "db_name": "foo"},
-            {"engine": "sqlite"},
-            {"engine": "mssql", "db_name": "foo"},
-            {"engine": "mysql", "db_username": "foo"},
-            {"engine": "postgresql", "db_username": "foo", "db_password": "foo"},
+            {"read_query": "ready query"},
+            {"read_query": "ready query", "write_query_builder": "write query"},
+            {"read_query": "ready query", "write_query_builder": "write query", "db_username": "foo"},
+            {
+                "read_query": "ready query",
+                "write_query_builder": "write query",
+                "db_username": "foo",
+                "db_password": "foo",
+            },
+            {
+                "read_query": "ready query",
+                "write_query_builder": "write query",
+                "db_username": "foo",
+                "db_password": "foo",
+                "db_name": "foo",
+            },
+            {"read_query": "ready query", "write_query_builder": "write query", "db_engine": "some engine"},
+            {"read_query": "ready query", "write_query_builder": "write query", "db_engine": "sqlite"},
+            {"read_query": "ready query", "write_query_builder": "write query", "db_engine": "mssql", "db_name": "foo"},
+            {
+                "read_query": "ready query",
+                "write_query_builder": "write query",
+                "db_engine": "mysql",
+                "db_username": "foo",
+            },
+            {
+                "read_query": "ready query",
+                "write_query_builder": "write query",
+                "db_engine": "postgresql",
+                "db_username": "foo",
+                "db_password": "foo",
+            },
         ],
     )
     def test_create_with_missing_parameters(self, properties):
         with pytest.raises(MissingRequiredProperty):
             SQLDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"))
-        with pytest.raises(MissingRequiredProperty):
-            SQLDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
+        engine = properties.get("db_engine")
+        if engine is not None and engine not in ["sqlite", "mssql", "mysql", "postgresql"]:
+            with pytest.raises(UnknownDatabaseEngine):
+                SQLDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
+        else:
+            with pytest.raises(MissingRequiredProperty):
+                SQLDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
 
-    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    def test_write_query_builder(self, pandas_properties):
-        custom_properties = pandas_properties.copy()
+    @pytest.mark.parametrize("properties", __sql_properties)
+    def test_write_query_builder(self, properties):
+        custom_properties = properties.copy()
         custom_properties.pop("db_extra_args")
         dn = SQLDataNode("foo_bar", Scope.SCENARIO, properties=custom_properties)
         with patch("sqlalchemy.engine.Engine.connect") as engine_mock:
@@ -183,7 +220,6 @@ class TestSQLDataNode:
             dn.write(pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
             assert len(engine_mock.mock_calls[4].args) == 1
             assert engine_mock.mock_calls[4].args[0].text == "DELETE FROM example"
-
 
     @pytest.mark.parametrize(
         "tmp_sqlite_path",

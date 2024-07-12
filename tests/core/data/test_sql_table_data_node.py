@@ -14,7 +14,9 @@ from unittest.mock import patch
 
 import pytest
 
+from taipy.config import Config
 from taipy.config.common.scope import Scope
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.sql_table import SQLTableDataNode
 from taipy.core.exceptions.exceptions import InvalidExposedType, MissingRequiredProperty
@@ -29,7 +31,7 @@ class MyCustomObject:
 
 
 class TestSQLTableDataNode:
-    __pandas_properties = [
+    __sql_properties = [
         {
             "db_name": "taipy",
             "db_engine": "sqlite",
@@ -42,7 +44,7 @@ class TestSQLTableDataNode:
     ]
 
     if util.find_spec("pyodbc"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -56,7 +58,7 @@ class TestSQLTableDataNode:
         )
 
     if util.find_spec("pymysql"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -70,7 +72,7 @@ class TestSQLTableDataNode:
         )
 
     if util.find_spec("psycopg2"):
-        __pandas_properties.append(
+        __sql_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -83,13 +85,10 @@ class TestSQLTableDataNode:
             },
         )
 
-    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    def test_create(self, pandas_properties):
-        dn = SQLTableDataNode(
-            "foo_bar",
-            Scope.SCENARIO,
-            properties=pandas_properties,
-        )
+    @pytest.mark.parametrize("properties", __sql_properties)
+    def test_create(self, properties):
+        sql_table_dn_config = Config.configure_sql_table_data_node("foo_bar", **properties)
+        dn = _DataManagerFactory._build_manager()._create_and_set(sql_table_dn_config, None, None)
         assert isinstance(dn, SQLTableDataNode)
         assert dn.storage_type() == "sql_table"
         assert dn.config_id == "foo_bar"
@@ -102,7 +101,14 @@ class TestSQLTableDataNode:
         assert dn.table_name == "example"
         assert dn._get_base_read_query() == "SELECT * FROM example"
 
-    @pytest.mark.parametrize("properties", __pandas_properties)
+        sql_table_dn_config_1 = Config.configure_sql_table_data_node(
+            "foo_bar", **properties, exposed_type=MyCustomObject
+        )
+        dn_1 = _DataManagerFactory._build_manager()._create_and_set(sql_table_dn_config_1, None, None)
+        assert isinstance(dn_1, SQLTableDataNode)
+        assert dn_1.exposed_type == MyCustomObject
+
+    @pytest.mark.parametrize("properties", __sql_properties)
     def test_get_user_properties(self, properties):
         custom_properties = properties.copy()
         custom_properties["foo"] = "bar"
@@ -129,28 +135,28 @@ class TestSQLTableDataNode:
             SQLTableDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
 
     @patch("taipy.core.data.sql_table.SQLTableDataNode._read_as_pandas_dataframe", return_value="pandas")
-    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    def test_modin_deprecated_in_favor_of_pandas(self, mock_read_as_pandas_dataframe, pandas_properties):
-        pandas_properties["exposed_type"] = "modin"
-        sql_data_node_as_modin = SQLTableDataNode("foo", Scope.SCENARIO, properties=pandas_properties)
+    @pytest.mark.parametrize("properties", __sql_properties)
+    def test_modin_deprecated_in_favor_of_pandas(self, mock_read_as_pandas_dataframe, properties):
+        properties["exposed_type"] = "modin"
+        sql_data_node_as_modin = SQLTableDataNode("foo", Scope.SCENARIO, properties=properties)
         assert sql_data_node_as_modin.properties["exposed_type"] == "pandas"
         assert sql_data_node_as_modin.read() == "pandas"
 
-    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    def test_raise_error_invalid_exposed_type(self, pandas_properties):
-        custom_properties = pandas_properties.copy()
+    @pytest.mark.parametrize("properties", __sql_properties)
+    def test_raise_error_invalid_exposed_type(self, properties):
+        custom_properties = properties.copy()
         custom_properties.pop("db_extra_args")
         custom_properties["exposed_type"] = "foo"
         with pytest.raises(InvalidExposedType):
             SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
-    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
+    @pytest.mark.parametrize("properties", __sql_properties)
     @patch("pandas.read_sql_query")
-    def test_engine_cache(self, _, pandas_properties):
+    def test_engine_cache(self, _, properties):
         dn = SQLTableDataNode(
             "foo",
             Scope.SCENARIO,
-            properties=pandas_properties,
+            properties=properties,
         )
 
         assert dn._engine is None
