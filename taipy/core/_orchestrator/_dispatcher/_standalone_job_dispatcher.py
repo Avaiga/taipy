@@ -35,7 +35,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         max_workers = Config.job_config.max_nb_of_workers or self._DEFAULT_MAX_NB_OF_WORKERS
         self._executor: Executor = ProcessPoolExecutor(
             max_workers=max_workers, initializer=subproc_initializer, mp_context=mp.get_context("spawn")
-        )  # type: ignore
+        )
         self._nb_available_workers = self._executor._max_workers  # type: ignore
 
     def _can_execute(self) -> bool:
