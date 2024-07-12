@@ -14,8 +14,6 @@ from __future__ import annotations
 import typing as t
 from operator import add
 
-import pandas as pd
-
 from .._warnings import _warn
 from ..icon import Icon
 from . import _MapDict
@@ -42,8 +40,11 @@ class _Adapter:
         self.__warning_by_type: t.Set[str] = set()
 
     def _get_adapted_lov(self, lov: t.Any, var_type: str) -> _AdaptedLov:
-        if isinstance(lov, pd.Series):
-            lov = lov.tolist()
+        if not isinstance(lov, list) and hasattr(lov, "tolist"):
+            try:
+                lov = lov.tolist()  # type: ignore[union-attr]
+            except Exception as e:
+                _warn("Error accessing List of values", e)
         return _AdaptedLov(lov, var_type)
 
     def _add_for_type(self, type_name: str, adapter: t.Callable) -> None:
