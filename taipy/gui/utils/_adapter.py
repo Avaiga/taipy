@@ -42,6 +42,8 @@ class _Adapter:
         self.__warning_by_type: t.Set[str] = set()
 
     def _get_adapted_lov(self, lov: t.Any, var_type: str) -> _AdaptedLov:
+        if isinstance(lov, pd.Series):
+            lov = lov.tolist()
         return _AdaptedLov(lov, var_type)
 
     def _add_for_type(self, type_name: str, adapter: t.Callable) -> None:
@@ -62,8 +64,6 @@ class _Adapter:
 
     def run(self, var_name: str, value: t.Any, id_only=False) -> t.Any:
         lov = _AdaptedLov.get_lov(value)
-        if isinstance(lov, pd.Series):
-            lov = lov.tolist()
         adapter = self.__get_for_var(var_name, value)
         if isinstance(lov, (list, tuple)):
             res = []
@@ -84,8 +84,6 @@ class _Adapter:
         if not isinstance(type_name, str):
             adapter = self.__adapter_for_type.get(var_name)
             lov = _AdaptedLov.get_lov(value)
-            if isinstance(lov, pd.Series):
-                lov = lov.tolist()
             elt = lov[0] if isinstance(lov, (list, tuple)) and len(lov) else None
             type_name = var_name if callable(adapter) else type(elt).__name__
         if adapter is None:
@@ -98,8 +96,6 @@ class _Adapter:
         dict_res = {}
         type_name = _AdaptedLov.get_type(lov)
         lov = _AdaptedLov.get_lov(lov)
-        if isinstance(lov, pd.Series):
-            lov = lov.tolist()
         if not adapter and type_name:
             adapter = self.__adapter_for_type.get(type_name)
         if not adapter:
