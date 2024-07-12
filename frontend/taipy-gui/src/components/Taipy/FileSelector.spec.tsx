@@ -143,7 +143,7 @@ describe("FileSelector Component", () => {
     });
 
     it("resets dropLabel and dropSx on drag leave", async () => {
-        const { getByRole, getByTestId } = render(<FileSelector />);
+        const { getByRole } = render(<FileSelector />);
         const elt = getByRole("button");
 
         // Create a mock DragEvent
@@ -153,15 +153,14 @@ describe("FileSelector Component", () => {
         fireEvent(elt, mockEvent);
 
         // Add assertions to check if dropLabel and dropSx have been reset
-        const dropLabelElement = getByTestId("file-selector");
-        expect(dropLabelElement.textContent).toBe(" ");
-        const buttonElement = getByTestId("upload-button");
-        expect(buttonElement).toHaveStyle("min-width: 0px");
+        const labelElement = elt.querySelector("span");
+        expect(labelElement!.textContent).toBe("");
+        expect(elt).toHaveStyle("min-width: 0px");
     });
 
     it("checks if notification is dispatched on file upload completion", async () => {
         const mockDispatch = jest.fn();
-        const { getByTestId } = render(
+        const { getByLabelText } = render(
             <TaipyContext.Provider value={{ state: INITIAL_STATE, dispatch: mockDispatch }}>
                 <FileSelector label="FileSelector" notify={true} />
             </TaipyContext.Provider>,
@@ -169,10 +168,8 @@ describe("FileSelector Component", () => {
 
         // Simulate file upload
         const file = new File(["(⌐□_□)"], "chucknorris.png", { type: "image/png" });
-        const inputElement = getByTestId("file-selector").querySelector("input");
-        if (inputElement) {
-            fireEvent.change(inputElement, { target: { files: [file] } });
-        }
+        const inputElement = getByLabelText("FileSelector");
+        fireEvent.change(inputElement, { target: { files: [file] } });
 
         // Wait for the upload to complete
         await waitFor(() => expect(mockDispatch).toHaveBeenCalled());
@@ -199,7 +196,7 @@ describe("FileSelector Component", () => {
         });
 
         const mockDispatch = jest.fn();
-        const { getByTestId } = render(
+        const { getByLabelText } = render(
             <TaipyContext.Provider value={{ state: INITIAL_STATE, dispatch: mockDispatch }}>
                 <FileSelector label="FileSelector" notify={true} />
             </TaipyContext.Provider>,
@@ -207,10 +204,8 @@ describe("FileSelector Component", () => {
 
         // Simulate file upload
         const file = new File(["(⌐□_□)"], "chucknorris.png", { type: "image/png" });
-        const inputElement = getByTestId("file-selector").querySelector("input");
-        if (inputElement) {
-            fireEvent.change(inputElement, { target: { files: [file] } });
-        }
+        const inputElement = getByLabelText("FileSelector");
+        fireEvent.change(inputElement, { target: { files: [file] } });
 
         // Wait for the upload to complete
         await waitFor(() => expect(mockDispatch).toHaveBeenCalled());
@@ -232,7 +227,7 @@ describe("FileSelector Component", () => {
         (uploadFile as jest.Mock).mockImplementation(() => Promise.resolve("mocked response"));
 
         const mockDispatch = jest.fn();
-        const { getByTestId, queryByRole } = render(
+        const { getByLabelText, queryByRole } = render(
             <TaipyContext.Provider value={{ state: INITIAL_STATE, dispatch: mockDispatch }}>
                 <FileSelector label="FileSelector" notify={true} onAction="testAction" />
             </TaipyContext.Provider>,
@@ -240,10 +235,8 @@ describe("FileSelector Component", () => {
 
         // Simulate file upload
         const file = new File(["(⌐□_□)"], "chucknorris.png", { type: "image/png" });
-        const inputElement = getByTestId("file-selector").querySelector("input");
-        if (inputElement) {
-            fireEvent.change(inputElement, { target: { files: [file] } });
-        }
+        const inputElement = getByLabelText("FileSelector");
+        fireEvent.change(inputElement, { target: { files: [file] } });
 
         // Check if the progress bar is displayed during the upload process
         expect(queryByRole("progressbar")).toBeInTheDocument();
@@ -266,17 +259,15 @@ describe("FileSelector Component", () => {
 
     it("checks if no action is taken when no file is uploaded", async () => {
         const mockDispatch = jest.fn();
-        const { getByTestId } = render(
+        const { getByLabelText } = render(
             <TaipyContext.Provider value={{ state: INITIAL_STATE, dispatch: mockDispatch }}>
                 <FileSelector label="FileSelector" notify={true} />
             </TaipyContext.Provider>,
         );
 
         // Simulate file upload without providing a file
-        const inputElement = getByTestId("file-selector").querySelector("input");
-        if (inputElement) {
-            fireEvent.change(inputElement, { target: { files: [] } });
-        }
+        const inputElement = getByLabelText("FileSelector");
+        fireEvent.change(inputElement, { target: { files: [] } });
 
         // Check if the dispatch function has not been called
         expect(mockDispatch).not.toHaveBeenCalled();

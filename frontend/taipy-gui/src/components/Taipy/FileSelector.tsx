@@ -144,7 +144,7 @@ const FileSelector = (props: FileSelectorProps) => {
     }, [handleDrop, handleDragLeave, handleDragOverWithLabel]);
 
     return (
-        <label data-testid="file-selector" htmlFor={inputId} className={className}>
+        <label htmlFor={inputId} className={className}>
             <input
                 style={noDisplayStyle}
                 id={inputId}
@@ -157,7 +157,6 @@ const FileSelector = (props: FileSelectorProps) => {
             <Tooltip title={hover || ""}>
                 <Button
                     id={id}
-                    data-testid="upload-button"
                     component="span"
                     aria-label="upload"
                     variant="outlined"
