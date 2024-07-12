@@ -137,41 +137,48 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         return cls.__STORAGE_TYPE
 
     def _read(self):
+        return self._read_from_path()
+
+    def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
+        if path is None:
+            path = self._path
+
         properties = self.properties
         if properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
-            return self._read_as_pandas_dataframe()
+            return self._read_as_pandas_dataframe(path=path)
         if properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
-            return self._read_as_numpy()
-        return self._read_as()
+            return self._read_as_numpy(path=path)
+        return self._read_as(path=path)
 
-    def _read_as(self):
+    def _read_as(self, path: str):
         properties = self.properties
-        with open(self._path, encoding=properties[self.__ENCODING_KEY]) as csvFile:
+        with open(path, encoding=properties[self.__ENCODING_KEY]) as csvFile:
             if properties[self._HAS_HEADER_PROPERTY]:
-                reader = csv.DictReader(csvFile)
-            else:
-                reader = csv.reader(csvFile)
+                reader_with_header = csv.DictReader(csvFile)
+                return [self._decoder(line) for line in reader_with_header]
 
-            return [self._decoder(line) for line in reader]
+            reader_without_header = csv.reader(csvFile)
+            return [self._decoder(line) for line in reader_without_header]
 
-    def _read_as_numpy(self) -> np.ndarray:
-        return self._read_as_pandas_dataframe().to_numpy()
+    def _read_as_numpy(self, path: str) -> np.ndarray:
+        return self._read_as_pandas_dataframe(path=path).to_numpy()
 
     def _read_as_pandas_dataframe(
-        self, usecols: Optional[List[int]] = None, column_names: Optional[List[str]] = None
+        self,
+        path: str,
+        usecols: Optional[List[int]] = None,
+        column_names: Optional[List[str]] = None,
     ) -> pd.DataFrame:
         try:
             properties = self.properties
             if properties[self._HAS_HEADER_PROPERTY]:
                 if column_names:
-                    return pd.read_csv(self._path, encoding=properties[self.__ENCODING_KEY])[column_names]
-                return pd.read_csv(self._path, encoding=properties[self.__ENCODING_KEY])
+                    return pd.read_csv(path, encoding=properties[self.__ENCODING_KEY])[column_names]
+                return pd.read_csv(path, encoding=properties[self.__ENCODING_KEY])
             else:
                 if usecols:
-                    return pd.read_csv(
-                        self._path, encoding=properties[self.__ENCODING_KEY], header=None, usecols=usecols
-                    )
-                return pd.read_csv(self._path, encoding=properties[self.__ENCODING_KEY], header=None)
+                    return pd.read_csv(path, encoding=properties[self.__ENCODING_KEY], header=None, usecols=usecols)
+                return pd.read_csv(path, encoding=properties[self.__ENCODING_KEY], header=None)
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 

@@ -14,11 +14,13 @@ import pathlib
 import shutil
 from datetime import datetime
 from os.path import isfile
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 from taipy.config.config import Config
+from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._entity._reload import _self_reload
+from ..reason import InvalidUploadFile, ReasonCollection, UploadFileCanNotBeRead
 from .data_node import DataNode
 from .data_node_id import Edit
 
@@ -33,6 +35,8 @@ class _FileDataNodeMixin(object):
     _PATH_KEY = "path"
     _DEFAULT_PATH_KEY = "default_path"
     _IS_GENERATED_KEY = "is_generated"
+
+    __logger = _TaipyLogger._get_logger()
 
     def __init__(self, properties: Dict) -> None:
         self._path: str = properties.get(self._PATH_KEY, properties.get(self._DEFAULT_PATH_KEY))
@@ -92,3 +96,56 @@ class _FileDataNodeMixin(object):
         if os.path.exists(old_path):
             shutil.move(old_path, new_path)
         return new_path
+
+    def _get_downloadable_path(self) -> str:
+        """Get the downloadable path of the file data of the data node.
+
+        Returns:
+            The downloadable path of the file data of the data node if it exists, otherwise an empty string.
+        """
+        if os.path.exists(self.path) and isfile(self._path):
+            return self.path
+
+        return ""
+
+    def _upload(self, path: str, upload_checker: Optional[Callable[[str, Any], bool]] = None) -> ReasonCollection:
+        """Upload a file data to the data node.
+
+        Parameters:
+            path (str): The path of the file to upload to the data node.
+            upload_checker (Optional[Callable[[str, Any], bool]]): A function to check if the upload is allowed.
+                The function takes the title of the upload data and the data itself as arguments and returns
+                True if the upload is allowed, otherwise False.
+
+        Returns:
+            True if the upload was successful, otherwise False.
+        """
+        from ._data_manager_factory import _DataManagerFactory
+
+        reason_collection = ReasonCollection()
+
+        upload_path = pathlib.Path(path)
+
+        try:
+            upload_data = self._read_from_path(str(upload_path))
+        except Exception as err:
+            self.__logger.error(f"Error while uploading {upload_path.name} to data node {self.id}:")  # type: ignore[attr-defined]
+            self.__logger.error(f"Error: {err}")
+            reason_collection._add_reason(self.id, UploadFileCanNotBeRead(upload_path.name, self.id))  # type: ignore[attr-defined]
+            return reason_collection
+
+        if upload_checker is not None:
+            if not upload_checker(upload_path.name, upload_data):
+                reason_collection._add_reason(self.id, InvalidUploadFile(upload_path.name, self.id))  # type: ignore[attr-defined]
+                return reason_collection
+
+        shutil.copy(upload_path, self.path)
+
+        self.track_edit(timestamp=datetime.now())  # type: ignore[attr-defined]
+        self.unlock_edit()  # type: ignore[attr-defined]
+        _DataManagerFactory._build_manager()._set(self)  # type: ignore[arg-type]
+
+        return reason_collection
+
+    def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
+        raise NotImplementedError
