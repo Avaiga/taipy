@@ -29,15 +29,16 @@ class _TabularDataNodeMixin(object):
     _VALID_STRING_EXPOSED_TYPES = [_EXPOSED_TYPE_PANDAS, _EXPOSED_TYPE_NUMPY]
 
     def __init__(self, **kwargs) -> None:
-        self._decoder: Union[Callable[[List[Any]], Any], Callable[[Dict[Any, Any]], Any]]
+        self._decoder: Union[Callable, Any]
         self.custom_document = kwargs.get(self._EXPOSED_TYPE_PROPERTY)
-        if kwargs.get(self._HAS_HEADER_PROPERTY, True):
-            self._decoder = self._default_decoder_with_header
-        else:
-            self._decoder = self._default_decoder_without_header
+
         custom_decoder = getattr(self.custom_document, "decode", None)
         if callable(custom_decoder):
             self._decoder = custom_decoder
+        elif kwargs.get(self._HAS_HEADER_PROPERTY, True):
+            self._decoder = self._default_decoder_with_header
+        else:
+            self._decoder = self._default_decoder_without_header
 
         self._encoder = self._default_encoder
         custom_encoder = getattr(self.custom_document, "encode", None)
