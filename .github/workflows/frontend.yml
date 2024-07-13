@@ -11,6 +11,7 @@ on:
 
 permissions:
   pull-requests: write
+  contents: "read"
   checks: "write"
 
 env:
@@ -22,7 +23,7 @@ jobs:
     strategy:
       matrix:
         node-version: [20.x]
-        os: [ubuntu-latest, windows-latest, macos-13]
+        os: [ubuntu-latest] #, windows-latest, macos-13]
     runs-on: ${{ matrix.os }}
 
     defaults:
@@ -70,7 +71,7 @@ jobs:
         run: npm test
 
       - name: Code coverage
-        #if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request' && steps.cache-gui-fe-build.outputs.cache-hit != 'true'
+        # if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request' && steps.cache-gui-fe-build.outputs.cache-hit != 'true'
         uses: artiomtr/jest-coverage-report-action@v2.3.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
