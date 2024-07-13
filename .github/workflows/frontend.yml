@@ -73,21 +73,14 @@ jobs:
 
       # - run: npm install --save-dev jest typescript ts-jest @types/jest
 
-      # - name: Code coverage
-      #   # if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request' && steps.cache-gui-fe-build.outputs.cache-hit != 'true'
-      #   uses: artiomtr/jest-coverage-report-action@v2.3.0
-      #   with:
-      #     #github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     threshold: "80"
-      #     working-directory: "./frontend/taipy-gui"
-      #     skip-step: install
-      #     annotations: failed-tests
-
-      - name: Run tests
-        working-directory: "./frontend/taipy-gui"
-        run: |
-          npx jest --coverage --coverageReporters json-summary
-
-      - name: Jest Coverage Comment
-        working-directory: "./frontend/taipy-gui"
-        uses: MishaKav/jest-coverage-comment@main
+      - name: Code coverage
+        # if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request' && steps.cache-gui-fe-build.outputs.cache-hit != 'true'
+        uses: artiomtr/jest-coverage-report-action@v2.3.0
+        with:
+          #github-token: ${{ secrets.GITHUB_TOKEN }}
+          threshold: "80"
+          working-directory: "./frontend/taipy-gui"
+          skip-step: install
+          annotations: failed-tests
+          coverage-file: report.json
+          base-coverage-file: report.json
