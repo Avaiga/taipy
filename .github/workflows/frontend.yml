@@ -80,7 +80,5 @@ jobs:
           #github-token: ${{ secrets.GITHUB_TOKEN }}
           threshold: "80"
           working-directory: "./frontend/taipy-gui"
-          skip-step: install
-          annotations: failed-tests
-          coverage-file: report.json
-          base-coverage-file: report.json
+          # skip-step: install
+          # annotations: failed-tests
