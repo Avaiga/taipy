@@ -71,14 +71,11 @@ jobs:
       - if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
         run: npm test
 
-      # - run: npm install --save-dev jest typescript ts-jest @types/jest
-
       - name: Code coverage
         # if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request' && steps.cache-gui-fe-build.outputs.cache-hit != 'true'
         uses: artiomtr/jest-coverage-report-action@v2.3.0
         with:
-          #github-token: ${{ secrets.GITHUB_TOKEN }}
           threshold: "80"
           working-directory: "./frontend/taipy-gui"
-          # skip-step: install
-          # annotations: failed-tests
+          skip-step: install
+          annotations: failed-tests
