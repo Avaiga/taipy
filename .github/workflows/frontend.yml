@@ -13,6 +13,7 @@ permissions:
   pull-requests: write
   contents: "read"
   checks: "write"
+  id-token: "write"
 
 env:
   NODE_OPTIONS: --max-old-space-size=4096
