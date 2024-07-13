@@ -43,32 +43,32 @@ jobs:
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
 
-      - name: Hash taipy-gui source code
-        id: hash-gui-fe
-        working-directory: ./
-        run: |
-          python tools/frontend/hash_source.py --taipy-gui-only
-          echo "HASH=$(cat hash.txt)" >> $GITHUB_OUTPUT
-          rm hash.txt
-        shell: bash
-      - name: Restore cached frontend build
-        id: cache-gui-fe-build
-        uses: actions/cache@v4
-        with:
-          path: taipy/gui/webapp
-          key: taipy-gui-frontend-build-${{ runner.os }}-${{ steps.hash-gui-fe.outputs.HASH }}
+      # - name: Hash taipy-gui source code
+      #   id: hash-gui-fe
+      #   working-directory: ./
+      #   run: |
+      #     python tools/frontend/hash_source.py --taipy-gui-only
+      #     echo "HASH=$(cat hash.txt)" >> $GITHUB_OUTPUT
+      #     rm hash.txt
+      #   shell: bash
+      # - name: Restore cached frontend build
+      #   id: cache-gui-fe-build
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: taipy/gui/webapp
+      #     key: taipy-gui-frontend-build-${{ runner.os }}-${{ steps.hash-gui-fe.outputs.HASH }}
 
       - name: Install dom dependencies
-        if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
+        #if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
         working-directory: ./frontend/taipy-gui/dom
         run: npm ci
       - name: Install dependencies
-        if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
+        #if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
         run: npm ci --omit=optional
-      - if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
+      - #if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
         run: npm run build --if-present
 
-      - if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
+      - #if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
         run: npm test
 
       - run: npm install --save-dev jest typescript ts-jest @types/jest
