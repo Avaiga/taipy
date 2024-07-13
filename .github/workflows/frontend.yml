@@ -75,7 +75,7 @@ jobs:
 
       - name: Code coverage
         # if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request' && steps.cache-gui-fe-build.outputs.cache-hit != 'true'
-        uses: artiomtr/jest-coverage-report-action@v2.3
+        uses: artiomtr/jest-coverage-report-action@v2.3.0
         with:
           #github-token: ${{ secrets.GITHUB_TOKEN }}
           threshold: "80"
