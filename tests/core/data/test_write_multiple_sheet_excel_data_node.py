@@ -20,6 +20,7 @@ from pandas.testing import assert_frame_equal
 
 from taipy.config.common.scope import Scope
 from taipy.core.data.excel import ExcelDataNode
+from taipy.core.exceptions.exceptions import SheetNameLengthMismatch
 
 
 @pytest.fixture(scope="function")
@@ -35,6 +36,7 @@ def cleanup(tmp_excel_file):
             os.remove(tmp_excel_file)
         except Exception as e:
             from taipy.logger._taipy_logger import _TaipyLogger
+
             logger = _TaipyLogger._get_logger()
             logger.error(f"Failed to delete {tmp_excel_file}. {e}")
 
@@ -184,10 +186,7 @@ def test_write_with_header_multiple_sheet_custom_exposed_type_with_sheet_name(tm
 
 
 def test_write_with_header_multiple_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file):
-    excel_dn = ExcelDataNode(
-        "foo",
-        Scope.SCENARIO,
-        properties={"path": tmp_excel_file, "exposed_type": MyCustomObject})
+    excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": MyCustomObject})
 
     row_1 = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
     row_2 = [MyCustomObject(0, 4, "hello"), MyCustomObject(1, 5, "abc"), MyCustomObject(2, 6, ".")]
@@ -202,9 +201,7 @@ def test_write_with_header_multiple_sheet_custom_exposed_type_without_sheet_name
 
 def test_write_without_header_multiple_sheet_pandas_with_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode(
-        "foo",
-        Scope.SCENARIO,
-        properties={"path": tmp_excel_file, "sheet_name": sheet_names, "has_header": False}
+        "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "sheet_name": sheet_names, "has_header": False}
     )
 
     df_1 = pd.DataFrame([*zip([1, 2, 3])])
@@ -292,9 +289,7 @@ def test_write_without_header_multiple_sheet_numpy_with_sheet_name(tmp_excel_fil
 
 def test_write_without_header_multiple_sheet_numpy_without_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode(
-        "foo",
-        Scope.SCENARIO,
-        properties={"path": tmp_excel_file, "exposed_type": "numpy", "has_header": False}
+        "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": "numpy", "has_header": False}
     )
 
     arr_1 = np.array([[1], [2], [3]])
@@ -343,9 +338,7 @@ def test_write_without_header_multiple_sheet_custom_exposed_type_with_sheet_name
 
 def test_write_without_header_multiple_sheet_custom_exposed_type_without_sheet_name(tmp_excel_file):
     excel_dn = ExcelDataNode(
-        "foo",
-        Scope.SCENARIO,
-        properties={"path": tmp_excel_file, "exposed_type": MyCustomObject, "has_header": False}
+        "foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "exposed_type": MyCustomObject, "has_header": False}
     )
 
     row_1 = [MyCustomObject(0, 1, "hi"), MyCustomObject(1, 2, "world"), MyCustomObject(2, 3, "text")]
@@ -357,6 +350,39 @@ def test_write_without_header_multiple_sheet_custom_exposed_type_without_sheet_n
     assert len(excel_dn_data) == len(sheet_data) == 2
     for sheet_name in sheet_data.keys():
         assert all(actual == expected for actual, expected in zip(excel_dn_data[sheet_name], sheet_data[sheet_name]))
+
+
+def test_write_empty_multiple_sheet_without_sheet_name(tmp_excel_file):
+    excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": tmp_excel_file})
+
+    excel_dn.write(None)
+    assert len(excel_dn.read()) == 1
+    assert excel_dn.read()["Sheet1"].empty
+
+    excel_dn.write({"Sheet2": None})
+    assert len(excel_dn.read()) == 1
+    assert excel_dn.read()["Sheet2"].empty
+
+    excel_dn.write({"Sheet1": pd.DataFrame([{"a": 1, "b": 2, "c": 3}]), "Sheet2": None})
+    assert len(excel_dn.read()) == 2
+    assert excel_dn.read()["Sheet2"].empty
+
+
+def test_write_empty_multiple_sheet_with_sheet_name(tmp_excel_file):
+    excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": tmp_excel_file, "sheet_name": sheet_names})
+
+    # Multisheet excel dn can only be written with a dictionary of data
+    with pytest.raises(SheetNameLengthMismatch):
+        excel_dn.write(None)
+
+    excel_dn.write({"Sheet1": None, "Sheet2": None})
+    assert len(excel_dn.read()) == 2
+    assert excel_dn.read()["Sheet1"].empty
+    assert excel_dn.read()["Sheet2"].empty
+
+    excel_dn.write({"Sheet1": pd.DataFrame([{"a": 1, "b": 2, "c": 3}]), "Sheet2": None})
+    assert len(excel_dn.read()) == 2
+    assert excel_dn.read()["Sheet2"].empty
 
 
 @pytest.mark.skip(reason="Not implemented on pandas 1.3.5")
