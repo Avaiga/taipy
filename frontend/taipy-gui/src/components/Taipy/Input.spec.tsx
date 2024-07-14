@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render, waitFor } from "@testing-library/react";
+import { render, waitFor, fireEvent, createEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -109,6 +109,25 @@ describe("Input Component", () => {
             type: "SEND_UPDATE_ACTION",
         });
     });
+    it("dispatch a well formed update message with change_delay=0", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByDisplayValue } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <Input value="Val" type="text" updateVarName="varname" changeDelay={0} />
+            </TaipyContext.Provider>,
+        );
+        const elt = getByDisplayValue("Val");
+        await userEvent.click(elt);
+        await userEvent.keyboard("data{Enter}");
+        await waitFor(() => expect(dispatch).toHaveBeenCalled());
+        expect(dispatch).toHaveBeenLastCalledWith({
+            name: "varname",
+            payload: { value: "Valdata" },
+            propagate: true,
+            type: "SEND_UPDATE_ACTION",
+        });
+    });
     it("dispatch a no action message on unsupported key", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
@@ -127,6 +146,18 @@ describe("Input Component", () => {
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });
+    });
+    it("should display visibility off icon when showPassword is true", async () => {
+        const { getByLabelText } = render(<Input value={"Test Input"} type="password" />);
+        const visibilityButton = getByLabelText("toggle password visibility");
+        fireEvent.click(visibilityButton);
+        const visibilityIcon = document.querySelector('svg[data-testid="VisibilityOffIcon"]');
+        expect(visibilityIcon).toBeInTheDocument();
+    });
+    it("should display visibility icon when showPassword is false", async () => {
+        const { getByLabelText } = render(<Input value={"Test Input"} type="password" />);
+        const visibilityButton = getByLabelText("toggle password visibility");
+        expect(visibilityButton).toBeInTheDocument();
     });
 });
 
@@ -185,7 +216,7 @@ describe("Number Component", () => {
     });
     xit("shows 0", async () => {
         //not working cf. https://github.com/testing-library/user-event/issues/1066
-        const { getByDisplayValue, rerender } = render(<Input value={"0"} type="number" />);
+        const { getByDisplayValue } = render(<Input value={"0"} type="number" />);
         const elt = getByDisplayValue("0") as HTMLInputElement;
         expect(elt).toBeInTheDocument();
         await userEvent.type(elt, "{ArrowUp}");
@@ -194,23 +225,29 @@ describe("Number Component", () => {
         expect(elt.value).toBe("0");
     });
     it("Validates increment by step value on up click", async () => {
-        const { getByDisplayValue, getByTestId } = render(<Input value={"0"} type="number" step={2} />);
-        const upSpinner = getByTestId("stepper-up-spinner");
+        const { getByDisplayValue, getByLabelText } = render(
+            <Input id={"Test Input"} value={"0"} type="number" step={2} />,
+        );
+        const upSpinner = getByLabelText("Increment Test Input");
         const elt = getByDisplayValue("0") as HTMLInputElement;
         await userEvent.click(upSpinner);
         expect(elt.value).toBe("2");
     });
     it("Validates decrement by step value on down click", async () => {
-        const { getByDisplayValue, getByTestId } = render(<Input value={"0"} type="number" step={2} />);
-        const downSpinner = getByTestId("stepper-down-spinner");
+        const { getByDisplayValue, getByLabelText } = render(
+            <Input id={"Test Input"} value={"0"} type="number" step={2} />,
+        );
+        const downSpinner = getByLabelText("Decrement Test Input");
         const elt = getByDisplayValue("0") as HTMLInputElement;
         await userEvent.click(downSpinner);
         expect(elt.value).toBe("-2");
     });
     it("Validates increment when holding shift key and clicking up", async () => {
         const user = userEvent.setup();
-        const { getByDisplayValue, getByTestId } = render(<Input value={"0"} type="number" step={2} />);
-        const upSpinner = getByTestId("stepper-up-spinner");
+        const { getByDisplayValue, getByLabelText } = render(
+            <Input id={"Test Input"} value={"0"} type="number" step={2} />,
+        );
+        const upSpinner = getByLabelText("Increment Test Input");
         const elt = getByDisplayValue("0") as HTMLInputElement;
         await user.keyboard("[ShiftLeft>]");
         await user.click(upSpinner);
@@ -218,8 +255,10 @@ describe("Number Component", () => {
     });
     it("Validates decrement when holding shift key and clicking down", async () => {
         const user = userEvent.setup();
-        const { getByDisplayValue, getByTestId } = render(<Input value={"0"} type="number" step={2} />);
-        const downSpinner = getByTestId("stepper-down-spinner");
+        const { getByDisplayValue, getByLabelText } = render(
+            <Input id={"Test Input"} value={"0"} type="number" step={2} />,
+        );
+        const downSpinner = getByLabelText("Decrement Test Input");
         const elt = getByDisplayValue("0") as HTMLInputElement;
         await user.keyboard("[ShiftLeft>]");
         await user.click(downSpinner);
@@ -255,5 +294,36 @@ describe("Number Component", () => {
         await user.keyboard("[ArrowDown]");
         await user.keyboard("[ArrowDown]");
         expect(elt.value).toBe("0");
+    });
+    it("parses actionKeys correctly", () => {
+        const { rerender } = render(<Input type="text" value="test" actionKeys="Enter;Escape;F1" />);
+        rerender(<Input type="text" value="test" actionKeys="Enter;F1;F2" />);
+        rerender(<Input type="text" value="test" actionKeys="F1;F2;F3" />);
+        rerender(<Input type="text" value="test" actionKeys="F2;F3;F4" />);
+    });
+    it("it should not decrement below the min value", () => {
+        const { getByLabelText } = render(<Input id={"Test Input"} type="number" value="0" min={0} />);
+        const downSpinner = getByLabelText("Decrement Test Input");
+        fireEvent.mouseDown(downSpinner);
+        const inputElement = document.getElementById("Test Input") as HTMLInputElement;
+        expect(inputElement.value).toBe("0");
+    });
+    it("should not exceed max value when incrementing", async () => {
+        const { getByLabelText } = render(
+            <Input id={"Test Input"} type="number" value="0" max={20} step={2} stepMultiplier={15} />,
+        );
+        const upSpinner = getByLabelText("Increment Test Input");
+        fireEvent.mouseDown(upSpinner, { shiftKey: true });
+        const inputElement = document.getElementById("Test Input") as HTMLInputElement;
+        await waitFor(() => {
+            expect(inputElement.value).toBe("20");
+        });
+    });
+    it("should prevent default action when mouse down event occurs on password visibility button", async () => {
+        const { getByLabelText } = render(<Input value={"Test Input"} type="password" />);
+        const visibilityButton = getByLabelText("toggle password visibility");
+        const keyDown = createEvent.mouseDown(visibilityButton);
+        fireEvent(visibilityButton, keyDown);
+        expect(keyDown.defaultPrevented).toBe(true);
     });
 });
