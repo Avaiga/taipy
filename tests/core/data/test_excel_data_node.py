@@ -12,17 +12,20 @@
 import os
 import pathlib
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import sleep
 from typing import Dict
 
+import freezegun
 import numpy as np
 import pandas as pd
 import pytest
+from pandas.testing import assert_frame_equal
 
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.core.data._data_manager import _DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.excel import ExcelDataNode
 from taipy.core.exceptions.exceptions import (
@@ -75,11 +78,10 @@ class TestExcelDataNode:
     def test_create(self):
         path = "data/node/path"
         sheet_names = ["sheet_name_1", "sheet_name_2"]
-        dn = ExcelDataNode(
-            "foo_bar",
-            Scope.SCENARIO,
-            properties={"path": path, "has_header": False, "sheet_name": sheet_names, "name": "super name"},
+        excel_dn_config = Config.configure_excel_data_node(
+            id="foo_bar", default_path=path, has_header=False, sheet_name="Sheet1", name="super name"
         )
+        dn = _DataManagerFactory._build_manager()._create_and_set(excel_dn_config, None, None)
         assert isinstance(dn, ExcelDataNode)
         assert dn.storage_type() == "excel"
         assert dn.config_id == "foo_bar"
@@ -93,7 +95,48 @@ class TestExcelDataNode:
         assert not dn.is_ready_for_reading
         assert dn.path == path
         assert dn.has_header is False
-        assert dn.sheet_name == sheet_names
+        assert dn.sheet_name == "Sheet1"
+
+        excel_dn_config_1 = Config.configure_excel_data_node(
+            id="baz", default_path=path, has_header=True, sheet_name="Sheet1", exposed_type=MyCustomObject
+        )
+        dn_1 = _DataManagerFactory._build_manager()._create_and_set(excel_dn_config_1, None, None)
+        assert isinstance(dn_1, ExcelDataNode)
+        assert dn_1.has_header is True
+        assert dn_1.sheet_name == "Sheet1"
+        assert dn_1.exposed_type == MyCustomObject
+
+        excel_dn_config_2 = Config.configure_excel_data_node(
+            id="baz",
+            default_path=path,
+            has_header=True,
+            sheet_name=sheet_names,
+            exposed_type={"Sheet1": "pandas", "Sheet2": "numpy"},
+        )
+        dn_2 = _DataManagerFactory._build_manager()._create_and_set(excel_dn_config_2, None, None)
+        assert isinstance(dn_2, ExcelDataNode)
+        assert dn_2.sheet_name == sheet_names
+        assert dn_2.exposed_type == {"Sheet1": "pandas", "Sheet2": "numpy"}
+
+        excel_dn_config_3 = Config.configure_excel_data_node(
+            id="baz", default_path=path, has_header=True, sheet_name=sheet_names, exposed_type=MyCustomObject
+        )
+        dn_3 = _DataManagerFactory._build_manager()._create_and_set(excel_dn_config_3, None, None)
+        assert isinstance(dn_3, ExcelDataNode)
+        assert dn_3.sheet_name == sheet_names
+        assert dn_3.exposed_type == MyCustomObject
+
+        excel_dn_config_4 = Config.configure_excel_data_node(
+            id="baz",
+            default_path=path,
+            has_header=True,
+            sheet_name=sheet_names,
+            exposed_type={"Sheet1": MyCustomObject, "Sheet2": MyCustomObject2},
+        )
+        dn_4 = _DataManagerFactory._build_manager()._create_and_set(excel_dn_config_4, None, None)
+        assert isinstance(dn_4, ExcelDataNode)
+        assert dn_4.sheet_name == sheet_names
+        assert dn_4.exposed_type == {"Sheet1": MyCustomObject, "Sheet2": MyCustomObject2}
 
     def test_get_user_properties(self, excel_file):
         dn_1 = ExcelDataNode("dn_1", Scope.SCENARIO, properties={"path": "data/node/path"})
@@ -365,3 +408,127 @@ class TestExcelDataNode:
 
         assert ".data" not in dn.path
         assert os.path.exists(dn.path)
+
+    def test_get_download_path(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+        assert dn._get_downloadable_path() == path
+
+    def test_get_downloadable_path_with_not_existing_file(self):
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": "NOT_EXISTING.xlsx", "exposed_type": "pandas"})
+        assert dn._get_downloadable_path() == ""
+
+    def test_upload(self, excel_file, tmpdir_factory):
+        old_xlsx_path = tmpdir_factory.mktemp("data").join("df.xlsx").strpath
+        old_data = pd.DataFrame([{"a": 0, "b": 1, "c": 2}, {"a": 3, "b": 4, "c": 5}])
+
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": old_xlsx_path, "exposed_type": "pandas"})
+        dn.write(old_data)
+        old_last_edit_date = dn.last_edit_date
+
+        upload_content = pd.read_excel(excel_file)
+
+        with freezegun.freeze_time(old_last_edit_date + timedelta(seconds=1)):
+            dn._upload(excel_file)
+
+        assert_frame_equal(dn.read()["Sheet1"], upload_content)  # The data of dn should change to the uploaded content
+        assert dn.last_edit_date > old_last_edit_date
+        assert dn.path == old_xlsx_path  # The path of the dn should not change
+
+    def test_upload_with_upload_check_pandas(self, excel_file, tmpdir_factory):
+        old_xlsx_path = tmpdir_factory.mktemp("data").join("df.xlsx").strpath
+        old_data = pd.DataFrame([{"a": 0, "b": 1, "c": 2}, {"a": 3, "b": 4, "c": 5}])
+
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": old_xlsx_path, "exposed_type": "pandas"})
+        dn.write(old_data)
+        old_last_edit_date = dn.last_edit_date
+
+        def check_data_column(upload_path, upload_data):
+            """Check if the uploaded data has the correct file format and
+            the sheet named "Sheet1" has the correct columns.
+            """
+            return upload_path.endswith(".xlsx") and upload_data["Sheet1"].columns.tolist() == ["a", "b", "c"]
+
+        not_exists_xlsx_path = tmpdir_factory.mktemp("data").join("not_exists.xlsx").strpath
+        reasons = dn._upload(not_exists_xlsx_path, upload_checker=check_data_column)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file not_exists.xlsx can not be read,"
+            f' therefore is not a valid data file for data node "{dn.id}"'
+        )
+
+        not_xlsx_path = tmpdir_factory.mktemp("data").join("wrong_format_df.xlsm").strpath
+        old_data.to_excel(not_xlsx_path, index=False)
+        # The upload should fail when the file is not a xlsx
+        reasons = dn._upload(not_xlsx_path, upload_checker=check_data_column)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0])
+            == f'The uploaded file wrong_format_df.xlsm has invalid data for data node "{dn.id}"'
+        )
+
+        wrong_format_xlsx_path = tmpdir_factory.mktemp("data").join("wrong_format_df.xlsx").strpath
+        pd.DataFrame([{"a": 1, "b": 2, "d": 3}, {"a": 4, "b": 5, "d": 6}]).to_excel(wrong_format_xlsx_path, index=False)
+        # The upload should fail when check_data_column() return False
+        reasons = dn._upload(wrong_format_xlsx_path, upload_checker=check_data_column)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0])
+            == f'The uploaded file wrong_format_df.xlsx has invalid data for data node "{dn.id}"'
+        )
+
+        assert_frame_equal(dn.read()["Sheet1"], old_data)  # The content of the dn should not change when upload fails
+        assert dn.last_edit_date == old_last_edit_date  # The last edit date should not change when upload fails
+        assert dn.path == old_xlsx_path  # The path of the dn should not change
+
+        # The upload should succeed when check_data_column() return True
+        assert dn._upload(excel_file, upload_checker=check_data_column)
+
+    def test_upload_with_upload_check_numpy(self, tmpdir_factory):
+        old_excel_path = tmpdir_factory.mktemp("data").join("df.xlsx").strpath
+        old_data = np.array([[1, 2, 3], [4, 5, 6]])
+
+        new_excel_path = tmpdir_factory.mktemp("data").join("new_upload_data.xlsx").strpath
+        new_data = np.array([[1, 2, 3], [4, 5, 6]])
+        pd.DataFrame(new_data).to_excel(new_excel_path, index=False)
+
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": old_excel_path, "exposed_type": "numpy"})
+        dn.write(old_data)
+        old_last_edit_date = dn.last_edit_date
+
+        def check_data_is_positive(upload_path, upload_data):
+            return upload_path.endswith(".xlsx") and np.all(upload_data["Sheet1"] > 0)
+
+        not_exists_xlsx_path = tmpdir_factory.mktemp("data").join("not_exists.xlsx").strpath
+        reasons = dn._upload(not_exists_xlsx_path, upload_checker=check_data_is_positive)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file not_exists.xlsx can not be read,"
+            f' therefore is not a valid data file for data node "{dn.id}"'
+        )
+
+        wrong_format_not_excel_path = tmpdir_factory.mktemp("data").join("wrong_format_df.xlsm").strpath
+        pd.DataFrame(old_data).to_excel(wrong_format_not_excel_path, index=False)
+        # The upload should fail when the file is not a excel
+        reasons = dn._upload(wrong_format_not_excel_path, upload_checker=check_data_is_positive)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0])
+            == f'The uploaded file wrong_format_df.xlsm has invalid data for data node "{dn.id}"'
+        )
+
+        not_xlsx_path = tmpdir_factory.mktemp("data").join("wrong_format_df.xlsx").strpath
+        pd.DataFrame(np.array([[-1, 2, 3], [-4, -5, -6]])).to_excel(not_xlsx_path, index=False)
+        # The upload should fail when check_data_is_positive() return False
+        reasons = dn._upload(not_xlsx_path, upload_checker=check_data_is_positive)
+        assert (
+            str(list(reasons._reasons[dn.id])[0])
+            == f'The uploaded file wrong_format_df.xlsx has invalid data for data node "{dn.id}"'
+        )
+
+        np.array_equal(dn.read()["Sheet1"], old_data)  # The content of the dn should not change when upload fails
+        assert dn.last_edit_date == old_last_edit_date  # The last edit date should not change when upload fails
+        assert dn.path == old_excel_path  # The path of the dn should not change
+
+        # The upload should succeed when check_data_is_positive() return True
+        assert dn._upload(new_excel_path, upload_checker=check_data_is_positive)

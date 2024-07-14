@@ -157,7 +157,10 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         with _Reloader():
             self._write_default_data(default_value)
 
-        if not self._last_edit_date and (isfile(self._path) or isdir(self._path)):
+        if (
+            not self._last_edit_date  # type: ignore
+            and (isfile(self._path) or isdir(self._path[:-1] if self._path.endswith("*") else self._path))
+        ):
             self._last_edit_date = datetime.now()
         self._TAIPY_PROPERTIES.update(
             {
@@ -178,18 +181,43 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         return cls.__STORAGE_TYPE
 
     def _read(self):
-        return self.read_with_kwargs()
+        return self._read_from_path()
 
-    def _read_as(self, read_kwargs: Dict):
+    def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
+        if path is None:
+            path = self._path
+
+        # return None if data was never written
+        if not self.last_edit_date:
+            self._DataNode__logger.warning(
+                f"Data node {self.id} from config {self.config_id} is being read but has never been written."
+            )
+            return None
+
+        kwargs = self.properties[self.__READ_KWARGS_PROPERTY]
+        kwargs.update(
+            {
+                self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
+            }
+        )
+        kwargs.update(read_kwargs)
+
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
+            return self._read_as_pandas_dataframe(path, kwargs)
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
+            return self._read_as_numpy(path, kwargs)
+        return self._read_as(path, kwargs)
+
+    def _read_as(self, path: str, read_kwargs: Dict):
         custom_class = self.properties[self._EXPOSED_TYPE_PROPERTY]
-        list_of_dicts = self._read_as_pandas_dataframe(read_kwargs).to_dict(orient="records")
+        list_of_dicts = self._read_as_pandas_dataframe(path, read_kwargs).to_dict(orient="records")
         return [custom_class(**dct) for dct in list_of_dicts]
 
-    def _read_as_numpy(self, read_kwargs: Dict) -> np.ndarray:
-        return self._read_as_pandas_dataframe(read_kwargs).to_numpy()
+    def _read_as_numpy(self, path: str, read_kwargs: Dict) -> np.ndarray:
+        return self._read_as_pandas_dataframe(path, read_kwargs).to_numpy()
 
-    def _read_as_pandas_dataframe(self, read_kwargs: Dict) -> pd.DataFrame:
-        return pd.read_parquet(self._path, **read_kwargs)
+    def _read_as_pandas_dataframe(self, path: str, read_kwargs: Dict) -> pd.DataFrame:
+        return pd.read_parquet(path, **read_kwargs)
 
     def _append(self, data: Any):
         self.write_with_kwargs(data, engine="fastparquet", append=True)
@@ -208,14 +236,15 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             **write_kwargs (dict[str, any]): The keyword arguments passed to the function
                 `pandas.DataFrame.to_parquet()`.
         """
+        properties = self.properties
         kwargs = {
-            self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
-            self.__COMPRESSION_PROPERTY: self.properties[self.__COMPRESSION_PROPERTY],
+            self.__ENGINE_PROPERTY: properties[self.__ENGINE_PROPERTY],
+            self.__COMPRESSION_PROPERTY: properties[self.__COMPRESSION_PROPERTY],
         }
-        kwargs.update(self.properties[self.__WRITE_KWARGS_PROPERTY])
+        kwargs.update(properties[self.__WRITE_KWARGS_PROPERTY])
         kwargs.update(write_kwargs)
 
-        df = self._convert_data_to_dataframe(self.properties[self._EXPOSED_TYPE_PROPERTY], data)
+        df = self._convert_data_to_dataframe(properties[self._EXPOSED_TYPE_PROPERTY], data)
         if isinstance(df, pd.Series):
             df = pd.DataFrame(df)
 
@@ -233,23 +262,4 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             **read_kwargs (dict[str, any]): The keyword arguments passed to the function
                 `pandas.read_parquet()`.
         """
-        # return None if data was never written
-        if not self.last_edit_date:
-            self._DataNode__logger.warning(
-                f"Data node {self.id} from config {self.config_id} is being read but has never been written."
-            )
-            return None
-
-        kwargs = self.properties[self.__READ_KWARGS_PROPERTY]
-        kwargs.update(
-            {
-                self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
-            }
-        )
-        kwargs.update(read_kwargs)
-
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
-            return self._read_as_pandas_dataframe(kwargs)
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
-            return self._read_as_numpy(kwargs)
-        return self._read_as(kwargs)
+        return self._read_from_path(**read_kwargs)

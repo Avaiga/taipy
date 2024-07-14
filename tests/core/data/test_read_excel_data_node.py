@@ -58,6 +58,7 @@ class MyCustomObject2:
 excel_file_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
 sheet_names = ["Sheet1", "Sheet2"]
 custom_class_dict = {"Sheet1": MyCustomObject1, "Sheet2": MyCustomObject2}
+custom_pandas_numpy_exposed_type_dict = {"Sheet1": "pandas", "Sheet2": "numpy"}
 
 
 def test_raise_no_data_with_header():
@@ -300,7 +301,7 @@ def test_read_multi_sheet_with_header_pandas():
     assert isinstance(data_pandas, Dict)
     assert len(data_pandas) == 2
     assert all(
-        len(data_pandas[sheet_name] == 5) and isinstance(data_pandas[sheet_name], pd.DataFrame)
+        len(data_pandas[sheet_name]) == 5 and isinstance(data_pandas[sheet_name], pd.DataFrame)
         for sheet_name in sheet_names
     )
     assert list(data_pandas.keys()) == sheet_names
@@ -331,7 +332,7 @@ def test_read_multi_sheet_with_header_numpy():
     assert isinstance(data_numpy, Dict)
     assert len(data_numpy) == 2
     assert all(
-        len(data_numpy[sheet_name] == 5) and isinstance(data_numpy[sheet_name], np.ndarray)
+        len(data_numpy[sheet_name]) == 5 and isinstance(data_numpy[sheet_name], np.ndarray)
         for sheet_name in sheet_names
     )
     assert list(data_numpy.keys()) == sheet_names
@@ -400,7 +401,7 @@ def test_read_multi_sheet_with_header_single_custom_exposed_type():
             assert row_custom_no_sheet_name.text == row_custom.text
 
 
-def test_read_multi_sheet_with_header_multiple_custom_exposed_type():
+def test_read_multi_sheet_with_header_multiple_custom_object_exposed_type():
     data_pandas = pd.read_excel(excel_file_path, sheet_name=sheet_names)
 
     # With sheet name
@@ -459,6 +460,48 @@ def test_read_multi_sheet_with_header_multiple_custom_exposed_type():
             assert row_custom_no_sheet_name.id == row_custom.id
             assert row_custom_no_sheet_name.integer == row_custom.integer
             assert row_custom_no_sheet_name.text == row_custom.text
+
+
+def test_read_multi_sheet_with_header_multiple_custom_pandas_numpy_exposed_type():
+    # With sheet name
+    excel_dn_as_pandas_numpy = ExcelDataNode(
+        "bar",
+        Scope.SCENARIO,
+        properties={
+            "path": excel_file_path,
+            "sheet_name": sheet_names,
+            "exposed_type": custom_pandas_numpy_exposed_type_dict,
+        },
+    )
+    assert excel_dn_as_pandas_numpy.properties["exposed_type"] == custom_pandas_numpy_exposed_type_dict
+    multi_data_custom = excel_dn_as_pandas_numpy.read()
+    assert isinstance(multi_data_custom["Sheet1"], pd.DataFrame)
+    assert isinstance(multi_data_custom["Sheet2"], np.ndarray)
+
+    excel_dn_as_pandas_numpy = ExcelDataNode(
+        "bar",
+        Scope.SCENARIO,
+        properties={
+            "path": excel_file_path,
+            "sheet_name": sheet_names,
+            "exposed_type": ["pandas", "numpy"],
+        },
+    )
+    assert excel_dn_as_pandas_numpy.properties["exposed_type"] == ["pandas", "numpy"]
+    multi_data_custom = excel_dn_as_pandas_numpy.read()
+    assert isinstance(multi_data_custom["Sheet1"], pd.DataFrame)
+    assert isinstance(multi_data_custom["Sheet2"], np.ndarray)
+
+    # Without sheet name
+    excel_dn_as_pandas_numpy_no_sheet_name = ExcelDataNode(
+        "bar",
+        Scope.SCENARIO,
+        properties={"path": excel_file_path, "exposed_type": custom_pandas_numpy_exposed_type_dict},
+    )
+    assert excel_dn_as_pandas_numpy_no_sheet_name.properties["exposed_type"] == custom_pandas_numpy_exposed_type_dict
+    multi_data_custom_no_sheet_name = excel_dn_as_pandas_numpy_no_sheet_name.read()
+    assert isinstance(multi_data_custom_no_sheet_name["Sheet1"], pd.DataFrame)
+    assert isinstance(multi_data_custom_no_sheet_name["Sheet2"], np.ndarray)
 
 
 def test_read_multi_sheet_without_header_pandas():
@@ -525,7 +568,7 @@ def test_read_multi_sheet_without_header_numpy():
         assert np.array_equal(data_numpy[key], data_numpy_no_sheet_name[key])
 
 
-def test_read_multi_sheet_without_header_single_custom_exposed_type():
+def test_read_multi_sheet_without_header_single_custom_object_exposed_type():
     data_pandas = pd.read_excel(excel_file_path, header=None, sheet_name=sheet_names)
 
     # With sheet name
@@ -579,7 +622,7 @@ def test_read_multi_sheet_without_header_single_custom_exposed_type():
             assert row_custom_no_sheet_name.text == row_custom.text
 
 
-def test_read_multi_sheet_without_header_multiple_custom_exposed_type():
+def test_read_multi_sheet_without_header_multiple_custom_object_exposed_type():
     data_pandas = pd.read_excel(excel_file_path, header=None, sheet_name=sheet_names)
 
     # With sheet names
@@ -643,3 +686,51 @@ def test_read_multi_sheet_without_header_multiple_custom_exposed_type():
             assert row_custom_no_sheet_name.id == row_custom.id
             assert row_custom_no_sheet_name.integer == row_custom.integer
             assert row_custom_no_sheet_name.text == row_custom.text
+
+
+def test_read_multi_sheet_without_header_multiple_custom_pandas_numpy_exposed_type():
+    # With sheet names
+    excel_dn_as_pandas_numpy = ExcelDataNode(
+        "bar",
+        Scope.SCENARIO,
+        properties={
+            "path": excel_file_path,
+            "sheet_name": sheet_names,
+            "exposed_type": custom_pandas_numpy_exposed_type_dict,
+            "has_header": False,
+        },
+    )
+    assert excel_dn_as_pandas_numpy.properties["exposed_type"] == custom_pandas_numpy_exposed_type_dict
+    multi_data_custom = excel_dn_as_pandas_numpy.read()
+    assert isinstance(multi_data_custom["Sheet1"], pd.DataFrame)
+    assert isinstance(multi_data_custom["Sheet2"], np.ndarray)
+
+    excel_dn_as_pandas_numpy = ExcelDataNode(
+        "bar",
+        Scope.SCENARIO,
+        properties={
+            "path": excel_file_path,
+            "sheet_name": sheet_names,
+            "exposed_type": ["pandas", "numpy"],
+            "has_header": False,
+        },
+    )
+    assert excel_dn_as_pandas_numpy.properties["exposed_type"] == ["pandas", "numpy"]
+    multi_data_custom = excel_dn_as_pandas_numpy.read()
+    assert isinstance(multi_data_custom["Sheet1"], pd.DataFrame)
+    assert isinstance(multi_data_custom["Sheet2"], np.ndarray)
+
+    # Without sheet names
+    excel_dn_as_pandas_numpy_no_sheet_name = ExcelDataNode(
+        "bar",
+        Scope.SCENARIO,
+        properties={
+            "path": excel_file_path,
+            "has_header": False,
+            "exposed_type": custom_pandas_numpy_exposed_type_dict,
+        },
+    )
+    multi_data_custom_no_sheet_name = excel_dn_as_pandas_numpy_no_sheet_name.read()
+    multi_data_custom_no_sheet_name = excel_dn_as_pandas_numpy.read()
+    assert isinstance(multi_data_custom_no_sheet_name["Sheet1"], pd.DataFrame)
+    assert isinstance(multi_data_custom_no_sheet_name["Sheet2"], np.ndarray)

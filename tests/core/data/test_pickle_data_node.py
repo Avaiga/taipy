@@ -11,16 +11,20 @@
 
 import os
 import pathlib
-from datetime import datetime
+import pickle
+from datetime import datetime, timedelta
 from time import sleep
 
+import freezegun
 import pandas as pd
 import pytest
+from pandas.testing import assert_frame_equal
 
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 from taipy.core.data._data_manager import _DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.exceptions.exceptions import NoData
 
@@ -42,9 +46,17 @@ class TestPickleDataNodeEntity:
         for f in glob.glob("*.p"):
             os.remove(f)
 
+    def test_create_with_manager(self, pickle_file_path):
+        parquet_dn_config = Config.configure_pickle_data_node(id="baz", default_path=pickle_file_path)
+        parquet_dn = _DataManagerFactory._build_manager()._create_and_set(parquet_dn_config, None, None)
+        assert isinstance(parquet_dn, PickleDataNode)
+
     def test_create(self):
-        dn = PickleDataNode("foobar_bazxyxea", Scope.SCENARIO, properties={"default_data": "Data"})
-        assert os.path.isfile(os.path.join(Config.core.storage_folder.strip("/"), "pickles", dn.id + ".p"))
+        pickle_dn_config = Config.configure_pickle_data_node(
+            id="foobar_bazxyxea", default_path="Data", default_data="Data"
+        )
+        dn = _DataManagerFactory._build_manager()._create_and_set(pickle_dn_config, None, None)
+
         assert isinstance(dn, PickleDataNode)
         assert dn.storage_type() == "pickle"
         assert dn.config_id == "foobar_bazxyxea"
@@ -192,3 +204,77 @@ class TestPickleDataNodeEntity:
 
         assert ".data" not in dn.path
         assert os.path.exists(dn.path)
+
+    def test_get_download_path(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.p")
+        dn = PickleDataNode("foo", Scope.SCENARIO, properties={"path": path})
+        assert dn._get_downloadable_path() == path
+
+    def test_get_download_path_with_not_existed_file(self):
+        dn = PickleDataNode("foo", Scope.SCENARIO, properties={"path": "NOT_EXISTED.p"})
+        assert dn._get_downloadable_path() == ""
+
+    def test_upload(self, pickle_file_path, tmpdir_factory):
+        old_pickle_path = tmpdir_factory.mktemp("data").join("df.p").strpath
+        old_data = pd.DataFrame([{"a": 0, "b": 1, "c": 2}, {"a": 3, "b": 4, "c": 5}])
+
+        dn = PickleDataNode("foo", Scope.SCENARIO, properties={"path": old_pickle_path})
+        dn.write(old_data)
+        old_last_edit_date = dn.last_edit_date
+
+        upload_content = pd.read_pickle(pickle_file_path)
+
+        with freezegun.freeze_time(old_last_edit_date + timedelta(seconds=1)):
+            dn._upload(pickle_file_path)
+
+        assert_frame_equal(dn.read(), upload_content)  # The content of the dn should change to the uploaded content
+        assert dn.last_edit_date > old_last_edit_date
+        assert dn.path == old_pickle_path  # The path of the dn should not change
+
+    def test_upload_with_upload_check(self, pickle_file_path, tmpdir_factory):
+        old_pickle_path = tmpdir_factory.mktemp("data").join("df.p").strpath
+        old_data = pd.DataFrame([{"a": 0, "b": 1, "c": 2}, {"a": 3, "b": 4, "c": 5}])
+
+        dn = PickleDataNode("foo", Scope.SCENARIO, properties={"path": old_pickle_path})
+        dn.write(old_data)
+        old_last_edit_date = dn.last_edit_date
+
+        def check_data_column(upload_path, upload_data):
+            return upload_path.endswith(".p") and upload_data.columns.tolist() == ["a", "b", "c"]
+
+        not_exists_json_path = tmpdir_factory.mktemp("data").join("not_exists.json").strpath
+        reasons = dn._upload(not_exists_json_path, upload_checker=check_data_column)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file not_exists.json can not be read,"
+            f' therefore is not a valid data file for data node "{dn.id}"'
+        )
+
+        not_pickle_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_pickle").strpath
+        with open(str(not_pickle_path), "wb") as f:
+            pickle.dump(pd.DataFrame([{"a": 1, "b": 2, "d": 3}, {"a": 4, "b": 5, "d": 6}]), f)
+        # The upload should fail when the file is not a pickle
+        reasons = dn._upload(not_pickle_path, upload_checker=check_data_column)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0])
+            == f'The uploaded file wrong_format_df.not_pickle has invalid data for data node "{dn.id}"'
+        )
+
+        wrong_format_pickle_path = tmpdir_factory.mktemp("data").join("wrong_format_df.p").strpath
+        with open(str(wrong_format_pickle_path), "wb") as f:
+            pickle.dump(pd.DataFrame([{"a": 1, "b": 2, "d": 3}, {"a": 4, "b": 5, "d": 6}]), f)
+        # The upload should fail when check_data_column() return False
+        reasons = dn._upload(wrong_format_pickle_path, upload_checker=check_data_column)
+        assert bool(reasons) is False
+        assert (
+            str(list(reasons._reasons[dn.id])[0])
+            == f'The uploaded file wrong_format_df.p has invalid data for data node "{dn.id}"'
+        )
+
+        assert_frame_equal(dn.read(), old_data)  # The content of the dn should not change when upload fails
+        assert dn.last_edit_date == old_last_edit_date  # The last edit date should not change when upload fails
+        assert dn.path == old_pickle_path  # The path of the dn should not change
+
+        # The upload should succeed when check_data_column() return True
+        assert dn._upload(pickle_file_path, upload_checker=check_data_column)
