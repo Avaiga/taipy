@@ -147,14 +147,14 @@ describe("Input Component", () => {
             type: "SEND_UPDATE_ACTION",
         });
     });
-    it("should display visibility off icon when showPassword is true", async () => {
+    it("should display visibility off icon when password is visible", async () => {
         const { getByLabelText } = render(<Input value={"Test Input"} type="password" />);
         const visibilityButton = getByLabelText("toggle password visibility");
         fireEvent.click(visibilityButton);
         const visibilityIcon = document.querySelector('svg[data-testid="VisibilityOffIcon"]');
         expect(visibilityIcon).toBeInTheDocument();
     });
-    it("should display visibility icon when showPassword is false", async () => {
+    it("should display visibility icon when password is hidden", async () => {
         const { getByLabelText } = render(<Input value={"Test Input"} type="password" />);
         const visibilityButton = getByLabelText("toggle password visibility");
         expect(visibilityButton).toBeInTheDocument();
