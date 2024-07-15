@@ -24,7 +24,7 @@ const re = {
  * This function formats a precision specifier for a number. It takes an optional precision and specifier string.
  * If no precision is provided, it defaults to 2. The function returns a string that represents the formatted precision.
  */
-const precisionFormat = (precision?: string, specifier?: string): string => {
+export const precisionFormat = (precision?: string, specifier?: string): string => {
     // Default to precision of 2 if not specified
     return "." + (precision?.slice(1) ?? "2") + specifier;
 }
@@ -33,7 +33,7 @@ const precisionFormat = (precision?: string, specifier?: string): string => {
  * This function parses a sprintf format string and returns an array of strings and objects. Each object has a single
  * key, 'placeholder', that contains the placeholder string.
  */
-const sprintfParse = (fmt?: string): (string | { placeholder: string; })[] => {
+export const sprintfParse = (fmt?: string): (string | { placeholder: string; })[] => {
     let _fmt = fmt;
     let match;
     const parseTree = [];
