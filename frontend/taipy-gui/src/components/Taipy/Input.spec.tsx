@@ -228,7 +228,7 @@ describe("Number Component", () => {
         const { getByDisplayValue, getByLabelText } = render(
             <Input id={"Test Input"} value={"0"} type="number" step={2} />,
         );
-        const upSpinner = getByLabelText("Increment Test Input");
+        const upSpinner = getByLabelText("Increment value");
         const elt = getByDisplayValue("0") as HTMLInputElement;
         await userEvent.click(upSpinner);
         expect(elt.value).toBe("2");
@@ -237,7 +237,7 @@ describe("Number Component", () => {
         const { getByDisplayValue, getByLabelText } = render(
             <Input id={"Test Input"} value={"0"} type="number" step={2} />,
         );
-        const downSpinner = getByLabelText("Decrement Test Input");
+        const downSpinner = getByLabelText("Decrement value");
         const elt = getByDisplayValue("0") as HTMLInputElement;
         await userEvent.click(downSpinner);
         expect(elt.value).toBe("-2");
@@ -247,7 +247,7 @@ describe("Number Component", () => {
         const { getByDisplayValue, getByLabelText } = render(
             <Input id={"Test Input"} value={"0"} type="number" step={2} />,
         );
-        const upSpinner = getByLabelText("Increment Test Input");
+        const upSpinner = getByLabelText("Increment value");
         const elt = getByDisplayValue("0") as HTMLInputElement;
         await user.keyboard("[ShiftLeft>]");
         await user.click(upSpinner);
@@ -258,7 +258,7 @@ describe("Number Component", () => {
         const { getByDisplayValue, getByLabelText } = render(
             <Input id={"Test Input"} value={"0"} type="number" step={2} />,
         );
-        const downSpinner = getByLabelText("Decrement Test Input");
+        const downSpinner = getByLabelText("Decrement value");
         const elt = getByDisplayValue("0") as HTMLInputElement;
         await user.keyboard("[ShiftLeft>]");
         await user.click(downSpinner);
@@ -303,7 +303,7 @@ describe("Number Component", () => {
     });
     it("it should not decrement below the min value", () => {
         const { getByLabelText } = render(<Input id={"Test Input"} type="number" value="0" min={0} />);
-        const downSpinner = getByLabelText("Decrement Test Input");
+        const downSpinner = getByLabelText("Decrement value");
         fireEvent.mouseDown(downSpinner);
         const inputElement = document.getElementById("Test Input") as HTMLInputElement;
         expect(inputElement.value).toBe("0");
@@ -312,7 +312,7 @@ describe("Number Component", () => {
         const { getByLabelText } = render(
             <Input id={"Test Input"} type="number" value="0" max={20} step={2} stepMultiplier={15} />,
         );
-        const upSpinner = getByLabelText("Increment Test Input");
+        const upSpinner = getByLabelText("Increment value");
         fireEvent.mouseDown(upSpinner, { shiftKey: true });
         const inputElement = document.getElementById("Test Input") as HTMLInputElement;
         await waitFor(() => {
