@@ -235,14 +235,14 @@ const Input = (props: TaipyInputProps) => {
                       endAdornment: (
                           <div style={verticalDivStyle}>
                               <IconButton
-                                  aria-label={"Increment value"}
+                                  aria-label="Increment value"
                                   size="small"
                                   onMouseDown={handleUpStepperMouseDown}
                               >
                                   <ArrowDropUpIcon fontSize="inherit" />
                               </IconButton>
                               <IconButton
-                                  aria-label={"Decrement value"}
+                                  aria-label="Decrement value"
                                   size="small"
                                   onMouseDown={handleDownStepperMouseDown}
                               >
