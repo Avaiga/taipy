@@ -73,7 +73,7 @@ def test_selector_builder_3(gui: Gui, test_client, helpers):
     helpers.test_control_builder(gui, page, expected_list)
 
 
-def test_selector_builder_4(gui: Gui, test_client, helpers):
+def test_selector_pandas_series(gui: Gui, test_client, helpers):
     pd_series = pd.Series(["l1", "l2", "l3"])
     gui._bind_var_val("selected_val", "l1")
     gui._bind_var_val("selector_properties", pd_series)
