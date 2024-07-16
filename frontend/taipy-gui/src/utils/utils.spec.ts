@@ -63,6 +63,18 @@ describe("format conversion", () => {
         const result = extractSuffixWrapper("Hello, %s. You have %d new messages.");
         expect(result).toBe(". You have %d new messages.");
     });
+    it("should return empty string when no format string is provided to extractPrefix", () => {
+        const result = extractPrefix();
+        expect(result).toBe("");
+    });
+    it("should return empty string when no format string is provided to extractSuffix", () => {
+        const result = extractSuffix();
+        expect(result).toBe("");
+    });
+    it("should break the loop for invalid placeholder", () => {
+        const result = sprintfParse("Hello, %z");
+        expect(result).toEqual(["Hello, "]);
+    });
     it("should return 'b' for '%b'", () => {
         expect(sprintfToD3Converter("%b")).toBe("b");
     });
@@ -90,5 +102,8 @@ describe("format conversion", () => {
     });
     it("should return '(' for '%u'", () => {
         expect(sprintfToD3Converter("%u")).toBe("(");
+    });
+    it("should return '' for unsupported converter", () => {
+        expect(sprintfToD3Converter("hi")).toBe("");
     });
 });
