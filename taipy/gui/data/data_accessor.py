@@ -40,6 +40,17 @@ class _DataAccessor(ABC):
     def _get_dataframe(self, value: t.Any) -> t.Union[t.List[t.Any], t.Any]:
         pass
 
+    @abstractmethod
+    def _on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
+        pass
+
+    @abstractmethod
+    def _on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
+        pass
+
+    @abstractmethod
+    def _on_add(self, value: t.Any, payload: t.Dict[str, t.Any]):
+        pass
 
 class _InvalidDataAccessor(_DataAccessor):
     @staticmethod
@@ -55,6 +66,15 @@ class _InvalidDataAccessor(_DataAccessor):
         return {}
 
     def _get_dataframe(self, value: t.Any) -> t.Union[t.List[t.Any], t.Any]:
+        return None
+
+    def _on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
+        return None
+
+    def _on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
+        return None
+
+    def _on_add(self, value: t.Any, payload: t.Dict[str, t.Any]):
         return None
 
 
@@ -119,3 +139,12 @@ class _DataAccessors(object):
 
     def _get_dataframe(self, value: t.Any):
         return self.__get_instance(value)._get_dataframe(value)
+
+    def _on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
+        return self.__get_instance(value)._on_edit(value, payload)
+
+    def _on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
+        return self.__get_instance(value)._on_delete(value, payload)
+
+    def _on_add(self, value: t.Any, payload: t.Dict[str, t.Any]):
+        return self.__get_instance(value)._on_add(value, payload)

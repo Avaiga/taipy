@@ -70,7 +70,6 @@ class _Builder:
         "style",
         "tooltip",
         "lov",
-        "on_edit",
     ]
 
     def __init__(
@@ -357,6 +356,8 @@ class _Builder:
             strattr = self.__hashes.get(name)
             if strattr is None:
                 return self
+        elif _is_boolean(strattr) and not _is_true(strattr):
+            return self
         elif strattr:
             strattr = str(strattr)
             func = self.__gui._get_user_function(strattr)

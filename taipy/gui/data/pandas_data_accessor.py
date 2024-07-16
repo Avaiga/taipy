@@ -15,6 +15,7 @@ from importlib import util
 
 import numpy as np
 import pandas as pd
+from pandas.api.types import is_numeric_dtype
 
 from .._warnings import _warn
 from ..gui import Gui
@@ -453,3 +454,32 @@ class _PandasDataAccessor(_DataAccessor):
         if isinstance(value, _PandasDataAccessor.__types):  # type: ignore
             return self.__get_data(gui, var_name, value, payload, data_format)
         return {}
+
+    def _on_edit(self, df: pd.DataFrame, payload: t.Dict[str, t.Any]):
+        df.at[payload["index"], payload["col"]] = payload["value"]
+        return df
+
+    def _on_delete(self, df: pd.DataFrame, payload: t.Dict[str, t.Any]):
+        return df.drop(payload["index"])
+
+    def _on_add(self, df: pd.DataFrame, payload: t.Dict[str, t.Any]):
+        # Save the insertion index
+        index = payload["index"]
+        # Create the new row (Column value types must match the original DataFrame's)
+        col_types = self.get_col_types("", df)
+        if col_types:
+            new_row = [0 if is_numeric_dtype(df[c]) else "" for c in list(col_types)]
+            if index > 0:
+                # Column names and value types must match the original DataFrame
+                new_df = pd.DataFrame(new_row, columns=list(col_types))
+                # Split the DataFrame
+                rows_before = df.loc[:index-1]
+                rows_after = df.loc[index+1:]
+                return pd.concat([rows_before, new_df, rows_after], ignore_index=True)
+            else:
+                # Insert as the new first row
+                df.loc[-1] = new_row  # Insert the new row
+                df.index = df.index + 1  # Shift index
+                return df.sort_index()
+        return df
+

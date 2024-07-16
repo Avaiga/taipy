@@ -1386,7 +1386,11 @@ class Gui:
                 self.__send_ws({"type": _WsType.MULTIPLE_MESSAGE.value, "payload": grouping_message})
 
     def _get_user_function(self, func_name: str) -> t.Union[t.Callable, str]:
-        func = _getscopeattr(self, func_name, None)
+        func = (
+            getattr(self, func_name.split(".", 2)[1], func_name) if func_name.startswith(f"{Gui.__SELF_VAR}.") else None
+        )
+        if not callable(func):
+            func = _getscopeattr(self, func_name, None)
         if not callable(func):
             func = self._get_locals_bind().get(func_name)
         if not callable(func):
@@ -1658,6 +1662,24 @@ class Gui:
 
     def _get_adapted_lov(self, lov: list, var_type: str):
         return self.__adapter._get_adapted_lov(lov, var_type)
+
+    def _table_on_edit(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
+        try:
+            setattr(state, var_name, self._accessors._on_edit(getattr(state, var_name), payload))
+        except Exception as e:
+            _warn("TODO: Table.on_edit", e)
+
+    def _table_on_delete(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
+        try:
+            setattr(state, var_name, self._accessors._on_delete(getattr(state, var_name), payload))
+        except Exception as e:
+            _warn("TODO: Table.on_delete", e)
+
+    def _table_on_add(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
+        try:
+            setattr(state, var_name, self._accessors._on_add(getattr(state, var_name), payload))
+        except Exception as e:
+            _warn("TODO: Table.on_add", e)
 
     def _tbl_cols(
         self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs
