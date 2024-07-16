@@ -37,11 +37,22 @@ export type WsMessageType =
     | "GMC"
     | "GDT"
     | "AID"
-    | "GR";
+    | "GR"
+    | "FV";
+export interface WsMessage {
+    type: WsMessageType | string;
+    name: string;
+    payload: Record<string, unknown> | unknown;
+    propagate: boolean;
+    client_id: string;
+    module_context: string;
+    ack_id?: string;
+}
 export type OnInitHandler = (taipyApp: TaipyApp) => void;
 export type OnChangeHandler = (taipyApp: TaipyApp, encodedName: string, value: unknown) => void;
 export type OnNotifyHandler = (taipyApp: TaipyApp, type: string, message: string) => void;
 export type OnReloadHandler = (taipyApp: TaipyApp, removedChanges: ModuleData) => void;
+export type OnWsMessage = (taipyApp: TaipyApp, event: string, payload: unknown) => void;
 export type OnWsStatusUpdate = (taipyApp: TaipyApp, messageQueue: string[]) => void;
 export type Route = [string, string];
 export declare class TaipyApp {
@@ -50,6 +61,7 @@ export declare class TaipyApp {
     _onChange: OnChangeHandler | undefined;
     _onNotify: OnNotifyHandler | undefined;
     _onReload: OnReloadHandler | undefined;
+    _onWsMessage: OnWsMessage | undefined;
     _onWsStatusUpdate: OnWsStatusUpdate | undefined;
     _ackList: string[];
     variableData: DataManager | undefined;
@@ -69,14 +81,22 @@ export declare class TaipyApp {
     );
     get onInit(): OnInitHandler | undefined;
     set onInit(handler: OnInitHandler | undefined);
+    onInitEvent(): void;
     get onChange(): OnChangeHandler | undefined;
     set onChange(handler: OnChangeHandler | undefined);
+    onChangeEvent(encodedName: string, value: unknown): void;
     get onNotify(): OnNotifyHandler | undefined;
     set onNotify(handler: OnNotifyHandler | undefined);
+    onNotifyEvent(type: string, message: string): void;
     get onReload(): OnReloadHandler | undefined;
     set onReload(handler: OnReloadHandler | undefined);
+    onReloadEvent(removedChanges: ModuleData): void;
+    get onWsMessage(): OnWsMessage | undefined;
+    set onWsMessage(handler: OnWsMessage | undefined);
+    onWsMessageEvent(event: string, payload: unknown): void;
     get onWsStatusUpdate(): OnWsStatusUpdate | undefined;
     set onWsStatusUpdate(handler: OnWsStatusUpdate | undefined);
+    onWsStatusUpdateEvent(messageQueue: string[]): void;
     init(): void;
     sendWsMessage(type: WsMessageType | string, id: string, payload: unknown, context?: string | undefined): void;
     registerWsAdapter(wsAdapter: WsAdapter): void;
@@ -95,15 +115,6 @@ export declare class TaipyApp {
     upload(encodedName: string, files: FileList, progressCallback: (val: number) => void): Promise<string>;
     getPageMetadata(): Record<string, unknown>;
     getWsStatus(): string[];
-}
-export interface WsMessage {
-    type: WsMessageType | string;
-    name: string;
-    payload: Record<string, unknown> | unknown;
-    propagate: boolean;
-    client_id: string;
-    module_context: string;
-    ack_id?: string;
 }
 export declare abstract class WsAdapter {
     abstract supportedMessageTypes: string[];

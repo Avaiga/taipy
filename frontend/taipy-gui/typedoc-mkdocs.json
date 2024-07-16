@@ -9,7 +9,7 @@
   "out": "reference_guiext",
   "excludeNotDocumented": true,
   "disableSources": true,
-  "entryDocument": "index.md",
+  "entryFileName": "index.md",
   "readme": "extension-index.md",
   "githubPages": false
 }
