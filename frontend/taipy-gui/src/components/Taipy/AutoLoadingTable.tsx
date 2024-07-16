@@ -292,7 +292,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     }
                 });
                 addDeleteColumn(
-                    (active && (onAdd || onDelete) ? 1 : 0) +
+                    (active && editable && (onAdd || onDelete) ? 1 : 0) +
                         (active && filter ? 1 : 0) +
                         (active && downloadable ? 1 : 0),
                     baseColumns
