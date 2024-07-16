@@ -375,7 +375,7 @@ describe("PaginatedTable Component", () => {
             const state: TaipyState = INITIAL_STATE;
             const { getAllByTestId, queryAllByTestId, rerender } = render(
                 <TaipyContext.Provider value={{ state, dispatch }}>
-                    <PaginatedTable data={undefined} defaultColumns={editableColumns} onEdit="onEdit" showAll={true} />
+                    <PaginatedTable data={undefined} defaultColumns={editableColumns} editable={true} onEdit="onEdit" showAll={true} />
                 </TaipyContext.Provider>
             );
 
@@ -384,6 +384,7 @@ describe("PaginatedTable Component", () => {
                     <PaginatedTable
                         data={editableValue as TableValueType}
                         defaultColumns={editableColumns}
+                        editable={true}
                         onEdit="onEdit"
                         showAll={true}
                     />
@@ -400,7 +401,7 @@ describe("PaginatedTable Component", () => {
             const state: TaipyState = INITIAL_STATE;
             const { getByTestId, queryAllByTestId, getAllByTestId, rerender } = render(
                 <TaipyContext.Provider value={{ state, dispatch }}>
-                    <PaginatedTable data={undefined} defaultColumns={editableColumns} onEdit="onEdit" showAll={true} />
+                    <PaginatedTable data={undefined} defaultColumns={editableColumns} editable={true} onEdit="onEdit" showAll={true} />
                 </TaipyContext.Provider>
             );
 
@@ -409,6 +410,7 @@ describe("PaginatedTable Component", () => {
                     <PaginatedTable
                         data={editableValue as TableValueType}
                         defaultColumns={editableColumns}
+                        editable={true}
                         onEdit="onEdit"
                         showAll={true}
                     />
@@ -497,7 +499,7 @@ describe("PaginatedTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByTestId } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable data={undefined} defaultColumns={editableColumns} showAll={true} onAdd="onAdd" />
+                <PaginatedTable data={undefined} defaultColumns={editableColumns} showAll={true} editable={true} onAdd="onAdd" />
             </TaipyContext.Provider>
         );
 
@@ -519,7 +521,7 @@ describe("PaginatedTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getAllByTestId, getByTestId, queryAllByTestId, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable data={undefined} defaultColumns={editableColumns} showAll={true} onDelete="onDelete" />
+                <PaginatedTable data={undefined} defaultColumns={editableColumns} showAll={true} editable={true} onDelete="onDelete" />
             </TaipyContext.Provider>
         );
 
@@ -528,6 +530,7 @@ describe("PaginatedTable Component", () => {
                 <PaginatedTable
                     data={editableValue as TableValueType}
                     defaultColumns={editableColumns}
+                    editable={true}
                     showAll={true}
                     onDelete="onDelete"
                 />
