@@ -58,13 +58,22 @@ jobs:
       #     path: taipy/gui/webapp
       #     key: taipy-gui-frontend-build-${{ runner.os }}-${{ steps.hash-gui-fe.outputs.HASH }}
 
-      - run: |
-          cd dom
-          npm ci
-          cd ..
-          npm ci --omit=optional
-          npm run build --if-present
-          # npm test
+      - name: Install dom dependencies
+        working-directory: ./frontend/taipy-gui/dom
+        run: npm ci
+      - name: Install dependencies
+        run: npm ci --omit=optional
+      - run: npm run build --if-present
+      - run: npm test
+
+      - name: Code coverage
+        #if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request'
+        uses: artiomtr/jest-coverage-report-action@v2.2.6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          threshold: "80"
+          working-directory: "frontend/taipy-gui"
+          skip-step: "install"
 
       # - name: Install dom dependencies
       #   if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
@@ -79,12 +88,12 @@ jobs:
       # - if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
       #   run: npm test
 
-      - name: Code coverage
-        # if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request' && steps.cache-gui-fe-build.outputs.cache-hit != 'true'
-        uses: artiomtr/jest-coverage-report-action@v2.3.0
-        with:
-          threshold: "80"
-          working-directory: "./frontend/taipy-gui"
-          skip-step: install
-          annotations: failed-tests
-          test-script: npm test
+      # - name: Code coverage
+      #   # if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request' && steps.cache-gui-fe-build.outputs.cache-hit != 'true'
+      #   uses: artiomtr/jest-coverage-report-action@v2.3.0
+      #   with:
+      #     threshold: "80"
+      #     working-directory: "./frontend/taipy-gui"
+      #     skip-step: install
+      #     annotations: failed-tests
+      #     test-script: npm test
