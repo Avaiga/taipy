@@ -9,6 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import pandas as pd
+
 import taipy.gui.builder as tgb
 from taipy.gui import Gui
 
@@ -67,5 +69,21 @@ def test_selector_builder_3(gui: Gui, test_client, helpers):
         'updateVars="lov=_TpL_tp_TpExPr_gui_get_adapted_lov_scenario_list_dict_TPMDL_0_0"',
         'updateVarName="_TpLv_tpec_TpExPr_selected_obj_TPMDL_0"',
         "value={_TpLv_tpec_TpExPr_selected_obj_TPMDL_0}",
+    ]
+    helpers.test_control_builder(gui, page, expected_list)
+
+
+def test_selector_pandas_series(gui: Gui, test_client, helpers):
+    pd_series = pd.Series(["l1", "l2", "l3"])
+    gui._bind_var_val("selected_val", "l1")
+    gui._bind_var_val("selector_properties", pd_series)
+    with tgb.Page(frame=None) as page:
+        tgb.selector(value="{selected_val}", lov="{selector_properties}")  # type: ignore[attr-defined]
+    expected_list = [
+        "<Selector",
+        'defaultLov="[&quot;l1&quot;, &quot;l2&quot;, &quot;l3&quot;]"',
+        'defaultValue="[&quot;l1&quot;]"',
+        'updateVarName="_TpLv_tpec_TpExPr_selected_val_TPMDL_0"',
+        "value={_TpLv_tpec_TpExPr_selected_val_TPMDL_0}",
     ]
     helpers.test_control_builder(gui, page, expected_list)
