@@ -67,5 +67,9 @@ class _LambdaByName(ast.NodeVisitor):
                     None,
                 )
             for kwd in node.keywords:
-                if isinstance(kwd.value, ast.Lambda) and self.lineno >= kwd.lineno and self.lineno <= kwd.end_lineno:
+                if (
+                    isinstance(kwd.value, ast.Lambda)
+                    and self.lineno >= kwd.value.lineno
+                    and self.lineno <= kwd.value.end_lineno
+                ):
                     self.lambdas[kwd.arg] = kwd.value
