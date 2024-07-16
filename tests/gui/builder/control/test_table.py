@@ -82,12 +82,15 @@ def test_table_builder_2(gui: Gui, helpers, csvdata):
         "height": "60vh",
     }
     with tgb.Page(frame=None) as page:
-        tgb.table(data="{csvdata}", properties="table_properties", auto_loading=True, editable=False)  # type: ignore[attr-defined]
+        tgb.table(data="{csvdata}", properties="table_properties", auto_loading=True, editable=True)  # type: ignore[attr-defined]
     expected_list = [
         "<Table",
         "allowAllRows={true}",
         "autoLoading={true}",
-        "editable={false}",
+        "editable={true}",
+        'onEdit="__gui._table_on_edit',
+        'onDelete="__gui._table_on_delete',
+        'onAdd="__gui._table_on_add',
         'defaultColumns="{&quot;Entity&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;&#x7D;, &quot;Code&quot;: &#x7B;&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;&#x7D;, &quot;Daily hospital occupancy&quot;: &#x7B;&quot;index&quot;: 3, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;, &quot;format&quot;: &quot;%.3f&quot;&#x7D;, &quot;Day_str&quot;: &#x7B;&quot;index&quot;: 0, &quot;format&quot;: &quot;dd/MM/yyyy&quot;, &quot;title&quot;: &quot;Date of measure&quot;, &quot;type&quot;: &quot;datetime&quot;, &quot;dfid&quot;: &quot;Day&quot;&#x7D;}"',  # noqa: E501
         'height="60vh"',
         'width="60vw"',
