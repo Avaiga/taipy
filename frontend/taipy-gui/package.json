@@ -20,7 +20,7 @@
     "react-dom": "^18.2.0",
     "react-error-boundary": "^4.0.3",
     "react-helmet-async": "^2.0.1",
-    "react-jsx-parser": "^1.28.4",
+    "react-jsx-parser": "^2.0.0",
     "react-markdown": "^9.0.1",
     "react-plotly.js": "^2.5.1",
     "react-router-dom": "^6.0.1",
