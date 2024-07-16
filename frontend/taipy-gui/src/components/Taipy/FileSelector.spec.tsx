@@ -44,6 +44,7 @@ describe("FileSelector Component", () => {
         const { getByText } = render(<FileSelector label="val" active={false} />);
         const elt = getByText("val");
         expect(elt).toHaveClass("Mui-disabled");
+        expect(elt.parentElement?.parentElement?.querySelector("input")).toBeDisabled();
     });
     it("is enabled by default", async () => {
         const { getByText } = render(<FileSelector label="val" />);
