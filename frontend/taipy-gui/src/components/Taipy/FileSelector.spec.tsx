@@ -67,7 +67,7 @@ describe("FileSelector Component", () => {
             </TaipyContext.Provider>,
         );
         const elt = getByText("FileSelector");
-        const inputElt = elt.parentElement?.querySelector("input");
+        const inputElt = elt.parentElement?.parentElement?.querySelector("input");
         expect(inputElt).toBeInTheDocument();
         inputElt && (await userEvent.upload(inputElt, file));
         expect(dispatch).toHaveBeenCalledWith({
@@ -80,7 +80,7 @@ describe("FileSelector Component", () => {
         const file = new File(["(⌐□_□)"], "chucknorris2.png", { type: "image/png" });
         const { getByRole, getByText } = render(<FileSelector label="FileSelectorDrop" />);
         const elt = getByRole("button");
-        const inputElt = elt.parentElement?.querySelector("input");
+        const inputElt = elt.parentElement?.parentElement?.querySelector("input");
         expect(inputElt).toBeInTheDocument();
         waitFor(() => getByText("Drop here to Upload"));
         inputElt &&
@@ -96,7 +96,7 @@ describe("FileSelector Component", () => {
             <FileSelector label="FileSelectorDrop" dropMessage="drop here those files" />,
         );
         const elt = getByRole("button");
-        const inputElt = elt.parentElement?.querySelector("input");
+        const inputElt = elt.parentElement?.parentElement?.querySelector("input");
         expect(inputElt).toBeInTheDocument();
         waitFor(() => getByText("drop here those files"));
         inputElt &&
