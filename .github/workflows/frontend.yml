@@ -59,9 +59,9 @@ jobs:
       #     key: taipy-gui-frontend-build-${{ runner.os }}-${{ steps.hash-gui-fe.outputs.HASH }}
 
       - run: |
-          cd ./frontend/taipy-gui/dom
+          cd dom
           npm ci
-          cd ../../..
+          cd ..
           npm ci --omit=optional
           npm run build --if-present
           npm test
