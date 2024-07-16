@@ -34,7 +34,7 @@ describe("FileSelector Component", () => {
     it("displays the right info for string", async () => {
         const { getByText } = render(<FileSelector label="toto" defaultLabel="titi" className="taipy-file-selector" />);
         const elt = getByText("toto");
-        expect(elt.parentElement).toHaveClass("taipy-file-selector");
+        expect(elt.parentElement?.parentElement).toHaveClass("taipy-file-selector");
     });
     it("displays the default value", async () => {
         const { getByText } = render(<FileSelector defaultLabel="titi" label={undefined as unknown as string} />);
