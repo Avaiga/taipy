@@ -19,6 +19,9 @@ import userEvent from "@testing-library/user-event";
 import Image from "./Image";
 import { TaipyContext } from "../../context/taipyContext";
 import { TaipyState, INITIAL_STATE } from "../../context/taipyReducers";
+import axios from "axios";
+
+jest.mock("axios");
 
 describe("Image Component", () => {
     it("renders", async () => {
@@ -69,7 +72,7 @@ describe("Image Component", () => {
         const { getByRole } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <Image defaultContent="/url/toto.png" onAction="on_action" />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
         const elt = getByRole("button");
         await userEvent.click(elt);
@@ -78,5 +81,73 @@ describe("Image Component", () => {
             payload: { args: [], action: "on_action" },
             type: "SEND_ACTION_ACTION",
         });
+    });
+    it("should return [undefined, undefined, false] when content prop is not provided", () => {
+        const { getByRole } = render(<Image defaultContent="/url/to/default/image.png" />);
+        const img = getByRole("img") as HTMLImageElement;
+        expect(img.src).toBe("http://localhost/url/to/default/image.png");
+    });
+    it("should return [undefined, undefined, false] when content prop is an empty string", () => {
+        const { getByRole } = render(<Image defaultContent="/url/to/default/image.png" content="" />);
+        const img = getByRole("img") as HTMLImageElement;
+        expect(img.src).toBe("http://localhost/");
+    });
+    it("should return [undefined, undefined, false] when content prop is a string of length less than 4", () => {
+        const { getByRole } = render(<Image defaultContent="/url/to/default/image.png" content="abc" />);
+        const img = getByRole("img") as HTMLImageElement;
+        expect(img.src).toBe("http://localhost/abc");
+    });
+    it("should return the content prop when it is a SVG file", async () => {
+        const svgContent = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
+        (axios.get as jest.Mock).mockResolvedValue({ data: svgContent });
+
+        const { container } = render(
+            <Image defaultContent="/url/to/default/image.png" content="/url/to/content/image.svg" />,
+        );
+
+        // Wait for useEffect to complete
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        const svg = container.querySelector("svg");
+        expect(svg?.outerHTML.replace(/"/g, "'")).toBe(svgContent.replace(/"/g, "'"));
+    });
+    it("should return the content prop when it is SVG XML", () => {
+        const content = "<svg xmlns='http://www.w3.org/2000/svg'></svg>";
+        const { container } = render(<Image defaultContent="/url/to/default/image.png" content={content} />);
+        const svg = container.querySelector("svg");
+        expect(svg?.outerHTML.replace(/"/g, "'")).toBe(content);
+    });
+    it("should return the content prop when it is a string of length 4 or more that is not a SVG file or SVG XML", () => {
+        const { getByRole } = render(
+            <Image defaultContent="/url/to/default/image.png" content="/url/to/content/image.png" />,
+        );
+        const img = getByRole("img") as HTMLImageElement;
+        expect(img.src).toBe("http://localhost/url/to/content/image.png");
+    });
+    it("should render a div when content prop is a SVG file", async () => {
+        const svgContent = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
+        (axios.get as jest.Mock).mockResolvedValue({ data: svgContent });
+
+        const { container } = render(
+            <Image defaultContent="/url/to/default/image.png" content="/url/to/content/image.svg" />,
+        );
+        // Wait for useEffect to complete
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        const div = container.querySelector("div");
+        expect(div).toBeInTheDocument();
+    });
+    it("should render a div when content prop is SVG XML", () => {
+        const content = "<svg xmlns='http://www.w3.org/2000/svg'></svg>";
+        const { container } = render(<Image defaultContent="/url/to/default/image.png" content={content} />);
+        const div = container.querySelector("div");
+        expect(div).toBeInTheDocument();
+    });
+    it("should render an img when content prop is not a SVG file or SVG XML", () => {
+        const { getByRole } = render(
+            <Image defaultContent="/url/to/default/image.png" content="/url/to/content/image.png" />,
+        );
+        const img = getByRole("img") as HTMLImageElement;
+        expect(img).toBeInTheDocument();
     });
 });

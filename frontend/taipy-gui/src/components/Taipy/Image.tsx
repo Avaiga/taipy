@@ -58,12 +58,15 @@ const Image = (props: ImageProps) => {
         return [undefined, undefined, false];
     }, [content]);
 
-    const style = useMemo(() => ({
-        width: width,
-        height: height,
-        display: inlineSvg ? "inline-flex" : undefined,
-        verticalAlign: inlineSvg ? "middle" : undefined
-    }), [width, height, inlineSvg]);
+    const style = useMemo(
+        () => ({
+            width: width,
+            height: height,
+            display: inlineSvg ? "inline-flex" : undefined,
+            verticalAlign: inlineSvg ? "middle" : undefined,
+        }),
+        [width, height, inlineSvg],
+    );
 
     useEffect(() => {
         if (svg) {
@@ -76,21 +79,23 @@ const Image = (props: ImageProps) => {
     return (
         <Tooltip title={hover || label}>
             {onAction ? (
-                <Button
-                    id={id}
-                    className={className}
-                    onClick={handleClick}
-                    aria-label={label}
-                    variant="outlined"
-                    disabled={!active}
-                    title={label}
-                >
-                    {inlineSvg ? (
-                        <div ref={divRef} style={style} />
-                    ) : (
-                        <img src={content} style={style} alt={label} />
-                    )}
-                </Button>
+                <span>
+                    <Button
+                        id={id}
+                        className={className}
+                        onClick={handleClick}
+                        aria-label={label}
+                        variant="outlined"
+                        disabled={!active}
+                        title={label}
+                    >
+                        {inlineSvg ? (
+                            <div ref={divRef} style={style} />
+                        ) : (
+                            <img src={content} style={style} alt={label} />
+                        )}
+                    </Button>
+                </span>
             ) : inlineSvg ? (
                 <div id={id} className={className} style={style} ref={divRef} title={label}></div>
             ) : (
