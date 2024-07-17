@@ -11,8 +11,8 @@ on:
 
 permissions:
   # Required to checkout the code
-  contents: write
-  # checks: write
+  # contents: write
+  checks: write
   # Required to put a comment into the pull-request
   pull-requests: write
 
