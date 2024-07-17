@@ -2,14 +2,18 @@ name: Frontend Tests & Coverage
 
 on:
   push:
-    branches: [ develop ]
+    branches: [develop]
   pull_request:
-    branches: [ develop ]
+    branches: [develop]
     paths:
-        - 'frontend/taipy-gui/**'
+      - "frontend/taipy-gui/**"
   workflow_dispatch:
 
 permissions:
+  # Required to checkout the code
+  contents: write
+  checks: write
+  # Required to put a comment into the pull-request
   pull-requests: write
 
 env:
@@ -32,13 +36,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: npm build and test with node ${{ matrix.node-version }} on ${{ matrix.os }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
+          cache: "npm"
+          cache-dependency-path: "**/package-lock.json"
 
       - name: Hash taipy-gui source code
         id: hash-gui-fe
