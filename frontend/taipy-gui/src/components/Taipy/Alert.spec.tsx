@@ -103,7 +103,7 @@ describe("Alert Component", () => {
         document.head.removeChild(link);
     });
 
-    it("closes Snackbar on close button click", async () => {
+    it("closes alert on close button click", async () => {
         const alerts = [{ atype: "success", message: "Test Alert", duration: 3000, system: false }];
         render(
             <SnackbarProvider>
@@ -118,7 +118,7 @@ describe("Alert Component", () => {
         });
     });
 
-    it("Snackbar disappears when alert type is empty", async () => {
+    it("Alert disappears when alert type is empty", async () => {
         const alerts = [{ atype: "success", message: "Test Alert", duration: 3000, system: false }];
         const { rerender } = render(
             <SnackbarProvider>
