@@ -33,6 +33,8 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     defaultValue?: number
     delta?: number
     defaultDelta?: number
+    positiveDeltaColor?: string
+    negativeDeltaColor?: string
     threshold?: number
     defaultThreshold?: number
     testId?: string
@@ -58,7 +60,9 @@ const Metric = (props: MetricProps) => {
     const {
         width = "100%",
         height,
-        showValue = true
+        showValue = true,
+        positiveDeltaColor = "#3D9970",
+        negativeDeltaColor = "#FF4136"
     } = props;
     const value = useDynamicProperty(props.value, props.defaultValue, 0)
     const threshold = useDynamicProperty(props.threshold, props.defaultThreshold, undefined)
@@ -103,7 +107,16 @@ const Metric = (props: MetricProps) => {
                     reference: typeof value === 'number' && typeof delta === 'number' ? value - delta : undefined,
                     prefix: extractPrefix(props.deltaFormat),
                     suffix: extractSuffix(props.deltaFormat),
-                    valueformat: sprintfToD3Converter(props.deltaFormat)
+                    valueformat: sprintfToD3Converter(props.deltaFormat),
+                    increasing:{
+                        symbol: "▲",
+                        color: positiveDeltaColor
+                    },
+                    decreasing: {
+                        symbol: "▼",
+                        color: negativeDeltaColor
+                    }
+
                 } as Partial<Delta>,
                 gauge: {
                     axis: {
@@ -130,6 +143,8 @@ const Metric = (props: MetricProps) => {
         props.type,
         value,
         showValue,
+        positiveDeltaColor,
+        negativeDeltaColor,
         delta,
         threshold,
         colorMap
