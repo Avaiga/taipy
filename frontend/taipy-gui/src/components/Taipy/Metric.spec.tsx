@@ -238,6 +238,16 @@ describe("Metric Component", () => {
         });
     });
 
+    it("applies style correctly when positiveDeltaColor is set", async () => {
+        render(<Metric delta={10} positiveDeltaColor="#FF4136" testId="test-id" />);
+        await waitFor(() => {
+            const elt = document.querySelector(".delta");
+            expect(elt).toHaveStyle({
+                    fill: "rgb(255, 65, 54)"
+                });
+        });
+    });
+
     it("processes type and threshold props correctly when type is linear", async () => {
         render(<Metric type="linear" threshold={50} testId="test-id" />);
         await waitFor(() => {
