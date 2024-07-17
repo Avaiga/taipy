@@ -77,5 +77,4 @@ jobs:
           working-directory: "./frontend/taipy-gui"
           skip-step: install
           annotations: failed-tests
-          coverage-file: ./coverage/report.json
           base-coverage-file: ./coverage/report.json
