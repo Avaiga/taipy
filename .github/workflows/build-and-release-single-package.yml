@@ -46,6 +46,7 @@ jobs:
           ${{ github.event.inputs.target_package }} >> $GITHUB_OUTPUT
 
   build-and-release-package:
+    permissions: write-all
     needs: [fetch-versions]
     timeout-minutes: 20
     runs-on: ubuntu-latest
