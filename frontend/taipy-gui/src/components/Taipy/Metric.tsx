@@ -93,11 +93,9 @@ const Metric = (props: MetricProps) => {
         showValue && mode.push("number");
         (delta !== undefined) && mode.push("delta");
         const deltaIncreasing = positiveDeltaColor?{
-            symbol: "▲",
             color: positiveDeltaColor
         } : undefined
         const deltaDecreasing =negativeDeltaColor?{
-                symbol: "▼",
                 color: negativeDeltaColor
             } : undefined
         return [
