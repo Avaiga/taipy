@@ -61,8 +61,8 @@ const Metric = (props: MetricProps) => {
         width = "100%",
         height,
         showValue = true,
-        positiveDeltaColor = "#3D9970",
-        negativeDeltaColor = "#FF4136"
+        positiveDeltaColor,
+        negativeDeltaColor
     } = props;
     const value = useDynamicProperty(props.value, props.defaultValue, 0)
     const threshold = useDynamicProperty(props.threshold, props.defaultThreshold, undefined)
@@ -92,6 +92,14 @@ const Metric = (props: MetricProps) => {
         const mode = (props.type === "none") ? [] : ["gauge"];
         showValue && mode.push("number");
         (delta !== undefined) && mode.push("delta");
+        const deltaIncreasing = positiveDeltaColor?{
+            symbol: "▲",
+            color: positiveDeltaColor
+        } : undefined
+        const deltaDecreasing =negativeDeltaColor?{
+                symbol: "▼",
+                color: negativeDeltaColor
+            } : undefined
         return [
             {
                 domain: {x: [0, 1], y: [0, 1]},
@@ -108,14 +116,8 @@ const Metric = (props: MetricProps) => {
                     prefix: extractPrefix(props.deltaFormat),
                     suffix: extractSuffix(props.deltaFormat),
                     valueformat: sprintfToD3Converter(props.deltaFormat),
-                    increasing:{
-                        symbol: "▲",
-                        color: positiveDeltaColor
-                    },
-                    decreasing: {
-                        symbol: "▼",
-                        color: negativeDeltaColor
-                    }
+                    increasing:deltaIncreasing,
+                    decreasing: deltaDecreasing
 
                 } as Partial<Delta>,
                 gauge: {

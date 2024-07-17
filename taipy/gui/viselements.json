@@ -1192,13 +1192,11 @@
                     {
                         "name": "positive_delta_color",
                         "type": "str",
-                        "default_value": "#3D9970",
                         "doc": "Set the color of positive delta."
                     },
                     {
                         "name": "negative_delta_color",
                         "type": "str",
-                        "default_value": "#FF4136",
                         "doc": "Set the color of negative delta."
 
                     },
