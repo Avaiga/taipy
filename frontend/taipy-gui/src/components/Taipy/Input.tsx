@@ -13,7 +13,6 @@
 
 import React, { useState, useEffect, useCallback, useRef, KeyboardEvent, useMemo, CSSProperties } from "react";
 import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Visibility from "@mui/icons-material/Visibility";
