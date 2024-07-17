@@ -12,7 +12,7 @@ on:
 permissions:
   # Required to checkout the code
   contents: write
-  checks: write
+  # checks: write
   # Required to put a comment into the pull-request
   pull-requests: write
 
@@ -81,4 +81,4 @@ jobs:
           working-directory: "./frontend/taipy-gui"
           skip-step: install
           annotations: failed-tests
-          base-coverage-file: ./report.json
+          # base-coverage-file: ./report.json
