@@ -78,25 +78,25 @@ const FileSelector = (props: FileSelectorProps) => {
                         onAction && dispatch(createSendActionNameAction(id, module, onAction));
                         notify &&
                             dispatch(
-                                createAlertAction({ atype: "success", message: value, system: false, duration: 3000 }),
+                                createAlertAction({ atype: "success", message: value, system: false, duration: 3000 })
                             );
                     },
                     (reason) => {
                         setUpload(false);
                         notify &&
                             dispatch(
-                                createAlertAction({ atype: "error", message: reason, system: false, duration: 3000 }),
+                                createAlertAction({ atype: "error", message: reason, system: false, duration: 3000 })
                             );
-                    },
+                    }
                 );
             }
         },
-        [state.id, id, onAction, notify, updateVarName, dispatch, module],
+        [state.id, id, onAction, notify, updateVarName, dispatch, module]
     );
 
     const handleChange = useCallback(
         (e: ChangeEvent<HTMLInputElement>) => handleFiles(e.target.files, e),
-        [handleFiles],
+        [handleFiles]
     );
 
     const handleDrop = useCallback(
@@ -105,7 +105,7 @@ const FileSelector = (props: FileSelectorProps) => {
             setDropSx(defaultSx);
             handleFiles(e.dataTransfer?.files, e);
         },
-        [handleFiles],
+        [handleFiles]
     );
 
     const handleDragLeave = useCallback(() => {
@@ -118,12 +118,12 @@ const FileSelector = (props: FileSelectorProps) => {
             console.log(evt);
             const target = evt.currentTarget as HTMLElement;
             setDropSx((sx) =>
-                sx.minWidth === defaultSx.minWidth && target ? { minWidth: target.clientWidth + "px" } : sx,
+                sx.minWidth === defaultSx.minWidth && target ? { minWidth: target.clientWidth + "px" } : sx
             );
             setDropLabel(dropMessage);
             handleDragOver(evt);
         },
-        [dropMessage],
+        [dropMessage]
     );
 
     useEffect(() => {
@@ -153,19 +153,22 @@ const FileSelector = (props: FileSelectorProps) => {
                 accept={extensions}
                 multiple={multiple}
                 onChange={handleChange}
+                disabled={!active || upload}
             />
             <Tooltip title={hover || ""}>
-                <Button
-                    id={id}
-                    component="span"
-                    aria-label="upload"
-                    variant="outlined"
-                    disabled={!active || upload}
-                    sx={dropSx}
-                    ref={butRef}
-                >
-                    <UploadFile /> {dropLabel || label || defaultLabel}
-                </Button>
+                <span>
+                    <Button
+                        id={id}
+                        component="span"
+                        aria-label="upload"
+                        variant="outlined"
+                        disabled={!active || upload}
+                        sx={dropSx}
+                        ref={butRef}
+                    >
+                        <UploadFile /> {dropLabel || label || defaultLabel}
+                    </Button>
+                </span>
             </Tooltip>
             {upload ? <LinearProgress value={progress} /> : null}
         </label>
