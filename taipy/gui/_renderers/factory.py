@@ -510,7 +510,7 @@ class _Factory:
                 ("height", PropertyType.string_or_number, "80vh"),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("editable", PropertyType.dynamic_boolean, False),
-                ("on_edit", PropertyType.function, gui._get_call_method_name('_table_on_edit')),
+                ("on_edit", PropertyType.function, gui._get_call_method_name("_table_on_edit")),
                 ("on_delete", PropertyType.function, gui._get_call_method_name('_table_on_delete')),
                 ("on_add", PropertyType.function, gui._get_call_method_name('_table_on_add')),
                 ("on_action", PropertyType.function),
