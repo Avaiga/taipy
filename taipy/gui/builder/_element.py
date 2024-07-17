@@ -98,9 +98,10 @@ class _Element(ABC):
                 return value.__name__
 
             try:
-                st = ast.parse(inspect.getsource(value.__code__).strip())
+                source = inspect.findsource(value)
+                st = ast.parse("".join(source[0]))
                 lambda_by_name: t.Dict[str, ast.Lambda] = {}
-                _LambdaByName(self._ELEMENT_NAME, lambda_by_name).visit(st)
+                _LambdaByName(self._ELEMENT_NAME, source[1], lambda_by_name).visit(st)
                 lambda_fn = lambda_by_name.get(
                     key,
                     lambda_by_name.get(_LambdaByName._DEFAULT_NAME, None) if key == self._DEFAULT_PROPERTY else None,

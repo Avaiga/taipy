@@ -214,21 +214,22 @@ const CoreItem = (props: {
             }
             sx={nodeType === NodeType.NODE ? undefined : ParentItemSx}
         >
-            {items ?
-                items.map((item) => (
-                    <CoreItem
-                        key={item[0]}
-                        item={item}
-                        displayCycles={true}
-                        showPrimaryFlag={props.showPrimaryFlag}
-                        leafType={props.leafType}
-                        editComponent={props.editComponent}
-                        pins={props.pins}
-                        onPin={props.onPin}
-                        hideNonPinned={props.hideNonPinned}
-                        active={props.active}
-                    />
-                )) : null}
+            {items
+                ? items.map((item) => (
+                      <CoreItem
+                          key={item[0]}
+                          item={item}
+                          displayCycles={true}
+                          showPrimaryFlag={props.showPrimaryFlag}
+                          leafType={props.leafType}
+                          editComponent={props.editComponent}
+                          pins={props.pins}
+                          onPin={props.onPin}
+                          hideNonPinned={props.hideNonPinned}
+                          active={props.active}
+                      />
+                  ))
+                : null}
         </TreeItem>
     ) : null;
 };
@@ -592,12 +593,17 @@ const CoreSelector = (props: CoreSelectorProps) => {
 
     useEffect(() => {
         if (lovPropertyName) {
-            const filters = localStoreGet(id, lovPropertyName, "filter");
-            filters && applyFilters(filters);
-            const sorts = localStoreGet(id, lovPropertyName, "sort");
-            sorts && applySorts(sorts);
+            if (colFilters) {
+                const filters = localStoreGet(id, lovPropertyName, "filter") as FilterDesc[];
+                filters &&
+                    applyFilters(filters.filter((fd) => Object.values(colFilters).some((cd) => cd.dfid === fd.col)));
+            }
+            if (colSorts) {
+                const sorts = localStoreGet(id, lovPropertyName, "sort") as SortDesc[];
+                sorts && applySorts(sorts.filter((fd) => Object.values(colSorts).some((cd) => cd.dfid === fd.col)));
+            }
         }
-    }, [id, lovPropertyName, applyFilters, applySorts]);
+    }, [id, colFilters, colSorts, lovPropertyName, applyFilters, applySorts]);
 
     // Search
     const [searchValue, setSearchValue] = useState("");

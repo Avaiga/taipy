@@ -49,17 +49,27 @@ class _TransformVarToValue(ast.NodeTransformer):
 class _LambdaByName(ast.NodeVisitor):
     _DEFAULT_NAME = "<default>"
 
-    def __init__(self, element_name: str, lambdas: t.Dict[str, ast.Lambda]) -> None:
+    def __init__(self, element_name: str, lineno: int, lambdas: t.Dict[str, ast.Lambda]) -> None:
         super().__init__()
         self.element_name = element_name
         self.lambdas = lambdas
+        self.lineno = lineno + 1
 
     def visit_Call(self, node):
-        if node.func.attr == self.element_name:
+        if getattr(node.func, "attr", None) == self.element_name:
             if self.lambdas.get(_LambdaByName._DEFAULT_NAME, None) is None:
                 self.lambdas[_LambdaByName._DEFAULT_NAME] = next(
-                    (arg for arg in node.args if isinstance(arg, ast.Lambda)), None
+                    (
+                        arg
+                        for arg in node.args
+                        if isinstance(arg, ast.Lambda) and self.lineno >= arg.lineno and self.lineno <= arg.end_lineno
+                    ),
+                    None,
                 )
             for kwd in node.keywords:
-                if isinstance(kwd.value, ast.Lambda):
+                if (
+                    isinstance(kwd.value, ast.Lambda)
+                    and self.lineno >= kwd.value.lineno
+                    and self.lineno <= kwd.value.end_lineno
+                ):
                     self.lambdas[kwd.arg] = kwd.value
