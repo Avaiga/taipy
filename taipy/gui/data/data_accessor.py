@@ -49,7 +49,7 @@ class _DataAccessor(ABC):
         pass
 
     @abstractmethod
-    def _on_add(self, value: t.Any, payload: t.Dict[str, t.Any]):
+    def _on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
         pass
 
 class _InvalidDataAccessor(_DataAccessor):
@@ -74,7 +74,7 @@ class _InvalidDataAccessor(_DataAccessor):
     def _on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
         return None
 
-    def _on_add(self, value: t.Any, payload: t.Dict[str, t.Any]):
+    def _on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
         return None
 
 
@@ -146,5 +146,5 @@ class _DataAccessors(object):
     def _on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
         return self.__get_instance(value)._on_delete(value, payload)
 
-    def _on_add(self, value: t.Any, payload: t.Dict[str, t.Any]):
-        return self.__get_instance(value)._on_add(value, payload)
+    def _on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
+        return self.__get_instance(value)._on_add(value, payload, new_row)

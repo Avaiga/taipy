@@ -1663,21 +1663,32 @@ class Gui:
     def _get_adapted_lov(self, lov: list, var_type: str):
         return self.__adapter._get_adapted_lov(lov, var_type)
 
-    def _table_on_edit(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
+    def table_on_edit(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
+        """
+        TODO: Default implementation of on_edit for tables
+        """
         try:
             setattr(state, var_name, self._accessors._on_edit(getattr(state, var_name), payload))
         except Exception as e:
             _warn("TODO: Table.on_edit", e)
 
-    def _table_on_delete(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
+    def table_on_delete(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
+        """
+        TODO: Default implementation of on_delete for tables
+        """
         try:
             setattr(state, var_name, self._accessors._on_delete(getattr(state, var_name), payload))
         except Exception as e:
             _warn("TODO: Table.on_delete", e)
 
-    def _table_on_add(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
+    def table_on_add(
+        self, state: State, var_name: str, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None
+    ):
+        """
+        TODO: Default implementation of on_add for tables
+        """
         try:
-            setattr(state, var_name, self._accessors._on_add(getattr(state, var_name), payload))
+            setattr(state, var_name, self._accessors._on_add(getattr(state, var_name), payload, new_row))
         except Exception as e:
             _warn("TODO: Table.on_add", e)
 

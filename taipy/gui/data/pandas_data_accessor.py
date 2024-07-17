@@ -462,13 +462,13 @@ class _PandasDataAccessor(_DataAccessor):
     def _on_delete(self, df: pd.DataFrame, payload: t.Dict[str, t.Any]):
         return df.drop(payload["index"])
 
-    def _on_add(self, df: pd.DataFrame, payload: t.Dict[str, t.Any]):
+    def _on_add(self, df: pd.DataFrame, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
         # Save the insertion index
         index = payload["index"]
         # Create the new row (Column value types must match the original DataFrame's)
         col_types = self.get_col_types("", df)
         if col_types:
-            new_row = [0 if is_numeric_dtype(df[c]) else "" for c in list(col_types)]
+            new_row = [0 if is_numeric_dtype(df[c]) else "" for c in list(col_types)] if new_row is None else new_row
             if index > 0:
                 # Column names and value types must match the original DataFrame
                 new_df = pd.DataFrame(new_row, columns=list(col_types))
