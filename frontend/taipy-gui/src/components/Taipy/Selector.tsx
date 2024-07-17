@@ -99,7 +99,7 @@ const getOptionLabel = (option: LovItem) => (typeof option.item === "string" ? o
 const getOptionKey = (option: LovItem) => "" + option.id;
 const isOptionEqualToValue = (option: LovItem, value: LovItem) => option.id == value.id;
 const renderOption = (props: HTMLAttributes<HTMLLIElement>, option: LovItem) => (
-    <li {...props}>{typeof option.item === "string" ? option.item : <LovImage item={option.item} />}</li>
+    <li {...props} key={option.id}>{typeof option.item === "string" ? option.item : <LovImage item={option.item} />}</li>
 );
 
 const getLovItemsFromStr = (value: string | string[] | undefined, lovList: LovItem[], multiple: boolean) => {

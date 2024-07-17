@@ -112,7 +112,8 @@ def _enhance_columns(  # noqa: C901
                 col_desc["tooltip"] = value
         else:
             _warn(f"{elt_name}: tooltip[{k}] is not in the list of displayed columns.")
-    if attributes.get("on_edit"):
+    editable = attributes.get("editable", False)
+    if _is_boolean(editable) and _is_true(editable):
         lovs = _get_name_indexed_property(attributes, "lov")
         for k, v in lovs.items():  # pragma: no cover
             if col_desc := _get_column_desc(columns, k):
