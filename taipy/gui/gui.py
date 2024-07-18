@@ -98,7 +98,6 @@ from .utils import (
     _TaipyData,
     _TaipyLov,
     _TaipyLovValue,
-    _TaipyToJson,
     _to_camel_case,
     _variable_decode,
     is_debugging,
