@@ -245,23 +245,38 @@ _operators: t.Dict[str, t.Callable] = {
 }
 
 
-def _filter_value(cur_val: t.Any, operator: t.Callable, val: t.Any):
+def _filter_value(base_val: t.Any, operator: t.Callable, val: t.Any, adapt: t.Optional[t.Callable] = None):
+    if isinstance(base_val, (datetime, date)):
+        base_val = base_val.isoformat()
+    val = adapt(base_val, val) if adapt else val
+    if isinstance(base_val, str) and isinstance(val, str):
+        base_val = base_val.lower()
+        val = val.lower()
+    return operator(base_val, val)
+
+def _adapt_type(base_val, val):
     # try casting the filter to the value
-    if isinstance(val, str) and not isinstance(cur_val, str):
-        if isinstance(cur_val, (datetime, date)):
-            cur_val = cur_val.isoformat()
-        elif isinstance(cur_val, bool) and _is_boolean(val):
-            val = _is_true(val)
+    if isinstance(val, str) and not isinstance(base_val, str):
+        if isinstance(base_val, bool) and _is_boolean(val):
+            return _is_true(val)
         else:
             try:
-                val = type(cur_val)(val)
+                return type(base_val)(val)
             except Exception:
                 # forget it
                 pass
-    return operator(cur_val, val)
-
+    return val
 
 def _filter_iterable(list_val: Iterable, operator: t.Callable, val: t.Any):
+    if operator is contains:
+        types = {type(v) for v in list_val}
+        if len(types) == 1:
+            typed_val = next(v for v in list_val)
+            if isinstance(typed_val, (datetime, date)):
+                list_val = [v.isoformat() for v in list_val]
+            else:
+                val = _adapt_type(typed_val, val)
+        return contains(list(list_val), val)
     return next(filter(lambda v: _filter_value(v, operator, val), list_val), None) is not None
 
 
@@ -283,7 +298,7 @@ def _invoke_action(
             cur_val = cur_val() if col_fn else cur_val
             if isinstance(cur_val, Iterable):
                 return _filter_iterable(cur_val, op, val)
-            return _filter_value(cur_val, op, val)
+            return _filter_value(cur_val, op, val, _adapt_type)
     except Exception as e:
         if _is_debugging():
             _warn(f"Error filtering with {col} {action} {val} on {ent}.", e)
