@@ -286,7 +286,7 @@ def _invoke_action(
     if ent is None:
         return False
     if not (col_fn or col).isidentifier():
-        _warn(f'Error filtering with "{col_fn or col}": not a valid python identifier.')
+        _warn(f'Error filtering with "{col_fn or col}": not a valid Python identifier.')
         return True
     try:
         if col_type == "any":
