@@ -44,7 +44,7 @@ class S3ObjectDataNode(DataNode):
         validity_period (Optional[timedelta]): The duration implemented as a timedelta since the last edit date for
             which the data node can be considered up-to-date. Once the validity period has passed, the data node is
             considered stale and relevant tasks will run even if they are skippable (see the
-            [Task management page](../core/entities/task-mgt.md) for more details).
+            [Task management](../../userman/sdm/task/index.md) page for more details).
             If _validity_period_ is set to `None`, the data node is always up-to-date.
         edit_in_progress (bool): True if a task computing the data node has been submitted
             and not completed yet. False otherwise.
