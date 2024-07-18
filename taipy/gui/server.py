@@ -186,7 +186,7 @@ class _Server:
 
             if path == "taipy.status.json":
                 return self._direct_render_json(self._gui._serve_status(pathlib.Path(template_folder) / path))
-            if str(os.path.normpath(file_path := ((base_path := static_folder + os.path.sep) + path))).startswith(
+            if (file_path := str(os.path.normpath((base_path := static_folder + os.path.sep) + path))).startswith(
                 base_path
             ) and os.path.isfile(file_path):
                 return send_from_directory(base_path, path)
@@ -194,17 +194,17 @@ class _Server:
             for k, v in self.__path_mapping.items():
                 if (
                     path.startswith(f"{k}/")
-                    and str(
-                        os.path.normpath(file_path := ((base_path := v + os.path.sep) + path[len(k) + 1 :]))
+                    and (
+                        file_path := str(os.path.normpath((base_path := v + os.path.sep) + path[len(k) + 1 :]))
                     ).startswith(base_path)
                     and os.path.isfile(file_path)
                 ):
                     return send_from_directory(base_path, path[len(k) + 1 :])
             if (
                 hasattr(__main__, "__file__")
-                and str(
-                    os.path.normpath(
-                        file_path := ((base_path := os.path.dirname(__main__.__file__) + os.path.sep) + path)
+                and (
+                    file_path := str(
+                        os.path.normpath((base_path := os.path.dirname(__main__.__file__) + os.path.sep) + path)
                     )
                 ).startswith(base_path)
                 and os.path.isfile(file_path)
@@ -212,7 +212,7 @@ class _Server:
             ):
                 return send_from_directory(base_path, path)
             if (
-                str(os.path.normpath(file_path := (base_path := self._gui._root_dir + os.path.sep) + path)).startswith(
+                (file_path := str(os.path.normpath(base_path := self._gui._root_dir + os.path.sep) + path)).startswith(
                     base_path
                 )
                 and os.path.isfile(file_path)
