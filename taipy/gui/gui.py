@@ -1514,7 +1514,7 @@ class Gui:
                 The first parameter of this function **must** be a `State^`.
             args (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
             module_context (Optional[str]): the name of the module that will be used.
-        """
+        """  # noqa: E501
         this_sid = None
         if request:
             # avoid messing with the client_id => Set(ws id)
