@@ -14,7 +14,7 @@ import re
 from pathlib import Path
 from typing import List
 
-_end_doc = re.compile(r'\"\"\"\s*(#\s*noqa:\s*E501)?\s*\n')
+_end_doc = re.compile(r'\"\"\"\s*(#\s*noqa\s*:\s*E501)?\s*\n')
 
 def _get_function_delimiters(initial_line, lines):
     begin = end = initial_line
