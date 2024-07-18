@@ -244,14 +244,35 @@ _operators: t.Dict[str, t.Callable] = {
     "contains": contains,
 }
 
+
+def _filter_value(cur_val: t.Any, operator: t.Callable, val: t.Any):
+    # try casting the filter to the value
+    if isinstance(val, str) and not isinstance(cur_val, str):
+        if isinstance(cur_val, (datetime, date)):
+            cur_val = cur_val.isoformat()
+        elif isinstance(cur_val, bool) and _is_boolean(val):
+            val = _is_true(val)
+        else:
+            try:
+                val = type(cur_val)(val)
+            except Exception:
+                # forget it
+                pass
+    return operator(cur_val, val)
+
+
 def _filter_iterable(list_val: Iterable, operator: t.Callable, val: t.Any):
-    return next(filter(lambda v: operator(v, val), list_val), None) is not None
+    return next(filter(lambda v: _filter_value(v, operator, val), list_val), None) is not None
+
 
 def _invoke_action(
     ent: t.Any, col: str, col_type: str, is_dn: bool, action: str, val: t.Any, col_fn: t.Optional[str]
 ) -> bool:
     if ent is None:
         return False
+    if not (col_fn or col).isidentifier():
+        _warn(f'Error filtering with "{col_fn or col}": not a valid python identifier.')
+        return True
     try:
         if col_type == "any":
             # when a property is not found, return True only if action is not equals
@@ -262,7 +283,7 @@ def _invoke_action(
             cur_val = cur_val() if col_fn else cur_val
             if isinstance(cur_val, Iterable):
                 return _filter_iterable(cur_val, op, val)
-            return op(cur_val.isoformat() if isinstance(cur_val, (datetime, date)) else cur_val, val)
+            return _filter_value(cur_val, op, val)
     except Exception as e:
         if _is_debugging():
             _warn(f"Error filtering with {col} {action} {val} on {ent}.", e)
@@ -349,7 +370,7 @@ class _GuiCoreProperties(ABC):
                 [
                     (attr, self.get_type(attr), self.get_enums().get(attr)) if self.full_desc() else (attr,)
                     for attr in flist
-                    if attr and isinstance(attr, str)
+                    if attr
                 ]
             )
         return None
