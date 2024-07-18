@@ -105,7 +105,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             with self.gui._get_autorization(system=True):
                 self.scenario_refresh(
                     event.entity_id
-                    if event.operation != EventOperation.DELETION and is_readable(t.cast(ScenarioId, event.entity_id))
+                    if event.operation == EventOperation.DELETION or is_readable(t.cast(ScenarioId, event.entity_id))
                     else None
                 )
         elif event.entity_type == EventEntityType.SEQUENCE and event.entity_id:

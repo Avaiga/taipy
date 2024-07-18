@@ -98,7 +98,6 @@ from .utils import (
     _TaipyData,
     _TaipyLov,
     _TaipyLovValue,
-    _TaipyToJson,
     _to_camel_case,
     _variable_decode,
     is_debugging,
@@ -688,13 +687,14 @@ class Gui:
         elif rel_var and isinstance(current_value, _TaipyLovValue):  # pragma: no cover
             lov_holder = _getscopeattr_drill(self, self.__evaluator.get_hash_from_expr(rel_var))
             if isinstance(lov_holder, _TaipyLov):
-                val = value if isinstance(value, list) else [value]
-                elt_4_ids = self.__adapter._get_elt_per_ids(lov_holder.get_name(), lov_holder.get())
-                ret_val = [elt_4_ids.get(x, x) for x in val]
-                if isinstance(value, list):
-                    value = ret_val
-                elif ret_val:
-                    value = ret_val[0]
+                if value:
+                    val = value if isinstance(value, list) else [value]
+                    elt_4_ids = self.__adapter._get_elt_per_ids(lov_holder.get_name(), lov_holder.get())
+                    ret_val = [elt_4_ids.get(x, x) for x in val]
+                    if isinstance(value, list):
+                        value = ret_val
+                    elif ret_val:
+                        value = ret_val[0]
         elif isinstance(current_value, _TaipyBase):
             value = current_value.cast_value(value)
         self._update_var(
@@ -1033,7 +1033,7 @@ class Gui:
                     newvalue = self.__adapter.run(
                         newvalue.get_name(), newvalue.get(), id_only=isinstance(newvalue, _TaipyLovValue)
                     )
-                elif isinstance(newvalue, _TaipyToJson):
+                elif isinstance(newvalue, _TaipyBase):
                     newvalue = newvalue.get()
                 if isinstance(newvalue, (dict, _MapDict)):
                     # Skip in taipy-gui, available in custom frontend
@@ -1046,23 +1046,24 @@ class Gui:
                 if isinstance(newvalue, float) and math.isnan(newvalue):
                     # do not let NaN go through json, it is not handle well (dies silently through websocket)
                     newvalue = None
-                debug_warnings: t.List[warnings.WarningMessage] = []
-                with warnings.catch_warnings(record=True) as warns:
-                    warnings.resetwarnings()
-                    json.dumps(newvalue, cls=_TaipyJsonEncoder)
-                    if len(warns):
-                        keep_value = True
-                        for w in warns:
-                            if is_debugging():
-                                debug_warnings.append(w)
-                            if w.category is not DeprecationWarning and w.category is not PendingDeprecationWarning:
-                                keep_value = False
-                                break
-                        if not keep_value:
-                            # do not send data that is not serializable
-                            continue
-                for w in debug_warnings:
-                    warnings.warn(w.message, w.category)  # noqa: B028
+                if newvalue:
+                    debug_warnings: t.List[warnings.WarningMessage] = []
+                    with warnings.catch_warnings(record=True) as warns:
+                        warnings.resetwarnings()
+                        json.dumps(newvalue, cls=_TaipyJsonEncoder)
+                        if len(warns):
+                            keep_value = True
+                            for w in warns:
+                                if is_debugging():
+                                    debug_warnings.append(w)
+                                if w.category is not DeprecationWarning and w.category is not PendingDeprecationWarning:
+                                    keep_value = False
+                                    break
+                            if not keep_value:
+                                # do not send data that is not serializable
+                                continue
+                    for w in debug_warnings:
+                        warnings.warn(w.message, w.category)  # noqa: B028
             ws_dict[_var] = newvalue
         # TODO: What if value == newvalue?
         self.__send_ws_update_with_dict(ws_dict)
