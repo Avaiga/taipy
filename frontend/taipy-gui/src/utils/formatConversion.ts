@@ -15,8 +15,8 @@
  * Regular expressions used for parsing sprintf format strings.
  */
 const re = {
-    text: /^[^\x25]+/,                         // Matches non-placeholder text
-    modulo: /^\x25{2}/,                        // Matches the '%%' escape sequence
+    text: /^[^\x25]+/, // Matches non-placeholder text
+    modulo: /^\x25{2}/, // Matches the '%%' escape sequence
     placeholder: /^\x25?(?:\.(\d+))?([b-giostuvxX])/, // Matches placeholders
 };
 
@@ -24,16 +24,16 @@ const re = {
  * This function formats a precision specifier for a number. It takes an optional precision and specifier string.
  * If no precision is provided, it defaults to 2. The function returns a string that represents the formatted precision.
  */
-const precisionFormat = (precision?: string, specifier?: string): string => {
+export const precisionFormat = (precision?: string, specifier?: string): string => {
     // Default to precision of 2 if not specified
     return "." + (precision?.slice(1) ?? "2") + specifier;
-}
+};
 
 /*
  * This function parses a sprintf format string and returns an array of strings and objects. Each object has a single
  * key, 'placeholder', that contains the placeholder string.
  */
-const sprintfParse = (fmt?: string): (string | { placeholder: string; })[] => {
+export const sprintfParse = (fmt?: string): (string | { placeholder: string })[] => {
     let _fmt = fmt;
     let match;
     const parseTree = [];
@@ -44,7 +44,7 @@ const sprintfParse = (fmt?: string): (string | { placeholder: string; })[] => {
             parseTree.push(match[0]);
         } else if ((match = re.modulo.exec(_fmt)) !== null) {
             // '%%' escape sequence
-            parseTree.push('%');
+            parseTree.push("%");
         } else if ((match = re.placeholder.exec(_fmt)) !== null) {
             // Placeholder
             if (match && match[0]) {
@@ -52,15 +52,17 @@ const sprintfParse = (fmt?: string): (string | { placeholder: string; })[] => {
                     placeholder: match[0],
                 });
             }
+        } else {
+            // If none of the conditions are met, break the loop
+            break;
         }
 
         if (match) {
             _fmt = _fmt.substring(match[0].length);
         }
     }
-
     return parseTree;
-}
+};
 
 /*
  * This function converts a sprintf format string to a D3 format string. It takes an optional sprintf format string and
@@ -68,10 +70,10 @@ const sprintfParse = (fmt?: string): (string | { placeholder: string; })[] => {
  */
 export const sprintfToD3Converter = (fmt?: string): string => {
     const sprintfFmtArr = sprintfParse(fmt);
-    const objectIndex = sprintfFmtArr.findIndex((element) => typeof element === 'object');
+    const objectIndex = sprintfFmtArr.findIndex((element) => typeof element === "object");
     let placeholderValue;
 
-    if (typeof sprintfFmtArr[objectIndex] === 'object' && sprintfFmtArr[objectIndex] !== null) {
+    if (typeof sprintfFmtArr[objectIndex] === "object" && sprintfFmtArr[objectIndex] !== null) {
         placeholderValue = (sprintfFmtArr[objectIndex] as { placeholder: string }).placeholder;
     }
 
@@ -94,12 +96,10 @@ export const sprintfToD3Converter = (fmt?: string): string => {
             case "g":
                 return precisionFormat(precision, type);
             case "u":
-                return "("
-            default:
-                return "";
+                return "(";
         }
     });
-}
+};
 
 /*
  * This function extracts the prefix from a sprintf format string. It takes an optional sprintf format string and returns
@@ -108,9 +108,9 @@ export const sprintfToD3Converter = (fmt?: string): string => {
 export const extractPrefix = (fmt?: string): string => {
     if (!fmt) return "";
     const sprintfFmtArr = sprintfParse(fmt);
-    const objectIndex = sprintfFmtArr.findIndex((element) => typeof element === 'object');
-    return sprintfFmtArr.slice(0, objectIndex).join('');
-}
+    const objectIndex = sprintfFmtArr.findIndex((element) => typeof element === "object");
+    return sprintfFmtArr.slice(0, objectIndex).join("");
+};
 
 /*
  * This function extracts the suffix from a sprintf format string. It takes an optional sprintf format string and returns
@@ -119,7 +119,6 @@ export const extractPrefix = (fmt?: string): string => {
 export const extractSuffix = (fmt?: string): string => {
     if (!fmt) return "";
     const sprintfFmtArr = sprintfParse(fmt);
-    const objectIndex = sprintfFmtArr.findIndex((element) => typeof element === 'object');
-    return sprintfFmtArr.slice(objectIndex + 1).join('');
-}
-
+    const objectIndex = sprintfFmtArr.findIndex((element) => typeof element === "object");
+    return sprintfFmtArr.slice(objectIndex + 1).join("");
+};

@@ -171,13 +171,7 @@ const FilterRow = (props: FilterRowProps) => {
     );
     const onDateChange = useCallback(
         (v: Date | null) => {
-            let dv;
-            try {
-                dv = v?.toISOString() || "";
-            } catch (e) {
-                dv = "";
-                console.info("TableFilter.onDateChange", v);
-            }
+            const dv = (!(v instanceof Date) || isNaN(v.valueOf())) ?  "": v.toISOString();
             setVal(dv);
             setEnableCheck(!!getFilterDesc(columns, colId, action, dv));
         },

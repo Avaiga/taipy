@@ -48,8 +48,8 @@ const closeSx: SxProps<Theme> = {
     alignSelf: "start",
 };
 const titleSx = { m: 0, p: 2, display: "flex", paddingRight: "0.1em" };
-const userProps = { autocomplete: "username" };
-const pwdProps = { autocomplete: "current-password" };
+const userProps = { autoComplete: "username" };
+const pwdProps = { autoComplete: "current-password" };
 
 const Login = (props: LoginProps) => {
     const { id, title = "Log-in", onAction = "on_login", message, defaultMessage } = props;

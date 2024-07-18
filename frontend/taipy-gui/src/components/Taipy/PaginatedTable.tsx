@@ -127,7 +127,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const refresh = typeof props.data === "number";
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
-    const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
+    const editable = useDynamicProperty(props.editable, props.defaultEditable, false);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const baseColumns = useDynamicJsonProperty(props.columns, props.defaultColumns, defaultColumns);
 
@@ -149,7 +149,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     }
                 });
                 addDeleteColumn(
-                    (active && (onAdd || onDelete) ? 1 : 0) +
+                    (active && editable && (onAdd || onDelete) ? 1 : 0) +
                         (active && filter ? 1 : 0) +
                         (active && downloadable ? 1 : 0),
                     baseColumns

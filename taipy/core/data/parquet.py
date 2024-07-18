@@ -194,17 +194,21 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             )
             return None
 
-        kwargs = self.properties[self.__READ_KWARGS_PROPERTY]
+        properties = self.properties
+
+        kwargs = properties[self.__READ_KWARGS_PROPERTY]
         kwargs.update(
             {
-                self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
+                self.__ENGINE_PROPERTY: properties[self.__ENGINE_PROPERTY],
             }
         )
         kwargs.update(read_kwargs)
+        return self._do_read_from_path(path, properties[self._EXPOSED_TYPE_PROPERTY], kwargs)
 
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
+    def _do_read_from_path(self, path: str, exposed_type: str, kwargs: Dict) -> Any:
+        if exposed_type == self._EXPOSED_TYPE_PANDAS:
             return self._read_as_pandas_dataframe(path, kwargs)
-        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
+        if exposed_type == self._EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy(path, kwargs)
         return self._read_as(path, kwargs)
 

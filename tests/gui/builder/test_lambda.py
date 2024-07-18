@@ -47,3 +47,12 @@ def test_builder_simple_lambda(gui: Gui, test_client, helpers):
         tgb.text(lambda value: value)  # type: ignore[attr-defined] # noqa: B023
     expected_list = ['defaultValue="10"']
     helpers.test_control_builder(gui, page, expected_list)
+
+def test_builder_multiline_lambda(gui: Gui, test_client, helpers):
+    value = 10
+    gui._bind_var_val("value", value)
+    with tgb.Page(frame=None) as page:
+        tgb.text(  # type: ignore[attr-defined] # noqa: B023
+            lambda value: value)
+    expected_list = ['defaultValue="10"']
+    helpers.test_control_builder(gui, page, expected_list)

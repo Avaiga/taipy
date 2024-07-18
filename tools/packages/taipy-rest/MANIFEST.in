@@ -1,3 +1,4 @@
 include taipy/rest/*.json
 include *.json
 include taipy/rest/setup.requirements.txt
+include package_desc.md

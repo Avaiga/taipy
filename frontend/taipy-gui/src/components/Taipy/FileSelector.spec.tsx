@@ -34,7 +34,7 @@ describe("FileSelector Component", () => {
     it("displays the right info for string", async () => {
         const { getByText } = render(<FileSelector label="toto" defaultLabel="titi" className="taipy-file-selector" />);
         const elt = getByText("toto");
-        expect(elt.parentElement).toHaveClass("taipy-file-selector");
+        expect(elt.parentElement?.parentElement).toHaveClass("taipy-file-selector");
     });
     it("displays the default value", async () => {
         const { getByText } = render(<FileSelector defaultLabel="titi" label={undefined as unknown as string} />);
@@ -44,6 +44,7 @@ describe("FileSelector Component", () => {
         const { getByText } = render(<FileSelector label="val" active={false} />);
         const elt = getByText("val");
         expect(elt).toHaveClass("Mui-disabled");
+        expect(elt.parentElement?.parentElement?.querySelector("input")).toBeDisabled();
     });
     it("is enabled by default", async () => {
         const { getByText } = render(<FileSelector label="val" />);
@@ -66,7 +67,7 @@ describe("FileSelector Component", () => {
             </TaipyContext.Provider>,
         );
         const elt = getByText("FileSelector");
-        const inputElt = elt.parentElement?.querySelector("input");
+        const inputElt = elt.parentElement?.parentElement?.querySelector("input");
         expect(inputElt).toBeInTheDocument();
         inputElt && (await userEvent.upload(inputElt, file));
         expect(dispatch).toHaveBeenCalledWith({
@@ -79,7 +80,7 @@ describe("FileSelector Component", () => {
         const file = new File(["(⌐□_□)"], "chucknorris2.png", { type: "image/png" });
         const { getByRole, getByText } = render(<FileSelector label="FileSelectorDrop" />);
         const elt = getByRole("button");
-        const inputElt = elt.parentElement?.querySelector("input");
+        const inputElt = elt.parentElement?.parentElement?.querySelector("input");
         expect(inputElt).toBeInTheDocument();
         waitFor(() => getByText("Drop here to Upload"));
         inputElt &&
@@ -95,7 +96,7 @@ describe("FileSelector Component", () => {
             <FileSelector label="FileSelectorDrop" dropMessage="drop here those files" />,
         );
         const elt = getByRole("button");
-        const inputElt = elt.parentElement?.querySelector("input");
+        const inputElt = elt.parentElement?.parentElement?.querySelector("input");
         expect(inputElt).toBeInTheDocument();
         waitFor(() => getByText("drop here those files"));
         inputElt &&
