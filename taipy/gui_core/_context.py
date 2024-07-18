@@ -105,7 +105,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             with self.gui._get_autorization(system=True):
                 self.scenario_refresh(
                     event.entity_id
-                    if event.operation != EventOperation.DELETION and is_readable(t.cast(ScenarioId, event.entity_id))
+                    if event.operation == EventOperation.DELETION or is_readable(t.cast(ScenarioId, event.entity_id))
                     else None
                 )
         elif event.entity_type == EventEntityType.SEQUENCE and event.entity_id:
@@ -142,6 +142,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         with self.lock:
             self.scenario_by_cycle = None
             self.data_nodes_by_owner = None
+            print(f"scenario_refresh(self, scenario_id: {scenario_id})")
         self.broadcast_core_changed({"scenario": scenario_id or True})
 
     def submission_status_callback(self, submission_id: t.Optional[str] = None, event: t.Optional[Event] = None):
