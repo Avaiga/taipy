@@ -15,8 +15,8 @@ import typing as t
 class Icon:
     """Small image in the User Interface.
 
-    Icons are typically used in controls like [button](../gui/viselements/button.md)
-    or items in a [menu](../gui/viselements/menu.md).
+    Icons are typically used in controls like [button](../../userman/gui/viselements/standard-and-blocks/button.md)
+    or items in a [menu](../../userman/gui/viselements/standard-and-blocks/menu.md).
 
     Attributes:
         path (str): The path to the image file.

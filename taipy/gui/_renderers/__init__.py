@@ -139,7 +139,7 @@ class Markdown(_Renderer):
     user interfaces.
 
     You can find details on the Taipy Markdown-specific syntax and how to add
-    Taipy Visual Elements in the [section on Markdown](../gui/pages/markdown.md)
+    Taipy Visual Elements in the [section on Markdown](../../userman/gui/pages/markdown.md)
     of the User Manual.
     """
 
@@ -167,7 +167,7 @@ class Html(_Renderer):
     user interfaces.
 
     You can find details on HTML-specific constructs and how to add
-    Taipy Visual Elements in the [section on HTML](../gui/pages/html.md)
+    Taipy Visual Elements in the [section on HTML](../../userman/gui/pages/html.md)
     of the User Manual.
     """
 
