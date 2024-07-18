@@ -142,7 +142,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
         with self.lock:
             self.scenario_by_cycle = None
             self.data_nodes_by_owner = None
-            print(f"scenario_refresh(self, scenario_id: {scenario_id})")
         self.broadcast_core_changed({"scenario": scenario_id or True})
 
     def submission_status_callback(self, submission_id: t.Optional[str] = None, event: t.Optional[Event] = None):
