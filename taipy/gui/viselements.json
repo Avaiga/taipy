@@ -1197,7 +1197,7 @@
                     {
                         "name": "negative_delta_color",
                         "type": "str",
-                        "doc": "if set, this represents the color to be used when the value of <i>delta</i> is negative (or positive if delta_color is set to \"invert\")"
+                        "doc": "If set, this represents the color to be used when the value of <i>delta</i> is negative (or positive if <i>delta_color</i> is set to \"invert\")"
 
                     },
                     {
