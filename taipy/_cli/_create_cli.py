@@ -52,7 +52,7 @@ class _CreateCLI(_AbstractCLI):
             "--application",
             choices=list(cls._template_map.keys()),
             default="default",
-            help="The template name to create a new Taipy application.",
+            help="The template used to create the new Taipy application.",
         )
 
     @classmethod
