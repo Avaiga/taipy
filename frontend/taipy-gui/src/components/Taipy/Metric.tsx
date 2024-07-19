@@ -33,6 +33,8 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     defaultValue?: number
     delta?: number
     defaultDelta?: number
+    deltaColor?: string
+    negativeDeltaColor?: string
     threshold?: number
     defaultThreshold?: number
     testId?: string
@@ -58,7 +60,9 @@ const Metric = (props: MetricProps) => {
     const {
         width = "100%",
         height,
-        showValue = true
+        showValue = true,
+        deltaColor,
+        negativeDeltaColor
     } = props;
     const value = useDynamicProperty(props.value, props.defaultValue, 0)
     const threshold = useDynamicProperty(props.threshold, props.defaultThreshold, undefined)
@@ -88,6 +92,11 @@ const Metric = (props: MetricProps) => {
         const mode = (props.type === "none") ? [] : ["gauge"];
         showValue && mode.push("number");
         (delta !== undefined) && mode.push("delta");
+        const deltaIncreasing = deltaColor ? {
+            color: deltaColor == "invert" ? "#FF4136" : deltaColor } : undefined
+        const deltaDecreasing = deltaColor == "invert" ? {
+                color: "#3D9970"
+            } : negativeDeltaColor ? { color: negativeDeltaColor } : undefined;
         return [
             {
                 domain: {x: [0, 1], y: [0, 1]},
@@ -103,7 +112,10 @@ const Metric = (props: MetricProps) => {
                     reference: typeof value === 'number' && typeof delta === 'number' ? value - delta : undefined,
                     prefix: extractPrefix(props.deltaFormat),
                     suffix: extractSuffix(props.deltaFormat),
-                    valueformat: sprintfToD3Converter(props.deltaFormat)
+                    valueformat: sprintfToD3Converter(props.deltaFormat),
+                    increasing: deltaIncreasing,
+                    decreasing: deltaDecreasing
+
                 } as Partial<Delta>,
                 gauge: {
                     axis: {
@@ -130,6 +142,8 @@ const Metric = (props: MetricProps) => {
         props.type,
         value,
         showValue,
+        deltaColor,
+        negativeDeltaColor,
         delta,
         threshold,
         colorMap
