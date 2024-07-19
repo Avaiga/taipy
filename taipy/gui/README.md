@@ -23,7 +23,7 @@ specific language governing permissions and limitations under the License.
 ## What is Taipy GUI
 
 Taipy is a Python library for creating Business Applications. More information on our
-[website](https://www.taipy.io). Taipy is split into multiple repositories including `taipy-gui` to let users
+[website](https://www.taipy.io). Taipy is split into multiple packages including `taipy-gui` to let users
 install the minimum they need.
 
 Taipy GUI provides Python classes that make it easy to create powerful web apps in minutes.
