@@ -296,7 +296,7 @@ def _invoke_action(
         if op := _operators.get(action):
             cur_val = attrgetter(col_fn or col)(ent)
             cur_val = cur_val() if col_fn else cur_val
-            if isinstance(cur_val, Iterable):
+            if not isinstance(cur_val, str) and isinstance(cur_val, Iterable):
                 return _filter_iterable(cur_val, op, val)
             return _filter_value(cur_val, op, val, _adapt_type)
     except Exception as e:
@@ -306,11 +306,11 @@ def _invoke_action(
     return True
 
 
-def _get_entity_property(col: str, a_type: t.Type):
-    col_parts = col.split("(")  # handle the case where the col is a method (ie get_simple_label())
+def _get_entity_property(col: str, *types: t.Type):
+    col_parts = col.split("(", 2)  # handle the case where the col is a method (ie get_simple_label())
     col_fn = (
         next(
-            (col_parts[0] for i in inspect.getmembers(a_type, predicate=inspect.isfunction) if i[0] == col_parts[0]),
+            (col_parts[0] for i in inspect.getmembers(types[0], predicate=inspect.isfunction) if i[0] == col_parts[0]),
             None,
         )
         if len(col_parts) > 1
@@ -319,10 +319,16 @@ def _get_entity_property(col: str, a_type: t.Type):
 
     def sort_key(entity: t.Union[Scenario, Cycle, Sequence, DataNode]):
         # we compare only strings
-        if isinstance(entity, a_type):
+        if isinstance(entity, types):
+            if isinstance(entity, Cycle):
+                lcol = "creation_date"
+                lfn = None
+            else:
+                lcol = col
+                lfn = col_fn
             try:
-                val = attrgetter(col_fn or col)(entity)
-                if col_fn:
+                val = attrgetter(lfn or lcol)(entity)
+                if lfn:
                     val = val()
             except AttributeError as e:
                 if _is_debugging():
