@@ -247,9 +247,9 @@ def test_format_converter_yields_edge_cases(page: Page, gui: Gui, helpers):
 
 
 @pytest.mark.teste2e
-def test_delta_color(page: Page, gui: Gui, helpers):
+def test_negative_delta_color(page: Page, gui: Gui, helpers):
     page_md = """
-<|-50|metric|negative_delta_color=#3D9970|delta=20|>
+<|50|metric|negative_delta_color=#3D9970|delta=-20|>
 """
     gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
@@ -266,7 +266,7 @@ def test_delta_color(page: Page, gui: Gui, helpers):
 @pytest.mark.teste2e
 def test_delta_color_invert(page: Page, gui: Gui, helpers):
     page_md = """
-<|-50|metric|delta_color="invert"|delta=20|>
+<|50|metric|delta_color=invert|delta=-20|>
 """
     gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)

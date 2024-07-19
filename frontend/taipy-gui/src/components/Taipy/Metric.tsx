@@ -94,9 +94,9 @@ const Metric = (props: MetricProps) => {
         (delta !== undefined) && mode.push("delta");
         const deltaIncreasing = deltaColor ? {
             color: deltaColor == "invert" ? "#FF4136" : deltaColor } : undefined
-        const deltaDecreasing = negativeDeltaColor ? {
-                color: deltaColor == "invert" ? "#3D9970" : negativeDeltaColor
-            } : undefined
+        const deltaDecreasing = deltaColor == "invert" ? {
+                color: "#3D9970"
+            } : negativeDeltaColor ? { color: negativeDeltaColor } : undefined;
         return [
             {
                 domain: {x: [0, 1], y: [0, 1]},
