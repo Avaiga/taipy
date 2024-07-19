@@ -12,25 +12,11 @@
 from dataclasses import dataclass
 from typing import Any, Dict
 
-from sqlalchemy import Boolean, Column, String, Table
-
 from .._repository._base_taipy_model import _BaseModel
-from .._repository.db._sql_base_model import mapper_registry
 
 
-@mapper_registry.mapped
 @dataclass
 class _VersionModel(_BaseModel):
-    __table__ = Table(
-        "version",
-        mapper_registry.metadata,
-        Column("id", String, primary_key=True),
-        Column("config", String),  # config is store as a json string
-        Column("creation_date", String),
-        Column("is_production", Boolean),
-        Column("is_development", Boolean),
-        Column("is_latest", Boolean),
-    )
     id: str
     config: str
     creation_date: str
@@ -42,17 +28,7 @@ class _VersionModel(_BaseModel):
             config=data["config"],
             creation_date=data["creation_date"],
         )
-        model.is_production = data.get("is_production")  # type: ignore
-        model.is_development = data.get("is_development")  # type: ignore
-        model.is_latest = data.get("is_latest")  # type: ignore
         return model
 
     def to_list(self):
-        return [
-            self.id,
-            self.config,
-            self.creation_date,
-            self.is_production,
-            self.is_development,
-            self.is_latest,
-        ]
+        return [self.id, self.config, self.creation_date]

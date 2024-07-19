@@ -12,35 +12,15 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import JSON, Boolean, Column, String, Table
-
 from .._repository._base_taipy_model import _BaseModel
-from .._repository.db._sql_base_model import mapper_registry
 from ..cycle.cycle_id import CycleId
 from ..data.data_node_id import DataNodeId
 from ..task.task_id import TaskId
 from .scenario_id import ScenarioId
 
 
-@mapper_registry.mapped
 @dataclass
 class _ScenarioModel(_BaseModel):
-    __table__ = Table(
-        "scenario",
-        mapper_registry.metadata,
-        Column("id", String, primary_key=True),
-        Column("config_id", String),
-        Column("tasks", JSON),
-        Column("additional_data_nodes", JSON),
-        Column("properties", JSON),
-        Column("creation_date", String),
-        Column("primary_scenario", Boolean),
-        Column("subscribers", JSON),
-        Column("tags", JSON),
-        Column("version", String),
-        Column("sequences", JSON),
-        Column("cycle", String),
-    )
     id: ScenarioId
     config_id: str
     tasks: List[TaskId]

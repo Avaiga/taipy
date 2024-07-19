@@ -15,11 +15,10 @@ from .._manager._manager_factory import _ManagerFactory
 from ..common import _utils
 from ._version_fs_repository import _VersionFSRepository
 from ._version_manager import _VersionManager
-from ._version_sql_repository import _VersionSQLRepository
 
 
 class _VersionManagerFactory(_ManagerFactory):
-    __REPOSITORY_MAP = {"default": _VersionFSRepository, "sql": _VersionSQLRepository}
+    __REPOSITORY_MAP = {"default": _VersionFSRepository}
 
     @classmethod
     def _build_manager(cls) -> Type[_VersionManager]:

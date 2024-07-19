@@ -15,14 +15,12 @@ import pytest
 
 from taipy.core.exceptions import ModelNotFound
 from taipy.core.scenario._scenario_fs_repository import _ScenarioFSRepository
-from taipy.core.scenario._scenario_sql_repository import _ScenarioSQLRepository
 from taipy.core.scenario.scenario import Scenario, ScenarioId
 
 
 class TestScenarioFSRepository:
-    @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
-    def test_save_and_load(self, scenario: Scenario, repo, init_sql_repo):
-        repository = repo()
+    def test_save_and_load(self, scenario: Scenario):
+        repository = _ScenarioFSRepository()
         repository._save(scenario)
 
         loaded_scenario = repository._load(scenario.id)
@@ -39,17 +37,15 @@ class TestScenarioFSRepository:
         assert scenario._sequences == loaded_scenario._sequences
         assert scenario._version == loaded_scenario._version
 
-    @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
-    def test_exists(self, scenario, repo, init_sql_repo):
-        repository = repo()
+    def test_exists(self, scenario):
+        repository = _ScenarioFSRepository()
         repository._save(scenario)
 
         assert repository._exists(scenario.id)
         assert not repository._exists("not-existed-scenario")
 
-    @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
-    def test_load_all(self, scenario, repo, init_sql_repo):
-        repository = repo()
+    def test_load_all(self, scenario):
+        repository = _ScenarioFSRepository()
         for i in range(10):
             scenario.id = ScenarioId(f"scenario-{i}")
             repository._save(scenario)
@@ -57,9 +53,8 @@ class TestScenarioFSRepository:
 
         assert len(data_nodes) == 10
 
-    @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
-    def test_load_all_with_filters(self, scenario, repo, init_sql_repo):
-        repository = repo()
+    def test_load_all_with_filters(self, scenario):
+        repository = _ScenarioFSRepository()
 
         for i in range(10):
             scenario.id = ScenarioId(f"scenario-{i}")
@@ -68,9 +63,8 @@ class TestScenarioFSRepository:
 
         assert len(objs) == 1
 
-    @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
-    def test_delete(self, scenario, repo, init_sql_repo):
-        repository = repo()
+    def test_delete(self, scenario):
+        repository = _ScenarioFSRepository()
         repository._save(scenario)
 
         repository._delete(scenario.id)
@@ -78,9 +72,8 @@ class TestScenarioFSRepository:
         with pytest.raises(ModelNotFound):
             repository._load(scenario.id)
 
-    @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
-    def test_delete_all(self, scenario, repo, init_sql_repo):
-        repository = repo()
+    def test_delete_all(self, scenario):
+        repository = _ScenarioFSRepository()
 
         for i in range(10):
             scenario.id = ScenarioId(f"scenario-{i}")
@@ -92,9 +85,8 @@ class TestScenarioFSRepository:
 
         assert len(repository._load_all()) == 0
 
-    @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
-    def test_delete_many(self, scenario, repo, init_sql_repo):
-        repository = repo()
+    def test_delete_many(self, scenario):
+        repository = _ScenarioFSRepository()
 
         for i in range(10):
             scenario.id = ScenarioId(f"scenario-{i}")
@@ -107,9 +99,8 @@ class TestScenarioFSRepository:
 
         assert len(repository._load_all()) == 7
 
-    @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
-    def test_delete_by(self, scenario, repo, init_sql_repo):
-        repository = repo()
+    def test_delete_by(self, scenario):
+        repository = _ScenarioFSRepository()
 
         # Create 5 entities with version 1.0 and 5 entities with version 2.0
         for i in range(10):
@@ -123,9 +114,8 @@ class TestScenarioFSRepository:
 
         assert len(repository._load_all()) == 5
 
-    @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
-    def test_search(self, scenario, repo, init_sql_repo):
-        repository = repo()
+    def test_search(self, scenario):
+        repository = _ScenarioFSRepository()
 
         for i in range(10):
             scenario.id = ScenarioId(f"scenario-{i}")
@@ -143,12 +133,11 @@ class TestScenarioFSRepository:
 
         assert repository._search("id", "scenario-2", filters=[{"version": "non_existed_version"}]) == []
 
-    @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
-    def test_export(self, tmpdir, scenario, repo, init_sql_repo):
-        repository = repo()
+    def test_export(self, tmpdir, scenario):
+        repository = _ScenarioFSRepository()
         repository._save(scenario)
 
         repository._export(scenario.id, tmpdir.strpath)
-        dir_path = repository.dir_path if repo == _ScenarioFSRepository else os.path.join(tmpdir.strpath, "scenario")
+        dir_path = repository.dir_path
 
         assert os.path.exists(os.path.join(dir_path, f"{scenario.id}.json"))
