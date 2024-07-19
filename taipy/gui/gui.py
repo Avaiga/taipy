@@ -1046,7 +1046,7 @@ class Gui:
                 if isinstance(newvalue, float) and math.isnan(newvalue):
                     # do not let NaN go through json, it is not handle well (dies silently through websocket)
                     newvalue = None
-                if newvalue is not None and newvalue != "":
+                if newvalue is not None and not isinstance(newvalue, str):
                     debug_warnings: t.List[warnings.WarningMessage] = []
                     with warnings.catch_warnings(record=True) as warns:
                         warnings.resetwarnings()
