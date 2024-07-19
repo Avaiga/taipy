@@ -4,3 +4,4 @@ include taipy/gui/viselements.json
 include taipy/gui/*.pyi
 include *.json
 include taipy/gui/setup.requirements.txt
+include package_desc.md

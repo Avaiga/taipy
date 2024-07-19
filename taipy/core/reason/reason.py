@@ -88,7 +88,7 @@ class EntityIsNotSubmittableEntity(Reason):
     An entity is not a submittable entity, which prevents specific actions from being performed.
 
     Attributes:
-        entity_id (str): The identifier of the `Entity^`.
+        entity_id (str): The entity identifier.
     """
 
     def __init__(self, entity_id: str):

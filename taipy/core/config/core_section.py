@@ -40,9 +40,9 @@ class CoreSection(UniqueSection):
             The default value is 3.
         mode (str): The Taipy operating mode. By default, the `Core^` service runs in "development" mode.
             An "experiment" and a "production" mode are also available. Please refer to the
-            [Versioning management](../core/versioning/index.md) documentation page for more details.
+            [Versioning management](../../userman/versioning/index.md) documentation page for more details.
         version_number (str)): The identifier of the user application version. Please refer to the
-            [Versioning management](../core/versioning/index.md) documentation page for more details.
+            [Versioning management](../../userman/versioning/index.md) documentation page for more details.
         force (bool): If True, force the application run even if there are some conflicts in the
             configuration.
         core_version (str): The Taipy Core package version.

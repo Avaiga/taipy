@@ -271,14 +271,13 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the
-                [Task configs page](../core/config/task-config.md) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
             The default data node configuration.
-        """
+        """  # noqa: E501
 
     @classmethod
     def configure_data_node_from(
@@ -323,14 +322,13 @@ class Config:
                 `(Config.)set_default_data_node_configuration()^`).
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the
-                [Task configs page](../core/config/task-config.md) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
             The new data node configuration.
-        """
+        """  # noqa: E501
 
     @classmethod
     def configure_csv_data_node(
@@ -357,14 +355,13 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the
-                [Task configs page](../core/config/task-config.md) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
             The new CSV data node configuration.
-        """
+        """  # noqa: E501
 
     @classmethod
     def configure_json_data_node(
@@ -390,13 +387,12 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the
-                [Task configs page](../core/config/task-config.md) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
             The new JSON data node configuration.
-        """
+        """  # noqa: E501
 
     @classmethod
     def configure_parquet_data_node(
@@ -434,14 +430,13 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the
-                [Task configs page](../core/config/task-config.md) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
             The new Parquet data node configuration.
-        """
+        """  # noqa: E501
 
     @classmethod
     def configure_excel_data_node(
@@ -469,14 +464,13 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the
-                [Task configs page](../core/config/task-config.md) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
             The new Excel data node configuration.
-        """
+        """  # noqa: E501
 
     @classmethod
     def configure_generic_data_node(
@@ -505,13 +499,12 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the
-                [Task configs page](../core/config/task-config.md) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
             The new Generic data node configuration.
-        """
+        """  # noqa: E501
 
     @classmethod
     def configure_in_memory_data_node(
@@ -534,14 +527,13 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the
-                [Task configs page](../core/config/task-config.md) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
             The new *in-memory* data node configuration.
-        """
+        """  # noqa: E501
 
     @classmethod
     def configure_pickle_data_node(
@@ -566,14 +558,13 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the
-                [Task configs page](../core/config/task-config.md) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
             The new pickle data node configuration.
-        """
+        """  # noqa: E501
 
     @classmethod
     def configure_sql_table_data_node(
@@ -624,14 +615,13 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the
-                [Task configs page](../core/config/task-config.md) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
             The new SQL data node configuration.
-        """
+        """  # noqa: E501
 
     @classmethod
     def configure_sql_data_node(
@@ -688,13 +678,12 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the
-                [Task configs page](../core/config/task-config.md) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
             The new SQL data node configuration.
-        """
+        """  # noqa: E501
 
     @classmethod
     def configure_mongo_collection_data_node(
@@ -737,14 +726,13 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the
-                [Task configs page](../core/config/task-config.md) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
             The new Mongo collection data node configuration.
-        """
+        """  # noqa: E501
 
     @classmethod
     def configure_s3_object_data_node(
@@ -775,14 +763,13 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the
-                [Task configs page](../core/config/task-config.md) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
             The new S3 object data node configuration.
-        """
+        """  # noqa: E501
 
     @staticmethod
     def configure_task(

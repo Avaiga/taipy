@@ -18,6 +18,9 @@ on:
 env:
   NODE_OPTIONS: --max-old-space-size=4096
 
+permissions:
+  contents: write
+
 jobs:
   fetch-versions:
     runs-on: ubuntu-latest
@@ -152,6 +155,7 @@ jobs:
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
         run: |
           python setup.py build_py && python -m build
+          for file in ./dist/*; do mv "$file" "${file//_/-}"; done
 
       - name: Create tag and release
         working-directory: ${{ steps.set-variables.outputs.package_dir }}

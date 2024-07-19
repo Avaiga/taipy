@@ -105,7 +105,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             with self.gui._get_autorization(system=True):
                 self.scenario_refresh(
                     event.entity_id
-                    if event.operation != EventOperation.DELETION and is_readable(t.cast(ScenarioId, event.entity_id))
+                    if event.operation == EventOperation.DELETION or is_readable(t.cast(ScenarioId, event.entity_id))
                     else None
                 )
         elif event.entity_type == EventEntityType.SEQUENCE and event.entity_id:
@@ -288,9 +288,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 col = sd.get("col", "")
                 col = _GuiCoreScenarioProperties.get_col_name(col)
                 order = sd.get("order", True)
-                sorted_list = sorted(sorted_list, key=_get_entity_property(col, Scenario), reverse=not order)
+                sorted_list = sorted(sorted_list, key=_get_entity_property(col, Scenario, Cycle), reverse=not order)
         else:
-            sorted_list = sorted(entities, key=_get_entity_property("creation_date", Scenario))
+            sorted_list = sorted(entities, key=_get_entity_property("creation_date", Scenario, Cycle))
         return [self.cycle_adapter(e, sorts) if isinstance(e, Cycle) else e for e in sorted_list]
 
     def get_filtered_scenario_list(
