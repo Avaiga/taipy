@@ -261,3 +261,20 @@ def test_delta_color(page: Page, gui: Gui, helpers):
     fill_color = delta.evaluate("el => getComputedStyle(el).fill")
 
     assert fill_color == "rgb(61, 153, 112)"
+
+
+@pytest.mark.teste2e
+def test_delta_color_invert(page: Page, gui: Gui, helpers):
+    page_md = """
+<|-50|metric|delta_color="invert"|delta=20|>
+"""
+    gui._set_frame(inspect.currentframe())
+    gui.add_page(name="test", page=page_md)
+    helpers.run_e2e(gui)
+    page.goto("./test")
+    page.wait_for_selector(".plot-container")
+    events_list = page.locator("//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[local-name()='text']")
+    delta = events_list.nth(1)
+    fill_color = delta.evaluate("el => getComputedStyle(el).fill")
+
+    assert fill_color == "rgb(61, 153, 112)"

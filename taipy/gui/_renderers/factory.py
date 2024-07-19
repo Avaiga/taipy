@@ -353,7 +353,7 @@ class _Factory:
                 ("min", PropertyType.number, 0),
                 ("max", PropertyType.number, 100),
                 ("delta", PropertyType.dynamic_number),
-                ("positive_delta_color", PropertyType.string),
+                ("delta_color", PropertyType.string),
                 ("negative_delta_color", PropertyType.string),
                 ("threshold", PropertyType.dynamic_number),
                 ("width", PropertyType.string_or_number),

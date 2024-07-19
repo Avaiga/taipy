@@ -1190,14 +1190,14 @@
                         "doc": "The delta value to display."
                     },
                     {
-                        "name": "positive_delta_color",
+                        "name": "delta_color",
                         "type": "str",
-                        "doc": "Set the color of positive delta."
+                        "doc": "The color that is used to display the value of the <i>delta</i> property. If negative_delta_color is set, then this property applies for positive values of delta only. If this property is set to \"invert\", then delta values are represented with the color used for negative values if delta is positive. The value for delta is also represented with the color used for positive values if delta is negative."
                     },
                     {
                         "name": "negative_delta_color",
                         "type": "str",
-                        "doc": "Set the color of negative delta."
+                        "doc": "if set, this represents the color to be used when the value of <i>delta</i> is negative (or positive if delta_color is set to \"invert\")"
 
                     },
                     {
