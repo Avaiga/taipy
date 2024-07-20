@@ -25,7 +25,7 @@ import { MenuProps } from "../utils/lov";
 import { changeFavicon, getLocalStorageValue, IdMessage, storeClientId } from "./utils";
 import { ligthenPayload, sendWsMessage, TAIPY_CLIENT_ID, WsMessage } from "./wsUtils";
 
-enum Types {
+export enum Types {
     SocketConnected = "SOCKET_CONNECTED",
     Update = "UPDATE",
     MultipleUpdate = "MULTIPLE_UPDATE",
@@ -80,7 +80,7 @@ export interface TaipyBaseAction {
     type: Types;
 }
 
-interface NamePayload {
+export interface NamePayload {
     name: string;
     payload: Record<string, unknown>;
 }
@@ -118,7 +118,7 @@ export interface BlockMessage {
 
 interface TaipyBlockAction extends TaipyBaseAction, BlockMessage {}
 
-interface NavigateMessage {
+export interface NavigateMessage {
     to?: string;
     params?: Record<string, string>;
     tab?: string;
@@ -173,7 +173,7 @@ const getUserTheme = (mode: PaletteMode) => {
                     },
                 },
             },
-        })
+        }),
     );
 };
 
@@ -203,7 +203,7 @@ export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
     socket: io("/", { autoConnect: false, path: `${getBaseURL()}socket.io` }),
 });
 
-const messageToAction = (message: WsMessage) => {
+export const messageToAction = (message: WsMessage) => {
     if (message.type) {
         if (message.type === "MU" && Array.isArray(message.payload)) {
             return createMultipleUpdateAction(message.payload as NamePayload[]);
@@ -218,7 +218,7 @@ const messageToAction = (message: WsMessage) => {
                 (message as unknown as NavigateMessage).to,
                 (message as unknown as NavigateMessage).params,
                 (message as unknown as NavigateMessage).tab,
-                (message as unknown as NavigateMessage).force
+                (message as unknown as NavigateMessage).force,
             );
         } else if (message.type === "ID") {
             return createIdAction((message as unknown as IdMessage).id);
@@ -235,7 +235,7 @@ const messageToAction = (message: WsMessage) => {
     return {} as TaipyBaseAction;
 };
 
-const getWsMessageListener = (dispatch: Dispatch<TaipyBaseAction>) => {
+export const getWsMessageListener = (dispatch: Dispatch<TaipyBaseAction>) => {
     const dispatchWsMessage = (message: WsMessage) => {
         if (message.type === "MU" && Array.isArray(message.payload)) {
             const payloads = message.payload as NamePayload[];
@@ -284,13 +284,13 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
     }
 };
 
-const addRows = (previousRows: Record<string, unknown>[], newRows: Record<string, unknown>[], start: number) =>
+export const addRows = (previousRows: Record<string, unknown>[], newRows: Record<string, unknown>[], start: number) =>
     newRows.reduce((arr, row) => {
         arr[start++] = row;
         return arr;
     }, previousRows.concat([]));
 
-const storeBlockUi = (block?: BlockMessage) => () => {
+export const storeBlockUi = (block?: BlockMessage) => () => {
     if (localStorage) {
         if (block) {
             document.visibilityState !== "visible" && localStorage.setItem("TaipyBlockUi", JSON.stringify(block));
@@ -462,7 +462,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                 action.payload,
                 state.id,
                 action.context,
-                action.propagate
+                action.propagate,
             );
             break;
         case Types.Action:
@@ -479,12 +479,12 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
     return state;
 };
 
-const createUpdateAction = (payload: NamePayload): TaipyAction => ({
+export const createUpdateAction = (payload: NamePayload): TaipyAction => ({
     ...payload,
     type: Types.Update,
 });
 
-const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction => ({
+export const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction => ({
     type: Types.MultipleUpdate,
     payload: payload,
 });
@@ -512,7 +512,7 @@ export const createSendUpdateAction = (
     context: string | undefined,
     onChange?: string,
     propagate = true,
-    relName?: string
+    relName?: string,
 ): TaipyAction => ({
     type: Types.SendUpdate,
     name: name,
@@ -521,7 +521,7 @@ export const createSendUpdateAction = (
     payload: getPayload(value, onChange, relName),
 });
 
-const getPayload = (value: unknown, onChange?: string, relName?: string) => {
+export const getPayload = (value: unknown, onChange?: string, relName?: string) => {
     const ret: Record<string, unknown> = { value: value };
     if (relName) {
         ret.relvar = relName;
@@ -565,7 +565,7 @@ export const createRequestChartUpdateAction = (
     context: string | undefined,
     columns: string[],
     pageKey: string,
-    decimatorPayload: unknown | undefined
+    decimatorPayload: unknown | undefined,
 ): TaipyAction =>
     createRequestDataUpdateAction(
         name,
@@ -576,7 +576,7 @@ export const createRequestChartUpdateAction = (
         {
             decimatorPayload: decimatorPayload,
         },
-        true
+        true,
     );
 
 export const createRequestTableUpdateAction = (
@@ -597,7 +597,7 @@ export const createRequestTableUpdateAction = (
     filters?: Array<FilterDesc>,
     compare?: string,
     compareDatas?: string,
-    stateContext?: Record<string, unknown>
+    stateContext?: Record<string, unknown>,
 ): TaipyAction =>
     createRequestDataUpdateAction(
         name,
@@ -619,7 +619,7 @@ export const createRequestTableUpdateAction = (
             compare: compare,
             compare_datas: compareDatas,
             state_context: stateContext,
-        })
+        }),
     );
 
 export const createRequestInfiniteTableUpdateAction = (
@@ -641,7 +641,7 @@ export const createRequestInfiniteTableUpdateAction = (
     compare?: string,
     compareDatas?: string,
     stateContext?: Record<string, unknown>,
-    reverse?: boolean
+    reverse?: boolean,
 ): TaipyAction =>
     createRequestDataUpdateAction(
         name,
@@ -665,7 +665,7 @@ export const createRequestInfiniteTableUpdateAction = (
             compare_datas: compareDatas,
             state_context: stateContext,
             reverse: !!reverse,
-        })
+        }),
     );
 
 /**
@@ -696,7 +696,7 @@ export const createRequestDataUpdateAction = (
     pageKey: string,
     payload: Record<string, unknown>,
     allData = false,
-    library?: string
+    library?: string,
 ): TaipyAction => {
     payload = payload || {};
     if (id !== undefined) {
@@ -734,7 +734,7 @@ export const createRequestUpdateAction = (
     context: string | undefined,
     names: string[],
     forceRefresh = false,
-    stateContext?: Record<string, unknown>
+    stateContext?: Record<string, unknown>,
 ): TaipyAction => ({
     type: Types.RequestUpdate,
     name: "",
@@ -807,7 +807,7 @@ export const createNavigateAction = (
     to?: string,
     params?: Record<string, string>,
     tab?: string,
-    force?: boolean
+    force?: boolean,
 ): TaipyNavigateAction => ({
     type: Types.Navigate,
     to,
