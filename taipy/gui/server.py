@@ -212,9 +212,9 @@ class _Server:
             ):
                 return send_from_directory(base_path, path)
             if (
-                (file_path := str(os.path.normpath(base_path := self._gui._root_dir + os.path.sep) + path)).startswith(
-                    base_path
-                )
+                (
+                    file_path := str(os.path.normpath((base_path := self._gui._root_dir + os.path.sep) + path))
+                ).startswith(base_path)
                 and os.path.isfile(file_path)
                 and not self.__is_ignored(file_path)
             ):
