@@ -22,11 +22,11 @@ from ._base_cli._abstract_cli import _AbstractCLI
 from ._base_cli._taipy_parser import _TaipyParser
 
 
-class _ScaffoldCLI(_AbstractCLI):
+class _CreateCLI(_AbstractCLI):
     _template_map: Dict[str, str] = {}
 
     _COMMAND_NAME = "create"
-    _ARGUMENTS = ["--template"]
+    _ARGUMENTS = ["--application"]
 
     @classmethod
     def generate_template_map(cls, template_path: Optional[pathlib.Path] = None):
@@ -49,10 +49,10 @@ class _ScaffoldCLI(_AbstractCLI):
             help="Create a new Taipy application using pre-defined templates.",
         )
         create_parser.add_argument(
-            "--template",
+            "--application",
             choices=list(cls._template_map.keys()),
             default="default",
-            help="The Taipy template to create new application.",
+            help="The template used to create the new Taipy application.",
         )
 
     @classmethod
@@ -61,7 +61,7 @@ class _ScaffoldCLI(_AbstractCLI):
         if not args:
             return
         try:
-            cookiecutter(cls._template_map[args.template])
+            cookiecutter(cls._template_map[args.application])
         except OutputDirExistsException as err:
             error_msg = f"{str(err)}. Please remove the existing directory or provide a new folder name."
             print(error_msg)  # noqa: T201

@@ -19,9 +19,9 @@ from taipy.core._entity._migrate_cli import _MigrateCLI
 from taipy.core._version._cli._version_cli import _VersionCLI
 from taipy.gui._gui_cli import _GuiCLI
 
+from ._cli._create_cli import _CreateCLI
 from ._cli._help_cli import _HelpCLI
 from ._cli._run_cli import _RunCLI
-from ._cli._scaffold_cli import _ScaffoldCLI
 from .version import _get_version
 
 
@@ -46,8 +46,8 @@ def _entrypoint():
     _CoreCLI.create_run_parser()
 
     _VersionCLI.create_parser()
-    _ScaffoldCLI.generate_template_map()
-    _ScaffoldCLI.create_parser()
+    _CreateCLI.generate_template_map()
+    _CreateCLI.create_parser()
     _MigrateCLI.create_parser()
     _HelpCLI.create_parser()
 
@@ -65,7 +65,7 @@ def _entrypoint():
     _HelpCLI.handle_command()
     _VersionCLI.handle_command()
     _MigrateCLI.handle_command()
-    _ScaffoldCLI.handle_command()
+    _CreateCLI.handle_command()
 
     _TaipyParser._remove_argument("help")
     _TaipyParser._parser.print_help()
