@@ -59,7 +59,7 @@ with open("./taipy/gui/version.json", "r") as vfile:
         current_version = "develop"
     else:
         current_version = f'release-{version.get("major", 0)}.{version.get("minor", 0)}'
-taipy_doc_url = f"https://docs.taipy.io/en/{current_version}/manuals/userman/gui/viselements/standard-and-blocks/"
+taipy_doc_url = f"https://docs.taipy.io/en/{current_version}/manuals/userman/gui/viselements/generic/"
 
 
 # ############################################################

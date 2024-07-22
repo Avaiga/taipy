@@ -58,7 +58,7 @@ def test_help_non_existed_command(caplog):
 
 
 def test_taipy_create_help(capsys):
-    expected_help = "create [-h] [--template"
+    expected_help = "create [-h] [--application"
 
     with patch("sys.argv", ["prog", "help", "create"]):
         with pytest.raises(SystemExit):

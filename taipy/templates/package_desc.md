@@ -19,7 +19,7 @@ Taipy is a Python library for creating Business Applications. More information o
 [website](https://www.taipy.io). Taipy is split into multiple packages including *taipy-templates*
 to let users install the minimum they need.
 
-Taipy templates is a repository that contains templates created and
+Taipy templates is a repository that contains application templates created and
 maintained by Taipy. It helps users getting started with a simple and ready-to-go application.
 
 To create a Taipy application using this template, first you need to install Taipy (> 2.2).
@@ -29,7 +29,7 @@ taipy create
 ```
 or
 ```bash
-taipy create --template "default"
+taipy create --application "default"
 ```
 
 After providing necessary information, your new application is created in the current
