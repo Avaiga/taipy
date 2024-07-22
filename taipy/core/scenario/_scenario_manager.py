@@ -312,11 +312,10 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     ) -> List[Scenario]:
         """
         Filter a list of scenarios by a given creation time period.
-        The time period is inclusive.
 
         Parameters:
-            created_start_time (Optional[datetime]): Start time of the period.
-            created_end_time (Optional[datetime]): End time of the period.
+            created_start_time (Optional[datetime]): Start time of the period. The start time is inclusive.
+            created_end_time (Optional[datetime]): End time of the period. The end time is exclusive.
 
         Returns:
             List[Scenario]: List of scenarios created in the given time period.
@@ -325,12 +324,12 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             return scenarios
 
         if not created_start_time:
-            return [scenario for scenario in scenarios if scenario.creation_date <= created_end_time]
+            return [scenario for scenario in scenarios if scenario.creation_date < created_end_time]
 
         if not created_end_time:
             return [scenario for scenario in scenarios if created_start_time <= scenario.creation_date]
 
-        return [scenario for scenario in scenarios if created_start_time <= scenario.creation_date <= created_end_time]
+        return [scenario for scenario in scenarios if created_start_time <= scenario.creation_date < created_end_time]
 
     @classmethod
     def _is_promotable_to_primary(cls, scenario: Union[Scenario, ScenarioId]) -> bool:
