@@ -1555,7 +1555,6 @@ class Gui:
         variable reflected in the user interface.
 
         Arguments:
-            gui (Gui^): The current Gui instance.
             callback: The user-defined function to be invoked.<br/>
                 The first parameter of this function must be a `State^` object representing the
                 client for which it is invoked.<br/>
@@ -1577,7 +1576,6 @@ class Gui:
         instance. All user interfaces reflect the change.
 
         Arguments:
-            gui (Gui^): The current Gui instance.
             var_name: The name of the variable to change.
             value: The new value for the variable.
         """
@@ -1600,9 +1598,9 @@ class Gui:
             values: An optional dictionary where each key is the name of a variable to change, and
                 where the associated value is the new value to set for that variable, in each state
                 for the application.
-            **kwargs: A collection of variable name-value pairs that are updated for each state of
-                the application. Name-value pairs overload the ones in *values* if the name exists
-                as a key in the dictionary.
+            **kwargs (dict[str, any]): A collection of variable name-value pairs that are updated
+                for each state of the application. Name-value pairs overload the ones in *values*
+                if the name exists as a key in the dictionary.
         """
         if kwargs:
             values = values.copy() if values else {}
