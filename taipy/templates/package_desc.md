@@ -16,10 +16,10 @@ and limitations under the License.
 ## What is Taipy templates
 
 Taipy is a Python library for creating Business Applications. More information on our
-[website](https://www.taipy.io). Taipy is split into multiple repositories including *taipy-templates*
+[website](https://www.taipy.io). Taipy is split into multiple packages including *taipy-templates*
 to let users install the minimum they need.
 
-Taipy templates is a repository that contains templates and scaffoldings created and
+Taipy templates is a repository that contains templates created and
 maintained by Taipy. It helps users getting started with a simple and ready-to-go application.
 
 To create a Taipy application using this template, first you need to install Taipy (> 2.2).

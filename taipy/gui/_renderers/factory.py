@@ -353,6 +353,8 @@ class _Factory:
                 ("min", PropertyType.number, 0),
                 ("max", PropertyType.number, 100),
                 ("delta", PropertyType.dynamic_number),
+                ("delta_color", PropertyType.string),
+                ("negative_delta_color", PropertyType.string),
                 ("threshold", PropertyType.dynamic_number),
                 ("width", PropertyType.string_or_number),
                 ("height", PropertyType.string_or_number),
@@ -594,7 +596,7 @@ class _Factory:
             [
                 ("linear", PropertyType.boolean, False),
                 ("show_value", PropertyType.boolean, False),
-                ("render", PropertyType.dynamic_boolean, True)
+                ("render", PropertyType.dynamic_boolean, True),
             ]
         )
         ._set_propagate(),

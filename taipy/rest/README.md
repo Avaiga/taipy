@@ -26,7 +26,7 @@ and limitations under the License.
 ## What is Taipy REST
 
 Taipy is a Python library for creating Business Applications. More information on our
-[website](https://www.taipy.io). Taipy is split into multiple repositories including
+[website](https://www.taipy.io). Taipy is split into multiple packages including
 *taipy-core* and *taipy-rest* to let users install the minimum they need.
 
 Taipy Core mostly includes business-oriented

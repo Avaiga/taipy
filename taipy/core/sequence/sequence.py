@@ -54,7 +54,7 @@ class Sequence(_Entity, Submittable, _Labeled):
         the forecasts, planning its production. Three task are configured and linked
         together through data nodes.
 
-        ![sequences](../refmans/img/sequences.svg){ align=left }
+        ![sequences](../img/sequences.svg){ align=left }
 
         First, the sales sequence (boxed in green in the picture) contains **training**
         and **predict** tasks. Second, a production sequence (boxed in dark gray in the

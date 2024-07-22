@@ -102,8 +102,7 @@ def test_format_converter_integer_to_binary(page: Page, gui: Gui, helpers):
     helpers.run_e2e(gui)
     page.goto("./test")
     page.wait_for_selector(".plot-container")
-    number = page.locator(
-        "//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
+    number = page.locator("//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
     assert number.text_content() == "110010"
 
 
@@ -117,8 +116,7 @@ def test_format_converter_integer_to_signed_decimal_d_type(page: Page, gui: Gui,
     helpers.run_e2e(gui)
     page.goto("./test")
     page.wait_for_selector(".plot-container")
-    number = page.locator(
-        "//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
+    number = page.locator("//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
     assert number.text_content() == "50"
 
 
@@ -132,8 +130,7 @@ def test_format_converter_integer_to_signed_decimal_i_type(page: Page, gui: Gui,
     helpers.run_e2e(gui)
     page.goto("./test")
     page.wait_for_selector(".plot-container")
-    number = page.locator(
-        "//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
+    number = page.locator("//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
     assert number.text_content() == "50"
 
 
@@ -147,8 +144,7 @@ def test_format_converter_yields_float_using_science_notation(page: Page, gui: G
     helpers.run_e2e(gui)
     page.goto("./test")
     page.wait_for_selector(".plot-container")
-    number = page.locator(
-        "//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
+    number = page.locator("//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
     assert number.text_content() == "5.000000e+1"
 
 
@@ -162,8 +158,7 @@ def test_format_converter_yields_float_using_fixed_point_notation_f_type(page: P
     helpers.run_e2e(gui)
     page.goto("./test")
     page.wait_for_selector(".plot-container")
-    number = page.locator(
-        "//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
+    number = page.locator("//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
     assert number.text_content() == "99.99"
 
 
@@ -177,8 +172,7 @@ def test_format_converter_yields_float_using_fixed_point_notation_g_type(page: P
     helpers.run_e2e(gui)
     page.goto("./test")
     page.wait_for_selector(".plot-container")
-    number = page.locator(
-        "//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
+    number = page.locator("//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
     assert number.text_content() == "51"
 
 
@@ -192,8 +186,7 @@ def test_format_converter_yields_integer_as_octal(page: Page, gui: Gui, helpers)
     helpers.run_e2e(gui)
     page.goto("./test")
     page.wait_for_selector(".plot-container")
-    number = page.locator(
-        "//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
+    number = page.locator("//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
     assert number.text_content() == "62"
 
 
@@ -207,8 +200,7 @@ def test_format_converter_yields_integer_as_hexadecimal(page: Page, gui: Gui, he
     helpers.run_e2e(gui)
     page.goto("./test")
     page.wait_for_selector(".plot-container")
-    number = page.locator(
-        "//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
+    number = page.locator("//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
     assert number.text_content() == "32"
 
 
@@ -222,8 +214,7 @@ def test_format_converter_yields_integer_as_uppercase_hexadecimal(page: Page, gu
     helpers.run_e2e(gui)
     page.goto("./test")
     page.wait_for_selector(".plot-container")
-    number = page.locator(
-        "//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
+    number = page.locator("//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
     assert number.text_content() == "32"
 
 
@@ -237,8 +228,7 @@ def test_format_converter_yields_integer_as_unsigned_decimal(page: Page, gui: Gu
     helpers.run_e2e(gui)
     page.goto("./test")
     page.wait_for_selector(".plot-container")
-    number = page.locator(
-        "//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
+    number = page.locator("//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
     assert number.text_content() == "(50)"
 
 
@@ -252,9 +242,39 @@ def test_format_converter_yields_edge_cases(page: Page, gui: Gui, helpers):
     helpers.run_e2e(gui)
     page.goto("./test")
     page.wait_for_selector(".plot-container")
-    number = page.locator(
-        "//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
+    number = page.locator("//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[@class='number']")
     assert number.text_content() == "a%b50c%d"
 
 
+@pytest.mark.teste2e
+def test_negative_delta_color(page: Page, gui: Gui, helpers):
+    page_md = """
+<|50|metric|negative_delta_color=#3D9970|delta=-20|>
+"""
+    gui._set_frame(inspect.currentframe())
+    gui.add_page(name="test", page=page_md)
+    helpers.run_e2e(gui)
+    page.goto("./test")
+    page.wait_for_selector(".plot-container")
+    events_list = page.locator("//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[local-name()='text']")
+    delta = events_list.nth(1)
+    fill_color = delta.evaluate("el => getComputedStyle(el).fill")
 
+    assert fill_color == "rgb(61, 153, 112)"
+
+
+@pytest.mark.teste2e
+def test_delta_color_invert(page: Page, gui: Gui, helpers):
+    page_md = """
+<|50|metric|delta_color=invert|delta=-20|>
+"""
+    gui._set_frame(inspect.currentframe())
+    gui.add_page(name="test", page=page_md)
+    helpers.run_e2e(gui)
+    page.goto("./test")
+    page.wait_for_selector(".plot-container")
+    events_list = page.locator("//*[@class='js-plotly-plot']//*[name()='svg'][2]//*[local-name()='text']")
+    delta = events_list.nth(1)
+    fill_color = delta.evaluate("el => getComputedStyle(el).fill")
+
+    assert fill_color == "rgb(61, 153, 112)"

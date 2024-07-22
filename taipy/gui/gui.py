@@ -98,7 +98,6 @@ from .utils import (
     _TaipyData,
     _TaipyLov,
     _TaipyLovValue,
-    _TaipyToJson,
     _to_camel_case,
     _variable_decode,
     is_debugging,
@@ -289,8 +288,8 @@ class Gui:
                 of the main Python file is allowed.
             env_filename (Optional[str]): An optional file from which to load application
                 configuration variables (see the
-                [Configuration](../gui/configuration.md#configuring-the-gui-instance) section
-                of the User Manual for details.)<br/>
+                [Configuration](../../userman/configuration/gui-config.md#configuring-the-gui-instance)
+                section of the User Manual for details.)<br/>
                 The default value is "taipy.gui.env"
             libraries (Optional[List[ElementLibrary]]): An optional list of extension library
                 instances that pages can reference.<br/>
@@ -688,13 +687,14 @@ class Gui:
         elif rel_var and isinstance(current_value, _TaipyLovValue):  # pragma: no cover
             lov_holder = _getscopeattr_drill(self, self.__evaluator.get_hash_from_expr(rel_var))
             if isinstance(lov_holder, _TaipyLov):
-                val = value if isinstance(value, list) else [value]
-                elt_4_ids = self.__adapter._get_elt_per_ids(lov_holder.get_name(), lov_holder.get())
-                ret_val = [elt_4_ids.get(x, x) for x in val]
-                if isinstance(value, list):
-                    value = ret_val
-                elif ret_val:
-                    value = ret_val[0]
+                if value:
+                    val = value if isinstance(value, list) else [value]
+                    elt_4_ids = self.__adapter._get_elt_per_ids(lov_holder.get_name(), lov_holder.get())
+                    ret_val = [elt_4_ids.get(x, x) for x in val]
+                    if isinstance(value, list):
+                        value = ret_val
+                    elif ret_val:
+                        value = ret_val[0]
         elif isinstance(current_value, _TaipyBase):
             value = current_value.cast_value(value)
         self._update_var(
@@ -1033,7 +1033,7 @@ class Gui:
                     newvalue = self.__adapter.run(
                         newvalue.get_name(), newvalue.get(), id_only=isinstance(newvalue, _TaipyLovValue)
                     )
-                elif isinstance(newvalue, _TaipyToJson):
+                elif isinstance(newvalue, _TaipyBase):
                     newvalue = newvalue.get()
                 if isinstance(newvalue, (dict, _MapDict)):
                     # Skip in taipy-gui, available in custom frontend
@@ -1046,23 +1046,24 @@ class Gui:
                 if isinstance(newvalue, float) and math.isnan(newvalue):
                     # do not let NaN go through json, it is not handle well (dies silently through websocket)
                     newvalue = None
-                debug_warnings: t.List[warnings.WarningMessage] = []
-                with warnings.catch_warnings(record=True) as warns:
-                    warnings.resetwarnings()
-                    json.dumps(newvalue, cls=_TaipyJsonEncoder)
-                    if len(warns):
-                        keep_value = True
-                        for w in warns:
-                            if is_debugging():
-                                debug_warnings.append(w)
-                            if w.category is not DeprecationWarning and w.category is not PendingDeprecationWarning:
-                                keep_value = False
-                                break
-                        if not keep_value:
-                            # do not send data that is not serializable
-                            continue
-                for w in debug_warnings:
-                    warnings.warn(w.message, w.category)  # noqa: B028
+                if newvalue is not None and not isinstance(newvalue, str):
+                    debug_warnings: t.List[warnings.WarningMessage] = []
+                    with warnings.catch_warnings(record=True) as warns:
+                        warnings.resetwarnings()
+                        json.dumps(newvalue, cls=_TaipyJsonEncoder)
+                        if len(warns):
+                            keep_value = True
+                            for w in warns:
+                                if is_debugging():
+                                    debug_warnings.append(w)
+                                if w.category is not DeprecationWarning and w.category is not PendingDeprecationWarning:
+                                    keep_value = False
+                                    break
+                            if not keep_value:
+                                # do not send data that is not serializable
+                                continue
+                    for w in debug_warnings:
+                        warnings.warn(w.message, w.category)  # noqa: B028
             ws_dict[_var] = newvalue
         # TODO: What if value == newvalue?
         self.__send_ws_update_with_dict(ws_dict)
@@ -1504,7 +1505,7 @@ class Gui:
         """Invoke a user callback for a given state.
 
         See the
-        [section on Long Running Callbacks in a Thread](../gui/callbacks.md#long-running-callbacks-in-a-thread)
+        [section on Long Running Callbacks in a Thread](../../userman/gui/callbacks.md#long-running-callbacks-in-a-thread)
         in the User Manual for details on when and how this function can be used.
 
         Arguments:
@@ -1513,7 +1514,7 @@ class Gui:
                 The first parameter of this function **must** be a `State^`.
             args (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
             module_context (Optional[str]): the name of the module that will be used.
-        """
+        """  # noqa: E501
         this_sid = None
         if request:
             # avoid messing with the client_id => Set(ws id)
@@ -2011,7 +2012,7 @@ class Gui:
     ) -> Partial:
         """Create a new `Partial^`.
 
-        The [User Manual section on Partials](../gui/pages/index.md#partials) gives details on
+        The [User Manual section on Partials](../../userman/gui/pages/index.md#partials) gives details on
         when and how to use this class.
 
         Arguments:
@@ -2580,7 +2581,7 @@ class Gui:
         URL that `Gui` serves. The default is to listen to the *localhost* address
         (127.0.0.1) on the port number 5000. However, the configuration of this `Gui`
         object may impact that (see the
-        [Configuration](../gui/configuration.md#configuring-the-gui-instance)
+        [Configuration](../../userman/configuration/gui-config.md#configuring-the-gui-instance)
         section of the User Manual for details).
 
         Arguments:
@@ -2606,7 +2607,7 @@ class Gui:
                 Also note that setting the *debug* argument to True forces *async_mode* to "threading".
             **kwargs (dict[str, any]): Additional keyword arguments that configure how this `Gui` is run.
                 Please refer to the
-                [Configuration section](../gui/configuration.md#configuring-the-gui-instance)
+                [Configuration section](../../userman/configuration/gui-config.md#configuring-the-gui-instance)
                 of the User Manual for more information.
 
         Returns:

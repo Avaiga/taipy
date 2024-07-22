@@ -89,7 +89,7 @@ interface ScenarioViewerProps {
     className?: string;
     dynamicClassName?: string;
     onSubmissionChange?: string;
-    updateScVar?: string;
+    updateScVars?: string;
 }
 
 interface SequencesRowProps {
@@ -345,7 +345,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         showSubmit = true,
         showSubmitSequences = true,
         showTags = true,
-        updateScVar = "",
+        updateScVars = "",
     } = props;
 
     const dispatch = useDispatch();
@@ -358,7 +358,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         let sc: ScenarioFull | undefined = undefined;
         if (Array.isArray(props.scenario)) {
             sc = getValidScenario(props.scenario);
-        } else if (props.defaultScenario) {
+        } else if (props.scenario !== null && props.defaultScenario) {
             try {
                 sc = getValidScenario(JSON.parse(props.defaultScenario));
             } catch {
@@ -397,9 +397,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const onDeleteScenario = useCallback(() => {
         setDeleteDialogOpen(false);
         if (valid) {
-            dispatch(createSendActionNameAction(id, module, props.onDelete, true, true, { id: scId }));
+            dispatch(createSendActionNameAction(id, module, { action: props.onDelete, error_id: getUpdateVar(updateScVars, "error_id") }, undefined, undefined, true, true, { id: scId }));
         }
-    }, [valid, props.onDelete, scId, id, dispatch, module]);
+    }, [valid, props.onDelete, scId, id, dispatch, module, updateScVars]);
 
     const [primaryDialog, setPrimaryDialog] = useState(false);
     const openPrimaryDialog = useCallback(() => setPrimaryDialog(true), []);
@@ -411,11 +411,11 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 createSendActionNameAction(id, module, props.onEdit, {
                     id: scId,
                     primary: true,
-                    error_id: getUpdateVar(updateScVar, "error_id"),
+                    error_id: getUpdateVar(updateScVars, "error_id"),
                 })
             );
         }
-    }, [valid, props.onEdit, scId, id, dispatch, module, updateScVar]);
+    }, [valid, props.onEdit, scId, id, dispatch, module, updateScVars]);
 
     // userExpanded
     const [userExpanded, setUserExpanded] = useState(valid && expanded);
@@ -433,11 +433,11 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         id: scId,
                         sequence: label,
                         on_submission_change: props.onSubmissionChange,
-                        error_id: getUpdateVar(updateScVar, "error_id"),
+                        error_id: getUpdateVar(updateScVars, "error_id"),
                     })
                 );
         },
-        [scId, props.onSubmit, props.onSubmissionChange, id, dispatch, module, updateScVar]
+        [scId, props.onSubmit, props.onSubmissionChange, id, dispatch, module, updateScVars]
     );
 
     const submitScenario = useCallback(
@@ -448,13 +448,13 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     createSendActionNameAction(id, module, props.onSubmit, {
                         id: scId,
                         on_submission_change: props.onSubmissionChange,
-                        error_id: getUpdateVar(updateScVar, "error_id"),
+                        error_id: getUpdateVar(updateScVars, "error_id"),
                     })
                 );
                 setSubmissionStatus(Status.SUBMITTED);
             }
         },
-        [valid, props.onSubmit, props.onSubmissionChange, id, scId, dispatch, module, updateScVar]
+        [valid, props.onSubmit, props.onSubmissionChange, id, scId, dispatch, module, updateScVars]
     );
 
     // focus
@@ -474,13 +474,13 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     createSendActionNameAction(id, module, props.onEdit, {
                         id: scId,
                         name: label,
-                        error_id: getUpdateVar(updateScVar, "error_id"),
+                        error_id: getUpdateVar(updateScVars, "error_id"),
                     })
                 );
                 setFocusName("");
             }
         },
-        [valid, props.onEdit, scId, label, id, dispatch, module, updateScVar]
+        [valid, props.onEdit, scId, label, id, dispatch, module, updateScVars]
     );
     const cancelLabel = useCallback(
         (e?: MouseEvent<HTMLElement>) => {
@@ -518,13 +518,13 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     createSendActionNameAction(id, module, props.onEdit, {
                         id: scId,
                         tags: tags,
-                        error_id: getUpdateVar(updateScVar, "error_id"),
+                        error_id: getUpdateVar(updateScVars, "error_id"),
                     })
                 );
                 setFocusName("");
             }
         },
-        [valid, props.onEdit, scId, tags, id, dispatch, module, updateScVar]
+        [valid, props.onEdit, scId, tags, id, dispatch, module, updateScVars]
     );
     const cancelTags = useCallback(
         (e?: MouseEvent<HTMLElement>) => {
@@ -559,7 +559,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             name: label,
                             task_ids: taskIds,
                             del: !!del,
-                            error_id: getUpdateVar(updateScVar, "error_id"),
+                            error_id: getUpdateVar(updateScVars, "error_id"),
                         })
                     );
                 } else {
@@ -568,7 +568,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 setFocusName("");
             }
         },
-        [valid, id, scId, props.onEdit, dispatch, module, updateScVar]
+        [valid, id, scId, props.onEdit, dispatch, module, updateScVars]
     );
     const isValidSequence = useCallback(
         (sLabel: string, label: string) => !!label && (sLabel == label || !sequences.find((seq) => seq[0] === label)),
@@ -841,7 +841,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 onFocus={onFocus}
                                 onEdit={props.onEdit}
                                 editable={scEditable}
-                                updatePropVars={updateScVar}
+                                updatePropVars={updateScVars}
                             />
                             {showSequences ? (
                                 <>

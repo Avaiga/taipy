@@ -64,7 +64,7 @@ class Cycle(_Entity, _Labeled):
 
     !!! example "Example for January cycle"
 
-        ![cycles](../refmans/img/cycles_january_colored.svg){ align=left width="250" }
+        ![cycles](../img/cycles_january_colored.svg){ align=left width="250" }
 
         Let's assume an end-user publishes production orders (i.e., a production plan) every
         month. During each month (the cycle), he/she will be interested in experimenting with
@@ -82,7 +82,7 @@ class Cycle(_Entity, _Labeled):
 
     !!! example "Example for February cycle"
 
-        ![cycles](../pic/cycles_colored.svg){ align=left width="250" }
+        ![cycles](../img/cycles_colored.svg){ align=left width="250" }
         Now the user starts working on the February work cycle. He or she creates two
         scenarios for the February cycle (one with a low capacity assumption and one with
         a high capacity assumption). The user can then decide to elect the low capacity
