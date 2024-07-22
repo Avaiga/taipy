@@ -51,7 +51,7 @@ class _LambdaByName(ast.NodeVisitor):
 
     def __init__(self, element_name: str, lineno: int, lambdas: t.Dict[str, ast.Lambda]) -> None:
         super().__init__()
-        self.element_name = element_name
+        self.element_name = element_name.split(".")[-1]
         self.lambdas = lambdas
         self.lineno = lineno + 1
 
