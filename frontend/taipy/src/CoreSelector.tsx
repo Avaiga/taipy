@@ -509,10 +509,10 @@ const CoreSelector = (props: CoreSelectorProps) => {
     // filters
     const colFilters = useMemo(() => {
         try {
-            const res = props.filter ? (JSON.parse(props.filter) as Array<[string, string, string[]]>) : undefined;
+            const res = props.filter ? (JSON.parse(props.filter) as Array<[string, string, string, string[]]>) : undefined;
             return Array.isArray(res)
-                ? res.reduce((pv, [name, coltype, lov], idx) => {
-                      pv[name] = { dfid: name, type: coltype, index: idx, filter: true, lov: lov, freeLov: !!lov };
+                ? res.reduce((pv, [name, id, coltype, lov], idx) => {
+                      pv[name] = { dfid: id, title: name, type: coltype, index: idx, filter: true, lov: lov, freeLov: !!lov };
                       return pv;
                   }, {} as Record<string, ColumnDesc>)
                 : undefined;
@@ -554,10 +554,10 @@ const CoreSelector = (props: CoreSelectorProps) => {
     // sort
     const colSorts = useMemo(() => {
         try {
-            const res = props.sort ? (JSON.parse(props.sort) as Array<[string]>) : undefined;
+            const res = props.sort ? (JSON.parse(props.sort) as Array<[string, string]>) : undefined;
             return Array.isArray(res)
-                ? res.reduce((pv, [name], idx) => {
-                      pv[name] = { dfid: name, type: "str", index: idx };
+                ? res.reduce((pv, [name, id], idx) => {
+                      pv[name] = { dfid: id, title: name, type: "str", index: idx };
                       return pv;
                   }, {} as Record<string, ColumnDesc>)
                 : undefined;

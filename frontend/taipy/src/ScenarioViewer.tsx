@@ -366,7 +366,13 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
             }
         }
         setValid(!!sc);
-        setScenario((oldSc) => (oldSc === sc ? oldSc : sc ? (deepEqual(oldSc, sc) ? oldSc : sc) : invalidScenario));
+        setScenario((oldSc) => {
+            if (oldSc === sc || (sc && deepEqual(oldSc, sc))) {
+                return oldSc;
+            }
+            setSubmissionStatus(-1);
+            return sc || invalidScenario;
+        });
     }, [props.scenario, props.defaultScenario]);
 
     const [
@@ -397,7 +403,18 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const onDeleteScenario = useCallback(() => {
         setDeleteDialogOpen(false);
         if (valid) {
-            dispatch(createSendActionNameAction(id, module, { action: props.onDelete, error_id: getUpdateVar(updateScVars, "error_id") }, undefined, undefined, true, true, { id: scId }));
+            dispatch(
+                createSendActionNameAction(
+                    id,
+                    module,
+                    { action: props.onDelete, error_id: getUpdateVar(updateScVars, "error_id") },
+                    undefined,
+                    undefined,
+                    true,
+                    true,
+                    { id: scId }
+                )
+            );
         }
     }, [valid, props.onDelete, scId, id, dispatch, module, updateScVars]);
 
@@ -423,6 +440,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         (e: SyntheticEvent, expand: boolean) => expandable && setUserExpanded(expand),
         [expandable]
     );
+
+    // Submission status
+    const [submissionStatus, setSubmissionStatus] = useState(-1);
 
     // submits
     const submitSequence = useCallback(
@@ -576,9 +596,6 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     );
 
     const addSequenceHandler = useCallback(() => setSequences((seq) => [...seq, ["", [], "", true]]), []);
-
-    // Submission status
-    const [submissionStatus, setSubmissionStatus] = useState(-1);
 
     // on scenario change
     useEffect(() => {

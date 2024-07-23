@@ -62,11 +62,10 @@ from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
 
 from ._adapters import (
+    ScenarioCustomFilter,
     _EntityType,
-    _get_datanode_property,
     _get_entity_property,
     _GuiCoreDatanodeAdapter,
-    _GuiCoreDatanodeProperties,
     _GuiCoreScenarioProperties,
     _invoke_action,
 )
@@ -286,7 +285,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
             sorted_list = entities
             for sd in reversed(sorts):
                 col = sd.get("col", "")
-                col = _GuiCoreScenarioProperties.get_col_name(col)
                 order = sd.get("order", True)
                 sorted_list = sorted(sorted_list, key=_get_entity_property(col, Scenario, Cycle), reverse=not order)
         else:
@@ -304,12 +302,23 @@ class _GuiCoreContext(CoreEventConsumerBase):
         filtered_list = list(entities)
         for fd in filters:
             col = fd.get("col", "")
-            is_datanode_prop = _get_datanode_property(col) is not None
-            col_type = _GuiCoreScenarioProperties.get_type(col)
-            col = _GuiCoreScenarioProperties.get_col_name(col)
+            is_datanode_prop = _GuiCoreScenarioProperties.is_datanode_property(col)
+            col_type = fd.get("type", "no type")
             col_fn = cp[0] if (cp := col.split("(")) and len(cp) > 1 else None
             val = fd.get("value")
             action = fd.get("action", "")
+            custom_col = ScenarioCustomFilter._get_custom(col)
+            if custom_col:
+                fn = self.gui._get_user_function(custom_col)
+                if callable(fn):
+                    col = fn
+            if (
+                isinstance(col, str)
+                and next(filter(lambda s: not s.isidentifier(), (col_fn or col).split(".")), False) is True
+            ):
+                _warn(f'Error filtering with "{col_fn or col}": not a valid Python identifier.')
+                continue
+
             # level 1 filtering
             filtered_list = [
                 e
@@ -606,13 +615,21 @@ class _GuiCoreContext(CoreEventConsumerBase):
         filtered_list = list(entities)
         for fd in filters:
             col = fd.get("col", "")
-            col_type = _GuiCoreDatanodeProperties.get_type(col)
-            col = _GuiCoreDatanodeProperties.get_col_name(col)
+            col_type = fd.get("type", "no type")
             col_fn = cp[0] if (cp := col.split("(")) and len(cp) > 1 else None
             val = fd.get("value")
             action = fd.get("action", "")
-            if isinstance(val, str) and col_type == "date":
-                val = datetime.fromisoformat(val[:-1])
+            custom_col = ScenarioCustomFilter._get_custom(col)
+            if custom_col:
+                fn = self.gui._get_user_function(custom_col)
+                if callable(fn):
+                    col = fn
+            if (
+                isinstance(col, str)
+                and next(filter(lambda s: not s.isidentifier(), (col_fn or col).split(".")), False) is True
+            ):
+                _warn(f'Error filtering with "{col_fn or col}": not a valid Python identifier.')
+                continue
             # level 1 filtering
             filtered_list = [
                 e
@@ -642,7 +659,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
             sorted_list = entities
             for sd in reversed(sorts):
                 col = sd.get("col", "")
-                col = _GuiCoreDatanodeProperties.get_col_name(col)
                 order = sd.get("order", True)
                 sorted_list = sorted(sorted_list, key=_get_entity_property(col, DataNode), reverse=not order)
         else:

@@ -100,8 +100,8 @@
                     },
                     {
                         "name": "filter",
-                        "type": "bool|str|list[str]",
-                        "default_value": "\"Config id;Label;Creation date;Cycle label;Cycle start;Cycle end;Primary;Tags\"",
+                        "type": "bool|str|list[str|ScenarioFilter]",
+                        "default_value": "\"*\"",
                         "doc": "TODO: a list of <code>Scenario^</code> attributes to filter on. If False, do not allow filter."
                     },
                     {
@@ -112,8 +112,8 @@
                     },
                     {
                         "name": "sort",
-                        "type": "bool|str|list[str]",
-                        "default_value": "\"Config id;Label;Creation date\"",
+                        "type": "bool|str|list[str|ScenarioFilter]",
+                        "default_value": "\"*\"",
                         "doc": "TODO: a list of <code>Scenario^</code> attributes to sort on. If False, do not allow sort."
                     }
                 ]
@@ -356,7 +356,7 @@
                     {
                         "name": "filter",
                         "type": "bool|str|list[str]",
-                        "default_value": "\"Config id;Label;Up to date;Last edit date;Input;Output;Intermediate;Expiration date;Expired\"",
+                        "default_value": "\"*\"",
                         "doc": "TODO: a list of <code>DataNode^</code> attributes to filter on. If False, do not allow filter."
                     },
                     {
@@ -368,7 +368,7 @@
                     {
                         "name": "sort",
                         "type": "bool|str|list[str]",
-                        "default_value": "\"Config id;Label;Last edit date;Expiration date\"",
+                        "default_value": "\"*\"",
                         "doc": "TODO: a list of <code>DataNode^</code> attributes to sort on. If False, do not allow sort."
                     }
                 ]
