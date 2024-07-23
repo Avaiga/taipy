@@ -528,7 +528,7 @@ def get_scenarios(
         descending (bool): If True, sort the output list of scenarios in descending order.
             The default value is False.
         created_start_time (Optional[datetime]): The optional inclusive start date to filter scenarios by creation date.
-        created_end_time (Optional[datetime]): The optional inclusive end date to filter scenarios by creation date.
+        created_end_time (Optional[datetime]): The optional exclusive end date to filter scenarios by creation date.
         sort_key (Literal["name", "id", "creation_date", "tags"]): The optional sort_key to
             decide upon what key scenarios are sorted. The sorting is in increasing order for
             dates, in alphabetical order for name and id, and in lexicographical order for tags.
@@ -586,7 +586,7 @@ def get_primary_scenarios(
         descending (bool): If True, sort the output list of scenarios in descending order.
             The default value is False.
         created_start_time (Optional[datetime]): The optional inclusive start date to filter scenarios by creation date.
-        created_end_time (Optional[datetime]): The optional inclusive end date to filter scenarios by creation date.
+        created_end_time (Optional[datetime]): The optional exclusive end date to filter scenarios by creation date.
         sort_key (Literal["name", "id", "creation_date", "tags"]): The optional sort_key to
             decide upon what key scenarios are sorted. The sorting is in increasing order for
             dates, in alphabetical order for name and id, and in lexicographical order for tags.
