@@ -26,7 +26,6 @@ import warnings
 from importlib import metadata, util
 from importlib.util import find_spec
 from pathlib import Path
-from tempfile import mkstemp
 from types import FrameType, FunctionType, LambdaType, ModuleType, SimpleNamespace
 from urllib.parse import unquote, urlencode, urlparse
 
@@ -1408,22 +1407,17 @@ class Gui:
 
     def __download_csv(self, state: State, var_name: str, payload: dict):
         holder_name = t.cast(str, payload.get("var_name"))
-        ret = self._accessors._get_data(
-            self,
-            holder_name,
-            _getscopeattr(self, holder_name, None),
-            {"alldata": True, "csv": True},
-        )
-        if isinstance(ret, dict):
-            df = ret.get("df")
-            try:
-                fd, temp_path = mkstemp(".csv", var_name, text=True)
-                with os.fdopen(fd, "wt", newline="") as csv_file:
-                    df.to_csv(csv_file, index=False)  # type: ignore[union-attr]
-                self._download(temp_path, "data.csv", Gui.__DOWNLOAD_DELETE_ACTION)
-            except Exception as e:  # pragma: no cover
-                if not self._call_on_exception("download_csv", e):
-                    _warn("download_csv(): Exception raised", e)
+        try:
+            csv_path = self._accessors._to_csv(
+                self,
+                holder_name,
+                _getscopeattr(self, holder_name, None),
+            )
+            if csv_path:
+                self._download(csv_path, "data.csv", Gui.__DOWNLOAD_DELETE_ACTION)
+        except Exception as e:  # pragma: no cover
+            if not self._call_on_exception("download_csv", e):
+                _warn("download_csv(): Exception raised", e)
 
     def __delete_csv(self, state: State, var_name: str, payload: dict):
         try:

@@ -52,6 +52,11 @@ class _DataAccessor(ABC):
     def _on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
         pass
 
+    @abstractmethod
+    def _to_csv(self, guiApp: t.Any, var_name: str, value: t.Any):
+        pass
+
+
 class _InvalidDataAccessor(_DataAccessor):
     @staticmethod
     def get_supported_classes() -> t.List[str]:
@@ -75,6 +80,9 @@ class _InvalidDataAccessor(_DataAccessor):
         return None
 
     def _on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
+        return None
+
+    def _to_csv(self, guiApp: t.Any, var_name: str, value: t.Any):
         return None
 
 
@@ -148,3 +156,6 @@ class _DataAccessors(object):
 
     def _on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
         return self.__get_instance(value)._on_add(value, payload, new_row)
+
+    def _to_csv(self, guiApp: t.Any, var_name: str, value: t.Any):
+        return self.__get_instance(value)._to_csv(guiApp, var_name, value.get())
