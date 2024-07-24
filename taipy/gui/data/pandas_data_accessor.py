@@ -9,9 +9,11 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import os
 import typing as t
 from datetime import datetime
 from importlib import util
+from tempfile import mkstemp
 
 import numpy as np
 import pandas as pd
@@ -185,7 +187,7 @@ class _PandasDataAccessor(_DataAccessor):
             ret["start"] = start
         if data_extraction is not None:
             ret["dataExtraction"] = data_extraction  # Extract data out of dictionary on front-end
-        if data_format == _DataFormat.APACHE_ARROW:
+        if data_format is _DataFormat.APACHE_ARROW:
             if not _has_arrow_module:
                 raise RuntimeError("Cannot use Arrow as pyarrow package is not installed")
             # Convert from pandas to Arrow
@@ -417,7 +419,7 @@ class _PandasDataAccessor(_DataAccessor):
                         except Exception as e:
                             _warn(f"Limit rows error with {decimator} for Dataframe", e)
             value = self.__build_transferred_cols(gui, columns, t.cast(pd.DataFrame, value), is_copied=is_copied)
-            if payload.get("csv") is True:
+            if data_format is _DataFormat.CSV:
                 ret_payload["df"] = value
                 dictret = None
             else:
@@ -473,8 +475,8 @@ class _PandasDataAccessor(_DataAccessor):
                 # Column names and value types must match the original DataFrame
                 new_df = pd.DataFrame(new_row, columns=list(col_types))
                 # Split the DataFrame
-                rows_before = df.loc[:index-1]
-                rows_after = df.loc[index+1:]
+                rows_before = df.loc[: index - 1]
+                rows_after = df.loc[index + 1 :]
                 return pd.concat([rows_before, new_df, rows_after], ignore_index=True)
             else:
                 # Insert as the new first row
@@ -483,3 +485,15 @@ class _PandasDataAccessor(_DataAccessor):
                 return df.sort_index()
         return df
 
+    def _to_csv(self, gui: Gui, var_name: str, value: pd.DataFrame):
+        if isinstance(value, _PandasDataAccessor.__types):  # type: ignore
+            dict_ret = self.__get_data(gui, var_name, value, {"alldata": True}, _DataFormat.CSV)
+            if isinstance(dict_ret, dict):
+                df = dict_ret.get("df")
+                if isinstance(df, pd.DataFrame):
+                    fd, temp_path = mkstemp(".csv", var_name, text=True)
+                    with os.fdopen(fd, "wt", newline="") as csv_file:
+                        df.to_csv(csv_file, index=False)
+
+                    return temp_path
+        return None
