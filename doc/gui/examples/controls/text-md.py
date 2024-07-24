@@ -21,9 +21,9 @@ markdown = """
 You can insert *Markdown* code in a `text` control to
 add style to the text.
 
-If a line ends with two white spaces, such as here  
+If a line ends with two white spaces, such as here
 then you can create line skips.
-"""
+""" # noqa W291
 
 page = """
 # Text - Markdown
