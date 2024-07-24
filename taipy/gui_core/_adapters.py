@@ -486,11 +486,6 @@ class _GuiCoreScenarioProperties(_GuiCoreProperties):
         _GuiCorePropDesc(ScenarioFilter("Primary", bool, "is_primary"), extended=True),
         _GuiCorePropDesc(ScenarioFilter("Tags", str, "tags")),
     ]
-    __DN_PROPS = [
-        _GuiCorePropDesc(ScenarioDatanodeFilter("Up to date", bool, "", "is_up_to_date")),
-        _GuiCorePropDesc(ScenarioDatanodeFilter("Valid", bool, "", "is_valid")),
-        _GuiCorePropDesc(ScenarioDatanodeFilter("Last edit date", datetime, "", "last_edit_date")),
-    ]
     __ENUMS = None
     __SC_CYCLE = None
 
