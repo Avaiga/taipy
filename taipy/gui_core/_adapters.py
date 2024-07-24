@@ -377,7 +377,7 @@ class ScenarioFilter(_Filter):
 
 
 @dataclass
-class ScenarioDatanodeFilter(_Filter):
+class DataNodeScenarioFilter(_Filter):
     datanode_config_id: str
     property_id: str
 
@@ -389,7 +389,7 @@ _CUSTOM_PREFIX = "fn:"
 
 
 @dataclass
-class ScenarioCustomFilter(_Filter):
+class CustomScenarioFilter(_Filter):
     filter_function: t.Callable[[Scenario], t.Any]
 
     def __post_init__(self):

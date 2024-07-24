@@ -9,5 +9,5 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from ._adapters import DatanodeFilter, ScenarioCustomFilter, ScenarioDatanodeFilter, ScenarioFilter
+from ._adapters import CustomScenarioFilter, DatanodeFilter, DataNodeScenarioFilter, ScenarioFilter
 from ._init import *
