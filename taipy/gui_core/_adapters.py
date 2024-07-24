@@ -348,7 +348,7 @@ def _get_entity_property(col: str, *types: t.Type):
     return sort_key
 
 
-@dataclass(frozen=True)
+@dataclass()
 class _Filter(_DoNotUpdate):
     label: str
     property_type: t.Optional[t.Type]
@@ -368,7 +368,7 @@ class _Filter(_DoNotUpdate):
         return "any"
 
 
-@dataclass(frozen=True)
+@dataclass()
 class ScenarioFilter(_Filter):
     property_id: str
 
@@ -376,7 +376,7 @@ class ScenarioFilter(_Filter):
         return self.property_id
 
 
-@dataclass(frozen=True)
+@dataclass()
 class ScenarioDatanodeFilter(_Filter):
     datanode_config_id: str
     property_id: str
@@ -388,19 +388,25 @@ class ScenarioDatanodeFilter(_Filter):
 _CUSTOM_PREFIX = "fn:"
 
 
-@dataclass(frozen=True)
+@dataclass()
 class ScenarioCustomFilter(_Filter):
     filter_function: t.Callable[[Scenario], t.Any]
 
+    def __post_init__(self):
+        if self.filter_function.__name__ == "<lambda>":
+            raise TypeError("ScenarioCustomFilter does not support lambda functions.")
+        mod = self.filter_function.__module__
+        self.module = mod if isinstance(mod, str) else mod.__name__
+
     def get_property(self):
-        return f"{_CUSTOM_PREFIX}{self.filter_function.__name__}"
+        return f"{_CUSTOM_PREFIX}{self.module}:{self.filter_function.__name__}"
 
     @staticmethod
-    def _get_custom(col: str):
-        return col[len(_CUSTOM_PREFIX) :] if col.startswith(_CUSTOM_PREFIX) else None
+    def _get_custom(col: str) -> t.Optional[t.List[str]]:
+        return col[len(_CUSTOM_PREFIX) :].split(":") if col.startswith(_CUSTOM_PREFIX) else None
 
 
-@dataclass(frozen=True)
+@dataclass()
 class DatanodeFilter(_Filter):
     property_id: str
 

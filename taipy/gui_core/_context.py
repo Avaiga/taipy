@@ -306,11 +306,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
             col_fn = cp[0] if (cp := col.split("(")) and len(cp) > 1 else None
             val = fd.get("value")
             action = fd.get("action", "")
-            custom_col = ScenarioCustomFilter._get_custom(col)
-            if custom_col:
-                fn = self.gui._get_user_function(custom_col)
-                if callable(fn):
-                    col = fn
+            customs = ScenarioCustomFilter._get_custom(col)
+            if customs:
+                with self.gui._set_locals_context(customs[0] or None):
+                    fn = self.gui._get_user_function(customs[1])
+                    if callable(fn):
+                        col = fn
             if (
                 isinstance(col, str)
                 and next(filter(lambda s: not s.isidentifier(), (col_fn or col).split(".")), False) is True
@@ -618,11 +619,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
             col_fn = cp[0] if (cp := col.split("(")) and len(cp) > 1 else None
             val = fd.get("value")
             action = fd.get("action", "")
-            custom_col = ScenarioCustomFilter._get_custom(col)
-            if custom_col:
-                fn = self.gui._get_user_function(custom_col)
-                if callable(fn):
-                    col = fn
+            customs = ScenarioCustomFilter._get_custom(col)
+            if customs:
+                with self.gui._set_locals_context(customs[0] or None):
+                    fn = self.gui._get_user_function(customs[1])
+                    if callable(fn):
+                        col = fn
             if (
                 isinstance(col, str)
                 and next(filter(lambda s: not s.isidentifier(), (col_fn or col).split(".")), False) is True
