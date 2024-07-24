@@ -407,7 +407,7 @@ class CustomScenarioFilter(_Filter):
 
 
 @dataclass
-class DatanodeFilter(_Filter):
+class DataNodeFilter(_Filter):
     property_id: str
 
     def get_property(self):
@@ -577,15 +577,15 @@ class _GuiCoreScenarioSort(_GuiCoreScenarioProperties, _TaipyBase):
 
 class _GuiCoreDatanodeProperties(_GuiCoreProperties):
     _DN_PROPS: t.List[_GuiCorePropDesc] = [
-        _GuiCorePropDesc(DatanodeFilter("Config id", str, "config_id"), for_sort=True),
-        _GuiCorePropDesc(DatanodeFilter("Label", str, "get_simple_label()"), for_sort=True),
-        _GuiCorePropDesc(DatanodeFilter("Up to date", bool, "is_up_to_date")),
-        _GuiCorePropDesc(DatanodeFilter("Last edit date", datetime, "last_edit_date"), for_sort=True),
-        _GuiCorePropDesc(DatanodeFilter("Input", bool, "is_input")),
-        _GuiCorePropDesc(DatanodeFilter("Output", bool, "is_output")),
-        _GuiCorePropDesc(DatanodeFilter("Intermediate", bool, "is_intermediate")),
-        _GuiCorePropDesc(DatanodeFilter("Expiration date", datetime, "expiration_date"), extended=True, for_sort=True),
-        _GuiCorePropDesc(DatanodeFilter("Expired", bool, "is_expired"), extended=True),
+        _GuiCorePropDesc(DataNodeFilter("Config id", str, "config_id"), for_sort=True),
+        _GuiCorePropDesc(DataNodeFilter("Label", str, "get_simple_label()"), for_sort=True),
+        _GuiCorePropDesc(DataNodeFilter("Up to date", bool, "is_up_to_date")),
+        _GuiCorePropDesc(DataNodeFilter("Last edit date", datetime, "last_edit_date"), for_sort=True),
+        _GuiCorePropDesc(DataNodeFilter("Input", bool, "is_input")),
+        _GuiCorePropDesc(DataNodeFilter("Output", bool, "is_output")),
+        _GuiCorePropDesc(DataNodeFilter("Intermediate", bool, "is_intermediate")),
+        _GuiCorePropDesc(DataNodeFilter("Expiration date", datetime, "expiration_date"), extended=True, for_sort=True),
+        _GuiCorePropDesc(DataNodeFilter("Expired", bool, "is_expired"), extended=True),
     ]
     __DN_VALIDITY = None
 

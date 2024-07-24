@@ -355,7 +355,7 @@
                     },
                     {
                         "name": "filter",
-                        "type": "bool|str|DatanodeFilter|list[str|DatanodeFilter]",
+                        "type": "bool|str|DataNodeFilter|list[str|DataNodeFilter]",
                         "default_value": "\"*\"",
                         "doc": "TODO: a list of <code>DataNode^</code> attributes to filter on. If False, do not allow filter."
                     },
@@ -367,7 +367,7 @@
                     },
                     {
                         "name": "sort",
-                        "type": "bool|str|DatanodeFilter|list[str|DatanodeFilter]",
+                        "type": "bool|str|DataNodeFilter|list[str|DataNodeFilter]",
                         "default_value": "\"*\"",
                         "doc": "TODO: a list of <code>DataNode^</code> attributes to sort on. If False, do not allow sort."
                     }
