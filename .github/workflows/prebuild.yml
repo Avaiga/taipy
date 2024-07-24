@@ -1,0 +1,70 @@
+name: Generate prebuild for develop branch
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  NODE_OPTIONS: --max-old-space-size=4096
+
+jobs:
+  prebuild:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Hash taipy-gui source code
+        id: hash-gui-fe
+        working-directory: ./
+        run: |
+          python tools/frontend/hash_source.py
+          echo "HASH=$(cat hash.txt)" >> $GITHUB_OUTPUT
+          rm hash.txt
+        shell: bash
+
+      - name: Restore cached frontend build
+        id: cache-fe-build
+        uses: actions/cache@v4
+        with:
+          path: |
+            taipy/gui/webapp
+            taipy/gui_core/lib
+          key: frontend-build-${{ runner.os }}-${{ steps.hash-frontend.outputs.HASH }}
+
+      - name: Setup node ${{ matrix.node-version }} on ${{ matrix.os }}
+        if: steps.cache-fe-build.outputs.cache-hit != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: "**/package-lock.json"
+
+      - name: Frontend Bundle Build
+        if: steps.cache-fe-build.outputs.cache-hit != 'true'
+        run: pipenv run python tools/frontend/bundle_build.py
+
+      - name: Reset npm dependencies
+        if: steps.cache-fe-build.outputs.cache-hit != 'true'
+        run: |
+          git checkout -- frontend/taipy/package.json
+          git checkout -- frontend/taipy/package-lock.json
+          git checkout -- frontend/taipy-gui/package-lock.json
+
+      - name: Commit prebuild changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          branch: prebuild
+          add_options: "-u"
+          push_options: "--force"
