@@ -25,9 +25,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Hash taipy-gui source code
-        id: hash-gui-fe
-        working-directory: ./
+      - name: Hash frontend source code
+        id: hash-frontend
         run: |
           python tools/frontend/hash_source.py
           echo "HASH=$(cat hash.txt)" >> $GITHUB_OUTPUT
@@ -53,7 +52,7 @@ jobs:
 
       - name: Frontend Bundle Build
         if: steps.cache-fe-build.outputs.cache-hit != 'true'
-        run: pipenv run python tools/frontend/bundle_build.py
+        run: python tools/frontend/bundle_build.py
 
       - name: Reset npm dependencies
         if: steps.cache-fe-build.outputs.cache-hit != 'true'
@@ -61,6 +60,11 @@ jobs:
           git checkout -- frontend/taipy/package.json
           git checkout -- frontend/taipy/package-lock.json
           git checkout -- frontend/taipy-gui/package-lock.json
+
+      - name: Add frontend build force to bypass gitignore
+        run: |
+          git add -f taipy/gui/webapp
+          git add -f taipy/gui_core/lib
 
       - name: Commit prebuild changes
         uses: stefanzweifel/git-auto-commit-action@v5
