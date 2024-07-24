@@ -100,7 +100,7 @@
                     },
                     {
                         "name": "filter",
-                        "type": "bool|str|list[str|ScenarioFilter]",
+                        "type": "bool|str|ScenarioFilter|list[str|ScenarioFilter]",
                         "default_value": "\"*\"",
                         "doc": "TODO: a list of <code>Scenario^</code> attributes to filter on. If False, do not allow filter."
                     },
@@ -112,7 +112,7 @@
                     },
                     {
                         "name": "sort",
-                        "type": "bool|str|list[str|ScenarioFilter]",
+                        "type": "bool|str|ScenarioFilter|list[str|ScenarioFilter]",
                         "default_value": "\"*\"",
                         "doc": "TODO: a list of <code>Scenario^</code> attributes to sort on. If False, do not allow sort."
                     }
@@ -355,7 +355,7 @@
                     },
                     {
                         "name": "filter",
-                        "type": "bool|str|list[str]",
+                        "type": "bool|str|DatanodeFilter|list[str|DatanodeFilter]",
                         "default_value": "\"*\"",
                         "doc": "TODO: a list of <code>DataNode^</code> attributes to filter on. If False, do not allow filter."
                     },
@@ -367,7 +367,7 @@
                     },
                     {
                         "name": "sort",
-                        "type": "bool|str|list[str]",
+                        "type": "bool|str|DatanodeFilter|list[str|DatanodeFilter]",
                         "default_value": "\"*\"",
                         "doc": "TODO: a list of <code>DataNode^</code> attributes to sort on. If False, do not allow sort."
                     }
