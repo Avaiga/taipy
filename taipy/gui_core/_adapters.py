@@ -437,6 +437,8 @@ class _GuiCoreProperties(ABC):
                 return None
         if isinstance(data, str):
             data = data.split(";")
+        if isinstance(data, _Filter):
+            data = (data,)
         if isinstance(data, (list, tuple)):
             flist: t.List[_Filter] = []  # type: ignore[annotation-unchecked]
             for f in data:
