@@ -61,7 +61,7 @@ from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
 
 from ._adapters import (
-    ScenarioCustomFilter,
+    CustomScenarioFilter,
     _EntityType,
     _get_entity_property,
     _GuiCoreDatanodeAdapter,
@@ -306,7 +306,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             col_fn = cp[0] if (cp := col.split("(")) and len(cp) > 1 else None
             val = fd.get("value")
             action = fd.get("action", "")
-            customs = ScenarioCustomFilter._get_custom(col)
+            customs = CustomScenarioFilter._get_custom(col)
             if customs:
                 with self.gui._set_locals_context(customs[0] or None):
                     fn = self.gui._get_user_function(customs[1])
@@ -619,7 +619,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             col_fn = cp[0] if (cp := col.split("(")) and len(cp) > 1 else None
             val = fd.get("value")
             action = fd.get("action", "")
-            customs = ScenarioCustomFilter._get_custom(col)
+            customs = CustomScenarioFilter._get_custom(col)
             if customs:
                 with self.gui._set_locals_context(customs[0] or None):
                     fn = self.gui._get_user_function(customs[1])
