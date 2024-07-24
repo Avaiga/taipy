@@ -348,7 +348,7 @@ def _get_entity_property(col: str, *types: t.Type):
     return sort_key
 
 
-@dataclass()
+@dataclass
 class _Filter(_DoNotUpdate):
     label: str
     property_type: t.Optional[t.Type]
@@ -368,7 +368,7 @@ class _Filter(_DoNotUpdate):
         return "any"
 
 
-@dataclass()
+@dataclass
 class ScenarioFilter(_Filter):
     property_id: str
 
@@ -376,7 +376,7 @@ class ScenarioFilter(_Filter):
         return self.property_id
 
 
-@dataclass()
+@dataclass
 class ScenarioDatanodeFilter(_Filter):
     datanode_config_id: str
     property_id: str
@@ -388,7 +388,7 @@ class ScenarioDatanodeFilter(_Filter):
 _CUSTOM_PREFIX = "fn:"
 
 
-@dataclass()
+@dataclass
 class ScenarioCustomFilter(_Filter):
     filter_function: t.Callable[[Scenario], t.Any]
 
@@ -406,7 +406,7 @@ class ScenarioCustomFilter(_Filter):
         return col[len(_CUSTOM_PREFIX) :].split(":") if col.startswith(_CUSTOM_PREFIX) else None
 
 
-@dataclass()
+@dataclass
 class DatanodeFilter(_Filter):
     property_id: str
 
