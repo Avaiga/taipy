@@ -12,10 +12,19 @@ env:
   NODE_OPTIONS: --max-old-space-size=4096
 
 jobs:
+  reset-prebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reset prebuild branch to develop
+        uses: nicksnell/action-reset-repo@master
+        with:
+          base_branch: develop
+          reset_branch: prebuild
+
   prebuild:
+    needs: reset-prebuild
     timeout-minutes: 20
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
         with:
