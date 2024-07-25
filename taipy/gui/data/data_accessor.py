@@ -117,8 +117,8 @@ class _DataAccessors(object):
             raise TypeError(f"method {cls.__name__}.get_supported_classes returned an invalid value")
         # check existence
         inst: t.Optional[_DataAccessor] = None
-        for t in classes:
-            inst = self.__access_4_type.get(t)
+        for cl in classes:
+            inst = self.__access_4_type.get(cl)
             if inst:
                 break
         if inst is None:
