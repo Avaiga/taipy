@@ -27,7 +27,6 @@ from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.core._core import Core
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from taipy.core._repository.db._sql_connection import _SQLConnection
 from taipy.core._version._version import _Version
 from taipy.core._version._version_manager_factory import _VersionManagerFactory
 from taipy.core.config import (
@@ -402,18 +401,3 @@ def init_notifier():
 @pytest.fixture
 def sql_engine():
     return create_engine("sqlite:///:memory:")
-
-
-@pytest.fixture
-def init_sql_repo(tmp_sqlite, init_managers):
-    Config.configure_core(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
-
-    # Clean SQLite database
-    if _SQLConnection._connection:
-        _SQLConnection._connection.close()
-        _SQLConnection._connection = None
-    _SQLConnection.init_db()
-
-    init_managers()
-
-    return tmp_sqlite

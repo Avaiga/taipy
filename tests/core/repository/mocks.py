@@ -14,24 +14,10 @@ import pathlib
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
-from sqlalchemy import Column, String, Table
-from sqlalchemy.dialects import sqlite
-from sqlalchemy.orm import declarative_base, registry
-from sqlalchemy.schema import CreateTable
-
 from taipy.config.config import Config
 from taipy.core._repository._abstract_converter import _AbstractConverter
 from taipy.core._repository._filesystem_repository import _FileSystemRepository
-from taipy.core._repository._sql_repository import _SQLRepository
 from taipy.core._version._version_manager import _VersionManager
-
-
-class Base:
-    __allow_unmapped__ = True
-
-
-Base = declarative_base(cls=Base)  # type: ignore
-mapper_registry = registry()
 
 
 @dataclass
@@ -46,14 +32,7 @@ class MockObj:
 
 
 @dataclass
-class MockModel(Base):  # type: ignore
-    __table__ = Table(
-        "mock_model",
-        mapper_registry.metadata,
-        Column("id", String(200), primary_key=True),
-        Column("name", String(200)),
-        Column("version", String(200)),
-    )
+class MockModel:  # type: ignore
     id: str
     name: str
     version: str
@@ -93,9 +72,3 @@ class MockFSRepository(_FileSystemRepository):
     @property
     def _storage_folder(self) -> pathlib.Path:
         return pathlib.Path(Config.core.storage_folder)  # type: ignore
-
-
-class MockSQLRepository(_SQLRepository):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.db.execute(str(CreateTable(MockModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))

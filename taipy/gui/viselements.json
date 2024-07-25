@@ -627,7 +627,7 @@
                     {
                         "name": "decimator",
                         "type": "indexed(taipy.gui.data.Decimator)",
-                        "doc": "A decimator instance for the indicated trace that will reduce the size of the data being sent back and forth.<br>If defined as indexed, it will impact only the indicated trace; if not, it will apply only the first trace."
+                        "doc": "A decimator instance for the indicated trace that reduces the volume of the data being sent back and forth.<br>If defined as <i>indexed</i>, it impacts only the indicated trace; if not, it applies to the first trace only."
                     },
                     {
                         "name": "rebuild",
@@ -1224,7 +1224,7 @@
                     {
                         "name": "color_map",
                         "type": "dict",
-                        "doc": "TODO The color_map is used to display different colors for different ranges of the metric. The color_map's keys represent the starting point of each range, which is a number, while the values represent the corresponding color for that range. If the value associated with a key is set to None, it implies that the corresponding range will not be assigned any color."
+                        "doc": "TODO The color_map is used to display different colors for different ranges of the metric. The color_map's keys represent the starting point of each range, which is a number, while the values represent the corresponding color for that range. If the value associated with a key is set to None, it implies that the corresponding range is not assigned any color."
                     },
                     {
                         "name": "width",
@@ -1615,7 +1615,7 @@
                         "name": "class_name",
                         "default_property": true,
                         "type": "dynamic(str)",
-                        "doc": "A list of CSS class names, separated by white spaces, that will be associated with the generated HTML Element.<br/>These class names are added to the default <code>taipy-part</code>."
+                        "doc": "A list of CSS class names, separated by white spaces, that are associated with the generated HTML Element.<br/>These class names are added to the default <code>taipy-part</code> class name."
                     },
                     {
                         "name": "page",
@@ -1698,7 +1698,7 @@
                         "name": "close_label",
                         "type": "str",
                         "default_value": "\"Close\"",
-                        "doc": "The tooltip of the top-right close icon button. In the <tt>on_action</tt> callback, args will hold -1."
+                        "doc": "The tooltip of the top-right close icon button. In the <tt>on_action</tt> callback, <i>args</i> will be set to -1."
                     },
                     {
                         "name": "labels",
@@ -1965,7 +1965,7 @@
                     {
                         "name": "id",
                         "type": "str",
-                        "doc": "The identifier that will be assigned to the rendered HTML component."
+                        "doc": "The identifier that is assigned to the rendered HTML component."
                     },
                     {
                         "name": "properties",
@@ -1975,7 +1975,7 @@
                     {
                         "name": "class_name",
                         "type": "dynamic(str)",
-                        "doc": "The list of CSS class names that will be associated with the generated HTML Element.<br/>These class names will be added to the default <code>taipy-&lt;element_type&gt;</code>."
+                        "doc": "The list of CSS class names that are associated with the generated HTML Element.<br/>These class names are added to the default <code>taipy-&lt;element_type&gt;</code> class name."
                     },
                     {
                         "name": "hover_text",

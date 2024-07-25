@@ -15,11 +15,10 @@ from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ._submission_fs_repository import _SubmissionFSRepository
 from ._submission_manager import _SubmissionManager
-from ._submission_sql_repository import _SubmissionSQLRepository
 
 
 class _SubmissionManagerFactory(_ManagerFactory):
-    __REPOSITORY_MAP = {"default": _SubmissionFSRepository, "sql": _SubmissionSQLRepository}
+    __REPOSITORY_MAP = {"default": _SubmissionFSRepository}
 
     @classmethod
     def _build_manager(cls) -> Type[_SubmissionManager]:

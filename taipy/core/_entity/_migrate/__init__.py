@@ -11,4 +11,3 @@
 
 from ._migrate_fs import _migrate_fs_entities, _remove_backup_file_entities, _restore_migrate_file_entities
 from ._migrate_mongo import _migrate_mongo_entities, _remove_backup_mongo_entities, _restore_migrate_mongo_entities
-from ._migrate_sql import _migrate_sql_entities, _remove_backup_sql_entities, _restore_migrate_sql_entities

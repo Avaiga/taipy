@@ -56,3 +56,5 @@ gui/packaging/taipy-gui.gen.d.ts
 
 # GUI Build
 webapp
+
+!data

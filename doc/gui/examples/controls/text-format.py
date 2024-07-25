@@ -8,11 +8,20 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-from .._repository._sql_repository import _SQLRepository
-from ._cycle_converter import _CycleConverter
-from ._cycle_model import _CycleModel
+# -----------------------------------------------------------------------------------------
+# To execute this script, make sure that the taipy-gui package is installed in your
+# Python environment and run:
+#     python <script>
+# -----------------------------------------------------------------------------------------
+from taipy.gui import Gui
 
+pi = 3.14159265358979
 
-class _CycleSQLRepository(_SQLRepository):
-    def __init__(self) -> None:
-        super().__init__(model_type=_CycleModel, converter=_CycleConverter)
+page = """
+# Text - Formatting
+<|toggle|theme|>
+
+π≈<|{pi}|text|format=%.3f|>
+"""
+
+Gui(page).run()

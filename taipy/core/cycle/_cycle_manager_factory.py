@@ -15,18 +15,15 @@ from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ..cycle._cycle_manager import _CycleManager
 from ._cycle_fs_repository import _CycleFSRepository
-from ._cycle_sql_repository import _CycleSQLRepository
 
 
 class _CycleManagerFactory(_ManagerFactory):
-    __REPOSITORY_MAP = {"default": _CycleFSRepository, "sql": _CycleSQLRepository}
+    __REPOSITORY_MAP = {"default": _CycleFSRepository}
 
     @classmethod
     def _build_manager(cls) -> Type[_CycleManager]:
         if cls._using_enterprise():
-            cycle_manager = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".cycle._cycle_manager", "_CycleManager"
-            )  # type: ignore
+            cycle_manager = _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".cycle._cycle_manager", "_CycleManager")  # type: ignore
             build_repository = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + ".cycle._cycle_manager_factory", "_CycleManagerFactory"
             )._build_repository  # type: ignore
