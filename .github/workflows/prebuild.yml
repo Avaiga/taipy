@@ -51,7 +51,7 @@ jobs:
             taipy/gui_core/lib
           key: frontend-build-${{ runner.os }}-${{ steps.hash-frontend.outputs.HASH }}
 
-      - name: Setup node ${{ matrix.node-version }} on ${{ matrix.os }}
+      - name: Setup node
         if: steps.cache-fe-build.outputs.cache-hit != 'true'
         uses: actions/setup-node@v4
         with:
