@@ -127,8 +127,8 @@ class _DataAccessors(object):
             except Exception as e:
                 raise TypeError(f"Class {cls.__name__} cannot be instantiated") from e
             if inst:
-                for t in classes:
-                    self.__access_4_type[t] = inst  # type: ignore
+                for cl in classes:
+                    self.__access_4_type[cl] = inst  # type: ignore
 
     def __get_instance(self, value: _TaipyData) -> _DataAccessor:  # type: ignore
         value = value.get() if isinstance(value, _TaipyData) else value
