@@ -531,7 +531,7 @@ class _Builder:
                     + "}"
                 )
                 self.__update_vars.append(f"comparedatas={','.join(cmp_datas_hash)}")
-        col_types = self.__gui._accessors._get_col_types(data_hash, _TaipyData(data, data_hash))
+        col_types = self.__gui._get_accessor().get_col_types(data_hash, _TaipyData(data, data_hash))
         col_dict = _get_columns_dict(
             data, self.__attributes.get("columns", {}), col_types, date_format, self.__attributes.get("number_format")
         )
@@ -591,7 +591,7 @@ class _Builder:
         # read column definitions
         data = self.__attributes.get("data")
         data_hash = self.__hashes.get("data", "")
-        col_types = self.__gui._accessors._get_col_types(data_hash, _TaipyData(data, data_hash))
+        col_types = self.__gui._get_accessor().get_col_types(data_hash, _TaipyData(data, data_hash))
 
         config = _build_chart_config(self.__gui, self.__attributes, col_types)
 

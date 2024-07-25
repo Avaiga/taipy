@@ -17,9 +17,15 @@ from .._warnings import _warn
 from ..utils import _TaipyData
 from .data_format import _DataFormat
 
+if t.TYPE_CHECKING:
+    from ..gui import Gui
+
 
 class _DataAccessor(ABC):
     _WS_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+
+    def __init__(self, gui: "Gui") -> None:
+        self._gui = gui
 
     @staticmethod
     @abstractmethod
@@ -28,7 +34,7 @@ class _DataAccessor(ABC):
 
     @abstractmethod
     def get_data(
-        self, guiApp: t.Any, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
+        self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
     ) -> t.Dict[str, t.Any]:
         pass
 
@@ -37,23 +43,23 @@ class _DataAccessor(ABC):
         pass
 
     @abstractmethod
-    def _get_dataframe(self, value: t.Any) -> t.Union[t.List[t.Any], t.Any]:
+    def to_pandas(self, value: t.Any) -> t.Union[t.List[t.Any], t.Any]:
         pass
 
     @abstractmethod
-    def _on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
+    def on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
         pass
 
     @abstractmethod
-    def _on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
+    def on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
         pass
 
     @abstractmethod
-    def _on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
+    def on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
         pass
 
     @abstractmethod
-    def _to_csv(self, guiApp: t.Any, var_name: str, value: t.Any):
+    def to_csv(self, var_name: str, value: t.Any):
         pass
 
 
@@ -63,36 +69,35 @@ class _InvalidDataAccessor(_DataAccessor):
         return [type(None).__name__]
 
     def get_data(
-        self, guiApp: t.Any, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
+        self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
     ) -> t.Dict[str, t.Any]:
         return {}
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Dict[str, str]:
         return {}
 
-    def _get_dataframe(self, value: t.Any) -> t.Union[t.List[t.Any], t.Any]:
+    def to_pandas(self, value: t.Any) -> t.Union[t.List[t.Any], t.Any]:
         return None
 
-    def _on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
+    def on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
         return None
 
-    def _on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
+    def on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
         return None
 
-    def _on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
+    def on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
         return None
 
-    def _to_csv(self, guiApp: t.Any, var_name: str, value: t.Any):
+    def to_csv(self, var_name: str, value: t.Any):
         return None
 
 
 class _DataAccessors(object):
-    def __init__(self) -> None:
+    def __init__(self, gui: "Gui") -> None:
         self.__access_4_type: t.Dict[str, _DataAccessor] = {}
-
-        self.__invalid_data_accessor = _InvalidDataAccessor()
-
+        self.__invalid_data_accessor = _InvalidDataAccessor(gui)
         self.__data_format = _DataFormat.JSON
+        self.__gui = gui
 
         from .array_dict_data_accessor import _ArrayDictDataAccessor
         from .numpy_data_accessor import _NumpyDataAccessor
@@ -118,7 +123,7 @@ class _DataAccessors(object):
                 break
         if inst is None:
             try:
-                inst = cls()
+                inst = cls(self.__gui)
             except Exception as e:
                 raise TypeError(f"Class {cls.__name__} cannot be instantiated") from e
             if inst:
@@ -134,28 +139,29 @@ class _DataAccessors(object):
             return self.__invalid_data_accessor
         return access
 
-    def _get_data(
-        self, guiApp: t.Any, var_name: str, value: _TaipyData, payload: t.Dict[str, t.Any]
-    ) -> t.Dict[str, t.Any]:
-        return self.__get_instance(value).get_data(guiApp, var_name, value.get(), payload, self.__data_format)
+    def get_data(self, var_name: str, value: _TaipyData, payload: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
+        return self.__get_instance(value).get_data(var_name, value.get(), payload, self.__data_format)
 
-    def _get_col_types(self, var_name: str, value: _TaipyData) -> t.Dict[str, str]:
+    def get_col_types(self, var_name: str, value: _TaipyData) -> t.Dict[str, str]:
         return self.__get_instance(value).get_col_types(var_name, value.get())
 
-    def _set_data_format(self, data_format: _DataFormat):
+    def set_data_format(self, data_format: _DataFormat):
         self.__data_format = data_format
 
-    def _get_dataframe(self, value: t.Any):
-        return self.__get_instance(value)._get_dataframe(value)
+    def get_dataframe(self, value: t.Any):
+        return self.__get_instance(value).to_pandas(value)
 
-    def _on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
-        return self.__get_instance(value)._on_edit(value, payload)
+    def on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
+        return self.__get_instance(value).on_edit(value, payload)
 
-    def _on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
-        return self.__get_instance(value)._on_delete(value, payload)
+    def on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
+        return self.__get_instance(value).on_delete(value, payload)
 
-    def _on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
-        return self.__get_instance(value)._on_add(value, payload, new_row)
+    def on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
+        return self.__get_instance(value).on_add(value, payload, new_row)
 
-    def _to_csv(self, guiApp: t.Any, var_name: str, value: t.Any):
-        return self.__get_instance(value)._to_csv(guiApp, var_name, value.get())
+    def to_csv(self, var_name: str, value: t.Any):
+        return self.__get_instance(value).to_csv(var_name, value.get())
+
+    def to_pandas(self, value: t.Any):
+        return self.__get_instance(value).to_pandas(value.get())
