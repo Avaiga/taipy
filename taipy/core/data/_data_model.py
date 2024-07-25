@@ -12,39 +12,14 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import JSON, Boolean, Column, Enum, Float, String, Table, UniqueConstraint
-
 from taipy.config.common.scope import Scope
 
 from .._repository._base_taipy_model import _BaseModel
-from .._repository.db._sql_base_model import mapper_registry
 from .data_node_id import Edit
 
 
-@mapper_registry.mapped
 @dataclass
 class _DataNodeModel(_BaseModel):
-    __table__ = Table(
-        "data_node",
-        mapper_registry.metadata,
-        Column("id", String, primary_key=True),
-        Column("config_id", String),
-        Column("scope", Enum(Scope)),
-        Column("storage_type", String),
-        Column("owner_id", String),
-        Column("parent_ids", JSON),
-        Column("last_edit_date", String),
-        Column("edits", JSON),
-        Column("version", String),
-        Column("validity_days", Float),
-        Column("validity_seconds", Float),
-        Column("edit_in_progress", Boolean),
-        Column("editor_id", String),
-        Column("editor_expiration_date", String),
-        Column("data_node_properties", JSON),
-    )
-    __table_args__ = (UniqueConstraint("config_id", "owner_id", name="_config_owner_uc"),)
-
     id: str
     config_id: str
     scope: Scope

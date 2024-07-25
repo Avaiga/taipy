@@ -12,31 +12,13 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
-from sqlalchemy import JSON, Boolean, Column, Enum, String, Table
-
 from .._repository._base_taipy_model import _BaseModel
-from .._repository.db._sql_base_model import mapper_registry
 from .job_id import JobId
 from .status import Status
 
 
-@mapper_registry.mapped
 @dataclass
 class _JobModel(_BaseModel):
-    __table__ = Table(
-        "job",
-        mapper_registry.metadata,
-        Column("id", String, primary_key=True),
-        Column("task_id", String),
-        Column("status", Enum(Status)),
-        Column("force", Boolean),
-        Column("submit_id", String),
-        Column("submit_entity_id", String),
-        Column("creation_date", String),
-        Column("subscribers", JSON),
-        Column("stacktrace", JSON),
-        Column("version", String),
-    )
     id: JobId
     task_id: str
     status: Status

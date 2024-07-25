@@ -15,18 +15,15 @@ from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ._data_fs_repository import _DataFSRepository
 from ._data_manager import _DataManager
-from ._data_sql_repository import _DataSQLRepository
 
 
 class _DataManagerFactory(_ManagerFactory):
-    __REPOSITORY_MAP = {"default": _DataFSRepository, "sql": _DataSQLRepository}
+    __REPOSITORY_MAP = {"default": _DataFSRepository}
 
     @classmethod
     def _build_manager(cls) -> Type[_DataManager]:
         if cls._using_enterprise():
-            data_manager = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".data._data_manager", "_DataManager"
-            )  # type: ignore
+            data_manager = _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".data._data_manager", "_DataManager")  # type: ignore
             build_repository = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + ".data._data_manager_factory", "_DataManagerFactory"
             )._build_repository  # type: ignore
