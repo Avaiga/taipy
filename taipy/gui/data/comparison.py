@@ -27,12 +27,12 @@ def _compare_function(
             return None
         compare_fn = gui._get_user_function(compare_name) if compare_name else None
         if callable(compare_fn):
-            return gui._accessors._get_dataframe(
+            return gui._get_accessor().to_pandas(
                 gui._call_function_with_state(compare_fn, [name, [gui._get_real_var_name(n) for n in names]])
             )
         elif compare_fn is not None:
             _warn(f"{compare_name}(): compare function name is not valid.")
-        dfs = [gui._accessors._get_dataframe(_getscopeattr(gui, n)) for n in names]
+        dfs = [gui._get_accessor().to_pandas(_getscopeattr(gui, n)) for n in names]
         return value.compare(dfs[0], keep_shape=True)
     except Exception as e:
         if not gui._call_on_exception(compare_name or "Gui._compare_function", e):

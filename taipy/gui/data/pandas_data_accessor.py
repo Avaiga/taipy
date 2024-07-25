@@ -41,7 +41,17 @@ class _PandasDataAccessor(_DataAccessor):
 
     __AGGREGATE_FUNCTIONS: t.List[str] = ["count", "sum", "mean", "median", "min", "max", "std", "first", "last"]
 
-    def _get_dataframe(self, value: t.Any) -> t.Any:
+    def to_pandas(self, value: t.Union[pd.DataFrame, pd.Series]) -> t.Union[t.List[pd.DataFrame], pd.DataFrame]:
+        return self.__to_dataframe(value)
+
+    def __to_dataframe(self, value: t.Union[pd.DataFrame, pd.Series]) -> pd.DataFrame:
+        if isinstance(value, pd.Series):
+            return pd.DataFrame(value)
+        return t.cast(pd.DataFrame, value)
+
+    def _from_pandas(self, value: pd.DataFrame, data_type: t.Type):
+        if data_type is pd.Series:
+            return value.iloc[:, 0]
         return value
 
     @staticmethod
@@ -70,7 +80,6 @@ class _PandasDataAccessor(_DataAccessor):
 
     def __build_transferred_cols(
         self,
-        gui: Gui,
         payload_cols: t.Any,
         dataframe: pd.DataFrame,
         styles: t.Optional[t.Dict[str, str]] = None,
@@ -91,9 +100,9 @@ class _PandasDataAccessor(_DataAccessor):
                 is_copied = True
             for k, v in styles.items():
                 col_applied = False
-                func = gui._get_user_function(v)
+                func = self._gui._get_user_function(v)
                 if callable(func):
-                    col_applied = self.__apply_user_function(gui, func, k if k in cols else None, v, dataframe, "tps__")
+                    col_applied = self.__apply_user_function(func, k if k in cols else None, v, dataframe, "tps__")
                 if not col_applied:
                     dataframe[v] = v
                 cols.append(col_applied or v)
@@ -104,9 +113,9 @@ class _PandasDataAccessor(_DataAccessor):
                 is_copied = True
             for k, v in tooltips.items():
                 col_applied = False
-                func = gui._get_user_function(v)
+                func = self._gui._get_user_function(v)
                 if callable(func):
-                    col_applied = self.__apply_user_function(gui, func, k if k in cols else None, v, dataframe, "tpt__")
+                    col_applied = self.__apply_user_function(func, k if k in cols else None, v, dataframe, "tpt__")
                 cols.append(col_applied or v)
         # deal with dates
         datecols = col_types[col_types.astype(str).str.startswith("datetime")].index.tolist()  # type: ignore
@@ -146,7 +155,6 @@ class _PandasDataAccessor(_DataAccessor):
 
     def __apply_user_function(
         self,
-        gui: Gui,
         user_function: t.Callable,
         column_name: t.Optional[str],
         function_name: str,
@@ -158,7 +166,7 @@ class _PandasDataAccessor(_DataAccessor):
             data[new_col_name] = data.apply(
                 _PandasDataAccessor.__user_function,
                 axis=1,
-                args=(gui, column_name, user_function, function_name),
+                args=(self._gui, column_name, user_function, function_name),
             )
             return new_col_name
         except Exception as e:
@@ -210,22 +218,19 @@ class _PandasDataAccessor(_DataAccessor):
         return ret
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
-        if isinstance(value, pd.Series):
-            value = value.to_frame()
-        if isinstance(value, pd.DataFrame):  # type: ignore
-            return {str(k): v for k, v in value.dtypes.apply(lambda x: x.name.lower()).items()}
-        elif isinstance(value, list):
+        if isinstance(value, list):
             ret_dict: t.Dict[str, str] = {}
             for i, v in enumerate(value):
-                ret_dict.update({f"{i}/{k}": v for k, v in v.dtypes.apply(lambda x: x.name.lower()).items()})
+                ret_dict.update(
+                    {f"{i}/{k}": v for k, v in self.__to_dataframe(v).dtypes.apply(lambda x: x.name.lower()).items()}
+                )
             return ret_dict
-        return None
+        return {str(k): v for k, v in self.__to_dataframe(value).dtypes.apply(lambda x: x.name.lower()).items()}
 
     def __get_data(  # noqa: C901
         self,
-        gui: Gui,
         var_name: str,
-        value: t.Union[pd.DataFrame, pd.Series],
+        df: pd.DataFrame,
         payload: t.Dict[str, t.Any],
         data_format: _DataFormat,
         col_prefix: t.Optional[str] = "",
@@ -237,19 +242,17 @@ class _PandasDataAccessor(_DataAccessor):
         paged = not payload.get("alldata", False)
         is_copied = False
 
-        if isinstance(value, pd.Series):
-            value = value.to_frame()
-        orig_df = value
+        orig_df = df
         # add index if not chart
         if paged:
-            if _PandasDataAccessor.__INDEX_COL not in value.columns:
-                value = value.copy()
+            if _PandasDataAccessor.__INDEX_COL not in df.columns:
+                df = df.copy()
                 is_copied = True
-                value[_PandasDataAccessor.__INDEX_COL] = value.index
+                df[_PandasDataAccessor.__INDEX_COL] = df.index
             if columns and _PandasDataAccessor.__INDEX_COL not in columns:
                 columns.append(_PandasDataAccessor.__INDEX_COL)
 
-        fullrowcount = len(value)
+        fullrowcount = len(df)
         # filtering
         filters = payload.get("filters")
         if isinstance(filters, list) and len(filters) > 0:
@@ -260,7 +263,7 @@ class _PandasDataAccessor(_DataAccessor):
                 val = fd.get("value")
                 action = fd.get("action")
                 if isinstance(val, str):
-                    if self.__is_date_column(t.cast(pd.DataFrame, value), col):
+                    if self.__is_date_column(t.cast(pd.DataFrame, df), col):
                         val = datetime.fromisoformat(val[:-1])
                     vars.append(val)
                 val = f"@vars[{len(vars) - 1}]" if isinstance(val, (str, datetime)) else val
@@ -269,10 +272,10 @@ class _PandasDataAccessor(_DataAccessor):
                     query += " and "
                 query += f"`{col}`{right}"
             try:
-                value = value.query(query)
+                df = df.query(query)
                 is_copied = True
             except Exception as e:
-                _warn(f"Dataframe filtering: invalid query '{query}' on {value.head()}", e)
+                _warn(f"Dataframe filtering: invalid query '{query}' on {df.head()}", e)
 
         dictret: t.Optional[t.Dict[str, t.Any]]
         if paged:
@@ -280,7 +283,7 @@ class _PandasDataAccessor(_DataAccessor):
             applies = payload.get("applies")
             if isinstance(aggregates, list) and len(aggregates) and isinstance(applies, dict):
                 applies_with_fn = {
-                    k: v if v in _PandasDataAccessor.__AGGREGATE_FUNCTIONS else gui._get_user_function(v)
+                    k: v if v in _PandasDataAccessor.__AGGREGATE_FUNCTIONS else self._gui._get_user_function(v)
                     for k, v in applies.items()
                 }
 
@@ -288,14 +291,14 @@ class _PandasDataAccessor(_DataAccessor):
                     if col not in applies_with_fn.keys():
                         applies_with_fn[col] = "first"
                 try:
-                    value = t.cast(pd.DataFrame, value).groupby(aggregates).agg(applies_with_fn)
+                    df = t.cast(pd.DataFrame, df).groupby(aggregates).agg(applies_with_fn)
                 except Exception:
                     _warn(f"Cannot aggregate {var_name} with groupby {aggregates} and aggregates {applies}.")
             inf = payload.get("infinite")
             if inf is not None:
                 ret_payload["infinite"] = inf
             # real number of rows is needed to calculate the number of pages
-            rowcount = len(value)
+            rowcount = len(df)
             # here we'll deal with start and end values from payload if present
             if isinstance(payload["start"], int):
                 start = int(payload["start"])
@@ -328,9 +331,9 @@ class _PandasDataAccessor(_DataAccessor):
             order_by = payload.get("orderby")
             if isinstance(order_by, str) and len(order_by):
                 try:
-                    if value.columns.dtype.name == "int64":
+                    if df.columns.dtype.name == "int64":
                         order_by = int(order_by)
-                    new_indexes = t.cast(pd.DataFrame, value)[order_by].values.argsort(axis=0)
+                    new_indexes = t.cast(pd.DataFrame, df)[order_by].values.argsort(axis=0)
                     if payload.get("sort") == "desc":
                         # reverse order
                         new_indexes = new_indexes[::-1]
@@ -340,10 +343,9 @@ class _PandasDataAccessor(_DataAccessor):
                     new_indexes = slice(start, end + 1)  # type: ignore
             else:
                 new_indexes = slice(start, end + 1)  # type: ignore
-            value = self.__build_transferred_cols(
-                gui,
+            df = self.__build_transferred_cols(
                 columns,
-                t.cast(pd.DataFrame, value),
+                t.cast(pd.DataFrame, df),
                 styles=payload.get("styles"),
                 tooltips=payload.get("tooltips"),
                 is_copied=is_copied,
@@ -351,7 +353,7 @@ class _PandasDataAccessor(_DataAccessor):
                 handle_nan=payload.get("handlenan", False),
             )
             dictret = self.__format_data(
-                value,
+                df,
                 data_format,
                 "records",
                 start,
@@ -362,7 +364,7 @@ class _PandasDataAccessor(_DataAccessor):
             compare = payload.get("compare")
             if isinstance(compare, str):
                 comp_df = _compare_function(
-                    gui, compare, var_name, t.cast(pd.DataFrame, orig_df), payload.get("compare_datas", "")
+                    self._gui, compare, var_name, t.cast(pd.DataFrame, orig_df), payload.get("compare_datas", "")
                 )
                 if isinstance(comp_df, pd.DataFrame) and not comp_df.empty:
                     try:
@@ -371,7 +373,7 @@ class _PandasDataAccessor(_DataAccessor):
                             comp_df = t.cast(pd.DataFrame, comp_df.get(cols))
                             comp_df.columns = t.cast(pd.Index, [t.cast(tuple, c)[0] for c in cols])
                         comp_df.dropna(axis=1, how="all", inplace=True)
-                        comp_df = self.__build_transferred_cols(gui, columns, comp_df, new_indexes=new_indexes)
+                        comp_df = self.__build_transferred_cols(columns, comp_df, new_indexes=new_indexes)
                         dictret["comp"] = self.__format_data(comp_df, data_format, "records").get("data")
                     except Exception as e:
                         _warn("Pandas accessor compare raised an exception", e)
@@ -384,7 +386,9 @@ class _PandasDataAccessor(_DataAccessor):
             for decimator_pl in decimators:
                 decimator = decimator_pl.get("decimator")
                 decimator_instance = (
-                    gui._get_user_instance(decimator, PropertyType.decimator.value) if decimator is not None else None
+                    self._gui._get_user_instance(decimator, PropertyType.decimator.value)
+                    if decimator is not None
+                    else None
                 )
                 if isinstance(decimator_instance, PropertyType.decimator.value):
                     x_column, y_column, z_column = (
@@ -400,14 +404,14 @@ class _PandasDataAccessor(_DataAccessor):
                         y0 = relayoutData.get("yaxis.range[0]")
                         y1 = relayoutData.get("yaxis.range[1]")
 
-                        value, is_copied = _df_relayout(
-                            t.cast(pd.DataFrame, value), x_column, y_column, chart_mode, x0, x1, y0, y1, is_copied
+                        df, is_copied = _df_relayout(
+                            t.cast(pd.DataFrame, df), x_column, y_column, chart_mode, x0, x1, y0, y1, is_copied
                         )
 
-                    if nb_rows_max and decimator_instance._is_applicable(value, nb_rows_max, chart_mode):
+                    if nb_rows_max and decimator_instance._is_applicable(df, nb_rows_max, chart_mode):
                         try:
-                            value, is_copied = _df_data_filter(
-                                t.cast(pd.DataFrame, value),
+                            df, is_copied = _df_data_filter(
+                                t.cast(pd.DataFrame, df),
                                 x_column,
                                 y_column,
                                 z_column,
@@ -415,21 +419,21 @@ class _PandasDataAccessor(_DataAccessor):
                                 payload=decimator_payload,
                                 is_copied=is_copied,
                             )
-                            gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(value))
+                            self._gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(df))
                         except Exception as e:
                             _warn(f"Limit rows error with {decimator} for Dataframe", e)
-            value = self.__build_transferred_cols(gui, columns, t.cast(pd.DataFrame, value), is_copied=is_copied)
+            df = self.__build_transferred_cols(columns, t.cast(pd.DataFrame, df), is_copied=is_copied)
             if data_format is _DataFormat.CSV:
-                ret_payload["df"] = value
+                ret_payload["df"] = df
                 dictret = None
             else:
-                dictret = self.__format_data(value, data_format, "list", data_extraction=True)
+                dictret = self.__format_data(df, data_format, "list", data_extraction=True)
 
         ret_payload["value"] = dictret
         return ret_payload
 
     def get_data(
-        self, gui: Gui, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
+        self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
     ) -> t.Dict[str, t.Any]:
         if isinstance(value, list):
             # If is_chart data
@@ -442,7 +446,7 @@ class _PandasDataAccessor(_DataAccessor):
                 data = []
                 for i, v in enumerate(value):
                     ret = (
-                        self.__get_data(gui, var_name, v, payload, data_format, f"{i}/")
+                        self.__get_data(var_name, self.__to_dataframe(v), payload, data_format, f"{i}/")
                         if isinstance(v, _PandasDataAccessor.__types)
                         else {}
                     )
@@ -453,18 +457,25 @@ class _PandasDataAccessor(_DataAccessor):
                 return ret_payload
             else:
                 value = value[0]
-        if isinstance(value, _PandasDataAccessor.__types):  # type: ignore
-            return self.__get_data(gui, var_name, value, payload, data_format)
-        return {}
+        return self.__get_data(var_name, self.__to_dataframe(value), payload, data_format)
 
-    def _on_edit(self, df: pd.DataFrame, payload: t.Dict[str, t.Any]):
+    def on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
+        df = self.to_pandas(value)
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError(f"Cannot edit {type(value)}.")
         df.at[payload["index"], payload["col"]] = payload["value"]
-        return df
+        return self._from_pandas(df, type(value))
 
-    def _on_delete(self, df: pd.DataFrame, payload: t.Dict[str, t.Any]):
-        return df.drop(payload["index"])
+    def on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
+        df = self.to_pandas(value)
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError(f"Cannot delete a row from {type(value)}.")
+        return self._from_pandas(df.drop(payload["index"]), type(value))
 
-    def _on_add(self, df: pd.DataFrame, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
+    def on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
+        df = self.to_pandas(value)
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError(f"Cannot add a row to {type(value)}.")
         # Save the insertion index
         index = payload["index"]
         # Create the new row (Column value types must match the original DataFrame's)
@@ -477,23 +488,25 @@ class _PandasDataAccessor(_DataAccessor):
                 # Split the DataFrame
                 rows_before = df.loc[: index - 1]
                 rows_after = df.loc[index + 1 :]
-                return pd.concat([rows_before, new_df, rows_after], ignore_index=True)
+                return self._from_pandas(pd.concat([rows_before, new_df, rows_after], ignore_index=True), type(value))
             else:
                 # Insert as the new first row
                 df.loc[-1] = new_row  # Insert the new row
                 df.index = df.index + 1  # Shift index
-                return df.sort_index()
-        return df
+                return self._from_pandas(df.sort_index(), type(value))
+        return value
 
-    def _to_csv(self, gui: Gui, var_name: str, value: pd.DataFrame):
-        if isinstance(value, _PandasDataAccessor.__types):  # type: ignore
-            dict_ret = self.__get_data(gui, var_name, value, {"alldata": True}, _DataFormat.CSV)
-            if isinstance(dict_ret, dict):
-                df = dict_ret.get("df")
-                if isinstance(df, pd.DataFrame):
-                    fd, temp_path = mkstemp(".csv", var_name, text=True)
-                    with os.fdopen(fd, "wt", newline="") as csv_file:
-                        df.to_csv(csv_file, index=False)
+    def to_csv(self, var_name: str, value: t.Any):
+        df = self.to_pandas(value)
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError(f"Cannot export {type(value)} to csv.")
+        dict_ret = self.__get_data(var_name, df, {"alldata": True}, _DataFormat.CSV)
+        if isinstance(dict_ret, dict):
+            dfr = dict_ret.get("df")
+            if isinstance(dfr, pd.DataFrame):
+                fd, temp_path = mkstemp(".csv", var_name, text=True)
+                with os.fdopen(fd, "wt", newline="") as csv_file:
+                    dfr.to_csv(csv_file, index=False)
 
-                    return temp_path
+                return temp_path
         return None

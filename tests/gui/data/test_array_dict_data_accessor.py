@@ -20,8 +20,8 @@ an_array = [1, 2, 3]
 
 
 def test_simple_data(gui: Gui, helpers):
-    accessor = _ArrayDictDataAccessor()
-    ret_data = accessor.get_data(gui, "x", an_array, {"start": 0, "end": -1}, _DataFormat.JSON)
+    accessor = _ArrayDictDataAccessor(gui)
+    ret_data = accessor.get_data("x", an_array, {"start": 0, "end": -1}, _DataFormat.JSON)
     assert ret_data
     value = ret_data["value"]
     assert value
@@ -32,8 +32,8 @@ def test_simple_data(gui: Gui, helpers):
 
 def test_simple_data_with_arrow(gui: Gui, helpers):
     if util.find_spec("pyarrow"):
-        accessor = _ArrayDictDataAccessor()
-        ret_data = accessor.get_data(gui, "x", an_array, {"start": 0, "end": -1}, _DataFormat.APACHE_ARROW)
+        accessor = _ArrayDictDataAccessor(gui)
+        ret_data = accessor.get_data("x", an_array, {"start": 0, "end": -1}, _DataFormat.APACHE_ARROW)
         assert ret_data
         value = ret_data["value"]
         assert value
@@ -43,29 +43,29 @@ def test_simple_data_with_arrow(gui: Gui, helpers):
 
 
 def test_slice(gui: Gui, helpers):
-    accessor = _ArrayDictDataAccessor()
-    value = accessor.get_data(gui, "x", an_array, {"start": 0, "end": 1}, _DataFormat.JSON)["value"]
+    accessor = _ArrayDictDataAccessor(gui)
+    value = accessor.get_data("x", an_array, {"start": 0, "end": 1}, _DataFormat.JSON)["value"]
     assert value["rowcount"] == 3
     data = value["data"]
     assert len(data) == 2
-    value = accessor.get_data(gui, "x", an_array, {"start": "0", "end": "1"}, _DataFormat.JSON)["value"]
+    value = accessor.get_data("x", an_array, {"start": "0", "end": "1"}, _DataFormat.JSON)["value"]
     data = value["data"]
     assert len(data) == 2
 
 
 def test_sort(gui: Gui, helpers):
-    accessor = _ArrayDictDataAccessor()
+    accessor = _ArrayDictDataAccessor(gui)
     a_dict = {"name": ["A", "B", "C"], "value": [3, 2, 1]}
     query = {"columns": ["name", "value"], "start": 0, "end": -1, "orderby": "name", "sort": "desc"}
-    data = accessor.get_data(gui, "x", a_dict, query, _DataFormat.JSON)["value"]["data"]
+    data = accessor.get_data("x", a_dict, query, _DataFormat.JSON)["value"]["data"]
     assert data[0]["name"] == "C"
 
 
 def test_aggregate(gui: Gui, helpers, small_dataframe):
-    accessor = _ArrayDictDataAccessor()
+    accessor = _ArrayDictDataAccessor(gui)
     a_dict = {"name": ["A", "B", "C", "A"], "value": [3, 2, 1, 2]}
     query = {"columns": ["name", "value"], "start": 0, "end": -1, "aggregates": ["name"], "applies": {"value": "sum"}}
-    value = accessor.get_data(gui, "x", a_dict, query, _DataFormat.JSON)["value"]
+    value = accessor.get_data("x", a_dict, query, _DataFormat.JSON)["value"]
     assert value["rowcount"] == 3
     data = value["data"]
     agregValue = next(v.get("value") for v in data if v.get("name") == "A")
@@ -73,9 +73,9 @@ def test_aggregate(gui: Gui, helpers, small_dataframe):
 
 
 def test_array_of_array(gui: Gui, helpers, small_dataframe):
-    accessor = _ArrayDictDataAccessor()
+    accessor = _ArrayDictDataAccessor(gui)
     an_array = [[1, 2, 3], [2, 4, 6]]
-    ret_data = accessor.get_data(gui, "x", an_array, {"start": 0, "end": -1}, _DataFormat.JSON)
+    ret_data = accessor.get_data("x", an_array, {"start": 0, "end": -1}, _DataFormat.JSON)
     assert ret_data
     value = ret_data["value"]
     assert value
@@ -86,9 +86,9 @@ def test_array_of_array(gui: Gui, helpers, small_dataframe):
 
 
 def test_empty_array(gui: Gui, helpers, small_dataframe):
-    accessor = _ArrayDictDataAccessor()
+    accessor = _ArrayDictDataAccessor(gui)
     an_array: list[str] = []
-    ret_data = accessor.get_data(gui, "x", an_array, {"start": 0, "end": -1}, _DataFormat.JSON)
+    ret_data = accessor.get_data("x", an_array, {"start": 0, "end": -1}, _DataFormat.JSON)
     assert ret_data
     value = ret_data["value"]
     assert value
@@ -98,9 +98,9 @@ def test_empty_array(gui: Gui, helpers, small_dataframe):
 
 
 def test_array_of_diff_array(gui: Gui, helpers, small_dataframe):
-    accessor = _ArrayDictDataAccessor()
+    accessor = _ArrayDictDataAccessor(gui)
     an_array = [[1, 2, 3], [2, 4]]
-    ret_data = accessor.get_data(gui, "x", an_array, {"start": 0, "end": -1, "alldata": True}, _DataFormat.JSON)
+    ret_data = accessor.get_data("x", an_array, {"start": 0, "end": -1, "alldata": True}, _DataFormat.JSON)
     assert ret_data
     value = ret_data["value"]
     assert value
@@ -112,7 +112,7 @@ def test_array_of_diff_array(gui: Gui, helpers, small_dataframe):
 
 
 def test_array_of_dicts(gui: Gui, helpers, small_dataframe):
-    accessor = _ArrayDictDataAccessor()
+    accessor = _ArrayDictDataAccessor(gui)
     an_array_of_dicts = [
         {
             "temperatures": [
@@ -126,9 +126,7 @@ def test_array_of_dicts(gui: Gui, helpers, small_dataframe):
         },
         {"seasons": ["Winter", "Summer", "Spring", "Autumn"]},
     ]
-    ret_data = accessor.get_data(
-        gui, "x", an_array_of_dicts, {"start": 0, "end": -1, "alldata": True}, _DataFormat.JSON
-    )
+    ret_data = accessor.get_data("x", an_array_of_dicts, {"start": 0, "end": -1, "alldata": True}, _DataFormat.JSON)
     assert ret_data
     value = ret_data["value"]
     assert value
@@ -140,7 +138,7 @@ def test_array_of_dicts(gui: Gui, helpers, small_dataframe):
 
 
 def test_array_of_Mapdicts(gui: Gui, helpers, small_dataframe):
-    accessor = _ArrayDictDataAccessor()
+    accessor = _ArrayDictDataAccessor(gui)
     dict1 = _MapDict(
         {
             "temperatures": [
@@ -154,7 +152,7 @@ def test_array_of_Mapdicts(gui: Gui, helpers, small_dataframe):
         }
     )
     dict2 = _MapDict({"seasons": ["Winter", "Summer", "Spring", "Autumn"]})
-    ret_data = accessor.get_data(gui, "x", [dict1, dict2], {"start": 0, "end": -1, "alldata": True}, _DataFormat.JSON)
+    ret_data = accessor.get_data("x", [dict1, dict2], {"start": 0, "end": -1, "alldata": True}, _DataFormat.JSON)
     assert ret_data
     value = ret_data["value"]
     assert value

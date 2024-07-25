@@ -62,7 +62,7 @@ from .builder import _ElementApiGenerator
 from .config import Config, ConfigParameter, _Config
 from .custom import Page as CustomPage
 from .data.content_accessor import _ContentAccessor
-from .data.data_accessor import _DataAccessor, _DataAccessors
+from .data.data_accessor import _DataAccessors
 from .data.data_format import _DataFormat
 from .data.data_scope import _DataScopes
 from .extension.library import Element, ElementLibrary
@@ -312,7 +312,7 @@ class Gui:
 
         self._config = _Config()
         self.__content_accessor = None
-        self._accessors = _DataAccessors()
+        self.__accessors: t.Optional[_DataAccessors] = None
         self.__state: t.Optional[State] = None
         self.__bindings = _Bindings(self)
         self.__locals_context = _LocalsContext()
@@ -1099,7 +1099,7 @@ class Gui:
                                 e,
                             )
             if not isinstance(ret_payload, dict):
-                ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
+                ret_payload = self._get_accessor().get_data(var_name, newvalue, payload)
             self.__send_ws_update_with_dict({var_name: ret_payload})
 
     def __request_var_update(self, payload: t.Any):
@@ -1408,8 +1408,7 @@ class Gui:
     def __download_csv(self, state: State, var_name: str, payload: dict):
         holder_name = t.cast(str, payload.get("var_name"))
         try:
-            csv_path = self._accessors._to_csv(
-                self,
+            csv_path = self._get_accessor().to_csv(
                 holder_name,
                 _getscopeattr(self, holder_name, None),
             )
@@ -1661,7 +1660,7 @@ class Gui:
         TODO: Default implementation of on_edit for tables
         """
         try:
-            setattr(state, var_name, self._accessors._on_edit(getattr(state, var_name), payload))
+            setattr(state, var_name, self._get_accessor().on_edit(getattr(state, var_name), payload))
         except Exception as e:
             _warn("TODO: Table.on_edit", e)
 
@@ -1670,7 +1669,7 @@ class Gui:
         TODO: Default implementation of on_delete for tables
         """
         try:
-            setattr(state, var_name, self._accessors._on_delete(getattr(state, var_name), payload))
+            setattr(state, var_name, self._get_accessor().on_delete(getattr(state, var_name), payload))
         except Exception as e:
             _warn("TODO: Table.on_delete", e)
 
@@ -1681,7 +1680,7 @@ class Gui:
         TODO: Default implementation of on_add for tables
         """
         try:
-            setattr(state, var_name, self._accessors._on_add(getattr(state, var_name), payload, new_row))
+            setattr(state, var_name, self._get_accessor().on_add(getattr(state, var_name), payload, new_row))
         except Exception as e:
             _warn("TODO: Table.on_add", e)
 
@@ -1698,7 +1697,7 @@ class Gui:
                     col_dict = _get_columns_dict(
                         data,
                         attributes.get("columns", {}),
-                        self._accessors._get_col_types(data_hash, _TaipyData(data, data_hash)),
+                        self._get_accessor().get_col_types(data_hash, _TaipyData(data, data_hash)),
                         attributes.get("date_format"),
                         attributes.get("number_format"),
                     )
@@ -1721,7 +1720,7 @@ class Gui:
                     config = _build_chart_config(
                         self,
                         attributes,
-                        self._accessors._get_col_types(data_hash, _TaipyData(kwargs.get(data_hash), data_hash)),
+                        self._get_accessor().get_col_types(data_hash, _TaipyData(kwargs.get(data_hash), data_hash)),
                     )
 
                     return json.dumps(config, cls=_TaipyJsonEncoder)
@@ -2348,9 +2347,6 @@ class Gui:
             }
         )
 
-    def _register_data_accessor(self, data_accessor_class: t.Type[_DataAccessor]) -> None:
-        self._accessors._register(data_accessor_class)
-
     def get_flask_app(self) -> Flask:
         """Get the internal Flask application.
 
@@ -2560,6 +2556,11 @@ class Gui:
         for bp in self._flask_blueprint:
             self._server.get_flask().register_blueprint(bp)
 
+    def _get_accessor(self):
+        if self.__accessors is None:
+            self.__accessors = _DataAccessors(self)
+        return self.__accessors
+
     def run(
         self,
         run_server: bool = True,
@@ -2699,7 +2700,7 @@ class Gui:
         self.__register_blueprint()
 
         # Register data accessor communication data format (JSON, Apache Arrow)
-        self._accessors._set_data_format(_DataFormat.APACHE_ARROW if app_config["use_arrow"] else _DataFormat.JSON)
+        self._get_accessor().set_data_format(_DataFormat.APACHE_ARROW if app_config["use_arrow"] else _DataFormat.JSON)
 
         # Use multi user or not
         self._bindings()._set_single_client(bool(app_config["single_client"]))
