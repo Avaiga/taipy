@@ -23,8 +23,6 @@ from time import sleep
 
 from taipy.gui import Gui
 
-current_time = datetime.now()
-
 
 # The function that executes in its own thread.
 # Update the current time every second.
@@ -34,15 +32,18 @@ def update_time(gui):
         sleep(1)
 
 
-page = """
+if __name__ == "__main__":
+    current_time = datetime.now()
+
+    page = """
 Current time is: <|{current_time}|format=HH:mm:ss|>
-"""
+    """
 
-gui = Gui(page)
+    gui = Gui(page)
 
-# Run thread that regularly updates the current time
-thread = Thread(target=update_time, args=[gui], name="clock")
-thread.daemon = True
-thread.start()
+    # Run thread that regularly updates the current time
+    thread = Thread(target=update_time, args=[gui], name="clock")
+    thread.daemon = True
+    thread.start()
 
-gui.run()
+    gui.run()

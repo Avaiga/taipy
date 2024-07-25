@@ -116,10 +116,11 @@ class DataNodeResource(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    response = requests.get(
-                    "http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d")
-                    print(response)
-                    print(response.json())
+                response = requests.get(
+                    "http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d"
+                )
+                print(response)
+                print(response.json())
                 ```
                 `DATANODE_hist_cfg_75750ed8-4e09-4e00-958d-e352ee426cc9` is the value of the *datanode_id* parameter. It
                 represents the identifier of the data node we want to retrieve.
@@ -210,10 +211,11 @@ class DataNodeResource(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    response = requests.delete(
-                    "http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d")
-                    print(response)
-                    print(response.json())
+                response = requests.delete(
+                    "http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d"
+                )
+                print(response)
+                print(response.json())
                 ```
                 `DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d` is the value of the
                 *datanode_id* parameter. It represents the identifier of the Cycle we want to delete.
@@ -324,9 +326,9 @@ class DataNodeList(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    response = requests.get("http://localhost:5000/api/v1/datanodes")
-                    print(response)
-                    print(response.json())
+                response = requests.get("http://localhost:5000/api/v1/datanodes")
+                print(response)
+                print(response.json())
                 ```
 
                 In case of success here is an output example:
@@ -411,9 +413,9 @@ class DataNodeList(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    response = requests.post("http://localhost:5000/api/v1/datanodes?config_id=historical_data_set")
-                    print(response)
-                    print(response.json())
+                response = requests.post("http://localhost:5000/api/v1/datanodes?config_id=historical_data_set")
+                print(response)
+                print(response.json())
                 ```
                 In this example the *config_id* value ("historical_data_set") is given as parameter directly in the
                 url. A corresponding `DataNodeConfig^` must exist and must have been configured before.
@@ -527,10 +529,10 @@ class DataNodeReader(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    response = requests.get(
-                    "http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d/read")
-                    print(response)
-                    print(response.json())
+                response = requests.get(
+                "http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d/read")
+                print(response)
+                print(response.json())
                 ```
                 `DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d` is the *datanode_id*
                 parameter. It represents the identifier of the data node to read.

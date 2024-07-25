@@ -76,9 +76,9 @@ class CycleResource(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    response = requests.get("http://localhost:5000/api/v1/cycles/CYCLE_223894_e019-b50b-4b9f-ac09-527a")
-                    print(response)
-                    print(response.json())
+                response = requests.get("http://localhost:5000/api/v1/cycles/CYCLE_223894_e019-b50b-4b9f-ac09-527a")
+                print(response)
+                print(response.json())
                 ```
                 `CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a` is the value of the  *cycle_id* parameter. It
                 represents the identifier of the Cycle we want to retrieve.
@@ -258,9 +258,9 @@ class CycleList(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    response = requests.get("http://localhost:5000/api/v1/cycles")
-                    print(response)
-                    print(response.json())
+                response = requests.get("http://localhost:5000/api/v1/cycles")
+                print(response)
+                print(response.json())
                 ```
 
                 In case of success here is an output example:
@@ -333,16 +333,16 @@ class CycleList(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    cycle_schema = {
-                        "frequency": "DAILY",
-                        "properties": {},
-                        "creation_date": "2020-01-01T00:00:00",
-                        "start_date": "2020-01-01T00:00:00",
-                        "end_date": "2020-01-01T00:00:00"
-                    }
-                    response = requests.post("http://localhost:5000/api/v1/cycles", json=cycle_schema)
-                    print(response)
-                    print(response.json())
+                cycle_schema = {
+                    "frequency": "DAILY",
+                    "properties": {},
+                    "creation_date": "2020-01-01T00:00:00",
+                    "start_date": "2020-01-01T00:00:00",
+                    "end_date": "2020-01-01T00:00:00"
+                }
+                response = requests.post("http://localhost:5000/api/v1/cycles", json=cycle_schema)
+                print(response)
+                print(response.json())
                 ```
                 A `CycleSchema^` is provided as a dictionary to specify the various attributes of the `Cycle^` to
                 create.

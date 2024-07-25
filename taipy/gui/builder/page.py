@@ -24,17 +24,18 @@ class Page(_Renderer):
 
     This class is typically be used as a Python Context Manager to add the elements.<br/>
     Here is how you can create a single-page application, creating the elements with code:
-    ```py
+    ```python
     from taipy.gui import Gui
     from taipy.gui.builder import Page, button
 
     def do_something(state):
         pass
 
-    with Page() as page:
-        button(label="Press me", on_action=do_something)
+    if __name__ == "__main__":
+        with Page() as page:
+            button(label="Press me", on_action=do_something)
 
-    Gui(page).run()
+        Gui(page).run()
     ```
     """
 

@@ -15,12 +15,12 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-speed = 60
-variation = 15
+if __name__ == "__main__":
+    speed = 60
+    variation = 15
 
-page = """
+    page = """
 <|{speed}|metric|format=%d km/h|delta={variation}|delta_format=%d %%|>
-"""
+    """
 
-
-Gui(page).run()
+    Gui(page).run()
