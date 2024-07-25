@@ -29,7 +29,7 @@ class _DataAccessor(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_supported_classes() -> t.List[str]:
+    def get_supported_classes() -> t.List[t.Type]:
         pass
 
     @abstractmethod
@@ -65,8 +65,8 @@ class _DataAccessor(ABC):
 
 class _InvalidDataAccessor(_DataAccessor):
     @staticmethod
-    def get_supported_classes() -> t.List[str]:
-        return [type(None).__name__]
+    def get_supported_classes() -> t.List[t.Type]:
+        return []
 
     def get_data(
         self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
@@ -94,7 +94,7 @@ class _InvalidDataAccessor(_DataAccessor):
 
 class _DataAccessors(object):
     def __init__(self, gui: "Gui") -> None:
-        self.__access_4_type: t.Dict[str, _DataAccessor] = {}
+        self.__access_4_type: t.Dict[t.Type, _DataAccessor] = {}
         self.__invalid_data_accessor = _InvalidDataAccessor(gui)
         self.__data_format = _DataFormat.JSON
         self.__gui = gui
@@ -112,13 +112,13 @@ class _DataAccessors(object):
             raise AttributeError("The argument of 'DataAccessors.register' should be a class")
         if not issubclass(cls, _DataAccessor):
             raise TypeError(f"Class {cls.__name__} is not a subclass of DataAccessor")
-        names = cls.get_supported_classes()
-        if not names:
+        classes = cls.get_supported_classes()
+        if not classes:
             raise TypeError(f"method {cls.__name__}.get_supported_classes returned an invalid value")
         # check existence
         inst: t.Optional[_DataAccessor] = None
-        for name in names:
-            inst = self.__access_4_type.get(name)
+        for t in classes:
+            inst = self.__access_4_type.get(t)
             if inst:
                 break
         if inst is None:
@@ -127,15 +127,15 @@ class _DataAccessors(object):
             except Exception as e:
                 raise TypeError(f"Class {cls.__name__} cannot be instantiated") from e
             if inst:
-                for name in names:
-                    self.__access_4_type[name] = inst  # type: ignore
+                for t in classes:
+                    self.__access_4_type[t] = inst  # type: ignore
 
     def __get_instance(self, value: _TaipyData) -> _DataAccessor:  # type: ignore
         value = value.get() if isinstance(value, _TaipyData) else value
-        access = self.__access_4_type.get(type(value).__name__)
+        access = self.__access_4_type.get(type(value))
         if access is None:
             if value is not None:
-                _warn(f"Can't find Data Accessor for type {type(value).__name__}.")
+                _warn(f"Can't find Data Accessor for type {str(type(value))}.")
             return self.__invalid_data_accessor
         return access
 

@@ -55,8 +55,8 @@ class _PandasDataAccessor(_DataAccessor):
         return value
 
     @staticmethod
-    def get_supported_classes() -> t.List[str]:
-        return [t.__name__ for t in _PandasDataAccessor.__types]  # type: ignore
+    def get_supported_classes() -> t.List[t.Type]:
+        return  list(_PandasDataAccessor.__types)
 
     @staticmethod
     def __user_function(

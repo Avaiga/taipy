@@ -22,8 +22,8 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
     __types = (dict, list, tuple, _MapDict)
 
     @staticmethod
-    def get_supported_classes() -> t.List[str]:
-        return [t.__name__ for t in _ArrayDictDataAccessor.__types]  # type: ignore
+    def get_supported_classes() -> t.List[t.Type]:
+        return list(_ArrayDictDataAccessor.__types)
 
     def to_pandas(self, value: t.Any) -> t.Union[t.List[pd.DataFrame], pd.DataFrame]:
         if isinstance(value, (list, tuple)):

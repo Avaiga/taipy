@@ -21,8 +21,8 @@ class _NumpyDataAccessor(_PandasDataAccessor):
     __types = (numpy.ndarray,)
 
     @staticmethod
-    def get_supported_classes() -> t.List[str]:
-        return [t.__name__ for t in _NumpyDataAccessor.__types]  # type: ignore
+    def get_supported_classes() -> t.List[t.Type]:
+        return list(_NumpyDataAccessor.__types)
 
     def to_pandas(self, value: t.Any) -> pd.DataFrame:
         return pd.DataFrame(value)
