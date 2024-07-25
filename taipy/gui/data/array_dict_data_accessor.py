@@ -54,9 +54,9 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
 
     def _from_pandas(self, value: pd.DataFrame, type: t.Type):
         if type is dict:
-            return value.to_dict()
+            return value.to_dict("list")
         if type is _MapDict:
-            return _MapDict(value.to_dict())
+            return _MapDict(value.to_dict("list"))
         if len(value.columns) == 1:
             if type is list:
                 return value.iloc[:, 0].to_list()
