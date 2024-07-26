@@ -55,8 +55,8 @@ class _PandasDataAccessor(_DataAccessor):
         return value
 
     @staticmethod
-    def get_supported_classes() -> t.List[str]:
-        return [t.__name__ for t in _PandasDataAccessor.__types]  # type: ignore
+    def get_supported_classes() -> t.List[t.Type]:
+        return  list(_PandasDataAccessor.__types)
 
     @staticmethod
     def __user_function(
@@ -484,12 +484,13 @@ class _PandasDataAccessor(_DataAccessor):
             new_row = [0 if is_numeric_dtype(df[c]) else "" for c in list(col_types)] if new_row is None else new_row
             if index > 0:
                 # Column names and value types must match the original DataFrame
-                new_df = pd.DataFrame(new_row, columns=list(col_types))
+                new_df = pd.DataFrame([new_row], columns=list(col_types))
                 # Split the DataFrame
-                rows_before = df.loc[: index - 1]
-                rows_after = df.loc[index + 1 :]
+                rows_before = df.iloc[:index]
+                rows_after = df.iloc[index:]
                 return self._from_pandas(pd.concat([rows_before, new_df, rows_after], ignore_index=True), type(value))
             else:
+                df = df.copy()
                 # Insert as the new first row
                 df.loc[-1] = new_row  # Insert the new row
                 df.index = df.index + 1  # Shift index

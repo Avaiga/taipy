@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+import os
 from datetime import datetime
 from importlib import util
 
@@ -239,3 +240,61 @@ def test_decimator(gui: Gui, helpers, small_dataframe):
         assert value
         data = value["data"]
         assert len(data) == 2
+
+
+def test_edit(gui, small_dataframe):
+    accessor = _PandasDataAccessor(gui)
+    pd = pandas.DataFrame(small_dataframe)
+    ln = len(pd)
+    assert pd["value"].iloc[0] != 10
+    ret_data = accessor.on_edit(pd, {"index": 0, "col": "value", "value": 10})
+    assert isinstance(ret_data, pandas.DataFrame)
+    assert len(ret_data) == ln
+    assert ret_data["value"].iloc[0] == 10
+
+
+def test_delete(gui, small_dataframe):
+    accessor = _PandasDataAccessor(gui)
+    pd = pandas.DataFrame(small_dataframe)
+    ln = len(pd)
+    ret_data = accessor.on_delete(pd, {"index": 0})
+    assert isinstance(ret_data, pandas.DataFrame)
+    assert len(ret_data) == ln - 1
+
+
+def test_add(gui, small_dataframe):
+    accessor = _PandasDataAccessor(gui)
+    pd = pandas.DataFrame(small_dataframe)
+    ln = len(pd)
+
+    ret_data = accessor.on_add(pd, {"index": 0})
+    assert isinstance(ret_data, pandas.DataFrame)
+    assert len(ret_data) == ln + 1
+    assert ret_data["value"].iloc[0] == 0
+    assert ret_data["name"].iloc[0] == ""
+
+    ret_data = accessor.on_add(pd, {"index": 2})
+    assert isinstance(ret_data, pandas.DataFrame)
+    assert len(ret_data) == ln + 1
+    assert ret_data["value"].iloc[2] == 0
+    assert ret_data["name"].iloc[2] == ""
+
+    ret_data = accessor.on_add(pd, {"index": 0}, ["New", 100])
+    assert isinstance(ret_data, pandas.DataFrame)
+    assert len(ret_data) == ln + 1
+    assert ret_data["value"].iloc[0] == 100
+    assert ret_data["name"].iloc[0] == "New"
+
+    ret_data = accessor.on_add(pd, {"index": 2}, ["New", 100])
+    assert isinstance(ret_data, pandas.DataFrame)
+    assert len(ret_data) == ln + 1
+    assert ret_data["value"].iloc[2] == 100
+    assert ret_data["name"].iloc[2] == "New"
+
+
+def test_csv(gui, small_dataframe):
+    accessor = _PandasDataAccessor(gui)
+    pd = pandas.DataFrame(small_dataframe)
+    path = accessor.to_csv("", pd)
+    assert path is not None
+    assert os.path.getsize(path) > 0

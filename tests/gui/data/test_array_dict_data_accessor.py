@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import os
 from importlib import util
 
 from taipy.gui import Gui
@@ -161,3 +162,61 @@ def test_array_of_Mapdicts(gui: Gui, helpers, small_dataframe):
     assert len(data) == 2
     assert len(data[0]["temperatures"]) == 5
     assert len(data[1]["seasons"]) == 4
+
+
+def test_edit_dict(gui, small_dataframe):
+    accessor = _ArrayDictDataAccessor(gui)
+    pd = small_dataframe
+    ln = len(pd["name"])
+    assert pd["value"][0] != 10
+    ret_data = accessor.on_edit(pd, {"index": 0, "col": "value", "value": 10})
+    assert isinstance(ret_data, dict)
+    assert len(ret_data["name"]) == ln
+    assert ret_data["value"][0] == 10
+
+
+def test_delete_dict(gui, small_dataframe):
+    accessor = _ArrayDictDataAccessor(gui)
+    pd = small_dataframe
+    ln = len(pd['name'])
+    ret_data = accessor.on_delete(pd, {"index": 0})
+    assert isinstance(ret_data, dict)
+    assert len(ret_data["name"]) == ln - 1
+
+
+def test_add_dict(gui, small_dataframe):
+    accessor = _ArrayDictDataAccessor(gui)
+    pd = small_dataframe
+    ln = len(pd["name"])
+
+    ret_data = accessor.on_add(pd, {"index": 0})
+    assert isinstance(ret_data, dict)
+    assert len(ret_data["name"]) == ln + 1
+    assert ret_data["value"][0] == 0
+    assert ret_data["name"][0] == ""
+
+    ret_data = accessor.on_add(pd, {"index": 2})
+    assert isinstance(ret_data, dict)
+    assert len(ret_data["name"]) == ln + 1
+    assert ret_data["value"][2] == 0
+    assert ret_data["name"][2] == ""
+
+    ret_data = accessor.on_add(pd, {"index": 0}, ["New", 100])
+    assert isinstance(ret_data, dict)
+    assert len(ret_data["name"]) == ln + 1
+    assert ret_data["value"][0] == 100
+    assert ret_data["name"][0] == "New"
+
+    ret_data = accessor.on_add(pd, {"index": 2}, ["New", 100])
+    assert isinstance(ret_data, dict)
+    assert len(ret_data["name"]) == ln + 1
+    assert ret_data["value"][2] == 100
+    assert ret_data["name"][2] == "New"
+
+
+def test_csv(gui, small_dataframe):
+    accessor = _ArrayDictDataAccessor(gui)
+    pd = small_dataframe
+    path = accessor.to_csv("", pd)
+    assert path is not None
+    assert os.path.getsize(path) > 0
