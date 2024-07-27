@@ -377,11 +377,11 @@ class _Builder:
     def __set_react_attribute(self, name: str, value: t.Any):
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
 
-    def _get_lov_adapter(self, var_name: str, property_name: t.Optional[str] = None, multi_selection=True):  # noqa: C901
+    def _get_lov_adapter(self, var_name: str, property_name: t.Optional[str] = None, multi_selection=True, with_default = True):  # noqa: C901
         property_name = var_name if property_name is None else property_name
         lov_name = self.__hashes.get(var_name)
         lov = self.__get_list_of_(var_name)
-        default_lov = []
+        default_lov: t.Optional[t.List[t.Any]] = [] if with_default or not lov_name else None
 
         adapter = self.__attributes.get("adapter")
         if adapter and isinstance(adapter, str):
@@ -427,7 +427,7 @@ class _Builder:
             if adapter is not None:
                 self.__gui._add_adapter_for_type(var_type, adapter)  # type: ignore
 
-            if len(lov) > 0:
+            if default_lov is not None and len(lov) > 0:
                 for elt in lov:
                     ret = self.__gui._run_adapter(
                         t.cast(t.Callable, adapter), elt, adapter.__name__ if callable(adapter) else "adapter"
@@ -453,7 +453,8 @@ class _Builder:
                 self.__set_default_value("value", ret_val)
 
         # LoV default value
-        self.__set_json_attribute(_to_camel_case(f"default_{property_name}"), default_lov)
+        if default_lov is not None:
+            self.__set_json_attribute(_to_camel_case(f"default_{property_name}"), default_lov)
 
         # LoV expression binding
         if lov_name:
@@ -1031,8 +1032,8 @@ class _Builder:
                 self.__set_dynamic_date_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == PropertyType.data:
                 self.__set_dynamic_property_without_default(attr[0], var_type)
-            elif var_type == PropertyType.lov or var_type == PropertyType.single_lov:
-                self._get_lov_adapter(attr[0], multi_selection=var_type != PropertyType.single_lov)
+            elif var_type == PropertyType.lov or var_type == PropertyType.single_lov or var_type == PropertyType.lov_no_default:
+                self._get_lov_adapter(attr[0], multi_selection=var_type != PropertyType.single_lov, with_default = var_type != PropertyType.lov_no_default)
             elif var_type == PropertyType.lov_value:
                 self.__set_dynamic_property_without_default(
                     attr[0], var_type, _get_tuple_val(attr, 2, None) == "optional"
