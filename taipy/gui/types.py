@@ -118,6 +118,7 @@ class PropertyType(Enum):
     json = "json"
     single_lov = "singlelov"
     lov = _TaipyLov
+    lov_no_default = "lovnodefault"
     """
     The property holds a LoV (list of values).
     """
