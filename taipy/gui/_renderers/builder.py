@@ -377,7 +377,9 @@ class _Builder:
     def __set_react_attribute(self, name: str, value: t.Any):
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
 
-    def _get_lov_adapter(self, var_name: str, property_name: t.Optional[str] = None, multi_selection=True, with_default = True):  # noqa: C901
+    def _get_lov_adapter(  # noqa: C901
+        self, var_name: str, property_name: t.Optional[str] = None, multi_selection=True, with_default=True
+    ):
         property_name = var_name if property_name is None else property_name
         lov_name = self.__hashes.get(var_name)
         lov = self.__get_list_of_(var_name)
@@ -1032,8 +1034,16 @@ class _Builder:
                 self.__set_dynamic_date_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == PropertyType.data:
                 self.__set_dynamic_property_without_default(attr[0], var_type)
-            elif var_type == PropertyType.lov or var_type == PropertyType.single_lov or var_type == PropertyType.lov_no_default:
-                self._get_lov_adapter(attr[0], multi_selection=var_type != PropertyType.single_lov, with_default = var_type != PropertyType.lov_no_default)
+            elif (
+                var_type == PropertyType.lov
+                or var_type == PropertyType.single_lov
+                or var_type == PropertyType.lov_no_default
+            ):
+                self._get_lov_adapter(
+                    attr[0],
+                    multi_selection=var_type != PropertyType.single_lov,
+                    with_default=var_type != PropertyType.lov_no_default,
+                )
             elif var_type == PropertyType.lov_value:
                 self.__set_dynamic_property_without_default(
                     attr[0], var_type, _get_tuple_val(attr, 2, None) == "optional"
