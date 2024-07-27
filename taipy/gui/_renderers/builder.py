@@ -398,15 +398,15 @@ class _Builder:
         if isinstance(lov, list):
             if not isinstance(var_type, str):
                 elt = None
-                if len(lov) == 0:
+                if lov:
+                    elt = lov[0]
+                else:
                     value = self.__attributes.get("value")
                     if isinstance(value, list):
                         if len(value) > 0:
                             elt = value[0]
                     else:
                         elt = value
-                else:
-                    elt = lov[0]
                 var_type = self.__gui._get_unique_type_adapter(type(elt).__name__)
             if adapter is None:
                 adapter = self.__gui._get_adapter_for_type(var_type)
@@ -429,7 +429,7 @@ class _Builder:
             if adapter is not None:
                 self.__gui._add_adapter_for_type(var_type, adapter)  # type: ignore
 
-            if default_lov is not None and len(lov) > 0:
+            if default_lov is not None and lov:
                 for elt in lov:
                     ret = self.__gui._run_adapter(
                         t.cast(t.Callable, adapter), elt, adapter.__name__ if callable(adapter) else "adapter"
