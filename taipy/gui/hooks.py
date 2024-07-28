@@ -1,4 +1,5 @@
 import typing as t
+
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from .utils.singleton import _Singleton
