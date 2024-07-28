@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { getByTitle, render } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -140,7 +140,7 @@ describe("Table Filter Component", () => {
     });
     it("behaves on date column", async () => {
         const { getByTestId, getAllByTestId, findByRole, getByText, getByPlaceholderText } = render(
-                <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={jest.fn()} filteredCount={0} />
+            <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={jest.fn()} filteredCount={0} />
         );
         const elt = getByTestId("FilterListIcon");
         await userEvent.click(elt);
@@ -155,7 +155,7 @@ describe("Table Filter Component", () => {
         const validate = getByTestId("CheckIcon").parentElement;
         expect(validate).toBeDisabled();
         const input = getByPlaceholderText("YYYY/MM/DD");
-        await userEvent.type(input, "{ArrowLeft}{ArrowLeft}{ArrowLeft}2020/11/11", {delay: 1});
+        await userEvent.type(input, "{ArrowLeft}{ArrowLeft}{ArrowLeft}2020/11/11", { delay: 1 });
         expect(validate).not.toBeDisabled();
     });
     it("adds a row on validation", async () => {
@@ -212,7 +212,13 @@ describe("Table Filter Component", () => {
     it("reset filters", async () => {
         const onValidate = jest.fn();
         const { getAllByTestId, getByTestId } = render(
-            <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={onValidate} appliedFilters={[{col: "StringCol", action: "==", value: ""}]} filteredCount={0} />
+            <TableFilter
+                columns={tableColumns}
+                colsOrder={colsOrder}
+                onValidate={onValidate}
+                appliedFilters={[{ col: "StringCol", action: "==", value: "", type: "" }]}
+                filteredCount={0}
+            />
         );
         const elt = getByTestId("FilterListIcon");
         await userEvent.click(elt);
@@ -225,7 +231,13 @@ describe("Table Filter Component", () => {
     });
     it("ignores unapplicable filters", async () => {
         const { getAllByTestId, getByTestId } = render(
-            <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={jest.fn()} appliedFilters={[{col: "unknown col", action: "==", value: ""}]} filteredCount={0} />
+            <TableFilter
+                columns={tableColumns}
+                colsOrder={colsOrder}
+                onValidate={jest.fn()}
+                appliedFilters={[{ col: "unknown col", action: "==", value: "", type: "" }]}
+                filteredCount={0}
+            />
         );
         const elt = getByTestId("FilterListIcon");
         await userEvent.click(elt);

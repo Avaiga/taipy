@@ -160,11 +160,11 @@ const getDecimatorsPayload = (
                             xAxis: getAxis(traces, i, columns, 0),
                             yAxis: getAxis(traces, i, columns, 1),
                             zAxis: getAxis(traces, i, columns, 2),
-                            chartMode: modes[i]
+                            chartMode: modes[i],
                         }
                       : undefined
               ),
-              relayoutData: relayoutData
+              relayoutData: relayoutData,
           }
         : undefined;
 };
@@ -225,14 +225,19 @@ export const TaipyPlotlyButtons: ModeBarButtonAny[] = [
             if (!div) {
                 return;
             }
-            const {height} = gd.dataset;
+            const { height, width } = gd.dataset;
             if (!height) {
-                gd.setAttribute("data-height", getComputedStyle(div).height);
+                const st = getComputedStyle(div);
+                gd.setAttribute("data-height", st.height);
+                gd.setAttribute("data-width", st.width);
             }
             const fs = gd.classList.toggle("full-screen");
             (evt.currentTarget as HTMLElement).setAttribute("data-title", fs ? "Exit Full screen" : "Full screen");
-            if (height && !fs) {
-                div.attributeStyleMap.set("height", height);
+            if (!fs) {
+                // height && div.attributeStyleMap.set("height", height);
+                height && (div.style.height = height);
+                // width && div.attributeStyleMap.set("width", width);
+                width && (div.style.width = width);
             }
             window.dispatchEvent(new Event("resize"));
         }
@@ -425,9 +430,9 @@ const Chart = (props: ChartProp) => {
                       mode: config.modes[idx],
                       name:
                           getArrayValue(config.names, idx) ||
-                          (config.columns[trace[1]] ? getColNameFromIndexed(config.columns[trace[1]].dfid) : undefined)
+                          (config.columns[trace[1]] ? getColNameFromIndexed(config.columns[trace[1]].dfid) : undefined),
                   } as Record<string, unknown>;
-                  ret.marker = {...getArrayValue(config.markers, idx, ret.marker || {})};
+                  ret.marker = { ...getArrayValue(config.markers, idx, ret.marker || {}) };
                   if (Object.keys(ret.marker as object).length) {
                       MARKER_TO_COL.forEach((prop) => {
                           const val = (ret.marker as Record<string, unknown>)[prop];
@@ -492,7 +497,7 @@ const Chart = (props: ChartProp) => {
                   ret.textposition = getArrayValue(config.textAnchors, idx);
                   const selectedMarker = getArrayValue(config.selectedMarkers, idx);
                   if (selectedMarker) {
-                      ret.selected = {marker: selectedMarker};
+                      ret.selected = { marker: selectedMarker };
                   }
                   return ret as Data;
               })
@@ -579,8 +584,8 @@ const Chart = (props: ChartProp) => {
                 ? props.figure
                     ? index
                     : data[dataKey].tp_index
-                      ? (data[dataKey].tp_index[index] as number)
-                      : index
+                    ? (data[dataKey].tp_index[index] as number)
+                    : index
                 : 0,
         [data, dataKey, props.figure]
     );

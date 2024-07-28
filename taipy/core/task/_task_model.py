@@ -12,30 +12,11 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import JSON, Boolean, Column, String, Table
-
 from .._repository._base_taipy_model import _BaseModel
-from .._repository.db._sql_base_model import mapper_registry
 
 
-@mapper_registry.mapped
 @dataclass
 class _TaskModel(_BaseModel):
-    __table__ = Table(
-        "task",
-        mapper_registry.metadata,
-        Column("id", String, primary_key=True),
-        Column("owner_id", String),
-        Column("parent_ids", JSON),
-        Column("config_id", String),
-        Column("input_ids", JSON),
-        Column("function_name", String),
-        Column("function_module", String),
-        Column("output_ids", JSON),
-        Column("version", String),
-        Column("skippable", Boolean),
-        Column("properties", JSON),
-    )
     id: str
     owner_id: Optional[str]
     parent_ids: List[str]

@@ -64,7 +64,7 @@ const sendWsMessageSpy = jest.spyOn(wsUtils, "sendWsMessage");
 describe("reducer", () => {
     it("store socket connected", async () => {
         expect(
-            taipyReducer({ ...INITIAL_STATE }, { type: "SOCKET_CONNECTED" } as TaipyBaseAction).isSocketConnected,
+            taipyReducer({ ...INITIAL_STATE }, { type: "SOCKET_CONNECTED" } as TaipyBaseAction).isSocketConnected
         ).toBeDefined();
     });
     it("returns update", async () => {
@@ -73,7 +73,7 @@ describe("reducer", () => {
                 type: "UPDATE",
                 name: "name",
                 payload: { value: "value" },
-            } as TaipyBaseAction).data.name,
+            } as TaipyBaseAction).data.name
         ).toBeDefined();
     });
     it("store locations", async () => {
@@ -81,7 +81,7 @@ describe("reducer", () => {
             taipyReducer({ ...INITIAL_STATE }, {
                 type: "SET_LOCATIONS",
                 payload: { value: { loc: "loc" } },
-            } as TaipyBaseAction).locations,
+            } as TaipyBaseAction).locations
         ).toBeDefined();
     });
     it("set alert", async () => {
@@ -91,7 +91,7 @@ describe("reducer", () => {
                 atype: "i",
                 message: "message",
                 system: "system",
-            } as TaipyBaseAction).alerts,
+            } as TaipyBaseAction).alerts
         ).toHaveLength(1);
     });
     it("set show block", async () => {
@@ -100,7 +100,7 @@ describe("reducer", () => {
                 type: "SET_BLOCK",
                 action: "action",
                 message: "message",
-            } as TaipyBaseAction).block,
+            } as TaipyBaseAction).block
         ).toBeDefined();
     });
     it("set hide block", async () => {
@@ -110,7 +110,7 @@ describe("reducer", () => {
                 action: "action",
                 message: "message",
                 close: true,
-            } as TaipyBaseAction).block,
+            } as TaipyBaseAction).block
         ).toBeUndefined();
     });
     it("set navigate", async () => {
@@ -119,7 +119,7 @@ describe("reducer", () => {
                 type: "NAVIGATE",
                 to: "navigateTo",
                 tab: "_blank",
-            } as TaipyBaseAction).navigateTo,
+            } as TaipyBaseAction).navigateTo
         ).toBeDefined();
     });
     it("set client id", async () => {
@@ -130,7 +130,7 @@ describe("reducer", () => {
             taipyReducer({ ...INITIAL_STATE }, {
                 type: "ACKNOWLEDGEMENT",
                 id: "id",
-            } as TaipyBaseAction),
+            } as TaipyBaseAction)
         ).toEqual(INITIAL_STATE);
     });
     it("remove Acknowledgement", async () => {
@@ -138,7 +138,7 @@ describe("reducer", () => {
             taipyReducer({ ...INITIAL_STATE, ackList: ["ack"] }, {
                 type: "ACKNOWLEDGEMENT",
                 id: "ack",
-            } as TaipyBaseAction),
+            } as TaipyBaseAction)
         ).toEqual(INITIAL_STATE);
     });
     it("set Theme", async () => {
@@ -146,7 +146,7 @@ describe("reducer", () => {
             taipyReducer({ ...INITIAL_STATE }, {
                 type: "SET_THEME",
                 payload: { value: "dark" },
-            } as TaipyBaseAction).theme,
+            } as TaipyBaseAction).theme
         ).toBeDefined();
     });
     it("set TimeZone", async () => {
@@ -154,7 +154,7 @@ describe("reducer", () => {
             taipyReducer({ ...INITIAL_STATE }, {
                 type: "SET_TIMEZONE",
                 payload: { timeZone: "tz" },
-            } as TaipyBaseAction).timeZone,
+            } as TaipyBaseAction).timeZone
         ).toBeDefined();
     });
     it("set default TimeZone", async () => {
@@ -162,12 +162,12 @@ describe("reducer", () => {
             taipyReducer({ ...INITIAL_STATE }, {
                 type: "SET_TIMEZONE",
                 payload: {},
-            } as TaipyBaseAction).timeZone,
+            } as TaipyBaseAction).timeZone
         ).toBeDefined();
     });
     it("set Menu", async () => {
         expect(
-            taipyReducer({ ...INITIAL_STATE }, { type: "SET_MENU", menu: {} } as TaipyBaseAction).menu,
+            taipyReducer({ ...INITIAL_STATE }, { type: "SET_MENU", menu: {} } as TaipyBaseAction).menu
         ).toBeDefined();
     });
     it("sets download", async () => {
@@ -175,12 +175,12 @@ describe("reducer", () => {
             taipyReducer({ ...INITIAL_STATE }, {
                 type: "DOWNLOAD_FILE",
                 content: {},
-            } as TaipyBaseAction).download,
+            } as TaipyBaseAction).download
         ).toBeDefined();
     });
     it("resets download", async () => {
         expect(
-            taipyReducer({ ...INITIAL_STATE }, { type: "DOWNLOAD_FILE" } as TaipyBaseAction).download,
+            taipyReducer({ ...INITIAL_STATE }, { type: "DOWNLOAD_FILE" } as TaipyBaseAction).download
         ).toBeUndefined();
     });
     it("sets partial", async () => {
@@ -189,7 +189,7 @@ describe("reducer", () => {
                 type: "PARTIAL",
                 name: "partial",
                 create: true,
-            } as TaipyBaseAction).data.partial,
+            } as TaipyBaseAction).data.partial
         ).toBeDefined();
     });
     it("resets partial", async () => {
@@ -197,7 +197,7 @@ describe("reducer", () => {
             taipyReducer({ ...INITIAL_STATE, data: { partial: true } }, {
                 type: "PARTIAL",
                 name: "partial",
-            } as TaipyBaseAction).data.partial,
+            } as TaipyBaseAction).data.partial
         ).toBeUndefined();
     });
     it("creates an alert action", () => {
@@ -333,6 +333,7 @@ describe("createRequestInfiniteTableUpdateAction function", () => {
                 value: "testValue",
                 col: "yourColValue",
                 action: "yourActionValue",
+                type: "yourTypeValue",
             },
         ];
         const action = createRequestInfiniteTableUpdateAction(
@@ -354,7 +355,7 @@ describe("createRequestInfiniteTableUpdateAction function", () => {
             compare,
             compareDatas,
             stateContext,
-            reverse,
+            reverse
         );
         expect(action.type).toEqual(Types.RequestDataUpdate);
         expect(action.name).toEqual(name);
@@ -396,7 +397,7 @@ describe("createRequestTableUpdateAction function", () => {
         const tooltips = { tooltipKey: "tooltipValue" };
         const handleNan = true;
         const filters = [
-            { field: "testField", operator: "testOperator", value: "testValue", col: "testCol", action: "testAction" },
+            { field: "testField", operator: "testOperator", value: "testValue", col: "testCol", action: "testAction", type: "type" },
         ];
         const compare = "testCompare";
         const compareDatas = "testCompareDatas";
@@ -419,7 +420,7 @@ describe("createRequestTableUpdateAction function", () => {
             filters,
             compare,
             compareDatas,
-            stateContext,
+            stateContext
         );
         expect(action.type).toEqual(Types.RequestDataUpdate);
         expect(action.name).toEqual(name);
@@ -1058,7 +1059,7 @@ describe("initializeWebSocket function", () => {
                 "mockId",
                 undefined,
                 false,
-                expect.any(Function),
+                expect.any(Function)
             );
         }
     });

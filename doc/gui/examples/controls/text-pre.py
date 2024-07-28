@@ -8,8 +8,26 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+# -----------------------------------------------------------------------------------------
+# To execute this script, make sure that the taipy-gui package is installed in your
+# Python environment and run:
+#     python <script>
+# -----------------------------------------------------------------------------------------
+from taipy.gui import Gui
 
-from sqlalchemy.orm import declarative_base, registry
+code = """
+def say_hello(name: str):
+    print(f"Hello, {name}!")
 
-_SQLBaseModel = declarative_base()
-mapper_registry = registry()
+if __name__ == "__main__":
+    say_hello("Taipy")
+"""
+
+page = """
+# Text - pre
+<|toggle|theme|>
+
+<|{code}|text|mode=pre|>
+"""
+
+Gui(page).run()

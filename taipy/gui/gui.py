@@ -26,7 +26,6 @@ import warnings
 from importlib import metadata, util
 from importlib.util import find_spec
 from pathlib import Path
-from tempfile import mkstemp
 from types import FrameType, FunctionType, LambdaType, ModuleType, SimpleNamespace
 from urllib.parse import unquote, urlencode, urlparse
 
@@ -63,7 +62,7 @@ from .builder import _ElementApiGenerator
 from .config import Config, ConfigParameter, _Config
 from .custom import Page as CustomPage
 from .data.content_accessor import _ContentAccessor
-from .data.data_accessor import _DataAccessor, _DataAccessors
+from .data.data_accessor import _DataAccessors
 from .data.data_format import _DataFormat
 from .data.data_scope import _DataScopes
 from .extension.library import Element, ElementLibrary
@@ -313,7 +312,7 @@ class Gui:
 
         self._config = _Config()
         self.__content_accessor = None
-        self._accessors = _DataAccessors()
+        self.__accessors: t.Optional[_DataAccessors] = None
         self.__state: t.Optional[State] = None
         self.__bindings = _Bindings(self)
         self.__locals_context = _LocalsContext()
@@ -1100,7 +1099,7 @@ class Gui:
                                 e,
                             )
             if not isinstance(ret_payload, dict):
-                ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
+                ret_payload = self._get_accessor().get_data(var_name, newvalue, payload)
             self.__send_ws_update_with_dict({var_name: ret_payload})
 
     def __request_var_update(self, payload: t.Any):
@@ -1408,22 +1407,16 @@ class Gui:
 
     def __download_csv(self, state: State, var_name: str, payload: dict):
         holder_name = t.cast(str, payload.get("var_name"))
-        ret = self._accessors._get_data(
-            self,
-            holder_name,
-            _getscopeattr(self, holder_name, None),
-            {"alldata": True, "csv": True},
-        )
-        if isinstance(ret, dict):
-            df = ret.get("df")
-            try:
-                fd, temp_path = mkstemp(".csv", var_name, text=True)
-                with os.fdopen(fd, "wt", newline="") as csv_file:
-                    df.to_csv(csv_file, index=False)  # type: ignore[union-attr]
-                self._download(temp_path, "data.csv", Gui.__DOWNLOAD_DELETE_ACTION)
-            except Exception as e:  # pragma: no cover
-                if not self._call_on_exception("download_csv", e):
-                    _warn("download_csv(): Exception raised", e)
+        try:
+            csv_path = self._get_accessor().to_csv(
+                holder_name,
+                _getscopeattr(self, holder_name, None),
+            )
+            if csv_path:
+                self._download(csv_path, "data.csv", Gui.__DOWNLOAD_DELETE_ACTION)
+        except Exception as e:  # pragma: no cover
+            if not self._call_on_exception("download_csv", e):
+                _warn("download_csv(): Exception raised", e)
 
     def __delete_csv(self, state: State, var_name: str, payload: dict):
         try:
@@ -1555,7 +1548,6 @@ class Gui:
         variable reflected in the user interface.
 
         Arguments:
-            gui (Gui^): The current Gui instance.
             callback: The user-defined function to be invoked.<br/>
                 The first parameter of this function must be a `State^` object representing the
                 client for which it is invoked.<br/>
@@ -1577,7 +1569,6 @@ class Gui:
         instance. All user interfaces reflect the change.
 
         Arguments:
-            gui (Gui^): The current Gui instance.
             var_name: The name of the variable to change.
             value: The new value for the variable.
         """
@@ -1600,9 +1591,9 @@ class Gui:
             values: An optional dictionary where each key is the name of a variable to change, and
                 where the associated value is the new value to set for that variable, in each state
                 for the application.
-            **kwargs: A collection of variable name-value pairs that are updated for each state of
-                the application. Name-value pairs overload the ones in *values* if the name exists
-                as a key in the dictionary.
+            **kwargs (dict[str, any]): A collection of variable name-value pairs that are updated
+                for each state of the application. Name-value pairs overload the ones in *values*
+                if the name exists as a key in the dictionary.
         """
         if kwargs:
             values = values.copy() if values else {}
@@ -1669,7 +1660,7 @@ class Gui:
         TODO: Default implementation of on_edit for tables
         """
         try:
-            setattr(state, var_name, self._accessors._on_edit(getattr(state, var_name), payload))
+            setattr(state, var_name, self._get_accessor().on_edit(getattr(state, var_name), payload))
         except Exception as e:
             _warn("TODO: Table.on_edit", e)
 
@@ -1678,7 +1669,7 @@ class Gui:
         TODO: Default implementation of on_delete for tables
         """
         try:
-            setattr(state, var_name, self._accessors._on_delete(getattr(state, var_name), payload))
+            setattr(state, var_name, self._get_accessor().on_delete(getattr(state, var_name), payload))
         except Exception as e:
             _warn("TODO: Table.on_delete", e)
 
@@ -1689,7 +1680,7 @@ class Gui:
         TODO: Default implementation of on_add for tables
         """
         try:
-            setattr(state, var_name, self._accessors._on_add(getattr(state, var_name), payload, new_row))
+            setattr(state, var_name, self._get_accessor().on_add(getattr(state, var_name), payload, new_row))
         except Exception as e:
             _warn("TODO: Table.on_add", e)
 
@@ -1706,7 +1697,7 @@ class Gui:
                     col_dict = _get_columns_dict(
                         data,
                         attributes.get("columns", {}),
-                        self._accessors._get_col_types(data_hash, _TaipyData(data, data_hash)),
+                        self._get_accessor().get_col_types(data_hash, _TaipyData(data, data_hash)),
                         attributes.get("date_format"),
                         attributes.get("number_format"),
                     )
@@ -1729,7 +1720,7 @@ class Gui:
                     config = _build_chart_config(
                         self,
                         attributes,
-                        self._accessors._get_col_types(data_hash, _TaipyData(kwargs.get(data_hash), data_hash)),
+                        self._get_accessor().get_col_types(data_hash, _TaipyData(kwargs.get(data_hash), data_hash)),
                     )
 
                     return json.dumps(config, cls=_TaipyJsonEncoder)
@@ -2356,9 +2347,6 @@ class Gui:
             }
         )
 
-    def _register_data_accessor(self, data_accessor_class: t.Type[_DataAccessor]) -> None:
-        self._accessors._register(data_accessor_class)
-
     def get_flask_app(self) -> Flask:
         """Get the internal Flask application.
 
@@ -2568,6 +2556,11 @@ class Gui:
         for bp in self._flask_blueprint:
             self._server.get_flask().register_blueprint(bp)
 
+    def _get_accessor(self):
+        if self.__accessors is None:
+            self.__accessors = _DataAccessors(self)
+        return self.__accessors
+
     def run(
         self,
         run_server: bool = True,
@@ -2707,7 +2700,7 @@ class Gui:
         self.__register_blueprint()
 
         # Register data accessor communication data format (JSON, Apache Arrow)
-        self._accessors._set_data_format(_DataFormat.APACHE_ARROW if app_config["use_arrow"] else _DataFormat.JSON)
+        self._get_accessor().set_data_format(_DataFormat.APACHE_ARROW if app_config["use_arrow"] else _DataFormat.JSON)
 
         # Use multi user or not
         self._bindings()._set_single_client(bool(app_config["single_client"]))

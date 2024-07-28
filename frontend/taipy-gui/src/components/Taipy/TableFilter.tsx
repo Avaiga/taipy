@@ -38,6 +38,7 @@ export interface FilterDesc {
     col: string;
     action: string;
     value: string | number | boolean | Date;
+    type: string;
 }
 
 interface TableFilterProps {
@@ -118,6 +119,7 @@ const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?
                             ? getDateTime(val)
                             : val
                         : val,
+                type: colType,
             } as FilterDesc;
         } catch (e) {
             console.info("could not parse value ", val, e);

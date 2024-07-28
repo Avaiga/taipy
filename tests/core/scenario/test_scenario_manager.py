@@ -1508,11 +1508,20 @@ def test_filter_scenarios_by_creation_datetime():
     assert len(filtered_scenarios) == 1
     assert [s_1_1] == filtered_scenarios
 
-    # The time period is inclusive
+    # The start time is inclusive
     filtered_scenarios = _ScenarioManager._filter_by_creation_time(
         scenarios=all_scenarios,
         created_start_time=datetime(2024, 1, 1),
         created_end_time=datetime(2024, 1, 3),
+    )
+    assert len(filtered_scenarios) == 1
+    assert [s_1_1] == filtered_scenarios
+
+    # The end time is exclusive
+    filtered_scenarios = _ScenarioManager._filter_by_creation_time(
+        scenarios=all_scenarios,
+        created_start_time=datetime(2024, 1, 1),
+        created_end_time=datetime(2024, 1, 4),
     )
     assert len(filtered_scenarios) == 2
     assert sorted([s_1_1.id, s_1_2.id]) == sorted([scenario.id for scenario in filtered_scenarios])

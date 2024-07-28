@@ -121,6 +121,7 @@ export interface FilterDesc {
     col: string;
     action: string;
     value: string | number | boolean | Date;
+    type: string;
 }
 export interface TableFilterProps {
     columns: Record<string, ColumnDesc>;
