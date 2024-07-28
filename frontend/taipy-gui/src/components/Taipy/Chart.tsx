@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, {CSSProperties, useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense} from "react";
+import React, { CSSProperties, useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
 import {
     Config,
     Data,
@@ -21,29 +21,29 @@ import {
     PlotMarker,
     PlotRelayoutEvent,
     PlotSelectionEvent,
-    ScatterLine
+    ScatterLine,
 } from "plotly.js";
 import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
-import {useTheme} from "@mui/material";
+import { useTheme } from "@mui/material";
 
-import {getArrayValue, getUpdateVar, TaipyActiveProps, TaipyChangeProps} from "./utils";
+import { getArrayValue, getUpdateVar, TaipyActiveProps, TaipyChangeProps } from "./utils";
 import {
     createRequestChartUpdateAction,
     createSendActionNameAction,
-    createSendUpdateAction
+    createSendUpdateAction,
 } from "../../context/taipyReducers";
-import {ColumnDesc} from "./tableUtils";
+import { ColumnDesc } from "./tableUtils";
 import {
     useClassNames,
     useDispatch,
     useDispatchRequestUpdateOnFirstRender,
     useDynamicJsonProperty,
     useDynamicProperty,
-    useModule
+    useModule,
 } from "../../utils/hooks";
-import {darkThemeTemplate} from "../../themes/darkThemeTemplate";
+import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -91,7 +91,7 @@ interface ChartConfig {
 
 export type TraceValueType = Record<string, (string | number)[]>;
 
-const defaultStyle = {position: "relative", display: "inline-block"};
+const defaultStyle = { position: "relative", display: "inline-block" };
 
 const indexedData = /^(\d+)\/(.*)/;
 
@@ -205,7 +205,7 @@ const defaultConfig = {
     textAnchors: [],
     options: [],
     axisNames: [],
-    addIndex: []
+    addIndex: [],
 } as ChartConfig;
 
 const emptyLayout = {} as Partial<Layout>;
@@ -218,7 +218,7 @@ export const TaipyPlotlyButtons: ModeBarButtonAny[] = [
         icon: {
             height: 24,
             width: 24,
-            path: "M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"
+            path: "M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z",
         },
         click: function (gd: HTMLElement, evt: Event) {
             const div = gd.querySelector("div.svg-container") as HTMLDivElement;
@@ -240,8 +240,8 @@ export const TaipyPlotlyButtons: ModeBarButtonAny[] = [
                 width && (div.style.width = width);
             }
             window.dispatchEvent(new Event("resize"));
-        }
-    }
+        },
+    },
 ];
 
 const updateArrays = (sel: number[][], val: number[], idx: number) => {
@@ -262,7 +262,7 @@ const Chart = (props: ChartProp) => {
         id,
         data = emptyData,
         onRangeChange,
-        propagate = true
+        propagate = true,
     } = props;
     const dispatch = useDispatch();
     const [selected, setSelected] = useState<number[][]>([]);
@@ -348,7 +348,7 @@ const Chart = (props: ChartProp) => {
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
 
     const layout = useMemo(() => {
-        const layout = {...baseLayout};
+        const layout = { ...baseLayout };
         let template = undefined;
         try {
             const tpl = props.template && JSON.parse(props.template);
@@ -358,7 +358,7 @@ const Chart = (props: ChartProp) => {
                         ? JSON.parse(props.template_Dark_)
                         : darkThemeTemplate
                     : props.template_Light_ && JSON.parse(props.template_Light_);
-            template = tpl ? (tplTheme ? {...tpl, ...tplTheme} : tpl) : tplTheme ? tplTheme : undefined;
+            template = tpl ? (tplTheme ? { ...tpl, ...tplTheme } : tpl) : tplTheme ? tplTheme : undefined;
         } catch (e) {
             console.info(`Error while parsing Chart.template\n${(e as Error).message || e}`);
         }
@@ -370,7 +370,7 @@ const Chart = (props: ChartProp) => {
                 ...(props.figure[0].layout as Partial<Layout>),
                 ...layout,
                 title: title || layout.title || (props.figure[0].layout as Partial<Layout>).title,
-                clickmode: "event+select"
+                clickmode: "event+select",
             } as Layout;
         }
         return {
@@ -382,16 +382,16 @@ const Chart = (props: ChartProp) => {
                     config.traces.length && config.traces[0].length && config.traces[0][0]
                         ? getColNameFromIndexed(config.columns[config.traces[0][0]]?.dfid)
                         : undefined,
-                ...layout.xaxis
+                ...layout.xaxis,
             },
             yaxis: {
                 title:
                     config.traces.length == 1 && config.traces[0].length > 1 && config.columns[config.traces[0][1]]
                         ? getColNameFromIndexed(config.columns[config.traces[0][1]]?.dfid)
                         : undefined,
-                ...layout.yaxis
+                ...layout.yaxis,
             },
-            clickmode: "event+select"
+            clickmode: "event+select",
         } as Layout;
     }, [
         theme.palette.mode,
@@ -402,17 +402,17 @@ const Chart = (props: ChartProp) => {
         props.template,
         props.template_Dark_,
         props.template_Light_,
-        props.figure
+        props.figure,
     ]);
 
     const style = useMemo(
         () =>
             height === undefined
-                ? ({...defaultStyle, width: width} as CSSProperties)
-                : ({...defaultStyle, width: width, height: height} as CSSProperties),
+                ? ({ ...defaultStyle, width: width } as CSSProperties)
+                : ({ ...defaultStyle, width: width, height: height } as CSSProperties),
         [width, height]
     );
-    const skelStyle = useMemo(() => ({...style, minHeight: "7em"}), [style]);
+    const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
 
     const dataPl = useMemo(() => {
         if (props.figure) {
@@ -529,7 +529,7 @@ const Chart = (props: ChartProp) => {
 
     const onRelayout = useCallback(
         (eventData: PlotRelayoutEvent) => {
-            onRangeChange && dispatch(createSendActionNameAction(id, module, {action: onRangeChange, ...eventData}));
+            onRangeChange && dispatch(createSendActionNameAction(id, module, { action: onRangeChange, ...eventData }));
             if (config.decimators && !config.types.includes("scatter3d")) {
                 const backCols = Object.values(config.columns).map((col) => col.dfid);
                 const eventDataKey = Object.entries(eventData)
@@ -570,7 +570,7 @@ const Chart = (props: ChartProp) => {
             config.types,
             config.decimators,
             updateVarName,
-            module
+            module,
         ]
     );
 
@@ -584,8 +584,8 @@ const Chart = (props: ChartProp) => {
                 ? props.figure
                     ? index
                     : data[dataKey].tp_index
-                    ? (data[dataKey].tp_index[index] as number)
-                    : index
+                      ? (data[dataKey].tp_index[index] as number)
+                      : index
                 : 0,
         [data, dataKey, props.figure]
     );

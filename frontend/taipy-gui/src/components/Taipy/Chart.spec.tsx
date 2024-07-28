@@ -265,7 +265,6 @@ describe("Chart Component", () => {
         expect(elts.length).toBeGreaterThan(1);
         expect(elts[0].tagName).toBe("TD");
     });
-
     it("Chart renders correctly", () => {
         const figure = [{data: [], layout: {title: "Mock Title"}}];
         const {getByTestId} = render(
@@ -281,7 +280,6 @@ describe("Chart Component", () => {
         );
         expect(getByTestId("chart")).toBeInTheDocument();
     });
-
     it("handles plotConfig prop correctly", () => {
         const consoleInfoSpy = jest.spyOn(console, "info");
         // Case 1: plotConfig is a valid JSON string
