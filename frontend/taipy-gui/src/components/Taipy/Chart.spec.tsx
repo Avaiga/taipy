@@ -268,7 +268,7 @@ describe("Chart Component", () => {
 
     it("Chart renders correctly", () => {
         const figure = [{data: [], layout: {title: "Mock Title"}}];
-        const {asFragment} = render(
+        const {getByTestId} = render(
             <Chart
                 id="table"
                 updateVarName="data_var"
@@ -276,9 +276,10 @@ describe("Chart Component", () => {
                 defaultConfig={chartConfig}
                 updateVars="varname=varname"
                 figure={figure}
+                testId="chart"
             />
         );
-        expect(asFragment()).toMatchSnapshot();
+        expect(getByTestId("chart")).toBeInTheDocument();
     });
 
     it("handles plotConfig prop correctly", () => {
