@@ -510,7 +510,7 @@ const Chart = (props: ChartProp) => {
         let plconf: Partial<Config> = {};
         if (props.plotConfig) {
             try {
-                plconf = {...JSON.parse(props.plotConfig), removeLogo};
+                plconf = {...removeLogo, ...JSON.parse(props.plotConfig)};
             } catch (e) {
                 console.info(`Error while parsing Chart.plot_config\n${(e as Error).message || e}`);
             }
