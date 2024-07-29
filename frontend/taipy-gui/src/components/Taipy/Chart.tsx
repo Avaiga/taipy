@@ -506,17 +506,21 @@ const Chart = (props: ChartProp) => {
     }, [props.figure, selected, data, config, dataKey]);
 
     const plotConfig = useMemo(() => {
+        const removeLogo = {displaylogo: false};
         let plconf: Partial<Config> = {};
         if (props.plotConfig) {
             try {
-                plconf = JSON.parse(props.plotConfig);
+                plconf = {...JSON.parse(props.plotConfig), removeLogo};
             } catch (e) {
                 console.info(`Error while parsing Chart.plot_config\n${(e as Error).message || e}`);
             }
             if (typeof plconf !== "object" || plconf === null || Array.isArray(plconf)) {
                 console.info("Error Chart.plot_config is not a dictionary");
-                plconf = {};
+                plconf = removeLogo;
             }
+        }
+        else {
+            plconf = removeLogo;
         }
         plconf.modeBarButtonsToAdd = TaipyPlotlyButtons;
         // plconf.responsive = true; // this is the source of the on/off height ...
