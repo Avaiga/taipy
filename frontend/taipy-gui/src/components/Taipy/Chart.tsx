@@ -518,10 +518,7 @@ const Chart = (props: ChartProp) => {
                 plconf = {};
             }
         }
-        else {
-            plconf = {};
-        }
-        plconf.displaylogo = plconf.displaylogo || false;
+        plconf.displaylogo = !!plconf.displaylogo;
         plconf.modeBarButtonsToAdd = TaipyPlotlyButtons;
         // plconf.responsive = true; // this is the source of the on/off height ...
         plconf.autosizable = true;
