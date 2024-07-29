@@ -12,7 +12,7 @@
  */
 
 import React, { useCallback } from "react";
-import { render, renderHook, waitFor } from "@testing-library/react";
+import { fireEvent, render, renderHook, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -295,6 +295,18 @@ describe("Chart Component", () => {
         expect(consoleInfoSpy).toHaveBeenCalledWith("Error Chart.plot_config is not a dictionary");
         consoleInfoSpy.mockRestore();
     });
+    it("handles fullscreen toggle correctly", async () => {
+        // Render the Chart component
+        render(<Chart plotConfig='{"autosizable": true}' defaultConfig={chartConfig} />);
+        await waitFor(() => {
+            const fullscreenButton = document.querySelector(".modebar-btn[data-title='Full screen']");
+            fireEvent.click(fullscreenButton as Element);
+            const exitFullscreenButton = document.querySelector(".modebar-btn[data-title='Exit Full screen']");
+            fireEvent.click(exitFullscreenButton as Element);
+            const divElement = document.querySelector(".js-plotly-plot");
+            expect(divElement).toHaveStyle("width: 100%");
+        });
+    });
 });
 
 describe("Chart Component as Map", () => {
@@ -479,7 +491,7 @@ describe("click function", () => {
         // We can check this by verifying that no 'full-screen' class was added
         expect(mockElement.classList.contains("full-screen")).toBe(false);
     });
-    it("should set data-height when div.svg-container is found but data-height is not set", () => {
+    it("should set data-height when data-height is not set", () => {
         // Create a mock HTMLElement
         const mockElement = document.createElement("div");
 
