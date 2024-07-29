@@ -11,14 +11,23 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React from "react";
-import { render, waitFor } from "@testing-library/react";
+import React, { useCallback } from "react";
+import { fireEvent, render, renderHook, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
-import Chart, { TraceValueType } from "./Chart";
+import Chart, {
+    getAxis,
+    getColNameFromIndexed,
+    getValue,
+    getValueFromCol,
+    TaipyPlotlyButtons,
+    TraceValueType,
+} from "./Chart";
 import { TaipyContext } from "../../context/taipyContext";
-import { TaipyState, INITIAL_STATE } from "../../context/taipyReducers";
+import { INITIAL_STATE, TaipyState } from "../../context/taipyReducers";
+import { ColumnDesc } from "./tableUtils";
+import { ModeBarButtonAny } from "plotly.js";
 
 const chartValue = {
     default: {
@@ -57,7 +66,7 @@ const chartConfig = JSON.stringify({
     yaxis: ["y"],
     types: ["scatter"],
     modes: ["lines+markers"],
-    axisNames: []
+    axisNames: [],
 });
 
 const mapValue = {
@@ -83,14 +92,39 @@ const mapConfig = JSON.stringify({
     yaxis: ["y"],
     types: ["scattermapbox"],
     modes: ["markers"],
-    axisNames: [["lon", "lat"]]
+    axisNames: [["lon", "lat"]],
 });
 
 const mapLayout = JSON.stringify({
     dragmode: "zoom",
     mapbox: { style: "open-street-map", center: { lat: 38, lon: -90 }, zoom: 3 },
-    margin: { r: 0, t: 0, b: 0, l: 0 }
-})
+    margin: { r: 0, t: 0, b: 0, l: 0 },
+});
+
+interface Props {
+    figure?: boolean;
+}
+
+interface Clickable {
+    click: (gd: HTMLElement, evt: Event) => void;
+}
+
+type DataKey = string;
+type Data = Record<DataKey, { tp_index?: number[] }>;
+
+const useGetRealIndex = (data: Data, dataKey: DataKey, props: Props) => {
+    return useCallback(
+        (index?: number) =>
+            typeof index === "number"
+                ? props.figure
+                    ? index
+                    : data[dataKey] && data[dataKey].tp_index
+                      ? data[dataKey]!.tp_index![index]
+                      : index
+                : 0,
+        [data, dataKey, props.figure]
+    );
+};
 
 describe("Chart Component", () => {
     it("renders", async () => {
@@ -106,7 +140,9 @@ describe("Chart Component", () => {
         expect(elt).toHaveClass("taipy-chart");
     });
     it("is disabled", async () => {
-        const { getByTestId } = render(<Chart data={chartValue} defaultConfig={chartConfig} testId="test" active={false} />);
+        const { getByTestId } = render(
+            <Chart data={chartValue} defaultConfig={chartConfig} testId="test" active={false} />
+        );
         const elt = getByTestId("test");
         expect(elt.querySelector(".modebar")).toBeNull();
     });
@@ -116,7 +152,9 @@ describe("Chart Component", () => {
         await waitFor(() => expect(elt.querySelector(".modebar")).not.toBeNull());
     });
     it("is enabled by active", async () => {
-        const { getByTestId } = render(<Chart data={undefined} defaultConfig={chartConfig} testId="test" active={true} />);
+        const { getByTestId } = render(
+            <Chart data={undefined} defaultConfig={chartConfig} testId="test" active={true} />
+        );
         const elt = getByTestId("test");
         await waitFor(() => expect(elt.querySelector(".modebar")).not.toBeNull());
     });
@@ -126,7 +164,14 @@ describe("Chart Component", () => {
         const selProps = { selected0: JSON.stringify([2, 4, 6]) };
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Chart id="chart" data={undefined} updateVarName="data_var" defaultConfig={chartConfig} updateVars="varname=varname" {...selProps} />
+                <Chart
+                    id="chart"
+                    data={undefined}
+                    updateVarName="data_var"
+                    defaultConfig={chartConfig}
+                    updateVars="varname=varname"
+                    {...selProps}
+                />
             </TaipyContext.Provider>
         );
         expect(dispatch).toHaveBeenCalledWith({
@@ -157,12 +202,12 @@ describe("Chart Component", () => {
         const elt = getByTestId("test");
         await waitFor(() => expect(elt.querySelector(".modebar")).not.toBeNull());
         const modebar = elt.querySelector(".modebar");
-        modebar && await userEvent.click(modebar);
+        modebar && (await userEvent.click(modebar));
         expect(dispatch).toHaveBeenCalledWith({
             name: "data_var",
             payload: {
                 alldata: true,
-                columns: ["Day","Daily hospital occupancy"],
+                columns: ["Day", "Daily hospital occupancy"],
                 decimatorPayload: undefined,
                 pagekey: "Day-Daily hospital occupancy",
             },
@@ -220,11 +265,272 @@ describe("Chart Component", () => {
         expect(elts.length).toBeGreaterThan(1);
         expect(elts[0].tagName).toBe("TD");
     });
-    describe("Chart Component as Map", () => {
-        it("renders", async () => {
-            const { getByTestId } = render(<Chart data={mapValue} defaultConfig={mapConfig} layout={mapLayout} testId="test" />);
-            const elt = getByTestId("test");
-            await waitFor(() => expect(elt.querySelector(".modebar")).not.toBeNull());
+    it("Chart renders correctly", () => {
+        const figure = [{ data: [], layout: { title: "Mock Title" } }];
+        const { getByTestId } = render(
+            <Chart
+                id="table"
+                updateVarName="data_var"
+                data={undefined}
+                defaultConfig={chartConfig}
+                updateVars="varname=varname"
+                figure={figure}
+                testId="chart"
+            />
+        );
+        expect(getByTestId("chart")).toBeInTheDocument();
+    });
+    it("handles plotConfig prop correctly", () => {
+        const consoleInfoSpy = jest.spyOn(console, "info");
+        // Case 1: plotConfig is a valid JSON string
+        render(<Chart plotConfig='{"autosizable": true}' defaultConfig={chartConfig} />);
+        expect(consoleInfoSpy).not.toHaveBeenCalled();
+        // Case 2: plotConfig is not a valid JSON string
+        render(<Chart plotConfig="not a valid json" defaultConfig={chartConfig} />);
+        expect(consoleInfoSpy).toHaveBeenCalledWith(
+            "Error while parsing Chart.plot_config\nUnexpected token 'o', \"not a valid json\" is not valid JSON"
+        );
+        // Case 3: plotConfig is not an object
+        render(<Chart plotConfig='"not an object"' defaultConfig={chartConfig} />);
+        expect(consoleInfoSpy).toHaveBeenCalledWith("Error Chart.plot_config is not a dictionary");
+        consoleInfoSpy.mockRestore();
+    });
+    it("handles fullscreen toggle correctly", async () => {
+        // Render the Chart component
+        render(<Chart plotConfig='{"autosizable": true}' defaultConfig={chartConfig} />);
+        await waitFor(() => {
+            const fullscreenButton = document.querySelector(".modebar-btn[data-title='Full screen']");
+            fireEvent.click(fullscreenButton as Element);
+            const exitFullscreenButton = document.querySelector(".modebar-btn[data-title='Exit Full screen']");
+            fireEvent.click(exitFullscreenButton as Element);
+            const divElement = document.querySelector(".js-plotly-plot");
+            expect(divElement).toHaveStyle("width: 100%");
         });
+    });
+});
+
+describe("Chart Component as Map", () => {
+    it("renders", async () => {
+        const { getByTestId } = render(
+            <Chart data={mapValue} defaultConfig={mapConfig} layout={mapLayout} testId="test" />
+        );
+        const elt = getByTestId("test");
+        await waitFor(() => expect(elt.querySelector(".modebar")).not.toBeNull());
+    });
+});
+
+describe("getColNameFromIndexed function", () => {
+    it("returns the column name when the input string matches the pattern", () => {
+        const colName = "1/myColumn";
+        const result = getColNameFromIndexed(colName);
+        expect(result).toBe("myColumn");
+    });
+    it("returns the input string when the input string does not match the pattern", () => {
+        const colName = "myColumn";
+        const result = getColNameFromIndexed(colName);
+        expect(result).toBe("myColumn");
+    });
+    it("returns the input string when the input string is empty", () => {
+        const colName = "";
+        const result = getColNameFromIndexed(colName);
+        expect(result).toBe("");
+    });
+});
+
+describe("getValue function", () => {
+    it("returns the value from column when the input string matches the pattern", () => {
+        const values: TraceValueType = { myColumn: [1, 2, 3] };
+        const arr: string[] = ["myColumn"];
+        const idx = 0;
+        const result = getValue(values, arr, idx);
+        expect(result).toEqual([1, 2, 3]);
+    });
+
+    it("returns undefined when returnUndefined is true and value is empty", () => {
+        const values: TraceValueType = { myColumn: [] };
+        const arr: string[] = ["myColumn"];
+        const idx = 0;
+        const returnUndefined = true;
+        const result = getValue(values, arr, idx, returnUndefined);
+        expect(result).toBeUndefined();
+    });
+
+    it("returns empty array when returnUndefined is false and value is empty", () => {
+        const values: TraceValueType = { myColumn: [] };
+        const arr: string[] = ["myColumn"];
+        const idx = 0;
+        const returnUndefined = false;
+        const result = getValue(values, arr, idx, returnUndefined);
+        expect(result).toEqual([]);
+    });
+});
+
+describe("getRealIndex function", () => {
+    it("should return 0 if index is not a number", () => {
+        const data = {};
+        const dataKey = "someKey";
+        const props = { figure: false };
+
+        const { result } = renderHook(() => useGetRealIndex(data, dataKey, props));
+        const getRealIndex = result.current;
+        expect(getRealIndex(undefined)).toBe(0);
+    });
+
+    it("should return index if figure is true", () => {
+        const data = {};
+        const dataKey = "someKey";
+        const props = { figure: true };
+
+        const { result } = renderHook(() => useGetRealIndex(data, dataKey, props));
+        const getRealIndex = result.current;
+        expect(getRealIndex(5)).toBe(5); // index is a number
+    });
+
+    it("should return index if figure is false and tp_index does not exist", () => {
+        const data = {
+            someKey: {},
+        };
+        const dataKey = "someKey";
+        const props = { figure: false };
+
+        const { result } = renderHook(() => useGetRealIndex(data, dataKey, props));
+        const getRealIndex = result.current;
+        expect(getRealIndex(2)).toBe(2); // index is a number
+    });
+});
+
+describe("getValueFromCol function", () => {
+    it("should return an empty array when values is undefined", () => {
+        const result = getValueFromCol(undefined, "test");
+        expect(result).toEqual([]);
+    });
+
+    it("should return an empty array when values[col] is undefined", () => {
+        const values = { test: [1, 2, 3] };
+        const result = getValueFromCol(values, "nonexistent");
+        expect(result).toEqual([]);
+    });
+});
+
+describe("getAxis function", () => {
+    it("should return undefined when traces length is less than idx", () => {
+        const traces = [["test"]];
+        const columns: Record<string, ColumnDesc> = {
+            test: {
+                dfid: "test",
+                type: "testType",
+                index: 0,
+            },
+        };
+        const result = getAxis(traces, 2, columns, 0);
+        expect(result).toBeUndefined();
+    });
+
+    it("should return undefined when traces[idx] length is less than axis", () => {
+        const traces = [["test"]];
+        const columns: Record<string, ColumnDesc> = {
+            test: {
+                dfid: "test",
+                type: "testType",
+                index: 0,
+            },
+        };
+        const result = getAxis(traces, 0, columns, 2);
+        expect(result).toBeUndefined();
+    });
+
+    it("should return undefined when traces[idx][axis] is undefined", () => {
+        const traces = [["test"]];
+        const columns: Record<string, ColumnDesc> = {
+            test: {
+                dfid: "test",
+                type: "testType",
+                index: 0,
+            },
+        };
+        const result = getAxis(traces, 0, columns, 1);
+        expect(result).toBeUndefined();
+    });
+
+    it("should return undefined when columns[traces[idx][axis]] is undefined", () => {
+        const traces = [["test"]];
+        const columns: Record<string, ColumnDesc> = {
+            test: {
+                dfid: "test",
+                type: "testType",
+                index: 0,
+            },
+        };
+        const result = getAxis(traces, 0, columns, 1); // changed axis from 0 to 1
+        expect(result).toBeUndefined();
+    });
+
+    it("should return dfid when all conditions are met", () => {
+        const traces = [["test"]];
+        const columns: Record<string, ColumnDesc> = {
+            test: {
+                dfid: "test",
+                type: "testType",
+                index: 0,
+            },
+        };
+        const result = getAxis(traces, 0, columns, 0);
+        expect(result).toBe("test");
+    });
+});
+
+describe("click function", () => {
+    it("should return when div is not found", () => {
+        // Create a mock HTMLElement without 'div.svg-container'
+        const mockElement = document.createElement("div");
+        // Create a mock Event
+        const mockEvent = new Event("click");
+        // Call the click function with the mock HTMLElement and Event
+        (TaipyPlotlyButtons[0] as ModeBarButtonAny & Clickable).click(mockElement, mockEvent);
+        // Since there's no 'div.svg-container', the function should return without making any changes
+        // We can check this by verifying that no 'full-screen' class was added
+        expect(mockElement.classList.contains("full-screen")).toBe(false);
+    });
+    it("should set data-height when data-height is not set", () => {
+        // Create a mock HTMLElement
+        const mockElement = document.createElement("div");
+
+        // Create a mock div with class 'svg-container' and append it to the mockElement
+        const mockDiv = document.createElement("div");
+        mockDiv.className = "svg-container";
+        mockElement.appendChild(mockDiv);
+
+        // Create a mock Event
+        const mockEvent = {
+            ...new Event("click"),
+            currentTarget: document.createElement("div"),
+        };
+
+        // Call the click function with the mock HTMLElement and Event
+        (TaipyPlotlyButtons[0] as ModeBarButtonAny & Clickable).click(mockElement, mockEvent);
+
+        // Check that the 'data-height' attribute was set
+        expect(mockElement.getAttribute("data-height")).not.toBeNull();
+    });
+    it("should set data-title attribute", () => {
+        // Create a mock HTMLElement
+        const mockElement = document.createElement("div");
+
+        // Create a mock div with class 'svg-container' and append it to the mockElement
+        const mockDiv = document.createElement("div");
+        mockDiv.className = "svg-container";
+        mockElement.appendChild(mockDiv);
+
+        // Create a mock Event with a mock currentTarget
+        const mockEvent = {
+            ...new Event("click"),
+            currentTarget: mockElement,
+        };
+
+        // Call the click function with the mock HTMLElement and Event
+        (TaipyPlotlyButtons[0] as ModeBarButtonAny & Clickable).click(mockElement, mockEvent);
+
+        // Check that the 'data-title' attribute was set
+        expect(mockElement.getAttribute("data-title")).toBe("Exit Full screen");
     });
 });
