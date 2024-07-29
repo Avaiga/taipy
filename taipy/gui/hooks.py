@@ -4,8 +4,10 @@ from taipy.logger._taipy_logger import _TaipyLogger
 
 from .utils.singleton import _Singleton
 
+
 class BaseGuiHook:
     exposed_hooks: t.List[str] = []
+
 
 class GuiHooks(object, metaclass=_Singleton):
     def __init__(self):
@@ -29,6 +31,7 @@ class GuiHooks(object, metaclass=_Singleton):
                 if res == True:
                     return
                 # only hooks that return true are allowed to return values to ensure consistent response
-                if isinstance(res, (list, tuple)) and len(res) > 0 and res[0] == True:
-                    return res[1:] or None
+                if isinstance(res, (list, tuple)) and len(res) == 2 and res[0] == True:
+                    return res[1] or None
+
         return _resolve_hook
