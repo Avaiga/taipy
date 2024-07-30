@@ -65,8 +65,8 @@ class _Orchestrator(_AbstractOrchestrator):
              wait (bool): Wait for the orchestrated jobs created from the scenario or sequence submission to be
                 finished in asynchronous mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
-                before returning.
-                If not provided and wait is True, the function waits indefinitely.
+                before returning.<br/>
+                If not provided and *wait* is True, the function waits indefinitely.
              **properties (dict[str, any]): A key worded variable length list of user additional arguments
                 that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
         Returns:
@@ -120,8 +120,8 @@ class _Orchestrator(_AbstractOrchestrator):
              wait (bool): Wait for the orchestrated job created from the task submission to be finished
                 in asynchronous mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the job
-                to be finished before returning.
-                If not provided and wait is True, the function waits indefinitely.
+                to be finished before returning.<br/>
+                If not provided and *wait* is True, the function waits indefinitely.
              **properties (dict[str, any]): A key worded variable length list of user additional arguments
                 that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
         Returns:
