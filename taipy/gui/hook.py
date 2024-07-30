@@ -5,33 +5,36 @@ from taipy.logger._taipy_logger import _TaipyLogger
 from .utils.singleton import _Singleton
 
 
-class BaseGuiHook:
-    exposed_hooks: t.List[str] = []
+class Hook:
+    method_names: t.List[str] = []
 
 
-class GuiHooks(object, metaclass=_Singleton):
+class Hooks(object, metaclass=_Singleton):
     def __init__(self):
-        self.__hooks: t.List[BaseGuiHook] = []
+        self.__hooks: t.List[Hook] = []
 
-    def _register_gui_hook(self, hook: BaseGuiHook):
+    def _register_hook(self, hook: Hook):
         self.__hooks.append(hook)
 
     def __getattr__(self, name: str):
         def _resolve_hook(*args, **kwargs):
             for hook in self.__hooks:
-                if name not in hook.exposed_hooks:
+                if name not in hook.method_names:
                     continue
                 # call hook
                 try:
+                    func = getattr(hook, name)
+                    if not callable(func):
+                        raise Exception(f"'{name}' hook is not callable")
                     res = getattr(hook, name)(*args, **kwargs)
                 except Exception as e:
-                    _TaipyLogger._get_logger().error(f"Error while calling Gui Hooks '{name}': {e}")
+                    _TaipyLogger._get_logger().error(f"Error while calling hook '{name}': {e}")
                     return
                 # check if the hook returns True -> stop the chain
-                if res == True:
+                if res is True:
                     return
                 # only hooks that return true are allowed to return values to ensure consistent response
-                if isinstance(res, (list, tuple)) and len(res) == 2 and res[0] == True:
-                    return res[1] or None
+                if isinstance(res, (list, tuple)) and len(res) == 2 and res[0] is True:
+                    return res[1]
 
         return _resolve_hook

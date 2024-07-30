@@ -66,7 +66,7 @@ from .data.data_accessor import _DataAccessors
 from .data.data_format import _DataFormat
 from .data.data_scope import _DataScopes
 from .extension.library import Element, ElementLibrary
-from .hooks import GuiHooks
+from .hook import Hooks
 from .page import Page
 from .partial import Partial
 from .server import _Server
@@ -367,7 +367,7 @@ class Gui:
         )
 
         # Init Gui Hooks
-        GuiHooks()._init(self)
+        Hooks()._init(self)
 
         if page:
             self.add_page(name=Gui.__root_page_name, page=page)
@@ -607,10 +607,10 @@ class Gui:
             return None
 
     def _handle_connect(self):
-        GuiHooks().handle_connect(self)
+        Hooks().handle_connect(self)
 
     def _handle_disconnect(self):
-        GuiHooks()._handle_disconnect(self)
+        Hooks()._handle_disconnect(self)
 
     def _manage_message(self, msg_type: _WsType, message: dict) -> None:
         try:
@@ -671,7 +671,7 @@ class Gui:
     # To be expanded by inheriting classes
     # this will be used to handle ws messages that is not handled by the base Gui class
     def _manage_external_message(self, msg_type: _WsType, message: dict) -> None:
-        GuiHooks()._manage_external_message(self, msg_type, message)
+        Hooks()._manage_external_message(self, msg_type, message)
 
     def __front_end_update(
         self,
@@ -1905,7 +1905,7 @@ class Gui:
         if name == Gui.__root_page_name:
             self._config.root_page = new_page
         # Validate Page
-        GuiHooks().validate_page(self, page)
+        Hooks().validate_page(self, page)
         # Update locals context
         self.__locals_context.add(page._get_module_name(), page._get_locals())
         # Update variable directory
@@ -1916,7 +1916,7 @@ class Gui:
             page._notebook_gui = self
             page._notebook_page = new_page
         # add page to hook
-        GuiHooks().add_page(self, page)
+        Hooks().add_page(self, page)
 
     def add_pages(self, pages: t.Optional[t.Union[t.Mapping[str, t.Union[str, Page]], str]] = None) -> None:
         """Add several pages to the Graphical User Interface.
@@ -2630,7 +2630,7 @@ class Gui:
         # --------------------------------------------------------------------------------
 
         # setup run function with gui hooks
-        GuiHooks().run(self, **kwargs)
+        Hooks().run(self, **kwargs)
 
         app_config = self._config.config
 
