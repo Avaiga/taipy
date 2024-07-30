@@ -241,6 +241,7 @@ def submit(
             in asynchronous mode.
         timeout (Union[float, int]): The optional maximum number of seconds to wait
             for the jobs to be finished before returning.
+            If not provided and wait is True, the function waits indefinitely.
         **properties (dict[str, any]): A key-worded variable length list of user additional arguments
             that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
 

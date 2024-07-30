@@ -312,6 +312,7 @@ class Sequence(_Entity, Submittable, _Labeled):
                 in asynchronous mode.
             timeout (Union[float, int]): The maximum number of seconds to wait for the jobs to be finished before
                 returning.
+                If not provided and wait is True, the function waits indefinitely.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
             A `Submission^` containing the information of the submission.
