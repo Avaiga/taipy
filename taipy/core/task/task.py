@@ -231,7 +231,8 @@ class Task(_Entity, _Labeled):
             wait (bool): Wait for the orchestrated job created from the task submission to be finished in asynchronous
                 mode.
             timeout (Union[float, int]): The maximum number of seconds to wait for the job to be finished before
-                returning.
+                returning.<br/>
+                If not provided and *wait* is True, the function waits indefinitely.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
             A `Submission^` containing the information of the submission.
