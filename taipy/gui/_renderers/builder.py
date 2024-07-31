@@ -663,8 +663,8 @@ class _Builder:
                 sel = []
 
     def _get_list_attribute(self, name: str, list_type: PropertyType):
-        varname = self.__hashes.get(name)
-        if varname is None:
+        hash_name = self.__hashes.get(name)
+        if hash_name is None:
             list_val = self.__attributes.get(name)
             if isinstance(list_val, str):
                 list_val = list(list_val.split(";"))
@@ -680,7 +680,8 @@ class _Builder:
                 list_val = []
             self.__set_react_attribute(_to_camel_case(name), list_val)
         else:
-            self.__set_react_attribute(_to_camel_case(name), varname)
+            self.__set_react_attribute(_to_camel_case(name), hash_name)
+            self.__update_vars.append(f"{_to_camel_case(name)}={hash_name}")
         return self
 
     def __set_class_names(self):

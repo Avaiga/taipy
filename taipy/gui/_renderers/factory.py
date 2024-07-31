@@ -502,6 +502,7 @@ class _Factory:
         )
         .set_value_and_default(with_default=False, var_type=PropertyType.data)
         ._get_dataframe_attributes()
+        ._get_list_attribute("selected", PropertyType.number)
         .set_attributes(
             [
                 ("page_size", PropertyType.number, "100"),
@@ -524,7 +525,6 @@ class _Factory:
             ]
         )
         ._set_propagate()
-        ._get_list_attribute("selected", PropertyType.number)
         ._set_table_pagesize_options(),
         "text": lambda gui, control_type, attrs: _Builder(
             gui=gui,

@@ -95,7 +95,7 @@ const defaultStyle = { position: "relative", display: "inline-block" };
 
 const indexedData = /^(\d+)\/(.*)/;
 
-const getColNameFromIndexed = (colName: string): string => {
+export const getColNameFromIndexed = (colName: string): string => {
     if (colName) {
         const reRes = indexedData.exec(colName);
         if (reRes && reRes.length > 2) {
@@ -105,7 +105,7 @@ const getColNameFromIndexed = (colName: string): string => {
     return colName;
 };
 
-const getValue = <T,>(
+export const getValue = <T,>(
     values: TraceValueType | undefined,
     arr: T[],
     idx: number,
@@ -118,9 +118,10 @@ const getValue = <T,>(
     return undefined;
 };
 
-const getValueFromCol = (values: TraceValueType | undefined, col: string): (string | number)[] => {
+export const getValueFromCol = (values: TraceValueType | undefined, col: string): (string | number)[] => {
     if (values) {
         if (col) {
+            // TODO: Re-review the logic here
             if (Array.isArray(values)) {
                 const reRes = indexedData.exec(col);
                 if (reRes && reRes.length > 2) {
@@ -134,7 +135,7 @@ const getValueFromCol = (values: TraceValueType | undefined, col: string): (stri
     return [];
 };
 
-const getAxis = (traces: string[][], idx: number, columns: Record<string, ColumnDesc>, axis: number) => {
+export const getAxis = (traces: string[][], idx: number, columns: Record<string, ColumnDesc>, axis: number) => {
     if (traces.length > idx && traces[idx].length > axis && traces[idx][axis] && columns[traces[idx][axis]])
         return columns[traces[idx][axis]].dfid;
     return undefined;
@@ -178,7 +179,7 @@ interface WithpointNumbers {
     pointNumbers: number[];
 }
 
-const getPlotIndex = (pt: PlotDatum) =>
+export const getPlotIndex = (pt: PlotDatum) =>
     pt.pointIndex === undefined
         ? pt.pointNumber === undefined
             ? (pt as unknown as WithpointNumbers).pointNumbers?.length
@@ -210,7 +211,7 @@ const defaultConfig = {
 const emptyLayout = {} as Partial<Layout>;
 const emptyData = {} as Record<string, TraceValueType>;
 
-const TaipyPlotlyButtons: ModeBarButtonAny[] = [
+export const TaipyPlotlyButtons: ModeBarButtonAny[] = [
     {
         name: "Full screen",
         title: "Full screen",
@@ -517,6 +518,7 @@ const Chart = (props: ChartProp) => {
                 plconf = {};
             }
         }
+        plconf.displaylogo = !!plconf.displaylogo;
         plconf.modeBarButtonsToAdd = TaipyPlotlyButtons;
         // plconf.responsive = true; // this is the source of the on/off height ...
         plconf.autosizable = true;
@@ -583,8 +585,8 @@ const Chart = (props: ChartProp) => {
                 ? props.figure
                     ? index
                     : data[dataKey].tp_index
-                    ? (data[dataKey].tp_index[index] as number)
-                    : index
+                      ? (data[dataKey].tp_index[index] as number)
+                      : index
                 : 0,
         [data, dataKey, props.figure]
     );

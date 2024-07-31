@@ -689,7 +689,7 @@
                     },
                     {
                         "name": "selected",
-                        "type": "list[int]|str",
+                        "type": "dynamic(list[int]|str)",
                         "doc": "The list of the indices of the rows to be displayed as selected."
                     },
                     {

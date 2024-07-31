@@ -87,7 +87,7 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
             )
             # Allow element to be accessed from the root module
             if hasattr(self.__module, element_name):
-                _TaipyLogger()._get_logger().info(
+                _TaipyLogger._get_logger().info(
                     f"Can't add element `{element_name}` of library `{library_name}` to the root of Builder API as another element with the same name already exists."  # noqa: E501
                 )
                 continue
