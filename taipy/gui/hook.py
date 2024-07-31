@@ -14,6 +14,10 @@ class Hooks(object, metaclass=_Singleton):
         self.__hooks: t.List[Hook] = []
 
     def _register_hook(self, hook: Hook):
+        # Prevent duplicated hooks
+        for h in self.__hooks:
+            if isinstance(hook, type(h)):
+                return
         self.__hooks.append(hook)
 
     def __getattr__(self, name: str):
