@@ -236,4 +236,4 @@ def test_submit_task_with_callbacks_and_force_and_wait():
         assert job._subscribers[1].__code__ == _Orchestrator._update_submission_status.__code__
         assert job._subscribers[2].__code__ == _Orchestrator._on_status_change.__code__
 
-        mck.assert_called_once_with(job, timeout=2)
+        mck.assert_called_once_with(job, 2)

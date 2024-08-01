@@ -689,7 +689,7 @@
                     },
                     {
                         "name": "selected",
-                        "type": "list[int]|str",
+                        "type": "dynamic(list[int]|str)",
                         "doc": "The list of the indices of the rows to be displayed as selected."
                     },
                     {
@@ -1264,7 +1264,7 @@
                         "name": "value",
                         "type": "dynamic(int)",
                         "doc": "If set, then the value represents the progress percentage that is shown.TODO - if unset?",
-                        "default_property": "true"
+                        "default_property": true
                     },
                     {
                         "name": "linear",
@@ -1281,8 +1281,8 @@
                     {
                         "name": "render",
                         "type": "dynamic(bool)",
-                        "doc": "If False, this progress indicator is hidden from the page.",
-                        "default_property": "true"
+                        "default_value": "True",
+                        "doc": "If False, this progress indicator is hidden from the page."
                     }
                 ]
             }

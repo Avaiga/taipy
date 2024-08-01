@@ -65,7 +65,8 @@ class _Orchestrator(_AbstractOrchestrator):
              wait (bool): Wait for the orchestrated jobs created from the scenario or sequence submission to be
                 finished in asynchronous mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
-                before returning.
+                before returning.<br/>
+                If not provided and *wait* is True, the function waits indefinitely.
              **properties (dict[str, any]): A key worded variable length list of user additional arguments
                 that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
         Returns:
@@ -97,7 +98,7 @@ class _Orchestrator(_AbstractOrchestrator):
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         elif wait:
-            cls._wait_until_job_finished(jobs, timeout=timeout or 0)
+            cls._wait_until_job_finished(jobs, timeout)
         return submission
 
     @classmethod
@@ -119,7 +120,8 @@ class _Orchestrator(_AbstractOrchestrator):
              wait (bool): Wait for the orchestrated job created from the task submission to be finished
                 in asynchronous mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the job
-                to be finished before returning.
+                to be finished before returning.<br/>
+                If not provided and *wait* is True, the function waits indefinitely.
              **properties (dict[str, any]): A key worded variable length list of user additional arguments
                 that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
         Returns:
@@ -145,7 +147,7 @@ class _Orchestrator(_AbstractOrchestrator):
             cls._check_and_execute_jobs_if_development_mode()
         else:
             if wait:
-                cls._wait_until_job_finished(job, timeout=timeout or 0)
+                cls._wait_until_job_finished(job, timeout)
         return submission
 
     @classmethod
@@ -199,9 +201,11 @@ class _Orchestrator(_AbstractOrchestrator):
             cls.jobs_to_run.put(job)
 
     @classmethod
-    def _wait_until_job_finished(cls, jobs: Union[List[Job], Job], timeout: float = 0) -> None:
+    def _wait_until_job_finished(cls, jobs: Union[List[Job], Job], timeout: Optional[Union[float, int]] = None) -> None:
         #  Note: this method should be prefixed by two underscores, but it has only one, so it can be mocked in tests.
         def __check_if_timeout(st, to):
+            if to is None:
+                return True
             return (datetime.now() - st).seconds < to
 
         start = datetime.now()

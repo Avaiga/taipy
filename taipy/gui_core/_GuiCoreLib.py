@@ -87,7 +87,7 @@ class _GuiCore(ElementLibrary):
             },
             inner_properties={
                 "inner_scenarios": ElementProperty(
-                    PropertyType.lov,
+                    PropertyType.lov_no_default,
                     f"{{{__CTX_VAR_NAME}.get_scenarios(<tp:prop:{__SEL_SCENARIOS_PROP}>, "
                     + f"{__SCENARIO_SELECTOR_FILTER_VAR}<tp:uniq:sc>, "
                     + f"{__SCENARIO_SELECTOR_SORT_VAR}<tp:uniq:sc>)}}",
@@ -182,7 +182,7 @@ class _GuiCore(ElementLibrary):
             },
             inner_properties={
                 "inner_datanodes": ElementProperty(
-                    PropertyType.lov,
+                    PropertyType.lov_no_default,
                     f"{{{__CTX_VAR_NAME}.get_datanodes_tree(<tp:prop:{__DATANODE_SEL_SCENARIO_PROP}>, "
                     + f"<tp:prop:{__SEL_DATANODES_PROP}>, "
                     + f"{__DATANODE_SELECTOR_FILTER_VAR}<tp:uniq:dns>, "
