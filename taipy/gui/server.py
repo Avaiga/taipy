@@ -256,7 +256,8 @@ class _Server:
 
     def _apply_patch(self):
         if self._get_async_mode() == "gevent" and util.find_spec("gevent"):
-            from gevent import monkey, get_hub
+            from gevent import get_hub, monkey
+
             get_hub().NOT_ERROR += (KeyboardInterrupt, )
             if not monkey.is_module_patched("time"):
                 monkey.patch_time()
