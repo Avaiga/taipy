@@ -16,7 +16,8 @@ class Hooks(object, metaclass=_Singleton):
     def _register_hook(self, hook: Hook):
         # Prevent duplicated hooks
         for h in self.__hooks:
-            if isinstance(hook, type(h)):
+            if type(hook) is type(h):
+                _TaipyLogger._get_logger().info(f"Failed to register duplicated hook of type '{type(h)}'")
                 return
         self.__hooks.append(hook)
 
