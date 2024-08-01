@@ -14,6 +14,11 @@ class Hooks(object, metaclass=_Singleton):
         self.__hooks: t.List[Hook] = []
 
     def _register_hook(self, hook: Hook):
+        # Prevent duplicated hooks
+        for h in self.__hooks:
+            if type(hook) is type(h):
+                _TaipyLogger._get_logger().info(f"Failed to register duplicated hook of type '{type(h)}'")
+                return
         self.__hooks.append(hook)
 
     def __getattr__(self, name: str):
