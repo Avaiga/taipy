@@ -45,7 +45,7 @@ from .exceptions.exceptions import (
 from .job._job_manager_factory import _JobManagerFactory
 from .job.job import Job
 from .job.job_id import JobId
-from .reason import EntityIsNotSubmittableEntity, ReasonCollection
+from .reason import EntityDoesNotExist, EntityIsNotSubmittableEntity, ReasonCollection
 from .scenario._scenario_manager_factory import _ScenarioManagerFactory
 from .scenario.scenario import Scenario
 from .scenario.scenario_id import ScenarioId
@@ -160,7 +160,7 @@ def is_editable(
         return _SubmissionManagerFactory._build_manager()._is_editable(entity)
     if isinstance(entity, str) and entity.startswith(Submission._ID_PREFIX):
         return _SubmissionManagerFactory._build_manager()._is_editable(SequenceId(entity))
-    return False
+    return ReasonCollection(str(entity), EntityDoesNotExist(str(entity)))
 
 
 def is_readable(
@@ -216,7 +216,7 @@ def is_readable(
         return _SubmissionManagerFactory._build_manager()._is_readable(entity)
     if isinstance(entity, str) and entity.startswith(Submission._ID_PREFIX):
         return _SubmissionManagerFactory._build_manager()._is_readable(SequenceId(entity))
-    return False
+    return ReasonCollection(str(entity), EntityDoesNotExist(str(entity)))
 
 
 @_warn_no_core_service("The submitted entity will not be executed until the Core service is running.")
@@ -461,7 +461,7 @@ def is_deletable(entity: Union[Scenario, Job, Submission, ScenarioId, JobId, Sub
         return _SubmissionManagerFactory._build_manager()._is_deletable(entity)
     if isinstance(entity, str) and entity.startswith(Submission._ID_PREFIX):
         return _SubmissionManagerFactory._build_manager()._is_deletable(SubmissionId(entity))
-    return True
+    return ReasonCollection()._add_reason(str(entity), EntityDoesNotExist(str(entity)))
 
 
 def delete(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId, SubmissionId]):

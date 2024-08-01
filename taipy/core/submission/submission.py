@@ -21,12 +21,13 @@ from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..job.job import Job, JobId
 from ..notification import Event, EventEntityType, EventOperation, _make_event
+from ..reason.reason_collection import ReasonCollection
 from .submission_id import SubmissionId
 from .submission_status import SubmissionStatus
 
 
 class Submission(_Entity, _Labeled):
-    """ Submission of a submittable entity: `Task^`, a `Sequence^` or a `Scenario^`.
+    """Submission of a submittable entity: `Task^`, a `Sequence^` or a `Scenario^`.
 
     Task, Sequence, and Scenario entities can be submitted for execution. The submission
     represents the unique request to execute a submittable entity. The submission is created
@@ -236,7 +237,7 @@ class Submission(_Entity, _Labeled):
             SubmissionStatus.CANCELED,
         ]
 
-    def is_deletable(self) -> bool:
+    def is_deletable(self) -> ReasonCollection:
         """Indicate if the submission can be deleted.
 
         Returns:
