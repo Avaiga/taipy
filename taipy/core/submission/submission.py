@@ -241,7 +241,8 @@ class Submission(_Entity, _Labeled):
         """Indicate if the submission can be deleted.
 
         Returns:
-            True if the submission can be deleted. False otherwise.
+            A ReasonCollection object that can function as a Boolean value,
+            which is True if the submission can be deleted. False otherwise.
         """
         from ... import core as tp
 

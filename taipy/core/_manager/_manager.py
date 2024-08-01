@@ -128,7 +128,8 @@ class _Manager(Generic[EntityType]):
     @classmethod
     def _exists(cls, entity_id: str) -> ReasonCollection:
         """
-        Returns True if the entity id exists.
+        A ReasonCollection object that can function as a Boolean value,
+        which is True if the entity id exists.
         """
         reason_collector = ReasonCollection()
 

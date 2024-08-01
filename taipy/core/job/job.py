@@ -353,7 +353,8 @@ class Job(_Entity, _Labeled):
         """Indicate if the job can be deleted.
 
         Returns:
-            True if the job can be deleted. False otherwise.
+            A ReasonCollection object that can function as a Boolean value,
+            which is True if the job can be deleted. False otherwise.
         """
         from ... import core as tp
 

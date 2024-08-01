@@ -227,4 +227,4 @@ class SubmissionStatusIsUndefined(Reason, _DataNodeReasonMixin):
     """
 
     def __init__(self, submission_id: str):
-        Reason.__init__(self, f"The submission {submission_id} status is undefined.")
+        Reason.__init__(self, f"The status of submission {submission_id} is undefined.")

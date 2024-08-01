@@ -130,7 +130,8 @@ def is_editable(
     This function checks if the given entity can be edited.
 
     Returns:
-        True if the given entity can be edited. False otherwise.
+        A ReasonCollection object that can function as a Boolean value,
+        which is True if the given entity can be edited. False otherwise.
     """
     if isinstance(entity, Cycle):
         return _CycleManagerFactory._build_manager()._is_editable(entity)
@@ -186,7 +187,8 @@ def is_readable(
     This function checks if the given entity can be read.
 
     Returns:
-        True if the given entity can be read. False otherwise.
+        A ReasonCollection object that can function as a Boolean value,
+        which is True if the given entity can be read. False otherwise.
     """
     if isinstance(entity, Cycle):
         return _CycleManagerFactory._build_manager()._is_readable(entity)
@@ -318,7 +320,8 @@ def exists(
             identifier of the entity to check for existence.
 
     Returns:
-        True if the given entity exists. False otherwise.
+        A ReasonCollection object that can function as a Boolean value,
+        which is True if the given entity exists. False otherwise.
 
     Raises:
         ModelNotFound: If the entity's type cannot be determined.
@@ -447,7 +450,8 @@ def is_deletable(entity: Union[Scenario, Job, Submission, ScenarioId, JobId, Sub
             job or submission to check.
 
     Returns:
-        True if the given scenario, job or submission can be deleted. False otherwise.
+        A ReasonCollection object that can function as a Boolean value,
+        which is True if the given scenario, job or submission can be deleted. False otherwise.
     """
     if isinstance(entity, Job):
         return _JobManagerFactory._build_manager()._is_deletable(entity)
@@ -619,7 +623,8 @@ def is_promotable(scenario: Union[Scenario, ScenarioId]) -> ReasonCollection:
         scenario (Union[Scenario, ScenarioId]): The scenario to be evaluated for promotion.
 
     Returns:
-        True if the given scenario can be promoted to be a primary scenario. False otherwise.
+        A ReasonCollection object that can function as a Boolean value,
+        which is True if the given scenario can be promoted to be a primary scenario. False otherwise.
     """
     return _ScenarioManagerFactory._build_manager()._is_promotable_to_primary(scenario)
 
