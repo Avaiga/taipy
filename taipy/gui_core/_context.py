@@ -94,11 +94,19 @@ class _GuiCoreContext(CoreEventConsumerBase):
         # locks
         self.lock = Lock()
         self.submissions_lock = Lock()
+        # lazy_start
+        self.__started = False
         # super
         super().__init__(reg_id, reg_queue)
+
+    def __lazy_start(self):
+        if self.__started:
+            return
+        self.__started = True
         self.start()
 
     def process_event(self, event: Event):
+        self.__lazy_start()
         if event.entity_type == EventEntityType.SCENARIO:
             with self.gui._get_autorization(system=True):
                 self.scenario_refresh(
@@ -221,6 +229,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return entity
 
     def cycle_adapter(self, cycle: Cycle, sorts: t.Optional[t.List[t.Dict[str, t.Any]]] = None):
+        self.__lazy_start()
         try:
             if (
                 isinstance(cycle, Cycle)
@@ -243,6 +252,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return None
 
     def scenario_adapter(self, scenario: Scenario):
+        self.__lazy_start()
         if isinstance(scenario, (tuple, list)):
             return scenario
         try:
@@ -342,6 +352,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         filters: t.Optional[t.List[t.Dict[str, t.Any]]],
         sorts: t.Optional[t.List[t.Dict[str, t.Any]]],
     ):
+        self.__lazy_start()
         cycles_scenarios: t.List[t.Union[Cycle, Scenario]] = []
         with self.lock:
             # always needed to get scenarios for a cycle in cycle_adapter
@@ -360,12 +371,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return adapted_list
 
     def select_scenario(self, state: State, id: str, payload: t.Dict[str, str]):
+        self.__lazy_start()
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 2:
             return
         state.assign(args[0], args[1])
 
     def get_scenario_by_id(self, id: str) -> t.Optional[Scenario]:
+        self.__lazy_start()
         if not id or not is_readable(t.cast(ScenarioId, id)):
             return None
         try:
@@ -374,6 +387,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return None
 
     def get_scenario_configs(self):
+        self.__lazy_start()
         with self.lock:
             if self.scenario_configs is None:
                 configs = Config.scenarios
@@ -382,6 +396,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return self.scenario_configs
 
     def crud_scenario(self, state: State, id: str, payload: t.Dict[str, str]):  # noqa: C901
+        self.__lazy_start()
         args = payload.get("args")
         start_idx = 2
         if (
@@ -519,6 +534,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             state.assign(var_name, msg)
 
     def edit_entity(self, state: State, id: str, payload: t.Dict[str, str]):
+        self.__lazy_start()
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
@@ -567,6 +583,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 _GuiCoreContext.__assign_var(state, error_var, f"Error updating {type(scenario).__name__}. {e}")
 
     def submit_entity(self, state: State, id: str, payload: t.Dict[str, str]):
+        self.__lazy_start()
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
@@ -679,6 +696,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         filters: t.Optional[t.List[t.Dict[str, t.Any]]],
         sorts: t.Optional[t.List[t.Dict[str, t.Any]]],
     ):
+        self.__lazy_start()
         base_list = []
         with self.lock:
             self.__do_datanodes_tree()
@@ -707,6 +725,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         sorts: t.Optional[t.List[t.Dict[str, t.Any]]] = None,
         adapt_dn=True,
     ):
+        self.__lazy_start()
         if isinstance(data, tuple):
             raise NotImplementedError
         if isinstance(data, list):
@@ -767,12 +786,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return None
 
     def get_jobs_list(self):
+        self.__lazy_start()
         with self.lock:
             if self.jobs_list is None:
                 self.jobs_list = get_jobs()
             return self.jobs_list
 
     def job_adapter(self, job):
+        self.__lazy_start()
         try:
             if hasattr(job, "id") and is_readable(job.id) and core_get(job.id) is not None:
                 if isinstance(job, Job):
@@ -795,6 +816,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return None
 
     def act_on_jobs(self, state: State, id: str, payload: t.Dict[str, str]):
+        self.__lazy_start()
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
@@ -830,6 +852,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             _GuiCoreContext.__assign_var(state, payload.get("error_id"), "<br/>".join(errs) if errs else "")
 
     def edit_data_node(self, state: State, id: str, payload: t.Dict[str, str]):
+        self.__lazy_start()
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
@@ -847,6 +870,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 _GuiCoreContext.__assign_var(state, error_var, f"Error updating Datanode. {e}")
 
     def lock_datanode_for_edit(self, state: State, id: str, payload: t.Dict[str, str]):
+        self.__lazy_start()
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
@@ -893,6 +917,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         ent.properties.pop(key, None)
 
     def get_scenarios_for_owner(self, owner_id: str):
+        self.__lazy_start()
         cycles_scenarios: t.List[t.Union[Scenario, Cycle]] = []
         with self.lock:
             if self.scenario_by_cycle is None:
@@ -913,6 +938,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return sorted(cycles_scenarios, key=_get_entity_property("creation_date", Scenario))
 
     def get_data_node_history(self, id: str):
+        self.__lazy_start()
         if id and (dn := core_get(id)) and isinstance(dn, DataNode):
             res = []
             for e in dn.edits:
@@ -945,6 +971,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return True
 
     def update_data(self, state: State, id: str, payload: t.Dict[str, str]):
+        self.__lazy_start()
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
@@ -973,6 +1000,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             _GuiCoreContext.__assign_var(state, payload.get("data_id"), entity_id)  # this will update the data value
 
     def tabular_data_edit(self, state: State, var_name: str, payload: dict):
+        self.__lazy_start()
         error_var = payload.get("error_id")
         user_data = payload.get("user_data", {})
         dn_id = user_data.get("dn_id")
@@ -1039,6 +1067,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         _GuiCoreContext.__assign_var(state, payload.get("data_id"), dn_id)
 
     def get_data_node_properties(self, id: str):
+        self.__lazy_start()
         if id and is_readable(t.cast(DataNodeId, id)) and (dn := core_get(id)) and isinstance(dn, DataNode):
             try:
                 return (
@@ -1056,6 +1085,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return datanode.read()
 
     def get_data_node_tabular_data(self, id: str):
+        self.__lazy_start()
         if (
             id
             and is_readable(t.cast(DataNodeId, id))
@@ -1072,6 +1102,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return None
 
     def get_data_node_tabular_columns(self, id: str):
+        self.__lazy_start()
         if (
             id
             and is_readable(t.cast(DataNodeId, id))
@@ -1090,6 +1121,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return None
 
     def get_data_node_chart_config(self, id: str):
+        self.__lazy_start()
         if (
             id
             and is_readable(t.cast(DataNodeId, id))
@@ -1106,6 +1138,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return None
 
     def on_dag_select(self, state: State, id: str, payload: t.Dict[str, str]):
+        self.__lazy_start()
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 2:
             return
@@ -1124,4 +1157,5 @@ class _GuiCoreContext(CoreEventConsumerBase):
             _warn(f"dag.on_action(): Invalid function '{args[1]}()'.")
 
     def get_creation_reason(self):
+        self.__lazy_start()
         return "" if (reason := can_create()) else f"Cannot create scenario: {reason.reasons}"

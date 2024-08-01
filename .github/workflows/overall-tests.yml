@@ -18,7 +18,7 @@ jobs:
     uses: ./.github/workflows/partial-tests.yml
 
   coverage:
-    timeout-minutes: 40
+    timeout-minutes: 50
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'pull_request' }}
     steps:
