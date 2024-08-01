@@ -124,7 +124,7 @@ def is_editable(
         CycleId,
         SubmissionId,
     ],
-) -> bool:
+) -> ReasonCollection:
     """Indicate if an entity can be edited.
 
     This function checks if the given entity can be edited.
@@ -180,7 +180,7 @@ def is_readable(
         CycleId,
         SubmissionId,
     ],
-) -> bool:
+) -> ReasonCollection:
     """Indicate if an entity can be read.
 
     This function checks if the given entity can be read.
@@ -264,46 +264,48 @@ def submit(
 
 
 @overload
-def exists(entity_id: TaskId) -> bool:
+def exists(entity_id: TaskId) -> ReasonCollection:
     ...
 
 
 @overload
-def exists(entity_id: DataNodeId) -> bool:
+def exists(entity_id: DataNodeId) -> ReasonCollection:
     ...
 
 
 @overload
-def exists(entity_id: SequenceId) -> bool:
+def exists(entity_id: SequenceId) -> ReasonCollection:
     ...
 
 
 @overload
-def exists(entity_id: ScenarioId) -> bool:
+def exists(entity_id: ScenarioId) -> ReasonCollection:
     ...
 
 
 @overload
-def exists(entity_id: CycleId) -> bool:
+def exists(entity_id: CycleId) -> ReasonCollection:
     ...
 
 
 @overload
-def exists(entity_id: JobId) -> bool:
+def exists(entity_id: JobId) -> ReasonCollection:
     ...
 
 
 @overload
-def exists(entity_id: SubmissionId) -> bool:
+def exists(entity_id: SubmissionId) -> ReasonCollection:
     ...
 
 
 @overload
-def exists(entity_id: str) -> bool:
+def exists(entity_id: str) -> ReasonCollection:
     ...
 
 
-def exists(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId, SubmissionId, str]) -> bool:
+def exists(
+    entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId, SubmissionId, str],
+) -> ReasonCollection:
     """Check if an entity with the specified identifier exists.
 
     This function checks if an entity with the given identifier exists.
@@ -434,7 +436,7 @@ def get_tasks() -> List[Task]:
     return _TaskManagerFactory._build_manager()._get_all()
 
 
-def is_deletable(entity: Union[Scenario, Job, Submission, ScenarioId, JobId, SubmissionId]) -> bool:
+def is_deletable(entity: Union[Scenario, Job, Submission, ScenarioId, JobId, SubmissionId]) -> ReasonCollection:
     """Check if a `Scenario^`, a `Job^` or a `Submission^` can be deleted.
 
     This function determines whether a scenario or a job can be safely
@@ -607,7 +609,7 @@ def get_primary_scenarios(
     return scenarios
 
 
-def is_promotable(scenario: Union[Scenario, ScenarioId]) -> bool:
+def is_promotable(scenario: Union[Scenario, ScenarioId]) -> ReasonCollection:
     """Determine if a scenario can be promoted to become a primary scenario.
 
     This function checks whether the given scenario is eligible to be promoted

@@ -17,6 +17,7 @@ from .._entity._entity_ids import _EntityIds
 from .._repository._abstract_repository import _AbstractRepository
 from ..exceptions.exceptions import ModelNotFound
 from ..notification import Event, EventOperation, Notifier
+from ..reason import EntityDoesNotExist, ReasonCollection
 
 EntityType = TypeVar("EntityType")
 
@@ -125,11 +126,16 @@ class _Manager(Generic[EntityType]):
             return default
 
     @classmethod
-    def _exists(cls, entity_id: str) -> bool:
+    def _exists(cls, entity_id: str) -> ReasonCollection:
         """
         Returns True if the entity id exists.
         """
-        return cls._repository._exists(entity_id)
+        reason_collector = ReasonCollection()
+
+        if not cls._repository._exists(entity_id):
+            reason_collector._add_reason(entity_id, EntityDoesNotExist(entity_id))
+
+        return reason_collector
 
     @classmethod
     def _delete_entities_of_multiple_types(cls, _entity_ids: _EntityIds):
@@ -153,9 +159,9 @@ class _Manager(Generic[EntityType]):
         _SubmissionManagerFactory._build_manager()._delete_many(_entity_ids.submission_ids)
 
     @classmethod
-    def _is_editable(cls, entity: Union[EntityType, str]) -> bool:
-        return True
+    def _is_editable(cls, entity: Union[EntityType, str]) -> ReasonCollection:
+        return ReasonCollection()
 
     @classmethod
-    def _is_readable(cls, entity: Union[EntityType, str]) -> bool:
-        return True
+    def _is_readable(cls, entity: Union[EntityType, str]) -> ReasonCollection:
+        return ReasonCollection()

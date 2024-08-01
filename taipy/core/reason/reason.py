@@ -155,3 +155,76 @@ class InvalidUploadFile(Reason, _DataNodeReasonMixin):
     def __init__(self, file_name: str, datanode_id: str):
         Reason.__init__(self, f'The uploaded file {file_name} has invalid data for data node "{datanode_id}"')
         _DataNodeReasonMixin.__init__(self, datanode_id)
+
+
+class EntityDoesNotExist(Reason, _DataNodeReasonMixin):
+    """
+    The entity id provided does not exist in the repository.
+
+    Attributes:
+        entity_id (str): The entity identifier.
+    """
+
+    def __init__(self, entity_id: str):
+        Reason.__init__(self, f"Entity {entity_id} does not exist in the repository.")
+
+
+class JobIsNotFinished(Reason, _DataNodeReasonMixin):
+    """
+    As the job is not finished yet, it prevents specific actions from being performed.
+
+    Attributes:
+        job_id (str): The job identifier.
+    """
+
+    def __init__(self, job_id: str):
+        Reason.__init__(self, f"The job {job_id} is not finished yet.")
+
+
+class ScenarioIsThePrimaryScenario(Reason, _DataNodeReasonMixin):
+    """
+    The scenario is the primary scenario of a cycle, which prevents specific actions from being performed.
+
+    Attributes:
+        scenario_id (str): The scenario identifier.
+        cycle_id (str): The cycle identifier.
+    """
+
+    def __init__(self, scenario_id: str, cycle: str):
+        Reason.__init__(self, f"The scenario {scenario_id} is the primary scenario of cycle {cycle}.")
+
+
+class ScenarioDoesNotBelongToACycle(Reason, _DataNodeReasonMixin):
+    """
+    The scenario does not belong to any cycle, which prevents specific actions from being performed.
+
+    Attributes:
+        scenario_id (str): The scenario identifier.
+    """
+
+    def __init__(self, scenario_id: str):
+        Reason.__init__(self, f"The scenario {scenario_id} does not belong to any cycle.")
+
+
+class SubmissionIsNotFinished(Reason, _DataNodeReasonMixin):
+    """
+    The submission is not finished yet.
+
+    Attributes:
+        submission_id (str): The submission identifier.
+    """
+
+    def __init__(self, submission_id: str):
+        Reason.__init__(self, f"The submission {submission_id} is not finished yet.")
+
+
+class SubmissionStatusIsUndefined(Reason, _DataNodeReasonMixin):
+    """
+    The submission status is undefined.
+
+    Attributes:
+        submission_id (str): The submission identifier.
+    """
+
+    def __init__(self, submission_id: str):
+        Reason.__init__(self, f"The submission {submission_id} status is undefined.")
