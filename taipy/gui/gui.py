@@ -2374,12 +2374,16 @@ class Gui:
         self.__default_module_name = _get_module_name_from_frame(self.__frame)
 
     def _set_css_file(self, css_file: t.Optional[str] = None):
+        script_file = Path(self.__frame.f_code.co_filename or ".").resolve()
         if css_file is None:
-            script_file = Path(self.__frame.f_code.co_filename or ".").resolve()
             if script_file.with_suffix(".css").exists():
                 css_file = f"{script_file.stem}.css"
             elif script_file.is_dir() and (script_file / "taipy.css").exists():
                 css_file = "taipy.css"
+        if css_file is None:
+             script_file = script_file.with_name("taipy").with_suffix(".css")
+             if script_file.exists():
+                css_file = f"{script_file.stem}.css"
         self.__css_file = css_file
 
     def _set_state(self, state: State):
