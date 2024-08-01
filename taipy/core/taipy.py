@@ -160,7 +160,7 @@ def is_editable(
         return _SubmissionManagerFactory._build_manager()._is_editable(entity)
     if isinstance(entity, str) and entity.startswith(Submission._ID_PREFIX):
         return _SubmissionManagerFactory._build_manager()._is_editable(SequenceId(entity))
-    return ReasonCollection(str(entity), EntityDoesNotExist(str(entity)))
+    return ReasonCollection()._add_reason(str(entity), EntityDoesNotExist(str(entity)))
 
 
 def is_readable(
@@ -216,7 +216,7 @@ def is_readable(
         return _SubmissionManagerFactory._build_manager()._is_readable(entity)
     if isinstance(entity, str) and entity.startswith(Submission._ID_PREFIX):
         return _SubmissionManagerFactory._build_manager()._is_readable(SequenceId(entity))
-    return ReasonCollection(str(entity), EntityDoesNotExist(str(entity)))
+    return ReasonCollection()._add_reason(str(entity), EntityDoesNotExist(str(entity)))
 
 
 @_warn_no_core_service("The submitted entity will not be executed until the Core service is running.")
