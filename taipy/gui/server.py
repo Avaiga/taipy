@@ -256,8 +256,8 @@ class _Server:
 
     def _apply_patch(self):
         if self._get_async_mode() == "gevent" and util.find_spec("gevent"):
-            from gevent import monkey
-
+            from gevent import monkey, get_hub
+            get_hub().NOT_ERROR += (KeyboardInterrupt, )
             if not monkey.is_module_patched("time"):
                 monkey.patch_time()
         if self._get_async_mode() == "eventlet" and util.find_spec("eventlet"):
@@ -318,7 +318,10 @@ class _Server:
         # flask-socketio specific conditions for 'allow_unsafe_werkzeug' parameters to be popped out of kwargs
         if self._get_async_mode() == "threading" and (not sys.stdin or not sys.stdin.isatty()):
             run_config = {**run_config, "allow_unsafe_werkzeug": allow_unsafe_werkzeug}
-        self._ws.run(**run_config)
+        try:
+            self._ws.run(**run_config)
+        except KeyboardInterrupt:
+            pass
 
     def stop_thread(self):
         if hasattr(self, "_thread") and self._thread.is_alive() and self._is_running:
