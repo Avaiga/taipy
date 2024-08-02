@@ -108,7 +108,7 @@
                         "name": "lines_shown",
                         "type": "int",
                         "default_value": "5",
-                        "doc": "The height of the displayed element if multiline is True."
+                        "doc": "The number of lines shown in the input control, when multiline is True."
                     },
                     {
                         "name": "type",
@@ -224,12 +224,12 @@
                         "name": "width",
                         "type": "str",
                         "default_value": "\"300px\"",
-                        "doc": "The width, in CSS units, of this element."
+                        "doc": "The width of this slider, in CSS units."
                     },
                     {
                         "name": "height",
                         "type": "str",
-                        "doc": "The height, in CSS units, of this element.<br/>It defaults to the <i>width</i> value when using the vertical orientation."
+                        "doc": "The height of this slider, in CSS units.<br/>It defaults to the value of <i>width</i> when using the vertical orientation."
                     },
                     {
                         "name": "orientation",
@@ -602,12 +602,12 @@
                         "name": "width",
                         "type": "str|int|float",
                         "default_value": "\"100%\"",
-                        "doc": "The width, in CSS units, of this element."
+                        "doc": "The width of this chart, in CSS units."
                     },
                     {
                         "name": "height",
                         "type": "str|int|float",
-                        "doc": "The height, in CSS units, of this element."
+                        "doc": "The height of this chart, in CSS units."
                     },
                     {
                         "name": "template",
@@ -685,7 +685,7 @@
                     {
                         "name": "width[<i>column_name</i>]",
                         "type": "str",
-                        "doc": "The width, in CSS units, of the indicated column."
+                        "doc": "The width of the indicated column, in CSS units."
                     },
                     {
                         "name": "selected",
@@ -751,13 +751,13 @@
                         "name": "width",
                         "type": "str",
                         "default_value": "\"100%\"",
-                        "doc": "The width, in CSS units, of this table control."
+                        "doc": "The width of this table control, in CSS units."
                     },
                     {
                         "name": "height",
                         "type": "str",
                         "default_value": "\"80vh\"",
-                        "doc": "The height, in CSS units, of this table control."
+                        "doc": "The height of this table control, in CSS units."
                     },
                     {
                         "name": "filter",
@@ -956,12 +956,12 @@
                         "name": "width",
                         "type": "str|int",
                         "default_value": "\"360px\"",
-                        "doc": "The width, in CSS units, of this element."
+                        "doc": "The width of this selector, in CSS units."
                     },
                     {
                         "name": "height",
                         "type": "str|int",
-                        "doc": "The height, in CSS units, of this element."
+                        "doc": "The height of this selector, in CSS units."
                     }
                 ]
             }
@@ -1137,12 +1137,12 @@
                         "name": "width",
                         "type": "str|int|float",
                         "default_value": "\"300px\"",
-                        "doc": "The width, in CSS units, of this element."
+                        "doc": "The width of this image control, in CSS units."
                     },
                     {
                         "name": "height",
                         "type": "str|int|float",
-                        "doc": "The height, in CSS units, of this element."
+                        "doc": "The height of this image control, in CSS units."
                     }
                 ]
             }
@@ -1230,13 +1230,13 @@
                         "name": "width",
                         "type": "str|number",
                         "default_value": "None",
-                        "doc": "The width, in CSS units, of the metric."
+                        "doc": "The width of the metric control, in CSS units."
                     },
                     {
                         "name": "height",
                         "type": "str|number",
                         "default_value": "None",
-                        "doc": "The height, in CSS units, of the metric."
+                        "doc": "The height of the metric control, in CSS units."
                     },
                     {
                         "name": "template",
@@ -1333,13 +1333,13 @@
                         "name": "width",
                         "type": "str",
                         "default_value": "None",
-                        "doc": "The width, in CSS units, of the indicator (used when orientation is horizontal)."
+                        "doc": "The width of the indicator, in CSS units (used when orientation is horizontal)."
                     },
                     {
                         "name": "height",
                         "type": "str",
                         "default_value": "None",
-                        "doc": "The height, in CSS units, of the indicator (used when orientation is vertical)."
+                        "doc": "The height of the indicator, in CSS units (used when orientation is vertical)."
                     },
                     {
                         "name": "hover_text",
@@ -1387,13 +1387,13 @@
                         "name": "width",
                         "type": "str",
                         "default_value": "\"15vw\"",
-                        "doc": "The width, in CSS units, of the menu when unfolded.<br/>Note that when running on a mobile device, the property <i>width[active]</i> is used instead."
+                        "doc": "The width of the menu when unfolded, in CSS units.<br/>Note that when running on a mobile device, the property <i>width[active]</i> is used instead."
                     },
                     {
                         "name": "width[mobile]",
                         "type": "str",
                         "default_value": "\"85vw\"",
-                        "doc": "The width, in CSS units, of the menu when unfolded, on a mobile device."
+                        "doc": "The width of the menu when unfolded, in CSS units, when running on a mobile device."
                     },
                     {
                         "name": "on_action",
@@ -1510,7 +1510,7 @@
                         "default_property": true,
                         "required": true,
                         "type": "dynamic(list[str])",
-                        "doc": "The list of messages. Each element is a list composed of an id, a message and an user identifier."
+                        "doc": "The list of messages. Each item of this list must consist of a list of three strings: a message identifier, a message content, and a user identifier."
                     },
                     {
                         "name": "users",
@@ -1518,9 +1518,21 @@
                         "doc": "The list of users. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
                     },
                     {
+                        "name": "sender_id",
+                        "type": "str",
+                        "default_value": "\"taipy\"",
+                        "doc": "The user identifier, as indicated in the <i>users</i> list, associated with all messages sent from the input."
+                    },
+                    {
+                        "name": "with_input",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "If False, the input field is not rendered."
+                    },
+                    {
                         "name": "on_action",
                         "type": "Callback",
-                        "doc": "The name of a function that is triggered when the user enters a new message.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the messages variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args (list): A list composed of a reason (click or Enter), variable name, message, sender id.</li></ul></li></ul>.",
+                        "doc": "The name of a function that is triggered when the user enters a new message.<br/>All the parameters of that function are optional:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li>\n<li><i>var_name</i> (str): the name of the variable bound to the <i>messages</i> property.</li>\n<li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li><i>action</i>: the name of the action that triggered this callback.</li>\n<li><i>args</i> (list): A list composed of a reason (\"click\" or \"Enter\"), the variable name, message, the user idenifier of the sender.</li></ul></li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -1537,27 +1549,15 @@
                         ]
                     },
                     {
-                        "name": "with_input",
-                        "type": "dynamic(bool)",
-                        "default_value": "True",
-                        "doc": "If True, the input field is visible."
-                    },
-                    {
-                        "name": "sender_id",
-                        "type": "str",
-                        "default_value": "\"taipy\"",
-                        "doc": "The user id associated with the message sent from the input"
+                        "name": "page_size",
+                        "type": "int",
+                        "default_value": "50",
+                        "doc": "The number of messages retrieved from the application and sent to the frontend. Larger values imply more potential latency."
                     },
                     {
                         "name": "height",
                         "type": "str|int|float",
-                        "doc": "The maximum height, in CSS units, of this element."
-                    },
-                    {
-                        "name": "page_size",
-                        "type": "int",
-                        "default_value": "50",
-                        "doc": "The number of rows retrieved on the frontend."
+                        "doc": "The maximum height of this chat control, in CSS units."
                     }
                 ]
             }
@@ -1590,7 +1590,7 @@
                     {
                         "name": "row_height",
                         "type": "str",
-                        "doc": "The height, in CSS units, of each row."
+                        "doc": "The height of each row of this tree, in CSS units."
                     }
                 ]
             }
@@ -1708,12 +1708,12 @@
                     {
                         "name": "width",
                         "type": "str|int|float",
-                        "doc": "The width, in CSS units, of this dialog.<br/>(CSS property)"
+                        "doc": "The width of this dialog, in CSS units."
                     },
                     {
                         "name": "height",
                         "type": "str|int|float",
-                        "doc": "The height, in CSS units, of this dialog.<br/>(CSS property)"
+                        "doc": "The height of this dialog, in CSS units."
                     }
                 ]
             }

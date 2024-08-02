@@ -28,7 +28,7 @@ def download(
         name: File name for the content on the client browser (defaults to content name).
         on_action: Callback function (or callback name) to call when the download ends. See below.
 
-    ## Notes:
+    <h4>Notes:</h4>
 
     - *content*: this parameter can hold several values depending on your use case:
         - a string: the value must be an existing path name to the file that gets downloaded or
@@ -122,9 +122,12 @@ def hold_control(
             chooses to cancel.<br/>
             If empty or None, no cancel action is provided to the user.<br/>
             The signature of this function is:
-            - state (State^): The user state;
+
+            - state (`State^`): The user state;
             - id (str): the id of the button that triggered the callback. That will always be
               "UIBlocker" since it is created and managed internally;
+
+            If this parameter is None, no "Cancel" button is displayed.
         message: The message to show. The default value is the string "Work in Progress...".
     """
     if state and isinstance(state._gui, Gui):
@@ -212,8 +215,7 @@ def get_state_id(state: State) -> t.Optional[str]:
         state (State^): The current user state as received in any callback.
 
     Returns:
-        A string that uniquely identifies the state.<br/>
-        If None, then **state** was not handled by a `Gui^` instance.
+        A string that uniquely identifies the state. If this value None, it indicates that *state* is not handled by a `Gui^` instance.
     """
     if state and isinstance(state._gui, Gui):
         return state._gui._get_client_id()
@@ -273,7 +275,7 @@ def invoke_callback(
     """Invoke a user callback for a given state.
 
     Calling this function is equivalent to calling
-    *gui*.[Gui.]invoke_callback(state_id, callback, args, module_context)^`.
+    *gui*.`(Gui.)invoke_callback(state_id, callback, args, module_context)^`.
 
     Arguments:
         gui (Gui^): The current Gui instance.
