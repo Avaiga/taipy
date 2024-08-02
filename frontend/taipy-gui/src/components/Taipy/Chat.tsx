@@ -167,7 +167,6 @@ const Chat = (props: ChatProps) => {
 
     const [rows, setRows] = useState<RowType[]>([]);
     const page = useRef<key2Rows>({ key: defaultKey });
-    const [rowCount, setRowCount] = useState(0);
     const [columns, setColumns] = useState<Array<string>>([]);
     const scrollDivRef = useRef<HTMLDivElement>(null);
     const anchorDivRef = useRef<HTMLElement>(null);
@@ -291,7 +290,6 @@ const Chat = (props: ChatProps) => {
     useEffect(() => {
         if (!refresh && props.messages && page.current.key && props.messages[page.current.key] !== undefined) {
             const newValue = props.messages[page.current.key];
-            setRowCount(newValue.rowcount);
             const nr = newValue.data as RowType[];
             if (Array.isArray(nr) && nr.length > newValue.start && nr[newValue.start]) {
                 setRows((old) => {

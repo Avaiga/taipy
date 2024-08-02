@@ -32,7 +32,7 @@ Gui.add_shared_variables("messages", "users")
 
 def send(state, _: str, payload: dict):
     (_, _, message, sender_id) = payload.get("args", [])
-    messages.append([f"{len(messages)}", message, sender_id])
+    messages.append((f"{len(messages)}", message, sender_id))
     state.messages = messages
 
 
