@@ -36,6 +36,12 @@ def send(state, _: str, payload: dict):
     state.messages = messages
 
 
+def on_init(state):
+    # Copy the global variables users and messages to this user's state
+    state.users = users
+    state.messages = messages
+
+
 def on_navigate(state, path: str):
     # Navigate to the 'register' page if the user is not registered
     if path == "discuss" and state.username == "":
@@ -61,8 +67,6 @@ def register(state):
 
 
 register_page = """
-<|toggle|theme|>
-
 Please enter your user name:
 
 <|{username}|input|>
@@ -71,8 +75,6 @@ Please enter your user name:
 """
 
 discuss_page = """
-<|toggle|theme|>
-
 <|### Let's discuss, {username}|text|mode=markdown|>
 
 <|{messages}|chat|users={users}|sender_id={username}|on_action=send|>
