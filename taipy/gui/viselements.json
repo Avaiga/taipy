@@ -1532,7 +1532,7 @@
                     {
                         "name": "on_action",
                         "type": "Callback",
-                        "doc": "The name of a function that is triggered when the user enters a new message.<br/>All the parameters of that function are optional:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li>\n<li><i>var_name</i> (str): the name of the variable bound to the <i>messages</i> property.</li>\n<li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li><i>action</i>: the name of the action that triggered this callback.</li>\n<li><i>args</i> (list): A list composed of a reason (\"click\" or \"Enter\"), the variable name, message, the user idenifier of the sender.</li></ul></li></ul>",
+                        "doc": "The name of a function that is triggered when the user enters a new message.<br/>All the parameters of that function are optional:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li>\n<li><i>var_name</i> (str): the name of the variable bound to the <i>messages</i> property.</li>\n<li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li><i>action</i>: the name of the action that triggered this callback.</li>\n<li><i>args</i> (list): A list composed of a reason (\"click\" or \"Enter\"), the variable name, message, the user identifier of the sender.</li></ul></li></ul>",
                         "signature": [
                             [
                                 "state",

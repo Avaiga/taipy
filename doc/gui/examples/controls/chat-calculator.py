@@ -19,7 +19,7 @@ from math import cos, pi, sin, sqrt, tan  # noqa: F401
 
 from taipy.gui import Gui
 
-# The user interacts with the Python interpretor
+# The user interacts with the Python interpreter
 users = ["human", "Result"]
 messages: list[tuple[str, str, str]] = []
 
