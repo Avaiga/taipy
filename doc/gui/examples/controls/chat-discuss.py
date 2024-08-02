@@ -23,17 +23,11 @@ from os import path
 from taipy.gui import Gui, Icon
 from taipy.gui.gui_actions import navigate, notify
 
-messages: list[tuple[str, str, str]] = []
-users: list[str|Icon] = []
 username = ""
+users: list[str|Icon] = []
+messages: list[tuple[str, str, str]] = []
 
 Gui.add_shared_variables("messages", "users")
-
-
-def send(state, _: str, payload: dict):
-    (_, _, message, sender_id) = payload.get("args", [])
-    messages.append((f"{len(messages)}", message, sender_id))
-    state.messages = messages
 
 
 def on_init(state):
@@ -64,6 +58,12 @@ def register(state):
     # Because users is a shared variable, this propagates to every client
     state.users = users
     navigate(state, "discuss")
+
+
+def send(state, _: str, payload: dict):
+    (_, _, message, sender_id) = payload.get("args", [])
+    messages.append((f"{len(messages)}", message, sender_id))
+    state.messages = messages
 
 
 register_page = """

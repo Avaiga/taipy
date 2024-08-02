@@ -215,7 +215,8 @@ def get_state_id(state: State) -> t.Optional[str]:
         state (State^): The current user state as received in any callback.
 
     Returns:
-        A string that uniquely identifies the state. If this value None, it indicates that *state* is not handled by a `Gui^` instance.
+        A string that uniquely identifies the state. If this value None, it indicates that *state* is not
+        handled by a `Gui^` instance.
     """
     if state and isinstance(state._gui, Gui):
         return state._gui._get_client_id()
