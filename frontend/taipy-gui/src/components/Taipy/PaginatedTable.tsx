@@ -199,6 +199,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
 
+    // TODO: unexpected behavior, need to check
     useEffect(() => {
         if (selected.length) {
             if (selected[0] < startIndex || selected[0] > startIndex + rowsPerPage) {
@@ -259,7 +260,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     afs,
                     compare ? onCompare : undefined,
                     updateVars && getUpdateVar(updateVars, "comparedatas"),
-                    typeof userData == "object" ? (userData as Record<string, Record<string, unknown>>).context : undefined
+                    typeof userData == "object"
+                        ? (userData as Record<string, Record<string, unknown>>).context
+                        : undefined
                 )
             );
         } else {
@@ -286,7 +289,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         module,
         compare,
         onCompare,
-        userData
+        userData,
     ]);
 
     const onSort = useCallback(
