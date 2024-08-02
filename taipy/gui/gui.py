@@ -66,6 +66,7 @@ from .data.data_accessor import _DataAccessors
 from .data.data_format import _DataFormat
 from .data.data_scope import _DataScopes
 from .extension.library import Element, ElementLibrary
+from .hook import Hooks
 from .page import Page
 from .partial import Partial
 from .server import _Server
@@ -365,6 +366,9 @@ class Gui:
             ]
         )
 
+        # Init Gui Hooks
+        Hooks()._init(self)
+
         if page:
             self.add_page(name=Gui.__root_page_name, page=page)
         if pages is not None:
@@ -603,10 +607,10 @@ class Gui:
             return None
 
     def _handle_connect(self):
-        pass
+        Hooks().handle_connect(self)
 
     def _handle_disconnect(self):
-        pass
+        Hooks()._handle_disconnect(self)
 
     def _manage_message(self, msg_type: _WsType, message: dict) -> None:
         try:
@@ -667,7 +671,7 @@ class Gui:
     # To be expanded by inheriting classes
     # this will be used to handle ws messages that is not handled by the base Gui class
     def _manage_external_message(self, msg_type: _WsType, message: dict) -> None:
-        pass
+        Hooks()._manage_external_message(self, msg_type, message)
 
     def __front_end_update(
         self,
@@ -1900,6 +1904,8 @@ class Gui:
         # set root page
         if name == Gui.__root_page_name:
             self._config.root_page = new_page
+        # Validate Page
+        Hooks().validate_page(self, page)
         # Update locals context
         self.__locals_context.add(page._get_module_name(), page._get_locals())
         # Update variable directory
@@ -1909,6 +1915,8 @@ class Gui:
         if _is_in_notebook():
             page._notebook_gui = self
             page._notebook_page = new_page
+        # add page to hook
+        Hooks().add_page(self, page)
 
     def add_pages(self, pages: t.Optional[t.Union[t.Mapping[str, t.Union[str, Page]], str]] = None) -> None:
         """Add several pages to the Graphical User Interface.
@@ -2366,12 +2374,16 @@ class Gui:
         self.__default_module_name = _get_module_name_from_frame(self.__frame)
 
     def _set_css_file(self, css_file: t.Optional[str] = None):
+        script_file = Path(self.__frame.f_code.co_filename or ".").resolve()
         if css_file is None:
-            script_file = Path(self.__frame.f_code.co_filename or ".").resolve()
             if script_file.with_suffix(".css").exists():
                 css_file = f"{script_file.stem}.css"
             elif script_file.is_dir() and (script_file / "taipy.css").exists():
                 css_file = "taipy.css"
+        if css_file is None:
+             script_file = script_file.with_name("taipy").with_suffix(".css")
+             if script_file.exists():
+                css_file = f"{script_file.stem}.css"
         self.__css_file = css_file
 
     def _set_state(self, state: State):
@@ -2620,6 +2632,10 @@ class Gui:
         #
         #         The default value is None.
         # --------------------------------------------------------------------------------
+
+        # setup run function with gui hooks
+        Hooks().run(self, **kwargs)
+
         app_config = self._config.config
 
         run_root_dir = os.path.dirname(inspect.getabsfile(self.__frame))
