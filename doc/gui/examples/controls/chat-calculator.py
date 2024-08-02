@@ -21,7 +21,7 @@ from taipy.gui import Gui
 
 # The user interacts with the Python interpretor
 users = ["human", "Result"]
-messages = []
+messages: list[tuple[str, str, str]] = []
 
 
 def evaluate(state, var_name: str, payload: dict):
@@ -37,7 +37,7 @@ def evaluate(state, var_name: str, payload: dict):
     except Exception:
         pass
     # Add the result as an incoming message
-    messages.append([f"{len(messages)}", result, users[1]])
+    messages.append((f"{len(messages)}", result, users[1]))
     state.messages = messages
 
 

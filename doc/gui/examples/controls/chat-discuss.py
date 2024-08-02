@@ -23,8 +23,8 @@ from os import path
 from taipy.gui import Gui, Icon
 from taipy.gui.gui_actions import navigate, notify
 
-messages = []
-users = []
+messages: list[tuple[str, str, str]] = []
+users: list[str|Icon] = []
 username = ""
 
 Gui.add_shared_variables("messages", "users")
