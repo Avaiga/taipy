@@ -11,8 +11,8 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React from "react";
-import { render, waitFor } from "@testing-library/react";
+import React, { act } from "react";
+import { fireEvent, render, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -163,6 +163,20 @@ const buttonColumns = JSON.stringify({
     Code: { dfid: "Code", type: "str", index: 3 },
 });
 
+const styledColumns = JSON.stringify({
+    Entity: { dfid: "Entity" },
+    "Daily hospital occupancy": {
+        dfid: "Daily hospital occupancy",
+        type: "int64",
+        style: "some style function",
+        tooltip: "some tooltip",
+    },
+});
+
+const invalidColumns = JSON.stringify({
+    invalid: true,
+});
+
 describe("PaginatedTable Component", () => {
     it("renders", async () => {
         const { getByText } = render(<PaginatedTable data={undefined} defaultColumns={tableColumns} />);
@@ -187,13 +201,17 @@ describe("PaginatedTable Component", () => {
         expect(elt.parentElement).not.toHaveClass("Mui-disabled");
     });
     it("is enabled by active", async () => {
-        const { getByText, getAllByTestId } = render(<PaginatedTable data={undefined} defaultColumns={tableColumns} active={true} />);
+        const { getByText, getAllByTestId } = render(
+            <PaginatedTable data={undefined} defaultColumns={tableColumns} active={true} />
+        );
         const elt = getByText("Entity");
         expect(elt.parentElement).not.toHaveClass("Mui-disabled");
         expect(getAllByTestId("ArrowDownwardIcon").length).toBeGreaterThan(0);
     });
     it("Hides sort icons when not active", async () => {
-        const { queryByTestId } = render(<PaginatedTable data={undefined} defaultColumns={tableColumns} active={false} />);
+        const { queryByTestId } = render(
+            <PaginatedTable data={undefined} defaultColumns={tableColumns} active={false} />
+        );
         expect(queryByTestId("ArrowDownwardIcon")).toBeNull();
     });
     it("dispatch 2 well formed messages at first render", async () => {
@@ -201,7 +219,12 @@ describe("PaginatedTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable id="table" data={undefined} defaultColumns={tableColumns} updateVars="varname=varname" />
+                <PaginatedTable
+                    id="table"
+                    data={undefined}
+                    defaultColumns={tableColumns}
+                    updateVars="varname=varname"
+                />
             </TaipyContext.Provider>
         );
         expect(dispatch).toHaveBeenCalledWith({
@@ -337,7 +360,7 @@ describe("PaginatedTable Component", () => {
                 <PaginatedTable data={tableValue as TableValueType} defaultColumns={tableColumns} />
             </TaipyContext.Provider>
         );
-        expect(getAllByText("Austria").length).toBeGreaterThan(1)
+        expect(getAllByText("Austria").length).toBeGreaterThan(1);
 
         rerender(
             <TaipyContext.Provider value={{ state, dispatch }}>
@@ -375,7 +398,13 @@ describe("PaginatedTable Component", () => {
             const state: TaipyState = INITIAL_STATE;
             const { getAllByTestId, queryAllByTestId, rerender } = render(
                 <TaipyContext.Provider value={{ state, dispatch }}>
-                    <PaginatedTable data={undefined} defaultColumns={editableColumns} editable={true} onEdit="onEdit" showAll={true} />
+                    <PaginatedTable
+                        data={undefined}
+                        defaultColumns={editableColumns}
+                        editable={true}
+                        onEdit="onEdit"
+                        showAll={true}
+                    />
                 </TaipyContext.Provider>
             );
 
@@ -401,7 +430,13 @@ describe("PaginatedTable Component", () => {
             const state: TaipyState = INITIAL_STATE;
             const { getByTestId, queryAllByTestId, getAllByTestId, rerender } = render(
                 <TaipyContext.Provider value={{ state, dispatch }}>
-                    <PaginatedTable data={undefined} defaultColumns={editableColumns} editable={true} onEdit="onEdit" showAll={true} />
+                    <PaginatedTable
+                        data={undefined}
+                        defaultColumns={editableColumns}
+                        editable={true}
+                        onEdit="onEdit"
+                        showAll={true}
+                    />
                 </TaipyContext.Provider>
             );
 
@@ -499,7 +534,13 @@ describe("PaginatedTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByTestId } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable data={undefined} defaultColumns={editableColumns} showAll={true} editable={true} onAdd="onAdd" />
+                <PaginatedTable
+                    data={undefined}
+                    defaultColumns={editableColumns}
+                    showAll={true}
+                    editable={true}
+                    onAdd="onAdd"
+                />
             </TaipyContext.Provider>
         );
 
@@ -521,7 +562,13 @@ describe("PaginatedTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getAllByTestId, getByTestId, queryAllByTestId, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable data={undefined} defaultColumns={editableColumns} showAll={true} editable={true} onDelete="onDelete" />
+                <PaginatedTable
+                    data={undefined}
+                    defaultColumns={editableColumns}
+                    showAll={true}
+                    editable={true}
+                    onDelete="onDelete"
+                />
             </TaipyContext.Provider>
         );
 
@@ -608,7 +655,7 @@ describe("PaginatedTable Component", () => {
                 col: "int",
                 index: 1,
                 reason: "click",
-                value: undefined
+                value: undefined,
             },
             type: "SEND_ACTION_ACTION",
         });
@@ -645,9 +692,96 @@ describe("PaginatedTable Component", () => {
                 col: "Code",
                 index: 0,
                 reason: "button",
-                value: "button action"
+                value: "button action",
             },
             type: "SEND_ACTION_ACTION",
         });
+    });
+    it("should renders correctly when style is applied to columns", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        await waitFor(() => {
+            render(
+                <TaipyContext.Provider value={{ state, dispatch }}>
+                    <PaginatedTable
+                        data={tableValue}
+                        defaultColumns={styledColumns}
+                        lineStyle={"class_name=rows-bordered"}
+                    />
+                </TaipyContext.Provider>
+            );
+        });
+        const elt = document.querySelector('table[aria-labelledby="tableTitle"]');
+        expect(elt).toBeInTheDocument();
+    });
+    it("logs error when baseColumns prop is invalid", () => {
+        // Mock console.info to check if it gets called
+        console.info = jest.fn();
+        // Render the component with invalid baseColumns prop
+        render(<PaginatedTable defaultColumns={invalidColumns} />);
+        // Check if console.info was called
+        expect(console.info).toHaveBeenCalled();
+    });
+    it("should sort the table in ascending order", async () => {
+        await waitFor(() => {
+            render(<PaginatedTable data={tableValue} defaultColumns={tableColumns} />);
+        });
+        const elt = document.querySelector('svg[data-testid="ArrowDownwardIcon"]');
+        act(() => {
+            fireEvent.click(elt as Element);
+        });
+        expect(document.querySelector('th[aria-sort="ascending"]')).toBeInTheDocument();
+    });
+    it("should handle rows per page change", async () => {
+        const { getByRole, queryByRole } = render(<PaginatedTable data={tableValue} defaultColumns={tableColumns} />);
+        const rowsPerPageDropdown = getByRole("combobox");
+        fireEvent.mouseDown(rowsPerPageDropdown);
+        const option = queryByRole("option", { selected: false, name: "50" });
+        fireEvent.click(option as Element);
+        const table = document.querySelector(
+            'table[aria-labelledby="tableTitle"].MuiTable-root.MuiTable-stickyHeader.css-cz602z-MuiTable-root'
+        );
+        expect(table).toBeInTheDocument();
+    });
+    it("should handle on row click", async () => {
+        render(<PaginatedTable data={tableValue} defaultColumns={tableColumns} />);
+        const elt = document.querySelectorAll('td[role="cell"]');
+        await userEvent.click(elt[0]);
+    });
+    it("should allow all rows", async () => {
+        const { getByRole, queryByRole } = render(
+            <PaginatedTable data={tableValue} defaultColumns={tableColumns} allowAllRows={true} />
+        );
+        const rowsPerPageDropdown = getByRole("combobox");
+        fireEvent.mouseDown(rowsPerPageDropdown);
+        const option = queryByRole("option", { selected: false, name: "All" });
+        expect(option).toBeInTheDocument();
+    });
+    it("should display row per page correctly", async () => {
+        const { getByRole, queryByRole } = render(
+            <PaginatedTable
+                data={tableValue}
+                defaultColumns={tableColumns}
+                pageSizeOptions={JSON.stringify([10, 20, 30])}
+            />
+        );
+        const rowsPerPageDropdown = getByRole("combobox");
+        fireEvent.mouseDown(rowsPerPageDropdown);
+        const option = queryByRole("option", { selected: false, name: "10" });
+        expect(option).toBeInTheDocument();
+    });
+    it("logs error when pageSizeOptions prop is invalid", () => {
+        // Create a spy on console.log
+        const logSpy = jest.spyOn(console, "log");
+        // Render the component with invalid pageSizeOptions prop
+        render(<PaginatedTable data={tableValue} defaultColumns={tableColumns} pageSizeOptions={"not a valid json"} />);
+        // Check if console.log was called with the expected arguments
+        expect(logSpy).toHaveBeenCalledWith(
+            "PaginatedTable pageSizeOptions is wrong ",
+            "not a valid json",
+            expect.any(Error)
+        );
+        // Clean up the spy
+        logSpy.mockRestore();
     });
 });
