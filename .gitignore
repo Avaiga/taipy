@@ -95,5 +95,4 @@ demo_*/
 *.dags
 data_sources
 pipelines
-tasks
 pickles

@@ -346,8 +346,12 @@ class NonExistingVersion(Exception):
         self.message = f"Version '{version_number}' does not exist."
 
 
-class VersionIsNotProductionVersion(Exception):
-    """Raised if the version is not a production version."""
+class VersionAlreadyExistsAsDevelopment(Exception):
+    """Raised if a version already exists as the development version."""
+
+    def __init__(self, version_number: str):
+        self.message = f"Version number {version_number} already exists as the development version."
+        self.message += " Please choose a different name for this experiment."
 
 
 class ConflictedConfigurationError(Exception):

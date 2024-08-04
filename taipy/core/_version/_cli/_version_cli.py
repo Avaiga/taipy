@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import sys
+from importlib.util import find_spec
 
 from taipy._cli._base_cli._abstract_cli import _AbstractCLI
 from taipy._cli._base_cli._taipy_parser import _TaipyParser
@@ -17,7 +18,6 @@ from taipy.config import Config
 from taipy.config.exceptions.exceptions import InconsistentEnvVariableError
 
 from ...data._data_manager_factory import _DataManagerFactory
-from ...exceptions.exceptions import VersionIsNotProductionVersion
 from ...job._job_manager_factory import _JobManagerFactory
 from ...scenario._scenario_manager_factory import _ScenarioManagerFactory
 from ...sequence._sequence_manager_factory import _SequenceManagerFactory
@@ -31,7 +31,7 @@ class _VersionCLI(_AbstractCLI):
     """Command-line interface of the versioning system."""
 
     _COMMAND_NAME = "manage-versions"
-    _ARGUMENTS = ["-l", "--list", "--rename", "--compare-config", "-d", "--delete", "-dp", "--delete-production"]
+    _ARGUMENTS = ["-l", "--list", "--rename", "--compare-config", "-d", "--delete"]
 
     @classmethod
     def create_parser(cls):
@@ -54,14 +54,6 @@ class _VersionCLI(_AbstractCLI):
 
         version_parser.add_argument(
             "-d", "--delete", metavar="VERSION", help="Delete a Taipy version by version number."
-        )
-
-        version_parser.add_argument(
-            "-dp",
-            "--delete-production",
-            metavar="VERSION",
-            help="Delete a Taipy version from production by version number. The version is still kept as an experiment "
-            "version.",
         )
 
     @classmethod
@@ -91,16 +83,6 @@ class _VersionCLI(_AbstractCLI):
             cls.__compare_version_config(args.compare_config[0], args.compare_config[1])
             sys.exit(0)
 
-        if args.delete_production:
-            try:
-                _VersionManagerFactory._build_manager()._delete_production_version(args.delete_production)
-                cls._logger.info(
-                    f"Successfully delete version {args.delete_production} from the production version list."
-                )
-                sys.exit(0)
-            except VersionIsNotProductionVersion as e:
-                raise SystemExit(e) from None
-
         if args.delete:
             if clean_all_entities(args.delete):
                 cls._logger.info(f"Successfully delete version {args.delete}.")
@@ -115,7 +97,10 @@ class _VersionCLI(_AbstractCLI):
 
         latest_version_number = _VersionManagerFactory._build_manager()._get_latest_version()
         development_version_number = _VersionManagerFactory._build_manager()._get_development_version()
-        production_version_numbers = _VersionManagerFactory._build_manager()._get_production_versions()
+        if find_spec("taipy.enterprise"):
+            production_version_numbers = _VersionManagerFactory._build_manager()._get_production_versions()
+        else:
+            production_version_numbers = []
 
         versions = _VersionManagerFactory._build_manager()._get_all()
         versions.sort(key=lambda x: x.creation_date, reverse=True)
@@ -186,23 +171,8 @@ class _VersionCLI(_AbstractCLI):
             datanode._version = new_version
             _DataManagerFactory._build_manager()._set(datanode)
 
-        # Update the version entity
-        if old_version in _version_manager._get_production_versions():
-            _version_manager._set_production_version(new_version)
-        if old_version == _version_manager._get_latest_version():
-            _version_manager._set_experiment_version(new_version)
-        if old_version == _version_manager._get_development_version():
-            _version_manager._set_development_version(new_version)
-        _version_manager._delete(old_version)
-
-        try:
-            _version_manager._delete_production_version(old_version)
-        except VersionIsNotProductionVersion:
-            pass
-
-        if not _version_manager._get(new_version):
-            version_entity.id = new_version
-            _version_manager._set(version_entity)
+        # Rename the _Version entity
+        _version_manager._rename_version(old_version, new_version)
 
     @classmethod
     def __compare_version_config(cls, version_1: str, version_2: str):

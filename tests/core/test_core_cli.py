@@ -88,16 +88,6 @@ def test_core_cli_experiment_mode_with_force_version(init_config):
         core.stop()
 
 
-def test_core_cli_production_mode():
-    with patch("sys.argv", ["prog", "--production"]):
-        core = Core()
-        core.run()
-        assert Config.core.mode == "production"
-        assert Config.core.version_number == _VersionManagerFactory._build_manager()._get_latest_version()
-        assert not Config.core.force
-        core.stop()
-
-
 def test_dev_mode_clean_all_entities_of_the_latest_version():
     scenario_config = config_scenario()
 
@@ -268,28 +258,6 @@ def test_version_number_when_switching_mode():
         assert len(_VersionManager._get_all()) == 4
         core.stop()
 
-    # When run with production mode, the latest version is used as production
-    with patch("sys.argv", ["prog", "--production"]):
-        core = Core()
-        core.run()
-        ver_6 = _VersionManager._get_latest_version()
-        production_versions = _VersionManager._get_production_versions()
-        assert ver_6 == ver_5
-        assert production_versions == [ver_6]
-        assert len(_VersionManager._get_all()) == 4
-        core.stop()
-
-    # When run with production mode, the "2.1" version is used as production
-    with patch("sys.argv", ["prog", "--production", "2.1"]):
-        core = Core()
-        core.run()
-        ver_7 = _VersionManager._get_latest_version()
-        production_versions = _VersionManager._get_production_versions()
-        assert ver_7 == "2.1"
-        assert production_versions == [ver_6, ver_7]
-        assert len(_VersionManager._get_all()) == 4
-        core.stop()
-
     # Run with dev mode, the version number is the same as the first dev version to override it
     with patch("sys.argv", ["prog", "--development"]):
         core = Core()
@@ -297,56 +265,6 @@ def test_version_number_when_switching_mode():
         ver_7 = _VersionManager._get_latest_version()
         assert ver_1 == ver_7
         assert len(_VersionManager._get_all()) == 4
-        core.stop()
-
-
-def test_production_mode_load_all_entities_from_previous_production_version():
-    scenario_config = config_scenario()
-
-    with patch("sys.argv", ["prog", "--development"]):
-        core = Core()
-        core.run()
-        scenario = _ScenarioManager._create(scenario_config)
-        taipy.submit(scenario)
-        core.stop()
-
-    with patch("sys.argv", ["prog", "--production", "1.0"]):
-        core = Core()
-        core.run()
-        production_ver_1 = _VersionManager._get_latest_version()
-        assert _VersionManager._get_production_versions() == [production_ver_1]
-        # When run production mode on a new app, a dev version is created alongside
-        assert _VersionManager._get_development_version() not in _VersionManager._get_production_versions()
-        assert len(_VersionManager._get_all()) == 2
-
-        scenario = _ScenarioManager._create(scenario_config)
-        taipy.submit(scenario)
-
-        assert len(_DataManager._get_all()) == 2
-        assert len(_TaskManager._get_all()) == 1
-        assert len(_SequenceManager._get_all()) == 1
-        assert len(_ScenarioManager._get_all()) == 1
-        assert len(_CycleManager._get_all()) == 1
-        assert len(_JobManager._get_all()) == 1
-        core.stop()
-
-    with patch("sys.argv", ["prog", "--production", "2.0"]):
-        core = Core()
-        core.run()
-        production_ver_2 = _VersionManager._get_latest_version()
-        assert _VersionManager._get_production_versions() == [production_ver_1, production_ver_2]
-        assert len(_VersionManager._get_all()) == 3
-
-        # All entities from previous production version should be saved
-        scenario = _ScenarioManager._create(scenario_config)
-        taipy.submit(scenario)
-
-        assert len(_DataManager._get_all()) == 4
-        assert len(_TaskManager._get_all()) == 2
-        assert len(_SequenceManager._get_all()) == 2
-        assert len(_ScenarioManager._get_all()) == 2
-        assert len(_CycleManager._get_all()) == 1
-        assert len(_JobManager._get_all()) == 2
         core.stop()
 
 
@@ -388,60 +306,6 @@ def test_force_override_experiment_version():
         ver_2 = _VersionManager._get_latest_version()
         assert ver_2 == "1.0"
         assert len(_VersionManager._get_all()) == 2  # 2 version include 1 experiment 1 development
-
-        # All entities from previous submit should be saved
-        scenario = _ScenarioManager._create(scenario_config)
-        taipy.submit(scenario)
-
-        assert len(_DataManager._get_all()) == 4
-        assert len(_TaskManager._get_all()) == 2
-        assert len(_SequenceManager._get_all()) == 2
-        assert len(_ScenarioManager._get_all()) == 2
-        assert len(_CycleManager._get_all()) == 1
-        assert len(_JobManager._get_all()) == 2
-        core.stop()
-
-
-def test_force_override_production_version():
-    scenario_config = config_scenario()
-
-    with patch("sys.argv", ["prog", "--production", "1.0"]):
-        core = Core()
-        core.run()
-        ver_1 = _VersionManager._get_latest_version()
-        production_versions = _VersionManager._get_production_versions()
-        assert ver_1 == "1.0"
-        assert production_versions == ["1.0"]
-        # When create new production version, a development version entity is also created as a placeholder
-        assert len(_VersionManager._get_all()) == 2  # 2 version include 1 production 1 development
-
-        scenario = _ScenarioManager._create(scenario_config)
-        taipy.submit(scenario)
-
-        assert len(_DataManager._get_all()) == 2
-        assert len(_TaskManager._get_all()) == 1
-        assert len(_SequenceManager._get_all()) == 1
-        assert len(_ScenarioManager._get_all()) == 1
-        assert len(_CycleManager._get_all()) == 1
-        assert len(_JobManager._get_all()) == 1
-        core.stop()
-
-    Config.configure_global_app(foo="bar")
-
-    # Without --taipy-force parameter, a SystemExit will be raised
-    with pytest.raises(SystemExit):
-        with patch("sys.argv", ["prog", "--production", "1.0"]):
-            core = Core()
-            core.run()
-    core.stop()
-
-    # With --taipy-force parameter
-    with patch("sys.argv", ["prog", "--production", "1.0", "--taipy-force"]):
-        core = Core()
-        core.run()
-        ver_2 = _VersionManager._get_latest_version()
-        assert ver_2 == "1.0"
-        assert len(_VersionManager._get_all()) == 2  # 2 version include 1 production 1 development
 
         # All entities from previous submit should be saved
         scenario = _ScenarioManager._create(scenario_config)
