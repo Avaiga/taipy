@@ -14,7 +14,8 @@ import re
 from pathlib import Path
 from typing import List
 
-_end_doc = re.compile(r'\"\"\"\s*(#\s*noqa\s*:\s*E501)?\s*\n')
+_end_doc = re.compile(r"\"\"\"\s*(#\s*noqa\s*:\s*E501)?\s*\n")
+
 
 def _get_function_delimiters(initial_line, lines):
     begin = end = initial_line
@@ -148,7 +149,6 @@ if __name__ == "__main__":
     job_filename = "taipy/core/config/job_config.py"
     scenario_filename = "taipy/core/config/scenario_config.py"
     task_filename = "taipy/core/config/task_config.py"
-    migration_filename = "taipy/core/config/migration_config.py"
     core_filename = "taipy/core/config/core_section.py"
 
     entities_map, property_map = _generate_entity_and_property_maps(config_init)
@@ -159,7 +159,6 @@ if __name__ == "__main__":
     pyi = _build_entity_config_pyi(pyi, dn_filename, entities_map["DataNodeConfig"])
     pyi = _build_entity_config_pyi(pyi, task_filename, entities_map["TaskConfig"])
     pyi = _build_entity_config_pyi(pyi, job_filename, entities_map["JobConfig"])
-    pyi = _build_entity_config_pyi(pyi, migration_filename, entities_map["MigrationConfig"])
     pyi = _build_entity_config_pyi(pyi, core_filename, entities_map["CoreSection"])
 
     # Remove the final redundant \n

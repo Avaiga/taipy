@@ -9,9 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-
 from .._repository._abstract_converter import _AbstractConverter
-from .._version._utils import _migrate_entity
 from ..common._utils import _load_fct
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions import NonExistingDataNode
@@ -39,7 +37,7 @@ class _TaskConverter(_AbstractConverter):
 
     @classmethod
     def _model_to_entity(cls, model: _TaskModel) -> Task:
-        task = Task(
+        return Task(
             id=TaskId(model.id),
             owner_id=model.owner_id,
             parent_ids=set(model.parent_ids),
@@ -51,7 +49,6 @@ class _TaskConverter(_AbstractConverter):
             skippable=model.skippable,
             properties=model.properties,
         )
-        return _migrate_entity(task)
 
     @staticmethod
     def __to_ids(data_nodes):

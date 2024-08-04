@@ -14,7 +14,7 @@ from datetime import timedelta
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from taipy.config._config import _Config
-from taipy.core.config import CoreSection, DataNodeConfig, JobConfig, MigrationConfig, ScenarioConfig, TaskConfig
+from taipy.core.config import CoreSection, DataNodeConfig, JobConfig, ScenarioConfig, TaskConfig
 
 from .checker.issue_collector import IssueCollector
 from .common._classproperty import _Classproperty
@@ -167,10 +167,6 @@ class Config:
 
     @_Classproperty
     def scenarios(cls) -> Dict[str, ScenarioConfig]:
-        """"""
-
-    @_Classproperty
-    def migration_functions(cls) -> Dict[str, MigrationConfig]:
         """"""
 
     @_Classproperty
