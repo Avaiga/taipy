@@ -27,6 +27,7 @@ from ..utils.singleton import _Singleton
 
 
 class JsonAdapter(ABC):
+    """NOT DOCUMENTED"""
     def register(self):
         _TaipyJsonAdapter().register(self)
 

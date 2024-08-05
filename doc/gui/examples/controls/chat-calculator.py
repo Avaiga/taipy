@@ -13,37 +13,36 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-# This script needs to run in a Python environment where the plotly-express package is
-# installed.
+# Human-computer dialog UI based on the chat control.
 # -----------------------------------------------------------------------------------------
-import numpy as np
-import plotly.graph_objects as go
+from math import cos, pi, sin, sqrt, tan  # noqa: F401
 
 from taipy.gui import Gui
 
-# Create the Plotly figure object
-figure = go.Figure()
+# The user interacts with the Python interpreter
+users = ["human", "Result"]
+messages: list[tuple[str, str, str]] = []
 
-# Add trace for Normal Distribution
-figure.add_trace(
-    go.Violin(name="Normal", y=np.random.normal(loc=0, scale=1, size=1000), box_visible=True, meanline_visible=True)
-)
 
-# Add trace for Exponential Distribution
-figure.add_trace(
-    go.Violin(name="Exponential", y=np.random.exponential(scale=1, size=1000), box_visible=True, meanline_visible=True)
-)
+def evaluate(state, var_name: str, payload: dict):
+    # Retrieve the callback parameters
+    (_, _, expression, sender_id) = payload.get("args", [])
+    # Add the input content as a sent message
+    messages.append((f"{len(messages)}", expression, sender_id))
+    # Default message used if evaluation fails
+    result = "Invalid expression"
+    try:
+        # Evaluate the expression and store the result
+        result = f"= {eval(expression)}"
+    except Exception:
+        pass
+    # Add the result as an incoming message
+    messages.append((f"{len(messages)}", result, users[1]))
+    state.messages = messages
 
-# Add trace for Uniform Distribution
-figure.add_trace(
-    go.Violin(name="Uniform", y=np.random.uniform(low=0, high=1, size=1000), box_visible=True, meanline_visible=True)
-)
-
-# Updating layout for better visualization
-figure.update_layout(title="Different Probability Distributions")
 
 page = """
-<|chart|figure={figure}|>
+<|{messages}|chat|users={users}|sender_id={users[0]}|on_action=evaluate|>
 """
 
 Gui(page).run()
