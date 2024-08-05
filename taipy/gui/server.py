@@ -161,7 +161,7 @@ class _Server:
                 if resource_handler is None:
                     return (f"Invalid value for query {_Server._RESOURCE_HANDLER_ARG}", 404)
                 try:
-                    return resource_handler.get_resources(path, static_folder)
+                    return resource_handler.get_resources(path, static_folder, base_url)
                 except Exception as e:
                     raise RuntimeError("Can't get resources from custom resource handler") from e
             if path == "" or path == "index.html" or "." not in path:
