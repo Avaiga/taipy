@@ -18,9 +18,6 @@ from taipy.gui import Gui
 pi = 3.14159265358979
 
 page = """
-# Text - Formatting
-<|toggle|theme|>
-
 π≈<|{pi}|text|format=%.3f|>
 """
 
