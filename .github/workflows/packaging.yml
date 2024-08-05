@@ -31,11 +31,28 @@ jobs:
         with:
           python-version: ${{ matrix.python-versions }}
 
+      - name: Install Dependencies
+        run: |
+          pip install toml
+
       - name: Build frontends
         run: |
           python tools/frontend/bundle_build.py
 
-      - name: Install Taipy without dependencies
+      - name: Update pyproject.toml
+        run: |
+          python tools/release/setup_project.py taipy/config
+          python tools/release/setup_project.py taipy/core
+          python tools/release/setup_project.py taipy/gui
+          python tools/release/setup_project.py taipy/rest
+          python tools/release/setup_project.py taipy/templates
+          python tools/release/setup_project.py .
+
+      - name: Install Taipy Subpackages
+        run: |
+          pip install taipy/config taipy/core taipy/gui taipy/rest taipy/templates
+
+      - name: Install Taipy
         run: |
           pip install .
 
