@@ -655,7 +655,7 @@ describe("PaginatedTable Component", () => {
                 col: "int",
                 index: 1,
                 reason: "click",
-                value: undefined,
+                value: undefined
             },
             type: "SEND_ACTION_ACTION",
         });
@@ -692,7 +692,7 @@ describe("PaginatedTable Component", () => {
                 col: "Code",
                 index: 0,
                 reason: "button",
-                value: "button action",
+                value: "button action"
             },
             type: "SEND_ACTION_ACTION",
         });
