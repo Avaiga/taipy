@@ -42,9 +42,6 @@ def evaluate(state, var_name: str, payload: dict):
 
 
 page = """
-# Taipy Calculator
-<|toggle|theme|>
-
 <|{messages}|chat|users={users}|sender_id={users[0]}|on_action=evaluate|>
 """
 

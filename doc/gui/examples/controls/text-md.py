@@ -26,9 +26,6 @@ then you can create line skips.
 """ # noqa W291
 
 page = """
-# Text - Markdown
-<|toggle|theme|>
-
 <|{markdown}|text|mode=markdown|>
 """
 

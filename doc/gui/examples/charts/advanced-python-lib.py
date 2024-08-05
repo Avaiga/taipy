@@ -43,9 +43,6 @@ figure.add_trace(
 figure.update_layout(title="Different Probability Distributions")
 
 page = """
-# Plotly Python
-<|toggle|theme|>
-
 <|chart|figure={figure}|>
 """
 
