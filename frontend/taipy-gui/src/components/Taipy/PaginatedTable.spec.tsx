@@ -697,7 +697,7 @@ describe("PaginatedTable Component", () => {
             type: "SEND_ACTION_ACTION",
         });
     });
-    it("should renders correctly when style is applied to columns", async () => {
+    it("should render correctly when style is applied to columns", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         await waitFor(() => {

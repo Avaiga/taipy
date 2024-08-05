@@ -199,7 +199,11 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
 
-    // TODO: unexpected behavior, need to check
+    /*
+    TODO: If the 'selected' value is a negative number, it will lead to unexpected pagination behavior.
+    For instance, if 'selected' is -1, the pagination will display from -99 to 0 and no data will be selected.
+    Need to fix this issue.
+    */
     useEffect(() => {
         if (selected.length) {
             if (selected[0] < startIndex || selected[0] > startIndex + rowsPerPage) {
