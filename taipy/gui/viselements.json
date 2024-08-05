@@ -23,7 +23,7 @@
                     {
                         "name": "mode",
                         "type": "str",
-                        "doc": "Define the way the text is processed:<ul><li>&quot;raw&quot;: synonym for setting the *raw* property to True</li><li>&quot;pre&quot;: keeps spaces and new lines</li><li>&quot;markdown&quot; or &quot;md&quot;: basic support for Markdown."
+                        "doc": "Define the way the text is processed:\n<ul><li>&quot;raw&quot;: synonym for setting the *raw* property to True</li><li>&quot;pre&quot;: keeps spaces and new lines</li><li>&quot;markdown&quot; or &quot;md&quot;: basic support for Markdown."
                     },
                     {
                         "name": "format",
@@ -272,7 +272,7 @@
                     {
                         "name": "mode",
                         "type": "str",
-                        "doc": "Define the way the toggle is displayed:<ul><li>&quot;theme&quot;: synonym for setting the *theme* property to True</li></ul>"
+                        "doc": "Define the way the toggle is displayed:\n<ul><li>&quot;theme&quot;: synonym for setting the *theme* property to True</li></ul>"
                     }
                 ]
             }
@@ -932,7 +932,7 @@
                     {
                         "name": "mode",
                         "type": "str",
-                        "doc": "Define the way the selector is displayed:<ul><li>&quot;radio&quot;: list of radio buttons</li><li>&quot;check&quot;: list of check buttons</li><li>any other value: selector as usual."
+                        "doc": "Define the way the selector is displayed:\n<ul><li>&quot;radio&quot;: list of radio buttons</li><li>&quot;check&quot;: list of check buttons</li><li>any other value: selector as usual."
                     },
                     {
                         "name": "dropdown",
@@ -1473,7 +1473,7 @@
                     {
                         "name": "on_action",
                         "type": "Callback",
-                        "doc": "The name of the function that is triggered when the dialog button is pressed.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: a list with three elements:<ul><li>The first element is the username</li><li>The second element is the password</li><li>The third element is the current page name</li></ul></li></li>\n</ul>\n</li>\n</ul><br/>When the button is pressed, and if this property is not set, Taipy will try to find a callback function called <i>on_login()</i> and invoke it with the parameters listed above.",
+                        "doc": "The name of the function that is triggered when the dialog button is pressed.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: a list with three elements:\n<ul><li>The first element is the username</li><li>The second element is the password</li><li>The third element is the current page name</li></ul></li></li>\n</ul>\n</li>\n</ul><br/>When the button is pressed, and if this property is not set, Taipy will try to find a callback function called <i>on_login()</i> and invoke it with the parameters listed above.",
                         "signature": [
                             [
                                 "state",
@@ -1965,21 +1965,25 @@
                     {
                         "name": "id",
                         "type": "str",
+                        "default_value": "None",
                         "doc": "The identifier that is assigned to the rendered HTML component."
                     },
                     {
                         "name": "properties",
                         "type": "dict[str, any]",
+                        "default_value": "None",
                         "doc": "Bound to a dictionary that contains additional properties for this element."
                     },
                     {
                         "name": "class_name",
                         "type": "dynamic(str)",
+                        "default_value": "None",
                         "doc": "The list of CSS class names that are associated with the generated HTML Element.<br/>These class names are added to the default <code>taipy-&lt;element_type&gt;</code> class name."
                     },
                     {
                         "name": "hover_text",
                         "type": "dynamic(str)",
+                        "default_value": "None",
                         "doc": "The information that is displayed when the user hovers over this element."
                     }
                 ]
