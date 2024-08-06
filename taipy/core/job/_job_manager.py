@@ -18,6 +18,7 @@ from .._version._version_manager_factory import _VersionManagerFactory
 from .._version._version_mixin import _VersionMixin
 from ..exceptions.exceptions import JobNotDeletedException
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
+from ..reason import JobIsNotFinished, ReasonCollection
 from ..task.task import Task
 from .job import Job
 from .job_id import JobId
@@ -87,7 +88,13 @@ class _JobManager(_Manager[Job], _VersionMixin):
             return max(jobs_of_task)
 
     @classmethod
-    def _is_deletable(cls, job: Union[Job, JobId]) -> bool:
+    def _is_deletable(cls, job: Union[Job, JobId]) -> ReasonCollection:
+        reason_collector = ReasonCollection()
+
         if isinstance(job, str):
             job = cls._get(job)
-        return job.is_finished()
+
+        if not job.is_finished():
+            reason_collector._add_reason(job.id, JobIsNotFinished(job.id))
+
+        return reason_collector

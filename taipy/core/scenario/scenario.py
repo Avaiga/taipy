@@ -40,6 +40,7 @@ from ..exceptions.exceptions import (
 )
 from ..job.job import Job
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
+from ..reason import ReasonCollection
 from ..sequence.sequence import Sequence
 from ..submission.submission import Submission
 from ..task.task import Task
@@ -651,7 +652,7 @@ class Scenario(_Entity, Submittable, _Labeled):
 
         return tp.untag(self, tag)
 
-    def is_deletable(self) -> bool:
+    def is_deletable(self) -> ReasonCollection:
         """Indicate if the scenario can be deleted.
 
         Returns:

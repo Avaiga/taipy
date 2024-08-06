@@ -22,6 +22,7 @@ from .._entity._reload import _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._utils import _fcts_to_dict
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
+from ..reason import ReasonCollection
 from .job_id import JobId
 from .status import Status
 
@@ -348,11 +349,12 @@ class Job(_Entity, _Labeled):
         """
         return self._get_simple_label()
 
-    def is_deletable(self) -> bool:
+    def is_deletable(self) -> ReasonCollection:
         """Indicate if the job can be deleted.
 
         Returns:
-            True if the job can be deleted. False otherwise.
+            A ReasonCollection object that can function as a Boolean value,
+            which is True if the job can be deleted. False otherwise.
         """
         from ... import core as tp
 

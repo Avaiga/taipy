@@ -29,7 +29,7 @@ from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..notification import Event, EventEntityType, EventOperation, Notifier
 from ..notification.event import _make_event
-from ..reason import EntityIsNotSubmittableEntity, ReasonCollection
+from ..reason import EntityDoesNotExist, EntityIsNotSubmittableEntity, ReasonCollection
 from ..scenario._scenario_manager_factory import _ScenarioManagerFactory
 from ..scenario.scenario import Scenario
 from ..scenario.scenario_id import ScenarioId
@@ -389,11 +389,16 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         return submission
 
     @classmethod
-    def _exists(cls, entity_id: str) -> bool:
+    def _exists(cls, entity_id: str) -> ReasonCollection:
         """
         Returns True if the entity id exists.
         """
-        return True if cls._get(entity_id) else False
+        reason_collector = ReasonCollection()
+
+        if cls._get(entity_id) is None:
+            reason_collector._add_reason(entity_id, EntityDoesNotExist(entity_id))
+
+        return reason_collector
 
     @classmethod
     def __log_error_entity_not_found(cls, sequence_id: Union[SequenceId, str]):
