@@ -170,7 +170,6 @@ describe("Slider Component", () => {
 
         // Wait for the changeDelay timeout
         await new Promise((r) => setTimeout(r, 150));
-
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
             payload: { value: 50 },
@@ -186,16 +185,13 @@ describe("Slider Component", () => {
             ["Item 2", "Description 2"],
             ["Item 3", "Description 3"],
         ];
-
         const { getByRole } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <Slider value={33} continuous={false} lov={lovArray} />
             </TaipyContext.Provider>
         );
-
         const slider = getByRole("slider");
         fireEvent.change(slider, { target: { value: 50 } });
-
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
             payload: { value: "Item 3" },
@@ -203,45 +199,23 @@ describe("Slider Component", () => {
             type: "SEND_UPDATE_ACTION",
         });
     });
-    it("returns correct text when before is true and textAnchor is top", async () => {
+    it("returns correct text position and style when textAnchor is set to top", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
-
         const lovList: LoVElt[] = [
             ["Item 1", "Description 1"],
             ["Item 2", "Description 2"],
             ["Item 3", "Description 3"],
         ];
-
         const { container } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <Slider changeDelay={0} lov={lovList} textAnchor="top" />
             </TaipyContext.Provider>
         );
         expect(container).toHaveTextContent("Description 1");
-    });
-    it("handles case when idx is -1", async () => {
-        const dispatch = jest.fn();
-        const state: TaipyState = INITIAL_STATE;
-
-        const lovList: LoVElt[] = [
-            ["Item 1", "Description 1"],
-            ["Item 2", "Description 2"],
-            ["Item 3", "Description 3"],
-        ];
-
-        const labels = {
-            "Item 4": "Label for Item 4", // This will cause idx to be -1
-        };
-
-        const { container } = render(
-            <TaipyContext.Provider value={{ state, dispatch }}>
-                <Slider changeDelay={0} lov={lovList} labels={JSON.stringify(labels)} />
-            </TaipyContext.Provider>
-        );
-
-        // Check that the label for "Item 4" is not found
-        expect(container).not.toHaveTextContent("Label for Item 4");
+        const sliderContainer = container.querySelector("div");
+        expect(sliderContainer).toHaveStyle("display: inline-grid");
+        expect(sliderContainer).toHaveStyle("text-align: center");
     });
     it("returns correct style for textAnchor 'left'", () => {
         const lovList: LoVElt[] = [
@@ -249,10 +223,50 @@ describe("Slider Component", () => {
             ["Item 2", "Description 2"],
             ["Item 3", "Description 3"],
         ];
-
         const { container } = render(<Slider lov={lovList} textAnchor="left" />);
         const slider = container.querySelector("div");
         expect(slider).toBeInTheDocument();
+        expect(slider).toHaveStyle("display: inline-grid");
+        expect(slider).toHaveStyle("grid-template-columns: auto 1fr");
+        expect(slider).toHaveStyle("align-items: center");
+    });
+    it("should change the orientation of the slider to horizontal", async () => {
+        render(<Slider value={5} orientation="horizontal" />);
+        const horizontalInputs = document.querySelectorAll('input[aria-orientation="horizontal"]');
+        expect(horizontalInputs).toHaveLength(1);
+    });
+    it("should change the orientation of the slider to vertical", async () => {
+        render(<Slider value={5} orientation="vertical" />);
+        const verticalInputs = document.querySelectorAll('input[aria-orientation="vertical"]');
+        expect(verticalInputs).toHaveLength(1);
+    });
+    it("should change the orientation of the slider to vertical when default value is an array", async () => {
+        render(<Slider orientation="vertical" defaultValue={[1, 2]} />);
+        const verticalInputs = document.querySelectorAll('input[aria-orientation="vertical"]');
+        expect(verticalInputs).toHaveLength(2);
+    });
+    it("should return an array of number when value is an array of number and no lov is defined", async () => {
+        const { getAllByRole } = render(<Slider value={[1, 2]} />);
+        const sliders = getAllByRole("slider");
+        expect(sliders).toHaveLength(2);
+    });
+    it("handles case when label is out of range", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const lovList: LoVElt[] = [
+            ["Item 1", "Description 1"],
+            ["Item 2", "Description 2"],
+            ["Item 3", "Description 3"],
+        ];
+        const labels = {
+            "Item 4": "Label for Item 4",
+        };
+        const { container } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <Slider changeDelay={0} lov={lovList} labels={JSON.stringify(labels)} />
+            </TaipyContext.Provider>
+        );
+        expect(container).not.toHaveTextContent("Label for Item 4");
     });
     it("should parse lov when default value is greater than 2 values", async () => {
         const lovList: LoVElt[] = [
@@ -260,7 +274,6 @@ describe("Slider Component", () => {
             ["Item 2", "Description 2"],
             ["Item 3", "Description 3"],
         ];
-
         const { container } = render(<Slider defaultValue='["Item 2", "Item 3"]' lov={lovList} />);
         const slider = container.querySelector("div");
         expect(slider).toBeInTheDocument();
@@ -288,9 +301,7 @@ describe("Slider Component", () => {
         expect(() => {
             render(<Slider defaultValue="invalid-json" lov={lovList} />);
         }).toThrow("Slider lov value couldn't be parsed");
-
         expect(errorSpy).toHaveBeenCalledWith("Slider lov value couldn't be parsed");
-
         errorSpy.mockRestore();
     });
     it("throws an error when defaultValue contains non-numeric values", () => {
@@ -322,35 +333,13 @@ describe("Slider Component", () => {
                 <Slider value={["1", "2"]} lov={lovList} />
             </TaipyContext.Provider>
         );
-
         const sliders = getAllByRole("slider");
         fireEvent.change(sliders[0], { target: { value: "2" } });
-
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
             payload: { value: ["2", "3"] },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });
-    });
-    it("should change the orientation of the slider to horizontal", async () => {
-        render(<Slider value={5} orientation="horizontal" />);
-        const horizontalInputs = document.querySelectorAll('input[aria-orientation="horizontal"]');
-        expect(horizontalInputs).toHaveLength(1);
-    });
-    it("should change the orientation of the slider to vertical", async () => {
-        render(<Slider value={5} orientation="vertical" />);
-        const verticalInputs = document.querySelectorAll('input[aria-orientation="vertical"]');
-        expect(verticalInputs).toHaveLength(1);
-    });
-    it("should change the orientation of the slider to vertical when default value is an array", async () => {
-        render(<Slider orientation="vertical" defaultValue={[1, 2]} />);
-        const verticalInputs = document.querySelectorAll('input[aria-orientation="vertical"]');
-        expect(verticalInputs).toHaveLength(2);
-    });
-    it("should return an array of number when value is an array of number and no lov is defined", async () => {
-        const { getAllByRole } = render(<Slider value={[1, 2]} />);
-        const sliders = getAllByRole("slider");
-        expect(sliders).toHaveLength(2);
     });
 });
