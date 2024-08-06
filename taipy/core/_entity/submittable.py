@@ -86,7 +86,7 @@ class Submittable:
         """Indicate if the entity is ready to be run.
 
         Returns:
-            A Reason object that can function as a Boolean value.
+            A ReasonCollection object that can function as a Boolean value,
             which is True if the given entity is ready to be run or there is no reason to be blocked, False otherwise.
         """
         reason_collection = ReasonCollection()

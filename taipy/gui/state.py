@@ -117,6 +117,8 @@ class State:
         return filter(lambda n: n not in excluded_attrs, var_list)
 
     def __getattribute__(self, name: str) -> t.Any:
+        if name == "__class__":
+            return State
         if name in State.__methods:
             return super().__getattribute__(name)
         gui: "Gui" = self.get_gui()
