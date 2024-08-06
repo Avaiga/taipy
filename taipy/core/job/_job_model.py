@@ -26,6 +26,8 @@ class _JobModel(_BaseModel):
     submit_id: str
     submit_entity_id: str
     creation_date: str
+    execution_started_at: str
+    execution_ended_at: str
     subscribers: List[Dict]
     stacktrace: List[str]
     version: str
@@ -40,6 +42,8 @@ class _JobModel(_BaseModel):
             submit_id=data["submit_id"],
             submit_entity_id=data["submit_entity_id"],
             creation_date=data["creation_date"],
+            execution_started_at=data["execution_started_at"],
+            execution_ended_at=data["execution_ended_at"],
             subscribers=_BaseModel._deserialize_attribute(data["subscribers"]),
             stacktrace=_BaseModel._deserialize_attribute(data["stacktrace"]),
             version=data["version"],
@@ -54,6 +58,8 @@ class _JobModel(_BaseModel):
             self.submit_id,
             self.submit_entity_id,
             self.creation_date,
+            self.execution_started_at,
+            self.execution_ended_at,
             _BaseModel._serialize_attribute(self.subscribers),
             _BaseModel._serialize_attribute(self.stacktrace),
             self.version,
