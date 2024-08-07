@@ -15,14 +15,21 @@ import pytest
 
 from taipy.config import Frequency
 from taipy.config.common.scope import Scope
+from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
+from taipy.core import create_scenario
 from taipy.core.common._utils import _Subscriber
 from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from taipy.core.cycle.cycle import Cycle, CycleId
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.in_memory import DataNode, InMemoryDataNode
 from taipy.core.data.pickle import PickleDataNode
-from taipy.core.exceptions.exceptions import SequenceAlreadyExists, SequenceTaskDoesNotExistInScenario
+from taipy.core.exceptions.exceptions import (
+    AttributeKeyAlreadyExisted,
+    PropertyKeyAlreadyExisted,
+    SequenceAlreadyExists,
+    SequenceTaskDoesNotExistInScenario,
+)
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from taipy.core.scenario.scenario import Scenario
 from taipy.core.scenario.scenario_id import ScenarioId
@@ -154,6 +161,29 @@ def test_create_scenario_and_add_sequences():
     assert scenario.sequence_1 == scenario.sequences["sequence_1"]
     assert scenario.sequence_2 == scenario.sequences["sequence_2"]
     assert scenario.sequences == {"sequence_1": scenario.sequence_1, "sequence_2": scenario.sequence_2}
+
+
+def test_get_set_property_to_scenario():
+    dn_cfg = Config.configure_data_node("bar")
+    s_cfg = Config.configure_scenario("foo", additional_data_node_configs=[dn_cfg], key="value")
+    scenario = create_scenario(s_cfg)
+
+    assert scenario.properties == {"key": "value"}
+    assert scenario.key == "value"
+
+    scenario.properties["new_key"] = "new_value"
+    scenario.another_key = "another_value"
+
+    assert scenario.key == "value"
+    assert scenario.new_key == "new_value"
+    assert scenario.another_key == "another_value"
+    assert scenario.properties == {"key": "value", "new_key": "new_value"}
+
+    with pytest.raises(AttributeKeyAlreadyExisted):
+        scenario.bar = "KeyAlreadyUsed"
+
+    with pytest.raises(PropertyKeyAlreadyExisted):
+        scenario.properties["bar"] = "KeyAlreadyUsed"
 
 
 def test_create_scenario_overlapping_sequences():

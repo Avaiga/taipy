@@ -31,6 +31,7 @@ from ..cycle.cycle import Cycle
 from ..data.data_node import DataNode
 from ..data.data_node_id import DataNodeId
 from ..exceptions.exceptions import (
+    AttributeKeyAlreadyExisted,
     InvalidSequence,
     NonExistingDataNode,
     NonExistingSequence,
@@ -176,11 +177,40 @@ class Scenario(_Entity, Submittable, _Labeled):
     def __eq__(self, other):
         return isinstance(other, Scenario) and self.id == other.id
 
-    def __getattr__(self, attribute_name):
-        protected_attribute_name = _validate_id(attribute_name)
-        if protected_attribute_name in self._properties:
-            return _tpl._replace_templates(self._properties[protected_attribute_name])
+    def __setattr__(self, name: str, value: Any) -> None:
+        entity_taipy_attributes = [
+            "_config_id",
+            "id",
+            "_tasks",
+            "_additional_data_nodes",
+            "_creation_date",
+            "_cycle",
+            "_primary_scenario",
+            "_tags",
+            "_properties",
+            "_sequences",
+            "_version",
+            "_submittable_id",
+            "_subscribers",  # from Submittable class
+            "_in_context_attributes_changed_collector",
+            "_is_in_context"  # from _Entity class
+            "name",  # from def name setter
+        ]
+        if name in entity_taipy_attributes:
+            return super().__setattr__(name, value)
+        else:
+            protected_attribute_name = _validate_id(name)
+            try:
+                if protected_attribute_name not in self._properties and not self._get_attributes(
+                    protected_attribute_name, name
+                ):
+                    raise AttributeError  #   throw AttributeError if found
 
+                raise AttributeKeyAlreadyExisted(name)
+            except AttributeError:
+                return super().__setattr__(name, value)
+
+    def _get_attributes(self, protected_attribute_name, attribute_name):
         sequences = self._get_sequences()
         if protected_attribute_name in sequences:
             return sequences[protected_attribute_name]
@@ -190,7 +220,16 @@ class Scenario(_Entity, Submittable, _Labeled):
         data_nodes = self.data_nodes
         if protected_attribute_name in data_nodes:
             return data_nodes[protected_attribute_name]
+
         raise AttributeError(f"{attribute_name} is not an attribute of scenario {self.id}")
+
+    def __getattr__(self, attribute_name):
+        protected_attribute_name = _validate_id(attribute_name)
+        if hasattr(self, "_properties"):
+            if protected_attribute_name in self._properties:
+                return _tpl._replace_templates(self._properties[protected_attribute_name])
+
+        return self._get_attributes(protected_attribute_name, attribute_name)
 
     @property
     def config_id(self):
