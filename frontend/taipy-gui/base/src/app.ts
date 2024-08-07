@@ -49,7 +49,7 @@ export class TaipyApp {
         path: string | undefined = undefined,
         socket: Socket | undefined = undefined,
     ) {
-        socket = socket || io("/", { autoConnect: false, path: `${getBase()}socket.io` });
+        socket = socket || io("/", { autoConnect: false, path: `${this.getBaseUrl()}socket.io` });
         this.onInit = onInit;
         this.onChange = onChange;
         this.variableData = undefined;
@@ -232,7 +232,7 @@ export class TaipyApp {
 
     updateContext(path: string | undefined = "") {
         if (!path || path === "") {
-            path = window.location.pathname.slice(1);
+            path = window.location.pathname.replace(this.getBaseUrl().slice(0, -1), "") || "/"
         }
         this.sendWsMessage("GMC", "get_module_context", { path: path || "/" });
     }
