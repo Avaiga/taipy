@@ -232,7 +232,7 @@ export class TaipyApp {
 
     updateContext(path: string | undefined = "") {
         if (!path || path === "") {
-            path = window.location.pathname.replace(this.getBaseUrl().slice(0, -1), "") || "/"
+            path = window.location.pathname.replace(this.getBaseUrl(), "") || "/"
         }
         this.sendWsMessage("GMC", "get_module_context", { path: path || "/" });
     }
