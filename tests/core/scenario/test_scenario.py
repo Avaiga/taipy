@@ -495,6 +495,7 @@ def test_add_rename_and_remove_sequences_within_context(data_node):
     task_1 = Task("task_1", {}, print, output=[data_node])
     task_2 = Task("task_2", {}, print, input=[data_node])
     _TaskManagerFactory._build_manager()._set(task_1)
+    _TaskManagerFactory._build_manager()._set(task_2)
     scenario = Scenario(config_id="scenario", tasks={task_1, task_2}, properties={})
     _ScenarioManagerFactory._build_manager()._set(scenario)
 

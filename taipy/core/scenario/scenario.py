@@ -118,6 +118,7 @@ class Scenario(_Entity, Submittable, _Labeled):
     _SEQUENCE_TASKS_KEY = "tasks"
     _SEQUENCE_PROPERTIES_KEY = "properties"
     _SEQUENCE_SUBSCRIBERS_KEY = "subscribers"
+    __CHECK_INIT_DONE_ATTR_NAME = "_init_done"
 
     def __init__(
         self,
@@ -156,6 +157,7 @@ class Scenario(_Entity, Submittable, _Labeled):
             )
 
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
+        self._init_done = True
 
     @staticmethod
     def _new_id(config_id: str) -> ScenarioId:
@@ -178,25 +180,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         return isinstance(other, Scenario) and self.id == other.id
 
     def __setattr__(self, name: str, value: Any) -> None:
-        entity_taipy_attributes = [
-            "_config_id",
-            "id",
-            "_tasks",
-            "_additional_data_nodes",
-            "_creation_date",
-            "_cycle",
-            "_primary_scenario",
-            "_tags",
-            "_properties",
-            "_sequences",
-            "_version",
-            "_submittable_id",
-            "_subscribers",  # from Submittable class
-            "_in_context_attributes_changed_collector",
-            "_is_in_context"  # from _Entity class
-            "name",  # from def name setter
-        ]
-        if name in entity_taipy_attributes:
+        if self.__CHECK_INIT_DONE_ATTR_NAME not in dir(self) or name in dir(self):
             return super().__setattr__(name, value)
         else:
             protected_attribute_name = _validate_id(name)
@@ -204,8 +188,7 @@ class Scenario(_Entity, Submittable, _Labeled):
                 if protected_attribute_name not in self._properties and not self._get_attributes(
                     protected_attribute_name, name
                 ):
-                    raise AttributeError  #   throw AttributeError if found
-
+                    raise AttributeError
                 raise AttributeKeyAlreadyExisted(name)
             except AttributeError:
                 return super().__setattr__(name, value)
@@ -214,10 +197,10 @@ class Scenario(_Entity, Submittable, _Labeled):
         sequences = self._get_sequences()
         if protected_attribute_name in sequences:
             return sequences[protected_attribute_name]
-        tasks = self.tasks
+        tasks = self.__get_tasks()
         if protected_attribute_name in tasks:
             return tasks[protected_attribute_name]
-        data_nodes = self.data_nodes
+        data_nodes = self.__get_data_nodes()
         if protected_attribute_name in data_nodes:
             return data_nodes[protected_attribute_name]
 
@@ -225,9 +208,8 @@ class Scenario(_Entity, Submittable, _Labeled):
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = _validate_id(attribute_name)
-        if hasattr(self, "_properties"):
-            if protected_attribute_name in self._properties:
-                return _tpl._replace_templates(self._properties[protected_attribute_name])
+        if protected_attribute_name in self._properties:
+            return _tpl._replace_templates(self._properties[protected_attribute_name])
 
         return self._get_attributes(protected_attribute_name, attribute_name)
 
@@ -497,13 +479,16 @@ class Scenario(_Entity, Submittable, _Labeled):
     def _get_set_of_tasks(self) -> Set[Task]:
         return set(self.tasks.values())
 
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def data_nodes(self) -> Dict[str, DataNode]:
+    def __get_data_nodes(self) -> Dict[str, DataNode]:
         data_nodes_dict = self.__get_additional_data_nodes()
         for _, task in self.__get_tasks().items():
             data_nodes_dict.update(task.data_nodes)
         return data_nodes_dict
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def data_nodes(self) -> Dict[str, DataNode]:
+        return self.__get_data_nodes()
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

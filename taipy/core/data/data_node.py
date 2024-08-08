@@ -347,6 +347,12 @@ class DataNode(_Entity, _Labeled):
     def __setstate__(self, state):
         vars(self).update(state)
 
+    # def __setattr__(self, name: str, value: Any) -> None:
+    #     return super().__setattr__(name, value)
+
+    def _get_attributes(self, protected_attribute_name, attribute_name):
+        raise AttributeError
+
     def __getattr__(self, attribute_name):
         protected_attribute_name = _validate_id(attribute_name)
         if protected_attribute_name in self._properties:

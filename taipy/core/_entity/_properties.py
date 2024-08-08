@@ -31,9 +31,8 @@ class _Properties(UserDict):
         if hasattr(self, "_entity_owner"):
             from ... import core as tp
 
-            entity_owner = tp.get(self._entity_owner)
             try:
-                entity_owner._get_attributes(_validate_id(key), key)
+                self._entity_owner._get_attributes(_validate_id(key), key)
                 raise PropertyKeyAlreadyExisted(key)
             except AttributeError:
                 super(_Properties, self).__setitem__(key, value)
