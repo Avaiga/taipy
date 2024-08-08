@@ -29,16 +29,16 @@ import { TIMEZONE_CLIENT } from "../utils";
  * @param defaultStatic - The default static value.
  * @returns The latest updated value.
  */
-export const useDynamicProperty = <T>(value: T, defaultValue: T, defaultStatic: T, check_type?: string): T => {
+export const useDynamicProperty = <T>(value: T, defaultValue: T, defaultStatic: T, checkType?: string, allowNull?: boolean): T => {
     return useMemo(() => {
-        if (value !== undefined && (!check_type || typeof value === check_type)) {
+        if (value !== undefined && ((allowNull && value === null) || !checkType || typeof value === checkType)) {
             return value;
         }
-        if (defaultValue !== undefined && (!check_type || typeof value === check_type)) {
+        if (defaultValue !== undefined && ((allowNull && value === null) || !checkType || typeof defaultValue === checkType)) {
             return defaultValue;
         }
         return defaultStatic;
-    }, [value, defaultValue, defaultStatic, check_type]);
+    }, [value, defaultValue, defaultStatic, checkType, allowNull]);
 };
 
 /**
