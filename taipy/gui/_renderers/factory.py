@@ -361,6 +361,7 @@ class _Factory:
                 ("show_value", PropertyType.boolean, True),
                 ("format", PropertyType.string),
                 ("delta_format", PropertyType.string),
+                ("bar_color", PropertyType.string),
                 ("color_map", PropertyType.dict),
                 ("hover_text", PropertyType.dynamic_string),
                 ("template", PropertyType.dict),
