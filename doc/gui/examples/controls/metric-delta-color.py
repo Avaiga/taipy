@@ -15,24 +15,14 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-
-# Color wavelength
-color_wl = 530
-# Color ranges by wavelength
-color_map = {
-    200: None,
-    380: "violet",
-    435: "blue",
-    500: "cyan",
-    520: "green",
-    565: "yellow",
-    590: "orange",
-    625: "red",
-    740: None,
-}
+# Source: https://gml.noaa.gov/ccgg/trends/gl_gr.html
+# Estimated Global Trend on january 1st:
+co2_2014 = 396.37
+co2_2024 = 421.13
+delta = co2_2024-co2_2014
 
 page = """
-<|{color_wl}|metric|color_map={color_map}|format=%d nm|min=200|max=800|bar_color=gray|>
+<|{co2_2024}|metric|delta={delta}|delta_color=invert|format=%.1f ppm|delta_format=%.1f ppm|min=300|max=500|>
 """
 
 Gui(page).run()
