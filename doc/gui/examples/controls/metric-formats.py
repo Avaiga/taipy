@@ -8,13 +8,19 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
-import taipy.gui.builder as tgb
+# -----------------------------------------------------------------------------------------
+# To execute this script, make sure that the taipy-gui package is installed in your
+# Python environment and run:
+#     python <script>
+# -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
+speed = 60
+variation = 15
 
-def test_progress_builder(gui: Gui, helpers):
-    with tgb.Page(frame=None) as page:
-        tgb.progress(linear="true", show_value="true", value={50})  # type: ignore[attr-defined]
-    expected_list = ["<Progress", "linear={true}", "showValue={true}", 'value="{50}"']
-    helpers.test_control_builder(gui, page, expected_list)
+page = """
+<|{speed}|metric|format=%d km/h|delta={variation}|delta_format=%d %%|>
+"""
+
+
+Gui(page).run()

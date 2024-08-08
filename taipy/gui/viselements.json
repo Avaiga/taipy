@@ -51,7 +51,7 @@
                     {
                         "name": "on_action",
                         "type": "Callback",
-                        "doc": "The name of a function that is triggered when the button is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
+                        "doc": "The name of a function that is triggered when the button is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str|None): the identifier of the button.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
                         "signature": [
                             [
                                 "state",
@@ -501,7 +501,7 @@
                     {
                         "name": "on_range_change",
                         "type": "Callback",
-                        "doc": "The callback function that is invoked when the visible part of the x axis changes.<br/>The function receives three parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the chart control.</li>\n<li>payload (dict[str, any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">Plotly</a>.</li>\n</ul>",
+                        "doc": "The callback function that is invoked when the visible part of the x axis changes.<br/>The function receives three parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str|None): the identifier of the chart control.</li>\n<li>payload (dict[str, any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">Plotly</a>.</li>\n</ul>",
                         "signature": [
                             [
                                 "state",
@@ -988,7 +988,7 @@
                     {
                         "name": "on_action",
                         "type": "Callback",
-                        "doc": "The name of a function that is triggered when the download is terminated (or on user action if <i>content</i> is None).<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has two keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: A list of two elements: <i>args[0]</i> reflects the <i>name</i> property and <i>args[1]</i> holds the file URL.</li>\n</ul>\n</li>\n</ul>",
+                        "doc": "The name of a function that is triggered when the download is terminated (or on user action if <i>content</i> is None).<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str|None): the identifier of the button.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has two keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: A list of two elements: <i>args[0]</i> reflects the <i>name</i> property and <i>args[1]</i> holds the file URL.</li>\n</ul>\n</li>\n</ul>",
                         "signature": [
                             [
                                 "state",
@@ -1052,7 +1052,7 @@
                     {
                         "name": "on_action",
                         "type": "Callback",
-                        "doc": "The name of the function that will be triggered.<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
+                        "doc": "The name of the function that will be triggered.<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str|None): the identifier of the button.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
                         "signature": [
                             [
                                 "state",
@@ -1117,7 +1117,7 @@
                     {
                         "name": "on_action",
                         "type": "Callback",
-                        "doc": "The name of a function that is triggered when the user clicks on the image.<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
+                        "doc": "The name of a function that is triggered when the user clicks on the image.<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str|None): the identifier of the button.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
                         "signature": [
                             [
                                 "state",
@@ -1158,31 +1158,25 @@
                         "name": "value",
                         "default_property": true,
                         "type": "dynamic(int|float)",
-                        "doc": "The value to display."
+                        "doc": "The value to represent."
                     },
                     {
                         "name": "type",
                         "default_value": "\"circular\"",
                         "type": "str",
-                        "doc": "The type of the gauge.<br/>Possible values are:\n<ul>\n<li>\"none\"</li>\n<li>\"circular\"</li>\n<li>\"linear\"</li></ul>."
-                    },
-                    {
-                        "name": "title",
-                        "default_value": "None",
-                        "type": "str",
-                        "doc": "The title of the metric."
+                        "doc": "The type of the gauge.<br/>Possible values are:\n<ul>\n<li>\"none\"</li>\n<li>\"circular\"</li>\n<li>\"linear\"</li></ul>Setting this value to \"none\" remove the gauge."
                     },
                     {
                         "name": "min",
                         "type": "int|float",
                         "default_value": "0",
-                        "doc": "The minimum value of this metric control."
+                        "doc": "The minimum value of this metric control's gauge."
                     },
                     {
                         "name": "max",
                         "type": "int|float",
                         "default_value": "100",
-                        "doc": "The maximum value of this metric control."
+                        "doc": "The maximum value of this metric control's gauge."
                     },
                     {
                         "name": "delta",
@@ -1192,13 +1186,18 @@
                     {
                         "name": "delta_color",
                         "type": "str",
-                        "doc": "The color that is used to display the value of the <i>delta</i> property. If negative_delta_color is set, then this property applies for positive values of delta only. If this property is set to \"invert\", then delta values are represented with the color used for negative values if delta is positive. The value for delta is also represented with the color used for positive values if delta is negative."
+                        "doc": "The color that is used to display the value of the <i>delta</i> property.<br/>If <i>negative_delta_color</i> is set, then this property applies for positive values of <i>delta</i> only.<br/>If this property is set to \"invert\", then values for <i>delta</i> are represented with the color used for negative values if delta is positive and <i>delta</i> is represented with the color used for positive values if it is negative."
+                    },
+                    {
+                        "name": "title",
+                        "default_value": "None",
+                        "type": "str",
+                        "doc": "The title of the metric."
                     },
                     {
                         "name": "negative_delta_color",
                         "type": "str",
-                        "doc": "If set, this represents the color to be used when the value of <i>delta</i> is negative (or positive if <i>delta_color</i> is set to \"invert\")"
-
+                        "doc": "If set, this represents the color to be used when the value of <i>delta</i> is negative (or positive if <i>delta_color</i> is set to \"invert\")."
                     },
                     {
                         "name": "threshold",
@@ -1224,12 +1223,12 @@
                     {
                         "name": "bar_color",
                         "type": "str",
-                        "doc": "The color of the bar."
+                        "doc": "The color of the bar in the gauge."
                     },
                     {
                         "name": "color_map",
                         "type": "dict",
-                        "doc": "TODO The color_map is used to display different colors for different ranges of the metric. The color_map's keys represent the starting point of each range, which is a number, while the values represent the corresponding color for that range. If the value associated with a key is set to None, it implies that the corresponding range is not assigned any color."
+                        "doc": "Indicates what colors should be used for different ranges of the metric. The <i>color_map</i>'s keys represent the lower bound of each range, which is a number, while the values represent the color for that range.<br/>If the value associated with a key is set to None, the corresponding range is not assigned any color."
                     },
                     {
                         "name": "width",
@@ -1242,6 +1241,11 @@
                         "type": "str|number",
                         "default_value": "None",
                         "doc": "The height of the metric control, in CSS units."
+                    },
+                    {
+                        "name": "layout",
+                        "type": "dynamic(dict[str, any])",
+                        "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/reference/layout/\">layout object</a>."
                     },
                     {
                         "name": "template",
@@ -1772,7 +1776,7 @@
                     {
                         "name": "on_close",
                         "type": "Callback",
-                        "doc": "The name of a function that is triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n</ul><br/>If this property is not set, no function is called when this pane is closed.",
+                        "doc": "The name of a function that is triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str|None): the identifier of the button.</li>\n</ul><br/>If this property is not set, no function is called when this pane is closed.",
                         "signature": [
                             [
                                 "state",

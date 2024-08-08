@@ -25,30 +25,30 @@ import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
 const Plot = lazy(() => import("react-plotly.js"));
 
 interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
-    title?: string;
-    type?: string;
-    min?: number;
-    max?: number;
     value?: number;
     defaultValue?: number;
     delta?: number;
     defaultDelta?: number;
+    type?: string;
+    min?: number;
+    max?: number;
     deltaColor?: string;
     negativeDeltaColor?: string;
     threshold?: number;
     defaultThreshold?: number;
-    testId?: string;
-    defaultLayout?: string;
-    layout?: string;
-    defaultStyle?: string;
-    style?: string;
-    width?: string | number;
-    height?: string | number;
-    showValue?: boolean;
     format?: string;
     deltaFormat?: string;
-    colorMap?: string;
     barColor?: string;
+    showValue?: boolean;
+    colorMap?: string;
+    title?: string;
+    testId?: string;
+    layout?: string;
+    defaultLayout?: string;
+    style?: string;
+    defaultStyle?: string;
+    width?: string | number;
+    height?: string | number;
     template?: string;
     template_Dark_?: string;
     template_Light_?: string;
@@ -140,18 +140,18 @@ const Metric = (props: MetricProps) => {
             },
         ] as Data[];
     }, [
-        props.barColor,
-        props.format,
-        props.deltaFormat,
+        value,
+        delta,
+        props.type,
         props.min,
         props.max,
-        props.type,
-        value,
-        showValue,
         deltaColor,
         negativeDeltaColor,
-        delta,
         threshold,
+        props.format,
+        props.deltaFormat,
+        props.barColor,
+        showValue,
         colorMap,
     ]);
 
@@ -191,11 +191,12 @@ const Metric = (props: MetricProps) => {
         return layout as Partial<Layout>;
     }, [props.title, props.template, props.template_Dark_, props.template_Light_, theme.palette.mode, baseLayout]);
 
+    const plotConfig = {displaylogo: false}
     return (
         <Tooltip title={hover || ""}>
             <Box data-testid={props.testId} className={className}>
                 <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
-                    <Plot data={data} layout={layout} style={style} useResizeHandler />
+                    <Plot data={data} layout={layout} style={style} config={plotConfig} useResizeHandler />
                 </Suspense>
             </Box>
         </Tooltip>
