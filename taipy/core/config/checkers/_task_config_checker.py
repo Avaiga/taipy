@@ -45,7 +45,7 @@ class _TaskConfigChecker(_ConfigChecker):
 
     def _check_if_children_config_id_is_overlapping_with_properties(self, task_config_id: str, task_config: TaskConfig):
         for data_node in task_config.input_configs + task_config.output_configs:
-            if data_node.id in task_config.properties:
+            if isinstance(data_node, DataNodeConfig) and data_node.id in task_config.properties:
                 self._error(
                     DataNodeConfig._ID_KEY,
                     data_node.id,

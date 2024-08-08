@@ -46,22 +46,24 @@ class _ScenarioConfigChecker(_ConfigChecker):
     def _check_if_children_config_id_is_overlapping_with_properties(
         self, scenario_config_id: str, scenario_config: ScenarioConfig
     ):
-        for task in scenario_config.tasks:
-            if task.id in scenario_config.properties:
-                self._error(
-                    TaskConfig._ID_KEY,
-                    task.id,
-                    f"The id of the TaskConfig `{task.id}` is overlapping with the "
-                    f"property `{task.id}` of ScenarioConfig `{scenario_config_id}`.",
-                )
-        for data_node in scenario_config.data_nodes:
-            if data_node.id in scenario_config.properties:
-                self._error(
-                    DataNodeConfig._ID_KEY,
-                    data_node.id,
-                    f"The id of the DataNodeConfig `{data_node.id}` is overlapping with the "
-                    f"property `{data_node.id}` of ScenarioConfig `{scenario_config_id}`.",
-                )
+        if scenario_config.tasks:
+            for task in scenario_config.tasks:
+                if isinstance(task, TaskConfig) and task.id in scenario_config.properties:
+                    self._error(
+                        TaskConfig._ID_KEY,
+                        task.id,
+                        f"The id of the TaskConfig `{task.id}` is overlapping with the "
+                        f"property `{task.id}` of ScenarioConfig `{scenario_config_id}`.",
+                    )
+        if scenario_config.data_nodes:
+            for data_node in scenario_config.data_nodes:
+                if isinstance(data_node, DataNodeConfig) and data_node.id in scenario_config.properties:
+                    self._error(
+                        DataNodeConfig._ID_KEY,
+                        data_node.id,
+                        f"The id of the DataNodeConfig `{data_node.id}` is overlapping with the "
+                        f"property `{data_node.id}` of ScenarioConfig `{scenario_config_id}`.",
+                    )
 
     def _check_task_configs(self, scenario_config_id: str, scenario_config: ScenarioConfig):
         self._check_children(
