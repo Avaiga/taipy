@@ -1,3 +1,3 @@
 export const getBase = () => {
-    return document.getElementsByTagName("base")[0].getAttribute("href");
+    return document.getElementsByTagName("base")[0].getAttribute("href") || "/";
 };
