@@ -83,6 +83,47 @@ class TestScenarioConfigChecker:
         )
         assert expected_error_message in caplog.text
 
+    def test_check_if_children_id_is_used_in_properties(self, caplog):
+        config = Config._applied_config
+        Config._compile_configs()
+        input_dn_config = DataNodeConfig("input_dn")
+        output_dn_config = DataNodeConfig("output_dn")
+        test_dn_config = DataNodeConfig("test")
+        task_config = TaskConfig("bar", print, [input_dn_config], [output_dn_config])
+        test_task_config = TaskConfig("test", print, [test_dn_config], [output_dn_config])
+
+        config._sections[ScenarioConfig.name]["new"] = copy(config._sections[ScenarioConfig.name]["default"])
+        config._sections[ScenarioConfig.name]["new"]._properties["test"] = "test"
+        config._sections[ScenarioConfig.name]["new"]._tasks = [task_config]
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+
+        config._sections[ScenarioConfig.name]["new"]._tasks = [test_task_config]
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 2
+        assert (
+            "The id of the TaskConfig `test` is overlapping with the property `test` of ScenarioConfig `new`."
+            in caplog.text
+        )
+        assert (
+            "The id of the DataNodeConfig `test` is overlapping with the property `test` of ScenarioConfig `new`."
+            in caplog.text
+        )
+
+        config._sections[ScenarioConfig.name]["new"]._tasks = [task_config]
+        config._sections[ScenarioConfig.name]["new"]._additional_data_nodes = [test_dn_config]
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        assert (
+            "The id of the DataNodeConfig `test` is overlapping with the property `test` of ScenarioConfig `new`."
+            in caplog.text
+        )
+
     def test_check_task_configs(self, caplog):
         Config._collector = IssueCollector()
         config = Config._applied_config

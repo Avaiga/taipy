@@ -38,9 +38,30 @@ class _ScenarioConfigChecker(_ConfigChecker):
                 self._check_addition_data_node_configs(scenario_config_id, scenario_config)
                 self._check_additional_dns_not_overlapping_tasks_dns(scenario_config_id, scenario_config)
                 self._check_tasks_in_sequences_exist_in_scenario_tasks(scenario_config_id, scenario_config)
+                self._check_if_children_config_id_is_overlapping_with_properties(scenario_config_id, scenario_config)
                 self._check_comparators(scenario_config_id, scenario_config)
 
         return self._collector
+
+    def _check_if_children_config_id_is_overlapping_with_properties(
+        self, scenario_config_id: str, scenario_config: ScenarioConfig
+    ):
+        for task in scenario_config.tasks:
+            if task.id in scenario_config.properties:
+                self._error(
+                    TaskConfig._ID_KEY,
+                    task.id,
+                    f"The id of the TaskConfig `{task.id}` is overlapping with the "
+                    f"property `{task.id}` of ScenarioConfig `{scenario_config_id}`.",
+                )
+        for data_node in scenario_config.data_nodes:
+            if data_node.id in scenario_config.properties:
+                self._error(
+                    DataNodeConfig._ID_KEY,
+                    data_node.id,
+                    f"The id of the DataNodeConfig `{data_node.id}` is overlapping with the "
+                    f"property `{data_node.id}` of ScenarioConfig `{scenario_config_id}`.",
+                )
 
     def _check_task_configs(self, scenario_config_id: str, scenario_config: ScenarioConfig):
         self._check_children(
@@ -78,7 +99,7 @@ class _ScenarioConfigChecker(_ConfigChecker):
                 f"{ScenarioConfig._COMPARATOR_KEY} field of ScenarioConfig"
                 f" `{scenario_config_id}` must be populated with a dictionary value.",
             )
-        else:
+        elif scenario_config.comparators is not None:
             for data_node_id, comparator in scenario_config.comparators.items():
                 if data_node_id not in Config.data_nodes:
                     self._error(
