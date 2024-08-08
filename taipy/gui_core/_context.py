@@ -414,6 +414,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         data = args[start_idx + 2]
         with_dialog = True if len(args) < start_idx + 4 else bool(args[start_idx + 3])
         scenario = None
+        user_scenario = None
 
         name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
         if update:
@@ -468,7 +469,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         )
                         if isinstance(res, Scenario):
                             # everything's fine
-                            scenario_id = res.id
+                            user_scenario = res
+                            scenario_id = user_scenario.id
                             state.assign(error_var, "")
                             return
                         if res:
@@ -502,10 +504,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 state.assign(error_var, f"Error creating Scenario. {e}")
             finally:
                 self.scenario_refresh(scenario_id)
-                if scenario and (sel_scenario_var := args[1] if isinstance(args[1], str) else None):
+                if (scenario or user_scenario) and (sel_scenario_var := args[1] if isinstance(args[1], str) else None):
                     try:
                         var_name, _ = gui._get_real_var_name(sel_scenario_var)
-                        state.assign(var_name, scenario)
+                        state.assign(var_name, scenario or user_scenario)
                     except Exception as e:  # pragma: no cover
                         _warn("Can't find value variable name in context", e)
         if scenario:
