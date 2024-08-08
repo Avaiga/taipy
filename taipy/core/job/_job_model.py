@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from .._repository._base_taipy_model import _BaseModel
 from .job_id import JobId
@@ -26,8 +26,8 @@ class _JobModel(_BaseModel):
     submit_id: str
     submit_entity_id: str
     creation_date: str
-    execution_started_at: str
-    execution_ended_at: str
+    execution_started_at: Optional[str]
+    execution_ended_at: Optional[str]
     subscribers: List[Dict]
     stacktrace: List[str]
     version: str
