@@ -21,6 +21,8 @@ from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.exceptions import AttributeKeyAlreadyExisted, PropertyKeyAlreadyExisted
+from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
@@ -108,6 +110,33 @@ def test_create_task():
         get_mck.return_value = MockOwner()
         assert task.get_label() == "owner_label > " + task.config_id
         assert task.get_simple_label() == task.config_id
+
+
+def test_get_set_property_and_attribute():
+    dn_cfg = Config.configure_data_node("bar")
+    task_config = Config.configure_task("print", print, [dn_cfg], None)
+    scenario_config = Config.configure_scenario("scenario", [task_config])
+    scenario = _ScenarioManager._create(scenario_config)
+    task = scenario.tasks["print"]
+
+    task.properties["key"] = "value"
+
+    assert task.properties == {"key": "value"}
+    assert task.key == "value"
+
+    task.properties["new_key"] = "new_value"
+    task.another_key = "another_value"
+
+    assert task.key == "value"
+    assert task.new_key == "new_value"
+    assert task.another_key == "another_value"
+    assert task.properties == {"key": "value", "new_key": "new_value"}
+
+    with pytest.raises(AttributeKeyAlreadyExisted):
+        task.bar = "KeyAlreadyUsed"
+
+    with pytest.raises(PropertyKeyAlreadyExisted):
+        task.properties["bar"] = "KeyAlreadyUsed"
 
 
 def test_can_not_change_task_output(output):

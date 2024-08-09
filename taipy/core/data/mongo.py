@@ -143,15 +143,15 @@ class MongoCollectionDataNode(DataNode):
             properties.get(self.__COLLECTION_KEY, "")
         ]
 
-        self.custom_document = properties[self._CUSTOM_DOCUMENT_PROPERTY]
+        self.custom_mongo_document = properties[self._CUSTOM_DOCUMENT_PROPERTY]
 
         self._decoder = self._default_decoder
-        custom_decoder = getattr(self.custom_document, "decode", None)
+        custom_decoder = getattr(self.custom_mongo_document, "decode", None)
         if callable(custom_decoder):
             self._decoder = custom_decoder
 
         self._encoder = self._default_encoder
-        custom_encoder = getattr(self.custom_document, "encode", None)
+        custom_encoder = getattr(self.custom_mongo_document, "encode", None)
         if callable(custom_encoder):
             self._encoder = custom_encoder
 
@@ -275,7 +275,7 @@ class MongoCollectionDataNode(DataNode):
         Returns:
             A custom document object.
         """
-        return self.custom_document(**document)
+        return self.custom_mongo_document(**document)
 
     def _default_encoder(self, document_object: Any) -> Dict:
         """Encode a custom document object to a dictionary for writing to MongoDB.

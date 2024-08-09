@@ -163,7 +163,7 @@ def test_create_scenario_and_add_sequences():
     assert scenario.sequences == {"sequence_1": scenario.sequence_1, "sequence_2": scenario.sequence_2}
 
 
-def test_get_set_property_to_scenario():
+def test_get_set_property_and_attribute():
     dn_cfg = Config.configure_data_node("bar")
     s_cfg = Config.configure_scenario("foo", additional_data_node_configs=[dn_cfg], key="value")
     scenario = create_scenario(s_cfg)

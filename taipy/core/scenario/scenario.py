@@ -193,7 +193,7 @@ class Scenario(_Entity, Submittable, _Labeled):
             except AttributeError:
                 return super().__setattr__(name, value)
 
-    def _get_attributes(self, protected_attribute_name, attribute_name):
+    def _get_attributes(self, protected_attribute_name, attribute_name) -> Union[Sequence, Task, DataNode]:
         sequences = self._get_sequences()
         if protected_attribute_name in sequences:
             return sequences[protected_attribute_name]

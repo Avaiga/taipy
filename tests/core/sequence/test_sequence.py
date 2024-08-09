@@ -20,6 +20,7 @@ from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.pickle import PickleDataNode
+from taipy.core.exceptions import AttributeKeyAlreadyExisted, PropertyKeyAlreadyExisted
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.scenario.scenario import Scenario
 from taipy.core.sequence._sequence_manager import _SequenceManager
@@ -124,6 +125,34 @@ def test_create_sequence():
         get_mck.return_value = MockOwner()
         assert sequence_2.get_label() == "owner_label > " + sequence_2.name
         assert sequence_2.get_simple_label() == sequence_2.name
+
+
+def test_get_set_property_and_attribute():
+    dn_cfg = Config.configure_data_node("bar")
+    task_config = Config.configure_task("print", print, [dn_cfg], None)
+    scenario_config = Config.configure_scenario("scenario", [task_config])
+
+    scenario = _ScenarioManager._create(scenario_config)
+    scenario.add_sequences({"seq": list(scenario.tasks.values())})
+    sequence = scenario.sequences["seq"]
+    sequence.properties["key"] = "value"
+
+    assert sequence.properties == {"name": "seq", "key": "value"}
+    assert sequence.key == "value"
+
+    sequence.properties["new_key"] = "new_value"
+    sequence.another_key = "another_value"
+
+    assert sequence.key == "value"
+    assert sequence.new_key == "new_value"
+    assert sequence.another_key == "another_value"
+    assert sequence.properties == {"name": "seq", "key": "value", "new_key": "new_value"}
+
+    with pytest.raises(AttributeKeyAlreadyExisted):
+        sequence.bar = "KeyAlreadyUsed"
+
+    with pytest.raises(PropertyKeyAlreadyExisted):
+        sequence.properties["bar"] = "KeyAlreadyUsed"
 
 
 def test_check_consistency():

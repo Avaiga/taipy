@@ -8,14 +8,18 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 import datetime
 from datetime import timedelta
+
+import pytest
 
 from taipy.config.common.frequency import Frequency
 from taipy.core import CycleId
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from taipy.core.cycle.cycle import Cycle
+from taipy.core.exceptions import AttributeKeyAlreadyExisted
 from taipy.core.task.task import Task
 
 
@@ -118,6 +122,33 @@ def test_add_property_to_scenario(current_datetime):
     assert cycle.properties == {"key": "value", "new_key": "new_value"}
     assert cycle.key == "value"
     assert cycle.new_key == "new_value"
+
+
+def test_get_set_property_and_attribute(current_datetime):
+    cycle_manager = _CycleManagerFactory()._build_manager()
+
+    cycle = Cycle(
+        Frequency.WEEKLY,
+        {"key": "value"},
+        current_datetime,
+        current_datetime,
+        current_datetime,
+        name="foo",
+    )
+    cycle_manager._set(cycle)
+
+    assert cycle.properties == {"key": "value"}
+
+    cycle.properties["new_key"] = "new_value"
+    cycle.another_key = "another_value"
+
+    assert cycle.key == "value"
+    assert cycle.new_key == "new_value"
+    assert cycle.another_key == "another_value"
+    assert cycle.properties["new_key"] == "new_value"
+
+    with pytest.raises(AttributeKeyAlreadyExisted):
+        cycle.key = "KeyAlreadyUsed"
 
 
 def test_auto_set_and_reload(current_datetime):

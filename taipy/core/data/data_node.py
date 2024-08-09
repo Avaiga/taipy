@@ -29,7 +29,7 @@ from .._entity._ready_to_run_property import _ReadyToRunProperty
 from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._warnings import _warn_deprecated
-from ..exceptions.exceptions import DataNodeIsBeingEdited, NoData
+from ..exceptions.exceptions import AttributeKeyAlreadyExisted, DataNodeIsBeingEdited, NoData
 from ..job.job_id import JobId
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
 from ..reason import DataNodeEditInProgress, DataNodeIsNotWritten
@@ -139,6 +139,7 @@ class DataNode(_Entity, _Labeled):
     _MANAGER_NAME: str = "data"
     _PATH_KEY = "path"
     __EDIT_TIMEOUT = 30
+    __CHECK_INIT_DONE_ATTR_NAME = "_init_done"
 
     _TAIPY_PROPERTIES: Set[str] = set()
 
@@ -174,6 +175,7 @@ class DataNode(_Entity, _Labeled):
         self._edits: List[Edit] = edits or []
 
         self._properties: _Properties = _Properties(self, **kwargs)
+        self._init_done = True
 
     @staticmethod
     def _new_id(config_id: str) -> DataNodeId:
@@ -347,8 +349,17 @@ class DataNode(_Entity, _Labeled):
     def __setstate__(self, state):
         vars(self).update(state)
 
-    # def __setattr__(self, name: str, value: Any) -> None:
-    #     return super().__setattr__(name, value)
+    def __setattr__(self, name: str, value: Any) -> None:
+        if self.__CHECK_INIT_DONE_ATTR_NAME not in dir(self) or name in dir(self):
+            return super().__setattr__(name, value)
+        else:
+            protected_attribute_name = _validate_id(name)
+            try:
+                if protected_attribute_name not in self._properties:
+                    raise AttributeError
+                raise AttributeKeyAlreadyExisted(name)
+            except AttributeError:
+                return super().__setattr__(name, value)
 
     def _get_attributes(self, protected_attribute_name, attribute_name):
         raise AttributeError

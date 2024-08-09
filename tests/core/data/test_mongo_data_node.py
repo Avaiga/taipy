@@ -88,7 +88,7 @@ class TestMongoCollectionDataNode:
         assert mongo_dn.owner_id is None
         assert mongo_dn.job_ids == []
         assert mongo_dn.is_ready_for_reading
-        assert mongo_dn.custom_document == MongoDefaultDocument
+        assert mongo_dn.custom_mongo_document == MongoDefaultDocument
 
     @pytest.mark.parametrize("properties", __properties)
     def test_get_user_properties(self, properties):

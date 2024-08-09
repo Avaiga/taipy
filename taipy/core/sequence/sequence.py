@@ -27,7 +27,7 @@ from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
 from ..data.data_node import DataNode
-from ..exceptions.exceptions import NonExistingTask
+from ..exceptions.exceptions import AttributeKeyAlreadyExisted, NonExistingTask
 from ..job.job import Job
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
 from ..submission.submission import Submission
@@ -126,6 +126,7 @@ class Sequence(_Entity, Submittable, _Labeled):
     _ID_PREFIX = "SEQUENCE"
     _SEPARATOR = "_"
     _MANAGER_NAME = "sequence"
+    __CHECK_INIT_DONE_ATTR_NAME = "_init_done"
 
     def __init__(
         self,
@@ -144,6 +145,7 @@ class Sequence(_Entity, Submittable, _Labeled):
         self._parent_ids = parent_ids or set()
         self._properties = _Properties(self, **properties)
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
+        self._init_done = True
 
     @staticmethod
     def _new_id(sequence_name: str, scenario_id) -> SequenceId:
@@ -156,10 +158,21 @@ class Sequence(_Entity, Submittable, _Labeled):
     def __eq__(self, other):
         return isinstance(other, Sequence) and self.id == other.id
 
-    def __getattr__(self, attribute_name):
-        protected_attribute_name = _validate_id(attribute_name)
-        if protected_attribute_name in self._properties:
-            return _tpl._replace_templates(self._properties[protected_attribute_name])
+    def __setattr__(self, name: str, value: Any) -> None:
+        if self.__CHECK_INIT_DONE_ATTR_NAME not in dir(self) or name in dir(self):
+            return super().__setattr__(name, value)
+        else:
+            protected_attribute_name = _validate_id(name)
+            try:
+                if protected_attribute_name not in self._properties and not self._get_attributes(
+                    protected_attribute_name, name
+                ):
+                    raise AttributeError
+                raise AttributeKeyAlreadyExisted(name)
+            except AttributeError:
+                return super().__setattr__(name, value)
+
+    def _get_attributes(self, protected_attribute_name, attribute_name) -> Union[Task, DataNode]:
         tasks = self._get_tasks()
         if protected_attribute_name in tasks:
             return tasks[protected_attribute_name]
@@ -169,6 +182,13 @@ class Sequence(_Entity, Submittable, _Labeled):
             if protected_attribute_name in task.output:
                 return task.output[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of sequence {self.id}")
+
+    def __getattr__(self, attribute_name):
+        protected_attribute_name = _validate_id(attribute_name)
+        if protected_attribute_name in self._properties:
+            return _tpl._replace_templates(self._properties[protected_attribute_name])
+
+        return self._get_attributes(protected_attribute_name, attribute_name)
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
