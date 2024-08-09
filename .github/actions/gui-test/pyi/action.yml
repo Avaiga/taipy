@@ -8,7 +8,7 @@ runs:
       run: pipenv run pip install mypy black isort
     - name: Generate pyi
       shell: bash
-      run: cp tools/gui/generate_pyi.py pyi_temp.py && pipenv run python pyi_temp.py && rm pyi_temp.py
+      run: pipenv run python tools/gui/generate_pyi.py
     - name: Cleanup any untracked files
       shell: bash
       run: git clean -f

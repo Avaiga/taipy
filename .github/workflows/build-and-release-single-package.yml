@@ -128,7 +128,7 @@ jobs:
       - name: Generate GUI pyi file
         if: github.event.inputs.target_package == 'gui'
         run: |
-          cp tools/gui/generate_pyi.py pyi_temp.py && pipenv run python pyi_temp.py && rm pyi_temp.py
+          pipenv run python tools/gui/generate_pyi.py
 
       - name: Build frontends
         if: github.event.inputs.target_package == 'gui'

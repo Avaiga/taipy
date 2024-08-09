@@ -15,23 +15,24 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-# color_map = {
-#     # 0-20 - Let Taipy decide
-#     # 20-40 - red
-#     20: "red",
-#     # 40-60 - Let Taipy decide
-#     40: None,
-#     # 60-80 - blue
-#     60: "blue",
-#     # 80-100 - Let Taipy decide
-#     80: None
-# }
 
-value = 50
-color_map = {20: "red", 40: None, 60: "blue", 80: None}
+# Color wavelength
+color_wl = 530
+# Color ranges by wavelength
+color_map = {
+    200: None,
+    380: "violet",
+    435: "blue",
+    500: "cyan",
+    520: "green",
+    565: "yellow",
+    590: "orange",
+    625: "red",
+    740: None,
+}
 
 page = """
-<|{value}|metric|color_map={color_map}|>
+<|{color_wl}|metric|color_map={color_map}|format=%d nm|min=200|max=800|bar_color=gray|>
 """
 
 Gui(page).run()
