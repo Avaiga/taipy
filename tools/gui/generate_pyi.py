@@ -26,7 +26,7 @@ if not os.path.isdir(os.path.abspath(os.path.join(script_dir, "taipy"))):
 # ##################################################################################################
 gui_py_file = "./taipy/gui/gui.py"
 gui_pyi_file = f"{gui_py_file}i"
-from taipy.config import Config
+from taipy.config import Config  # noqa: E402
 
 # Generate Python interface definition files
 os.system(f"pipenv run stubgen {gui_py_file} --no-import --parse-only --export-less -o ./")
