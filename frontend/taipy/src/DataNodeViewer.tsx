@@ -114,8 +114,8 @@ type DataNodeFull = [
     DatanodeData, // data
     boolean, // editInProgress
     string, // editorId
-    boolean, // readable
-    boolean // editable
+    string, // notReadableReason
+    string // notEditableReason
 ];
 
 enum DataNodeFullProps {
@@ -131,8 +131,8 @@ enum DataNodeFullProps {
     data,
     editInProgress,
     editorId,
-    readable,
-    editable,
+    notReadableReason,
+    notEditableReason,
 }
 const DataNodeFullLength = Object.keys(DataNodeFullProps).length / 2;
 
@@ -206,8 +206,8 @@ const invalidDatanode: DataNodeFull = [
     [null, null, null, null],
     false,
     "",
-    false,
-    false,
+    "invalid",
+    "invalid",
 ];
 
 enum TabValues {
@@ -253,8 +253,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         dnData,
         dnEditInProgress,
         dnEditorId,
-        dnReadable,
-        dnEditable,
+        dnNotReadableReason,
+        dnNotEditableReason,
     ] = datanode;
     const dtType = dnData[DatanodeDataProps.type];
     const dtValue = dnData[DatanodeDataProps.value] ?? (dtType == "float" ? null : undefined);
@@ -454,7 +454,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         [dnId, id, dispatch, module, props.onLock, updateDnVars]
     );
 
-    const active = useDynamicProperty(props.active, props.defaultActive, true) && dnReadable;
+    const active = useDynamicProperty(props.active, props.defaultActive, true) && !dnNotReadableReason;
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     // history & data
@@ -715,7 +715,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                         onClick={onFocus}
                                         sx={hoverSx}
                                     >
-                                        {active && dnEditable && focusName === "label" ? (
+                                        {active && !dnNotEditableReason && focusName === "label" ? (
                                             <TextField
                                                 label="Label"
                                                 variant="outlined"
@@ -859,7 +859,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     setFocusName={setFocusName}
                                     onFocus={onFocus}
                                     onEdit={props.onEdit}
-                                    editable={dnEditable}
+                                    notEditableReason={dnNotEditableReason}
                                     updatePropVars={updateDnVars}
                                 />
                             </Grid>
@@ -929,7 +929,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                         sx={hoverSx}
                                     >
                                         {active &&
-                                        dnEditable &&
+                                        !dnNotEditableReason &&
                                         dnEditInProgress &&
                                         dnEditorId === editorId &&
                                         focusName === dataValueFocus ? (
@@ -1088,7 +1088,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                 onLock={props.onLock}
                                                 editInProgress={dnEditInProgress && dnEditorId !== editorId}
                                                 editLock={editLock}
-                                                editable={dnEditable}
+                                                notEditableReason={dnNotEditableReason}
                                                 updateDnVars={updateDnVars}
                                             />
                                         ) : (

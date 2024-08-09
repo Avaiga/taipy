@@ -24,14 +24,14 @@ export type ScenarioFull = [
     string,     // label
     string[],   // tags
     Array<[string, string]>,    // properties
-    Array<[string, string[], string, boolean]>,   // sequences (label, task ids, notSubmittableReason, editable)
+    Array<[string, string[], string, string]>,   // sequences (label, task ids, notSubmittableReason, notEditableReason)
     Record<string, string>, // tasks (id: label)
     string[],   // authorized_tags
-    boolean,    // deletable
-    boolean,    // promotable
+    string,    // notDeletableReason
+    string,    // notPromotableReason
     string,     // notSubmittableReason
-    boolean,    // readable
-    boolean     // editable
+    string,     // notReadableReason
+    string      // notEditableReason
 ];
 
 export enum ScFProps {
