@@ -15,7 +15,6 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-
 # Color wavelength
 color_wl = 530
 # Color ranges by wavelength
