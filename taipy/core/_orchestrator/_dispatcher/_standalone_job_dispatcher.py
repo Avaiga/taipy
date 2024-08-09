@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import datetime
 import multiprocessing as mp
 from concurrent.futures import Executor, ProcessPoolExecutor
 from functools import partial
@@ -59,6 +60,8 @@ class _StandaloneJobDispatcher(_JobDispatcher):
             self._nb_available_workers -= 1
             self._logger.debug(f"Setting nb_available_workers to {self._nb_available_workers} in the dispatch method.")
         config_as_string = _TomlSerializer()._serialize(Config._applied_config)  # type: ignore[attr-defined]
+
+        job.execution_started_at = datetime.datetime.now()
         future = self._executor.submit(_TaskFunctionWrapper(job.id, job.task), config_as_string=config_as_string)
         future.add_done_callback(partial(self._update_job_status_from_future, job))
 
@@ -67,3 +70,4 @@ class _StandaloneJobDispatcher(_JobDispatcher):
             self._nb_available_workers += 1
             self._logger.debug(f"Setting nb_available_workers to {self._nb_available_workers} in the callback method.")
         self._update_job_status(job, ft.result())
+        job.execution_ended_at = datetime.datetime.now()
