@@ -31,6 +31,8 @@ class _JobConverter(_AbstractConverter):
             job.submit_id,
             job.submit_entity_id,
             job._creation_date.isoformat(),
+            job._execution_started_at.isoformat() if job._execution_started_at else None,
+            job._execution_ended_at.isoformat() if job._execution_ended_at else None,
             cls.__serialize_subscribers(job._subscribers),
             job._stacktrace,
             version=job._version,
@@ -52,6 +54,10 @@ class _JobConverter(_AbstractConverter):
         job._status = model.status  # type: ignore
         job._force = model.force  # type: ignore
         job._creation_date = datetime.fromisoformat(model.creation_date)  # type: ignore
+        job._execution_started_at = (
+            datetime.fromisoformat(model.execution_started_at) if model.execution_started_at else None
+        )
+        job._execution_ended_at = datetime.fromisoformat(model.execution_ended_at) if model.execution_ended_at else None
         for it in model.subscribers:
             try:
                 fct_module, fct_name = it.get("fct_module"), it.get("fct_name")
