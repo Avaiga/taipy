@@ -25,10 +25,10 @@ stock = {
 }
 
 columns = {
-    "date" : {"title": "Data", "format": "MMM d"},
-    "price" : {"title": "Price", "format": "$%.02f"},
-    "change" : {"title": "% change", "format": "%.01f"},
-    "volume" : {"title": "Volume"}
+    "date": {"title": "Data", "format": "MMM d"},
+    "price": {"title": "Price", "format": "$%.02f"},
+    "change": {"title": "% change", "format": "%.01f"},
+    "volume": {"title": "Volume"},
 }
 
 page = """
