@@ -19,7 +19,7 @@
 # incognito windows so a given user's context is not reused.
 # -----------------------------------------------------------------------------------------
 from os import path
-from types import Union
+from typing import Union
 
 from taipy.gui import Gui, Icon
 from taipy.gui.gui_actions import navigate, notify
