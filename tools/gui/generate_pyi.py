@@ -71,8 +71,9 @@ with open("./taipy/gui/viselements.json", "r") as file:
 os.system(f"pipenv run stubgen {builder_py_file} --no-import --parse-only --export-less -o ./")
 
 with open(builder_pyi_file, "a") as file:
-    file.write("from ._element import _Element, _Block, _Control\n")
-    file.write("from typing import Union")
+    file.write("from typing import Union\n")
+    file.write("\n")
+    file.write("from ._element import _Block, _Control, _Element\n")
 
 
 def resolve_inherit(name: str, properties, inherits, viselements) -> list[dict[str, any]]:
@@ -117,7 +118,6 @@ def format_as_parameter(property):
     if type == "Callback" or type == "Function":
         type = ""
     else:
-        type = re.sub(r"(int|float|str)\[\]", r"list[\1]", type)
         type = f": {type}"
     default_value = property.get("default_value", None)
     if default_value is not None:
@@ -136,6 +136,8 @@ def build_doc(name: str, desc: dict[str, any]):
     doc = desc["doc"]
     if desc["name"] == "class_name":
         doc = doc.replace("<element_type>", name)
+    # This won't work for Scenartio Management and Block elements
+    doc = re.sub(r"(href=\")\.\.((?:.*?)\")", r"\1" + taipy_doc_url + name + r"/../..\2", doc)
     doc = "\n  ".join(markdownify(doc).split("\n"))
     doc = doc.replace("  \n", "  \\n")
     doc = re.sub(r"(?:\s+\\n)?\s+See below(?:[^\.]*)?\.", "", doc).replace("\n", "\\n")
@@ -179,7 +181,7 @@ def generate_elements(category: str, base_class: str):
             properties_decl.insert(1, "*")
         # Append element to __init__.pyi
         with open(builder_pyi_file, "a") as file:
-            n = "n" if name[0] == "a" or name[0] == "e" else ""
+            n = "n" if name[0] in ["a", "e", "i", "o"] else ""
             file.write(
                 element_template.replace("{{name}}", name).replace("{{n}}", n)
                 .replace("{{base_class}}", base_class)
