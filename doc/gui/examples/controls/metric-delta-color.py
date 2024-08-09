@@ -19,7 +19,7 @@ from taipy.gui import Gui
 # Estimated Global Trend on january 1st:
 co2_2014 = 396.37
 co2_2024 = 421.13
-delta = co2_2024-co2_2014
+delta = co2_2024 - co2_2014
 
 page = """
 <|{co2_2024}|metric|delta={delta}|delta_color=invert|format=%.1f ppm|delta_format=%.1f ppm|min=300|max=500|>
