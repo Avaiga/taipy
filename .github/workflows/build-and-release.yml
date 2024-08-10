@@ -126,7 +126,7 @@ jobs:
       - name: Generate GUI pyi file
         if: matrix.package == 'gui'
         run: |
-          cp tools/gui/generate_pyi.py pyi_temp.py && pipenv run python pyi_temp.py && rm pyi_temp.py
+          pipenv run python tools/gui/generate_pyi.py
 
       - name: Build frontends
         if: matrix.package == 'gui'

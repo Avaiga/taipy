@@ -15,7 +15,7 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-value = 50
+value = 45
 # The layout object reference can be found in Plotly's documentation:
 #         https://plotly.com/python/reference/layout/
 layout = {

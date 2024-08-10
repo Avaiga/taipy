@@ -12,23 +12,24 @@
 import json
 import os
 import re
-import typing as t
+import sys
 
 from markdownify import markdownify
 
-# ############################################################
-# Generate Python interface definition files
-# ############################################################
-from taipy.gui.config import Config
+# Make sure we can import the mandatory packages
+script_dir = os.path.dirname(os.path.realpath(__file__))
+if not os.path.isdir(os.path.abspath(os.path.join(script_dir, "taipy"))):
+    sys.path.append(os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir)))
 
-# ############################################################
+# ##################################################################################################
 # Generate gui pyi file (gui/gui.pyi)
-# ############################################################
+# ##################################################################################################
 gui_py_file = "./taipy/gui/gui.py"
-gui_pyi_file = gui_py_file + "i"
+gui_pyi_file = f"{gui_py_file}i"
+from taipy.config import Config  # noqa: E402
 
+# Generate Python interface definition files
 os.system(f"pipenv run stubgen {gui_py_file} --no-import --parse-only --export-less -o ./")
-
 
 gui_config = "".join(
     f", {k}: {v.__name__} = ..."
@@ -44,14 +45,15 @@ with open(gui_pyi_file, "r") as file:
             replace_str = line[line.index(", run_server") : (line.index("**kwargs") + len("**kwargs"))]
             # ", run_server: bool = ..., run_in_thread: bool = ..., async_mode: str = ..., **kwargs"
             line = line.replace(replace_str, gui_config)
-        replaced_content = replaced_content + line
+        replaced_content += line
 
 with open(gui_pyi_file, "w") as write_file:
     write_file.write(replaced_content)
 
-# ################
+# ##################################################################################################
+# Generate Page Builder pyi file (gui/builder/__init__.pyi)
+# ##################################################################################################
 # Read the version
-# ################
 current_version = "latest"
 with open("./taipy/gui/version.json", "r") as vfile:
     version = json.load(vfile)
@@ -59,108 +61,138 @@ with open("./taipy/gui/version.json", "r") as vfile:
         current_version = "develop"
     else:
         current_version = f'release-{version.get("major", 0)}.{version.get("minor", 0)}'
+
 taipy_doc_url = f"https://docs.taipy.io/en/{current_version}/manuals/userman/gui/viselements/generic/"
 
-
-# ############################################################
-# Generate Page Builder pyi file (gui/builder/__init__.pyi)
-# ############################################################
 builder_py_file = "./taipy/gui/builder/__init__.py"
-builder_pyi_file = builder_py_file + "i"
+builder_pyi_file = f"{builder_py_file}i"
 with open("./taipy/gui/viselements.json", "r") as file:
     viselements = json.load(file)
-with open("./tools/gui/builder/block.txt", "r") as file:
-    block_template = file.read()
-with open("./tools/gui/builder/control.txt", "r") as file:
-    control_template = file.read()
-
 os.system(f"pipenv run stubgen {builder_py_file} --no-import --parse-only --export-less -o ./")
 
 with open(builder_pyi_file, "a") as file:
-    file.write("from ._element import _Element, _Block, _Control\n")
+    file.write("from typing import Union\n")
+    file.write("\n")
+    file.write("from ._element import _Block, _Control, _Element\n")
 
 
-def get_properties(element, viselements) -> t.List[t.Dict[str, t.Any]]:
-    properties = element["properties"]
-    if "inherits" not in element:
+def resolve_inherit(name: str, properties, inherits, viselements) -> list[dict[str, any]]:
+    if not inherits:
         return properties
-    for inherit in element["inherits"]:
-        inherit_element = next((e for e in viselements["undocumented"] if e[0] == inherit), None)
-        if inherit_element is None:
-            inherit_element = next((e for e in viselements["blocks"] if e[0] == inherit), None)
-        if inherit_element is None:
-            inherit_element = next((e for e in viselements["controls"] if e[0] == inherit), None)
-        if inherit_element is None:
-            raise RuntimeError(f"Can't find element with name {inherit}")
-        properties += get_properties(inherit_element[1], viselements)
+    for inherit_name in inherits:
+        inherited_desc = next((e for e in viselements["undocumented"] if e[0] == inherit_name), None)
+        if inherited_desc is None:
+            inherited_desc = next((e for e in viselements["blocks"] if e[0] == inherit_name), None)
+        if inherited_desc is None:
+            inherited_desc = next((e for e in viselements["controls"] if e[0] == inherit_name), None)
+        if inherited_desc is None:
+            raise RuntimeError(f"Element type '{name}' inherits from unknown element type '{inherit_name}'")
+        inherited_desc = inherited_desc[1]
+        for inherit_prop in inherited_desc["properties"]:
+            prop_desc = next((p for p in properties if p["name"] == inherit_prop["name"]), None)
+            if prop_desc: # Property exists
+                def override(current, inherits, p: str):
+                    if p not in current and (inherited := inherits.get(p, None)):
+                        current[p] = inherited
+                override(prop_desc, inherit_prop, "type")
+                override(prop_desc, inherit_prop, "default_value")
+                override(prop_desc, inherit_prop, "doc")
+                override(prop_desc, inherit_prop, "signature")
+            else:
+                properties.append(inherit_prop)
+            properties =  resolve_inherit(inherit_name, properties, inherited_desc.get("inherits", None), viselements)
     return properties
 
+def format_as_parameter(property):
+    type = property["type"]
+    if m := re.match(r"indexed\((.*)\)", type):
+        type = m[1]
+        property["indexed"] = " (indexed)"
+    else:
+        property["indexed"] = ""
+    if m := re.match(r"dynamic\((.*)\)", type):
+        type = m[1]
+        property["dynamic"] = " (dynamic)"
+    else:
+        property["dynamic"] = ""
+    if type == "Callback" or type == "Function":
+        type = ""
+    else:
+        type = f": {type}"
+    default_value = property.get("default_value", None)
+    if default_value is not None:
+        try:
+            eval(default_value)
+            default_value = f" = {default_value}"
+        except Exception:
+            default_value = ""
+    else:
+        default_value = ""
+    return f"{property['name']}{type}{default_value}"
 
-def build_doc(name: str, element: t.Dict[str, t.Any]):
-    if "doc" not in element:
+def build_doc(name: str, desc: dict[str, any]):
+    if "doc" not in desc:
         return ""
-    doc = str(element["doc"]).replace("\n", f'\n{16*" "}')
-    doc = re.sub(
-        r"^(.*\..*\shref=\")([^h].*)(\".*\..*)$",
-        r"\1" + taipy_doc_url + name + r"/\2\3",
-        doc,
-    )
-    doc = re.sub(
-        r"^(.*\.)(<br/>|\s)(See below((?!href=).)*\.)(.*)$",
-        r"\1\3",
-        doc,
-    )
-    doc = markdownify(doc, strip=["br"])
-    return f"{element['name']} ({element['type']}): {doc} {'(default: '+markdownify(element['default_value']) + ')' if 'default_value' in element else ''}"  # noqa: E501
+    doc = desc["doc"]
+    if desc["name"] == "class_name":
+        doc = doc.replace("<element_type>", name)
+    # This won't work for Scenartio Management and Block elements
+    doc = re.sub(r"(href=\")\.\.((?:.*?)\")", r"\1" + taipy_doc_url + name + r"/../..\2", doc)
+    doc = "\n  ".join(markdownify(doc).split("\n"))
+    doc = doc.replace("  \n", "  \\n")
+    doc = re.sub(r"(?:\s+\\n)?\s+See below(?:[^\.]*)?\.", "", doc).replace("\n", "\\n")
+    return f"{desc['name']}{desc['dynamic']}{desc['indexed']}\\n  {doc}\\n\\n"
 
 
-for control_element in viselements["controls"]:
-    name = control_element[0]
-    property_list: t.List[t.Dict[str, t.Any]] = []
-    property_names: t.List[str] = []
-    hidden_properties: t.List[str] = []
-    for property in get_properties(control_element[1], viselements):
-        if "hide" in property and property["hide"] is True:
-            hidden_properties.append(property["name"])
-            continue
-        if (
-            property["name"] not in property_names
-            and "[" not in property["name"]
-            and property["name"] not in hidden_properties
-        ):
+element_template = """
+
+class {{name}}(_{{base_class}}):
+    _ELEMENT_NAME: str
+    def __init__(self, {{properties_decl}}) -> None:
+        \"\"\"Creates a{{n}} {{name}} element.\\n\\nParameters\\n----------\\n\\n{{properties_doc}}\"\"\"  # noqa: E501
+        ...
+"""
+
+def generate_elements(category: str, base_class: str):
+    for element in viselements[category]:
+        name = element[0]
+        desc = element[1]
+        properties_doc = ""
+        property_list: list[dict[str, any]] = []
+        property_names: list[str] = []
+        properties = resolve_inherit(name, desc["properties"], desc.get("inherits", None), viselements)
+        # Remove hidden properties and indexed properties (TODO?)
+        properties = [p for p in properties if not p.get("hide", False) and "[" not in p["name"]]
+        # Generate function parameters
+        properties_decl = [format_as_parameter(p) for p in properties]
+        # Generate properties doc
+        for property in properties:
             if "default_property" in property and property["default_property"] is True:
                 property_list.insert(0, property)
                 property_names.insert(0, property["name"])
                 continue
             property_list.append(property)
             property_names.append(property["name"])
-    properties = ", ".join([f"{p} = ..." for p in property_names if p not in hidden_properties])
-    doc_arguments = "\n".join([build_doc(name, p) for p in property_list if p["name"] not in hidden_properties])
-    # append properties to __init__.pyi
-    with open(builder_pyi_file, "a") as file:
-        file.write(
-            control_template.replace("{{name}}", name)
-            .replace("{{properties}}", properties)
-            .replace("{{doc_arguments}}", doc_arguments)
-        )
+        # Append properties doc to element doc (once ordered)
+        for property in property_list:
+            property_doc = build_doc(name, property)
+            properties_doc += property_doc
+        if (len(properties_decl) > 1):
+            properties_decl.insert(1, "*")
+        # Append element to __init__.pyi
+        with open(builder_pyi_file, "a") as file:
+            n = "n" if name[0] in ["a", "e", "i", "o"] else ""
+            file.write(
+                element_template.replace("{{name}}", name).replace("{{n}}", n)
+                .replace("{{base_class}}", base_class)
+                .replace("{{properties_decl}}", ", ".join(properties_decl))
+                .replace("{{properties_doc}}", properties_doc)
+            )
 
-for block_element in viselements["blocks"]:
-    name = block_element[0]
-    property_list = []
-    property_names = []
-    for property in get_properties(block_element[1], viselements):
-        if property["name"] not in property_names and "[" not in property["name"]:
-            property_list.append(property)
-            property_names.append(property["name"])
-    properties = ", ".join([f"{p} = ..." for p in property_names])
-    doc_arguments = "\n".join([build_doc(name, p) for p in property_list])
-    # append properties to __init__.pyi
-    with open(builder_pyi_file, "a") as file:
-        file.write(
-            block_template.replace("{{name}}", name)
-            .replace("{{properties}}", properties)
-            .replace("{{doc_arguments}}", doc_arguments)
-        )
+
+
+generate_elements("controls", "Control")
+generate_elements("blocks", "Block")
 
 os.system(f"pipenv run isort {gui_pyi_file}")
 os.system(f"pipenv run black {gui_pyi_file}")
