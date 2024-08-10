@@ -108,32 +108,6 @@ def resolve_inherit(name: str, properties, inherits, viselements) -> List[dict[s
             properties = resolve_inherit(inherit_name, properties, inherited_desc.get("inherits", None), viselements)
     return properties
 
-def format_as_parameter(property):
-    type = property["type"]
-    if m := re.match(r"indexed\((.*)\)", type):
-        type = m[1]
-        property["indexed"] = " (indexed)"
-    else:
-        property["indexed"] = ""
-    if m := re.match(r"dynamic\((.*)\)", type):
-        type = m[1]
-        property["dynamic"] = " (dynamic)"
-    else:
-        property["dynamic"] = ""
-    if type == "Callback" or type == "Function":
-        type = ""
-    else:
-        type = f": {type}"
-    default_value = property.get("default_value", None)
-    if default_value is not None:
-        try:
-            eval(default_value)
-            default_value = f" = {default_value}"
-        except Exception:
-            default_value = ""
-    else:
-        default_value = ""
-    return f"{property['name']}{type}{default_value}"
 
 def format_as_parameter(property):
     type = property["type"]
