@@ -13,6 +13,7 @@ import json
 import os
 import re
 import sys
+from typing import List
 
 from markdownify import markdownify
 
@@ -32,9 +33,11 @@ from taipy.config import Config  # noqa: E402
 os.system(f"pipenv run stubgen {gui_py_file} --no-import --parse-only --export-less -o ./")
 
 gui_config = "".join(
-    f", {k}: {v.__name__} = ..."
-    if "<class" in str(v)
-    else f", {k}: {str(v).replace('typing', 't').replace('taipy.gui.config.', '')} = ..."
+    (
+        f", {k}: {v.__name__} = ..."
+        if "<class" in str(v)
+        else f", {k}: {str(v).replace('typing', 't').replace('taipy.gui.config.', '')} = ..."
+    )
     for k, v in Config.__annotations__.items()
 )
 
@@ -76,7 +79,7 @@ with open(builder_pyi_file, "a") as file:
     file.write("from ._element import _Block, _Control, _Element\n")
 
 
-def resolve_inherit(name: str, properties, inherits, viselements) -> list[dict[str, any]]:
+def resolve_inherit(name: str, properties, inherits, viselements) -> List[dict[str, any]]:
     if not inherits:
         return properties
     for inherit_name in inherits:
@@ -90,18 +93,21 @@ def resolve_inherit(name: str, properties, inherits, viselements) -> list[dict[s
         inherited_desc = inherited_desc[1]
         for inherit_prop in inherited_desc["properties"]:
             prop_desc = next((p for p in properties if p["name"] == inherit_prop["name"]), None)
-            if prop_desc: # Property exists
+            if prop_desc:  # Property exists
+
                 def override(current, inherits, p: str):
                     if p not in current and (inherited := inherits.get(p, None)):
                         current[p] = inherited
+
                 override(prop_desc, inherit_prop, "type")
                 override(prop_desc, inherit_prop, "default_value")
                 override(prop_desc, inherit_prop, "doc")
                 override(prop_desc, inherit_prop, "signature")
             else:
                 properties.append(inherit_prop)
-            properties =  resolve_inherit(inherit_name, properties, inherited_desc.get("inherits", None), viselements)
+            properties = resolve_inherit(inherit_name, properties, inherited_desc.get("inherits", None), viselements)
     return properties
+
 
 def format_as_parameter(property):
     type = property["type"]
@@ -130,6 +136,7 @@ def format_as_parameter(property):
         default_value = ""
     return f"{property['name']}{type}{default_value}"
 
+
 def build_doc(name: str, desc: dict[str, any]):
     if "doc" not in desc:
         return ""
@@ -153,13 +160,14 @@ class {{name}}(_{{base_class}}):
         ...
 """
 
+
 def generate_elements(category: str, base_class: str):
     for element in viselements[category]:
         name = element[0]
         desc = element[1]
         properties_doc = ""
-        property_list: list[dict[str, any]] = []
-        property_names: list[str] = []
+        property_list: List[dict[str, any]] = []
+        property_names: List[str] = []
         properties = resolve_inherit(name, desc["properties"], desc.get("inherits", None), viselements)
         # Remove hidden properties and indexed properties (TODO?)
         properties = [p for p in properties if not p.get("hide", False) and "[" not in p["name"]]
@@ -177,18 +185,18 @@ def generate_elements(category: str, base_class: str):
         for property in property_list:
             property_doc = build_doc(name, property)
             properties_doc += property_doc
-        if (len(properties_decl) > 1):
+        if len(properties_decl) > 1:
             properties_decl.insert(1, "*")
         # Append element to __init__.pyi
         with open(builder_pyi_file, "a") as file:
             n = "n" if name[0] in ["a", "e", "i", "o"] else ""
             file.write(
-                element_template.replace("{{name}}", name).replace("{{n}}", n)
+                element_template.replace("{{name}}", name)
+                .replace("{{n}}", n)
                 .replace("{{base_class}}", base_class)
                 .replace("{{properties_decl}}", ", ".join(properties_decl))
                 .replace("{{properties_doc}}", properties_doc)
             )
-
 
 
 generate_elements("controls", "Control")
