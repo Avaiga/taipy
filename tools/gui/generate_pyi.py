@@ -13,7 +13,7 @@ import json
 import os
 import re
 import sys
-from typing import Any, List
+from typing import Any, Dict, List
 
 from markdownify import markdownify
 
@@ -79,7 +79,7 @@ with open(builder_pyi_file, "a") as file:
     file.write("from ._element import _Block, _Control, _Element\n")
 
 
-def resolve_inherit(name: str, properties, inherits, viselements) -> List[dict[str, Any]]:
+def resolve_inherit(name: str, properties, inherits, viselements) -> List[Dict[str, Any]]:
     if not inherits:
         return properties
     for inherit_name in inherits:
@@ -137,7 +137,7 @@ def format_as_parameter(property):
     return f"{property['name']}{type}{default_value}"
 
 
-def build_doc(name: str, desc: dict[str, Any]):
+def build_doc(name: str, desc: Dict[str, Any]):
     if "doc" not in desc:
         return ""
     doc = str(desc["doc"])
@@ -166,7 +166,7 @@ def generate_elements(category: str, base_class: str):
         name = element[0]
         desc = element[1]
         properties_doc = ""
-        property_list: List[dict[str, Any]] = []
+        property_list: List[Dict[str, Any]] = []
         property_names: List[str] = []
         properties = resolve_inherit(name, desc["properties"], desc.get("inherits", None), viselements)
         # Remove hidden properties and indexed properties (TODO?)
