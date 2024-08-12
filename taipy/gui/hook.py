@@ -11,7 +11,7 @@ class Hook:
 
 class Hooks(object, metaclass=_Singleton):
     def __init__(self):
-        self.__hooks: t.List[Hook] = []
+        self.__hooks: t.List[Hook] = []  # type: ignore[annotation-unchecked]
 
     def _register_hook(self, hook: Hook):
         # Prevent duplicated hooks

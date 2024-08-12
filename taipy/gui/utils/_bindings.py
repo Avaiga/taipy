@@ -68,6 +68,9 @@ class _Bindings:
         self.__scopes.create_scope(id)
         return id, create
 
+    def _delete_scope(self, id: str):
+        self.__scopes.delete_scope(id)
+
     def _new_scopes(self):
         self.__scopes = _DataScopes(self.__gui)
 
