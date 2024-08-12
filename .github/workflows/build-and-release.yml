@@ -244,7 +244,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           file_pattern: '*/version.json'
           commit_message: Update version to ${{ needs.fetch-versions.outputs.NEW_VERSION }}
