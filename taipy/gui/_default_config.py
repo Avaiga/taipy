@@ -65,7 +65,7 @@ default_config: Config = {
     "run_server": True,
     "server_config": None,
     "single_client": False,
-    "state_timeout": 0,
+    "state_retention_period": 0,
     "system_notification": False,
     "theme": None,
     "time_zone": None,

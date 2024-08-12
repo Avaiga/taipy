@@ -612,7 +612,7 @@ class Gui:
 
     def _handle_disconnect(self):
         Hooks()._handle_disconnect(self)
-        if (sid := getattr(request, "sid", None)) and (st_to := self._get_config("state_timeout", 0)) > 0:
+        if (sid := getattr(request, "sid", None)) and (st_to := self._get_config("state_retention_period", 0)) > 0:
             for cl_id, sids in self.__client_id_2_sid.items():
                 if sid in sids:
                     if len(sids) == 1:
