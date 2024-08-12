@@ -15,15 +15,14 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-value = 50
-delta_value = 20
-
-# format & delta_format are used to format the value and delta value respectively.
-# They use the printf syntax.
+# Source: https://gml.noaa.gov/ccgg/trends/gl_gr.html
+# Estimated Global Trend on january 1st:
+co2_2014 = 396.37
+co2_2024 = 421.13
+delta = co2_2024 - co2_2014
 
 page = """
-<|{value}|metric|delta={delta_value}|format=%d km/h|delta_format=%d km/h|>
+<|{co2_2024}|metric|delta={delta}|delta_color=invert|format=%.1f ppm|delta_format=%.1f ppm|min=300|max=500|>
 """
-
 
 Gui(page).run()

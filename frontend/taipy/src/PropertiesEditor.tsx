@@ -50,7 +50,7 @@ interface PropertiesEditorProps {
     setFocusName: (name: string) => void;
     isDefined: boolean;
     onEdit?: string;
-    editable: boolean;
+    notEditableReason: string;
     updatePropVars?: string;
 }
 
@@ -65,7 +65,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
         focusName,
         setFocusName,
         entProperties,
-        editable,
+        notEditableReason,
         updatePropVars = "",
     } = props;
 
@@ -195,7 +195,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                   onClick={onFocus}
                                   sx={hoverSx}
                               >
-                                  {active && editable && focusName === propName ? (
+                                  {active && !notEditableReason && focusName === propName ? (
                                       <>
                                           <Grid item xs={4}>
                                               <TextField
@@ -284,7 +284,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                           </Grid>
                                           <Grid item xs={5}>
                                               <Typography variant="subtitle2">{property.value}</Typography>
-                                          </Grid>{" "}
+                                          </Grid>
                                           <Grid item xs={3} />
                                       </>
                                   )}

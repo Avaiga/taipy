@@ -375,14 +375,16 @@ const CoreSelector = (props: CoreSelectorProps) => {
                 return;
             }
             setSelectedItems(() => {
-                const lovVar = getUpdateVar(updateVars, lovPropertyName);
-                const val = multiple ? nodeId : isSelectable ? nodeId : "";
-                setTimeout(
-                    // to avoid set state while render react errors
-                    () => dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate, lovVar)),
-                    1
-                );
-                onSelect && isSelectable && onSelect(val);
+                if (isSelectable) {
+                    const lovVar = getUpdateVar(updateVars, lovPropertyName);
+                    const val = nodeId;
+                    setTimeout(
+                        // to avoid set state while render react errors
+                        () => dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate, lovVar)),
+                        1
+                    );
+                    onSelect && onSelect(val);
+                }
                 return Array.isArray(nodeId) ? nodeId : nodeId ? [nodeId] : [];
             });
         },

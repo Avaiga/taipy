@@ -86,6 +86,8 @@ class _TaipyBool(_TaipyBase):
 
 class _TaipyNumber(_TaipyBase):
     def get(self):
+        if super().get() is None:
+            return None
         try:
             return float(super().get())
         except Exception as e:

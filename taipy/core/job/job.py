@@ -78,6 +78,8 @@ class Job(_Entity, _Labeled):
         self._creation_date = datetime.now()
         self._submit_id: str = submit_id
         self._submit_entity_id: str = submit_entity_id
+        self._execution_started_at: Optional[datetime] = None
+        self._execution_ended_at: Optional[datetime] = None
         self._subscribers: List[Callable] = []
         self._stacktrace: List[str] = []
         self.__logger = _TaipyLogger._get_logger()
@@ -143,6 +145,39 @@ class Job(_Entity, _Labeled):
     @_self_setter(_MANAGER_NAME)
     def creation_date(self, val):
         self._creation_date = val
+
+    @property
+    @_self_reload(_MANAGER_NAME)
+    def execution_started_at(self) -> Optional[datetime]:
+        return self._execution_started_at
+
+    @execution_started_at.setter
+    @_self_setter(_MANAGER_NAME)
+    def execution_started_at(self, val):
+        self._execution_started_at = val
+
+    @property
+    @_self_reload(_MANAGER_NAME)
+    def execution_ended_at(self) -> Optional[datetime]:
+        return self._execution_ended_at
+
+    @execution_ended_at.setter
+    @_self_setter(_MANAGER_NAME)
+    def execution_ended_at(self, val):
+        self._execution_ended_at = val
+
+    @property
+    @_self_reload(_MANAGER_NAME)
+    def execution_duration(self) -> Optional[float]:
+        """Get the duration of the job execution in seconds.
+
+        Returns:
+            Optional[float]: The duration of the job execution in seconds. If the job is not
+            completed, None is returned.
+        """
+        if self._execution_started_at and self._execution_ended_at:
+            return (self._execution_ended_at - self._execution_started_at).total_seconds()
+        return None
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

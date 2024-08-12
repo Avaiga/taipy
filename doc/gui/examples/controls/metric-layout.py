@@ -15,22 +15,14 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-# Layout reference can be found in the documentation: https://plotly.com/python/reference/layout/
-
-value = 50
+value = 45
+# The layout object reference can be found in Plotly's documentation:
+#         https://plotly.com/python/reference/layout/
 layout = {
-    "width": "1000",
-    "height": "500",
-    "paper_bgcolor": "lightgray",
-    "margin": {
-        "l": 100,
-        "r": 100,
-        "b": 100,
-        "t": 100,
-    },
+    "paper_bgcolor": "lightblue",
     "font": {
-        "size": 20,
-        "color": "black",
+        "size": 30,
+        "color": "blue",
         "family": "Arial",
     },
 }

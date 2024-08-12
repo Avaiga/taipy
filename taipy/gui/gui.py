@@ -26,6 +26,7 @@ import warnings
 from importlib import metadata, util
 from importlib.util import find_spec
 from pathlib import Path
+from threading import Timer
 from types import FrameType, FunctionType, LambdaType, ModuleType, SimpleNamespace
 from urllib.parse import unquote, urlencode, urlparse
 
@@ -611,6 +612,22 @@ class Gui:
 
     def _handle_disconnect(self):
         Hooks()._handle_disconnect(self)
+        if (sid := getattr(request, "sid", None)) and (st_to := self._get_config("state_retention_period", 0)) > 0:
+            for cl_id, sids in self.__client_id_2_sid.items():
+                if sid in sids:
+                    if len(sids) == 1:
+                        Timer(st_to, self._remove_state, [cl_id]).start()
+                    else:
+                        sids.remove(sid)
+                    return
+
+    def _remove_state(self, client_id: str):
+        if (sids := self.__client_id_2_sid.get(client_id, None)) and len(sids) == 1:
+            try:
+                del self.__client_id_2_sid[client_id]
+                self._bindings()._delete_scope(client_id)
+            except Exception as e:
+                _warn(f"Unexpected error removing state {client_id}", e)
 
     def _manage_message(self, msg_type: _WsType, message: dict) -> None:
         try:
