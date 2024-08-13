@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from functools import lru_cache
 from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
@@ -21,6 +22,7 @@ class _CycleManagerFactory(_ManagerFactory):
     __REPOSITORY_MAP = {"default": _CycleFSRepository}
 
     @classmethod
+    @lru_cache
     def _build_manager(cls) -> Type[_CycleManager]:
         if cls._using_enterprise():
             cycle_manager = _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".cycle._cycle_manager", "_CycleManager")  # type: ignore
@@ -34,5 +36,6 @@ class _CycleManagerFactory(_ManagerFactory):
         return cycle_manager  # type: ignore
 
     @classmethod
+    @lru_cache
     def _build_repository(cls):
         return cls._get_repository_with_repo_map(cls.__REPOSITORY_MAP)()

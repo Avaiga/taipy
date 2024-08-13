@@ -8,7 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+from functools import lru_cache
 from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
@@ -21,6 +21,7 @@ class _ScenarioManagerFactory(_ManagerFactory):
     __REPOSITORY_MAP = {"default": _ScenarioFSRepository}
 
     @classmethod
+    @lru_cache
     def _build_manager(cls) -> Type[_ScenarioManager]:
         if cls._using_enterprise():
             scenario_manager = _load_fct(
@@ -36,5 +37,6 @@ class _ScenarioManagerFactory(_ManagerFactory):
         return scenario_manager  # type: ignore
 
     @classmethod
+    @lru_cache
     def _build_repository(cls):
         return cls._get_repository_with_repo_map(cls.__REPOSITORY_MAP)()
