@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "taipy-templates"
+version = "0.0.0"  # will be dynamically set
+description = "An open-source package holding Taipy application templates."
+readme = "package_desc.md"
+requires-python = ">=3.8"
+license = {text = "Apache License 2.0"}
+keywords = ["taipy-templates"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development",
+    "Topic :: Scientific/Engineering",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+]
+dependencies = []  # version will be dynamically set
+
+[project.optional-dependencies]
+test = ["pytest>=3.8"]
+
+[project.urls]
+Homepage = "https://www.taipy.io"
+Documentation = "https://docs.taipy.io"
+Source = "https://github.com/Avaiga/taipy"
+Download = "https://pypi.org/project/taipy/#files"
+Tracker = "https://github.com/Avaiga/taipy/issues"
+Security = "https://github.com/Avaiga/taipy?tab=security-ov-file#readme"
+"Release notes" = "https://docs.taipy.io/en/release-0.0.0/relnotes/"  # version will be dynamically set
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["taipy"]
+
+[tool.setuptools.package-data]
+"taipy" = ["version.json"]
+
+[tool.setuptools]
+zip-safe = false
