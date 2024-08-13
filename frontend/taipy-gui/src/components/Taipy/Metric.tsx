@@ -168,8 +168,8 @@ const Metric = (props: MetricProps) => {
     const layout = useMemo(() => {
         const layout = {
             ...baseLayout,
-            height: baseLayout.height !== undefined ? (baseLayout.height >= 10 ? baseLayout.height : 10) : null,
-            width: baseLayout.width !== undefined ? (baseLayout.width >= 10 ? baseLayout.width : 10) : null,
+            height: baseLayout.height !== undefined ? (baseLayout.height >= 10 ? baseLayout.height : 10) : undefined,
+            width: baseLayout.width !== undefined ? (baseLayout.width >= 10 ? baseLayout.width : 10) : undefined,
         };
         let template = undefined;
         try {
