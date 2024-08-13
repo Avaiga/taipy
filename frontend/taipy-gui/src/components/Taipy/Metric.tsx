@@ -166,7 +166,11 @@ const Metric = (props: MetricProps) => {
     const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
 
     const layout = useMemo(() => {
-        const layout = { ...baseLayout };
+        const layout = {
+            ...baseLayout,
+            height: baseLayout.height !== undefined ? (baseLayout.height >= 10 ? baseLayout.height : 10) : null,
+            width: baseLayout.width !== undefined ? (baseLayout.width >= 10 ? baseLayout.width : 10) : null,
+        };
         let template = undefined;
         try {
             const tpl = props.template && JSON.parse(props.template);
@@ -191,7 +195,7 @@ const Metric = (props: MetricProps) => {
         return layout as Partial<Layout>;
     }, [props.title, props.template, props.template_Dark_, props.template_Light_, theme.palette.mode, baseLayout]);
 
-    const plotConfig = {displaylogo: false}
+    const plotConfig = { displaylogo: false };
     return (
         <Tooltip title={hover || ""}>
             <Box data-testid={props.testId} className={className}>
