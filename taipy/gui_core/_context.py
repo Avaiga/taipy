@@ -398,7 +398,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def crud_scenario(self, state: State, id: str, payload: t.Dict[str, str]):  # noqa: C901
         self.__lazy_start()
         args = payload.get("args")
-        start_idx = 2
+        start_idx = 3
         if (
             args is None
             or not isinstance(args, list)
@@ -507,7 +507,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 if (scenario or user_scenario) and (sel_scenario_var := args[1] if isinstance(args[1], str) else None):
                     try:
                         var_name, _ = gui._get_real_var_name(sel_scenario_var)
-                        state.assign(var_name, scenario or user_scenario)
+                        self.gui._update_var(var_name, scenario or user_scenario, on_change= args[2])
                     except Exception as e:  # pragma: no cover
                         _warn("Can't find value variable name in context", e)
         if scenario:
