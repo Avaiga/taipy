@@ -20,11 +20,11 @@ from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
 from taipy.core import (
-    Core,
     Cycle,
     CycleId,
     DataNodeId,
     JobId,
+    Orchestrator,
     Scenario,
     ScenarioId,
     Sequence,
@@ -348,7 +348,7 @@ class TestTaipy:
                 tp.submit(scenario)
 
         assert len(warning) == 1
-        assert "The Core service is NOT running" in warning[0].message.args[0]
+        assert "The Orchestrator service is NOT running" in warning[0].message.args[0]
 
     def test_get_tasks(self):
         with mock.patch("taipy.core.task._task_manager._TaskManager._get_all") as mck:
@@ -649,7 +649,7 @@ class TestTaipy:
         Config.configure_scenario("s1", [task_cfg_1], [], Frequency.DAILY)
 
         with mock.patch("sys.argv", ["prog"]):
-            core = Core()
+            core = Orchestrator()
             core.run()
 
         with pytest.raises(ConfigurationUpdateBlocked):
@@ -699,7 +699,7 @@ class TestTaipy:
         dn_cfg_global = DataNodeConfig("id", "pickle", Scope.GLOBAL)
         dn_cfg_scenario = DataNodeConfig("id", "pickle", Scope.SCENARIO)
         with mock.patch("taipy.core.data._data_manager._DataManager._create_and_set") as dn_create_mock:
-            with mock.patch("taipy.core._core.Core._manage_version_and_block_config") as mv_mock:
+            with mock.patch("taipy.core.orchestrator.Orchestrator._manage_version_and_block_config") as mv_mock:
                 dn = tp.create_global_data_node(dn_cfg_global)
                 dn_create_mock.assert_called_once_with(dn_cfg_global, None, None)
                 mv_mock.assert_called_once()
@@ -719,7 +719,7 @@ class TestTaipy:
     def test_create_scenario(self):
         scenario_config = ScenarioConfig("scenario_config")
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._create") as mck:
-            with mock.patch("taipy.core._core.Core._manage_version_and_block_config") as mv_mock:
+            with mock.patch("taipy.core.orchestrator.Orchestrator._manage_version_and_block_config") as mv_mock:
                 tp.create_scenario(scenario_config)
                 mck.assert_called_once_with(scenario_config, None, None)
                 mv_mock.assert_called_once()

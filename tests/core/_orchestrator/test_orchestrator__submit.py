@@ -18,7 +18,7 @@ import pytest
 
 from taipy import Scenario, Scope, Task
 from taipy.config import Config
-from taipy.core import Core, taipy
+from taipy.core import Orchestrator, taipy
 from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.config import JobConfig
@@ -520,7 +520,7 @@ def task_sleep_2():
 
 
 def test_submit_duration_development_mode():
-    core = Core()
+    core = Orchestrator()
     core.run()
 
     task_1 = Task("task_config_id_1", {}, task_sleep_1, [], [])
@@ -550,7 +550,7 @@ def test_submit_duration_development_mode():
 @pytest.mark.standalone
 def test_submit_duration_standalone_mode():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
-    core = Core()
+    core = Orchestrator()
     core.run()
 
     task_1 = Task("task_config_id_1", {}, task_sleep_1, [], [])

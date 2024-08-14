@@ -14,7 +14,7 @@ from pages import job_page, scenario_page
 from pages.root import content, root, selected_data_node, selected_scenario
 
 import taipy as tp
-from taipy import Core, Gui
+from taipy import Gui, Orchestrator
 
 
 def on_init(state):
@@ -35,7 +35,7 @@ pages = {
 
 if __name__ == "__main__":
     # Instantiate, configure and run the Core
-    core = Core()
+    core = Orchestrator()
     default_scenario_cfg = configure()
     core.run()
 

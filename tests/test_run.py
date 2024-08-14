@@ -12,7 +12,7 @@
 from unittest import mock
 
 from taipy._run import _run
-from taipy.core import Core
+from taipy.core import Orchestrator
 from taipy.gui import Gui
 from taipy.rest import Rest
 
@@ -25,7 +25,7 @@ def test_run_pass_with_gui(gui_run):
 
 @mock.patch("taipy.core.Core.run")
 def test_run_pass_with_core(core_run):
-    _run(Core())
+    _run(Orchestrator())
     core_run.assert_called_once()
 
 
@@ -40,7 +40,7 @@ def test_run_pass_with_rest(rest_run, core_run):
 @mock.patch("taipy.rest.Rest.run")
 @mock.patch("taipy.core.Core.run")
 def test_run_pass_with_core_and_rest(core_run, rest_run):
-    _run(Core(), Rest())
+    _run(Orchestrator(), Rest())
     core_run.assert_called_once()
     rest_run.assert_called_once()
 
@@ -58,6 +58,6 @@ def test_run_pass_with_gui_and_rest(core_run, rest_run, gui_run):
 @mock.patch("taipy.gui.Gui.run")
 @mock.patch("taipy.core.Core.run")
 def test_run_pass_with_gui_and_core(core_run, gui_run):
-    _run(Gui(), Core())
+    _run(Gui(), Orchestrator())
     gui_run.assert_called_once()
     core_run.assert_called_once()

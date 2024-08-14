@@ -9,14 +9,14 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-"""# Taipy Core
+"""# Taipy Orchestrator
 
-The Taipy Core package is a Python library designed to build powerful, customized, data-driven back-end
+The Taipy Orchestrator package is a Python library designed to build powerful, customized, data-driven back-end
 applications. It provides the tools to help Python developers transform their algorithms into a
 complete back-end application.
-More details on the Core functionalities are available in the user manual.
+More details on the Orchestrator functionalities are available in the user manual.
 
-To build a Taipy Core application, the first step consists of setting up the Taipy configuration to design
+To build a Taipy Orchestrator application, the first step consists of setting up the Taipy configuration to design
 your application's characteristics and behaviors.
 Import `Config^` from the `taipy.config^` module, then use the various methods of the `Config^` singleton class to
 configure your core application. In particular, configure the
@@ -30,11 +30,13 @@ in the following section on [Function](#functions). In particular, the most used
 
 !!! Note
 
-    Taipy Core provides a runnable service, `Core^` that runs as a service in a dedicated thread. The purpose is to
-    have a dedicated thread responsible for dispatching the submitted jobs to an available executor for their execution.
+    Taipy Orchestrator provides a runnable service, `Orchestrator^` that runs as a service in a dedicated thread.
+    The purpose is to have a dedicated thread responsible for dispatching the submitted jobs to an available
+    executor for their execution.
 
-    In particular, this `Core^` service is automatically run when Core is used with Taipy REST or Taipy GUI. See the
-    [running services](../../../run-deploy/run/running_services.md) page of the user manual for more details.
+    In particular, this `Orchestrator^` service is automatically run when Orchestrator is used with Taipy REST or
+    Taipy GUI. See the [running services](../../../run-deploy/run/running_services.md) page of the user manual for
+    more details.
 """
 
 from ._init import *

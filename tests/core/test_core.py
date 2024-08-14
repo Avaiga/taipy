@@ -14,19 +14,19 @@ import pytest
 
 from taipy.config import Config
 from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
-from taipy.core import Core
+from taipy.core import Orchestrator
 from taipy.core._orchestrator._dispatcher import _DevelopmentJobDispatcher, _StandaloneJobDispatcher
 from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.config.job_config import JobConfig
-from taipy.core.exceptions.exceptions import CoreServiceIsAlreadyRunning
+from taipy.core.exceptions.exceptions import OrchestratorServiceIsAlreadyRunning
 
 
 class TestCore:
     def test_run_core_trigger_config_check(self, caplog):
         Config.configure_data_node(id="d0", storage_type="toto")
         with pytest.raises(SystemExit):
-            core = Core()
+            core = Orchestrator()
             core.run()
         expected_error_message = (
             "`storage_type` field of DataNodeConfig `d0` must be either csv, sql_table,"
@@ -39,7 +39,7 @@ class TestCore:
     def test_run_core_as_a_service_development_mode(self):
         _OrchestratorFactory._dispatcher = None
 
-        core = Core()
+        core = Orchestrator()
         assert core._orchestrator is None
         assert core._dispatcher is None
         assert _OrchestratorFactory._dispatcher is None
@@ -57,7 +57,7 @@ class TestCore:
     def test_run_core_as_a_service_standalone_mode(self):
         _OrchestratorFactory._dispatcher = None
 
-        core = Core()
+        core = Orchestrator()
         assert core._orchestrator is None
 
         assert core._dispatcher is None
@@ -77,14 +77,14 @@ class TestCore:
         core.stop()
 
     def test_core_service_can_only_be_run_once(self):
-        core_instance_1 = Core()
-        core_instance_2 = Core()
+        core_instance_1 = Orchestrator()
+        core_instance_2 = Orchestrator()
 
         core_instance_1.run()
 
-        with pytest.raises(CoreServiceIsAlreadyRunning):
+        with pytest.raises(OrchestratorServiceIsAlreadyRunning):
             core_instance_1.run()
-        with pytest.raises(CoreServiceIsAlreadyRunning):
+        with pytest.raises(OrchestratorServiceIsAlreadyRunning):
             core_instance_2.run()
 
         # Stop the Core service and run it again should work
@@ -98,7 +98,7 @@ class TestCore:
     def test_block_config_update_when_core_service_is_running_development_mode(self):
         _OrchestratorFactory._dispatcher = None
 
-        core = Core()
+        core = Orchestrator()
         core.run()
         with pytest.raises(ConfigurationUpdateBlocked):
             Config.configure_data_node(id="i1")
@@ -108,7 +108,7 @@ class TestCore:
     def test_block_config_update_when_core_service_is_running_standalone_mode(self):
         _OrchestratorFactory._dispatcher = None
 
-        core = Core()
+        core = Orchestrator()
         Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
         core.run()
         with pytest.raises(ConfigurationUpdateBlocked):
