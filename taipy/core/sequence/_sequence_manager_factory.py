@@ -8,7 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+from functools import lru_cache
 from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
@@ -18,6 +18,7 @@ from ._sequence_manager import _SequenceManager
 
 class _SequenceManagerFactory(_ManagerFactory):
     @classmethod
+    @lru_cache
     def _build_manager(cls) -> Type[_SequenceManager]:  # type: ignore
         if cls._using_enterprise():
             sequence_manager = _load_fct(
