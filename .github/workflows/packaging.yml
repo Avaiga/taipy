@@ -12,15 +12,12 @@ on:
         required: false
         default: ""
 
-env:
-  NODE_OPTIONS: --max-old-space-size=4096
-
 jobs:
   standard-packages:
     timeout-minutes: 30
     strategy:
       matrix:
-        python-versions: [ '3.8', '3.9', '3.10', '3.11', '3.12' ]
+        python-versions: [ '3.8', '3.9', '3.10', '3.11', '3.12']
         os: [ubuntu-latest, macos-13, windows-latest]
 
     runs-on: ${{ matrix.os }}
@@ -31,34 +28,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-versions }}
 
-      - name: Install Dependencies
-        run: |
-          pip install toml
-
       - name: Build frontends
         run: |
           python tools/frontend/bundle_build.py
 
-      - name: Update pyproject.toml
-        run: |
-          python tools/release/setup_project.py taipy/config
-          python tools/release/setup_project.py taipy/core
-          python tools/release/setup_project.py taipy/gui
-          python tools/release/setup_project.py taipy/rest
-          python tools/release/setup_project.py taipy/templates
-          python tools/release/setup_project.py .
-
-      - name: Install Taipy Subpackages
-        run: |
-          pip install taipy/config taipy/core taipy/gui taipy/rest taipy/templates
-
-      - name: Install Taipy
+      - name: Install Taipy without dependencies
         run: |
           pip install .
-
-      - name: Remove local folder
-        run: rm -r taipy
-
+          rm -r taipy
       - name: Check Taipy Installation
         run: |
           python tools/validate_taipy_install.py
