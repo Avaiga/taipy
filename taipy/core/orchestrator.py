@@ -15,12 +15,12 @@ from typing import Optional
 from taipy.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from ._cli._core_cli_factory import _CoreCLIFactory
 from ._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
 from ._orchestrator._orchestrator import _Orchestrator
 from ._orchestrator._orchestrator_factory import _OrchestratorFactory
-from ._orchestrator_cli import _OrchestratorCLI
 from ._version._version_manager_factory import _VersionManagerFactory
-from .config import OrchestratorSection
+from .config import CoreSection
 from .exceptions.exceptions import OrchestratorServiceIsAlreadyRunning
 
 
@@ -102,14 +102,15 @@ class Orchestrator:
     @classmethod
     def __update_orchestrator_section(cls):
         cls.__logger.info("Updating configuration with command-line arguments...")
-        _OrchestratorCLI.create_parser()
-        Config._applied_config._unique_sections[OrchestratorSection.name]._update(_OrchestratorCLI.handle_command())
+        _core_cli = _CoreCLIFactory._build_cli()
+        _core_cli.create_parser()
+        Config._applied_config._unique_sections[CoreSection.name]._update(_core_cli.handle_command())
 
     @classmethod
     def __manage_version(cls):
         cls.__logger.info("Managing application's version...")
         _VersionManagerFactory._build_manager()._manage_version()
-        Config._applied_config._unique_sections[OrchestratorSection.name]._update(
+        Config._applied_config._unique_sections[CoreSection.name]._update(
             {"version_number": _VersionManagerFactory._build_manager()._get_latest_version()}
         )
 

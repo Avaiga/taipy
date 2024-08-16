@@ -24,7 +24,7 @@ from ..exceptions.exceptions import ConfigCoreVersionMismatched
 
 class CoreSection(UniqueSection):
     """
-    Configuration parameters for running the `Core^` service.
+    Configuration parameters for running the `Orchestrator^` service.
 
     Attributes:
         root_folder (str): Path of the base folder for the taipy application. The default value is "./taipy/"
@@ -38,7 +38,7 @@ class CoreSection(UniqueSection):
             repository.
         read_entity_retry (int): Number of retries to read an entity from the repository before return failure.
             The default value is 3.
-        mode (str): The Taipy operating mode. By default, the `Core^` service runs in "development" mode.
+        mode (str): The Taipy operating mode. By default, the `Orchestrator^` service runs in "development" mode.
             Please refer to the [Versioning management](../../userman/versioning/index.md)
             documentation page for more details.
         version_number (str)): The identifier of the user application version. Please refer to the
@@ -345,7 +345,7 @@ class CoreSection(UniqueSection):
         force: Optional[bool] = None,
         **properties,
     ) -> "CoreSection":
-        """Configure the Core service.
+        """Configure the Orchestrator service.
 
         Parameters:
             root_folder (Optional[str]): Path of the base folder for the taipy application.
@@ -371,7 +371,7 @@ class CoreSection(UniqueSection):
             force (Optional[bool]): If True, Taipy will override a version even if the configuration
                 has changed and run the application.
             **properties (Dict[str, Any]): A keyworded variable length list of additional arguments configure the
-                behavior of the `Core^` service.
+                behavior of the `Orchestrator^` service.
         Returns:
             The Core configuration.
         """

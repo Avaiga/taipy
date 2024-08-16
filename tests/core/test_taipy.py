@@ -642,19 +642,19 @@ class TestTaipy:
             tp.get_latest_submission(task)
             mck.assert_called_once_with(task)
 
-    def test_block_config_when_core_is_running(self):
+    def test_block_config_when_orchestrator_is_running(self):
         input_cfg_1 = Config.configure_data_node(id="i1", storage_type="pickle", scope=Scope.SCENARIO, default_data=1)
         output_cfg_1 = Config.configure_data_node(id="o1", storage_type="pickle", scope=Scope.SCENARIO)
         task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)
         Config.configure_scenario("s1", [task_cfg_1], [], Frequency.DAILY)
 
         with mock.patch("sys.argv", ["prog"]):
-            core = Orchestrator()
-            core.run()
+            orchestrator = Orchestrator()
+            orchestrator.run()
 
         with pytest.raises(ConfigurationUpdateBlocked):
             Config.configure_scenario("block_scenario", [task_cfg_1])
-        core.stop()
+        orchestrator.stop()
 
     def test_get_data_node(self, data_node):
         with mock.patch("taipy.core.data._data_manager._DataManager._get") as mck:
