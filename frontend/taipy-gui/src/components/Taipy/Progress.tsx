@@ -30,7 +30,7 @@ interface ProgressBarProps extends TaipyBaseProps {
     defaultRender?: boolean;
     title?: string;
     defaultTitle?: string;
-    titleAnchor?: "top" | "bottom" | "left" | "right";
+    titleAnchor?: "top" | "bottom" | "left" | "right" | "none";
 }
 
 const linearSx = { display: "flex", alignItems: "center" };
@@ -80,11 +80,11 @@ const Progress = (props: ProgressBarProps) => {
     return showValue && value !== undefined ? (
         linear ? (
             <Box sx={{ ...linearSx, flexDirection: getFlexDirection(titleAnchor) }}>
-                {title && (
+                {title && titleAnchor !== "none" ? (
                     <Typography sx={{ margin: 1 }} variant="caption">
                         {title}
                     </Typography>
-                )}
+                ) : null}
                 <Box sx={{ ...linearSx, width: getBoxWidth(title, titleAnchor) }} className={className} id={props.id}>
                     <Box sx={linearPrgSx}>
                         <LinearProgress data-progress={value} variant="determinate" value={value} />
@@ -102,11 +102,11 @@ const Progress = (props: ProgressBarProps) => {
                     alignItems: title && titleAnchor ? "center" : "",
                 }}
             >
-                {title && (
+                {title && titleAnchor !== "none" ? (
                     <Typography sx={{ margin: 1 }} variant="caption">
                         {title}
                     </Typography>
-                )}
+                ) : null}
                 <Box sx={{ ...circularSx, width: getBoxWidth(title, titleAnchor) }} className={className} id={props.id}>
                     <CircularProgress data-progress={value} variant="determinate" value={value} />
                     <Box sx={circularPrgSx}>
@@ -119,11 +119,11 @@ const Progress = (props: ProgressBarProps) => {
         )
     ) : linear ? (
         <Box sx={{ ...linearSx, flexDirection: getFlexDirection(titleAnchor) }}>
-            {title && (
+            {title && titleAnchor !== "none" ? (
                 <Typography sx={{ margin: 1 }} variant="caption">
                     {title}
                 </Typography>
-            )}
+            ) : null}
             <LinearProgress
                 id={props.id}
                 sx={{ width: "100%" }}
@@ -141,11 +141,11 @@ const Progress = (props: ProgressBarProps) => {
                 alignItems: title && titleAnchor ? "center" : "",
             }}
         >
-            {title && (
+            {title && titleAnchor !== "none" ? (
                 <Typography sx={{ margin: 1 }} variant="caption">
                     {title}
                 </Typography>
-            )}
+            ) : null}
             <CircularProgress
                 id={props.id}
                 variant={value === undefined ? "indeterminate" : "determinate"}
