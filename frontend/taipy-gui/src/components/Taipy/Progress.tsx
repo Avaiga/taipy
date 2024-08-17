@@ -28,6 +28,9 @@ interface ProgressBarProps extends TaipyBaseProps {
     defaultValue?: number; //default progress value
     render?: boolean;
     defaultRender?: boolean;
+    title?: string;
+    defaultTitle?: string;
+    titleAnchor?: "top" | "bottom" | "left" | "right";
 }
 
 const linearSx = { display: "flex", alignItems: "center" };
@@ -45,12 +48,30 @@ const circularPrgSx = {
     justifyContent: "center",
 };
 
+export const getFlexDirection = (titleAnchor: string) => {
+    switch (titleAnchor) {
+        case "top":
+            return "column";
+        case "bottom":
+            return "column-reverse";
+        case "left":
+            return "row";
+        case "right":
+            return "row-reverse";
+        default:
+            return "row";
+    }
+};
+
+export const getBoxWidth = (title?: string, titleAnchor?: string) => (title && titleAnchor ? "100%" : "");
+
 const Progress = (props: ProgressBarProps) => {
-    const { linear = false, showValue = false } = props;
+    const { linear = false, showValue = false, titleAnchor = "bottom" } = props;
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const value = useDynamicProperty(props.value, props.defaultValue, undefined, "number", true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
+    const title = useDynamicProperty(props.title, props.defaultTitle, undefined);
 
     if (!render) {
         return null;
@@ -58,38 +79,81 @@ const Progress = (props: ProgressBarProps) => {
 
     return showValue && value !== undefined ? (
         linear ? (
-            <Box sx={linearSx} className={className} id={props.id}>
-                <Box sx={linearPrgSx}>
-                    <LinearProgress variant="determinate" value={value} />
-                </Box>
-                <Box sx={linearTxtSx}>
-                    <Typography variant="body2" color="text.secondary">{`${Math.round(value)}%`}</Typography>
+            <Box sx={{ ...linearSx, flexDirection: getFlexDirection(titleAnchor) }}>
+                {title && (
+                    <Typography sx={{ margin: 1 }} variant="caption">
+                        {title}
+                    </Typography>
+                )}
+                <Box sx={{ ...linearSx, width: getBoxWidth(title, titleAnchor) }} className={className} id={props.id}>
+                    <Box sx={linearPrgSx}>
+                        <LinearProgress data-progress={value} variant="determinate" value={value} />
+                    </Box>
+                    <Box sx={linearTxtSx}>
+                        <Typography variant="body2" color="text.secondary">{`${Math.round(value)}%`}</Typography>
+                    </Box>
                 </Box>
             </Box>
         ) : (
-            <Box sx={circularSx} className={className} id={props.id}>
-                <CircularProgress variant="determinate" value={value} />
-                <Box sx={circularPrgSx}>
-                    <Typography variant="caption" component="div" color="text.secondary">
-                        {`${Math.round(value)}%`}
+            <Box
+                sx={{
+                    ...circularSx,
+                    flexDirection: getFlexDirection(titleAnchor),
+                    alignItems: title && titleAnchor ? "center" : "",
+                }}
+            >
+                {title && (
+                    <Typography sx={{ margin: 1 }} variant="caption">
+                        {title}
                     </Typography>
+                )}
+                <Box sx={{ ...circularSx, width: getBoxWidth(title, titleAnchor) }} className={className} id={props.id}>
+                    <CircularProgress data-progress={value} variant="determinate" value={value} />
+                    <Box sx={circularPrgSx}>
+                        <Typography variant="caption" component="div" color="text.secondary">
+                            {`${Math.round(value)}%`}
+                        </Typography>
+                    </Box>
                 </Box>
             </Box>
         )
     ) : linear ? (
-        <LinearProgress
-            id={props.id}
-            variant={value === undefined ? "indeterminate" : "determinate"}
-            value={value}
-            className={className}
-        />
+        <Box sx={{ ...linearSx, flexDirection: getFlexDirection(titleAnchor) }}>
+            {title && (
+                <Typography sx={{ margin: 1 }} variant="caption">
+                    {title}
+                </Typography>
+            )}
+            <LinearProgress
+                id={props.id}
+                sx={{ width: "100%" }}
+                variant={value === undefined ? "indeterminate" : "determinate"}
+                value={value}
+                className={className}
+                data-progress={value}
+            />
+        </Box>
     ) : (
-        <CircularProgress
-            id={props.id}
-            variant={value === undefined ? "indeterminate" : "determinate"}
-            value={value}
-            className={className}
-        />
+        <Box
+            sx={{
+                ...circularSx,
+                flexDirection: getFlexDirection(titleAnchor),
+                alignItems: title && titleAnchor ? "center" : "",
+            }}
+        >
+            {title && (
+                <Typography sx={{ margin: 1 }} variant="caption">
+                    {title}
+                </Typography>
+            )}
+            <CircularProgress
+                id={props.id}
+                variant={value === undefined ? "indeterminate" : "determinate"}
+                value={value}
+                className={className}
+                data-progress={value}
+            />
+        </Box>
     );
 };
 

@@ -11,12 +11,11 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React from "react";
 
 import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import Progress, { getFlexDirection, getBoxWidth } from "./Progress";
 
-import Progress from "./Progress";
 
 describe("Progress component", () => {
     it("renders circular progress without value (indeterminate)", () => {
@@ -47,5 +46,95 @@ describe("Progress component", () => {
         const valueText = getByText("50%");
         expect(elt).toHaveClass("MuiLinearProgress-root");
         expect(valueText).toBeInTheDocument();
+    });
+    it('should return null when render is false', async () => {
+        const { container } = render(<Progress render={false} />);
+        expect(container.firstChild).toBeNull();
+    });
+    it('should render the title when title is defined', () => {
+        const { getByText } = render(<Progress title="Title" />);
+        const title = getByText("Title");
+        expect(title).toBeInTheDocument();
+    })
+    it('renders Typography with correct sx and variant', () => {
+        const { getByText } = render(<Progress title="Title" />);
+        const typographyElement = getByText("Title");
+        expect(typographyElement).toBeInTheDocument();
+        expect(typographyElement).toHaveStyle('margin: 8px');
+        expect(typographyElement.tagName).toBe('SPAN');
+    });
+    it('renders determinate progress correctly', () => {
+        const { getByRole } = render(<Progress value={50} />);
+        const progressBar = getByRole('progressbar');
+        expect(progressBar).toBeInTheDocument();
+        expect(progressBar).toHaveAttribute('aria-valuenow', '50');
+    });
+    it('renders determinate progress with linear progress bar', () => {
+        const { getByRole } = render(<Progress value={50} linear />);
+        const progressBar = getByRole('progressbar');
+        expect(progressBar).toBeInTheDocument();
+        expect(progressBar).toHaveAttribute('aria-valuenow', '50');
+    }) 
+    it('renders title and linear progress bar correctly', () => {
+        const { getByText, getByRole } = render(<Progress title="Title" value={50} linear showValue={true} />);
+        const title = getByText("Title");
+        const progressBar = getByRole('progressbar');
+        expect(title).toBeInTheDocument();
+        expect(progressBar).toBeInTheDocument();
+    })
+    it('renders title and linear progress bar without showing value', () => {
+        const { getByText, queryByText } = render(<Progress title="Title" value={50} linear />);
+        const title = getByText("Title");
+        const value = queryByText("50%");
+        expect(title).toBeInTheDocument();
+        expect(value).toBeNull();
+    })
+    it('renders title and circular progress bar correctly', () => {
+        const { getByText, getByRole } = render(<Progress title="Title" value={50} showValue={true} />);
+        const title = getByText("Title");
+        const progressBar = getByRole('progressbar');
+        expect(title).toBeInTheDocument();
+        expect(progressBar).toBeInTheDocument();
+    })
+});
+
+describe('Progress functions', () => {
+    it('should return "column" when titleAnchor is "top"', () => {
+        expect(getFlexDirection("top")).toBe("column");
+    });
+
+    it('should return "column-reverse" when titleAnchor is "bottom"', () => {
+        expect(getFlexDirection("bottom")).toBe("column-reverse");
+    });
+
+    it('should return "row" when titleAnchor is "left"', () => {
+        expect(getFlexDirection("left")).toBe("row");
+    });
+
+    it('should return "row-reverse" when titleAnchor is "right"', () => {
+        expect(getFlexDirection("right")).toBe("row-reverse");
+    });
+
+    it('should return "row" when titleAnchor is not recognized', () => {
+        expect(getFlexDirection("unknown")).toBe("row");
+    });
+    it('should return "100%" when both title and titleAnchor are truthy', () => {
+        const result = getBoxWidth("Title", "Anchor");
+        expect(result).toBe("100%");
+    });
+
+    it('should return an empty string when title is truthy and titleAnchor is falsy', () => {
+        const result = getBoxWidth("Title", undefined);
+        expect(result).toBe("");
+    });
+
+    it('should return an empty string when title is falsy and titleAnchor is truthy', () => {
+        const result = getBoxWidth(undefined, "Anchor");
+        expect(result).toBe("");
+    });
+
+    it('should return an empty string when both title and titleAnchor are falsy', () => {
+        const result = getBoxWidth(undefined, undefined);
+        expect(result).toBe("");
     });
 });
