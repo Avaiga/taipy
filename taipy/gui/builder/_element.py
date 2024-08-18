@@ -44,7 +44,7 @@ class _Element(ABC):
     _DEFAULT_PROPERTY = ""
     __RE_INDEXED_PROPERTY = re.compile(r"^(.*?)__([\w\d]+)$")
     _NEW_LAMBDA_NAME = "new_lambda"
-    _TAIPY_EMBEDED_PREFIX = "_tp_embeded_"
+    _TAIPY_EMBEDDED_PREFIX = "_tp_embedded_"
 
     def __new__(cls, *args, **kwargs):
         obj = super(_Element, cls).__new__(cls)
@@ -144,10 +144,10 @@ class _Element(ABC):
     def __embed_object(self, obj: t.Any, is_expression = True) -> str:
         """Embed an object in the caller frame
 
-        Return the Taipy expression of the embeded object
+        Return the Taipy expression of the embedded object
         """
         frame_locals = self.__calling_frame.f_locals
-        obj_var_name = self._TAIPY_EMBEDED_PREFIX + obj.__class__.__name__
+        obj_var_name = self._TAIPY_EMBEDDED_PREFIX + obj.__class__.__name__
         index = 0
         while f"{obj_var_name}_{index}" in frame_locals:
             index += 1
