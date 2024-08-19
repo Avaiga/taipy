@@ -278,7 +278,6 @@ class _Server:
                 for r in port_auto_ranges
             ]
             port = choices(random_choices, weights=random_weights)[0]
-            print(random_choices, random_weights, port)
             if port not in _RuntimeManager().get_used_port() and not _is_port_open(self._host, port):
                 return port
 
