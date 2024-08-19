@@ -267,7 +267,7 @@ class _Server:
             if not patcher.is_monkey_patched("time"):
                 monkey_patch(time=True)
 
-    def _get_random_port(self, port_auto_ranges: t.Optional[t.List[t.Union[int, t.Tuple[int, int]]]] = None):  # pragma: no cover
+    def _get_random_port(self, port_auto_ranges: t.Optional[t.List[t.Union[int, t.Tuple[int, int]]]] = None):  # pragma: no cover  # noqa: E501
         port_auto_ranges = port_auto_ranges or [(49152, 65535)]
         random_weights = [
             1 if isinstance(r, int) else r[1] - r[0] + 1 for r in port_auto_ranges
