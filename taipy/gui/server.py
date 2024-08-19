@@ -258,7 +258,7 @@ class _Server:
         if self._get_async_mode() == "gevent" and util.find_spec("gevent"):
             from gevent import get_hub, monkey
 
-            get_hub().NOT_ERROR += (KeyboardInterrupt, )
+            get_hub().NOT_ERROR += (KeyboardInterrupt,)
             if not monkey.is_module_patched("time"):
                 monkey.patch_time()
         if self._get_async_mode() == "eventlet" and util.find_spec("eventlet"):
@@ -267,21 +267,31 @@ class _Server:
             if not patcher.is_monkey_patched("time"):
                 monkey_patch(time=True)
 
-    def _get_random_port(self, port_auto_ranges: t.Optional[t.List[t.Union[int, t.Tuple[int, int]]]] = None):  # pragma: no cover  # noqa: E501
+    def _get_random_port(
+        self, port_auto_ranges: t.Optional[t.List[t.Union[int, t.Tuple[int, int]]]] = None
+    ):  # pragma: no cover
         port_auto_ranges = port_auto_ranges or [(49152, 65535)]
-        random_weights = [
-            1 if isinstance(r, int) else r[1] - r[0] + 1 for r in port_auto_ranges
-        ]
+        random_weights = [1 if isinstance(r, int) else abs(r[1] - r[0]) + 1 for r in port_auto_ranges]
         while True:
             random_choices = [
-                r if isinstance(r, int) else randint(r[0], r[1])
-                for r in port_auto_ranges
+                r if isinstance(r, int) else randint(min(r[0], r[1]), max(r[0], r[1])) for r in port_auto_ranges
             ]
             port = choices(random_choices, weights=random_weights)[0]
             if port not in _RuntimeManager().get_used_port() and not _is_port_open(self._host, port):
                 return port
 
-    def run(self, host, port, debug, use_reloader, flask_log, run_in_thread, allow_unsafe_werkzeug, notebook_proxy, port_auto_ranges):  # noqa: E501
+    def run(
+        self,
+        host,
+        port,
+        debug,
+        use_reloader,
+        flask_log,
+        run_in_thread,
+        allow_unsafe_werkzeug,
+        notebook_proxy,
+        port_auto_ranges,
+    ):
         host_value = host if host != "0.0.0.0" else "localhost"
         self._host = host
         if port == "auto":
