@@ -161,7 +161,7 @@ class _Server:
                 if resource_handler is None:
                     return (f"Invalid value for query {_Server._RESOURCE_HANDLER_ARG}", 404)
                 try:
-                    return resource_handler.get_resources(path, static_folder)
+                    return resource_handler.get_resources(path, static_folder, base_url)
                 except Exception as e:
                     raise RuntimeError("Can't get resources from custom resource handler") from e
             if path == "" or path == "index.html" or "." not in path:
@@ -256,8 +256,9 @@ class _Server:
 
     def _apply_patch(self):
         if self._get_async_mode() == "gevent" and util.find_spec("gevent"):
-            from gevent import monkey
+            from gevent import get_hub, monkey
 
+            get_hub().NOT_ERROR += (KeyboardInterrupt, )
             if not monkey.is_module_patched("time"):
                 monkey.patch_time()
         if self._get_async_mode() == "eventlet" and util.find_spec("eventlet"):
@@ -290,7 +291,7 @@ class _Server:
             runtime_manager.add_gui(self._gui, port)
         if debug and not is_running_from_reloader() and _is_port_open(host_value, port):
             raise ConnectionError(
-                "Port {port} is already opened on {host} because another application is running on the same port. Please pick another port number and rerun with the 'port=<new_port>' option. You can also let Taipy choose a port number for you by running with the 'port=\"auto\"' option."  # noqa: E501
+                f"Port {port} is already opened on {host} because another application is running on the same port.\nPlease pick another port number and rerun with the 'port=<new_port>' setting.\nYou can also let Taipy choose a port number for you by running with the 'port=\"auto\"' setting."  # noqa: E501
             )
         if not flask_log:
             log = logging.getLogger("werkzeug")
@@ -318,7 +319,10 @@ class _Server:
         # flask-socketio specific conditions for 'allow_unsafe_werkzeug' parameters to be popped out of kwargs
         if self._get_async_mode() == "threading" and (not sys.stdin or not sys.stdin.isatty()):
             run_config = {**run_config, "allow_unsafe_werkzeug": allow_unsafe_werkzeug}
-        self._ws.run(**run_config)
+        try:
+            self._ws.run(**run_config)
+        except KeyboardInterrupt:
+            pass
 
     def stop_thread(self):
         if hasattr(self, "_thread") and self._thread.is_alive() and self._is_running:

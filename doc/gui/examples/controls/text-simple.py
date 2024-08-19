@@ -18,9 +18,6 @@ from taipy.gui import Gui
 name = "Taipy"
 
 page = """
-# Text - simple
-<|toggle|theme|>
-
 <|Hello {name}!|>
 """
 

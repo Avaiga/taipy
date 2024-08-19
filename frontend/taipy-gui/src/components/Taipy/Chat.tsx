@@ -35,7 +35,7 @@ import { TaipyActiveProps, disableColor, getSuffixedClassNames } from "./utils";
 import { useClassNames, useDispatch, useDynamicProperty, useElementVisible, useModule } from "../../utils/hooks";
 import { LoVElt, useLovListMemo } from "./lovUtils";
 import { IconAvatar, avatarSx } from "../../utils/icon";
-import { getInitials } from "../../utils";
+import { emptyArray, getInitials } from "../../utils";
 import { RowType, TableValueType } from "./tableUtils";
 
 interface ChatProps extends TaipyActiveProps {
@@ -167,7 +167,6 @@ const Chat = (props: ChatProps) => {
 
     const [rows, setRows] = useState<RowType[]>([]);
     const page = useRef<key2Rows>({ key: defaultKey });
-    const [rowCount, setRowCount] = useState(0);
     const [columns, setColumns] = useState<Array<string>>([]);
     const scrollDivRef = useRef<HTMLDivElement>(null);
     const anchorDivRef = useRef<HTMLElement>(null);
@@ -291,21 +290,24 @@ const Chat = (props: ChatProps) => {
     useEffect(() => {
         if (!refresh && props.messages && page.current.key && props.messages[page.current.key] !== undefined) {
             const newValue = props.messages[page.current.key];
-            setRowCount(newValue.rowcount);
-            const nr = newValue.data as RowType[];
-            if (Array.isArray(nr) && nr.length > newValue.start && nr[newValue.start]) {
-                setRows((old) => {
-                    old.length && nr.length > old.length && setShowMessage(true);
-                    if (nr.length < old.length) {
-                        return nr.concat(old.slice(nr.length))
-                    }
-                    if (old.length > newValue.start) {
-                        return old.slice(0, newValue.start).concat(nr.slice(newValue.start));
-                    }
-                    return nr;
-                });
-                const cols = Object.keys(nr[newValue.start]);
-                setColumns(cols.length > 2 ? cols : cols.length == 2 ? [...cols, ""] : ["", ...cols, "", ""]);
+            if (newValue.rowcount == 0) {
+                setRows(emptyArray)
+            } else {
+                const nr = newValue.data as RowType[];
+                if (Array.isArray(nr) && nr.length > newValue.start && nr[newValue.start]) {
+                    setRows((old) => {
+                        old.length && nr.length > old.length && setShowMessage(true);
+                        if (nr.length < old.length) {
+                            return nr.concat(old.slice(nr.length))
+                        }
+                        if (old.length > newValue.start) {
+                            return old.slice(0, newValue.start).concat(nr.slice(newValue.start));
+                        }
+                        return nr;
+                    });
+                    const cols = Object.keys(nr[newValue.start]);
+                    setColumns(cols.length > 2 ? cols : cols.length == 2 ? [...cols, ""] : ["", ...cols, "", ""]);
+                }
             }
             page.current.key = getChatKey(0, pageSize);
         }
@@ -341,7 +343,7 @@ const Chat = (props: ChatProps) => {
     );
 
     return (
-        <Tooltip title={hover || "" || `rowCount: ${rowCount}`}>
+        <Tooltip title={hover || ""}>
             <Paper className={className} sx={boxSx} id={id}>
                 <Grid container rowSpacing={2} sx={gridSx} ref={scrollDivRef}>
                     {rows.length && !rows[0] ? (

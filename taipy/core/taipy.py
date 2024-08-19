@@ -40,7 +40,7 @@ from .exceptions.exceptions import DataNodeConfigIsNotGlobal, ModelNotFound, Non
 from .job._job_manager_factory import _JobManagerFactory
 from .job.job import Job
 from .job.job_id import JobId
-from .reason import EntityIsNotSubmittableEntity, ReasonCollection
+from .reason import EntityDoesNotExist, EntityIsNotSubmittableEntity, ReasonCollection
 from .scenario._scenario_manager_factory import _ScenarioManagerFactory
 from .scenario.scenario import Scenario
 from .scenario.scenario_id import ScenarioId
@@ -119,13 +119,14 @@ def is_editable(
         CycleId,
         SubmissionId,
     ],
-) -> bool:
+) -> ReasonCollection:
     """Indicate if an entity can be edited.
 
     This function checks if the given entity can be edited.
 
     Returns:
-        True if the given entity can be edited. False otherwise.
+        A ReasonCollection object that can function as a Boolean value,
+        which is True if the given entity can be edited. False otherwise.
     """
     if isinstance(entity, Cycle):
         return _CycleManagerFactory._build_manager()._is_editable(entity)
@@ -155,7 +156,7 @@ def is_editable(
         return _SubmissionManagerFactory._build_manager()._is_editable(entity)
     if isinstance(entity, str) and entity.startswith(Submission._ID_PREFIX):
         return _SubmissionManagerFactory._build_manager()._is_editable(SequenceId(entity))
-    return False
+    return ReasonCollection()._add_reason(str(entity), EntityDoesNotExist(str(entity)))
 
 
 def is_readable(
@@ -175,13 +176,14 @@ def is_readable(
         CycleId,
         SubmissionId,
     ],
-) -> bool:
+) -> ReasonCollection:
     """Indicate if an entity can be read.
 
     This function checks if the given entity can be read.
 
     Returns:
-        True if the given entity can be read. False otherwise.
+        A ReasonCollection object that can function as a Boolean value,
+        which is True if the given entity can be read. False otherwise.
     """
     if isinstance(entity, Cycle):
         return _CycleManagerFactory._build_manager()._is_readable(entity)
@@ -211,7 +213,7 @@ def is_readable(
         return _SubmissionManagerFactory._build_manager()._is_readable(entity)
     if isinstance(entity, str) and entity.startswith(Submission._ID_PREFIX):
         return _SubmissionManagerFactory._build_manager()._is_readable(SequenceId(entity))
-    return False
+    return ReasonCollection()._add_reason(str(entity), EntityDoesNotExist(str(entity)))
 
 
 @_warn_no_core_service("The submitted entity will not be executed until the Core service is running.")
@@ -259,46 +261,48 @@ def submit(
 
 
 @overload
-def exists(entity_id: TaskId) -> bool:
+def exists(entity_id: TaskId) -> ReasonCollection:
     ...
 
 
 @overload
-def exists(entity_id: DataNodeId) -> bool:
+def exists(entity_id: DataNodeId) -> ReasonCollection:
     ...
 
 
 @overload
-def exists(entity_id: SequenceId) -> bool:
+def exists(entity_id: SequenceId) -> ReasonCollection:
     ...
 
 
 @overload
-def exists(entity_id: ScenarioId) -> bool:
+def exists(entity_id: ScenarioId) -> ReasonCollection:
     ...
 
 
 @overload
-def exists(entity_id: CycleId) -> bool:
+def exists(entity_id: CycleId) -> ReasonCollection:
     ...
 
 
 @overload
-def exists(entity_id: JobId) -> bool:
+def exists(entity_id: JobId) -> ReasonCollection:
     ...
 
 
 @overload
-def exists(entity_id: SubmissionId) -> bool:
+def exists(entity_id: SubmissionId) -> ReasonCollection:
     ...
 
 
 @overload
-def exists(entity_id: str) -> bool:
+def exists(entity_id: str) -> ReasonCollection:
     ...
 
 
-def exists(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId, SubmissionId, str]) -> bool:
+def exists(
+    entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId, SubmissionId, str],
+) -> ReasonCollection:
     """Check if an entity with the specified identifier exists.
 
     This function checks if an entity with the given identifier exists.
@@ -311,7 +315,8 @@ def exists(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, C
             identifier of the entity to check for existence.
 
     Returns:
-        True if the given entity exists. False otherwise.
+        A ReasonCollection object that can function as a Boolean value,
+        which is True if the given entity exists. False otherwise.
 
     Raises:
         ModelNotFound: If the entity's type cannot be determined.
@@ -429,7 +434,7 @@ def get_tasks() -> List[Task]:
     return _TaskManagerFactory._build_manager()._get_all()
 
 
-def is_deletable(entity: Union[Scenario, Job, Submission, ScenarioId, JobId, SubmissionId]) -> bool:
+def is_deletable(entity: Union[Scenario, Job, Submission, ScenarioId, JobId, SubmissionId]) -> ReasonCollection:
     """Check if a `Scenario^`, a `Job^` or a `Submission^` can be deleted.
 
     This function determines whether a scenario or a job can be safely
@@ -440,7 +445,8 @@ def is_deletable(entity: Union[Scenario, Job, Submission, ScenarioId, JobId, Sub
             job or submission to check.
 
     Returns:
-        True if the given scenario, job or submission can be deleted. False otherwise.
+        A ReasonCollection object that can function as a Boolean value,
+        which is True if the given scenario, job or submission can be deleted. False otherwise.
     """
     if isinstance(entity, Job):
         return _JobManagerFactory._build_manager()._is_deletable(entity)
@@ -454,7 +460,7 @@ def is_deletable(entity: Union[Scenario, Job, Submission, ScenarioId, JobId, Sub
         return _SubmissionManagerFactory._build_manager()._is_deletable(entity)
     if isinstance(entity, str) and entity.startswith(Submission._ID_PREFIX):
         return _SubmissionManagerFactory._build_manager()._is_deletable(SubmissionId(entity))
-    return True
+    return ReasonCollection()._add_reason(str(entity), EntityDoesNotExist(str(entity)))
 
 
 def delete(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId, SubmissionId]):
@@ -602,7 +608,7 @@ def get_primary_scenarios(
     return scenarios
 
 
-def is_promotable(scenario: Union[Scenario, ScenarioId]) -> bool:
+def is_promotable(scenario: Union[Scenario, ScenarioId]) -> ReasonCollection:
     """Determine if a scenario can be promoted to become a primary scenario.
 
     This function checks whether the given scenario is eligible to be promoted
@@ -612,7 +618,8 @@ def is_promotable(scenario: Union[Scenario, ScenarioId]) -> bool:
         scenario (Union[Scenario, ScenarioId]): The scenario to be evaluated for promotion.
 
     Returns:
-        True if the given scenario can be promoted to be a primary scenario. False otherwise.
+        A ReasonCollection object that can function as a Boolean value,
+        which is True if the given scenario can be promoted to be a primary scenario. False otherwise.
     """
     return _ScenarioManagerFactory._build_manager()._is_promotable_to_primary(scenario)
 

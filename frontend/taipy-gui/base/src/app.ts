@@ -7,6 +7,7 @@ import { DataManager, ModuleData } from "./dataManager";
 import { initSocket } from "./socket";
 import { TaipyWsAdapter, WsAdapter } from "./wsAdapter";
 import { WsMessageType } from "../../src/context/wsUtils";
+import { getBase } from "./utils";
 
 export type OnInitHandler = (taipyApp: TaipyApp) => void;
 export type OnChangeHandler = (taipyApp: TaipyApp, encodedName: string, value: unknown) => void;
@@ -46,9 +47,9 @@ export class TaipyApp {
         onInit: OnInitHandler | undefined = undefined,
         onChange: OnChangeHandler | undefined = undefined,
         path: string | undefined = undefined,
-        socket: Socket | undefined = undefined
+        socket: Socket | undefined = undefined,
     ) {
-        socket = socket || io("/", { autoConnect: false });
+        socket = socket || io("/", { autoConnect: false, path: `${this.getBaseUrl()}socket.io` });
         this.onInit = onInit;
         this.onChange = onChange;
         this.variableData = undefined;
@@ -231,7 +232,7 @@ export class TaipyApp {
 
     updateContext(path: string | undefined = "") {
         if (!path || path === "") {
-            path = window.location.pathname.slice(1);
+            path = window.location.pathname.replace(this.getBaseUrl(), "") || "/"
         }
         this.sendWsMessage("GMC", "get_module_context", { path: path || "/" });
     }
@@ -251,6 +252,10 @@ export class TaipyApp {
 
     getWsStatus() {
         return this._ackList;
+    }
+
+    getBaseUrl() {
+        return getBase();
     }
 }
 

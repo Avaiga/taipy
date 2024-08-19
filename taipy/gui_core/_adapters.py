@@ -37,6 +37,7 @@ from taipy.core import (
 from taipy.core import get as core_get
 from taipy.core.config import Config
 from taipy.core.data._tabular_datanode_mixin import _TabularDataNodeMixin
+from taipy.core.reason import ReasonCollection
 from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
 from taipy.gui.utils import _is_boolean, _is_true, _TaipyBase
@@ -54,6 +55,9 @@ class _EntityType(Enum):
     SEQUENCE = 2
     DATANODE = 3
 
+
+def _get_reason(rc: ReasonCollection, message: str):
+    return "" if rc else f"{message}: {rc.reasons}"
 
 class _GuiCoreScenarioAdapter(_TaipyBase):
     __INNER_PROPS = ["name"]
@@ -84,8 +88,8 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                             (
                                 s.get_simple_label(),
                                 [t.id for t in s.tasks.values()] if hasattr(s, "tasks") else [],
-                                "" if (reason := is_submittable(s)) else f"Sequence not submittable: {reason.reasons}",
-                                is_editable(s),
+                                _get_reason(is_submittable(s), "Sequence not submittable"),
+                                _get_reason(is_editable(s), "Sequence not editable"),
                             )
                             for s in scenario.sequences.values()
                         ]
@@ -95,11 +99,11 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                         if hasattr(scenario, "tasks")
                         else {},
                         list(scenario.properties.get("authorized_tags", [])) if scenario.properties else [],
-                        is_deletable(scenario),
-                        is_promotable(scenario),
-                        "" if (reason := is_submittable(scenario)) else f"Scenario not submittable: {reason.reasons}",
-                        is_readable(scenario),
-                        is_editable(scenario),
+                        _get_reason(is_deletable(scenario), "Scenario not deletable"),
+                        _get_reason(is_promotable(scenario), "Scenario not promotable"),
+                        _get_reason(is_submittable(scenario), "Scenario not submittable"),
+                        _get_reason(is_readable(scenario), "Scenario not readable"),
+                        _get_reason(is_editable(scenario), "Scenario not editable"),
                     ]
             except Exception as e:
                 _warn(f"Access to scenario ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)
@@ -221,8 +225,8 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                         self.__get_data(datanode),
                         datanode._edit_in_progress,
                         datanode._editor_id,
-                        is_readable(datanode),
-                        is_editable(datanode),
+                        _get_reason(is_readable(datanode), "Datanode not readable"),
+                        _get_reason(is_editable(datanode), "Datanode not editable"),
                     ]
             except Exception as e:
                 _warn(f"Access to datanode ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)

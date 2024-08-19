@@ -58,14 +58,14 @@ interface DataNodeTableProps {
     onLock?: string;
     editInProgress?: boolean;
     editLock: MutableRefObject<boolean>;
-    editable: boolean;
+    notEditableReason: string;
     updateDnVars?: string;
 }
 
 const pushRightSx = { ml: "auto" };
 
 const DataNodeTable = (props: DataNodeTableProps) => {
-    const { uniqid, configId, nodeId, columns = "", onViewTypeChange, editable, updateDnVars = "" } = props;
+    const { uniqid, configId, nodeId, columns = "", onViewTypeChange, notEditableReason, updateDnVars = "" } = props;
 
     const dispatch = useDispatch();
     const module = useModule();
@@ -202,7 +202,7 @@ const DataNodeTable = (props: DataNodeTableProps) => {
                 ) : null}
                 <Grid item sx={tableEdit ? undefined : pushRightSx}>
                     <FormControlLabel
-                        disabled={!props.active || !editable || !!props.editInProgress}
+                        disabled={!props.active || !!notEditableReason || !!props.editInProgress}
                         control={<Switch color="primary" checked={tableEdit} onChange={toggleTableEdit} />}
                         label="Edit data"
                         labelPlacement="start"

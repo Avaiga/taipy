@@ -15,12 +15,10 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-value = 50
-min_value = 50
-max_value = 150
+value = 120
 
 page = """
-<|{value}|metric|min={min_value}|max={max_value}|>
+<|{value}|metric|min=50|max=150|>
 """
 
 

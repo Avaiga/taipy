@@ -15,6 +15,7 @@ import { useContext, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { TaipyContext } from "../../context/taipyContext";
 import { createNavigateAction } from "../../context/taipyReducers";
+import { getBaseURL } from "../../utils";
 
 interface NavigateProps {
     to?: string;
@@ -32,6 +33,7 @@ const Navigate = ({ to, params, tab, force }: NavigateProps) => {
     useEffect(() => {
         if (to) {
             const tos = to === "/" ? to : "/" + to;
+            const navigatePath = getBaseURL() + tos.slice(1)
             const filteredParams = params
                 ? Object.keys(params).reduce((acc, key) => {
                       if (!SPECIAL_PARAMS.includes(key)) {
@@ -56,10 +58,10 @@ const Navigate = ({ to, params, tab, force }: NavigateProps) => {
             // Regular navigate cases
             if (Object.keys(state.locations || {}).some((route) => tos === route)) {
                 const searchParamsLocation = new URLSearchParams(location.search);
-                if (force && location.pathname === tos && searchParamsLocation.toString() === searchParams.toString()) {
+                if (force && location.pathname === navigatePath  && searchParamsLocation.toString() === searchParams.toString()) {
                     navigate(0);
                 } else {
-                    navigate({ pathname: to, search: `?${searchParams.toString()}` });
+                    navigate({ pathname: navigatePath, search: `?${searchParams.toString()}` });
                     // Handle Resource Handler Id
                     const tprh = params?.tprh;
                     if (tprh !== undefined) {

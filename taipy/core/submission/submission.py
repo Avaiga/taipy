@@ -21,12 +21,13 @@ from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..job.job import Job, JobId
 from ..notification import Event, EventEntityType, EventOperation, _make_event
+from ..reason.reason_collection import ReasonCollection
 from .submission_id import SubmissionId
 from .submission_status import SubmissionStatus
 
 
 class Submission(_Entity, _Labeled):
-    """ Submission of a submittable entity: `Task^`, a `Sequence^` or a `Scenario^`.
+    """Submission of a submittable entity: `Task^`, a `Sequence^` or a `Scenario^`.
 
     Task, Sequence, and Scenario entities can be submitted for execution. The submission
     represents the unique request to execute a submittable entity. The submission is created
@@ -137,6 +138,33 @@ class Submission(_Entity, _Labeled):
     def creation_date(self):
         return self._creation_date
 
+    @property
+    @_self_reload(_MANAGER_NAME)
+    def execution_started_at(self) -> Optional[datetime]:
+        if all(job.execution_started_at is not None for job in self.jobs):
+            return min(job.execution_started_at for job in self.jobs)
+        return None
+
+    @property
+    @_self_reload(_MANAGER_NAME)
+    def execution_ended_at(self) -> Optional[datetime]:
+        if all(job.execution_ended_at is not None for job in self.jobs):
+            return max(job.execution_ended_at for job in self.jobs)
+        return None
+
+    @property
+    @_self_reload(_MANAGER_NAME)
+    def execution_duration(self) -> Optional[float]:
+        """Get the duration of the submission in seconds.
+
+        Returns:
+            Optional[float]: The duration of the submission in seconds. If the job is not
+            completed, None is returned.
+        """
+        if self.execution_started_at and self.execution_ended_at:
+            return (self.execution_ended_at - self.execution_started_at).total_seconds()
+        return None
+
     def get_label(self) -> str:
         """Returns the submission simple label prefixed by its owner label.
 
@@ -236,11 +264,12 @@ class Submission(_Entity, _Labeled):
             SubmissionStatus.CANCELED,
         ]
 
-    def is_deletable(self) -> bool:
+    def is_deletable(self) -> ReasonCollection:
         """Indicate if the submission can be deleted.
 
         Returns:
-            True if the submission can be deleted. False otherwise.
+            A ReasonCollection object that can function as a Boolean value,
+            which is True if the submission can be deleted. False otherwise.
         """
         from ... import core as tp
 

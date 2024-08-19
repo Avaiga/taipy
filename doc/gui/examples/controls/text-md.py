@@ -23,12 +23,9 @@ add style to the text.
 
 If a line ends with two white spaces, such as here
 then you can create line skips.
-""" # noqa W291
+"""  # noqa W291
 
 page = """
-# Text - Markdown
-<|toggle|theme|>
-
 <|{markdown}|text|mode=markdown|>
 """
 

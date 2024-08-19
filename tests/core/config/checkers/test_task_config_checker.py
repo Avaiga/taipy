@@ -49,6 +49,40 @@ class TestTaskConfigChecker:
         assert len(Config._collector.errors) == 1
         assert len(Config._collector.warnings) == 2
 
+    def test_check_if_input_output_id_is_used_in_properties(self, caplog):
+        config = Config._applied_config
+        Config._compile_configs()
+        input_dn_config = DataNodeConfig("input_dn")
+        test_dn_config = DataNodeConfig("test")
+
+        config._sections[TaskConfig.name]["new"] = copy(config._sections[TaskConfig.name]["default"])
+        config._sections[TaskConfig.name]["new"].function = print
+        config._sections[TaskConfig.name]["new"]._properties["test"] = "test"
+        config._sections[TaskConfig.name]["new"]._inputs = [input_dn_config]
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+
+        config._sections[TaskConfig.name]["new"]._inputs = [test_dn_config]
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        assert (
+            "The id of the DataNodeConfig `test` is overlapping with the property `test` of TaskConfig `new`."
+            in caplog.text
+        )
+
+        config._sections[TaskConfig.name]["new"]._outputs = [test_dn_config]
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 2
+        assert (
+            "The id of the DataNodeConfig `test` is overlapping with the property `test` of TaskConfig `new`."
+            in caplog.text
+        )
+
     def test_check_config_id_is_different_from_all_task_properties(self, caplog):
         Config._collector = IssueCollector()
         config = Config._applied_config

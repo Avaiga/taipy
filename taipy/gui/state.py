@@ -117,6 +117,8 @@ class State:
         return filter(lambda n: n not in excluded_attrs, var_list)
 
     def __getattribute__(self, name: str) -> t.Any:
+        if name == "__class__":
+            return State
         if name in State.__methods:
             return super().__getattribute__(name)
         gui: "Gui" = self.get_gui()
@@ -128,7 +130,7 @@ class State:
             name not in gui._get_shared_variables() and not gui._bindings()._is_single_client()
         ):
             raise AttributeError(f"Variable '{name}' is not available to be accessed in shared callback.")
-        if name not in super().__getattribute__(State.__attrs[1]):
+        if not name.startswith("__") and name not in super().__getattribute__(State.__attrs[1]):
             raise AttributeError(f"Variable '{name}' is not defined.")
         with self._notebook_context(gui), self._set_context(gui):
             encoded_name = gui._bind_var(name)
@@ -140,7 +142,7 @@ class State:
             name not in gui._get_shared_variables() and not gui._bindings()._is_single_client()
         ):
             raise AttributeError(f"Variable '{name}' is not available to be accessed in shared callback.")
-        if name not in super().__getattribute__(State.__attrs[1]):
+        if not name.startswith("__") and name not in super().__getattribute__(State.__attrs[1]):
             raise AttributeError(f"Variable '{name}' is not accessible.")
         with self._notebook_context(gui), self._set_context(gui):
             encoded_name = gui._bind_var(name)

@@ -24,9 +24,6 @@ if __name__ == "__main__":
 """
 
 page = """
-# Text - pre
-<|toggle|theme|>
-
 <|{code}|text|mode=pre|>
 """
 
