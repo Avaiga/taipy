@@ -14,13 +14,18 @@ from typing import List, Optional, Union
 
 from taipy.config import Config
 from taipy.config._config_comparator._comparator_result import _ComparatorResult
-from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.exceptions.exceptions import InconsistentEnvVariableError
-from taipy.core.exceptions.exceptions import ConfigCoreVersionMismatched
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._manager._manager import _Manager
-from ..exceptions.exceptions import ConflictedConfigurationError, ModelNotFound, NonExistingVersion
+from ..exceptions.exceptions import (
+    ConfigCoreVersionMismatched,
+    ConflictedConfigurationError,
+    ModelNotFound,
+    NonExistingVersion,
+    VersionAlreadyExistsAsDevelopment,
+)
+from ..reason import ReasonCollection
 from ._version import _Version
 from ._version_fs_repository import _VersionFSRepository
 
@@ -28,14 +33,13 @@ from ._version_fs_repository import _VersionFSRepository
 class _VersionManager(_Manager[_Version]):
     _ENTITY_NAME = _Version.__name__
 
-    __logger = _TaipyLogger._get_logger()
+    _logger = _TaipyLogger._get_logger()
 
-    __DEVELOPMENT_VERSION = ["development", "dev"]
-    __LATEST_VERSION = "latest"
-    __PRODUCTION_VERSION = "production"
-    __ALL_VERSION = ["all", ""]
+    _DEVELOPMENT_VERSION = ["development", "dev"]
+    _LATEST_VERSION = "latest"
+    _ALL_VERSION = ["all", ""]
 
-    _DEFAULT_VERSION = __LATEST_VERSION
+    _DEFAULT_VERSION = _LATEST_VERSION
 
     _repository: _VersionFSRepository
 
@@ -58,7 +62,7 @@ class _VersionManager(_Manager[_Version]):
                 if not force:
                     raise ConflictedConfigurationError()
 
-                cls.__logger.warning(f"Option --force is detected, overriding the configuration of version {id} ...")
+                cls._logger.warning(f"Option --force is detected, overriding the configuration of version {id} ...")
                 version.config = Config._applied_config  # type: ignore[attr-defined]
 
         else:
@@ -79,6 +83,10 @@ class _VersionManager(_Manager[_Version]):
         return cls._repository._load_all(filters)
 
     @classmethod
+    def _is_deletable(cls, version_number: Optional[str]) -> ReasonCollection:
+        return ReasonCollection()
+
+    @classmethod
     def _set_development_version(cls, version_number: str) -> str:
         cls._get_or_create(version_number, force=True)
         cls._repository._set_development_version(version_number)
@@ -94,16 +102,7 @@ class _VersionManager(_Manager[_Version]):
     @classmethod
     def _set_experiment_version(cls, version_number: str, force: bool = False) -> str:
         if version_number == cls._get_development_version():
-            raise SystemExit(
-                f"Version number {version_number} is the development version. Please choose a different name"
-                f" for this experiment."
-            )
-
-        if version_number in cls._get_production_versions():
-            raise SystemExit(
-                f"Version number {version_number} is already a production version. Please choose a different name"
-                f" for this experiment."
-            )
+            raise VersionAlreadyExistsAsDevelopment(version_number)
 
         try:
             cls._get_or_create(version_number, force)
@@ -125,50 +124,15 @@ class _VersionManager(_Manager[_Version]):
             return cls._set_development_version(str(uuid.uuid4()))
 
     @classmethod
-    def _set_production_version(cls, version_number: str, force: bool = False) -> str:
-        if version_number == cls._get_development_version():
-            cls._set_development_version(str(uuid.uuid4()))
-
-        try:
-            cls._get_or_create(version_number, force)
-        except ConflictedConfigurationError:
-            raise SystemExit(
-                f"Please add a new production version with migration functions.\n"
-                f"If old entities remain compatible with the new configuration, you can also run your application with"
-                f" --force option to override the production configuration of version {version_number}."
-            ) from None
-        cls._repository._set_production_version(version_number)
-        return version_number
-
-    @classmethod
-    def _get_production_versions(cls) -> List[str]:
-        try:
-            return cls._repository._get_production_versions()
-        except (FileNotFoundError, ModelNotFound):
-            return []
-
-    @classmethod
-    def _delete_production_version(cls, version_number) -> str:
-        return cls._repository._delete_production_version(version_number)
-
-    @classmethod
     def _replace_version_number(cls, version_number: Optional[str] = None):
         if version_number is None:
-            version_number = cls._replace_version_number(cls._DEFAULT_VERSION)
+            return cls._replace_version_number(cls._DEFAULT_VERSION)
 
-            production_versions = cls._get_production_versions()
-            if version_number in production_versions:
-                return production_versions
-
-            return version_number
-
-        if version_number == cls.__LATEST_VERSION:
+        if version_number == cls._LATEST_VERSION:
             return cls._get_latest_version()
-        if version_number in cls.__DEVELOPMENT_VERSION:
+        if version_number in cls._DEVELOPMENT_VERSION:
             return cls._get_development_version()
-        if version_number == cls.__PRODUCTION_VERSION:
-            return cls._get_production_versions()
-        if version_number in cls.__ALL_VERSION:
+        if version_number in cls._ALL_VERSION:
             return ""
 
         try:
@@ -183,49 +147,45 @@ class _VersionManager(_Manager[_Version]):
         raise NonExistingVersion(version_number)
 
     @classmethod
-    def _manage_version(cls):
-        from ..taipy import clean_all_entities
+    def _rename_version(cls, old_version: str, new_version: str) -> None:
+        version_entity = cls._get(old_version)
 
+        if old_version == cls._get_latest_version():
+            try:
+                cls._set_experiment_version(new_version)
+            except VersionAlreadyExistsAsDevelopment as err:
+                raise SystemExit(err.message) from None
+        if old_version == cls._get_development_version():
+            cls._set_development_version(new_version)
+        cls._delete(old_version)
+
+        if not cls._get(new_version):
+            version_entity.id = new_version
+            cls._set(version_entity)
+
+    @classmethod
+    def _manage_version(cls) -> None:
         if Config.core.mode == "development":
+            from ..taipy import clean_all_entities
+
             current_version_number = cls._get_development_version()
-            cls.__logger.info(f"Development mode: Clean all entities of version {current_version_number}")
+            cls._logger.info(f"Development mode: Clean all entities of version {current_version_number}")
             clean_all_entities(current_version_number)
             cls._set_development_version(current_version_number)
 
-        elif Config.core.mode in ["experiment", "production"]:
-            default_version_number = {
-                "experiment": str(uuid.uuid4()),
-                "production": cls._get_latest_version(),
-            }
-            version_setter = {
-                "experiment": cls._set_experiment_version,
-                "production": cls._set_production_version,
-            }
-
+        elif Config.core.mode == "experiment":
             if Config.core.version_number:
                 current_version_number = Config.core.version_number
             else:
-                current_version_number = default_version_number[Config.core.mode]
+                current_version_number = str(uuid.uuid4())
 
-            version_setter[Config.core.mode](current_version_number, Config.core.force)
-            if Config.core.mode == "production":
-                cls.__check_production_migration_config()
+            try:
+                cls._set_experiment_version(current_version_number, Config.core.force)
+            except VersionAlreadyExistsAsDevelopment as err:
+                raise SystemExit(err.message) from None
+
         else:
             raise SystemExit(f"Undefined execution mode: {Config.core.mode}.")
-
-    @classmethod
-    def __check_production_migration_config(cls):
-        from ..config.checkers._migration_config_checker import _MigrationConfigChecker
-
-        collector = _MigrationConfigChecker(Config._applied_config, IssueCollector())._check()
-        for issue in collector._warnings:
-            cls.__logger.warning(str(issue))
-        for issue in collector._infos:
-            cls.__logger.info(str(issue))
-        for issue in collector._errors:
-            cls.__logger.error(str(issue))
-        if len(collector._errors) != 0:
-            raise SystemExit("Configuration errors found. Please check the error log for more information.")
 
     @classmethod
     def _delete_entities_of_multiple_types(cls, _entity_ids):

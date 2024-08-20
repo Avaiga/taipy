@@ -45,7 +45,7 @@ def test_core_section():
 [TAIPY]
 
 [CORE]
-mode = "production"
+mode = "experiment"
 version_number = "test_num_2"
 force = "true:bool"
         """
@@ -54,7 +54,7 @@ force = "true:bool"
     with patch("sys.argv", ["prog"]):
         core = Core()
         core.run()
-    assert Config.core.mode == "production"
+    assert Config.core.mode == "experiment"
     assert Config.core.version_number == "test_num_2"
     assert Config.core.force
     core.stop()
