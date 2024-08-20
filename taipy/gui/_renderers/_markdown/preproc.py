@@ -60,6 +60,10 @@ class _Preprocessor(MdPreprocessor):
     #  Note 2: Space characters after the equal sign are significative
     __PROPERTY_RE = re.compile(r"((?:don'?t|not)\s+)?([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)\s*(?:=(.*))?$")
 
+    # Error syntax detection regex
+    __MISSING_LEADING_PIPE_RE = re.compile(r"<(.*?)\|>")
+    __MISSING_TRAILING_PIPE_RE = re.compile(r"<\|(.*?)>")
+
     _gui: "Gui"
 
     @staticmethod
@@ -72,10 +76,21 @@ class _Preprocessor(MdPreprocessor):
         # Un-escape pipe character in property value
         return (prop_name, prop_value.replace("\\|", "|"))
 
+    def _validate_line(self, line: str, line_count: int) -> bool:
+        if _Preprocessor.__MISSING_LEADING_PIPE_RE.search(line) is not None:
+            _warn(f"Missing leading pipe '|' in line {line_count}: '{line}'.")
+            return False
+        if _Preprocessor.__MISSING_TRAILING_PIPE_RE.search(line) is not None:
+            _warn(f"Missing trailing pipe '|' in line {line_count}: '{line}'.")
+            return False
+        return True
+
     def run(self, lines: List[str]) -> List[str]:
         new_lines = []
         tag_stack = []
         for line_count, line in enumerate(lines, start=1):
+            if not self._validate_line(line, line_count):
+                continue
             new_line = ""
             last_index = 0
             # Opening tags
@@ -100,7 +115,7 @@ class _Preprocessor(MdPreprocessor):
                         line += f' {property[0]}="{prop_value}"'
                     line += _MarkdownFactory._TAIPY_END + new_line_delimeter
                 else:
-                    _warn(f"Invalid tag name '{tag}' in line {line_count}.")
+                    _warn(f"Failed to recoginized block tag '{tag}' in line {line_count}. Verify that you are closing the tag properly if it is a control element.")
             # Other controls
             for m in _Preprocessor.__CONTROL_RE.finditer(line):
                 control_name, properties = self._process_control(m.group(1), line_count)
