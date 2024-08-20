@@ -62,7 +62,6 @@ class _Preprocessor(MdPreprocessor):
 
     # Error syntax detection regex
     __MISSING_LEADING_PIPE_RE = re.compile(r"<[^|](.*?)\|>")
-    __MISSING_TRAILING_PIPE_RE = re.compile(r"<\|(.*?)[^|]>")
 
     _gui: "Gui"
 
@@ -78,10 +77,7 @@ class _Preprocessor(MdPreprocessor):
 
     def _validate_line(self, line: str, line_count: int) -> bool:
         if _Preprocessor.__MISSING_LEADING_PIPE_RE.search(line) is not None:
-            _warn(f"Missing leading pipe '|' in line {line_count}: '{line}'.")
-            return False
-        if _Preprocessor.__MISSING_TRAILING_PIPE_RE.search(line) is not None:
-            _warn(f"Missing trailing pipe '|' in line {line_count}: '{line}'.")
+            _warn(f"Missing leading pipe '|' in opening tag line {line_count}: '{line}'.")
             return False
         return True
 
@@ -115,7 +111,7 @@ class _Preprocessor(MdPreprocessor):
                         line += f' {property[0]}="{prop_value}"'
                     line += _MarkdownFactory._TAIPY_END + new_line_delimeter
                 else:
-                    _warn(f"Failed to recognized block tag '{tag}' in line {line_count}. Verify that you are closing the tag properly if it is a control element.")  # noqa: E501
+                    _warn(f"Failed to recognized block tag '{tag}' in line {line_count}. Verify that you are closing the tag properly with '|>' if it is a control element.")  # noqa: E501
             # Other controls
             for m in _Preprocessor.__CONTROL_RE.finditer(line):
                 control_name, properties = self._process_control(m.group(1), line_count)
