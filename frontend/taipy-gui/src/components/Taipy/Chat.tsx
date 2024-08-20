@@ -158,7 +158,7 @@ const ChatRow = (props: ChatRowProps) => {
     );
 };
 
-const getChatKey = (start: number, page: number) => `Chat-${start}-${start+page}`
+const getChatKey = (start: number, page: number) => `Chat-${start}-${start + page}`;
 
 const Chat = (props: ChatProps) => {
     const { id, updateVarName, senderId = "taipy", onAction, withInput = true, defaultKey = "", pageSize = 50 } = props;
@@ -184,7 +184,7 @@ const Chat = (props: ChatProps) => {
             props.height
                 ? ({
                       ...defaultBoxSx,
-                      maxHeight: props.height,
+                      maxHeight: "" + Number(props.height) == "" + props.height ? props.height + "px" : props.height,
                       display: "flex",
                       flexDirection: "column",
                   } as SxProps<Theme>)
@@ -291,14 +291,14 @@ const Chat = (props: ChatProps) => {
         if (!refresh && props.messages && page.current.key && props.messages[page.current.key] !== undefined) {
             const newValue = props.messages[page.current.key];
             if (newValue.rowcount == 0) {
-                setRows(emptyArray)
+                setRows(emptyArray);
             } else {
                 const nr = newValue.data as RowType[];
                 if (Array.isArray(nr) && nr.length > newValue.start && nr[newValue.start]) {
                     setRows((old) => {
                         old.length && nr.length > old.length && setShowMessage(true);
                         if (nr.length < old.length) {
-                            return nr.concat(old.slice(nr.length))
+                            return nr.concat(old.slice(nr.length));
                         }
                         if (old.length > newValue.start) {
                             return old.slice(0, newValue.start).concat(nr.slice(newValue.start));
