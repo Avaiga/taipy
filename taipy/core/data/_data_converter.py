@@ -14,7 +14,6 @@ from datetime import datetime, timedelta
 from pydoc import locate
 
 from .._repository._abstract_converter import _AbstractConverter
-from .._version._utils import _migrate_entity
 from ..common._utils import _load_fct
 from ..data._data_model import _DataNodeModel
 from ..data.data_node import DataNode
@@ -299,7 +298,7 @@ class _DataNodeConverter(_AbstractConverter):
             validity_period = timedelta(days=model.validity_days, seconds=model.validity_seconds)
 
         exp_date = datetime.fromisoformat(model.editor_expiration_date) if model.editor_expiration_date else None
-        datanode = DataNode._class_map()[model.storage_type](
+        return DataNode._class_map()[model.storage_type](
             config_id=model.config_id,
             scope=model.scope,
             id=model.id,
@@ -314,4 +313,3 @@ class _DataNodeConverter(_AbstractConverter):
             editor_expiration_date=exp_date,
             properties=data_node_properties,
         )
-        return _migrate_entity(datanode)
