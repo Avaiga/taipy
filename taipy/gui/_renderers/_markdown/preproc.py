@@ -61,8 +61,8 @@ class _Preprocessor(MdPreprocessor):
     __PROPERTY_RE = re.compile(r"((?:don'?t|not)\s+)?([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)\s*(?:=(.*))?$")
 
     # Error syntax detection regex
-    __MISSING_LEADING_PIPE_RE = re.compile(r"<(.*?)\|>")
-    __MISSING_TRAILING_PIPE_RE = re.compile(r"<\|(.*?)>")
+    __MISSING_LEADING_PIPE_RE = re.compile(r"<[^|](.*?)\|>")
+    __MISSING_TRAILING_PIPE_RE = re.compile(r"<\|(.*?)[^|]>")
 
     _gui: "Gui"
 
