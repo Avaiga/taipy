@@ -115,7 +115,7 @@ class _Preprocessor(MdPreprocessor):
                         line += f' {property[0]}="{prop_value}"'
                     line += _MarkdownFactory._TAIPY_END + new_line_delimeter
                 else:
-                    _warn(f"Failed to recoginized block tag '{tag}' in line {line_count}. Verify that you are closing the tag properly if it is a control element.")
+                    _warn(f"Failed to recognized block tag '{tag}' in line {line_count}. Verify that you are closing the tag properly if it is a control element.")  # noqa: E501
             # Other controls
             for m in _Preprocessor.__CONTROL_RE.finditer(line):
                 control_name, properties = self._process_control(m.group(1), line_count)
