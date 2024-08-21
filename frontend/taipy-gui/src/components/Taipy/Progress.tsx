@@ -118,7 +118,16 @@ const Progress = (props: ProgressBarProps) => {
                     </Typography>
                 ) : null}
                 <Box sx={{ ...circularSx, width: getBoxWidth(title, titleAnchor) }} className={className} id={props.id}>
-                    <CircularProgress data-progress={value} variant="determinate" value={value} />
+                    <CircularProgress
+                        sx={{
+                            "& .MuiCircularProgress-circle": {
+                                color: props.color ? props.color : undefined,
+                            },
+                        }}
+                        data-progress={value}
+                        variant="determinate"
+                        value={value}
+                    />
                     <Box sx={circularPrgSx}>
                         <Typography variant="caption" component="div" color="text.secondary">
                             {`${Math.round(value)}%`}
@@ -163,6 +172,11 @@ const Progress = (props: ProgressBarProps) => {
             ) : null}
             <CircularProgress
                 id={props.id}
+                sx={{
+                    "& .MuiCircularProgress-circle": {
+                        color: props.color ? props.color : undefined,
+                    },
+                }}
                 variant={value === undefined ? "indeterminate" : "determinate"}
                 value={value}
                 className={className}
