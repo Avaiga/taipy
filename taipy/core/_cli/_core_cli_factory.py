@@ -8,22 +8,26 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-from functools import lru_cache
+
+from importlib import import_module, util
+from operator import attrgetter
 from typing import Type
 
-from .._manager._manager_factory import _ManagerFactory
-from ..common._utils import _load_fct
-from ._sequence_manager import _SequenceManager
+from taipy._cli._base_cli._abstract_cli import _AbstractCLI
+
+from ._core_cli import _CoreCLI
 
 
-class _SequenceManagerFactory(_ManagerFactory):
+class _CoreCLIFactory:
+    _TAIPY_ENTERPRISE_MODULE = "taipy.enterprise"
+    _TAIPY_ENTERPRISE_CORE_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core"
+
     @classmethod
-    @lru_cache
-    def _build_manager(cls) -> Type[_SequenceManager]:  # type: ignore
-        if cls._using_enterprise():
-            sequence_manager = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".sequence._sequence_manager", "_SequenceManager"
-            )  # type: ignore
+    def _build_cli(cls) -> Type[_AbstractCLI]:
+        if util.find_spec(cls._TAIPY_ENTERPRISE_MODULE) is not None:
+            module = import_module(cls._TAIPY_ENTERPRISE_CORE_MODULE + "._cli._core_cli")
+            core_cli = attrgetter("_CoreCLI")(module)
         else:
-            sequence_manager = _SequenceManager
-        return sequence_manager  # type: ignore
+            core_cli = _CoreCLI
+
+        return core_cli

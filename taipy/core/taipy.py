@@ -36,12 +36,7 @@ from .cycle.cycle_id import CycleId
 from .data._data_manager_factory import _DataManagerFactory
 from .data.data_node import DataNode
 from .data.data_node_id import DataNodeId
-from .exceptions.exceptions import (
-    DataNodeConfigIsNotGlobal,
-    ModelNotFound,
-    NonExistingVersion,
-    VersionIsNotProductionVersion,
-)
+from .exceptions.exceptions import DataNodeConfigIsNotGlobal, ModelNotFound, NonExistingVersion
 from .job._job_manager_factory import _JobManagerFactory
 from .job.job import Job
 from .job.job_id import JobId
@@ -967,19 +962,14 @@ def clean_all_entities_by_version(version_number=None) -> bool:
 
 def clean_all_entities(version_number: str) -> bool:
     """Deletes all entities associated with the specified version.
+    This function cleans all entities, including jobs, submissions, scenarios, cycles, sequences, tasks, and data nodes.
 
     Parameters:
-        version_number (str): The version number of the entities to be deleted.
-            The version_number should not be a production version.
+        version_number (str): The version number of the entities to be deleted.<br/>
+            - If the specified version does not exist, the operation will be aborted, and False will be returned.
 
     Returns:
         True if the operation succeeded, False otherwise.
-
-    Notes:
-        - If the specified version does not exist, the operation will be aborted, and False will be returned.
-        - If the specified version is a production version, the operation will be aborted, and False will be returned.
-        - This function cleans all entities, including jobs, submissions, scenarios, cycles, sequences, tasks,
-            and data nodes.
     """
     version_manager = _VersionManagerFactory._build_manager()
     try:
@@ -988,10 +978,9 @@ def clean_all_entities(version_number: str) -> bool:
         __logger.warning(f"{e.message} Abort cleaning the entities of version '{version_number}'.")
         return False
 
-    if version_number in version_manager._get_production_versions():
-        __logger.warning(
-            f"Abort cleaning the entities of version '{version_number}'. A production version can not be deleted."
-        )
+    if not version_manager._is_deletable(version_number):
+        reason_collection = version_manager._is_deletable(version_number)
+        __logger.warning(f"Abort cleaning the entities of version '{version_number}'. {reason_collection.reasons}.")
         return False
 
     _JobManagerFactory._build_manager()._delete_by_version(version_number)
@@ -1000,13 +989,7 @@ def clean_all_entities(version_number: str) -> bool:
     _SequenceManagerFactory._build_manager()._delete_by_version(version_number)
     _TaskManagerFactory._build_manager()._delete_by_version(version_number)
     _DataManagerFactory._build_manager()._delete_by_version(version_number)
-
     version_manager._delete(version_number)
-
-    try:
-        version_manager._delete_production_version(version_number)
-    except VersionIsNotProductionVersion:
-        pass
 
     return True
 

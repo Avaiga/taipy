@@ -60,6 +60,7 @@ class TestGuiCoreContext_is_deletable:
                     "args": [
                         "",
                         "",
+                        "",
                         True,
                         True,
                         {"name": "name", "id": a_scenario.id},
@@ -78,6 +79,7 @@ class TestGuiCoreContext_is_deletable:
                     "",
                     {
                         "args": [
+                            "",
                             "",
                             "",
                             True,

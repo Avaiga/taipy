@@ -457,6 +457,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                     { action: props.onScenarioCrud, error_id: getUpdateVar(updateScVars, "error_id") },
                     props.onCreation,
                     props.updateVarName,
+                    props.onChange,
                     ...values
                 )
             );
