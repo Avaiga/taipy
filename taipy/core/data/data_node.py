@@ -354,12 +354,9 @@ class DataNode(_Entity, _Labeled):
             return super().__setattr__(name, value)
         else:
             protected_attribute_name = _validate_id(name)
-            try:
-                if protected_attribute_name not in self._properties:
-                    raise AttributeError
+            if protected_attribute_name in self._properties:
                 raise AttributeKeyAlreadyExisted(name)
-            except AttributeError:
-                return super().__setattr__(name, value)
+            return super().__setattr__(name, value)
 
     def _get_attributes(self, protected_attribute_name, attribute_name):
         raise AttributeError
