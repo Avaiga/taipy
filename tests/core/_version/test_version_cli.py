@@ -19,7 +19,7 @@ from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.core import Core
-from taipy.core._version._cli._version_cli import _VersionCLI
+from taipy.core._version._cli._version_cli_factory import _VersionCLIFactory
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.job._job_manager import _JobManager
@@ -59,11 +59,6 @@ def test_delete_version(caplog):
         _ScenarioManager._submit(scenario)
         core.stop()
 
-    with patch("sys.argv", ["prog", "--production", "1.1"]):
-        core = Core()
-        core.run()
-        core.stop()
-
     with patch("sys.argv", ["prog", "--experiment", "2.0"]):
         core = Core()
         core.run()
@@ -71,60 +66,27 @@ def test_delete_version(caplog):
         _ScenarioManager._submit(scenario)
         core.stop()
 
-    with patch("sys.argv", ["prog", "--experiment", "2.1"]):
-        core = Core()
-        core.run()
-        scenario = _ScenarioManager._create(scenario_config)
-        _ScenarioManager._submit(scenario)
-        core.stop()
-
-    with patch("sys.argv", ["prog", "--production", "2.1"]):
-        core = Core()
-        core.run()
-        core.stop()
-
     all_versions = [version.id for version in _VersionManager._get_all()]
-    production_version = _VersionManager._get_production_versions()
-    assert len(all_versions) == 5
-    assert len(production_version) == 2
+    assert len(all_versions) == 4
     assert "1.0" in all_versions
-    assert "1.1" in all_versions and "1.1" in production_version
+    assert "1.1" in all_versions
     assert "2.0" in all_versions
-    assert "2.1" in all_versions and "2.1" in production_version
 
-    _VersionCLI.create_parser()
+    _VersionCLIFactory._build_cli().create_parser()
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--delete", "1.0"]):
-            _VersionCLI.handle_command()
+            _VersionCLIFactory._build_cli().handle_command()
 
     assert "Successfully delete version 1.0." in caplog.text
     all_versions = [version.id for version in _VersionManager._get_all()]
-    assert len(all_versions) == 4
+    assert len(all_versions) == 3
     assert "1.0" not in all_versions
 
     # Test delete a non-existed version
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--delete", "non_exist_version"]):
-            _VersionCLI.handle_command()
+            _VersionCLIFactory._build_cli().handle_command()
     assert "Version 'non_exist_version' does not exist." in caplog.text
-
-    # Test delete production version will change the version from production to experiment
-    with pytest.raises(SystemExit):
-        with patch("sys.argv", ["prog", "manage-versions", "--delete-production", "1.1"]):
-            _VersionCLI.handle_command()
-
-    assert "Successfully delete version 1.1 from the production version list." in caplog.text
-    all_versions = [version.id for version in _VersionManager._get_all()]
-    production_version = _VersionManager._get_production_versions()
-    assert len(all_versions) == 4
-    assert "1.1" in all_versions and "1.1" not in production_version
-
-    # Test delete a non-existed production version
-    with pytest.raises(SystemExit) as e:
-        with patch("sys.argv", ["prog", "manage-versions", "--delete-production", "non_exist_version"]):
-            _VersionCLI.handle_command()
-
-    assert str(e.value) == "Version 'non_exist_version' is not a production version."
 
 
 def test_list_versions(capsys):
@@ -138,45 +100,23 @@ def test_list_versions(capsys):
         core.run()
         core.stop()
     sleep(0.05)
-    with patch("sys.argv", ["prog", "--experiment", "1.1"]):
-        core = Core()
-        core.run()
-        core.stop()
-    sleep(0.05)
-    with patch("sys.argv", ["prog", "--production", "1.1"]):
-        core = Core()
-        core.run()
-        core.stop()
-    sleep(0.05)
     with patch("sys.argv", ["prog", "--experiment", "2.0"]):
         core = Core()
         core.run()
         core.stop()
-    sleep(0.05)
-    with patch("sys.argv", ["prog", "--experiment", "2.1"]):
-        core = Core()
-        core.run()
-        core.stop()
-    sleep(0.05)
-    with patch("sys.argv", ["prog", "--production", "2.1"]):
-        core = Core()
-        core.run()
-        core.stop()
 
-    _VersionCLI.create_parser()
+    _VersionCLIFactory._build_cli().create_parser()
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--list"]):
-            _VersionCLI.handle_command()
+            _VersionCLIFactory._build_cli().handle_command()
 
     out, _ = capsys.readouterr()
     version_list = str(out).strip().split("\n")
-    assert len(version_list) == 6  # 5 versions with the header
+    assert len(version_list) == 4  # 3 versions with the header
     assert all(column in version_list[0] for column in ["Version number", "Mode", "Creation date"])
-    assert all(column in version_list[1] for column in ["2.1", "Production", "latest"])
-    assert all(column in version_list[2] for column in ["2.0", "Experiment"]) and "latest" not in version_list[2]
-    assert all(column in version_list[3] for column in ["1.1", "Production"]) and "latest" not in version_list[3]
-    assert all(column in version_list[4] for column in ["1.0", "Experiment"]) and "latest" not in version_list[4]
-    assert "Development" in version_list[5] and "latest" not in version_list[5]
+    assert all(column in version_list[1] for column in ["2.0", "Experiment", "latest"])
+    assert all(column in version_list[2] for column in ["1.0", "Experiment"]) and "latest" not in version_list[2]
+    assert "Development" in version_list[3] and "latest" not in version_list[3]
 
 
 def test_rename_version(caplog):
@@ -189,7 +129,7 @@ def test_rename_version(caplog):
         _ScenarioManager._submit(scenario)
         core.stop()
 
-    with patch("sys.argv", ["prog", "--production", "2.0"]):
+    with patch("sys.argv", ["prog", "--experiment", "2.0"]):
         core = Core()
         core.run()
         scenario = _ScenarioManager._create(scenario_config)
@@ -198,24 +138,22 @@ def test_rename_version(caplog):
 
     dev_ver = _VersionManager._get_development_version()
 
-    _VersionCLI.create_parser()
+    _VersionCLIFactory._build_cli().create_parser()
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--rename", "non_exist_version", "1.1"]):
             # This should raise an exception since version "non_exist_version" does not exist
-            _VersionCLI.handle_command()
+            _VersionCLIFactory._build_cli().handle_command()
     assert "Version 'non_exist_version' does not exist." in caplog.text
 
-    _VersionCLI.create_parser()
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--rename", "1.0", "2.0"]):
             # This should raise an exception since 2.0 already exists
-            _VersionCLI.handle_command()
+            _VersionCLIFactory._build_cli().handle_command()
     assert "Version name '2.0' is already used." in caplog.text
 
-    _VersionCLI.create_parser()
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--rename", "1.0", "1.1"]):
-            _VersionCLI.handle_command()
+            _VersionCLIFactory._build_cli().handle_command()
     assert _VersionManager._get("1.0") is None
     assert [version.id for version in _VersionManager._get_all()].sort() == [dev_ver, "1.1", "2.0"].sort()
     # All entities are assigned to the new version
@@ -224,20 +162,6 @@ def test_rename_version(caplog):
     assert len(_SequenceManager._get_all("1.1")) == 1
     assert len(_ScenarioManager._get_all("1.1")) == 1
     assert len(_JobManager._get_all("1.1")) == 1
-
-    _VersionCLI.create_parser()
-    with pytest.raises(SystemExit):
-        with patch("sys.argv", ["prog", "manage-versions", "--rename", "2.0", "2.1"]):
-            _VersionCLI.handle_command()
-    assert _VersionManager._get("2.0") is None
-    assert [version.id for version in _VersionManager._get_all()].sort() == [dev_ver, "1.1", "2.1"].sort()
-    assert _VersionManager._get_production_versions() == ["2.1"]
-    # All entities are assigned to the new version
-    assert len(_DataManager._get_all("2.1")) == 2
-    assert len(_TaskManager._get_all("2.1")) == 1
-    assert len(_SequenceManager._get_all("2.1")) == 1
-    assert len(_ScenarioManager._get_all("2.1")) == 1
-    assert len(_JobManager._get_all("2.1")) == 1
 
 
 def test_compare_version_config(caplog, init_config):
@@ -262,27 +186,27 @@ def test_compare_version_config(caplog, init_config):
         _ScenarioManager._submit(scenario)
         core.stop()
 
-    _VersionCLI.create_parser()
+    _VersionCLIFactory._build_cli().create_parser()
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--compare-config", "non_exist_version", "2.0"]):
             # This should raise an exception since version "non_exist_version" does not exist
-            _VersionCLI.handle_command()
+            _VersionCLIFactory._build_cli().handle_command()
     assert "Version 'non_exist_version' does not exist." in caplog.text
 
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--compare-config", "1.0", "non_exist_version"]):
             # This should raise an exception since 2.0 already exists
-            _VersionCLI.handle_command()
+            _VersionCLIFactory._build_cli().handle_command()
     assert "Version 'non_exist_version' does not exist." in caplog.text
 
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--compare-config", "1.0", "1.0"]):
-            _VersionCLI.handle_command()
+            _VersionCLIFactory._build_cli().handle_command()
     assert "There is no difference between version 1.0 Configuration and version 1.0 Configuration." in caplog.text
 
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "manage-versions", "--compare-config", "1.0", "2.0"]):
-            _VersionCLI.handle_command()
+            _VersionCLIFactory._build_cli().handle_command()
     expected_message = """Differences between version 1.0 Configuration and version 2.0 Configuration:
 \tDATA_NODE "d2" has attribute "default_path" modified: foo.csv -> bar.csv"""
     assert expected_message in caplog.text

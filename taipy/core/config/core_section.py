@@ -39,8 +39,8 @@ class CoreSection(UniqueSection):
         read_entity_retry (int): Number of retries to read an entity from the repository before return failure.
             The default value is 3.
         mode (str): The Taipy operating mode. By default, the `Core^` service runs in "development" mode.
-            An "experiment" and a "production" mode are also available. Please refer to the
-            [Versioning management](../../userman/versioning/index.md) documentation page for more details.
+            Please refer to the [Versioning management](../../userman/versioning/index.md)
+            documentation page for more details.
         version_number (str)): The identifier of the user application version. Please refer to the
             [Versioning management](../../userman/versioning/index.md) documentation page for more details.
         force (bool): If True, force the application run even if there are some conflicts in the
@@ -69,10 +69,7 @@ class CoreSection(UniqueSection):
     _DEFAULT_READ_ENTITY_RETRY = 1
 
     _MODE_KEY = "mode"
-    _DEVELOPMENT_MODE = "development"
-    _EXPERIMENT_MODE = "experiment"
-    _PRODUCTION_MODE = "production"
-    _DEFAULT_MODE = _DEVELOPMENT_MODE
+    _DEFAULT_MODE = "development"
 
     _VERSION_NUMBER_KEY = "version_number"
     _DEFAULT_VERSION_NUMBER = ""
@@ -366,7 +363,9 @@ class CoreSection(UniqueSection):
             read_entity_retry (Optional[int]): Number of retries to read an entity from the repository
                 before return failure. The default value is 3.
             mode (Optional[str]): Indicates the mode of the version management system.
-                Possible values are *"development"*, *"experiment"*, or *"production"*.
+                Possible values are *"development"* or *"experiment"*. On Enterprise edition of Taipy,
+                *production* mode is also available. Please refer to the
+                [Versioning management](../../userman/versioning/index.md) documentation page for more details.
             version_number (Optional[str]): The string identifier of the version.
                  In development mode, the version number is ignored.
             force (Optional[bool]): If True, Taipy will override a version even if the configuration
