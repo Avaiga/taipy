@@ -1276,6 +1276,11 @@
                         "default_property": true
                     },
                     {
+                        "name": "color",
+                        "type": "str",
+                        "doc": "The color of the progress indicator."
+                    },
+                    {
                         "name": "linear",
                         "type": "bool",
                         "default_value": "False",
@@ -1286,6 +1291,17 @@
                         "type": "bool",
                         "default_value": "False",
                         "doc": "If set to True, the progress value is shown."
+                    },
+                    {
+                        "name": "title",
+                        "type": "dynamic(str)",
+                        "doc": "The title of the progress indicator."
+                    },
+                    {
+                        "name": "title_anchor",
+                        "type": "str",
+                        "default_value": "\"bottom\"",
+                        "doc": "The anchor of the title."
                     },
                     {
                         "name": "render",

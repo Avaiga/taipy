@@ -22,6 +22,7 @@ import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import { TaipyBaseProps } from "./utils";
 
 interface ProgressBarProps extends TaipyBaseProps {
+    color?: string; //color of the progress indicator
     linear?: boolean; //by default - false
     showValue?: boolean; //by default - false
     value?: number; //progress value
@@ -87,7 +88,16 @@ const Progress = (props: ProgressBarProps) => {
                 ) : null}
                 <Box sx={{ ...linearSx, width: getBoxWidth(title, titleAnchor) }} className={className} id={props.id}>
                     <Box sx={linearPrgSx}>
-                        <LinearProgress data-progress={value} variant="determinate" value={value} />
+                        <LinearProgress
+                            sx={{
+                                "& .MuiLinearProgress-bar": {
+                                    background: props.color ? props.color : undefined,
+                                },
+                            }}
+                            data-progress={value}
+                            variant="determinate"
+                            value={value}
+                        />
                     </Box>
                     <Box sx={linearTxtSx}>
                         <Typography variant="body2" color="text.secondary">{`${Math.round(value)}%`}</Typography>
@@ -126,7 +136,12 @@ const Progress = (props: ProgressBarProps) => {
             ) : null}
             <LinearProgress
                 id={props.id}
-                sx={{ width: "100%" }}
+                sx={{
+                    width: "100%",
+                    "& .MuiLinearProgress-bar": {
+                        background: props.color ? props.color : undefined,
+                    },
+                }}
                 variant={value === undefined ? "indeterminate" : "determinate"}
                 value={value}
                 className={className}
