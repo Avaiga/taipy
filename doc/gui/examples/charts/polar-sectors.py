@@ -15,35 +15,36 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-# Sample small plot definition
-trace = {
-    "r": [1, 2, 3, 4, 1],
-    "theta": [0, 40, 80, 120, 160],
-}
+if __name__ == "__main__":
+    # Sample small plot definition
+    trace = {
+        "r": [1, 2, 3, 4, 1],
+        "theta": [0, 40, 80, 120, 160],
+    }
 
-# The same data is used in both traces
-data = [trace, trace]
+    # The same data is used in both traces
+    data = [trace, trace]
 
-# Naming the subplot is mandatory to get them both in
-# the same chart
-options = [
-    {
-        "subplot": "polar",
-    },
-    {"subplot": "polar2"},
-]
+    # Naming the subplot is mandatory to get them both in
+    # the same chart
+    options = [
+        {
+            "subplot": "polar",
+        },
+        {"subplot": "polar2"},
+    ]
 
-layout = {
-    # Hide the legend
-    "showlegend": False,
-    # Restrict the angular values for second trace
-    "polar2": {"sector": [30, 130]},
-}
+    layout = {
+        # Hide the legend
+        "showlegend": False,
+        # Restrict the angular values for second trace
+        "polar2": {"sector": [30, 130]},
+    }
 
-md = """
+    md = """
 # Polar - Sectors
 
 <|{data}|chart|type=scatterpolar|layout={layout}|options={options}|>
-"""
+    """
 
-Gui(md).run()
+    Gui(md).run()

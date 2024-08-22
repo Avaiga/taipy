@@ -15,34 +15,35 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-# x values are [-10..10]
-x_range = range(-10, 11)
+if __name__ == "__main__":
+    # x values are [-10..10]
+    x_range = range(-10, 11)
 
-# The data set holds the _x_ series and two distinct series for _y_
-data = {
-    "x": x_range,
-    # y1 = x*x
-    "y1": [x * x for x in x_range],
-    # y2 = 2-x*x/50
-    "y2": [(100 - x * x) / 50 for x in x_range],
-}
+    # The data set holds the _x_ series and two distinct series for _y_
+    data = {
+        "x": x_range,
+        # y1 = x*x
+        "y1": [x * x for x in x_range],
+        # y2 = 2-x*x/50
+        "y2": [(100 - x * x) / 50 for x in x_range],
+    }
 
-layout = {
-    "yaxis2": {
-        # Second axis overlays with the first y axis
-        "overlaying": "y",
-        # Place the second axis on the right
-        "side": "right",
-        # and give it a title
-        "title": "Second y axis",
-    },
-    "legend": {
-        # Place the legend above chart
-        "yanchor": "bottom"
-    },
-}
+    layout = {
+        "yaxis2": {
+            # Second axis overlays with the first y axis
+            "overlaying": "y",
+            # Place the second axis on the right
+            "side": "right",
+            # and give it a title
+            "title": "Second y axis",
+        },
+        "legend": {
+            # Place the legend above chart
+            "yanchor": "bottom"
+        },
+    }
 
-page = """
+    page = """
 # Basics - Multiple axis
 
 Shared axis:
@@ -50,7 +51,6 @@ Shared axis:
 
 With two axis:
 <|{data}|chart|x=x|y[1]=y1|y[2]=y2|yaxis[2]=y2|layout={layout}|height=300px|>
+    """
 
-"""
-
-Gui(page).run()
+    Gui(page).run()

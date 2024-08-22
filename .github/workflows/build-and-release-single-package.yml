@@ -51,6 +51,8 @@ jobs:
           ${{ github.event.inputs.target_package }} >> $GITHUB_OUTPUT
 
   build-and-release-package:
+    permissions:
+      contents: write
     needs: [fetch-versions]
     timeout-minutes: 20
     runs-on: ubuntu-latest
@@ -153,18 +155,10 @@ jobs:
         run: |
           cp -r taipy/_cli/. ${{ steps.set-variables.outputs.package_dir }}/taipy/_cli
 
-      - name: Update pyproject.toml
-        working-directory: ${{ steps.set-variables.outputs.package_dir }}
-        run: |
-          python tools/release/setup_project.py . prod
-
       - name: Build package
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
         run: |
           python -m build
-
-      - name: Rename files
-        run: |
           for file in ./dist/*; do mv "$file" "${file//_/-}"; done
 
       - name: Create tag and release
@@ -181,7 +175,7 @@ jobs:
 
       - name: Ensure Taipy release is marked as latest
         run: |
-           gh release edit ${{needs.fetch-versions.outputs.taipy_VERSION}} --latest
+          gh release edit ${{needs.fetch-versions.outputs.taipy_VERSION}} --latest
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

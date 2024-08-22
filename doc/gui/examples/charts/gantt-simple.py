@@ -17,42 +17,43 @@ import datetime
 
 from taipy.gui import Gui
 
-# Tasks definitions
-tasks = ["Plan", "Research", "Design", "Implement", "Test", "Deliver"]
-# Task durations, in days
-durations = [50, 30, 30, 40, 15, 10]
-# Planned start dates of tasks
-start_dates = [
-    datetime.date(2022, 10, 15),  # Plan
-    datetime.date(2022, 11, 7),  # Research
-    datetime.date(2022, 12, 1),  # Design
-    datetime.date(2022, 12, 20),  # Implement
-    datetime.date(2023, 1, 15),  # Test
-    datetime.date(2023, 2, 1),  # Deliver
-]
+if __name__ == "__main__":
+    # Tasks definitions
+    tasks = ["Plan", "Research", "Design", "Implement", "Test", "Deliver"]
+    # Task durations, in days
+    durations = [50, 30, 30, 40, 15, 10]
+    # Planned start dates of tasks
+    start_dates = [
+        datetime.date(2022, 10, 15),  # Plan
+        datetime.date(2022, 11, 7),  # Research
+        datetime.date(2022, 12, 1),  # Design
+        datetime.date(2022, 12, 20),  # Implement
+        datetime.date(2023, 1, 15),  # Test
+        datetime.date(2023, 2, 1),  # Deliver
+    ]
 
-epoch = datetime.date(1970, 1, 1)
+    epoch = datetime.date(1970, 1, 1)
 
-data = {
-    "start": start_dates,
-    "Task": tasks,
-    # Compute the time span as adatetime (relative to January 1st, 1970)
-    "Date": [epoch + datetime.timedelta(days=duration) for duration in durations],
-}
+    data = {
+        "start": start_dates,
+        "Task": tasks,
+        # Compute the time span as adatetime (relative to January 1st, 1970)
+        "Date": [epoch + datetime.timedelta(days=duration) for duration in durations],
+    }
 
-layout = {
-    "yaxis": {
-        # Sort tasks from top to bottom
-        "autorange": "reversed",
-        # Remove title
-        "title": {"text": ""},
-    },
-}
+    layout = {
+        "yaxis": {
+            # Sort tasks from top to bottom
+            "autorange": "reversed",
+            # Remove title
+            "title": {"text": ""},
+        },
+    }
 
-page = """
+    page = """
 # Gantt - Simple
 
 <|{data}|chart|type=bar|orientation=h|y=Task|x=Date|base=start|layout={layout}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

@@ -8,21 +8,15 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-# -----------------------------------------------------------------------------------------
-# To execute this script, make sure that the taipy-gui package is installed in your
-# Python environment and run:
-#     python <script>
-# -----------------------------------------------------------------------------------------
+import taipy.gui.builder as tgb
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # Data set
-    data = {"Opps": ["Hot leads", "Doc sent", "Quote", "Closed Won"], "Visits": [316, 238, 125, 83]}
 
-    page = """
-# Funnel Chart - Simple
-
-<|{data}|chart|type=funnel|x=Visits|y=Opps|>
-    """
-
-    Gui(page).run()
+def test_content_builder(gui: Gui, test_client, helpers):
+    with tgb.Page(frame=None) as page:
+        tgb.content()
+    expected_list = [
+        '<PageContent ',
+        '></PageContent>',
+    ]
+    helpers.test_control_builder(gui, page, expected_list)

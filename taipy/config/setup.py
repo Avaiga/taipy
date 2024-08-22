@@ -9,20 +9,21 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-"""The setup script for taipy-core package"""
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations under the License.
 
+"""The setup script."""
 import json
-from pathlib import Path
+import os
+from setuptools import find_namespace_packages, find_packages, setup
 
-from setuptools import find_packages, setup
+with open("README.md") as readme_file:
+    readme = readme_file.read()
 
-root_folder = Path(__file__).parent
-
-package_desc = Path(root_folder / "package_desc.md").read_text("UTF-8")
-
-version_path = "taipy/core/version.json"
-
-setup_requirements = Path("taipy/core/setup.requirements.txt")
+version_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "version.json")
 
 with open(version_path) as version_file:
     version = json.load(version_file)
@@ -30,23 +31,15 @@ with open(version_path) as version_file:
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
-requirements = [r for r in (setup_requirements).read_text("UTF-8").splitlines() if r]
+requirements = ["toml>=0.10,<0.11", "deepdiff>=6.2,<6.3"]
 
 test_requirements = ["pytest>=3.8"]
-
-extras_require = {
-    "fastparquet": ["fastparquet==2022.11.0"],
-    "mssql": ["pyodbc>=4,<4.1"],
-    "mysql": ["pymysql>1,<1.1"],
-    "postgresql": ["psycopg2>2.9,<2.10"],
-}
 
 setup(
     version=version_string,
     install_requires=requirements,
-    packages=find_packages(where=root_folder, include=["taipy", "taipy.core", "taipy.core.*"]),
+    packages=find_namespace_packages(where=".") + find_packages(include=["taipy", "taipy.config", "taipy.config.*", "taipy.logger", "taipy.logger.*"]),
     include_package_data=True,
     data_files=[('version', ['version.json'])],
     tests_require=test_requirements,
-    extras_require=extras_require,
 )

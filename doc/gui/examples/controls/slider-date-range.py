@@ -17,24 +17,6 @@ from datetime import date, timedelta
 
 from taipy.gui import Gui
 
-# Create the list of dates (all year 2000)
-all_dates = {}
-all_dates_str = []
-start_date = date(2000, 1, 1)
-end_date = date(2001, 1, 1)
-a_date = start_date
-while a_date < end_date:
-    date_str = a_date.strftime("%Y/%m/%d")
-    all_dates_str.append(date_str)
-    all_dates[date_str] = a_date
-    a_date += timedelta(days=1)
-
-# Initial selection: first and last day
-dates = [all_dates_str[1], all_dates_str[-1]]
-# These two variables are used in text controls
-start_sel = all_dates[dates[0]]
-end_sel = all_dates[dates[1]]
-
 
 def on_change(state, _, var_value):
     # Update the text controls
@@ -42,7 +24,26 @@ def on_change(state, _, var_value):
     state.end_sel = all_dates[var_value[1]]
 
 
-page = """
+if __name__ == "__main__":
+    # Create the list of dates (all year 2000)
+    all_dates = {}
+    all_dates_str = []
+    start_date = date(2000, 1, 1)
+    end_date = date(2001, 1, 1)
+    a_date = start_date
+    while a_date < end_date:
+        date_str = a_date.strftime("%Y/%m/%d")
+        all_dates_str.append(date_str)
+        all_dates[date_str] = a_date
+        a_date += timedelta(days=1)
+
+    # Initial selection: first and last day
+    dates = [all_dates_str[1], all_dates_str[-1]]
+    # These two variables are used in text controls
+    start_sel = all_dates[dates[0]]
+    end_sel = all_dates[dates[1]]
+
+    page = """
 # Slider - Date range
 
 <|{dates}|slider|lov={all_dates_str}|>
@@ -50,6 +51,6 @@ page = """
 Start: <|{start_sel}|text|format=d MMM|>
 
 End: <|{end_sel}|text|format=d MMM|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

@@ -20,43 +20,44 @@ import numpy
 
 from taipy.gui import Gui
 
-# x = [0..20]
-x = list(range(0, 21))
-
-data = {
-    "x": x,
-    # A list of random values within [1, 10]
-    "y": [random.uniform(1, 10) for _ in x],
-}
-
-layout = {
-    # Force the Box select tool
-    "dragmode": "select",
-    # Remove all margins around the plot
-    "margin": {"l": 0, "r": 0, "b": 0, "t": 0},
-}
-
-config = {
-    # Hide Plotly's mode bar
-    "displayModeBar": False
-}
-
-selected_indices: List = []
-
-mean_value = 0.0
-
 
 def on_change(state, var, val):
     if var == "selected_indices":
         state.mean_value = numpy.mean([data["y"][idx] for idx in val]) if len(val) else 0
 
 
-page = """
+if __name__ == "__main__":
+    # x = [0..20]
+    x = list(range(0, 21))
+
+    data = {
+        "x": x,
+        # A list of random values within [1, 10]
+        "y": [random.uniform(1, 10) for _ in x],
+    }
+
+    layout = {
+        # Force the Box select tool
+        "dragmode": "select",
+        # Remove all margins around the plot
+        "margin": {"l": 0, "r": 0, "b": 0, "t": 0},
+    }
+
+    config = {
+        # Hide Plotly's mode bar
+        "displayModeBar": False
+    }
+
+    selected_indices: List = []
+
+    mean_value = 0.0
+
+    page = """
 # Advanced - Selection
 
 ## Mean of <|{len(selected_indices)}|raw|> selected points: <|{mean_value}|format=%.2f|raw|>
 
 <|{data}|chart|selected={selected_indices}|layout={layout}|plot_config={config}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

@@ -17,12 +17,13 @@ import datetime
 
 from taipy.gui import Gui
 
-date = datetime.date(2024, 6, 15)
-start = datetime.date(2024, 5, 15)
-end = datetime.date(2024, 7, 15)
+if __name__ == "__main__":
+    date = datetime.date(2024, 6, 15)
+    start = datetime.date(2024, 5, 15)
+    end = datetime.date(2024, 7, 15)
 
-page = """
+    page = """
 <|{date}|date|min={start}|max={end}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

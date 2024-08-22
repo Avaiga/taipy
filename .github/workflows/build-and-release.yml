@@ -44,6 +44,12 @@ jobs:
         run: |
           python tools/release/setup_version.py ALL ${{ github.event.inputs.release_type }} ${{ github.event.inputs.target_version }} ${{ steps.extract_branch.outputs.branch }} >> $GITHUB_OUTPUT
 
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Update version to ${{ steps.version-setup.outputs.NEW_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build-and-release-taipy-packages:
     needs: [fetch-versions]
     timeout-minutes: 20
@@ -151,11 +157,6 @@ jobs:
         run: |
           cp -r taipy/_cli/. ${{ steps.set-variables.outputs.package_dir }}/taipy/_cli
 
-      - name: Update pyproject.toml
-        working-directory: ${{ steps.set-variables.outputs.package_dir }}
-        run: |
-          python tools/release/setup_project.py . prod
-
       - name: Build package
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
         run: |
@@ -209,14 +210,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install build wheel
 
+      - name: Backup setup.py
+        run: |
+          mv setup.py setup.old.py
+
       - name: Copy files from tools
         run: |
           cp -r tools/packages/taipy/. .
-
-      - name: Update pyproject.toml
-        working-directory: ${{ steps.set-variables.outputs.package_dir }}
-        run: |
-          python tools/release/setup_project.py . prod
 
       - name: Build Taipy package
         run: |

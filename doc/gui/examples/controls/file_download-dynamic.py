@@ -18,9 +18,6 @@ from decimal import Decimal, getcontext
 
 from taipy.gui import Gui, download
 
-# Initial precision
-precision = 10
-
 
 def pi(precision: int) -> list[int]:
     """Compute Pi to the required precision.
@@ -57,7 +54,11 @@ def download_pi(state):
     download(state, content=bytes(buffer.getvalue(), "UTF-8"), name="pi.csv")
 
 
-page = """
+if __name__ == "__main__":
+    # Initial precision
+    precision = 10
+
+    page = """
 # File Download - Dynamic content
 
 Precision:
@@ -65,6 +66,6 @@ Precision:
 <|{precision}|slider|min=2|max=10000|>
 
 <|{None}|file_download|on_action=download_pi|label=Download Pi digits|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()
