@@ -30,7 +30,7 @@ in the following section on [Function](#functions). In particular, the most used
 
 !!! Note
 
-    Taipy Core provides a runnable service, `Orchestrator^` that runs as a service in a dedicated thread.
+    Taipy provides a runnable service, `Orchestrator^` that runs as a service in a dedicated thread.
     The purpose is to have a dedicated thread responsible for dispatching the submitted jobs to an available
     executor for their execution.
 
