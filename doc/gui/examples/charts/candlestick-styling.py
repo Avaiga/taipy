@@ -18,32 +18,33 @@ import yfinance
 
 from taipy.gui import Gui
 
-# Extraction of a few days of stock historical data for AAPL using
-# the yfinance package (see https://pypi.org/project/yfinance/).
-# The returned value is a Pandas DataFrame.
-ticker = yfinance.Ticker("AAPL")
-stock = ticker.history(interval="1d", start="2018-08-18", end="2018-09-10")
-# Copy the DataFrame index to a new column
-stock["Date"] = stock.index
+if __name__ == "__main__":
+    # Extraction of a few days of stock historical data for AAPL using
+    # the yfinance package (see https://pypi.org/project/yfinance/).
+    # The returned value is a Pandas DataFrame.
+    ticker = yfinance.Ticker("AAPL")
+    stock = ticker.history(interval="1d", start="2018-08-18", end="2018-09-10")
+    # Copy the DataFrame index to a new column
+    stock["Date"] = stock.index
 
-options = {
-    # Candlesticks that show decreasing values are orange
-    "decreasing": {"line": {"color": "orange"}},
-    # Candlesticks that show decreasing values are blue
-    "increasing": {"line": {"color": "blue"}},
-}
-
-layout = {
-    "xaxis": {
-        # Hide the range slider
-        "rangeslider": {"visible": False}
+    options = {
+        # Candlesticks that show decreasing values are orange
+        "decreasing": {"line": {"color": "orange"}},
+        # Candlesticks that show decreasing values are blue
+        "increasing": {"line": {"color": "blue"}},
     }
-}
 
-page = """
+    layout = {
+        "xaxis": {
+            # Hide the range slider
+            "rangeslider": {"visible": False}
+        }
+    }
+
+    page = """
 # Candlestick - Styling
 
 <|{stock}|chart|type=candlestick|x=Date|open=Open|close=Close|low=Low|high=High|options={options}|layout={layout}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()
