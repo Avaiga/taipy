@@ -34,7 +34,7 @@ in the following section on [Function](#functions). In particular, the most used
     The purpose is to have a dedicated thread responsible for dispatching the submitted jobs to an available
     executor for their execution.
 
-    In particular, this `Orchestrator^` service is automatically run when Core is used with Taipy REST or Taipy GUI.
+    In particular, this `Orchestrator^` service is automatically run when used with Taipy REST or Taipy GUI.
     See the [running services](../../../run-deploy/run/running_services.md) page of the user manual for more details.
 """
 
