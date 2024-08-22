@@ -56,7 +56,7 @@ class _PandasDataAccessor(_DataAccessor):
 
     @staticmethod
     def get_supported_classes() -> t.List[t.Type]:
-        return  list(_PandasDataAccessor.__types)
+        return list(_PandasDataAccessor.__types)
 
     @staticmethod
     def __user_function(
@@ -88,37 +88,34 @@ class _PandasDataAccessor(_DataAccessor):
         new_indexes: t.Optional[np.ndarray] = None,
         handle_nan: t.Optional[bool] = False,
     ) -> pd.DataFrame:
+        dataframe = dataframe.iloc[new_indexes] if new_indexes is not None else dataframe
         if isinstance(payload_cols, list) and len(payload_cols):
             col_types = dataframe.dtypes[dataframe.dtypes.index.astype(str).isin(payload_cols)]
         else:
             col_types = dataframe.dtypes
         cols = col_types.index.astype(str).tolist()
+        new_cols = {}
         if styles:
-            if not is_copied:
-                # copy the df so that we don't "mess" with the user's data
-                dataframe = dataframe.copy()
-                is_copied = True
             for k, v in styles.items():
-                col_applied = False
+                col_applied = ""
                 func = self._gui._get_user_function(v)
                 if callable(func):
-                    col_applied = self.__apply_user_function(func, k if k in cols else None, v, dataframe, "tps__")
-                if not col_applied:
-                    dataframe[v] = v
-                cols.append(col_applied or v)
+                    col_applied, new_data = self.__apply_user_function(
+                        func, k if k in cols else None, v, dataframe, "tps__"
+                    )
+                new_cols[col_applied or v] = new_data if col_applied else v
         if tooltips:
-            if not is_copied:
-                # copy the df so that we don't "mess" with the user's data
-                dataframe = dataframe.copy()
-                is_copied = True
             for k, v in tooltips.items():
-                col_applied = False
+                col_applied = ""
                 func = self._gui._get_user_function(v)
                 if callable(func):
-                    col_applied = self.__apply_user_function(func, k if k in cols else None, v, dataframe, "tpt__")
-                cols.append(col_applied or v)
+                    col_applied, new_data = self.__apply_user_function(
+                        func, k if k in cols else None, v, dataframe, "tpt__"
+                    )
+                    if col_applied:
+                        new_cols[col_applied] = new_data
         # deal with dates
-        datecols = col_types[col_types.astype(str).str.startswith("datetime")].index.tolist()  # type: ignore
+        datecols = col_types[col_types.astype(str).str.startswith("datetime")].index.tolist()
         if len(datecols) != 0:
             if not is_copied:
                 # copy the df so that we don't "mess" with the user's data
@@ -126,11 +123,10 @@ class _PandasDataAccessor(_DataAccessor):
             tz = Gui._get_timezone()
             for col in datecols:
                 newcol = _get_date_col_str_name(cols, col)
-                cols.append(newcol)
                 re_type = _RE_PD_TYPE.match(str(col_types[col]))
                 grps = re_type.groups() if re_type else ()
                 if len(grps) > 4 and grps[4]:
-                    dataframe[newcol] = (
+                    new_cols[newcol] = (
                         dataframe[col]
                         .dt.tz_convert("UTC")
                         .dt.strftime(_DataAccessor._WS_DATE_FORMAT)
@@ -138,7 +134,7 @@ class _PandasDataAccessor(_DataAccessor):
                         .replace("nan", "NaT" if handle_nan else None)
                     )
                 else:
-                    dataframe[newcol] = (
+                    new_cols[newcol] = (
                         dataframe[col]
                         .dt.tz_localize(tz)
                         .dt.tz_convert("UTC")
@@ -149,8 +145,10 @@ class _PandasDataAccessor(_DataAccessor):
 
             # remove the date columns from the list of columns
             cols = list(set(cols) - set(datecols))
-        dataframe = dataframe.iloc[new_indexes] if new_indexes is not None else dataframe
-        dataframe = dataframe.loc[:, dataframe.dtypes[dataframe.dtypes.index.astype(str).isin(cols)].index]  # type: ignore
+        if new_cols:
+            dataframe = dataframe.assign(**new_cols)
+        cols += list(new_cols.keys())
+        dataframe = dataframe.loc[:, dataframe.dtypes[dataframe.dtypes.index.astype(str).isin(cols)].index]  # type: ignore[index]
         return dataframe
 
     def __apply_user_function(
@@ -163,15 +161,14 @@ class _PandasDataAccessor(_DataAccessor):
     ):
         try:
             new_col_name = f"{prefix}{column_name}__{function_name}" if column_name else function_name
-            data[new_col_name] = data.apply(
+            return new_col_name, data.apply(
                 _PandasDataAccessor.__user_function,
                 axis=1,
                 args=(self._gui, column_name, user_function, function_name),
             )
-            return new_col_name
         except Exception as e:
             _warn(f"Exception raised when invoking user function {function_name}()", e)
-        return False
+        return "", data
 
     def __format_data(
         self,
@@ -246,9 +243,8 @@ class _PandasDataAccessor(_DataAccessor):
         # add index if not chart
         if paged:
             if _PandasDataAccessor.__INDEX_COL not in df.columns:
-                df = df.copy()
                 is_copied = True
-                df[_PandasDataAccessor.__INDEX_COL] = df.index
+                df = df.assign(**{_PandasDataAccessor.__INDEX_COL: df.index})
             if columns and _PandasDataAccessor.__INDEX_COL not in columns:
                 columns.append(_PandasDataAccessor.__INDEX_COL)
 
