@@ -171,9 +171,9 @@ class DataNode(_Entity, _Labeled):
         self._editor_expiration_date: Optional[datetime] = editor_expiration_date
 
         # Track edits
-        self._edits = edits or []
+        self._edits: List[Edit] = edits or []
 
-        self._properties = _Properties(self, **kwargs)
+        self._properties: _Properties = _Properties(self, **kwargs)
 
     @staticmethod
     def _new_id(config_id: str) -> DataNodeId:
