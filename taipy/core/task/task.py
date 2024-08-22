@@ -51,29 +51,30 @@ class Task(_Entity, _Labeled):
         def by_two(x: int):
             return x * 2
 
-        # Configure data nodes, tasks and scenarios
-        input_cfg = Config.configure_data_node("my_input", default_data=2)
-        result_cfg = Config.configure_data_node("my_result")
-        task_cfg = Config.configure_task("my_double", function=by_two, input=input_cfg, output=result_cfg)
-        scenario_cfg = Config.configure_scenario("my_scenario", task_configs=[task_cfg])
+        if __name__ == "__main__":
+            # Configure data nodes, tasks and scenarios
+            input_cfg = Config.configure_data_node("my_input", default_data=2)
+            result_cfg = Config.configure_data_node("my_result")
+            task_cfg = Config.configure_task("my_double", function=by_two, input=input_cfg, output=result_cfg)
+            scenario_cfg = Config.configure_scenario("my_scenario", task_configs=[task_cfg])
 
-        # Instantiate a task along with a scenario
-        sc = tp.create_scenario(scenario_cfg)
+            # Instantiate a task along with a scenario
+            sc = tp.create_scenario(scenario_cfg)
 
-        # Retrieve task and data nodes from scenario
-        task_input = sc.my_input
-        double_task = sc.my_double
-        task_result = sc.my_result
+            # Retrieve task and data nodes from scenario
+            task_input = sc.my_input
+            double_task = sc.my_double
+            task_result = sc.my_result
 
-        # Write the input data and submit the task
-        task_input.write(3)
-        double_task.submit()
+            # Write the input data and submit the task
+            task_input.write(3)
+            double_task.submit()
 
-        # Read the result
-        print(task_result.read())  # Output: 6
+            # Read the result
+            print(task_result.read())  # Output: 6
 
-        # Retrieve the list of all tasks
-        all_tasks = tp.get_tasks()
+            # Retrieve the list of all tasks
+            all_tasks = tp.get_tasks()
         ```
 
     Attributes:

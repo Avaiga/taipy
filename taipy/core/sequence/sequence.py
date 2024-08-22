@@ -79,34 +79,36 @@ class Sequence(_Entity, Submittable, _Labeled):
         def planning(forecast, capacity):
             ...
 
-        # Configure data nodes
-        sales_history_cfg = Config.configure_csv_data_node("sales_history")
-        trained_model_cfg = Config.configure_data_node("trained_model")
-        current_month_cfg = Config.configure_data_node("current_month")
-        forecasts_cfg = Config.configure_data_node("sales_predictions")
-        capacity_cfg = Config.configure_data_node("capacity")
-        production_orders_cfg = Config.configure_sql_data_node("production_orders")
+        if __name__ == "__main__":
+            # Configure data nodes
+            sales_history_cfg = Config.configure_csv_data_node("sales_history")
+            trained_model_cfg = Config.configure_data_node("trained_model")
+            current_month_cfg = Config.configure_data_node("current_month")
+            forecasts_cfg = Config.configure_data_node("sales_predictions")
+            capacity_cfg = Config.configure_data_node("capacity")
+            production_orders_cfg = Config.configure_sql_data_node("production_orders")
 
-        # Configure tasks and scenarios
-        train_cfg = Config.configure_task("train", function=training, input=sales_history_cfg, output=trained_model_cfg)
-        predict_cfg = Config.configure_task("predict", function=predict,
-                                            input=[trained_model_cfg, current_month_cfg],
-                                            output=forecasts_cfg)
-        plan_cfg = Config.configure_task("planning", function=planning,
-                                         input=[forecasts_cfg, capacity_cfg],
-                                         output=production_orders_cfg)
-        scenario_cfg = Config.configure_scenario("scenario", task_configs=[train_cfg, predict_cfg, plan_cfg])
+            # Configure tasks and scenarios
+            train_cfg = Config.configure_task("train", function=training,
+                                              input=sales_history_cfg, output=trained_model_cfg)
+            predict_cfg = Config.configure_task("predict", function=predict,
+                                                input=[trained_model_cfg, current_month_cfg],
+                                                output=forecasts_cfg)
+            plan_cfg = Config.configure_task("planning", function=planning,
+                                            input=[forecasts_cfg, capacity_cfg],
+                                            output=production_orders_cfg)
+            scenario_cfg = Config.configure_scenario("scenario", task_configs=[train_cfg, predict_cfg, plan_cfg])
 
-        # Create a new scenario and sequences
-        scenario = tp.create_scenario(scenario_cfg)
-        scenario.add_sequence("sales_sequence", [train_cfg, predict_cfg])
-        scenario.add_sequence("production_sequence", [plan_cfg])
+            # Create a new scenario and sequences
+            scenario = tp.create_scenario(scenario_cfg)
+            scenario.add_sequence("sales_sequence", [train_cfg, predict_cfg])
+            scenario.add_sequence("production_sequence", [plan_cfg])
 
-        # Get all sequences
-        all_sequences = tp.get_sequences()
+            # Get all sequences
+            all_sequences = tp.get_sequences()
 
-        # Submit one sequence only
-        tp.submit(scenario.sales_sequence)
+            # Submit one sequence only
+            tp.submit(scenario.sales_sequence)
         ```
 
     Note that the sequences are not necessarily disjoint and may share some tasks.

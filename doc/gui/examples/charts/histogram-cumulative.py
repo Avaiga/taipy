@@ -17,18 +17,19 @@ import random
 
 from taipy.gui import Gui
 
-# Random data set
-data = [random.random() for _ in range(500)]
+if __name__ == "__main__":
+    # Random data set
+    data = [random.random() for _ in range(500)]
 
-options = {
-    # Enable the cumulative histogram
-    "cumulative": {"enabled": True}
-}
+    options = {
+        # Enable the cumulative histogram
+        "cumulative": {"enabled": True}
+    }
 
-page = """
+    page = """
 # Histogram - Cumulative
 
 <|{data}|chart|type=histogram|options={options}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

@@ -15,9 +15,9 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-page = """
+if __name__ == "__main__":
+    page = """
 <|90|metric|don't show_value|>
-"""
+    """
 
-
-Gui(page).run()
+    Gui(page).run()
