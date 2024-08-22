@@ -15,8 +15,6 @@ from .._version._version_manager_factory import _VersionManagerFactory
 
 
 class _VersionMixin:
-    _version_manager = _VersionManagerFactory._build_manager()
-
     @classmethod
     def __fetch_version_number(cls, version_number):
         version_number = _VersionManagerFactory._build_manager()._replace_version_number(version_number)
@@ -35,4 +33,4 @@ class _VersionMixin:
 
     @classmethod
     def _get_latest_version(cls):
-        return cls._version_manager._get_latest_version()
+        return _VersionManagerFactory._build_manager()._get_latest_version()
