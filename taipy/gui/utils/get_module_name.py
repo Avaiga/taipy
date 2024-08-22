@@ -41,7 +41,7 @@ def _get_absolute_module_name_from_ast(based_module: str, relative_module: str, 
     based_module_name_list = based_module.split(".")
     if level > len(based_module_name_list):
         _warn(
-            f"There is an error resolving the absolute module path for {relative_module}. The application might behave unexpectedly."
-        )  # noqa: E501
+            f"There is an error resolving the absolute module path for {relative_module}. The application might behave unexpectedly."  # noqa: E501
+        )
         return relative_module
     return ".".join(based_module_name_list[:-level] + [relative_module])
