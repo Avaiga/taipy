@@ -17,6 +17,14 @@ from taipy.config import Config, UniqueSection
 from taipy.config._config import _Config
 from taipy.config.common._config_blocker import _ConfigBlocker
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
+from taipy.core._version._version_manager_factory import _VersionManagerFactory
+from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
+from taipy.core.data._data_manager_factory import _DataManagerFactory
+from taipy.core.job._job_manager_factory import _JobManagerFactory
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
+from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
+from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 
 from .._init_version import _read_version
 from ..exceptions.exceptions import ConfigCoreVersionMismatched
@@ -159,6 +167,7 @@ class CoreSection(UniqueSection):
     @_ConfigBlocker._check()
     def repository_type(self, val):
         self._repository_type = val
+        CoreSection.__reload_repositories()
 
     @property
     def repository_properties(self):
@@ -389,4 +398,19 @@ class CoreSection(UniqueSection):
             **properties,
         )
         Config._register(section)
+
+        if repository_type:
+            CoreSection.__reload_repositories()
+
         return Config.unique_sections[CoreSection.name]
+
+    @staticmethod
+    def __reload_repositories():
+        _CycleManagerFactory._build_manager.cache_clear()
+        _SequenceManagerFactory._build_manager.cache_clear()
+        _ScenarioManagerFactory._build_manager.cache_clear()
+        _TaskManagerFactory._build_manager.cache_clear()
+        _JobManagerFactory._build_manager.cache_clear()
+        _DataManagerFactory._build_manager.cache_clear()
+        _SubmissionManagerFactory._build_manager.cache_clear()
+        _VersionManagerFactory._build_manager.cache_clear()
