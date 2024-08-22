@@ -182,7 +182,18 @@ const Metric = (props: MetricProps) => {
         }
 
         return layout as Partial<Layout>;
-    }, [props.title, props.template, props.template_Dark_, props.template_Light_, theme.palette.mode, baseLayout]);
+    }, [
+        props.title,
+        props.height,
+        props.width,
+        baseLayout.height,
+        baseLayout.width,
+        props.template,
+        props.template_Dark_,
+        props.template_Light_,
+        theme.palette.mode,
+        baseLayout,
+    ]);
 
     return (
         <Tooltip title={hover || ""}>
