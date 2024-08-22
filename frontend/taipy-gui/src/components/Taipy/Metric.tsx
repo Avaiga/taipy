@@ -186,8 +186,6 @@ const Metric = (props: MetricProps) => {
         props.title,
         props.height,
         props.width,
-        baseLayout.height,
-        baseLayout.width,
         props.template,
         props.template_Dark_,
         props.template_Light_,
