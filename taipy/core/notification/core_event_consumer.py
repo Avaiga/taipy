@@ -34,17 +34,18 @@ class CoreEventConsumerBase(threading.Thread):
             print(f"Received event created at : {event.creation_date}")
             pass
 
-    registration_id, registered_queue = Notifier.register(
-        entity_type=EventEntityType.SCENARIO,
-        operation=EventOperation.CREATION
-    )
+    if __name__ == "__main__":
+        registration_id, registered_queue = Notifier.register(
+            entity_type=EventEntityType.SCENARIO,
+            operation=EventOperation.CREATION
+        )
 
-    consumer = MyEventConsumer(registration_id, registered_queue)
-    consumer.start()
-    # ...
-    consumer.stop()
+        consumer = MyEventConsumer(registration_id, registered_queue)
+        consumer.start()
+        # ...
+        consumer.stop()
 
-    Notifier.unregister(registration_id)
+        Notifier.unregister(registration_id)
     ```
 
     Firstly, we would create a consumer class extending from CoreEventConsumerBase

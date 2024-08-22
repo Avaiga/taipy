@@ -41,7 +41,9 @@ class _RunCLI(_AbstractCLI):
         if getattr(args, "which", None) != "run":
             return
 
-        all_args = sys.argv[3:]  # First 3 args are always (1) Python executable, (2) run, (3) Python file
+        # First 2 args are always (1) Python executable, (2) run
+        # Unknown args are passed when running the application but will be ignored
+        all_args = sys.argv[2:]
 
         external_args = []
         try:

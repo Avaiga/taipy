@@ -9,32 +9,33 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-"""The setup script for taipy-gui package"""
-
 import json
 import os
-import platform
 from pathlib import Path
-import subprocess
-
-from setuptools import find_packages, setup
+from setuptools import find_namespace_packages, find_packages, setup
 from setuptools.command.build_py import build_py
 
 root_folder = Path(__file__).parent
 
-package_desc = Path(root_folder / "package_desc.md").read_text("UTF-8")
+readme = Path("README.md").read_text()
 
-version_path = os.path.join(root_folder, "taipy/gui/version.json")
-
-setup_requirements = Path("taipy/gui/setup.requirements.txt")
-
+version_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "version.json")
 with open(version_path) as version_file:
     version = json.load(version_file)
     version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
-requirements = [r for r in (setup_requirements).read_text("UTF-8").splitlines() if r]
+def get_requirements():
+    reqs = set()
+    for pkg in (root_folder / "tools" / "packages").iterdir():
+        if "taipy-gui" not in str(pkg):
+            continue
+        requirements_file = pkg / "setup.requirements.txt"
+        if requirements_file.exists():
+            reqs.update(requirements_file.read_text("UTF-8").splitlines())
+
+    return [r for r in reqs if r and not r.startswith("taipy")]
 
 test_requirements = ["pytest>=3.8"]
 
@@ -47,34 +48,21 @@ extras_require = {
     "arrow": ["pyarrow>=14.0.2,<15.0"],
 }
 
+def _build_webapp():
+    already_exists = Path("./taipy/gui/webapp/index.html").exists()
+    if not already_exists:
+        os.system("cd ../../frontend/taipy-gui/dom && npm ci")
+        os.system("cd ../../frontend/taipy-gui && npm ci --omit=optional && npm run build")
 
 class NPMInstall(build_py):
     def run(self):
-        with_shell = platform.system() == "Windows"
-        print(f"Building taipy-gui frontend bundle in {root_folder}.")
-        already_exists = (root_folder / "taipy" / "gui" / "webapp" / "index.html").exists()
-        if already_exists:
-            print(f'Found taipy-gui frontend bundle in {root_folder  / "taipy" / "gui" / "webapp"}.')
-        else:
-            subprocess.run(
-                ["npm", "ci"], cwd=root_folder / "frontend" / "taipy-gui" / "dom", check=True, shell=with_shell
-            )
-            subprocess.run(
-                ["npm", "ci", "--omit=optional"],
-                cwd=root_folder / "frontend" / "taipy-gui",
-                check=True,
-                shell=with_shell,
-            )
-            subprocess.run(
-                ["npm", "run", "build"], cwd=root_folder / "frontend" / "taipy-gui", check=True, shell=with_shell
-            )
+        _build_webapp()
         build_py.run(self)
-
 
 setup(
     version=version_string,
-    install_requires=requirements,
-    packages=find_packages(where=root_folder, include=["taipy", "taipy.gui", "taipy.gui.*"]),
+    install_requires=get_requirements(),
+    packages=find_namespace_packages(where=".") + find_packages(include=["taipy", "taipy.gui", "taipy.gui.*"]),
     include_package_data=True,
     data_files=[("version", ["version.json"])],
     tests_require=test_requirements,
