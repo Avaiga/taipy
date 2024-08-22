@@ -55,6 +55,7 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
 const emptyLayout = {} as Partial<Layout>;
 const defaultStyle = { position: "relative", display: "inline-block", width: "100%" } as CSSProperties;
 const skeletonStyle = { ...defaultStyle, minHeight: "7em" };
+const plotConfig = { displaylogo: false };
 
 const Metric = (props: MetricProps) => {
     const { showValue = true } = props;
@@ -197,7 +198,7 @@ const Metric = (props: MetricProps) => {
         <Tooltip title={hover || ""}>
             <Box data-testid={props.testId} className={className}>
                 <Suspense fallback={<Skeleton key="skeleton" sx={skeletonStyle} />}>
-                    <Plot data={data} layout={layout} style={defaultStyle} useResizeHandler />
+                    <Plot data={data} layout={layout} style={defaultStyle} config={plotConfig} useResizeHandler />
                 </Suspense>
             </Box>
         </Tooltip>
