@@ -45,8 +45,6 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     testId?: string;
     layout?: string;
     defaultLayout?: string;
-    style?: string;
-    defaultStyle?: string;
     width?: string | number;
     height?: string | number;
     template?: string;
@@ -55,10 +53,11 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
 }
 
 const emptyLayout = {} as Partial<Layout>;
-const defaultStyle = { position: "relative", display: "inline-block" };
+const defaultStyle = { position: "relative", display: "inline-block", width: "100%" } as CSSProperties;
+const skeletonStyle = { ...defaultStyle, minHeight: "7em" };
 
 const Metric = (props: MetricProps) => {
-    const { width = "100%", height, showValue = true, deltaColor, negativeDeltaColor } = props;
+    const { showValue = true } = props;
     const value = useDynamicProperty(props.value, props.defaultValue, 0);
     const threshold = useDynamicProperty(props.threshold, props.defaultThreshold, undefined);
     const delta = useDynamicProperty(props.delta, props.defaultDelta, undefined);
@@ -90,18 +89,18 @@ const Metric = (props: MetricProps) => {
         const mode = props.type === "none" ? [] : ["gauge"];
         showValue && mode.push("number");
         delta !== undefined && mode.push("delta");
-        const deltaIncreasing = deltaColor
+        const deltaIncreasing = props.deltaColor
             ? {
-                  color: deltaColor == "invert" ? "#FF4136" : deltaColor,
+                  color: props.deltaColor == "invert" ? "#FF4136" : props.deltaColor,
               }
             : undefined;
         const deltaDecreasing =
-            deltaColor == "invert"
+            props.deltaColor == "invert"
                 ? {
                       color: "#3D9970",
                   }
-                : negativeDeltaColor
-                  ? { color: negativeDeltaColor }
+                : props.negativeDeltaColor
+                  ? { color: props.negativeDeltaColor }
                   : undefined;
         return [
             {
@@ -145,8 +144,8 @@ const Metric = (props: MetricProps) => {
         props.type,
         props.min,
         props.max,
-        deltaColor,
-        negativeDeltaColor,
+        props.deltaColor,
+        props.negativeDeltaColor,
         threshold,
         props.format,
         props.deltaFormat,
@@ -155,21 +154,11 @@ const Metric = (props: MetricProps) => {
         colorMap,
     ]);
 
-    const style = useMemo(
-        () =>
-            height === undefined
-                ? ({ ...defaultStyle, width: width } as CSSProperties)
-                : ({ ...defaultStyle, width: width, height: height } as CSSProperties),
-        [height, width]
-    );
-
-    const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
-
     const layout = useMemo(() => {
         const layout = {
             ...baseLayout,
-            height: baseLayout.height !== undefined ? (baseLayout.height >= 10 ? baseLayout.height : 10) : undefined,
-            width: baseLayout.width !== undefined ? (baseLayout.width >= 10 ? baseLayout.width : 10) : undefined,
+            height: baseLayout.height !== undefined ? baseLayout.height : props.height,
+            width: baseLayout.width !== undefined ? baseLayout.width : props.width,
         };
         let template = undefined;
         try {
@@ -195,12 +184,11 @@ const Metric = (props: MetricProps) => {
         return layout as Partial<Layout>;
     }, [props.title, props.template, props.template_Dark_, props.template_Light_, theme.palette.mode, baseLayout]);
 
-    const plotConfig = { displaylogo: false };
     return (
         <Tooltip title={hover || ""}>
             <Box data-testid={props.testId} className={className}>
-                <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
-                    <Plot data={data} layout={layout} style={style} config={plotConfig} useResizeHandler />
+                <Suspense fallback={<Skeleton key="skeleton" sx={skeletonStyle} />}>
+                    <Plot data={data} layout={layout} style={defaultStyle} useResizeHandler />
                 </Suspense>
             </Box>
         </Tooltip>
