@@ -390,10 +390,3 @@ class AttributeKeyAlreadyExisted(Exception):
 
     def __init__(self, key: str):
         self.message = f"Attribute key '{key}' already existed."
-
-
-class PropertyKeyAlreadyExisted(Exception):
-    """Raised when a property key already existed."""
-
-    def __init__(self, key: str):
-        self.message = f"Property key '{key}' already existed."

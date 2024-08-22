@@ -29,7 +29,7 @@ from .._entity._ready_to_run_property import _ReadyToRunProperty
 from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._warnings import _warn_deprecated
-from ..exceptions.exceptions import AttributeKeyAlreadyExisted, DataNodeIsBeingEdited, NoData
+from ..exceptions.exceptions import DataNodeIsBeingEdited, NoData
 from ..job.job_id import JobId
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
 from ..reason import DataNodeEditInProgress, DataNodeIsNotWritten
@@ -348,24 +348,6 @@ class DataNode(_Entity, _Labeled):
 
     def __setstate__(self, state):
         vars(self).update(state)
-
-    def __setattr__(self, name: str, value: Any) -> None:
-        if self.__CHECK_INIT_DONE_ATTR_NAME not in dir(self) or name in dir(self):
-            return super().__setattr__(name, value)
-        else:
-            protected_attribute_name = _validate_id(name)
-            if protected_attribute_name in self._properties:
-                raise AttributeKeyAlreadyExisted(name)
-            return super().__setattr__(name, value)
-
-    def _get_attributes(self, protected_attribute_name, attribute_name):
-        raise AttributeError
-
-    def __getattr__(self, attribute_name):
-        protected_attribute_name = _validate_id(attribute_name)
-        if protected_attribute_name in self._properties:
-            return self._properties[protected_attribute_name]
-        raise AttributeError(f"{attribute_name} is not an attribute of data node {self.id}")
 
     @classmethod
     def _get_last_modified_datetime(cls, path: Optional[str] = None) -> Optional[datetime]:

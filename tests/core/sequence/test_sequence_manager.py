@@ -415,7 +415,7 @@ def test_get_or_create_data():
     scenario.add_sequences({"by_6": list(scenario.tasks.values())})
     sequence = scenario.sequences["by_6"]
 
-    assert sequence.name == "by_6"
+    assert sequence.properties["name"] == "by_6"
 
     assert len(_DataManager._get_all()) == 3
     assert len(_TaskManager._get_all()) == 2

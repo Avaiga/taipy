@@ -25,7 +25,7 @@ from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.exceptions.exceptions import AttributeKeyAlreadyExisted, DataNodeIsBeingEdited, NoData
+from taipy.core.exceptions.exceptions import DataNodeIsBeingEdited, NoData
 from taipy.core.job.job_id import JobId
 from taipy.core.task.task import Task
 
@@ -118,24 +118,6 @@ class TestDataNode:
 
         with pytest.raises(InvalidConfigurationId):
             DataNode("foo bar")
-
-    def test_get_set_property_and_attribute(self):
-        dn_cfg = Config.configure_data_node("bar", key="value")
-        dn = _DataManager._create_and_set(dn_cfg, "", "")
-
-        assert "key" in dn.properties.keys()
-        assert dn.key == "value"
-
-        dn.properties["new_key"] = "new_value"
-        dn.another_key = "another_value"
-
-        assert dn.key == "value"
-        assert dn.new_key == "new_value"
-        assert dn.another_key == "another_value"
-        assert dn.properties["new_key"] == "new_value"
-
-        with pytest.raises(AttributeKeyAlreadyExisted):
-            dn.key = "KeyAlreadyUsed"
 
     def test_read_write(self):
         dn = FakeDataNode("foo_bar")
@@ -688,7 +670,6 @@ class TestDataNode:
             dn = _DataManager._bulk_get_or_create([dn_config])[dn_config]
             assert dn._properties.data["prop"] == "ENV[FOO]"
             assert dn.properties["prop"] == "bar"
-            assert dn.prop == "bar"
 
     def test_path_populated_with_config_default_path(self):
         dn_config = Config.configure_data_node("data_node", "pickle", default_path="foo.p")

@@ -16,7 +16,6 @@ from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import networkx as nx
 
-from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 
 from .._entity._entity import _Entity
@@ -183,17 +182,14 @@ class Scenario(_Entity, Submittable, _Labeled):
         if self.__CHECK_INIT_DONE_ATTR_NAME not in dir(self) or name in dir(self):
             return super().__setattr__(name, value)
         else:
-            protected_attribute_name = _validate_id(name)
             try:
-                if protected_attribute_name not in self._properties and not self._get_attributes(
-                    protected_attribute_name, name
-                ):
-                    raise AttributeError
+                self.__getattr__(name)
                 raise AttributeKeyAlreadyExisted(name)
             except AttributeError:
                 return super().__setattr__(name, value)
 
-    def _get_attributes(self, protected_attribute_name, attribute_name) -> Union[Sequence, Task, DataNode]:
+    def __getattr__(self, attribute_name) -> Union[Sequence, Task, DataNode]:
+        protected_attribute_name = _validate_id(attribute_name)
         sequences = self._get_sequences()
         if protected_attribute_name in sequences:
             return sequences[protected_attribute_name]
@@ -205,13 +201,6 @@ class Scenario(_Entity, Submittable, _Labeled):
             return data_nodes[protected_attribute_name]
 
         raise AttributeError(f"{attribute_name} is not an attribute of scenario {self.id}")
-
-    def __getattr__(self, attribute_name):
-        protected_attribute_name = _validate_id(attribute_name)
-        if protected_attribute_name in self._properties:
-            return _tpl._replace_templates(self._properties[protected_attribute_name])
-
-        return self._get_attributes(protected_attribute_name, attribute_name)
 
     @property
     def config_id(self):

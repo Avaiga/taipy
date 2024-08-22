@@ -12,7 +12,6 @@
 import uuid
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
 
-from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.scope import Scope
 
@@ -141,28 +140,19 @@ class Task(_Entity, _Labeled):
         if self.__CHECK_INIT_DONE_ATTR_NAME not in dir(self) or name in dir(self):
             return super().__setattr__(name, value)
         else:
-            protected_attribute_name = _validate_id(name)
             try:
-                if protected_attribute_name not in self._properties and not self._get_attributes(
-                    protected_attribute_name, name
-                ):
-                    raise AttributeError
+                self.__getattr__(name)
                 raise AttributeKeyAlreadyExisted(name)
             except AttributeError:
                 return super().__setattr__(name, value)
 
-    def _get_attributes(self, protected_attribute_name, attribute_name) -> DataNode:
+    def __getattr__(self, attribute_name):
+        protected_attribute_name = _validate_id(attribute_name)
         if protected_attribute_name in self.input:
             return self.input[protected_attribute_name]
         if protected_attribute_name in self.output:
             return self.output[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of task {self.id}")
-
-    def __getattr__(self, attribute_name):
-        protected_attribute_name = _validate_id(attribute_name)
-        if protected_attribute_name in self._properties:
-            return _tpl._replace_templates(self._properties[protected_attribute_name])
-        return self._get_attributes(protected_attribute_name, attribute_name)
 
     @property
     def properties(self):

@@ -26,7 +26,6 @@ from taipy.core.data.in_memory import DataNode, InMemoryDataNode
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.exceptions.exceptions import (
     AttributeKeyAlreadyExisted,
-    PropertyKeyAlreadyExisted,
     SequenceAlreadyExists,
     SequenceTaskDoesNotExistInScenario,
 )
@@ -63,7 +62,7 @@ def test_create_primary_scenario(cycle):
     assert scenario.data_nodes == {}
     assert scenario.sequences == {}
     assert scenario.properties == {"key": "value"}
-    assert scenario.key == "value"
+    assert scenario.properties["key"] == "value"
     assert scenario.creation_date is not None
     assert scenario.is_primary
     assert scenario.cycle == cycle
@@ -163,27 +162,16 @@ def test_create_scenario_and_add_sequences():
     assert scenario.sequences == {"sequence_1": scenario.sequence_1, "sequence_2": scenario.sequence_2}
 
 
-def test_get_set_property_and_attribute():
+def test_get_set_attribute():
     dn_cfg = Config.configure_data_node("bar")
-    s_cfg = Config.configure_scenario("foo", additional_data_node_configs=[dn_cfg], key="value")
+    s_cfg = Config.configure_scenario("foo", additional_data_node_configs=[dn_cfg])
     scenario = create_scenario(s_cfg)
 
-    assert scenario.properties == {"key": "value"}
+    scenario.key = "value"
     assert scenario.key == "value"
-
-    scenario.properties["new_key"] = "new_value"
-    scenario.another_key = "another_value"
-
-    assert scenario.key == "value"
-    assert scenario.new_key == "new_value"
-    assert scenario.another_key == "another_value"
-    assert scenario.properties == {"key": "value", "new_key": "new_value"}
 
     with pytest.raises(AttributeKeyAlreadyExisted):
         scenario.bar = "KeyAlreadyUsed"
-
-    with pytest.raises(PropertyKeyAlreadyExisted):
-        scenario.properties["bar"] = "KeyAlreadyUsed"
 
 
 def test_create_scenario_overlapping_sequences():
@@ -483,11 +471,11 @@ def test_update_sequence(data_node):
 
     assert len(scenario.sequences) == 1
     assert scenario.sequences["seq_1"].tasks == {"foo": task_1}
-    assert scenario.sequences["seq_1"].name == "seq_1"
+    assert scenario.sequences["seq_1"].properties["name"] == "seq_1"
     scenario.update_sequence("seq_1", [task_2], {"new_key": "new_value"}, [])
     assert len(scenario.sequences) == 1
     assert scenario.sequences["seq_1"].tasks == {"bar": task_2}
-    assert scenario.sequences["seq_1"].name == "seq_1"
+    assert scenario.sequences["seq_1"].properties["name"] == "seq_1"
     assert scenario.sequences["seq_1"].properties["new_key"] == "new_value"
 
 
@@ -521,13 +509,13 @@ def test_add_rename_and_remove_sequences_within_context(data_node):
 def test_add_property_to_scenario():
     scenario = Scenario("foo", set(), {"key": "value"})
     assert scenario.properties == {"key": "value"}
-    assert scenario.key == "value"
+    assert scenario.properties["key"] == "value"
 
     scenario.properties["new_key"] = "new_value"
 
     assert scenario.properties == {"key": "value", "new_key": "new_value"}
-    assert scenario.key == "value"
-    assert scenario.new_key == "new_value"
+    assert scenario.properties["key"] == "value"
+    assert scenario.properties["new_key"] == "new_value"
 
 
 def test_add_cycle_to_scenario(cycle):

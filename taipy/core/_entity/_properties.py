@@ -12,9 +12,7 @@
 from collections import UserDict
 
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
-from taipy.config.common._validate_id import _validate_id
 
-from ..exceptions.exceptions import PropertyKeyAlreadyExisted
 from ..notification import EventOperation, Notifier, _make_event
 
 
@@ -28,14 +26,10 @@ class _Properties(UserDict):
         self._pending_deletions = set()
 
     def __setitem__(self, key, value):
+        super(_Properties, self).__setitem__(key, value)
+
         if hasattr(self, "_entity_owner"):
             from ... import core as tp
-
-            try:
-                self._entity_owner._get_attributes(_validate_id(key), key)
-                raise PropertyKeyAlreadyExisted(key)
-            except AttributeError:
-                super(_Properties, self).__setitem__(key, value)
 
             event = _make_event(
                 self._entity_owner,
@@ -51,8 +45,6 @@ class _Properties(UserDict):
                     self._pending_deletions.remove(key)
                 self._pending_changes[key] = value
                 self._entity_owner._in_context_attributes_changed_collector.append(event)
-        else:
-            super(_Properties, self).__setitem__(key, value)
 
     def __getitem__(self, key):
         return _tpl._replace_templates(super(_Properties, self).__getitem__(key))

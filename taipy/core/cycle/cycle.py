@@ -14,14 +14,13 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.frequency import Frequency
 
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
-from ..exceptions.exceptions import AttributeKeyAlreadyExisted, _SuspiciousFileOperation
+from ..exceptions.exceptions import _SuspiciousFileOperation
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
 from .cycle_id import CycleId
 
@@ -123,8 +122,6 @@ class Cycle(_Entity, _Labeled):
         self.id = id or self._new_id(self._name)
         self._properties = _Properties(self, **properties)
 
-        self._init_done = True
-
     def _new_name(self, name: Optional[str] = None) -> str:
         if name:
             return name
@@ -214,27 +211,6 @@ class Cycle(_Entity, _Labeled):
             return re.sub(r"(?u)[^-\w.]", "", s)
 
         return CycleId(_get_valid_filename(Cycle.__SEPARATOR.join([Cycle._ID_PREFIX, name, str(uuid.uuid4())])))
-
-    def __setattr__(self, name: str, value: Any) -> None:
-        if self.__CHECK_INIT_DONE_ATTR_NAME not in dir(self) or name in dir(self):
-            return super().__setattr__(name, value)
-        else:
-            protected_attribute_name = _validate_id(name)
-            try:
-                if protected_attribute_name not in self._properties:
-                    raise AttributeError
-                raise AttributeKeyAlreadyExisted(name)
-            except AttributeError:
-                return super().__setattr__(name, value)
-
-    def _get_attributes(self, protected_attribute_name, attribute_name):
-        raise AttributeError
-
-    def __getattr__(self, attribute_name):
-        protected_attribute_name = attribute_name
-        if protected_attribute_name in self._properties:
-            return self._properties[protected_attribute_name]
-        raise AttributeError(f"{attribute_name} is not an attribute of cycle {self.id}")
 
     def __eq__(self, other):
         return isinstance(other, Cycle) and self.id == other.id
