@@ -640,8 +640,7 @@ def set_primary(scenario: Scenario):
 def tag(scenario: Scenario, tag: str):
     """Add a tag to a scenario.
 
-    This function adds a user-defined tag to the specified scenario. If another scenario
-    within the same cycle already has the same tag applied, the previous scenario is untagged.
+    This function adds a user-defined tag to the specified scenario.
 
     Parameters:
         scenario (Scenario^): The scenario to which the tag will be added.

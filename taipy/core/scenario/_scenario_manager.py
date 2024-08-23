@@ -376,10 +376,6 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         tags = scenario.properties.get(cls._AUTHORIZED_TAGS_KEY, set())
         if len(tags) > 0 and tag not in tags:
             raise UnauthorizedTagError(f"Tag `{tag}` not authorized by scenario configuration `{scenario.config_id}`")
-        if scenario.cycle:
-            if old_tagged_scenario := cls._get_by_tag(scenario.cycle, tag):
-                old_tagged_scenario.remove_tag(tag)
-                cls._set(old_tagged_scenario)
         scenario._add_tag(tag)
         cls._set(scenario)
         Notifier.publish(
