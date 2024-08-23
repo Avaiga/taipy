@@ -1352,17 +1352,17 @@ def test_tags():
     _ScenarioManager._set(scenario_1_tag)
 
     # test getters
-    assert not _ScenarioManager._get_by_tag(cycle_3, "fst")
-    assert not _ScenarioManager._get_by_tag(cycle_3, "scd")
-    assert not _ScenarioManager._get_by_tag(cycle_3, "thd")
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_3, "fst") == []
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_3, "scd") == []
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_3, "thd") == []
 
-    assert _ScenarioManager._get_by_tag(cycle_2, "fst") == scenario_2_tags
-    assert _ScenarioManager._get_by_tag(cycle_2, "scd") == scenario_2_tags
-    assert not _ScenarioManager._get_by_tag(cycle_2, "thd")
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_2, "fst") == [scenario_2_tags]
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_2, "scd") == [scenario_2_tags]
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_2, "thd") == []
 
-    assert _ScenarioManager._get_by_tag(cycle_1, "fst") == scenario_1_tag
-    assert not _ScenarioManager._get_by_tag(cycle_1, "scd")
-    assert not _ScenarioManager._get_by_tag(cycle_1, "thd")
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_1, "fst") == [scenario_1_tag]
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_1, "scd") == []
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_1, "thd") == []
 
     assert len(_ScenarioManager._get_all_by_tag("NOT_EXISTING")) == 0
     assert scenario_1_tag in _ScenarioManager._get_all_by_tag("fst")
@@ -1372,24 +1372,22 @@ def test_tags():
 
     # test tag cycle mgt
 
-    _ScenarioManager._tag(
-        scenario_no_tag, "fst"
-    )  # tag sc_no_tag should untag sc_1_tag with same cycle but not sc_2_tags
+    _ScenarioManager._tag(scenario_no_tag, "fst")  # tag sc_no_tag with fst should not affect sc_1_tag and sc_2_tags
 
-    assert not _ScenarioManager._get_by_tag(cycle_3, "fst")
-    assert not _ScenarioManager._get_by_tag(cycle_3, "scd")
-    assert not _ScenarioManager._get_by_tag(cycle_3, "thd")
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_3, "fst") == []
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_3, "scd") == []
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_3, "thd") == []
 
-    assert _ScenarioManager._get_by_tag(cycle_2, "fst") == scenario_2_tags
-    assert _ScenarioManager._get_by_tag(cycle_2, "scd") == scenario_2_tags
-    assert not _ScenarioManager._get_by_tag(cycle_2, "thd")
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_2, "fst") == [scenario_2_tags]
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_2, "scd") == [scenario_2_tags]
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_2, "thd") == []
 
-    assert _ScenarioManager._get_by_tag(cycle_1, "fst") == scenario_no_tag
-    assert not _ScenarioManager._get_by_tag(cycle_1, "scd")
-    assert not _ScenarioManager._get_by_tag(cycle_1, "thd")
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_1, "fst") == [scenario_no_tag, scenario_1_tag]
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_1, "scd") == []
+    assert _ScenarioManager._get_all_by_cycle_tag(cycle_1, "thd") == []
 
     assert len(_ScenarioManager._get_all_by_tag("NOT_EXISTING")) == 0
-    assert len(_ScenarioManager._get_all_by_tag("fst")) == 2
+    assert len(_ScenarioManager._get_all_by_tag("fst")) == 3
     assert scenario_2_tags in _ScenarioManager._get_all_by_tag("fst")
     assert scenario_no_tag in _ScenarioManager._get_all_by_tag("fst")
     assert _ScenarioManager._get_all_by_tag("scd") == [scenario_2_tags]
