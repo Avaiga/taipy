@@ -520,8 +520,8 @@ def task_sleep_2():
 
 
 def test_submit_duration_development_mode():
-    core = Orchestrator()
-    core.run()
+    orchestrator = Orchestrator()
+    orchestrator.run()
 
     task_1 = Task("task_config_id_1", {}, task_sleep_1, [], [])
     task_2 = Task("task_config_id_2", {}, task_sleep_2, [], [])
@@ -533,7 +533,7 @@ def test_submit_duration_development_mode():
     _ScenarioManager._set(scenario)
     submission = taipy.submit(scenario)
     jobs = submission.jobs
-    core.stop()
+    orchestrator.stop()
 
     assert all(isinstance(job.execution_started_at, datetime) for job in jobs)
     assert all(isinstance(job.execution_ended_at, datetime) for job in jobs)
@@ -550,8 +550,8 @@ def test_submit_duration_development_mode():
 @pytest.mark.standalone
 def test_submit_duration_standalone_mode():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
-    core = Orchestrator()
-    core.run()
+    orchestrator = Orchestrator()
+    orchestrator.run()
 
     task_1 = Task("task_config_id_1", {}, task_sleep_1, [], [])
     task_2 = Task("task_config_id_2", {}, task_sleep_2, [], [])
@@ -566,7 +566,7 @@ def test_submit_duration_standalone_mode():
 
     assert_true_after_time(jobs[1].is_completed)
 
-    core.stop()
+    orchestrator.stop()
 
     assert all(isinstance(job.execution_started_at, datetime) for job in jobs)
     assert all(isinstance(job.execution_ended_at, datetime) for job in jobs)
