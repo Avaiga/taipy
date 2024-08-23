@@ -16,20 +16,21 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-data = {
-    "x": [1, 2, 3],
-    "y": [1, 2, 3],
-    "Colors": ["blue", "green", "red"],
-    "Sizes": [20, 40, 30],
-    "Opacities": [1, 0.4, 1],
-}
+if __name__ == "__main__":
+    data = {
+        "x": [1, 2, 3],
+        "y": [1, 2, 3],
+        "Colors": ["blue", "green", "red"],
+        "Sizes": [20, 40, 30],
+        "Opacities": [1, 0.4, 1],
+    }
 
-marker = {"color": "Colors", "size": "Sizes", "opacity": "Opacities"}
+    marker = {"color": "Colors", "size": "Sizes", "opacity": "Opacities"}
 
-page = """
+    page = """
 # Bubble - Simple
 
 <|{data}|chart|mode=markers|x=x|y=y|marker={marker}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

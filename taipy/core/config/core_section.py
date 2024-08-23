@@ -17,6 +17,14 @@ from taipy.config import Config, UniqueSection
 from taipy.config._config import _Config
 from taipy.config.common._config_blocker import _ConfigBlocker
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
+from taipy.core._version._version_manager_factory import _VersionManagerFactory
+from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
+from taipy.core.data._data_manager_factory import _DataManagerFactory
+from taipy.core.job._job_manager_factory import _JobManagerFactory
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
+from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
+from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 
 from .._init_version import _read_version
 from ..exceptions.exceptions import ConfigCoreVersionMismatched
@@ -24,7 +32,7 @@ from ..exceptions.exceptions import ConfigCoreVersionMismatched
 
 class CoreSection(UniqueSection):
     """
-    Configuration parameters for running the `Core^` service.
+    Configuration parameters for running the `Orchestrator^` service.
 
     Attributes:
         root_folder (str): Path of the base folder for the taipy application. The default value is "./taipy/"
@@ -38,9 +46,9 @@ class CoreSection(UniqueSection):
             repository.
         read_entity_retry (int): Number of retries to read an entity from the repository before return failure.
             The default value is 3.
-        mode (str): The Taipy operating mode. By default, the `Core^` service runs in "development" mode.
-            An "experiment" and a "production" mode are also available. Please refer to the
-            [Versioning management](../../userman/versioning/index.md) documentation page for more details.
+        mode (str): The Taipy operating mode. By default, the `Orchestrator^` service runs in "development" mode.
+            Please refer to the [Versioning management](../../userman/versioning/index.md)
+            documentation page for more details.
         version_number (str)): The identifier of the user application version. Please refer to the
             [Versioning management](../../userman/versioning/index.md) documentation page for more details.
         force (bool): If True, force the application run even if there are some conflicts in the
@@ -69,10 +77,7 @@ class CoreSection(UniqueSection):
     _DEFAULT_READ_ENTITY_RETRY = 1
 
     _MODE_KEY = "mode"
-    _DEVELOPMENT_MODE = "development"
-    _EXPERIMENT_MODE = "experiment"
-    _PRODUCTION_MODE = "production"
-    _DEFAULT_MODE = _DEVELOPMENT_MODE
+    _DEFAULT_MODE = "development"
 
     _VERSION_NUMBER_KEY = "version_number"
     _DEFAULT_VERSION_NUMBER = ""
@@ -162,6 +167,7 @@ class CoreSection(UniqueSection):
     @_ConfigBlocker._check()
     def repository_type(self, val):
         self._repository_type = val
+        CoreSection.__reload_repositories()
 
     @property
     def repository_properties(self):
@@ -348,7 +354,7 @@ class CoreSection(UniqueSection):
         force: Optional[bool] = None,
         **properties,
     ) -> "CoreSection":
-        """Configure the Core service.
+        """Configure the Orchestrator service.
 
         Parameters:
             root_folder (Optional[str]): Path of the base folder for the taipy application.
@@ -366,13 +372,15 @@ class CoreSection(UniqueSection):
             read_entity_retry (Optional[int]): Number of retries to read an entity from the repository
                 before return failure. The default value is 3.
             mode (Optional[str]): Indicates the mode of the version management system.
-                Possible values are *"development"*, *"experiment"*, or *"production"*.
+                Possible values are *"development"* or *"experiment"*. On Enterprise edition of Taipy,
+                *production* mode is also available. Please refer to the
+                [Versioning management](../../userman/versioning/index.md) documentation page for more details.
             version_number (Optional[str]): The string identifier of the version.
                  In development mode, the version number is ignored.
             force (Optional[bool]): If True, Taipy will override a version even if the configuration
                 has changed and run the application.
             **properties (Dict[str, Any]): A keyworded variable length list of additional arguments configure the
-                behavior of the `Core^` service.
+                behavior of the `Orchestrator^` service.
         Returns:
             The Core configuration.
         """
@@ -390,4 +398,19 @@ class CoreSection(UniqueSection):
             **properties,
         )
         Config._register(section)
+
+        if repository_type:
+            CoreSection.__reload_repositories()
+
         return Config.unique_sections[CoreSection.name]
+
+    @staticmethod
+    def __reload_repositories():
+        _CycleManagerFactory._build_manager.cache_clear()
+        _SequenceManagerFactory._build_manager.cache_clear()
+        _ScenarioManagerFactory._build_manager.cache_clear()
+        _TaskManagerFactory._build_manager.cache_clear()
+        _JobManagerFactory._build_manager.cache_clear()
+        _DataManagerFactory._build_manager.cache_clear()
+        _SubmissionManagerFactory._build_manager.cache_clear()
+        _VersionManagerFactory._build_manager.cache_clear()

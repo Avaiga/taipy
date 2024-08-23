@@ -15,13 +15,14 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-# Data set
-data = {"Opps": ["Hot leads", "Doc sent", "Quote", "Closed Won"], "Visits": [316, 238, 125, 83]}
+if __name__ == "__main__":
+    # Data set
+    data = {"Opps": ["Hot leads", "Doc sent", "Quote", "Closed Won"], "Visits": [316, 238, 125, 83]}
 
-page = """
+    page = """
 # Funnel Chart - Simple
 
 <|{data}|chart|type=funnel|x=Visits|y=Opps|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

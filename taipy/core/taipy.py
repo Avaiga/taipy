@@ -15,7 +15,6 @@ from typing import Any, Callable, Dict, List, Literal, Optional, Set, Union, ove
 from taipy.config import Scope
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from ._core import Core
 from ._entity._entity import _Entity
 from ._version._version_manager_factory import _VersionManagerFactory
 from .common._check_instance import (
@@ -27,7 +26,7 @@ from .common._check_instance import (
     _is_submission,
     _is_task,
 )
-from .common._warnings import _warn_deprecated, _warn_no_core_service
+from .common._warnings import _warn_deprecated, _warn_no_orchestrator_service
 from .config.data_node_config import DataNodeConfig
 from .config.scenario_config import ScenarioConfig
 from .cycle._cycle_manager_factory import _CycleManagerFactory
@@ -36,15 +35,11 @@ from .cycle.cycle_id import CycleId
 from .data._data_manager_factory import _DataManagerFactory
 from .data.data_node import DataNode
 from .data.data_node_id import DataNodeId
-from .exceptions.exceptions import (
-    DataNodeConfigIsNotGlobal,
-    ModelNotFound,
-    NonExistingVersion,
-    VersionIsNotProductionVersion,
-)
+from .exceptions.exceptions import DataNodeConfigIsNotGlobal, ModelNotFound, NonExistingVersion
 from .job._job_manager_factory import _JobManagerFactory
 from .job.job import Job
 from .job.job_id import JobId
+from .orchestrator import Orchestrator
 from .reason import EntityDoesNotExist, EntityIsNotSubmittableEntity, ReasonCollection
 from .scenario._scenario_manager_factory import _ScenarioManagerFactory
 from .scenario.scenario import Scenario
@@ -221,7 +216,7 @@ def is_readable(
     return ReasonCollection()._add_reason(str(entity), EntityDoesNotExist(str(entity)))
 
 
-@_warn_no_core_service("The submitted entity will not be executed until the Core service is running.")
+@_warn_no_orchestrator_service("The submitted entity will not be executed until the Orchestrator service is running.")
 def submit(
     entity: Union[Scenario, Sequence, Task],
     force: bool = False,
@@ -927,7 +922,7 @@ def create_scenario(
         SystemExit: If the configuration check returns some errors.
 
     """
-    Core._manage_version_and_block_config()
+    Orchestrator._manage_version_and_block_config()
 
     return _ScenarioManagerFactory._build_manager()._create(config, creation_date, name)
 
@@ -952,7 +947,7 @@ def create_global_data_node(config: DataNodeConfig) -> DataNode:
     if config.scope is not Scope.GLOBAL:
         raise DataNodeConfigIsNotGlobal(config.id)
 
-    Core._manage_version_and_block_config()
+    Orchestrator._manage_version_and_block_config()
 
     if dns := _DataManagerFactory._build_manager()._get_by_config_id(config.id):
         return dns[0]
@@ -967,19 +962,14 @@ def clean_all_entities_by_version(version_number=None) -> bool:
 
 def clean_all_entities(version_number: str) -> bool:
     """Deletes all entities associated with the specified version.
+    This function cleans all entities, including jobs, submissions, scenarios, cycles, sequences, tasks, and data nodes.
 
     Parameters:
-        version_number (str): The version number of the entities to be deleted.
-            The version_number should not be a production version.
+        version_number (str): The version number of the entities to be deleted.<br/>
+            - If the specified version does not exist, the operation will be aborted, and False will be returned.
 
     Returns:
         True if the operation succeeded, False otherwise.
-
-    Notes:
-        - If the specified version does not exist, the operation will be aborted, and False will be returned.
-        - If the specified version is a production version, the operation will be aborted, and False will be returned.
-        - This function cleans all entities, including jobs, submissions, scenarios, cycles, sequences, tasks,
-            and data nodes.
     """
     version_manager = _VersionManagerFactory._build_manager()
     try:
@@ -988,10 +978,9 @@ def clean_all_entities(version_number: str) -> bool:
         __logger.warning(f"{e.message} Abort cleaning the entities of version '{version_number}'.")
         return False
 
-    if version_number in version_manager._get_production_versions():
-        __logger.warning(
-            f"Abort cleaning the entities of version '{version_number}'. A production version can not be deleted."
-        )
+    if not version_manager._is_deletable(version_number):
+        reason_collection = version_manager._is_deletable(version_number)
+        __logger.warning(f"Abort cleaning the entities of version '{version_number}'. {reason_collection.reasons}.")
         return False
 
     _JobManagerFactory._build_manager()._delete_by_version(version_number)
@@ -1000,13 +989,7 @@ def clean_all_entities(version_number: str) -> bool:
     _SequenceManagerFactory._build_manager()._delete_by_version(version_number)
     _TaskManagerFactory._build_manager()._delete_by_version(version_number)
     _DataManagerFactory._build_manager()._delete_by_version(version_number)
-
     version_manager._delete(version_number)
-
-    try:
-        version_manager._delete_production_version(version_number)
-    except VersionIsNotProductionVersion:
-        pass
 
     return True
 
