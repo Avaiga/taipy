@@ -305,10 +305,7 @@ const Chat = (props: ChatProps) => {
                 if (Array.isArray(nr) && nr.length > newValue.start && nr[newValue.start]) {
                     setRows((old) => {
                         old.length && nr.length > old.length && setShowMessage(true);
-                        if (nr.length < old.length) {
-                            return nr.concat(old.slice(nr.length));
-                        }
-                        if (old.length > newValue.start) {
+                        if (newValue.start > 0 && old.length > newValue.start) {
                             return old.slice(0, newValue.start).concat(nr.slice(newValue.start));
                         }
                         return nr;
