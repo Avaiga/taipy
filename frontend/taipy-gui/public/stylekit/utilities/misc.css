@@ -30,6 +30,8 @@
 
 .d-flex > .taipy-part:not(.MuiDrawer-docked) {
     width: -webkit-fill-available;
+    width: -moz-available;
+    /* width: fill-available; */
 }
 
 .d-block {
