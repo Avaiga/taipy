@@ -158,8 +158,8 @@ if __name__ == "__main__":
     Config.load("config.toml")
     scenario_cfg = Config.scenarios["scenario"]
 
-    # Start Taipy Core service
-    tp.Core().run()
+    # Start Taipy Orchestrator
+    tp.Orchestrator().run()
 
     # Create a scenario
     scenario = tp.create_scenario(scenario_cfg)
