@@ -861,7 +861,7 @@ class Config:
         force: Optional[bool] = None,
         **properties,
     ) -> "CoreSection":
-        """Configure the Core service.
+        """Configure the Orchestrator service.
 
         Parameters:
             root_folder (Optional[str]): Path of the base folder for the taipy application.
@@ -887,7 +887,7 @@ class Config:
             force (Optional[bool]): If True, Taipy will override a version even if the configuration
                 has changed and run the application.
             **properties (Dict[str, Any]): A keyworded variable length list of additional arguments configure the
-                behavior of the `Core^` service.
+                behavior of the `Orchestrator^` service.
         Returns:
             The Core configuration.
         """

@@ -58,7 +58,7 @@ def test_main_file_with_and_without_extension(tmpdir):
     assert sorted(os.listdir(os.path.join(tmpdir, "foo_app"))) == sorted(["requirements.txt", "app.py"])
 
 
-def test_with_core_service(tmpdir):
+def test_with_orchestrator_service(tmpdir):
     cookiecutter(
         template="taipy/templates/default",
         output_dir=str(tmpdir),
@@ -73,7 +73,7 @@ def test_with_core_service(tmpdir):
         ["requirements.txt", "main.py", "configuration", "algorithms"]
     )
     with open(os.path.join(tmpdir, "taipy_application", "main.py")) as main_file:
-        assert "core = Core()" in main_file.read()
+        assert "orchestrator = Orchestrator()" in main_file.read()
 
     taipy_path = os.getcwd()
     stdout = _run_template(taipy_path, os.path.join(tmpdir, "taipy_application"), "main.py")
@@ -106,7 +106,7 @@ def test_with_rest_service(tmpdir):
     assert "[Taipy][INFO] Development mode: " in stdout
 
 
-def test_with_both_core_rest_services(tmpdir):
+def test_with_both_orchestrator_rest_services(tmpdir):
     cookiecutter(
         template="taipy/templates/default",
         output_dir=str(tmpdir),
@@ -122,7 +122,7 @@ def test_with_both_core_rest_services(tmpdir):
     )
     with open(os.path.join(tmpdir, "taipy_application", "main.py")) as main_file:
         assert "rest = Rest()" in main_file.read()
-        assert "core = Core()" not in main_file.read()
+        assert "orchestrator = Orchestrator()" not in main_file.read()
 
     taipy_path = os.getcwd()
     stdout = _run_template(taipy_path, os.path.join(tmpdir, "taipy_application"), "main.py")
