@@ -25,7 +25,6 @@ from taipy.config.checker._checker import _Checker
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.core._core import Core
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core._version._version import _Version
 from taipy.core._version._version_manager_factory import _VersionManagerFactory
@@ -48,6 +47,7 @@ from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.job.job import Job
 from taipy.core.job.job_id import JobId
 from taipy.core.notification.notifier import Notifier
+from taipy.core.orchestrator import Orchestrator
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from taipy.core.scenario._scenario_model import _ScenarioModel
 from taipy.core.scenario.scenario import Scenario
@@ -354,8 +354,8 @@ def init_config(reset_configuration_singleton, inject_core_sections):
         _Checker.add_checker(_ScenarioConfigChecker)
 
         Config.configure_core(read_entity_retry=0)
-        Core._is_running = False
-        Core._version_is_initialized = False
+        Orchestrator._is_running = False
+        Orchestrator._version_is_initialized = False
 
     return _init_config
 

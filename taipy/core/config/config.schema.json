@@ -6,7 +6,7 @@
   "type": "object",
   "properties": {
     "CORE": {
-      "description": "Core service",
+      "description": "Orchestrator service",
       "type": "object",
       "properties": {
         "core_version": {

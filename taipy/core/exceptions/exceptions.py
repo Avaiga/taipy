@@ -23,8 +23,8 @@ class ConfigCoreVersionMismatched(Exception):
         )
 
 
-class CoreServiceIsAlreadyRunning(Exception):
-    """Raised if the Core service is already running."""
+class OrchestratorServiceIsAlreadyRunning(Exception):
+    """Raised if the Orchestrator service is already running."""
 
 
 class CycleAlreadyExists(Exception):

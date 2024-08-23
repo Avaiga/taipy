@@ -56,7 +56,7 @@ const ENTER_KEY = "Enter";
 const indicWidth = 0.7;
 const avatarWidth = 24;
 const chatAvatarSx = { ...avatarSx, width: avatarWidth, height: avatarWidth };
-const avatarColSx = { width: 1.5 * avatarWidth };
+const avatarColSx = { width: 1.5 * avatarWidth, minWidth: 1.5 * avatarWidth };
 const senderMsgSx = {
     width: "fit-content",
     maxWidth: "80%",

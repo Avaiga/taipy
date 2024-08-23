@@ -18,7 +18,7 @@ from taipy._entrypoint import _entrypoint
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.core import Core
+from taipy.core import Orchestrator
 from taipy.core._version._cli._version_cli_factory import _VersionCLIFactory
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core.data._data_manager import _DataManager
@@ -39,32 +39,32 @@ def test_delete_version(caplog):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--development"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         scenario = _ScenarioManager._create(scenario_config)
         _ScenarioManager._submit(scenario)
-        core.stop()
+        orchestrator.stop()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         scenario = _ScenarioManager._create(scenario_config)
         _ScenarioManager._submit(scenario)
-        core.stop()
+        orchestrator.stop()
 
     with patch("sys.argv", ["prog", "--experiment", "1.1"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         scenario = _ScenarioManager._create(scenario_config)
         _ScenarioManager._submit(scenario)
-        core.stop()
+        orchestrator.stop()
 
     with patch("sys.argv", ["prog", "--experiment", "2.0"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         scenario = _ScenarioManager._create(scenario_config)
         _ScenarioManager._submit(scenario)
-        core.stop()
+        orchestrator.stop()
 
     all_versions = [version.id for version in _VersionManager._get_all()]
     assert len(all_versions) == 4
@@ -91,19 +91,19 @@ def test_delete_version(caplog):
 
 def test_list_versions(capsys):
     with patch("sys.argv", ["prog", "--development"]):
-        core = Core()
-        core.run()
-        core.stop()
+        orchestrator = Orchestrator()
+        orchestrator.run()
+        orchestrator.stop()
     sleep(0.05)
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-        core = Core()
-        core.run()
-        core.stop()
+        orchestrator = Orchestrator()
+        orchestrator.run()
+        orchestrator.stop()
     sleep(0.05)
     with patch("sys.argv", ["prog", "--experiment", "2.0"]):
-        core = Core()
-        core.run()
-        core.stop()
+        orchestrator = Orchestrator()
+        orchestrator.run()
+        orchestrator.stop()
 
     _VersionCLIFactory._build_cli().create_parser()
     with pytest.raises(SystemExit):
@@ -123,18 +123,18 @@ def test_rename_version(caplog):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         scenario = _ScenarioManager._create(scenario_config)
         _ScenarioManager._submit(scenario)
-        core.stop()
+        orchestrator.stop()
 
     with patch("sys.argv", ["prog", "--experiment", "2.0"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         scenario = _ScenarioManager._create(scenario_config)
         _ScenarioManager._submit(scenario)
-        core.stop()
+        orchestrator.stop()
 
     dev_ver = _VersionManager._get_development_version()
 
@@ -168,11 +168,11 @@ def test_compare_version_config(caplog, init_config):
     scenario_config_1 = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         scenario = _ScenarioManager._create(scenario_config_1)
         _ScenarioManager._submit(scenario)
-        core.stop()
+        orchestrator.stop()
 
     init_config()
 
@@ -180,11 +180,11 @@ def test_compare_version_config(caplog, init_config):
     Config.configure_data_node(id="d2", storage_type="csv", default_path="bar.csv")
 
     with patch("sys.argv", ["prog", "--experiment", "2.0"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         scenario = _ScenarioManager._create(scenario_config_2)
         _ScenarioManager._submit(scenario)
-        core.stop()
+        orchestrator.stop()
 
     _VersionCLIFactory._build_cli().create_parser()
     with pytest.raises(SystemExit):
