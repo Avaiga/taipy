@@ -1382,7 +1382,9 @@ def test_tags():
     assert _ScenarioManager._get_all_by_cycle_tag(cycle_2, "scd") == [scenario_2_tags]
     assert _ScenarioManager._get_all_by_cycle_tag(cycle_2, "thd") == []
 
-    assert _ScenarioManager._get_all_by_cycle_tag(cycle_1, "fst") == [scenario_no_tag, scenario_1_tag]
+    assert sorted([s.id for s in _ScenarioManager._get_all_by_cycle_tag(cycle_1, "fst")]) == sorted(
+        [s.id for s in [scenario_no_tag, scenario_1_tag]]
+    )
     assert _ScenarioManager._get_all_by_cycle_tag(cycle_1, "scd") == []
     assert _ScenarioManager._get_all_by_cycle_tag(cycle_1, "thd") == []
 
