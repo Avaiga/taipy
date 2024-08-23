@@ -34,10 +34,10 @@ pages = {
 
 
 if __name__ == "__main__":
-    # Instantiate, configure and run the Core
-    core = Orchestrator()
+    # Instantiate, configure and run the Orchestrator
+    orchestrator = Orchestrator()
     default_scenario_cfg = configure()
-    core.run()
+    orchestrator.run()
 
     # ##################################################################################################################
     # PLACEHOLDER: Initialize your data application here                                                               #
