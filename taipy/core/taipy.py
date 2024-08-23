@@ -548,8 +548,7 @@ def get_scenarios(
     elif not cycle and tag:
         scenarios = scenario_manager._get_all_by_tag(tag)
     elif cycle and tag:
-        cycles_scenarios = scenario_manager._get_all_by_cycle(cycle)
-        scenarios = [scenario for scenario in cycles_scenarios if scenario.has_tag(tag)]
+        scenarios = scenario_manager._get_all_by_cycle_tag(cycle, tag)
     else:
         scenarios = []
 
