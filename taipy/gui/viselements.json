@@ -273,6 +273,11 @@
                         "name": "mode",
                         "type": "str",
                         "doc": "Define the way the toggle is displayed:\n<ul><li>&quot;theme&quot;: synonym for setting the *theme* property to True</li></ul>"
+                    },
+                    {
+                        "name": "label",
+                        "type": "str",
+                        "doc": "The label associated with the toggle."
                     }
                 ]
             }
