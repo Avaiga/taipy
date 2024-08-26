@@ -136,34 +136,36 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         if (baseColumns) {
             try {
                 let filter = false;
-                Object.values(baseColumns).forEach((col) => {
-                    if (typeof col.filter != "boolean") {
-                        col.filter = !!props.filter;
+                const newCols: Record<string, ColumnDesc> = {};
+                Object.entries(baseColumns).forEach(([cId, cDesc]) => {
+                    const nDesc = (newCols[cId] = { ...cDesc });
+                    if (typeof nDesc.filter != "boolean") {
+                        nDesc.filter = !!props.filter;
                     }
-                    filter = filter || col.filter;
-                    if (typeof col.notEditable != "boolean") {
-                        col.notEditable = !editable;
+                    filter = filter || nDesc.filter;
+                    if (typeof nDesc.notEditable != "boolean") {
+                        nDesc.notEditable = !editable;
                     }
-                    if (col.tooltip === undefined) {
-                        col.tooltip = props.tooltip;
+                    if (nDesc.tooltip === undefined) {
+                        nDesc.tooltip = props.tooltip;
                     }
                 });
                 addDeleteColumn(
                     (active && editable && (onAdd || onDelete) ? 1 : 0) +
                         (active && filter ? 1 : 0) +
                         (active && downloadable ? 1 : 0),
-                    baseColumns
+                    newCols
                 );
-                const colsOrder = Object.keys(baseColumns).sort(getsortByIndex(baseColumns));
+                const colsOrder = Object.keys(newCols).sort(getsortByIndex(newCols));
                 const styTt = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
-                    if (baseColumns[col].style) {
+                    if (newCols[col].style) {
                         pv.styles = pv.styles || {};
-                        pv.styles[baseColumns[col].dfid] = baseColumns[col].style as string;
+                        pv.styles[newCols[col].dfid] = newCols[col].style as string;
                     }
-                    hNan = hNan || !!baseColumns[col].nanValue;
-                    if (baseColumns[col].tooltip) {
+                    hNan = hNan || !!newCols[col].nanValue;
+                    if (newCols[col].tooltip) {
                         pv.tooltips = pv.tooltips || {};
-                        pv.tooltips[baseColumns[col].dfid] = baseColumns[col].tooltip as string;
+                        pv.tooltips[newCols[col].dfid] = newCols[col].tooltip as string;
                     }
                     return pv;
                 }, {});
@@ -171,7 +173,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     styTt.styles = styTt.styles || {};
                     styTt.styles[LINE_STYLE] = props.lineStyle;
                 }
-                return [colsOrder, baseColumns, styTt.styles, styTt.tooltips, hNan, filter];
+                return [colsOrder, newCols, styTt.styles, styTt.tooltips, hNan, filter];
             } catch (e) {
                 console.info("PaginatedTable.columns: ", (e as Error).message || e);
             }
@@ -293,7 +295,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         module,
         compare,
         onCompare,
-        userData
+        userData,
     ]);
 
     const onSort = useCallback(

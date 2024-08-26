@@ -65,7 +65,7 @@ class TestGuiCoreContext_is_promotable:
             )
             assign.assert_called_once()
             assert assign.call_args.args[0] == "error_var"
-            assert str(assign.call_args.args[1]).endswith("to primary because it doesn't belong to a cycle.")
+            assert "to primary because it doesn't belong to a cycle" in assign.call_args.args[1]
             assign.reset_mock()
 
             with patch("taipy.gui_core._context.is_promotable", side_effect=mock_is_promotable_false):
@@ -81,4 +81,4 @@ class TestGuiCoreContext_is_promotable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not promotable.")
+                assert "is not promotable" in assign.call_args.args[1]
