@@ -1158,7 +1158,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 entity = (
                     core_get(args[0])
                     if (reason := is_readable(args[0]))
-                    else f"{args[0]} is not redable: {_get_reason(reason)}"
+                    else f"{args[0]} is not readable: {_get_reason(reason)}"
                 )
                 self.gui._call_function_with_state(
                     on_action_function,
