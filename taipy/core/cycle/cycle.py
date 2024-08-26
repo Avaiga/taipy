@@ -102,7 +102,6 @@ class Cycle(_Entity, _Labeled):
     _ID_PREFIX = "CYCLE"
     __SEPARATOR = "_"
     _MANAGER_NAME = "cycle"
-    __CHECK_INIT_DONE_ATTR_NAME = "_init_done"
 
     def __init__(
         self,

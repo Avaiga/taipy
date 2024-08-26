@@ -139,7 +139,6 @@ class DataNode(_Entity, _Labeled):
     _MANAGER_NAME: str = "data"
     _PATH_KEY = "path"
     __EDIT_TIMEOUT = 30
-    __CHECK_INIT_DONE_ATTR_NAME = "_init_done"
 
     _TAIPY_PROPERTIES: Set[str] = set()
 
@@ -175,7 +174,6 @@ class DataNode(_Entity, _Labeled):
         self._edits: List[Edit] = edits or []
 
         self._properties: _Properties = _Properties(self, **kwargs)
-        self._init_done = True
 
     @staticmethod
     def _new_id(config_id: str) -> DataNodeId:
