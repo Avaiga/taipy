@@ -112,6 +112,7 @@ const Input = (props: TaipyInputProps) => {
                         val = max;
                     }
                     setValue(val.toString());
+                    dispatch(createSendUpdateAction(updateVarName, val.toString(), module, onChange, propagate));
                     evt.preventDefault();
                 } else if (evt.key === "ArrowDown") {
                     let val =
@@ -121,8 +122,10 @@ const Input = (props: TaipyInputProps) => {
                         val = min;
                     }
                     setValue(val.toString());
+                    dispatch(createSendUpdateAction(updateVarName, val.toString(), module, onChange, propagate));
                     evt.preventDefault();
                 }
+                onAction && dispatch(createSendActionNameAction(id, module, onAction, evt.key, updateVarName, value));
             } else if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
                 const val = evt.currentTarget.querySelector("input")?.value;
                 if (changeDelay > 0 && delayCall.current > 0) {
@@ -139,18 +142,19 @@ const Input = (props: TaipyInputProps) => {
         [
             type,
             actionKeys,
-            step,
-            stepMultiplier,
-            max,
-            min,
-            changeDelay,
             onAction,
             dispatch,
             id,
             module,
             updateVarName,
+            value,
+            step,
+            stepMultiplier,
+            max,
             onChange,
             propagate,
+            min,
+            changeDelay,
         ]
     );
 
@@ -171,24 +175,18 @@ const Input = (props: TaipyInputProps) => {
 
     const handleStepperMouseDown = useCallback(
         (event: React.MouseEvent<HTMLButtonElement>, increment: boolean) => {
-            setValue((prevValue) => {
-                const newValue = calculateNewValue(
-                    prevValue,
-                    step || 1,
-                    stepMultiplier || 10,
-                    event.shiftKey,
-                    increment
-                );
-                if (min !== undefined && Number(newValue) < min) {
-                    return min.toString();
-                }
-                if (max !== undefined && Number(newValue) > max) {
-                    return max.toString();
-                }
-                return newValue;
-            });
+            const newValue = calculateNewValue(value, step || 1, stepMultiplier || 10, event.shiftKey, increment);
+            const finalValue =
+                min !== undefined && Number(newValue) < min
+                    ? min.toString()
+                    : max !== undefined && Number(newValue) > max
+                      ? max.toString()
+                      : newValue;
+
+            setValue(finalValue);
+            dispatch(createSendUpdateAction(updateVarName, finalValue, module, onChange, propagate));
         },
-        [min, max, step, stepMultiplier, calculateNewValue]
+        [calculateNewValue, step, stepMultiplier, min, max, dispatch, updateVarName, module, onChange, propagate, value]
     );
 
     const handleUpStepperMouseDown = useCallback(
@@ -228,27 +226,27 @@ const Input = (props: TaipyInputProps) => {
                       ),
                   }
                 : type == "number"
-                ? {
-                      endAdornment: (
-                          <div style={verticalDivStyle}>
-                              <IconButton
-                                  aria-label="Increment value"
-                                  size="small"
-                                  onMouseDown={handleUpStepperMouseDown}
-                              >
-                                  <ArrowDropUpIcon fontSize="inherit" />
-                              </IconButton>
-                              <IconButton
-                                  aria-label="Decrement value"
-                                  size="small"
-                                  onMouseDown={handleDownStepperMouseDown}
-                              >
-                                  <ArrowDropDownIcon fontSize="inherit" />
-                              </IconButton>
-                          </div>
-                      ),
-                  }
-                : undefined,
+                  ? {
+                        endAdornment: (
+                            <div style={verticalDivStyle}>
+                                <IconButton
+                                    aria-label="Increment value"
+                                    size="small"
+                                    onMouseDown={handleUpStepperMouseDown}
+                                >
+                                    <ArrowDropUpIcon fontSize="inherit" />
+                                </IconButton>
+                                <IconButton
+                                    aria-label="Decrement value"
+                                    size="small"
+                                    onMouseDown={handleDownStepperMouseDown}
+                                >
+                                    <ArrowDropDownIcon fontSize="inherit" />
+                                </IconButton>
+                            </div>
+                        ),
+                    }
+                  : undefined,
         [
             type,
             showPassword,
@@ -268,8 +266,8 @@ const Input = (props: TaipyInputProps) => {
                       max: max,
                   }
                 : type == "password"
-                ? { autoComplete: "current-password" }
-                : undefined,
+                  ? { autoComplete: "current-password" }
+                  : undefined,
         [type, step, min, max]
     );
 
