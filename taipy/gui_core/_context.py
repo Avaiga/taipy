@@ -125,7 +125,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         else None
                     )
                     if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:  # type: ignore
-                        self.broadcast_core_changed({"scenario": list(sequence.parent_ids)})
+                        self.broadcast_core_changed({"scenario": list(sequence.parent_ids)})  # type: ignore
             except Exception as e:
                 _warn(f"Access to sequence {event.entity_id} failed", e)
         elif event.entity_type == EventEntityType.JOB:
@@ -507,7 +507,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 if (scenario or user_scenario) and (sel_scenario_var := args[1] if isinstance(args[1], str) else None):
                     try:
                         var_name, _ = gui._get_real_var_name(sel_scenario_var)
-                        self.gui._update_var(var_name, scenario or user_scenario, on_change= args[2])
+                        self.gui._update_var(var_name, scenario or user_scenario, on_change=args[2])
                     except Exception as e:  # pragma: no cover
                         _warn("Can't find value variable name in context", e)
         if scenario:

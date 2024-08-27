@@ -189,7 +189,7 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
         # return None if data was never written
         if not self.last_edit_date:
-            self._DataNode.__logger.warning(
+            self._DataNode__logger.warning(
                 f"Data node {self.id} from config {self.config_id} is being read but has never been written."
             )
             return None
