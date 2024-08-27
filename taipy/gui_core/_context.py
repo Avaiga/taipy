@@ -126,8 +126,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         and is_readable(t.cast(SequenceId, event.entity_id))
                         else None
                     )
-                    if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:
-                        self.broadcast_core_changed({"scenario": list(sequence.parent_ids)})
+                    if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:  # type: ignore
+                        self.broadcast_core_changed({"scenario": list(sequence.parent_ids)})  # type: ignore
             except Exception as e:
                 _warn(f"Access to sequence {event.entity_id} failed", e)
         elif event.entity_type == EventEntityType.JOB:

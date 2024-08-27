@@ -119,9 +119,9 @@ class TestSQLDataNode:
         assert dn.owner_id is None
         assert dn.job_ids == []
         assert dn.is_ready_for_reading
-        assert dn.exposed_type == "pandas"
-        assert dn.read_query == "SELECT * FROM example"
-        assert dn.write_query_builder == my_write_query_builder_with_pandas
+        assert dn.properties["exposed_type"] == "pandas"
+        assert dn.properties["read_query"] == "SELECT * FROM example"
+        assert dn.properties["write_query_builder"] == my_write_query_builder_with_pandas
 
         sql_dn_config_1 = Config.configure_sql_data_node(
             id="foo",
@@ -131,8 +131,8 @@ class TestSQLDataNode:
         )
         dn_1 = _DataManagerFactory._build_manager()._create_and_set(sql_dn_config_1, None, None)
         assert isinstance(dn, SQLDataNode)
-        assert dn_1.exposed_type == MyCustomObject
-        assert dn_1.append_query_builder == my_append_query_builder_with_pandas
+        assert dn_1.properties["exposed_type"] == MyCustomObject
+        assert dn_1.properties["append_query_builder"] == my_append_query_builder_with_pandas
 
     @pytest.mark.parametrize("properties", __sql_properties)
     def test_get_user_properties(self, properties):

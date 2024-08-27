@@ -34,7 +34,7 @@ def _warn_if_inputs_not_ready(inputs: Iterable[DataNode]):
             ]:
                 logger.warning(
                     f"{dn.id} cannot be read because it has never been written. "
-                    f"Hint: The data node may refer to a wrong path : {dn.path} "
+                    f"Hint: The data node may refer to a wrong path : {dn.properties['path']} "
                 )
             else:
                 logger.warning(f"{dn.id} cannot be read because it has never been written.")

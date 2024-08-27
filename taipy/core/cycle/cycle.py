@@ -211,12 +211,6 @@ class Cycle(_Entity, _Labeled):
 
         return CycleId(_get_valid_filename(Cycle.__SEPARATOR.join([Cycle._ID_PREFIX, name, str(uuid.uuid4())])))
 
-    def __getattr__(self, attribute_name):
-        protected_attribute_name = attribute_name
-        if protected_attribute_name in self._properties:
-            return self._properties[protected_attribute_name]
-        raise AttributeError(f"{attribute_name} is not an attribute of cycle {self.id}")
-
     def __eq__(self, other):
         return isinstance(other, Cycle) and self.id == other.id
 

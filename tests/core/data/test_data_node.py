@@ -670,7 +670,6 @@ class TestDataNode:
             dn = _DataManager._bulk_get_or_create([dn_config])[dn_config]
             assert dn._properties.data["prop"] == "ENV[FOO]"
             assert dn.properties["prop"] == "bar"
-            assert dn.prop == "bar"
 
     def test_path_populated_with_config_default_path(self):
         dn_config = Config.configure_data_node("data_node", "pickle", default_path="foo.p")

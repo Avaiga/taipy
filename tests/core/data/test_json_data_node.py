@@ -108,7 +108,6 @@ class TestJSONDataNode:
         assert isinstance(dn_2, JSONDataNode)
         assert dn_2.storage_type() == "json"
         assert dn_2.properties["encoding"] == "utf-16"
-        assert dn_2.encoding == "utf-16"
 
         json_dn_config_3 = Config.configure_json_data_node(
             id="foo", default_path=path, encoder=MyCustomEncoder, decoder=MyCustomDecoder
