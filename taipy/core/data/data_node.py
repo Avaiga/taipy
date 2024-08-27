@@ -134,7 +134,7 @@ class DataNode(_Entity, _Labeled):
 
     _ID_PREFIX = "DATANODE"
     __ID_SEPARATOR = "_"
-    __logger = _TaipyLogger._get_logger()
+    _logger = _TaipyLogger._get_logger()
     _REQUIRED_PROPERTIES: List[str] = []
     _MANAGER_NAME: str = "data"
     _PATH_KEY = "path"
@@ -391,7 +391,7 @@ class DataNode(_Entity, _Labeled):
         try:
             return self.read_or_raise()
         except NoData:
-            self.__logger.warning(
+            self._logger.warning(
                 f"Data node {self.id} from config {self.config_id} is being read but has never been written."
             )
             return None
