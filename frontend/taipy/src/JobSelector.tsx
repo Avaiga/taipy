@@ -77,8 +77,8 @@ interface JobSelectorProps {
     updateJbVars?: string;
 }
 
-// job id, job name, empty list, entity id, entity name, submit id, creation date, status
-type Job = [string, string, [], string, string, string, string, number];
+// job id, job name, empty list, entity id, entity name, submit id, creation date, status, not deletable, not readable, not editable
+type Job = [string, string, [], string, string, string, string, number, string, string, string];
 type Jobs = Array<Job>;
 
 enum JobProps {
@@ -90,6 +90,9 @@ enum JobProps {
     submission_id,
     creation_date,
     status,
+    not_deletable,
+    not_readable,
+    not_editable
 }
 const JobLength = Object.keys(JobProps).length / 2;
 

@@ -44,12 +44,6 @@ jobs:
         run: |
           python tools/release/setup_version.py ALL ${{ github.event.inputs.release_type }} ${{ github.event.inputs.target_version }} ${{ steps.extract_branch.outputs.branch }} >> $GITHUB_OUTPUT
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Update version to ${{ steps.version-setup.outputs.NEW_VERSION }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   build-and-release-taipy-packages:
     needs: [fetch-versions]
     timeout-minutes: 20

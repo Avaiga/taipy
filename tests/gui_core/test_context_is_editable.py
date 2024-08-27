@@ -88,7 +88,7 @@ class TestGuiCoreContext_is_editable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not editable.")
+                assert "is not editable" in str(assign.call_args.args[1])
 
     def test_edit_entity(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
@@ -122,7 +122,7 @@ class TestGuiCoreContext_is_editable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not editable.")
+                assert "is not editable" in str(assign.call_args.args[1])
 
     def test_act_on_jobs(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get), patch(
@@ -142,7 +142,7 @@ class TestGuiCoreContext_is_editable:
             )
             assign.assert_called_once()
             assert assign.call_args.args[0] == "error_var"
-            assert str(assign.call_args.args[1]).find("is not editable.") == -1
+            assert "is not editable" not in assign.call_args.args[1]
             assign.reset_mock()
 
             with patch("taipy.gui_core._context.is_readable", side_effect=mock_is_editable_false):
@@ -158,7 +158,7 @@ class TestGuiCoreContext_is_editable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not readable.")
+                assert "is not readable" in assign.call_args.args[1]
 
     def test_edit_data_node(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
@@ -192,7 +192,7 @@ class TestGuiCoreContext_is_editable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not editable.")
+                assert "is not editable" in assign.call_args.args[1]
 
     def test_lock_datanode_for_edit(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
@@ -228,7 +228,7 @@ class TestGuiCoreContext_is_editable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not editable.")
+                assert "is not editable" in assign.call_args.args[1]
 
     def test_update_data(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
@@ -264,7 +264,7 @@ class TestGuiCoreContext_is_editable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not editable.")
+                assert "is not editable" in assign.call_args.args[1]
 
     def test_tabular_data_edit(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
@@ -299,4 +299,4 @@ class TestGuiCoreContext_is_editable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not editable.")
+                assert "is not editable" in assign.call_args.args[1]
