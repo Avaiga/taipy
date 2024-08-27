@@ -557,6 +557,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             columns,
             selected,
             formatConfig,
+            editable,
             onEdit,
             onCellValidation,
             onDelete,
