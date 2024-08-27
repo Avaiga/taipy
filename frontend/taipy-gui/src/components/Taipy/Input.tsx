@@ -80,6 +80,26 @@ const Input = (props: TaipyInputProps) => {
     const min = useDynamicProperty(props.min, props.defaultMin, undefined);
     const max = useDynamicProperty(props.max, props.defaultMax, undefined);
 
+    const updateValueWithDelay = useCallback(
+        (value: number | string) => {
+            if (changeDelay === -1) {
+                return;
+            }
+            if (changeDelay === 0) {
+                dispatch(createSendUpdateAction(updateVarName, value, module, onChange, propagate));
+                return;
+            }
+            if (delayCall.current > 0) {
+                clearTimeout(delayCall.current);
+            }
+            delayCall.current = window.setTimeout(() => {
+                delayCall.current = -1;
+                dispatch(createSendUpdateAction(updateVarName, value, module, onChange, propagate));
+            }, changeDelay);
+        },
+        [changeDelay, dispatch, updateVarName, module, onChange, propagate]
+    );
+
     const handleInput = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const val = e.target.value;
@@ -112,7 +132,8 @@ const Input = (props: TaipyInputProps) => {
                         val = max;
                     }
                     setValue(val.toString());
-                    dispatch(createSendUpdateAction(updateVarName, val.toString(), module, onChange, propagate));
+                    updateValueWithDelay(val);
+                    onAction && dispatch(createSendActionNameAction(id, module, onAction, evt.key, updateVarName, val));
                     evt.preventDefault();
                 } else if (evt.key === "ArrowDown") {
                     let val =
@@ -122,10 +143,10 @@ const Input = (props: TaipyInputProps) => {
                         val = min;
                     }
                     setValue(val.toString());
-                    dispatch(createSendUpdateAction(updateVarName, val.toString(), module, onChange, propagate));
+                    updateValueWithDelay(val);
+                    onAction && dispatch(createSendActionNameAction(id, module, onAction, evt.key, updateVarName, val));
                     evt.preventDefault();
                 }
-                onAction && dispatch(createSendActionNameAction(id, module, onAction, evt.key, updateVarName, value));
             } else if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
                 const val = evt.currentTarget.querySelector("input")?.value;
                 if (changeDelay > 0 && delayCall.current > 0) {
@@ -142,19 +163,19 @@ const Input = (props: TaipyInputProps) => {
         [
             type,
             actionKeys,
+            step,
+            stepMultiplier,
+            max,
+            updateValueWithDelay,
             onAction,
             dispatch,
             id,
             module,
             updateVarName,
-            value,
-            step,
-            stepMultiplier,
-            max,
-            onChange,
-            propagate,
             min,
             changeDelay,
+            onChange,
+            propagate,
         ]
     );
 
@@ -175,18 +196,30 @@ const Input = (props: TaipyInputProps) => {
 
     const handleStepperMouseDown = useCallback(
         (event: React.MouseEvent<HTMLButtonElement>, increment: boolean) => {
-            const newValue = calculateNewValue(value, step || 1, stepMultiplier || 10, event.shiftKey, increment);
-            const finalValue =
-                min !== undefined && Number(newValue) < min
-                    ? min.toString()
-                    : max !== undefined && Number(newValue) > max
-                      ? max.toString()
-                      : newValue;
+            setValue((prevValue) => {
+                const newValue = calculateNewValue(
+                    prevValue,
+                    step || 1,
+                    stepMultiplier || 10,
+                    event.shiftKey,
+                    increment
+                );
 
-            setValue(finalValue);
-            dispatch(createSendUpdateAction(updateVarName, finalValue, module, onChange, propagate));
+                if (min !== undefined && Number(newValue) < min) {
+                    updateValueWithDelay(min);
+                    return min.toString();
+                }
+
+                if (max !== undefined && Number(newValue) > max) {
+                    updateValueWithDelay(max);
+                    return max.toString();
+                }
+
+                updateValueWithDelay(newValue);
+                return newValue;
+            });
         },
-        [calculateNewValue, step, stepMultiplier, min, max, dispatch, updateVarName, module, onChange, propagate, value]
+        [calculateNewValue, step, stepMultiplier, min, max, updateValueWithDelay]
     );
 
     const handleUpStepperMouseDown = useCallback(
