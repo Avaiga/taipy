@@ -482,7 +482,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [
-                                                    active && onAdd ? (
+                                                    active && editable && onAdd ? (
                                                         <Tooltip title="Add a row" key="addARow">
                                                             <IconButton
                                                                 onClick={onAddRowClick}
@@ -594,7 +594,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                             ? onCellValidation
                                                             : undefined
                                                     }
-                                                    onDeletion={active && onDelete ? onRowDeletion : undefined}
+                                                    onDeletion={
+                                                        active && editable && onDelete ? onRowDeletion : undefined
+                                                    }
                                                     onSelection={active && onAction ? onRowSelection : undefined}
                                                     nanValue={columns[col].nanValue || props.nanValue}
                                                     tooltip={getTooltip(row, columns[col].tooltip, col)}

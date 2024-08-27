@@ -541,7 +541,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             selection: selected,
             formatConfig: formatConfig,
             onValidation: active && onEdit ? onCellValidation : undefined,
-            onDeletion: active && onDelete ? onRowDeletion : undefined,
+            onDeletion: active && editable && onDelete ? onRowDeletion : undefined,
             onRowSelection: active && onAction ? onRowSelection : undefined,
             onRowClick: active && onAction ? onRowClick : undefined,
             lineStyle: props.lineStyle,
@@ -588,7 +588,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [
-                                                    active && onAdd ? (
+                                                    active && editable && onAdd ? (
                                                         <Tooltip title="Add a row" key="addARow">
                                                             <IconButton
                                                                 onClick={onAddRowClick}
