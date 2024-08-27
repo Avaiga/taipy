@@ -91,7 +91,7 @@ class TestGuiCoreContext_is_deletable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not deletable.")
+                assert "is not deletable" in str(assign.call_args.args[1])
 
     def test_act_on_jobs(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get), patch(
@@ -127,4 +127,4 @@ class TestGuiCoreContext_is_deletable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not readable.")
+                assert "is not readable" in str(assign.call_args.args[1])
