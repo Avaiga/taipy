@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import datetime
 import json
 import typing as t
 from collections import defaultdict
@@ -29,6 +30,7 @@ from taipy.core import (
     DataNode,
     DataNodeId,
     Job,
+    JobId,
     Scenario,
     ScenarioId,
     Sequence,
@@ -806,8 +808,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         job.id,
                         job.get_simple_label(),
                         [],
-                        entity.get_simple_label() if entity else "",
                         entity.id if entity else "",
+                        entity.get_simple_label() if entity else "",
                         job.submit_id,
                         job.creation_date,
                         job.status.value,
@@ -854,6 +856,29 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     except Exception as e:
                         errs.append(f"Error canceling job. {e}")
             _GuiCoreContext.__assign_var(state, payload.get("error_id"), "<br/>".join(errs) if errs else "")
+
+    def get_job_details(self, job_id: t.Optional[JobId]):
+        try:
+            if job_id and is_readable(job_id) and (job := core_get(job_id)) is not None:
+                if isinstance(job, Job):
+                    entity = core_get(job.owner_id)
+                    return (
+                        job.id,
+                        job.get_simple_label(),
+                        entity.id if entity else "",
+                        entity.get_simple_label() if entity else "",
+                        job.submit_id,
+                        job.creation_date,
+                        job.status.value,
+                        _get_reason(is_deletable(job)),
+                        ""
+                        if job.execution_duration is None
+                        else str(datetime.timedelta(seconds=job.execution_duration)),
+                        [] if job.stacktrace is None else job.stacktrace,
+                    )
+        except Exception as e:
+            _warn(f"Access to job ({job.id if hasattr(job, 'id') else 'No_id'}) failed", e)
+        return None
 
     def edit_data_node(self, state: State, id: str, payload: t.Dict[str, str]):
         self.__lazy_start()

@@ -16,22 +16,22 @@ import { PopoverOrigin } from "@mui/material/Popover";
 import { getUpdateVar, useDynamicProperty } from "taipy-gui";
 
 export type ScenarioFull = [
-    string,     // id
-    boolean,    // is_primary
-    string,     // config_id
-    string,     // creation_date
-    string,     // cycle label
-    string,     // label
-    string[],   // tags
-    Array<[string, string]>,    // properties
-    Array<[string, string[], string, string]>,   // sequences (label, task ids, notSubmittableReason, notEditableReason)
+    string, // id
+    boolean, // is_primary
+    string, // config_id
+    string, // creation_date
+    string, // cycle label
+    string, // label
+    string[], // tags
+    Array<[string, string]>, // properties
+    Array<[string, string[], string, string]>, // sequences (label, task ids, notSubmittableReason, notEditableReason)
     Record<string, string>, // tasks (id: label)
-    string[],   // authorized_tags
-    string,    // notDeletableReason
-    string,    // notPromotableReason
-    string,     // notSubmittableReason
-    string,     // notReadableReason
-    string      // notEditableReason
+    string[], // authorized_tags
+    string, // notDeletableReason
+    string, // notPromotableReason
+    string, // notSubmittableReason
+    string, // notReadableReason
+    string // notEditableReason
 ];
 
 export enum ScFProps {
@@ -218,4 +218,8 @@ export const DeleteIconSx = { height: 50, width: 50, p: 0 };
 
 export const EmptyArray = [];
 
-export const getUpdateVarNames = (updateVars: string, ...vars: string[]) => vars.map((v) => getUpdateVar(updateVars, v) || "").filter(v => v);
+export const getUpdateVarNames = (updateVars: string, ...vars: string[]) =>
+    vars.map((v) => getUpdateVar(updateVars, v) || "").filter((v) => v);
+
+export const EllipsisSx = { textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" };
+export const SecondaryEllipsisProps = { sx: EllipsisSx };
