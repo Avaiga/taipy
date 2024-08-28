@@ -303,14 +303,14 @@ class TestDataManager:
         assert csv_dn.config_id == "foo"
         assert isinstance(csv_dn, CSVDataNode)
         assert csv_dn._path == "path_from_config_file"
-        assert csv_dn.has_header
+        assert csv_dn.properties["has_header"]
 
         csv_dn_cfg = Config.configure_data_node(id="baz", storage_type="csv", path="bar", has_header=True)
         csv_dn = _DataManager._create_and_set(csv_dn_cfg, None, None)
         assert csv_dn.config_id == "baz"
         assert isinstance(csv_dn, CSVDataNode)
         assert csv_dn._path == "bar"
-        assert csv_dn.has_header
+        assert csv_dn.properties["has_header"]
 
     def test_get_if_not_exists(self):
         with pytest.raises(ModelNotFound):
