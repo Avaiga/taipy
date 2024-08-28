@@ -1,5 +1,6 @@
 include taipy/config/*.pyi
 include taipy/config/*.json
 include *.json
+include version.json
 include taipy/config/setup.requirements.txt
 include package_desc.md

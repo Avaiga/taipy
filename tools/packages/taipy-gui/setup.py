@@ -76,7 +76,7 @@ setup(
     install_requires=requirements,
     packages=find_packages(where=root_folder, include=["taipy", "taipy.gui", "taipy.gui.*"]),
     include_package_data=True,
-    data_files=[("version", ["version.json"])],
+    data_files=[("version", [version_path])],
     tests_require=test_requirements,
     extras_require=extras_require,
     cmdclass={"build_py": NPMInstall},
