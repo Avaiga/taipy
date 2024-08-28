@@ -72,6 +72,41 @@ def test_slice(gui: Gui, helpers, small_dataframe):
     assert len(data) == 2
 
 
+def test_style(gui: Gui, helpers, small_dataframe):
+    accessor = _PandasDataAccessor(gui)
+    pd = pandas.DataFrame(data=small_dataframe)
+    gui.run(run_server=False)
+    cid = helpers.create_scope_and_get_sid(gui)
+    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+        g.client_id = cid
+        value = accessor.get_data("x", pd, {"start": 0, "end": 1, "styles": {"st": "test_style"}}, _DataFormat.JSON)[
+            "value"
+        ]
+        assert value["rowcount"] == 3
+        data = value["data"]
+        assert len(data) == 2
+        assert "test_style" in data[0]
+
+
+def test_tooltip(gui: Gui, helpers, small_dataframe):
+    def tt(state, value, index: int, row, column_name: str):
+        return f"{column_name}[{index}]: {value}"
+
+    accessor = _PandasDataAccessor(gui)
+    pd = pandas.DataFrame(data=small_dataframe)
+    gui.run(run_server=False)
+    cid = helpers.create_scope_and_get_sid(gui)
+    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+        gui._bind_var_val("tt", tt)
+        gui._get_locals_bind_from_context(None)["tt"] = tt
+        g.client_id = cid
+        value = accessor.get_data("x", pd, {"start": 0, "end": 1, "tooltips": {"tt": "tt"}}, _DataFormat.JSON)["value"]
+        assert value["rowcount"] == 3
+        data = value["data"]
+        assert len(data) == 2
+        assert "tt" in data[0]
+
+
 def test_sort(gui: Gui, helpers, small_dataframe):
     accessor = _PandasDataAccessor(gui)
     pd = pandas.DataFrame(data=small_dataframe)

@@ -151,11 +151,6 @@ jobs:
         run: |
           cp -r taipy/_cli/. ${{ steps.set-variables.outputs.package_dir }}/taipy/_cli
 
-      - name: Update pyproject.toml
-        working-directory: ${{ steps.set-variables.outputs.package_dir }}
-        run: |
-          python tools/release/setup_project.py . prod
-
       - name: Build package
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
         run: |
@@ -209,14 +204,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install build wheel
 
+      - name: Backup setup.py
+        run: |
+          mv setup.py setup.old.py
+
       - name: Copy files from tools
         run: |
           cp -r tools/packages/taipy/. .
-
-      - name: Update pyproject.toml
-        working-directory: ${{ steps.set-variables.outputs.package_dir }}
-        run: |
-          python tools/release/setup_project.py . prod
 
       - name: Build Taipy package
         run: |

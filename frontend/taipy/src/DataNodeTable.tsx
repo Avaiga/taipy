@@ -215,7 +215,8 @@ const DataNodeTable = (props: DataNodeTableProps) => {
                 updateVarName={props.updateVarName}
                 data={props.data}
                 userData={userData}
-                onEdit={tableEdit ? props.onEdit : undefined}
+                onEdit={props.onEdit}
+                editable={tableEdit}
                 filter={true}
                 libClassName="taipy-table"
                 pageSize={25}

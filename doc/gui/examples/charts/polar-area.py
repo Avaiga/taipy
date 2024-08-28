@@ -17,9 +17,6 @@ import math
 
 from taipy.gui import Gui
 
-# One data point for each degree
-theta = range(0, 360)
-
 
 # Parametric equation that draws a shape (source Wolfram Mathworld)
 def draw_heart(angle):
@@ -28,29 +25,33 @@ def draw_heart(angle):
     return 2 - 2 * sa + sa * (math.sqrt(math.fabs(math.cos(a))) / (sa + 1.4))
 
 
-data = {
-    # Create the heart shape
-    "r": [draw_heart(angle) for angle in theta],
-    "theta": theta,
-}
+if __name__ == "__main__":
+    # One data point for each degree
+    theta = range(0, 360)
 
-options = {"fill": "toself"}
+    data = {
+        # Create the heart shape
+        "r": [draw_heart(angle) for angle in theta],
+        "theta": theta,
+    }
 
-layout = {
-    # Hide the legend
-    "showlegend": False,
-    "polar": {
-        # Hide the angular axis
-        "angularaxis": {"visible": False},
-        # Hide the radial axis
-        "radialaxis": {"visible": False},
-    },
-}
+    options = {"fill": "toself"}
 
-page = """
+    layout = {
+        # Hide the legend
+        "showlegend": False,
+        "polar": {
+            # Hide the angular axis
+            "angularaxis": {"visible": False},
+            # Hide the radial axis
+            "radialaxis": {"visible": False},
+        },
+    }
+
+    page = """
 # Polar - Area
 
 <|{data}|chart|type=scatterpolar|mode=none|layout={layout}|options={options}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

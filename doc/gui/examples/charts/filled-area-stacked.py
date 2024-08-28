@@ -15,25 +15,26 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-data = {
-    "Month": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-    "Milk": [80, 85, 95, 120, 140, 130, 145, 150, 120, 100, 90, 110],
-    "Bread": [100, 90, 85, 90, 100, 110, 105, 95, 100, 110, 120, 125],
-    "Apples": [50, 65, 70, 65, 70, 75, 85, 70, 60, 65, 70, 80],
-}
+if __name__ == "__main__":
+    data = {
+        "Month": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        "Milk": [80, 85, 95, 120, 140, 130, 145, 150, 120, 100, 90, 110],
+        "Bread": [100, 90, 85, 90, 100, 110, 105, 95, 100, 110, 120, 125],
+        "Apples": [50, 65, 70, 65, 70, 75, 85, 70, 60, 65, 70, 80],
+    }
 
-# Name of the three sets to trace
-items = ["Milk", "Bread", "Apples"]
+    # Name of the three sets to trace
+    items = ["Milk", "Bread", "Apples"]
 
-options = {
-    # Group all traces in the same stack group
-    "stackgroup": "first_group"
-}
+    options = {
+        # Group all traces in the same stack group
+        "stackgroup": "first_group"
+    }
 
-page = """
+    page = """
 # Filled Area - Stacked
 
 <|{data}|chart|mode=none|x=Month|y={items}|options={options}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

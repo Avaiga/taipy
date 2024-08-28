@@ -17,13 +17,14 @@ import random
 
 from taipy.gui import Gui
 
-# Random data set
-data = {"Count": [random.random() for _ in range(100)]}
+if __name__ == "__main__":
+    # Random data set
+    data = {"Count": [random.random() for _ in range(100)]}
 
-page = """
+    page = """
 # Histograms - Horizontal
 
 <|{data}|chart|type=histogram|y=Count|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

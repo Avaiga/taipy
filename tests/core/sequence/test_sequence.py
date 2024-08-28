@@ -20,6 +20,7 @@ from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.pickle import PickleDataNode
+from taipy.core.exceptions import AttributeKeyAlreadyExisted
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.scenario.scenario import Scenario
 from taipy.core.sequence._sequence_manager import _SequenceManager
@@ -38,7 +39,7 @@ def test_sequence_equals():
     sequence_1 = scenario.sequences["print"]
     sequence_id = sequence_1.id
 
-    assert sequence_1.name == "print"
+    assert sequence_1.properties["name"] == "print"
     sequence_2 = _SequenceManager._get(sequence_id)
     # To test if instance is same type
     task = Task("task", {}, print, [], [], sequence_id)
@@ -56,7 +57,7 @@ def test_create_sequence():
     sequence = Sequence({"description": "description"}, [task], sequence_id=SequenceId("name_1"))
     assert sequence.id == "name_1"
     assert sequence.owner_id is None
-    assert sequence.description == "description"
+    assert sequence.properties["description"] == "description"
     assert sequence.foo == input
     assert sequence.bar == output
     assert sequence.baz.id == task.id
@@ -80,7 +81,7 @@ def test_create_sequence():
     )
     assert sequence_1.id == "name_1"
     assert sequence_1.owner_id == "owner_id"
-    assert sequence_1.description == "description"
+    assert sequence_1.properties["description"] == "description"
     assert sequence_1.input == input_1
     assert sequence_1.output == output_1
     assert sequence_1.task_1 == task_1
@@ -109,7 +110,7 @@ def test_create_sequence():
     )
     assert sequence_2.owner_id == "owner_id"
     assert sequence_2.id == "name_2"
-    assert sequence_2.description == "description"
+    assert sequence_2.properties["description"] == "description"
     assert sequence_2.tasks == {task.config_id: task, task_1.config_id: task_1}
     assert sequence_2.data_nodes == {"foo": input, "bar": output, "input": input_1, "output": output_1}
     assert sequence_2.parent_ids == {"parent_id_1", "parent_id_2"}
@@ -122,8 +123,24 @@ def test_create_sequence():
                 return self.label
 
         get_mck.return_value = MockOwner()
-        assert sequence_2.get_label() == "owner_label > " + sequence_2.name
-        assert sequence_2.get_simple_label() == sequence_2.name
+        assert sequence_2.get_label() == "owner_label > " + sequence_2.properties["name"]
+        assert sequence_2.get_simple_label() == sequence_2.properties["name"]
+
+
+def test_get_set_attribute():
+    dn_cfg = Config.configure_data_node("bar")
+    task_config = Config.configure_task("print", print, [dn_cfg], None)
+    scenario_config = Config.configure_scenario("scenario", [task_config])
+
+    scenario = _ScenarioManager._create(scenario_config)
+    scenario.add_sequences({"seq": list(scenario.tasks.values())})
+    sequence = scenario.sequences["seq"]
+
+    sequence.key = "value"
+    assert sequence.key == "value"
+
+    with pytest.raises(AttributeKeyAlreadyExisted):
+        sequence.bar = "KeyAlreadyUsed"
 
 
 def test_check_consistency():

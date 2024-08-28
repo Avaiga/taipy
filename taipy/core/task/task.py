@@ -12,7 +12,6 @@
 import uuid
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
 
-from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.scope import Scope
 
@@ -22,6 +21,7 @@ from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..data.data_node import DataNode
+from ..exceptions import AttributeKeyAlreadyExisted
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
 from ..submission.submission import Submission
 from .task_id import TaskId
@@ -51,29 +51,30 @@ class Task(_Entity, _Labeled):
         def by_two(x: int):
             return x * 2
 
-        # Configure data nodes, tasks and scenarios
-        input_cfg = Config.configure_data_node("my_input", default_data=2)
-        result_cfg = Config.configure_data_node("my_result")
-        task_cfg = Config.configure_task("my_double", function=by_two, input=input_cfg, output=result_cfg)
-        scenario_cfg = Config.configure_scenario("my_scenario", task_configs=[task_cfg])
+        if __name__ == "__main__":
+            # Configure data nodes, tasks and scenarios
+            input_cfg = Config.configure_data_node("my_input", default_data=2)
+            result_cfg = Config.configure_data_node("my_result")
+            task_cfg = Config.configure_task("my_double", function=by_two, input=input_cfg, output=result_cfg)
+            scenario_cfg = Config.configure_scenario("my_scenario", task_configs=[task_cfg])
 
-        # Instantiate a task along with a scenario
-        sc = tp.create_scenario(scenario_cfg)
+            # Instantiate a task along with a scenario
+            sc = tp.create_scenario(scenario_cfg)
 
-        # Retrieve task and data nodes from scenario
-        task_input = sc.my_input
-        double_task = sc.my_double
-        task_result = sc.my_result
+            # Retrieve task and data nodes from scenario
+            task_input = sc.my_input
+            double_task = sc.my_double
+            task_result = sc.my_result
 
-        # Write the input data and submit the task
-        task_input.write(3)
-        double_task.submit()
+            # Write the input data and submit the task
+            task_input.write(3)
+            double_task.submit()
 
-        # Read the result
-        print(task_result.read())  # Output: 6
+            # Read the result
+            print(task_result.read())  # Output: 6
 
-        # Retrieve the list of all tasks
-        all_tasks = tp.get_tasks()
+            # Retrieve the list of all tasks
+            all_tasks = tp.get_tasks()
         ```
 
     Attributes:
@@ -96,6 +97,7 @@ class Task(_Entity, _Labeled):
     _ID_PREFIX = "TASK"
     __ID_SEPARATOR = "_"
     _MANAGER_NAME = "task"
+    __CHECK_INIT_DONE_ATTR_NAME = "_init_done"
 
     def __init__(
         self,
@@ -120,6 +122,7 @@ class Task(_Entity, _Labeled):
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
         self._skippable = skippable
         self._properties = _Properties(self, **properties)
+        self._init_done = True
 
     def __hash__(self):
         return hash(self.id)
@@ -133,10 +136,18 @@ class Task(_Entity, _Labeled):
     def __setstate__(self, state):
         vars(self).update(state)
 
+    def __setattr__(self, name: str, value: Any) -> None:
+        if self.__CHECK_INIT_DONE_ATTR_NAME not in dir(self) or name in dir(self):
+            return super().__setattr__(name, value)
+        else:
+            try:
+                self.__getattr__(name)
+                raise AttributeKeyAlreadyExisted(name)
+            except AttributeError:
+                return super().__setattr__(name, value)
+
     def __getattr__(self, attribute_name):
         protected_attribute_name = _validate_id(attribute_name)
-        if protected_attribute_name in self._properties:
-            return _tpl._replace_templates(self._properties[protected_attribute_name])
         if protected_attribute_name in self.input:
             return self.input[protected_attribute_name]
         if protected_attribute_name in self.output:

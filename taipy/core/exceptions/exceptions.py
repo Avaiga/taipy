@@ -23,8 +23,8 @@ class ConfigCoreVersionMismatched(Exception):
         )
 
 
-class CoreServiceIsAlreadyRunning(Exception):
-    """Raised if the Core service is already running."""
+class OrchestratorServiceIsAlreadyRunning(Exception):
+    """Raised if the Orchestrator service is already running."""
 
 
 class CycleAlreadyExists(Exception):
@@ -383,3 +383,10 @@ class SQLQueryCannotBeExecuted(Exception):
 
 class _SuspiciousFileOperation(Exception):
     pass
+
+
+class AttributeKeyAlreadyExisted(Exception):
+    """Raised when an attribute key already existed."""
+
+    def __init__(self, key: str):
+        self.message = f"Attribute key '{key}' already existed."

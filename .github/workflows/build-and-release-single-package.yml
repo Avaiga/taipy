@@ -153,11 +153,6 @@ jobs:
         run: |
           cp -r taipy/_cli/. ${{ steps.set-variables.outputs.package_dir }}/taipy/_cli
 
-      - name: Update pyproject.toml
-        working-directory: ${{ steps.set-variables.outputs.package_dir }}
-        run: |
-          python tools/release/setup_project.py . prod
-
       - name: Build package
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
         run: |
