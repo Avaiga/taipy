@@ -296,6 +296,7 @@ class _Factory:
                 ("change_delay", PropertyType.number, gui._get_config("change_delay", None)),
                 ("multiline", PropertyType.boolean, False),
                 ("lines_shown", PropertyType.number, 5),
+                ("width", PropertyType.string_or_number),
             ]
         ),
         "layout": lambda gui, control_type, attrs: _Builder(
