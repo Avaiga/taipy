@@ -111,8 +111,6 @@ jobs:
 
       - name: Copy tools
         run: |
-          ls -lah
-          ls -lah taipy/config
           cp -r tools ${{ steps.set-variables.outputs.package_dir }}
 
       - name: Install dependencies
@@ -137,33 +135,25 @@ jobs:
 
       - name: Copy files from tools
         run: |
-          ls -lah taipy/config
           cp -r tools/packages/taipy-${{matrix.package}}/. ${{ steps.set-variables.outputs.package_dir }}
-          ls -lah taipy/config
 
       - name: Build Package Structure
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
         run: |
-          ls -lah
           python tools/release/build_package_structure.py ${{ matrix.package }}
-          ls -lah
 
       - name: Copy Taipy Logger
         if: matrix.package == 'config'
         run: |
-          ls -lah taipy/config
           cp -r taipy/logger/. ${{ steps.set-variables.outputs.package_dir }}/taipy/logger
 
       - name: Copy _cli folder
         run: |
-          ls -lah taipy/config
           cp -r taipy/_cli/. ${{ steps.set-variables.outputs.package_dir }}/taipy/_cli
 
       - name: Build package
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
         run: |
-          pwd
-          ls -lah taipy/config
           python -m build
           for file in ./dist/*; do mv "$file" "${file//_/-}"; done
 
@@ -181,7 +171,7 @@ jobs:
 
   build-and-release-taipy:
     runs-on: ubuntu-latest
-    needs: [build-and-release-taipy-packages, fetch-versions ]
+    needs: [build-and-release-taipy-packages, fetch-versions]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -221,6 +211,10 @@ jobs:
       - name: Copy files from tools
         run: |
           cp -r tools/packages/taipy/. .
+
+      - name: Build Frontend
+        run: |
+          python tools/frontend/bundle_build.py
 
       - name: Build Taipy package
         run: |

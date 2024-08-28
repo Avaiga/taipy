@@ -24,7 +24,7 @@ root_folder = Path(__file__).parent
 
 package_desc = Path(root_folder / "package_desc.md").read_text("UTF-8")
 
-version_path = os.path.join(root_folder, "taipy/gui/version.json")
+version_path = "taipy/gui/version.json"
 
 setup_requirements = Path("taipy/gui/setup.requirements.txt")
 

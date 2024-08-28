@@ -28,6 +28,3 @@ find = {include = ["taipy", "taipy.rest"]}
 
 [project.urls]
 homepage = "https://github.com/avaiga/taipy"
-
-[tool.setuptools.data-files]
-"version" = ["version.json"]
