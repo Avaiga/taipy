@@ -46,6 +46,31 @@ class _ScenarioConfigChecker(_ConfigChecker):
     def _check_if_children_config_id_is_overlapping_with_properties(
         self, scenario_config_id: str, scenario_config: ScenarioConfig
     ):
+        if scenario_config.sequences:
+            for sequence in scenario_config.sequences:
+                if sequence in scenario_config.properties:
+                    self._error(
+                        sequence,
+                        scenario_config.sequences[sequence],
+                        f"The sequence name `{sequence}` is overlapping with the "
+                        f"property `{sequence}` of ScenarioConfig `{scenario_config_id}`.",
+                    )
+                if scenario_config.data_nodes:
+                    if sequence in [dn.id for dn in scenario_config.data_nodes if isinstance(dn, DataNodeConfig)]:
+                        self._error(
+                            sequence,
+                            scenario_config.sequences[sequence],
+                            f"The sequence name `{sequence}` is overlapping with the "
+                            f"data node `{sequence}` of ScenarioConfig `{scenario_config_id}`.",
+                        )
+                if scenario_config.tasks:
+                    if sequence in [task.id for task in scenario_config.tasks if isinstance(task, TaskConfig)]:
+                        self._error(
+                            sequence,
+                            scenario_config.sequences[sequence],
+                            f"The sequence name `{sequence}` is overlapping with the "
+                            f"task `{sequence}` of ScenarioConfig `{scenario_config_id}`.",
+                        )
         if scenario_config.tasks:
             for task in scenario_config.tasks:
                 if isinstance(task, TaskConfig) and task.id in scenario_config.properties:
@@ -55,6 +80,16 @@ class _ScenarioConfigChecker(_ConfigChecker):
                         f"The id of the TaskConfig `{task.id}` is overlapping with the "
                         f"property `{task.id}` of ScenarioConfig `{scenario_config_id}`.",
                     )
+                if scenario_config.data_nodes:
+                    if isinstance(task, TaskConfig) and task.id in [
+                        dn.id for dn in scenario_config.data_nodes if isinstance(dn, DataNodeConfig)
+                    ]:
+                        self._error(
+                            TaskConfig._ID_KEY,
+                            task.id,
+                            f"The id of the TaskConfig `{task.id}` is overlapping with the "
+                            f"data node `{task.id}` of ScenarioConfig `{scenario_config_id}`.",
+                        )
         if scenario_config.data_nodes:
             for data_node in scenario_config.data_nodes:
                 if isinstance(data_node, DataNodeConfig) and data_node.id in scenario_config.properties:
