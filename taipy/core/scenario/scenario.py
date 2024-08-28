@@ -16,7 +16,6 @@ from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import networkx as nx
 
-from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 
 from .._entity._entity import _Entity
@@ -31,6 +30,7 @@ from ..cycle.cycle import Cycle
 from ..data.data_node import DataNode
 from ..data.data_node_id import DataNodeId
 from ..exceptions.exceptions import (
+    AttributeKeyAlreadyExisted,
     InvalidSequence,
     NonExistingDataNode,
     NonExistingSequence,
@@ -117,6 +117,7 @@ class Scenario(_Entity, Submittable, _Labeled):
     _SEQUENCE_TASKS_KEY = "tasks"
     _SEQUENCE_PROPERTIES_KEY = "properties"
     _SEQUENCE_SUBSCRIBERS_KEY = "subscribers"
+    __CHECK_INIT_DONE_ATTR_NAME = "_init_done"
 
     def __init__(
         self,
@@ -155,6 +156,7 @@ class Scenario(_Entity, Submittable, _Labeled):
             )
 
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
+        self._init_done = True
 
     @staticmethod
     def _new_id(config_id: str) -> ScenarioId:
@@ -176,20 +178,28 @@ class Scenario(_Entity, Submittable, _Labeled):
     def __eq__(self, other):
         return isinstance(other, Scenario) and self.id == other.id
 
-    def __getattr__(self, attribute_name):
-        protected_attribute_name = _validate_id(attribute_name)
-        if protected_attribute_name in self._properties:
-            return _tpl._replace_templates(self._properties[protected_attribute_name])
+    def __setattr__(self, name: str, value: Any) -> None:
+        if self.__CHECK_INIT_DONE_ATTR_NAME not in dir(self) or name in dir(self):
+            return super().__setattr__(name, value)
+        else:
+            try:
+                self.__getattr__(name)
+                raise AttributeKeyAlreadyExisted(name)
+            except AttributeError:
+                return super().__setattr__(name, value)
 
+    def __getattr__(self, attribute_name) -> Union[Sequence, Task, DataNode]:
+        protected_attribute_name = _validate_id(attribute_name)
         sequences = self._get_sequences()
         if protected_attribute_name in sequences:
             return sequences[protected_attribute_name]
-        tasks = self.tasks
+        tasks = self.__get_tasks()
         if protected_attribute_name in tasks:
             return tasks[protected_attribute_name]
-        data_nodes = self.data_nodes
+        data_nodes = self.__get_data_nodes()
         if protected_attribute_name in data_nodes:
             return data_nodes[protected_attribute_name]
+
         raise AttributeError(f"{attribute_name} is not an attribute of scenario {self.id}")
 
     @property
@@ -458,13 +468,16 @@ class Scenario(_Entity, Submittable, _Labeled):
     def _get_set_of_tasks(self) -> Set[Task]:
         return set(self.tasks.values())
 
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def data_nodes(self) -> Dict[str, DataNode]:
+    def __get_data_nodes(self) -> Dict[str, DataNode]:
         data_nodes_dict = self.__get_additional_data_nodes()
         for _, task in self.__get_tasks().items():
             data_nodes_dict.update(task.data_nodes)
         return data_nodes_dict
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def data_nodes(self) -> Dict[str, DataNode]:
+        return self.__get_data_nodes()
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

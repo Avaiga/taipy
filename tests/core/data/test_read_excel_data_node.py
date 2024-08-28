@@ -584,7 +584,7 @@ def test_read_multi_sheet_without_header_single_custom_object_exposed_type():
     )
 
     data_custom = excel_data_node_as_custom_object.read()
-    assert excel_data_node_as_custom_object.exposed_type == MyCustomObject1
+    assert excel_data_node_as_custom_object.properties["exposed_type"] == MyCustomObject1
     assert isinstance(data_custom, Dict)
     assert len(data_custom) == 2
     assert all(len(data_custom[sheet_name]) == 6 for sheet_name in sheet_names)
