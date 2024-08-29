@@ -80,7 +80,16 @@ const Input = (props: TaipyInputProps) => {
     const min = useDynamicProperty(props.min, props.defaultMin, undefined);
     const max = useDynamicProperty(props.max, props.defaultMax, undefined);
 
-    const textSx = useMemo(() => props.width ? {...numberSx, maxWidth: getCssSize(props.width)} : numberSx, [props.width]);
+    const textSx = useMemo(
+        () =>
+            props.width
+                ? {
+                      ...numberSx,
+                      maxWidth: getCssSize(props.width),
+                  }
+                : numberSx,
+        [props.width]
+    );
 
     const updateValueWithDelay = useCallback(
         (value: number | string) => {
@@ -88,7 +97,9 @@ const Input = (props: TaipyInputProps) => {
                 return;
             }
             if (changeDelay === 0) {
-                dispatch(createSendUpdateAction(updateVarName, value, module, onChange, propagate));
+                delayCall.current = window.setTimeout(() => {
+                    dispatch(createSendUpdateAction(updateVarName, value, module, onChange, propagate));
+                }, 0.1);
                 return;
             }
             if (delayCall.current > 0) {
@@ -107,7 +118,9 @@ const Input = (props: TaipyInputProps) => {
             const val = e.target.value;
             setValue(val);
             if (changeDelay === 0) {
-                dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
+                delayCall.current = window.setTimeout(() => {
+                    dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
+                }, 0.1);
                 return;
             }
             if (changeDelay > 0) {
