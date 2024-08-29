@@ -197,7 +197,7 @@ And the final result:
 
 ## ⚒️ Contributing
 
-Want to help build Taipy? Check out our **[Contributing Guide](https://github.com/Avaiga/taipy/blob/develop/CONTRIBUTING.md).**
+Want to help build Taipy? Check out our [**Contributing Guide**](https://github.com/Avaiga/taipy/blob/develop/CONTRIBUTING.md).
 
 ## 🪄 Code of conduct
 
