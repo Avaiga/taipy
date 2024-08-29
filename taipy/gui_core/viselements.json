@@ -65,7 +65,7 @@
                     {
                         "name": "on_creation",
                         "type": "Callback",
-                        "doc": "The name of the function that is triggered when a scenario is about to be created.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the scenario selector.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>config: the name of the selected scenario configuration.</li>\n<li>date: the creation date for the new scenario.</li>\n<li>label: the user-specified label.</li>\n<li>properties: a dictionary containing all the user-defined custom properties.</li>\n</ul>\n</li>\n<li>The callback function can return a scenario, a string containing an error message (a scenario will not be created), or None (then a new scenario is created with the user parameters).</li>\n</ul>",
+                        "doc": "The name of the function that is triggered when a scenario is about to be created.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of this scenario selector.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>config (str): the name of the selected scenario configuration.</li>\n<li>date (datetime): the creation date for the new scenario.</li>\n<li>label (str): the user-specified label.</li>\n<li>properties (dic): a dictionary containing all the user-defined custom properties.</li>\n</ul>\n</li>\n<li>The callback function can return a scenario, a string containing an error message (a scenario will not be created), or None (then a new scenario is created with the user parameters).</li>\n</ul>",
                         "signature": [
                             [
                                 "state",
@@ -207,7 +207,7 @@
                     {
                         "name": "on_submission_change",
                         "type": "Callback",
-                        "doc": "The name of the function that is triggered when a submission status is changed.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>submission (Submission): the submission entity containing submission information.</li>\n<li>details (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>submission_status (str): the new status of the submission (possible values: SUBMITTED, COMPLETED, CANCELED, FAILED, BLOCKED, WAITING, RUNNING).</li>\n<li>job: the Job (if any) that is at the origin of the submission status change.</li>\n<li>submittable_entity: submittable (Submittable): the entity (usually a Scenario) that was submitted.</li>\n</ul>",
+                        "doc": "The name of the function that is triggered when a submission status is changed.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>submission (Submission): the submission entity containing submission information.</li>\n<li>details (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>submission_status (str): the new status of the submission (possible values are: "SUBMITTED", "COMPLETED", "CANCELED", "FAILED", "BLOCKED", "WAITING", or "RUNNING").</li>\n<li>job: the Job (if any) that is at the origin of the submission status change.</li>\n<li>submittable_entity (Submittable): the entity (usually a Scenario) that was submitted.</li>\n</ul>",
                         "signature": [
                             [
                                 "state",
@@ -308,7 +308,7 @@
                     },
                     {
                         "name": "on_change",
-                        "type": "callback",
+                        "type": "Callback",
                         "doc": "The name of a function that is triggered when a data node is selected.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (<code>DataNode^</code>): the selected data node.</li>\n</ul>",
                         "signature": [
                             [
@@ -517,7 +517,7 @@
                     },
                     {
                         "name": "on_change",
-                        "type": "callback",
+                        "type": "Callback",
                         "doc": "The name of a function that is triggered when the selection is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (<code>Job^</code>): the selected job.</li>\n</ul>",
                         "signature": [
                             [
@@ -539,6 +539,26 @@
                         "type": "str",
                         "default_value": "\"50vh\"",
                         "doc": "The maximum height, in CSS units, of the control."
+                    },
+                    {
+                        "name": "on_details",
+                        "type": "Union[Callback, bool]",
+                        "doc": "The name of a function that is triggered when the details icon is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the id of the control.</li>\n<li>payload (<code>dict^</code>): a dictionary that contains the Job Id in the value for key <i>args<i>.</li>\n</ul></br>If False, the icon is not shown.",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+
                     }
                 ]
             }
