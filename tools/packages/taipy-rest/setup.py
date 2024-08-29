@@ -36,6 +36,6 @@ setup(
     version=version_string,
     packages=find_packages(where=root_folder, include=["taipy", "taipy.rest", "taipy.rest.*"]),
     include_package_data=True,
-    data_files=[('version', ['version.json'])],
+    data_files=[('version', [version_path])],
     install_requires=requirements,
 )

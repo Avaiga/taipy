@@ -31,6 +31,3 @@ find = {include = ["taipy", "taipy.config", "taipy.config.*", "taipy.logger", "t
 
 [project.urls]
 homepage = "https://github.com/avaiga/taipy"
-
-[tool.setuptools.data-files]
-"version" = ["version.json"]
