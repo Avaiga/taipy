@@ -543,7 +543,7 @@
                     {
                         "name": "on_details",
                         "type": "Union[Callback, bool]",
-                        "doc": "The name of a function that is triggered when the details icon is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the component id.</li>\n<li>payload (<code>dict^</code>): a dict that contains a value for args with the Job Id.</li>\n</ul></br>If False, the icon is not shown.",
+                        "doc": "The name of a function that is triggered when the details icon is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the id of the control.</li>\n<li>payload (<code>dict^</code>): a dictionary that contains the Job Id in the value for key <i>args<i>.</li>\n</ul></br>If False, the icon is not shown.",
                         "signature": [
                             [
                                 "state",
