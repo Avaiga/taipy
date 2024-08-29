@@ -61,6 +61,7 @@ export interface TaipyInputProps extends TaipyActiveProps, TaipyChangeProps, Tai
     actionKeys?: string;
     multiline?: boolean;
     linesShown?: number;
+    width?: string | number;
 }
 
 export interface TaipyLabelProps {

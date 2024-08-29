@@ -111,6 +111,12 @@
                         "doc": "The number of lines shown in the input control, when multiline is True."
                     },
                     {
+                        "name": "width",
+                        "type": "Union[str,int]",
+                        "default_value": "None",
+                        "doc": "The width of the input element."
+                    },
+                    {
                         "name": "type",
                         "type": "str",
                         "default_value": "\"text\"",
