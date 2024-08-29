@@ -41,7 +41,6 @@ interface DateRangeProps extends TaipyActiveProps, TaipyChangeProps {
     width?: string | number;
 }
 
-const baseBoxSx = { display: "inline-flex", alignItems: "center", gap: "0.5em" };
 const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotProps<Date>;
 
 const getRangeDateTime = (

@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { CSSProperties, MouseEvent } from "react";
+import { MouseEvent } from "react";
 
 export interface TaipyActiveProps extends TaipyDynamicProps, TaipyHoverProps {
     defaultActive?: boolean;
