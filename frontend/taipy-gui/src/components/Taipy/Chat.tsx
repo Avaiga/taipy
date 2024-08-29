@@ -329,7 +329,7 @@ const Chat = (props: ChatProps) => {
 
     useEffect(() => {
         if (refresh) {
-            setTimeout(() => loadMoreItems(0), 1); // So that the state can be changed
+            Promise.resolve().then(() => loadMoreItems(0)); // So that the state can be changed
         }
     }, [refresh, loadMoreItems]);
 

@@ -156,6 +156,24 @@ describe("DateRange Component", () => {
         const endInput = getByLabelText("end") as HTMLInputElement;
         expect(endInput.value).toBe("01/31/2001");
     });
+    it("displays with width=70%", async () => {
+        render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DateRange dates={curDates} width="70%" />
+            </LocalizationProvider>
+        );
+        const elt = document.querySelector(".MuiStack-root");
+        expect(elt).toHaveStyle("width: 70%");
+    });
+    it("displays with width=500", async () => {
+        render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DateRange dates={curDates} width={500} />
+            </LocalizationProvider>
+        );
+        const elt = document.querySelector(".MuiStack-root");
+        expect(elt).toHaveStyle("width: 500px");
+    });
     it("is disabled", async () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -256,7 +274,7 @@ describe("DateRange with time Component", () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DateRange
-                    defaultDates="[&quot;2001-01-01T00:00:01.001Z&quot;,&quot;2001-01-31T00:00:01.001Z&quot;]"
+                    defaultDates='["2001-01-01T00:00:01.001Z","2001-01-31T00:00:01.001Z"]'
                     withTime={true}
                     dates={undefined as unknown as string[]}
                     className="tp-dt"
@@ -274,7 +292,7 @@ describe("DateRange with time Component", () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DateRange
-                    defaultDates="[&quot;2001-01-01T00:10:01.001Z&quot;,&quot;2001-01-31T00:11:01.001Z&quot;]"
+                    defaultDates='["2001-01-01T00:10:01.001Z","2001-01-31T00:11:01.001Z"]'
                     withTime={true}
                     dates={undefined as unknown as string[]}
                     className="tp-dt"
@@ -293,7 +311,7 @@ describe("DateRange with time Component", () => {
         const { getByLabelText } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DateRange
-                    defaultDates="[&quot;2001-01-01T00:00:01.001Z&quot;,&quot;2001-01-31T00:00:01.001Z&quot;]"
+                    defaultDates='["2001-01-01T00:00:01.001Z","2001-01-31T00:00:01.001Z"]'
                     dates={undefined as unknown as string[]}
                     withTime={true}
                     className="taipy-date-range"
