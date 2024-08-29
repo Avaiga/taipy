@@ -97,9 +97,10 @@ const Input = (props: TaipyInputProps) => {
                 return;
             }
             if (changeDelay === 0) {
-                delayCall.current = window.setTimeout(() => {
+                // Workaround using microtask to ensure the value is updated before the next action to avoid the bad setState behavior
+                Promise.resolve().then(() => {
                     dispatch(createSendUpdateAction(updateVarName, value, module, onChange, propagate));
-                }, 0.1);
+                });
                 return;
             }
             if (delayCall.current > 0) {
@@ -117,23 +118,9 @@ const Input = (props: TaipyInputProps) => {
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const val = e.target.value;
             setValue(val);
-            if (changeDelay === 0) {
-                delayCall.current = window.setTimeout(() => {
-                    dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
-                }, 0.1);
-                return;
-            }
-            if (changeDelay > 0) {
-                if (delayCall.current > 0) {
-                    clearTimeout(delayCall.current);
-                }
-                delayCall.current = window.setTimeout(() => {
-                    delayCall.current = -1;
-                    dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
-                }, changeDelay);
-            }
+            dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
         },
-        [updateVarName, dispatch, propagate, onChange, changeDelay, module]
+        [updateVarName, dispatch, propagate, onChange, module]
     );
 
     const handleAction = useCallback(
@@ -148,7 +135,6 @@ const Input = (props: TaipyInputProps) => {
                     }
                     setValue(val.toString());
                     updateValueWithDelay(val);
-                    onAction && dispatch(createSendActionNameAction(id, module, onAction, evt.key, updateVarName, val));
                     evt.preventDefault();
                 } else if (evt.key === "ArrowDown") {
                     let val =
@@ -159,7 +145,6 @@ const Input = (props: TaipyInputProps) => {
                     }
                     setValue(val.toString());
                     updateValueWithDelay(val);
-                    onAction && dispatch(createSendActionNameAction(id, module, onAction, evt.key, updateVarName, val));
                     evt.preventDefault();
                 }
             } else if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
