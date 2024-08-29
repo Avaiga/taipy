@@ -14,7 +14,7 @@ import shutil
 import sys
 from pathlib import Path
 
-__SKIP = ["LICENSE", "MANIFEST.in", "taipy", "setup.py", "tools"]
+__SKIP = ["LICENSE", "MANIFEST.in", "taipy", "setup.py", "tools", "pyproject.toml"]
 
 
 if __name__ == "__main__":
