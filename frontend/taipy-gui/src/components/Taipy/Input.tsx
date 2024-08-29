@@ -21,7 +21,7 @@ import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
-import { TaipyInputProps } from "./utils";
+import { getCssSize, TaipyInputProps } from "./utils";
 import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 
 const AUTHORIZED_KEYS = ["Enter", "Escape", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"];
@@ -79,6 +79,8 @@ const Input = (props: TaipyInputProps) => {
     const stepMultiplier = useDynamicProperty(props.stepMultiplier, props.defaultStepMultiplier, 10);
     const min = useDynamicProperty(props.min, props.defaultMin, undefined);
     const max = useDynamicProperty(props.max, props.defaultMax, undefined);
+
+    const textSx = useMemo(() => props.width ? {...numberSx, maxWidth: getCssSize(props.width)} : numberSx, [props.width]);
 
     const updateValueWithDelay = useCallback(
         (value: number | string) => {
@@ -313,7 +315,7 @@ const Input = (props: TaipyInputProps) => {
     return (
         <Tooltip title={hover || ""}>
             <TextField
-                sx={numberSx}
+                sx={textSx}
                 margin="dense"
                 hiddenLabel
                 value={value ?? ""}
