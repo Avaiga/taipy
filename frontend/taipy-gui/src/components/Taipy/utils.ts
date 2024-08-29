@@ -128,8 +128,6 @@ export const getSuffixedClassNames = (names: string | undefined, suffix: string)
         .map((n) => n + suffix)
         .join(" ");
 
-export const emptyStyle = {} as CSSProperties;
-
 export const disableColor = <T>(color: T, disabled: boolean) => (disabled ? ("disabled" as T) : color);
 
 export const getProps = (p: DateProps, start: boolean, val: Date | null, withTime: boolean): DateProps => {
@@ -141,10 +139,10 @@ export const getProps = (p: DateProps, start: boolean, val: Date | null, withTim
             ? "minDateTime"
             : "maxDateTime"
         : start
-            ? "minDate"
-            : "maxDate";
+        ? "minDate"
+        : "maxDate";
     if (p[propName] == val) {
         return p;
     }
-    return {...p, [propName]: val};
+    return { ...p, [propName]: val };
 };
