@@ -151,21 +151,26 @@ const getDecimatorsPayload = (
 ) => {
     return decimators
         ? {
-              width: plotDiv?.clientWidth,
-              height: plotDiv?.clientHeight,
-              decimators: decimators.map((d, i) =>
-                  d
-                      ? {
-                            decimator: d,
-                            xAxis: getAxis(traces, i, columns, 0),
-                            yAxis: getAxis(traces, i, columns, 1),
-                            zAxis: getAxis(traces, i, columns, 2),
-                            chartMode: modes[i],
-                        }
-                      : undefined
-              ),
-              relayoutData: relayoutData,
-          }
+            width: plotDiv?.clientWidth,
+            height: plotDiv?.clientHeight,
+            decimators: decimators.map((d, i) =>
+                d
+                    ? {
+                        decimator: d,
+                        xAxis: getAxis(traces, i, columns, 0),
+                        yAxis: getAxis(traces, i, columns, 1),
+                        zAxis: getAxis(traces, i, columns, 2),
+                        chartMode: modes[i],
+                    }
+                    : {
+                        xAxis: getAxis(traces, i, columns, 0),
+                        yAxis: getAxis(traces, i, columns, 1),
+                        zAxis: getAxis(traces, i, columns, 2),
+                        chartMode: modes[i],
+                    }
+            ),
+            relayoutData: relayoutData,
+        }
         : undefined;
 };
 

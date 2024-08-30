@@ -26,7 +26,6 @@ from ..utils import _RE_PD_TYPE, _get_date_col_str_name
 from .comparison import _compare_function
 from .data_accessor import _DataAccessor
 from .data_format import _DataFormat
-from .utils import _df_data_filter, _df_relayout
 
 _has_arrow_module = False
 if util.find_spec("pyarrow"):
@@ -378,46 +377,36 @@ class _PandasDataAccessor(_DataAccessor):
             ret_payload["alldata"] = True
             decimator_payload: t.Dict[str, t.Any] = payload.get("decimatorPayload", {})
             decimators = decimator_payload.get("decimators", [])
-            nb_rows_max = decimator_payload.get("width")
+            decimated_dfs: t.List[pd.DataFrame] = []
             for decimator_pl in decimators:
+                if decimator_pl is None:
+                    continue
                 decimator = decimator_pl.get("decimator")
+                if decimator is None:
+                    x_column = decimator_pl.get("xAxis", "")
+                    y_column = decimator_pl.get("yAxis", "")
+                    z_column = decimator_pl.get("zAxis", "")
+                    filterd_columns = [x_column, y_column, z_column] if z_column else [x_column, y_column]
+                    decimated_df = df.copy().filter(filterd_columns, axis=1)
+                    decimated_dfs.append(decimated_df)
+                    continue
                 decimator_instance = (
                     self._gui._get_user_instance(decimator, PropertyType.decimator.value)
                     if decimator is not None
                     else None
                 )
                 if isinstance(decimator_instance, PropertyType.decimator.value):
-                    x_column, y_column, z_column = (
-                        decimator_pl.get("xAxis", ""),
-                        decimator_pl.get("yAxis", ""),
-                        decimator_pl.get("zAxis", ""),
+                    # Run the on_decimate method -> check if the decimator should be applied
+                    # -> apply the decimator
+                    decimated_df, is_decimator_applied, is_copied = decimator_instance.on_decimate(
+                        df, decimator_pl, decimator_payload, is_copied
                     )
-                    chart_mode = decimator_pl.get("chartMode", "")
-                    if decimator_instance._zoom and "relayoutData" in decimator_payload and not z_column:
-                        relayoutData = decimator_payload.get("relayoutData", {})
-                        x0 = relayoutData.get("xaxis.range[0]")
-                        x1 = relayoutData.get("xaxis.range[1]")
-                        y0 = relayoutData.get("yaxis.range[0]")
-                        y1 = relayoutData.get("yaxis.range[1]")
-
-                        df, is_copied = _df_relayout(
-                            t.cast(pd.DataFrame, df), x_column, y_column, chart_mode, x0, x1, y0, y1, is_copied
-                        )
-
-                    if nb_rows_max and decimator_instance._is_applicable(df, nb_rows_max, chart_mode):
-                        try:
-                            df, is_copied = _df_data_filter(
-                                t.cast(pd.DataFrame, df),
-                                x_column,
-                                y_column,
-                                z_column,
-                                decimator=decimator_instance,
-                                payload=decimator_payload,
-                                is_copied=is_copied,
-                            )
-                            self._gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(df))
-                        except Exception as e:
-                            _warn(f"Limit rows error with {decimator} for Dataframe", e)
+                    # add decimated dataframe to the list of decimated
+                    decimated_dfs.append(decimated_df)
+                    if is_decimator_applied:
+                        self._gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(df))
+            # merge the decimated dataframes
+            df = pd.merge(*decimated_dfs, how="outer", left_index=True, right_index=True)
             df = self.__build_transferred_cols(columns, t.cast(pd.DataFrame, df), is_copied=is_copied)
             if data_format is _DataFormat.CSV:
                 ret_payload["df"] = df

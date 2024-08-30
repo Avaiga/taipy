@@ -10,5 +10,4 @@
 # specific language governing permissions and limitations under the License.
 
 from .data_accessor import _DataAccessor
-from .decimator import LTTB, RDP, MinMaxDecimator, ScatterDecimator
-from .utils import Decimator
+from .decimator import *

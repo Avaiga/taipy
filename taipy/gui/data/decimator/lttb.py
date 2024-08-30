@@ -13,7 +13,7 @@ import typing as t
 
 import numpy as np
 
-from ..utils import Decimator
+from .base import Decimator
 
 
 class LTTB(Decimator):
@@ -28,7 +28,14 @@ class LTTB(Decimator):
 
     _CHART_MODES = ["lines+markers", "lines", "markers"]
 
-    def __init__(self, n_out: int, threshold: t.Optional[int] = None, zoom: t.Optional[bool] = True) -> None:
+    def __init__(
+        self,
+        n_out: int,
+        threshold: t.Optional[int] = None,
+        zoom: t.Optional[bool] = True,
+        on_decimate: t.Optional[t.Callable] = None,
+        apply_decimator: t.Optional[t.Callable] = None,
+    ) -> None:
         """Initialize a new `LTTB`.
 
         Arguments:
@@ -37,8 +44,12 @@ class LTTB(Decimator):
                 decimation is applied.
             zoom (Optional[bool]): set to True to reapply the decimation
                 when zoom or re-layout events are triggered.
+            on_decimate (Optional[Callable]): an user-defined function that is executed when the decimator
+                is found during runtime. This function can be used to provide custom decimation logic.
+            apply_decimator (Optional[Callable]): an user-defined function that is executed when the decimator
+                is applied to modify the data.
         """
-        super().__init__(threshold, zoom)
+        super().__init__(threshold, zoom, on_decimate, apply_decimator)
         self._n_out = n_out
 
     @staticmethod
