@@ -28,23 +28,27 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Popover from "@mui/material/Popover";
 import Switch from "@mui/material/Switch";
+import Stack from "@mui/material/Stack";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 
-import CheckCircle from "@mui/icons-material/CheckCircle";
-import Cancel from "@mui/icons-material/Cancel";
 import ArrowForwardIosSharp from "@mui/icons-material/ArrowForwardIosSharp";
+import Cancel from "@mui/icons-material/Cancel";
+import CheckCircle from "@mui/icons-material/CheckCircle";
+import Download from "@mui/icons-material/Download";
 import Launch from "@mui/icons-material/Launch";
 import LockOutlined from "@mui/icons-material/LockOutlined";
+import Upload from "@mui/icons-material/Upload";
 
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
@@ -64,6 +68,7 @@ import {
     useDynamicProperty,
     useModule,
     Store,
+    FileSelector,
 } from "taipy-gui";
 
 import { Cycle as CycleIcon, Scenario as ScenarioIcon } from "./icons";
@@ -100,6 +105,7 @@ const editSx = {
     "& > div": { writingMode: "vertical-rl", transform: "rotate(180deg)", paddingBottom: "1em" },
 };
 const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotProps<Date>;
+const buttonSx = { minWidth: "0px" };
 
 type DataNodeFull = [
     string, // id
@@ -115,7 +121,8 @@ type DataNodeFull = [
     boolean, // editInProgress
     string, // editorId
     string, // notReadableReason
-    string // notEditableReason
+    string, // notEditableReason
+    boolean // is file based
 ];
 
 enum DataNodeFullProps {
@@ -133,6 +140,7 @@ enum DataNodeFullProps {
     editorId,
     notReadableReason,
     notEditableReason,
+    isFileBased,
 }
 const DataNodeFullLength = Object.keys(DataNodeFullProps).length / 2;
 
@@ -180,6 +188,10 @@ interface DataNodeViewerProps {
     width?: string;
     onLock?: string;
     updateDnVars?: string;
+    fileDownload?: boolean;
+    fileUpload?: boolean;
+    uploadCheck?: string;
+    onFileAction?: string;
 }
 
 const dataValueFocus = "data-value";
@@ -208,6 +220,7 @@ const invalidDatanode: DataNodeFull = [
     "",
     "invalid",
     "invalid",
+    false,
 ];
 
 enum TabValues {
@@ -230,6 +243,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         showData = true,
         updateVars = "",
         updateDnVars = "",
+        fileDownload = false,
+        fileUpload = false,
     } = props;
 
     const { state, dispatch } = useContext<Store>(Context);
@@ -255,6 +270,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         dnEditorId,
         dnNotReadableReason,
         dnNotEditableReason,
+        isFileBased,
     ] = datanode;
     const dtType = dnData[DatanodeDataProps.type];
     const dtValue = dnData[DatanodeDataProps.value] ?? (dtType == "float" ? null : undefined);
@@ -611,6 +627,37 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         [props.width]
     );
 
+    // file action
+    const onfileHandler = useCallback(
+        (e: MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            const { action = "import" } = e.currentTarget.dataset || {};
+            if (action == "export") {
+                dispatch(
+                    createSendActionNameAction(id, module, props.onFileAction, {
+                        id: dnId,
+                        action: action,
+                        type: "raw",
+                        error_id: getUpdateVar(updateDnVars, "error_id"),
+                    })
+                );
+            }
+        },
+        [props.onFileAction, dispatch, dnId, id, module, updateDnVars]
+    );
+
+    const uploadData = useMemo(
+        () =>
+            valid && isFileBased && fileUpload
+                ? JSON.stringify({
+                      id: dnId,
+                      error_id: getUpdateVar(updateDnVars, "error_id"),
+                      upload_check: props.uploadCheck,
+                  })
+                : undefined,
+        [dnId, valid, isFileBased, fileUpload, props.uploadCheck, updateDnVars]
+    );
+
     // Refresh on broadcast
     useEffect(() => {
         const ids = props.coreChanged?.datanode;
@@ -627,50 +674,76 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
                         sx={AccordionSummarySx}
                     >
-                        <Grid container alignItems="baseline" direction="row" spacing={1}>
-                            <Grid item>{dnLabel}</Grid>
-                            <Grid item>
-                                <Typography fontSize="smaller">{dnType}</Typography>
-                            </Grid>
-                        </Grid>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                            <Typography>{dnLabel}</Typography>
+                            <Typography fontSize="smaller">{dnType}</Typography>
+                        </Stack>
                     </AccordionSummary>
                     <AccordionDetails>
                         <Box sx={tabBoxSx}>
-                            <Tabs value={tabValue} onChange={handleTabChange}>
-                                <Tab
-                                    label={
-                                        <Grid container alignItems="center">
-                                            <Grid item>Data</Grid>
-                                            {dnEditInProgress ? (
-                                                <Grid item>
-                                                    <Tooltip
-                                                        title={"locked " + (dnEditorId === editorId ? "by you" : "")}
-                                                    >
-                                                        <LockOutlined
-                                                            fontSize="small"
-                                                            color={dnEditorId === editorId ? "disabled" : "primary"}
-                                                        />
-                                                    </Tooltip>
-                                                </Grid>
-                                            ) : null}
-                                        </Grid>
-                                    }
-                                    id={`${uniqid}-data`}
-                                    aria-controls={`${uniqid}-dn-tabpanel-data`}
-                                    style={showData ? undefined : noDisplay}
-                                />
-                                <Tab
-                                    label="Properties"
-                                    id={`${uniqid}-properties`}
-                                    aria-controls={`${uniqid}-dn-tabpanel-properties`}
-                                />
-                                <Tab
-                                    label="History"
-                                    id={`${uniqid}-history`}
-                                    aria-controls={`${uniqid}-dn-tabpanel-history`}
-                                    style={showHistory ? undefined : noDisplay}
-                                />
-                            </Tabs>
+                            <Stack direction="row" justifyContent="space-between">
+                                <Tabs value={tabValue} onChange={handleTabChange}>
+                                    <Tab
+                                        label={
+                                            <Grid container alignItems="center">
+                                                <Grid item>Data</Grid>
+                                                {dnEditInProgress ? (
+                                                    <Grid item>
+                                                        <Tooltip
+                                                            title={
+                                                                "locked " + (dnEditorId === editorId ? "by you" : "")
+                                                            }
+                                                        >
+                                                            <LockOutlined
+                                                                fontSize="small"
+                                                                color={dnEditorId === editorId ? "disabled" : "primary"}
+                                                            />
+                                                        </Tooltip>
+                                                    </Grid>
+                                                ) : null}
+                                            </Grid>
+                                        }
+                                        id={`${uniqid}-data`}
+                                        aria-controls={`${uniqid}-dn-tabpanel-data`}
+                                        style={showData ? undefined : noDisplay}
+                                    />
+                                    <Tab
+                                        label="Properties"
+                                        id={`${uniqid}-properties`}
+                                        aria-controls={`${uniqid}-dn-tabpanel-properties`}
+                                    />
+                                    <Tab
+                                        label="History"
+                                        id={`${uniqid}-history`}
+                                        aria-controls={`${uniqid}-dn-tabpanel-history`}
+                                        style={showHistory ? undefined : noDisplay}
+                                    />
+                                </Tabs>
+                                {valid && isFileBased && (fileDownload || fileUpload) ? (
+                                    <Stack direction="row" spacing={1}>
+                                        {fileDownload ? (
+                                            <Tooltip title="Export">
+                                                <Button
+                                                    data-action="export"
+                                                    onClick={onfileHandler}
+                                                    sx={buttonSx}
+                                                >
+                                                    <Download />
+                                                </Button>
+                                            </Tooltip>
+                                        ) : null}
+                                        {fileUpload ? (
+                                            <FileSelector
+                                                hoverText="Import"
+                                                icon={<Upload />}
+                                                withBorder={false}
+                                                onUploadAction={props.onFileAction}
+                                                uploadData={uploadData}
+                                            />
+                                        ) : null}
+                                    </Stack>
+                                ) : null}
+                            </Stack>
                         </Box>
                         <div
                             role="tabpanel"

@@ -14,6 +14,7 @@ import json
 import typing as t
 from collections import defaultdict
 from numbers import Number
+from pathlib import Path
 from threading import Lock
 
 try:
@@ -53,6 +54,7 @@ from taipy.core import (
 from taipy.core import delete as core_delete
 from taipy.core import get as core_get
 from taipy.core import submit as core_submit
+from taipy.core.data._file_datanode_mixin import _FileDataNodeMixin
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event, EventOperation
 from taipy.core.notification.notifier import Notifier
@@ -1198,6 +1200,36 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def get_creation_reason(self):
         self.__lazy_start()
         return "" if (reason := can_create()) else f"Cannot create scenario: {_get_reason(reason)}"
+
+    def on_file_action(self, state: State, id: str, payload: t.Dict[str, t.Any]):
+        args = t.cast(list, payload.get("args"))
+        act_payload = t.cast(t.Dict[str, str], args[0])
+        dn_id = t.cast(DataNodeId, act_payload.get("id"))
+        error_id = act_payload.get("error_id", "")
+        if reason := is_readable(dn_id):
+            try:
+                dn = t.cast(_FileDataNodeMixin, core_get(dn_id))
+                if act_payload.get("action") == "export":
+                    path = dn._get_downloadable_path()
+                    if path:
+                        self.gui._download(Path(path), dn_id)
+                    else:
+                        state.assign(error_id, "Datanode doesn't have a file.")
+                else:
+                    checker_name = act_payload.get("upload_check")
+                    checker = self.gui._get_user_function(checker_name) if checker_name else None
+                    if not (
+                        reason := dn._upload(
+                            act_payload.get("path", ""),
+                            t.cast(t.Callable[[str, t.Any], bool], checker) if callable(checker) else None,
+                        )
+                    ):
+                        state.assign(error_id, reason.reasons)
+
+            except Exception as e:
+                state.assign(error_id, f"Datanode export error: {e}")
+        else:
+            state.assign(error_id, reason.reasons)
 
 
 def _get_reason(reason: t.Union[bool, ReasonCollection]):

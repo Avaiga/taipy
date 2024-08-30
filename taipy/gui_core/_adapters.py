@@ -36,6 +36,7 @@ from taipy.core import (
 )
 from taipy.core import get as core_get
 from taipy.core.config import Config
+from taipy.core.data._file_datanode_mixin import _FileDataNodeMixin
 from taipy.core.data._tabular_datanode_mixin import _TabularDataNodeMixin
 from taipy.core.reason import ReasonCollection
 from taipy.gui._warnings import _warn
@@ -227,6 +228,7 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                         datanode._editor_id,
                         _get_reason(is_readable(datanode), "Datanode not readable"),
                         _get_reason(is_editable(datanode), "Datanode not editable"),
+                        isinstance(datanode, _FileDataNodeMixin)
                     ]
             except Exception as e:
                 _warn(f"Access to datanode ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)
