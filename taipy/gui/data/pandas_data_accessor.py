@@ -406,7 +406,8 @@ class _PandasDataAccessor(_DataAccessor):
                     if is_decimator_applied:
                         self._gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(df))
             # merge the decimated dataframes
-            df = pd.merge(*decimated_dfs, how="outer", left_index=True, right_index=True)
+            if decimated_dfs:
+                df = pd.merge(*decimated_dfs, how="outer", left_index=True, right_index=True)
             df = self.__build_transferred_cols(columns, t.cast(pd.DataFrame, df), is_copied=is_copied)
             if data_format is _DataFormat.CSV:
                 ret_payload["df"] = df
