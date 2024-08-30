@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 """
-Package for notifications about changes on `Core^` service entities.
+Package for notifications about changes on `Orchestrator^` service entities.
 
 
 The Core service generates `Event^` objects to track changes on entities.
