@@ -40,6 +40,16 @@ describe("FileSelector Component", () => {
         const { getByText } = render(<FileSelector defaultLabel="titi" label={undefined as unknown as string} />);
         getByText("titi");
     });
+    it("displays with width=70%", async () => {
+        const { getByText } = render(<FileSelector label="toto" width="70%" />);
+        const elt = getByText("toto");
+        expect(elt).toHaveStyle("width: 70%");
+    });
+    it("displays with width=500", async () => {
+        const { getByText } = render(<FileSelector label="toto" width={500} />);
+        const elt = getByText("toto");
+        expect(elt).toHaveStyle("width: 500px");
+    });
     it("is disabled", async () => {
         const { getByText } = render(<FileSelector label="val" active={false} />);
         const elt = getByText("val");
@@ -64,7 +74,7 @@ describe("FileSelector Component", () => {
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <FileSelector label="FileSelector" onAction="on_action" />
-            </TaipyContext.Provider>,
+            </TaipyContext.Provider>
         );
         const elt = getByText("FileSelector");
         const inputElt = elt.parentElement?.parentElement?.querySelector("input");
@@ -93,7 +103,7 @@ describe("FileSelector Component", () => {
     it("displays a dropped custom message", async () => {
         const file = new File(["(⌐□_□)"], "chucknorris2.png", { type: "image/png" });
         const { getByRole, getByText } = render(
-            <FileSelector label="FileSelectorDrop" dropMessage="drop here those files" />,
+            <FileSelector label="FileSelectorDrop" dropMessage="drop here those files" />
         );
         const elt = getByRole("button");
         const inputElt = elt.parentElement?.parentElement?.querySelector("input");
@@ -164,7 +174,7 @@ describe("FileSelector Component", () => {
         const { getByLabelText } = render(
             <TaipyContext.Provider value={{ state: INITIAL_STATE, dispatch: mockDispatch }}>
                 <FileSelector label="FileSelector" notify={true} />
-            </TaipyContext.Provider>,
+            </TaipyContext.Provider>
         );
 
         // Simulate file upload
@@ -183,7 +193,7 @@ describe("FileSelector Component", () => {
                 duration: 3000,
                 message: "mocked response",
                 system: false,
-            }),
+            })
         );
     });
 
@@ -200,7 +210,7 @@ describe("FileSelector Component", () => {
         const { getByLabelText } = render(
             <TaipyContext.Provider value={{ state: INITIAL_STATE, dispatch: mockDispatch }}>
                 <FileSelector label="FileSelector" notify={true} />
-            </TaipyContext.Provider>,
+            </TaipyContext.Provider>
         );
 
         // Simulate file upload
@@ -219,7 +229,7 @@ describe("FileSelector Component", () => {
                 duration: 3000,
                 message: "Upload failed",
                 system: false,
-            }),
+            })
         );
     });
 
@@ -231,7 +241,7 @@ describe("FileSelector Component", () => {
         const { getByLabelText, queryByRole } = render(
             <TaipyContext.Provider value={{ state: INITIAL_STATE, dispatch: mockDispatch }}>
                 <FileSelector label="FileSelector" notify={true} onAction="testAction" />
-            </TaipyContext.Provider>,
+            </TaipyContext.Provider>
         );
 
         // Simulate file upload
@@ -254,7 +264,7 @@ describe("FileSelector Component", () => {
                 type: "SEND_ACTION_ACTION",
                 name: "",
                 payload: { args: [], action: "testAction" },
-            }),
+            })
         );
     });
 
@@ -263,7 +273,7 @@ describe("FileSelector Component", () => {
         const { getByLabelText } = render(
             <TaipyContext.Provider value={{ state: INITIAL_STATE, dispatch: mockDispatch }}>
                 <FileSelector label="FileSelector" notify={true} />
-            </TaipyContext.Provider>,
+            </TaipyContext.Provider>
         );
 
         // Simulate file upload without providing a file

@@ -247,7 +247,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 setOrder(isAsc ? "desc" : "asc");
                 setOrderBy(col);
                 setRows([]);
-                setTimeout(() => infiniteLoaderRef.current?.resetloadMoreItemsCache(true), 1); // So that the state can be changed
+                Promise.resolve().then(() => infiniteLoaderRef.current?.resetloadMoreItemsCache(true)); // So that the state can be changed
             }
         },
         [orderBy, order]
@@ -256,7 +256,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     useEffect(() => {
         if (refresh) {
             setRows([]);
-            setTimeout(() => infiniteLoaderRef.current?.resetloadMoreItemsCache(true), 1); // So that the state can be changed
+            Promise.resolve().then(() => infiniteLoaderRef.current?.resetloadMoreItemsCache(true)); // So that the state can be changed
         }
     }, [refresh]);
 

@@ -11,8 +11,13 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useEffect, useState, useCallback, useMemo, MouseEvent } from "react";
-import { DeleteOutline, StopCircleOutlined, Add, FilterList } from "@mui/icons-material";
+import React, { useEffect, useState, useCallback, useMemo, MouseEvent, useRef } from "react";
+import Add from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import FilterList from "@mui/icons-material/FilterList";
+import StopCircleOutlined from "@mui/icons-material/StopCircleOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
@@ -47,8 +52,26 @@ import {
     useModule,
 } from "taipy-gui";
 
-import { disableColor, popoverOrigin, useClassNames } from "./utils";
+import {
+    disableColor,
+    getUpdateVarNames,
+    popoverOrigin,
+    useClassNames,
+    EllipsisSx,
+    SecondaryEllipsisProps,
+} from "./utils";
 import StatusChip, { Status } from "./StatusChip";
+import JobViewer, { JobDetail } from "./JobViewer";
+import { Dialog, DialogActions, DialogContent, DialogTitle, Theme } from "@mui/material";
+
+const CloseDialogSx = {
+    position: "absolute",
+    right: 8,
+    top: 8,
+    color: (theme: Theme) => theme.palette.grey[500],
+};
+
+const RightButtonSx = { marginLeft: "auto ! important" };
 
 interface JobSelectorProps {
     updateVarName?: string;
@@ -75,6 +98,8 @@ interface JobSelectorProps {
     defaultValue?: string;
     propagate?: boolean;
     updateJbVars?: string;
+    details?: JobDetail;
+    onDetails?: string | boolean;
 }
 
 // job id, job name, empty list, entity id, entity name, submit id, creation date, status, not deletable, not readable, not editable
@@ -92,7 +117,7 @@ enum JobProps {
     status,
     not_deletable,
     not_readable,
-    not_editable
+    not_editable,
 }
 const JobLength = Object.keys(JobProps).length / 2;
 
@@ -359,6 +384,7 @@ interface JobSelectedTableRowProps {
     handleCheckboxClick: (event: React.MouseEvent<HTMLElement>) => void;
     handleCancelJobs: (event: React.MouseEvent<HTMLElement>) => void;
     handleDeleteJobs: (event: React.MouseEvent<HTMLElement>) => void;
+    handleShowDetails: false | ((event: React.MouseEvent<HTMLElement>) => void);
     showId?: boolean;
     showSubmittedLabel?: boolean;
     showSubmittedId?: boolean;
@@ -375,13 +401,14 @@ const JobSelectedTableRow = ({
     handleCheckboxClick,
     handleCancelJobs,
     handleDeleteJobs,
+    handleShowDetails,
     showId,
     showSubmittedLabel,
     showSubmittedId,
     showSubmissionId,
     showDate,
     showCancel,
-    showDelete
+    showDelete,
 }: JobSelectedTableRowProps) => {
     const [id, jobName, , entityId, entityName, submitId, creationDate, status] = row;
 
@@ -400,18 +427,22 @@ const JobSelectedTableRow = ({
             </TableCell>
             {showId ? (
                 <TableCell component="th" scope="row" padding="none">
-                    <ListItemText primary={jobName} secondary={id} />
+                    <ListItemText primary={jobName} secondary={id} secondaryTypographyProps={SecondaryEllipsisProps} />
                 </TableCell>
             ) : null}
             {showSubmissionId ? <TableCell>{submitId}</TableCell> : null}
             {showSubmittedLabel || showSubmittedId ? (
                 <TableCell>
                     {!showSubmittedLabel && showSubmittedId ? (
-                        entityId
+                        <Typography sx={EllipsisSx}>{entityId}</Typography>
                     ) : !showSubmittedId && showSubmittedLabel ? (
-                        entityName
+                        <Typography>{entityName}</Typography>
                     ) : (
-                        <ListItemText primary={entityName} secondary={entityId} />
+                        <ListItemText
+                            primary={entityName}
+                            secondary={entityId}
+                            secondaryTypographyProps={SecondaryEllipsisProps}
+                        />
                     )}
                 </TableCell>
             ) : null}
@@ -419,8 +450,15 @@ const JobSelectedTableRow = ({
             <TableCell>
                 <StatusChip status={status} />
             </TableCell>
-            {showCancel || showDelete ? (
+            {showCancel || showDelete || handleShowDetails ? (
                 <TableCell>
+                    {handleShowDetails ? (
+                        <Tooltip title="Show details">
+                            <IconButton data-id={id} onClick={handleShowDetails}>
+                                <DescriptionOutlinedIcon />
+                            </IconButton>
+                        </Tooltip>
+                    ) : null}
                     {status === Status.RUNNING ? null : status === Status.BLOCKED ||
                       status === Status.PENDING ||
                       status === Status.SUBMITTED ? (
@@ -455,13 +493,15 @@ const JobSelector = (props: JobSelectorProps) => {
         showCancel = true,
         showDelete = true,
         propagate = true,
-        updateJbVars = ""
+        updateJbVars = "",
     } = props;
     const [checked, setChecked] = useState<string[]>([]);
     const [selected, setSelected] = useState<string[]>([]);
     const [jobRows, setJobRows] = useState<Jobs>([]);
     const [filters, setFilters] = useState<FilterData[]>();
-    const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+    const [showDetails, setShowDetails] = useState(false);
+    const detailId = useRef<string>();
 
     const dispatch = useDispatch();
     const module = useModule();
@@ -586,7 +626,7 @@ const JobSelector = (props: JobSelectorProps) => {
                     createSendActionNameAction(props.id, module, props.onJobAction, {
                         id: multiple === false ? [id] : JSON.parse(id),
                         action: "cancel",
-                        error_id: getUpdateVar(updateJbVars, "error_id")
+                        error_id: getUpdateVar(updateJbVars, "error_id"),
                     })
                 );
             } catch (e) {
@@ -605,7 +645,7 @@ const JobSelector = (props: JobSelectorProps) => {
                     createSendActionNameAction(props.id, module, props.onJobAction, {
                         id: multiple === false ? [id] : JSON.parse(id),
                         action: "delete",
-                        error_id: getUpdateVar(updateJbVars, "error_id")
+                        error_id: getUpdateVar(updateJbVars, "error_id"),
                     })
                 );
             } catch (e) {
@@ -614,6 +654,39 @@ const JobSelector = (props: JobSelectorProps) => {
         },
         [dispatch, module, props.id, props.onJobAction, updateJbVars]
     );
+
+    const deleteJob = useCallback(
+        (event: React.MouseEvent<HTMLElement>) => {
+            handleDeleteJobs(event);
+            setShowDetails(false);
+        },
+        [handleDeleteJobs]
+    );
+
+    const handleShowDetails = useCallback(
+        (event: React.MouseEvent<HTMLElement>) => {
+            event.stopPropagation();
+            const { id = "" } = event.currentTarget?.dataset || {};
+            if (props.onDetails) {
+                dispatch(createSendActionNameAction(props.id, module, props.onDetails, id));
+            } else {
+                const idVar = getUpdateVar(updateJbVars, "detail_id");
+                detailId.current = id;
+                dispatch(
+                    createRequestUpdateAction(
+                        id,
+                        module,
+                        getUpdateVarNames(props.updateVars, "details"),
+                        true,
+                        idVar ? { [idVar]: id } : undefined
+                    )
+                );
+            }
+        },
+        [dispatch, module, props.id, props.onDetails, props.updateVars, updateJbVars]
+    );
+
+    const closeDetails = useCallback(() => setShowDetails(false), []);
 
     const allowCancelJobs = useMemo(
         () =>
@@ -652,6 +725,13 @@ const JobSelector = (props: JobSelectorProps) => {
     const handleFilterClose = useCallback(() => {
         setAnchorEl(null);
     }, []);
+
+    useEffect(() => {
+        if (props.details && props.details[0] == detailId.current) {
+            // show Dialog
+            setShowDetails(true);
+        }
+    }, [props.details]);
 
     useEffect(() => {
         let filteredJobRows = [...(props.jobs || [])];
@@ -708,6 +788,25 @@ const JobSelector = (props: JobSelectorProps) => {
 
     return (
         <Box className={className}>
+            {showDetails && props.details ? (
+                <Dialog open={true} onClose={closeDetails} scroll="paper" fullWidth>
+                    <DialogTitle>{props.details[1]}</DialogTitle>
+                    <IconButton aria-label="close" onClick={closeDetails} sx={CloseDialogSx}>
+                        <CloseIcon />
+                    </IconButton>
+                    <DialogContent dividers>
+                        <JobViewer job={props.details} inDialog={true}></JobViewer>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button variant="outlined" color="primary" onClick={deleteJob} data-id={props.details[0]}>
+                            Delete
+                        </Button>
+                        <Button variant="outlined" color="secondary" onClick={closeDetails} sx={RightButtonSx}>
+                            Close
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            ) : null}
             <Paper sx={containerSx}>
                 <Toolbar sx={headerToolbarSx}>
                     <Grid container spacing={2} alignItems="center">
@@ -792,6 +891,7 @@ const JobSelector = (props: JobSelectorProps) => {
                                     key={row[JobProps.id]}
                                     handleDeleteJobs={handleDeleteJobs}
                                     handleCancelJobs={handleCancelJobs}
+                                    handleShowDetails={props.onDetails === false ? false : handleShowDetails}
                                     showSubmissionId={showSubmissionId}
                                     showId={showId}
                                     showSubmittedLabel={showSubmittedLabel}

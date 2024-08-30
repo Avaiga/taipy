@@ -43,6 +43,6 @@ setup(
         ]
     ),
     include_package_data=True,
-    data_files=[('version', ['version.json'])],
+    data_files=[('version', [version_path])],
     tests_require=test_requirements,
 )

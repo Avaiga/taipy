@@ -31,6 +31,12 @@ def test_number_md_2(gui: Gui, test_client, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
+def test_number_md_width(gui: Gui, helpers):
+    md_string = "<|10|number|width=70%|>"
+    expected_list = ["<Input", 'value="10"', 'type="number"', 'width="70%"']
+    helpers.test_control_md(gui, md_string, expected_list)
+
+
 def test_number_html_1(gui: Gui, test_client, helpers):
     gui._bind_var_val("x", 10)
     html_string = '<taipy:number value="{x}" />'
