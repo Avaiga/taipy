@@ -134,7 +134,7 @@ class DataNode(_Entity, _Labeled):
 
     _ID_PREFIX = "DATANODE"
     __ID_SEPARATOR = "_"
-    __logger = _TaipyLogger._get_logger()
+    _logger = _TaipyLogger._get_logger()
     _REQUIRED_PROPERTIES: List[str] = []
     _MANAGER_NAME: str = "data"
     _PATH_KEY = "path"
@@ -347,12 +347,6 @@ class DataNode(_Entity, _Labeled):
     def __setstate__(self, state):
         vars(self).update(state)
 
-    def __getattr__(self, attribute_name):
-        protected_attribute_name = _validate_id(attribute_name)
-        if protected_attribute_name in self._properties:
-            return self._properties[protected_attribute_name]
-        raise AttributeError(f"{attribute_name} is not an attribute of data node {self.id}")
-
     @classmethod
     def _get_last_modified_datetime(cls, path: Optional[str] = None) -> Optional[datetime]:
         if path and os.path.isfile(path):
@@ -397,7 +391,7 @@ class DataNode(_Entity, _Labeled):
         try:
             return self.read_or_raise()
         except NoData:
-            self.__logger.warning(
+            self._logger.warning(
                 f"Data node {self.id} from config {self.config_id} is being read but has never been written."
             )
             return None

@@ -207,10 +207,15 @@ class Config:
 
     @classmethod
     def _override_env_file(cls):
-        if config_filename := os.environ.get(cls._ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH):
-            cls.__logger.info(f"Loading configuration provided by environment variable. Filename: '{config_filename}'")
-            cls._env_file_config = cls._serializer._read(config_filename)
-            cls.__logger.info(f"Configuration '{config_filename}' successfully loaded.")
+        if cfg_filename := os.environ.get(cls._ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH):
+            if not os.path.exists(cfg_filename):
+                cls.__logger.error(f"File '{cfg_filename}' provided by environment variable "
+                                   f"'{cls._ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH}' does not exist. "
+                                   f"No configuration will be loaded from environment variable.")
+                return
+            cls.__logger.info(f"Loading configuration provided by environment variable. Filename: '{cfg_filename}'")
+            cls._env_file_config = cls._serializer._read(cfg_filename)
+            cls.__logger.info(f"Configuration '{cfg_filename}' successfully loaded.")
 
     @classmethod
     def _compile_configs(cls):

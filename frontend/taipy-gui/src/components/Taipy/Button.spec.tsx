@@ -32,17 +32,28 @@ describe("Button Component", () => {
         expect(elt).toHaveClass("taipy-button");
     });
     it("displays the default value", async () => {
-        const { getByText } = render(
-            <Button defaultLabel="titi" label={undefined as unknown as string}  />
-        );
+        const { getByText } = render(<Button defaultLabel="titi" label={undefined as unknown as string} />);
         getByText("titi");
     });
     it("displays an image", async () => {
         const { getByAltText } = render(
-            <Button defaultLabel={JSON.stringify({path: "/image/fred.png", text: "fred"})} label={undefined as unknown as string} />
+            <Button
+                defaultLabel={JSON.stringify({ path: "/image/fred.png", text: "fred" })}
+                label={undefined as unknown as string}
+            />
         );
         const img = getByAltText("fred");
-        expect(img.tagName).toBe("IMG")
+        expect(img.tagName).toBe("IMG");
+    });
+    it("displays with width=70%", async () => {
+        const { getByText } = render(<Button label="toto" width="70%" />);
+        const element = getByText("toto");
+        expect(element).toHaveStyle("width: 70%");
+    });
+    it("displays with width=500", async () => {
+        const { getByText } = render(<Button label="toto" width={500} />);
+        const element = getByText("toto");
+        expect(element).toHaveStyle("width: 500px");
     });
     it("is disabled", async () => {
         const { getByText } = render(<Button label="val" active={false} />);
@@ -62,11 +73,17 @@ describe("Button Component", () => {
     it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
-        const { getByText } = render(<TaipyContext.Provider value={{ state, dispatch }}>
+        const { getByText } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
                 <Button label="Button" onAction="on_action" />
-            </TaipyContext.Provider>);
+            </TaipyContext.Provider>
+        );
         const elt = getByText("Button");
         await userEvent.click(elt);
-        expect(dispatch).toHaveBeenCalledWith({"name": "", "payload": {args: [], action: "on_action"}, "type": "SEND_ACTION_ACTION"});
+        expect(dispatch).toHaveBeenCalledWith({
+            name: "",
+            payload: { args: [], action: "on_action" },
+            type: "SEND_ACTION_ACTION",
+        });
     });
 });

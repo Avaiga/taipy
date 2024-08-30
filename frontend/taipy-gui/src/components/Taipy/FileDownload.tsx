@@ -18,7 +18,7 @@ import Tooltip from "@mui/material/Tooltip";
 import FileDownloadIco from "@mui/icons-material/FileDownload";
 
 import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
-import { noDisplayStyle, TaipyActiveProps } from "./utils";
+import { getCssSize, noDisplayStyle, TaipyActiveProps } from "./utils";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { runXHR } from "../../utils/downloads";
 
@@ -33,6 +33,7 @@ interface FileDownloadProps extends TaipyActiveProps {
     defaultRender?: boolean;
     bypassPreview?: boolean;
     onAction?: string;
+    width?: string | number;
 }
 
 const FileDownload = (props: FileDownloadProps) => {
@@ -46,6 +47,8 @@ const FileDownload = (props: FileDownloadProps) => {
     const render = useDynamicProperty(props.render, props.defaultRender, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const linkId = useMemo(() => (id || `tp-${Date.now()}-${Math.random()}`) + "-download-file", [id]);
+
+    const buttonSx = useMemo(() => (props.width ? { width: getCssSize(props.width) } : undefined), [props.width]);
 
     const [url, download] = useMemo(() => {
         const url = props.content || props.defaultContent || "";
@@ -97,7 +100,14 @@ const FileDownload = (props: FileDownloadProps) => {
             <a style={noDisplayStyle} id={linkId} download={download} {...aProps} ref={aRef} />
             {auto ? null : (
                 <Tooltip title={hover || ""}>
-                    <Button id={id} variant="outlined" aria-label="download" disabled={!active} onClick={clickHandler}>
+                    <Button
+                        id={id}
+                        variant="outlined"
+                        aria-label="download"
+                        disabled={!active}
+                        onClick={clickHandler}
+                        sx={buttonSx}
+                    >
                         <FileDownloadIco /> {label || defaultLabel}
                     </Button>
                 </Tooltip>

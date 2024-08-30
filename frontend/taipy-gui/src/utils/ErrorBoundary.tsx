@@ -23,8 +23,10 @@ interface ErrorFallBackProps {
 const ErrorFallback = (props: ErrorFallBackProps) => (
     <Box sx={{ backgroundColor: "error.main" }}>
         <Box>Something went wrong ...</Box>
-        <Box>{(props.error as Error).message}</Box>
-        <Button onClick={props.resetErrorBoundary}>Try again</Button>
+        <Box>{props.error.message}</Box>
+        <Button onClick={props.resetErrorBoundary} color="secondary">
+            Try again
+        </Button>
     </Box>
 );
 

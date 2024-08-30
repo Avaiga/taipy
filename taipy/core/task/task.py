@@ -12,7 +12,6 @@
 import uuid
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
 
-from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.scope import Scope
 
@@ -22,6 +21,7 @@ from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..data.data_node import DataNode
+from ..exceptions import AttributeKeyAlreadyExisted
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
 from ..submission.submission import Submission
 from .task_id import TaskId
@@ -97,6 +97,7 @@ class Task(_Entity, _Labeled):
     _ID_PREFIX = "TASK"
     __ID_SEPARATOR = "_"
     _MANAGER_NAME = "task"
+    __CHECK_INIT_DONE_ATTR_NAME = "_init_done"
 
     def __init__(
         self,
@@ -121,6 +122,7 @@ class Task(_Entity, _Labeled):
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
         self._skippable = skippable
         self._properties = _Properties(self, **properties)
+        self._init_done = True
 
     def __hash__(self):
         return hash(self.id)
@@ -134,10 +136,18 @@ class Task(_Entity, _Labeled):
     def __setstate__(self, state):
         vars(self).update(state)
 
+    def __setattr__(self, name: str, value: Any) -> None:
+        if self.__CHECK_INIT_DONE_ATTR_NAME not in dir(self) or name in dir(self):
+            return super().__setattr__(name, value)
+        else:
+            try:
+                self.__getattr__(name)
+                raise AttributeKeyAlreadyExisted(name)
+            except AttributeError:
+                return super().__setattr__(name, value)
+
     def __getattr__(self, attribute_name):
         protected_attribute_name = _validate_id(attribute_name)
-        if protected_attribute_name in self._properties:
-            return _tpl._replace_templates(self._properties[protected_attribute_name])
         if protected_attribute_name in self.input:
             return self.input[protected_attribute_name]
         if protected_attribute_name in self.output:

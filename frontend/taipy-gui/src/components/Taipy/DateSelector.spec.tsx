@@ -99,7 +99,11 @@ describe("DateSelector Component", () => {
     it("displays the default value with format", async () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateSelector defaultDate="2011-01-01T00:00:01.001Z" date={undefined as unknown as string} format="yy-MM-dd" />
+                <DateSelector
+                    defaultDate="2011-01-01T00:00:01.001Z"
+                    date={undefined as unknown as string}
+                    format="yy-MM-dd"
+                />
             </LocalizationProvider>
         );
         const input = document.querySelector("input");
@@ -119,6 +123,24 @@ describe("DateSelector Component", () => {
         );
         const input = getByLabelText("a label") as HTMLInputElement;
         expect(input.value).toBe("01/01/2001");
+    });
+    it("displays with width=70%", async () => {
+        render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DateSelector date={curDateStr} width="70%" />
+            </LocalizationProvider>
+        );
+        const elt = document.querySelector(".MuiFormControl-root");
+        expect(elt).toHaveStyle("max-width: 70%");
+    });
+    it("displays with width=500", async () => {
+        render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DateSelector date={curDateStr} width={500} />
+            </LocalizationProvider>
+        );
+        const elt = document.querySelector(".MuiFormControl-root");
+        expect(elt).toHaveStyle("max-width: 500px");
     });
     it("is disabled", async () => {
         render(
@@ -212,7 +234,11 @@ describe("DateSelector with time Component", () => {
     it("displays the default value with format", async () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateSelector defaultDate="2011-01-01T00:10:01.001Z" date={undefined as unknown as string} format="yy-MM-dd mm" />
+                <DateSelector
+                    defaultDate="2011-01-01T00:10:01.001Z"
+                    date={undefined as unknown as string}
+                    format="yy-MM-dd mm"
+                />
             </LocalizationProvider>
         );
         const input = document.querySelector("input");

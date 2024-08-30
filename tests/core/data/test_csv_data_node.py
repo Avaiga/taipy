@@ -65,8 +65,8 @@ class TestCSVDataNode:
         assert dn.job_ids == []
         assert not dn.is_ready_for_reading
         assert dn.path == default_path
-        assert dn.has_header is False
-        assert dn.exposed_type == "pandas"
+        assert dn.properties["has_header"] is False
+        assert dn.properties["exposed_type"] == "pandas"
 
         csv_dn_config = Config.configure_csv_data_node(
             id="foo", default_path=default_path, has_header=True, exposed_type=MyCustomObject
@@ -74,8 +74,8 @@ class TestCSVDataNode:
         dn = _DataManagerFactory._build_manager()._create_and_set(csv_dn_config, None, None)
         assert dn.storage_type() == "csv"
         assert dn.config_id == "foo"
-        assert dn.has_header is True
-        assert dn.exposed_type == MyCustomObject
+        assert dn.properties["has_header"] is True
+        assert dn.properties["exposed_type"] == MyCustomObject
 
         with pytest.raises(InvalidConfigurationId):
             CSVDataNode(

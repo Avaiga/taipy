@@ -45,6 +45,21 @@ def test_date_range_md_2(gui: Gui, test_client, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
+def test_date_range_md_width(gui: Gui, helpers):
+    gui._bind_var_val(
+        "dates", [datetime.strptime("15 Dec 2020", "%d %b %Y"), datetime.strptime("31 Dec 2020", "%d %b %Y")]
+    )
+    md_string = "<|{dates}|date_range|width=70%|>"
+    expected_list = [
+        "<DateRange",
+        'defaultDates="[&quot;2020-12-',
+        'updateVarName="_TpDr_tpec_TpExPr_dates_TPMDL_0"',
+        'width="70%"',
+        "dates={_TpDr_tpec_TpExPr_dates_TPMDL_0}",
+    ]
+    helpers.test_control_md(gui, md_string, expected_list)
+
+
 def test_date_range_html_1(gui: Gui, test_client, helpers):
     gui._bind_var_val(
         "dates", [datetime.strptime("15 Dec 2020", "%d %b %Y"), datetime.strptime("31 Dec 2020", "%d %b %Y")]
