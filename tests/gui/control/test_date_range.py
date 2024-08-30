@@ -45,7 +45,7 @@ def test_date_range_md_2(gui: Gui, test_client, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_date_range_md_width(gui: Gui, helpers):
+def test_date_range_md_width(gui: Gui, test_client, helpers):
     gui._bind_var_val(
         "dates", [datetime.strptime("15 Dec 2020", "%d %b %Y"), datetime.strptime("31 Dec 2020", "%d %b %Y")]
     )
