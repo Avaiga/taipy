@@ -64,8 +64,7 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
 
             job_status = job.status
             if job_status == Status.FAILED:
-                submission._submission_status = SubmissionStatus.FAILED
-                cls._set(submission)
+                cls.__set_submission_status(submission, SubmissionStatus.FAILED, job)
                 cls.__logger.debug(
                     f"{job.id} status is {job_status}. Submission status set to `{submission._submission_status}`."
                 )
@@ -110,7 +109,7 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
             else:
                 cls.__set_submission_status(submission, SubmissionStatus.UNDEFINED, job)
             cls.__logger.debug(
-                f"{job.id} status is {job_status}. Submission status set to `{submission._submission_status}`"
+                f"{job.id} status is {job_status}. Submission status set to `{submission._submission_status}`."
             )
 
     @classmethod

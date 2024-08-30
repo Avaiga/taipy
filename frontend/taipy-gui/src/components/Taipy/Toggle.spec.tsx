@@ -82,6 +82,16 @@ describe("Toggle Component", () => {
         const elt2 = getByText("Item 2");
         expect(elt2.parentElement).toHaveClass("Mui-selected");
     });
+    it("displays with width=70%", async () => {
+        render(<Toggle lov={lov} width="70%" />);
+        const elt = document.querySelector(".MuiBox-root");
+        expect(elt).toHaveStyle("width: 70%");
+    });
+    it("displays with width=500", async () => {
+        render(<Toggle lov={lov} width={500} />);
+        const elt = document.querySelector(".MuiBox-root");
+        expect(elt).toHaveStyle("width: 500px");
+    });
     it("is disabled", async () => {
         const { getAllByRole } = render(<Toggle lov={lov} active={false} />);
         const elts = getAllByRole("button");
@@ -151,32 +161,47 @@ describe("Toggle Component", () => {
             expect(elt.tagName).toBe("SPAN");
         });
         it("uses the class", async () => {
-            const { getByText } = render(<Toggle isSwitch={true}  label="switch" className="taipy-toggle" />);
+            const { getByText } = render(<Toggle isSwitch={true} label="switch" className="taipy-toggle" />);
             const elt = getByText("switch");
             expect(elt.parentElement).toHaveClass("taipy-toggle-switch");
         });
         it("shows a selection at start", async () => {
-            const { getByText } = render(<Toggle isSwitch={true} defaultValue={true as unknown as string} label="switch" />);
+            const { getByText } = render(
+                <Toggle isSwitch={true} defaultValue={true as unknown as string} label="switch" />
+            );
             const elt = getByText("switch");
             expect(elt.parentElement?.querySelector(".MuiSwitch-switchBase")).toHaveClass("Mui-checked");
         });
         it("shows a selection at start through value", async () => {
-            const { getByText } = render(<Toggle isSwitch={true} value={true as unknown as string} defaultValue={false as unknown as string} label="switch" />);
+            const { getByText } = render(
+                <Toggle
+                    isSwitch={true}
+                    value={true as unknown as string}
+                    defaultValue={false as unknown as string}
+                    label="switch"
+                />
+            );
             const elt = getByText("switch");
             expect(elt.parentElement?.querySelector(".MuiSwitch-switchBase")).toHaveClass("Mui-checked");
         });
         it("is disabled", async () => {
-            const { getByText } = render(<Toggle isSwitch={true} defaultValue={false as unknown as string} label="switch" active={false} />);
+            const { getByText } = render(
+                <Toggle isSwitch={true} defaultValue={false as unknown as string} label="switch" active={false} />
+            );
             const elt = getByText("switch");
             expect(elt.parentElement?.querySelector("input")).toBeDisabled();
         });
         it("is enabled by default", async () => {
-            const { getByText } = render(<Toggle isSwitch={true} defaultValue={false as unknown as string} label="switch" />);
+            const { getByText } = render(
+                <Toggle isSwitch={true} defaultValue={false as unknown as string} label="switch" />
+            );
             const elt = getByText("switch");
             expect(elt.parentElement?.querySelector("input")).not.toBeDisabled();
         });
         it("is enabled by active", async () => {
-            const { getByText } = render(<Toggle isSwitch={true} defaultValue={false as unknown as string} label="switch" active={true} />);
+            const { getByText } = render(
+                <Toggle isSwitch={true} defaultValue={false as unknown as string} label="switch" active={true} />
+            );
             const elt = getByText("switch");
             expect(elt.parentElement?.querySelector("input")).not.toBeDisabled();
         });
@@ -185,7 +210,12 @@ describe("Toggle Component", () => {
             const state: TaipyState = INITIAL_STATE;
             const { getByText } = render(
                 <TaipyContext.Provider value={{ state, dispatch }}>
-                    <Toggle isSwitch={true} updateVarName="varname" defaultValue={false as unknown as string} label="switch" />
+                    <Toggle
+                        isSwitch={true}
+                        updateVarName="varname"
+                        defaultValue={false as unknown as string}
+                        label="switch"
+                    />
                 </TaipyContext.Provider>
             );
             const elt = getByText("switch");
@@ -197,6 +227,5 @@ describe("Toggle Component", () => {
                 type: "SEND_UPDATE_ACTION",
             });
         });
-
     });
 });

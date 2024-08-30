@@ -81,6 +81,7 @@ class _Factory:
                 ("on_action", PropertyType.function),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
+                ("width", PropertyType.string_or_number),
             ]
         ),
         "chat": lambda gui, control_type, attrs: _Builder(
@@ -145,6 +146,7 @@ class _Factory:
                 ("label",),
                 ("on_change", PropertyType.function),
                 ("format",),
+                ("width", PropertyType.string_or_number),
             ]
         )
         ._set_propagate(),
@@ -165,6 +167,7 @@ class _Factory:
                 ("label_end",),
                 ("on_change", PropertyType.function),
                 ("format",),
+                ("width", PropertyType.string_or_number),
             ]
         )
         ._set_propagate(),
@@ -220,6 +223,7 @@ class _Factory:
                 ("bypass_preview", PropertyType.boolean, True),
                 ("name",),
                 ("hover_text", PropertyType.dynamic_string),
+                ("width", PropertyType.string_or_number),
             ]
         ),
         "file_selector": lambda gui, control_type, attrs: _Builder(
@@ -239,6 +243,7 @@ class _Factory:
                 ("drop_message",),
                 ("hover_text", PropertyType.dynamic_string),
                 ("notify", PropertyType.boolean, True),
+                ("width", PropertyType.string_or_number),
             ]
         ),
         "image": lambda gui, control_type, attrs: _Builder(
@@ -542,6 +547,7 @@ class _Factory:
                 ("hover_text", PropertyType.dynamic_string),
                 ("raw", PropertyType.boolean, False),
                 ("mode",),
+                ("width", PropertyType.string_or_number),
             ]
         ),
         "toggle": lambda gui, control_type, attrs: _Builder(
@@ -559,6 +565,7 @@ class _Factory:
                 ("on_change", PropertyType.function),
                 ("mode",),
                 ("lov", PropertyType.single_lov),
+                ("width", PropertyType.string_or_number),
             ]
         )
         ._set_kind()

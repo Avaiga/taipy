@@ -378,10 +378,9 @@ const CoreSelector = (props: CoreSelectorProps) => {
                 if (isSelectable) {
                     const lovVar = getUpdateVar(updateVars, lovPropertyName);
                     const val = nodeId;
-                    setTimeout(
+                    Promise.resolve().then(
                         // to avoid set state while render react errors
-                        () => dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate, lovVar)),
-                        1
+                        () => dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate, lovVar))
                     );
                     onSelect && onSelect(val);
                 }
@@ -421,19 +420,17 @@ const CoreSelector = (props: CoreSelectorProps) => {
             setSelectedItems((old) => {
                 if (old.length) {
                     const lovVar = getUpdateVar(updateVars, lovPropertyName);
-                    setTimeout(
-                        () =>
-                            dispatch(
-                                createSendUpdateAction(
-                                    updateVarName,
-                                    multiple ? [] : "",
-                                    module,
-                                    onChange,
-                                    propagate,
-                                    lovVar
-                                )
-                            ),
-                        1
+                    Promise.resolve().then(() =>
+                        dispatch(
+                            createSendUpdateAction(
+                                updateVarName,
+                                multiple ? [] : "",
+                                module,
+                                onChange,
+                                propagate,
+                                lovVar
+                            )
+                        )
                     );
                     return [];
                 }
@@ -511,10 +508,20 @@ const CoreSelector = (props: CoreSelectorProps) => {
     // filters
     const colFilters = useMemo(() => {
         try {
-            const res = props.filter ? (JSON.parse(props.filter) as Array<[string, string, string, string[]]>) : undefined;
+            const res = props.filter
+                ? (JSON.parse(props.filter) as Array<[string, string, string, string[]]>)
+                : undefined;
             return Array.isArray(res)
                 ? res.reduce((pv, [name, id, coltype, lov], idx) => {
-                      pv[name] = { dfid: id, title: name, type: coltype, index: idx, filter: true, lov: lov, freeLov: !!lov };
+                      pv[name] = {
+                          dfid: id,
+                          title: name,
+                          type: coltype,
+                          index: idx,
+                          filter: true,
+                          lov: lov,
+                          freeLov: !!lov,
+                      };
                       return pv;
                   }, {} as Record<string, ColumnDesc>)
                 : undefined;
@@ -532,18 +539,16 @@ const CoreSelector = (props: CoreSelectorProps) => {
                     localStoreSet(jsonFilters, id, lovPropertyName, "filter");
                     const filterVar = getUpdateVar(updateCoreVars, "filter");
                     const lovVar = getUpdateVarNames(updateVars, lovPropertyName);
-                    setTimeout(
-                        () =>
-                            dispatch(
-                                createRequestUpdateAction(
-                                    id,
-                                    module,
-                                    lovVar,
-                                    true,
-                                    filterVar ? { [filterVar]: filters } : undefined
-                                )
-                            ),
-                        1
+                    Promise.resolve().then(() =>
+                        dispatch(
+                            createRequestUpdateAction(
+                                id,
+                                module,
+                                lovVar,
+                                true,
+                                filterVar ? { [filterVar]: filters } : undefined
+                            )
+                        )
                     );
                     return filters;
                 }
