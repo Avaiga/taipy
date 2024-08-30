@@ -101,7 +101,15 @@ const FileSelector = (props: FileSelectorProps) => {
             evt.preventDefault();
             if (files?.length) {
                 setUpload(true);
-                uploadFile(updateVarName, module, props.onUploadAction, props.uploadData, files, setProgress, state.id).then(
+                uploadFile(
+                    updateVarName,
+                    module,
+                    props.onUploadAction,
+                    props.uploadData,
+                    files,
+                    setProgress,
+                    state.id
+                ).then(
                     (value) => {
                         setUpload(false);
                         onAction && dispatch(createSendActionNameAction(id, module, onAction));
@@ -120,7 +128,7 @@ const FileSelector = (props: FileSelectorProps) => {
                 );
             }
         },
-        [state.id, id, onAction, props.onUploadAction, notify, updateVarName, dispatch, module]
+        [state.id, id, onAction, props.onUploadAction, props.uploadData, notify, updateVarName, dispatch, module]
     );
 
     const handleChange = useCallback(
@@ -150,8 +158,7 @@ const FileSelector = (props: FileSelectorProps) => {
                     sx,
                     (sx as CSSProperties).minWidth === defaultSx.minWidth && target
                         ? { minWidth: target.clientWidth + "px" }
-                        : undefined,
-                    withBorder ? undefined : { border: "" }
+                        : undefined
                 )
             );
             setDropLabel(dropMessage);
