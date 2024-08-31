@@ -50,8 +50,7 @@ class Decimator(ABC):
 
     def _is_applicable(self, data: t.Any, nb_rows_max: int, chart_mode: str):
         if chart_mode not in self._CHART_MODES:
-            _warn(f"{type(self).__name__} is only applicable for {' '.join(self._CHART_MODES)}.")
-            return False
+            _warn(f"Decimator '{type(self).__name__}' is not optimized for chart mode '{chart_mode}'. Consider using other chart mode such as '{f'{chr(39)}, {chr(39)}'.join(self._CHART_MODES)}.'")  # noqa: E501
         if self.threshold is None:
             if nb_rows_max < len(data):
                 return True
