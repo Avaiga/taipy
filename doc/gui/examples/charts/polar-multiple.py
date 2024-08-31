@@ -17,35 +17,36 @@ import math
 
 from taipy.gui import Gui
 
-# One data point for each degree
-theta = range(0, 360)
-
 
 # Create a rose-like shaped radius-array
 def create_rose(n_petals):
     return [math.cos(math.radians(n_petals * angle)) for angle in theta]
 
 
-data = {"theta": theta, "r1": create_rose(2), "r2": create_rose(3), "r3": create_rose(4)}
+if __name__ == "__main__":
+    # One data point for each degree
+    theta = range(0, 360)
 
-# We want three traces in the same chart
-r = ["r1", "r2", "r3"]
+    data = {"theta": theta, "r1": create_rose(2), "r2": create_rose(3), "r3": create_rose(4)}
 
-layout = {
-    # Hide the legend
-    "showlegend": False,
-    "polar": {
-        # Hide the angular axis
-        "angularaxis": {"visible": False},
-        # Hide the radial axis
-        "radialaxis": {"visible": False},
-    },
-}
+    # We want three traces in the same chart
+    r = ["r1", "r2", "r3"]
 
-page = """
+    layout = {
+        # Hide the legend
+        "showlegend": False,
+        "polar": {
+            # Hide the angular axis
+            "angularaxis": {"visible": False},
+            # Hide the radial axis
+            "radialaxis": {"visible": False},
+        },
+    }
+
+    page = """
 # Polar - Multiple
 
 <|{data}|chart|type=scatterpolar|mode=lines|r={r}|theta=theta|layout={layout}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

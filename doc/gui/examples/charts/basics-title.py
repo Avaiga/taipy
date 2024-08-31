@@ -15,17 +15,18 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-layout = {
-    "xaxis": {
-        # Force the title of the x axis
-        "title": "Values for x"
+if __name__ == "__main__":
+    layout = {
+        "xaxis": {
+            # Force the title of the x axis
+            "title": "Values for x"
+        }
     }
-}
 
-page = """
+    page = """
 # Basics - Title
 
 <|{[x*x for x in range(0, 11)]}|chart|title=Plotting x squared|layout={layout}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

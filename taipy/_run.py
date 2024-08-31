@@ -14,15 +14,15 @@ import typing as t
 
 from flask import Flask
 
-from taipy.core import Core
+from taipy.core import Orchestrator
 from taipy.gui import Gui
 from taipy.rest import Rest
 
 if sys.version_info >= (3, 10):
     from typing import TypeGuard
 
-_AppType = t.Union[Gui, Rest, Core]
-_AppTypeT = t.TypeVar("_AppTypeT", Gui, Rest, Core)
+_AppType = t.Union[Gui, Rest, Orchestrator]
+_AppTypeT = t.TypeVar("_AppTypeT", Gui, Rest, Orchestrator)
 
 
 def _run(*services: _AppType, **kwargs) -> t.Optional[Flask]:
@@ -31,7 +31,7 @@ def _run(*services: _AppType, **kwargs) -> t.Optional[Flask]:
     A Taipy service is an instance of a class that runs code as a Web application.
 
     Parameters:
-        *services (Union[`Gui^`, `Rest^`, `Core^`]): Services to run, as separate arguments.<br/>
+        *services (Union[`Gui^`, `Rest^`, `Orchestrator^`]): Services to run, as separate arguments.<br/>
             If several services are provided, all the services run simultaneously.<br/>
             If this is empty or set to None, this method does nothing.
         **kwargs: Other parameters to provide to the services.
@@ -39,19 +39,19 @@ def _run(*services: _AppType, **kwargs) -> t.Optional[Flask]:
 
     gui = __get_app(services, Gui)
     rest = __get_app(services, Rest)
-    core = __get_app(services, Core)
+    orchestrator = __get_app(services, Orchestrator)
 
-    if gui and core:
-        from taipy.core._core_cli import _CoreCLI
+    if gui and orchestrator:
+        from taipy.core._cli._core_cli_factory import _CoreCLIFactory
         from taipy.gui._gui_cli import _GuiCLI
 
-        _CoreCLI.create_parser()
+        _CoreCLIFactory._build_cli().create_parser()
         _GuiCLI.create_parser()
 
-    if rest or core:
-        if not core:
-            core = Core()
-        core.run()
+    if rest or orchestrator:
+        if not orchestrator:
+            orchestrator = Orchestrator()
+        orchestrator.run()
 
     if not rest and not gui:
         return None

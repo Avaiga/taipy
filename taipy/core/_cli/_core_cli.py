@@ -14,13 +14,13 @@ from typing import Dict
 from taipy._cli._base_cli._abstract_cli import _AbstractCLI
 from taipy._cli._base_cli._taipy_parser import _TaipyParser
 
-from .config import CoreSection
+from ..config import CoreSection
 
 
 class _CoreCLI(_AbstractCLI):
     """Command-line interface for Taipy Core application."""
 
-    __MODE_ARGS: Dict[str, Dict] = {
+    _mode_args: Dict[str, Dict] = {
         "--development": {
             "action": "store_true",
             "dest": "taipy_development",
@@ -38,17 +38,6 @@ class _CoreCLI(_AbstractCLI):
                 When execute Taipy application in `experiment` mode, the current Taipy application is saved to a new
                 version. If version name already exists, check for compatibility with current Python Config and run the
                 application. Without being specified, the version number will be a random string.
-            """,
-        },
-        "--production": {
-            "dest": "taipy_production",
-            "nargs": "?",
-            "const": "",
-            "metavar": "VERSION",
-            "help": """
-                When execute in `production` mode, the current version is used in production. All production versions
-                should have the same configuration and share all entities. Without being specified, the latest version
-                is used.
             """,
         },
     }
@@ -73,7 +62,7 @@ class _CoreCLI(_AbstractCLI):
         core_parser = _TaipyParser._add_groupparser("Taipy Core", "Optional arguments for Taipy Core service")
 
         mode_group = core_parser.add_mutually_exclusive_group()
-        for mode_arg, mode_arg_dict in cls.__MODE_ARGS.items():
+        for mode_arg, mode_arg_dict in cls._mode_args.items():
             mode_group.add_argument(mode_arg, cls.__add_taipy_prefix(mode_arg), **mode_arg_dict)
 
         force_group = core_parser.add_mutually_exclusive_group()
@@ -84,7 +73,7 @@ class _CoreCLI(_AbstractCLI):
     def create_run_parser(cls):
         run_parser = _TaipyParser._add_subparser("run", help="Run a Taipy application.")
         mode_group = run_parser.add_mutually_exclusive_group()
-        for mode_arg, mode_arg_dict in cls.__MODE_ARGS.items():
+        for mode_arg, mode_arg_dict in cls._mode_args.items():
             mode_group.add_argument(mode_arg, **mode_arg_dict)
 
         force_group = run_parser.add_mutually_exclusive_group()
@@ -97,13 +86,10 @@ class _CoreCLI(_AbstractCLI):
 
         as_dict = {}
         if args.taipy_development:
-            as_dict[CoreSection._MODE_KEY] = CoreSection._DEVELOPMENT_MODE
+            as_dict[CoreSection._MODE_KEY] = "development"
         elif args.taipy_experiment is not None:
-            as_dict[CoreSection._MODE_KEY] = CoreSection._EXPERIMENT_MODE
+            as_dict[CoreSection._MODE_KEY] = "experiment"
             as_dict[CoreSection._VERSION_NUMBER_KEY] = args.taipy_experiment
-        elif args.taipy_production is not None:
-            as_dict[CoreSection._MODE_KEY] = CoreSection._PRODUCTION_MODE
-            as_dict[CoreSection._VERSION_NUMBER_KEY] = args.taipy_production
 
         if args.taipy_force:
             as_dict[CoreSection._FORCE_KEY] = True

@@ -12,17 +12,23 @@
 """
 Contain the application's configuration including the scenario configurations.
 
-The configuration is run by the Core service.
+The configuration is run when starting the Orchestrator.
 """
 
 from algorithms import *
 
 from taipy import Config
 
-# #############################################################################
-# PLACEHOLDER: Put your application's configurations here                     #
-#                                                                             #
-# Example:                                                                    #
-# scenario_config = Config.configure_scenario("placeholder_scenario", [])     #
-# Comment, remove or replace the previous lines with your own use case        #
-# #############################################################################
+# ###########################################################################
+# PLACEHOLDER: Put your application's configurations here                   #
+#                                                                           #
+# Example:                                                                  #
+# scenario_config = Config.configure_scenario("placeholder_scenario", [])   #
+#                                                                           #
+# Or create a config.toml file and load it like this:                       #
+# def configure():                                                          #
+#    Config.load("config/config.toml")                                      #
+#    return Config.scenarios["scenario_configuration"]                      #
+#                                                                           #
+# Comment, remove or replace the previous lines with your own use case      #
+# ###########################################################################

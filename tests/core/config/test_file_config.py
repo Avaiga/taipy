@@ -40,8 +40,6 @@ version_number = ""
 force = "False:bool"
 core_version = "{CoreSection._CURRENT_CORE_VERSION}"
 
-[VERSION_MIGRATION.migration_fcts]
-
 [DATA_NODE.default]
 storage_type = "in_memory"
 scope = "SCENARIO:SCOPE"

@@ -21,31 +21,31 @@ def f(x):
     return x * x * x / 3 - x
 
 
-# x values: [-2.2, ..., 2.2]
-x = [(x - 10) / 4.5 for x in range(0, 21)]
+if __name__ == "__main__":
+    # x values: [-2.2, ..., 2.2]
+    x = [(x - 10) / 4.5 for x in range(0, 21)]
 
-data = {
-    "x": x,
-    # y: [f(-2.2), ..., f(2.2)]
-    "y": [f(x) for x in x],
-}
+    data = {
+        "x": x,
+        # y: [f(-2.2), ..., f(2.2)]
+        "y": [f(x) for x in x],
+    }
 
+    layout = {
+        # Chart title
+        "title": "Local extrema",
+        "annotations": [
+            # Annotation for local maximum (x = -1)
+            {"text": "Local <b>max</b>", "font": {"size": 20}, "x": -1, "y": f(-1)},
+            # Annotation for local minimum (x = 1)
+            {"text": "Local <b>min</b>", "font": {"size": 20}, "x": 1, "y": f(1), "xanchor": "left"},
+        ],
+    }
 
-layout = {
-    # Chart title
-    "title": "Local extrema",
-    "annotations": [
-        # Annotation for local maximum (x = -1)
-        {"text": "Local <b>max</b>", "font": {"size": 20}, "x": -1, "y": f(-1)},
-        # Annotation for local minimum (x = 1)
-        {"text": "Local <b>min</b>", "font": {"size": 20}, "x": 1, "y": f(1), "xanchor": "left"},
-    ],
-}
-
-page = """
+    page = """
 # Advanced - Annotations
 
 <|{data}|chart|layout={layout}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

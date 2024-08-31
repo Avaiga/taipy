@@ -275,3 +275,22 @@ class _Control(_Element):
 
     def __exit__(self, exc_type, exc_value, traceback):
         raise RuntimeError(f"Can't use Context Manager for control type '{self._ELEMENT_NAME}'")
+
+
+class content(_Control):
+    """
+    Create a `content` pseudo-element
+
+    Arguments:
+            None
+
+        Examples:
+            - To generate `content`, use:
+               ```
+               content()
+               ```
+    """
+
+    def _render(self, gui: "Gui") -> str:
+        el = _BuilderFactory.create_element(gui, "content", {})
+        return f"{el[0]}</{el[1]}>"

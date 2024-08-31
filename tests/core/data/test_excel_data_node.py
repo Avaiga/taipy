@@ -94,17 +94,17 @@ class TestExcelDataNode:
         assert dn.job_ids == []
         assert not dn.is_ready_for_reading
         assert dn.path == path
-        assert dn.has_header is False
-        assert dn.sheet_name == "Sheet1"
+        assert dn.properties["has_header"] is False
+        assert dn.properties["sheet_name"] == "Sheet1"
 
         excel_dn_config_1 = Config.configure_excel_data_node(
             id="baz", default_path=path, has_header=True, sheet_name="Sheet1", exposed_type=MyCustomObject
         )
         dn_1 = _DataManagerFactory._build_manager()._create_and_set(excel_dn_config_1, None, None)
         assert isinstance(dn_1, ExcelDataNode)
-        assert dn_1.has_header is True
-        assert dn_1.sheet_name == "Sheet1"
-        assert dn_1.exposed_type == MyCustomObject
+        assert dn_1.properties["has_header"] is True
+        assert dn_1.properties["sheet_name"] == "Sheet1"
+        assert dn_1.properties["exposed_type"] == MyCustomObject
 
         excel_dn_config_2 = Config.configure_excel_data_node(
             id="baz",
@@ -115,16 +115,16 @@ class TestExcelDataNode:
         )
         dn_2 = _DataManagerFactory._build_manager()._create_and_set(excel_dn_config_2, None, None)
         assert isinstance(dn_2, ExcelDataNode)
-        assert dn_2.sheet_name == sheet_names
-        assert dn_2.exposed_type == {"Sheet1": "pandas", "Sheet2": "numpy"}
+        assert dn_2.properties["sheet_name"] == sheet_names
+        assert dn_2.properties["exposed_type"] == {"Sheet1": "pandas", "Sheet2": "numpy"}
 
         excel_dn_config_3 = Config.configure_excel_data_node(
             id="baz", default_path=path, has_header=True, sheet_name=sheet_names, exposed_type=MyCustomObject
         )
         dn_3 = _DataManagerFactory._build_manager()._create_and_set(excel_dn_config_3, None, None)
         assert isinstance(dn_3, ExcelDataNode)
-        assert dn_3.sheet_name == sheet_names
-        assert dn_3.exposed_type == MyCustomObject
+        assert dn_3.properties["sheet_name"] == sheet_names
+        assert dn_3.properties["exposed_type"] == MyCustomObject
 
         excel_dn_config_4 = Config.configure_excel_data_node(
             id="baz",
@@ -135,8 +135,8 @@ class TestExcelDataNode:
         )
         dn_4 = _DataManagerFactory._build_manager()._create_and_set(excel_dn_config_4, None, None)
         assert isinstance(dn_4, ExcelDataNode)
-        assert dn_4.sheet_name == sheet_names
-        assert dn_4.exposed_type == {"Sheet1": MyCustomObject, "Sheet2": MyCustomObject2}
+        assert dn_4.properties["sheet_name"] == sheet_names
+        assert dn_4.properties["exposed_type"] == {"Sheet1": MyCustomObject, "Sheet2": MyCustomObject2}
 
     def test_get_user_properties(self, excel_file):
         dn_1 = ExcelDataNode("dn_1", Scope.SCENARIO, properties={"path": "data/node/path"})
@@ -204,7 +204,7 @@ class TestExcelDataNode:
             pathlib.Path(__file__).parent.resolve(), "data_sample/example_2.xlsx"
         )  # ["Sheet1", "Sheet2", "Sheet3"]
         dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"default_path": path, "exposed_type": MyCustomObject1})
-        assert dn.exposed_type == MyCustomObject1
+        assert dn.properties["exposed_type"] == MyCustomObject1
         dn.read()
         dn.path = new_path
         dn.read()
@@ -214,7 +214,7 @@ class TestExcelDataNode:
             Scope.SCENARIO,
             properties={"default_path": path, "exposed_type": MyCustomObject1, "sheet_name": ["Sheet4"]},
         )
-        assert dn.exposed_type == MyCustomObject1
+        assert dn.properties["exposed_type"] == MyCustomObject1
         with pytest.raises(NonExistingExcelSheet):
             dn.read()
 
@@ -264,14 +264,14 @@ class TestExcelDataNode:
             "foo", Scope.SCENARIO, properties={"default_path": "notexistyet.xlsx", "exposed_type": MyCustomObject1}
         )
         assert dn.path == "notexistyet.xlsx"
-        assert dn.exposed_type == MyCustomObject1
+        assert dn.properties["exposed_type"] == MyCustomObject1
         dn = ExcelDataNode(
             "foo",
             Scope.SCENARIO,
             properties={"default_path": "notexistyet.xlsx", "exposed_type": [MyCustomObject1, MyCustomObject2]},
         )
         assert dn.path == "notexistyet.xlsx"
-        assert dn.exposed_type == [MyCustomObject1, MyCustomObject2]
+        assert dn.properties["exposed_type"] == [MyCustomObject1, MyCustomObject2]
         dn = ExcelDataNode(
             "foo",
             Scope.SCENARIO,
@@ -281,12 +281,12 @@ class TestExcelDataNode:
             },
         )
         assert dn.path == "notexistyet.xlsx"
-        assert dn.exposed_type == {"Sheet1": MyCustomObject1, "Sheet2": MyCustomObject2}
+        assert dn.properties["exposed_type"] == {"Sheet1": MyCustomObject1, "Sheet2": MyCustomObject2}
 
     def test_exposed_type_default(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
         dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"default_path": path, "sheet_name": "Sheet1"})
-        assert dn.exposed_type == "pandas"
+        assert dn.properties["exposed_type"] == "pandas"
         data = dn.read()
         assert isinstance(data, pd.DataFrame)
 
@@ -295,7 +295,7 @@ class TestExcelDataNode:
         dn = ExcelDataNode(
             "foo", Scope.SCENARIO, properties={"default_path": path, "exposed_type": "pandas", "sheet_name": "Sheet1"}
         )
-        assert dn.exposed_type == "pandas"
+        assert dn.properties["exposed_type"] == "pandas"
         data = dn.read()
         assert isinstance(data, pd.DataFrame)
 

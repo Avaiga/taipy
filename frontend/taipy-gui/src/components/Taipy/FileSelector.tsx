@@ -20,7 +20,7 @@ import UploadFile from "@mui/icons-material/UploadFile";
 import { TaipyContext } from "../../context/taipyContext";
 import { createAlertAction, createSendActionNameAction } from "../../context/taipyReducers";
 import { useClassNames, useDynamicProperty, useModule } from "../../utils/hooks";
-import { noDisplayStyle, TaipyActiveProps } from "./utils";
+import { getCssSize, noDisplayStyle, TaipyActiveProps } from "./utils";
 import { uploadFile } from "../../workers/fileupload";
 
 interface FileSelectorProps extends TaipyActiveProps {
@@ -31,6 +31,7 @@ interface FileSelectorProps extends TaipyActiveProps {
     extensions?: string;
     dropMessage?: string;
     notify?: boolean;
+    width?: string | number;
 }
 
 const handleDragOver = (evt: DragEvent) => {
@@ -65,6 +66,8 @@ const FileSelector = (props: FileSelectorProps) => {
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
+
+    useEffect(() => setDropSx((sx) => (props.width ? { ...sx, width: getCssSize(props.width) } : sx)), [props.width]);
 
     const handleFiles = useCallback(
         (files: FileList | undefined | null, evt: Event | ChangeEvent) => {
@@ -102,7 +105,7 @@ const FileSelector = (props: FileSelectorProps) => {
     const handleDrop = useCallback(
         (e: DragEvent) => {
             setDropLabel("");
-            setDropSx(defaultSx);
+            setDropSx((sx) => ({ ...sx, ...defaultSx }));
             handleFiles(e.dataTransfer?.files, e);
         },
         [handleFiles]
@@ -110,7 +113,7 @@ const FileSelector = (props: FileSelectorProps) => {
 
     const handleDragLeave = useCallback(() => {
         setDropLabel("");
-        setDropSx(defaultSx);
+        setDropSx((sx) => ({ ...sx, ...defaultSx }));
     }, []);
 
     const handleDragOverWithLabel = useCallback(
@@ -118,7 +121,7 @@ const FileSelector = (props: FileSelectorProps) => {
             console.log(evt);
             const target = evt.currentTarget as HTMLElement;
             setDropSx((sx) =>
-                sx.minWidth === defaultSx.minWidth && target ? { minWidth: target.clientWidth + "px" } : sx
+                sx.minWidth === defaultSx.minWidth && target ? { ...sx, minWidth: target.clientWidth + "px" } : sx
             );
             setDropLabel(dropMessage);
             handleDragOver(evt);

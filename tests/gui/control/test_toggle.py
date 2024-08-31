@@ -18,6 +18,12 @@ def test_toggle_md(gui: Gui, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
+def test_toggle_width_md(gui: Gui, helpers):
+    md_string = "<|toggle|theme|width=70%|>"
+    expected_list = ["<Toggle", 'mode="theme"', 'unselectedValue=""', 'width="70%"']
+    helpers.test_control_md(gui, md_string, expected_list)
+
+
 def test_toggle_allow_unselected_md(gui: Gui, helpers):
     md_string = "<|toggle|lov=1;2|allow_unselect|>"
     expected_list = ["<Toggle", 'unselectedValue=""', "allowUnselect={true}"]

@@ -12,7 +12,7 @@
 from unittest import mock
 
 from taipy._run import _run
-from taipy.core import Core
+from taipy.core import Orchestrator
 from taipy.gui import Gui
 from taipy.rest import Rest
 
@@ -23,41 +23,41 @@ def test_run_pass_with_gui(gui_run):
     gui_run.assert_called_once()
 
 
-@mock.patch("taipy.core.Core.run")
-def test_run_pass_with_core(core_run):
-    _run(Core())
-    core_run.assert_called_once()
+@mock.patch("taipy.core.Orchestrator.run")
+def test_run_pass_with_core(orchestrator_run):
+    _run(Orchestrator())
+    orchestrator_run.assert_called_once()
 
 
 @mock.patch("taipy.rest.Rest.run")
-@mock.patch("taipy.core.Core.run")
-def test_run_pass_with_rest(rest_run, core_run):
+@mock.patch("taipy.core.Orchestrator.run")
+def test_run_pass_with_rest(rest_run, orchestrator_run):
     _run(Rest())
     rest_run.assert_called_once()
-    core_run.assert_called_once()
+    orchestrator_run.assert_called_once()
 
 
 @mock.patch("taipy.rest.Rest.run")
-@mock.patch("taipy.core.Core.run")
-def test_run_pass_with_core_and_rest(core_run, rest_run):
-    _run(Core(), Rest())
-    core_run.assert_called_once()
+@mock.patch("taipy.core.Orchestrator.run")
+def test_run_pass_with_core_and_rest(orchestrator_run, rest_run):
+    _run(Orchestrator(), Rest())
+    orchestrator_run.assert_called_once()
     rest_run.assert_called_once()
 
 
 @mock.patch("taipy.gui.Gui.run")
 @mock.patch("taipy.rest.Rest.run")
-@mock.patch("taipy.core.Core.run")
-def test_run_pass_with_gui_and_rest(core_run, rest_run, gui_run):
+@mock.patch("taipy.core.Orchestrator.run")
+def test_run_pass_with_gui_and_rest(orchestrator_run, rest_run, gui_run):
     _run(Gui(), Rest())
     gui_run.assert_called_once()
-    core_run.assert_called_once()
+    orchestrator_run.assert_called_once()
     rest_run.assert_not_called()
 
 
 @mock.patch("taipy.gui.Gui.run")
-@mock.patch("taipy.core.Core.run")
-def test_run_pass_with_gui_and_core(core_run, gui_run):
-    _run(Gui(), Core())
+@mock.patch("taipy.core.Orchestrator.run")
+def test_run_pass_with_gui_and_core(orchestrator_run, gui_run):
+    _run(Gui(), Orchestrator())
     gui_run.assert_called_once()
-    core_run.assert_called_once()
+    orchestrator_run.assert_called_once()

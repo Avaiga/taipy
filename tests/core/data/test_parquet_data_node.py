@@ -84,16 +84,16 @@ class TestParquetDataNode:
         assert dn.job_ids == []
         assert not dn.is_ready_for_reading
         assert dn.path == path
-        assert dn.exposed_type == "pandas"
-        assert dn.compression == "snappy"
-        assert dn.engine == "pyarrow"
+        assert dn.properties["exposed_type"] == "pandas"
+        assert dn.properties["compression"] == "snappy"
+        assert dn.properties["engine"] == "pyarrow"
 
         parquet_dn_config_1 = Config.configure_parquet_data_node(
             id="bar", default_path=path, compression=compression, exposed_type=MyCustomObject
         )
         dn_1 = _DataManagerFactory._build_manager()._create_and_set(parquet_dn_config_1, None, None)
         assert isinstance(dn_1, ParquetDataNode)
-        assert dn_1.exposed_type == MyCustomObject
+        assert dn_1.properties["exposed_type"] == MyCustomObject
 
         with pytest.raises(InvalidConfigurationId):
             dn = ParquetDataNode("foo bar", Scope.SCENARIO, properties={"path": path, "name": "super name"})

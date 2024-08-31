@@ -23,8 +23,8 @@ class ConfigCoreVersionMismatched(Exception):
         )
 
 
-class CoreServiceIsAlreadyRunning(Exception):
-    """Raised if the Core service is already running."""
+class OrchestratorServiceIsAlreadyRunning(Exception):
+    """Raised if the Orchestrator service is already running."""
 
 
 class CycleAlreadyExists(Exception):
@@ -346,8 +346,12 @@ class NonExistingVersion(Exception):
         self.message = f"Version '{version_number}' does not exist."
 
 
-class VersionIsNotProductionVersion(Exception):
-    """Raised if the version is not a production version."""
+class VersionAlreadyExistsAsDevelopment(Exception):
+    """Raised if a version already exists as the development version."""
+
+    def __init__(self, version_number: str):
+        self.message = f"Version number {version_number} already exists as the development version."
+        self.message += " Please choose a different name for this experiment."
 
 
 class ConflictedConfigurationError(Exception):
@@ -379,3 +383,10 @@ class SQLQueryCannotBeExecuted(Exception):
 
 class _SuspiciousFileOperation(Exception):
     pass
+
+
+class AttributeKeyAlreadyExisted(Exception):
+    """Raised when an attribute key already existed."""
+
+    def __init__(self, key: str):
+        self.message = f"Attribute key '{key}' already existed."

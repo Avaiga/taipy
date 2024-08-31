@@ -15,76 +15,77 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-# List of countries, used as labels in the pie charts
-countries = ["US", "China", "European Union", "Russian Federation", "Brazil", "India", "Rest of World"]
+if __name__ == "__main__":
+    # List of countries, used as labels in the pie charts
+    countries = ["US", "China", "European Union", "Russian Federation", "Brazil", "India", "Rest of World"]
 
-data = [
-    {
-        # Values for GHG Emissions
-        "values": [16, 15, 12, 6, 5, 4, 42],
-        "labels": countries,
-    },
-    {
-        # Values for CO2 Emissions
-        "values": [27, 11, 25, 8, 1, 3, 25],
-        "labels": countries,
-    },
-]
-
-options = [
-    # First pie chart
-    {
-        # Show label value on hover
-        "hoverinfo": "label",
-        # Leave a hole in the middle of the chart
-        "hole": 0.4,
-        # Place the trace on the left side
-        "domain": {"column": 0},
-    },
-    # Second pie chart
-    {
-        # Show label value on hover
-        "hoverinfo": "label",
-        # Leave a hole in the middle of the chart
-        "hole": 0.4,
-        # Place the trace on the right side
-        "domain": {"column": 1},
-    },
-]
-
-layout = {
-    # Chart title
-    "title": "Global Emissions 1990-2011",
-    # Show traces in a 1x2 grid
-    "grid": {"rows": 1, "columns": 2},
-    "annotations": [
-        # Annotation for the first trace
+    data = [
         {
-            "text": "GHG",
-            "font": {"size": 20},
-            # Hide annotation arrow
-            "showarrow": False,
-            # Move to the center of the trace
-            "x": 0.18,
-            "y": 0.5,
+            # Values for GHG Emissions
+            "values": [16, 15, 12, 6, 5, 4, 42],
+            "labels": countries,
         },
-        # Annotation for the second trace
         {
-            "text": "CO2",
-            "font": {"size": 20},
-            "showarrow": False,
-            # Move to the center of the trace
-            "x": 0.81,
-            "y": 0.5,
+            # Values for CO2 Emissions
+            "values": [27, 11, 25, 8, 1, 3, 25],
+            "labels": countries,
         },
-    ],
-    "showlegend": False,
-}
+    ]
 
-page = """
+    options = [
+        # First pie chart
+        {
+            # Show label value on hover
+            "hoverinfo": "label",
+            # Leave a hole in the middle of the chart
+            "hole": 0.4,
+            # Place the trace on the left side
+            "domain": {"column": 0},
+        },
+        # Second pie chart
+        {
+            # Show label value on hover
+            "hoverinfo": "label",
+            # Leave a hole in the middle of the chart
+            "hole": 0.4,
+            # Place the trace on the right side
+            "domain": {"column": 1},
+        },
+    ]
+
+    layout = {
+        # Chart title
+        "title": "Global Emissions 1990-2011",
+        # Show traces in a 1x2 grid
+        "grid": {"rows": 1, "columns": 2},
+        "annotations": [
+            # Annotation for the first trace
+            {
+                "text": "GHG",
+                "font": {"size": 20},
+                # Hide annotation arrow
+                "showarrow": False,
+                # Move to the center of the trace
+                "x": 0.18,
+                "y": 0.5,
+            },
+            # Annotation for the second trace
+            {
+                "text": "CO2",
+                "font": {"size": 20},
+                "showarrow": False,
+                # Move to the center of the trace
+                "x": 0.81,
+                "y": 0.5,
+            },
+        ],
+        "showlegend": False,
+    }
+
+    page = """
 # Pie - Multiple
 
 <|{data}|chart|type=pie|x[1]=0/values|x[2]=1/values|options={options}|layout={layout}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()
