@@ -24,7 +24,7 @@ root_folder = Path(__file__).parent
 
 package_desc = Path(root_folder / "package_desc.md").read_text("UTF-8")
 
-version_path = os.path.join(root_folder, "taipy/gui/version.json")
+version_path = "taipy/gui/version.json"
 
 setup_requirements = Path("taipy/gui/setup.requirements.txt")
 
@@ -76,7 +76,7 @@ setup(
     install_requires=requirements,
     packages=find_packages(where=root_folder, include=["taipy", "taipy.gui", "taipy.gui.*"]),
     include_package_data=True,
-    data_files=[("version", ["version.json"])],
+    data_files=[("version", [version_path])],
     tests_require=test_requirements,
     extras_require=extras_require,
     cmdclass={"build_py": NPMInstall},

@@ -348,16 +348,14 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
             // clean lock on change
             if (oldDn[DataNodeFullProps.id] && isNewDn && editLock.current) {
                 const oldId = oldDn[DataNodeFullProps.id];
-                setTimeout(
-                    () =>
-                        dispatch(
-                            createSendActionNameAction(id, module, props.onLock, {
-                                id: oldId,
-                                lock: false,
-                                error_id: getUpdateVar(updateDnVars, "error_id"),
-                            })
-                        ),
-                    1
+                Promise.resolve().then(() =>
+                    dispatch(
+                        createSendActionNameAction(id, module, props.onLock, {
+                            id: oldId,
+                            lock: false,
+                            error_id: getUpdateVar(updateDnVars, "error_id"),
+                        })
+                    )
                 );
             }
             if (!dn || isNewDn) {
@@ -371,18 +369,10 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                 if (req && !isNewDn && tabValue == TabValues.History) {
                     const idVar = getUpdateVar(updateDnVars, "history_id");
                     const vars = getUpdateVarNames(updateVars, "history");
-                    setTimeout(
-                        () =>
-                            dispatch(
-                                createRequestUpdateAction(
-                                    id,
-                                    module,
-                                    vars,
-                                    true,
-                                    idVar ? { [idVar]: newDnId } : undefined
-                                )
-                            ),
-                        1
+                    Promise.resolve().then(() =>
+                        dispatch(
+                            createRequestUpdateAction(id, module, vars, true, idVar ? { [idVar]: newDnId } : undefined)
+                        )
                     );
                     return true;
                 }
@@ -392,18 +382,10 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                 if (showData && tabValue == TabValues.Data && dn[DataNodeFullProps.data][DatanodeDataProps.tabular]) {
                     const idVar = getUpdateVar(updateDnVars, "data_id");
                     const vars = getUpdateVarNames(updateVars, "tabularData", "tabularColumns");
-                    setTimeout(
-                        () =>
-                            dispatch(
-                                createRequestUpdateAction(
-                                    id,
-                                    module,
-                                    vars,
-                                    true,
-                                    idVar ? { [idVar]: newDnId } : undefined
-                                )
-                            ),
-                        1
+                    Promise.resolve().then(() =>
+                        dispatch(
+                            createRequestUpdateAction(id, module, vars, true, idVar ? { [idVar]: newDnId } : undefined)
+                        )
                     );
                     return true;
                 }
@@ -413,18 +395,10 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                 if ((req || !showData) && tabValue == TabValues.Properties) {
                     const idVar = getUpdateVar(updateDnVars, "properties_id");
                     const vars = getUpdateVarNames(updateVars, "properties");
-                    setTimeout(
-                        () =>
-                            dispatch(
-                                createRequestUpdateAction(
-                                    id,
-                                    module,
-                                    vars,
-                                    true,
-                                    idVar ? { [idVar]: newDnId } : undefined
-                                )
-                            ),
-                        1
+                    Promise.resolve().then(() =>
+                        dispatch(
+                            createRequestUpdateAction(id, module, vars, true, idVar ? { [idVar]: newDnId } : undefined)
+                        )
                     );
                     return true;
                 }

@@ -1,6 +1,3 @@
-[![Taipy Designer banner](https://github.com/Avaiga/taipy/assets/31435778/6378ffd4-438a-498f-9385-10394f7d53fb)](https://links.taipy.io/306TwUH)
-
-
 <div align="center">
   <a href="https://taipy.io?utm_source=github" target="_blank">
   <picture>
@@ -15,7 +12,8 @@ Build Python Data & AI web applications
 </h1>
 
 <div align="center">
-From simple pilots to production-ready web applications in no time. No more compromise on performance, customization, and scalability.
+From simple pilots to production-ready web applications in no time. <br />
+No more compromise on performance, customization, and scalability.
 </div>
 
 <br />
@@ -23,28 +21,28 @@ From simple pilots to production-ready web applications in no time. No more comp
 <div align="center">
 
 **Go beyond existing libraries**
+
 </div>
 
-
-
-  <p align="left">
+<p align="left">
     <br />
     <a href="https://docs.taipy.io/en/latest/"><strong>📚 Explore the docs </strong></a>
     <br />
-    <a href="https://discord.com/invite/SJyz2VJGxV">  🫱🏼‍🫲🏼 Discord support</a>
+    <a href="https://discord.com/invite/SJyz2VJGxV"><strong>  🫱🏼‍🫲🏼 Discord support </strong></a>
     <br />
-    <a href="https://docs.taipy.io/en/latest/gallery/"> 👀 Demos & Examples</a>
+    <a href="https://docs.taipy.io/en/latest/gallery/"><strong> 👀 Demos & Examples </strong></a>
   </p>
 
 &nbsp;
 
 ## ⭐️ What's Taipy?
+
 Taipy is designed for data scientists and machine learning engineers to build data & AI web applications.
 &nbsp;
 
 ⭐️ Enables building production-ready web applications. <br />
 ⭐️ No need to learn new languages. Only Python is needed.<br />
-⭐️ Concentrate on Data and AI algorithms without development and deployment complexities.
+⭐️ Concentrate on Data and AI algorithms without development and deployment complexities.<br />
 
 &nbsp;
 
@@ -52,23 +50,25 @@ Taipy is designed for data scientists and machine learning engineers to build da
 Taipy is a Two-in-One Tool for UI Generation and Scenario/Data Management
 </h4>
 
- <br />
+<br />
 
-| User Interface Generation  | Scenario and Data Management |
-| --------  | -------- |
-|<img src="readme_img/taipy_github_GUI_video.gif" alt="Interface Animation"  width="100%" /> | <img src="readme_img/taipy_github_scenarios_video.gif" alt="Back-End Animation"  width="100%"/>
+| User Interface Generation                                                                       | Scenario and Data Management                                                                        |
+| ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| <img src="readme_img/taipy_github_GUI_video.gif" alt="Interface Animation"  width="100%" /> | <img src="readme_img/taipy_github_scenarios_video.gif" alt="Back-End Animation"  width="100%"/> |
 
 &nbsp;
 
-## ✨ Features
+## ✨ Key Features
+
 <img src="readme_img/taipy_github_scenario.png" alt="Scenario Banner"  width="49%" />  <img src="readme_img/taipy-github-optimized.png" alt="Back-End Animation"  width="49.7%"/>
 <img src="readme_img/taipy_github_data_support.png" alt="Back-End Animation"  width="49.7%" />
-
 
 &nbsp;
 
 ## ⚙️ Quickstart
+
 To install Taipy stable release run:
+
 ```bash
 pip install taipy
 ```
@@ -102,11 +102,13 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 ```
 
 This is the execution graph of the scenario we are implementing
+
 <p align="center">
 <img src="https://github.com/Avaiga/taipy/raw/develop/readme_img/readme_exec_graph.png" width="600" align="center" />
 </p>
 
 ### Taipy Studio
+
 You can use the Taipy Studio extension in Visual Studio Code to configure your scenario with no code<br />
 Your configuration is automatically saved as a TOML file.<br />
 Check out Taipy Studio [Documentation](https://docs.taipy.io/en/latest/manuals/studio/)
@@ -119,6 +121,7 @@ Check out the movie genre demo scenario creation with this [Demo](https://docs.t
 &nbsp;
 
 ## User Interface Generation and Scenario & Data Management
+
 This simple Taipy application demonstrates how to create a basic film recommendation system using Taipy.<br />
 The application filters a dataset of films based on the user's selected genre and displays the top seven films in that genre by popularity.
 Here is the full code for both the frontend and backend of the application.
@@ -154,8 +157,8 @@ if __name__ == "__main__":
     Config.load("config.toml")
     scenario_cfg = Config.scenarios["scenario"]
 
-    # Start Taipy Core service
-    tp.Core().run()
+    # Start Taipy Orchestrator
+    tp.Orchestrator().run()
 
     # Create a scenario
     scenario = tp.create_scenario(scenario_cfg)
@@ -193,17 +196,20 @@ And the final result:
 &nbsp;
 
 ## ⚒️ Contributing
-Want to help build Taipy? Check out our [Contributing Guide](https://github.com/Avaiga/taipy/blob/develop/CONTRIBUTING.md).
+
+Want to help build Taipy? Check out our [**Contributing Guide**](https://github.com/Avaiga/taipy/blob/develop/CONTRIBUTING.md).
 
 ## 🪄 Code of conduct
-Want to be part of the Taipy community? Check out our [Code of Conduct](https://github.com/Avaiga/taipy/blob/develop/CODE_OF_CONDUCT.md)
+
+Want to be part of the Taipy community? Check out our **[Code of Conduct](https://github.com/Avaiga/taipy/blob/develop/CODE_OF_CONDUCT.md)**
 
 ## 🪪 License
+
 Copyright 2021-2024 Avaiga Private Limited
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 the License. You may obtain a copy of the License at
-[http://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+(Apache License)[http://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the

@@ -72,7 +72,7 @@ version = "==4.2.13"
 "kthread" = {version="==0.2.3"}
 "gitignore-parser" = {version="==0.1.11"}
 "simple-websocket" = {version="==1.0.0"}
-"twisted" = {version="==24.3.0"}
+"twisted" = {version="==24.7.0"}
 "deepdiff" = {version="==7.0.1"}
 "flask-restful" = {version="==0.3.10"}
 "passlib" = {version="==1.7.4"}

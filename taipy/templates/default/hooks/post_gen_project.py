@@ -14,8 +14,8 @@ import shutil
 import subprocess
 
 
-def handle_services(use_rest, use_core):
-    if use_core or use_rest:
+def handle_services(use_rest, use_orchestrator):
+    if use_orchestrator or use_rest:
         # Write "import taipy as tp" at the third line of the import.txt file
         with open(os.path.join(os.getcwd(), "sections", "import.txt"), "r") as import_file:
             import_lines = import_file.readlines()
@@ -24,12 +24,12 @@ def handle_services(use_rest, use_core):
             import_file.writelines(import_lines)
 
     # Import the necessary services
-    if use_core and use_rest:
+    if use_orchestrator and use_rest:
         with open(os.path.join(os.getcwd(), "sections", "import.txt"), "a") as import_file:
-            import_file.write("from taipy import Core, Rest\n")
-    elif use_core:
+            import_file.write("from taipy import Orchestrator, Rest\n")
+    elif use_orchestrator:
         with open(os.path.join(os.getcwd(), "sections", "import.txt"), "a") as import_file:
-            import_file.write("from taipy import Core\n")
+            import_file.write("from taipy import Orchestrator\n")
     elif use_rest:
         with open(os.path.join(os.getcwd(), "sections", "import.txt"), "a") as import_file:
             import_file.write("from taipy import Rest\n")
@@ -39,12 +39,12 @@ def handle_services(use_rest, use_core):
         with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
             main_file.write("    rest = Rest()\n")
 
-    if use_core:
+    if use_orchestrator:
         # Create and submit the placeholder scenario
         with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
-            main_file.write("    core = Core()\n")
+            main_file.write("    orchestrator = Orchestrator()\n")
             if not use_rest:
-                main_file.write("    core.run()\n")
+                main_file.write("    orchestrator.run()\n")
             main_file.write("    # #############################################################################\n")
             main_file.write("    # PLACEHOLDER: Create and submit your scenario here                           #\n")
             main_file.write("    #                                                                             #\n")
@@ -171,9 +171,9 @@ def initialize_as_git_project(project_dir: str) -> str:
     return msg
 
 
-use_core = "{{ cookiecutter.__core }}".upper()
+use_orchestrator = "{{ cookiecutter.__orchestrator }}".upper()
 use_rest = "{{ cookiecutter.__rest }}".upper()
-handle_services(use_rest in ["YES", "Y"], use_core in ["YES", "Y"])
+handle_services(use_rest in ["YES", "Y"], use_orchestrator in ["YES", "Y"])
 
 pages = "{{ cookiecutter.__pages }}".split(" ")
 # Remove empty string from pages list

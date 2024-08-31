@@ -51,7 +51,7 @@ def _publish_event(
 
 
 class Notifier:
-    """A class for managing event registrations and publishing `Core^` service events."""
+    """A class for managing event registrations and publishing `Orchestrator^` service events."""
 
     _topics_registrations_list: Dict[_Topic, Set[_Registration]] = {}
 
@@ -166,7 +166,7 @@ class Notifier:
 
     @classmethod
     def publish(cls, event) -> None:
-        """Publish a `Core^` service event to all registered listeners whose topic matches the event.
+        """Publish a `Orchestrator^` service event to all registered listeners whose topic matches the event.
 
         Parameters:
             event (Event^): The event to publish.

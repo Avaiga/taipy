@@ -64,6 +64,18 @@ def test_file_download_any_file_md(gui: Gui, test_client, helpers):
         helpers.test_control_md(gui, md_string, expected_list)
 
 
+def test_file_download_url_width_md(gui: Gui, test_client, helpers):
+    gui._bind_var_val("content", "some_url")
+    md_string = "<|{content}|file_download|width=70%|>"
+    expected_list = [
+        "<FileDownload",
+        "content={_TpC_tpec_TpExPr_content_TPMDL_0}",
+        'defaultContent="some_url"',
+        'width="70%"',
+    ]
+    helpers.test_control_md(gui, md_string, expected_list)
+
+
 def test_file_download_url_html(gui: Gui, test_client, helpers):
     gui._bind_var_val("content", "some_url")
     html_string = '<taipy:file_download content="{content}" />'

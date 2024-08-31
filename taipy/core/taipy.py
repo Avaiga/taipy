@@ -15,7 +15,6 @@ from typing import Any, Callable, Dict, List, Literal, Optional, Set, Union, ove
 from taipy.config import Scope
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from ._core import Core
 from ._entity._entity import _Entity
 from ._version._version_manager_factory import _VersionManagerFactory
 from .common._check_instance import (
@@ -27,7 +26,7 @@ from .common._check_instance import (
     _is_submission,
     _is_task,
 )
-from .common._warnings import _warn_deprecated, _warn_no_core_service
+from .common._warnings import _warn_deprecated, _warn_no_orchestrator_service
 from .config.data_node_config import DataNodeConfig
 from .config.scenario_config import ScenarioConfig
 from .cycle._cycle_manager_factory import _CycleManagerFactory
@@ -40,6 +39,7 @@ from .exceptions.exceptions import DataNodeConfigIsNotGlobal, ModelNotFound, Non
 from .job._job_manager_factory import _JobManagerFactory
 from .job.job import Job
 from .job.job_id import JobId
+from .orchestrator import Orchestrator
 from .reason import EntityDoesNotExist, EntityIsNotSubmittableEntity, ReasonCollection
 from .scenario._scenario_manager_factory import _ScenarioManagerFactory
 from .scenario.scenario import Scenario
@@ -216,7 +216,7 @@ def is_readable(
     return ReasonCollection()._add_reason(str(entity), EntityDoesNotExist(str(entity)))
 
 
-@_warn_no_core_service("The submitted entity will not be executed until the Core service is running.")
+@_warn_no_orchestrator_service("The submitted entity will not be executed until the Orchestrator service is running.")
 def submit(
     entity: Union[Scenario, Sequence, Task],
     force: bool = False,
@@ -548,8 +548,7 @@ def get_scenarios(
     elif not cycle and tag:
         scenarios = scenario_manager._get_all_by_tag(tag)
     elif cycle and tag:
-        cycles_scenarios = scenario_manager._get_all_by_cycle(cycle)
-        scenarios = [scenario for scenario in cycles_scenarios if scenario.has_tag(tag)]
+        scenarios = scenario_manager._get_all_by_cycle_tag(cycle, tag)
     else:
         scenarios = []
 
@@ -640,8 +639,7 @@ def set_primary(scenario: Scenario):
 def tag(scenario: Scenario, tag: str):
     """Add a tag to a scenario.
 
-    This function adds a user-defined tag to the specified scenario. If another scenario
-    within the same cycle already has the same tag applied, the previous scenario is untagged.
+    This function adds a user-defined tag to the specified scenario.
 
     Parameters:
         scenario (Scenario^): The scenario to which the tag will be added.
@@ -922,7 +920,7 @@ def create_scenario(
         SystemExit: If the configuration check returns some errors.
 
     """
-    Core._manage_version_and_block_config()
+    Orchestrator._manage_version_and_block_config()
 
     return _ScenarioManagerFactory._build_manager()._create(config, creation_date, name)
 
@@ -947,7 +945,7 @@ def create_global_data_node(config: DataNodeConfig) -> DataNode:
     if config.scope is not Scope.GLOBAL:
         raise DataNodeConfigIsNotGlobal(config.id)
 
-    Core._manage_version_and_block_config()
+    Orchestrator._manage_version_and_block_config()
 
     if dns := _DataManagerFactory._build_manager()._get_by_config_id(config.id):
         return dns[0]
