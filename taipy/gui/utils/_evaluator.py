@@ -91,7 +91,8 @@ class _Evaluator:
         var_val: t.Dict[str, t.Any] = {}
         var_map: t.Dict[str, str] = {}
         non_vars = list(self.__global_ctx.keys())
-        non_vars.extend(dir(builtins))
+        builtin_vars = dir(builtins)
+        non_vars.extend(builtin_vars)
         # Get a list of expressions (value that has been wrapped in curly braces {}) and find variables to bind
         for e in self._fetch_expression_list(expr):
             var_name = e.split(sep=".")[0]
@@ -106,7 +107,9 @@ class _Evaluator:
             for node in ast.walk(st):
                 if isinstance(node, ast.Name):
                     var_name = node.id.split(sep=".")[0]
-                    if var_name not in args and var_name not in targets and var_name not in non_vars:
+                    if var_name in builtin_vars:
+                        _warn(f"Variable '{var_name}' cannot be used in Taipy expressions as its name collides with a Python built-in identifier.")  # noqa: E501
+                    elif var_name not in args and var_name not in targets and var_name not in non_vars:
                         try:
                             if lazy_declare and var_name.startswith("__"):
                                 with warnings.catch_warnings(record=True) as warns:
