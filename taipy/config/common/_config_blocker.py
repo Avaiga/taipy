@@ -40,7 +40,7 @@ class _ConfigBlocker:
             def _check_if_is_blocking(*args, **kwargs):
                 if cls.__block_config_update:
                     error_message = (
-                        "The Core service should be stopped by running core.stop() before"
+                        "The Orchestrator service should be stopped by running orchestrator.stop() before"
                         " modifying the Configuration."
                     )
                     cls.__logger.error(f"ConfigurationUpdateBlocked: {error_message}")

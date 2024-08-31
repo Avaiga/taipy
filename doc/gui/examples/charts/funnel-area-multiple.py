@@ -15,79 +15,80 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-data = {
-    "John_us": [500, 450, 340, 230, 220, 110],
-    "John_eu": [600, 500, 400, 300, 200, 100],
-    "Robert_us": [510, 480, 440, 330, 220, 100],
-    "Robert_eu": [360, 250, 240, 130, 120, 60],
-}
+if __name__ == "__main__":
+    data = {
+        "John_us": [500, 450, 340, 230, 220, 110],
+        "John_eu": [600, 500, 400, 300, 200, 100],
+        "Robert_us": [510, 480, 440, 330, 220, 100],
+        "Robert_eu": [360, 250, 240, 130, 120, 60],
+    }
 
-# Values for each trace
-values = ["John_us", "John_eu", "Robert_us", "Robert_eu"]
+    # Values for each trace
+    values = ["John_us", "John_eu", "Robert_us", "Robert_eu"]
 
-options = [
-    # For John/US
-    {
-        "scalegroup": "first",
-        "textinfo": "value",
-        "title": {
-            # "position": "top",
-            "text": "John in the U.S."
+    options = [
+        # For John/US
+        {
+            "scalegroup": "first",
+            "textinfo": "value",
+            "title": {
+                # "position": "top",
+                "text": "John in the U.S."
+            },
+            # Lower-left corner
+            "domain": {"x": [0, 0.5], "y": [0, 0.5]},
         },
-        # Lower-left corner
-        "domain": {"x": [0, 0.5], "y": [0, 0.5]},
-    },
-    # For John/EU
-    {
-        "scalegroup": "first",
-        "textinfo": "value",
-        "title": {
-            # "position": "top",
-            "text": "John in the E.U."
+        # For John/EU
+        {
+            "scalegroup": "first",
+            "textinfo": "value",
+            "title": {
+                # "position": "top",
+                "text": "John in the E.U."
+            },
+            # Upper-left corner
+            "domain": {"x": [0, 0.5], "y": [0.55, 1]},
         },
-        # Upper-left corner
-        "domain": {"x": [0, 0.5], "y": [0.55, 1]},
-    },
-    # For Robert/US
-    {
-        "scalegroup": "second",
-        "textinfo": "value",
-        "title": {
-            # "position": "top",
-            "text": "Robert in the U.S."
+        # For Robert/US
+        {
+            "scalegroup": "second",
+            "textinfo": "value",
+            "title": {
+                # "position": "top",
+                "text": "Robert in the U.S."
+            },
+            # Lower-right corner
+            "domain": {"x": [0.51, 1], "y": [0, 0.5]},
         },
-        # Lower-right corner
-        "domain": {"x": [0.51, 1], "y": [0, 0.5]},
-    },
-    # For Robert/EU
-    {
-        "scalegroup": "second",
-        "textinfo": "value",
-        "title": {
-            # "position": "top",
-            "text": "Robert in the E.U."
+        # For Robert/EU
+        {
+            "scalegroup": "second",
+            "textinfo": "value",
+            "title": {
+                # "position": "top",
+                "text": "Robert in the E.U."
+            },
+            # Upper-right corner
+            "domain": {"x": [0.51, 1], "y": [0.51, 1]},
         },
-        # Upper-right corner
-        "domain": {"x": [0.51, 1], "y": [0.51, 1]},
-    },
-]
+    ]
 
-layout = {
-    "title": "Sales per Salesman per Region",
-    "showlegend": False,
-    # Draw frames around each trace
-    "shapes": [
-        {"x0": 0, "x1": 0.5, "y0": 0, "y1": 0.5},
-        {"x0": 0, "x1": 0.5, "y0": 0.52, "y1": 1},
-        {"x0": 0.52, "x1": 1, "y0": 0, "y1": 0.5},
-        {"x0": 0.52, "x1": 1, "y0": 0.52, "y1": 1},
-    ],
-}
+    layout = {
+        "title": "Sales per Salesman per Region",
+        "showlegend": False,
+        # Draw frames around each trace
+        "shapes": [
+            {"x0": 0, "x1": 0.5, "y0": 0, "y1": 0.5},
+            {"x0": 0, "x1": 0.5, "y0": 0.52, "y1": 1},
+            {"x0": 0.52, "x1": 1, "y0": 0, "y1": 0.5},
+            {"x0": 0.52, "x1": 1, "y0": 0.52, "y1": 1},
+        ],
+    }
 
-page = """
+    page = """
 # Funnel Area - Multiple Charts
 
 <|{data}|chart|type=funnelarea|values={values}|options={options}|layout={layout}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

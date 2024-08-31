@@ -15,27 +15,28 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-data = {
-    "Types": ["Website visit", "Downloads", "Prospects", "Invoice sent", "Closed"],
-    "Visits": [13873, 10533, 5443, 2703, 908],
-}
+if __name__ == "__main__":
+    data = {
+        "Types": ["Website visit", "Downloads", "Prospects", "Invoice sent", "Closed"],
+        "Visits": [13873, 10533, 5443, 2703, 908],
+    }
 
-marker = {
-    # Boxes are filled with a blue gradient color
-    "color": ["hsl(210,50%,50%)", "hsl(210,60%,60%)", "hsl(210,70%,70%)", "hsl(210,80%,80%)", "hsl(210,90%,90%)"],
-    # Lines get thicker, with an orange-to-green gradient color
-    "line": {"width": [1, 1, 2, 3, 4], "color": ["f5720a", "f39c1d", "f0cc3d", "aadb12", "8cb709"]},
-}
+    marker = {
+        # Boxes are filled with a blue gradient color
+        "color": ["hsl(210,50%,50%)", "hsl(210,60%,60%)", "hsl(210,70%,70%)", "hsl(210,80%,80%)", "hsl(210,90%,90%)"],
+        # Lines get thicker, with an orange-to-green gradient color
+        "line": {"width": [1, 1, 2, 3, 4], "color": ["f5720a", "f39c1d", "f0cc3d", "aadb12", "8cb709"]},
+    }
 
-options = {
-    # Lines connecting boxes are thick, dotted and green
-    "connector": {"line": {"color": "green", "dash": "dot", "width": 4}}
-}
+    options = {
+        # Lines connecting boxes are thick, dotted and green
+        "connector": {"line": {"color": "green", "dash": "dot", "width": 4}}
+    }
 
-page = """
+    page = """
 # Funnel Chart - Custom markers
 
 <|{data}|chart|type=funnel|x=Visits|y=Types|marker={marker}|options={options}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

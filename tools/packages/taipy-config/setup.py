@@ -35,51 +35,14 @@ requirements = [r for r in (setup_requirements).read_text("UTF-8").splitlines() 
 test_requirements = ["pytest>=3.8"]
 
 setup(
-    author="Avaiga",
-    author_email="dev@taipy.io",
-    python_requires=">=3.8",
-    classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: Apache Software License",
-        "Natural Language :: English",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
-        "Topic :: Software Development",
-        "Topic :: Scientific/Engineering",
-        "Operating System :: Microsoft :: Windows",
-        "Operating System :: POSIX",
-        "Operating System :: Unix",
-        "Operating System :: MacOS",
-    ],
-    description="A Taipy package dedicated to easily configure a Taipy application.",
+    version=version_string,
     install_requires=requirements,
-    long_description=package_desc,
-    long_description_content_type="text/markdown",
-    include_package_data=True,
-    license="Apache License 2.0",
-    keywords="taipy-config",
-    name="taipy-config",
     packages=find_packages(
         where=root_folder, include=[
             "taipy", "taipy.config", "taipy.config.*", "taipy.logger", "taipy.logger.*", "taipy._cli", "taipy._cli.*"
         ]
     ),
-    test_suite="tests",
+    include_package_data=True,
+    data_files=[('version', [version_path])],
     tests_require=test_requirements,
-    version=version_string,
-    zip_safe=False,
-    project_urls={
-        "Homepage": "https://www.taipy.io",
-        "Documentation": "https://docs.taipy.io",
-        "Source": "https://github.com/Avaiga/taipy",
-        "Download": "https://pypi.org/project/taipy/#files",
-        "Tracker": "https://github.com/Avaiga/taipy/issues",
-        "Security": "https://github.com/Avaiga/taipy?tab=security-ov-file#readme",
-        f"Release notes": "https://docs.taipy.io/en/release-{version_string}/relnotes/",
-    },
 )

@@ -21,7 +21,7 @@ from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.checker._checker import _Checker
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.config import Config
-from taipy.core.config import CoreSection, DataNodeConfig, JobConfig, MigrationConfig, ScenarioConfig, TaskConfig
+from taipy.core.config import CoreSection, DataNodeConfig, JobConfig, ScenarioConfig, TaskConfig
 
 
 def pytest_addoption(parser):
@@ -136,13 +136,6 @@ def inject_core_sections():
                 ("configure_scenario", ScenarioConfig._configure),
                 ("set_default_scenario_configuration", ScenarioConfig._set_default_configuration),
             ],
-        )
-        _inject_section(
-            MigrationConfig,
-            "migration_functions",
-            MigrationConfig.default_config(),
-            [("add_migration_function", MigrationConfig._add_migration_function)],
-            True,
         )
 
     return _inject_core_sections

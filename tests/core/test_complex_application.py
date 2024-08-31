@@ -17,7 +17,7 @@ import pandas as pd
 
 import taipy.core.taipy as tp
 from taipy.config import Config
-from taipy.core import Core, Status
+from taipy.core import Orchestrator, Status
 
 # ################################  USER FUNCTIONS  ##################################
 
@@ -75,8 +75,8 @@ def test_skipped_jobs():
     task_config_2 = Config.configure_task("second", mult_by_2, intermediate_config, output_config, skippable=True)
     scenario_config = Config.configure_scenario("scenario", [task_config_1, task_config_2])
 
-    core = Core()
-    core.run()
+    orchestrator = Orchestrator()
+    orchestrator.run()
 
     scenario = tp.create_scenario(scenario_config)
     scenario.input_dn.write(2)
@@ -92,7 +92,7 @@ def test_skipped_jobs():
             assert job.status == Status.SKIPPED
             skipped.append(job)
     assert len(skipped) == 2
-    core.stop()
+    orchestrator.stop()
 
 
 def test_complex():
@@ -171,11 +171,11 @@ def test_complex():
         ],
     )
 
-    core = Core()
-    core.run()
+    orchestrator = Orchestrator()
+    orchestrator.run()
     scenario = tp.create_scenario(scenario_config)
     tp.submit(scenario)
-    core.stop()
+    orchestrator.stop()
 
     csv_sum_res = pd.read_csv(csv_path_sum)
     excel_sum_res = pd.read_excel(excel_path_sum)

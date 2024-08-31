@@ -15,47 +15,48 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-data = {
-    "Products": [
-        "Nail polish",
-        "Eyebrow pencil",
-        "Rouge",
-        "Lipstick",
-        "Eyeshadows",
-        "Eyeliner",
-        "Foundation",
-        "Lip gloss",
-        "Mascara",
-    ],
-    "USA": [12814, 13012, 11624, 8814, 12998, 12321, 10342, 22998, 11261],
-    "China": [3054, 5067, 7004, 9054, 12043, 15067, 10119, 12043, 10419],
-    "EU": [4376, 3987, 3574, 4376, 4572, 3417, 5231, 4572, 6134],
-    "Africa": [4229, 3932, 5221, 9256, 3308, 5432, 13701, 4008, 18712],
-}
+if __name__ == "__main__":
+    data = {
+        "Products": [
+            "Nail polish",
+            "Eyebrow pencil",
+            "Rouge",
+            "Lipstick",
+            "Eyeshadows",
+            "Eyeliner",
+            "Foundation",
+            "Lip gloss",
+            "Mascara",
+        ],
+        "USA": [12814, 13012, 11624, 8814, 12998, 12321, 10342, 22998, 11261],
+        "China": [3054, 5067, 7004, 9054, 12043, 15067, 10119, 12043, 10419],
+        "EU": [4376, 3987, 3574, 4376, 4572, 3417, 5231, 4572, 6134],
+        "Africa": [4229, 3932, 5221, 9256, 3308, 5432, 13701, 4008, 18712],
+    }
 
-# Order the different traces
-ys = ["USA", "China", "EU", "Africa"]
+    # Order the different traces
+    ys = ["USA", "China", "EU", "Africa"]
 
-options = [
-    # For the USA
-    {"stackgroup": "one", "groupnorm": "percent"},
-    # For China
-    {"stackgroup": "one"},
-    # For the EU
-    {"stackgroup": "one"},
-    # For Africa
-    {"stackgroup": "one"},
-]
+    options = [
+        # For the USA
+        {"stackgroup": "one", "groupnorm": "percent"},
+        # For China
+        {"stackgroup": "one"},
+        # For the EU
+        {"stackgroup": "one"},
+        # For Africa
+        {"stackgroup": "one"},
+    ]
 
-layout = {
-    # Show all values when hovering on a data point
-    "hovermode": "x unified"
-}
+    layout = {
+        # Show all values when hovering on a data point
+        "hovermode": "x unified"
+    }
 
-page = """
+    page = """
 # Filled Area - Stacked Normalized
 
 <|{data}|chart|mode=none|x=Products|y={ys}|options={options}|layout={layout}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

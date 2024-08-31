@@ -7,7 +7,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger taipy-integration-testing
+      - name: Trigger taipy-benchmark computation
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{secrets.TAIPY_INTEGRATION_TESTING_ACCESS_TOKEN}}

@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from ._api_generator import _ElementApiGenerator
-from ._element import html
+from ._element import content, html
 
 # separate import for "Page" class so stubgen can properly generate pyi file
 from .page import Page

@@ -15,39 +15,40 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-# Flight start and end locations
-data = {
-    # Hartsfield-Jackson Atlanta International Airport
-    # to
-    # Aéroport de Paris-Charles de Gaulle
-    "lat": [33.64, 49.01],
-    "lon": [-84.44, 2.55],
-}
+if __name__ == "__main__":
+    # Flight start and end locations
+    data = {
+        # Hartsfield-Jackson Atlanta International Airport
+        # to
+        # Aéroport de Paris-Charles de Gaulle
+        "lat": [33.64, 49.01],
+        "lon": [-84.44, 2.55],
+    }
 
-layout = {
-    # Chart title
-    "title": "ATL to CDG",
-    # Hide legend
-    "showlegend": False,
-    # Focus on relevant area
-    "geo": {
-        "resolution": 50,
-        "showland": True,
-        "showocean": True,
-        "landcolor": "4a4",
-        "oceancolor": "77d",
-        "lataxis": {"range": [20, 60]},
-        "lonaxis": {"range": [-100, 20]},
-    },
-}
+    layout = {
+        # Chart title
+        "title": "ATL to CDG",
+        # Hide legend
+        "showlegend": False,
+        # Focus on relevant area
+        "geo": {
+            "resolution": 50,
+            "showland": True,
+            "showocean": True,
+            "landcolor": "4a4",
+            "oceancolor": "77d",
+            "lataxis": {"range": [20, 60]},
+            "lonaxis": {"range": [-100, 20]},
+        },
+    }
 
-# Flight displayed as a thick, red plot
-line = {"width": 5, "color": "red"}
+    # Flight displayed as a thick, red plot
+    line = {"width": 5, "color": "red"}
 
-page = """
+    page = """
 # Maps - Simple
 
 <|{data}|chart|type=scattergeo|mode=lines|lat=lat|lon=lon|line={line}|layout={layout}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

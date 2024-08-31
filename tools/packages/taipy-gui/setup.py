@@ -24,7 +24,7 @@ root_folder = Path(__file__).parent
 
 package_desc = Path(root_folder / "package_desc.md").read_text("UTF-8")
 
-version_path = os.path.join(root_folder, "taipy/gui/version.json")
+version_path = "taipy/gui/version.json"
 
 setup_requirements = Path("taipy/gui/setup.requirements.txt")
 
@@ -72,49 +72,12 @@ class NPMInstall(build_py):
 
 
 setup(
-    author="Avaiga",
-    author_email="dev@taipy.io",
-    python_requires=">=3.8",
-    classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: Apache Software License",
-        "Natural Language :: English",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
-        "Topic :: Software Development",
-        "Topic :: Scientific/Engineering",
-        "Operating System :: Microsoft :: Windows",
-        "Operating System :: POSIX",
-        "Operating System :: Unix",
-        "Operating System :: MacOS",
-    ],
-    description="Low-code library to create graphical user interfaces on the Web for your Python applications.",
-    long_description=package_desc,
-    long_description_content_type="text/markdown",
-    install_requires=requirements,
-    license="Apache License 2.0",
-    include_package_data=True,
-    keywords="taipy-gui",
-    name="taipy-gui",
-    packages=find_packages(where=root_folder, include=["taipy", "taipy.gui", "taipy.gui.*"]),
-    test_suite="tests",
-    tests_require=test_requirements,
     version=version_string,
-    zip_safe=False,
+    install_requires=requirements,
+    packages=find_packages(where=root_folder, include=["taipy", "taipy.gui", "taipy.gui.*"]),
+    include_package_data=True,
+    data_files=[("version", [version_path])],
+    tests_require=test_requirements,
     extras_require=extras_require,
     cmdclass={"build_py": NPMInstall},
-    project_urls={
-        "Homepage": "https://www.taipy.io",
-        "Documentation": "https://docs.taipy.io",
-        "Source": "https://github.com/Avaiga/taipy",
-        "Download": "https://pypi.org/project/taipy/#files",
-        "Tracker": "https://github.com/Avaiga/taipy/issues",
-        "Security": "https://github.com/Avaiga/taipy?tab=security-ov-file#readme",
-        f"Release notes": "https://docs.taipy.io/en/release-{version_string}/relnotes/",
-    },
 )

@@ -37,6 +37,7 @@ import { LoVElt, useLovListMemo } from "./lovUtils";
 import { IconAvatar, avatarSx } from "../../utils/icon";
 import { emptyArray, getInitials } from "../../utils";
 import { RowType, TableValueType } from "./tableUtils";
+import { Stack } from "@mui/material";
 
 interface ChatProps extends TaipyActiveProps {
     messages?: TableValueType;
@@ -55,8 +56,12 @@ const ENTER_KEY = "Enter";
 const indicWidth = 0.7;
 const avatarWidth = 24;
 const chatAvatarSx = { ...avatarSx, width: avatarWidth, height: avatarWidth };
-const avatarColSx = { width: 1.5 * avatarWidth };
-const senderMsgSx = { width: "fit-content", maxWidth: "80%", marginLeft: "auto" };
+const avatarColSx = { width: 1.5 * avatarWidth, minWidth: 1.5 * avatarWidth };
+const senderMsgSx = {
+    width: "fit-content",
+    maxWidth: "80%",
+    color: (theme: Theme) => theme.palette.text.disabled,
+} as SxProps<Theme>;
 const gridSx = { pb: "1em", mt: "unset", flex: 1, overflow: "auto" };
 const loadMoreSx = { width: "fit-content", marginLeft: "auto", marginRight: "auto" };
 const inputSx = { maxWidth: "unset" };
@@ -79,6 +84,7 @@ const senderPaperSx = {
         top: "0",
         right: `-${indicWidth}em`,
     },
+    color: (theme: Theme) => theme.palette.text.disabled,
 } as SxProps<Theme>;
 const otherPaperSx = {
     position: "relative",
@@ -118,47 +124,48 @@ interface ChatRowProps {
     message: string;
     name: string;
     className?: string;
-    getAvatar: (id: string) => ReactNode;
+    getAvatar: (id: string, sender: boolean) => ReactNode;
     index: number;
 }
 
 const ChatRow = (props: ChatRowProps) => {
     const { senderId, message, name, className, getAvatar, index } = props;
-    return senderId == name ? (
-        <Grid item className={getSuffixedClassNames(className, "-sent")} xs={12} sx={noAnchorSx}>
-            <Box sx={senderMsgSx}>
-                <Paper sx={senderPaperSx} data-idx={index}>
-                    {message}
-                </Paper>
-            </Box>
-        </Grid>
-    ) : (
+    const sender = senderId == name;
+    const avatar = getAvatar(name, sender);
+    return (
         <Grid
             item
             container
-            className={getSuffixedClassNames(className, "-received")}
-            rowSpacing={0.2}
-            columnSpacing={1}
+            className={getSuffixedClassNames(className, sender ? "-sent" : "-received")}
+            xs={12}
             sx={noAnchorSx}
+            justifyContent={sender ? "flex-end" : undefined}
         >
-            <Grid item sx={avatarColSx}></Grid>
-            <Grid item sx={nameSx}>
-                {name}
-            </Grid>
-            <Box width="100%" />
-            <Grid item sx={avatarColSx}>
-                {getAvatar(name)}
-            </Grid>
-            <Grid item>
-                <Paper sx={otherPaperSx} data-idx={index}>
-                    {message}
-                </Paper>
+            <Grid item sx={sender ? senderMsgSx : undefined}>
+                {avatar ? (
+                    <Stack>
+                        <Stack direction="row" gap={1}>
+                            <Box sx={avatarColSx}></Box>
+                            <Box sx={nameSx}>{name}</Box>
+                        </Stack>
+                        <Stack direction="row" gap={1}>
+                            <Box sx={avatarColSx}>{avatar}</Box>
+                            <Paper sx={sender ? senderPaperSx : otherPaperSx} data-idx={index}>
+                                {message}
+                            </Paper>
+                        </Stack>
+                    </Stack>
+                ) : (
+                    <Paper sx={sender ? senderPaperSx : otherPaperSx} data-idx={index}>
+                        {message}
+                    </Paper>
+                )}
             </Grid>
         </Grid>
     );
 };
 
-const getChatKey = (start: number, page: number) => `Chat-${start}-${start+page}`
+const getChatKey = (start: number, page: number) => `Chat-${start}-${start + page}`;
 
 const Chat = (props: ChatProps) => {
     const { id, updateVarName, senderId = "taipy", onAction, withInput = true, defaultKey = "", pageSize = 50 } = props;
@@ -184,7 +191,7 @@ const Chat = (props: ChatProps) => {
             props.height
                 ? ({
                       ...defaultBoxSx,
-                      maxHeight: props.height,
+                      maxHeight: "" + Number(props.height) == "" + props.height ? props.height + "px" : props.height,
                       display: "flex",
                       flexDirection: "column",
                   } as SxProps<Theme>)
@@ -238,12 +245,13 @@ const Chat = (props: ChatProps) => {
     }, [users]);
 
     const getAvatar = useCallback(
-        (id: string) =>
-            avatars[id] || (
+        (id: string, sender: boolean) =>
+            avatars[id] ||
+            (sender ? null : (
                 <Tooltip title={id}>
                     <Avatar sx={chatAvatarSx}>{getInitials(id)}</Avatar>
                 </Tooltip>
-            ),
+            )),
         [avatars]
     );
 
@@ -291,16 +299,13 @@ const Chat = (props: ChatProps) => {
         if (!refresh && props.messages && page.current.key && props.messages[page.current.key] !== undefined) {
             const newValue = props.messages[page.current.key];
             if (newValue.rowcount == 0) {
-                setRows(emptyArray)
+                setRows(emptyArray);
             } else {
                 const nr = newValue.data as RowType[];
                 if (Array.isArray(nr) && nr.length > newValue.start && nr[newValue.start]) {
                     setRows((old) => {
                         old.length && nr.length > old.length && setShowMessage(true);
-                        if (nr.length < old.length) {
-                            return nr.concat(old.slice(nr.length))
-                        }
-                        if (old.length > newValue.start) {
+                        if (newValue.start > 0 && old.length > newValue.start) {
                             return old.slice(0, newValue.start).concat(nr.slice(newValue.start));
                         }
                         return nr;
@@ -324,7 +329,7 @@ const Chat = (props: ChatProps) => {
 
     useEffect(() => {
         if (refresh) {
-            setTimeout(() => loadMoreItems(0), 1); // So that the state can be changed
+            Promise.resolve().then(() => loadMoreItems(0)); // So that the state can be changed
         }
     }, [refresh, loadMoreItems]);
 

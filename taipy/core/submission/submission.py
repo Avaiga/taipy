@@ -55,23 +55,24 @@ class Submission(_Entity, _Labeled):
         def by_two(x: int):
             return x * 2
 
-        # Configure scenarios
-        input_cfg = Config.configure_data_node("my_input")
-        result_cfg = Config.configure_data_node("my_result")
-        task_cfg = Config.configure_task("my_double", function=by_two, input=input_cfg, output=result_cfg)
-        scenario_cfg = Config.configure_scenario("my_scenario", task_configs=[task_cfg])
+        if __name__ == "__main__":
+            # Configure scenarios
+            input_cfg = Config.configure_data_node("my_input")
+            result_cfg = Config.configure_data_node("my_result")
+            task_cfg = Config.configure_task("my_double", function=by_two, input=input_cfg, output=result_cfg)
+            scenario_cfg = Config.configure_scenario("my_scenario", task_configs=[task_cfg])
 
-        # Create a new scenario from the configuration
-        scenario = tp.create_scenario(scenario_cfg)
+            # Create a new scenario from the configuration
+            scenario = tp.create_scenario(scenario_cfg)
 
-        # Write the input data and submit the scenario
-        scenario.my_input.write(3)
-        submission = scenario.submit()
+            # Write the input data and submit the scenario
+            scenario.my_input.write(3)
+            submission = scenario.submit()
 
-        # Retrieve the list of jobs, the submission status, and the creation date
-        jobs = submission.jobs
-        status = submission.submission_status
-        creation_date = submission.creation_date
+            # Retrieve the list of jobs, the submission status, and the creation date
+            jobs = submission.jobs
+            status = submission.submission_status
+            creation_date = submission.creation_date
         ```
     """
 

@@ -11,7 +11,7 @@
     "__main_file": "{{ cookiecutter['Application main Python file'][:-3] if cookiecutter['Application main Python file'].endswith('.py') else cookiecutter['Application main Python file'] }}",
     "__application_title": "{{ cookiecutter['Application title'] }}",
     "__pages": "{{ cookiecutter['Page names in multi-page application?'] }}",
-    "__core": "{{ cookiecutter['Does the application use scenario management or version management?'] }}",
+    "__orchestrator": "{{ cookiecutter['Does the application use scenario management or version management?'] }}",
     "__rest": "{{ cookiecutter['Does the application use Rest API?'] }}",
     "__git": "{{ cookiecutter['Do you want to initialize a new Git repository?']}}"
 }
