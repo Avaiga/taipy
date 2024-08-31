@@ -2751,6 +2751,7 @@ class Gui:
             run_in_thread=app_config["run_in_thread"],
             allow_unsafe_werkzeug=app_config["allow_unsafe_werkzeug"],
             notebook_proxy=app_config["notebook_proxy"],
+            port_auto_ranges=app_config["port_auto_ranges"]
         )
 
     def reload(self):  # pragma: no cover
