@@ -46,6 +46,7 @@ def test_date_range_md_2(gui: Gui, test_client, helpers):
 
 
 def test_date_range_md_width(gui: Gui, test_client, helpers):
+    # do not remove test_client: it brings an app context needed for this test
     gui._bind_var_val(
         "dates", [datetime.strptime("15 Dec 2020", "%d %b %Y"), datetime.strptime("31 Dec 2020", "%d %b %Y")]
     )
