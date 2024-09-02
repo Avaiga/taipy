@@ -968,20 +968,20 @@ class Gui:
         on_upload_action = request.form.get("on_action", None)
         var_name = request.form.get("var_name", None)
         if not var_name and not on_upload_action:
-            _warn("No var name")
-            return ("No var name", 400)
+            _warn("upload files: No var name")
+            return ("upload files: No var name", 400)
         context = request.form.get("context", None)
         upload_data = request.form.get("upload_data", None)
         multiple = "multiple" in request.form and request.form["multiple"] == "True"
         file = request.files.get("blob", None)
         if not file:
-            _warn("No file part")
-            return ("No file part", 400)
+            _warn("upload files: No file part")
+            return ("upload files: No file part", 400)
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
         if file.filename == "":
-            _warn("No selected file")
-            return ("No selected file", 400)
+            _warn("upload files: No selected file")
+            return ("upload files: No selected file", 400)
         suffix = ""
         complete = True
         part = 0
