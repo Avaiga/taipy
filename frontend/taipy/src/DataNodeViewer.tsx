@@ -122,7 +122,8 @@ type DataNodeFull = [
     string, // editorId
     string, // notReadableReason
     string, // notEditableReason
-    boolean // is file based
+    boolean, // is file based
+    string // notDownloadableReason
 ];
 
 enum DataNodeFullProps {
@@ -141,6 +142,7 @@ enum DataNodeFullProps {
     notReadableReason,
     notEditableReason,
     isFileBased,
+    notDownloadableReason,
 }
 const DataNodeFullLength = Object.keys(DataNodeFullProps).length / 2;
 
@@ -221,6 +223,7 @@ const invalidDatanode: DataNodeFull = [
     "invalid",
     "invalid",
     false,
+    "invalid",
 ];
 
 enum TabValues {
@@ -271,6 +274,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         dnNotReadableReason,
         dnNotEditableReason,
         isFileBased,
+        dnNotDownloadableReason,
     ] = datanode;
     const dtType = dnData[DatanodeDataProps.type];
     const dtValue = dnData[DatanodeDataProps.value] ?? (dtType == "float" ? null : undefined);
@@ -722,14 +726,19 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                 {valid && isFileBased && (fileDownload || fileUpload) ? (
                                     <Stack direction="row" spacing={1}>
                                         {fileDownload ? (
-                                            <Tooltip title="Export">
-                                                <Button
-                                                    data-action="export"
-                                                    onClick={onfileHandler}
-                                                    sx={buttonSx}
-                                                >
-                                                    <Download />
-                                                </Button>
+                                            <Tooltip
+                                                title={dnNotDownloadableReason ? dnNotDownloadableReason : "Export"}
+                                            >
+                                                <span>
+                                                    <Button
+                                                        data-action="export"
+                                                        onClick={onfileHandler}
+                                                        sx={buttonSx}
+                                                        disabled={!!dnNotDownloadableReason}
+                                                    >
+                                                        <Download />
+                                                    </Button>
+                                                </span>
                                             </Tooltip>
                                         ) : null}
                                         {fileUpload ? (

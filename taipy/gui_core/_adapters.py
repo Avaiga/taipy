@@ -60,6 +60,7 @@ class _EntityType(Enum):
 def _get_reason(rc: ReasonCollection, message: str):
     return "" if rc else f"{message}: {rc.reasons}"
 
+
 class _GuiCoreScenarioAdapter(_TaipyBase):
     __INNER_PROPS = ["name"]
 
@@ -228,7 +229,10 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                         datanode._editor_id,
                         _get_reason(is_readable(datanode), "Datanode not readable"),
                         _get_reason(is_editable(datanode), "Datanode not editable"),
-                        isinstance(datanode, _FileDataNodeMixin)
+                        isinstance(datanode, _FileDataNodeMixin),
+                        "Datanode doesn't have a file."
+                        if isinstance(datanode, _FileDataNodeMixin) and not datanode._get_downloadable_path()
+                        else "",
                     ]
             except Exception as e:
                 _warn(f"Access to datanode ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)
