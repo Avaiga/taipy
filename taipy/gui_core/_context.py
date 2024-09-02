@@ -1227,7 +1227,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         state.assign(error_id, reason.reasons)
 
             except Exception as e:
-                state.assign(error_id, f"Data node export error: {e}")
+                state.assign(error_id, f"Data node download error: {e}")
         else:
             state.assign(error_id, reason.reasons)
 

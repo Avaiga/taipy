@@ -227,15 +227,15 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                         self.__get_data(datanode),
                         datanode._edit_in_progress,
                         datanode._editor_id,
-                        _get_reason(is_readable(datanode), "Datanode not readable"),
-                        _get_reason(is_editable(datanode), "Datanode not editable"),
+                        _get_reason(is_readable(datanode), "Data node not readable"),
+                        _get_reason(is_editable(datanode), "Data node not editable"),
                         isinstance(datanode, _FileDataNodeMixin),
                         "Data unavailable: The data node has never been written."
                         if isinstance(datanode, _FileDataNodeMixin) and not datanode._get_downloadable_path()
                         else "",
                     ]
             except Exception as e:
-                _warn(f"Access to datanode ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)
+                _warn(f"Access to data node ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)
 
         return None
 
