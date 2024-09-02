@@ -438,6 +438,7 @@ class _Factory:
                 ("render", PropertyType.dynamic_boolean, True),
                 ("height", PropertyType.dynamic_string),
                 ("content", PropertyType.toHtmlContent),
+                ("width", PropertyType.string_or_number),
             ]
         ),
         "selector": lambda gui, control_type, attrs: _Builder(
