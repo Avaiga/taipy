@@ -267,7 +267,7 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
@@ -318,7 +318,7 @@ class Config:
                 `(Config.)set_default_data_node_configuration()^`).
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
@@ -351,7 +351,7 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
@@ -383,7 +383,7 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
@@ -426,7 +426,7 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
@@ -460,7 +460,7 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
@@ -495,7 +495,7 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
@@ -523,7 +523,7 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
@@ -554,7 +554,7 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
@@ -611,7 +611,7 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
@@ -674,7 +674,7 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
@@ -722,7 +722,7 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
@@ -759,7 +759,7 @@ class Config:
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
-                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/task-orchestration/scenario-config.md#from-task-configurations) for more details).
+                relevant tasks will run even if they are skippable (see the [Task configs page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations) for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
@@ -881,7 +881,7 @@ class Config:
             mode (Optional[str]): Indicates the mode of the version management system.
                 Possible values are *"development"* or *"experiment"*. On Enterprise edition of Taipy,
                 *production* mode is also available. Please refer to the
-                [Versioning management](../../userman/versioning/index.md) documentation page for more details.
+                [Versioning management](../../userman/advanced_features/versioning/index.md) documentation page for more details.
             version_number (Optional[str]): The string identifier of the version.
                  In development mode, the version number is ignored.
             force (Optional[bool]): If True, Taipy will override a version even if the configuration

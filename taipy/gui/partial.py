@@ -28,9 +28,9 @@ class Partial(_Page):
     and not related pages. This allows not to have to repeat yourself when
     creating your page templates.
 
-    Visual elements such as [`part`](../../userman/gui/viselements/generic/part.md),
+    Visual elements such as [`part`](../../refmans/gui/viselements/generic/part.md),
     [`dialog`](../..//userman/gui/viselements/generic/dialog.md) or
-    [`pane`](../../userman/gui/viselements/generic/pane.md) can use Partials.
+    [`pane`](../../refmans/gui/viselements/generic/pane.md) can use Partials.
 
     Note that `Partial` has no constructor (no `__init__()` method): to create a
     `Partial`, you must call the `Gui.add_partial()^` function.

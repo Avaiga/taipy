@@ -20,8 +20,8 @@ To build a Taipy Core application, the first step consists of setting up the Tai
 your application's characteristics and behaviors.
 Import `Config^` from the `taipy.config^` module, then use the various methods of the `Config^` singleton class to
 configure your core application. In particular, configure the
-[data nodes](../../../userman/data-integration/data-node-config.md),
-[tasks](../../../userman/task-orchestration/scenario-config.md),
+[data nodes](../../../userman/scenario_features/data-integration/data-node-config.md),
+[tasks](../../../userman/scenario_features/task-orchestration/scenario-config.md),
 and [scenarios](../../../userman/sdm/scenario/scenario-config.md).
 
 Once your application is configured, import module `import taipy as tp` so you can use any function described
