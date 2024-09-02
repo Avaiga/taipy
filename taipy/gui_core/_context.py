@@ -1214,7 +1214,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     if path:
                         self.gui._download(Path(path), dn_id)
                     else:
-                        state.assign(error_id, "Data unavailable: The data node has never been written.")
+                        reason = dn.is_downloadable()
+                        state.assign(
+                            error_id,
+                            "Data unavailable: "
+                            + ("The data node has never been written." if reason else reason.reasons),
+                        )
                 else:
                     checker_name = act_payload.get("upload_check")
                     checker = self.gui._get_user_function(checker_name) if checker_name else None
@@ -1224,7 +1229,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             t.cast(t.Callable[[str, t.Any], bool], checker) if callable(checker) else None,
                         )
                     ):
-                        state.assign(error_id, reason.reasons)
+                        state.assign(error_id, f"Data unavailable: {reason.reasons}")
 
             except Exception as e:
                 state.assign(error_id, f"Data node download error: {e}")

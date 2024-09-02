@@ -27,7 +27,7 @@ from taipy.core.data._data_manager import _DataManager
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.exceptions.exceptions import NoData
-from taipy.core.reason import NotAFile, NoFileToDownload
+from taipy.core.reason import NoFileToDownload, NotAFile
 
 
 @pytest.fixture(scope="function", autouse=True)

@@ -32,7 +32,7 @@ from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.json import JSONDataNode
 from taipy.core.data.operator import JoinOperator, Operator
 from taipy.core.exceptions.exceptions import NoData
-from taipy.core.reason import NotAFile, NoFileToDownload
+from taipy.core.reason import NoFileToDownload, NotAFile
 
 
 @pytest.fixture(scope="function", autouse=True)

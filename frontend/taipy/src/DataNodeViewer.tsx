@@ -123,7 +123,8 @@ type DataNodeFull = [
     string, // notReadableReason
     string, // notEditableReason
     boolean, // is file based
-    string // notDownloadableReason
+    string, // notDownloadableReason
+    string // notUploadableReason
 ];
 
 enum DataNodeFullProps {
@@ -143,6 +144,7 @@ enum DataNodeFullProps {
     notEditableReason,
     isFileBased,
     notDownloadableReason,
+    notUploadableReason,
 }
 const DataNodeFullLength = Object.keys(DataNodeFullProps).length / 2;
 
@@ -224,6 +226,7 @@ const invalidDatanode: DataNodeFull = [
     "invalid",
     false,
     "invalid",
+    "invalid",
 ];
 
 enum TabValues {
@@ -275,6 +278,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         dnNotEditableReason,
         isFileBased,
         dnNotDownloadableReason,
+        dnNotUploadableReason
     ] = datanode;
     const dtType = dnData[DatanodeDataProps.type];
     const dtValue = dnData[DatanodeDataProps.value] ?? (dtType == "float" ? null : undefined);
@@ -743,11 +747,12 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                         ) : null}
                                         {fileUpload ? (
                                             <FileSelector
-                                                hoverText="Upload"
+                                                hoverText={dnNotUploadableReason ? dnNotUploadableReason :"Upload"}
                                                 icon={<Upload />}
                                                 withBorder={false}
                                                 onUploadAction={props.onFileAction}
                                                 uploadData={uploadData}
+                                                defaultActive={!dnNotUploadableReason}
                                             />
                                         ) : null}
                                     </Stack>

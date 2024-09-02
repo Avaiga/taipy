@@ -34,7 +34,7 @@ from taipy.core.exceptions.exceptions import (
     UnknownCompressionAlgorithm,
     UnknownParquetEngine,
 )
-from taipy.core.reason import NotAFile, NoFileToDownload
+from taipy.core.reason import NoFileToDownload, NotAFile
 
 
 @pytest.fixture(scope="function", autouse=True)
