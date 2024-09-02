@@ -143,6 +143,34 @@ class UploadFileCanNotBeRead(Reason, _DataNodeReasonMixin):
         _DataNodeReasonMixin.__init__(self, datanode_id)
 
 
+class NoFileToDownload(Reason, _DataNodeReasonMixin):
+    """
+    There is no file to download, therefore the download action cannot be performed.
+
+    Attributes:
+        datanode_id (str): The datanode id that the file is intended to download from.
+    """
+
+    def __init__(self, file_path: str, datanode_id: str):
+        Reason.__init__(self, f"Path '{file_path}' from data node '{datanode_id}'"
+                              f" does not exist and can t be downloaded.")
+        _DataNodeReasonMixin.__init__(self, datanode_id)
+
+
+class NotAFile(Reason, _DataNodeReasonMixin):
+    """
+    The data node path is not a file, therefore the download action cannot be performed.
+
+    Attributes:
+        datanode_id (str): The datanode id that the file is intended to download from.
+    """
+
+    def __init__(self, file_path: str, datanode_id: str):
+        Reason.__init__(self, f"Path '{file_path}' from data node '{datanode_id}'"
+                              f" is not a file and can t be downloaded.")
+        _DataNodeReasonMixin.__init__(self, datanode_id)
+
+
 class InvalidUploadFile(Reason, _DataNodeReasonMixin):
     """
     The uploaded file has invalid data, therefore is not a valid data file for the data node.

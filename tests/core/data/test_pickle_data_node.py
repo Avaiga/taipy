@@ -27,6 +27,7 @@ from taipy.core.data._data_manager import _DataManager
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.exceptions.exceptions import NoData
+from taipy.core.reason import NotAFile, NoFileToDownload
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -204,6 +205,30 @@ class TestPickleDataNodeEntity:
 
         assert ".data" not in dn.path
         assert os.path.exists(dn.path)
+
+    def test_is_downloadable(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.p")
+        dn = PickleDataNode("foo", Scope.SCENARIO, properties={"path": path})
+        reasons = dn.is_downloadable()
+        assert reasons
+        assert reasons.reasons == ""
+
+    def test_is_not_downloadable_no_file(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/wrong_path.p")
+        dn = PickleDataNode("foo", Scope.SCENARIO, properties={"path": path})
+        reasons = dn.is_downloadable()
+        assert not reasons
+        assert not reasons
+        assert len(reasons._reasons) == 1
+        assert str(NoFileToDownload(path, dn.id)) in reasons.reasons
+
+    def test_is_not_downloadable_not_a_file(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample")
+        dn = PickleDataNode("foo", Scope.SCENARIO, properties={"path": path})
+        reasons = dn.is_downloadable()
+        assert not reasons
+        assert len(reasons._reasons) == 1
+        assert str(NotAFile(path, dn.id)) in reasons.reasons
 
     def test_get_download_path(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.p")

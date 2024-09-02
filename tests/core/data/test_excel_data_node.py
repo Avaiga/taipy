@@ -33,6 +33,7 @@ from taipy.core.exceptions.exceptions import (
     InvalidExposedType,
     NonExistingExcelSheet,
 )
+from taipy.core.reason import NoFileToDownload, NotAFile
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -408,6 +409,29 @@ class TestExcelDataNode:
 
         assert ".data" not in dn.path
         assert os.path.exists(dn.path)
+
+    def test_is_downloadable(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+        reasons = dn.is_downloadable()
+        assert reasons
+        assert reasons.reasons == ""
+
+    def test_is_not_downloadable_no_file(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/wrong_path.xlsx")
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+        reasons = dn.is_downloadable()
+        assert not reasons
+        assert len(reasons._reasons) == 1
+        assert str(NoFileToDownload(path, dn.id)) in reasons.reasons
+
+    def test_is_not_downloadable_not_a_file(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample")
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+        reasons = dn.is_downloadable()
+        assert not reasons
+        assert len(reasons._reasons) == 1
+        assert str(NotAFile(path, dn.id)) in reasons.reasons
 
     def test_get_download_path(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")

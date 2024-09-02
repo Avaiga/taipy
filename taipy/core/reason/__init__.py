@@ -16,6 +16,8 @@ from .reason import (
     EntityIsNotSubmittableEntity,
     InvalidUploadFile,
     JobIsNotFinished,
+    NoFileToDownload,
+    NotAFile,
     NotGlobalScope,
     Reason,
     ScenarioDoesNotBelongToACycle,
