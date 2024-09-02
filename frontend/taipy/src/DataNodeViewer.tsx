@@ -727,7 +727,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     <Stack direction="row" spacing={1}>
                                         {fileDownload ? (
                                             <Tooltip
-                                                title={dnNotDownloadableReason ? dnNotDownloadableReason : "Export"}
+                                                title={dnNotDownloadableReason ? dnNotDownloadableReason : "Download"}
                                             >
                                                 <span>
                                                     <Button
@@ -743,7 +743,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                         ) : null}
                                         {fileUpload ? (
                                             <FileSelector
-                                                hoverText="Import"
+                                                hoverText="Upload"
                                                 icon={<Upload />}
                                                 withBorder={false}
                                                 onUploadAction={props.onFileAction}
