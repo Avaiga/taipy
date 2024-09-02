@@ -23,9 +23,11 @@ import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
+import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+
 import Add from "@mui/icons-material/Add";
 import ArrowForwardIosSharp from "@mui/icons-material/ArrowForwardIosSharp";
 import Cancel from "@mui/icons-material/Cancel";
@@ -627,16 +629,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
                         sx={AccordionSummarySx}
                     >
-                        <Grid
-                            container
-                            alignItems="center"
-                            direction="row"
-                            flexWrap="nowrap"
-                            justifyContent="space-between"
-                            spacing={1}
-                        >
-                            <Grid item>
-                                {scLabel}
+                        <Stack direction="row" justifyContent="space-between" width="100%" alignItems="center">
+                            <Stack direction="row" spacing={1}>
+                                <Typography>{scLabel}</Typography>
                                 {scPrimary ? (
                                     <Chip
                                         color="primary"
@@ -646,31 +641,27 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     />
                                 ) : null}
                                 {submissionStatus > -1 ? <StatusChip status={submissionStatus} sx={ChipSx} /> : null}
-                            </Grid>
-                            <Grid item>
-                                {showSubmit ? (
-                                    <Tooltip
-                                        title={
-                                            disabled
-                                                ? scNotSubmittableReason || "Cannot submit Scenario"
-                                                : "Submit Scenario"
-                                        }
-                                    >
-                                        <span>
-                                            <Button
-                                                onClick={submitScenario}
-                                                disabled={disabled}
-                                                endIcon={
-                                                    <Send fontSize="medium" color={disableColor("info", disabled)} />
-                                                }
-                                            >
-                                                Submit
-                                            </Button>
-                                        </span>
-                                    </Tooltip>
-                                ) : null}
-                            </Grid>
-                        </Grid>
+                            </Stack>
+                            {showSubmit ? (
+                                <Tooltip
+                                    title={
+                                        disabled
+                                            ? scNotSubmittableReason || "Cannot submit Scenario"
+                                            : "Submit Scenario"
+                                    }
+                                >
+                                    <span>
+                                        <Button
+                                            onClick={submitScenario}
+                                            disabled={disabled}
+                                            endIcon={<Send fontSize="medium" color={disableColor("info", disabled)} />}
+                                        >
+                                            Submit
+                                        </Button>
+                                    </span>
+                                </Tooltip>
+                            ) : null}
+                        </Stack>
                     </AccordionSummary>
                     <AccordionDetails>
                         <Grid container rowSpacing={2}>

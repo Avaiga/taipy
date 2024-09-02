@@ -13,6 +13,9 @@
 
 export interface FileUploadData {
     varName: string;
+    context?: string;
+    onAction?: string;
+    uploadData?: string;
     files: FileList;
     uploadUrl: string;
     id: string;
