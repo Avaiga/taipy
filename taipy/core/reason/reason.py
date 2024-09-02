@@ -148,12 +148,12 @@ class NoFileToDownload(Reason, _DataNodeReasonMixin):
     There is no file to download, therefore the download action cannot be performed.
 
     Attributes:
-        datanode_id (str): The datanode id that the file is intended to download from.
+        datanode_id (str): The id of the data node that the file is intended to download from.
     """
 
     def __init__(self, file_path: str, datanode_id: str):
         Reason.__init__(self, f"Path '{file_path}' from data node '{datanode_id}'"
-                              f" does not exist and can t be downloaded.")
+                              f" does not exist and cannot be downloaded.")
         _DataNodeReasonMixin.__init__(self, datanode_id)
 
 

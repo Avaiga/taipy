@@ -1097,7 +1097,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             _GuiCoreContext.__assign_var(
                                 state,
                                 error_var,
-                                "Error updating Data node: cannot handle multi-column list value.",
+                                "Error updating data node: cannot handle multi-column list value.",
                             )
                         if data_tuple and new_data is not None:
                             new_data = tuple(new_data)
@@ -1105,13 +1105,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         _GuiCoreContext.__assign_var(
                             state,
                             error_var,
-                            "Error updating Data node tabular value: type does not support at[] indexer.",
+                            "Error updating data node tabular value: type does not support at[] indexer.",
                         )
                 if new_data is not None:
                     datanode.write(new_data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
                     _GuiCoreContext.__assign_var(state, error_var, "")
             except Exception as e:
-                _GuiCoreContext.__assign_var(state, error_var, f"Error updating Data node tabular value. {e}")
+                _GuiCoreContext.__assign_var(state, error_var, f"Error updating data node tabular value. {e}")
         _GuiCoreContext.__assign_var(state, payload.get("data_id"), dn_id)
 
     def get_data_node_properties(self, id: str):

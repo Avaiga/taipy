@@ -278,7 +278,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         dnNotEditableReason,
         isFileBased,
         dnNotDownloadableReason,
-        dnNotUploadableReason
+        dnNotUploadableReason,
     ] = datanode;
     const dtType = dnData[DatanodeDataProps.type];
     const dtValue = dnData[DatanodeDataProps.value] ?? (dtType == "float" ? null : undefined);
@@ -747,7 +747,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                         ) : null}
                                         {fileUpload ? (
                                             <FileSelector
-                                                hoverText={dnNotUploadableReason ? dnNotUploadableReason :"Upload"}
+                                                hoverText={dnNotUploadableReason ? dnNotUploadableReason : "Upload"}
                                                 icon={<Upload />}
                                                 withBorder={false}
                                                 onUploadAction={props.onFileAction}

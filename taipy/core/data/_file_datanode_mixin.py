@@ -101,7 +101,7 @@ class _FileDataNodeMixin(object):
         """Check if the data node is downloadable.
 
         Returns:
-            A ReasonCollection object containing the reasons why the data node is not downloadable.
+            A `ReasonCollection^` object containing the reasons why the data node is not downloadable.
         """
         collection = ReasonCollection()
         if not os.path.exists(self.path):
@@ -114,7 +114,7 @@ class _FileDataNodeMixin(object):
         """Check if the data node is uploadable.
 
         Returns:
-            A ReasonCollection object containing the reasons why the data node is not uploadable.
+            A `ReasonCollection^` object containing the reasons why the data node is not uploadable.
         """
 
         return ReasonCollection()
