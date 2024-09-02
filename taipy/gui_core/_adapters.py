@@ -230,7 +230,7 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                         _get_reason(is_readable(datanode), "Datanode not readable"),
                         _get_reason(is_editable(datanode), "Datanode not editable"),
                         isinstance(datanode, _FileDataNodeMixin),
-                        "Datanode doesn't have a file."
+                        "Data unavailable: The data node has never been written."
                         if isinstance(datanode, _FileDataNodeMixin) and not datanode._get_downloadable_path()
                         else "",
                     ]

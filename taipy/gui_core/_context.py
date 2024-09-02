@@ -898,7 +898,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 self.__edit_properties(entity, data)
                 _GuiCoreContext.__assign_var(state, error_var, "")
             except Exception as e:
-                _GuiCoreContext.__assign_var(state, error_var, f"Error updating Datanode. {e}")
+                _GuiCoreContext.__assign_var(state, error_var, f"Error updating Data node. {e}")
 
     def lock_datanode_for_edit(self, state: State, id: str, payload: t.Dict[str, str]):
         self.__lazy_start()
@@ -908,7 +908,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         data = args[0]
         error_var = payload.get("error_id")
         entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
-        if not self.__check_readable_editable(state, entity_id, "Datanode", error_var):
+        if not self.__check_readable_editable(state, entity_id, "Data node", error_var):
             return
         lock = data.get("lock", True)
         entity: DataNode = core_get(entity_id)
@@ -920,7 +920,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     entity.unlock_edit(self.gui._get_client_id())
                 _GuiCoreContext.__assign_var(state, error_var, "")
             except Exception as e:
-                _GuiCoreContext.__assign_var(state, error_var, f"Error locking Datanode. {e}")
+                _GuiCoreContext.__assign_var(state, error_var, f"Error locking Data node. {e}")
 
     def __edit_properties(self, entity: t.Union[Scenario, Sequence, DataNode], data: t.Dict[str, str]):
         with entity as ent:
@@ -1009,7 +1009,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         data = args[0]
         error_var = payload.get("error_id")
         entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
-        if not self.__check_readable_editable(state, entity_id, "DataNode", error_var):
+        if not self.__check_readable_editable(state, entity_id, "Data node", error_var):
             return
         entity: DataNode = core_get(entity_id)
         if isinstance(entity, DataNode):
@@ -1027,7 +1027,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 entity.unlock_edit(self.gui._get_client_id())
                 _GuiCoreContext.__assign_var(state, error_var, "")
             except Exception as e:
-                _GuiCoreContext.__assign_var(state, error_var, f"Error updating Datanode value. {e}")
+                _GuiCoreContext.__assign_var(state, error_var, f"Error updating Data node value. {e}")
             _GuiCoreContext.__assign_var(state, payload.get("data_id"), entity_id)  # this will update the data value
 
     def tabular_data_edit(self, state: State, var_name: str, payload: dict):  # noqa:C901
@@ -1035,7 +1035,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         error_var = payload.get("error_id")
         user_data = payload.get("user_data", {})
         dn_id = user_data.get("dn_id")
-        if not self.__check_readable_editable(state, dn_id, "DataNode", error_var):
+        if not self.__check_readable_editable(state, dn_id, "Data node", error_var):
             return
         datanode = core_get(dn_id) if dn_id else None
         if isinstance(datanode, DataNode):
@@ -1072,7 +1072,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         _GuiCoreContext.__assign_var(
                             state,
                             error_var,
-                            "Error updating Datanode: dict values must be list or tuple.",
+                            "Error updating Data node: dict values must be list or tuple.",
                         )
                 else:
                     data_tuple = False
@@ -1097,7 +1097,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             _GuiCoreContext.__assign_var(
                                 state,
                                 error_var,
-                                "Error updating Datanode: cannot handle multi-column list value.",
+                                "Error updating Data node: cannot handle multi-column list value.",
                             )
                         if data_tuple and new_data is not None:
                             new_data = tuple(new_data)
@@ -1105,13 +1105,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         _GuiCoreContext.__assign_var(
                             state,
                             error_var,
-                            "Error updating Datanode tabular value: type does not support at[] indexer.",
+                            "Error updating Data node tabular value: type does not support at[] indexer.",
                         )
                 if new_data is not None:
                     datanode.write(new_data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
                     _GuiCoreContext.__assign_var(state, error_var, "")
             except Exception as e:
-                _GuiCoreContext.__assign_var(state, error_var, f"Error updating Datanode tabular value. {e}")
+                _GuiCoreContext.__assign_var(state, error_var, f"Error updating Data node tabular value. {e}")
         _GuiCoreContext.__assign_var(state, payload.get("data_id"), dn_id)
 
     def get_data_node_properties(self, id: str):
@@ -1214,7 +1214,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     if path:
                         self.gui._download(Path(path), dn_id)
                     else:
-                        state.assign(error_id, "Datanode doesn't have a file.")
+                        state.assign(error_id, "Data unavailable: The data node has never been written.")
                 else:
                     checker_name = act_payload.get("upload_check")
                     checker = self.gui._get_user_function(checker_name) if checker_name else None
@@ -1227,7 +1227,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         state.assign(error_id, reason.reasons)
 
             except Exception as e:
-                state.assign(error_id, f"Datanode export error: {e}")
+                state.assign(error_id, f"Data node export error: {e}")
         else:
             state.assign(error_id, reason.reasons)
 
