@@ -2028,7 +2028,7 @@ class Gui:
     ) -> Partial:
         """Create a new `Partial^`.
 
-        The [User Manual section on Partials](../../userman/gui/pages/index.md#partials) gives details on
+        The [User Manual section on Partials](../../userman/gui/pages/partial/index.md) gives details on
         when and how to use this class.
 
         Arguments:
