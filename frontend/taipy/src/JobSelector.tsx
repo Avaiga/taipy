@@ -22,7 +22,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import FormControl from "@mui/material/FormControl";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import InputLabel from "@mui/material/InputLabel";
 import ListItemText from "@mui/material/ListItemText";
@@ -218,8 +218,8 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                     {form && form.values.filters && form.values.filters.length > 0
                         ? form.values.filters.map((filter, index) => {
                               return (
-                                  <Grid item xs={12} container spacing={2} mb={1} key={index}>
-                                      <Grid item xs={3}>
+                                  <Grid size={12} container spacing={2} mb={1} key={index}>
+                                      <Grid size={3}>
                                           <FormControl fullWidth>
                                               <InputLabel id="data">Column</InputLabel>
                                               <Select
@@ -242,7 +242,7 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                                               </Select>
                                           </FormControl>
                                       </Grid>
-                                      <Grid item xs={3}>
+                                      <Grid size={3}>
                                           <FormControl fullWidth>
                                               <InputLabel id="operator">Operator</InputLabel>
                                               <Select
@@ -256,14 +256,14 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                                               </Select>
                                           </FormControl>
                                       </Grid>
-                                      <Grid item xs={5}>
+                                      <Grid size={5}>
                                           <TextField
                                               label="Value"
                                               variant="outlined"
                                               {...form.getFieldProps(`filters.${index}.value`)}
                                           />
                                       </Grid>
-                                      <Grid item xs={1}>
+                                      <Grid size={1}>
                                           <Tooltip title="Delete Filter">
                                               <IconButton data-idx={index} onClick={removeFilter}>
                                                   <DeleteOutline />
@@ -274,8 +274,8 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                               );
                           })
                         : null}
-                    <Grid item xs={12} container spacing={2} justifyContent="space-between">
-                        <Grid item xs={3}>
+                    <Grid size={12} container spacing={2} justifyContent="space-between">
+                        <Grid size={3}>
                             <FormControl fullWidth>
                                 <InputLabel id="data-new">Column</InputLabel>
                                 <Select
@@ -298,7 +298,7 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid size={3}>
                             <FormControl fullWidth>
                                 <InputLabel id="operator-new">Operator</InputLabel>
                                 <Select
@@ -312,10 +312,10 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid item xs={5}>
+                        <Grid size={5}>
                             <TextField label="Value" variant="outlined" {...form.getFieldProps(`newValue`)} />
                         </Grid>
-                        <Grid item xs={1}>
+                        <Grid size={1}>
                             <Tooltip
                                 title={typeof form.values.newData === "string" ? "Cannot Add Filter" : "Add Filter"}
                             >
@@ -325,7 +325,7 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                             </Tooltip>
                         </Grid>
                     </Grid>
-                    <Grid item xs={12} container justifyContent="space-between" mt={2}>
+                    <Grid size={12} container justifyContent="space-between" mt={2}>
                         <Button
                             variant="outlined"
                             color="inherit"
@@ -810,7 +810,7 @@ const JobSelector = (props: JobSelectorProps) => {
             <Paper sx={containerSx}>
                 <Toolbar sx={headerToolbarSx}>
                     <Grid container spacing={2} alignItems="center">
-                        <Grid item container xs={3} alignItems="center">
+                        <Grid container size={3} alignItems="center">
                             <Tooltip title="Filter">
                                 <IconButton onClick={handleFilterOpen}>
                                     <FilterList />
@@ -824,10 +824,10 @@ const JobSelector = (props: JobSelectorProps) => {
                         </Grid>
                         {checked.length ? (
                             <>
-                                <Grid item xs={7}>
+                                <Grid size={7}>
                                     <Typography variant="subtitle1">{checked.length} selected</Typography>
                                 </Grid>
-                                <Grid item container justifyContent="flex-end" spacing={1} xs={2}>
+                                <Grid container justifyContent="flex-end" spacing={1} size={2}>
                                     {showCancel ? (
                                         <Tooltip title="Cancel Jobs">
                                             <span>

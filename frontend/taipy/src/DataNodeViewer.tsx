@@ -30,7 +30,7 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Popover from "@mui/material/Popover";
@@ -694,9 +694,9 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     <Tab
                                         label={
                                             <Grid container alignItems="center">
-                                                <Grid item>Data</Grid>
+                                                <Grid>Data</Grid>
                                                 {dnEditInProgress ? (
-                                                    <Grid item>
+                                                    <Grid>
                                                         <Tooltip
                                                             title={
                                                                 "locked " + (dnEditorId === editorId ? "by you" : "")
@@ -766,10 +766,9 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             aria-labelledby={`${uniqid}-properties`}
                         >
                             <Grid container rowSpacing={2} sx={gridSx}>
-                                <Grid item xs={12} container justifyContent="space-between" spacing={1}>
+                                <Grid size={12} container justifyContent="space-between" spacing={1}>
                                     <Grid
-                                        item
-                                        xs={12}
+                                        size={12}
                                         container
                                         justifyContent="space-between"
                                         data-focus="label"
@@ -812,10 +811,10 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                             />
                                         ) : (
                                             <>
-                                                <Grid item xs={4}>
+                                                <Grid size={4}>
                                                     <Typography variant="subtitle2">Label</Typography>
                                                 </Grid>
-                                                <Grid item xs={8}>
+                                                <Grid size={8}>
                                                     <Typography variant="subtitle2">{dnLabel}</Typography>
                                                 </Grid>
                                             </>
@@ -823,41 +822,41 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     </Grid>
                                 </Grid>
                                 {showEditDate ? (
-                                    <Grid item xs={12} container justifyContent="space-between">
-                                        <Grid item xs={4}>
+                                    <Grid size={12} container justifyContent="space-between">
+                                        <Grid size={4}>
                                             <Typography variant="subtitle2">Last edit date</Typography>
                                         </Grid>
-                                        <Grid item xs={8}>
+                                        <Grid size={8}>
                                             <Typography variant="subtitle2">{dnEditDate}</Typography>
                                         </Grid>
                                     </Grid>
                                 ) : null}
                                 {showExpirationDate ? (
-                                    <Grid item xs={12} container justifyContent="space-between">
-                                        <Grid item xs={4}>
+                                    <Grid size={12} container justifyContent="space-between">
+                                        <Grid size={4}>
                                             <Typography variant="subtitle2">Expiration date</Typography>
                                         </Grid>
-                                        <Grid item xs={8}>
+                                        <Grid size={8}>
                                             <Typography variant="subtitle2">{dnExpirationDate}</Typography>
                                         </Grid>
                                     </Grid>
                                 ) : null}
                                 {showConfig ? (
-                                    <Grid item xs={12} container justifyContent="space-between">
-                                        <Grid item xs={4} pb={2}>
+                                    <Grid size={12} container justifyContent="space-between">
+                                        <Grid size={4} pb={2}>
                                             <Typography variant="subtitle2">Config ID</Typography>
                                         </Grid>
-                                        <Grid item xs={8}>
+                                        <Grid size={8}>
                                             <Typography variant="subtitle2">{dnConfig}</Typography>
                                         </Grid>
                                     </Grid>
                                 ) : null}
                                 {showOwner ? (
-                                    <Grid item xs={12} container justifyContent="space-between">
-                                        <Grid item xs={4}>
+                                    <Grid size={12} container justifyContent="space-between">
+                                        <Grid size={4}>
                                             <Typography variant="subtitle2">Owner</Typography>
                                         </Grid>
-                                        <Grid item xs={7} sx={iconLabelSx}>
+                                        <Grid size={7} sx={iconLabelSx}>
                                             {dnOwnerType === NodeType.CYCLE ? (
                                                 <CycleIcon fontSize="small" color="primary" />
                                             ) : dnOwnerType === NodeType.SCENARIO ? (
@@ -865,7 +864,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                             ) : null}
                                             <Typography variant="subtitle2">{dnOwnerLabel}</Typography>
                                         </Grid>
-                                        <Grid item xs={1}>
+                                        <Grid size={1}>
                                             {dnOwnerId ? (
                                                 <>
                                                     <Tooltip title="Show Scenarios">
@@ -903,7 +902,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                         </Grid>
                                     </Grid>
                                 ) : null}
-                                <Grid item xs={12}>
+                                <Grid size={12}>
                                     <Divider />
                                 </Grid>
                                 <PropertiesEditor
@@ -936,17 +935,17 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     {props.history.map((edit, idx) => (
                                         <Fragment key={`edit-${idx}`}>
                                             {idx != 0 ? (
-                                                <Grid item xs={12}>
+                                                <Grid size={12}>
                                                     <Divider />
                                                 </Grid>
                                             ) : null}
-                                            <Grid item container>
-                                                <Grid item xs={0.4} sx={editSx}>
+                                            <Grid container>
+                                                <Grid size={0.4} sx={editSx}>
                                                     <Box>{(props.history || []).length - idx}</Box>
                                                 </Grid>
-                                                <Grid item xs={0.1}></Grid>
-                                                <Grid item container xs={11.5}>
-                                                    <Grid item xs={12}>
+                                                <Grid size={0.1}></Grid>
+                                                <Grid container size={11.5}>
+                                                    <Grid size={12}>
                                                         <Typography variant="subtitle1">
                                                             {edit[0]
                                                                 ? format(new Date(edit[0]), editTimestampFormat)
@@ -954,12 +953,12 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                         </Typography>
                                                     </Grid>
                                                     {edit[2] ? (
-                                                        <Grid item xs={12}>
+                                                        <Grid size={12}>
                                                             {edit[2]}
                                                         </Grid>
                                                     ) : null}
                                                     {edit[1] ? (
-                                                        <Grid item xs={12}>
+                                                        <Grid size={12}>
                                                             <Typography fontSize="smaller">{edit[1]}</Typography>
                                                         </Grid>
                                                     ) : null}
@@ -981,9 +980,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             {dtValue !== undefined ? (
                                 <Grid container justifyContent="space-between" spacing={1}>
                                     <Grid
-                                        item
                                         container
-                                        xs={12}
+                                        size={12}
                                         justifyContent="space-between"
                                         data-focus={dataValueFocus}
                                         onClick={onFocus}
@@ -997,13 +995,13 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                             <>
                                                 {typeof dtValue == "boolean" ? (
                                                     <>
-                                                        <Grid item xs={10}>
+                                                        <Grid size={10}>
                                                             <Switch
                                                                 value={dataValue as boolean}
                                                                 onChange={onDataValueChange}
                                                             />
                                                         </Grid>
-                                                        <Grid item xs={2}>
+                                                        <Grid size={2}>
                                                             <Tooltip title="Apply">
                                                                 <IconButton
                                                                     onClick={editDataValue}
@@ -1027,14 +1025,14 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                 ) : dtType == "date" &&
                                                   (dataValue === null || dataValue instanceof Date) ? (
                                                     <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                                        <Grid item xs={10}>
+                                                        <Grid size={10}>
                                                             <DateTimePicker
                                                                 value={dataValue as Date}
                                                                 onChange={onDataValueDateChange}
                                                                 slotProps={textFieldProps}
                                                             />
                                                         </Grid>
-                                                        <Grid item xs={2}>
+                                                        <Grid size={2}>
                                                             <Tooltip title="Apply">
                                                                 <IconButton
                                                                     onClick={editDataValue}
@@ -1105,10 +1103,10 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                             </>
                                         ) : (
                                             <>
-                                                <Grid item xs={4}>
+                                                <Grid size={4}>
                                                     <Typography variant="subtitle2">Value</Typography>
                                                 </Grid>
-                                                <Grid item xs={8}>
+                                                <Grid size={8}>
                                                     {typeof dtValue == "boolean" ? (
                                                         <Switch
                                                             defaultChecked={dtValue}
