@@ -35,7 +35,7 @@ in the following section on [Function](#functions). In particular, the most used
     executor for their execution.
 
     In particular, this `Orchestrator^` service is automatically run when used with Taipy REST or Taipy GUI.
-    See the [running services](../../userman/run-deploy/run/running_services.md) page of the user manual for more details.
+    See the [running services](../../../userman/run-deploy/run/running_services.md) page of the user manual for more details.
 """
 
 from ._init import *
