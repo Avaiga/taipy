@@ -59,6 +59,7 @@ default_config: Config = {
     "notebook_proxy": True,
     "notification_duration": 3000,
     "port": 5000,
+    "port_auto_ranges": [(49152, 65535)],
     "propagate": True,
     "run_browser": True,
     "run_in_thread": False,

@@ -17,6 +17,9 @@ const uploadFile = (
     blobOrFile: Blob,
     uploadUrl: string,
     varName: string,
+    context: string | undefined,
+    onAction: string | undefined,
+    uploadData: string | undefined,
     part: number,
     total: number,
     fileName: string,
@@ -33,6 +36,9 @@ const uploadFile = (
     fdata.append("part", part.toString());
     fdata.append("total", total.toString());
     fdata.append("var_name", varName);
+    context && fdata.append("context", context);
+    onAction && fdata.append("on_action", onAction);
+    uploadData && fdata.append("upload_data", uploadData);
     fdata.append("multiple", multiple ? "True" : "False");
     xhr.send(fdata);
 };
@@ -46,7 +52,15 @@ const getProgressCallback = (globalSize: number, offset: number) => (uploaded: n
         done: false,
     } as FileUploadReturn);
 
-const process = (files: FileList, uploadUrl: string, varName: string, id: string) => {
+const process = (
+    files: FileList,
+    uploadUrl: string,
+    varName: string,
+    context: string | undefined,
+    onAction: string | undefined,
+    uploadData: string | undefined,
+    id: string
+) => {
     if (files) {
         let globalSize = 0;
         for (let i = 0; i < files.length; i++) {
@@ -70,6 +84,9 @@ const process = (files: FileList, uploadUrl: string, varName: string, id: string
                     chunk,
                     uploadUrl,
                     varName,
+                    context,
+                    onAction,
+                    uploadData,
                     Math.floor(start / BYTES_PER_CHUNK),
                     tot,
                     blob.name,
@@ -94,5 +111,5 @@ const process = (files: FileList, uploadUrl: string, varName: string, id: string
 };
 
 self.onmessage = (e: MessageEvent<FileUploadData>) => {
-    process(e.data.files, e.data.uploadUrl, e.data.varName, e.data.id);
+    process(e.data.files, e.data.uploadUrl, e.data.varName, e.data.context, e.data.onAction, e.data.uploadData, e.data.id);
 };

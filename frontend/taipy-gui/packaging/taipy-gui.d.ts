@@ -148,6 +148,23 @@ export interface TableSortProps {
 
 export declare const TableSort: (props: TableSortProps) => JSX.Element;
 
+export interface FileSelectorProps extends TaipyActiveProps {
+    onAction?: string;
+    defaultLabel?: string;
+    label?: string;
+    multiple?: boolean;
+    extensions?: string;
+    dropMessage?: string;
+    notify?: boolean;
+    width?: string | number;
+    icon?: React.ReactNode;
+    withBorder?: boolean;
+    onUploadAction?: string;
+    uploadData?: string;
+}
+
+export declare const FileSelector: (props: FileSelectorProps) => JSX.Element;
+
 export declare const Router: () => JSX.Element;
 
 /**

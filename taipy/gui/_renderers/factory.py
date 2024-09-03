@@ -406,6 +406,7 @@ class _Factory:
                 ("on_action", PropertyType.function),
                 ("label",),
                 ("change_delay", PropertyType.number, gui._get_config("change_delay", None)),
+                ("width", PropertyType.string_or_number),
             ]
         ),
         "pane": lambda gui, control_type, attrs: _Builder(
