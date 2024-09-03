@@ -17,7 +17,7 @@ import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Paper from "@mui/material/Paper";
@@ -65,7 +65,7 @@ const senderMsgSx = {
 const gridSx = { pb: "1em", mt: "unset", flex: 1, overflow: "auto" };
 const loadMoreSx = { width: "fit-content", marginLeft: "auto", marginRight: "auto" };
 const inputSx = { maxWidth: "unset" };
-const nameSx = { fontSize: "0.6em", fontWeight: "bolder" };
+const nameSx = { fontSize: "0.6em", fontWeight: "bolder", pl: `${indicWidth}em` };
 const senderPaperSx = {
     pr: `${indicWidth}em`,
     pl: `${indicWidth}em`,
@@ -134,22 +134,21 @@ const ChatRow = (props: ChatRowProps) => {
     const avatar = getAvatar(name, sender);
     return (
         <Grid
-            item
             container
             className={getSuffixedClassNames(className, sender ? "-sent" : "-received")}
-            xs={12}
+            size={12}
             sx={noAnchorSx}
             justifyContent={sender ? "flex-end" : undefined}
         >
-            <Grid item sx={sender ? senderMsgSx : undefined}>
+            <Grid sx={sender ? senderMsgSx : undefined}>
                 {avatar ? (
                     <Stack>
                         <Stack direction="row" gap={1}>
-                            <Box sx={avatarColSx}></Box>
+                            <Box sx={avatarColSx}>{avatar}</Box>
                             <Box sx={nameSx}>{name}</Box>
                         </Stack>
                         <Stack direction="row" gap={1}>
-                            <Box sx={avatarColSx}>{avatar}</Box>
+                            <Box sx={avatarColSx}></Box>
                             <Paper sx={sender ? senderPaperSx : otherPaperSx} data-idx={index}>
                                 {message}
                             </Paper>
@@ -352,7 +351,7 @@ const Chat = (props: ChatProps) => {
             <Paper className={className} sx={boxSx} id={id}>
                 <Grid container rowSpacing={2} sx={gridSx} ref={scrollDivRef}>
                     {rows.length && !rows[0] ? (
-                        <Grid item className={getSuffixedClassNames(className, "-load")} xs={12} sx={noAnchorSx}>
+                        <Grid className={getSuffixedClassNames(className, "-load")} size={12} sx={noAnchorSx}>
                             <Box sx={loadMoreSx}>
                                 <Button
                                     endIcon={<ArrowUpward />}
