@@ -19,6 +19,9 @@ const UPLOAD_URL = "/taipy-uploads";
 
 export const uploadFile = (
     varName: string,
+    context: string | undefined,
+    onAction: string | undefined,
+    uploadData: string | undefined,
     files: FileList,
     progressCallback: (val: number) => void,
     id: string,
@@ -35,6 +38,6 @@ export const uploadFile = (
             }
         };
         worker.onerror = (evt: ErrorEvent) => reject(evt);
-        worker.postMessage({ files: files, uploadUrl: uploadUrl, varName: varName, id: id } as FileUploadData);
+        worker.postMessage({ files, uploadUrl, varName, context, onAction, uploadData, id } as FileUploadData);
     });
 };

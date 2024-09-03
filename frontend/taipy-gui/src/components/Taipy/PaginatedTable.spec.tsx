@@ -727,7 +727,7 @@ describe("PaginatedTable Component", () => {
         const option = queryByRole("option", { selected: false, name: "50" });
         fireEvent.click(option as Element);
         const table = document.querySelector(
-            'table[aria-labelledby="tableTitle"].MuiTable-root.MuiTable-stickyHeader.css-cz602z-MuiTable-root'
+            'table[aria-labelledby="tableTitle"].MuiTable-root.MuiTable-stickyHeader'
         );
         expect(table).toBeInTheDocument();
     });

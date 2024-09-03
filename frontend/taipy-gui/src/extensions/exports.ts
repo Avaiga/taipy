@@ -13,6 +13,7 @@
 
 import Chart from "../components/Taipy/Chart";
 import Dialog from "../components/Taipy/Dialog";
+import FileSelector from "../components/Taipy/FileSelector";
 import Login from "../components/Taipy/Login";
 import Router from "../components/Router";
 import Table from "../components/Taipy/Table";
@@ -43,6 +44,7 @@ import {
 export {
     Chart,
     Dialog,
+    FileSelector,
     Login,
     Router,
     Table,
