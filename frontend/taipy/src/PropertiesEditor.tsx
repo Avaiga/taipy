@@ -13,7 +13,7 @@
 
 import React, { useState, useCallback, useEffect, ChangeEvent, MouseEvent, KeyboardEvent } from "react";
 import Divider from "@mui/material/Divider";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
@@ -179,14 +179,13 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
 
     return show ? (
         <>
-            <Grid item xs={12} container rowSpacing={2}>
+            <Grid size={12} container rowSpacing={2}>
                 {properties
                     ? properties.map((property) => {
                           const propName = `property-${property.id}`;
                           return (
                               <Grid
-                                  item
-                                  xs={12}
+                                  size={12}
                                   spacing={1}
                                   container
                                   justifyContent="space-between"
@@ -197,7 +196,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                               >
                                   {active && !notEditableReason && focusName === propName ? (
                                       <>
-                                          <Grid item xs={4}>
+                                          <Grid size={4}>
                                               <TextField
                                                   label="Key"
                                                   variant="outlined"
@@ -210,7 +209,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                                   inputProps={{ onKeyDown }}
                                               />
                                           </Grid>
-                                          <Grid item xs={5}>
+                                          <Grid size={5}>
                                               <TextField
                                                   label="Value"
                                                   variant="outlined"
@@ -224,8 +223,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                               />
                                           </Grid>
                                           <Grid
-                                              item
-                                              xs={2}
+                                              size={2}
                                               container
                                               alignContent="center"
                                               alignItems="center"
@@ -253,8 +251,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                               </Tooltip>
                                           </Grid>
                                           <Grid
-                                              item
-                                              xs={1}
+                                              size={1}
                                               container
                                               alignContent="center"
                                               alignItems="center"
@@ -279,13 +276,13 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                       </>
                                   ) : (
                                       <>
-                                          <Grid item xs={4}>
+                                          <Grid size={4}>
                                               <Typography variant="subtitle2">{property.key}</Typography>
                                           </Grid>
-                                          <Grid item xs={5}>
+                                          <Grid size={5}>
                                               <Typography variant="subtitle2">{property.value}</Typography>
                                           </Grid>
-                                          <Grid item xs={3} />
+                                          <Grid size={3} />
                                       </>
                                   )}
                               </Grid>
@@ -293,8 +290,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                       })
                     : null}
                 <Grid
-                    item
-                    xs={12}
+                    size={12}
                     spacing={1}
                     container
                     justifyContent="space-between"
@@ -304,7 +300,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                 >
                     {active && focusName == "new-property" ? (
                         <>
-                            <Grid item xs={4}>
+                            <Grid size={4}>
                                 <TextField
                                     value={newProp.key}
                                     data-name="key"
@@ -316,7 +312,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                     inputProps={{ onKeyDown }}
                                 />
                             </Grid>
-                            <Grid item xs={5}>
+                            <Grid size={5}>
                                 <TextField
                                     value={newProp.value}
                                     data-name="value"
@@ -328,14 +324,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                     inputProps={{ onKeyDown, "data-enter": true }}
                                 />
                             </Grid>
-                            <Grid
-                                item
-                                xs={2}
-                                container
-                                alignContent="center"
-                                alignItems="center"
-                                justifyContent="center"
-                            >
+                            <Grid size={2} container alignContent="center" alignItems="center" justifyContent="center">
                                 <Tooltip title="Apply">
                                     <IconButton sx={IconPaddingSx} onClick={editProperty} size="small">
                                         <CheckCircle color="primary" />
@@ -347,22 +336,22 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                     </IconButton>
                                 </Tooltip>
                             </Grid>
-                            <Grid item xs={1} />
+                            <Grid size={1} />
                         </>
                     ) : (
                         <>
-                            <Grid item xs={4}>
+                            <Grid size={4}>
                                 <Typography variant="subtitle2">New Property Key</Typography>
                             </Grid>
-                            <Grid item xs={5}>
+                            <Grid size={5}>
                                 <Typography variant="subtitle2">Value</Typography>
                             </Grid>
-                            <Grid item xs={3} />
+                            <Grid size={3} />
                         </>
                     )}
                 </Grid>
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
                 <Divider />
             </Grid>
         </>

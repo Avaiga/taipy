@@ -20,7 +20,7 @@ import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Stack from "@mui/material/Stack";
@@ -203,10 +203,10 @@ const SequenceRow = ({
     const disabledSubmit = disabled || !!notSubmittableReason;
 
     return (
-        <Grid item xs={12} container justifyContent="space-between" data-focus={name} onClick={onFocus} sx={hoverSx}>
+        <Grid size={12} container justifyContent="space-between" data-focus={name} onClick={onFocus} sx={hoverSx}>
             {active && !notEditableReason && focusName === name ? (
                 <>
-                    <Grid item xs={4}>
+                    <Grid size={4}>
                         <TextField
                             label={`Sequence ${number + 1}`}
                             variant="outlined"
@@ -219,7 +219,7 @@ const SequenceRow = ({
                             helperText={valid ? "" : label ? "This name is already used." : "Cannot be empty."}
                         />
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid size={4}>
                         <Autocomplete
                             multiple
                             options={Object.keys(tasks)}
@@ -252,7 +252,7 @@ const SequenceRow = ({
                             disabled={disabled}
                         />
                     </Grid>
-                    <Grid item xs={2} container alignContent="center" alignItems="center" justifyContent="center">
+                    <Grid size={2} container alignContent="center" alignItems="center" justifyContent="center">
                         <Tooltip title="Apply">
                             <IconButton sx={IconPaddingSx} onClick={onSaveSequence} size="small" disabled={!valid}>
                                 <CheckCircle color={disableColor("primary", !valid)} />
@@ -267,15 +267,15 @@ const SequenceRow = ({
                 </>
             ) : (
                 <>
-                    <Grid item xs={5}>
+                    <Grid size={5}>
                         <Typography variant="subtitle2">{label || "New Sequence"}</Typography>
                     </Grid>
-                    <Grid item xs={5}>
+                    <Grid size={5}>
                         {taskIds.map((id) =>
                             tasks[id] ? <Chip key={id} label={tasks[id]} variant="outlined" /> : null
                         )}
                     </Grid>
-                    <Grid item xs={1} alignContent="center" alignItems="center" justifyContent="center">
+                    <Grid size={1} alignContent="center" alignItems="center" justifyContent="center">
                         <Tooltip title={`Delete Sequence '${label}'`}>
                             <span>
                                 <IconButton size="small" onClick={onDeleteSequence} disabled={disabled}>
@@ -284,7 +284,7 @@ const SequenceRow = ({
                             </span>
                         </Tooltip>
                     </Grid>
-                    <Grid item xs={1} alignContent="center" alignItems="center" justifyContent="center">
+                    <Grid size={1} alignContent="center" alignItems="center" justifyContent="center">
                         {pLabel && submit ? (
                             <Tooltip
                                 title={
@@ -666,39 +666,38 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     <AccordionDetails>
                         <Grid container rowSpacing={2}>
                             {showConfig ? (
-                                <Grid item xs={12} container justifyContent="space-between">
-                                    <Grid item xs={4} pb={2}>
+                                <Grid size={12} container justifyContent="space-between">
+                                    <Grid size={4} pb={2}>
                                         <Typography variant="subtitle2">Config ID</Typography>
                                     </Grid>
-                                    <Grid item xs={8}>
+                                    <Grid size={8}>
                                         <Typography variant="subtitle2">{scConfig}</Typography>
                                     </Grid>
                                 </Grid>
                             ) : null}
                             {showCreationDate ? (
-                                <Grid item xs={12} container justifyContent="space-between">
-                                    <Grid item xs={4}>
+                                <Grid size={12} container justifyContent="space-between">
+                                    <Grid size={4}>
                                         <Typography variant="subtitle2">Creation Date</Typography>
                                     </Grid>
-                                    <Grid item xs={8}>
+                                    <Grid size={8}>
                                         <Typography variant="subtitle2">{scCreationDate}</Typography>
                                     </Grid>
                                 </Grid>
                             ) : null}
                             {showCycle ? (
-                                <Grid item xs={12} container justifyContent="space-between">
-                                    <Grid item xs={4}>
+                                <Grid size={12} container justifyContent="space-between">
+                                    <Grid size={4}>
                                         <Typography variant="subtitle2">Cycle / Frequency</Typography>
                                     </Grid>
-                                    <Grid item xs={8}>
+                                    <Grid size={8}>
                                         <Typography variant="subtitle2">{scCycle}</Typography>
                                     </Grid>
                                 </Grid>
                             ) : null}
-                            <Grid item xs={12} container justifyContent="space-between" spacing={1}>
+                            <Grid size={12} container justifyContent="space-between" spacing={1}>
                                 <Grid
-                                    item
-                                    xs={12}
+                                    size={12}
                                     container
                                     justifyContent="space-between"
                                     data-focus="label"
@@ -742,10 +741,10 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         />
                                     ) : (
                                         <>
-                                            <Grid item xs={4}>
+                                            <Grid size={4}>
                                                 <Typography variant="subtitle2">Label</Typography>
                                             </Grid>
-                                            <Grid item xs={8}>
+                                            <Grid size={8}>
                                                 <Typography variant="subtitle2">{scLabel}</Typography>
                                             </Grid>
                                         </>
@@ -753,8 +752,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 </Grid>
                                 {showTags ? (
                                     <Grid
-                                        item
-                                        xs={12}
+                                    size={12}
                                         container
                                         justifyContent="space-between"
                                         data-focus="tags"
@@ -821,10 +819,10 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                             />
                                         ) : (
                                             <>
-                                                <Grid item xs={4}>
+                                                <Grid size={4}>
                                                     <Typography variant="subtitle2">Tags</Typography>
                                                 </Grid>
-                                                <Grid item xs={8}>
+                                                <Grid size={8}>
                                                     {tags.map((tag, index) => (
                                                         <Chip key={index} label={tag} variant="outlined" />
                                                     ))}
@@ -835,7 +833,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 ) : null}
                             </Grid>
 
-                            <Grid item xs={12}>
+                            <Grid size={12}>
                                 <Divider />
                             </Grid>
                             <PropertiesEditor
@@ -853,11 +851,11 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             />
                             {showSequences ? (
                                 <>
-                                    <Grid item xs={12} container justifyContent="space-between">
-                                        <Grid item xs={9}>
+                                    <Grid size={12} container justifyContent="space-between">
+                                        <Grid size={9}>
                                             <Typography variant="h6">Sequences</Typography>
                                         </Grid>
-                                        <Grid item xs={3} sx={{ ml: "auto" }}>
+                                        <Grid size={3} sx={{ ml: "auto" }}>
                                             <Button onClick={addSequenceHandler} endIcon={<Add />}>
                                                 Add
                                             </Button>
@@ -888,12 +886,12 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         );
                                     })}
 
-                                    <Grid item xs={12}>
+                                    <Grid size={12}>
                                         <Divider />
                                     </Grid>
                                 </>
                             ) : null}
-                            <Grid item xs={12} container justifyContent="space-between">
+                            <Grid size={12} container justifyContent="space-between">
                                 {showDelete ? (
                                     <Button
                                         variant="outlined"
