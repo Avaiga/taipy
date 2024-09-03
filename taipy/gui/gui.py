@@ -289,7 +289,7 @@ class Gui:
                 of the main Python file is allowed.
             env_filename (Optional[str]): An optional file from which to load application
                 configuration variables (see the
-                [Configuration](../../userman/configuration/gui-config.md#configuring-the-gui-instance)
+                [Configuration](../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
                 section of the User Manual for details.)<br/>
                 The default value is "taipy.gui.env"
             libraries (Optional[List[ElementLibrary]]): An optional list of extension library
@@ -2603,7 +2603,7 @@ class Gui:
         URL that `Gui` serves. The default is to listen to the *localhost* address
         (127.0.0.1) on the port number 5000. However, the configuration of this `Gui`
         object may impact that (see the
-        [Configuration](../../userman/configuration/gui-config.md#configuring-the-gui-instance)
+        [Configuration](../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
         section of the User Manual for details).
 
         Arguments:
@@ -2629,7 +2629,7 @@ class Gui:
                 Also note that setting the *debug* argument to True forces *async_mode* to "threading".
             **kwargs (dict[str, any]): Additional keyword arguments that configure how this `Gui` is run.
                 Please refer to the
-                [Configuration section](../../userman/configuration/gui-config.md#configuring-the-gui-instance)
+                [Configuration section](../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
                 of the User Manual for more information.
 
         Returns:

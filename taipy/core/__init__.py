@@ -22,7 +22,7 @@ Import `Config^` from the `taipy.config^` module, then use the various methods o
 configure your core application. In particular, configure the
 [data nodes](../../../userman/scenario_features/data-integration/data-node-config.md),
 [tasks](../../../userman/scenario_features/task-orchestration/scenario-config.md),
-and [scenarios](../../../userman/sdm/scenario/scenario-config.md).
+and [scenarios](../../../userman/scenario_features/sdm/scenario/scenario-config.md).
 
 Once your application is configured, import module `import taipy as tp` so you can use any function described
 in the following section on [Function](#functions). In particular, the most used functions are `tp.create_scenario()`,

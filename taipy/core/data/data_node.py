@@ -123,7 +123,7 @@ class DataNode(_Entity, _Labeled):
         validity_period (Optional[timedelta]): The duration implemented as a timedelta since the last edit date for
             which the data node can be considered up-to-date. Once the validity period has passed, the data node is
             considered stale and relevant tasks will run even if they are skippable (see the
-            [Task orchestration](../../userman/sdm/task/index.md#task-configuration) page for more details).
+            [Task orchestration](../../userman/scenario_features/sdm/task/index.md#task-configuration) page for more details).
             If _validity_period_ is set to `None`, the data node is always up-to-date.
         edit_in_progress (bool): True if the data node is locked for modification. False
             otherwise.
