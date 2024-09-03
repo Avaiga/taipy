@@ -29,7 +29,7 @@ class Partial(_Page):
     creating your page templates.
 
     Visual elements such as [`part`](../../refmans/gui/viselements/generic/part.md),
-    [`dialog`](../..//userman/gui/viselements/generic/dialog.md) or
+    [`dialog`](../../refmans/gui/viselements/generic/dialog.md) or
     [`pane`](../../refmans/gui/viselements/generic/pane.md) can use Partials.
 
     Note that `Partial` has no constructor (no `__init__()` method): to create a
