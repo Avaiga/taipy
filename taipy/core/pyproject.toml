@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "taipy-core"
+description = "A Python library to build powerful and customized data-driven back-end applications."
+readme = "package_desc.md"
+requires-python = ">=3.8"
+license = {text = "Apache License 2.0"}
+authors = [{name = "Avaiga", email = "dev@taipy.io"}]
+keywords = ["taipy-core"]
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dynamic = ["version", "dependencies"]
+
+[project.optional-dependencies]
+mssql = ["pyodbc>=4,<4.1"]
+mysql = ["pymysql>1,<1.1"]
+postgresql = ["psycopg2>2.9,<2.10"]
+parquet = ["fastparquet==2022.11.0", "pyarrow>=14.0.2,<15.0"]
+s3 = ["boto3==1.29.1"]
+mongo = ["pymongo[srv]>=4.2.0,<5.0"]
+
+[tool.setuptools.packages]
+find = {include = ["taipy", "taipy.core", "taipy.core.*"]}
+
+[project.urls]
+homepage = "https://github.com/avaiga/taipy"

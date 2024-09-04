@@ -46,6 +46,8 @@ ConfigParameter = t.Literal[
     "ngrok_token",
     "notebook_proxy",
     "notification_duration",
+    "port",
+    "port_auto_ranges",
     "propagate",
     "run_browser",
     "run_in_thread",
@@ -56,13 +58,13 @@ ConfigParameter = t.Literal[
     "theme",
     "time_zone",
     "title",
+    "state_retention_period",
     "stylekit",
     "upload_folder",
     "use_arrow",
     "use_reloader",
     "watermark",
     "webapp_path",
-    "port",
 ]
 
 Stylekit = t.TypedDict(
@@ -117,23 +119,25 @@ Config = t.TypedDict(
         "ngrok_token": str,
         "notebook_proxy": bool,
         "notification_duration": int,
+        "port": t.Union[t.Literal["auto"], int],
+        "port_auto_ranges": t.List[t.Union[int, t.Tuple[int, int]]],
         "propagate": bool,
         "run_browser": bool,
         "run_in_thread": bool,
         "run_server": bool,
         "server_config": t.Optional[ServerConfig],
         "single_client": bool,
+        "state_retention_period": int,
+        "stylekit": t.Union[bool, Stylekit],
         "system_notification": bool,
         "theme": t.Optional[t.Dict[str, t.Any]],
         "time_zone": t.Optional[str],
         "title": t.Optional[str],
-        "stylekit": t.Union[bool, Stylekit],
         "upload_folder": t.Optional[str],
         "use_arrow": bool,
         "use_reloader": bool,
         "watermark": t.Optional[str],
         "webapp_path": t.Optional[str],
-        "port": t.Union[t.Literal["auto"], int],
     },
     total=False,
 )
@@ -235,7 +239,7 @@ class _Config(object):
                     elif key == "port" and str(value).strip() == "auto":
                         config["port"] = "auto"
                     else:
-                        config[key] = value if config[key] is None else type(config[key])(value)  # type: ignore
+                        config[key] = value if config[key] is None else type(config[key])(value)
                 except Exception as e:
                     _warn(
                         f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse value to the correct type",  # noqa: E501

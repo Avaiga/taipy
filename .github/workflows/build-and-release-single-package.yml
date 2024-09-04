@@ -156,7 +156,7 @@ jobs:
       - name: Build package
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
         run: |
-          python setup.py build_py && python -m build
+          python -m build
 
       - name: Rename files
         run: |

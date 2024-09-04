@@ -30,6 +30,7 @@ from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.exceptions.exceptions import InvalidExposedType
+from taipy.core.reason import NoFileToDownload, NotAFile
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -65,8 +66,8 @@ class TestCSVDataNode:
         assert dn.job_ids == []
         assert not dn.is_ready_for_reading
         assert dn.path == default_path
-        assert dn.has_header is False
-        assert dn.exposed_type == "pandas"
+        assert dn.properties["has_header"] is False
+        assert dn.properties["exposed_type"] == "pandas"
 
         csv_dn_config = Config.configure_csv_data_node(
             id="foo", default_path=default_path, has_header=True, exposed_type=MyCustomObject
@@ -74,8 +75,8 @@ class TestCSVDataNode:
         dn = _DataManagerFactory._build_manager()._create_and_set(csv_dn_config, None, None)
         assert dn.storage_type() == "csv"
         assert dn.config_id == "foo"
-        assert dn.has_header is True
-        assert dn.exposed_type == MyCustomObject
+        assert dn.properties["has_header"] is True
+        assert dn.properties["exposed_type"] == MyCustomObject
 
         with pytest.raises(InvalidConfigurationId):
             CSVDataNode(
@@ -194,6 +195,29 @@ class TestCSVDataNode:
         assert ".data" not in dn.path
         assert os.path.exists(dn.path)
 
+    def test_is_downloadable(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
+        dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+        reasons = dn.is_downloadable()
+        assert reasons
+        assert reasons.reasons == ""
+
+    def test_is_not_downloadable_no_file(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/wrong_example.csv")
+        dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+        reasons = dn.is_downloadable()
+        assert not reasons
+        assert len(reasons._reasons) == 1
+        assert str(NoFileToDownload(path, dn.id)) in reasons.reasons
+
+    def test_is_not_downloadable_not_a_file(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample")
+        dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+        reasons = dn.is_downloadable()
+        assert not reasons
+        assert len(reasons._reasons) == 1
+        assert str(NotAFile(path, dn.id)) in reasons.reasons
+
     def test_get_downloadable_path(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
@@ -202,6 +226,11 @@ class TestCSVDataNode:
     def test_get_downloadable_path_with_not_existing_file(self):
         dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": "NOT_EXISTING.csv", "exposed_type": "pandas"})
         assert dn._get_downloadable_path() == ""
+
+    def is_uploadable(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
+        dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+        assert dn.is_uploadable()
 
     def test_upload(self, csv_file, tmpdir_factory):
         old_csv_path = tmpdir_factory.mktemp("data").join("df.csv").strpath

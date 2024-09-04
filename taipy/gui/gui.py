@@ -26,6 +26,7 @@ import warnings
 from importlib import metadata, util
 from importlib.util import find_spec
 from pathlib import Path
+from threading import Timer
 from types import FrameType, FunctionType, LambdaType, ModuleType, SimpleNamespace
 from urllib.parse import unquote, urlencode, urlparse
 
@@ -611,6 +612,22 @@ class Gui:
 
     def _handle_disconnect(self):
         Hooks()._handle_disconnect(self)
+        if (sid := getattr(request, "sid", None)) and (st_to := self._get_config("state_retention_period", 0)) > 0:
+            for cl_id, sids in self.__client_id_2_sid.items():
+                if sid in sids:
+                    if len(sids) == 1:
+                        Timer(st_to, self._remove_state, [cl_id]).start()
+                    else:
+                        sids.remove(sid)
+                    return
+
+    def _remove_state(self, client_id: str):
+        if (sids := self.__client_id_2_sid.get(client_id, None)) and len(sids) == 1:
+            try:
+                del self.__client_id_2_sid[client_id]
+                self._bindings()._delete_scope(client_id)
+            except Exception as e:
+                _warn(f"Unexpected error removing state {client_id}", e)
 
     def _manage_message(self, msg_type: _WsType, message: dict) -> None:
         try:
@@ -948,20 +965,23 @@ class Gui:
 
     def __upload_files(self):
         self.__set_client_id_in_context()
-        if "var_name" not in request.form:
-            _warn("No var name")
-            return ("No var name", 400)
-        var_name = request.form["var_name"]
+        on_upload_action = request.form.get("on_action", None)
+        var_name = request.form.get("var_name", None)
+        if not var_name and not on_upload_action:
+            _warn("upload files: No var name")
+            return ("upload files: No var name", 400)
+        context = request.form.get("context", None)
+        upload_data = request.form.get("upload_data", None)
         multiple = "multiple" in request.form and request.form["multiple"] == "True"
-        if "blob" not in request.files:
-            _warn("No file part")
-            return ("No file part", 400)
-        file = request.files["blob"]
+        file = request.files.get("blob", None)
+        if not file:
+            _warn("upload files: No file part")
+            return ("upload files: No file part", 400)
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
         if file.filename == "":
-            _warn("No selected file")
-            return ("No selected file", 400)
+            _warn("upload files: No selected file")
+            return ("upload files: No selected file", 400)
         suffix = ""
         complete = True
         part = 0
@@ -990,13 +1010,27 @@ class Gui:
                         return (f"Cannot group file after chunk upload for {file.filename}", 500)
                 # notify the file is uploaded
                 newvalue = str(file_path)
-                if multiple:
+                if multiple and var_name:
                     value = _getscopeattr(self, var_name)
                     if not isinstance(value, t.List):
                         value = [] if value is None else [value]
                     value.append(newvalue)
                     newvalue = value
-                setattr(self._bindings(), var_name, newvalue)
+                with self._set_locals_context(context):
+                    if on_upload_action:
+                        data = {}
+                        if upload_data:
+                            try:
+                                data = json.loads(upload_data)
+                            except Exception:
+                                pass
+                        data["path"] = file_path
+                        file_fn = self._get_user_function(on_upload_action)
+                        if not callable(file_fn):
+                            file_fn = _getscopeattr(self, on_upload_action)
+                        self._call_function_with_state(file_fn, ["file_upload", {"args": [data]}])
+                    else:
+                        setattr(self._bindings(), var_name, newvalue)
         return ("", 200)
 
     _data_request_counter = 1
@@ -2381,8 +2415,8 @@ class Gui:
             elif script_file.is_dir() and (script_file / "taipy.css").exists():
                 css_file = "taipy.css"
         if css_file is None:
-             script_file = script_file.with_name("taipy").with_suffix(".css")
-             if script_file.exists():
+            script_file = script_file.with_name("taipy").with_suffix(".css")
+            if script_file.exists():
                 css_file = f"{script_file.stem}.css"
         self.__css_file = css_file
 
@@ -2734,6 +2768,7 @@ class Gui:
             run_in_thread=app_config["run_in_thread"],
             allow_unsafe_werkzeug=app_config["allow_unsafe_werkzeug"],
             notebook_proxy=app_config["notebook_proxy"],
+            port_auto_ranges=app_config["port_auto_ranges"]
         )
 
     def reload(self):  # pragma: no cover

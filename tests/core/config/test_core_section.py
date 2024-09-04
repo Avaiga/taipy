@@ -16,7 +16,7 @@ import pytest
 
 from taipy.config import Config
 from taipy.config.exceptions.exceptions import MissingEnvVariableError
-from taipy.core import Core
+from taipy.core import Orchestrator
 from taipy.core._version._version_manager_factory import _VersionManagerFactory
 from taipy.core.config import CoreSection
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
@@ -24,48 +24,48 @@ from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 def test_core_section():
     with patch("sys.argv", ["prog"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
     assert Config.core.mode == "development"
     assert Config.core.version_number == _VersionManagerFactory._build_manager()._get_development_version()
     assert not Config.core.force
-    core.stop()
+    orchestrator.stop()
 
     with patch("sys.argv", ["prog"]):
         Config.configure_core(mode="experiment", version_number="test_num", force=True)
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
     assert Config.core.mode == "experiment"
     assert Config.core.version_number == "test_num"
     assert Config.core.force
-    core.stop()
+    orchestrator.stop()
 
     toml_config = NamedTemporaryFile(
         content="""
 [TAIPY]
 
 [CORE]
-mode = "production"
+mode = "experiment"
 version_number = "test_num_2"
 force = "true:bool"
         """
     )
     Config.load(toml_config.filename)
     with patch("sys.argv", ["prog"]):
-        core = Core()
-        core.run()
-    assert Config.core.mode == "production"
+        orchestrator = Orchestrator()
+        orchestrator.run()
+    assert Config.core.mode == "experiment"
     assert Config.core.version_number == "test_num_2"
     assert Config.core.force
-    core.stop()
+    orchestrator.stop()
 
     with patch("sys.argv", ["prog", "--experiment", "test_num_3", "--no-taipy-force"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         assert Config.core.mode == "experiment"
         assert Config.core.version_number == "test_num_3"
         assert not Config.core.force
-        core.stop()
+        orchestrator.stop()
 
 
 def test_config_attribute_overiden_by_code_config_including_env_variable_values():

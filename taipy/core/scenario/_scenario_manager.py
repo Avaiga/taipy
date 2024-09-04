@@ -268,12 +268,9 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         return None
 
     @classmethod
-    def _get_by_tag(cls, cycle: Cycle, tag: str) -> Optional[Scenario]:
-        scenarios = cls._get_all_by_cycle(cycle)
-        for scenario in scenarios:
-            if scenario.has_tag(tag):
-                return scenario
-        return None
+    def _get_all_by_cycle_tag(cls, cycle: Cycle, tag: str) -> List[Scenario]:
+        cycles_scenarios = cls._get_all_by_cycle(cycle)
+        return [scenario for scenario in cycles_scenarios if scenario.has_tag(tag)]
 
     @classmethod
     def _get_all_by_tag(cls, tag: str) -> List[Scenario]:
@@ -376,10 +373,6 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         tags = scenario.properties.get(cls._AUTHORIZED_TAGS_KEY, set())
         if len(tags) > 0 and tag not in tags:
             raise UnauthorizedTagError(f"Tag `{tag}` not authorized by scenario configuration `{scenario.config_id}`")
-        if scenario.cycle:
-            if old_tagged_scenario := cls._get_by_tag(scenario.cycle, tag):
-                old_tagged_scenario.remove_tag(tag)
-                cls._set(old_tagged_scenario)
         scenario._add_tag(tag)
         cls._set(scenario)
         Notifier.publish(

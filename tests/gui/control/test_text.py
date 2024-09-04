@@ -19,6 +19,13 @@ def test_text_md_1(gui: Gui, test_client, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
+def test_text_md_width(gui: Gui, test_client, helpers):
+    gui._bind_var_val("x", 10)
+    md_string = "<|{x}|text|width=70%|>"
+    expected_list = ["<Field", 'dataType="int"', 'defaultValue="10"', "value={tpec_TpExPr_x_TPMDL_0}", 'width="70%"']
+    helpers.test_control_md(gui, md_string, expected_list)
+
+
 def test_text_html_1(gui: Gui, test_client, helpers):
     gui._bind_var_val("x", 10)
     html_string = '<taipy:text value="{x}" />'

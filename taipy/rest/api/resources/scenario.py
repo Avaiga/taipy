@@ -81,10 +81,11 @@ class ScenarioResource(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    response = requests.get(
-                    "http://localhost:5000/api/v1/scenarios/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c")
-                    print(response)
-                    print(response.json())
+                response = requests.get(
+                    "http://localhost:5000/api/v1/scenarios/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c"
+                )
+                print(response)
+                print(response.json())
                 ```
                 `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the  *scenario_id* parameter. It
                 represents the identifier of the Cycle we want to retrieve.
@@ -166,10 +167,11 @@ class ScenarioResource(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    response = requests.delete(
-                    "http://localhost:5000/api/v1/scenarios/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c")
-                    print(response)
-                    print(response.json())
+                response = requests.delete(
+                    "http://localhost:5000/api/v1/scenarios/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c"
+                )
+                print(response)
+                print(response.json())
                 ```
                 `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the *scenario_id* parameter. It
                 represents the identifier of the Scenario we want to delete.
@@ -275,9 +277,9 @@ class ScenarioList(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    response = requests.get("http://localhost:5000/api/v1/scenarios")
-                    print(response)
-                    print(response.json())
+                response = requests.get("http://localhost:5000/api/v1/scenarios")
+                print(response)
+                print(response.json())
                 ```
 
                 In case of success here is an output example:
@@ -361,9 +363,9 @@ class ScenarioList(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    response = requests.post("http://localhost:5000/api/v1/scenarios?config_id=my_scenario_config")
-                    print(response)
-                    print(response.json())
+                response = requests.post("http://localhost:5000/api/v1/scenarios?config_id=my_scenario_config")
+                print(response)
+                print(response.json())
                 ```
                 In this example the *config_id* value ("my_scenario_config") is given as parameter directly in the
                 url. A corresponding `ScenarioConfig^` must exist and must have been configured before.
@@ -476,11 +478,12 @@ class ScenarioExecutor(Resource):
             === "Python"
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
-                    import requests
-                        response = requests.post(
-                        "http://localhost:5000/api/v1/scenarios/submit/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c")
-                        print(response)
-                        print(response.json())
+                import requests
+                response = requests.post(
+                    "http://localhost:5000/api/v1/scenarios/submit/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c"
+                )
+                print(response)
+                print(response.json())
                 ```
                 `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the *scenario_id* parameter. It
                 represents the identifier of the Scenario we want to submit.

@@ -17,39 +17,40 @@ from typing import Dict, List
 
 from taipy.gui import Gui
 
-# Skill categories
-skills = ["HTML", "CSS", "Java", "Python", "PHP", "JavaScript", "Photoshop"]
-data: List[Dict[str, List]] = [
-    # Proportion of skills used for Backend development
-    {"Backend": [10, 10, 80, 70, 90, 30, 0], "Skills": skills},
-    # Proportion of skills used for Frontend development
-    {"Frontend": [90, 90, 0, 10, 20, 80, 60], "Skills": skills},
-]
+if __name__ == "__main__":
+    # Skill categories
+    skills = ["HTML", "CSS", "Java", "Python", "PHP", "JavaScript", "Photoshop"]
+    data: List[Dict[str, List]] = [
+        # Proportion of skills used for Backend development
+        {"Backend": [10, 10, 80, 70, 90, 30, 0], "Skills": skills},
+        # Proportion of skills used for Frontend development
+        {"Frontend": [90, 90, 0, 10, 20, 80, 60], "Skills": skills},
+    ]
 
-# Append first elements to all arrays for a nice stroke
-skills.append(skills[0])
-data[0]["Backend"].append(data[0]["Backend"][0])
-data[1]["Frontend"].append(data[1]["Frontend"][0])
+    # Append first elements to all arrays for a nice stroke
+    skills.append(skills[0])
+    data[0]["Backend"].append(data[0]["Backend"][0])
+    data[1]["Frontend"].append(data[1]["Frontend"][0])
 
-layout = {
-    # Force the radial axis displayed range
-    "polar": {"radialaxis": {"range": [0, 100]}}
-}
+    layout = {
+        # Force the radial axis displayed range
+        "polar": {"radialaxis": {"range": [0, 100]}}
+    }
 
-# Fill the trace
-options = {"fill": "toself"}
+    # Fill the trace
+    options = {"fill": "toself"}
 
-# Reflected in the legend
-names = ["Backend", "Frontend"]
+    # Reflected in the legend
+    names = ["Backend", "Frontend"]
 
-# To shorten the chart control definition
-r = ["0/Backend", "1/Frontend"]
-theta = ["0/Skills", "1/Skills"]
+    # To shorten the chart control definition
+    r = ["0/Backend", "1/Frontend"]
+    theta = ["0/Skills", "1/Skills"]
 
-page = """
+    page = """
 # Radar - Multiple
 
 <|{data}|chart|type=scatterpolar|name={names}|r={r}|theta={theta}|options={options}|layout={layout}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

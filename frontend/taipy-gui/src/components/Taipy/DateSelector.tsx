@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import { DatePicker, DatePickerProps } from "@mui/x-date-pickers/DatePicker";
@@ -21,7 +21,7 @@ import { isValid } from "date-fns";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps, DateProps, getProps } from "./utils";
+import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps, DateProps, getProps, getCssSize } from "./utils";
 import { dateToString, getDateTime, getTimeZonedDate } from "../../utils";
 import { useClassNames, useDispatch, useDynamicProperty, useFormatConfig, useModule } from "../../utils/hooks";
 import Field from "./Field";
@@ -39,6 +39,7 @@ interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
     defaultEditable?: boolean;
     editable?: boolean;
     label?: string;
+    width?: string | number;
 }
 
 const boxSx = { display: "inline-block" };
@@ -61,6 +62,8 @@ const DateSelector = (props: DateSelectorProps) => {
     const min = useDynamicProperty(props.min, props.defaultMin, undefined);
     const max = useDynamicProperty(props.max, props.defaultMax, undefined);
 
+    const dateSx = useMemo(() => (props.width ? { maxWidth: getCssSize(props.width) } : undefined), [props.width]);
+
     const handleChange = useCallback(
         (v: Date | null) => {
             setValue(v);
@@ -72,12 +75,12 @@ const DateSelector = (props: DateSelectorProps) => {
                         dateToString(newDate, withTime),
                         module,
                         props.onChange,
-                        propagate,
-                    ),
+                        propagate
+                    )
                 );
             }
         },
-        [updateVarName, dispatch, withTime, propagate, tz, props.onChange, module],
+        [updateVarName, dispatch, withTime, propagate, tz, props.onChange, module]
     );
 
     // Run every time props.value get updated
@@ -115,6 +118,7 @@ const DateSelector = (props: DateSelectorProps) => {
                                 slotProps={textFieldProps}
                                 label={props.label}
                                 format={props.format}
+                                sx={dateSx}
                             />
                         ) : (
                             <DatePicker
@@ -127,6 +131,7 @@ const DateSelector = (props: DateSelectorProps) => {
                                 slotProps={textFieldProps}
                                 label={props.label}
                                 format={props.format}
+                                sx={dateSx}
                             />
                         )
                     ) : (
@@ -137,6 +142,7 @@ const DateSelector = (props: DateSelectorProps) => {
                             format={props.format}
                             id={id && id + "-field"}
                             className={getSuffixedClassNames(className, "-text")}
+                            width={props.width}
                         />
                     )}
                 </Box>

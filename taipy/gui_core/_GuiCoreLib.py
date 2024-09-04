@@ -50,6 +50,7 @@ class _GuiCore(ElementLibrary):
     __SCENARIO_SELECTOR_SORT_VAR = "__tpgc_sc_sort"
     __SCENARIO_VIZ_ERROR_VAR = "__tpgc_sv_error"
     __JOB_SELECTOR_ERROR_VAR = "__tpgc_js_error"
+    __JOB_DETAIL_ID_VAR = "__tpgc_jd_id"
     __DATANODE_VIZ_ERROR_VAR = "__tpgc_dv_error"
     __DATANODE_VIZ_OWNER_ID_VAR = "__tpgc_dv_owner_id"
     __DATANODE_VIZ_HISTORY_ID_VAR = "__tpgc_dv_history_id"
@@ -218,6 +219,9 @@ class _GuiCore(ElementLibrary):
                 "class_name": ElementProperty(PropertyType.dynamic_string),
                 "scenario": ElementProperty(PropertyType.lov_value, "optional"),
                 "width": ElementProperty(PropertyType.string),
+                "file_download": ElementProperty(PropertyType.boolean, False),
+                "file_upload": ElementProperty(PropertyType.boolean, False),
+                "upload_check": ElementProperty(PropertyType.function),
             },
             inner_properties={
                 "on_edit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.edit_data_node}}"),
@@ -258,6 +262,7 @@ class _GuiCore(ElementLibrary):
                     PropertyType.function, f"{{{__CTX_VAR_NAME}.tabular_data_edit}}"
                 ),
                 "on_lock": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.lock_datanode_for_edit}}"),
+                "on_file_action": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.on_file_action}}"),
                 "update_dn_vars": ElementProperty(
                     PropertyType.string,
                     f"data_id={__DATANODE_VIZ_DATA_ID_VAR}<tp:uniq:dn>;"
@@ -283,6 +288,7 @@ class _GuiCore(ElementLibrary):
                 "show_cancel": ElementProperty(PropertyType.boolean, True),
                 "show_delete": ElementProperty(PropertyType.boolean, True),
                 "on_change": ElementProperty(PropertyType.function),
+                "on_details": ElementProperty(PropertyType.function),
                 "height": ElementProperty(PropertyType.string, "50vh"),
             },
             inner_properties={
@@ -291,8 +297,14 @@ class _GuiCore(ElementLibrary):
                 "type": ElementProperty(PropertyType.inner, __JOB_ADAPTER),
                 "on_job_action": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.act_on_jobs}}"),
                 "error": ElementProperty(PropertyType.dynamic_string, f"{{{__JOB_SELECTOR_ERROR_VAR}<tp:uniq:jb>}}"),
+                "details": ElementProperty(
+                    PropertyType.react,
+                    f"{{{__CTX_VAR_NAME}.get_job_details(" + f"{__JOB_DETAIL_ID_VAR}<tp:uniq:jb>)}}",
+                ),
                 "update_jb_vars": ElementProperty(
-                    PropertyType.string, f"error_id={__JOB_SELECTOR_ERROR_VAR}<tp:uniq:jb>"
+                    PropertyType.string,
+                    f"error_id={__JOB_SELECTOR_ERROR_VAR}<tp:uniq:jb>;"
+                    + f"detail_id={__JOB_DETAIL_ID_VAR}<tp:uniq:jb>;",
                 ),
             },
         ),

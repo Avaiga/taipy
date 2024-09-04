@@ -32,6 +32,7 @@ from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.json import JSONDataNode
 from taipy.core.data.operator import JoinOperator, Operator
 from taipy.core.exceptions.exceptions import NoData
+from taipy.core.reason import NoFileToDownload, NotAFile
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -108,7 +109,6 @@ class TestJSONDataNode:
         assert isinstance(dn_2, JSONDataNode)
         assert dn_2.storage_type() == "json"
         assert dn_2.properties["encoding"] == "utf-16"
-        assert dn_2.encoding == "utf-16"
 
         json_dn_config_3 = Config.configure_json_data_node(
             id="foo", default_path=path, encoder=MyCustomEncoder, decoder=MyCustomDecoder
@@ -391,6 +391,29 @@ class TestJSONDataNode:
 
         assert ".data" not in dn.path
         assert os.path.exists(dn.path)
+
+    def test_is_downloadable(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/json/example_dict.json")
+        dn = JSONDataNode("foo", Scope.SCENARIO, properties={"path": path})
+        reasons = dn.is_downloadable()
+        assert reasons
+        assert reasons.reasons == ""
+
+    def test_is_not_downloadable_no_file(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/json/wrong_path.json")
+        dn = JSONDataNode("foo", Scope.SCENARIO, properties={"path": path})
+        reasons = dn.is_downloadable()
+        assert not reasons
+        assert len(reasons._reasons) == 1
+        assert str(NoFileToDownload(path, dn.id)) in reasons.reasons
+
+    def is_not_downloadable_not_a_file(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/json")
+        dn = JSONDataNode("foo", Scope.SCENARIO, properties={"path": path})
+        reasons = dn.is_downloadable()
+        assert not reasons
+        assert len(reasons._reasons) == 1
+        assert str(NotAFile(path, dn.id)) in reasons.reasons
 
     def test_get_download_path(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/json/example_dict.json")

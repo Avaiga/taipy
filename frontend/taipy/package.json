@@ -21,8 +21,8 @@
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.8",
-    "@mui/icons-material": "^5.0.5",
-    "@mui/material": "^5.0.6",
+    "@mui/icons-material": "^6.0.1",
+    "@mui/material": "^6.0.1",
     "@mui/x-date-pickers": "^7.0.0",
     "@mui/x-tree-view": "^7.0.0",
     "@projectstorm/react-diagrams": "^7.0.2",

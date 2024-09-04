@@ -357,7 +357,7 @@ class _Builder:
             if strattr is None:
                 return self
         elif _is_boolean(strattr) and not _is_true(strattr):
-            return self
+            return self.__set_react_attribute(_to_camel_case(name), False)
         elif strattr:
             strattr = str(strattr)
             func = self.__gui._get_user_function(strattr)

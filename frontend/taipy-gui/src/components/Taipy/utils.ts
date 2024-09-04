@@ -11,7 +11,8 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { CSSProperties, MouseEvent } from "react";
+import { MouseEvent } from "react";
+import { SxProps } from "@mui/material";
 
 export interface TaipyActiveProps extends TaipyDynamicProps, TaipyHoverProps {
     defaultActive?: boolean;
@@ -61,6 +62,7 @@ export interface TaipyInputProps extends TaipyActiveProps, TaipyChangeProps, Tai
     actionKeys?: string;
     multiline?: boolean;
     linesShown?: number;
+    width?: string | number;
 }
 
 export interface TaipyLabelProps {
@@ -127,8 +129,6 @@ export const getSuffixedClassNames = (names: string | undefined, suffix: string)
         .map((n) => n + suffix)
         .join(" ");
 
-export const emptyStyle = {} as CSSProperties;
-
 export const disableColor = <T>(color: T, disabled: boolean) => (disabled ? ("disabled" as T) : color);
 
 export const getProps = (p: DateProps, start: boolean, val: Date | null, withTime: boolean): DateProps => {
@@ -140,10 +140,19 @@ export const getProps = (p: DateProps, start: boolean, val: Date | null, withTim
             ? "minDateTime"
             : "maxDateTime"
         : start
-            ? "minDate"
-            : "maxDate";
+        ? "minDate"
+        : "maxDate";
     if (p[propName] == val) {
         return p;
     }
-    return {...p, [propName]: val};
+    return { ...p, [propName]: val };
+};
+
+export const expandSx = (sx: SxProps, ...partials: (SxProps | undefined)[]) => {
+    return partials.reduce((prevSx: SxProps, partialSx) => {
+        if (partialSx) {
+            return { ...prevSx, ...partialSx } as SxProps;
+        }
+        return prevSx;
+    }, sx);
 };

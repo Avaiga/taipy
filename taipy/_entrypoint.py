@@ -14,9 +14,9 @@ import sys
 from importlib.util import find_spec
 
 from taipy._cli._base_cli._taipy_parser import _TaipyParser
-from taipy.core._core_cli import _CoreCLI
+from taipy.core._cli._core_cli_factory import _CoreCLIFactory
 from taipy.core._entity._migrate_cli import _MigrateCLI
-from taipy.core._version._cli._version_cli import _VersionCLI
+from taipy.core._version._cli._version_cli_factory import _VersionCLIFactory
 from taipy.gui._gui_cli import _GuiCLI
 
 from ._cli._create_cli import _CreateCLI
@@ -41,11 +41,13 @@ def _entrypoint():
 
         _enterprise_entrypoint_initialize()
 
+    _core_cli = _CoreCLIFactory._build_cli()
+
     _RunCLI.create_parser()
     _GuiCLI.create_run_parser()
-    _CoreCLI.create_run_parser()
+    _core_cli.create_run_parser()
 
-    _VersionCLI.create_parser()
+    _VersionCLIFactory._build_cli().create_parser()
     _CreateCLI.generate_template_map()
     _CreateCLI.create_parser()
     _MigrateCLI.create_parser()
@@ -63,7 +65,7 @@ def _entrypoint():
 
     _RunCLI.handle_command()
     _HelpCLI.handle_command()
-    _VersionCLI.handle_command()
+    _VersionCLIFactory._build_cli().handle_command()
     _MigrateCLI.handle_command()
     _CreateCLI.handle_command()
 

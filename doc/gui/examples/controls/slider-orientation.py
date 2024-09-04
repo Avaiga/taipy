@@ -15,14 +15,15 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-value = 40
+if __name__ == "__main__":
+    value = 40
 
-page = """
+    page = """
 # Slider - Vertical
 
 <|{value}|slider|orientation=v|>
 
 Value: <|{value}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

@@ -15,62 +15,63 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-data = [
-    {
-        "x": [1, 2, 3, 4],
-        "y": [10, 11, 12, 13],
-    },
-    {
-        "x": [1, 2, 3, 4],
-        "y": [11, 12, 13, 14],
-    },
-    {
-        "x": [1, 2, 3, 4],
-        "y": [12, 13, 14, 15],
-    },
-]
+if __name__ == "__main__":
+    data = [
+        {
+            "x": [1, 2, 3, 4],
+            "y": [10, 11, 12, 13],
+        },
+        {
+            "x": [1, 2, 3, 4],
+            "y": [11, 12, 13, 14],
+        },
+        {
+            "x": [1, 2, 3, 4],
+            "y": [12, 13, 14, 15],
+        },
+    ]
 
-options = [
-    # First data set is represented by increasingly large
-    # disks, getting more and more opaque
-    {"marker": {"color": "red", "size": [12, 22, 32, 42], "opacity": [0.2, 0.5, 0.7, 1]}},
-    # Second data set is represented with a different symbol
-    # for each data point
-    {
-        "marker": {"color": "blue", "size": 18, "symbol": ["circle", "square", "diamond", "cross"]},
-    },
-    # Third data set is represented with green disks surrounded
-    # by a red circle that becomes thicker and thicker
-    {
-        "marker": {"color": "green", "size": 20, "line": {"color": "red", "width": [2, 4, 6, 8]}},
-    },
-]
+    options = [
+        # First data set is represented by increasingly large
+        # disks, getting more and more opaque
+        {"marker": {"color": "red", "size": [12, 22, 32, 42], "opacity": [0.2, 0.5, 0.7, 1]}},
+        # Second data set is represented with a different symbol
+        # for each data point
+        {
+            "marker": {"color": "blue", "size": 18, "symbol": ["circle", "square", "diamond", "cross"]},
+        },
+        # Third data set is represented with green disks surrounded
+        # by a red circle that becomes thicker and thicker
+        {
+            "marker": {"color": "green", "size": 20, "line": {"color": "red", "width": [2, 4, 6, 8]}},
+        },
+    ]
 
-markers = [
-    # First data set is represented by increasingly large
-    # disks, getting more and more opaque
-    {"color": "red", "size": [12, 22, 32, 42], "opacity": [0.2, 0.5, 0.7, 1]},
-    # Second data set is represented with a different symbol
-    # for each data point
-    {"color": "blue", "size": 18, "symbol": ["circle", "square", "diamond", "cross"]},
-    # Third data set is represented with green disks surrounded
-    # by a red circle that becomes thicker and thicker
-    {"color": "green", "size": 20, "line": {"color": "red", "width": [2, 4, 6, 8]}},
-]
+    markers = [
+        # First data set is represented by increasingly large
+        # disks, getting more and more opaque
+        {"color": "red", "size": [12, 22, 32, 42], "opacity": [0.2, 0.5, 0.7, 1]},
+        # Second data set is represented with a different symbol
+        # for each data point
+        {"color": "blue", "size": 18, "symbol": ["circle", "square", "diamond", "cross"]},
+        # Third data set is represented with green disks surrounded
+        # by a red circle that becomes thicker and thicker
+        {"color": "green", "size": 20, "line": {"color": "red", "width": [2, 4, 6, 8]}},
+    ]
 
-layout = {
-    # Hide the chart legend
-    "showlegend": False,
-    # Remove all ticks from the x axis
-    "xaxis": {"showticklabels": False},
-    # Remove all ticks from the y axis
-    "yaxis": {"showticklabels": False},
-}
+    layout = {
+        # Hide the chart legend
+        "showlegend": False,
+        # Remove all ticks from the x axis
+        "xaxis": {"showticklabels": False},
+        # Remove all ticks from the y axis
+        "yaxis": {"showticklabels": False},
+    }
 
-page = """
+    page = """
 ## Scatter - Customize markers
 
 <|{data}|chart|mode=markers|layout={layout}|marker={markers}|>
-"""
+    """
 
-Gui(page).run()
+    Gui(page).run()

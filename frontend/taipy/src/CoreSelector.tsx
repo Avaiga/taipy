@@ -24,7 +24,7 @@ import React, {
 import { TextField, Theme, alpha } from "@mui/material";
 import Badge, { BadgeOrigin } from "@mui/material/Badge";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import Switch from "@mui/material/Switch";
 import Tooltip from "@mui/material/Tooltip";
@@ -167,7 +167,7 @@ const CoreItem = (props: {
             data-selectable={nodeType === props.leafType}
             label={
                 <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={1}>
-                    <Grid item xs sx={iconLabelSx}>
+                    <Grid  size="grow" sx={iconLabelSx}>
                         {nodeType === NodeType.CYCLE ? (
                             <CycleIcon fontSize="small" color="primary" />
                         ) : nodeType === NodeType.SCENARIO ? (
@@ -191,12 +191,12 @@ const CoreItem = (props: {
                         {label}
                     </Grid>
                     {props.editComponent && nodeType === props.leafType ? (
-                        <Grid item xs="auto">
+                        <Grid size="auto">
                             <props.editComponent id={id} active={props.active} />
                         </Grid>
                     ) : null}
                     {props.onPin ? (
-                        <Grid item xs="auto">
+                        <Grid size="auto">
                             <Tooltip title={isPinned ? "Unpin" : "Pin"}>
                                 <IconButton
                                     data-id={id}
@@ -378,10 +378,9 @@ const CoreSelector = (props: CoreSelectorProps) => {
                 if (isSelectable) {
                     const lovVar = getUpdateVar(updateVars, lovPropertyName);
                     const val = nodeId;
-                    setTimeout(
+                    Promise.resolve().then(
                         // to avoid set state while render react errors
-                        () => dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate, lovVar)),
-                        1
+                        () => dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate, lovVar))
                     );
                     onSelect && onSelect(val);
                 }
@@ -421,19 +420,17 @@ const CoreSelector = (props: CoreSelectorProps) => {
             setSelectedItems((old) => {
                 if (old.length) {
                     const lovVar = getUpdateVar(updateVars, lovPropertyName);
-                    setTimeout(
-                        () =>
-                            dispatch(
-                                createSendUpdateAction(
-                                    updateVarName,
-                                    multiple ? [] : "",
-                                    module,
-                                    onChange,
-                                    propagate,
-                                    lovVar
-                                )
-                            ),
-                        1
+                    Promise.resolve().then(() =>
+                        dispatch(
+                            createSendUpdateAction(
+                                updateVarName,
+                                multiple ? [] : "",
+                                module,
+                                onChange,
+                                propagate,
+                                lovVar
+                            )
+                        )
                     );
                     return [];
                 }
@@ -511,10 +508,20 @@ const CoreSelector = (props: CoreSelectorProps) => {
     // filters
     const colFilters = useMemo(() => {
         try {
-            const res = props.filter ? (JSON.parse(props.filter) as Array<[string, string, string, string[]]>) : undefined;
+            const res = props.filter
+                ? (JSON.parse(props.filter) as Array<[string, string, string, string[]]>)
+                : undefined;
             return Array.isArray(res)
                 ? res.reduce((pv, [name, id, coltype, lov], idx) => {
-                      pv[name] = { dfid: id, title: name, type: coltype, index: idx, filter: true, lov: lov, freeLov: !!lov };
+                      pv[name] = {
+                          dfid: id,
+                          title: name,
+                          type: coltype,
+                          index: idx,
+                          filter: true,
+                          lov: lov,
+                          freeLov: !!lov,
+                      };
                       return pv;
                   }, {} as Record<string, ColumnDesc>)
                 : undefined;
@@ -532,18 +539,16 @@ const CoreSelector = (props: CoreSelectorProps) => {
                     localStoreSet(jsonFilters, id, lovPropertyName, "filter");
                     const filterVar = getUpdateVar(updateCoreVars, "filter");
                     const lovVar = getUpdateVarNames(updateVars, lovPropertyName);
-                    setTimeout(
-                        () =>
-                            dispatch(
-                                createRequestUpdateAction(
-                                    id,
-                                    module,
-                                    lovVar,
-                                    true,
-                                    filterVar ? { [filterVar]: filters } : undefined
-                                )
-                            ),
-                        1
+                    Promise.resolve().then(() =>
+                        dispatch(
+                            createRequestUpdateAction(
+                                id,
+                                module,
+                                lovVar,
+                                true,
+                                filterVar ? { [filterVar]: filters } : undefined
+                            )
+                        )
                     );
                     return filters;
                 }
@@ -626,7 +631,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
         <>
             <Grid container sx={switchBoxSx} gap={1}>
                 {active && colFilters ? (
-                    <Grid item>
+                    <Grid>
                         <TableFilter
                             columns={colFilters}
                             appliedFilters={filters}
@@ -636,12 +641,12 @@ const CoreSelector = (props: CoreSelectorProps) => {
                     </Grid>
                 ) : null}
                 {active && colSorts ? (
-                    <Grid item>
+                    <Grid>
                         <TableSort columns={colSorts} appliedSorts={sorts} onValidate={applySorts}></TableSort>
                     </Grid>
                 ) : null}
                 {showSearch ? (
-                    <Grid item>
+                    <Grid>
                         <IconButton onClick={onRevealSearch} size="small" sx={iconInRowSx}>
                             {revealSearch ? (
                                 <SearchOffOutlined fontSize="inherit" />
@@ -652,7 +657,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                     </Grid>
                 ) : null}
                 {showPins ? (
-                    <Grid item>
+                    <Grid>
                         <FormControlLabel
                             control={
                                 <Switch
@@ -668,7 +673,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                     </Grid>
                 ) : null}
                 {showSearch && revealSearch ? (
-                    <Grid item xs={12}>
+                    <Grid size={12}>
                         <TextField
                             margin="dense"
                             value={searchValue}

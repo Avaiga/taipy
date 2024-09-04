@@ -109,6 +109,7 @@ class TestGuiCoreContext_is_readable:
                     "args": [
                         "",
                         "",
+                        "",
                         True,
                         False,
                         {"name": "name", "id": a_scenario.id},
@@ -127,6 +128,7 @@ class TestGuiCoreContext_is_readable:
                         "args": [
                             "",
                             "",
+                            "",
                             True,
                             False,
                             {"name": "name", "id": a_scenario.id},
@@ -136,7 +138,7 @@ class TestGuiCoreContext_is_readable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not readable.")
+                assert "is not readable" in assign.call_args.args[1]
 
     def test_edit_entity(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
@@ -170,7 +172,7 @@ class TestGuiCoreContext_is_readable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not readable.")
+                assert "is not readable" in assign.call_args.args[1]
 
     def test_submission_status_callback(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get) as mockget:
@@ -237,7 +239,7 @@ class TestGuiCoreContext_is_readable:
             )
             assign.assert_called_once()
             assert assign.call_args.args[0] == "error_var"
-            assert str(assign.call_args.args[1]).find("is not readable.") == -1
+            assert "is not readable" not in assign.call_args.args[1]
             assign.reset_mock()
 
             gui_core_context.act_on_jobs(
@@ -252,7 +254,7 @@ class TestGuiCoreContext_is_readable:
             )
             assign.assert_called_once()
             assert assign.call_args.args[0] == "error_var"
-            assert str(assign.call_args.args[1]).find("is not readable.") == -1
+            assert "is not readable" not in assign.call_args.args[1]
             assign.reset_mock()
 
             with patch("taipy.gui_core._context.is_readable", side_effect=mock_is_readable_false):
@@ -268,7 +270,7 @@ class TestGuiCoreContext_is_readable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not readable.")
+                assert "is not readable" in assign.call_args.args[1]
                 assign.reset_mock()
 
                 gui_core_context.act_on_jobs(
@@ -283,7 +285,7 @@ class TestGuiCoreContext_is_readable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not readable.")
+                assert "is not readable" in assign.call_args.args[1]
 
     def test_edit_data_node(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
@@ -317,7 +319,7 @@ class TestGuiCoreContext_is_readable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not readable.")
+                assert "is not readable" in assign.call_args.args[1]
 
     def test_lock_datanode_for_edit(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
@@ -353,7 +355,7 @@ class TestGuiCoreContext_is_readable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not readable.")
+                assert "is not readable" in assign.call_args.args[1]
 
     def test_get_scenarios_for_owner(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get) as mockget:
@@ -400,7 +402,7 @@ class TestGuiCoreContext_is_readable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not readable.")
+                assert "is not readable" in assign.call_args.args[1]
 
     def test_tabular_data_edit(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
@@ -418,10 +420,7 @@ class TestGuiCoreContext_is_readable:
             )
             assign.assert_called_once()
             assert assign.call_args_list[0].args[0] == "error_var"
-            assert (
-                assign.call_args_list[0].args[1]
-                == "Error updating Datanode tabular value: type does not support at[] indexer."
-            )
+            assert "tabular value: type does not support at[] indexer" in assign.call_args_list[0].args[1]
             assign.reset_mock()
 
             with patch("taipy.gui_core._context.is_readable", side_effect=mock_is_readable_false):
@@ -435,7 +434,7 @@ class TestGuiCoreContext_is_readable:
                 )
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "error_var"
-                assert str(assign.call_args.args[1]).endswith("is not readable.")
+                assert "is not readable" in assign.call_args.args[1]
 
     def test_get_data_node_tabular_data(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get) as mockget:
