@@ -49,6 +49,7 @@ interface ChatProps extends TaipyActiveProps {
     height?: string;
     defaultKey?: string; // for testing purposes only
     pageSize?: number;
+    showSender?: boolean;
 }
 
 const ENTER_KEY = "Enter";
@@ -56,7 +57,7 @@ const ENTER_KEY = "Enter";
 const indicWidth = 0.7;
 const avatarWidth = 24;
 const chatAvatarSx = { ...avatarSx, width: avatarWidth, height: avatarWidth };
-const avatarColSx = { width: 1.5 * avatarWidth, minWidth: 1.5 * avatarWidth };
+const avatarColSx = { width: 1.5 * avatarWidth, minWidth: 1.5 * avatarWidth, pt: 1 };
 const senderMsgSx = {
     width: "fit-content",
     maxWidth: "80%",
@@ -126,10 +127,11 @@ interface ChatRowProps {
     className?: string;
     getAvatar: (id: string, sender: boolean) => ReactNode;
     index: number;
+    showSender: boolean;
 }
 
 const ChatRow = (props: ChatRowProps) => {
-    const { senderId, message, name, className, getAvatar, index } = props;
+    const { senderId, message, name, className, getAvatar, index, showSender } = props;
     const sender = senderId == name;
     const avatar = getAvatar(name, sender);
     return (
@@ -141,14 +143,11 @@ const ChatRow = (props: ChatRowProps) => {
             justifyContent={sender ? "flex-end" : undefined}
         >
             <Grid sx={sender ? senderMsgSx : undefined}>
-                {avatar ? (
-                    <Stack>
-                        <Stack direction="row" gap={1}>
-                            <Box sx={avatarColSx}>{avatar}</Box>
+                {(!sender || showSender) && avatar ? (
+                    <Stack direction="row" gap={1}>
+                        <Box sx={avatarColSx}>{avatar}</Box>
+                        <Stack>
                             <Box sx={nameSx}>{name}</Box>
-                        </Stack>
-                        <Stack direction="row" gap={1}>
-                            <Box sx={avatarColSx}></Box>
                             <Paper sx={sender ? senderPaperSx : otherPaperSx} data-idx={index}>
                                 {message}
                             </Paper>
@@ -167,7 +166,16 @@ const ChatRow = (props: ChatRowProps) => {
 const getChatKey = (start: number, page: number) => `Chat-${start}-${start + page}`;
 
 const Chat = (props: ChatProps) => {
-    const { id, updateVarName, senderId = "taipy", onAction, withInput = true, defaultKey = "", pageSize = 50 } = props;
+    const {
+        id,
+        updateVarName,
+        senderId = "taipy",
+        onAction,
+        withInput = true,
+        defaultKey = "",
+        pageSize = 50,
+        showSender = true,
+    } = props;
     const dispatch = useDispatch();
     const module = useModule();
 
@@ -373,6 +381,7 @@ const Chat = (props: ChatProps) => {
                                 className={className}
                                 getAvatar={getAvatar}
                                 index={idx}
+                                showSender={showSender}
                             />
                         ) : null
                     )}

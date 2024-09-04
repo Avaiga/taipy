@@ -1614,6 +1614,12 @@
                         "name": "height",
                         "type": "Union[str,int,float]",
                         "doc": "The maximum height of this chat control, in CSS units."
+                    },
+                    {
+                        "name": "show_sender",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the sender avatar and name is not displayed."
                     }
                 ]
             }

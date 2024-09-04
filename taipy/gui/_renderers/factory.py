@@ -98,6 +98,7 @@ class _Factory:
                 ("sender_id",),
                 ("height",),
                 ("page_size", PropertyType.number, 50),
+                ("show_sender", PropertyType.boolean, True),
             ]
         ),
         "chart": lambda gui, control_type, attrs: _Builder(
