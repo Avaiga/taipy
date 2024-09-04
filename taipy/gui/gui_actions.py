@@ -33,8 +33,8 @@ def download(
     - *content*: this parameter can hold several values depending on your use case:
         - a string: the value must be an existing path name to the file that gets downloaded or
           the URL to the resource you want to download.
-        - a buffer (such as a `bytes` object): if the size of the buffer is smaller than
-           the [*data_url_max_size*](../../userman/advanced_features/configuration/gui-config.md#p-data_url_max_size) configuration
+        - a buffer (such as a `bytes` object): if the size of the buffer is smaller than the
+           [*data_url_max_size*](../../userman/advanced_features/configuration/gui-config.md#p-data_url_max_size) configuration
            setting, then the [`python-magic`](https://pypi.org/project/python-magic/) package is
            used to determine the [MIME type](https://en.wikipedia.org/wiki/Media_type) of the
            buffer content, and the download is performed using a generated "data:" URL with
