@@ -2645,8 +2645,8 @@ class Gui:
                 ignored.<br/>
                 Also note that setting the *debug* argument to True forces *async_mode* to "threading".
             **kwargs (dict[str, any]): Additional keyword arguments that configure how this `Gui` is run.
-                Please refer to the
-                [Configuration section](../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
+                Please refer to the gui config section
+                [page](../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
                 of the User Manual for more information.
 
         Returns:
