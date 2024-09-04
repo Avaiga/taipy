@@ -20,7 +20,7 @@ from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._entity._reload import _self_reload
-from ..reason import InvalidUploadFile, ReasonCollection, UploadFileCanNotBeRead
+from ..reason import InvalidUploadFile, NoFileToDownload, NotAFile, ReasonCollection, UploadFileCanNotBeRead
 from .data_node import DataNode
 from .data_node_id import Edit
 
@@ -96,6 +96,28 @@ class _FileDataNodeMixin(object):
         if os.path.exists(old_path):
             shutil.move(old_path, new_path)
         return new_path
+
+    def is_downloadable(self) -> ReasonCollection:
+        """Check if the data node is downloadable.
+
+        Returns:
+            A `ReasonCollection^` object containing the reasons why the data node is not downloadable.
+        """
+        collection = ReasonCollection()
+        if not os.path.exists(self.path):
+            collection._add_reason(self.id, NoFileToDownload(self.path, self.id))  # type: ignore[attr-defined]
+        elif not isfile(self.path):
+            collection._add_reason(self.id, NotAFile(self.path, self.id))  # type: ignore[attr-defined]
+        return collection
+
+    def is_uploadable(self) -> ReasonCollection:
+        """Check if the data node is uploadable.
+
+        Returns:
+            A `ReasonCollection^` object containing the reasons why the data node is not uploadable.
+        """
+
+        return ReasonCollection()
 
     def _get_downloadable_path(self) -> str:
         """Get the downloadable path of the file data of the data node.

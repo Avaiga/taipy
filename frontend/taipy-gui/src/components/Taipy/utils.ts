@@ -12,6 +12,7 @@
  */
 
 import { MouseEvent } from "react";
+import { SxProps } from "@mui/material";
 
 export interface TaipyActiveProps extends TaipyDynamicProps, TaipyHoverProps {
     defaultActive?: boolean;
@@ -145,4 +146,13 @@ export const getProps = (p: DateProps, start: boolean, val: Date | null, withTim
         return p;
     }
     return { ...p, [propName]: val };
+};
+
+export const expandSx = (sx: SxProps, ...partials: (SxProps | undefined)[]) => {
+    return partials.reduce((prevSx: SxProps, partialSx) => {
+        if (partialSx) {
+            return { ...prevSx, ...partialSx } as SxProps;
+        }
+        return prevSx;
+    }, sx);
 };

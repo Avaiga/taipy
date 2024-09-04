@@ -28,23 +28,27 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Popover from "@mui/material/Popover";
 import Switch from "@mui/material/Switch";
+import Stack from "@mui/material/Stack";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 
-import CheckCircle from "@mui/icons-material/CheckCircle";
-import Cancel from "@mui/icons-material/Cancel";
 import ArrowForwardIosSharp from "@mui/icons-material/ArrowForwardIosSharp";
+import Cancel from "@mui/icons-material/Cancel";
+import CheckCircle from "@mui/icons-material/CheckCircle";
+import Download from "@mui/icons-material/Download";
 import Launch from "@mui/icons-material/Launch";
 import LockOutlined from "@mui/icons-material/LockOutlined";
+import Upload from "@mui/icons-material/Upload";
 
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
@@ -64,6 +68,7 @@ import {
     useDynamicProperty,
     useModule,
     Store,
+    FileSelector,
 } from "taipy-gui";
 
 import { Cycle as CycleIcon, Scenario as ScenarioIcon } from "./icons";
@@ -100,6 +105,7 @@ const editSx = {
     "& > div": { writingMode: "vertical-rl", transform: "rotate(180deg)", paddingBottom: "1em" },
 };
 const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotProps<Date>;
+const buttonSx = { minWidth: "0px" };
 
 type DataNodeFull = [
     string, // id
@@ -115,7 +121,10 @@ type DataNodeFull = [
     boolean, // editInProgress
     string, // editorId
     string, // notReadableReason
-    string // notEditableReason
+    string, // notEditableReason
+    boolean, // is file based
+    string, // notDownloadableReason
+    string // notUploadableReason
 ];
 
 enum DataNodeFullProps {
@@ -133,6 +142,9 @@ enum DataNodeFullProps {
     editorId,
     notReadableReason,
     notEditableReason,
+    isFileBased,
+    notDownloadableReason,
+    notUploadableReason,
 }
 const DataNodeFullLength = Object.keys(DataNodeFullProps).length / 2;
 
@@ -180,6 +192,10 @@ interface DataNodeViewerProps {
     width?: string;
     onLock?: string;
     updateDnVars?: string;
+    fileDownload?: boolean;
+    fileUpload?: boolean;
+    uploadCheck?: string;
+    onFileAction?: string;
 }
 
 const dataValueFocus = "data-value";
@@ -208,6 +224,9 @@ const invalidDatanode: DataNodeFull = [
     "",
     "invalid",
     "invalid",
+    false,
+    "invalid",
+    "invalid",
 ];
 
 enum TabValues {
@@ -230,6 +249,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         showData = true,
         updateVars = "",
         updateDnVars = "",
+        fileDownload = false,
+        fileUpload = false,
     } = props;
 
     const { state, dispatch } = useContext<Store>(Context);
@@ -255,6 +276,9 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         dnEditorId,
         dnNotReadableReason,
         dnNotEditableReason,
+        isFileBased,
+        dnNotDownloadableReason,
+        dnNotUploadableReason,
     ] = datanode;
     const dtType = dnData[DatanodeDataProps.type];
     const dtValue = dnData[DatanodeDataProps.value] ?? (dtType == "float" ? null : undefined);
@@ -611,6 +635,37 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         [props.width]
     );
 
+    // file action
+    const onfileHandler = useCallback(
+        (e: MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            const { action = "import" } = e.currentTarget.dataset || {};
+            if (action == "export") {
+                dispatch(
+                    createSendActionNameAction(id, module, props.onFileAction, {
+                        id: dnId,
+                        action: action,
+                        type: "raw",
+                        error_id: getUpdateVar(updateDnVars, "error_id"),
+                    })
+                );
+            }
+        },
+        [props.onFileAction, dispatch, dnId, id, module, updateDnVars]
+    );
+
+    const uploadData = useMemo(
+        () =>
+            valid && isFileBased && fileUpload
+                ? JSON.stringify({
+                      id: dnId,
+                      error_id: getUpdateVar(updateDnVars, "error_id"),
+                      upload_check: props.uploadCheck,
+                  })
+                : undefined,
+        [dnId, valid, isFileBased, fileUpload, props.uploadCheck, updateDnVars]
+    );
+
     // Refresh on broadcast
     useEffect(() => {
         const ids = props.coreChanged?.datanode;
@@ -627,50 +682,82 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
                         sx={AccordionSummarySx}
                     >
-                        <Grid container alignItems="baseline" direction="row" spacing={1}>
-                            <Grid item>{dnLabel}</Grid>
-                            <Grid item>
-                                <Typography fontSize="smaller">{dnType}</Typography>
-                            </Grid>
-                        </Grid>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                            <Typography>{dnLabel}</Typography>
+                            <Typography fontSize="smaller">{dnType}</Typography>
+                        </Stack>
                     </AccordionSummary>
                     <AccordionDetails>
                         <Box sx={tabBoxSx}>
-                            <Tabs value={tabValue} onChange={handleTabChange}>
-                                <Tab
-                                    label={
-                                        <Grid container alignItems="center">
-                                            <Grid item>Data</Grid>
-                                            {dnEditInProgress ? (
-                                                <Grid item>
-                                                    <Tooltip
-                                                        title={"locked " + (dnEditorId === editorId ? "by you" : "")}
+                            <Stack direction="row" justifyContent="space-between">
+                                <Tabs value={tabValue} onChange={handleTabChange}>
+                                    <Tab
+                                        label={
+                                            <Grid container alignItems="center">
+                                                <Grid>Data</Grid>
+                                                {dnEditInProgress ? (
+                                                    <Grid>
+                                                        <Tooltip
+                                                            title={
+                                                                "locked " + (dnEditorId === editorId ? "by you" : "")
+                                                            }
+                                                        >
+                                                            <LockOutlined
+                                                                fontSize="small"
+                                                                color={dnEditorId === editorId ? "disabled" : "primary"}
+                                                            />
+                                                        </Tooltip>
+                                                    </Grid>
+                                                ) : null}
+                                            </Grid>
+                                        }
+                                        id={`${uniqid}-data`}
+                                        aria-controls={`${uniqid}-dn-tabpanel-data`}
+                                        style={showData ? undefined : noDisplay}
+                                    />
+                                    <Tab
+                                        label="Properties"
+                                        id={`${uniqid}-properties`}
+                                        aria-controls={`${uniqid}-dn-tabpanel-properties`}
+                                    />
+                                    <Tab
+                                        label="History"
+                                        id={`${uniqid}-history`}
+                                        aria-controls={`${uniqid}-dn-tabpanel-history`}
+                                        style={showHistory ? undefined : noDisplay}
+                                    />
+                                </Tabs>
+                                {valid && isFileBased && (fileDownload || fileUpload) ? (
+                                    <Stack direction="row" spacing={1}>
+                                        {fileDownload ? (
+                                            <Tooltip
+                                                title={dnNotDownloadableReason ? dnNotDownloadableReason : "Download"}
+                                            >
+                                                <span>
+                                                    <Button
+                                                        data-action="export"
+                                                        onClick={onfileHandler}
+                                                        sx={buttonSx}
+                                                        disabled={!!dnNotDownloadableReason}
                                                     >
-                                                        <LockOutlined
-                                                            fontSize="small"
-                                                            color={dnEditorId === editorId ? "disabled" : "primary"}
-                                                        />
-                                                    </Tooltip>
-                                                </Grid>
-                                            ) : null}
-                                        </Grid>
-                                    }
-                                    id={`${uniqid}-data`}
-                                    aria-controls={`${uniqid}-dn-tabpanel-data`}
-                                    style={showData ? undefined : noDisplay}
-                                />
-                                <Tab
-                                    label="Properties"
-                                    id={`${uniqid}-properties`}
-                                    aria-controls={`${uniqid}-dn-tabpanel-properties`}
-                                />
-                                <Tab
-                                    label="History"
-                                    id={`${uniqid}-history`}
-                                    aria-controls={`${uniqid}-dn-tabpanel-history`}
-                                    style={showHistory ? undefined : noDisplay}
-                                />
-                            </Tabs>
+                                                        <Download />
+                                                    </Button>
+                                                </span>
+                                            </Tooltip>
+                                        ) : null}
+                                        {fileUpload ? (
+                                            <FileSelector
+                                                hoverText={dnNotUploadableReason ? dnNotUploadableReason : "Upload"}
+                                                icon={<Upload />}
+                                                withBorder={false}
+                                                onUploadAction={props.onFileAction}
+                                                uploadData={uploadData}
+                                                defaultActive={!dnNotUploadableReason}
+                                            />
+                                        ) : null}
+                                    </Stack>
+                                ) : null}
+                            </Stack>
                         </Box>
                         <div
                             role="tabpanel"
@@ -679,10 +766,9 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             aria-labelledby={`${uniqid}-properties`}
                         >
                             <Grid container rowSpacing={2} sx={gridSx}>
-                                <Grid item xs={12} container justifyContent="space-between" spacing={1}>
+                                <Grid size={12} container justifyContent="space-between" spacing={1}>
                                     <Grid
-                                        item
-                                        xs={12}
+                                        size={12}
                                         container
                                         justifyContent="space-between"
                                         data-focus="label"
@@ -725,10 +811,10 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                             />
                                         ) : (
                                             <>
-                                                <Grid item xs={4}>
+                                                <Grid size={4}>
                                                     <Typography variant="subtitle2">Label</Typography>
                                                 </Grid>
-                                                <Grid item xs={8}>
+                                                <Grid size={8}>
                                                     <Typography variant="subtitle2">{dnLabel}</Typography>
                                                 </Grid>
                                             </>
@@ -736,41 +822,41 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     </Grid>
                                 </Grid>
                                 {showEditDate ? (
-                                    <Grid item xs={12} container justifyContent="space-between">
-                                        <Grid item xs={4}>
+                                    <Grid size={12} container justifyContent="space-between">
+                                        <Grid size={4}>
                                             <Typography variant="subtitle2">Last edit date</Typography>
                                         </Grid>
-                                        <Grid item xs={8}>
+                                        <Grid size={8}>
                                             <Typography variant="subtitle2">{dnEditDate}</Typography>
                                         </Grid>
                                     </Grid>
                                 ) : null}
                                 {showExpirationDate ? (
-                                    <Grid item xs={12} container justifyContent="space-between">
-                                        <Grid item xs={4}>
+                                    <Grid size={12} container justifyContent="space-between">
+                                        <Grid size={4}>
                                             <Typography variant="subtitle2">Expiration date</Typography>
                                         </Grid>
-                                        <Grid item xs={8}>
+                                        <Grid size={8}>
                                             <Typography variant="subtitle2">{dnExpirationDate}</Typography>
                                         </Grid>
                                     </Grid>
                                 ) : null}
                                 {showConfig ? (
-                                    <Grid item xs={12} container justifyContent="space-between">
-                                        <Grid item xs={4} pb={2}>
+                                    <Grid size={12} container justifyContent="space-between">
+                                        <Grid size={4} pb={2}>
                                             <Typography variant="subtitle2">Config ID</Typography>
                                         </Grid>
-                                        <Grid item xs={8}>
+                                        <Grid size={8}>
                                             <Typography variant="subtitle2">{dnConfig}</Typography>
                                         </Grid>
                                     </Grid>
                                 ) : null}
                                 {showOwner ? (
-                                    <Grid item xs={12} container justifyContent="space-between">
-                                        <Grid item xs={4}>
+                                    <Grid size={12} container justifyContent="space-between">
+                                        <Grid size={4}>
                                             <Typography variant="subtitle2">Owner</Typography>
                                         </Grid>
-                                        <Grid item xs={7} sx={iconLabelSx}>
+                                        <Grid size={7} sx={iconLabelSx}>
                                             {dnOwnerType === NodeType.CYCLE ? (
                                                 <CycleIcon fontSize="small" color="primary" />
                                             ) : dnOwnerType === NodeType.SCENARIO ? (
@@ -778,7 +864,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                             ) : null}
                                             <Typography variant="subtitle2">{dnOwnerLabel}</Typography>
                                         </Grid>
-                                        <Grid item xs={1}>
+                                        <Grid size={1}>
                                             {dnOwnerId ? (
                                                 <>
                                                     <Tooltip title="Show Scenarios">
@@ -816,7 +902,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                         </Grid>
                                     </Grid>
                                 ) : null}
-                                <Grid item xs={12}>
+                                <Grid size={12}>
                                     <Divider />
                                 </Grid>
                                 <PropertiesEditor
@@ -849,17 +935,17 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     {props.history.map((edit, idx) => (
                                         <Fragment key={`edit-${idx}`}>
                                             {idx != 0 ? (
-                                                <Grid item xs={12}>
+                                                <Grid size={12}>
                                                     <Divider />
                                                 </Grid>
                                             ) : null}
-                                            <Grid item container>
-                                                <Grid item xs={0.4} sx={editSx}>
+                                            <Grid container>
+                                                <Grid size={0.4} sx={editSx}>
                                                     <Box>{(props.history || []).length - idx}</Box>
                                                 </Grid>
-                                                <Grid item xs={0.1}></Grid>
-                                                <Grid item container xs={11.5}>
-                                                    <Grid item xs={12}>
+                                                <Grid size={0.1}></Grid>
+                                                <Grid container size={11.5}>
+                                                    <Grid size={12}>
                                                         <Typography variant="subtitle1">
                                                             {edit[0]
                                                                 ? format(new Date(edit[0]), editTimestampFormat)
@@ -867,12 +953,12 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                         </Typography>
                                                     </Grid>
                                                     {edit[2] ? (
-                                                        <Grid item xs={12}>
+                                                        <Grid size={12}>
                                                             {edit[2]}
                                                         </Grid>
                                                     ) : null}
                                                     {edit[1] ? (
-                                                        <Grid item xs={12}>
+                                                        <Grid size={12}>
                                                             <Typography fontSize="smaller">{edit[1]}</Typography>
                                                         </Grid>
                                                     ) : null}
@@ -894,9 +980,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             {dtValue !== undefined ? (
                                 <Grid container justifyContent="space-between" spacing={1}>
                                     <Grid
-                                        item
                                         container
-                                        xs={12}
+                                        size={12}
                                         justifyContent="space-between"
                                         data-focus={dataValueFocus}
                                         onClick={onFocus}
@@ -910,13 +995,13 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                             <>
                                                 {typeof dtValue == "boolean" ? (
                                                     <>
-                                                        <Grid item xs={10}>
+                                                        <Grid size={10}>
                                                             <Switch
                                                                 value={dataValue as boolean}
                                                                 onChange={onDataValueChange}
                                                             />
                                                         </Grid>
-                                                        <Grid item xs={2}>
+                                                        <Grid size={2}>
                                                             <Tooltip title="Apply">
                                                                 <IconButton
                                                                     onClick={editDataValue}
@@ -940,14 +1025,14 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                 ) : dtType == "date" &&
                                                   (dataValue === null || dataValue instanceof Date) ? (
                                                     <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                                        <Grid item xs={10}>
+                                                        <Grid size={10}>
                                                             <DateTimePicker
                                                                 value={dataValue as Date}
                                                                 onChange={onDataValueDateChange}
                                                                 slotProps={textFieldProps}
                                                             />
                                                         </Grid>
-                                                        <Grid item xs={2}>
+                                                        <Grid size={2}>
                                                             <Tooltip title="Apply">
                                                                 <IconButton
                                                                     onClick={editDataValue}
@@ -1018,10 +1103,10 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                             </>
                                         ) : (
                                             <>
-                                                <Grid item xs={4}>
+                                                <Grid size={4}>
                                                     <Typography variant="subtitle2">Value</Typography>
                                                 </Grid>
-                                                <Grid item xs={8}>
+                                                <Grid size={8}>
                                                     {typeof dtValue == "boolean" ? (
                                                         <Switch
                                                             defaultChecked={dtValue}

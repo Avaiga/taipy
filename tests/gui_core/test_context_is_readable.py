@@ -420,10 +420,7 @@ class TestGuiCoreContext_is_readable:
             )
             assign.assert_called_once()
             assert assign.call_args_list[0].args[0] == "error_var"
-            assert (
-                assign.call_args_list[0].args[1]
-                == "Error updating Datanode tabular value: type does not support at[] indexer."
-            )
+            assert "tabular value: type does not support at[] indexer" in assign.call_args_list[0].args[1]
             assign.reset_mock()
 
             with patch("taipy.gui_core._context.is_readable", side_effect=mock_is_readable_false):
