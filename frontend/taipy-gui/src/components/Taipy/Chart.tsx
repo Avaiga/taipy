@@ -44,6 +44,7 @@ import {
     useModule,
 } from "../../utils/hooks";
 import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
+import { Figure } from "react-plotly.js";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -66,6 +67,7 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     template_Light_?: string;
     //[key: `selected_${number}`]: number[];
     figure?: Array<Record<string, unknown>>;
+    onMapClick?: string;
 }
 
 interface ChartConfig {
@@ -175,6 +177,12 @@ const MARKER_TO_COL = ["color", "size", "symbol", "opacity", "colors"];
 
 const isOnClick = (types: string[]) => (types?.length ? types.every((t) => t === "pie") : false);
 
+interface MapDiv extends HTMLDivElement {
+    _fullLayout?: {
+        map?: { _subplot?: { xaxis: { p2c: () => void }; yaxis: { p2c: () => void } } };
+    };
+}
+
 interface WithpointNumbers {
     pointNumbers: number[];
 }
@@ -263,6 +271,7 @@ const Chart = (props: ChartProp) => {
         data = emptyData,
         onRangeChange,
         propagate = true,
+        onMapClick,
     } = props;
     const dispatch = useDispatch();
     const [selected, setSelected] = useState<number[][]>([]);
@@ -575,9 +584,30 @@ const Chart = (props: ChartProp) => {
         ]
     );
 
-    const onAfterPlot = useCallback(() => {
-        // Manage loading Animation ... One day
-    }, []);
+    const mapClickHandler = useCallback(
+        (evt?: MouseEvent) => {
+            const subplot = (evt?.currentTarget as MapDiv)?._fullLayout?.map?._subplot;
+            if (!subplot) {
+                console.info("mapClickHandler div does not have a subplot object", evt);
+                return;
+            }
+            dispatch(
+                createSendActionNameAction(id, module, {
+                    action: onMapClick,
+                    lat: subplot.yaxis.p2c(),
+                    lon: subplot.xaxis.p2c(),
+                })
+            );
+        },
+        [dispatch, module, id, onMapClick]
+    );
+
+    const onInitialized = useCallback(
+        (figure: Readonly<Figure>, graphDiv: Readonly<HTMLElement>) => {
+            onMapClick && graphDiv.addEventListener("click", mapClickHandler);
+        },
+        [onMapClick, mapClickHandler]
+    );
 
     const getRealIndex = useCallback(
         (index?: number) =>
@@ -585,8 +615,8 @@ const Chart = (props: ChartProp) => {
                 ? props.figure
                     ? index
                     : data[dataKey].tp_index
-                      ? (data[dataKey].tp_index[index] as number)
-                      : index
+                    ? (data[dataKey].tp_index[index] as number)
+                    : index
                 : 0,
         [data, dataKey, props.figure]
     );
@@ -631,11 +661,11 @@ const Chart = (props: ChartProp) => {
                             layout={layout}
                             style={style}
                             onRelayout={onRelayout}
-                            onAfterPlot={onAfterPlot}
                             onSelected={onSelect}
                             onDeselect={onSelect}
                             config={plotConfig}
                             useResizeHandler
+                            onInitialized={onInitialized}
                         />
                     ) : (
                         <Plot
@@ -643,12 +673,12 @@ const Chart = (props: ChartProp) => {
                             layout={layout}
                             style={style}
                             onRelayout={onRelayout}
-                            onAfterPlot={onAfterPlot}
                             onSelected={isOnClick(config.types) ? undefined : onSelect}
                             onDeselect={isOnClick(config.types) ? undefined : onSelect}
                             onClick={isOnClick(config.types) ? onSelect : undefined}
                             config={plotConfig}
                             useResizeHandler
+                            onInitialized={onInitialized}
                         />
                     )}
                 </Suspense>
