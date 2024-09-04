@@ -678,7 +678,7 @@
                     {
                         "name": "on_map_click",
                         "type": "Callable",
-                        "doc": "The callback function that is invoked when the background map is clicked.<br/>The function receives three parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the chart control if it has one.</li>\n<li>payload (dict[str, any]): a dict containing latitude and longitude ot the point clicked (this feature relies on non-public plotly structured information).</li>\n</ul>",
+                        "doc": "The callback function that is invoked when the background map is clicked.<br/>The function receives three parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the chart control if it has one.</li>\n<li>payload (dict[str, any]): a dict containing latitude and longitude of the point clicked (this feature relies on non-public plotly structured information).</li>\n</ul>",
                         "signature": [
                             [
                                 "state",
