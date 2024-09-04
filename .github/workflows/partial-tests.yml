@@ -3,6 +3,9 @@ name: Partial Tests Workflow
 on:
   workflow_call:
 
+env:
+  NODE_OPTIONS: --max-old-space-size=4096
+
 jobs:
   linter:
     runs-on: ubuntu-latest
