@@ -22,7 +22,7 @@ import Status, { StatusType } from "./Status";
 import { TaipyBaseProps, TaipyHoverProps } from "./utils";
 import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 
-const getStatusIntValue = (status: string) => {
+export const getStatusIntValue = (status: string) => {
     status = status.toLowerCase();
     if (status.startsWith("i")) {
         return 1;
@@ -36,7 +36,7 @@ const getStatusIntValue = (status: string) => {
     return 0;
 };
 
-const getStatusStrValue = (status: number) => {
+export const getStatusStrValue = (status: number) => {
     switch (status) {
         case 1:
             return "info";

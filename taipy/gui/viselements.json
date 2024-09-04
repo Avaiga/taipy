@@ -29,6 +29,12 @@
                         "name": "format",
                         "type": "str",
                         "doc": "The format to apply to the value.<br/>See below."
+                    },
+                    {
+                        "name": "width",
+                        "type": "Union[str,int]",
+                        "default_value": "None",
+                        "doc": "The width of the element."
                     }
                 ]
             }
@@ -50,7 +56,7 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callback",
+                        "type": "Callable",
                         "doc": "The name of a function that is triggered when the button is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button it it has one.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
                         "signature": [
                             [
@@ -66,6 +72,12 @@
                                 "dict"
                             ]
                         ]
+                    },
+                    {
+                        "name": "width",
+                        "type": "Union[str,int]",
+                        "default_value": "None",
+                        "doc": "The width of the button element."
                     }
                 ]
             }
@@ -273,6 +285,17 @@
                         "name": "mode",
                         "type": "str",
                         "doc": "Define the way the toggle is displayed:\n<ul><li>&quot;theme&quot;: synonym for setting the *theme* property to True</li></ul>"
+                    },
+                    {
+                        "name": "label",
+                        "type": "str",
+                        "doc": "The label associated with the toggle."
+                    },
+                    {
+                        "name": "width",
+                        "type": "Union[str,int]",
+                        "default_value": "None",
+                        "doc": "The width of the element."
                     }
                 ]
             }
@@ -322,6 +345,12 @@
                         "name": "max",
                         "type": "dynamic(datetime)",
                         "doc": "The maximum date to accept for this input."
+                    },
+                    {
+                        "name": "width",
+                        "type": "Union[str,int]",
+                        "default_value": "None",
+                        "doc": "The width of the date element."
                     }
                 ]
             }
@@ -366,6 +395,12 @@
                         "name": "label_end",
                         "type": "str",
                         "doc": "The label associated with the second input."
+                    },
+                    {
+                        "name": "width",
+                        "type": "Union[str,int]",
+                        "default_value": "None",
+                        "doc": "The width of the date_range element."
                     }
                 ]
             }
@@ -500,7 +535,7 @@
                     },
                     {
                         "name": "on_range_change",
-                        "type": "Callback",
+                        "type": "Callable",
                         "doc": "The callback function that is invoked when the visible part of the x axis changes.<br/>The function receives three parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the chart control if it has one.</li>\n<li>payload (dict[str, any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">Plotly</a>.</li>\n</ul>",
                         "signature": [
                             [
@@ -797,7 +832,7 @@
                     },
                     {
                         "name": "on_edit",
-                        "type": "Callback",
+                        "type": "Callable",
                         "doc": "TODO: Default implementation and False value. The name of a function that is triggered when a cell edition is validated.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>value (any): the new cell value cast to the type of the column.</li>\n<li>user_value (str): the new cell value, as it was provided by the user.</li>\n<li>tz (str): the timezone if the column type is date.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot edit cells.",
                         "signature": [
                             [
@@ -816,7 +851,7 @@
                     },
                     {
                         "name": "on_delete",
-                        "type": "Callback",
+                        "type": "Callable",
                         "doc": "TODO: Default implementation and False value. The name of a function that is triggered when a row is deleted.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot delete rows.",
                         "signature": [
                             [
@@ -835,7 +870,7 @@
                     },
                     {
                         "name": "on_add",
-                        "type": "Callback",
+                        "type": "Callable",
                         "doc": "TODO: Default implementation and False value. The name of a function that is triggered when the user requests a row to be added.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot add rows.",
                         "signature": [
                             [
@@ -854,7 +889,7 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callback",
+                        "type": "Callable",
                         "doc": "The name of a function that is triggered when the user selects a row.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>reason (str): the origin of the action: \"click\", or \"button\" if the cell contains a Markdown link syntax.</li>\n<li>value (str): the *link value* indicated in the cell when using a Markdown link syntax (that is, <i>reason</i> is set to \"button\").</li></ul></li></ul>.",
                         "signature": [
                             [
@@ -895,7 +930,7 @@
                     },
                     {
                         "name": "on_compare",
-                        "type": "Callback",
+                        "type": "Callable",
                         "doc": "A data comparison function that would return a structure that identifies the differences between the different data passed as name. The default implementation compares the default data with the data[1] value.",
                         "signature": [
                             [
@@ -987,7 +1022,7 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callback",
+                        "type": "Callable",
                         "doc": "The name of a function that is triggered when the download is terminated (or on user action if <i>content</i> is None).<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button if it has one.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has two keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: A list of two elements: <i>args[0]</i> reflects the <i>name</i> property and <i>args[1]</i> holds the file URL.</li>\n</ul>\n</li>\n</ul>",
                         "signature": [
                             [
@@ -1026,6 +1061,12 @@
                         "name": "name",
                         "type": "str",
                         "doc": "A name proposition for the file to save, that the user can change."
+                    },
+                    {
+                        "name": "width",
+                        "type": "Union[str,int]",
+                        "default_value": "None",
+                        "doc": "The width of the element."
                     }
                 ]
             }
@@ -1051,7 +1092,7 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callback",
+                        "type": "Callable",
                         "doc": "The name of the function that will be triggered.<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button if it has one.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
                         "signature": [
                             [
@@ -1091,6 +1132,12 @@
                         "type": "bool",
                         "default_value": "True",
                         "doc": "If set to False, the user won't be notified of upload finish."
+                    },
+                    {
+                        "name": "width",
+                        "type": "Union[str,int]",
+                        "default_value": "None",
+                        "doc": "The width of the element."
                     }
                 ]
             }
@@ -1116,7 +1163,7 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callback",
+                        "type": "Callable",
                         "doc": "The name of a function that is triggered when the user clicks on the image.<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button if it has one.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
                         "signature": [
                             [
@@ -1422,7 +1469,7 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callback",
+                        "type": "Callable",
                         "doc": "The name of the function that is triggered when a menu option is selected.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button if it has one.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: List where the first element contains the id of the selected option.</li>\n</ul>\n</li>\n</ul>",
                         "signature": [
                             [
@@ -1497,7 +1544,7 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callback",
+                        "type": "Callable",
                         "doc": "The name of the function that is triggered when the dialog button is pressed.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button if it has one.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: a list with three elements:\n<ul><li>The first element is the username</li><li>The second element is the password</li><li>The third element is the current page name</li></ul></li></li>\n</ul>\n</li>\n</ul><br/>When the button is pressed, and if this property is not set, Taipy will try to find a callback function called <i>on_login()</i> and invoke it with the parameters listed above.",
                         "signature": [
                             [
@@ -1556,7 +1603,7 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callback",
+                        "type": "Callable",
                         "doc": "The name of a function that is triggered when the user enters a new message.<br/>All the parameters of that function are optional:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li>\n<li><i>var_name</i> (str): the name of the variable bound to the <i>messages</i> property.</li>\n<li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li><i>action</i>: the name of the action that triggered this callback.</li>\n<li><i>args</i> (list): A list composed of a reason (\"click\" or \"Enter\"), the variable name, message, the user identifier of the sender.</li></ul></li></ul>",
                         "signature": [
                             [
@@ -1583,6 +1630,12 @@
                         "name": "height",
                         "type": "Union[str,int,float]",
                         "doc": "The maximum height of this chat control, in CSS units."
+                    },
+                    {
+                        "name": "show_sender",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the sender avatar and name is not displayed."
                     }
                 ]
             }
@@ -1702,7 +1755,7 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callback",
+                        "type": "Callable",
                         "doc": "Name of a function triggered when a button is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the dialog if it has one.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: a list where the first element contains the index of the selected label.</li>\n</ul>\n</li>\n</ul>",
                         "signature": [
                             [
@@ -1791,7 +1844,7 @@
                     },
                     {
                         "name": "on_close",
-                        "type": "Callback",
+                        "type": "Callable",
                         "doc": "The name of a function that is triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the close button if it has one.</li>\n</ul><br/>If this property is not set, no function is called when this pane is closed.",
                         "signature": [
                             [
@@ -1891,7 +1944,7 @@
                 "properties": [
                     {
                         "name": "on_change",
-                        "type": "Callback",
+                        "type": "Callable",
                         "doc": "The name of a function that is triggered when the value is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (any): the new value.</li>\n</ul>",
                         "signature": [
                             [
@@ -1957,7 +2010,7 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callback",
+                        "type": "Callable",
                         "doc": "Name of a function that is triggered when a specific key is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the control if it has one.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args (list):\n<ul><li>key name</li><li>variable name</li><li>current value</li></ul>\n</li>\n</ul>\n</li>\n</ul>",
                         "signature": [
                             [
@@ -1979,6 +2032,12 @@
                         "type": "str",
                         "default_value": "\"Enter\"",
                         "doc": "Semicolon (';')-separated list of supported key names.<br/>Authorized values are Enter, Escape, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12."
+                    },
+                    {
+                        "name": "width",
+                        "type": "Union[str,int]",
+                        "default_value": "None",
+                        "doc": "The width of the element."
                     }
                 ]
             }

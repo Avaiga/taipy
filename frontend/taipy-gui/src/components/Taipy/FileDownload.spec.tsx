@@ -15,7 +15,7 @@ import React from "react";
 import { render, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
-import { newServer } from 'mock-xmlhttprequest';
+import { newServer } from "mock-xmlhttprequest";
 
 import FileDownload from "./FileDownload";
 import { TaipyContext } from "../../context/taipyContext";
@@ -33,7 +33,9 @@ describe("FileDownload Component", () => {
         expect(elt.parentElement).toHaveClass("taipy-file-download");
     });
     it("displays the default content", async () => {
-        const { getByRole } = render(<FileDownload defaultContent="/url/toto.png" content={undefined as unknown as string} />);
+        const { getByRole } = render(
+            <FileDownload defaultContent="/url/toto.png" content={undefined as unknown as string} />
+        );
         const elt = getByRole("button");
         const aElt = elt.parentElement?.querySelector("a");
         expect(aElt).toBeEmptyDOMElement();
@@ -44,6 +46,16 @@ describe("FileDownload Component", () => {
             <FileDownload defaultContent="/url/toto.png" defaultLabel="titi" label={undefined as unknown as string} />
         );
         getByText("titi");
+    });
+    it("displays with width=70%", async () => {
+        const { getByRole } = render(<FileDownload defaultContent="/url/toto.png" width="70%" />);
+        const elt = getByRole("button");
+        expect(elt).toHaveStyle("width: 70%");
+    });
+    it("displays with width=500", async () => {
+        const { getByRole } = render(<FileDownload defaultContent="/url/toto.png" width={500} />);
+        const elt = getByRole("button");
+        expect(elt).toHaveStyle("width: 500px");
     });
     it("is disabled", async () => {
         const { getByRole } = render(<FileDownload defaultContent="/url/toto.png" active={false} />);
@@ -70,35 +82,48 @@ describe("FileDownload Component", () => {
         );
         const elt = getByText("label");
         await userEvent.click(elt);
-        await waitFor(() => expect(dispatch).toHaveBeenCalledWith({
-            name: "anId",
-            payload: { args: ["from.png", ""], action: "on_action" },
-            type: "SEND_ACTION_ACTION",
-        }));
+        await waitFor(() =>
+            expect(dispatch).toHaveBeenCalledWith({
+                name: "anId",
+                payload: { args: ["from.png", ""], action: "on_action" },
+                type: "SEND_ACTION_ACTION",
+            })
+        );
     });
     it("dispatch a well formed message when content is not empty", async () => {
         const server = newServer({
-            get: ['/some/link/to.png?bypass=', {
-              // status: 200 is the default
-              //headers: { 'Content-Type': 'application/json' },
-              body: '{ "message": "Success!" }',
-            }],
-          });
+            get: [
+                "/some/link/to.png?bypass=",
+                {
+                    // status: 200 is the default
+                    //headers: { 'Content-Type': 'application/json' },
+                    body: '{ "message": "Success!" }',
+                },
+            ],
+        });
         server.install();
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <FileDownload defaultContent="/some/link/to.png" onAction="on_action" id="anId" name="from.png" label="label" />
+                <FileDownload
+                    defaultContent="/some/link/to.png"
+                    onAction="on_action"
+                    id="anId"
+                    name="from.png"
+                    label="label"
+                />
             </TaipyContext.Provider>
         );
         const elt = getByText("label");
         await userEvent.click(elt);
-        await waitFor(() => expect(dispatch).toHaveBeenCalledWith({
-            name: "anId",
-            payload: { args: ["from.png", "/some/link/to.png?bypass="], action: "on_action" },
-            type: "SEND_ACTION_ACTION",
-        }));
+        await waitFor(() =>
+            expect(dispatch).toHaveBeenCalledWith({
+                name: "anId",
+                payload: { args: ["from.png", "/some/link/to.png?bypass="], action: "on_action" },
+                type: "SEND_ACTION_ACTION",
+            })
+        );
         server.remove();
     });
 });

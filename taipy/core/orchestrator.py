@@ -21,12 +21,12 @@ from ._orchestrator._orchestrator import _Orchestrator
 from ._orchestrator._orchestrator_factory import _OrchestratorFactory
 from ._version._version_manager_factory import _VersionManagerFactory
 from .config import CoreSection
-from .exceptions.exceptions import CoreServiceIsAlreadyRunning
+from .exceptions.exceptions import OrchestratorServiceIsAlreadyRunning
 
 
-class Core:
+class Orchestrator:
     """
-    Core service
+    Orchestrator service
     """
 
     _is_running = False
@@ -42,30 +42,30 @@ class Core:
 
     def __init__(self) -> None:
         """
-        Initialize a Core service.
+        Initialize a Orchestrator service.
         """
         pass
 
     def run(self, force_restart=False):
         """
-        Start a Core service.
+        Start a Orchestrator service.
 
         This function checks and locks the configuration, manages application's version,
         and starts a job dispatcher.
         """
         if self.__class__._is_running:
-            raise CoreServiceIsAlreadyRunning
+            raise OrchestratorServiceIsAlreadyRunning
 
         with self.__class__.__lock_is_running:
             self.__class__._is_running = True
 
         self._manage_version_and_block_config()
         self.__start_dispatcher(force_restart)
-        self.__logger.info("Core service has been started.")
+        self.__logger.info("Orchestrator service has been started.")
 
     def stop(self, wait: bool = True, timeout: Optional[float] = None):
         """
-        Stop the Core service.
+        Stop the Orchestrator service.
         This function stops the dispatcher and unblock the Config for update.
 
         Parameters:
@@ -82,7 +82,7 @@ class Core:
             self.__class__._is_running = False
         with self.__class__.__lock_version_is_initialized:
             self.__class__._version_is_initialized = False
-        self.__logger.info("Core service has been stopped.")
+        self.__logger.info("Orchestrator service has been stopped.")
 
     @classmethod
     def _manage_version_and_block_config(cls):
@@ -95,12 +95,12 @@ class Core:
         with cls.__lock_version_is_initialized:
             cls._version_is_initialized = True
 
-        cls.__update_core_section()
+        cls.__update_orchestrator_section()
         cls.__manage_version()
         cls.__check_and_block_config()
 
     @classmethod
-    def __update_core_section(cls):
+    def __update_orchestrator_section(cls):
         cls.__logger.info("Updating configuration with command-line arguments...")
         _core_cli = _CoreCLIFactory._build_cli()
         _core_cli.create_parser()

@@ -8,6 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 import datetime
 from datetime import timedelta
 
@@ -49,7 +50,7 @@ def test_create_cycle_entity(current_datetime):
     assert cycle_1.creation_date == current_datetime
     assert cycle_1.start_date == current_datetime
     assert cycle_1.end_date == current_datetime
-    assert cycle_1.key == "value"
+    assert cycle_1.properties["key"] == "value"
     assert cycle_1.frequency == Frequency.DAILY
 
     cycle_2 = Cycle(Frequency.YEARLY, {}, current_datetime, current_datetime, current_datetime)
@@ -111,13 +112,13 @@ def test_add_property_to_scenario(current_datetime):
         name="foo",
     )
     assert cycle.properties == {"key": "value"}
-    assert cycle.key == "value"
+    assert cycle.properties["key"] == "value"
 
     cycle.properties["new_key"] = "new_value"
 
     assert cycle.properties == {"key": "value", "new_key": "new_value"}
-    assert cycle.key == "value"
-    assert cycle.new_key == "new_value"
+    assert cycle.properties["key"] == "value"
+    assert cycle.properties["new_key"] == "new_value"
 
 
 def test_auto_set_and_reload(current_datetime):

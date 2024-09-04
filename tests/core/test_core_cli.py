@@ -16,7 +16,7 @@ import pytest
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.core import Core, taipy
+from taipy.core import Orchestrator, taipy
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core._version._version_manager_factory import _VersionManagerFactory
 from taipy.core.common._utils import _load_fct
@@ -29,63 +29,63 @@ from taipy.core.sequence._sequence_manager import _SequenceManager
 from taipy.core.task._task_manager import _TaskManager
 
 
-def test_core_cli_no_arguments():
+def test_orchestrator_cli_no_arguments():
     with patch("sys.argv", ["prog"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         assert Config.core.mode == "development"
         assert Config.core.version_number == _VersionManagerFactory._build_manager()._get_development_version()
         assert not Config.core.force
-        core.stop()
+        orchestrator.stop()
 
 
-def test_core_cli_development_mode():
+def test_orchestrator_cli_development_mode():
     with patch("sys.argv", ["prog", "--development"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         assert Config.core.mode == "development"
         assert Config.core.version_number == _VersionManagerFactory._build_manager()._get_development_version()
-        core.stop()
+        orchestrator.stop()
 
 
-def test_core_cli_dev_mode():
+def test_orchestrator_cli_dev_mode():
     with patch("sys.argv", ["prog", "-dev"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         assert Config.core.mode == "development"
         assert Config.core.version_number == _VersionManagerFactory._build_manager()._get_development_version()
-        core.stop()
+        orchestrator.stop()
 
 
-def test_core_cli_experiment_mode():
+def test_orchestrator_cli_experiment_mode():
     with patch("sys.argv", ["prog", "--experiment"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         assert Config.core.mode == "experiment"
         assert Config.core.version_number == _VersionManagerFactory._build_manager()._get_latest_version()
         assert not Config.core.force
-        core.stop()
+        orchestrator.stop()
 
 
-def test_core_cli_experiment_mode_with_version():
+def test_orchestrator_cli_experiment_mode_with_version():
     with patch("sys.argv", ["prog", "--experiment", "2.1"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         assert Config.core.mode == "experiment"
         assert Config.core.version_number == "2.1"
         assert not Config.core.force
-        core.stop()
+        orchestrator.stop()
 
 
-def test_core_cli_experiment_mode_with_force_version(init_config):
+def test_orchestrator_cli_experiment_mode_with_force_version(init_config):
     with patch("sys.argv", ["prog", "--experiment", "2.1", "--taipy-force"]):
         init_config()
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         assert Config.core.mode == "experiment"
         assert Config.core.version_number == "2.1"
         assert Config.core.force
-        core.stop()
+        orchestrator.stop()
 
 
 def test_dev_mode_clean_all_entities_of_the_latest_version():
@@ -93,11 +93,11 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
 
     # Create a scenario in development mode
     with patch("sys.argv", ["prog"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         scenario = _ScenarioManager._create(scenario_config)
         taipy.submit(scenario)
-        core.stop()
+        orchestrator.stop()
 
     # Initial assertion
     assert len(_DataManager._get_all(version_number="all")) == 2
@@ -109,11 +109,11 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
 
     # Create a new scenario in experiment mode
     with patch("sys.argv", ["prog", "--experiment"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         scenario = _ScenarioManager._create(scenario_config)
         taipy.submit(scenario)
-        core.stop()
+        orchestrator.stop()
 
     # Assert number of entities in 2nd version
     assert len(_DataManager._get_all(version_number="all")) == 4
@@ -126,8 +126,8 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
 
     # Run development mode again
     with patch("sys.argv", ["prog", "--development"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
 
         # The 1st dev version should be deleted run with development mode
         assert len(_DataManager._get_all(version_number="all")) == 2
@@ -140,7 +140,7 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
         # Submit new dev version
         scenario = _ScenarioManager._create(scenario_config)
         taipy.submit(scenario)
-        core.stop()
+        orchestrator.stop()
 
         # Assert number of entities with 1 dev version and 1 exp version
         assert len(_DataManager._get_all(version_number="all")) == 4
@@ -191,11 +191,11 @@ def test_dev_mode_clean_all_entities_when_config_is_alternated():
 
     # Create a scenario in development mode with the doppelganger function
     with patch("sys.argv", ["prog"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         scenario = _ScenarioManager._create(scenario_config)
         taipy.submit(scenario)
-        core.stop()
+        orchestrator.stop()
 
     # Delete the twice_doppelganger function
     # and clear cache of _load_fct() to simulate a new run
@@ -205,75 +205,75 @@ def test_dev_mode_clean_all_entities_when_config_is_alternated():
     # Create a scenario in development mode with another function
     scenario_config = config_scenario()
     with patch("sys.argv", ["prog"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         scenario = _ScenarioManager._create(scenario_config)
         taipy.submit(scenario)
-        core.stop()
+        orchestrator.stop()
 
 
 def test_version_number_when_switching_mode():
     with patch("sys.argv", ["prog", "--development"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         ver_1 = _VersionManager._get_latest_version()
         ver_dev = _VersionManager._get_development_version()
         assert ver_1 == ver_dev
         assert len(_VersionManager._get_all()) == 1
-        core.stop()
+        orchestrator.stop()
 
     # Run with dev mode, the version number is the same
     with patch("sys.argv", ["prog", "--development"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         ver_2 = _VersionManager._get_latest_version()
         assert ver_2 == ver_dev
         assert len(_VersionManager._get_all()) == 1
-        core.stop()
+        orchestrator.stop()
 
     # When run with experiment mode, a new version is created
     with patch("sys.argv", ["prog", "--experiment"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         ver_3 = _VersionManager._get_latest_version()
         assert ver_3 != ver_dev
         assert len(_VersionManager._get_all()) == 2
-        core.stop()
+        orchestrator.stop()
 
     with patch("sys.argv", ["prog", "--experiment", "2.1"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         ver_4 = _VersionManager._get_latest_version()
         assert ver_4 == "2.1"
         assert len(_VersionManager._get_all()) == 3
-        core.stop()
+        orchestrator.stop()
 
     with patch("sys.argv", ["prog", "--experiment"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         ver_5 = _VersionManager._get_latest_version()
         assert ver_5 != ver_3
         assert ver_5 != ver_4
         assert ver_5 != ver_dev
         assert len(_VersionManager._get_all()) == 4
-        core.stop()
+        orchestrator.stop()
 
     # Run with dev mode, the version number is the same as the first dev version to override it
     with patch("sys.argv", ["prog", "--development"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         ver_7 = _VersionManager._get_latest_version()
         assert ver_1 == ver_7
         assert len(_VersionManager._get_all()) == 4
-        core.stop()
+        orchestrator.stop()
 
 
 def test_force_override_experiment_version():
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         ver_1 = _VersionManager._get_latest_version()
         assert ver_1 == "1.0"
         # When create new experiment version, a development version entity is also created as a placeholder
@@ -288,21 +288,21 @@ def test_force_override_experiment_version():
         assert len(_ScenarioManager._get_all()) == 1
         assert len(_CycleManager._get_all()) == 1
         assert len(_JobManager._get_all()) == 1
-        core.stop()
+        orchestrator.stop()
 
     Config.configure_global_app(foo="bar")
 
     # Without --taipy-force parameter, a SystemExit will be raised
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-            core = Core()
-            core.run()
-    core.stop()
+            orchestrator = Orchestrator()
+            orchestrator.run()
+    orchestrator.stop()
 
     # With --taipy-force parameter
     with patch("sys.argv", ["prog", "--experiment", "1.0", "--taipy-force"]):
-        core = Core()
-        core.run()
+        orchestrator = Orchestrator()
+        orchestrator.run()
         ver_2 = _VersionManager._get_latest_version()
         assert ver_2 == "1.0"
         assert len(_VersionManager._get_all()) == 2  # 2 version include 1 experiment 1 development
@@ -317,36 +317,36 @@ def test_force_override_experiment_version():
         assert len(_ScenarioManager._get_all()) == 2
         assert len(_CycleManager._get_all()) == 1
         assert len(_JobManager._get_all()) == 2
-        core.stop()
+        orchestrator.stop()
 
 
 def test_modified_job_configuration_dont_block_application_run(caplog, init_config):
     _ = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-        core = Core()
+        orchestrator = Orchestrator()
         Config.configure_job_executions(mode="development")
-        core.run()
-        core.stop()
+        orchestrator.run()
+        orchestrator.stop()
     init_config()
     _ = config_scenario()
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-        core = Core()
+        orchestrator = Orchestrator()
         Config.configure_job_executions(mode="standalone", max_nb_of_workers=3)
-        core.run()
+        orchestrator.run()
         error_message = str(caplog.text)
         assert 'JOB "mode" was modified' in error_message
         assert 'JOB "max_nb_of_workers" was added' in error_message
-        core.stop()
+        orchestrator.stop()
 
 
 def test_modified_config_properties_without_force(caplog, init_config):
     _ = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-        core = Core()
-        core.run()
-        core.stop()
+        orchestrator = Orchestrator()
+        orchestrator.run()
+        orchestrator.stop()
 
     init_config()
 
@@ -354,9 +354,9 @@ def test_modified_config_properties_without_force(caplog, init_config):
 
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-            core = Core()
-            core.run()
-    core.stop()
+            orchestrator = Orchestrator()
+            orchestrator.run()
+    orchestrator.stop()
     error_message = str(caplog.text)
 
     assert 'DATA_NODE "d3" was added' in error_message

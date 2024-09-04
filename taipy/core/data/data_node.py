@@ -84,20 +84,21 @@ class DataNode(_Entity, _Labeled):
         import taipy as tp
         from taipy import Config
 
-        # Configure a global data node
-        dataset_cfg = Config.configure_data_node("my_dataset", scope=tp.Scope.GLOBAL)
+        if __name__ == "__main__":
+            # Configure a global data node
+            dataset_cfg = Config.configure_data_node("my_dataset", scope=tp.Scope.GLOBAL)
 
-        # Instantiate a global data node
-        dataset = tp.create_global_data_node(dataset_cfg)
+            # Instantiate a global data node
+            dataset = tp.create_global_data_node(dataset_cfg)
 
-        # Retrieve the list of all data nodes
-        all_data_nodes = tp.get_data_nodes()
+            # Retrieve the list of all data nodes
+            all_data_nodes = tp.get_data_nodes()
 
-        # Write the data
-        dataset.write("Hello, World!")
+            # Write the data
+            dataset.write("Hello, World!")
 
-        # Read the data
-        print(dataset.read())
+            # Read the data
+            print(dataset.read())
         ```
 
     Attributes:
@@ -133,7 +134,7 @@ class DataNode(_Entity, _Labeled):
 
     _ID_PREFIX = "DATANODE"
     __ID_SEPARATOR = "_"
-    __logger = _TaipyLogger._get_logger()
+    _logger = _TaipyLogger._get_logger()
     _REQUIRED_PROPERTIES: List[str] = []
     _MANAGER_NAME: str = "data"
     _PATH_KEY = "path"
@@ -170,9 +171,9 @@ class DataNode(_Entity, _Labeled):
         self._editor_expiration_date: Optional[datetime] = editor_expiration_date
 
         # Track edits
-        self._edits = edits or []
+        self._edits: List[Edit] = edits or []
 
-        self._properties = _Properties(self, **kwargs)
+        self._properties: _Properties = _Properties(self, **kwargs)
 
     @staticmethod
     def _new_id(config_id: str) -> DataNodeId:
@@ -346,12 +347,6 @@ class DataNode(_Entity, _Labeled):
     def __setstate__(self, state):
         vars(self).update(state)
 
-    def __getattr__(self, attribute_name):
-        protected_attribute_name = _validate_id(attribute_name)
-        if protected_attribute_name in self._properties:
-            return self._properties[protected_attribute_name]
-        raise AttributeError(f"{attribute_name} is not an attribute of data node {self.id}")
-
     @classmethod
     def _get_last_modified_datetime(cls, path: Optional[str] = None) -> Optional[datetime]:
         if path and os.path.isfile(path):
@@ -396,7 +391,7 @@ class DataNode(_Entity, _Labeled):
         try:
             return self.read_or_raise()
         except NoData:
-            self.__logger.warning(
+            self._logger.warning(
                 f"Data node {self.id} from config {self.config_id} is being read but has never been written."
             )
             return None

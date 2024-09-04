@@ -173,10 +173,6 @@ const styledColumns = JSON.stringify({
     },
 });
 
-const invalidColumns = JSON.stringify({
-    invalid: true,
-});
-
 describe("PaginatedTable Component", () => {
     it("renders", async () => {
         const { getByText } = render(<PaginatedTable data={undefined} defaultColumns={tableColumns} />);
@@ -655,7 +651,7 @@ describe("PaginatedTable Component", () => {
                 col: "int",
                 index: 1,
                 reason: "click",
-                value: undefined
+                value: undefined,
             },
             type: "SEND_ACTION_ACTION",
         });
@@ -692,7 +688,7 @@ describe("PaginatedTable Component", () => {
                 col: "Code",
                 index: 0,
                 reason: "button",
-                value: "button action"
+                value: "button action",
             },
             type: "SEND_ACTION_ACTION",
         });
@@ -714,14 +710,6 @@ describe("PaginatedTable Component", () => {
         const elt = document.querySelector('table[aria-labelledby="tableTitle"]');
         expect(elt).toBeInTheDocument();
     });
-    it("logs error when baseColumns prop is invalid", () => {
-        // Mock console.info to check if it gets called
-        console.info = jest.fn();
-        // Render the component with invalid baseColumns prop
-        render(<PaginatedTable defaultColumns={invalidColumns} />);
-        // Check if console.info was called
-        expect(console.info).toHaveBeenCalled();
-    });
     it("should sort the table in ascending order", async () => {
         await waitFor(() => {
             render(<PaginatedTable data={tableValue} defaultColumns={tableColumns} />);
@@ -739,7 +727,7 @@ describe("PaginatedTable Component", () => {
         const option = queryByRole("option", { selected: false, name: "50" });
         fireEvent.click(option as Element);
         const table = document.querySelector(
-            'table[aria-labelledby="tableTitle"].MuiTable-root.MuiTable-stickyHeader.css-cz602z-MuiTable-root'
+            'table[aria-labelledby="tableTitle"].MuiTable-root.MuiTable-stickyHeader'
         );
         expect(table).toBeInTheDocument();
     });

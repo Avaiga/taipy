@@ -48,7 +48,7 @@ describe("Chat Component", () => {
     it("uses the class", async () => {
         const { getByText } = render(<Chat messages={messages} className="taipy-chat" defaultKey={valueKey} />);
         const elt = getByText(searchMsg);
-        expect(elt.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("taipy-chat");
+        expect(elt.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("taipy-chat");
     });
     it("can display an avatar", async () => {
         const { getByAltText } = render(<Chat messages={messages} users={users} defaultKey={valueKey} />);

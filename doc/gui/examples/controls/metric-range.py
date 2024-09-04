@@ -15,11 +15,11 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-value = 120
+if __name__ == "__main__":
+    value = 120
 
-page = """
+    page = """
 <|{value}|metric|min=50|max=150|>
-"""
+    """
 
-
-Gui(page).run()
+    Gui(page).run()

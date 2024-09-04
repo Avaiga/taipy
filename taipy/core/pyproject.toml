@@ -1,16 +1,16 @@
 [build-system]
-requires = ["setuptools>=42", "wheel", ]
+requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "taipy-core"
-version = "0.0.0"   # will be dynamically set
 description = "A Python library to build powerful and customized data-driven back-end applications."
 readme = "package_desc.md"
 requires-python = ">=3.8"
-keywords = ["taipy-core", ]
+license = {text = "Apache License 2.0"}
+authors = [{name = "Avaiga", email = "dev@taipy.io"}]
+keywords = ["taipy-core"]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Natural Language :: English",
@@ -20,43 +20,19 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Topic :: Software Development",
-    "Topic :: Scientific/Engineering",
-    "Operating System :: Microsoft :: Windows",
-    "Operating System :: POSIX",
-    "Operating System :: Unix",
-    "Operating System :: MacOS",
 ]
-
-dependencies = []   # will be dynamically set
-
-[project.license]
-text = "Apache License 2.0"
+dynamic = ["version", "dependencies"]
 
 [project.optional-dependencies]
-test = ["pytest>=3.8", ]
-mssql = ["pyodbc>=4,<4.1", ]
-mysql = ["pymysql>1,<1.1", ]
-postgresql = ["psycopg2>2.9,<2.10", ]
-parquet = ["fastparquet==2022.11.0", "pyarrow>=14.0.2,<15.0", ]
-s3 = ["boto3==1.29.1", ]
-mongo = ["pymongo[srv]>=4.2.0,<5.0", ]
+mssql = ["pyodbc>=4,<4.1"]
+mysql = ["pymysql>1,<1.1"]
+postgresql = ["psycopg2>2.9,<2.10"]
+parquet = ["fastparquet==2022.11.0", "pyarrow>=14.0.2,<15.0"]
+s3 = ["boto3==1.29.1"]
+mongo = ["pymongo[srv]>=4.2.0,<5.0"]
+
+[tool.setuptools.packages]
+find = {include = ["taipy", "taipy.core", "taipy.core.*"]}
 
 [project.urls]
-Homepage = "https://www.taipy.io"
-Documentation = "https://docs.taipy.io"
-Source = "https://github.com/Avaiga/taipy"
-Download = "https://pypi.org/project/taipy/#files"
-Tracker = "https://github.com/Avaiga/taipy/issues"
-Security = "https://github.com/Avaiga/taipy?tab=security-ov-file#readme"
-"Release notes" = "https://docs.taipy.io/en/release-4.0.0.dev0/relnotes/"
-
-[tool.setuptools]
-zip-safe = false
-
-[tool.setuptools.package-data]
-taipy = ["version.json", ]
-
-[tool.setuptools.packages.find]
-where = [".", ]
-include = ["taipy", "taipy.core", "taipy.core.*", ]
+homepage = "https://github.com/avaiga/taipy"

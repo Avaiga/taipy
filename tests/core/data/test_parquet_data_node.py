@@ -34,6 +34,7 @@ from taipy.core.exceptions.exceptions import (
     UnknownCompressionAlgorithm,
     UnknownParquetEngine,
 )
+from taipy.core.reason import NoFileToDownload, NotAFile
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -84,16 +85,16 @@ class TestParquetDataNode:
         assert dn.job_ids == []
         assert not dn.is_ready_for_reading
         assert dn.path == path
-        assert dn.exposed_type == "pandas"
-        assert dn.compression == "snappy"
-        assert dn.engine == "pyarrow"
+        assert dn.properties["exposed_type"] == "pandas"
+        assert dn.properties["compression"] == "snappy"
+        assert dn.properties["engine"] == "pyarrow"
 
         parquet_dn_config_1 = Config.configure_parquet_data_node(
             id="bar", default_path=path, compression=compression, exposed_type=MyCustomObject
         )
         dn_1 = _DataManagerFactory._build_manager()._create_and_set(parquet_dn_config_1, None, None)
         assert isinstance(dn_1, ParquetDataNode)
-        assert dn_1.exposed_type == MyCustomObject
+        assert dn_1.properties["exposed_type"] == MyCustomObject
 
         with pytest.raises(InvalidConfigurationId):
             dn = ParquetDataNode("foo bar", Scope.SCENARIO, properties={"path": path, "name": "super name"})
@@ -233,6 +234,29 @@ class TestParquetDataNode:
 
         assert ".data" not in dn.path
         assert os.path.exists(dn.path)
+
+    def test_is_downloadable(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.parquet")
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+        reasons = dn.is_downloadable()
+        assert reasons
+        assert reasons.reasons == ""
+
+    def test_is_not_downloadable_no_file(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/wrong_path.parquet")
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+        reasons = dn.is_downloadable()
+        assert not reasons
+        assert len(reasons._reasons) == 1
+        assert str(NoFileToDownload(path, dn.id)) in reasons.reasons
+
+    def test_is_not_downloadable_not_a_file(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample")
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+        reasons = dn.is_downloadable()
+        assert not reasons
+        assert len(reasons._reasons) == 1
+        assert str(NotAFile(path, dn.id)) in reasons.reasons
 
     def test_get_downloadable_path(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.parquet")

@@ -15,7 +15,6 @@ from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import networkx as nx
 
-from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 
 from .._entity._entity import _Entity
@@ -27,7 +26,7 @@ from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
 from ..data.data_node import DataNode
-from ..exceptions.exceptions import NonExistingTask
+from ..exceptions.exceptions import AttributeKeyAlreadyExisted, NonExistingTask
 from ..job.job import Job
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
 from ..submission.submission import Submission
@@ -79,34 +78,36 @@ class Sequence(_Entity, Submittable, _Labeled):
         def planning(forecast, capacity):
             ...
 
-        # Configure data nodes
-        sales_history_cfg = Config.configure_csv_data_node("sales_history")
-        trained_model_cfg = Config.configure_data_node("trained_model")
-        current_month_cfg = Config.configure_data_node("current_month")
-        forecasts_cfg = Config.configure_data_node("sales_predictions")
-        capacity_cfg = Config.configure_data_node("capacity")
-        production_orders_cfg = Config.configure_sql_data_node("production_orders")
+        if __name__ == "__main__":
+            # Configure data nodes
+            sales_history_cfg = Config.configure_csv_data_node("sales_history")
+            trained_model_cfg = Config.configure_data_node("trained_model")
+            current_month_cfg = Config.configure_data_node("current_month")
+            forecasts_cfg = Config.configure_data_node("sales_predictions")
+            capacity_cfg = Config.configure_data_node("capacity")
+            production_orders_cfg = Config.configure_sql_data_node("production_orders")
 
-        # Configure tasks and scenarios
-        train_cfg = Config.configure_task("train", function=training, input=sales_history_cfg, output=trained_model_cfg)
-        predict_cfg = Config.configure_task("predict", function=predict,
-                                            input=[trained_model_cfg, current_month_cfg],
-                                            output=forecasts_cfg)
-        plan_cfg = Config.configure_task("planning", function=planning,
-                                         input=[forecasts_cfg, capacity_cfg],
-                                         output=production_orders_cfg)
-        scenario_cfg = Config.configure_scenario("scenario", task_configs=[train_cfg, predict_cfg, plan_cfg])
+            # Configure tasks and scenarios
+            train_cfg = Config.configure_task("train", function=training,
+                                              input=sales_history_cfg, output=trained_model_cfg)
+            predict_cfg = Config.configure_task("predict", function=predict,
+                                                input=[trained_model_cfg, current_month_cfg],
+                                                output=forecasts_cfg)
+            plan_cfg = Config.configure_task("planning", function=planning,
+                                            input=[forecasts_cfg, capacity_cfg],
+                                            output=production_orders_cfg)
+            scenario_cfg = Config.configure_scenario("scenario", task_configs=[train_cfg, predict_cfg, plan_cfg])
 
-        # Create a new scenario and sequences
-        scenario = tp.create_scenario(scenario_cfg)
-        scenario.add_sequence("sales_sequence", [train_cfg, predict_cfg])
-        scenario.add_sequence("production_sequence", [plan_cfg])
+            # Create a new scenario and sequences
+            scenario = tp.create_scenario(scenario_cfg)
+            scenario.add_sequence("sales_sequence", [train_cfg, predict_cfg])
+            scenario.add_sequence("production_sequence", [plan_cfg])
 
-        # Get all sequences
-        all_sequences = tp.get_sequences()
+            # Get all sequences
+            all_sequences = tp.get_sequences()
 
-        # Submit one sequence only
-        tp.submit(scenario.sales_sequence)
+            # Submit one sequence only
+            tp.submit(scenario.sales_sequence)
         ```
 
     Note that the sequences are not necessarily disjoint and may share some tasks.
@@ -124,6 +125,7 @@ class Sequence(_Entity, Submittable, _Labeled):
     _ID_PREFIX = "SEQUENCE"
     _SEPARATOR = "_"
     _MANAGER_NAME = "sequence"
+    __CHECK_INIT_DONE_ATTR_NAME = "_init_done"
 
     def __init__(
         self,
@@ -142,6 +144,7 @@ class Sequence(_Entity, Submittable, _Labeled):
         self._parent_ids = parent_ids or set()
         self._properties = _Properties(self, **properties)
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
+        self._init_done = True
 
     @staticmethod
     def _new_id(sequence_name: str, scenario_id) -> SequenceId:
@@ -154,10 +157,18 @@ class Sequence(_Entity, Submittable, _Labeled):
     def __eq__(self, other):
         return isinstance(other, Sequence) and self.id == other.id
 
+    def __setattr__(self, name: str, value: Any) -> None:
+        if self.__CHECK_INIT_DONE_ATTR_NAME not in dir(self) or name in dir(self):
+            return super().__setattr__(name, value)
+        else:
+            try:
+                self.__getattr__(name)
+                raise AttributeKeyAlreadyExisted(name)
+            except AttributeError:
+                return super().__setattr__(name, value)
+
     def __getattr__(self, attribute_name):
         protected_attribute_name = _validate_id(attribute_name)
-        if protected_attribute_name in self._properties:
-            return _tpl._replace_templates(self._properties[protected_attribute_name])
         tasks = self._get_tasks()
         if protected_attribute_name in tasks:
             return tasks[protected_attribute_name]

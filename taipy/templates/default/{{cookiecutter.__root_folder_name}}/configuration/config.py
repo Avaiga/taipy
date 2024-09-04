@@ -12,7 +12,7 @@
 """
 Contain the application's configuration including the scenario configurations.
 
-The configuration is run by the Core service.
+The configuration is run when starting the Orchestrator.
 """
 
 from algorithms import *

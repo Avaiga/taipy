@@ -39,6 +39,20 @@ describe("Input Component", () => {
         );
         getByDisplayValue("titi");
     });
+    it("displays with width=70%", async () => {
+        const { getByDisplayValue, getByTestId } = render(
+            <Input value="toto" type="text" defaultValue="titi" width="70%"/>
+        );
+        const element = getByDisplayValue("toto");
+        expect(element.parentElement?.parentElement).toHaveStyle('max-width: 70%');
+    });
+    it("displays with width=500", async () => {
+        const { getByDisplayValue, getByTestId } = render(
+            <Input value="toto" type="text" defaultValue="titi" width={500}/>
+        );
+        const element = getByDisplayValue("toto");
+        expect(element.parentElement?.parentElement).toHaveStyle('max-width: 500px');
+    });
     it("is disabled", async () => {
         const { getByDisplayValue } = render(<Input value="val" type="text" active={false} />);
         const elt = getByDisplayValue("val");

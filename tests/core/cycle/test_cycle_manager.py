@@ -91,7 +91,7 @@ def test_create_and_delete_cycle_entity(tmpdir):
     assert cycle_1.start_date is not None
     assert cycle_1.end_date is not None
     assert cycle_1.start_date < cycle_1.creation_date < cycle_1.end_date
-    assert cycle_1.key == "value"
+    assert cycle_1.properties["key"] == "value"
     assert cycle_1.frequency == Frequency.DAILY
 
     cycle_1_id = cycle_1.id
