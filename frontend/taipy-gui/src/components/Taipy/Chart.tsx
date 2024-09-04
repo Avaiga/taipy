@@ -45,6 +45,7 @@ import {
 } from "../../utils/hooks";
 import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
 import { Figure } from "react-plotly.js";
+import { ligthenPayload } from "../../context/wsUtils";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -67,7 +68,7 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     template_Light_?: string;
     //[key: `selected_${number}`]: number[];
     figure?: Array<Record<string, unknown>>;
-    onMapClick?: string;
+    onClick?: string;
 }
 
 interface ChartConfig {
@@ -177,9 +178,20 @@ const MARKER_TO_COL = ["color", "size", "symbol", "opacity", "colors"];
 
 const isOnClick = (types: string[]) => (types?.length ? types.every((t) => t === "pie") : false);
 
-interface MapDiv extends HTMLDivElement {
+interface Axis {
+    p2c: () => number;
+    p2d: (a: number) => number;
+}
+interface PlotlyMap {
+    _subplot?: { xaxis: Axis; yaxis: Axis };
+}
+interface PlotlyDiv extends HTMLDivElement {
     _fullLayout?: {
-        map?: { _subplot?: { xaxis: { p2c: () => void }; yaxis: { p2c: () => void } } };
+        map?: PlotlyMap;
+        geo?: PlotlyMap;
+        mapbox?: PlotlyMap;
+        xaxis?: Axis;
+        yaxis?: Axis;
     };
 }
 
@@ -271,7 +283,7 @@ const Chart = (props: ChartProp) => {
         data = emptyData,
         onRangeChange,
         propagate = true,
-        onMapClick,
+        onClick,
     } = props;
     const dispatch = useDispatch();
     const [selected, setSelected] = useState<number[][]>([]);
@@ -584,29 +596,44 @@ const Chart = (props: ChartProp) => {
         ]
     );
 
-    const mapClickHandler = useCallback(
+    const clickHandler = useCallback(
         (evt?: MouseEvent) => {
-            const subplot = (evt?.currentTarget as MapDiv)?._fullLayout?.map?._subplot;
-            if (!subplot) {
-                console.info("mapClickHandler div does not have a subplot object", evt);
+            const map =
+                (evt?.currentTarget as PlotlyDiv)?._fullLayout?.map ||
+                (evt?.currentTarget as PlotlyDiv)?._fullLayout?.geo ||
+                (evt?.currentTarget as PlotlyDiv)?._fullLayout?.mapbox;
+            const xaxis = map ? map._subplot?.xaxis : (evt?.currentTarget as PlotlyDiv)?._fullLayout?.xaxis;
+            const yaxis = map ? map._subplot?.xaxis : (evt?.currentTarget as PlotlyDiv)?._fullLayout?.yaxis;
+            if (!xaxis || !yaxis) {
+                console.info("clickHandler: Plotly div does not have an xaxis object", evt);
                 return;
             }
+            const transform = (axis: Axis, delta: keyof DOMRect) => {
+                const bb = (evt?.target as HTMLDivElement).getBoundingClientRect();
+                return (pos?: number) => axis.p2d((pos || 0) - (bb[delta] as number));
+            };
             dispatch(
-                createSendActionNameAction(id, module, {
-                    action: onMapClick,
-                    lat: subplot.yaxis.p2c(),
-                    lon: subplot.xaxis.p2c(),
-                })
+                createSendActionNameAction(
+                    id,
+                    module,
+                    ligthenPayload({
+                        action: onClick,
+                        lat: map ? yaxis.p2c() : undefined,
+                        y: map ? undefined : transform(yaxis, "top")(evt?.clientY),
+                        lon: map ? xaxis.p2c() : undefined,
+                        x: map ? undefined : transform(xaxis, "left")(evt?.clientX),
+                    })
+                )
             );
         },
-        [dispatch, module, id, onMapClick]
+        [dispatch, module, id, onClick]
     );
 
     const onInitialized = useCallback(
         (figure: Readonly<Figure>, graphDiv: Readonly<HTMLElement>) => {
-            onMapClick && graphDiv.addEventListener("click", mapClickHandler);
+            onClick && graphDiv.addEventListener("click", clickHandler);
         },
-        [onMapClick, mapClickHandler]
+        [onClick, clickHandler]
     );
 
     const getRealIndex = useCallback(

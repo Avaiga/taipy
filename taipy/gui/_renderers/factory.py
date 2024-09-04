@@ -121,7 +121,7 @@ class _Factory:
                 ("template[dark]", PropertyType.dict, gui._get_config("chart_dark_template", None)),
                 ("template[light]", PropertyType.dict),
                 ("figure", PropertyType.to_json),
-                ("on_map_click", PropertyType.function),
+                ("on_click", PropertyType.function),
             ]
         )
         ._get_chart_config("scatter", "lines+markers")
