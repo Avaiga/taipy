@@ -222,6 +222,7 @@ class _GuiCore(ElementLibrary):
                 "file_download": ElementProperty(PropertyType.boolean, False),
                 "file_upload": ElementProperty(PropertyType.boolean, False),
                 "upload_check": ElementProperty(PropertyType.function),
+                "show_owner_label": ElementProperty(PropertyType.boolean, False),
             },
             inner_properties={
                 "on_edit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.edit_data_node}}"),
