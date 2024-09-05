@@ -678,7 +678,7 @@
                     {
                         "name": "on_click",
                         "type": "Callable",
-                        "doc": "The callback function that is invoked when the background is clicked.<br/>The function receives three parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the chart control if it has one.</li>\n<li>payload (dict[str, any]): a dict containing latitude and longitude or x and y of the point clicked (this feature relies on non-public plotly structured information).</li>\n</ul>",
+                        "doc": "The callback that is invoked when the user clicks in the chart background.<br/>The function receives three parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the chart control if it has one.</li>\n<li>payload (dict[str, any]): a dictionary containing the <i>x</i> and <i>y</i> coordinates of the click <b>or</b> <i>latitude</i> and <i>longitude</i> in the case of a map. This feature relies on non-public Plotly structured information.</li>\n</ul>",
                         "signature": [
                             [
                                 "state",
