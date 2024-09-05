@@ -143,17 +143,17 @@ def test_map_md(gui: Gui, helpers):
     marker = {"color": "fuchsia", "size": 4}  # noqa: F841
     layout = {  # noqa: F841
         "dragmode": "zoom",
-        "mapbox": {"style": "open-street-map", "center": {"lat": 38, "lon": -90}, "zoom": 3},
+        "map": {"style": "open-street-map", "center": {"lat": 38, "lon": -90}, "zoom": 3},
         "margin": {"r": 0, "t": 0, "b": 0, "l": 0},
     }
-    md = "<|{mapData}|chart|type=scattermapbox|marker={marker}|layout={layout}|lat=Lat|lon=Lon|text=Globvalue|mode=markers|>"  # noqa: E501
+    md = "<|{mapData}|chart|type=scattermap|marker={marker}|layout={layout}|lat=Lat|lon=Lon|text=Globvalue|mode=markers|>"  # noqa: E501
     gui._set_frame(inspect.currentframe())
     expected_list = [
         "<Chart",
         "&quot;Lat&quot;: &#x7B;&quot;index&quot;:",
         "&quot;Lon&quot;: &#x7B;&quot;index&quot;:",
         "data={_TpD_tpec_TpExPr_mapData_TPMDL_0}",
-        'defaultLayout="{&quot;dragmode&quot;: &quot;zoom&quot;, &quot;mapbox&quot;: &#x7B;&quot;style&quot;: &quot;open-street-map&quot;, &quot;center&quot;: &#x7B;&quot;lat&quot;: 38, &quot;lon&quot;: -90&#x7D;, &quot;zoom&quot;: 3&#x7D;, &quot;margin&quot;: &#x7B;&quot;r&quot;: 0, &quot;t&quot;: 0, &quot;b&quot;: 0, &quot;l&quot;: 0&#x7D;}"',  # noqa: E501
+        'defaultLayout="{&quot;dragmode&quot;: &quot;zoom&quot;, &quot;map&quot;: &#x7B;&quot;style&quot;: &quot;open-street-map&quot;, &quot;center&quot;: &#x7B;&quot;lat&quot;: 38, &quot;lon&quot;: -90&#x7D;, &quot;zoom&quot;: 3&#x7D;, &quot;margin&quot;: &#x7B;&quot;r&quot;: 0, &quot;t&quot;: 0, &quot;b&quot;: 0, &quot;l&quot;: 0&#x7D;}"',  # noqa: E501
         'updateVarName="_TpD_tpec_TpExPr_mapData_TPMDL_0"',
     ]
     helpers.test_control_md(gui, md, expected_list)
