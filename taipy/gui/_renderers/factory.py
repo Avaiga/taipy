@@ -484,7 +484,7 @@ class _Factory:
                 ("orientation",),
                 ("width", PropertyType.string, "300px"),
                 ("on_change", PropertyType.function),
-                ("continuous", PropertyType.boolean, True),
+                ("continuous", PropertyType.boolean, None),
                 ("lov", PropertyType.lov),
                 ("change_delay", PropertyType.number, gui._get_config("change_delay", None)),
             ]
