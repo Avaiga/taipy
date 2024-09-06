@@ -289,7 +289,7 @@ class Gui:
                 of the main Python file is allowed.
             env_filename (Optional[str]): An optional file from which to load application
                 configuration variables (see the
-                [Configuration](../../userman/configuration/gui-config.md#configuring-the-gui-instance)
+                [Configuration](../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
                 section of the User Manual for details.)<br/>
                 The default value is "taipy.gui.env"
             libraries (Optional[List[ElementLibrary]]): An optional list of extension library
@@ -2045,7 +2045,7 @@ class Gui:
     ) -> Partial:
         """Create a new `Partial^`.
 
-        The [User Manual section on Partials](../../userman/gui/pages/index.md#partials) gives details on
+        The [User Manual section on Partials](../../userman/gui/pages/partial/index.md) gives details on
         when and how to use this class.
 
         Arguments:
@@ -2620,7 +2620,7 @@ class Gui:
         URL that `Gui` serves. The default is to listen to the *localhost* address
         (127.0.0.1) on the port number 5000. However, the configuration of this `Gui`
         object may impact that (see the
-        [Configuration](../../userman/configuration/gui-config.md#configuring-the-gui-instance)
+        [Configuration](../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
         section of the User Manual for details).
 
         Arguments:
@@ -2645,8 +2645,8 @@ class Gui:
                 ignored.<br/>
                 Also note that setting the *debug* argument to True forces *async_mode* to "threading".
             **kwargs (dict[str, any]): Additional keyword arguments that configure how this `Gui` is run.
-                Please refer to the
-                [Configuration section](../../userman/configuration/gui-config.md#configuring-the-gui-instance)
+                Please refer to the gui config section
+                [page](../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
                 of the User Manual for more information.
 
         Returns:

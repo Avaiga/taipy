@@ -1504,7 +1504,7 @@
                         "name": "lov",
                         "default_property": true,
                         "type": "dict[str, any]",
-                        "doc": "The list of pages. The keys should be:\n<ul>\n<li>page id (start with \"/\")</li>\n<li>or full URL</li>\n</ul>\nThe values are labels. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
+                        "doc": "The list of pages. The keys should be:\n<ul>\n<li>page id (start with \"/\")</li>\n<li>or full URL</li>\n</ul>\nThe values are labels. See the <a href=\"../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for details."
                     }
                 ]
             }
@@ -1590,7 +1590,7 @@
                     {
                         "name": "users",
                         "type": "dynamic(list[Union[str,Icon]])",
-                        "doc": "The list of users. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
+                        "doc": "The list of users. See the <a href=\"../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for details."
                     },
                     {
                         "name": "sender_id",
@@ -1924,7 +1924,7 @@
                     {
                         "name": "lov",
                         "type": "dict[str, any]",
-                        "doc": "The list of values. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
+                        "doc": "The list of values. See the <a href=\"../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for details."
                     },
                     {
                         "name": "adapter",
