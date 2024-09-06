@@ -15,7 +15,7 @@ from taipy.gui.data.decimator import ScatterDecimator
 
 
 def test_decimator_embed_object(gui: Gui, test_client, helpers):
-    chart_builder = tgb.chart(decimator=ScatterDecimator())
+    chart_builder = tgb.chart(decimator=ScatterDecimator())  # type: ignore[attr-defined] # noqa: B023
     frame_locals = locals()
     decimator_property = chart_builder._properties.get("decimator", None)
     assert decimator_property is not None
