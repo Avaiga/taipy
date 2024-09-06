@@ -13,7 +13,7 @@
 
 The Taipy Rest package exposes the Runnable `Rest^` service to expose REST APIs on top of Taipy Core
 functionalities, in particular the scenario and data management. (more details
-on the [user manual](../../../userman/sdm/index.md)).
+on the [user manual](../../../userman/scenario_features/sdm/index.md)).
 
 Once the `Rest^` service runs, users can call REST APIs to create, read, update, submit and remove Taipy entities
 (including cycles, scenarios, sequences, tasks, jobs, and data nodes). It is handy when it comes to integrating a

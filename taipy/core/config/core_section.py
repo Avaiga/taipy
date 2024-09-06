@@ -47,10 +47,11 @@ class CoreSection(UniqueSection):
         read_entity_retry (int): Number of retries to read an entity from the repository before return failure.
             The default value is 3.
         mode (str): The Taipy operating mode. By default, the `Orchestrator^` service runs in "development" mode.
-            Please refer to the [Versioning management](../../userman/versioning/index.md)
+            Please refer to the [Versioning management](../../userman/advanced_features/versioning/index.md)
             documentation page for more details.
         version_number (str)): The identifier of the user application version. Please refer to the
-            [Versioning management](../../userman/versioning/index.md) documentation page for more details.
+            [Versioning management](../../userman/advanced_features/versioning/index.md)
+            documentation page for more details.
         force (bool): If True, force the application run even if there are some conflicts in the
             configuration.
         core_version (str): The Taipy Core package version.
@@ -374,7 +375,8 @@ class CoreSection(UniqueSection):
             mode (Optional[str]): Indicates the mode of the version management system.
                 Possible values are *"development"* or *"experiment"*. On Enterprise edition of Taipy,
                 *production* mode is also available. Please refer to the
-                [Versioning management](../../userman/versioning/index.md) documentation page for more details.
+                [Versioning management](../../userman/advanced_features/versioning/index.md)
+                documentation page for more details.
             version_number (Optional[str]): The string identifier of the version.
                  In development mode, the version number is ignored.
             force (Optional[bool]): If True, Taipy will override a version even if the configuration

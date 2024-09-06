@@ -20,9 +20,9 @@ To build a Taipy Core application, the first step consists of setting up the Tai
 your application's characteristics and behaviors.
 Import `Config^` from the `taipy.config^` module, then use the various methods of the `Config^` singleton class to
 configure your core application. In particular, configure the
-[data nodes](../../../userman/data-integration/data-node-config.md),
-[tasks](../../../userman/task-orchestration/scenario-config.md),
-and [scenarios](../../../userman/sdm/scenario/scenario-config.md).
+[data nodes](../../../userman/scenario_features/data-integration/data-node-config.md),
+[tasks](../../../userman/scenario_features/task-orchestration/scenario-config.md),
+and [scenarios](../../../userman/scenario_features/sdm/scenario/scenario-config.md).
 
 Once your application is configured, import module `import taipy as tp` so you can use any function described
 in the following section on [Function](#functions). In particular, the most used functions are `tp.create_scenario()`,
@@ -35,7 +35,8 @@ in the following section on [Function](#functions). In particular, the most used
     executor for their execution.
 
     In particular, this `Orchestrator^` service is automatically run when used with Taipy REST or Taipy GUI.
-    See the [running services](../../../run-deploy/run/running_services.md) page of the user manual for more details.
+    See the [running services](../../../userman/run-deploy/run/running_services.md) page of the user
+    manual for more details.
 """
 
 from ._init import *
