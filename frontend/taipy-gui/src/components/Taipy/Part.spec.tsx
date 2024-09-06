@@ -29,6 +29,16 @@ describe("Part Component", () => {
         const elt = getByText("bar");
         expect(elt).toHaveClass("taipy-part");
     })
+    it("displays with width=70%", async () => {
+        const { getByText } = render(<Part width="70%">bar</Part>);
+        const elt = getByText("bar");
+        expect(elt).toHaveStyle('width: 70%');
+    });
+    it("displays with width=500", async () => {
+        const { getByText } = render(<Part width={500}>bar</Part>);
+        const elt = getByText("bar");
+        expect(elt).toHaveStyle('width: 500px');
+    });
     it("renders an iframe", async () => {
         const {getByText} = render(<Part className="taipy-part" page="http://taipy.io">bar</Part>);
         const elt = getByText("bar");

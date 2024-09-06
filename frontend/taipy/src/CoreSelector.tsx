@@ -24,7 +24,7 @@ import React, {
 import { TextField, Theme, alpha } from "@mui/material";
 import Badge, { BadgeOrigin } from "@mui/material/Badge";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import Switch from "@mui/material/Switch";
 import Tooltip from "@mui/material/Tooltip";
@@ -167,7 +167,7 @@ const CoreItem = (props: {
             data-selectable={nodeType === props.leafType}
             label={
                 <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={1}>
-                    <Grid item xs sx={iconLabelSx}>
+                    <Grid  size="grow" sx={iconLabelSx}>
                         {nodeType === NodeType.CYCLE ? (
                             <CycleIcon fontSize="small" color="primary" />
                         ) : nodeType === NodeType.SCENARIO ? (
@@ -191,12 +191,12 @@ const CoreItem = (props: {
                         {label}
                     </Grid>
                     {props.editComponent && nodeType === props.leafType ? (
-                        <Grid item xs="auto">
+                        <Grid size="auto">
                             <props.editComponent id={id} active={props.active} />
                         </Grid>
                     ) : null}
                     {props.onPin ? (
-                        <Grid item xs="auto">
+                        <Grid size="auto">
                             <Tooltip title={isPinned ? "Unpin" : "Pin"}>
                                 <IconButton
                                     data-id={id}
@@ -631,7 +631,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
         <>
             <Grid container sx={switchBoxSx} gap={1}>
                 {active && colFilters ? (
-                    <Grid item>
+                    <Grid>
                         <TableFilter
                             columns={colFilters}
                             appliedFilters={filters}
@@ -641,12 +641,12 @@ const CoreSelector = (props: CoreSelectorProps) => {
                     </Grid>
                 ) : null}
                 {active && colSorts ? (
-                    <Grid item>
+                    <Grid>
                         <TableSort columns={colSorts} appliedSorts={sorts} onValidate={applySorts}></TableSort>
                     </Grid>
                 ) : null}
                 {showSearch ? (
-                    <Grid item>
+                    <Grid>
                         <IconButton onClick={onRevealSearch} size="small" sx={iconInRowSx}>
                             {revealSearch ? (
                                 <SearchOffOutlined fontSize="inherit" />
@@ -657,7 +657,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                     </Grid>
                 ) : null}
                 {showPins ? (
-                    <Grid item>
+                    <Grid>
                         <FormControlLabel
                             control={
                                 <Switch
@@ -673,7 +673,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                     </Grid>
                 ) : null}
                 {showSearch && revealSearch ? (
-                    <Grid item xs={12}>
+                    <Grid size={12}>
                         <TextField
                             margin="dense"
                             value={searchValue}

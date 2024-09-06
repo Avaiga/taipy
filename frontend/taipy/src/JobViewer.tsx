@@ -14,7 +14,7 @@
 import React, { useEffect, useCallback } from "react";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import ListItemText from "@mui/material/ListItemText";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
@@ -101,35 +101,35 @@ const JobViewer = (props: JobViewerProps) => {
         <Grid container className={className} sx={{ maxWidth: width }}>
             {inDialog ? null : (
                 <>
-                    <Grid item xs={4}>
+                    <Grid size={4}>
                         <Typography>Job Name</Typography>
                     </Grid>
-                    <Grid item xs={8}>
+                    <Grid size={8}>
                         <Typography>{jobName}</Typography>
                     </Grid>
                     <Divider />
                 </>
             )}
-            <Grid item xs={4}>
+            <Grid size={4}>
                 <Typography>Job Id</Typography>
             </Grid>
-            <Grid item xs={8}>
+            <Grid size={8}>
                 <Tooltip title={jobId}>
                     <Typography sx={EllipsisSx}>{jobId}</Typography>
                 </Tooltip>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={4}>
                 <Typography>Submission Id</Typography>
             </Grid>
-            <Grid item xs={8}>
+            <Grid size={8}>
                 <Tooltip title={submissionId}>
                     <Typography sx={EllipsisSx}>{submissionId}</Typography>
                 </Tooltip>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={4}>
                 <Typography>Submitted entity</Typography>
             </Grid>
-            <Grid item xs={8}>
+            <Grid size={8}>
                 <Tooltip title={entityId}>
                     <ListItemText
                         primary={entityName}
@@ -138,29 +138,29 @@ const JobViewer = (props: JobViewerProps) => {
                     />
                 </Tooltip>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={4}>
                 <Typography>Execution time</Typography>
             </Grid>
-            <Grid item xs={8}>
+            <Grid size={8}>
                 <Typography>{executionTime}</Typography>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={4}>
                 <Typography>Status</Typography>
             </Grid>
-            <Grid item xs={8}>
+            <Grid size={8}>
                 <StatusChip status={status} />
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={4}>
                 <Typography>Creation date</Typography>
             </Grid>
-            <Grid item xs={8}>
+            <Grid size={8}>
                 <Typography>{creationDate ? new Date(creationDate).toLocaleString() : ""}</Typography>
             </Grid>
             <Divider />
-            <Grid item xs={12}>
+            <Grid size={12}>
                 <Typography>Stack Trace</Typography>
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
                 <Typography variant="caption" component="pre" overflow="auto" maxHeight="50vh">
                     {stacktrace.join("<br/>")}
                 </Typography>
@@ -168,7 +168,7 @@ const JobViewer = (props: JobViewerProps) => {
             {props.onDelete ? (
                 <>
                     <Divider />
-                    <Grid item xs={6}>
+                    <Grid size={6}>
                         <Tooltip title={notDeleteable}>
                             <span>
                                 <Button variant="outlined" onClick={handleDeleteJob} disabled={!!notDeleteable}>

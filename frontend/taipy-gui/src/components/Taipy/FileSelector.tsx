@@ -11,7 +11,17 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { ChangeEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    ChangeEvent,
+    CSSProperties,
+    ReactNode,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import Button from "@mui/material/Button";
 import LinearProgress from "@mui/material/LinearProgress";
 import Tooltip from "@mui/material/Tooltip";
@@ -20,8 +30,9 @@ import UploadFile from "@mui/icons-material/UploadFile";
 import { TaipyContext } from "../../context/taipyContext";
 import { createAlertAction, createSendActionNameAction } from "../../context/taipyReducers";
 import { useClassNames, useDynamicProperty, useModule } from "../../utils/hooks";
-import { getCssSize, noDisplayStyle, TaipyActiveProps } from "./utils";
+import { expandSx, getCssSize, noDisplayStyle, TaipyActiveProps } from "./utils";
 import { uploadFile } from "../../workers/fileupload";
+import { SxProps } from "@mui/material";
 
 interface FileSelectorProps extends TaipyActiveProps {
     onAction?: string;
@@ -32,6 +43,10 @@ interface FileSelectorProps extends TaipyActiveProps {
     dropMessage?: string;
     notify?: boolean;
     width?: string | number;
+    icon?: ReactNode;
+    withBorder?: boolean;
+    onUploadAction?: string;
+    uploadData?: string;
 }
 
 const handleDragOver = (evt: DragEvent) => {
@@ -53,9 +68,10 @@ const FileSelector = (props: FileSelectorProps) => {
         dropMessage = "Drop here to Upload",
         label,
         notify = true,
+        withBorder = true,
     } = props;
     const [dropLabel, setDropLabel] = useState("");
-    const [dropSx, setDropSx] = useState(defaultSx);
+    const [dropSx, setDropSx] = useState<SxProps>(defaultSx);
     const [upload, setUpload] = useState(false);
     const [progress, setProgress] = useState(0);
     const { state, dispatch } = useContext(TaipyContext);
@@ -67,7 +83,17 @@ const FileSelector = (props: FileSelectorProps) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
-    useEffect(() => setDropSx((sx) => (props.width ? { ...sx, width: getCssSize(props.width) } : sx)), [props.width]);
+    useEffect(
+        () =>
+            setDropSx((sx: SxProps) =>
+                expandSx(
+                    sx,
+                    props.width ? { width: getCssSize(props.width) } : undefined,
+                    withBorder ? undefined : { border: "none" }
+                )
+            ),
+        [props.width, withBorder]
+    );
 
     const handleFiles = useCallback(
         (files: FileList | undefined | null, evt: Event | ChangeEvent) => {
@@ -75,7 +101,15 @@ const FileSelector = (props: FileSelectorProps) => {
             evt.preventDefault();
             if (files?.length) {
                 setUpload(true);
-                uploadFile(updateVarName, files, setProgress, state.id).then(
+                uploadFile(
+                    updateVarName,
+                    module,
+                    props.onUploadAction,
+                    props.uploadData,
+                    files,
+                    setProgress,
+                    state.id
+                ).then(
                     (value) => {
                         setUpload(false);
                         onAction && dispatch(createSendActionNameAction(id, module, onAction));
@@ -94,7 +128,7 @@ const FileSelector = (props: FileSelectorProps) => {
                 );
             }
         },
-        [state.id, id, onAction, notify, updateVarName, dispatch, module]
+        [state.id, id, onAction, props.onUploadAction, props.uploadData, notify, updateVarName, dispatch, module]
     );
 
     const handleChange = useCallback(
@@ -105,7 +139,7 @@ const FileSelector = (props: FileSelectorProps) => {
     const handleDrop = useCallback(
         (e: DragEvent) => {
             setDropLabel("");
-            setDropSx((sx) => ({ ...sx, ...defaultSx }));
+            setDropSx((sx: SxProps) => ({ ...sx, ...defaultSx }));
             handleFiles(e.dataTransfer?.files, e);
         },
         [handleFiles]
@@ -113,15 +147,19 @@ const FileSelector = (props: FileSelectorProps) => {
 
     const handleDragLeave = useCallback(() => {
         setDropLabel("");
-        setDropSx((sx) => ({ ...sx, ...defaultSx }));
+        setDropSx((sx: SxProps) => ({ ...sx, ...defaultSx }));
     }, []);
 
     const handleDragOverWithLabel = useCallback(
         (evt: DragEvent) => {
-            console.log(evt);
             const target = evt.currentTarget as HTMLElement;
-            setDropSx((sx) =>
-                sx.minWidth === defaultSx.minWidth && target ? { ...sx, minWidth: target.clientWidth + "px" } : sx
+            setDropSx((sx: SxProps) =>
+                expandSx(
+                    sx,
+                    (sx as CSSProperties).minWidth === defaultSx.minWidth && target
+                        ? { minWidth: target.clientWidth + "px" }
+                        : undefined
+                )
             );
             setDropLabel(dropMessage);
             handleDragOver(evt);
@@ -164,12 +202,12 @@ const FileSelector = (props: FileSelectorProps) => {
                         id={id}
                         component="span"
                         aria-label="upload"
-                        variant="outlined"
+                        variant={withBorder ? "outlined" : undefined}
                         disabled={!active || upload}
                         sx={dropSx}
                         ref={butRef}
                     >
-                        <UploadFile /> {dropLabel || label || defaultLabel}
+                        {props.icon || <UploadFile />} {dropLabel || label || defaultLabel}
                     </Button>
                 </span>
             </Tooltip>
