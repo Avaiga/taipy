@@ -448,6 +448,12 @@
                         "doc": "If False, the data node value is not visible."
                     },
                     {
+                        "name": "show_owner_label",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the data node owner label is added to the datanode label at the top of the block."
+                    },
+                    {
                         "name": "chart_config",
                         "type": "dict",
                         "doc": "Chart configs by data node configuration id."

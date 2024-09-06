@@ -17,7 +17,7 @@ import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Paper from "@mui/material/Paper";
@@ -49,6 +49,7 @@ interface ChatProps extends TaipyActiveProps {
     height?: string;
     defaultKey?: string; // for testing purposes only
     pageSize?: number;
+    showSender?: boolean;
 }
 
 const ENTER_KEY = "Enter";
@@ -56,7 +57,7 @@ const ENTER_KEY = "Enter";
 const indicWidth = 0.7;
 const avatarWidth = 24;
 const chatAvatarSx = { ...avatarSx, width: avatarWidth, height: avatarWidth };
-const avatarColSx = { width: 1.5 * avatarWidth, minWidth: 1.5 * avatarWidth };
+const avatarColSx = { width: 1.5 * avatarWidth, minWidth: 1.5 * avatarWidth, pt: 1 };
 const senderMsgSx = {
     width: "fit-content",
     maxWidth: "80%",
@@ -65,7 +66,7 @@ const senderMsgSx = {
 const gridSx = { pb: "1em", mt: "unset", flex: 1, overflow: "auto" };
 const loadMoreSx = { width: "fit-content", marginLeft: "auto", marginRight: "auto" };
 const inputSx = { maxWidth: "unset" };
-const nameSx = { fontSize: "0.6em", fontWeight: "bolder" };
+const nameSx = { fontSize: "0.6em", fontWeight: "bolder", pl: `${indicWidth}em` };
 const senderPaperSx = {
     pr: `${indicWidth}em`,
     pl: `${indicWidth}em`,
@@ -126,30 +127,27 @@ interface ChatRowProps {
     className?: string;
     getAvatar: (id: string, sender: boolean) => ReactNode;
     index: number;
+    showSender: boolean;
 }
 
 const ChatRow = (props: ChatRowProps) => {
-    const { senderId, message, name, className, getAvatar, index } = props;
+    const { senderId, message, name, className, getAvatar, index, showSender } = props;
     const sender = senderId == name;
     const avatar = getAvatar(name, sender);
     return (
         <Grid
-            item
             container
             className={getSuffixedClassNames(className, sender ? "-sent" : "-received")}
-            xs={12}
+            size={12}
             sx={noAnchorSx}
             justifyContent={sender ? "flex-end" : undefined}
         >
-            <Grid item sx={sender ? senderMsgSx : undefined}>
-                {avatar ? (
-                    <Stack>
-                        <Stack direction="row" gap={1}>
-                            <Box sx={avatarColSx}></Box>
+            <Grid sx={sender ? senderMsgSx : undefined}>
+                {(!sender || showSender) && avatar ? (
+                    <Stack direction="row" gap={1}>
+                        <Box sx={avatarColSx}>{avatar}</Box>
+                        <Stack>
                             <Box sx={nameSx}>{name}</Box>
-                        </Stack>
-                        <Stack direction="row" gap={1}>
-                            <Box sx={avatarColSx}>{avatar}</Box>
                             <Paper sx={sender ? senderPaperSx : otherPaperSx} data-idx={index}>
                                 {message}
                             </Paper>
@@ -168,7 +166,16 @@ const ChatRow = (props: ChatRowProps) => {
 const getChatKey = (start: number, page: number) => `Chat-${start}-${start + page}`;
 
 const Chat = (props: ChatProps) => {
-    const { id, updateVarName, senderId = "taipy", onAction, withInput = true, defaultKey = "", pageSize = 50 } = props;
+    const {
+        id,
+        updateVarName,
+        senderId = "taipy",
+        onAction,
+        withInput = true,
+        defaultKey = "",
+        pageSize = 50,
+        showSender = true,
+    } = props;
     const dispatch = useDispatch();
     const module = useModule();
 
@@ -352,7 +359,7 @@ const Chat = (props: ChatProps) => {
             <Paper className={className} sx={boxSx} id={id}>
                 <Grid container rowSpacing={2} sx={gridSx} ref={scrollDivRef}>
                     {rows.length && !rows[0] ? (
-                        <Grid item className={getSuffixedClassNames(className, "-load")} xs={12} sx={noAnchorSx}>
+                        <Grid className={getSuffixedClassNames(className, "-load")} size={12} sx={noAnchorSx}>
                             <Box sx={loadMoreSx}>
                                 <Button
                                     endIcon={<ArrowUpward />}
@@ -374,6 +381,7 @@ const Chat = (props: ChatProps) => {
                                 className={className}
                                 getAvatar={getAvatar}
                                 index={idx}
+                                showSender={showSender}
                             />
                         ) : null
                     )}

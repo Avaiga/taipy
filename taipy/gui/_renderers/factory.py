@@ -98,6 +98,7 @@ class _Factory:
                 ("sender_id",),
                 ("height",),
                 ("page_size", PropertyType.number, 50),
+                ("show_sender", PropertyType.boolean, True),
             ]
         ),
         "chart": lambda gui, control_type, attrs: _Builder(
@@ -120,6 +121,7 @@ class _Factory:
                 ("template[dark]", PropertyType.dict, gui._get_config("chart_dark_template", None)),
                 ("template[light]", PropertyType.dict),
                 ("figure", PropertyType.to_json),
+                ("on_click", PropertyType.function),
             ]
         )
         ._get_chart_config("scatter", "lines+markers")
@@ -438,6 +440,7 @@ class _Factory:
                 ("render", PropertyType.dynamic_boolean, True),
                 ("height", PropertyType.dynamic_string),
                 ("content", PropertyType.toHtmlContent),
+                ("width", PropertyType.string_or_number),
             ]
         ),
         "selector": lambda gui, control_type, attrs: _Builder(
@@ -481,7 +484,7 @@ class _Factory:
                 ("orientation",),
                 ("width", PropertyType.string, "300px"),
                 ("on_change", PropertyType.function),
-                ("continuous", PropertyType.boolean, True),
+                ("continuous", PropertyType.boolean, None),
                 ("lov", PropertyType.lov),
                 ("change_delay", PropertyType.number, gui._get_config("change_delay", None)),
             ]

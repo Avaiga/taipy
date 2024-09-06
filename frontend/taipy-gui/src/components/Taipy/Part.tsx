@@ -16,7 +16,7 @@ import Box from "@mui/material/Box";
 
 import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import TaipyRendered from "../pages/TaipyRendered";
-import { TaipyBaseProps } from "./utils";
+import { expandSx, getCssSize, TaipyBaseProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 
 interface PartProps extends TaipyBaseProps {
@@ -29,6 +29,7 @@ interface PartProps extends TaipyBaseProps {
     partial?: boolean;
     height?: string;
     defaultHeight?: string;
+    width?: string | number;
 }
 
 const IframeStyle = {
@@ -55,7 +56,7 @@ const Part = (props: PartProps) => {
         return false;
     }, [state.locations, page, defaultPartial]);
 
-    const boxSx = useMemo(() => (height ? { height: height } : undefined), [height]);
+    const boxSx = useMemo(() => expandSx({}, height ? { height: height } : undefined, props.width ? {width: getCssSize(props.width)}: undefined), [height, props.width]);
     return render ? (
         <Box id={id} className={className} sx={boxSx}>
             {iFrame ? (

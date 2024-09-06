@@ -17,7 +17,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SortByAlpha from "@mui/icons-material/SortByAlpha";
 import Badge from "@mui/material/Badge";
 import FormControl from "@mui/material/FormControl";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -129,8 +129,8 @@ const SortRow = (props: SortRowProps) => {
     }, [columns, sort, idx]);
 
     return cols.length ? (
-        <Grid container item xs={12} alignItems="center">
-            <Grid item xs={6}>
+        <Grid container size={12} alignItems="center">
+            <Grid size={6}>
                 <FormControl margin="dense">
                     <InputLabel>Column</InputLabel>
                     <Select value={colId || ""} onChange={onColSelect} input={<OutlinedInput label="Column" />}>
@@ -142,13 +142,13 @@ const SortRow = (props: SortRowProps) => {
                     </Select>
                 </FormControl>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={4}>
                 <Switch checked={order} onChange={onOrderSwitch} />
                 <Typography variant="caption" color="text.secondary" sx={orderCaptionSx}>
                     {order ? "asc" : "desc"}
                 </Typography>
             </Grid>
-            <Grid item xs={1}>
+            <Grid size={1}>
                 <Tooltip title="Validate">
                     <span>
                         <IconButton onClick={onCheckClick} disabled={!enableCheck} sx={iconInRowSx}>
@@ -157,7 +157,7 @@ const SortRow = (props: SortRowProps) => {
                     </span>
                 </Tooltip>
             </Grid>
-            <Grid item xs={1}>
+            <Grid size={1}>
                 <Tooltip title="Delete">
                     <span>
                         <IconButton onClick={onDeleteClick} disabled={!enableDel} sx={iconInRowSx}>
