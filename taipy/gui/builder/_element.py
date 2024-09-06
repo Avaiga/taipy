@@ -24,7 +24,6 @@ from collections.abc import Iterable
 from types import FrameType, FunctionType
 
 from .._warnings import _warn
-from ..data.utils import Decimator
 from ..utils import _getscopeattr
 
 if sys.version_info < (3, 9):
@@ -100,7 +99,7 @@ class _Element(ABC):
             if (lambda_name := self.__parse_lambda_property(key, value)) is not None:
                 return lambda_name
         # Embed value in the caller frame
-        if isinstance(value, Decimator) and "decimator" in key:
+        if not isinstance(value, str) and "decimator" in key:
             return self.__embed_object(value, is_expression=False)
         if hasattr(value, "__name__"):
             return str(getattr(value, "__name__"))  # noqa: B009
