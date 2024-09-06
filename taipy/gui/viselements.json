@@ -1888,7 +1888,7 @@
                         "name": "show_button",
                         "type": "bool",
                         "default_value": "False",
-                        "doc": "if True, a button that allows to open the pane is shown when the pane is closed."
+                        "doc": "If True and when the pane is closed, a button allowing the pane to be opened is shown."
                     }
                 ]
             }
