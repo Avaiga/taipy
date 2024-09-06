@@ -157,7 +157,16 @@ class _FileDataNodeMixin(object):
             return reason_collection
 
         if upload_checker is not None:
-            if not upload_checker(upload_path.name, upload_data):
+            try:
+                can_upload = upload_checker(upload_path.name, upload_data)
+            except Exception as err:
+                self.__logger.error(
+                    f"Error while checking if {upload_path.name} can be uploaded to data node {self.id}"  # type: ignore[attr-defined]
+                    f" using the upload checker {upload_checker.__name__}: {err}"
+                )
+                can_upload = False
+
+            if not can_upload:
                 reason_collection._add_reason(self.id, InvalidUploadFile(upload_path.name, self.id))  # type: ignore[attr-defined]
                 return reason_collection
 
