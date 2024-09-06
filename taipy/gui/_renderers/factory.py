@@ -427,6 +427,7 @@ class _Factory:
                 ("height", PropertyType.string_or_number, "30vh"),
                 ("hover_text", PropertyType.dynamic_string),
                 ("on_change", PropertyType.function),
+                ("show_button", PropertyType.boolean, False),
             ]
         )
         ._set_propagate(),

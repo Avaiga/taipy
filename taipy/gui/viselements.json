@@ -1883,6 +1883,12 @@
                         "type": "bool",
                         "default_value": "False",
                         "doc": "If False, the pane covers the page where it appeared and disappears if the user clicks in the page.<br/>If True, the pane appears next to the page. Note that the parent section of the pane must have the <i>flex</i> display mode set. See below for an example using the <code>persistent</code> property."
+                    },
+                    {
+                        "name": "show_button",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True and when the pane is closed, a button allowing the pane to be opened is shown."
                     }
                 ]
             }

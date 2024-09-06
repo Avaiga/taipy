@@ -140,7 +140,7 @@ describe("Pane Component", () => {
     it("dispatch a well formed message on close", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
-        const { getByText } = render(
+        render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <HelmetProvider>
                     <Pane id="testId" page="page" open={true} onClose="testCloseAction" />
@@ -152,7 +152,7 @@ describe("Pane Component", () => {
         elt && await userEvent.click(elt);
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "testId",
-            payload: { action: "testCloseAction", args: [] },
+            payload: { action: "testCloseAction", args: [false] },
             type: "SEND_ACTION_ACTION",
         });
     });
@@ -177,4 +177,20 @@ describe("Pane Component", () => {
             type: "SEND_UPDATE_ACTION",
         });
     });
+    it("shows a button when closed with property", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByRole } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <HelmetProvider>
+                    <Pane page="page" open={false} showButton={true} persistent={true} onClose="testCloseAction" />
+                </HelmetProvider>
+            </TaipyContext.Provider>
+        );
+        const elt = document.querySelector(".MuiBackdrop-root");
+        expect(elt).toBeNull();
+        const but = getByRole("button");
+        expect(but).not.toBeDisabled();
+    });
+
 });
