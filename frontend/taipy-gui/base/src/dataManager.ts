@@ -6,7 +6,10 @@ export interface VarData {
     type: string;
     value: unknown;
     encoded_name: string;
+    request_update: boolean;
 }
+
+const RU_DATA_EVENT_KEY_SEP = "__tPy_RU__";
 
 // This class hold the information of variables and real-time value of variables
 export class DataManager {
@@ -14,10 +17,13 @@ export class DataManager {
     _data: Record<string, unknown>;
     // Initial data fetched from taipy-gui backend
     _init_data: ModuleData;
+    // key: encodedName + RU_DATA_EVENT_KEY_SEP + dataEventKey, value: requested data
+    _requested_data: Record<string, unknown>;
 
     constructor(variableModuleData: ModuleData) {
         this._data = {};
         this._init_data = {};
+        this._requested_data = {};
         this.init(variableModuleData);
     }
 
@@ -53,6 +59,10 @@ export class DataManager {
         return changes;
     }
 
+    addRequestedData(encodedName: string, dataEventKey: string, value: unknown) {
+        this._requested_data[this.getRequestedDataName(encodedName, dataEventKey)] = value;
+    }
+
     getEncodedName(varName: string, module: string): string | undefined {
         if (module in this._init_data && varName in this._init_data[module]) {
             return this._init_data[module][varName].encoded_name;
@@ -75,9 +85,21 @@ export class DataManager {
 
     get(encodedName: string): unknown {
         if (!(encodedName in this._data)) {
-            throw new Error(`${encodedName} is not available in Taipy Gui`);
+            throw new Error(`${encodedName} is not available in Taipy GUI`);
         }
         return this._data[encodedName];
+    }
+
+    getRequestedData(encodedName: string, dataEventKey: string): unknown {
+        const key = this.getRequestedDataName(encodedName, dataEventKey);
+        if (!(key in this._requested_data)) {
+            throw new Error(`${key} is not available in Taipy GUI`);
+        }
+        return this._requested_data[key];
+    }
+
+    getRequestedDataName(encodedName: string, dataEventKey: string): string {
+        return encodedName + RU_DATA_EVENT_KEY_SEP + dataEventKey;
     }
 
     getInfo(encodedName: string): VarData | undefined {

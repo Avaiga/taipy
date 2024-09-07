@@ -31,6 +31,7 @@ from types import FrameType, FunctionType, LambdaType, ModuleType, SimpleNamespa
 from urllib.parse import unquote, urlencode, urlparse
 
 import markdown as md_lib
+import pandas as pd
 import tzlocal
 from flask import (
     Blueprint,
@@ -1178,6 +1179,8 @@ class Gui:
     def __get_variable_tree(self, data: t.Dict[str, t.Any]):
         # Module Context -> Variable -> Variable data (name, type, initial_value)
         variable_tree: t.Dict[str, t.Dict[str, t.Dict[str, t.Any]]] = {}
+        # Types of data to be handled by the data layer and filtered out here
+        filtered_value_types = (pd.DataFrame,)
         for k, v in data.items():
             if isinstance(v, _TaipyBase):
                 data[k] = v.get()
@@ -1186,10 +1189,13 @@ class Gui:
                 var_module_name = "__main__"
             if var_module_name not in variable_tree:
                 variable_tree[var_module_name] = {}
+            request_update = isinstance(v, filtered_value_types)
+            value = None if request_update else data[k]
             variable_tree[var_module_name][var_name] = {
                 "type": type(v).__name__,
-                "value": data[k],
+                "value": value,
                 "encoded_name": k,
+                "request_update": request_update,
             }
         return variable_tree
 
@@ -2768,7 +2774,7 @@ class Gui:
             run_in_thread=app_config["run_in_thread"],
             allow_unsafe_werkzeug=app_config["allow_unsafe_werkzeug"],
             notebook_proxy=app_config["notebook_proxy"],
-            port_auto_ranges=app_config["port_auto_ranges"]
+            port_auto_ranges=app_config["port_auto_ranges"],
         )
 
     def reload(self):  # pragma: no cover

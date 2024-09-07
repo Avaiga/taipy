@@ -23,6 +23,7 @@ export type OnEvent =
     | OnWsMessage
     | OnWsStatusUpdate;
 type Route = [string, string];
+type RequestDataCallback = (taipyApp: TaipyApp, encodedName: string, dataEventKey: string, value: unknown) => void;
 
 export class TaipyApp {
     socket: Socket;
@@ -33,6 +34,7 @@ export class TaipyApp {
     _onWsMessage: OnWsMessage | undefined;
     _onWsStatusUpdate: OnWsStatusUpdate | undefined;
     _ackList: string[];
+    _rdc: Record<string, RequestDataCallback>;
     variableData: DataManager | undefined;
     functionData: DataManager | undefined;
     appId: string;
@@ -63,6 +65,7 @@ export class TaipyApp {
         this.socket = socket;
         this.wsAdapters = [new TaipyWsAdapter()];
         this._ackList = [];
+        this._rdc = {};
         // Init socket io connection
         initSocket(socket, this);
     }
@@ -187,6 +190,10 @@ export class TaipyApp {
         this.wsAdapters.unshift(wsAdapter);
     }
 
+    addRequestedData(encodedName: string, dataEventKey: string, value: unknown) {
+        this.variableData?.addRequestedData(encodedName, dataEventKey, value);
+    }
+
     getEncodedName(varName: string, module: string) {
         return this.variableData?.getEncodedName(varName, module);
     }
@@ -197,6 +204,14 @@ export class TaipyApp {
 
     get(encodedName: string) {
         return this.variableData?.get(encodedName);
+    }
+
+    getRequestedData(encodedName: string, dataEventKey: string) {
+        return this.variableData?.getRequestedData(encodedName, dataEventKey);
+    }
+
+    getRequestedDataName(encodedName: string, dataEventKey: string) {
+        return this.variableData?.getRequestedDataName(encodedName, dataEventKey) || "";
     }
 
     getInfo(encodedName: string) {
@@ -224,6 +239,21 @@ export class TaipyApp {
     // the actual update will be handled when the backend responds
     update(encodedName: string, value: unknown) {
         this.sendWsMessage("U", encodedName, { value: value });
+    }
+
+    // Request Data from taipy backend
+    // This will trigger the backend to send the data to the frontend
+    requestData(encodedName: string, cb: RequestDataCallback) {
+        const varInfo = this.getInfo(encodedName);
+        if (!varInfo?.request_update) {
+            throw new Error(`Cannot request data for ${encodedName}. Not supported for type of ${varInfo?.type}`);
+        }
+        // generate event key
+        const dataEventKey = "";
+        // preserve callback so it can be called later
+        this._rdc[this.getRequestedDataName(encodedName, dataEventKey)] = cb;
+        // call the ws to request data
+        this.sendWsMessage("RU", encodedName, {});
     }
 
     getContext() {

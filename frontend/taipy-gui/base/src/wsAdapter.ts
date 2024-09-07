@@ -25,7 +25,7 @@ export class TaipyWsAdapter extends WsAdapter {
     initWsMessageTypes: string[];
     constructor() {
         super();
-        this.supportedMessageTypes = ["MU", "ID", "GMC", "GDT", "AID", "GR", "AL", "ACK"];
+        this.supportedMessageTypes = ["MU", "ID", "GMC", "GDT", "AID", "GR", "AL", "ACK", "RU"];
         this.initWsMessageTypes = ["ID", "AID", "GMC"];
     }
     handleWsMessage(message: WsMessage, taipyApp: TaipyApp): boolean {
@@ -85,6 +85,22 @@ export class TaipyWsAdapter extends WsAdapter {
                 const { id } = message as unknown as Record<string, string>;
                 taipyApp._ackList = taipyApp._ackList.filter((v) => v !== id);
                 taipyApp.onWsStatusUpdateEvent(taipyApp._ackList);
+            } else if (message.type === "RU") {
+                const payload = message.payload as Record<string, unknown>;
+                // process to get data
+                const data = {};
+                const encodedName = "";
+                const dataEventKey = "";
+                // add data to cache
+                taipyApp.addRequestedData(encodedName, dataEventKey, data);
+                // get and execute callback
+                const callbackName = taipyApp.getRequestedDataName(encodedName, dataEventKey);
+                const requestedDataCallback = taipyApp._rdc[callbackName];
+                if (requestedDataCallback) {
+                    requestedDataCallback(taipyApp, encodedName, dataEventKey, data);
+                    // remove callback after usage
+                    delete taipyApp._rdc[callbackName];
+                }
             }
             this.postWsMessageProcessing(message, taipyApp);
             return true;
