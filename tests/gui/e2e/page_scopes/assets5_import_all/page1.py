@@ -1,7 +1,7 @@
 from taipy.gui import Markdown
 
-from .folder1.content1 import a, update_a
-from .folder1.content2 import *
+from .folder1.content1 import a, update_a  # noqa: F401
+from .folder1.content2 import *  # noqa: F403
 
 page = Markdown(
 """
