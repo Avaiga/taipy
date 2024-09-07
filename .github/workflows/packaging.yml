@@ -12,6 +12,9 @@ on:
         required: false
         default: ""
 
+env:
+  NODE_OPTIONS: --max-old-space-size=4096
+
 jobs:
   standard-packages:
     timeout-minutes: 30

@@ -49,7 +49,7 @@ has the name that the Python script has created it with, the equivalent to this 
 on the front-end might have a different name, for technical reasons.
 
 Note that controls that hold dynamic properties have two generated properties called
-*updateVars* and *updateVarName*, that are used to ensure a proper update of variable changes. The function [getUpdateVar()](modules/#getupdatevar) uses that property.
+*updateVars* and *updateVarName*, that are used to ensure a proper update of variable changes. The function [getUpdateVar()](functions/getUpdateVar.md) uses that property.
 
 Components dynamic properties are tied to the State: all updates of the State will
 automatically be propagated to the relevant components and the component is in charge

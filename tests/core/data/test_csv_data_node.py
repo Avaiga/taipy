@@ -249,6 +249,20 @@ class TestCSVDataNode:
         assert dn.last_edit_date > old_last_edit_date
         assert dn.path == old_csv_path  # The path of the dn should not change
 
+    def test_upload_with_upload_check_with_exception(self, csv_file, tmpdir_factory, caplog):
+        old_csv_path = tmpdir_factory.mktemp("data").join("df.csv").strpath
+        dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": old_csv_path, "exposed_type": "pandas"})
+
+        def check_with_exception(upload_path, upload_data):
+            raise Exception("An error with check_with_exception")
+
+        reasons = dn._upload(csv_file, upload_checker=check_with_exception)
+        assert bool(reasons) is False
+        assert (
+            f"Error while checking if df.csv can be uploaded to data node {dn.id} using "
+            "the upload checker check_with_exception: An error with check_with_exception" in caplog.text
+        )
+
     def test_upload_with_upload_check_pandas(self, csv_file, tmpdir_factory):
         old_csv_path = tmpdir_factory.mktemp("data").join("df.csv").strpath
         old_data = pd.DataFrame([{"a": 0, "b": 1, "c": 2}, {"a": 3, "b": 4, "c": 5}])

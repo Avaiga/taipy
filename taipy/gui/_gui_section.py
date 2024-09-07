@@ -52,8 +52,8 @@ class _GuiSection(UniqueSection):
 
         Parameters:
             **properties (dict[str, any]): Keyword arguments that configure the behavior of the `Gui^` instances.<br/>
-                Please refer to the
-                [Configuration section](../../userman/configuration/gui-config.md#configuring-the-gui-instance)
+                Please refer to the gui config section
+                [page](../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
                 of the User Manual for more information on the accepted arguments.
         Returns:
             The GUI configuration.
