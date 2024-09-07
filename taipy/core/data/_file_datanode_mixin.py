@@ -20,7 +20,7 @@ from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._entity._reload import _self_reload
-from ..reason import InvalidUploadFile, ReasonCollection, UploadFileCanNotBeRead
+from ..reason import InvalidUploadFile, NoFileToDownload, NotAFile, ReasonCollection, UploadFileCanNotBeRead
 from .data_node import DataNode
 from .data_node_id import Edit
 
@@ -97,6 +97,28 @@ class _FileDataNodeMixin(object):
             shutil.move(old_path, new_path)
         return new_path
 
+    def is_downloadable(self) -> ReasonCollection:
+        """Check if the data node is downloadable.
+
+        Returns:
+            A `ReasonCollection^` object containing the reasons why the data node is not downloadable.
+        """
+        collection = ReasonCollection()
+        if not os.path.exists(self.path):
+            collection._add_reason(self.id, NoFileToDownload(self.path, self.id))  # type: ignore[attr-defined]
+        elif not isfile(self.path):
+            collection._add_reason(self.id, NotAFile(self.path, self.id))  # type: ignore[attr-defined]
+        return collection
+
+    def is_uploadable(self) -> ReasonCollection:
+        """Check if the data node is uploadable.
+
+        Returns:
+            A `ReasonCollection^` object containing the reasons why the data node is not uploadable.
+        """
+
+        return ReasonCollection()
+
     def _get_downloadable_path(self) -> str:
         """Get the downloadable path of the file data of the data node.
 
@@ -135,7 +157,16 @@ class _FileDataNodeMixin(object):
             return reason_collection
 
         if upload_checker is not None:
-            if not upload_checker(upload_path.name, upload_data):
+            try:
+                can_upload = upload_checker(upload_path.name, upload_data)
+            except Exception as err:
+                self.__logger.error(
+                    f"Error while checking if {upload_path.name} can be uploaded to data node {self.id}"  # type: ignore[attr-defined]
+                    f" using the upload checker {upload_checker.__name__}: {err}"
+                )
+                can_upload = False
+
+            if not can_upload:
                 reason_collection._add_reason(self.id, InvalidUploadFile(upload_path.name, self.id))  # type: ignore[attr-defined]
                 return reason_collection
 

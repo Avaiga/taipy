@@ -243,7 +243,7 @@ export class TaipyApp {
     }
 
     upload(encodedName: string, files: FileList, progressCallback: (val: number) => void) {
-        return uploadFile(encodedName, files, progressCallback, this.clientId);
+        return uploadFile(encodedName, undefined, undefined, undefined, files, progressCallback, this.clientId);
     }
 
     getPageMetadata() {

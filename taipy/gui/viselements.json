@@ -674,6 +674,25 @@
                         "name": "figure",
                         "type": "dynamic(plotly.graph_objects.Figure)",
                         "doc": "A figure as produced by plotly."
+                    },
+                    {
+                        "name": "on_click",
+                        "type": "Callable",
+                        "doc": "The callback that is invoked when the user clicks in the chart background.<br/>The function receives three parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the chart control if it has one.</li>\n<li>payload (dict[str, any]): a dictionary containing the <i>x</i> and <i>y</i> coordinates of the click <b>or</b> <i>latitude</i> and <i>longitude</i> in the case of a map. This feature relies on non-public Plotly structured information.</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
                     }
                 ]
             }
@@ -1485,7 +1504,7 @@
                         "name": "lov",
                         "default_property": true,
                         "type": "dict[str, any]",
-                        "doc": "The list of pages. The keys should be:\n<ul>\n<li>page id (start with \"/\")</li>\n<li>or full URL</li>\n</ul>\nThe values are labels. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
+                        "doc": "The list of pages. The keys should be:\n<ul>\n<li>page id (start with \"/\")</li>\n<li>or full URL</li>\n</ul>\nThe values are labels. See the <a href=\"../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for details."
                     }
                 ]
             }
@@ -1571,7 +1590,7 @@
                     {
                         "name": "users",
                         "type": "dynamic(list[Union[str,Icon]])",
-                        "doc": "The list of users. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
+                        "doc": "The list of users. See the <a href=\"../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for details."
                     },
                     {
                         "name": "sender_id",
@@ -1614,6 +1633,12 @@
                         "name": "height",
                         "type": "Union[str,int,float]",
                         "doc": "The maximum height of this chat control, in CSS units."
+                    },
+                    {
+                        "name": "show_sender",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the sender avatar and name is not displayed."
                     }
                 ]
             }
@@ -1858,6 +1883,12 @@
                         "type": "bool",
                         "default_value": "False",
                         "doc": "If False, the pane covers the page where it appeared and disappears if the user clicks in the page.<br/>If True, the pane appears next to the page. Note that the parent section of the pane must have the <i>flex</i> display mode set. See below for an example using the <code>persistent</code> property."
+                    },
+                    {
+                        "name": "show_button",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True and when the pane is closed, a button allowing the pane to be opened is shown."
                     }
                 ]
             }
@@ -1893,7 +1924,7 @@
                     {
                         "name": "lov",
                         "type": "dict[str, any]",
-                        "doc": "The list of values. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
+                        "doc": "The list of values. See the <a href=\"../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for details."
                     },
                     {
                         "name": "adapter",

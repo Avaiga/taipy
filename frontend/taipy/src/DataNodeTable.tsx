@@ -22,7 +22,7 @@ import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import InputLabel from "@mui/material/InputLabel";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import ListItemText from "@mui/material/ListItemText";
@@ -150,7 +150,7 @@ const DataNodeTable = (props: DataNodeTableProps) => {
     return (
         <>
             <Grid container sx={tabularHeaderSx}>
-                <Grid item>
+                <Grid>
                     <Box className="taipy-toggle">
                         <ToggleButtonGroup onChange={onViewTypeChange} exclusive value={TableViewType} color="primary">
                             <ToggleButton value={TableViewType}>
@@ -162,7 +162,7 @@ const DataNodeTable = (props: DataNodeTableProps) => {
                         </ToggleButtonGroup>
                     </Box>
                 </Grid>
-                <Grid item>
+                <Grid>
                     <FormControl sx={selectSx} fullWidth className="taipy-selector">
                         <InputLabel id={uniqid + "-cols-label"}>Columns</InputLabel>
                         <Select
@@ -184,7 +184,7 @@ const DataNodeTable = (props: DataNodeTableProps) => {
                         </Select>
                     </FormControl>
                 </Grid>
-                <Grid item>
+                <Grid>
                     <Button
                         onClick={resetCols}
                         variant="text"
@@ -196,11 +196,11 @@ const DataNodeTable = (props: DataNodeTableProps) => {
                     </Button>
                 </Grid>
                 {tableEdit ? (
-                    <Grid item sx={pushRightSx}>
+                    <Grid sx={pushRightSx}>
                         <TextField value={comment} onChange={changeComment} label="Comment"></TextField>
                     </Grid>
                 ) : null}
-                <Grid item sx={tableEdit ? undefined : pushRightSx}>
+                <Grid sx={tableEdit ? undefined : pushRightSx}>
                     <FormControlLabel
                         disabled={!props.active || !!notEditableReason || !!props.editInProgress}
                         control={<Switch color="primary" checked={tableEdit} onChange={toggleTableEdit} />}

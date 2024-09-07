@@ -219,6 +219,10 @@ class _GuiCore(ElementLibrary):
                 "class_name": ElementProperty(PropertyType.dynamic_string),
                 "scenario": ElementProperty(PropertyType.lov_value, "optional"),
                 "width": ElementProperty(PropertyType.string),
+                "file_download": ElementProperty(PropertyType.boolean, False),
+                "file_upload": ElementProperty(PropertyType.boolean, False),
+                "upload_check": ElementProperty(PropertyType.function),
+                "show_owner_label": ElementProperty(PropertyType.boolean, False),
             },
             inner_properties={
                 "on_edit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.edit_data_node}}"),
@@ -259,6 +263,7 @@ class _GuiCore(ElementLibrary):
                     PropertyType.function, f"{{{__CTX_VAR_NAME}.tabular_data_edit}}"
                 ),
                 "on_lock": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.lock_datanode_for_edit}}"),
+                "on_file_action": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.on_file_action}}"),
                 "update_dn_vars": ElementProperty(
                     PropertyType.string,
                     f"data_id={__DATANODE_VIZ_DATA_ID_VAR}<tp:uniq:dn>;"

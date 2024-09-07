@@ -48,8 +48,8 @@ application.
     add functionality to Taipy GUI:
 
     - [`python-magic`](https://pypi.org/project/python-magic/): identifies image format
-      from byte buffers so the [`image`](../../../userman/gui/viselements/generic/image.md) control can
-      display them, and so that [`file_download`](../../../userman/gui/viselements/generic/file_download.md)
+      from byte buffers so the [`image`](../../../refmans/gui/viselements/generic/image.md) control can
+      display them, and so that [`file_download`](../../../refmans/gui/viselements/generic/file_download.md)
       can request the browser to display the image content when relevant.<br/>
       You can install that package with the regular `pip install python-magic` command
       (then potentially `pip install python-magic` on Windows),

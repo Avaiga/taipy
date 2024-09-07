@@ -1,7 +1,7 @@
 backports.zoneinfo>=0.2.1,<=0.2.1;python_version<'3.9'
 charset-normalizer>=3.3.2,<=3.3.2
 flask>=3.0.0,<=3.0.3
-flask-cors>=4.0.0,<=4.0.1
+flask-cors>=5.0.0,<5.1
 flask-socketio>=5.3.6,<=5.3.6
 gevent>=23.7.0,<=24.2.1
 gevent-websocket>=0.10.1,<=0.10.1

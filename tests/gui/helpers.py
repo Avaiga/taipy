@@ -153,6 +153,7 @@ class Helpers:
                 run_in_thread=True,
                 allow_unsafe_werkzeug=False,
                 notebook_proxy=False,
+                port_auto_ranges=gui._get_config("port_auto_ranges", None),
             )
         while not Helpers.port_check():
             time.sleep(0.1)

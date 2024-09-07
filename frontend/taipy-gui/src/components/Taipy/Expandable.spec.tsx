@@ -33,7 +33,7 @@ describe("Expandable Component", () => {
             </Expandable>
         );
         const elt = getByText("foo");
-        expect(elt.parentElement?.parentElement).toHaveClass("taipy-expandable");
+        expect(elt.parentElement?.parentElement?.parentElement).toHaveClass("taipy-expandable");
     });
     it("displays the default value", async () => {
         const { getByText } = render(
