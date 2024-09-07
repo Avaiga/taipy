@@ -44,6 +44,7 @@ class _Element(ABC):
     __RE_INDEXED_PROPERTY = re.compile(r"^(.*?)__([\w\d]+)$")
     _NEW_LAMBDA_NAME = "new_lambda"
     _TAIPY_EMBEDDED_PREFIX = "_tp_embedded_"
+    _EMBEDED_PROPERTIES = ["decimator"]
 
     def __new__(cls, *args, **kwargs):
         obj = super(_Element, cls).__new__(cls)
@@ -99,7 +100,7 @@ class _Element(ABC):
             if (lambda_name := self.__parse_lambda_property(key, value)) is not None:
                 return lambda_name
         # Embed value in the caller frame
-        if not isinstance(value, str) and "decimator" in key:
+        if not isinstance(value, str) and key in self._EMBEDED_PROPERTIES:
             return self.__embed_object(value, is_expression=False)
         if hasattr(value, "__name__"):
             return str(getattr(value, "__name__"))  # noqa: B009
@@ -140,7 +141,7 @@ class _Element(ABC):
             _warn("Error in lambda expression", e)
         return None
 
-    def __embed_object(self, obj: t.Any, is_expression = True) -> str:
+    def __embed_object(self, obj: t.Any, is_expression=True) -> str:
         """Embed an object in the caller frame
 
         Return the Taipy expression of the embedded object
