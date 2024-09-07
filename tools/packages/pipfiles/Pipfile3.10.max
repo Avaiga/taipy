@@ -61,7 +61,7 @@ version = "==4.2.13"
 "backports.zoneinfo" = {version="==0.2.1", markers="python_version<'3.9'"}
 "cookiecutter" = {version="==2.6.0"}
 "flask" = {version="==3.0.3"}
-"flask-cors" = {version="==4.0.1"}
+"flask-cors" = {version="==5.0.0"}
 "flask-socketio" = {version="==5.3.6"}
 "markdown" = {version="==3.6"}
 "python-dotenv" = {version="==1.0.1"}
