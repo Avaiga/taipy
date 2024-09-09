@@ -229,6 +229,16 @@ class _Server:
         template_str = _Server.__RE_CLOSING_CURLY.sub(_Server.__CLOSING_CURLY, template_str)
         template_str = template_str.replace('"{!', "{")
         template_str = template_str.replace('!}"', "}")
+        if isinstance(style, dict):
+            style_arr = []
+            for k, v in style.items():
+                if isinstance(v, dict):
+                    rules= []
+                    for vk, vv in v.items():
+                        rules.append(f'{vk}:{vv};')
+                    if rules:
+                        style_arr.append(f"{k}{{{''.join(rules)}}}")
+            style = os.linesep.join(style_arr) if style_arr else None
         return self._direct_render_json(
             {
                 "jsx": template_str,
