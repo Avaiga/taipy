@@ -18,7 +18,7 @@ from taipy.gui import Gui
 show_pane = False
 
 
-# When the button is pressed, set the variable controling the pane visibility to True
+# When the button is pressed, set the variable controlling the pane visibility to True
 def on_action(state):
     state.show_pane = True
 
