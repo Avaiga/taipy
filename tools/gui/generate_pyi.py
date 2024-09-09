@@ -153,7 +153,7 @@ def build_doc(name: str, desc: Dict[str, Any]):
     doc = doc.replace("\\[", "[").replace("\\-", "-").replace("\\_", "_").replace("\\*", "*")
     # Final dots are prefixed with a \
     doc = re.sub(r"\\.$", ".", doc)
-    # Link anchors # signes are prefixed with a \
+    # Link anchors # signs are prefixed with a \
     doc = re.sub(r"\\(#[a-z_]+\))", r"\1", doc)
     doc = re.sub(r"(?:\s+\\n)?\s+See below(?:[^\.]*)?\.", "", doc).replace("\n", "\\n")
     return f"{desc['name']}{desc['dynamic']}{desc['indexed']}\\n  {doc}\\n\\n"
