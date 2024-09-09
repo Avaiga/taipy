@@ -272,6 +272,9 @@ export const darkThemeTemplate = {
         mapbox: {
             style: "dark",
         },
+        map: {
+            style: "dark",
+        },
         paper_bgcolor: "rgb(17,17,17)",
         plot_bgcolor: "rgb(17,17,17)",
         polar: {
