@@ -260,14 +260,11 @@ class content(_Control):
     """
     Create a `content` pseudo-element
 
-    Arguments:
-            None
+    This pseudo-element can be used in the root page of your application. It is replaced at runtime
+    by the content of the page the user navigates to.
 
-        Examples:
-            - To generate `content`, use:
-               ```
-               content()
-               ```
+    The usage of this peuse-element is descripted in
+    [this page](../../userman/gui/pages/index.md#application-header-and-footer).
     """
 
     def _render(self, gui: "Gui") -> str:

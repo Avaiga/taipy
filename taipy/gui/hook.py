@@ -10,6 +10,7 @@ class Hook:
 
 
 class Hooks(object, metaclass=_Singleton):
+    """NOT DOCUMENTED"""
     def __init__(self):
         self.__hooks: t.List[Hook] = []  # type: ignore[annotation-unchecked]
 

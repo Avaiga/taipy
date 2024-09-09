@@ -9,5 +9,10 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+"""# Taipy GUI for Scenario Management
+
+This package provides classes that can be used in GUI controls dedicated to scenario management.
+"""
+
 from ._adapters import CustomScenarioFilter, DataNodeFilter, DataNodeScenarioFilter, ScenarioFilter
 from ._init import *
