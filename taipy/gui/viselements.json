@@ -1323,11 +1323,6 @@
                         "default_property": true
                     },
                     {
-                        "name": "color",
-                        "type": "str",
-                        "doc": "The color of the progress indicator."
-                    },
-                    {
                         "name": "linear",
                         "type": "bool",
                         "default_value": "False",
@@ -1343,6 +1338,11 @@
                         "name": "title",
                         "type": "dynamic(str)",
                         "doc": "The title of the progress indicator."
+                    },
+                    {
+                        "name": "color",
+                        "type": "str",
+                        "doc": "The color of the progress indicator."
                     },
                     {
                         "name": "title_anchor",

@@ -88,7 +88,15 @@ const Progress = (props: ProgressBarProps) => {
                 ) : null}
                 <Box sx={{ ...linearSx, width: getBoxWidth(title, titleAnchor) }} className={className} id={props.id}>
                     <Box sx={linearPrgSx}>
-                        <LinearProgress variant="determinate" value={value} />
+                        <LinearProgress
+                            sx={{
+                                "& .MuiLinearProgress-bar": {
+                                    background: props.color ? props.color : undefined,
+                                },
+                            }}
+                            variant="determinate"
+                            value={value}
+                        />
                     </Box>
                     <Box sx={linearTxtSx}>
                         <Typography variant="body2" color="text.secondary">{`${Math.round(value)}%`}</Typography>
@@ -109,7 +117,15 @@ const Progress = (props: ProgressBarProps) => {
                     </Typography>
                 ) : null}
                 <Box sx={{ ...circularSx, width: getBoxWidth(title, titleAnchor) }} className={className} id={props.id}>
-                    <CircularProgress variant="determinate" value={value} />
+                    <CircularProgress
+                        sx={{
+                            "& .MuiCircularProgress-circle": {
+                                color: props.color ? props.color : undefined,
+                            },
+                        }}
+                        variant="determinate"
+                        value={value}
+                    />
                     <Box sx={circularPrgSx}>
                         <Typography variant="caption" component="div" color="text.secondary">
                             {`${Math.round(value)}%`}
@@ -127,7 +143,12 @@ const Progress = (props: ProgressBarProps) => {
             ) : null}
             <LinearProgress
                 id={props.id}
-                sx={{ width: "100%" }}
+                sx={{
+                    width: "100%",
+                    "& .MuiLinearProgress-bar": {
+                        background: props.color ? props.color : undefined,
+                    },
+                }}
                 variant={value === undefined ? "indeterminate" : "determinate"}
                 value={value}
                 className={className}
@@ -148,6 +169,11 @@ const Progress = (props: ProgressBarProps) => {
             ) : null}
             <CircularProgress
                 id={props.id}
+                sx={{
+                    "& .MuiCircularProgress-circle": {
+                        color: props.color ? props.color : undefined,
+                    },
+                }}
                 variant={value === undefined ? "indeterminate" : "determinate"}
                 value={value}
                 className={className}
