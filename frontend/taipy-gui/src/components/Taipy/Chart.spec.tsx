@@ -90,14 +90,14 @@ const mapConfig = JSON.stringify({
     traces: [["Lat", "Lon"]],
     xaxis: ["x"],
     yaxis: ["y"],
-    types: ["scattermapbox"],
+    types: ["scattermap"],
     modes: ["markers"],
     axisNames: [["lon", "lat"]],
 });
 
 const mapLayout = JSON.stringify({
     dragmode: "zoom",
-    mapbox: { style: "open-street-map", center: { lat: 38, lon: -90 }, zoom: 3 },
+    map: { style: "open-street-map", center: { lat: 38, lon: -90 }, zoom: 3 },
     margin: { r: 0, t: 0, b: 0, l: 0 },
 });
 

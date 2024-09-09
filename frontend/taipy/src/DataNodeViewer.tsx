@@ -196,6 +196,7 @@ interface DataNodeViewerProps {
     fileUpload?: boolean;
     uploadCheck?: string;
     onFileAction?: string;
+    showOwnerLabel?: boolean;
 }
 
 const dataValueFocus = "data-value";
@@ -251,6 +252,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         updateDnVars = "",
         fileDownload = false,
         fileUpload = false,
+        showOwnerLabel = false,
     } = props;
 
     const { state, dispatch } = useContext<Store>(Context);
@@ -682,7 +684,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
                         sx={AccordionSummarySx}
                     >
-                        <Stack direction="row" spacing={1} alignItems="center">
+                        <Stack direction="row" spacing={1} alignItems="baseline">
+                            {showOwnerLabel ? <Typography>{dnOwnerLabel} &gt;</Typography>: null}
                             <Typography>{dnLabel}</Typography>
                             <Typography fontSize="smaller">{dnType}</Typography>
                         </Stack>
@@ -952,11 +955,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                                 : "no date"}
                                                         </Typography>
                                                     </Grid>
-                                                    {edit[2] ? (
-                                                        <Grid size={12}>
-                                                            {edit[2]}
-                                                        </Grid>
-                                                    ) : null}
+                                                    {edit[2] ? <Grid size={12}>{edit[2]}</Grid> : null}
                                                     {edit[1] ? (
                                                         <Grid size={12}>
                                                             <Typography fontSize="smaller">{edit[1]}</Typography>
