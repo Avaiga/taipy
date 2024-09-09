@@ -22,11 +22,11 @@ import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import { TaipyBaseProps } from "./utils";
 
 interface ProgressBarProps extends TaipyBaseProps {
-    color?: string; //color of the progress indicator
-    linear?: boolean; //by default - false
-    showValue?: boolean; //by default - false
-    value?: number; //progress value
-    defaultValue?: number; //default progress value
+    color?: string;
+    linear?: boolean;
+    showValue?: boolean;
+    value?: number;
+    defaultValue?: number;
     render?: boolean;
     defaultRender?: boolean;
     title?: string;
@@ -88,16 +88,7 @@ const Progress = (props: ProgressBarProps) => {
                 ) : null}
                 <Box sx={{ ...linearSx, width: getBoxWidth(title, titleAnchor) }} className={className} id={props.id}>
                     <Box sx={linearPrgSx}>
-                        <LinearProgress
-                            sx={{
-                                "& .MuiLinearProgress-bar": {
-                                    background: props.color ? props.color : undefined,
-                                },
-                            }}
-                            data-progress={value}
-                            variant="determinate"
-                            value={value}
-                        />
+                        <LinearProgress variant="determinate" value={value} />
                     </Box>
                     <Box sx={linearTxtSx}>
                         <Typography variant="body2" color="text.secondary">{`${Math.round(value)}%`}</Typography>
@@ -118,16 +109,7 @@ const Progress = (props: ProgressBarProps) => {
                     </Typography>
                 ) : null}
                 <Box sx={{ ...circularSx, width: getBoxWidth(title, titleAnchor) }} className={className} id={props.id}>
-                    <CircularProgress
-                        sx={{
-                            "& .MuiCircularProgress-circle": {
-                                color: props.color ? props.color : undefined,
-                            },
-                        }}
-                        data-progress={value}
-                        variant="determinate"
-                        value={value}
-                    />
+                    <CircularProgress variant="determinate" value={value} />
                     <Box sx={circularPrgSx}>
                         <Typography variant="caption" component="div" color="text.secondary">
                             {`${Math.round(value)}%`}
@@ -145,16 +127,10 @@ const Progress = (props: ProgressBarProps) => {
             ) : null}
             <LinearProgress
                 id={props.id}
-                sx={{
-                    width: "100%",
-                    "& .MuiLinearProgress-bar": {
-                        background: props.color ? props.color : undefined,
-                    },
-                }}
+                sx={{ width: "100%" }}
                 variant={value === undefined ? "indeterminate" : "determinate"}
                 value={value}
                 className={className}
-                data-progress={value}
             />
         </Box>
     ) : (
@@ -172,15 +148,9 @@ const Progress = (props: ProgressBarProps) => {
             ) : null}
             <CircularProgress
                 id={props.id}
-                sx={{
-                    "& .MuiCircularProgress-circle": {
-                        color: props.color ? props.color : undefined,
-                    },
-                }}
                 variant={value === undefined ? "indeterminate" : "determinate"}
                 value={value}
                 className={className}
-                data-progress={value}
             />
         </Box>
     );
