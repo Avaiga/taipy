@@ -148,7 +148,7 @@ const Input = (props: TaipyInputProps) => {
                     evt.preventDefault();
                 }
             } else if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
-                const val = evt.currentTarget.querySelector("input")?.value;
+                const val = multiline ? evt.currentTarget.querySelector("textarea")?.value : evt.currentTarget.querySelector("input")?.value;
                 if (changeDelay > 0 && delayCall.current > 0) {
                     clearTimeout(delayCall.current);
                     delayCall.current = -1;
@@ -162,6 +162,7 @@ const Input = (props: TaipyInputProps) => {
         },
         [
             type,
+            multiline,
             actionKeys,
             step,
             stepMultiplier,
