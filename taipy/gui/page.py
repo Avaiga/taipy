@@ -74,6 +74,7 @@ class Page:
         # Special variables only use for page reloading in notebook context
         self._notebook_gui: t.Optional["Gui"] = None
         self._notebook_page: t.Optional["_Page"] = None
+        self.set_style(kwargs.get("style", None))
 
     def create_page(self) -> t.Optional[Page]:
         """Create the page content for page modules.
@@ -93,7 +94,7 @@ class Page:
     def set_content(self, content: str) -> None:
         """Set a new page content.
 
-        Reads the new page content and reinitializes the `Page^` instance to reflect the change.
+        Reads the new page content and re-initializes the `Page^` instance to reflect the change.
 
         !!! important
             This function can only be used in an IPython notebook context.
@@ -140,3 +141,18 @@ class Page:
         if self._renderer is not None:
             return self._renderer.render(gui)
         return "<h1>No renderer found for page</h1>"
+
+    def set_style(self, style: t.Dict[str, t.Dict[str, t.Any]]):
+        """Set the style for this page.
+
+        Arguments:
+            style (dict): A dict describing the style as CSS or Nested CSS.
+
+        Returns:
+            the current instance.
+        """
+        self.__style = style if isinstance(style, dict) else None
+        return self
+
+    def _get_style(self):
+        return self.__style
