@@ -118,9 +118,23 @@ const Input = (props: TaipyInputProps) => {
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const val = e.target.value;
             setValue(val);
-            dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
+            if (changeDelay === -1) {
+                return;
+            }
+            if (changeDelay === 0) {
+                Promise.resolve().then(() => {
+                    dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
+                });
+            }
+            if (delayCall.current > 0) {
+                clearTimeout(delayCall.current);
+            }
+            delayCall.current = window.setTimeout(() => {
+                delayCall.current = -1;
+                dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
+            }, changeDelay);
         },
-        [updateVarName, dispatch, propagate, onChange, module]
+        [changeDelay, dispatch, updateVarName, module, onChange, propagate]
     );
 
     const handleAction = useCallback(
@@ -148,7 +162,9 @@ const Input = (props: TaipyInputProps) => {
                     evt.preventDefault();
                 }
             } else if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
-                const val = multiline ? evt.currentTarget.querySelector("textarea")?.value : evt.currentTarget.querySelector("input")?.value;
+                const val = multiline
+                    ? evt.currentTarget.querySelector("textarea")?.value
+                    : evt.currentTarget.querySelector("input")?.value;
                 if (changeDelay > 0 && delayCall.current > 0) {
                     clearTimeout(delayCall.current);
                     delayCall.current = -1;
@@ -321,8 +337,10 @@ const Input = (props: TaipyInputProps) => {
                 className={className}
                 type={showPassword && type == "password" ? "text" : type}
                 id={id}
-                inputProps={inputProps}
-                InputProps={muiInputProps}
+                slotProps={{
+                    htmlInput: inputProps,
+                    input: muiInputProps,
+                }}
                 label={props.label}
                 onChange={handleInput}
                 disabled={!active}
