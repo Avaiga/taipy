@@ -24,8 +24,28 @@ export type OnEvent =
     | OnWsStatusUpdate;
 type Route = [string, string];
 type RequestDataCallback = (taipyApp: TaipyApp, encodedName: string, dataEventKey: string, value: unknown) => void;
+type ColumnName = string;
+type RequestOptions = {
+    columns?: Array<ColumnName>;
+    pagekey?: string;
+    alldata?: boolean;
+    start?: number;
+    end?: number;
+    filters?: Array<{ col: ColumnName; value: string | boolean | number; action: string }>;
+    aggregates?: Array<ColumnName>;
+    applies?: { [key: ColumnName]: string };
+    infinite?: boolean;
+    reverse?: boolean;
+    orderby?: ColumnName;
+    sort?: "asc" | "desc";
+    styles?: { [key: ColumnName]: string };
+    tooltips?: { [key: ColumnName]: string };
+    handlenan?: boolean;
+    compare_datas?: string;
+};
 
-const getPageKey = (payload: unknown) => (payload !== null && typeof payload == "object" && "pagekey" in payload && payload["pagekey"] as string) || "";
+const getPageKey = (payload?: unknown) =>
+    (!!payload && typeof payload == "object" && "pagekey" in payload && (payload["pagekey"] as string)) || "";
 
 export class TaipyApp {
     socket: Socket;
@@ -100,8 +120,7 @@ export class TaipyApp {
     }
 
     onChangeEvent(encodedName: string, value: unknown) {
-
-        const key = this.getRequestedDataName(encodedName,  getPageKey(value))
+        const key = this.getRequestedDataName(encodedName, getPageKey(value));
         if (key in this._rdc) {
             this._rdc[key](this, encodedName, "", value);
         } else if (this.onChange) {
@@ -251,15 +270,13 @@ export class TaipyApp {
 
     // Request Data from taipy backend
     // This will trigger the backend to send the data to the frontend
-    requestData(encodedName: string, cb: RequestDataCallback) {
+    requestData(encodedName: string, cb: RequestDataCallback, options?: RequestOptions) {
         const varInfo = this.getInfo(encodedName);
         if (!varInfo?.data_update) {
             throw new Error(`Cannot request data for ${encodedName}. Not supported for type of ${varInfo?.type}`);
         }
-        // generate event key
-        const dataEventKey = "";
         // preserve callback so it can be called later
-        this._rdc[this.getRequestedDataName(encodedName, dataEventKey)] = cb;
+        this._rdc[this.getRequestedDataName(encodedName, getPageKey(options))] = cb;
         // call the ws to request data
         this.sendWsMessage("DU", encodedName, {});
     }
