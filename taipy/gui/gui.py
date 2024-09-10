@@ -1180,7 +1180,7 @@ class Gui:
         # Module Context -> Variable -> Variable data (name, type, initial_value)
         variable_tree: t.Dict[str, t.Dict[str, t.Dict[str, t.Any]]] = {}
         # Types of data to be handled by the data layer and filtered out here
-        filtered_value_types = (pd.DataFrame,)
+        filtered_value_types = (_TaipyData,)
         for k, v in data.items():
             if isinstance(v, _TaipyBase):
                 data[k] = v.get()
@@ -1189,13 +1189,13 @@ class Gui:
                 var_module_name = "__main__"
             if var_module_name not in variable_tree:
                 variable_tree[var_module_name] = {}
-            request_update = isinstance(v, filtered_value_types)
-            value = None if request_update else data[k]
+            data_update = isinstance(v, filtered_value_types)
+            value = None if data_update else data[k]
             variable_tree[var_module_name][var_name] = {
                 "type": type(v).__name__,
                 "value": value,
                 "encoded_name": k,
-                "request_update": request_update,
+                "data_update": data_update,
             }
         return variable_tree
 
