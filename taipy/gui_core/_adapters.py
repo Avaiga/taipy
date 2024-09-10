@@ -139,7 +139,9 @@ class _GuiCoreScenarioDagAdapter(_TaipyBase):
                             nodes[entityType] = cat
                         cat[id] = {
                             "name": datanode.entity.get_simple_label(),
-                            "type": datanode.entity.storage_type() if hasattr(datanode.entity, "storage_type") else None,
+                            "type": datanode.entity.storage_type()
+                            if hasattr(datanode.entity, "storage_type")
+                            else None,
                         }
                     cat = nodes.get(DataNode.__name__)
                     if cat is None:
