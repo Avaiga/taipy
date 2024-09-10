@@ -62,7 +62,7 @@ class _Element(ABC):
 
         if args and self._DEFAULT_PROPERTY != "":
             self._properties = {self._DEFAULT_PROPERTY: args[0]}
-        # special attributes for inline
+        # special attribute for inline
         self._is_inline = kwargs.pop("inline", False)
         self._properties.update(kwargs)
         self.parse_properties()
