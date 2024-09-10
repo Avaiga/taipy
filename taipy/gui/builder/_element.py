@@ -270,7 +270,7 @@ class _Control(_Element):
         return (
             f"<div {inline_block}>{el[0]}</{el[1]}></div>"
             if f"<{el[1]}" in el[0] and f"</{el[1]}" not in el[0]
-            else f"<div>{el[0]}</div>"
+            else f"<div {inline_block}>{el[0]}</div>"
         )
 
     def __enter__(self):
