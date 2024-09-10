@@ -6,7 +6,7 @@ export interface VarData {
     type: string;
     value: unknown;
     encoded_name: string;
-    request_update: boolean;
+    data_update: boolean;
 }
 
 const RU_DATA_EVENT_KEY_SEP = "__tPy_RU__";

@@ -25,6 +25,8 @@ export type OnEvent =
 type Route = [string, string];
 type RequestDataCallback = (taipyApp: TaipyApp, encodedName: string, dataEventKey: string, value: unknown) => void;
 
+const getPageKey = (payload: unknown) => (payload !== null && typeof payload == "object" && "pagekey" in payload && payload["pagekey"] as string) || "";
+
 export class TaipyApp {
     socket: Socket;
     _onInit: OnInitHandler | undefined;
@@ -49,7 +51,7 @@ export class TaipyApp {
         onInit: OnInitHandler | undefined = undefined,
         onChange: OnChangeHandler | undefined = undefined,
         path: string | undefined = undefined,
-        socket: Socket | undefined = undefined,
+        socket: Socket | undefined = undefined
     ) {
         socket = socket || io("/", { autoConnect: false, path: `${this.getBaseUrl()}socket.io` });
         this.onInit = onInit;
@@ -98,7 +100,13 @@ export class TaipyApp {
     }
 
     onChangeEvent(encodedName: string, value: unknown) {
-        this.onChange && this.onChange(this, encodedName, value);
+
+        const key = this.getRequestedDataName(encodedName,  getPageKey(value))
+        if (key in this._rdc) {
+            this._rdc[key](this, encodedName, "", value);
+        } else if (this.onChange) {
+            this.onChange(this, encodedName, value);
+        }
     }
 
     get onNotify() {
@@ -245,7 +253,7 @@ export class TaipyApp {
     // This will trigger the backend to send the data to the frontend
     requestData(encodedName: string, cb: RequestDataCallback) {
         const varInfo = this.getInfo(encodedName);
-        if (!varInfo?.request_update) {
+        if (!varInfo?.data_update) {
             throw new Error(`Cannot request data for ${encodedName}. Not supported for type of ${varInfo?.type}`);
         }
         // generate event key
@@ -253,7 +261,7 @@ export class TaipyApp {
         // preserve callback so it can be called later
         this._rdc[this.getRequestedDataName(encodedName, dataEventKey)] = cb;
         // call the ws to request data
-        this.sendWsMessage("RU", encodedName, {});
+        this.sendWsMessage("DU", encodedName, {});
     }
 
     getContext() {
@@ -262,7 +270,7 @@ export class TaipyApp {
 
     updateContext(path: string | undefined = "") {
         if (!path || path === "") {
-            path = window.location.pathname.replace(this.getBaseUrl(), "") || "/"
+            path = window.location.pathname.replace(this.getBaseUrl(), "") || "/";
         }
         this.sendWsMessage("GMC", "get_module_context", { path: path || "/" });
     }
