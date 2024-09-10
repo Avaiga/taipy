@@ -31,7 +31,6 @@ from types import FrameType, FunctionType, LambdaType, ModuleType, SimpleNamespa
 from urllib.parse import unquote, urlencode, urlparse
 
 import markdown as md_lib
-import pandas as pd
 import tzlocal
 from flask import (
     Blueprint,
