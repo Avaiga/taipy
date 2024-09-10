@@ -3,7 +3,7 @@ import os
 import typing as t
 
 
-def get_style(style: t.Union[str, t.Dict[str, t.Union[str, t.Dict[str, str]]]]):
+def get_style(style: t.Union[str, t.Dict[str, t.Union[str, t.Dict[str, t.Any]]]]):
     if isinstance(style, dict):
             style_arr = []
             for k, v in style.items():
