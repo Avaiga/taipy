@@ -131,26 +131,26 @@ class _GuiCoreScenarioDagAdapter(_TaipyBase):
                 if scenario := core_get(data.id):
                     dag = scenario._get_dag()
                     nodes = {}
-                    for id, datanode in dag.nodes.items():
-                        entityType = _GuiCoreScenarioDagAdapter.get_entity_type(datanode)
+                    for id, dag_node in dag.nodes.items():
+                        entityType = _GuiCoreScenarioDagAdapter.get_entity_type(dag_node)
                         cat = nodes.get(entityType)
                         if cat is None:
                             cat = {}
                             nodes[entityType] = cat
                         cat[id] = {
-                            "name": datanode.entity.get_simple_label(),
-                            "type": datanode.entity.storage_type()
-                            if hasattr(datanode.entity, "storage_type")
+                            "name": dag_node.entity.get_simple_label(),
+                            "type": dag_node.entity.storage_type()
+                            if hasattr(dag_node.entity, "storage_type")
                             else None,
                         }
                     cat = nodes.get(DataNode.__name__)
                     if cat is None:
                         cat = {}
                         nodes[DataNode.__name__] = cat
-                    for id, datanode in scenario.additional_data_nodes.items():
+                    for id, data_node in scenario.additional_data_nodes.items():
                         cat[id] = {
-                            "name": datanode.get_simple_label(),
-                            "type": datanode.storage_type(),
+                            "name": data_node.get_simple_label(),
+                            "type": data_node.storage_type(),
                         }
 
                     return [
