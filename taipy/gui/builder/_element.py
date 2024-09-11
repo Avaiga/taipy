@@ -62,6 +62,8 @@ class _Element(ABC):
 
         if args and self._DEFAULT_PROPERTY != "":
             self._properties = {self._DEFAULT_PROPERTY: args[0]}
+        # special attribute for inline
+        self._is_inline = kwargs.pop("inline", False)
         self._properties.update(kwargs)
         self.parse_properties()
 
@@ -264,10 +266,11 @@ class _Control(_Element):
     def _render(self, gui: "Gui") -> str:
         self._evaluate_lambdas(gui)
         el = _BuilderFactory.create_element(gui, self._ELEMENT_NAME, self._deepcopy_properties())
+        inline_block = 'style="display:inline-block;"' if self._is_inline else ""
         return (
-            f"<div>{el[0]}</{el[1]}></div>"
+            f"<div {inline_block}>{el[0]}</{el[1]}></div>"
             if f"<{el[1]}" in el[0] and f"</{el[1]}" not in el[0]
-            else f"<div>{el[0]}</div>"
+            else f"<div {inline_block}>{el[0]}</div>"
         )
 
     def __enter__(self):
