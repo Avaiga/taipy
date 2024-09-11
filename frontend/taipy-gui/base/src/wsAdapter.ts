@@ -34,6 +34,10 @@ export class TaipyWsAdapter extends WsAdapter {
                 for (const muPayload of message.payload as [MultipleUpdatePayload]) {
                     const encodedName = muPayload.name;
                     const { value } = muPayload.payload;
+                    if (value && typeof (value as any).__taipy_refresh === "boolean") {
+                        // here we know that we can request an DU for this variable
+                        // Question is how to get the right payload ?
+                    }
                     taipyApp.variableData?.update(encodedName, value);
                     taipyApp.onChangeEvent(encodedName, value);
                 }
