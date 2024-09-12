@@ -58,7 +58,7 @@ Want to be part of the *Taipy* community? Check out our
 - `taipy/`:
   - `templates/`: Contains templates, each in a dedicated sub-folder with the following structure:
     - `<template-name>/`: Internal package for Taipy data backup mechanism.
-      - `{{cookiecutter.__root_folder_name}}/`: The root folder of the application created using this template.
+      - `{{cookiecutter.__root_folder}}/`: The root folder of the application created using this template.
       - `hooks/`: Contains hooks to be executed before and after the application is created.
       - `cookiecutter.json`: The configuration file for the template.
     - `LICENSE`: The Apache 2.0 License.
