@@ -252,7 +252,7 @@ export class TaipyApp {
         // preserve options for this data key so it can be called during refresh
         this.variableData?.addRequestDataOptions(encodedName, dataKey, options);
         // preserve callback so it can be called later
-        this._rdc[encodedName] = this._rdc[encodedName] ? { ...this._rdc[encodedName], [dataKey]: cb } : { [dataKey]: cb };
+        this._rdc[encodedName] = { ...this._rdc[encodedName], [dataKey]: cb };
         // call the ws to request data
         this.sendWsMessage("DU", encodedName, options);
     }
