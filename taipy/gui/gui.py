@@ -31,6 +31,7 @@ from types import FrameType, FunctionType, LambdaType, ModuleType, SimpleNamespa
 from urllib.parse import unquote, urlencode, urlparse
 
 import markdown as md_lib
+import pandas as pd
 import tzlocal
 from flask import (
     Blueprint,
@@ -2339,10 +2340,19 @@ class Gui:
             return
         with self.get_flask_app().app_context() if has_app_context() else contextlib.nullcontext():  # type: ignore[attr-defined]
             self.__set_client_id_in_context(client_id)
-            with self._set_locals_context(page._get_module_name()):
-                for k in self._get_locals_bind().keys():
-                    if (not page._binding_variables or k in page._binding_variables) and not k.startswith("_"):
-                        self._bind_var(k)
+            page_module = page._get_module_name()
+            with self._set_locals_context(page_module):
+                for k, v in self._get_locals_bind().items():
+                    if (
+                        (not page._binding_variables or k in page._binding_variables)
+                        and not k.startswith("_")
+                        and not isinstance(v, (ModuleType, FunctionType))
+                    ):
+                        encoded_var_name = self.__var_dir.add_var(k, page_module)
+                        if not hasattr(self._bindings(), encoded_var_name):
+                            if isinstance(v, (pd.DataFrame, pd.Series)):
+                                v = _TaipyData(v, "")
+                            self._bind(encoded_var_name, v)
 
     def __render_page(self, page_name: str) -> t.Any:
         self.__set_client_id_in_context()
