@@ -106,7 +106,7 @@ from .utils import (
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
-from .utils._variable_directory import _MODULE_ID, _VariableDirectory
+from .utils._variable_directory import _is_moduled_variable, _VariableDirectory
 from .utils.chart_config_builder import _build_chart_config
 from .utils.table_col_builder import _enhance_columns
 
@@ -1041,7 +1041,9 @@ class Gui:
         front_var: t.Optional[str] = None,
     ):
         ws_dict = {}
-        values = {v: _getscopeattr_drill(self, v) for v in modified_vars}
+        values = {v: _getscopeattr_drill(self, v) for v in modified_vars if _is_moduled_variable(v)}
+        if not values:
+            return
         for k, v in values.items():
             if isinstance(v, (_TaipyData, _TaipyContentHtml)) and v.get_name() in modified_vars:
                 modified_vars.remove(v.get_name())
@@ -1191,12 +1193,13 @@ class Gui:
                 variable_tree[var_module_name] = {}
             data_update = isinstance(v, filtered_value_types)
             value = None if data_update else data[k]
-            variable_tree[var_module_name][var_name] = {
-                "type": type(v).__name__,
-                "value": value,
-                "encoded_name": k,
-                "data_update": data_update,
-            }
+            if _is_moduled_variable(var_name):
+                variable_tree[var_module_name][var_name] = {
+                    "type": type(v).__name__,
+                    "value": value,
+                    "encoded_name": k,
+                    "data_update": data_update,
+                }
         return variable_tree
 
     def __handle_ws_get_data_tree(self):
@@ -2122,7 +2125,7 @@ class Gui:
         return encoded_var_name
 
     def _bind_var_val(self, var_name: str, value: t.Any) -> bool:
-        if _MODULE_ID not in var_name:
+        if not _is_moduled_variable(var_name):
             var_name = self.__var_dir.add_var(var_name, self._get_locals_context())
         if not hasattr(self._bindings(), var_name):
             self._bind(var_name, value)
