@@ -187,6 +187,7 @@ interface EditableCellProps {
     onSelection?: OnRowSelection;
     nanValue?: string;
     className?: string;
+    tableClassName?: string;
     tooltip?: string;
     tableCellProps?: Partial<TableCellProps>;
     comp?: RowValue;
@@ -286,6 +287,7 @@ export const EditableCell = (props: EditableCellProps) => {
         onSelection,
         nanValue,
         className,
+        tableClassName,
         tooltip,
         tableCellProps = emptyObject,
         comp,
@@ -304,11 +306,17 @@ export const EditableCell = (props: EditableCellProps) => {
 
     const withTime = useMemo(() => !!colDesc.format && colDesc.format.toLowerCase().includes("h"), [colDesc.format]);
 
-    const button = useMemo(() => {
-        if (onSelection && typeof value == "string" && value.startsWith("[") && value.endsWith(")")) {
+    const buttonImg = useMemo(() => {
+        if (typeof value == "string" && value.startsWith("[") && value.endsWith(")")) {
             const parts = value.slice(1, -1).split("](");
             if (parts.length == 2) {
-                return parts as [string, string];
+                const img = parts[0].startsWith("img:");
+                return {
+                    text: img ? parts[0].slice(4) : parts[0],
+                    value: parts[1],
+                    img: img,
+                    action: !!onSelection,
+                };
             }
         }
         return undefined;
@@ -421,9 +429,9 @@ export const EditableCell = (props: EditableCellProps) => {
     const onSelect = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            onSelection && onSelection(rowIndex, colDesc.dfid, button && button[1]);
+            onSelection && onSelection(rowIndex, colDesc.dfid, buttonImg && buttonImg.value);
         },
-        [onSelection, rowIndex, colDesc.dfid, button]
+        [onSelection, rowIndex, colDesc.dfid, buttonImg]
     );
 
     const filterOptions = useCallback(
@@ -453,104 +461,26 @@ export const EditableCell = (props: EditableCellProps) => {
             className={
                 onValidation ? getSuffixedClassNames(className || "tpc", edit ? "-editing" : "-editable") : className
             }
-            title={tooltip || comp ? `${tooltip ? tooltip : ""}${comp ? " " + formatValue(comp as RowValue, colDesc, formatConfig, nanValue) : ""}` : undefined}
+            title={
+                tooltip || comp
+                    ? `${tooltip ? tooltip : ""}${
+                          comp ? " " + formatValue(comp as RowValue, colDesc, formatConfig, nanValue) : ""
+                      }`
+                    : undefined
+            }
         >
             <Badge color="primary" variant="dot" invisible={comp === undefined || comp === null}>
-            {edit ? (
-                colDesc.type?.startsWith("bool") ? (
-                    <Box sx={cellBoxSx}>
-                        <Switch
-                            checked={val as boolean}
-                            size="small"
-                            title={val ? "True" : "False"}
-                            sx={iconInRowSx}
-                            onChange={onBoolChange}
-                            inputRef={setInputFocus}
-                        />
-                        <Box sx={iconsWrapperSx}>
-                            <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
-                                <CheckIcon fontSize="inherit" />
-                            </IconButton>
-                            <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
-                                <ClearIcon fontSize="inherit" />
-                            </IconButton>
-                        </Box>
-                    </Box>
-                ) : colDesc.type?.startsWith("date") ? (
-                    <Box sx={cellBoxSx}>
-                        {withTime ? (
-                            <DateTimePicker
-                                value={val as Date}
-                                onChange={onDateChange}
-                                slotProps={textFieldProps}
+                {edit ? (
+                    colDesc.type?.startsWith("bool") ? (
+                        <Box sx={cellBoxSx}>
+                            <Switch
+                                checked={val as boolean}
+                                size="small"
+                                title={val ? "True" : "False"}
+                                sx={iconInRowSx}
+                                onChange={onBoolChange}
                                 inputRef={setInputFocus}
-                                sx={tableFontSx}
                             />
-                        ) : (
-                            <DatePicker
-                                value={val as Date}
-                                onChange={onDateChange}
-                                slotProps={textFieldProps}
-                                inputRef={setInputFocus}
-                                sx={tableFontSx}
-                            />
-                        )}
-                        <Box sx={iconsWrapperSx}>
-                            <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
-                                <CheckIcon fontSize="inherit" />
-                            </IconButton>
-                            <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
-                                <ClearIcon fontSize="inherit" />
-                            </IconButton>
-                        </Box>
-                    </Box>
-                ) : colDesc.lov ? (
-                    <Box sx={cellBoxSx}>
-                        <Autocomplete
-                            autoComplete={true}
-                            fullWidth
-                            selectOnFocus={!!colDesc.freeLov}
-                            clearOnBlur={!!colDesc.freeLov}
-                            handleHomeEndKeys={!!colDesc.freeLov}
-                            options={colDesc.lov}
-                            getOptionKey={getOptionKey}
-                            getOptionLabel={getOptionLabel}
-                            filterOptions={filterOptions}
-                            freeSolo={!!colDesc.freeLov}
-                            value={val as string}
-                            onChange={onCompleteChange}
-                            onOpen={onCompleteClose}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    fullWidth
-                                    inputRef={setInputFocus}
-                                    onChange={colDesc.freeLov ? onChange : undefined}
-                                    margin="dense"
-                                    variant="standard"
-                                    sx={tableFontSx}
-                                />
-                            )}
-                            disableClearable={!colDesc.freeLov}
-                        />
-                        <Box sx={iconsWrapperSx}>
-                            <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
-                                <CheckIcon fontSize="inherit" />
-                            </IconButton>
-                            <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
-                                <ClearIcon fontSize="inherit" />
-                            </IconButton>
-                        </Box>
-                    </Box>
-                ) : (
-                    <Input
-                        value={val}
-                        onChange={onChange}
-                        onKeyDown={onKeyDown}
-                        inputRef={setInputFocus}
-                        margin="dense"
-                        sx={tableFontSx}
-                        endAdornment={
                             <Box sx={iconsWrapperSx}>
                                 <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
                                     <CheckIcon fontSize="inherit" />
@@ -559,61 +489,161 @@ export const EditableCell = (props: EditableCellProps) => {
                                     <ClearIcon fontSize="inherit" />
                                 </IconButton>
                             </Box>
-                        }
-                    />
-                )
-            ) : EDIT_COL === colDesc.dfid ? (
-                deletion ? (
-                    <Input
-                        value="Confirm"
-                        onKeyDown={onDeleteKeyDown}
-                        inputRef={setInputFocus}
-                        sx={tableFontSx}
-                        endAdornment={
+                        </Box>
+                    ) : colDesc.type?.startsWith("date") ? (
+                        <Box sx={cellBoxSx}>
+                            {withTime ? (
+                                <DateTimePicker
+                                    value={val as Date}
+                                    onChange={onDateChange}
+                                    slotProps={textFieldProps}
+                                    inputRef={setInputFocus}
+                                    sx={tableFontSx}
+                                />
+                            ) : (
+                                <DatePicker
+                                    value={val as Date}
+                                    onChange={onDateChange}
+                                    slotProps={textFieldProps}
+                                    inputRef={setInputFocus}
+                                    sx={tableFontSx}
+                                />
+                            )}
                             <Box sx={iconsWrapperSx}>
-                                <IconButton onClick={onDeleteCheckClick} size="small" sx={iconInRowSx}>
+                                <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
                                     <CheckIcon fontSize="inherit" />
                                 </IconButton>
-                                <IconButton onClick={onDeleteClick} size="small" sx={iconInRowSx}>
+                                <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
                                     <ClearIcon fontSize="inherit" />
                                 </IconButton>
                             </Box>
-                        }
-                    />
-                ) : onDeletion ? (
-                    <Box sx={iconsWrapperSx}>
-                        <IconButton onClick={onDeleteClick} size="small" sx={iconInRowSx}>
-                            <DeleteIcon fontSize="inherit" />
-                        </IconButton>
-                    </Box>
-                ) : null
-            ) : (
-                <Box sx={cellBoxSx} onClick={onSelect}>
-                    {button ? (
-                        <Button size="small" onClick={onSelect} sx={ButtonSx}>
-                            {formatValue(button[0] as RowValue, colDesc, formatConfig, nanValue)}
-                        </Button>
-                    ) : value !== null && value !== undefined && colDesc.type && colDesc.type.startsWith("bool") ? (
-                        <Switch
-                            checked={value as boolean}
-                            size="small"
-                            title={value ? "True" : "False"}
-                            sx={defaultCursorIcon}
-                        />
+                        </Box>
+                    ) : colDesc.lov ? (
+                        <Box sx={cellBoxSx}>
+                            <Autocomplete
+                                autoComplete={true}
+                                fullWidth
+                                selectOnFocus={!!colDesc.freeLov}
+                                clearOnBlur={!!colDesc.freeLov}
+                                handleHomeEndKeys={!!colDesc.freeLov}
+                                options={colDesc.lov}
+                                getOptionKey={getOptionKey}
+                                getOptionLabel={getOptionLabel}
+                                filterOptions={filterOptions}
+                                freeSolo={!!colDesc.freeLov}
+                                value={val as string}
+                                onChange={onCompleteChange}
+                                onOpen={onCompleteClose}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        fullWidth
+                                        inputRef={setInputFocus}
+                                        onChange={colDesc.freeLov ? onChange : undefined}
+                                        margin="dense"
+                                        variant="standard"
+                                        sx={tableFontSx}
+                                    />
+                                )}
+                                disableClearable={!colDesc.freeLov}
+                            />
+                            <Box sx={iconsWrapperSx}>
+                                <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
+                                    <CheckIcon fontSize="inherit" />
+                                </IconButton>
+                                <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
+                                    <ClearIcon fontSize="inherit" />
+                                </IconButton>
+                            </Box>
+                        </Box>
                     ) : (
-                        <span style={defaultCursor}>
-                            {formatValue(value as RowValue, colDesc, formatConfig, nanValue)}
-                        </span>
-                    )}
-                    {onValidation && !button ? (
+                        <Input
+                            value={val}
+                            onChange={onChange}
+                            onKeyDown={onKeyDown}
+                            inputRef={setInputFocus}
+                            margin="dense"
+                            sx={tableFontSx}
+                            endAdornment={
+                                <Box sx={iconsWrapperSx}>
+                                    <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
+                                        <CheckIcon fontSize="inherit" />
+                                    </IconButton>
+                                    <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
+                                        <ClearIcon fontSize="inherit" />
+                                    </IconButton>
+                                </Box>
+                            }
+                        />
+                    )
+                ) : EDIT_COL === colDesc.dfid ? (
+                    deletion ? (
+                        <Input
+                            value="Confirm"
+                            onKeyDown={onDeleteKeyDown}
+                            inputRef={setInputFocus}
+                            sx={tableFontSx}
+                            endAdornment={
+                                <Box sx={iconsWrapperSx}>
+                                    <IconButton onClick={onDeleteCheckClick} size="small" sx={iconInRowSx}>
+                                        <CheckIcon fontSize="inherit" />
+                                    </IconButton>
+                                    <IconButton onClick={onDeleteClick} size="small" sx={iconInRowSx}>
+                                        <ClearIcon fontSize="inherit" />
+                                    </IconButton>
+                                </Box>
+                            }
+                        />
+                    ) : onDeletion ? (
                         <Box sx={iconsWrapperSx}>
-                            <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
-                                <EditIcon fontSize="inherit" />
+                            <IconButton onClick={onDeleteClick} size="small" sx={iconInRowSx}>
+                                <DeleteIcon fontSize="inherit" />
                             </IconButton>
                         </Box>
-                    ) : null}
-                </Box>
-            )}
+                    ) : null
+                ) : (
+                    <Box sx={cellBoxSx} onClick={onSelect}>
+                        {buttonImg ? (
+                            buttonImg.img ? (
+                                <img
+                                    src={buttonImg.text}
+                                    className={getSuffixedClassNames(tableClassName, "-img")}
+                                    alt={buttonImg.value}
+                                    onClick={onSelect}
+                                />
+                            ) : (
+                                <Button
+                                    size="small"
+                                    onClick={onSelect}
+                                    sx={ButtonSx}
+                                    className={getSuffixedClassNames(tableClassName, "-btn")}
+                                    disabled={!buttonImg.action}
+                                >
+                                    {formatValue(buttonImg.text, colDesc, formatConfig, nanValue)}
+                                </Button>
+                            )
+                        ) : value !== null && value !== undefined && colDesc.type && colDesc.type.startsWith("bool") ? (
+                            <Switch
+                                checked={value as boolean}
+                                size="small"
+                                title={value ? "True" : "False"}
+                                sx={defaultCursorIcon}
+                                className={getSuffixedClassNames(tableClassName, "-bool")}
+                            />
+                        ) : (
+                            <span style={defaultCursor}>
+                                {formatValue(value as RowValue, colDesc, formatConfig, nanValue)}
+                            </span>
+                        )}
+                        {onValidation && !buttonImg ? (
+                            <Box sx={iconsWrapperSx}>
+                                <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
+                                    <EditIcon fontSize="inherit" />
+                                </IconButton>
+                            </Box>
+                        ) : null}
+                    </Box>
+                )}
             </Badge>
         </TableCell>
     );
