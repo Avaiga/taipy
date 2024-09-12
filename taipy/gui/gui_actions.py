@@ -299,8 +299,8 @@ def broadcast_callback(
 ) -> t.Dict[str, t.Any]:
     """Invoke a callback for every client.
 
-    Calling this function is equivalent to calling
-    *gui*.[Gui.]broadcast_callback(callback, args, module_context)^`.
+    Calling this function is equivalent to calling the method
+    *gui*.`(Gui.)broadcast_callback(callback, args)^`.
 
     Arguments:
         gui (Gui^): The current Gui instance.

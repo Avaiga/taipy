@@ -148,12 +148,20 @@ def build_doc(name: str, desc: Dict[str, Any]):
     if "doc" not in desc:
         return ""
     doc = str(desc["doc"])
+    # Hack to replace the actual element name in the class_name property doc
     if desc["name"] == "class_name":
-        doc = doc.replace("<element_type>", name)
+        doc = doc.replace("[element_type]", name)
     # This won't work for Scenario Management and Block elements
     doc = re.sub(r"(href=\")\.\.((?:.*?)\")", r"\1" + taipy_doc_url + name + r"/../..\2", doc)
+    doc = re.sub(r"<tt>([\w_]+)</tt>", r"`\1`", doc) # <tt> not processed properly by markdownify()
     doc = "\n  ".join(markdownify(doc).split("\n"))
-    doc = doc.replace("  \n", "  \\n")
+    # <, >, `, [, -, _ and * prefixed with a \
+    doc = doc.replace("  \n", "  \\n").replace("\\<", "<").replace("\\>", ">").replace("\\`", "`")
+    doc = doc.replace("\\[", "[").replace("\\-", "-").replace("\\_", "_").replace("\\*", "*")
+    # Final dots are prefixed with a \
+    doc = re.sub(r"\\.$", ".", doc)
+    # Link anchors # signs are prefixed with a \
+    doc = re.sub(r"\\(#[a-z_]+\))", r"\1", doc)
     doc = re.sub(r"(?:\s+\\n)?\s+See below(?:[^\.]*)?\.", "", doc).replace("\n", "\\n")
     return f"{desc['name']}{desc['dynamic']}{desc['indexed']}\\n  {doc}\\n\\n"
 

@@ -23,7 +23,7 @@
                     {
                         "name": "mode",
                         "type": "str",
-                        "doc": "Define the way the text is processed:\n<ul><li>&quot;raw&quot;: synonym for setting the *raw* property to True</li><li>&quot;pre&quot;: keeps spaces and new lines</li><li>&quot;markdown&quot; or &quot;md&quot;: basic support for Markdown."
+                        "doc": "Define the way the text is processed:\n<ul><li>&quot;raw&quot;: synonym for setting the <i>raw</i> property to True</li><li>&quot;pre&quot;: keeps spaces and new lines</li><li>&quot;markdown&quot; or &quot;md&quot;: basic support for Markdown."
                     },
                     {
                         "name": "format",
@@ -126,7 +126,7 @@
                         "name": "type",
                         "type": "str",
                         "default_value": "\"text\"",
-                        "doc": "TODO: The type of input: text, tel, email ... as defined in HTML standards https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#input_types "
+                        "doc": "The type of generated input HTML element, as defined in [HTML input types](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#input_types).<br/>This value forces certain values to be entered and can be set to \"text\", \"tel\", \"url\", \"url\"..., among other choices."
                     }
                 ]
             }
@@ -284,7 +284,7 @@
                     {
                         "name": "mode",
                         "type": "str",
-                        "doc": "Define the way the toggle is displayed:\n<ul><li>&quot;theme&quot;: synonym for setting the *theme* property to True</li></ul>"
+                        "doc": "Define the way the toggle is displayed:\n<ul><li>&quot;theme&quot;: synonym for setting the <i>theme</i> property to True</li></ul>"
                     },
                     {
                         "name": "label",
@@ -673,7 +673,7 @@
                     {
                         "name": "figure",
                         "type": "dynamic(plotly.graph_objects.Figure)",
-                        "doc": "A figure as produced by plotly."
+                        "doc": "A figure as produced by Plotly."
                     },
                     {
                         "name": "on_click",
@@ -909,7 +909,7 @@
                     {
                         "name": "on_action",
                         "type": "Callable",
-                        "doc": "The name of a function that is triggered when the user selects a row.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>reason (str): the origin of the action: \"click\", or \"button\" if the cell contains a Markdown link syntax.</li>\n<li>value (str): the *link value* indicated in the cell when using a Markdown link syntax (that is, <i>reason</i> is set to \"button\").</li></ul></li></ul>.",
+                        "doc": "The name of a function that is triggered when the user selects a row.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>reason (str): the origin of the action: \"click\", or \"button\" if the cell contains a Markdown link syntax.</li>\n<li>value (str): the <i>link value</i> indicated in the cell when using a Markdown link syntax (that is, <i>reason</i> is set to \"button\").</li></ul></li></ul>.",
                         "signature": [
                             [
                                 "state",
@@ -1504,7 +1504,7 @@
                         "name": "lov",
                         "default_property": true,
                         "type": "dict[str, Any]",
-                        "doc": "The list of pages. The keys should be:\n<ul>\n<li>page id (start with \"/\")</li>\n<li>or full URL</li>\n</ul>\nThe values are labels. See the <a href=\"../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for details."
+                        "doc": "The list of pages. The keys should be:\n<ul>\n<li>page id (start with \"/\")</li>\n<li>or full URL</li>\n</ul>\nThe values are labels. See the <a href=\"../../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for details."
                     }
                 ]
             }
@@ -1590,7 +1590,7 @@
                     {
                         "name": "users",
                         "type": "dynamic(list[Union[str,Icon]])",
-                        "doc": "The list of users. See the <a href=\"../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for details."
+                        "doc": "The list of users. See the <a href=\"../../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for details."
                     },
                     {
                         "name": "sender_id",
@@ -1811,7 +1811,7 @@
                         "default_property": true,
                         "type": "str",
                         "default_value": "\"1 1\"",
-                        "doc": "The list of weights for each column.<br/>For example, `\"1 2\"` creates a 2 column grid:\n<ul>\n<li>1fr</li>\n<li>2fr</li>\n</ul><br/>The creation of multiple same size columns can be simplified by using the multiply sign eg. \"5*1\" is equivalent to \"1 1 1 1 1\"."
+                        "doc": "The list of weights for each column.<br/>For example, \"1 2\" creates a 2 column grid:\n<ul>\n<li>1fr</li>\n<li>2fr</li>\n</ul><br/>The creation of multiple same size columns can be simplified by using the multiply sign eg. \"5*1\" is equivalent to \"1 1 1 1 1\"."
                     },
                     {
                         "name": "columns[mobile]",
@@ -1867,6 +1867,12 @@
                         "doc": "Anchor side of the pane.<br/>Valid values are \"left\", \"right\", \"top\", or \"bottom\"."
                     },
                     {
+                        "name": "persistent",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If False, the pane covers the page where it appeared and disappears if the user clicks in the page.<br/>If True, the pane appears next to the page. Note that the parent section of the pane must have the <i>flex</i> display mode set. See below for an example using the <code>persistent</code> property."
+                    },
+                    {
                         "name": "width",
                         "type": "str",
                         "default_value": "\"30vw\"",
@@ -1877,12 +1883,6 @@
                         "type": "str",
                         "default_value": "\"30vh\"",
                         "doc": "Height, in CSS units, of this pane.<br/>This is used only if <i>anchor</i> is \"top\" or \"bottom\"."
-                    },
-                    {
-                        "name": "persistent",
-                        "type": "bool",
-                        "default_value": "False",
-                        "doc": "If False, the pane covers the page where it appeared and disappears if the user clicks in the page.<br/>If True, the pane appears next to the page. Note that the parent section of the pane must have the <i>flex</i> display mode set. See below for an example using the <code>persistent</code> property."
                     },
                     {
                         "name": "show_button",
@@ -1924,12 +1924,12 @@
                     {
                         "name": "lov",
                         "type": "dict[str, Any]",
-                        "doc": "The list of values. See the <a href=\"../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for details."
+                        "doc": "The list of values. See the <a href=\"../../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for details."
                     },
                     {
                         "name": "adapter",
                         "type": "Function",
-                        "default_value": "`lambda x: str(x)`",
+                        "default_value": "`\"lambda x: str(x)\"`",
                         "doc": "The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>."
                     },
                     {
@@ -1978,14 +1978,14 @@
             {
                 "properties": [
                     {
-                        "name": "partial",
-                        "type": "taipy.gui.Partial",
-                        "doc": "A Partial object that holds the content of the block.<br/>This should not be defined if <i>page</i> is set."
-                    },
-                    {
                         "name": "page",
                         "type": "str",
                         "doc": "The page name to show as the content of the block.<br/>This should not be defined if <i>partial</i> is set."
+                    },
+                    {
+                        "name": "partial",
+                        "type": "taipy.gui.Partial",
+                        "doc": "A Partial object that holds the content of the block.<br/>This should not be defined if <i>page</i> is set."
                     }
                 ]
             }
@@ -2068,7 +2068,7 @@
                     {
                         "name": "class_name",
                         "type": "dynamic(str)",
-                        "doc": "The list of CSS class names that are associated with the generated HTML Element.<br/>These class names are added to the default <code>taipy-&lt;element_type&gt;</code> class name."
+                        "doc": "The list of CSS class names that are associated with the generated HTML Element.<br/>These class names are added to the default <code>taipy-[element_type]</code> class name."
                     },
                     {
                         "name": "hover_text",

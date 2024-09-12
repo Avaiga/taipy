@@ -8,11 +8,24 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+# -----------------------------------------------------------------------------------------
+# To execute this script, make sure that the taipy-gui package is installed in your
+# Python environment and run:
+#     python <script>
+# -----------------------------------------------------------------------------------------
+from taipy.gui import Gui
 
-"""# Taipy GUI for Scenario Management
+show_pane = True
 
-This package provides classes that can be used in GUI controls dedicated to scenario management.
+page = """
+<|{show_pane}|pane|anchor=top|height=50px|
+Here is some text that is displayed at the top of the page in a pane.
+|>
+
+# Main page content
+
+This is the content of the page.
 """
 
-from ._adapters import CustomScenarioFilter, DataNodeFilter, DataNodeScenarioFilter, ScenarioFilter
-from ._init import *
+if __name__ == "__main__":
+    Gui(page).run()
