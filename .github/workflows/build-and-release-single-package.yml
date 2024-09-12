@@ -159,6 +159,7 @@ jobs:
           python -m build
 
       - name: Rename files
+        working-directory: ${{ steps.set-variables.outputs.package_dir }}
         run: |
           for file in ./dist/*; do mv "$file" "${file//_/-}"; done
 

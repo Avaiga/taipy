@@ -17,6 +17,8 @@ from typing import Any, Dict, List
 
 from markdownify import markdownify
 
+__RE_INDEXED_PROPERTY = re.compile(r"^([\w_]+)\[(<\w+>)?([\w]+)(</\w+>)?\]$")
+
 # Make sure we can import the mandatory packages
 script_dir = os.path.dirname(os.path.realpath(__file__))
 if not os.path.isdir(os.path.abspath(os.path.join(script_dir, "taipy"))):
@@ -74,9 +76,11 @@ with open("./taipy/gui/viselements.json", "r") as file:
 os.system(f"pipenv run stubgen {builder_py_file} --no-import --parse-only --export-less -o ./")
 
 with open(builder_pyi_file, "a") as file:
-    file.write("from typing import Union\n")
+    file.write("from datetime import datetime\n")
+    file.write("from typing import Any, Callable, Union\n")
     file.write("\n")
-    file.write("from ._element import _Block, _Control, _Element\n")
+    file.write("from .. import Icon\n")
+    file.write("from ._element import _Block, _Control\n")
 
 
 def resolve_inherit(name: str, properties, inherits, viselements) -> List[Dict[str, Any]]:
@@ -121,6 +125,9 @@ def format_as_parameter(property):
         property["dynamic"] = " (dynamic)"
     else:
         property["dynamic"] = ""
+    name = property["name"]
+    if match := __RE_INDEXED_PROPERTY.match(name):
+        name = f"{match.group(1)}__{match.group(3)}"
     if type == "Callback" or type == "Function":
         type = ""
     else:
@@ -134,7 +141,7 @@ def format_as_parameter(property):
             default_value = ""
     else:
         default_value = ""
-    return f"{property['name']}{type}{default_value}"
+    return f"{name}{type}{default_value}"
 
 
 def build_doc(name: str, desc: Dict[str, Any]):
@@ -177,8 +184,8 @@ def generate_elements(category: str, base_class: str):
         property_list: List[Dict[str, Any]] = []
         property_names: List[str] = []
         properties = resolve_inherit(name, desc["properties"], desc.get("inherits", None), viselements)
-        # Remove hidden properties and indexed properties (TODO?)
-        properties = [p for p in properties if not p.get("hide", False) and "[" not in p["name"]]
+        # Remove hidden properties
+        properties = [p for p in properties if not p.get("hide", False)]
         # Generate function parameters
         properties_decl = [format_as_parameter(p) for p in properties]
         # Generate properties doc

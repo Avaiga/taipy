@@ -10,7 +10,7 @@
                     {
                         "name": "value",
                         "default_property": true,
-                        "type": "dynamic(any)",
+                        "type": "dynamic(Any)",
                         "default_value": "\"\"",
                         "doc": "The value displayed as text by this control."
                     },
@@ -94,7 +94,7 @@
                     {
                         "name": "value",
                         "default_property": true,
-                        "type": "dynamic(any)",
+                        "type": "dynamic(Any)",
                         "default_value": "None",
                         "doc": "The value represented by this control."
                     },
@@ -143,7 +143,7 @@
                     {
                         "name": "value",
                         "default_property": true,
-                        "type": "dynamic(any)",
+                        "type": "dynamic(Any)",
                         "doc": "The numerical value represented by this control."
                     },
                     {
@@ -277,7 +277,7 @@
                     },
                     {
                         "name": "unselected_value",
-                        "type": "any",
+                        "type": "Any",
                         "default_value": "None",
                         "doc": "Value assigned to <i>value</i> when no item is selected."
                     },
@@ -366,7 +366,7 @@
                     {
                         "name": "dates",
                         "default_property": true,
-                        "type": "dynamic(list(datetime))",
+                        "type": "dynamic(list[datetime])",
                         "doc": "The dates that this control represents and can modify.<br/>It is typically bound to a list of two <code>datetime</code> object."
                     },
                     {
@@ -417,7 +417,7 @@
                         "name": "data",
                         "default_property": true,
                         "required": true,
-                        "type": "dynamic(any)",
+                        "type": "dynamic(Any)",
                         "doc": "The data object bound to this chart control.<br/>See the section on the <a href=\"#the-data-property\"><i>data</i> property</a> below for details."
                     },
                     {
@@ -536,7 +536,7 @@
                     {
                         "name": "on_range_change",
                         "type": "Callable",
-                        "doc": "The callback function that is invoked when the visible part of the x axis changes.<br/>The function receives three parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the chart control if it has one.</li>\n<li>payload (dict[str, any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">Plotly</a>.</li>\n</ul>",
+                        "doc": "The callback function that is invoked when the visible part of the x axis changes.<br/>The function receives three parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the chart control if it has one.</li>\n<li>payload (dict[str, Any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">Plotly</a>.</li>\n</ul>",
                         "signature": [
                             [
                                 "state",
@@ -585,32 +585,32 @@
                     },
                     {
                         "name": "marker",
-                        "type": "indexed(dict[str, any])",
+                        "type": "indexed(dict[str, Any])",
                         "doc": "The type of markers used for the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-marker\">marker</a> for details.<br/>Color, opacity, size and symbol can be column name."
                     },
                     {
                         "name": "line",
-                        "type": "indexed(Union[str,dict[str,any]])",
+                        "type": "indexed(Union[str,dict[str,Any]])",
                         "doc": "The configuration of the line used for the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-line\">line</a> for details.<br/>If the value is a string, it must be a dash type or pattern (see <a href=\"https://plotly.com/python/reference/scatter/#scatter-line-dash\">dash style of lines</a> for details)."
                     },
                     {
                         "name": "selected_marker",
-                        "type": "indexed(dict[str, any])",
+                        "type": "indexed(dict[str, Any])",
                         "doc": "The type of markers used for selected points in the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-selected-marker\">selected marker for details."
                     },
                     {
                         "name": "layout",
-                        "type": "dynamic(dict[str, any])",
+                        "type": "dynamic(dict[str, Any])",
                         "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/reference/layout/\">layout object</a>."
                     },
                     {
                         "name": "plot_config",
-                        "type": "dict[str, any]",
+                        "type": "dict[str, Any]",
                         "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/configuration-options/\"> configuration options object</a>."
                     },
                     {
                         "name": "options",
-                        "type": "indexed(dict[str, any])",
+                        "type": "indexed(dict[str, Any])",
                         "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/reference/\">data object where dynamic data will be overridden.</a>."
                     },
                     {
@@ -678,7 +678,7 @@
                     {
                         "name": "on_click",
                         "type": "Callable",
-                        "doc": "The callback that is invoked when the user clicks in the chart background.<br/>The function receives three parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the chart control if it has one.</li>\n<li>payload (dict[str, any]): a dictionary containing the <i>x</i> and <i>y</i> coordinates of the click <b>or</b> <i>latitude</i> and <i>longitude</i> in the case of a map. This feature relies on non-public Plotly structured information.</li>\n</ul>",
+                        "doc": "The callback that is invoked when the user clicks in the chart background.<br/>The function receives three parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the chart control if it has one.</li>\n<li>payload (dict[str, Any]): a dictionary containing the <i>x</i> and <i>y</i> coordinates of the click <b>or</b> <i>latitude</i> and <i>longitude</i> in the case of a map. This feature relies on non-public Plotly structured information.</li>\n</ul>",
                         "signature": [
                             [
                                 "state",
@@ -709,7 +709,7 @@
                         "name": "data",
                         "default_property": true,
                         "required": true,
-                        "type": "dynamic(any)",
+                        "type": "dynamic(Any)",
                         "doc": "The data to be represented in this table. This property can be indexed to define other data for comparison."
                     },
                     {
@@ -749,7 +749,7 @@
                     {
                         "name": "page_size_options",
                         "type": "Union[list[int],str]",
-                        "default_value": "(50, 100, 500)",
+                        "default_value": "[50, 100, 500]",
                         "doc": "The list of available page sizes that users can choose from."
                     },
                     {
@@ -852,7 +852,7 @@
                     {
                         "name": "on_edit",
                         "type": "Callable",
-                        "doc": "TODO: Default implementation and False value. The name of a function that is triggered when a cell edition is validated.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>value (any): the new cell value cast to the type of the column.</li>\n<li>user_value (str): the new cell value, as it was provided by the user.</li>\n<li>tz (str): the timezone if the column type is date.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot edit cells.",
+                        "doc": "TODO: Default implementation and False value. The name of a function that is triggered when a cell edition is validated.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>value (Any): the new cell value cast to the type of the column.</li>\n<li>user_value (str): the new cell value, as it was provided by the user.</li>\n<li>tz (str): the timezone if the column type is date.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot edit cells.",
                         "signature": [
                             [
                                 "state",
@@ -1310,7 +1310,7 @@
                     },
                     {
                         "name": "layout",
-                        "type": "dynamic(dict[str, any])",
+                        "type": "dynamic(dict[str, Any])",
                         "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/reference/layout/\">layout object</a>."
                     },
                     {
@@ -1372,7 +1372,7 @@
                     {
                         "name": "display",
                         "default_property": true,
-                        "type": "dynamic(any)",
+                        "type": "dynamic(Any)",
                         "doc": "The label to be displayed.<br/>This can be formatted if it is a numerical value."
                     },
                     {
@@ -1433,7 +1433,7 @@
                     {
                         "name": "lov",
                         "default_property": true,
-                        "type": "dynamic(Union[str,list[Union[str,Icon,any]]])",
+                        "type": "dynamic(Union[str,list[Union[str,Icon,Any]]])",
                         "doc": "The list of menu option values."
                     },
                     {
@@ -1503,7 +1503,7 @@
                     {
                         "name": "lov",
                         "default_property": true,
-                        "type": "dict[str, any]",
+                        "type": "dict[str, Any]",
                         "doc": "The list of pages. The keys should be:\n<ul>\n<li>page id (start with \"/\")</li>\n<li>or full URL</li>\n</ul>\nThe values are labels. See the <a href=\"../../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for details."
                     }
                 ]
@@ -1710,7 +1710,7 @@
                     },
                     {
                         "name": "content",
-                        "type": "dynamic(any)",
+                        "type": "dynamic(Any)",
                         "doc": "The content provided to the part. See the documentation section on content providers."
                     }
                 ]
@@ -1918,12 +1918,12 @@
                     {
                         "name": "value",
                         "default_property": true,
-                        "type": "dynamic(any)",
+                        "type": "dynamic(Any)",
                         "doc": "Bound to the selection value."
                     },
                     {
                         "name": "lov",
-                        "type": "dict[str, any]",
+                        "type": "dict[str, Any]",
                         "doc": "The list of values. See the <a href=\"../../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for details."
                     },
                     {
@@ -1954,7 +1954,7 @@
                     {
                         "name": "on_change",
                         "type": "Callable",
-                        "doc": "The name of a function that is triggered when the value is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (any): the new value.</li>\n</ul>",
+                        "doc": "The name of a function that is triggered when the value is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (Any): the new value.</li>\n</ul>",
                         "signature": [
                             [
                                 "state",
@@ -2062,7 +2062,7 @@
                     },
                     {
                         "name": "properties",
-                        "type": "dict[str, any]",
+                        "type": "dict[str, Any]",
                         "doc": "Bound to a dictionary that contains additional properties for this element."
                     },
                     {
