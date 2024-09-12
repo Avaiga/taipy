@@ -19,7 +19,7 @@ show_pane = True
 
 page = """
 <|{show_pane}|pane|anchor=top|height=50px|
-Here is a some text that is displayed at the top of the page in a pane.
+Here is some text that is displayed at the top of the page in a pane.
 |>
 
 # Main page content
