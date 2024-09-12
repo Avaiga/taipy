@@ -3,14 +3,15 @@ import { sendWsMessage, TAIPY_CLIENT_ID } from "../../src/context/wsUtils";
 import { uploadFile } from "../../src/workers/fileupload";
 
 import { Socket, io } from "socket.io-client";
-import { DataManager, ModuleData } from "./dataManager";
+import { nanoid } from 'nanoid';
+import { DataManager, ModuleData, RequestDataOptions } from "./dataManager";
 import { initSocket } from "./socket";
 import { TaipyWsAdapter, WsAdapter } from "./wsAdapter";
 import { WsMessageType } from "../../src/context/wsUtils";
 import { getBase } from "./utils";
 
 export type OnInitHandler = (taipyApp: TaipyApp) => void;
-export type OnChangeHandler = (taipyApp: TaipyApp, encodedName: string, value: unknown) => void;
+export type OnChangeHandler = (taipyApp: TaipyApp, encodedName: string, value: unknown, dataEventKey?: string) => void;
 export type OnNotifyHandler = (taipyApp: TaipyApp, type: string, message: string) => void;
 export type OnReloadHandler = (taipyApp: TaipyApp, removedChanges: ModuleData) => void;
 export type OnWsMessage = (taipyApp: TaipyApp, event: string, payload: unknown) => void;
@@ -24,28 +25,7 @@ export type OnEvent =
     | OnWsStatusUpdate;
 type Route = [string, string];
 type RequestDataCallback = (taipyApp: TaipyApp, encodedName: string, dataEventKey: string, value: unknown) => void;
-type ColumnName = string;
-type RequestOptions = {
-    columns?: Array<ColumnName>;
-    pagekey?: string;
-    alldata?: boolean;
-    start?: number;
-    end?: number;
-    filters?: Array<{ col: ColumnName; value: string | boolean | number; action: string }>;
-    aggregates?: Array<ColumnName>;
-    applies?: { [key: ColumnName]: string };
-    infinite?: boolean;
-    reverse?: boolean;
-    orderby?: ColumnName;
-    sort?: "asc" | "desc";
-    styles?: { [key: ColumnName]: string };
-    tooltips?: { [key: ColumnName]: string };
-    handlenan?: boolean;
-    compare_datas?: string;
-};
 
-const getPageKey = (payload?: unknown) =>
-    (!!payload && typeof payload == "object" && "pagekey" in payload && (payload["pagekey"] as string)) || "";
 
 export class TaipyApp {
     socket: Socket;
@@ -56,7 +36,7 @@ export class TaipyApp {
     _onWsMessage: OnWsMessage | undefined;
     _onWsStatusUpdate: OnWsStatusUpdate | undefined;
     _ackList: string[];
-    _rdc: Record<string, RequestDataCallback>;
+    _rdc: Record<string, Record<string, RequestDataCallback>>;
     variableData: DataManager | undefined;
     functionData: DataManager | undefined;
     appId: string;
@@ -119,13 +99,8 @@ export class TaipyApp {
         this._onChange = handler;
     }
 
-    onChangeEvent(encodedName: string, value: unknown) {
-        const key = this.getRequestedDataName(encodedName, getPageKey(value));
-        if (key in this._rdc) {
-            this._rdc[key](this, encodedName, "", value);
-        } else if (this.onChange) {
-            this.onChange(this, encodedName, value);
-        }
+    onChangeEvent(encodedName: string, value: unknown, dataEventKey?: string) {
+        this.onChange && this.onChange(this, encodedName, value, dataEventKey);
     }
 
     get onNotify() {
@@ -217,10 +192,6 @@ export class TaipyApp {
         this.wsAdapters.unshift(wsAdapter);
     }
 
-    addRequestedData(encodedName: string, dataEventKey: string, value: unknown) {
-        this.variableData?.addRequestedData(encodedName, dataEventKey, value);
-    }
-
     getEncodedName(varName: string, module: string) {
         return this.variableData?.getEncodedName(varName, module);
     }
@@ -229,16 +200,8 @@ export class TaipyApp {
         return this.variableData?.getName(encodedName);
     }
 
-    get(encodedName: string) {
-        return this.variableData?.get(encodedName);
-    }
-
-    getRequestedData(encodedName: string, dataEventKey: string) {
-        return this.variableData?.getRequestedData(encodedName, dataEventKey);
-    }
-
-    getRequestedDataName(encodedName: string, dataEventKey: string) {
-        return this.variableData?.getRequestedDataName(encodedName, dataEventKey) || "";
+    get(encodedName: string, dataEventKey?: string) {
+        return this.variableData?.get(encodedName, dataEventKey);
     }
 
     getInfo(encodedName: string) {
@@ -262,23 +225,36 @@ export class TaipyApp {
         return this.routes;
     }
 
+    deleteRequestedData(encodedName: string, dataEventKey: string) {
+        this.variableData?.deleteRequestedData(encodedName, dataEventKey);
+    }
+
     // This update will only send the request to Taipy Gui backend
     // the actual update will be handled when the backend responds
     update(encodedName: string, value: unknown) {
         this.sendWsMessage("U", encodedName, { value: value });
     }
 
+
     // Request Data from taipy backend
     // This will trigger the backend to send the data to the frontend
-    requestData(encodedName: string, cb: RequestDataCallback, options?: RequestOptions) {
+    requestData(encodedName: string, cb: RequestDataCallback, options?: RequestDataOptions) {
         const varInfo = this.getInfo(encodedName);
         if (!varInfo?.data_update) {
             throw new Error(`Cannot request data for ${encodedName}. Not supported for type of ${varInfo?.type}`);
         }
+        // Populate pagekey if there is no pagekey
+        if (!options) {
+            options = { pagekey: nanoid(10) };
+        }
+        options.pagekey = options?.pagekey || nanoid(10);
+        const dataKey = options.pagekey;
+        // preserve options for this data key so it can be called during refresh
+        this.variableData?.addRequestDataOptions(encodedName, dataKey, options);
         // preserve callback so it can be called later
-        this._rdc[this.getRequestedDataName(encodedName, getPageKey(options))] = cb;
+        this._rdc[encodedName] = this._rdc[encodedName] ? { ...this._rdc[encodedName], [dataKey]: cb } : { [dataKey]: cb };
         // call the ws to request data
-        this.sendWsMessage("DU", encodedName, {});
+        this.sendWsMessage("DU", encodedName, options);
     }
 
     getContext() {

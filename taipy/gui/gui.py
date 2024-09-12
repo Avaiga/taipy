@@ -1193,7 +1193,7 @@ class Gui:
                 variable_tree[var_module_name] = {}
             data_update = isinstance(v, filtered_value_types)
             value = None if data_update else data[k]
-            if _is_moduled_variable(var_name):
+            if _is_moduled_variable(k):
                 variable_tree[var_module_name][var_name] = {
                     "type": type(v).__name__,
                     "value": value,

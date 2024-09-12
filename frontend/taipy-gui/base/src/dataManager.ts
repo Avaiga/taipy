@@ -9,7 +9,34 @@ export interface VarData {
     data_update: boolean;
 }
 
-const RU_DATA_EVENT_KEY_SEP = "__tPy_RU__";
+type ColumnName = string;
+
+export type RequestDataOptions = {
+    columns?: Array<ColumnName>;
+    pagekey?: string;
+    alldata?: boolean;
+    start?: number;
+    end?: number;
+    filters?: Array<{ col: ColumnName; value: string | boolean | number; action: string }>;
+    aggregates?: Array<ColumnName>;
+    applies?: { [key: ColumnName]: string };
+    infinite?: boolean;
+    reverse?: boolean;
+    orderby?: ColumnName;
+    sort?: "asc" | "desc";
+    styles?: { [key: ColumnName]: string };
+    tooltips?: { [key: ColumnName]: string };
+    handlenan?: boolean;
+    compare_datas?: string;
+};
+
+type RequestDataEntry = {
+    options: RequestDataOptions;
+    receivedData: unknown;
+}
+
+export const getRequestedDataKey = (payload?: unknown) =>
+    (!!payload && typeof payload == "object" && "pagekey" in payload && (payload["pagekey"] as string)) || undefined;
 
 // This class hold the information of variables and real-time value of variables
 export class DataManager {
@@ -17,8 +44,8 @@ export class DataManager {
     _data: Record<string, unknown>;
     // Initial data fetched from taipy-gui backend
     _init_data: ModuleData;
-    // key: encodedName + RU_DATA_EVENT_KEY_SEP + dataEventKey, value: requested data
-    _requested_data: Record<string, unknown>;
+    // key: encodedName -> dataEventKey -> requeste data
+    _requested_data: Record<string, Record<string, RequestDataEntry>>;
 
     constructor(variableModuleData: ModuleData) {
         this._data = {};
@@ -59,10 +86,6 @@ export class DataManager {
         return changes;
     }
 
-    addRequestedData(encodedName: string, dataEventKey: string, value: unknown) {
-        this._requested_data[this.getRequestedDataName(encodedName, dataEventKey)] = value;
-    }
-
     getEncodedName(varName: string, module: string): string | undefined {
         if (module in this._init_data && varName in this._init_data[module]) {
             return this._init_data[module][varName].encoded_name;
@@ -83,23 +106,30 @@ export class DataManager {
         return undefined;
     }
 
-    get(encodedName: string): unknown {
+    get(encodedName: string, dataEventKey?: string): unknown {
+        // handle requested data
+        if (dataEventKey) {
+            if (!(encodedName in this._requested_data)) {
+                throw new Error(`Encoded name '${encodedName}' is not available in Taipy GUI`);
+            }
+            if (!(dataEventKey in this._requested_data[encodedName])) {
+                throw new Error(`Event key '${dataEventKey}' is not available for encoded name '${encodedName}' in Taipy GUI`);
+            }
+            return this._requested_data[encodedName][dataEventKey].receivedData;
+        }
+        // handle normal data
         if (!(encodedName in this._data)) {
             throw new Error(`${encodedName} is not available in Taipy GUI`);
         }
         return this._data[encodedName];
     }
 
-    getRequestedData(encodedName: string, dataEventKey: string): unknown {
-        const key = this.getRequestedDataName(encodedName, dataEventKey);
-        if (!(key in this._requested_data)) {
-            throw new Error(`${key} is not available in Taipy GUI`);
+    addRequestDataOptions(encodedName: string, dataEventKey: string, options: RequestDataOptions) {
+        if (!(encodedName in this._requested_data)) {
+            this._requested_data[encodedName] = {};
         }
-        return this._requested_data[key];
-    }
-
-    getRequestedDataName(encodedName: string, dataEventKey: string): string {
-        return encodedName + RU_DATA_EVENT_KEY_SEP + dataEventKey;
+        // This would overrides object with the same key
+        this._requested_data[encodedName][dataEventKey] = { options: options, receivedData: undefined };
     }
 
     getInfo(encodedName: string): VarData | undefined {
@@ -122,10 +152,28 @@ export class DataManager {
         return this._data;
     }
 
-    update(encodedName: string, value: unknown) {
+    update(encodedName: string, value: unknown, dataEventKey?: string) {
+        // handle requested data
+        if (dataEventKey) {
+            if (!(encodedName in this._requested_data)) {
+                throw new Error(`Encoded name '${encodedName}' is not available in Taipy GUI`);
+            }
+            if (!(dataEventKey in this._requested_data[encodedName])) {
+                throw new Error(`Event key '${dataEventKey}' is not available for encoded name '${encodedName}' in Taipy GUI`);
+            }
+            this._requested_data[encodedName][dataEventKey].receivedData = value;
+            return;
+        }
+        // handle normal data
         if (!(encodedName in this._data)) {
             throw new Error(`${encodedName} is not available in Taipy Gui`);
         }
         this._data[encodedName] = value;
+    }
+
+    deleteRequestedData(encodedName: string, dataEventKey: string) {
+        if (encodedName in this._requested_data && dataEventKey in this._requested_data[encodedName]) {
+            delete this._requested_data[encodedName][dataEventKey];
+        }
     }
 }

@@ -2,7 +2,7 @@ import merge from "lodash/merge";
 import { TaipyApp } from "./app";
 import { IdMessage, storeClientId } from "../../src/context/utils";
 import { WsMessage } from "../../src/context/wsUtils";
-import { DataManager, ModuleData } from "./dataManager";
+import { DataManager, getRequestedDataKey, ModuleData } from "./dataManager";
 
 export abstract class WsAdapter {
     abstract supportedMessageTypes: string[];
@@ -25,7 +25,7 @@ export class TaipyWsAdapter extends WsAdapter {
     initWsMessageTypes: string[];
     constructor() {
         super();
-        this.supportedMessageTypes = ["MU", "ID", "GMC", "GDT", "AID", "GR", "AL", "ACK", "RU"];
+        this.supportedMessageTypes = ["MU", "ID", "GMC", "GDT", "AID", "GR", "AL", "ACK"];
         this.initWsMessageTypes = ["ID", "AID", "GMC"];
     }
     handleWsMessage(message: WsMessage, taipyApp: TaipyApp): boolean {
@@ -35,11 +35,24 @@ export class TaipyWsAdapter extends WsAdapter {
                     const encodedName = muPayload.name;
                     const { value } = muPayload.payload;
                     if (value && typeof (value as any).__taipy_refresh === "boolean") {
-                        // here we know that we can request an DU for this variable
-                        // Question is how to get the right payload ?
+                        // refresh all requested data for this encodedName var
+                        const requestDataOptions = taipyApp.variableData?._requested_data[encodedName];
+                        for (const dataKey in requestDataOptions) {
+                            const requestDataEntry = requestDataOptions[dataKey];
+                            const { options } = requestDataEntry;
+                            taipyApp.sendWsMessage("DU", encodedName, options);
+                        }
+                        return true;
                     }
-                    taipyApp.variableData?.update(encodedName, value);
-                    taipyApp.onChangeEvent(encodedName, value);
+                    const dataKey = getRequestedDataKey(value);
+                    taipyApp.variableData?.update(encodedName, value, dataKey);
+                    // call the callback if it exists for request data
+                    if (dataKey && (encodedName in taipyApp._rdc && dataKey in taipyApp._rdc[encodedName])) {
+                        const cb = taipyApp._rdc[encodedName]?.[dataKey];
+                        cb(taipyApp, encodedName, dataKey, value);
+                        delete taipyApp._rdc[encodedName][dataKey];
+                    }
+                    taipyApp.onChangeEvent(encodedName, value, dataKey);
                 }
             } else if (message.type === "ID") {
                 const { id } = message as unknown as IdMessage;
@@ -89,22 +102,6 @@ export class TaipyWsAdapter extends WsAdapter {
                 const { id } = message as unknown as Record<string, string>;
                 taipyApp._ackList = taipyApp._ackList.filter((v) => v !== id);
                 taipyApp.onWsStatusUpdateEvent(taipyApp._ackList);
-            } else if (message.type === "RU") {
-                const payload = message.payload as Record<string, unknown>;
-                // process to get data
-                const data = {};
-                const encodedName = "";
-                const dataEventKey = "";
-                // add data to cache
-                taipyApp.addRequestedData(encodedName, dataEventKey, data);
-                // get and execute callback
-                const callbackName = taipyApp.getRequestedDataName(encodedName, dataEventKey);
-                const requestedDataCallback = taipyApp._rdc[callbackName];
-                if (requestedDataCallback) {
-                    requestedDataCallback(taipyApp, encodedName, dataEventKey, data);
-                    // remove callback after usage
-                    delete taipyApp._rdc[callbackName];
-                }
             }
             this.postWsMessageProcessing(message, taipyApp);
             return true;
