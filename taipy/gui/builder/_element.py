@@ -263,7 +263,7 @@ class content(_Control):
     This pseudo-element can be used in the root page of your application. It is replaced at runtime
     by the content of the page the user navigates to.
 
-    The usage of this peuse-element is descripted in
+    The usage of this pseudo-element is described in
     [this page](../../userman/gui/pages/index.md#application-header-and-footer).
     """
 
