@@ -2346,7 +2346,7 @@ class Gui:
                     if (
                         (not page._binding_variables or k in page._binding_variables)
                         and not k.startswith("_")
-                        and not isinstance(v, (ModuleType, FunctionType))
+                        and not isinstance(v, ModuleType)
                     ):
                         encoded_var_name = self.__var_dir.add_var(k, page_module)
                         if not hasattr(self._bindings(), encoded_var_name):

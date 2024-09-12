@@ -44,7 +44,7 @@ export class TaipyWsAdapter extends WsAdapter {
                         }
                         return true;
                     }
-                    const dataKey = getRequestedDataKey(value);
+                    const dataKey = getRequestedDataKey(muPayload.payload);
                     taipyApp.variableData?.update(encodedName, value, dataKey);
                     // call the callback if it exists for request data
                     if (dataKey && (encodedName in taipyApp._rdc && dataKey in taipyApp._rdc[encodedName])) {
