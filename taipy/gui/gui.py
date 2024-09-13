@@ -1053,9 +1053,7 @@ class Gui:
             newvalue = values.get(_var)
             resource_handler = get_current_resource_handler()
             custom_page_filtered_types = resource_handler.data_layer_supported_types if resource_handler else ()
-            if isinstance(newvalue, (_TaipyData)) or (
-                custom_page_filtered_types and isinstance(newvalue, custom_page_filtered_types)
-            ):
+            if isinstance(newvalue, (_TaipyData)) or isinstance(newvalue, custom_page_filtered_types):
                 # A changing integer that triggers a data request
                 # newvalue = Gui._data_request_counter
                 newvalue = {"__taipy_refresh": True}
@@ -1120,11 +1118,7 @@ class Gui:
         newvalue = _getscopeattr_drill(self, var_name)
         resource_handler = get_current_resource_handler()
         custom_page_filtered_types = resource_handler.data_layer_supported_types if resource_handler else ()
-        if (
-            not isinstance(newvalue, _TaipyData)
-            and custom_page_filtered_types
-            and isinstance(newvalue, custom_page_filtered_types)
-        ):  # noqa: E501
+        if not isinstance(newvalue, _TaipyData) and isinstance(newvalue, custom_page_filtered_types):
             newvalue = _TaipyData(newvalue, "")
         if isinstance(newvalue, _TaipyData):
             ret_payload = None
@@ -1200,7 +1194,7 @@ class Gui:
                 var_module_name = "__main__"
             if var_module_name not in variable_tree:
                 variable_tree[var_module_name] = {}
-            data_update = isinstance(v, filtered_value_types) if filtered_value_types else False
+            data_update = isinstance(v, filtered_value_types)
             value = None if data_update else data[k]
             if _is_moduled_variable(k):
                 variable_tree[var_module_name][var_name] = {
