@@ -116,6 +116,8 @@ def _build_chart_config(gui: "Gui", attributes: t.Dict[str, t.Any], col_types: t
     default_type = attributes.get("_default_type", "scatter")
     default_mode = attributes.get("_default_mode", "lines+markers")
     trace = __get_multiple_indexed_attributes(attributes, _CHART_NAMES)
+    if len([t for t in trace if t]) == 0:
+        return {"traces": []}
     if not trace[_Chart_iprops.mode.value]:
         trace[_Chart_iprops.mode.value] = default_mode
     # type

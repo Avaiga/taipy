@@ -278,7 +278,7 @@ class _Factory:
                 ("max", PropertyType.number),
                 ("value", PropertyType.dynamic_number),
                 ("format",),
-                ("orientation"),
+                ("orientation",),
                 ("width",),
                 ("height",),
             ]
