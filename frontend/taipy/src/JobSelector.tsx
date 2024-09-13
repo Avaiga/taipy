@@ -12,15 +12,22 @@
  */
 
 import React, { useEffect, useState, useCallback, useMemo, MouseEvent, useRef } from "react";
+
 import Add from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import FilterList from "@mui/icons-material/FilterList";
 import StopCircleOutlined from "@mui/icons-material/StopCircleOutlined";
+
+import { Theme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material//DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
@@ -30,6 +37,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import Popover from "@mui/material/Popover";
 import Select from "@mui/material/Select";
+import Stack from "@mui/material/Stack";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -40,6 +48,7 @@ import TextField from "@mui/material/TextField";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+
 import { useFormik } from "formik";
 
 import {
@@ -62,7 +71,6 @@ import {
 } from "./utils";
 import StatusChip, { Status } from "./StatusChip";
 import JobViewer, { JobDetail } from "./JobViewer";
-import { Dialog, DialogActions, DialogContent, DialogTitle, Theme } from "@mui/material";
 
 const CloseDialogSx = {
     position: "absolute",
@@ -71,7 +79,7 @@ const CloseDialogSx = {
     color: (theme: Theme) => theme.palette.grey[500],
 };
 
-const RightButtonSx = { marginLeft: "auto ! important" };
+const RightButtonSx = { marginLeft: "auto !important" };
 
 interface JobSelectorProps {
     updateVarName?: string;
@@ -125,7 +133,6 @@ const containerSx = { width: "100%", mb: 2 };
 const selectSx = { height: 50 };
 const containerPopupSx = { width: "619px" };
 const tableWidthSx = { minWidth: 750 };
-const toolbarRightSx = { mr: 6 };
 
 type JobSelectorColumns = {
     id: string;
@@ -809,68 +816,58 @@ const JobSelector = (props: JobSelectorProps) => {
             ) : null}
             <Paper sx={containerSx}>
                 <Toolbar sx={headerToolbarSx}>
-                    <Grid container spacing={2} alignItems="center">
-                        <Grid container size={3} alignItems="center">
-                            <Tooltip title="Filter">
-                                <IconButton onClick={handleFilterOpen}>
-                                    <FilterList />
-                                </IconButton>
-                            </Tooltip>
-                            {filters && filters.length ? (
-                                <Typography component="div">
-                                    {filters.length} filter{filters.length > 1 ? "s" : ""}
-                                </Typography>
-                            ) : null}
-                        </Grid>
-                        {checked.length ? (
-                            <>
-                                <Grid size={7}>
-                                    <Typography variant="subtitle1">{checked.length} selected</Typography>
-                                </Grid>
-                                <Grid container justifyContent="flex-end" spacing={1} size={2}>
-                                    {showCancel ? (
-                                        <Tooltip title="Cancel Jobs">
-                                            <span>
-                                                <IconButton
-                                                    disabled={!allowCancelJobs}
-                                                    data-id={JSON.stringify(checked)}
-                                                    data-multiple
-                                                    onClick={handleCancelJobs}
-                                                >
-                                                    <StopCircleOutlined
-                                                        color={disableColor("inherit", !allowCancelJobs)}
-                                                    />
-                                                </IconButton>
-                                            </span>
-                                        </Tooltip>
-                                    ) : null}
-                                    {showDelete ? (
-                                        <Tooltip title="Delete Jobs">
-                                            <span>
-                                                <IconButton
-                                                    disabled={!allowDeleteJobs}
-                                                    data-id={JSON.stringify(checked)}
-                                                    data-multiple
-                                                    onClick={handleDeleteJobs}
-                                                >
-                                                    <DeleteOutline color={disableColor("primary", !allowDeleteJobs)} />
-                                                </IconButton>
-                                            </span>
-                                        </Tooltip>
-                                    ) : null}
-                                    <Box sx={toolbarRightSx} />
-                                </Grid>
-                            </>
+                    <Stack direction="row" justifyContent="space-between" width="100%" marginRight={4}>
+                        <Tooltip title="Filter">
+                            <IconButton onClick={handleFilterOpen}>
+                                <FilterList />
+                            </IconButton>
+                        </Tooltip>
+                        {filters && filters.length ? (
+                            <Typography component="div">
+                                {filters.length} filter{filters.length > 1 ? "s" : ""}
+                            </Typography>
                         ) : null}
-
-                        <Filter
-                            open={!!anchorEl}
-                            anchorEl={anchorEl}
-                            handleFilterClose={handleFilterClose}
-                            handleApplyFilter={setFilters}
-                            columns={jobSelectorColumns}
-                        />
-                    </Grid>
+                        {checked.length ? (
+                            <Stack direction="row" alignItems="center">
+                                <Typography variant="subtitle1">{checked.length} selected</Typography>
+                                {showCancel ? (
+                                    <Tooltip title="Cancel Jobs">
+                                        <span>
+                                            <IconButton
+                                                disabled={!allowCancelJobs}
+                                                data-id={JSON.stringify(checked)}
+                                                data-multiple
+                                                onClick={handleCancelJobs}
+                                            >
+                                                <StopCircleOutlined color={disableColor("inherit", !allowCancelJobs)} />
+                                            </IconButton>
+                                        </span>
+                                    </Tooltip>
+                                ) : null}
+                                {showDelete ? (
+                                    <Tooltip title="Delete Jobs">
+                                        <span>
+                                            <IconButton
+                                                disabled={!allowDeleteJobs}
+                                                data-id={JSON.stringify(checked)}
+                                                data-multiple
+                                                onClick={handleDeleteJobs}
+                                            >
+                                                <DeleteOutline color={disableColor("primary", !allowDeleteJobs)} />
+                                            </IconButton>
+                                        </span>
+                                    </Tooltip>
+                                ) : null}
+                            </Stack>
+                        ) : null}
+                    </Stack>
+                    <Filter
+                        open={!!anchorEl}
+                        anchorEl={anchorEl}
+                        handleFilterClose={handleFilterClose}
+                        handleApplyFilter={setFilters}
+                        columns={jobSelectorColumns}
+                    />
                 </Toolbar>
                 <TableContainer sx={tableHeightSx}>
                     <Table sx={tableWidthSx} aria-labelledby="tableTitle" size="medium">

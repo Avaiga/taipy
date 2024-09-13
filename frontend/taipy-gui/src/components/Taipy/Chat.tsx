@@ -61,7 +61,6 @@ const avatarColSx = { width: 1.5 * avatarWidth, minWidth: 1.5 * avatarWidth, pt:
 const senderMsgSx = {
     width: "fit-content",
     maxWidth: "80%",
-    color: (theme: Theme) => theme.palette.text.disabled,
 } as SxProps<Theme>;
 const gridSx = { pb: "1em", mt: "unset", flex: 1, overflow: "auto" };
 const loadMoreSx = { width: "fit-content", marginLeft: "auto", marginRight: "auto" };
@@ -85,7 +84,6 @@ const senderPaperSx = {
         top: "0",
         right: `-${indicWidth}em`,
     },
-    color: (theme: Theme) => theme.palette.text.disabled,
 } as SxProps<Theme>;
 const otherPaperSx = {
     position: "relative",
