@@ -107,6 +107,8 @@ export const LINE_STYLE = "__taipy_line_style__";
 
 export const defaultDateFormat = "yyyy/MM/dd";
 
+const imgButtonRe = /^(!)?\[([^\]]*)]\(([^)]*)\)$/;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type TableValueType = Record<string, Record<string, any>>;
 
@@ -307,17 +309,14 @@ export const EditableCell = (props: EditableCellProps) => {
     const withTime = useMemo(() => !!colDesc.format && colDesc.format.toLowerCase().includes("h"), [colDesc.format]);
 
     const buttonImg = useMemo(() => {
-        if (typeof value == "string" && value.startsWith("[") && value.endsWith(")")) {
-            const parts = value.slice(1, -1).split("](");
-            if (parts.length == 2) {
-                const img = parts[0].startsWith("img:");
-                return {
-                    text: img ? parts[0].slice(4) : parts[0],
-                    value: parts[1],
-                    img: img,
-                    action: !!onSelection,
-                };
-            }
+        let m;
+        if (typeof value == "string" && (m = imgButtonRe.exec(value)) !== null) {
+            return {
+                text: !!m[1] ? m[3]: m[2],
+                value: !!m[1] ? m[2]: m[3],
+                img: !!m[1],
+                action: !!onSelection,
+            };
         }
         return undefined;
     }, [value, onSelection]);
@@ -610,6 +609,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                     className={getSuffixedClassNames(tableClassName, "-img")}
                                     alt={buttonImg.value}
                                     onClick={onSelect}
+                                    title={buttonImg.value}
                                 />
                             ) : (
                                 <Button
@@ -618,6 +618,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                     sx={ButtonSx}
                                     className={getSuffixedClassNames(tableClassName, "-btn")}
                                     disabled={!buttonImg.action}
+                                    title={buttonImg.value}
                                 >
                                     {formatValue(buttonImg.text, colDesc, formatConfig, nanValue)}
                                 </Button>

@@ -155,7 +155,7 @@ const buttonImgValue = {
                 bool: true,
                 int: 478,
                 float: 3.5,
-                Code: "[img:https://docs.taipy.io/en/latest/assets/images/favicon.png](Taipy!)",
+                Code: "![Taipy!](https://docs.taipy.io/en/latest/assets/images/favicon.png)",
             },
         ],
         rowcount: 2,
