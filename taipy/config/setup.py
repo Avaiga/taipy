@@ -38,7 +38,17 @@ test_requirements = ["pytest>=3.8"]
 setup(
     version=version_string,
     install_requires=requirements,
-    packages=find_namespace_packages(where=".") + find_packages(include=["taipy", "taipy.config", "taipy.config.*", "taipy.logger", "taipy.logger.*"]),
+    packages=find_namespace_packages(where=".")+ find_packages(
+        include=[
+            "taipy",
+            "taipy.config",
+            "taipy.config.*",
+            "taipy.logger",
+            "taipy.logger.*",
+            "taipy._cli",
+            "taipy._cli.*"
+        ]
+    ),
     include_package_data=True,
     data_files=[('version', ['version.json'])],
     tests_require=test_requirements,

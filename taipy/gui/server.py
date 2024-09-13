@@ -37,6 +37,7 @@ from ._renderers.json import _TaipyJsonProvider
 from .config import ServerConfig
 from .custom._page import _ExternalResourceHandlerManager
 from .utils import _is_in_notebook, _is_port_open, _RuntimeManager
+from .utils._css import get_style
 
 if t.TYPE_CHECKING:
     from .gui import Gui
@@ -229,6 +230,7 @@ class _Server:
         template_str = _Server.__RE_CLOSING_CURLY.sub(_Server.__CLOSING_CURLY, template_str)
         template_str = template_str.replace('"{!', "{")
         template_str = template_str.replace('!}"', "}")
+        style = get_style(style)
         return self._direct_render_json(
             {
                 "jsx": template_str,

@@ -1931,7 +1931,7 @@ class Gui:
         new_page = _Page()
         new_page._route = name
         new_page._renderer = page
-        new_page._style = style
+        new_page._style = style or page._get_style()
         # Append page to _config
         self._config.pages.append(new_page)
         self._config.routes.append(name)
