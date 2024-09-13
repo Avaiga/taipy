@@ -584,6 +584,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                 <EditableCell
                                                     key={"val" + index + "-" + cidx}
                                                     className={getClassName(row, columns[col].style, col)}
+                                                    tableClassName={className}
                                                     colDesc={columns[col]}
                                                     value={row[col]}
                                                     formatConfig={formatConfig}
