@@ -332,14 +332,14 @@ export const EditableCell = (props: EditableCellProps) => {
                 case "int":
                     try {
                         castVal = parseInt(val as string, 10);
-                    } catch (e) {
+                    } catch {
                         // ignore
                     }
                     break;
                 case "float":
                     try {
                         castVal = parseFloat(val as string);
-                    } catch (e) {
+                    } catch {
                         // ignore
                     }
                     break;
