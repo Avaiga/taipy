@@ -79,7 +79,7 @@ class _Builder:
         element_name: str,
         attributes: t.Optional[t.Dict[str, t.Any]],
         hash_names: t.Optional[t.Dict[str, str]] = None,
-        default_value="<Empty>",
+        default_value: t.Optional[t.Any] = "<Empty>",
         lib_name: str = "taipy",
     ):
         from ..gui import Gui
@@ -599,7 +599,7 @@ class _Builder:
         config = _build_chart_config(self.__gui, self.__attributes, col_types)
 
         self.__set_json_attribute("defaultConfig", config)
-        self._set_chart_selected(max=len(config.get("traces", "")))
+        self._set_chart_selected(max=len(config.get("traces", [])))
         self.__set_refresh_on_update()
         return self
 
@@ -641,6 +641,16 @@ class _Builder:
         default_sel = self.__attributes.get(name)
         if not isinstance(default_sel, list) and name in self.__attributes:
             default_sel = []
+        if max == 0:
+            self.__update_vars.extend(
+                self.__set_list_attribute(
+                    name,
+                    self.__hashes.get(name),
+                    default_sel,
+                    int,
+                )
+            )
+            return
         idx = 1
         name_idx = f"{name}[{idx}]"
         sel = self.__attributes.get(name_idx)
