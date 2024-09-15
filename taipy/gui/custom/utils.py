@@ -19,7 +19,8 @@ from ..server import _Server
 from ._page import ResourceHandler, _ExternalResourceHandlerManager
 
 
-def is_in_custom_page_context():
+def is_in_custom_page_context() -> bool:
+    "NOT DOCUMENTED"
     resource_handler_id = None
     with contextlib.suppress(Exception):
         if has_request_context():
@@ -28,6 +29,7 @@ def is_in_custom_page_context():
 
 
 def get_current_resource_handler() -> t.Optional[ResourceHandler]:
+    "NOT DOCUMENTED"
     resource_handler_id = None
     with contextlib.suppress(Exception):
         if has_request_context():
