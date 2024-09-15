@@ -33,6 +33,7 @@ module.exports =  {
       // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/explicit-module-boundary-types": "off",
+      "@typescript-eslint/no-unused-expressions": "off", // allows a && b()
       "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
       "react-hooks/exhaustive-deps": "error", // Checks effect dependencies
       "tsdoc/syntax": "off", // "warn" to check tsdoc syntax
