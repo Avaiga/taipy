@@ -24,9 +24,7 @@ def build_gui(root_path: Path):
         print(f'Found taipy-gui frontend bundle in {root_path  / "taipy" / "gui" / "webapp"}.')  # noqa: T201
     else:
         subprocess.run(["npm", "ci"], cwd=root_path / "frontend" / "taipy-gui" / "dom", check=True, shell=with_shell)
-        subprocess.run(
-            ["npm", "ci", "--omit=optional"], cwd=root_path / "frontend" / "taipy-gui", check=True, shell=with_shell
-        )
+        subprocess.run(["npm", "ci"], cwd=root_path / "frontend" / "taipy-gui", check=True, shell=with_shell)
         subprocess.run(["npm", "run", "build"], cwd=root_path / "frontend" / "taipy-gui", check=True, shell=with_shell)
 
 
