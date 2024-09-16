@@ -11,8 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React from "react";
-
+import React, { useMemo } from "react";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -34,8 +33,9 @@ interface ProgressBarProps extends TaipyBaseProps {
     titleAnchor?: "top" | "bottom" | "left" | "right" | "none";
 }
 
-const linearSx = { display: "flex", alignItems: "center" };
+const linearSx = { display: "flex", alignItems: "center", width: "100%" };
 const linearPrgSx = { width: "100%", mr: 1 };
+const titleSx = { margin: 1 };
 const linearTxtSx = { minWidth: 35 };
 const circularSx = { position: "relative", display: "inline-flex" };
 const circularPrgSx = {
@@ -49,23 +49,6 @@ const circularPrgSx = {
     justifyContent: "center",
 };
 
-export const getFlexDirection = (titleAnchor: string) => {
-    switch (titleAnchor) {
-        case "top":
-            return "column";
-        case "bottom":
-            return "column-reverse";
-        case "left":
-            return "row";
-        case "right":
-            return "row-reverse";
-        default:
-            return "row";
-    }
-};
-
-export const getBoxWidth = (title?: string, titleAnchor?: string) => (title && titleAnchor ? "100%" : "");
-
 const Progress = (props: ProgressBarProps) => {
     const { linear = false, showValue = false, titleAnchor = "bottom" } = props;
 
@@ -74,29 +57,69 @@ const Progress = (props: ProgressBarProps) => {
     const render = useDynamicProperty(props.render, props.defaultRender, true);
     const title = useDynamicProperty(props.title, props.defaultTitle, undefined);
 
+    const memoizedValues = useMemo(() => {
+        const getFlexDirection = (titleAnchor: string) => {
+            switch (titleAnchor) {
+                case "top":
+                    return "column";
+                case "left":
+                    return "row";
+                case "right":
+                    return "row-reverse";
+                case "bottom":
+                default:
+                    return "column-reverse";
+            }
+        };
+
+        return {
+            getFlexDirection,
+            boxWithFlexDirectionSx: {
+                ...linearSx,
+                flexDirection: getFlexDirection(titleAnchor),
+            },
+            circularBoxSx: {
+                ...circularSx,
+                flexDirection: getFlexDirection(titleAnchor),
+                alignItems: title && titleAnchor ? "center" : "",
+            },
+            linearProgressSx: {
+                "& .MuiLinearProgress-bar": {
+                    background: props.color ? props.color : undefined,
+                },
+            },
+            circularProgressSx: {
+                "& .MuiCircularProgress-circle": {
+                    color: props.color ? props.color : undefined,
+                },
+            },
+            linearProgressFullWidthSx: {
+                width: "100%",
+                "& .MuiLinearProgress-bar": {
+                    background: props.color ? props.color : undefined,
+                },
+            },
+        };
+    }, [props.color, title, titleAnchor]);
+
+    const { boxWithFlexDirectionSx, circularBoxSx, linearProgressSx, circularProgressSx, linearProgressFullWidthSx } =
+        memoizedValues;
+
     if (!render) {
         return null;
     }
 
     return showValue && value !== undefined ? (
         linear ? (
-            <Box sx={{ ...linearSx, flexDirection: getFlexDirection(titleAnchor) }}>
+            <Box sx={boxWithFlexDirectionSx}>
                 {title && titleAnchor !== "none" ? (
-                    <Typography sx={{ margin: 1 }} variant="caption">
+                    <Typography sx={titleSx} variant="caption">
                         {title}
                     </Typography>
                 ) : null}
-                <Box sx={{ ...linearSx, width: getBoxWidth(title, titleAnchor) }} className={className} id={props.id}>
+                <Box sx={linearSx} className={className} id={props.id}>
                     <Box sx={linearPrgSx}>
-                        <LinearProgress
-                            sx={{
-                                "& .MuiLinearProgress-bar": {
-                                    background: props.color ? props.color : undefined,
-                                },
-                            }}
-                            variant="determinate"
-                            value={value}
-                        />
+                        <LinearProgress sx={linearProgressSx} variant="determinate" value={value} />
                     </Box>
                     <Box sx={linearTxtSx}>
                         <Typography variant="body2" color="text.secondary">{`${Math.round(value)}%`}</Typography>
@@ -104,28 +127,14 @@ const Progress = (props: ProgressBarProps) => {
                 </Box>
             </Box>
         ) : (
-            <Box
-                sx={{
-                    ...circularSx,
-                    flexDirection: getFlexDirection(titleAnchor),
-                    alignItems: title && titleAnchor ? "center" : "",
-                }}
-            >
+            <Box sx={circularBoxSx}>
                 {title && titleAnchor !== "none" ? (
-                    <Typography sx={{ margin: 1 }} variant="caption">
+                    <Typography sx={titleSx} variant="caption">
                         {title}
                     </Typography>
                 ) : null}
-                <Box sx={{ ...circularSx, width: getBoxWidth(title, titleAnchor) }} className={className} id={props.id}>
-                    <CircularProgress
-                        sx={{
-                            "& .MuiCircularProgress-circle": {
-                                color: props.color ? props.color : undefined,
-                            },
-                        }}
-                        variant="determinate"
-                        value={value}
-                    />
+                <Box sx={circularSx} className={className} id={props.id}>
+                    <CircularProgress sx={circularProgressSx} variant="determinate" value={value} />
                     <Box sx={circularPrgSx}>
                         <Typography variant="caption" component="div" color="text.secondary">
                             {`${Math.round(value)}%`}
@@ -135,45 +144,30 @@ const Progress = (props: ProgressBarProps) => {
             </Box>
         )
     ) : linear ? (
-        <Box sx={{ ...linearSx, flexDirection: getFlexDirection(titleAnchor) }}>
+        <Box sx={boxWithFlexDirectionSx}>
             {title && titleAnchor !== "none" ? (
-                <Typography sx={{ margin: 1 }} variant="caption">
+                <Typography sx={titleSx} variant="caption">
                     {title}
                 </Typography>
             ) : null}
             <LinearProgress
                 id={props.id}
-                sx={{
-                    width: "100%",
-                    "& .MuiLinearProgress-bar": {
-                        background: props.color ? props.color : undefined,
-                    },
-                }}
+                sx={linearProgressFullWidthSx}
                 variant={value === undefined ? "indeterminate" : "determinate"}
                 value={value}
                 className={className}
             />
         </Box>
     ) : (
-        <Box
-            sx={{
-                ...circularSx,
-                flexDirection: getFlexDirection(titleAnchor),
-                alignItems: title && titleAnchor ? "center" : "",
-            }}
-        >
+        <Box sx={circularBoxSx}>
             {title && titleAnchor !== "none" ? (
-                <Typography sx={{ margin: 1 }} variant="caption">
+                <Typography sx={titleSx} variant="caption">
                     {title}
                 </Typography>
             ) : null}
             <CircularProgress
                 id={props.id}
-                sx={{
-                    "& .MuiCircularProgress-circle": {
-                        color: props.color ? props.color : undefined,
-                    },
-                }}
+                sx={circularProgressSx}
                 variant={value === undefined ? "indeterminate" : "determinate"}
                 value={value}
                 className={className}

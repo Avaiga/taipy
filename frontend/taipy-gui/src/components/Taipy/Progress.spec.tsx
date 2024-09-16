@@ -14,7 +14,7 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import Progress, { getFlexDirection, getBoxWidth } from "./Progress";
+import Progress from "./Progress";
 
 describe("Progress component", () => {
     it("renders circular progress without value (indeterminate)", () => {
@@ -107,44 +107,39 @@ describe("Progress component", () => {
         expect(title).toBeInTheDocument();
         expect(progressBar).toBeInTheDocument();
     });
+
+    it("displays title above progress", () => {
+        const { container } = render(<Progress titleAnchor="top" />);
+        const box = container.querySelector(".MuiBox-root");
+        expect(box).toHaveStyle("flex-direction: column");
+    });
+
+    it("displays title to the left of progress", () => {
+        const { container } = render(<Progress titleAnchor="left" />);
+        const box = container.querySelector(".MuiBox-root");
+        expect(box).toHaveStyle("flex-direction: row");
+    });
+
+    it("displays title to the right of progress", () => {
+        const { container } = render(<Progress titleAnchor="right" />);
+        const box = container.querySelector(".MuiBox-root");
+        expect(box).toHaveStyle("flex-direction: row-reverse");
+    });
+
+    it("displays title at the bottom of progress", () => {
+        const { container } = render(<Progress titleAnchor="bottom" />);
+        const box = container.querySelector(".MuiBox-root");
+        expect(box).toHaveStyle("flex-direction: column-reverse");
+    });
+
+    it("displays the title at the bottom of the progress bar when the title anchor is undefined", () => {
+        const { container } = render(<Progress />);
+        const box = container.querySelector(".MuiBox-root");
+        expect(box).toHaveStyle("flex-direction: column-reverse");
+    });
 });
 
 describe("Progress functions", () => {
-    it('should return "column" when titleAnchor is "top"', () => {
-        expect(getFlexDirection("top")).toBe("column");
-    });
-
-    it('should return "column-reverse" when titleAnchor is "bottom"', () => {
-        expect(getFlexDirection("bottom")).toBe("column-reverse");
-    });
-
-    it('should return "row" when titleAnchor is "left"', () => {
-        expect(getFlexDirection("left")).toBe("row");
-    });
-
-    it('should return "row-reverse" when titleAnchor is "right"', () => {
-        expect(getFlexDirection("right")).toBe("row-reverse");
-    });
-
-    it('should return "row" when titleAnchor is not recognized', () => {
-        expect(getFlexDirection("unknown")).toBe("row");
-    });
-
-    it('should return "100%" when both title and titleAnchor are truthy', () => {
-        const result = getBoxWidth("Title", "Anchor");
-        expect(result).toBe("100%");
-    });
-
-    it("should return an empty string when title is truthy and titleAnchor is falsy", () => {
-        const result = getBoxWidth("Title", undefined);
-        expect(result).toBe("");
-    });
-
-    it("should return an empty string when title is falsy and titleAnchor is truthy", () => {
-        const result = getBoxWidth(undefined, "Anchor");
-        expect(result).toBe("");
-    });
-
     it("renders title and linear progress bar correctly", () => {
         const { getByText, getByRole } = render(<Progress title="Title" value={50} linear showValue={true} />);
         const title = getByText("Title");
