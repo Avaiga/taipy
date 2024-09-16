@@ -67,7 +67,7 @@ npm i
 - Install the web app dependencies
 ```bash
 cd ..
-npm i --omit=optional
+npm i
 ```
 - Build the web app
 ```bash

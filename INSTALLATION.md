@@ -80,7 +80,7 @@ cd frontend/taipy-gui
 cd dom
 npm i
 cd ..
-npm i --omit=optional
+npm i
 npm run build
 #
 # Build the Taipy front-end bundle

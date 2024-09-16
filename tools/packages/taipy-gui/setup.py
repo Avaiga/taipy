@@ -60,10 +60,7 @@ class NPMInstall(build_py):
                 ["npm", "ci"], cwd=root_folder / "frontend" / "taipy-gui" / "dom", check=True, shell=with_shell
             )
             subprocess.run(
-                ["npm", "ci", "--omit=optional"],
-                cwd=root_folder / "frontend" / "taipy-gui",
-                check=True,
-                shell=with_shell,
+                ["npm", "ci"], cwd=root_folder / "frontend" / "taipy-gui", check=True, shell=with_shell,
             )
             subprocess.run(
                 ["npm", "run", "build"], cwd=root_folder / "frontend" / "taipy-gui", check=True, shell=with_shell
