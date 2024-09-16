@@ -51,7 +51,7 @@ describe("Progress component", () => {
         expect(valueText).toBeInTheDocument();
     });
 
-    it("should return null when render is false", async () => {
+    it("does not render when render prop is false", async () => {
         const { container } = render(<Progress render={false} />);
         expect(container.firstChild).toBeNull();
     });
