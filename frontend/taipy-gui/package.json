@@ -36,7 +36,7 @@
     "react-dom": "$react-dom"
   },
   "scripts": {
-    "inst": "npm i --omit=optional",
+    "inst": "npm i",
     "start": "echo no start see python",
     "build:dev": "webpack --mode development",
     "build": "webpack --mode production",
