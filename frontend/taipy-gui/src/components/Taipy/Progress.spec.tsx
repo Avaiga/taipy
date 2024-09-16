@@ -139,13 +139,13 @@ describe("Progress component", () => {
     });
 
     it("applies color to linear progress when color is defined", () => {
-        const { container } = render(<Progress linear={true} value={50} color="red" />);
+        const { container } = render(<Progress linear value={50} color="red" />);
         const linearProgressBar = container.querySelector(".MuiLinearProgress-bar");
         expect(linearProgressBar).toHaveStyle("background: red");
     });
 
     it("does not apply color to linear progress when color is undefined", () => {
-        const { container } = render(<Progress linear={true} value={50} />);
+        const { container } = render(<Progress linear value={50} />);
         const linearProgressBar = container.querySelector(".MuiLinearProgress-bar");
         expect(linearProgressBar).not.toHaveStyle("background: red");
     });
