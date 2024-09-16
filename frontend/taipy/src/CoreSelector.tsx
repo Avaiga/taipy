@@ -304,7 +304,7 @@ const localStoreSet = (val: string, ...ids: string[]) => {
     }
     try {
         id && localStorage && localStorage.setItem(id, val);
-    } catch (e) {
+    } catch {
         // Too bad
     }
 };
@@ -320,7 +320,7 @@ const localStoreGet = (...ids: string[]) => {
     }
     try {
         return JSON.parse(val);
-    } catch (e) {
+    } catch {
         return undefined;
     }
 };
@@ -525,7 +525,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                       return pv;
                   }, {} as Record<string, ColumnDesc>)
                 : undefined;
-        } catch (e) {
+        } catch {
             return undefined;
         }
     }, [props.filter]);
@@ -568,7 +568,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                       return pv;
                   }, {} as Record<string, ColumnDesc>)
                 : undefined;
-        } catch (e) {
+        } catch {
             return undefined;
         }
     }, [props.sort]);

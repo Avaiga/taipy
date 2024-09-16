@@ -315,7 +315,7 @@ const Chart = (props: ChartProp) => {
                         if (typeof val === "string") {
                             try {
                                 val = JSON.parse(val) as number[];
-                            } catch (e) {
+                            } catch {
                                 // too bad
                                 val = [];
                             }
