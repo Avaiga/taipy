@@ -136,7 +136,7 @@ const editableColumns = JSON.stringify({
     Code: { dfid: "Code", type: "str", index: 3 },
 });
 
-const buttonValue = {
+const buttonImgValue = {
     "0--1-bool,int,float,Code--asc": {
         data: [
             {
@@ -150,6 +150,12 @@ const buttonValue = {
                 int: 823,
                 float: 2.5,
                 Code: "ZZZ",
+            },
+            {
+                bool: true,
+                int: 478,
+                float: 3.5,
+                Code: "![Taipy!](https://docs.taipy.io/en/latest/assets/images/favicon.png)",
             },
         ],
         rowcount: 2,
@@ -668,7 +674,22 @@ describe("PaginatedTable Component", () => {
         rerender(
             <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
                 <PaginatedTable
-                    data={buttonValue as TableValueType}
+                    data={buttonImgValue as TableValueType}
+                    defaultColumns={buttonColumns}
+                    showAll={true}
+                />
+            </TaipyContext.Provider>
+        );
+
+        dispatch.mockClear();
+        const elt = getByText("Button Label");
+        expect(elt.tagName).toBe("BUTTON");
+        expect(elt).toBeDisabled();
+
+        rerender(
+            <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
+                <PaginatedTable
+                    data={buttonImgValue as TableValueType}
                     defaultColumns={buttonColumns}
                     showAll={true}
                     onAction="onSelect"
@@ -677,9 +698,9 @@ describe("PaginatedTable Component", () => {
         );
 
         dispatch.mockClear();
-        const elt = getByText("Button Label");
-        expect(elt.tagName).toBe("BUTTON");
-        await userEvent.click(elt);
+        const elt2 = getByText("Button Label");
+        expect(elt2.tagName).toBe("BUTTON");
+        await userEvent.click(elt2);
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
             payload: {
@@ -689,6 +710,57 @@ describe("PaginatedTable Component", () => {
                 index: 0,
                 reason: "button",
                 value: "button action",
+            },
+            type: "SEND_ACTION_ACTION",
+        });
+    });
+    it("can show an image", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByAltText, rerender } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <PaginatedTable data={undefined} defaultColumns={editableColumns} showAll={true} onAction="onSelect" />
+            </TaipyContext.Provider>
+        );
+
+        rerender(
+            <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
+                <PaginatedTable
+                    data={buttonImgValue as TableValueType}
+                    defaultColumns={buttonColumns}
+                    showAll={true}
+                />
+            </TaipyContext.Provider>
+        );
+
+        dispatch.mockClear();
+        const elt = getByAltText("Taipy!");
+        expect(elt.tagName).toBe("IMG");
+
+        rerender(
+            <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
+                <PaginatedTable
+                    data={buttonImgValue as TableValueType}
+                    defaultColumns={buttonColumns}
+                    showAll={true}
+                    onAction="onSelect"
+                />
+            </TaipyContext.Provider>
+        );
+
+        dispatch.mockClear();
+        const elt2 = getByAltText("Taipy!");
+        expect(elt2.tagName).toBe("IMG");
+        await userEvent.click(elt2);
+        expect(dispatch).toHaveBeenCalledWith({
+            name: "",
+            payload: {
+                action: "onSelect",
+                args: [],
+                col: "Code",
+                index: 2,
+                reason: "button",
+                value: "Taipy!",
             },
             type: "SEND_ACTION_ACTION",
         });

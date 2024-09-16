@@ -51,7 +51,7 @@ const Button = (props: ButtonProps) => {
             if (props.label === undefined && defaultLabel) {
                 try {
                     return JSON.parse(defaultLabel) as Icon;
-                } catch (e) {
+                } catch {
                     return defaultLabel;
                 }
             }

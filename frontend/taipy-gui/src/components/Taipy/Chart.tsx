@@ -315,7 +315,7 @@ const Chart = (props: ChartProp) => {
                         if (typeof val === "string") {
                             try {
                                 val = JSON.parse(val) as number[];
-                            } catch (e) {
+                            } catch {
                                 // too bad
                                 val = [];
                             }
@@ -656,10 +656,16 @@ const Chart = (props: ChartProp) => {
                     tr[pt.curveNumber].push(getRealIndex(getPlotIndex(pt)));
                     return tr;
                 }, [] as number[][]);
+                if (config.traces.length === 0) { // figure
+                    const theVar = getUpdateVar(updateVars, "selected");
+                    theVar && dispatch(createSendUpdateAction(theVar, traces, module, props.onChange, propagate));
+                    return;
+                }
                 if (traces.length) {
                     const upvars = traces.map((_, idx) => getUpdateVar(updateVars, `selected${idx}`));
-                    if (traces.length > 1 && new Set(upvars).size === 1) {
-                        dispatch(createSendUpdateAction(upvars[0], traces, module, props.onChange, propagate));
+                    const setVars = new Set(upvars.filter((v) => v));
+                    if (traces.length > 1 && setVars.size === 1) {
+                        dispatch(createSendUpdateAction(setVars.values().next().value, traces, module, props.onChange, propagate));
                         return;
                     }
                     traces.forEach((tr, idx) => {

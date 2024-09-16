@@ -27,7 +27,7 @@ dynamic = ["version", "dependencies"]
 testing = ["pytest>=3.8"]
 
 [tool.setuptools.packages]
-find = {include = ["taipy", "taipy.config", "taipy.config.*", "taipy.logger", "taipy.logger.*"]}
+find = {include = ["taipy", "taipy.config", "taipy.config.*", "taipy.logger", "taipy.logger.*", "taipy._cli", "taipy._cli.*"]}
 
 [project.urls]
 homepage = "https://github.com/avaiga/taipy"
