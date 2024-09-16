@@ -93,7 +93,7 @@ export const getDateTime = (value: string | null | undefined, tz?: string, withT
     }
     try {
         return tz && tz !== "Etc/Unknown" && withTime ? toZonedTime(value, tz) : new Date(value);
-    } catch (e) {
+    } catch {
         return null;
     }
 };

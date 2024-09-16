@@ -54,7 +54,7 @@ const MenuCtl = (props: MenuCtlProps) => {
         if (props.defaultInactiveIds) {
             try {
                 return JSON.parse(props.defaultInactiveIds) as string[];
-            } catch (e) {
+            } catch {
                 // too bad
             }
         }

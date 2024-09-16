@@ -82,6 +82,7 @@ interface RowData {
     columns: Record<string, ColumnDesc>;
     rows: RowType[];
     classes: Record<string, string>;
+    tableClassName: string;
     cellProps: Partial<TableCellProps>[];
     isItemLoaded: (index: number) => boolean;
     selection: number[];
@@ -103,6 +104,7 @@ const Row = ({
         columns,
         rows,
         classes,
+        tableClassName,
         cellProps,
         isItemLoaded,
         selection,
@@ -136,6 +138,7 @@ const Row = ({
                 <EditableCell
                     key={"val" + index + "-" + cidx}
                     className={getClassName(rows[index], columns[col].style, col)}
+                    tableClassName={tableClassName}
                     colDesc={columns[col]}
                     value={rows[index][col]}
                     formatConfig={formatConfig}
@@ -531,6 +534,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             columns: columns,
             rows: rows,
             classes: {},
+            tableClassName: className,
             cellProps: colsOrder.map((col) => ({
                 sx: getCellSx(columns[col].width || columns[col].widthHint, size),
                 component: "div",
@@ -555,6 +559,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             active,
             colsOrder,
             columns,
+            className,
             selected,
             formatConfig,
             editable,
