@@ -296,16 +296,16 @@ class _PandasDataAccessor(_DataAccessor):
             # real number of rows is needed to calculate the number of pages
             rowcount = len(df)
             # here we'll deal with start and end values from payload if present
-            if isinstance(payload["start"], int):
-                start = int(payload["start"])
+            if isinstance(payload.get("start", 0), int):
+                start = int(payload.get("start", 0))
             else:
                 try:
                     start = int(str(payload["start"]), base=10)
                 except Exception:
                     _warn(f'start should be an int value {payload["start"]}.')
                     start = 0
-            if isinstance(payload["end"], int):
-                end = int(payload["end"])
+            if isinstance(payload.get("end", -1), int):
+                end = int(payload.get("end", -1))
             else:
                 try:
                     end = int(str(payload["end"]), base=10)

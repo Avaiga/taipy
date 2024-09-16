@@ -124,7 +124,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const formatConfig = useFormatConfig();
     const module = useModule();
 
-    const refresh = typeof props.data === "number";
+    const refresh = props.data && typeof props.data.__taipy_refresh === "boolean";
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, false);
