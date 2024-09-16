@@ -24,7 +24,7 @@ cd dom
 npm i
 cd ..
 # Install the web app dependencies
-npm i --omit=optional
+npm i
 # Build the web app and all elements
 npm run build
 ```

@@ -6,7 +6,37 @@ export interface VarData {
     type: string;
     value: unknown;
     encoded_name: string;
+    data_update: boolean;
 }
+
+type ColumnName = string;
+
+export type RequestDataOptions = {
+    columns?: Array<ColumnName>;
+    pagekey?: string;
+    alldata?: boolean;
+    start?: number;
+    end?: number;
+    filters?: Array<{ col: ColumnName; value: string | boolean | number; action: string }>;
+    aggregates?: Array<ColumnName>;
+    applies?: { [key: ColumnName]: string };
+    infinite?: boolean;
+    reverse?: boolean;
+    orderby?: ColumnName;
+    sort?: "asc" | "desc";
+    styles?: { [key: ColumnName]: string };
+    tooltips?: { [key: ColumnName]: string };
+    handlenan?: boolean;
+    compare_datas?: string;
+};
+
+type RequestDataEntry = {
+    options: RequestDataOptions;
+    receivedData: unknown;
+}
+
+export const getRequestedDataKey = (payload?: unknown) =>
+    (!!payload && typeof payload == "object" && "pagekey" in payload && (payload["pagekey"] as string)) || undefined;
 
 // This class hold the information of variables and real-time value of variables
 export class DataManager {
@@ -14,10 +44,13 @@ export class DataManager {
     _data: Record<string, unknown>;
     // Initial data fetched from taipy-gui backend
     _init_data: ModuleData;
+    // key: encodedName -> dataEventKey -> requeste data
+    _requested_data: Record<string, Record<string, RequestDataEntry>>;
 
     constructor(variableModuleData: ModuleData) {
         this._data = {};
         this._init_data = {};
+        this._requested_data = {};
         this.init(variableModuleData);
     }
 
@@ -73,11 +106,30 @@ export class DataManager {
         return undefined;
     }
 
-    get(encodedName: string): unknown {
+    get(encodedName: string, dataEventKey?: string): unknown {
+        // handle requested data
+        if (dataEventKey) {
+            if (!(encodedName in this._requested_data)) {
+                throw new Error(`Encoded name '${encodedName}' is not available in Taipy GUI`);
+            }
+            if (!(dataEventKey in this._requested_data[encodedName])) {
+                throw new Error(`Event key '${dataEventKey}' is not available for encoded name '${encodedName}' in Taipy GUI`);
+            }
+            return this._requested_data[encodedName][dataEventKey].receivedData;
+        }
+        // handle normal data
         if (!(encodedName in this._data)) {
-            throw new Error(`${encodedName} is not available in Taipy Gui`);
+            throw new Error(`${encodedName} is not available in Taipy GUI`);
         }
         return this._data[encodedName];
+    }
+
+    addRequestDataOptions(encodedName: string, dataEventKey: string, options: RequestDataOptions) {
+        if (!(encodedName in this._requested_data)) {
+            this._requested_data[encodedName] = {};
+        }
+        // This would overrides object with the same key
+        this._requested_data[encodedName][dataEventKey] = { options: options, receivedData: undefined };
     }
 
     getInfo(encodedName: string): VarData | undefined {
@@ -100,10 +152,28 @@ export class DataManager {
         return this._data;
     }
 
-    update(encodedName: string, value: unknown) {
+    update(encodedName: string, value: unknown, dataEventKey?: string) {
+        // handle requested data
+        if (dataEventKey) {
+            if (!(encodedName in this._requested_data)) {
+                throw new Error(`Encoded name '${encodedName}' is not available in Taipy GUI`);
+            }
+            if (!(dataEventKey in this._requested_data[encodedName])) {
+                throw new Error(`Event key '${dataEventKey}' is not available for encoded name '${encodedName}' in Taipy GUI`);
+            }
+            this._requested_data[encodedName][dataEventKey].receivedData = value;
+            return;
+        }
+        // handle normal data
         if (!(encodedName in this._data)) {
             throw new Error(`${encodedName} is not available in Taipy Gui`);
         }
         this._data[encodedName] = value;
+    }
+
+    deleteRequestedData(encodedName: string, dataEventKey: string) {
+        if (encodedName in this._requested_data && dataEventKey in this._requested_data[encodedName]) {
+            delete this._requested_data[encodedName][dataEventKey];
+        }
     }
 }

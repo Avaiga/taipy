@@ -119,6 +119,8 @@ _MODULE_NAME_MAP: t.List[str] = []
 _MODULE_ID = "_TPMDL_"
 _RE_TPMDL_DECODE = re.compile(r"(.*?)" + _MODULE_ID + r"(\d+)$")
 
+def _is_moduled_variable(var_name: str):
+    return _MODULE_ID in var_name
 
 def _variable_encode(var_name: str, module_name: t.Optional[str]):
     if module_name is None:

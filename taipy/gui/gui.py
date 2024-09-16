@@ -37,7 +37,6 @@ from flask import (
     Flask,
     g,
     has_app_context,
-    has_request_context,
     jsonify,
     request,
     send_file,
@@ -63,6 +62,7 @@ from ._warnings import TaipyGuiWarning, _warn
 from .builder import _ElementApiGenerator
 from .config import Config, ConfigParameter, _Config
 from .custom import Page as CustomPage
+from .custom.utils import get_current_resource_handler, is_in_custom_page_context
 from .data.content_accessor import _ContentAccessor
 from .data.data_accessor import _DataAccessors
 from .data.data_format import _DataFormat
@@ -106,7 +106,7 @@ from .utils import (
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
-from .utils._variable_directory import _MODULE_ID, _VariableDirectory
+from .utils._variable_directory import _is_moduled_variable, _VariableDirectory
 from .utils.chart_config_builder import _build_chart_config
 from .utils.table_col_builder import _enhance_columns
 
@@ -1033,15 +1033,15 @@ class Gui:
                         setattr(self._bindings(), var_name, newvalue)
         return ("", 200)
 
-    _data_request_counter = 1
-
     def __send_var_list_update(  # noqa C901
         self,
         modified_vars: t.List[str],
         front_var: t.Optional[str] = None,
     ):
         ws_dict = {}
-        values = {v: _getscopeattr_drill(self, v) for v in modified_vars}
+        values = {v: _getscopeattr_drill(self, v) for v in modified_vars if _is_moduled_variable(v)}
+        if not values:
+            return
         for k, v in values.items():
             if isinstance(v, (_TaipyData, _TaipyContentHtml)) and v.get_name() in modified_vars:
                 modified_vars.remove(v.get_name())
@@ -1049,10 +1049,10 @@ class Gui:
                 modified_vars.remove(k)
         for _var in modified_vars:
             newvalue = values.get(_var)
-            if isinstance(newvalue, _TaipyData):
-                # A changing integer that triggers a data request
-                newvalue = Gui._data_request_counter
-                Gui._data_request_counter = (Gui._data_request_counter % 100) + 1
+            resource_handler = get_current_resource_handler()
+            custom_page_filtered_types = resource_handler.data_layer_supported_types if resource_handler else ()
+            if isinstance(newvalue, (_TaipyData)) or isinstance(newvalue, custom_page_filtered_types):
+                newvalue = {"__taipy_refresh": True}
             else:
                 if isinstance(newvalue, (_TaipyContent, _TaipyContentImage)):
                     ret_value = self.__get_content_accessor().get_info(
@@ -1072,14 +1072,9 @@ class Gui:
                     )
                 elif isinstance(newvalue, _TaipyBase):
                     newvalue = newvalue.get()
-                if isinstance(newvalue, (dict, _MapDict)):
-                    # Skip in taipy-gui, available in custom frontend
-                    resource_handler_id = None
-                    with contextlib.suppress(Exception):
-                        if has_request_context():
-                            resource_handler_id = request.cookies.get(_Server._RESOURCE_HANDLER_ARG, None)
-                    if resource_handler_id is None:
-                        continue  # this var has no transformer
+                # Skip in taipy-gui, available in custom frontend
+                if isinstance(newvalue, (dict, _MapDict)) and not is_in_custom_page_context():
+                    continue
                 if isinstance(newvalue, float) and math.isnan(newvalue):
                     # do not let NaN go through json, it is not handle well (dies silently through websocket)
                     newvalue = None
@@ -1115,6 +1110,10 @@ class Gui:
     def __request_data_update(self, var_name: str, payload: t.Any) -> None:
         # Use custom attrgetter function to allow value binding for _MapDict
         newvalue = _getscopeattr_drill(self, var_name)
+        resource_handler = get_current_resource_handler()
+        custom_page_filtered_types = resource_handler.data_layer_supported_types if resource_handler else ()
+        if not isinstance(newvalue, _TaipyData) and isinstance(newvalue, custom_page_filtered_types):
+            newvalue = _TaipyData(newvalue, "")
         if isinstance(newvalue, _TaipyData):
             ret_payload = None
             if isinstance(payload, dict):
@@ -1178,6 +1177,9 @@ class Gui:
     def __get_variable_tree(self, data: t.Dict[str, t.Any]):
         # Module Context -> Variable -> Variable data (name, type, initial_value)
         variable_tree: t.Dict[str, t.Dict[str, t.Dict[str, t.Any]]] = {}
+        # Types of data to be handled by the data layer and filtered out here
+        resource_handler = get_current_resource_handler()
+        filtered_value_types = resource_handler.data_layer_supported_types if resource_handler else ()
         for k, v in data.items():
             if isinstance(v, _TaipyBase):
                 data[k] = v.get()
@@ -1186,11 +1188,15 @@ class Gui:
                 var_module_name = "__main__"
             if var_module_name not in variable_tree:
                 variable_tree[var_module_name] = {}
-            variable_tree[var_module_name][var_name] = {
-                "type": type(v).__name__,
-                "value": data[k],
-                "encoded_name": k,
-            }
+            data_update = isinstance(v, filtered_value_types)
+            value = None if data_update else data[k]
+            if _is_moduled_variable(k):
+                variable_tree[var_module_name][var_name] = {
+                    "type": type(v).__name__,
+                    "value": value,
+                    "encoded_name": k,
+                    "data_update": data_update,
+                }
         return variable_tree
 
     def __handle_ws_get_data_tree(self):
@@ -2116,7 +2122,7 @@ class Gui:
         return encoded_var_name
 
     def _bind_var_val(self, var_name: str, value: t.Any) -> bool:
-        if _MODULE_ID not in var_name:
+        if not _is_moduled_variable(var_name):
             var_name = self.__var_dir.add_var(var_name, self._get_locals_context())
         if not hasattr(self._bindings(), var_name):
             self._bind(var_name, value)
@@ -2331,8 +2337,12 @@ class Gui:
         with self.get_flask_app().app_context() if has_app_context() else contextlib.nullcontext():  # type: ignore[attr-defined]
             self.__set_client_id_in_context(client_id)
             with self._set_locals_context(page._get_module_name()):
-                for k in self._get_locals_bind().keys():
-                    if (not page._binding_variables or k in page._binding_variables) and not k.startswith("_"):
+                for k, v in self._get_locals_bind().items():
+                    if (
+                        (not page._binding_variables or k in page._binding_variables)
+                        and not k.startswith("_")
+                        and not isinstance(v, ModuleType)
+                    ):
                         self._bind_var(k)
 
     def __render_page(self, page_name: str) -> t.Any:

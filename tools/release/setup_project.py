@@ -54,7 +54,7 @@ def _build_webapp(webapp_path: str):
     already_exists = Path(webapp_path).exists()
     if not already_exists:
         os.system("cd ../../frontend/taipy-gui/dom && npm ci")
-        os.system("cd ../../frontend/taipy-gui && npm ci --omit=optional && npm run build")
+        os.system("cd ../../frontend/taipy-gui && npm ci && npm run build")
 
 
 def get_pkg_name(path: str) -> str:
