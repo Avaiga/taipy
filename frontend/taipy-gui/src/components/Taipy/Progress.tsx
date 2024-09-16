@@ -49,6 +49,20 @@ const circularPrgSx = {
     justifyContent: "center",
 };
 
+const getFlexDirection = (titleAnchor: string) => {
+    switch (titleAnchor) {
+        case "top":
+            return "column";
+        case "left":
+            return "row";
+        case "right":
+            return "row-reverse";
+        case "bottom":
+        default:
+            return "column-reverse";
+    }
+};
+
 const Progress = (props: ProgressBarProps) => {
     const { linear = false, showValue = false, titleAnchor = "bottom" } = props;
 
@@ -58,22 +72,7 @@ const Progress = (props: ProgressBarProps) => {
     const title = useDynamicProperty(props.title, props.defaultTitle, undefined);
 
     const memoizedValues = useMemo(() => {
-        const getFlexDirection = (titleAnchor: string) => {
-            switch (titleAnchor) {
-                case "top":
-                    return "column";
-                case "left":
-                    return "row";
-                case "right":
-                    return "row-reverse";
-                case "bottom":
-                default:
-                    return "column-reverse";
-            }
-        };
-
         return {
-            getFlexDirection,
             boxWithFlexDirectionSx: {
                 ...linearSx,
                 flexDirection: getFlexDirection(titleAnchor),

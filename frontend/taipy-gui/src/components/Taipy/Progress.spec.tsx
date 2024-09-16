@@ -137,6 +137,30 @@ describe("Progress component", () => {
         const box = container.querySelector(".MuiBox-root");
         expect(box).toHaveStyle("flex-direction: column-reverse");
     });
+
+    it("applies color to linear progress when color is defined", () => {
+        const { container } = render(<Progress linear={true} value={50} color="red" />);
+        const linearProgressBar = container.querySelector(".MuiLinearProgress-bar");
+        expect(linearProgressBar).toHaveStyle("background: red");
+    });
+
+    it("does not apply color to linear progress when color is undefined", () => {
+        const { container } = render(<Progress linear={true} value={50} />);
+        const linearProgressBar = container.querySelector(".MuiLinearProgress-bar");
+        expect(linearProgressBar).not.toHaveStyle("background: red");
+    });
+
+    it("applies color to circular progress when color is defined", () => {
+        const { container } = render(<Progress linear={false} value={50} color="blue" />);
+        const circularProgressCircle = container.querySelector(".MuiCircularProgress-circle");
+        expect(circularProgressCircle).toHaveStyle("color: blue");
+    });
+
+    it("does not apply color to circular progress when color is undefined", () => {
+        const { container } = render(<Progress linear={false} value={50} />);
+        const circularProgressCircle = container.querySelector(".MuiCircularProgress-circle");
+        expect(circularProgressCircle).not.toHaveStyle("color: blue");
+    });
 });
 
 describe("Progress functions", () => {
