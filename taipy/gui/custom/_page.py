@@ -14,7 +14,10 @@ from __future__ import annotations
 import typing as t
 from abc import ABC, abstractmethod
 
+import pandas as pd
+
 from ..page import Page as BasePage
+from ..utils import _TaipyData
 from ..utils.singleton import _Singleton
 
 
@@ -47,6 +50,8 @@ class ResourceHandler(ABC):
     """
 
     rh_id: str = ""
+
+    data_layer_supported_types: t.Tuple[t.Type, ...] = (_TaipyData, pd.DataFrame, pd.Series)
 
     def __init__(self) -> None:
         _ExternalResourceHandlerManager().register(self)

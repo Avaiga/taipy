@@ -323,6 +323,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
         case Types.Update:
             const newValue = action.payload.value as Record<string, unknown>;
             const oldValue = (state.data[action.name] as Record<string, unknown>) || {};
+            delete oldValue.__taipy_refresh;
             if (typeof action.payload.infinite === "boolean" && action.payload.infinite) {
                 const start = newValue.start;
                 if (typeof start === "number") {
