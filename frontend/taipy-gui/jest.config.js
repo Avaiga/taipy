@@ -26,8 +26,22 @@ module.exports = {
     ],
     coverageReporters: ["json", "html", "text"],
     transformIgnorePatterns: ["<rootDir>/node_modules/(?!react-jsx-parser/)"],
-    // transform: {"^.+\.[jt]sx?$": "ts-jest"},
-    // moduleNameMapper: {
-    //     "^react-jsx-parser": require.resolve("react-jsx-parser"),
-    // },
+    transform: {
+        "^.+\\.[jt]sx?$": [
+            "ts-jest",
+            {
+                diagnostics: {
+                    ignoreCodes: [1343],
+                },
+                astTransformers: {
+                    before: [
+                        {
+                            path: "node_modules/ts-jest-mock-import-meta", // or, alternatively, 'ts-jest-mock-import-meta' directly, without node_modules.
+                            options: { metaObjectReplacement: { url: "https://www.url.com" } },
+                        },
+                    ],
+                },
+            },
+        ],
+    },
 };
