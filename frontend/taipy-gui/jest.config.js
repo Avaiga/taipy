@@ -25,6 +25,7 @@ module.exports = {
         "./test-config/intersectionObserver.js",
     ],
     coverageReporters: ["json", "html", "text"],
+    modulePathIgnorePatterns: ["<rootDir>/packaging/"],
     transformIgnorePatterns: ["<rootDir>/node_modules/(?!react-jsx-parser/)"],
     ...createJsWithTsPreset()
 };
