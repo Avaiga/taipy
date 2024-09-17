@@ -116,8 +116,6 @@ const Progress = (props: ProgressBarProps) => {
         return null;
     }
 
-    console.log(circularProgressSize);
-
     return showValue && value !== undefined ? (
         linear ? (
             <Box sx={boxWithFlexDirectionSx} data-testid="linear-progress-container">
