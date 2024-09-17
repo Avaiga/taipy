@@ -50,7 +50,7 @@ version = "==4.2.13"
 
 
 [packages]
-"pyarrow" = {version="==16.1.0"}
+"pyarrow" = {version="==17.0.0"}
 "networkx" = {version="==3.1", markers="python_version<'3.9'"}
 "openpyxl" = {version="==3.1.2"}
 "pandas" = {version="==2.0.3", markers="python_version<'3.9'"}
