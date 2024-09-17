@@ -227,54 +227,54 @@ describe("Progress component", () => {
     });
 
     it("applies width to linear progress when width is defined as number", () => {
-        const { getByTestId } = render(<Progress linear value={50} width={100} />);
-        const linearProgress = getByTestId("linear-progress-container");
+        const { container } = render(<Progress linear value={50} width={100} />);
+        const linearProgress = container.querySelectorAll(".MuiBox-root")[0];
         expect(linearProgress).toHaveStyle("width: 100px");
     });
 
     it("applies width to linear progress when width is defined as number & title is defined", () => {
-        const { getByTestId } = render(<Progress linear value={50} width={100} title="Title" />);
-        const linearProgress = getByTestId("linear-progress-container");
+        const { container } = render(<Progress linear value={50} width={100} title="Title" />);
+        const linearProgress = container.querySelectorAll(".MuiBox-root")[0];
         expect(linearProgress).toHaveStyle("width: 100px");
     });
 
     it("applies width to linear progress when width is defined as number & title, titleAnchor are defined", () => {
-        const { getByTestId } = render(<Progress linear value={50} width={100} title="Title" titleAnchor="top" />);
-        const linearProgress = getByTestId("linear-progress-container");
+        const { container } = render(<Progress linear value={50} width={100} title="Title" titleAnchor="top" />);
+        const linearProgress = container.querySelectorAll(".MuiBox-root")[0];
         expect(linearProgress).toHaveStyle("width: 100px");
     });
 
     it("applies width to linear progress when width is defined as number & title, titleAnchor, showValue are defined", () => {
-        const { getByTestId } = render(
-            <Progress linear value={50} width={100} title="Title" titleAnchor="top" showValue={true} />
+        const { container } = render(
+            <Progress linear showValue value={50} width={100} title="Title" titleAnchor="top" />
         );
-        const linearProgress = getByTestId("linear-progress-container");
+        const linearProgress = container.querySelectorAll(".MuiBox-root")[0];
         expect(linearProgress).toHaveStyle("width: 100px");
     });
 
     it("applies width to linear progress when width is defined as string", () => {
-        const { getByTestId } = render(<Progress linear value={50} width="10rem" />);
-        const linearProgress = getByTestId("linear-progress-container");
+        const { container } = render(<Progress linear value={50} width="10rem" />);
+        const linearProgress = container.querySelectorAll(".MuiBox-root")[0];
         expect(linearProgress).toHaveStyle("width: 10rem");
     });
 
     it("applies width to linear progress when width is defined as string & title is defined", () => {
-        const { getByTestId } = render(<Progress linear value={50} width="10rem" title="Title" />);
-        const linearProgress = getByTestId("linear-progress-container");
+        const { container } = render(<Progress linear value={50} width="10rem" title="Title" />);
+        const linearProgress = container.querySelectorAll(".MuiBox-root")[0];
         expect(linearProgress).toHaveStyle("width: 10rem");
     });
 
     it("applies width to linear progress when width is defined as string & title, titleAnchor are defined", () => {
-        const { getByTestId } = render(<Progress linear value={50} width="10rem" title="Title" titleAnchor="top" />);
-        const linearProgress = getByTestId("linear-progress-container");
+        const { container } = render(<Progress linear value={50} width="10rem" title="Title" titleAnchor="top" />);
+        const linearProgress = container.querySelectorAll(".MuiBox-root")[0];
         expect(linearProgress).toHaveStyle("width: 10rem");
     });
 
     it("applies width to linear progress when width is defined as string & title, titleAnchor, showValue are defined", () => {
-        const { getByTestId } = render(
+        const { container } = render(
             <Progress linear value={50} width="10rem" title="Title" titleAnchor="top" showValue={true} />
         );
-        const linearProgress = getByTestId("linear-progress-container");
+        const linearProgress = container.querySelectorAll(".MuiBox-root")[0];
         expect(linearProgress).toHaveStyle("width: 10rem");
     });
 });

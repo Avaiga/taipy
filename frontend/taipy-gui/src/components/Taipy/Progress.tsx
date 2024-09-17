@@ -118,7 +118,7 @@ const Progress = (props: ProgressBarProps) => {
 
     return showValue && value !== undefined ? (
         linear ? (
-            <Box sx={boxWithFlexDirectionSx} data-testid="linear-progress-container">
+            <Box sx={boxWithFlexDirectionSx}>
                 {title && titleAnchor !== "none" ? (
                     <Typography sx={titleSx} variant="caption">
                         {title}
@@ -156,7 +156,7 @@ const Progress = (props: ProgressBarProps) => {
             </Box>
         )
     ) : linear ? (
-        <Box sx={boxWithFlexDirectionSx} data-testid="linear-progress-container">
+        <Box sx={boxWithFlexDirectionSx}>
             {title && titleAnchor !== "none" ? (
                 <Typography sx={titleSx} variant="caption">
                     {title}
