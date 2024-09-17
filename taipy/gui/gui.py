@@ -1039,7 +1039,8 @@ class Gui:
         front_var: t.Optional[str] = None,
     ):
         ws_dict = {}
-        values = {v: _getscopeattr_drill(self, v) for v in modified_vars if _is_moduled_variable(v)}
+        is_custom_page = is_in_custom_page_context()
+        values = {v: _getscopeattr_drill(self, v) for v in modified_vars if is_custom_page or _is_moduled_variable(v)}
         if not values:
             return
         for k, v in values.items():
@@ -1190,13 +1191,13 @@ class Gui:
                 variable_tree[var_module_name] = {}
             data_update = isinstance(v, filtered_value_types)
             value = None if data_update else data[k]
-            if _is_moduled_variable(k):
-                variable_tree[var_module_name][var_name] = {
-                    "type": type(v).__name__,
-                    "value": value,
-                    "encoded_name": k,
-                    "data_update": data_update,
-                }
+            # if _is_moduled_variable(k):
+            variable_tree[var_module_name][var_name] = {
+                "type": type(v).__name__,
+                "value": value,
+                "encoded_name": k,
+                "data_update": data_update,
+            }
         return variable_tree
 
     def __handle_ws_get_data_tree(self):
