@@ -608,8 +608,11 @@ class _Factory:
         .set_value_and_default(var_type=PropertyType.dynamic_number, native_type=True)
         .set_attributes(
             [
+                ("color", PropertyType.string),
                 ("linear", PropertyType.boolean, False),
                 ("show_value", PropertyType.boolean, False),
+                ("title", PropertyType.dynamic_string),
+                ("title_anchor", PropertyType.string, "bottom"),
                 ("render", PropertyType.dynamic_boolean, True),
             ]
         )
