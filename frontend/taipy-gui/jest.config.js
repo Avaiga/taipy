@@ -11,11 +11,11 @@
  * specific language governing permissions and limitations under the License.
  */
 
+const { createJsWithTsPreset } = require('ts-jest')
+
+
 /** @type {import('ts-jest/dist/types').JestConfigWithTsJest} */
 module.exports = {
-    // testEnvironment: 'jest-environment-jsdom',
-    // preset: "ts-jest",
-    preset: "ts-jest/presets/js-with-ts",
     testEnvironment: "jsdom",
     setupFiles: [
         "./test-config/jest.env.js",
@@ -25,9 +25,7 @@ module.exports = {
         "./test-config/intersectionObserver.js",
     ],
     coverageReporters: ["json", "html", "text"],
+    modulePathIgnorePatterns: ["<rootDir>/packaging/"],
     transformIgnorePatterns: ["<rootDir>/node_modules/(?!react-jsx-parser/)"],
-    // transform: {"^.+\.[jt]sx?$": "ts-jest"},
-    // moduleNameMapper: {
-    //     "^react-jsx-parser": require.resolve("react-jsx-parser"),
-    // },
+    ...createJsWithTsPreset()
 };
