@@ -1379,7 +1379,7 @@
                         "name": "width",
                         "type": "Union[str,int]",
                         "default_value": "None",
-                        "doc": "The width of the progress indicator, in CSS units."
+                        "doc": "The width of this progress indicator, in CSS units."
                     }
                 ]
             }
