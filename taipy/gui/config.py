@@ -167,7 +167,9 @@ class _Config(object):
                 try:
                     return type(default_value)(self.config.get(name))
                 except Exception as e:
-                    _warn(f'app_config "{name}" value "{self.config.get(name)}" is not of type {type(default_value)}', e)
+                    _warn(
+                        f'app_config "{name}" value "{self.config.get(name)}" is not of type {type(default_value)}', e
+                    )
                     return default_value
             return self.config.get(name)
         return default_value
@@ -239,7 +241,7 @@ class _Config(object):
                     elif key == "port" and str(value).strip() == "auto":
                         config["port"] = "auto"
                     else:
-                        config[key] = value if config.get(key) is None else type(config.get(key))(value) # type: ignore[reportCallIssue]
+                        config[key] = value if config.get(key) is None else type(config.get(key))(value)  # type: ignore[reportCallIssue]
                 except Exception as e:
                     _warn(
                         f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse value to the correct type",  # noqa: E501
@@ -323,10 +325,9 @@ class _Config(object):
         if isinstance(stylekit_config, dict) and "root_margin" in stylekit_config:
             from ._default_config import _default_stylekit, default_config
 
-            if (
-                stylekit_config.get("root_margin") == _default_stylekit.get("root_margin")
-                and app_config.get("margin") != default_config.get("margin")
-            ):
+            if stylekit_config.get("root_margin") == _default_stylekit.get("root_margin") and app_config.get(
+                "margin"
+            ) != default_config.get("margin"):
                 stylekit_config["root_margin"] = str(app_config.get("margin"))
             app_config["margin"] = None
 
