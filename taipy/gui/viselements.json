@@ -1659,8 +1659,8 @@
                     {
                         "name": "show_sender",
                         "type": "bool",
-                        "default_value": "True",
-                        "doc": "If False, the sender avatar and name is not displayed."
+                        "default_value": "False",
+                        "doc": "If True, the sender avatar and name are displayed."
                     }
                 ]
             }
