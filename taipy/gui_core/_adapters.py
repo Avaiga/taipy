@@ -47,7 +47,7 @@ from taipy.gui.utils import _is_boolean, _is_true, _TaipyBase
 # prevent gui from trying to push scenario instances to the front-end
 class _GuiCoreDoNotUpdate(_DoNotUpdate):
     def __repr__(self):
-        return self.get_label() if hasattr(self, "get_label") else super().__repr__()
+        return self.get_label() if hasattr(self, "get_label") else super().__repr__()  # type: ignore[reportAttributeAccessIssue]
 
 
 class _EntityType(Enum):
@@ -395,6 +395,9 @@ class _Filter(_DoNotUpdate):
 
 @dataclass
 class ScenarioFilter(_Filter):
+    """
+    used to describe a filter on a scenario property
+    """
     property_id: str
 
     def get_property(self):
@@ -403,6 +406,9 @@ class ScenarioFilter(_Filter):
 
 @dataclass
 class DataNodeScenarioFilter(_Filter):
+    """
+    used to describe a filter on a scenario datanode's property
+    """
     datanode_config_id: str
     property_id: str
 
@@ -415,11 +421,14 @@ _CUSTOM_PREFIX = "fn:"
 
 @dataclass
 class CustomScenarioFilter(_Filter):
+    """
+    used to describe a custom scenario filter ie based on a user defined function
+    """
     filter_function: t.Callable[[Scenario], t.Any]
 
     def __post_init__(self):
         if self.filter_function.__name__ == "<lambda>":
-            raise TypeError("ScenarioCustomFilter does not support lambda functions.")
+            raise TypeError("CustomScenarioFilter does not support lambda functions.")
         mod = self.filter_function.__module__
         self.module = mod if isinstance(mod, str) else mod.__name__
 
@@ -433,16 +442,26 @@ class CustomScenarioFilter(_Filter):
 
 @dataclass
 class DataNodeFilter(_Filter):
+    """
+    used to describe a filter on a datanode property
+    """
     property_id: str
 
     def get_property(self):
         return self.property_id
 
 
+@dataclass(frozen=True)
+class _GuiCorePropDesc:
+    filter: _Filter
+    extended: bool = False
+    for_sort: bool = False
+
+
 class _GuiCoreProperties(ABC):
     @staticmethod
     @abstractmethod
-    def get_default_list() -> t.List[_Filter]:
+    def get_default_list() -> t.List[_GuiCorePropDesc]:
         raise NotImplementedError
 
     @staticmethod
@@ -454,7 +473,7 @@ class _GuiCoreProperties(ABC):
         return {}
 
     def get(self):
-        data = super().get()
+        data = super().get()  # type: ignore[reportAttributeAccessIssue]
         if _is_boolean(data):
             if _is_true(data):
                 data = self.get_default_list()
@@ -465,18 +484,21 @@ class _GuiCoreProperties(ABC):
         if isinstance(data, _Filter):
             data = (data,)
         if isinstance(data, (list, tuple)):
-            flist: t.List[_Filter] = []  # type: ignore[annotation-unchecked]
+            f_list: t.List[_Filter] = []  # type: ignore[annotation-unchecked]
             for f in data:
                 if isinstance(f, str):
                     f = f.strip()
                     if f == "*":
-                        flist.extend(p.filter for p in self.get_default_list())
+                        f_list.extend(p.filter for p in self.get_default_list())
                     elif f:
-                        flist.append(
-                            next((p.filter for p in self.get_default_list() if p.get_property() == f), _Filter(f))
+                        f_list.append(
+                            next(
+                                (p.filter for p in self.get_default_list() if p.filter.get_property() == f),
+                                _Filter(f, None),
+                            )
                         )
                 elif isinstance(f, _Filter):
-                    flist.append(f)
+                    f_list.append(f)
             return json.dumps(
                 [
                     (
@@ -487,17 +509,10 @@ class _GuiCoreProperties(ABC):
                     )
                     if self.full_desc()
                     else (attr.label, attr.get_property())
-                    for attr in flist
+                    for attr in f_list
                 ]
             )
         return None
-
-
-@dataclass(frozen=True)
-class _GuiCorePropDesc:
-    filter: _Filter
-    extended: bool = False
-    for_sort: bool = False
 
 
 class _GuiCoreScenarioProperties(_GuiCoreProperties):
