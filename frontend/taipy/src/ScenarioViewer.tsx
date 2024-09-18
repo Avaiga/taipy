@@ -610,6 +610,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
     // Refresh on broadcast
     useEffect(() => {
+        console.log("coreChanged", props.coreChanged);
         const ids = props.coreChanged?.scenario;
         if (typeof ids === "string" ? ids === scId : Array.isArray(ids) ? ids.includes(scId) : ids) {
             if (typeof props.coreChanged?.submission === "number") {
@@ -629,7 +630,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
                         sx={AccordionSummarySx}
                     >
-                        <Stack direction="row" justifyContent="space-between" width="100%" alignItems="center">
+                        <Stack direction="row" justifyContent="space-between" width="100%" alignItems="baseline">
                             <Stack direction="row" spacing={1}>
                                 <Typography>{scLabel}</Typography>
                                 {scPrimary ? (
@@ -752,7 +753,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 </Grid>
                                 {showTags ? (
                                     <Grid
-                                    size={12}
+                                        size={12}
                                         container
                                         justifyContent="space-between"
                                         data-focus="tags"
