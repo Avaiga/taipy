@@ -48,7 +48,7 @@ const closeSx: SxProps<Theme> = {
     alignSelf: "start",
 };
 const titleSx = { m: 0, p: 2, display: "flex", paddingRight: "0.1em" };
-const userProps = { autoComplete: "username" };
+const userProps = { htmlInput: { autoComplete: "username" }};
 const pwdProps = { autoComplete: "current-password" };
 
 const Login = (props: LoginProps) => {
@@ -97,7 +97,7 @@ const Login = (props: LoginProps) => {
         []
     );
     const passwordProps = useMemo(
-        () => ({
+        () => ({input: {
             endAdornment: (
                 <InputAdornment position="end">
                     <IconButton
@@ -110,7 +110,7 @@ const Login = (props: LoginProps) => {
                     </IconButton>
                 </InputAdornment>
             ),
-        }),
+        }, htmlInput: pwdProps}),
         [showPassword, handleClickShowPassword, handleMouseDownPassword]
     );
 
@@ -145,7 +145,7 @@ const Login = (props: LoginProps) => {
                     onChange={changeInput}
                     data-input="user"
                     onKeyDown={handleEnter}
-                    inputProps={userProps}
+                    slotProps={userProps}
                 ></TextField>
                 <TextField
                     variant="outlined"
@@ -159,8 +159,7 @@ const Login = (props: LoginProps) => {
                     onChange={changeInput}
                     data-input="password"
                     onKeyDown={handleEnter}
-                    inputProps={pwdProps}
-                    InputProps={passwordProps}
+                    slotProps={passwordProps}
                 />
                 <DialogContentText>{message || defaultMessage}</DialogContentText>
             </DialogContent>

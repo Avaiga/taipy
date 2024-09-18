@@ -610,7 +610,6 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
     // Refresh on broadcast
     useEffect(() => {
-        console.log("coreChanged", props.coreChanged);
         const ids = props.coreChanged?.scenario;
         if (typeof ids === "string" ? ids === scId : Array.isArray(ids) ? ids.includes(scId) : ids) {
             if (typeof props.coreChanged?.submission === "number") {
@@ -713,7 +712,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                             sx={FieldNoMaxWidth}
                                             value={label || ""}
                                             onChange={onLabelChange}
-                                            InputProps={{
+                                            slotProps={{input: {
                                                 onKeyDown: onLabelKeyDown,
                                                 endAdornment: (
                                                     <InputAdornment position="end">
@@ -737,7 +736,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                         </Tooltip>
                                                     </InputAdornment>
                                                 ),
-                                            }}
+                                            }}}
                                             disabled={!valid}
                                         />
                                     ) : (
@@ -788,7 +787,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                         label="Tags"
                                                         sx={tagsAutocompleteSx}
                                                         fullWidth
-                                                        InputProps={{
+                                                        slotProps={{input: {
                                                             ...params.InputProps,
                                                             onKeyDown: onTagsKeyDown,
                                                             endAdornment: (
@@ -813,7 +812,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                                     </Tooltip>
                                                                 </>
                                                             ),
-                                                        }}
+                                                        }}}
                                                     />
                                                 )}
                                                 disabled={!valid}

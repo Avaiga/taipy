@@ -206,7 +206,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                                   data-name="key"
                                                   data-id={property.id}
                                                   onChange={updatePropertyField}
-                                                  inputProps={{ onKeyDown }}
+                                                  slotProps={{ input: { onKeyDown } }}
                                               />
                                           </Grid>
                                           <Grid size={5}>
@@ -219,7 +219,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                                   data-name="value"
                                                   data-id={property.id}
                                                   onChange={updatePropertyField}
-                                                  inputProps={{ onKeyDown, "data-enter": true }}
+                                                  slotProps={{ htmlInput: { onKeyDown, "data-enter": true } }}
                                               />
                                           </Grid>
                                           <Grid
@@ -309,7 +309,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                     variant="outlined"
                                     sx={FieldNoMaxWidth}
                                     disabled={!isDefined}
-                                    inputProps={{ onKeyDown }}
+                                    slotProps={{ htmlInput: { onKeyDown } }}
                                 />
                             </Grid>
                             <Grid size={5}>
@@ -321,7 +321,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                     variant="outlined"
                                     sx={FieldNoMaxWidth}
                                     disabled={!isDefined}
-                                    inputProps={{ onKeyDown, "data-enter": true }}
+                                    slotProps={{ htmlInput: { onKeyDown, "data-enter": true }}}
                                 />
                             </Grid>
                             <Grid size={2} container alignContent="center" alignItems="center" justifyContent="center">

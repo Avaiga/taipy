@@ -406,7 +406,7 @@ const Chat = (props: ChatProps) => {
                         label={`message (${senderId})`}
                         disabled={!active}
                         onKeyDown={handleAction}
-                        InputProps={{
+                        slotProps={{input: {
                             endAdornment: (
                                 <InputAdornment position="end">
                                     <IconButton
@@ -419,7 +419,7 @@ const Chat = (props: ChatProps) => {
                                     </IconButton>
                                 </InputAdornment>
                             ),
-                        }}
+                        }}}
                         sx={inputSx}
                     />
                 ) : null}
