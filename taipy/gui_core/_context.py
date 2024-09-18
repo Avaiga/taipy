@@ -113,20 +113,20 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def process_event(self, event: Event):
         self.__lazy_start()
-        if event.entity_type == EventEntityType.SCENARIO:
+        if event.entity_type is EventEntityType.SCENARIO:
             with self.gui._get_authorization(system=True):
                 self.scenario_refresh(
                     event.entity_id
-                    if event.operation == EventOperation.DELETION or is_readable(t.cast(ScenarioId, event.entity_id))
+                    if event.operation is EventOperation.DELETION or is_readable(t.cast(ScenarioId, event.entity_id))
                     else None
                 )
-        elif event.entity_type == EventEntityType.SEQUENCE and event.entity_id:
+        elif event.entity_type is EventEntityType.SEQUENCE and event.entity_id:
             sequence = None
             try:
                 with self.gui._get_authorization(system=True):
                     sequence = (
                         core_get(event.entity_id)
-                        if event.operation != EventOperation.DELETION
+                        if event.operation is not EventOperation.DELETION
                         and is_readable(t.cast(SequenceId, event.entity_id))
                         else None
                     )
@@ -134,13 +134,15 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         self.broadcast_core_changed({"scenario": list(sequence.parent_ids)})  # type: ignore
             except Exception as e:
                 _warn(f"Access to sequence {event.entity_id} failed", e)
-        elif event.entity_type == EventEntityType.JOB:
+        elif event.entity_type is EventEntityType.JOB:
             with self.lock:
                 self.jobs_list = None
             # no broadcast because the submission status will do the job
-        elif event.entity_type == EventEntityType.SUBMISSION:
+            if event.operation is EventOperation.DELETION:
+                self.broadcast_core_changed({"jobs": True})
+        elif event.entity_type is EventEntityType.SUBMISSION:
             self.submission_status_callback(event.entity_id, event)
-        elif event.entity_type == EventEntityType.DATA_NODE:
+        elif event.entity_type is EventEntityType.DATA_NODE:
             with self.lock:
                 self.data_nodes_by_owner = None
             self.broadcast_core_changed(

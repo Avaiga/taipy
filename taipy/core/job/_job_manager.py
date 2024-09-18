@@ -94,7 +94,7 @@ class _JobManager(_Manager[Job], _VersionMixin):
         if isinstance(job, str):
             job = cls._get(job)
 
-        if not job.is_finished():
+        if job and not job.is_finished():
             reason_collector._add_reason(job.id, JobIsNotFinished(job.id))
 
         return reason_collector
