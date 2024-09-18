@@ -20,7 +20,7 @@ class Core:
 
     __logger = _TaipyLogger._get_logger()
 
-    def __new__(cls) -> Orchestrator:
+    def __new__(cls) -> Orchestrator:  # type: ignore
         _warn_deprecated("'Core'", suggest="the 'Orchestrator' class")
         cls.__logger.warning(
             "Class `Core` has been deprecated, an object of class `Orchestrator` will be created instead."
