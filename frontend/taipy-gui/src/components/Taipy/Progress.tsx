@@ -18,7 +18,9 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Typography from "@mui/material/Typography";
 
 import { useClassNames, useDynamicProperty } from "../../utils/hooks";
-import { TaipyBaseProps } from "./utils";
+import { getCssSize, TaipyBaseProps } from "./utils";
+import { SxProps } from "@mui/material/styles";
+import { Theme } from "@mui/system";
 
 interface ProgressBarProps extends TaipyBaseProps {
     color?: string;
@@ -31,6 +33,7 @@ interface ProgressBarProps extends TaipyBaseProps {
     title?: string;
     defaultTitle?: string;
     titleAnchor?: "top" | "bottom" | "left" | "right" | "none";
+    width?: string | number;
 }
 
 const linearSx = { display: "flex", alignItems: "center", width: "100%" };
@@ -75,8 +78,9 @@ const Progress = (props: ProgressBarProps) => {
         return {
             boxWithFlexDirectionSx: {
                 ...linearSx,
+                width: props.width ? getCssSize(props.width) : "100%",
                 flexDirection: getFlexDirection(titleAnchor),
-            },
+            } as SxProps<Theme>,
             circularBoxSx: {
                 ...circularSx,
                 flexDirection: getFlexDirection(titleAnchor),
@@ -99,7 +103,11 @@ const Progress = (props: ProgressBarProps) => {
                 },
             },
         };
-    }, [props.color, title, titleAnchor]);
+    }, [props.color, props.width, title, titleAnchor]);
+
+    const circularProgressSize = useMemo(() => {
+        return props.width ? getCssSize(props.width) : undefined;
+    }, [props.width]);
 
     const { boxWithFlexDirectionSx, circularBoxSx, linearProgressSx, circularProgressSx, linearProgressFullWidthSx } =
         memoizedValues;
@@ -133,7 +141,12 @@ const Progress = (props: ProgressBarProps) => {
                     </Typography>
                 ) : null}
                 <Box sx={circularSx} className={className} id={props.id}>
-                    <CircularProgress sx={circularProgressSx} variant="determinate" value={value} />
+                    <CircularProgress
+                        sx={circularProgressSx}
+                        variant="determinate"
+                        value={value}
+                        size={circularProgressSize}
+                    />
                     <Box sx={circularPrgSx}>
                         <Typography variant="caption" component="div" color="text.secondary">
                             {`${Math.round(value)}%`}
@@ -170,6 +183,7 @@ const Progress = (props: ProgressBarProps) => {
                 variant={value === undefined ? "indeterminate" : "determinate"}
                 value={value}
                 className={className}
+                size={circularProgressSize}
             />
         </Box>
     );

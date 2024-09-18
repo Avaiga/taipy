@@ -161,6 +161,122 @@ describe("Progress component", () => {
         const circularProgressCircle = container.querySelector(".MuiCircularProgress-circle");
         expect(circularProgressCircle).not.toHaveStyle("color: blue");
     });
+
+    it("applies width to circular progress when width is defined as number", () => {
+        const { container } = render(<Progress linear={false} value={50} width={100} />);
+        const circularProgress = container.querySelector(".MuiCircularProgress-root");
+        expect(circularProgress).toHaveStyle("width: 100px");
+        expect(circularProgress).toHaveStyle("height: 100px");
+    });
+
+    it("applies width to circular progress when width is defined as number & title is defined", () => {
+        const { container } = render(<Progress linear={false} value={50} width={100} title="Title" />);
+        const circularProgress = container.querySelector(".MuiCircularProgress-root");
+        expect(circularProgress).toHaveStyle("width: 100px");
+        expect(circularProgress).toHaveStyle("height: 100px");
+    });
+
+    it("applies width to circular progress when width is defined as number & title, titleAnchor are defined", () => {
+        const { container } = render(
+            <Progress linear={false} value={50} width={100} title="Title" titleAnchor="top" />
+        );
+        const circularProgress = container.querySelector(".MuiCircularProgress-root");
+        expect(circularProgress).toHaveStyle("width: 100px");
+        expect(circularProgress).toHaveStyle("height: 100px");
+    });
+
+    it("applies width to circular progress when width is defined as number & title, titleAnchor, showValue are defined", () => {
+        const { container } = render(
+            <Progress linear={false} value={50} width={100} title="Title" titleAnchor="top" showValue={true} />
+        );
+        const circularProgress = container.querySelector(".MuiCircularProgress-root");
+        expect(circularProgress).toHaveStyle("width: 100px");
+        expect(circularProgress).toHaveStyle("height: 100px");
+    });
+
+    it("applies width to circular progress when width is defined as string", () => {
+        const { container } = render(<Progress linear={false} value={50} width="10rem" />);
+        const circularProgress = container.querySelector(".MuiCircularProgress-root");
+        expect(circularProgress).toHaveStyle("width: 10rem");
+        expect(circularProgress).toHaveStyle("height: 10rem");
+    });
+
+    it("applies width to circular progress when width is defined as string & title is defined", () => {
+        const { container } = render(<Progress linear={false} value={50} width="10rem" title="Title" />);
+        const circularProgress = container.querySelector(".MuiCircularProgress-root");
+        expect(circularProgress).toHaveStyle("width: 10rem");
+        expect(circularProgress).toHaveStyle("height: 10rem");
+    });
+
+    it("applies width to circular progress when width is defined as string & title, titleAnchor are defined", () => {
+        const { container } = render(
+            <Progress linear={false} value={50} width="10rem" title="Title" titleAnchor="top" />
+        );
+        const circularProgress = container.querySelector(".MuiCircularProgress-root");
+        expect(circularProgress).toHaveStyle("width: 10rem");
+        expect(circularProgress).toHaveStyle("height: 10rem");
+    });
+
+    it("applies width to circular progress when width is defined as string & title, titleAnchor, showValue are defined", () => {
+        const { container } = render(
+            <Progress linear={false} value={50} width="10rem" title="Title" titleAnchor="top" showValue={true} />
+        );
+        const circularProgress = container.querySelector(".MuiCircularProgress-root");
+        expect(circularProgress).toHaveStyle("width: 10rem");
+        expect(circularProgress).toHaveStyle("height: 10rem");
+    });
+
+    it("applies width to linear progress when width is defined as number", () => {
+        const { container } = render(<Progress linear value={50} width={100} />);
+        const linearProgress = container.querySelectorAll(".MuiBox-root")[0];
+        expect(linearProgress).toHaveStyle("width: 100px");
+    });
+
+    it("applies width to linear progress when width is defined as number & title is defined", () => {
+        const { container } = render(<Progress linear value={50} width={100} title="Title" />);
+        const linearProgress = container.querySelectorAll(".MuiBox-root")[0];
+        expect(linearProgress).toHaveStyle("width: 100px");
+    });
+
+    it("applies width to linear progress when width is defined as number & title, titleAnchor are defined", () => {
+        const { container } = render(<Progress linear value={50} width={100} title="Title" titleAnchor="top" />);
+        const linearProgress = container.querySelectorAll(".MuiBox-root")[0];
+        expect(linearProgress).toHaveStyle("width: 100px");
+    });
+
+    it("applies width to linear progress when width is defined as number & title, titleAnchor, showValue are defined", () => {
+        const { container } = render(
+            <Progress linear showValue value={50} width={100} title="Title" titleAnchor="top" />
+        );
+        const linearProgress = container.querySelectorAll(".MuiBox-root")[0];
+        expect(linearProgress).toHaveStyle("width: 100px");
+    });
+
+    it("applies width to linear progress when width is defined as string", () => {
+        const { container } = render(<Progress linear value={50} width="10rem" />);
+        const linearProgress = container.querySelectorAll(".MuiBox-root")[0];
+        expect(linearProgress).toHaveStyle("width: 10rem");
+    });
+
+    it("applies width to linear progress when width is defined as string & title is defined", () => {
+        const { container } = render(<Progress linear value={50} width="10rem" title="Title" />);
+        const linearProgress = container.querySelectorAll(".MuiBox-root")[0];
+        expect(linearProgress).toHaveStyle("width: 10rem");
+    });
+
+    it("applies width to linear progress when width is defined as string & title, titleAnchor are defined", () => {
+        const { container } = render(<Progress linear value={50} width="10rem" title="Title" titleAnchor="top" />);
+        const linearProgress = container.querySelectorAll(".MuiBox-root")[0];
+        expect(linearProgress).toHaveStyle("width: 10rem");
+    });
+
+    it("applies width to linear progress when width is defined as string & title, titleAnchor, showValue are defined", () => {
+        const { container } = render(
+            <Progress linear value={50} width="10rem" title="Title" titleAnchor="top" showValue={true} />
+        );
+        const linearProgress = container.querySelectorAll(".MuiBox-root")[0];
+        expect(linearProgress).toHaveStyle("width: 10rem");
+    });
 });
 
 describe("Progress functions", () => {

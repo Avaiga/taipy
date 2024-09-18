@@ -1374,6 +1374,12 @@
                         "type": "dynamic(bool)",
                         "default_value": "True",
                         "doc": "If False, this progress indicator is hidden from the page."
+                    },
+                    {
+                        "name": "width",
+                        "type": "Union[str,int]",
+                        "default_value": "None",
+                        "doc": "The width of this progress indicator, in CSS units."
                     }
                 ]
             }

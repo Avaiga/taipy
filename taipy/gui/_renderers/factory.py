@@ -614,6 +614,7 @@ class _Factory:
                 ("title", PropertyType.dynamic_string),
                 ("title_anchor", PropertyType.string, "bottom"),
                 ("render", PropertyType.dynamic_boolean, True),
+                ("width", PropertyType.string_or_number),
             ]
         )
         ._set_propagate(),
