@@ -9,23 +9,21 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from taipy.logger._taipy_logger import _TaipyLogger
 
-import pytest
+from .common._warnings import _warn_deprecated
+from .orchestrator import Orchestrator
 
-from taipy.core import Core, Orchestrator
 
+class Core:
+    """Deprecated. Use the `Orchestrator^` service class with `taipy.Orchestrator()` instead."""
 
-class TestCore:
-    def test_run_core_with_depracated_message(self, caplog):
-        with pytest.warns(DeprecationWarning):
-            core = Core()
-        core.run()
+    __logger = _TaipyLogger._get_logger()
 
-        assert isinstance(core, Orchestrator)
-        expected_message = (
+    def __new__(cls) -> Orchestrator:  # type: ignore
+        _warn_deprecated("'Core'", suggest="the 'Orchestrator' class")
+        cls.__logger.warning(
             "The `Core` service is deprecated and replaced by the `Orchestrator` service. "
             "An `Orchestrator` instance has been instantiated instead."
         )
-        assert expected_message in caplog.text
-
-        core.stop()
+        return Orchestrator()
