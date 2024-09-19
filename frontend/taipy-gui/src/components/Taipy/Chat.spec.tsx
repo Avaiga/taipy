@@ -75,12 +75,27 @@ describe("Chat Component", () => {
         const elt = document.querySelector(".taipy-chat input");
         expect(elt).toBeNull();
     });
+    it("renders markdown by default", async () => {
+        render(<Chat messages={messages} withInput={false} className="taipy-chat" defaultKey={valueKey} />);
+        const elt = document.querySelector(".taipy-chat .taipy-chat-received .MuiPaper-root p");
+        expect(elt).toBeInTheDocument()
+    });
+    it("can render pre", async () => {
+        render(<Chat messages={messages} withInput={false} className="taipy-chat" defaultKey={valueKey} mode="pre" />);
+        const elt = document.querySelector(".taipy-chat .taipy-chat-received .MuiPaper-root pre");
+        expect(elt).toBeInTheDocument();
+    });
+    it("can render raw", async () => {
+        render(<Chat messages={messages} withInput={false} className="taipy-chat" defaultKey={valueKey} mode="raw" />);
+        const elt = document.querySelector(".taipy-chat .taipy-chat-received div.MuiPaper-root");
+        expect(elt).toBeInTheDocument();
+    });
     it("dispatch a well formed message by Keyboard", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByLabelText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Chat messages={messages} updateVarName="varname" defaultKey={valueKey} />
+                <Chat messages={messages} updateVarName="varName" defaultKey={valueKey} />
             </TaipyContext.Provider>
         );
         const elt = getByLabelText("message (taipy)");
@@ -92,7 +107,7 @@ describe("Chat Component", () => {
             context: undefined,
             payload: {
                 action: undefined,
-                args: ["Enter", "varname", "new message", "taipy"],
+                args: ["Enter", "varName", "new message", "taipy"],
             },
         });
     });
@@ -101,7 +116,7 @@ describe("Chat Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByLabelText, getByRole } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Chat messages={messages} updateVarName="varname" defaultKey={valueKey} />
+                <Chat messages={messages} updateVarName="varName" defaultKey={valueKey} />
             </TaipyContext.Provider>
         );
         const elt = getByLabelText("message (taipy)");
@@ -114,7 +129,7 @@ describe("Chat Component", () => {
             context: undefined,
             payload: {
                 action: undefined,
-                args: ["click", "varname", "new message", "taipy"],
+                args: ["click", "varName", "new message", "taipy"],
             },
         });
     });
