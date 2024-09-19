@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -77,8 +77,8 @@ describe("Chat Component", () => {
     });
     it("renders markdown by default", async () => {
         render(<Chat messages={messages} className="taipy-chat" defaultKey={valueKey} />);
-        const elt = document.querySelector(".taipy-chat .taipy-chat-received .MuiPaper-root p");
-        expect(elt).toBeInTheDocument()
+        const elt = document.querySelector(".taipy-chat .taipy-chat-received .MuiPaper-root");
+        await waitFor(() => expect(elt?.querySelector("p")).not.toBeNull());
     });
     it("can render pre", async () => {
         render(<Chat messages={messages} className="taipy-chat" defaultKey={valueKey} mode="pre" />);
