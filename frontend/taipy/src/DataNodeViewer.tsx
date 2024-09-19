@@ -786,7 +786,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                 sx={FieldNoMaxWidth}
                                                 value={label || ""}
                                                 onChange={onLabelChange}
-                                                InputProps={{
+                                                slotProps={{input:{
                                                     endAdornment: (
                                                         <InputAdornment position="end">
                                                             <Tooltip title="Apply">
@@ -809,7 +809,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                             </Tooltip>
                                                         </InputAdornment>
                                                     ),
-                                                }}
+                                                }}}
                                                 disabled={!valid}
                                             />
                                         ) : (
@@ -1067,7 +1067,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                                 ? "number"
                                                                 : undefined
                                                         }
-                                                        InputProps={{
+                                                        slotProps={{input: {
                                                             endAdornment: (
                                                                 <InputAdornment position="end">
                                                                     <Tooltip title="Apply">
@@ -1090,7 +1090,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                                     </Tooltip>
                                                                 </InputAdornment>
                                                             ),
-                                                        }}
+                                                        }}}
                                                         disabled={!valid}
                                                     />
                                                 )}

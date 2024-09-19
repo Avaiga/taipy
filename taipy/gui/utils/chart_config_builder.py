@@ -207,7 +207,10 @@ def _build_chart_config(gui: "Gui", attributes: t.Dict[str, t.Any], col_types: t
         decimators.append(None)
 
     # set default columns if not defined
-    icols = [[c2 for c2 in [__get_col_from_indexed(c1, i) for c1 in col_dict.keys()] if c2] for i in range(len(traces))]
+    icols = [
+        [c2 for c2 in [__get_col_from_indexed(c1, i) for c1 in t.cast(dict, col_dict).keys()] if c2]
+        for i in range(len(traces))
+    ]
 
     for i, tr in enumerate(traces):
         if i < len(axis):

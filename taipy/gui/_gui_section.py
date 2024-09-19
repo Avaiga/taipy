@@ -19,7 +19,7 @@ from ._default_config import default_config
 
 
 class _GuiSection(UniqueSection):
-    name = "gui"
+    name = "gui" # type: ignore[reportAssignmentType]
 
     def __init__(self, property_list: t.Optional[t.List] = None, **properties):
         self._property_list = property_list
@@ -37,13 +37,14 @@ class _GuiSection(UniqueSection):
         return as_dict
 
     @classmethod
-    def _from_dict(cls, as_dict: t.Dict[str, t.Any], *_):
-        return _GuiSection(property_list=list(default_config), **as_dict)
+    def _from_dict(cls, config_as_dict: t.Dict[str, t.Any], id, config):
+        return _GuiSection(property_list=list(default_config), **config_as_dict)
 
     def _update(self, config_as_dict: t.Dict[str, t.Any], default_section=None):
+        as_dict = None
         if self._property_list:
             as_dict = {k: v for k, v in config_as_dict.items() if k in self._property_list}
-        self._properties.update(as_dict)
+        self._properties.update(as_dict or config_as_dict)
 
     @staticmethod
     def _configure(**properties) -> "_GuiSection":

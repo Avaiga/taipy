@@ -22,8 +22,8 @@ class _RuntimeManager(object, metaclass=_Singleton):
         self.__port_gui: t.Dict[int, "Gui"] = {}
 
     def add_gui(self, gui: "Gui", port: int):
-        if port in self.__port_gui:
-            self.__port_gui[port].stop()
+        if gui_port := self.__port_gui.get(port):
+            gui_port.stop()
         self.__port_gui[port] = gui
 
     def get_used_port(self):

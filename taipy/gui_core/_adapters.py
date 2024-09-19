@@ -43,11 +43,13 @@ from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
 from taipy.gui.utils import _is_boolean, _is_true, _TaipyBase
 
+from .filters import DataNodeFilter, ScenarioFilter, _Filter
+
 
 # prevent gui from trying to push scenario instances to the front-end
 class _GuiCoreDoNotUpdate(_DoNotUpdate):
     def __repr__(self):
-        return self.get_label() if hasattr(self, "get_label") else super().__repr__()
+        return self.get_label() if hasattr(self, "get_label") else super().__repr__()  # type: ignore[reportAttributeAccessIssue]
 
 
 class _EntityType(Enum):
@@ -353,18 +355,18 @@ def _get_entity_property(col: str, *types: t.Type):
         # we compare only strings
         if isinstance(entity, types):
             if isinstance(entity, Cycle):
-                lcol = "creation_date"
-                lfn = None
+                the_col = "creation_date"
+                the_fn = None
             else:
-                lcol = col
-                lfn = col_fn
+                the_col = col
+                the_fn = col_fn
             try:
-                val = attrgetter(lfn or lcol)(entity)
-                if lfn:
+                val = attrgetter(the_fn or the_col)(entity)
+                if the_fn:
                     val = val()
             except AttributeError as e:
                 if _is_debugging():
-                    _warn("Attribute", e)
+                    _warn(f"sort_key({entity.id}):", e)
                 val = ""
         else:
             val = ""
@@ -373,76 +375,17 @@ def _get_entity_property(col: str, *types: t.Type):
     return sort_key
 
 
-@dataclass
-class _Filter(_DoNotUpdate):
-    label: str
-    property_type: t.Optional[t.Type]
-
-    def get_property(self):
-        return self.label
-
-    def get_type(self):
-        if self.property_type is bool:
-            return "boolean"
-        elif self.property_type is int or self.property_type is float:
-            return "number"
-        elif self.property_type is datetime or self.property_type is date:
-            return "date"
-        elif self.property_type is str:
-            return "str"
-        return "any"
-
-
-@dataclass
-class ScenarioFilter(_Filter):
-    property_id: str
-
-    def get_property(self):
-        return self.property_id
-
-
-@dataclass
-class DataNodeScenarioFilter(_Filter):
-    datanode_config_id: str
-    property_id: str
-
-    def get_property(self):
-        return f"{self.datanode_config_id}.{self.property_id}"
-
-
-_CUSTOM_PREFIX = "fn:"
-
-
-@dataclass
-class CustomScenarioFilter(_Filter):
-    filter_function: t.Callable[[Scenario], t.Any]
-
-    def __post_init__(self):
-        if self.filter_function.__name__ == "<lambda>":
-            raise TypeError("ScenarioCustomFilter does not support lambda functions.")
-        mod = self.filter_function.__module__
-        self.module = mod if isinstance(mod, str) else mod.__name__
-
-    def get_property(self):
-        return f"{_CUSTOM_PREFIX}{self.module}:{self.filter_function.__name__}"
-
-    @staticmethod
-    def _get_custom(col: str) -> t.Optional[t.List[str]]:
-        return col[len(_CUSTOM_PREFIX) :].split(":") if col.startswith(_CUSTOM_PREFIX) else None
-
-
-@dataclass
-class DataNodeFilter(_Filter):
-    property_id: str
-
-    def get_property(self):
-        return self.property_id
+@dataclass(frozen=True)
+class _GuiCorePropDesc:
+    filter: _Filter
+    extended: bool = False
+    for_sort: bool = False
 
 
 class _GuiCoreProperties(ABC):
     @staticmethod
     @abstractmethod
-    def get_default_list() -> t.List[_Filter]:
+    def get_default_list() -> t.List[_GuiCorePropDesc]:
         raise NotImplementedError
 
     @staticmethod
@@ -454,7 +397,7 @@ class _GuiCoreProperties(ABC):
         return {}
 
     def get(self):
-        data = super().get()
+        data = super().get()  # type: ignore[reportAttributeAccessIssue]
         if _is_boolean(data):
             if _is_true(data):
                 data = self.get_default_list()
@@ -465,18 +408,21 @@ class _GuiCoreProperties(ABC):
         if isinstance(data, _Filter):
             data = (data,)
         if isinstance(data, (list, tuple)):
-            flist: t.List[_Filter] = []  # type: ignore[annotation-unchecked]
+            f_list: t.List[_Filter] = []  # type: ignore[annotation-unchecked]
             for f in data:
                 if isinstance(f, str):
                     f = f.strip()
                     if f == "*":
-                        flist.extend(p.filter for p in self.get_default_list())
+                        f_list.extend(p.filter for p in self.get_default_list())
                     elif f:
-                        flist.append(
-                            next((p.filter for p in self.get_default_list() if p.get_property() == f), _Filter(f))
+                        f_list.append(
+                            next(
+                                (p.filter for p in self.get_default_list() if p.filter.get_property() == f),
+                                _Filter(f, None),
+                            )
                         )
                 elif isinstance(f, _Filter):
-                    flist.append(f)
+                    f_list.append(f)
             return json.dumps(
                 [
                     (
@@ -487,17 +433,10 @@ class _GuiCoreProperties(ABC):
                     )
                     if self.full_desc()
                     else (attr.label, attr.get_property())
-                    for attr in flist
+                    for attr in f_list
                 ]
             )
         return None
-
-
-@dataclass(frozen=True)
-class _GuiCorePropDesc:
-    filter: _Filter
-    extended: bool = False
-    for_sort: bool = False
 
 
 class _GuiCoreScenarioProperties(_GuiCoreProperties):
