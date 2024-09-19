@@ -53,6 +53,7 @@ def _resolve_inherit_property(element: VisElement, viselements: VisElements) -> 
 
 
 def resolve_inherits(viselements: VisElements) -> VisElements:
+    """NOT DOCUMENTED"""
     for element_type in "blocks", "controls":
         for element in viselements[element_type]:  # type: ignore[literal-required]
             element[1]["properties"] = _resolve_inherit_property(element, viselements)

@@ -1365,11 +1365,6 @@
                         "doc": "The anchor of the title."
                     },
                     {
-                        "name": "color",
-                        "type": "str",
-                        "doc": "The color of the progress indicator."
-                    },
-                    {
                         "name": "render",
                         "type": "dynamic(bool)",
                         "default_value": "True",
