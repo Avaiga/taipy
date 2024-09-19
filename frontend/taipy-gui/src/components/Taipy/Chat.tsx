@@ -65,7 +65,8 @@ const senderMsgSx = {
 const gridSx = { pb: "1em", mt: "unset", flex: 1, overflow: "auto" };
 const loadMoreSx = { width: "fit-content", marginLeft: "auto", marginRight: "auto" };
 const inputSx = { maxWidth: "unset" };
-const nameSx = { fontSize: "0.6em", fontWeight: "bolder", pl: `${indicWidth}em` };
+const leftNameSx = { fontSize: "0.6em", fontWeight: "bolder", pl: `${indicWidth}em` };
+const rightNameSx: SxProps = { ...leftNameSx, pr: `${2 * indicWidth}em`, width: "100%", display: "flex", justifyContent: "flex-end" };
 const senderPaperSx = {
     pr: `${indicWidth}em`,
     pl: `${indicWidth}em`,
@@ -132,6 +133,7 @@ const ChatRow = (props: ChatRowProps) => {
     const { senderId, message, name, className, getAvatar, index, showSender } = props;
     const sender = senderId == name;
     const avatar = getAvatar(name, sender);
+
     return (
         <Grid
             container
@@ -143,13 +145,14 @@ const ChatRow = (props: ChatRowProps) => {
             <Grid sx={sender ? senderMsgSx : undefined}>
                 {(!sender || showSender) && avatar ? (
                     <Stack direction="row" gap={1}>
-                        <Box sx={avatarColSx}>{avatar}</Box>
+                        {!sender ? <Box sx={avatarColSx}>{avatar}</Box> : null}
                         <Stack>
-                            <Box sx={nameSx}>{name}</Box>
+                            <Box sx={sender ? rightNameSx : leftNameSx}>{name}</Box>
                             <Paper sx={sender ? senderPaperSx : otherPaperSx} data-idx={index}>
                                 {message}
                             </Paper>
                         </Stack>
+                        {sender ? <Box sx={avatarColSx}>{avatar}</Box> : null}
                     </Stack>
                 ) : (
                     <Paper sx={sender ? senderPaperSx : otherPaperSx} data-idx={index}>
@@ -172,7 +175,7 @@ const Chat = (props: ChatProps) => {
         withInput = true,
         defaultKey = "",
         pageSize = 50,
-        showSender = true,
+        showSender = false,
     } = props;
     const dispatch = useDispatch();
     const module = useModule();
@@ -203,6 +206,7 @@ const Chat = (props: ChatProps) => {
                 : defaultBoxSx,
         [props.height]
     );
+
     const handleAction = useCallback(
         (evt: KeyboardEvent<HTMLDivElement>) => {
             if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && ENTER_KEY == evt.key) {

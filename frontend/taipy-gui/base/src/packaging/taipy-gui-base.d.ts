@@ -1,4 +1,4 @@
-import { Socket } from 'socket.io-client';
+import { Socket } from "socket.io-client";
 
 export type ModuleData = Record<string, VarName>;
 export type VarName = Record<string, VarData>;
@@ -48,10 +48,7 @@ declare class DataManager {
     constructor(variableModuleData: ModuleData);
     init(variableModuleData: ModuleData): ModuleData;
     getEncodedName(varName: string, module: string): string | undefined;
-    getName(encodedName: string): [
-        string,
-        string
-    ] | undefined;
+    getName(encodedName: string): [string, string] | undefined;
     get(encodedName: string, dataEventKey?: string): unknown;
     addRequestDataOptions(encodedName: string, dataEventKey: string, options: RequestDataOptions): void;
     getInfo(encodedName: string): VarData | undefined;
@@ -60,7 +57,25 @@ declare class DataManager {
     update(encodedName: string, value: unknown, dataEventKey?: string): void;
     deleteRequestedData(encodedName: string, dataEventKey: string): void;
 }
-export type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID" | "MS" | "DF" | "PR" | "ACK" | "GMC" | "GDT" | "AID" | "GR" | "FV";
+export type WsMessageType =
+    | "A"
+    | "U"
+    | "DU"
+    | "MU"
+    | "RU"
+    | "AL"
+    | "BL"
+    | "NA"
+    | "ID"
+    | "MS"
+    | "DF"
+    | "PR"
+    | "ACK"
+    | "GMC"
+    | "GDT"
+    | "AID"
+    | "GR"
+    | "FV";
 export interface WsMessage {
     type: WsMessageType | string;
     name: string;
@@ -76,11 +91,13 @@ export type OnNotifyHandler = (taipyApp: TaipyApp, type: string, message: string
 export type OnReloadHandler = (taipyApp: TaipyApp, removedChanges: ModuleData) => void;
 export type OnWsMessage = (taipyApp: TaipyApp, event: string, payload: unknown) => void;
 export type OnWsStatusUpdate = (taipyApp: TaipyApp, messageQueue: string[]) => void;
-export type Route = [
-    string,
-    string
-];
-export type RequestDataCallback = (taipyApp: TaipyApp, encodedName: string, dataEventKey: string, value: unknown) => void;
+export type Route = [string, string];
+export type RequestDataCallback = (
+    taipyApp: TaipyApp,
+    encodedName: string,
+    dataEventKey: string,
+    value: unknown,
+) => void;
 export declare class TaipyApp {
     socket: Socket;
     _onInit: OnInitHandler | undefined;
@@ -100,7 +117,12 @@ export declare class TaipyApp {
     path: string | undefined;
     routes: Route[] | undefined;
     wsAdapters: WsAdapter[];
-    constructor(onInit?: OnInitHandler | undefined, onChange?: OnChangeHandler | undefined, path?: string | undefined, socket?: Socket | undefined);
+    constructor(
+        onInit?: OnInitHandler | undefined,
+        onChange?: OnChangeHandler | undefined,
+        path?: string | undefined,
+        socket?: Socket | undefined,
+    );
     get onInit(): OnInitHandler | undefined;
     set onInit(handler: OnInitHandler | undefined);
     onInitEvent(): void;
@@ -123,10 +145,7 @@ export declare class TaipyApp {
     sendWsMessage(type: WsMessageType | string, id: string, payload: unknown, context?: string | undefined): void;
     registerWsAdapter(wsAdapter: WsAdapter): void;
     getEncodedName(varName: string, module: string): string | undefined;
-    getName(encodedName: string): [
-        string,
-        string
-    ] | undefined;
+    getName(encodedName: string): [string, string] | undefined;
     get(encodedName: string, dataEventKey?: string): unknown;
     getInfo(encodedName: string): VarData | undefined;
     getDataTree(): ModuleData | undefined;
