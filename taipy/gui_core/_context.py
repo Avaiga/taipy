@@ -885,7 +885,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         [] if job.stacktrace is None else job.stacktrace,
                     )
         except Exception as e:
-            _warn(f"Access to job ({job_id or ''}) failed", e)
+            _warn(f"Access to job ({job_id}) failed", e)
         return None
 
     def edit_data_node(self, state: State, id: str, payload: t.Dict[str, str]):
