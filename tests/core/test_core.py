@@ -23,7 +23,8 @@ class TestCore:
 
         assert isinstance(core, Orchestrator)
         expected_message = (
-            "Class `Core` has been deprecated, an object of class `Orchestrator` will be created instead."
+            "The `Core` service is deprecated and replaced by the `Orchestrator` service. "
+            "An `Orchestrator` instance has been instantiated instead."
         )
         assert expected_message in caplog.text
 
