@@ -45,7 +45,7 @@ This section explains how to build the custom extension library.
 
 To complete the build of the extension library, we need the following tools:
 
-- Python 3.8 or higher;
+- Python 3.9 or higher;
 - Taipy GUI 2.2 or higher;
 - [Node.js](https://nodejs.org/en/) 18.0 or higher: a JavaScript runtime.<br/>
   This embeds [npm](https://www.npmjs.com/), the Node Package Manager.

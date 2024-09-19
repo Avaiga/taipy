@@ -58,7 +58,6 @@ version = "==4.2.13"
 "sqlalchemy" = {version="==2.0.30"}
 "toml" = {version="==0.10.2"}
 "boto3" = {version="==1.34.113"}
-"backports.zoneinfo" = {version="==0.2.1", markers="python_version<'3.9'"}
 "cookiecutter" = {version="==2.6.0"}
 "flask" = {version="==3.0.3"}
 "flask-cors" = {version="==5.0.0"}

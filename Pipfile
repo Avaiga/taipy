@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 apispec = {extras = ["yaml"], version = "==6.3"}
 apispec-webframeworks = "==0.5.2"
-"backports.zoneinfo" = {version="==0.2.1", markers="python_version < '3.9'", extras=["tzdata"]}
 cookiecutter = "==2.1.1"
 deepdiff = "==6.7.1"
 flask = "==3.0.0"

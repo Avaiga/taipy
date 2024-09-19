@@ -12,15 +12,11 @@
 import datetime
 import json
 import typing as t
+import zoneinfo
 from collections import defaultdict
 from numbers import Number
 from pathlib import Path
 from threading import Lock
-
-try:
-    import zoneinfo
-except ImportError:
-    from backports import zoneinfo  # type: ignore[no-redef]
 
 import pandas as pd
 from dateutil import parser
@@ -715,7 +711,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 )
             else:
                 if isinstance(scenarios, (list, tuple)) and len(scenarios) > 1:
-                    base_list = scenarios
+                    base_list = list(scenarios)
                 else:
                     if self.data_nodes_by_owner:
                         owners = scenarios if isinstance(scenarios, (list, tuple)) else [scenarios]

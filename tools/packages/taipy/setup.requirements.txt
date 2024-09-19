@@ -1,4 +1,3 @@
-backports.zoneinfo>=0.2.1,<=0.2.1;python_version<'3.9'
 cookiecutter>=2.1.1,<=2.6.0
 taipy-gui
 taipy-rest
