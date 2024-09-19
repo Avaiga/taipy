@@ -866,7 +866,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
             _GuiCoreContext.__assign_var(state, payload.get("error_id"), "<br/>".join(errs) if errs else "")
 
     def get_job_details(self, job_id: t.Optional[JobId]):
-        job = None
         try:
             if job_id and is_readable(job_id) and (job := core_get(job_id)) is not None:
                 if isinstance(job, Job):
@@ -886,7 +885,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         [] if job.stacktrace is None else job.stacktrace,
                     )
         except Exception as e:
-            _warn(f"Access to job ({job.id if job and hasattr(job, 'id') else 'No_id'}) failed", e)
+            _warn(f"Access to job ({job_id if job_id else 'No_id'}) failed", e)
         return None
 
     def edit_data_node(self, state: State, id: str, payload: t.Dict[str, str]):
