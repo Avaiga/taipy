@@ -76,17 +76,17 @@ describe("Chat Component", () => {
         expect(elt).toBeNull();
     });
     it("renders markdown by default", async () => {
-        render(<Chat messages={messages} withInput={false} className="taipy-chat" defaultKey={valueKey} />);
+        render(<Chat messages={messages} className="taipy-chat" defaultKey={valueKey} />);
         const elt = document.querySelector(".taipy-chat .taipy-chat-received .MuiPaper-root p");
         expect(elt).toBeInTheDocument()
     });
     it("can render pre", async () => {
-        render(<Chat messages={messages} withInput={false} className="taipy-chat" defaultKey={valueKey} mode="pre" />);
+        render(<Chat messages={messages} className="taipy-chat" defaultKey={valueKey} mode="pre" />);
         const elt = document.querySelector(".taipy-chat .taipy-chat-received .MuiPaper-root pre");
         expect(elt).toBeInTheDocument();
     });
     it("can render raw", async () => {
-        render(<Chat messages={messages} withInput={false} className="taipy-chat" defaultKey={valueKey} mode="raw" />);
+        render(<Chat messages={messages} className="taipy-chat" defaultKey={valueKey} mode="raw" />);
         const elt = document.querySelector(".taipy-chat .taipy-chat-received div.MuiPaper-root");
         expect(elt).toBeInTheDocument();
     });
