@@ -14,5 +14,5 @@
 This package provides classes that can be used in GUI controls dedicated to scenario management.
 """
 
-from ._adapters import CustomScenarioFilter, DataNodeFilter, DataNodeScenarioFilter, ScenarioFilter
 from ._init import *
+from .filters import CustomScenarioFilter, DataNodeFilter, DataNodeScenarioFilter, ScenarioFilter

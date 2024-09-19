@@ -67,13 +67,13 @@ from taipy.gui.gui import _DoNotUpdate
 from taipy.gui.utils._map_dict import _MapDict
 
 from ._adapters import (
-    CustomScenarioFilter,
     _EntityType,
     _get_entity_property,
     _GuiCoreDatanodeAdapter,
     _GuiCoreScenarioProperties,
     _invoke_action,
 )
+from .filters import CustomScenarioFilter
 
 
 class _GuiCoreContext(CoreEventConsumerBase):
