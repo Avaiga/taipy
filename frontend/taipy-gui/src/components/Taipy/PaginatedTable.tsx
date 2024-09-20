@@ -146,7 +146,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     filter = filter || nDesc.filter;
                     if (typeof nDesc.notEditable == "boolean") {
                         partialEditable = partialEditable || !nDesc.notEditable;
-                    }else {
+                    } else {
                         nDesc.notEditable = !editable;
                     }
                     if (nDesc.tooltip === undefined) {
@@ -188,7 +188,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             {} as Record<string, string>,
             hNan,
             false,
-            false
+            false,
         ];
     }, [
         active,
@@ -599,7 +599,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                             : undefined
                                                     }
                                                     onDeletion={
-                                                        active && (editable || partialEditable) && onDelete ? onRowDeletion : undefined
+                                                        active && (editable || partialEditable) && onDelete
+                                                            ? onRowDeletion
+                                                            : undefined
                                                     }
                                                     onSelection={active && onAction ? onRowSelection : undefined}
                                                     nanValue={columns[col].nanValue || props.nanValue}

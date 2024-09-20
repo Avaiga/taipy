@@ -292,7 +292,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     filter = filter || nDesc.filter;
                     if (typeof nDesc.notEditable == "boolean") {
                         nDesc.notEditable = !editable;
-                    }else {
+                    } else {
                         partialEditable = partialEditable || !nDesc.notEditable;
                     }
                     if (nDesc.tooltip === undefined) {
@@ -334,7 +334,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             {} as Record<string, string>,
             hNan,
             false,
-            false
+            false,
         ];
     }, [
         active,
