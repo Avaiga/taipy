@@ -13,7 +13,7 @@ repos:
         - --ignore-missing-imports
         - --implicit-optional
         - --no-namespace-packages
-        - --exclude=(taipy/templates/|generate_pyi.py|tools)
+        - --exclude=(taipy/templates/|tools/|doc/gui/examples/*/*/builder.py)
         - --follow-imports=skip
 -   repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
