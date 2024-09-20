@@ -178,7 +178,7 @@ class TestGuiCoreContext_is_readable:
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get) as mockget:
             mockget.reset_mock()
             mockGui = Mock(Gui)
-            mockGui._get_autorization = lambda s: contextlib.nullcontext()
+            mockGui._get_authorization = lambda s: contextlib.nullcontext()
             gui_core_context = _GuiCoreContext(mockGui)
 
             def sub_cb():

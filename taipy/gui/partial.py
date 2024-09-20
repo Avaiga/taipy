@@ -53,7 +53,7 @@ class Partial(_Page):
         else:
             self._route = route
 
-    def update_content(self, state: State, content: str | "Page"):
+    def update_content(self, state: State, content: t.Union[str, "Page"]):
         """Update partial content.
 
         Arguments:
@@ -65,7 +65,7 @@ class Partial(_Page):
         else:
             _warn("'Partial.update_content()' must be called in the context of a callback.")
 
-    def __copy(self, content: str | "Page") -> Partial:
+    def __copy(self, content:  t.Union[str, "Page"]) -> Partial:
         new_partial = Partial(self._route)
         from .page import Page
 

@@ -25,7 +25,7 @@ class _Page(object):
     def __init__(self) -> None:
         self._rendered_jsx: t.Optional[str] = None
         self._renderer: t.Optional[Page] = None
-        self._style: t.Optional[str] = None
+        self._style: t.Optional[t.Union[str, t.Dict[str, t.Any]]] = None
         self._route: t.Optional[str] = None
         self._head: t.Optional[list] = None
 

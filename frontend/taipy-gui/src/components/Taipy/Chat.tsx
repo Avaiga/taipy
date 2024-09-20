@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useMemo, useCallback, KeyboardEvent, MouseEvent, useState, useRef, useEffect, ReactNode } from "react";
+import React, { useMemo, useCallback, KeyboardEvent, MouseEvent, useState, useRef, useEffect, ReactNode, lazy } from "react";
 import { SxProps, Theme, darken, lighten } from "@mui/material/styles";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
@@ -28,8 +28,6 @@ import Send from "@mui/icons-material/Send";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
 
-// import InfiniteLoader from "react-window-infinite-loader";
-
 import { createRequestInfiniteTableUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
 import { TaipyActiveProps, disableColor, getSuffixedClassNames } from "./utils";
 import { useClassNames, useDispatch, useDynamicProperty, useElementVisible, useModule } from "../../utils/hooks";
@@ -38,6 +36,8 @@ import { IconAvatar, avatarSx } from "../../utils/icon";
 import { emptyArray, getInitials } from "../../utils";
 import { RowType, TableValueType } from "./tableUtils";
 import { Stack } from "@mui/material";
+
+const Markdown = lazy(() => import("react-markdown"));
 
 interface ChatProps extends TaipyActiveProps {
     messages?: TableValueType;
@@ -50,6 +50,7 @@ interface ChatProps extends TaipyActiveProps {
     defaultKey?: string; // for testing purposes only
     pageSize?: number;
     showSender?: boolean;
+    mode?: string;
 }
 
 const ENTER_KEY = "Enter";
@@ -66,7 +67,13 @@ const gridSx = { pb: "1em", mt: "unset", flex: 1, overflow: "auto" };
 const loadMoreSx = { width: "fit-content", marginLeft: "auto", marginRight: "auto" };
 const inputSx = { maxWidth: "unset" };
 const leftNameSx = { fontSize: "0.6em", fontWeight: "bolder", pl: `${indicWidth}em` };
-const rightNameSx: SxProps = { ...leftNameSx, pr: `${2 * indicWidth}em`, width: "100%", display: "flex", justifyContent: "flex-end" };
+const rightNameSx: SxProps = {
+    ...leftNameSx,
+    pr: `${2 * indicWidth}em`,
+    width: "100%",
+    display: "flex",
+    justifyContent: "flex-end",
+};
 const senderPaperSx = {
     pr: `${indicWidth}em`,
     pl: `${indicWidth}em`,
@@ -127,10 +134,11 @@ interface ChatRowProps {
     getAvatar: (id: string, sender: boolean) => ReactNode;
     index: number;
     showSender: boolean;
+    mode?: string;
 }
 
 const ChatRow = (props: ChatRowProps) => {
-    const { senderId, message, name, className, getAvatar, index, showSender } = props;
+    const { senderId, message, name, className, getAvatar, index, showSender, mode } = props;
     const sender = senderId == name;
     const avatar = getAvatar(name, sender);
 
@@ -149,14 +157,26 @@ const ChatRow = (props: ChatRowProps) => {
                         <Stack>
                             <Box sx={sender ? rightNameSx : leftNameSx}>{name}</Box>
                             <Paper sx={sender ? senderPaperSx : otherPaperSx} data-idx={index}>
-                                {message}
+                                {mode == "pre" ? (
+                                    <pre>{message}</pre>
+                                ) : mode == "raw" ? (
+                                    message
+                                ) : (
+                                    <Markdown>{message}</Markdown>
+                                )}
                             </Paper>
                         </Stack>
                         {sender ? <Box sx={avatarColSx}>{avatar}</Box> : null}
                     </Stack>
                 ) : (
                     <Paper sx={sender ? senderPaperSx : otherPaperSx} data-idx={index}>
-                        {message}
+                        {mode == "pre" ? (
+                            <pre>{message}</pre>
+                        ) : mode == "raw" ? (
+                            message
+                        ) : (
+                            <Markdown>{message}</Markdown>
+                        )}
                     </Paper>
                 )}
             </Grid>
@@ -385,6 +405,7 @@ const Chat = (props: ChatProps) => {
                                 getAvatar={getAvatar}
                                 index={idx}
                                 showSender={showSender}
+                                mode={props.mode}
                             />
                         ) : null
                     )}
@@ -406,19 +427,21 @@ const Chat = (props: ChatProps) => {
                         label={`message (${senderId})`}
                         disabled={!active}
                         onKeyDown={handleAction}
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="send message"
-                                        onClick={handleClick}
-                                        edge="end"
-                                        disabled={!active}
-                                    >
-                                        <Send color={disableColor("primary", !active)} />
-                                    </IconButton>
-                                </InputAdornment>
-                            ),
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="send message"
+                                            onClick={handleClick}
+                                            edge="end"
+                                            disabled={!active}
+                                        >
+                                            <Send color={disableColor("primary", !active)} />
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            },
                         }}
                         sx={inputSx}
                     />

@@ -17,7 +17,7 @@ def _is_in_notebook():  # pragma: no cover
         if not util.find_spec("IPython"):
             return False
 
-        from IPython import get_ipython
+        from IPython import get_ipython  # type: ignore[reportPrivateImportUsage]
 
         ipython = get_ipython()
 
