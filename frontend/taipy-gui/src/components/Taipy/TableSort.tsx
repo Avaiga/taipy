@@ -28,7 +28,7 @@ import Switch from "@mui/material/Switch";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 
-import { ColumnDesc, getsortByIndex, iconInRowSx } from "./tableUtils";
+import { ColumnDesc, getSortByIndex, iconInRowSx } from "./tableUtils";
 import { getSuffixedClassNames } from "./utils";
 
 export interface SortDesc {
@@ -181,7 +181,7 @@ const TableSort = (props: TableSortProps) => {
         if (props.colsOrder) {
             return props.colsOrder;
         }
-        return Object.keys(columns).sort(getsortByIndex(columns));
+        return Object.keys(columns).sort(getSortByIndex(columns));
     }, [props.colsOrder, columns]);
 
     const onShowSortClick = useCallback(() => setShowSort((f) => !f), []);

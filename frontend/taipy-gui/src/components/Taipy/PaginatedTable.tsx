@@ -49,7 +49,7 @@ import {
     EditableCell,
     EDIT_COL,
     getClassName,
-    getsortByIndex,
+    getSortByIndex,
     headBoxSx,
     LINE_STYLE,
     OnCellValidation,
@@ -84,7 +84,7 @@ import { getSuffixedClassNames, getUpdateVar } from "./utils";
 import { emptyArray } from "../../utils";
 
 const loadingStyle: CSSProperties = { width: "100%", height: "3em", textAlign: "right", verticalAlign: "center" };
-const skelSx = { width: "100%", height: "3em" };
+const skeletonSx = { width: "100%", height: "3em" };
 
 const rowsPerPageOptions: PageSizeOptionsType = [10, 50, 100, 500];
 
@@ -131,11 +131,12 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const baseColumns = useDynamicJsonProperty(props.columns, props.defaultColumns, defaultColumns);
 
-    const [colsOrder, columns, styles, tooltips, handleNan, filter] = useMemo(() => {
+    const [colsOrder, columns, styles, tooltips, handleNan, filter, partialEditable] = useMemo(() => {
         let hNan = !!props.nanValue;
         if (baseColumns) {
             try {
                 let filter = false;
+                let partialEditable = editable;
                 const newCols: Record<string, ColumnDesc> = {};
                 Object.entries(baseColumns).forEach(([cId, cDesc]) => {
                     const nDesc = (newCols[cId] = { ...cDesc });
@@ -143,7 +144,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                         nDesc.filter = !!props.filter;
                     }
                     filter = filter || nDesc.filter;
-                    if (typeof nDesc.notEditable != "boolean") {
+                    if (typeof nDesc.notEditable == "boolean") {
+                        partialEditable = partialEditable || !nDesc.notEditable;
+                    }else {
                         nDesc.notEditable = !editable;
                     }
                     if (nDesc.tooltip === undefined) {
@@ -151,12 +154,12 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     }
                 });
                 addDeleteColumn(
-                    (active && editable && (onAdd || onDelete) ? 1 : 0) +
+                    (active && partialEditable && (onAdd || onDelete) ? 1 : 0) +
                         (active && filter ? 1 : 0) +
                         (active && downloadable ? 1 : 0),
                     newCols
                 );
-                const colsOrder = Object.keys(newCols).sort(getsortByIndex(newCols));
+                const colsOrder = Object.keys(newCols).sort(getSortByIndex(newCols));
                 const styTt = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
                     if (newCols[col].style) {
                         pv.styles = pv.styles || {};
@@ -173,7 +176,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     styTt.styles = styTt.styles || {};
                     styTt.styles[LINE_STYLE] = props.lineStyle;
                 }
-                return [colsOrder, newCols, styTt.styles, styTt.tooltips, hNan, filter];
+                return [colsOrder, newCols, styTt.styles, styTt.tooltips, hNan, filter, partialEditable];
             } catch (e) {
                 console.info("PaginatedTable.columns: ", (e as Error).message || e);
             }
@@ -185,6 +188,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             {} as Record<string, string>,
             hNan,
             false,
+            false
         ];
     }, [
         active,
@@ -482,7 +486,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [
-                                                    active && editable && onAdd ? (
+                                                    active && (editable || partialEditable) && onAdd ? (
                                                         <Tooltip title="Add a row" key="addARow">
                                                             <IconButton
                                                                 onClick={onAddRowClick}
@@ -580,9 +584,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                             data-index={index}
                                             onClick={active && onAction ? onRowClick : undefined}
                                         >
-                                            {colsOrder.map((col, cidx) => (
+                                            {colsOrder.map((col, cIdx) => (
                                                 <EditableCell
-                                                    key={"val" + index + "-" + cidx}
+                                                    key={"val" + index + "-" + cIdx}
                                                     className={getClassName(row, columns[col].style, col)}
                                                     tableClassName={className}
                                                     colDesc={columns[col]}
@@ -595,7 +599,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                             : undefined
                                                     }
                                                     onDeletion={
-                                                        active && editable && onDelete ? onRowDeletion : undefined
+                                                        active && (editable || partialEditable) && onDelete ? onRowDeletion : undefined
                                                     }
                                                     onSelection={active && onAction ? onRowSelection : undefined}
                                                     nanValue={columns[col].nanValue || props.nanValue}
@@ -609,10 +613,10 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                 {rows.length == 0 &&
                                     loading &&
                                     Array.from(Array(30).keys(), (v, idx) => (
-                                        <TableRow hover key={"rowskel" + idx}>
-                                            {colsOrder.map((col, cidx) => (
-                                                <TableCell key={"skel" + cidx}>
-                                                    <Skeleton sx={skelSx} />
+                                        <TableRow hover key={"rowSkel" + idx}>
+                                            {colsOrder.map((col, cIdx) => (
+                                                <TableCell key={"skel" + cIdx}>
+                                                    <Skeleton sx={skeletonSx} />
                                                 </TableCell>
                                             ))}
                                         </TableRow>
