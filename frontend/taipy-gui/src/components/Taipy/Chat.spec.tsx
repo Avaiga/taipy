@@ -81,14 +81,15 @@ describe("Chat Component", () => {
         await waitFor(() => expect(elt?.querySelector("p")).not.toBeNull());
     });
     it("can render pre", async () => {
-        render(<Chat messages={messages} className="taipy-chat" defaultKey={valueKey} mode="pre" />);
-        const elt = document.querySelector(".taipy-chat .taipy-chat-received .MuiPaper-root pre");
-        expect(elt).toBeInTheDocument();
+        const { getByText } = render(<Chat messages={messages} defaultKey={valueKey} className="taipy-chat"  mode="pre" />);
+        const elt = getByText(searchMsg);
+        expect(elt.tagName).toBe("PRE");
+        expect(elt.parentElement).toHaveClass("taipy-chat-pre");
     });
     it("can render raw", async () => {
-        render(<Chat messages={messages} className="taipy-chat" defaultKey={valueKey} mode="raw" />);
-        const elt = document.querySelector(".taipy-chat .taipy-chat-received div.MuiPaper-root");
-        expect(elt).toBeInTheDocument();
+        const { getByText } = render(<Chat messages={messages} defaultKey={valueKey} className="taipy-chat"  mode="raw" />);
+        const elt = getByText(searchMsg);
+        expect(elt).toHaveClass("taipy-chat-raw");
     });
     it("dispatch a well formed message by Keyboard", async () => {
         const dispatch = jest.fn();
