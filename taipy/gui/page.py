@@ -142,14 +142,14 @@ class Page:
             return self._renderer.render(gui)
         return "<h1>No renderer found for page</h1>"
 
-    def set_style(self, style: t.Dict[str, t.Dict[str, t.Any]]):
+    def set_style(self, style: t.Dict[str, t.Dict[str, t.Any]]) -> Page:
         """Set the style for this page.
 
         Arguments:
             style (dict): A dict describing the style as CSS or Nested CSS.
 
         Returns:
-            the current instance.
+            This `Page` instance.
         """
         self.__style = style if isinstance(style, dict) else None
         return self

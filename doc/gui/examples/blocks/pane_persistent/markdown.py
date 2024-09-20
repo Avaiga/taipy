@@ -15,45 +15,19 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-# Initially invested amount
-initial_investment = 100
-# Interest rate by period
-rate = 5
-# Number of periods
-periods = 0
-# Number of periods
-final_amount = initial_investment
-# Is the interest rate setting panel shown
-show_rate = False
-
-pane_page = """
-Rate (in %):
-<|{rate}|number|>
-"""
+show_pane = False
 
 page = """
-# Interest Calculator
-
-<|{show_rate}|pane|show_button|page=_rate_pane|>
-
-Initial amount: <|{initial_investment}|number|>
-
-Periods: <|{periods}|number|min=0|max=50|>
-
-Final amount: <|{final_amount}|format=%.2f|>
+<|d-flex|
+<|{show_pane}|pane|persistent|show_button|width=150px|
+Here is the content of the pane.
+|>
+<|
+# Main page
+Here is the content of the page.
+|>
+|>
 """
 
-
-# Invoked when any control value is changed.
-def on_change(state, var_name: str):
-    # Cumulated interest percentage
-    progress = pow(1 + state.rate / 100, state.periods)
-    state.final_amount = state.initial_investment * progress
-
-
 if __name__ == "__main__":
-    pages = {
-        "main": page,
-        "_rate_pane": pane_page,
-    }
-    Gui(pages=pages).run()
+    Gui(page).run()
