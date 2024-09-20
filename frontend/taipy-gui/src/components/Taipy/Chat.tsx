@@ -11,7 +11,17 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useMemo, useCallback, KeyboardEvent, MouseEvent, useState, useRef, useEffect, ReactNode, lazy } from "react";
+import React, {
+    useMemo,
+    useCallback,
+    KeyboardEvent,
+    MouseEvent,
+    useState,
+    useRef,
+    useEffect,
+    ReactNode,
+    lazy,
+} from "react";
 import { SxProps, Theme, darken, lighten } from "@mui/material/styles";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
@@ -134,7 +144,7 @@ interface ChatRowProps {
     getAvatar: (id: string, sender: boolean) => ReactNode;
     index: number;
     showSender: boolean;
-    mode?: string;
+    mode: string;
 }
 
 const ChatRow = (props: ChatRowProps) => {
@@ -156,7 +166,11 @@ const ChatRow = (props: ChatRowProps) => {
                         {!sender ? <Box sx={avatarColSx}>{avatar}</Box> : null}
                         <Stack>
                             <Box sx={sender ? rightNameSx : leftNameSx}>{name}</Box>
-                            <Paper sx={sender ? senderPaperSx : otherPaperSx} data-idx={index}>
+                            <Paper
+                                sx={sender ? senderPaperSx : otherPaperSx}
+                                data-idx={index}
+                                className={getSuffixedClassNames(className, "-" + mode)}
+                            >
                                 {mode == "pre" ? (
                                     <pre>{message}</pre>
                                 ) : mode == "raw" ? (
@@ -169,7 +183,11 @@ const ChatRow = (props: ChatRowProps) => {
                         {sender ? <Box sx={avatarColSx}>{avatar}</Box> : null}
                     </Stack>
                 ) : (
-                    <Paper sx={sender ? senderPaperSx : otherPaperSx} data-idx={index}>
+                    <Paper
+                        sx={sender ? senderPaperSx : otherPaperSx}
+                        data-idx={index}
+                        className={getSuffixedClassNames(className, mode)}
+                    >
                         {mode == "pre" ? (
                             <pre>{message}</pre>
                         ) : mode == "raw" ? (
@@ -214,6 +232,10 @@ const Chat = (props: ChatProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const users = useLovListMemo(props.users, props.defaultUsers || "");
 
+    const mode = useMemo(
+        () => (["pre", "raw"].includes(props.mode || "") ? (props.mode as string) : "markdown"),
+        [props.mode]
+    );
     const boxSx = useMemo(
         () =>
             props.height
@@ -405,7 +427,7 @@ const Chat = (props: ChatProps) => {
                                 getAvatar={getAvatar}
                                 index={idx}
                                 showSender={showSender}
-                                mode={props.mode}
+                                mode={mode}
                             />
                         ) : null
                     )}
