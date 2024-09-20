@@ -85,6 +85,10 @@ export interface WsMessage {
     module_context: string;
     ack_id?: string;
 }
+export declare abstract class WsAdapter {
+    abstract supportedMessageTypes: string[];
+    abstract handleWsMessage(message: WsMessage, app: TaipyApp): boolean;
+}
 export type OnInitHandler = (taipyApp: TaipyApp) => void;
 export type OnChangeHandler = (taipyApp: TaipyApp, encodedName: string, value: unknown, dataEventKey?: string) => void;
 export type OnNotifyHandler = (taipyApp: TaipyApp, type: string, message: string) => void;
@@ -163,7 +167,11 @@ export declare class TaipyApp {
     getWsStatus(): string[];
     getBaseUrl(): string;
 }
-export declare abstract class WsAdapter {
-    abstract supportedMessageTypes: string[];
-    abstract handleWsMessage(message: WsMessage, app: TaipyApp): boolean;
-}
+export declare const createApp: (
+    onInit?: OnInitHandler,
+    onChange?: OnChangeHandler,
+    path?: string,
+    socket?: Socket,
+) => TaipyApp;
+
+export { TaipyApp as default };

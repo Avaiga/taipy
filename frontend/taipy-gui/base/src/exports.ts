@@ -1,7 +1,7 @@
+import { TaipyApp, createApp, OnChangeHandler, OnInitHandler } from "./app";
 import { WsAdapter } from "./wsAdapter";
-// import { TaipyApp } from "./app";
+import { ModuleData } from "./dataManager";
 
-export {
-    WsAdapter,
-    // TaipyApp,
-};
+export default TaipyApp;
+export { TaipyApp, createApp, WsAdapter };
+export type { OnChangeHandler, OnInitHandler, ModuleData };
