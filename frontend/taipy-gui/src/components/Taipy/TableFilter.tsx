@@ -30,7 +30,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { DateField, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 
-import { ColumnDesc, defaultDateFormat, getsortByIndex, iconInRowSx } from "./tableUtils";
+import { ColumnDesc, defaultDateFormat, getSortByIndex, iconInRowSx } from "./tableUtils";
 import { getDateTime, getTypeFromDf } from "../../utils";
 import { getSuffixedClassNames } from "./utils";
 
@@ -323,7 +323,7 @@ const TableFilter = (props: TableFilterProps) => {
         if (props.colsOrder) {
             return props.colsOrder;
         }
-        return Object.keys(columns).sort(getsortByIndex(columns));
+        return Object.keys(columns).sort(getSortByIndex(columns));
     }, [props.colsOrder, columns]);
 
     const onShowFilterClick = useCallback(() => setShowFilter((f) => !f), []);
