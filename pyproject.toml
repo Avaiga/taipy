@@ -95,7 +95,7 @@ convention = "google"
 ignore_missing_imports = true
 implicit_optional = true
 namespace_packages = false
-exclude = "(taipy/templates/|generate_pyi.py|tools)"
+exclude = "(taipy/templates/|tools/|doc/gui/examples/*/*/builder.py)"
 follow_imports = "skip"
 
 [tool.pyright]
