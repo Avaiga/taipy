@@ -24,9 +24,10 @@ describe("Progress component", () => {
     });
 
     it("uses the class", async () => {
-        const { getByRole } = render(<Progress className="taipy-progress" />);
+        const { getByRole } = render(<Progress className="test-class" />);
         const elt = getByRole("progressbar");
-        expect(elt).toHaveClass("taipy-progress");
+        // Actual progress bar in a child of the component
+        expect(elt.parentElement).toHaveClass("test-class");
     });
 
     it("renders circular progress with value (determinate)", () => {
@@ -138,22 +139,10 @@ describe("Progress component", () => {
         expect(box).toHaveStyle("flex-direction: column-reverse");
     });
 
-    it("applies color to linear progress when color is defined", () => {
-        const { container } = render(<Progress linear value={50} color="red" />);
-        const linearProgressBar = container.querySelector(".MuiLinearProgress-bar");
-        expect(linearProgressBar).toHaveStyle("background: red");
-    });
-
     it("does not apply color to linear progress when color is undefined", () => {
         const { container } = render(<Progress linear value={50} />);
         const linearProgressBar = container.querySelector(".MuiLinearProgress-bar");
         expect(linearProgressBar).not.toHaveStyle("background: red");
-    });
-
-    it("applies color to circular progress when color is defined", () => {
-        const { container } = render(<Progress linear={false} value={50} color="blue" />);
-        const circularProgressCircle = container.querySelector(".MuiCircularProgress-circle");
-        expect(circularProgressCircle).toHaveStyle("color: blue");
     });
 
     it("does not apply color to circular progress when color is undefined", () => {

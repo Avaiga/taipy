@@ -46,6 +46,7 @@ class _Factory:
         "layout": "columns",
         "login": "title",
         "menu": "lov",
+        "metric": "value",
         "navbar": "value",
         "number": "value",
         "pane": "open",
@@ -58,7 +59,6 @@ class _Factory:
         "text": "value",
         "toggle": "value",
         "tree": "value",
-        "metric": "value",
     }
 
     _TEXT_ATTRIBUTES = ["format", "id", "hover_text", "raw"]
@@ -445,6 +445,23 @@ class _Factory:
                 ("width", PropertyType.string_or_number),
             ]
         ),
+        "progress": lambda gui, control_type, attrs: _Builder(
+            gui=gui,
+            control_type=control_type,
+            element_name="Progress",
+            attributes=attrs,
+        )
+        .set_value_and_default(var_type=PropertyType.dynamic_number, native_type=True)
+        .set_attributes(
+            [
+                ("linear", PropertyType.boolean, False),
+                ("show_value", PropertyType.boolean, False),
+                ("title", PropertyType.dynamic_string),
+                ("title_anchor", PropertyType.string, "bottom"),
+                ("render", PropertyType.dynamic_boolean, True),
+                ("width", PropertyType.string_or_number),
+            ]
+        ),
         "selector": lambda gui, control_type, attrs: _Builder(
             gui=gui, control_type=control_type, element_name="Selector", attributes=attrs, default_value=None
         )
@@ -597,25 +614,6 @@ class _Factory:
                 ("select_leafs_only", PropertyType.boolean),
                 ("row_height", PropertyType.string),
                 ("lov", PropertyType.lov),
-            ]
-        )
-        ._set_propagate(),
-        "progress": lambda gui, control_type, attrs: _Builder(
-            gui=gui,
-            control_type=control_type,
-            element_name="Progress",
-            attributes=attrs,
-        )
-        .set_value_and_default(var_type=PropertyType.dynamic_number, native_type=True)
-        .set_attributes(
-            [
-                ("color", PropertyType.string),
-                ("linear", PropertyType.boolean, False),
-                ("show_value", PropertyType.boolean, False),
-                ("title", PropertyType.dynamic_string),
-                ("title_anchor", PropertyType.string, "bottom"),
-                ("render", PropertyType.dynamic_boolean, True),
-                ("width", PropertyType.string_or_number),
             ]
         )
         ._set_propagate(),
