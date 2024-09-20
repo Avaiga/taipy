@@ -238,6 +238,7 @@ def get_module_context(state: State) -> t.Optional[str]:
 
 
 def get_context_id(state: State) -> t.Any:
+    """NOT DOCUMENTED"""
     _warn("'get_context_id()' was deprecated in Taipy GUI 2.0. Use 'get_state_id()' instead.")
     return get_state_id(state)
 
@@ -316,6 +317,7 @@ def broadcast_callback(
 
 
 def invoke_state_callback(gui: Gui, state_id: str, callback: t.Callable, args: t.Union[t.Tuple, t.List]) -> t.Any:
+    """NOT DOCUMENTED"""
     _warn("'invoke_state_callback()' was deprecated in Taipy GUI 2.0. Use 'Gui.invoke_callback()' instead.")
     return gui.invoke_callback(state_id, callback, args)
 
