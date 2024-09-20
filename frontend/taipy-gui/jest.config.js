@@ -26,6 +26,6 @@ module.exports = {
     ],
     coverageReporters: ["json", "html", "text"],
     modulePathIgnorePatterns: ["<rootDir>/packaging/"],
-    transformIgnorePatterns: ["<rootDir>/node_modules/(?!(react-jsx-parser|react-markdown)/)"],
+    transformIgnorePatterns: ["<rootDir>/node_modules/(?!react-jsx-parser/)", "<rootDir>/node_modules/(?!react-markdown/)"],
     ...createJsWithTsPreset()
 };
