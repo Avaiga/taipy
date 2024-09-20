@@ -460,8 +460,7 @@ class _Factory:
                 ("render", PropertyType.dynamic_boolean, True),
                 ("width", PropertyType.string_or_number),
             ]
-        )
-        ._set_propagate(),
+        ),
         "selector": lambda gui, control_type, attrs: _Builder(
             gui=gui, control_type=control_type, element_name="Selector", attributes=attrs, default_value=None
         )

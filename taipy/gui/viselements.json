@@ -1362,7 +1362,7 @@
                         "name": "title_anchor",
                         "type": "str",
                         "default_value": "\"bottom\"",
-                        "doc": "The anchor of the title."
+                        "doc": "The anchor of the title.<br/>Possible values are:\n<ul>\n<li>\"bottom\"</li>\n<li>\"top\"</li>\n<li>\"left\"</li>\n<li>\"right\"</li>\n<li>\"none\" (no title is displayed)</li>\n</ul>"
                     },
                     {
                         "name": "render",
