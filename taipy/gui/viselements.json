@@ -1656,6 +1656,12 @@
                         "type": "bool",
                         "default_value": "False",
                         "doc": "If True, the sender avatar and name are displayed."
+                    },
+                    {
+                        "name": "mode",
+                        "type": "str",
+                        "default_value": "\"markdown\"",
+                        "doc": "Define the way the messages are processed:\n<ul><li>&quot;raw&quot; no processing</li><li>&quot;pre&quot;: keeps spaces and new lines</li><li>&quot;markdown&quot; or &quot;md&quot;: basic support for Markdown.</li></ul>"
                     }
                 ]
             }

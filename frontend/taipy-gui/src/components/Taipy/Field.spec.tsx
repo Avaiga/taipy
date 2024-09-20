@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import Field from "./Field";
@@ -59,5 +59,15 @@ describe("Field Component", () => {
         const { getByText } = render(<Field value="titi" width={500} />);
         const elt = getByText("titi");
         expect(elt).toHaveStyle("width: 500px");
+    });
+    it("can render markdown", async () => {
+        render(<Field value="titi" className="taipy-text" mode="md" />);
+        const elt = document.querySelector(".taipy-text");
+        await waitFor(() => expect(elt?.querySelector("p")).not.toBeNull());
+    });
+    it("can render pre", async () => {
+        render(<Field value="titi" className="taipy-text" mode="pre" />);
+        const elt = document.querySelector("pre.taipy-text");
+        expect(elt).toBeInTheDocument();
     });
 });

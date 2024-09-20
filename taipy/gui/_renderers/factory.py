@@ -99,6 +99,7 @@ class _Factory:
                 ("height",),
                 ("page_size", PropertyType.number, 50),
                 ("show_sender", PropertyType.boolean, False),
+                ("mode",),
             ]
         ),
         "chart": lambda gui, control_type, attrs: _Builder(
@@ -683,7 +684,7 @@ class _Factory:
         builder = _Factory.__CONTROL_BUILDERS.get(name)
         built = None
         _Factory.__COUNTER += 1
-        with gui._get_autorization():
+        with gui._get_authorization():
             if builder is None:
                 lib, element_name, element = _Factory.__get_library_element(name)
                 if lib:

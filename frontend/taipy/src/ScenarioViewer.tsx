@@ -629,7 +629,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
                         sx={AccordionSummarySx}
                     >
-                        <Stack direction="row" justifyContent="space-between" width="100%" alignItems="center">
+                        <Stack direction="row" justifyContent="space-between" width="100%" alignItems="baseline">
                             <Stack direction="row" spacing={1}>
                                 <Typography>{scLabel}</Typography>
                                 {scPrimary ? (
@@ -712,7 +712,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                             sx={FieldNoMaxWidth}
                                             value={label || ""}
                                             onChange={onLabelChange}
-                                            InputProps={{
+                                            slotProps={{input: {
                                                 onKeyDown: onLabelKeyDown,
                                                 endAdornment: (
                                                     <InputAdornment position="end">
@@ -736,7 +736,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                         </Tooltip>
                                                     </InputAdornment>
                                                 ),
-                                            }}
+                                            }}}
                                             disabled={!valid}
                                         />
                                     ) : (
@@ -752,7 +752,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 </Grid>
                                 {showTags ? (
                                     <Grid
-                                    size={12}
+                                        size={12}
                                         container
                                         justifyContent="space-between"
                                         data-focus="tags"
@@ -787,7 +787,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                         label="Tags"
                                                         sx={tagsAutocompleteSx}
                                                         fullWidth
-                                                        InputProps={{
+                                                        slotProps={{input: {
                                                             ...params.InputProps,
                                                             onKeyDown: onTagsKeyDown,
                                                             endAdornment: (
@@ -812,7 +812,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                                     </Tooltip>
                                                                 </>
                                                             ),
-                                                        }}
+                                                        }}}
                                                     />
                                                 )}
                                                 disabled={!valid}

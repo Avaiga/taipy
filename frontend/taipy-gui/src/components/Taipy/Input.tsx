@@ -260,65 +260,64 @@ const Input = (props: TaipyInputProps) => {
         (event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault(),
         []
     );
-    const muiInputProps = useMemo(
+    const inputProps = useMemo(
         () =>
-            type == "password"
+            type == "number"
                 ? {
-                      endAdornment: (
-                          <IconButton
-                              aria-label="toggle password visibility"
-                              onClick={handleClickShowPassword}
-                              onMouseDown={handleMouseDownPassword}
-                              edge="end"
-                          >
-                              {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                      ),
+                      htmlInput: {
+                          step: step ? step : 1,
+                          min: min,
+                          max: max,
+                      },
+                      input: {
+                          endAdornment: (
+                              <div style={verticalDivStyle}>
+                                  <IconButton
+                                      aria-label="Increment value"
+                                      size="small"
+                                      onMouseDown={handleUpStepperMouseDown}
+                                  >
+                                      <ArrowDropUpIcon fontSize="inherit" />
+                                  </IconButton>
+                                  <IconButton
+                                      aria-label="Decrement value"
+                                      size="small"
+                                      onMouseDown={handleDownStepperMouseDown}
+                                  >
+                                      <ArrowDropDownIcon fontSize="inherit" />
+                                  </IconButton>
+                              </div>
+                          ),
+                      },
                   }
-                : type == "number"
-                  ? {
-                        endAdornment: (
-                            <div style={verticalDivStyle}>
-                                <IconButton
-                                    aria-label="Increment value"
-                                    size="small"
-                                    onMouseDown={handleUpStepperMouseDown}
-                                >
-                                    <ArrowDropUpIcon fontSize="inherit" />
-                                </IconButton>
-                                <IconButton
-                                    aria-label="Decrement value"
-                                    size="small"
-                                    onMouseDown={handleDownStepperMouseDown}
-                                >
-                                    <ArrowDropDownIcon fontSize="inherit" />
-                                </IconButton>
-                            </div>
-                        ),
-                    }
-                  : undefined,
+                : type == "password"
+                ? {
+                      htmlInput: { autoComplete: "current-password" },
+                      input: {
+                          endAdornment: (
+                              <IconButton
+                                  aria-label="toggle password visibility"
+                                  onClick={handleClickShowPassword}
+                                  onMouseDown={handleMouseDownPassword}
+                                  edge="end"
+                              >
+                                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                              </IconButton>
+                          ),
+                      },
+                  }
+                : undefined,
         [
             type,
+            step,
+            min,
+            max,
             showPassword,
             handleClickShowPassword,
             handleMouseDownPassword,
             handleUpStepperMouseDown,
             handleDownStepperMouseDown,
         ]
-    );
-
-    const inputProps = useMemo(
-        () =>
-            type == "number"
-                ? {
-                      step: step ? step : 1,
-                      min: min,
-                      max: max,
-                  }
-                : type == "password"
-                  ? { autoComplete: "current-password" }
-                  : undefined,
-        [type, step, min, max]
     );
 
     useEffect(() => {
@@ -337,10 +336,7 @@ const Input = (props: TaipyInputProps) => {
                 className={className}
                 type={showPassword && type == "password" ? "text" : type}
                 id={id}
-                slotProps={{
-                    htmlInput: inputProps,
-                    input: muiInputProps,
-                }}
+                slotProps={inputProps}
                 label={props.label}
                 onChange={handleInput}
                 disabled={!active}

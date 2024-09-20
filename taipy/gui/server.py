@@ -247,14 +247,14 @@ class _Server:
         return self._flask
 
     def test_client(self):
-        return self._flask.test_client()
+        return t.cast(Flask, self._flask).test_client()
 
     def _run_notebook(self):
         self._is_running = True
         self._ws.run(self._flask, host=self._host, port=self._port, debug=False, use_reloader=False)
 
     def _get_async_mode(self) -> str:
-        return self._ws.async_mode
+        return self._ws.async_mode  # type: ignore[reportAttributeAccessIssue]
 
     def _apply_patch(self):
         if self._get_async_mode() == "gevent" and util.find_spec("gevent"):
@@ -264,7 +264,7 @@ class _Server:
             if not monkey.is_module_patched("time"):
                 monkey.patch_time()
         if self._get_async_mode() == "eventlet" and util.find_spec("eventlet"):
-            from eventlet import monkey_patch, patcher
+            from eventlet import monkey_patch, patcher  # type: ignore[reportMissingImport]
 
             if not patcher.is_monkey_patched("time"):
                 monkey_patch(time=True)
@@ -349,8 +349,8 @@ class _Server:
             self._is_running = False
             with contextlib.suppress(Exception):
                 if self._get_async_mode() == "gevent":
-                    if self._ws.wsgi_server is not None:
-                        self._ws.wsgi_server.stop()
+                    if self._ws.wsgi_server is not None:  # type: ignore[reportAttributeAccessIssue]
+                        self._ws.wsgi_server.stop()  # type: ignore[reportAttributeAccessIssue]
                     else:
                         self._thread.kill()
                 else:
