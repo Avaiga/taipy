@@ -175,7 +175,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     def _read_as(self, path: str):
         try:
             properties = self.properties
-            excel_file = load_workbook(path)
+            excel_file = load_workbook(path, read_only=True)
             exposed_type = properties[self._EXPOSED_TYPE_PROPERTY]
             work_books = {}
             sheet_names = excel_file.sheetnames
