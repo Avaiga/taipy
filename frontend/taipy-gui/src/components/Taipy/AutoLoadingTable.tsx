@@ -559,8 +559,8 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             lineStyle: props.lineStyle,
             nanValue: props.nanValue,
             compRows: compRows,
-            renderLightBool: useCheckbox,
-        }),
+            useCheckbox: useCheckbox,
+        } as RowData),
         [
             rows,
             compRows,
