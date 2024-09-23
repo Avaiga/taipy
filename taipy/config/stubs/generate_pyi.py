@@ -128,7 +128,7 @@ def _generate_entity_and_property_maps(filename):
 def _generate_accessors(base_pyi, ppty_map) -> str:
     for ppty, cls in ppty_map.items():
         return_template = f"Dict[str, {cls}]" if ppty != "job_config" else f"{cls}"
-        template = f'\t{ppty}: {return_template}\n\t\t"""The configured {ppty} section(s)."""\n'.replace("\t", "    ")
+        template = f'\t{ppty}: {return_template}\n\t"""The configured {ppty} section(s)."""\n'.replace("\t", "    ")
         base_pyi += template + "\n"
     return base_pyi
 
