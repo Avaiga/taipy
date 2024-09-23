@@ -17,12 +17,12 @@ class VisElementProperties(t.TypedDict):
     name: str
     type: str
     doc: str
-    default_value: t.NotRequired[t.Any]
+    default_value: t.Any
     default_property: t.Any
 
 
 class VisElementDetail(t.TypedDict):
-    inherits: t.NotRequired[t.List[str]]
+    inherits: t.List[str]
     properties: t.List[VisElementProperties]
 
 
