@@ -108,7 +108,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         downloadable = false,
         compare = false,
         onCompare = "",
-        renderLightBool = false,
+        useCheckbox = false,
     } = props;
     const pageSize = props.pageSize === undefined || props.pageSize < 1 ? 100 : Math.round(props.pageSize);
     const [value, setValue] = useState<Record<string, unknown>>({});
@@ -608,7 +608,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     nanValue={columns[col].nanValue || props.nanValue}
                                                     tooltip={getTooltip(row, columns[col].tooltip, col)}
                                                     comp={compRows && compRows[index] && compRows[index][col]}
-                                                    lightBool={renderLightBool}
+                                                    useCheckbox={useCheckbox}
                                                 />
                                             ))}
                                         </TableRow>

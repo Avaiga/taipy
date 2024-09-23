@@ -94,7 +94,7 @@ interface RowData {
     lineStyle?: string;
     nanValue?: string;
     compRows?: RowType[];
-    renderLightBool?: boolean;
+    useCheckbox?: boolean;
 }
 
 const Row = ({
@@ -117,7 +117,7 @@ const Row = ({
         lineStyle,
         nanValue,
         compRows,
-        renderLightBool,
+        useCheckbox,
     },
 }: {
     index: number;
@@ -152,7 +152,7 @@ const Row = ({
                     tableCellProps={cellProps[cIdx]}
                     tooltip={getTooltip(rows[index], columns[col].tooltip, col)}
                     comp={compRows && compRows[index] && compRows[index][col]}
-                    lightBool={renderLightBool}
+                    useCheckbox={useCheckbox}
                 />
             ))}
         </TableRow>
@@ -196,7 +196,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         downloadable = false,
         compare = false,
         onCompare = "",
-        renderLightBool = false,
+        useCheckbox = false,
     } = props;
     const [rows, setRows] = useState<RowType[]>([]);
     const [compRows, setCompRows] = useState<RowType[]>([]);
@@ -559,12 +559,12 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             lineStyle: props.lineStyle,
             nanValue: props.nanValue,
             compRows: compRows,
-            renderLightBool: renderLightBool,
+            renderLightBool: useCheckbox,
         }),
         [
             rows,
             compRows,
-            renderLightBool,
+            useCheckbox,
             isItemLoaded,
             active,
             colsOrder,

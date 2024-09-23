@@ -136,7 +136,7 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     downloadable?: boolean;
     onCompare?: string;
     compare?: boolean;
-    renderLightBool?: boolean;
+    useCheckbox?: boolean;
 }
 
 export const DownloadAction = "__Taipy__download_csv";
@@ -194,7 +194,7 @@ interface EditableCellProps {
     tooltip?: string;
     tableCellProps?: Partial<TableCellProps>;
     comp?: RowValue;
-    lightBool?: boolean;
+    useCheckbox?: boolean;
 }
 
 export const defaultColumns = {} as Record<string, ColumnDesc>;
@@ -295,7 +295,7 @@ export const EditableCell = (props: EditableCellProps) => {
         tooltip,
         tableCellProps = emptyObject,
         comp,
-        lightBool = false,
+        useCheckbox = false,
     } = props;
     const [val, setVal] = useState<RowValue | Date>(value);
     const [edit, setEdit] = useState(false);
@@ -645,7 +645,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                 </Button>
                             )
                         ) : value !== null && value !== undefined && colDesc.type && colDesc.type.startsWith("bool") ? (
-                            lightBool ? (
+                            useCheckbox ? (
                                 <input
                                     type="checkbox"
                                     checked={value as boolean}
