@@ -154,22 +154,22 @@ class _Builder:
         # Bind potential function and expressions in self.attributes
         for k, v in attributes.items():
             val = v
-            hashname = hash_names.get(k)
-            if hashname is None:
+            hash_name = hash_names.get(k)
+            if hash_name is None:
                 if callable(v):
                     if v.__name__ == "<lambda>":
-                        hashname = f"__lambda_{id(v)}"
-                        gui._bind_var_val(hashname, v)
+                        hash_name = f"__lambda_{id(v)}"
+                        gui._bind_var_val(hash_name, v)
                     else:
-                        hashname = _get_expr_var_name(v.__name__)
+                        hash_name = _get_expr_var_name(v.__name__)
                 elif isinstance(v, str):
                     # need to unescape the double quotes that were escaped during preprocessing
-                    (val, hashname) = _Builder.__parse_attribute_value(gui, v.replace('\\"', '"'))
+                    (val, hash_name) = _Builder.__parse_attribute_value(gui, v.replace('\\"', '"'))
 
-                if val is not None or hashname:
+                if val is not None or hash_name:
                     attributes[k] = val
-                if hashname:
-                    hashes[k] = hashname
+                if hash_name:
+                    hashes[k] = hash_name
         return hashes
 
     @staticmethod
@@ -209,8 +209,8 @@ class _Builder:
         return _get_name_indexed_property(self.__attributes, name)
 
     def __get_boolean_attribute(self, name: str, default_value=False):
-        boolattr = self.__attributes.get(name, default_value)
-        return _is_true(boolattr) if isinstance(boolattr, str) else bool(boolattr)
+        bool_attr = self.__attributes.get(name, default_value)
+        return _is_true(bool_attr) if isinstance(bool_attr, str) else bool(bool_attr)
 
     def set_boolean_attribute(self, name: str, value: bool):
         """
@@ -309,12 +309,12 @@ class _Builder:
     def __set_string_attribute(
         self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True
     ):
-        strattr = self.__attributes.get(name, default_value)
-        if strattr is None:
+        str_attr = self.__attributes.get(name, default_value)
+        if str_attr is None:
             if not optional:
                 _warn(f"Property {name} is required for control {self.__control_type}.")
             return self
-        return self.set_attribute(_to_camel_case(name), str(strattr))
+        return self.set_attribute(_to_camel_case(name), str(str_attr))
 
     def __set_dynamic_date_attribute(self, var_name: str, default_value: t.Optional[str] = None):
         date_attr = self.__attributes.get(var_name, default_value)
@@ -347,23 +347,23 @@ class _Builder:
     def __set_function_attribute(
         self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True
     ):
-        strattr = self.__attributes.get(name, default_value)
-        if strattr is None:
+        str_attr = self.__attributes.get(name, default_value)
+        if str_attr is None:
             if not optional:
                 _warn(f"Property {name} is required for control {self.__control_type}.")
             return self
-        elif callable(strattr):
-            strattr = self.__hashes.get(name)
-            if strattr is None:
+        elif callable(str_attr):
+            str_attr = self.__hashes.get(name)
+            if str_attr is None:
                 return self
-        elif _is_boolean(strattr) and not _is_true(strattr):
+        elif _is_boolean(str_attr) and not _is_true(str_attr):
             return self.__set_react_attribute(_to_camel_case(name), False)
-        elif strattr:
-            strattr = str(strattr)
-            func = self.__gui._get_user_function(strattr)
-            if func == strattr:
-                _warn(f"{self.__control_type}.{name}: {strattr} is not a function.")
-        return self.set_attribute(_to_camel_case(name), strattr) if strattr else self
+        elif str_attr:
+            str_attr = str(str_attr)
+            func = self.__gui._get_user_function(str_attr)
+            if func == str_attr:
+                _warn(f"{self.__control_type}.{name}: {str_attr} is not a function.")
+        return self.set_attribute(_to_camel_case(name), str_attr) if str_attr else self
 
     def __set_string_or_number_attribute(self, name: str, default_value: t.Optional[t.Any] = None):
         attr = self.__attributes.get(name, default_value)
@@ -506,7 +506,7 @@ class _Builder:
                 self.__gui._set_building(True)
                 return self.__gui._evaluate_expr(
                     "{"
-                    + f'{fn_name}({rebuild}, {rebuild_name}, "{quote(json.dumps(attributes))}", "{quote(json.dumps(hashes))}", {", ".join([f"{k}={v2}" for k, v2 in {v: self.__gui._get_real_var_name(v)[0] for v in hashes.values()}.items()])})'  # noqa: E501
+                    + f'{fn_name}({rebuild}, {rebuild_name}, "{quote(json.dumps(attributes))}", "{quote(json.dumps(hashes))}", {", ".join([f"{k}={v2}" for k, v2 in {v: self.__gui._get_real_var_name(t.cast(str, v))[0] for v in hashes.values()}.items()])})'  # noqa: E501
                     + "}"
                 )
             finally:
@@ -882,7 +882,7 @@ class _Builder:
         return self
 
     def _set_propagate(self):
-        val = self.__get_boolean_attribute("propagate", self.__gui._config.config.get("propagate"))
+        val = self.__get_boolean_attribute("propagate", t.cast(bool, self.__gui._config.config.get("propagate")))
         return self if val else self.set_boolean_attribute("propagate", False)
 
     def __set_refresh_on_update(self):
@@ -918,7 +918,7 @@ class _Builder:
     def __get_typed_hash_name(self, hash_name: str, var_type: t.Optional[PropertyType]) -> str:
         if taipy_type := _get_taipy_type(var_type):
             expr = self.__gui._get_expr_from_hash(hash_name)
-            hash_name = self.__gui._evaluate_bind_holder(taipy_type, expr)
+            hash_name = self.__gui._evaluate_bind_holder(t.cast(t.Type[_TaipyBase], taipy_type), expr)
         return hash_name
 
     def __set_dynamic_bool_attribute(self, name: str, def_val: t.Any, with_update: bool, update_main=True):
@@ -1045,7 +1045,7 @@ class _Builder:
             elif var_type == PropertyType.dynamic_date:
                 self.__set_dynamic_date_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == PropertyType.data:
-                self.__set_dynamic_property_without_default(attr[0], var_type)
+                self.__set_dynamic_property_without_default(attr[0], t.cast(PropertyType, var_type))
             elif (
                 var_type == PropertyType.lov
                 or var_type == PropertyType.single_lov
@@ -1058,10 +1058,10 @@ class _Builder:
                 )
             elif var_type == PropertyType.lov_value:
                 self.__set_dynamic_property_without_default(
-                    attr[0], var_type, _get_tuple_val(attr, 2, None) == "optional"
+                    attr[0], t.cast(PropertyType, var_type), _get_tuple_val(attr, 2, None) == "optional"
                 )
             elif var_type == PropertyType.toHtmlContent:
-                self.__set_html_content(attr[0], "page", var_type)
+                self.__set_html_content(attr[0], "page", t.cast(PropertyType, var_type))
             elif isclass(var_type) and issubclass(var_type, _TaipyBase):
                 prop_name = _to_camel_case(attr[0])
                 if hash_name := self.__hashes.get(attr[0]):
