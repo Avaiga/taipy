@@ -125,12 +125,11 @@ def _generate_entity_and_property_maps(filename):
     return entities_map, property_map
 
 
-def _generate_acessors(base_pyi, property_map) -> str:
-    for property, cls in property_map.items():
-        return_template = f"Dict[str, {cls}]" if property != "job_config" else f"{cls}"
-        template = ("\t@_Classproperty\n" + f'\tdef {property}(cls) -> {return_template}:\n\t\t""""""\n').replace(
-            "\t", "    "
-        )
+def _generate_accessors(base_pyi, ppty_map) -> str:
+    for ppty, cls in ppty_map.items():
+        return_template = f"Dict[str, {cls}]" if ppty != "job_config" else f"{cls}"
+        # template = ("\t@_Classproperty\n" + f'\tdef {ppty}(cls) -> {return_template}:\n\t\t""""""\n').replace("\t", "    ")
+        template = (f'\t{ppty}: {return_template}\n\t\t"""{ppty} section"""\n').replace("\t", "    ")
         base_pyi += template + "\n"
     return base_pyi
 
@@ -154,7 +153,7 @@ if __name__ == "__main__":
     entities_map, property_map = _generate_entity_and_property_maps(config_init)
     pyi = _build_header(header_file)
     pyi = _build_base_config_pyi(base_config, pyi)
-    pyi = _generate_acessors(pyi, property_map)
+    pyi = _generate_accessors(pyi, property_map)
     pyi = _build_entity_config_pyi(pyi, scenario_filename, entities_map["ScenarioConfig"])
     pyi = _build_entity_config_pyi(pyi, dn_filename, entities_map["DataNodeConfig"])
     pyi = _build_entity_config_pyi(pyi, task_filename, entities_map["TaskConfig"])
