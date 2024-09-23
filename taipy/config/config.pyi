@@ -153,25 +153,20 @@ class Config:
     def _from_json(cls, config_as_str: str) -> _Config:
         """"""
 
-    @_Classproperty
-    def job_config(cls) -> JobConfig:
-        """"""
+    job_config: JobConfig
+        """job_config section"""
 
-    @_Classproperty
-    def data_nodes(cls) -> Dict[str, DataNodeConfig]:
-        """"""
+    data_nodes: Dict[str, DataNodeConfig]
+        """data_nodes section"""
 
-    @_Classproperty
-    def tasks(cls) -> Dict[str, TaskConfig]:
-        """"""
+    tasks: Dict[str, TaskConfig]
+        """tasks section"""
 
-    @_Classproperty
-    def scenarios(cls) -> Dict[str, ScenarioConfig]:
-        """"""
+    scenarios: Dict[str, ScenarioConfig]
+        """scenarios section"""
 
-    @_Classproperty
-    def core(cls) -> Dict[str, CoreSection]:
-        """"""
+    core: Dict[str, CoreSection]
+        """core section"""
 
     @staticmethod
     def configure_scenario(
