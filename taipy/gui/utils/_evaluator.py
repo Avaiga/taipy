@@ -110,8 +110,9 @@ class _Evaluator:
                     var_name = node.id.split(sep=".")[0]
                     if var_name in builtin_vars:
                         _warn(
-                            f"Variable '{var_name}' cannot be used in Taipy expressions as its name collides with a Python built-in identifier."
-                        )  # noqa: E501
+                            f"Variable '{var_name}' cannot be used in Taipy expressions "
+                            "as its name collides with a Python built-in identifier."
+                        )
                     elif var_name not in args and var_name not in targets and var_name not in non_vars:
                         try:
                             if lazy_declare and var_name.startswith("__"):
