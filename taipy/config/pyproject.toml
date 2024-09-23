@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "taipy-config"
 description = "A Taipy package dedicated to easily configure a Taipy application."
 readme = "package_desc.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = {text = "Apache License 2.0"}
 authors = [{name = "Avaiga", email = "dev@taipy.io"}]
 keywords = ["taipy-config"]
@@ -15,7 +15,6 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",

@@ -14,9 +14,7 @@ from __future__ import annotations
 import ast
 import copy
 import inspect
-import io
 import re
-import sys
 import typing as t
 import uuid
 from abc import ABC, abstractmethod
@@ -25,9 +23,6 @@ from types import FrameType, FunctionType
 
 from .._warnings import _warn
 from ..utils import _getscopeattr
-
-if sys.version_info < (3, 9):
-    from ..utils.unparse import _Unparser
 from ._context_manager import _BuilderContextManager
 from ._factory import _BuilderFactory
 from ._utils import _LambdaByName, _python_builtins, _TransformVarToValue
@@ -44,7 +39,8 @@ class _Element(ABC):
     __RE_INDEXED_PROPERTY = re.compile(r"^(.*?)__([\w\d]+)$")
     _NEW_LAMBDA_NAME = "new_lambda"
     _TAIPY_EMBEDDED_PREFIX = "_tp_embedded_"
-    _EMBEDED_PROPERTIES = ["decimator"]
+    _EMBEDDED_PROPERTIES = ["decimator"]
+    _TYPES: t.Dict[str, str] = {}
 
     def __new__(cls, *args, **kwargs):
         obj = super(_Element, cls).__new__(cls)
@@ -92,17 +88,20 @@ class _Element(ABC):
             return f"{match.group(1)}[{match.group(2)}]"
         return key
 
+    def _is_callable(self, name: str):
+        return "callable" in self._TYPES.get(name, "").lower()
+
     def _parse_property(self, key: str, value: t.Any) -> t.Any:
         if isinstance(value, (str, dict, Iterable)):
             return value
         if isinstance(value, FunctionType):
-            if key.startswith("on_"):
+            if key.startswith("on_") or self._is_callable(key):
                 return value if value.__name__.startswith("<") else value.__name__
-            # Parse lambda function
+            # Parse lambda function_is_callable
             if (lambda_name := self.__parse_lambda_property(key, value)) is not None:
                 return lambda_name
         # Embed value in the caller frame
-        if not isinstance(value, str) and key in self._EMBEDED_PROPERTIES:
+        if not isinstance(value, str) and key in self._EMBEDDED_PROPERTIES:
             return self.__embed_object(value, is_expression=False)
         if hasattr(value, "__name__"):
             return str(getattr(value, "__name__"))  # noqa: B009
@@ -129,13 +128,7 @@ class _Element(ABC):
             ]
             tree = _TransformVarToValue(self.__calling_frame, args + targets + _python_builtins).visit(lambda_fn)
             ast.fix_missing_locations(tree)
-            if sys.version_info < (3, 9):  # python 3.8 ast has no unparse
-                string_fd = io.StringIO()
-                _Unparser(tree, string_fd)
-                string_fd.seek(0)
-                lambda_text = string_fd.read()
-            else:
-                lambda_text = ast.unparse(tree)
+            lambda_text = ast.unparse(tree)
             lambda_name = f"__lambda_{uuid.uuid4().hex}"
             self._lambdas[lambda_name] = lambda_text
             return f'{{{lambda_name}({", ".join(args)})}}'

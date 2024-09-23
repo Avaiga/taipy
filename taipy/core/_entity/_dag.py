@@ -8,8 +8,8 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 import math
-from functools import reduce
 from typing import Any, Dict, List, Tuple
 
 import networkx as nx
@@ -60,7 +60,7 @@ class _DAG:
         if self._width == 1:
             grd_wdt = 1
         else:
-            grd_wdt = self.__lcm(*[len(i) + 1 if len(i) != self._width else len(i) - 1 for i in self._sorted_nodes]) + 1
+            grd_wdt = math.lcm(*[len(i) + 1 if len(i) != self._width else len(i) - 1 for i in self._sorted_nodes]) + 1
         return len(self._sorted_nodes), grd_wdt
 
     def __compute_nodes(self) -> Dict[str, _Node]:
@@ -81,11 +81,3 @@ class _DAG:
 
     def __compute_edges(self, dag) -> List[_Edge]:
         return [_Edge(self.nodes[edge[0].id], self.nodes[edge[1].id]) for edge in dag.edges()]
-
-    @staticmethod
-    def __lcm(*integers) -> int:
-        # Function math.lcm is only implemented for Python 3.9+
-        # For compatibility with Python 3.8 it has been re implemented.
-        if 0 in integers:
-            return 0
-        return reduce(lambda x, y: (x * y) // math.gcd(x, y), integers)

@@ -13,7 +13,7 @@ import typing as t
 from copy import deepcopy
 
 
-class VisElementProperties(t.TypedDict, total=False):
+class VisElementProperties(t.TypedDict):
     name: str
     type: str
     doc: str
@@ -21,7 +21,7 @@ class VisElementProperties(t.TypedDict, total=False):
     default_property: t.Any
 
 
-class VisElementDetail(t.TypedDict, total=False):
+class VisElementDetail(t.TypedDict):
     inherits: t.List[str]
     properties: t.List[VisElementProperties]
 
