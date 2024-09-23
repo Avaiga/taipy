@@ -945,6 +945,7 @@
                     {
                         "name": "downloadable",
                         "type": "bool",
+                        "default_value": "False",
                         "doc": "If True, a clickable icon is shown so the user can download the data as CSV."
                     },
                     {
@@ -965,6 +966,12 @@
                                 "list[str]"
                             ]
                         ]
+                    },
+                    {
+                        "name": "use_checkbox",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, boolean values are rendered as a simple HTML checkbox."
                     }
                 ]
             }

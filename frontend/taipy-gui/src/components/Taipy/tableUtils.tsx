@@ -136,6 +136,7 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     downloadable?: boolean;
     onCompare?: string;
     compare?: boolean;
+    useCheckbox?: boolean;
 }
 
 export const DownloadAction = "__Taipy__download_csv";
@@ -193,6 +194,7 @@ interface EditableCellProps {
     tooltip?: string;
     tableCellProps?: Partial<TableCellProps>;
     comp?: RowValue;
+    useCheckbox?: boolean;
 }
 
 export const defaultColumns = {} as Record<string, ColumnDesc>;
@@ -293,6 +295,7 @@ export const EditableCell = (props: EditableCellProps) => {
         tooltip,
         tableCellProps = emptyObject,
         comp,
+        useCheckbox = false,
     } = props;
     const [val, setVal] = useState<RowValue | Date>(value);
     const [edit, setEdit] = useState(false);
@@ -306,14 +309,16 @@ export const EditableCell = (props: EditableCellProps) => {
     const onBoolChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setVal(e.target.checked), []);
     const onDateChange = useCallback((date: Date | null) => setVal(date), []);
 
+    const boolVal = colDesc.type?.startsWith("bool") && val as boolean;
+
     const withTime = useMemo(() => !!colDesc.format && colDesc.format.toLowerCase().includes("h"), [colDesc.format]);
 
     const buttonImg = useMemo(() => {
         let m;
         if (typeof value == "string" && (m = imgButtonRe.exec(value)) !== null) {
             return {
-                text: !!m[1] ? m[3]: m[2],
-                value: !!m[1] ? m[2]: m[3],
+                text: !!m[1] ? m[3] : m[2],
+                value: !!m[1] ? m[2] : m[3],
                 img: !!m[1],
                 action: !!onSelection,
             };
@@ -450,6 +455,14 @@ export const EditableCell = (props: EditableCellProps) => {
         [colDesc.freeLov]
     );
 
+    const boolTitle = useMemo(() => {
+        if (!colDesc.type?.startsWith("bool") || !colDesc.lov  || colDesc.lov.length == 0) {
+            return boolVal ? "True": "False";
+        }
+        return colDesc.lov[boolVal ? 1: 0];
+    }, [colDesc.type, boolVal, colDesc.lov]);
+
+
     useEffect(() => {
         !onValidation && setEdit(false);
     }, [onValidation]);
@@ -472,14 +485,27 @@ export const EditableCell = (props: EditableCellProps) => {
                 {edit ? (
                     colDesc.type?.startsWith("bool") ? (
                         <Box sx={cellBoxSx}>
+                            lightBool ? (
+                            <input
+                                type="checkbox"
+                                checked={val as boolean}
+                                title={boolTitle}
+                                style={iconInRowSx}
+                                className={getSuffixedClassNames(tableClassName, "-bool")}
+                                ref={setInputFocus}
+                                onChange={onBoolChange}
+                            />
+                            ) : (
                             <Switch
                                 checked={val as boolean}
                                 size="small"
-                                title={val ? "True" : "False"}
+                                title={boolTitle}
                                 sx={iconInRowSx}
                                 onChange={onBoolChange}
                                 inputRef={setInputFocus}
+                                className={getSuffixedClassNames(tableClassName, "-bool")}
                             />
+                            )
                             <Box sx={iconsWrapperSx}>
                                 <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
                                     <CheckIcon fontSize="inherit" />
@@ -498,6 +524,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                     slotProps={textFieldProps}
                                     inputRef={setInputFocus}
                                     sx={tableFontSx}
+                                    className={getSuffixedClassNames(tableClassName, "-date")}
                                 />
                             ) : (
                                 <DatePicker
@@ -506,6 +533,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                     slotProps={textFieldProps}
                                     inputRef={setInputFocus}
                                     sx={tableFontSx}
+                                    className={getSuffixedClassNames(tableClassName, "-date")}
                                 />
                             )}
                             <Box sx={iconsWrapperSx}>
@@ -542,6 +570,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                         margin="dense"
                                         variant="standard"
                                         sx={tableFontSx}
+                                        className={getSuffixedClassNames(tableClassName, "-input")}
                                     />
                                 )}
                                 disableClearable={!colDesc.freeLov}
@@ -563,6 +592,7 @@ export const EditableCell = (props: EditableCellProps) => {
                             inputRef={setInputFocus}
                             margin="dense"
                             sx={tableFontSx}
+                            className={getSuffixedClassNames(tableClassName, "-input")}
                             endAdornment={
                                 <Box sx={iconsWrapperSx}>
                                     <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
@@ -582,6 +612,7 @@ export const EditableCell = (props: EditableCellProps) => {
                             onKeyDown={onDeleteKeyDown}
                             inputRef={setInputFocus}
                             sx={tableFontSx}
+                            className={getSuffixedClassNames(tableClassName, "-delete")}
                             endAdornment={
                                 <Box sx={iconsWrapperSx}>
                                     <IconButton onClick={onDeleteCheckClick} size="small" sx={iconInRowSx}>
@@ -624,13 +655,23 @@ export const EditableCell = (props: EditableCellProps) => {
                                 </Button>
                             )
                         ) : value !== null && value !== undefined && colDesc.type && colDesc.type.startsWith("bool") ? (
-                            <Switch
-                                checked={value as boolean}
-                                size="small"
-                                title={value ? "True" : "False"}
-                                sx={defaultCursorIcon}
-                                className={getSuffixedClassNames(tableClassName, "-bool")}
-                            />
+                            useCheckbox ? (
+                                <input
+                                    type="checkbox"
+                                    checked={value as boolean}
+                                    title={boolTitle}
+                                    style={defaultCursor}
+                                    className={getSuffixedClassNames(tableClassName, "-bool")}
+                                />
+                            ) : (
+                                <Switch
+                                    checked={value as boolean}
+                                    size="small"
+                                    title={boolTitle}
+                                    sx={defaultCursorIcon}
+                                    className={getSuffixedClassNames(tableClassName, "-bool")}
+                                />
+                            )
                         ) : (
                             <span style={defaultCursor}>
                                 {formatValue(value as RowValue, colDesc, formatConfig, nanValue)}
