@@ -13,16 +13,16 @@ import typing as t
 from copy import deepcopy
 
 
-class VisElementProperties(t.TypedDict, total=False):
+class VisElementProperties(t.TypedDict):
     name: str
     type: str
     doc: str
-    default_value: t.Any
+    default_value: t.NotRequired[t.Any]
     default_property: t.Any
 
 
-class VisElementDetail(t.TypedDict, total=False):
-    inherits: t.List[str]
+class VisElementDetail(t.TypedDict):
+    inherits: t.NotRequired[t.List[str]]
     properties: t.List[VisElementProperties]
 
 
