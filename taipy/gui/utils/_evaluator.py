@@ -44,7 +44,8 @@ class _Evaluator:
     __EXPR_IS_EDGE_CASE = re.compile(r"^\s*{([^}]*)}\s*$")
     __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_0-9\[\]]*)$")
     __EXPR_EDGE_CASE_F_STRING = re.compile(r"[\{]*[a-zA-Z_][a-zA-Z0-9_]*:.+")
-    __IS_TAIPYEXPR_RE = re.compile(r"TpExPr_(.*)")
+    __IS_TAIPY_EXPR_RE = re.compile(r"TpExPr_(.*)")
+    __IS_ARRAY_EXPR_RE = re.compile(r"[^[]*\[(\d+)][^]]*")
 
     def __init__(self, default_bindings: t.Dict[str, t.Any], shared_variable: t.List[str]) -> None:
         # key = expression, value = hashed value of the expression
@@ -68,7 +69,7 @@ class _Evaluator:
 
     @staticmethod
     def _expr_decode(s: str):
-        return str(result[1]) if (result := _Evaluator.__IS_TAIPYEXPR_RE.match(s)) else s
+        return str(result[1]) if (result := _Evaluator.__IS_TAIPY_EXPR_RE.match(s)) else s
 
     def get_hash_from_expr(self, expr: str) -> str:
         return self.__expr_to_hash.get(expr, expr)
@@ -198,6 +199,7 @@ class _Evaluator:
         return f"{holder.get_hash()}_{_get_client_var_name(expr_hash)}"
 
     def __evaluate_holder(self, gui: Gui, holder: t.Type[_TaipyBase], expr: str) -> t.Optional[_TaipyBase]:
+        expr_hash = ""
         try:
             expr_hash = self.__expr_to_hash.get(expr, "unknownExpr")
             holder_hash = self.__get_holder_hash(holder, expr_hash)
@@ -276,7 +278,7 @@ class _Evaluator:
         except Exception as e:
             _warn(f"Exception raised evaluating {expr_string}", e)
 
-    def re_evaluate_expr(self, gui: Gui, var_name: str) -> t.Set[str]:
+    def re_evaluate_expr(self, gui: Gui, var_name: str) -> t.Set[str]: # noqa C901
         """
         This function will execute when the _update_var function is handling
         an expression with only a single variable
@@ -293,15 +295,23 @@ class _Evaluator:
             expr_original = self.__hash_to_expr[var_name]
             temp_expr_var_map = self.__expr_to_var_map[expr_original]
             if len(temp_expr_var_map) <= 1:
+                index_in_array = int(m[0]) if (m := _Evaluator.__IS_ARRAY_EXPR_RE.findall(expr_original)) else -1
                 # since this is an edge case --> only 1 item in the dict and that item is the original var
-                for v in temp_expr_var_map.values():
-                    var_name = v
+                var_name = next(iter(temp_expr_var_map.values()), var_name)
                 # construct correct var_path to reassign values
                 var_name_full, _ = _variable_decode(expr_original)
                 var_name_full = var_name_full.split(".")
                 var_name_full[0] = var_name
                 var_name_full = ".".join(var_name_full)
-                _setscopeattr_drill(gui, var_name_full, _getscopeattr(gui, var_name_original))
+                if index_in_array > - 1:
+                    array_val =  _getscopeattr(gui, var_name)
+                    if isinstance(array_val, list) and len(array_val) > index_in_array:
+                        array_val[index_in_array] = _getscopeattr(gui, var_name_original)
+                    else:
+                        index_in_array = -1
+
+                if index_in_array == -1:
+                    _setscopeattr_drill(gui, var_name_full, _getscopeattr(gui, var_name_original))
             else:
                 # multiple key-value pair in expr_var_map --> expr is special case a["b"]
                 key = ""
