@@ -111,7 +111,6 @@ class Config:
             configuration file and override the current Python configuration.
 
     """
-
     @_Classproperty
     def unique_sections(cls) -> Dict[str, UniqueSection]:
         """Return all unique sections."""
