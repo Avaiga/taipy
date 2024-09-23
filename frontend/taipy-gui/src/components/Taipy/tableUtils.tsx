@@ -309,6 +309,8 @@ export const EditableCell = (props: EditableCellProps) => {
     const onBoolChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setVal(e.target.checked), []);
     const onDateChange = useCallback((date: Date | null) => setVal(date), []);
 
+    const boolVal = colDesc.type.startsWith("bool") && val as boolean;
+
     const withTime = useMemo(() => !!colDesc.format && colDesc.format.toLowerCase().includes("h"), [colDesc.format]);
 
     const buttonImg = useMemo(() => {
@@ -453,6 +455,14 @@ export const EditableCell = (props: EditableCellProps) => {
         [colDesc.freeLov]
     );
 
+    const boolTitle = useMemo(() => {
+        if (!colDesc.type?.startsWith("bool") || !colDesc.lov  || colDesc.lov.length == 0) {
+            return boolVal ? "True": "False";
+        }
+        return colDesc.lov[boolVal ? 1: 0];
+    }, [colDesc.type, boolVal, colDesc.lov]);
+
+
     useEffect(() => {
         !onValidation && setEdit(false);
     }, [onValidation]);
@@ -479,7 +489,7 @@ export const EditableCell = (props: EditableCellProps) => {
                             <input
                                 type="checkbox"
                                 checked={val as boolean}
-                                title={val ? "True" : "False"}
+                                title={boolTitle}
                                 style={iconInRowSx}
                                 className={getSuffixedClassNames(tableClassName, "-bool")}
                                 ref={setInputFocus}
@@ -489,7 +499,7 @@ export const EditableCell = (props: EditableCellProps) => {
                             <Switch
                                 checked={val as boolean}
                                 size="small"
-                                title={val ? "True" : "False"}
+                                title={boolTitle}
                                 sx={iconInRowSx}
                                 onChange={onBoolChange}
                                 inputRef={setInputFocus}
@@ -649,7 +659,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                 <input
                                     type="checkbox"
                                     checked={value as boolean}
-                                    title={value ? "True" : "False"}
+                                    title={boolTitle}
                                     style={defaultCursor}
                                     className={getSuffixedClassNames(tableClassName, "-bool")}
                                 />
@@ -657,7 +667,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                 <Switch
                                     checked={value as boolean}
                                     size="small"
-                                    title={value ? "True" : "False"}
+                                    title={boolTitle}
                                     sx={defaultCursorIcon}
                                     className={getSuffixedClassNames(tableClassName, "-bool")}
                                 />
