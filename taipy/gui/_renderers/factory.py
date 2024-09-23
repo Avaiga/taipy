@@ -552,6 +552,7 @@ class _Factory:
                 ("hover_text", PropertyType.dynamic_string),
                 ("size",),
                 ("downloadable", PropertyType.boolean),
+                ("render_light_bool", PropertyType.boolean),
             ]
         )
         ._set_propagate()

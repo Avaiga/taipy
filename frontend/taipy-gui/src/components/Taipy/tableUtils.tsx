@@ -136,6 +136,7 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     downloadable?: boolean;
     onCompare?: string;
     compare?: boolean;
+    renderLightBool?: boolean;
 }
 
 export const DownloadAction = "__Taipy__download_csv";
@@ -193,6 +194,7 @@ interface EditableCellProps {
     tooltip?: string;
     tableCellProps?: Partial<TableCellProps>;
     comp?: RowValue;
+    lightBool?: boolean;
 }
 
 export const defaultColumns = {} as Record<string, ColumnDesc>;
@@ -293,6 +295,7 @@ export const EditableCell = (props: EditableCellProps) => {
         tooltip,
         tableCellProps = emptyObject,
         comp,
+        lightBool = false,
     } = props;
     const [val, setVal] = useState<RowValue | Date>(value);
     const [edit, setEdit] = useState(false);
@@ -312,8 +315,8 @@ export const EditableCell = (props: EditableCellProps) => {
         let m;
         if (typeof value == "string" && (m = imgButtonRe.exec(value)) !== null) {
             return {
-                text: !!m[1] ? m[3]: m[2],
-                value: !!m[1] ? m[2]: m[3],
+                text: !!m[1] ? m[3] : m[2],
+                value: !!m[1] ? m[2] : m[3],
                 img: !!m[1],
                 action: !!onSelection,
             };
@@ -624,13 +627,23 @@ export const EditableCell = (props: EditableCellProps) => {
                                 </Button>
                             )
                         ) : value !== null && value !== undefined && colDesc.type && colDesc.type.startsWith("bool") ? (
-                            <Switch
-                                checked={value as boolean}
-                                size="small"
-                                title={value ? "True" : "False"}
-                                sx={defaultCursorIcon}
-                                className={getSuffixedClassNames(tableClassName, "-bool")}
-                            />
+                            lightBool ? (
+                                <input
+                                    type="checkbox"
+                                    checked={value as boolean}
+                                    title={value ? "True" : "False"}
+                                    style={defaultCursor}
+                                    className={getSuffixedClassNames(tableClassName, "-bool")}
+                                />
+                            ) : (
+                                <Switch
+                                    checked={value as boolean}
+                                    size="small"
+                                    title={value ? "True" : "False"}
+                                    sx={defaultCursorIcon}
+                                    className={getSuffixedClassNames(tableClassName, "-bool")}
+                                />
+                            )
                         ) : (
                             <span style={defaultCursor}>
                                 {formatValue(value as RowValue, colDesc, formatConfig, nanValue)}
