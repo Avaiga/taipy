@@ -113,7 +113,7 @@ class Element:
 
         Arguments:
             default_property (str): the name of the default property for this element.
-            properties (List[ElementProperty]): The list of properties for this element.
+            properties (Dict[ElementProperty]): The dictionary of properties for this element.
             inner_properties (Optional[List[ElementProperty]]): The optional list of inner properties for this element.<br/>
                 Default values are set/binded automatically.
             react_component (Optional[str]): The name of the component to be created on the front-end.<br/>
