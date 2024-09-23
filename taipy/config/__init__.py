@@ -64,10 +64,8 @@ def _inject_section(
 
     if issubclass(section_clazz, UniqueSection):
         setattr(Config, attribute_name, Config.unique_sections[section_clazz.name])
-        Config.__getattribute__(attribute_name).__doc__ = f"The configured {section_clazz}."
     elif issubclass(section_clazz, Section):
         setattr(Config, attribute_name, Config.sections[section_clazz.name])
-        Config.__getattribute__(attribute_name).__doc__ = f"All the configured {section_clazz}."
     else:
         raise TypeError
 
