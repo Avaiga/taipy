@@ -309,7 +309,7 @@ export const EditableCell = (props: EditableCellProps) => {
     const onBoolChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setVal(e.target.checked), []);
     const onDateChange = useCallback((date: Date | null) => setVal(date), []);
 
-    const boolVal = colDesc.type.startsWith("bool") && val as boolean;
+    const boolVal = colDesc.type?.startsWith("bool") && val as boolean;
 
     const withTime = useMemo(() => !!colDesc.format && colDesc.format.toLowerCase().includes("h"), [colDesc.format]);
 
