@@ -154,19 +154,19 @@ class Config:
         """"""
 
     job_config: JobConfig
-        """The configured job_config section(s)."""
+    """The configured job_config section(s)."""
 
     data_nodes: Dict[str, DataNodeConfig]
-        """The configured data_nodes section(s)."""
+    """The configured data_nodes section(s)."""
 
     tasks: Dict[str, TaskConfig]
-        """The configured tasks section(s)."""
+    """The configured tasks section(s)."""
 
     scenarios: Dict[str, ScenarioConfig]
-        """The configured scenarios section(s)."""
+    """The configured scenarios section(s)."""
 
     core: Dict[str, CoreSection]
-        """The configured core section(s)."""
+    """The configured core section(s)."""
 
     @staticmethod
     def configure_scenario(
