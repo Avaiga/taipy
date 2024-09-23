@@ -475,6 +475,17 @@ export const EditableCell = (props: EditableCellProps) => {
                 {edit ? (
                     colDesc.type?.startsWith("bool") ? (
                         <Box sx={cellBoxSx}>
+                            lightBool ? (
+                            <input
+                                type="checkbox"
+                                checked={val as boolean}
+                                title={val ? "True" : "False"}
+                                style={iconInRowSx}
+                                className={getSuffixedClassNames(tableClassName, "-bool")}
+                                ref={setInputFocus}
+                                onChange={onBoolChange}
+                            />
+                            ) : (
                             <Switch
                                 checked={val as boolean}
                                 size="small"
@@ -482,7 +493,9 @@ export const EditableCell = (props: EditableCellProps) => {
                                 sx={iconInRowSx}
                                 onChange={onBoolChange}
                                 inputRef={setInputFocus}
+                                className={getSuffixedClassNames(tableClassName, "-bool")}
                             />
+                            )
                             <Box sx={iconsWrapperSx}>
                                 <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
                                     <CheckIcon fontSize="inherit" />
@@ -501,6 +514,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                     slotProps={textFieldProps}
                                     inputRef={setInputFocus}
                                     sx={tableFontSx}
+                                    className={getSuffixedClassNames(tableClassName, "-date")}
                                 />
                             ) : (
                                 <DatePicker
@@ -509,6 +523,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                     slotProps={textFieldProps}
                                     inputRef={setInputFocus}
                                     sx={tableFontSx}
+                                    className={getSuffixedClassNames(tableClassName, "-date")}
                                 />
                             )}
                             <Box sx={iconsWrapperSx}>
@@ -545,6 +560,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                         margin="dense"
                                         variant="standard"
                                         sx={tableFontSx}
+                                        className={getSuffixedClassNames(tableClassName, "-input")}
                                     />
                                 )}
                                 disableClearable={!colDesc.freeLov}
@@ -566,6 +582,7 @@ export const EditableCell = (props: EditableCellProps) => {
                             inputRef={setInputFocus}
                             margin="dense"
                             sx={tableFontSx}
+                            className={getSuffixedClassNames(tableClassName, "-input")}
                             endAdornment={
                                 <Box sx={iconsWrapperSx}>
                                     <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
@@ -585,6 +602,7 @@ export const EditableCell = (props: EditableCellProps) => {
                             onKeyDown={onDeleteKeyDown}
                             inputRef={setInputFocus}
                             sx={tableFontSx}
+                            className={getSuffixedClassNames(tableClassName, "-delete")}
                             endAdornment={
                                 <Box sx={iconsWrapperSx}>
                                     <IconButton onClick={onDeleteCheckClick} size="small" sx={iconInRowSx}>
