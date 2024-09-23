@@ -13,8 +13,7 @@ from typing import Any, Optional
 
 
 class Reason:
-    """
-    A reason explains why a specific action cannot be performed.
+    """A reason explains why a specific action cannot be performed.
 
     This is a parent class aiming at being implemented by specific sub-classes.
 

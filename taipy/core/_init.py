@@ -28,6 +28,7 @@ from .submission.submission_id import SubmissionId
 from .submission.submission_status import SubmissionStatus
 from .taipy import (
     cancel_job,
+    can_create,
     clean_all_entities,
     clean_all_entities_by_version,
     compare_scenarios,

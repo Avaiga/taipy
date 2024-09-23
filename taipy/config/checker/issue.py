@@ -15,8 +15,11 @@ from typing import Any, Optional
 
 @dataclass
 class Issue:
-    """
-    An issue detected in the configuration.
+    """An issue detected in the configuration.
+
+    An `Issue` is a dataclass that represents an issue detected during the configuration check
+    process. It contains the necessary information to understand the issue and help the user to fix
+    it.
 
     Attributes:
         level (str): Level of the issue among ERROR, WARNING, INFO.

@@ -26,7 +26,92 @@ from .section import Section
 from .unique_section import UniqueSection
 
 class Config:
-    """Configuration singleton."""
+    """Singleton class that manages the configuration of a Taipy application.
+
+    The `Config` singleton is the main entry point for configuring a Taipy application.
+    In particular, the class provides:
+
+    1. Various methods to configure the application's behavior
+
+        The Config class provides various methods to configure the application. Each method adds
+        a specific section to the configuration and returns it.
+
+        Here is a non-exhaustive list of configuration method examples:
+
+        - `configure_data_node`: Configure a data node adding and returning a `DataNodeConfig^`.
+        - `configure_task`: Configure a task adding and returning a `TaskConfig^`.
+        - `configure_scenario`: Configure a scenario adding and returning a `ScenarioConfig^`.
+        - `load`: Load a TOML configuration file. (This overrides the Python configuration)
+        - more...
+
+        !!! example "Most frequently used configuration methods"
+
+            ```python
+            from taipy import Config
+
+            def by_two(x: int):
+                return x * 2
+
+            input_cfg = Config.configure_data_node("my_input")
+            result_cfg = Config.configure_data_node("my_result")
+            task_cfg = Config.configure_task("my_double", function=by_two, input=input_cfg, output=result_cfg)
+            scenario_cfg = Config.configure_scenario("my_scenario", task_configs=[task_cfg])
+
+            Config.load("config.toml") # Load a configuration file
+            ```
+
+        !!! example "Advance use case"
+
+            The configuration can be done through 3 ways: Python code, configuration files, or
+            environment variables. Each method of configuration is merged (overriding previous
+            way) to create a final applied configuration. Please refer to the
+            [advanced configuration](../../userman/advanced_features/configuration/advanced-config.md)
+            section from the user manual for more details.
+
+    2. Attributes and methods to retrieve the configuration values.
+
+        Once the configuration is done, you can retrieve the configuration values using the exposed
+        attributes.
+
+        !!! Example "Retrieve configuration values"
+
+            ```python
+            from taipy import Config
+
+            global_cfg = Config.global_config  # Retrieve the global application configuration
+            data_node_cfgs = Config.data_nodes  # Retrieve all data node configurations
+            scenario_cfgs = Config.scenarios  # Retrieve all scenario configurations
+        ```
+
+    3. A few methods to manage the configuration:
+
+        The Config class also provides a few methods to manage the configuration. For example,
+        you can:
+
+        - *Check the configuration for issues*: Use the `Config.check()^` method to check the
+            configuration. It returns an `IssueCollector^` containing all the `Issue^`s
+            found representing the issues with their severity.
+        - *Block the configuration update*: Use the `Config.block_update()^` method to forbid
+            any update on the configuration. This can be useful when you want to ensure that
+            the configuration is not modified at run time. Note that running the `Orchestrator^`
+            service` automatically blocks the configuration update.
+        - *Unblock the configuration update*: Use the `Config.unblock_update()^` method to allow
+            again the update on the configuration.
+        - *Backup the configuration*: Use the `Config.backup()^` method to back up as a TOML
+            file the applied configuration. The applied configuration backed up is the result
+            of the compilation of the three possible configuration methods that overrides each
+            others.
+        - *Restore the configuration*: Use the `Config.restore()^` method to restore a TOML
+            configuration file and replace the current applied configuration.
+        - *Export the configuration*: Use the `Config.export()^` method to export as a TOML file
+            the Python code configuration.
+        - *Load the configuration*: Use the `Config.load()^` method to load a TOML configuration
+            file and replace the current Python configuration.
+        - *Override the configuration*: Use the `Config.override()^` method to load a TOML
+            configuration file and override the current Python configuration.
+
+    """
+
     @_Classproperty
     def unique_sections(cls) -> Dict[str, UniqueSection]:
         """Return all unique sections."""

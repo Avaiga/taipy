@@ -31,8 +31,7 @@ from ..exceptions.exceptions import ConfigCoreVersionMismatched
 
 
 class CoreSection(UniqueSection):
-    """
-    Configuration parameters for running the `Orchestrator^` service.
+    """Configuration parameters for running the `Orchestrator^` service.
 
     Attributes:
         root_folder (str): Path of the base folder for the taipy application. The default value is "./taipy/"
