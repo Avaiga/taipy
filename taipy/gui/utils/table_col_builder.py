@@ -112,9 +112,16 @@ def _enhance_columns(  # noqa: C901
                 col_desc["tooltip"] = value
         else:
             _warn(f"{elt_name}: tooltip[{k}] is not in the list of displayed columns.")
+    editable = attributes.get("editable", False)
+    loveable = _is_boolean(editable) and _is_true(editable)
     loves = _get_name_indexed_property(attributes, "lov")
     for k, v in loves.items():  # pragma: no cover
-        if col_desc := _get_column_desc(columns, k):
+        col_desc = _get_column_desc(columns, k)
+        if col_desc and (
+            loveable
+            or not col_desc.get("notEditable", True)
+            or t.cast(str, col_desc.get("type", "")).startswith("bool")
+        ):
             value = v.strip().split(";") if isinstance(v, str) else v  # type: ignore[assignment]
             if value is not None and not isinstance(value, (list, tuple)):
                 _warn(f"{elt_name}: lov[{k}] should be a list.")
@@ -125,6 +132,6 @@ def _enhance_columns(  # noqa: C901
                     col_desc["freeLov"] = True
                     value = new_value
                 col_desc["lov"] = value
-        else:
+        elif not col_desc:
             _warn(f"{elt_name}: lov[{k}] is not in the list of displayed columns.")
     return columns
