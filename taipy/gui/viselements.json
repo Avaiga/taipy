@@ -126,7 +126,7 @@
                         "name": "type",
                         "type": "str",
                         "default_value": "\"text\"",
-                        "doc": "The type of generated input HTML element, as defined in [HTML input types](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#input_types).<br/>This value forces certain values to be entered and can be set to \"text\", \"tel\", \"url\", \"url\"..., among other choices."
+                        "doc": "The type of generated input HTML element, as defined in [HTML input types](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#input_types).<br/>This value forces certain values to be entered and can be set to \"text\", \"tel\", \"email\", \"url\"..., among other choices."
                     }
                 ]
             }

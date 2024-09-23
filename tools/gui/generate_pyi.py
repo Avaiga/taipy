@@ -77,7 +77,7 @@ os.system(f"pipenv run stubgen {builder_py_file} --no-import --parse-only --expo
 
 with open(builder_pyi_file, "a") as file:
     file.write("from datetime import datetime\n")
-    file.write("from typing import Any, Callable, Union\n")
+    file.write("from typing import Any, Callable, Optional, Union\n")
     file.write("\n")
     file.write("from .. import Icon\n")
     file.write("from ._element import _Block, _Control\n")
@@ -114,6 +114,9 @@ def resolve_inherit(name: str, properties, inherits, viselements) -> List[Dict[s
 
 
 def format_as_parameter(property):
+    name = property["name"]
+    if match := __RE_INDEXED_PROPERTY.match(name):
+        name = f"{match.group(1)}__{match.group(3)}"
     type = property["type"]
     if m := re.match(r"indexed\((.*)\)", type):
         type = m[1]
@@ -125,22 +128,23 @@ def format_as_parameter(property):
         property["dynamic"] = " (dynamic)"
     else:
         property["dynamic"] = ""
-    name = property["name"]
-    if match := __RE_INDEXED_PROPERTY.match(name):
-        name = f"{match.group(1)}__{match.group(3)}"
     if type == "Callback" or type == "Function":
         type = ""
-    else:
-        type = f": {type}"
+    elif re.match(r"plotly\.", type) or re.match(r"taipy\.", type):
+        type = f"\"{type}\""
     default_value = property.get("default_value", None)
-    if default_value is not None:
+    if default_value is None or default_value == "None":
+        default_value = " = None"
+        if type:
+            type = f": Optional[{type}]"
+    else:
         try:
             eval(default_value)
             default_value = f" = {default_value}"
         except Exception:
             default_value = ""
-    else:
-        default_value = ""
+        if type:
+            type = f": {type}"
     return f"{name}{type}{default_value}"
 
 

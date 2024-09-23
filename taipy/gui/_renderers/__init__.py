@@ -149,8 +149,12 @@ class Markdown(_Renderer):
         Arguments:
             content (str): The text content or the path to the file holding the Markdown text
                 to be transformed.<br/>
-                If _content_ is a path to a readable file, the file is read as the Markdown
+                If *content* is a path to a readable file, the file is read as the Markdown
                 template content.
+
+        The `Markdown` constructor supports the *style* parameter as explained in the
+        [section on Styling](../../userman/gui/styling/index.md#style-sheets) and in the
+        `(taipy.gui.Page.)set_style()^` method.
         """
         kwargs["content"] = content
         super().__init__(**kwargs)
@@ -179,6 +183,10 @@ class Html(_Renderer):
                 be transformed.<br/>
                 If *content* is a path to a readable file, the file is read as the HTML
                 template content.
+
+        The `Html` constructor supports the *style* parameter as explained in the
+        [section on Styling](../../userman/gui/styling/index.md#style-sheets) and in the
+        `(taipy.gui.Page.)set_style()^` method.
         """
         kwargs["content"] = content
         super().__init__(**kwargs)
