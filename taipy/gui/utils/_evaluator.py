@@ -109,7 +109,9 @@ class _Evaluator:
                 if isinstance(node, ast.Name):
                     var_name = node.id.split(sep=".")[0]
                     if var_name in builtin_vars:
-                        _warn(f"Variable '{var_name}' cannot be used in Taipy expressions as its name collides with a Python built-in identifier.")  # noqa: E501
+                        _warn(
+                            f"Variable '{var_name}' cannot be used in Taipy expressions as its name collides with a Python built-in identifier."
+                        )  # noqa: E501
                     elif var_name not in args and var_name not in targets and var_name not in non_vars:
                         try:
                             if lazy_declare and var_name.startswith("__"):
@@ -278,7 +280,7 @@ class _Evaluator:
         except Exception as e:
             _warn(f"Exception raised evaluating {expr_string}", e)
 
-    def re_evaluate_expr(self, gui: Gui, var_name: str) -> t.Set[str]: # noqa C901
+    def re_evaluate_expr(self, gui: Gui, var_name: str) -> t.Set[str]:  # noqa C901
         """
         This function will execute when the _update_var function is handling
         an expression with only a single variable
@@ -303,14 +305,14 @@ class _Evaluator:
                 var_name_full = var_name_full.split(".")
                 var_name_full[0] = var_name
                 var_name_full = ".".join(var_name_full)
-                if index_in_array > - 1:
-                    array_val =  _getscopeattr(gui, var_name)
+                if index_in_array >= 0:
+                    array_val = _getscopeattr(gui, var_name)
                     if isinstance(array_val, list) and len(array_val) > index_in_array:
                         array_val[index_in_array] = _getscopeattr(gui, var_name_original)
                     else:
                         index_in_array = -1
 
-                if index_in_array == -1:
+                if index_in_array < 0:
                     _setscopeattr_drill(gui, var_name_full, _getscopeattr(gui, var_name_original))
             else:
                 # multiple key-value pair in expr_var_map --> expr is special case a["b"]
