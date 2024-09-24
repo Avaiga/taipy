@@ -15,9 +15,21 @@ from .section import Section
 
 
 class UniqueSection(Section, ABC):
-    """A UniqueSection is a configuration `Section^` that can have only one instance.
+    """An abstract class representing a subdivision of the configuration class `Config^`.
 
-    A UniqueSection is only defined by the section name.
+    Each UniqueSection implementation class defines a semantically consistent set of settings
+    related to a particular aspect of the application. It differs from a regular `Section` in
+    that it is designed to be unique, meaning only one instance can exist. Each UniqueSection
+    is defined by a section name (related to the objects they configure) and a set of properties.
+
+    Here are the various unique sections in Taipy:
+
+    - `GlobalAppConfig^` for configuring global application settings.
+    - `GuiSection` for configuring the GUI service.
+    - `CoreSection^` for configuring the core package behavior.
+    - `JobConfig^` for configuring the job orchestration.
+    - `AuthenticationConfig^` for configuring authentication settings.
+
     """
 
     def __init__(self, **properties):

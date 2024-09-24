@@ -18,9 +18,30 @@ from .common._validate_id import _validate_id
 
 
 class Section:
-    """A Section as a consistent part of the Config.
+    """An abstract class representing a subdivision of the configuration class `Config^`.
 
-    A section is defined by the section name (representing the type of objects that are configured) and a section id.
+    The role of the subclasses of this class is to define semantically consistent sets of settings
+    related to a particular aspect of the application.
+
+    Here are the various sections in Taipy:
+
+    - `DataNodeConfig^` for configuring data nodes.
+    - `TaskConfig^` for configuring tasks.
+    - `ScenarioConfig^` for configuring scenarios.
+    - `MigrationConfig^` for configuring data migration within the Taipy version management.
+
+    Each Section implementation is defined by a section name (related to the objects they
+    configure), a unique identifier, and a set of properties.
+
+    Some of the Section implementations are designed to be unique, meaning only one instance
+    can exist. They are subclasses of the `UniqueSection^` abstract class such as:
+
+    - `GlobalAppConfig^` for configuring global application settings.
+    - `GuiConfig` for configuring the GUI service.
+    - `CoreSection^` for configuring the core package behavior.
+    - `JobConfig^` for configuring the job orchestration.
+    - `AuthenticationConfig^` for configuring authentication settings.
+
     """
 
     _DEFAULT_KEY = "default"

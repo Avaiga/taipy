@@ -15,8 +15,7 @@ from .reason import Reason
 
 
 class ReasonCollection:
-    """
-    This class is used to store all the reasons to explain why some Taipy operations are not allowed.
+    """This class is used to store all the reasons to explain why some Taipy operations are not allowed.
 
     Because Taipy applications are natively multiuser, asynchronous, and dynamic,
     some functions might not be called in some specific contexts. You can protect
