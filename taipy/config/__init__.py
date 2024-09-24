@@ -13,7 +13,7 @@
 
 The `taipy.config` package provides features to configure a Taipy application.
 
-The main entrypoint is the `Config^` singleton class. It exposes various static methods
+Its main class is the `Config^` singleton. It exposes various static methods
 and attributes to configure the Taipy application and retrieve the configuration values.
 
 !!! example "Standard usage"
