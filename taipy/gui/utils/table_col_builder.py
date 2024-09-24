@@ -92,7 +92,7 @@ def _enhance_columns(  # noqa: C901
             else:
                 value = None
             if value in columns.keys():
-                _warn(f"{elt_name}: style[{k}]={value} cannot be a column's name.")
+                _warn(f"{elt_name}: style[{k}] cannot reference a column's name '{value}'.")
             elif value:
                 col_desc["style"] = value
         else:
@@ -107,7 +107,7 @@ def _enhance_columns(  # noqa: C901
             else:
                 value = None
             if value in columns.keys():
-                _warn(f"{elt_name}: tooltip[{k}]={value} cannot be a column's name.")
+                _warn(f"{elt_name}: tooltip[{k}] cannot reference a column's name '{value}'.")
             elif value:
                 col_desc["tooltip"] = value
         else:
@@ -122,7 +122,7 @@ def _enhance_columns(  # noqa: C901
             else:
                 value = None
             if value in columns.keys():
-                _warn(f"{elt_name}: format_fn[{k}]={value} cannot be a column's name.")
+                _warn(f"{elt_name}: format_fn[{k}] cannot reference a column's name '{value}'.")
             elif value:
                 col_desc["formatFn"] = value
         else:
