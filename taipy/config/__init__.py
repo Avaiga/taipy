@@ -43,7 +43,7 @@ and attributes to configure the Taipy application and retrieve the configuration
     the `Frequency^` and `Scope^` enums that are frequently used to configure data nodes and
     scenarios.
 
-    The three objects are exposed in the taipy module directly for convenience.
+    The three objects are exposed in the `taipy^` package directly for convenience.
 
 """
 

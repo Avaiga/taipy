@@ -30,7 +30,7 @@ class Config:
     """Singleton class that manages the configuration of a Taipy application.
 
     The `Config` singleton is the main entry point for configuring a Taipy application.
-    In particular, the class provides:
+    In particular, this class provides:
 
     1. Various methods to configure the application's behavior
 
@@ -39,10 +39,10 @@ class Config:
 
         Here is a non-exhaustive list of configuration method examples:
 
-        - `configure_data_node`: Configure a data node adding and returning a `DataNodeConfig^`.
-        - `configure_task`: Configure a task adding and returning a `TaskConfig^`.
-        - `configure_scenario`: Configure a scenario adding and returning a `ScenarioConfig^`.
-        - `load`: Load a TOML configuration file. (This overrides the Python configuration)
+        - `configure_data_node()^`: Configure a data node adding and returning a `DataNodeConfig^`.
+        - `configure_task()^`: Configure a task adding and returning a `TaskConfig^`.
+        - `configure_scenario()^`: Configure a scenario adding and returning a `ScenarioConfig^`.
+        - `load()^`: Load a TOML configuration file. (This overrides the Python configuration)
         - more...
 
         !!! example "Most frequently used configuration methods"
@@ -61,10 +61,10 @@ class Config:
             Config.load("config.toml") # Load a configuration file
             ```
 
-        !!! example "Advance use case"
+        !!! example "Advanced use case"
 
-            The configuration can be done through 3 ways: Python code, configuration files, or
-            environment variables. Each method of configuration is merged (overriding previous
+            The configuration can be done in three ways: Python code, configuration files, or
+            environment variables. All configuration manners are ultimately merged (overriding the previous way
             way) to create a final applied configuration. Please refer to the
             [advanced configuration](../../userman/advanced_features/configuration/advanced-config.md)
             section from the user manual for more details.

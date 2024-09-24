@@ -17,7 +17,7 @@ from .issue import Issue
 class IssueCollector:
     """A collection of configuration issues (instances of class `Issue^`).
 
-    An `IssueCollector` is a generic class that collects issues detected during the validation
+    `IssueCollector` is a generic class that collects issues detected during the validation
     process. In particular, an `IssueCollector` is created and returned by the `Config.check()^`
     method. It contains all the collected issues separated by severity (ERROR, WARNING, INFO).
     Each issue is an instance of the class `Issue^` and contains the necessary information to

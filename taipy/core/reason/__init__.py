@@ -11,15 +11,15 @@
 """Reasons for the Taipy actions why they can't be performed.
 
 Because Taipy applications are natively multiuser, asynchronous, and dynamic,
-some functions might not be called in some specific contexts. You can protect
+some functions should not be invoked in some specific contexts. You can protect
 such calls by calling other methods that return a `ReasonCollection^`. It acts
-like a boolean: True if the operation can be performed and False otherwise. If
+like a Boolean value: True if the operation can be performed and False otherwise. If
 the action cannot be performed, the `ReasonCollection^` holds all the individual
-reasons as a list of `Reason` objects.
+reasons as a list of `Reason^` objects.
 
-This package `taipy.core.reason` exposes the `ReasonCollection^` class and all
+This package exposes the `ReasonCollection^` class and all
 the reason implementations that can be used to explain why some Taipy operations
-is not allowed.
+are not available or allowed.
 """
 
 from .reason import (
