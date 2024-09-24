@@ -20,7 +20,7 @@ from .common._validate_id import _validate_id
 class Section:
     """An abstract class representing a subdivision of the configuration class `Config^`.
 
-    Each Section implementation class defines a semantically consistent set of settings
+    The role of the subclasses of this class is to define semantically consistent sets of settings
     related to a particular aspect of the application.
 
     Here are the various sections in Taipy:
