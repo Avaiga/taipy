@@ -423,13 +423,13 @@
                     {
                         "name": "type",
                         "type": "indexed(str)",
-                        "default_value": "scatter",
+                        "default_value": "\"scatter\"",
                         "doc": "Chart type.<br/>See the Plotly <a href=\"https://plotly.com/javascript/reference/\">chart type</a> documentation for details."
                     },
                     {
                         "name": "mode",
                         "type": "indexed(str)",
-                        "default_value": "lines+markers",
+                        "default_value": "\"lines+markers\"",
                         "doc": "Chart mode.<br/>See the Plotly <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-mode\">chart mode</a> documentation for details."
                     },
                     {
@@ -556,7 +556,7 @@
                         "name": "columns",
                         "type": "Union[str,list[str],dict[str,dict[str,str]]]",
                         "default_value": "<i>All columns</i>",
-                        "doc": "The list of column names\n<ul>\n<li>str: ;-separated list of column names</li>\n<li>list[str]: list of names</li>\n<li>dict: {\"column_name\": {format: \"format\", index: 1}} if index is specified, it represents the display order of the columns.\nIf not, the list order defines the index</li>\n</ul>"
+                        "doc": "The list of column names to represent.\n<ul>\n<li>str: ;-separated list of column names</li>\n<li>list[str]: list of names</li>\n<li>dict: {\"column_name\": {format: \"format\", index: 1}} if index is specified, it represents the display order of the columns.\nIf not, the list order defines the index</li>\n</ul><br/>If <i>columns</i> is omitted or set to None, all columns of <i>data</i> are represented."
                     },
                     {
                         "name": "label",
@@ -756,7 +756,7 @@
                         "name": "columns",
                         "type": "Union[str,list[str],dict[str,dict[str,Union[str,int]]]]",
                         "default_value": "<i>shows all columns when empty</i>",
-                        "doc": "The list of the column names to display.\n<ul>\n<li>str: Semicolon (';')-separated list of column names.</li>\n<li>list[str]: The list of column names.</li>\n<li>dict: A dictionary with entries matching: {\"col name\": {format: \"format\", index: 1}}.<br/>\nif <i>index</i> is specified, it represents the display order of the columns.\nIf <i>index</i> is not specified, the list order defines the index.<br/>\nIf <i>format</i> is specified, it is used for numbers or dates.</li>\n</ul>"
+                        "doc": "The list of the column names to display.\n<ul>\n<li>str: Semicolon (';')-separated list of column names.</li>\n<li>list[str]: The list of column names.</li>\n<li>dict: A dictionary with entries matching: {\"&lt;column_name&gt;\": {\"format\": \"&lt;format&gt;\", \"index\": 1}}.<br/>\nif <i>index</i> is specified, it represents the display order of this column.\nIf <i>index</i> is not specified, the list order defines the index.<br/>\nIf <i>format</i> is specified, it is used for numbers or dates.</li>\n</ul><br/>If <i>columns</i> is omitted or set to None, all columns of <i>data</i> are represented."
                     },
                     {
                         "name": "date_format",
@@ -846,32 +846,14 @@
                     {
                         "name": "editable[<i>column_name</i>]",
                         "type": "bool",
-                        "default_value": "editable",
-                        "doc": "Indicates, if False, that the indicated column cannot be edited when editable is True."
+                        "default_value": "<i>editable</i>",
+                        "doc": "Indicates, if False, that the indicated column cannot be edited, even if <i>editable</i> is True.<br/>By default, all columns are editable or not, depending on the value of the <i>editable</i> property."
                     },
                     {
                         "name": "on_edit",
                         "type": "Union[Callable, bool]",
-                        "doc": "TODO: Default implementation and False value. The name of a function that is triggered when a cell edition is validated.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>value (Any): the new cell value cast to the type of the column.</li>\n<li>user_value (str): the new cell value, as it was provided by the user.</li>\n<li>tz (str): the timezone if the column type is date.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot edit cells.",
-                        "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "var_name",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
-                        ]
-                    },
-                    {
-                        "name": "on_delete",
-                        "type": "Union[Callable, bool]",
-                        "doc": "TODO: Default implementation and False value. The name of a function that is triggered when a row is deleted.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot delete rows.",
+                        "default_value": "<i>default implementation</i>",
+                        "doc": "The name of the function triggered when a cell edition is validated.<br/>All the parameters of that function are optional:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li>\n<li><i>var_name</i> (str): the name of the tabular data variable.</li>\n<li><i>payload</i> (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li><i>index</i> (int): the row index.</li>\n<li><i>col</i> (str): the column name.</li>\n<li><i>value</i> (Any): the new cell value cast to the type of the column.</li>\n<li><i>user_value</i> (str): the new cell value, as it was provided by the user.</li>\n<li><i>tz</i> (str): the timezone if the column type is <tt>date</tt>.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set and the type of <i>data</i> allows it, the table uses the default implementation for editing cells.",
                         "signature": [
                             [
                                 "state",
@@ -890,7 +872,27 @@
                     {
                         "name": "on_add",
                         "type": "Union[Callable, bool]",
-                        "doc": "TODO: Default implementation and False value. The name of a function that is triggered when the user requests a row to be added.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot add rows.",
+                        "doc": "The name of a function that is triggered when the user requests a row to be added to the table.<br/>All parameters of that function are optional:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li>\n<li><i>var_name</i> (str): the name of the tabular data variable.</li>\n<li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li><i>index</i> (int): the row index.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set and the type of <i>data</i> supports it, the table uses the default implementation for adding a new row<br/>If this property is set to False, you cannot add new rows.",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "var_name",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "on_delete",
+                        "type": "Union[Callable, bool]",
+                        "default_value": "<i>default implementation</i>",
+                        "doc": "The name of the function triggered when a row is deleted.<br/>All the parameters of that function are optional:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li>\n<li><i>var_name</i> (str): the name of the tabular data variable.</li>\n<li><i>payload</i> (dict): the details on this callback's invocation.<br/>\nThis dictionary has one key:\n<ul>\n<li><i>index</i> (int): the row index.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set and the type of <i>data</i> allows it, the table uses the default implementation for deleting rows.",
                         "signature": [
                             [
                                 "state",
@@ -1345,7 +1347,8 @@
                     {
                         "name": "value",
                         "type": "dynamic(int)",
-                        "doc": "If set, then the value represents the progress percentage that is shown.TODO - if unset?",
+                        "default_value": "None",
+                        "doc": "The progress percentage represented by the control.<br/>If this property is not set or set to None, the progress control represents an indeterminate state.",
                         "default_property": true
                     },
                     {
@@ -1463,14 +1466,14 @@
                     {
                         "name": "adapter",
                         "type": "Function",
-                        "default_value": "`\"lambda x: str(x)\"`",
+                        "default_value": "<tt>\"lambda x: str(x)\"</tt>",
                         "doc": "The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>."
                     },
                     {
                         "name": "type",
                         "type": "str",
                         "default_value": "<i>Type of the first lov element</i>",
-                        "doc": "Must be specified if <i>lov</i> contains a non specific type of data (ex: dict).<br/><i>value</i> must be of that type, <i>lov</i> must be an iterable on this type, and the adapter function will receive an object of this type."
+                        "doc": "This property is required if <i>lov</i> contains a non-specific type of data (e.g., a dictionary).<br/>Then:<ul><li><i>value</i> must be of that type</li><li><i>lov</i> must be an iterable containing elements of this type</li><li>The function set to <i>adapter</i> will receive an object of this type.</li></ul>."
                     },
                     {
                         "name": "label",
@@ -1959,14 +1962,14 @@
                     {
                         "name": "adapter",
                         "type": "Function",
-                        "default_value": "`\"lambda x: str(x)\"`",
+                        "default_value": "<tt>\"lambda x: str(x)\"</tt>",
                         "doc": "The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>."
                     },
                     {
                         "name": "type",
                         "type": "str",
                         "default_value": "<i>Type name of the lov element</i>",
-                        "doc": "Must be specified if <i>lov</i> contains a non-specific type of data (ex: dict).<br/><i>value</i> must be of that type, <i>lov</i> must be an iterable on this type, and the adapter function will receive an object of this type."
+                        "doc": "This property is required if <i>lov</i> contains a non-specific type of data (e.g., a dictionary).<br/>Then:<ul><li><i>value</i> must be of that type</li><li><i>lov</i> must be an iterable containing elements of this type</li><li>The function set to <i>adapter</i> will receive an object of this type.</li></ul>"
                     },
                     {
                         "name": "value_by_id",
@@ -2032,7 +2035,7 @@
                         "name": "propagate",
                         "type": "bool",
                         "default_value": "<i>App config</i>",
-                        "doc": "Allows the control's main value to be automatically propagated.<br/>The default value is defined at the application configuration level.<br/>If True, any change to the control's value is immediately reflected in the bound application variable."
+                        "doc": "Allows the control's main value to be automatically propagated.<br/>The default value is defined at the application configuration level by the <strong>propagate</strong> configuration option.<br/>If True, any change to the control's value is immediately reflected in the bound application variable."
                     }
                 ]
             }
@@ -2045,7 +2048,7 @@
                         "name": "change_delay",
                         "type": "int",
                         "default_value": "<i>App config</i>",
-                        "doc": "Minimum time between triggering two calls to the <tt>on_change</tt> callback.<br/>The default value is defined at the application configuration level by the <strong>change_delay</strong> configuration option. if None, the delay is set to 300 ms.<br/>If set to -1, the input change is triggered only when the user presses the Enter key."
+                        "doc": "Minimum interval between two consecutive calls to the <tt>on_change</tt> callback.<br/>The default value is defined at the application configuration level by the <strong>change_delay</strong> configuration option.<br/>if None, the delay is set to 300 ms.<br/>If set to -1, the input change is triggered only when the user presses the Enter key."
                     },
                     {
                         "name": "on_action",
