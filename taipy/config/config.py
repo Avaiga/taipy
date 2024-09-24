@@ -39,10 +39,10 @@ class Config:
 
         Here is a non-exhaustive list of configuration method examples:
 
-        - `configure_data_node()^`: Configure a data node adding and returning a `DataNodeConfig^`.
-        - `configure_task()^`: Configure a task adding and returning a `TaskConfig^`.
-        - `configure_scenario()^`: Configure a scenario adding and returning a `ScenarioConfig^`.
-        - `load()^`: Load a TOML configuration file. (This overrides the Python configuration)
+        - `configure_data_node()`: Configure a data node adding and returning a `DataNodeConfig^`.
+        - `configure_task()`: Configure a task adding and returning a `TaskConfig^`.
+        - `configure_scenario()`: Configure a scenario adding and returning a `ScenarioConfig^`.
+        - `load()`: Load a TOML configuration file. (This overrides the Python configuration)
         - more...
 
         !!! example "Most frequently used configuration methods"
