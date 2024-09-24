@@ -802,6 +802,11 @@
                         "doc": "The name of the function that must return a tooltip text for a cell.<br/>See <a href=\"#cell-tooltips\">below</a> for details."
                     },
                     {
+                        "name": "format_fn[<i>column_name</i>]",
+                        "type": "str",
+                        "doc": "TODO: The name of the function that must return a formatted value for a cell.<br/>See <a href=\"#cell-formats\">below</a> for details."
+                    },
+                    {
                         "name": "width",
                         "type": "str",
                         "default_value": "\"100%\"",

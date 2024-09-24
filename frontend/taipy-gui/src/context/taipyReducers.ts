@@ -23,7 +23,7 @@ import { getBaseURL, TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 import { MenuProps } from "../utils/lov";
 import { changeFavicon, getLocalStorageValue, IdMessage, storeClientId } from "./utils";
-import { ligthenPayload, sendWsMessage, TAIPY_CLIENT_ID, WsMessage } from "./wsUtils";
+import { lightenPayload, sendWsMessage, TAIPY_CLIENT_ID, WsMessage } from "./wsUtils";
 
 export enum Types {
     SocketConnected = "SOCKET_CONNECTED",
@@ -594,6 +594,7 @@ export const createRequestTableUpdateAction = (
     applies?: Record<string, unknown>,
     styles?: Record<string, string>,
     tooltips?: Record<string, string>,
+    formats?: Record<string, string>,
     handleNan?: boolean,
     filters?: Array<FilterDesc>,
     compare?: string,
@@ -606,18 +607,19 @@ export const createRequestTableUpdateAction = (
         context,
         columns,
         pageKey,
-        ligthenPayload({
-            start: start,
-            end: end,
+        lightenPayload({
+            start,
+            end,
             orderby: orderBy,
-            sort: sort,
-            aggregates: aggregates,
-            applies: applies,
-            styles: styles,
-            tooltips: tooltips,
+            sort,
+            aggregates,
+            applies,
+            styles,
+            tooltips,
+            formats,
             handlenan: handleNan,
-            filters: filters,
-            compare: compare,
+            filters,
+            compare,
             compare_datas: compareDatas,
             state_context: stateContext,
         }),
@@ -637,6 +639,7 @@ export const createRequestInfiniteTableUpdateAction = (
     applies?: Record<string, unknown>,
     styles?: Record<string, string>,
     tooltips?: Record<string, string>,
+    formats?: Record<string, string>,
     handleNan?: boolean,
     filters?: Array<FilterDesc>,
     compare?: string,
@@ -650,19 +653,20 @@ export const createRequestInfiniteTableUpdateAction = (
         context,
         columns,
         pageKey,
-        ligthenPayload({
+        lightenPayload({
             infinite: true,
-            start: start,
-            end: end,
+            start,
+            end,
             orderby: orderBy,
-            sort: sort,
-            aggregates: aggregates,
-            applies: applies,
-            styles: styles,
-            tooltips: tooltips,
+            sort,
+            aggregates,
+            applies,
+            styles,
+            tooltips,
+            formats,
             handlenan: handleNan,
-            filters: filters,
-            compare: compare,
+            filters,
+            compare,
             compare_datas: compareDatas,
             state_context: stateContext,
             reverse: !!reverse,
@@ -740,7 +744,7 @@ export const createRequestUpdateAction = (
     type: Types.RequestUpdate,
     name: "",
     context: context,
-    payload: ligthenPayload({
+    payload: lightenPayload({
         id: id,
         names: names,
         refresh: forceRefresh,
