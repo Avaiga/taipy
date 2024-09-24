@@ -28,7 +28,7 @@ from .unique_section import UniqueSection
 class Config:
     """Singleton class that manages the configuration of a Taipy application.
 
-    The `Config` singleton is the main entry point for configuring a Taipy application.
+    The `Config` singleton is the main class to use for configuring a Taipy application.
     In particular, this class provides:
 
     1. Various methods to configure the application's behavior
