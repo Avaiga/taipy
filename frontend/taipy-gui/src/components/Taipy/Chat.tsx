@@ -332,6 +332,7 @@ const Chat = (props: ChatProps) => {
                     undefined,
                     undefined,
                     undefined,
+                    undefined,
                     true // reverse
                 )
             );
