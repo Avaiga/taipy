@@ -431,19 +431,25 @@ class _PandasDataAccessor(_DataAccessor):
                             self._gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(df))
                         except Exception as e:
                             _warn(f"Limit rows error with {decimator} for Dataframe", e)
-            df = self.__build_transferred_cols(
-                columns,
-                t.cast(pd.DataFrame, df),
-                styles=payload.get("styles"),
-                tooltips=payload.get("tooltips"),
-                is_copied=is_copied,
-                handle_nan=payload.get("handlenan", False),
-                formats=payload.get("formats"),
-            )
             if data_format is _DataFormat.CSV:
+                df = self.__build_transferred_cols(
+                    columns,
+                    t.cast(pd.DataFrame, df),
+                    is_copied=is_copied,
+                    handle_nan=payload.get("handlenan", False),
+                )
                 ret_payload["df"] = df
                 dict_ret = None
             else:
+                df = self.__build_transferred_cols(
+                    columns,
+                    t.cast(pd.DataFrame, df),
+                    styles=payload.get("styles"),
+                    tooltips=payload.get("tooltips"),
+                    is_copied=is_copied,
+                    handle_nan=payload.get("handlenan", False),
+                    formats=payload.get("formats"),
+                )
                 dict_ret = self.__format_data(df, data_format, "list", data_extraction=True)
 
         ret_payload["value"] = dict_ret
