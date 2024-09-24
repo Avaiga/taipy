@@ -141,10 +141,12 @@ def format_as_parameter(property):
         try:
             eval(default_value)
             default_value = f" = {default_value}"
+            if type:
+                type = f": {type}"
         except Exception:
-            default_value = ""
-        if type:
-            type = f": {type}"
+            default_value = " = None"
+            if type:
+                type = f": Optional[{type}]"
     return f"{name}{type}{default_value}"
 
 
