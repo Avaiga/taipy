@@ -321,6 +321,7 @@ describe("createRequestInfiniteTableUpdateAction function", () => {
         const applies = { key: "value" };
         const styles = { styleKey: "styleValue" };
         const tooltips = { tooltipKey: "tooltipValue" };
+        const formats = { formatKey: "formatValue"};
         const handleNan = true;
         const compare = "testCompare";
         const compareDatas = "testCompareDatas";
@@ -350,6 +351,7 @@ describe("createRequestInfiniteTableUpdateAction function", () => {
             applies,
             styles,
             tooltips,
+            formats,
             handleNan,
             filters,
             compare,
@@ -395,6 +397,7 @@ describe("createRequestTableUpdateAction function", () => {
         const applies = { key: "value" };
         const styles = { styleKey: "styleValue" };
         const tooltips = { tooltipKey: "tooltipValue" };
+        const formats = { formatKey: "formatValue" };
         const handleNan = true;
         const filters = [
             { field: "testField", operator: "testOperator", value: "testValue", col: "testCol", action: "testAction", type: "type" },
@@ -416,6 +419,7 @@ describe("createRequestTableUpdateAction function", () => {
             applies,
             styles,
             tooltips,
+            formats,
             handleNan,
             filters,
             compare,
