@@ -362,6 +362,9 @@ export interface ColumnDesc {
     lov?: string[];
     /** If true the user can enter any value besides the lov values. */
     freeLov?: boolean;
+    /** The name of the column that holds the formatted value to
+     *  show on the cells. */
+    formatFn?: string;
 }
 /**
  * A cell value type.

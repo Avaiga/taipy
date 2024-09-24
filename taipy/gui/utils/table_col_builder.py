@@ -92,7 +92,7 @@ def _enhance_columns(  # noqa: C901
             else:
                 value = None
             if value in columns.keys():
-                _warn(f"{elt_name}: style[{k}]={value} cannot be a column's name.")
+                _warn(f"{elt_name}: style[{k}] cannot reference a column's name '{value}'.")
             elif value:
                 col_desc["style"] = value
         else:
@@ -107,11 +107,26 @@ def _enhance_columns(  # noqa: C901
             else:
                 value = None
             if value in columns.keys():
-                _warn(f"{elt_name}: tooltip[{k}]={value} cannot be a column's name.")
+                _warn(f"{elt_name}: tooltip[{k}] cannot reference a column's name '{value}'.")
             elif value:
                 col_desc["tooltip"] = value
         else:
             _warn(f"{elt_name}: tooltip[{k}] is not in the list of displayed columns.")
+    formats = _get_name_indexed_property(attributes, "format_fn")
+    for k, v in formats.items():  # pragma: no cover
+        if col_desc := _get_column_desc(columns, k):
+            if callable(v):
+                value = hash_names.get(f"format_fn[{k}]")
+            elif isinstance(v, str):
+                value = v.strip()
+            else:
+                value = None
+            if value in columns.keys():
+                _warn(f"{elt_name}: format_fn[{k}] cannot reference a column's name '{value}'.")
+            elif value:
+                col_desc["formatFn"] = value
+        else:
+            _warn(f"{elt_name}: format_fn[{k}] is not in the list of displayed columns.")
     editable = attributes.get("editable", False)
     loveable = _is_boolean(editable) and _is_true(editable)
     loves = _get_name_indexed_property(attributes, "lov")

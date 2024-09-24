@@ -63,6 +63,7 @@ import {
     defaultColumns,
     OnRowClick,
     DownloadAction,
+    getFormatFn,
 } from "./tableUtils";
 import {
     useClassNames,
@@ -143,6 +144,7 @@ const Row = ({
                     tableClassName={tableClassName}
                     colDesc={columns[col]}
                     value={rows[index][col]}
+                    formattedVal={getFormatFn(rows[index], columns[col].formatFn, col)}
                     formatConfig={formatConfig}
                     rowIndex={index}
                     onValidation={!columns[col].notEditable ? onValidation : undefined}
@@ -281,7 +283,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         e.stopPropagation();
     }, []);
 
-    const [colsOrder, columns, styles, tooltips, handleNan, filter, partialEditable] = useMemo(() => {
+    const [colsOrder, columns, styles, tooltips, formats, handleNan, filter, partialEditable] = useMemo(() => {
         let hNan = !!props.nanValue;
         if (baseColumns) {
             try {
@@ -320,13 +322,17 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         pv.tooltips = pv.tooltips || {};
                         pv.tooltips[newCols[col].dfid] = newCols[col].tooltip as string;
                     }
+                    if (newCols[col].formatFn) {
+                        pv.formats = pv.formats || {};
+                        pv.formats[newCols[col].dfid] = newCols[col].formatFn;
+                    }
                     return pv;
                 }, {});
                 if (props.lineStyle) {
                     styTt.styles = styTt.styles || {};
                     styTt.styles[LINE_STYLE] = props.lineStyle;
                 }
-                return [colsOrder, newCols, styTt.styles, styTt.tooltips, hNan, filter, partialEditable];
+                return [colsOrder, newCols, styTt.styles, styTt.tooltips, styTt.formats, hNan, filter, partialEditable];
             } catch (e) {
                 console.info("ATable.columns: " + ((e as Error).message || e));
             }
@@ -334,6 +340,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         return [
             [],
             {} as Record<string, ColumnDesc>,
+            {} as Record<string, string>,
             {} as Record<string, string>,
             {} as Record<string, string>,
             hNan,
@@ -416,6 +423,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         applies,
                         styles,
                         tooltips,
+                        formats,
                         handleNan,
                         afs,
                         compare ? onCompare : undefined,
@@ -431,6 +439,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             aggregates,
             styles,
             tooltips,
+            formats,
             updateVarName,
             updateVars,
             orderBy,
@@ -537,30 +546,31 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     );
 
     const rowData: RowData = useMemo(
-        () => ({
-            colsOrder: colsOrder,
-            columns: columns,
-            rows: rows,
-            classes: {},
-            tableClassName: className,
-            cellProps: colsOrder.map((col) => ({
-                sx: getCellSx(columns[col].width || columns[col].widthHint, size),
-                component: "div",
-                variant: "body",
-            })),
+        () =>
+            ({
+                colsOrder: colsOrder,
+                columns: columns,
+                rows: rows,
+                classes: {},
+                tableClassName: className,
+                cellProps: colsOrder.map((col) => ({
+                    sx: getCellSx(columns[col].width || columns[col].widthHint, size),
+                    component: "div",
+                    variant: "body",
+                })),
 
-            isItemLoaded: isItemLoaded,
-            selection: selected,
-            formatConfig: formatConfig,
-            onValidation: active && onEdit ? onCellValidation : undefined,
-            onDeletion: active && (editable || partialEditable) && onDelete ? onRowDeletion : undefined,
-            onRowSelection: active && onAction ? onRowSelection : undefined,
-            onRowClick: active && onAction ? onRowClick : undefined,
-            lineStyle: props.lineStyle,
-            nanValue: props.nanValue,
-            compRows: compRows,
-            useCheckbox: useCheckbox,
-        } as RowData),
+                isItemLoaded: isItemLoaded,
+                selection: selected,
+                formatConfig: formatConfig,
+                onValidation: active && onEdit ? onCellValidation : undefined,
+                onDeletion: active && (editable || partialEditable) && onDelete ? onRowDeletion : undefined,
+                onRowSelection: active && onAction ? onRowSelection : undefined,
+                onRowClick: active && onAction ? onRowClick : undefined,
+                lineStyle: props.lineStyle,
+                nanValue: props.nanValue,
+                compRows: compRows,
+                useCheckbox: useCheckbox,
+            } as RowData),
         [
             rows,
             compRows,
