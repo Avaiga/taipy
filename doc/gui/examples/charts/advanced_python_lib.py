@@ -21,34 +21,31 @@ import plotly.graph_objects as go
 
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # Create the Plotly figure object
-    figure = go.Figure()
+# Create the Plotly figure object
+figure = go.Figure()
 
-    # Add trace for Normal Distribution
-    figure.add_trace(
-        go.Violin(name="Normal", y=np.random.normal(loc=0, scale=1, size=1000), box_visible=True, meanline_visible=True)
-    )
+# Add trace for Normal Distribution
+figure.add_trace(
+    go.Violin(name="Normal", y=np.random.normal(loc=0, scale=1, size=1000), box_visible=True, meanline_visible=True)
+)
 
-    # Add trace for Exponential Distribution
-    figure.add_trace(
-        go.Violin(
-            name="Exponential", y=np.random.exponential(scale=1, size=1000), box_visible=True, meanline_visible=True
-        )
-    )
+# Add trace for Exponential Distribution
+figure.add_trace(
+    go.Violin(name="Exponential", y=np.random.exponential(scale=1, size=1000), box_visible=True, meanline_visible=True)
+)
 
-    # Add trace for Uniform Distribution
-    figure.add_trace(
-        go.Violin(
-            name="Uniform", y=np.random.uniform(low=0, high=1, size=1000), box_visible=True, meanline_visible=True
-        )
-    )
+# Add trace for Uniform Distribution
+figure.add_trace(
+    go.Violin(name="Uniform", y=np.random.uniform(low=0, high=1, size=1000), box_visible=True, meanline_visible=True)
+)
 
-    # Updating layout for better visualization
-    figure.update_layout(title="Different Probability Distributions")
+# Updating layout for better visualization
+figure.update_layout(title="Different Probability Distributions")
 
-    page = """
+page = """
 <|chart|figure={figure}|>
-    """
+"""
 
+
+if __name__ == "__main__":
     Gui(page).run()
