@@ -163,7 +163,9 @@ class _Builder:
                     looks_like_a_lambda = False
                     val = v
                 if callable(val):
+                    # if it's not a callable (and not a string), forget it
                     if val.__name__ == "<lambda>":
+                        # if it is a lambda and it has already a hash_name, we're fine
                         if looks_like_a_lambda or not hash_name:
                             hash_name = gui._get_lambda_id(val)
                             gui._bind_var_val(hash_name, val)  # type: ignore[arg-type]

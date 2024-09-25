@@ -149,6 +149,7 @@ class _Evaluator:
         if expr_hash is None:
             expr_hash = _get_expr_var_name(expr)
         elif not lambda_expr:
+            # if lambda expr, it has a hasname, we work with that
             # edge case, only a single variable
             expr_hash = f"tpec_{_get_client_var_name(expr)}"
         self.__expr_to_hash[expr] = expr_hash
