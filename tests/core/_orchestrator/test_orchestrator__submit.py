@@ -535,16 +535,18 @@ def test_submit_duration_development_mode():
     jobs = submission.jobs
     orchestrator.stop()
 
-    assert all(isinstance(job.execution_started_at, datetime) for job in jobs)
-    assert all(isinstance(job.execution_ended_at, datetime) for job in jobs)
+    assert all(isinstance(job.submitted_time, datetime) for job in jobs)
+    assert all(isinstance(job.run_time, datetime) for job in jobs)
+    assert all(isinstance(job.finished_time, datetime) for job in jobs)
     jobs_1s = jobs[0] if jobs[0].task.config_id == "task_config_id_1" else jobs[1]
     jobs_2s = jobs[0] if jobs[0].task.config_id == "task_config_id_2" else jobs[1]
     assert jobs_1s.execution_duration >= 1
     assert jobs_2s.execution_duration >= 2
 
     assert submission.execution_duration >= 3
-    assert submission.execution_started_at == min(jobs_1s.execution_started_at, jobs_2s.execution_started_at)
-    assert submission.execution_ended_at == max(jobs_1s.execution_ended_at, jobs_2s.execution_ended_at)
+    assert submission.submitted_time == min(jobs_1s.submitted_time, jobs_2s.submitted_time)
+    assert submission.run_time == min(jobs_1s.run_time, jobs_2s.run_time)
+    assert submission.finished_time == max(jobs_1s.finished_time, jobs_2s.finished_time)
 
 
 @pytest.mark.standalone
@@ -564,17 +566,20 @@ def test_submit_duration_standalone_mode():
     submission = taipy.submit(scenario)
     jobs = submission.jobs
 
+    assert_true_after_time(jobs[0].is_completed)
     assert_true_after_time(jobs[1].is_completed)
 
     orchestrator.stop()
 
-    assert all(isinstance(job.execution_started_at, datetime) for job in jobs)
-    assert all(isinstance(job.execution_ended_at, datetime) for job in jobs)
+    assert all(isinstance(job.submitted_time, datetime) for job in jobs)
+    assert all(isinstance(job.run_time, datetime) for job in jobs)
+    assert all(isinstance(job.finished_time, datetime) for job in jobs)
     jobs_1s = jobs[0] if jobs[0].task.config_id == "task_config_id_1" else jobs[1]
     jobs_2s = jobs[0] if jobs[0].task.config_id == "task_config_id_2" else jobs[1]
     assert jobs_1s.execution_duration >= 1
     assert jobs_2s.execution_duration >= 2
 
     assert submission.execution_duration >= 2  # Both tasks are executed in parallel so the duration may smaller than 3
-    assert submission.execution_started_at == min(jobs_1s.execution_started_at, jobs_2s.execution_started_at)
-    assert submission.execution_ended_at == max(jobs_1s.execution_ended_at, jobs_2s.execution_ended_at)
+    assert submission.submitted_time == min(jobs_1s.submitted_time, jobs_2s.submitted_time)
+    assert submission.run_time == min(jobs_1s.run_time, jobs_2s.run_time)
+    assert submission.finished_time == max(jobs_1s.finished_time, jobs_2s.finished_time)
