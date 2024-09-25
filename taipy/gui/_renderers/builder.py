@@ -164,7 +164,7 @@ class _Builder:
                     val = v
                 if callable(val):
                     if val.__name__ == "<lambda>":
-                        if looks_like_a_lambda:
+                        if looks_like_a_lambda or not hash_name:
                             hash_name = gui._get_lambda_id(val)
                             gui._bind_var_val(hash_name, val)  # type: ignore[arg-type]
                     else:
