@@ -129,7 +129,7 @@ def format_as_parameter(property):
     else:
         property["dynamic"] = ""
     if type == "Callback" or type == "Function":
-        type = ""
+        type = "Callable"
     elif re.match(r"plotly\.", type) or re.match(r"taipy\.", type):
         type = f"\"{type}\""
     default_value = property.get("default_value", None)
