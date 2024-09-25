@@ -101,9 +101,7 @@ class _BaseSerializer(object):
         for section_name, sect_as_dict in as_dict.items():
             if section_class := cls._section_class.get(section_name, None):
                 if issubclass(section_class, UniqueSection):
-                    config._unique_sections[section_name] = section_class._from_dict(
-                        sect_as_dict, None, None
-                    )  # type: ignore
+                    config._unique_sections[section_name] = section_class._from_dict(sect_as_dict, None, None)  # type: ignore
                 elif issubclass(section_class, Section):
                     config._sections[section_name] = cls._extract_node(as_dict, section_class, section_name, config)
         return config

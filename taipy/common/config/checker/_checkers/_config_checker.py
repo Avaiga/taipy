@@ -52,15 +52,14 @@ class _ConfigChecker:
                 f"{config_key} field of {parent_config_class.__name__} `{config_id}` is empty.",
             )
         elif not (
-                (isinstance(config_value, (List, Set)))
-                and all(isinstance(x, child_config_class) for x in config_value)
-            ):
-                self._error(
-                    config_key,
-                    config_value,
-                    f"{config_key} field of {parent_config_class.__name__} `{config_id}` must be populated with a list "
-                    f"of {child_config_class.__name__} objects.",
-                )
+            (isinstance(config_value, (List, Set))) and all(isinstance(x, child_config_class) for x in config_value)
+        ):
+            self._error(
+                config_key,
+                config_value,
+                f"{config_key} field of {parent_config_class.__name__} `{config_id}` must be populated with a list "
+                f"of {child_config_class.__name__} objects.",
+            )
 
     def _check_existing_config_id(self, config):
         if not config.id:
