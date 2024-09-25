@@ -14,12 +14,12 @@ from copy import copy
 from datetime import timedelta
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from taipy.config._config import _Config
-from taipy.config.common._config_blocker import _ConfigBlocker
-from taipy.config.common._template_handler import _TemplateHandler as _tpl
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
-from taipy.config.section import Section
+from taipy.common.config._config import _Config
+from taipy.common.config.common._config_blocker import _ConfigBlocker
+from taipy.common.config.common._template_handler import _TemplateHandler as _tpl
+from taipy.common.config.common.scope import Scope
+from taipy.common.config.config import Config
+from taipy.common.config.section import Section
 
 from ..common._warnings import _warn_deprecated
 from ..common.mongo_default_document import MongoDefaultDocument

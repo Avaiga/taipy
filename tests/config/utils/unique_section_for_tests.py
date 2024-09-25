@@ -12,10 +12,10 @@
 from copy import copy
 from typing import Any, Dict, Optional
 
-from taipy.config import Config
-from taipy.config._config import _Config
-from taipy.config.common._config_blocker import _ConfigBlocker
-from taipy.config.unique_section import UniqueSection
+from taipy.common.config import Config
+from taipy.common.config._config import _Config
+from taipy.common.config.common._config_blocker import _ConfigBlocker
+from taipy.common.config.unique_section import UniqueSection
 
 
 class UniqueSectionForTest(UniqueSection):

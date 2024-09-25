@@ -14,7 +14,7 @@ import os
 import shutil
 from typing import Dict
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ._utils import _migrate
 

@@ -15,8 +15,8 @@ from functools import partial
 from threading import Lock
 from typing import Callable, Optional
 
-from taipy.config._serializer._toml_serializer import _TomlSerializer
-from taipy.config.config import Config
+from taipy.common.config._serializer._toml_serializer import _TomlSerializer
+from taipy.common.config.config import Config
 
 from ...job.job import Job
 from .._abstract_orchestrator import _AbstractOrchestrator

@@ -11,8 +11,8 @@
 
 import pytest
 
-from taipy.config import Config
-from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
+from taipy.common.config import Config
+from taipy.common.config.exceptions.exceptions import ConfigurationUpdateBlocked
 from tests.config.utils.section_for_tests import SectionForTest
 from tests.config.utils.unique_section_for_tests import UniqueSectionForTest
 

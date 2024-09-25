@@ -14,7 +14,7 @@ from abc import abstractmethod
 from difflib import SequenceMatcher
 from typing import List, Optional
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ._taipy_parser import _TaipyParser
 

@@ -12,7 +12,7 @@
 import re
 import sys
 
-from taipy._cli._base_cli._taipy_parser import _TaipyParser
+from taipy.common._cli._base_cli._taipy_parser import _TaipyParser
 
 if sys.version_info >= (3, 10):
     argparse_options_str = "options:"

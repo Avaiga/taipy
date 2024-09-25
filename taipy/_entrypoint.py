@@ -13,15 +13,15 @@ import os
 import sys
 from importlib.util import find_spec
 
-from taipy._cli._base_cli._taipy_parser import _TaipyParser
+from taipy.common._cli._base_cli._taipy_parser import _TaipyParser
+from taipy.common._cli._create_cli import _CreateCLI
+from taipy.common._cli._help_cli import _HelpCLI
+from taipy.common._cli._run_cli import _RunCLI
 from taipy.core._cli._core_cli_factory import _CoreCLIFactory
 from taipy.core._entity._migrate_cli import _MigrateCLI
 from taipy.core._version._cli._version_cli_factory import _VersionCLIFactory
 from taipy.gui._gui_cli import _GuiCLI
 
-from ._cli._create_cli import _CreateCLI
-from ._cli._help_cli import _HelpCLI
-from ._cli._run_cli import _RunCLI
 from .version import _get_version
 
 

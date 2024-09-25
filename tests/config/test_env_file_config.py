@@ -13,8 +13,8 @@ import os
 
 import pytest
 
-from taipy.config.config import Config
-from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
+from taipy.common.config.config import Config
+from taipy.common.config.exceptions.exceptions import ConfigurationUpdateBlocked
 from tests.config.utils.named_temporary_file import NamedTemporaryFile
 
 config_from_filename = NamedTemporaryFile(

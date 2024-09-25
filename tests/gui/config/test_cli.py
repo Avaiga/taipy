@@ -15,7 +15,7 @@ from unittest.mock import patch
 
 import pytest
 
-from taipy.config import Config, _inject_section
+from taipy.common.config import Config, _inject_section
 from taipy.gui import Gui
 from taipy.gui._default_config import default_config
 from taipy.gui._gui_section import _GuiSection

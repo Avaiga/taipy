@@ -16,7 +16,7 @@ import pandas as pd
 from flask import request
 from flask_restful import Resource
 
-from taipy.config.config import Config
+from taipy.common.config.config import Config
 from taipy.core import DataNode
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.operator import Operator

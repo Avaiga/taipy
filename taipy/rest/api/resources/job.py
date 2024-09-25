@@ -15,7 +15,7 @@ from typing import Optional
 from flask import request
 from flask_restful import Resource
 
-from taipy.config.config import Config
+from taipy.common.config.config import Config
 from taipy.core import Job, JobId
 from taipy.core.exceptions.exceptions import NonExistingJob, NonExistingTaskConfig
 from taipy.core.job._job_manager_factory import _JobManagerFactory

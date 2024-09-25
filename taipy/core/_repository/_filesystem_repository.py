@@ -15,7 +15,7 @@ import pathlib
 import shutil
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Type, Union
 
-from taipy.config.config import Config
+from taipy.common.config.config import Config
 
 from ..common._utils import _retry_repository_operation
 from ..common.typing import Converter, Entity, Json, ModelType

@@ -11,8 +11,8 @@
 
 from typing import Dict, Tuple
 
-from taipy._cli._base_cli._abstract_cli import _AbstractCLI
-from taipy._cli._base_cli._taipy_parser import _TaipyParser
+from taipy.common._cli._base_cli._abstract_cli import _AbstractCLI
+from taipy.common._cli._base_cli._taipy_parser import _TaipyParser
 
 
 class _GuiCLI(_AbstractCLI):

@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 
-from taipy.config.config import Config
+from taipy.common.config.config import Config
 from taipy.core.notification.event import EventEntityType, EventOperation
 from taipy.core.notification.notifier import Notifier
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
@@ -65,6 +65,7 @@ def test_write_never_written_input_does_not_publish_submittable_event():
     assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 4
     assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 4
 
+
 def test_write_never_written_input_publish_submittable_event_if_scenario_in_property():
     dn_config_1 = Config.configure_pickle_data_node("dn_1")
     dn_config_2 = Config.configure_pickle_data_node("dn_2")
@@ -92,7 +93,6 @@ def test_write_never_written_input_publish_submittable_event_if_scenario_in_prop
     assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 13
     assert snapshot.attr_name_collected["is_submittable"] == 6
     assert snapshot.attr_value_collected["is_submittable"] == [False, False, False, True, True, True]
-
 
 
 def test_write_output_does_not_publish_submittable_event():

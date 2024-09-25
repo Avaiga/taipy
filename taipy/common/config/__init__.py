@@ -19,9 +19,9 @@ and attributes to configure the Taipy application and retrieve the configuration
 !!! example "Standard usage"
 
     ```python
-    from taipy.config import Config
-    from taipy.config import Frequency
-    from taipy.config import Scope
+    from taipy.common.config import Config
+    from taipy.common.config import Frequency
+    from taipy.common.config import Scope
 
     data_node_cfg = Config.configure_data_node("my_data_node", scope=Scope.SCENARIO)
     Config.configure_scenario("my_scenario", additional_data_node_configs=[data_node_cfg], frequency=Frequency.DAILY)

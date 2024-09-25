@@ -15,10 +15,10 @@ from unittest import mock
 
 import pytest
 
-from taipy.config.common._template_handler import _TemplateHandler
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
-from taipy.config.exceptions.exceptions import InconsistentEnvVariableError
+from taipy.common.config.common._template_handler import _TemplateHandler
+from taipy.common.config.common.frequency import Frequency
+from taipy.common.config.common.scope import Scope
+from taipy.common.config.exceptions.exceptions import InconsistentEnvVariableError
 
 
 def test_replace_if_template():
@@ -127,7 +127,7 @@ def test_to_bool():
     with pytest.raises(InconsistentEnvVariableError):
         _TemplateHandler._to_bool("no")
     with pytest.raises(InconsistentEnvVariableError):
-        _TemplateHandler._to_bool("tru") # codespell:ignore tru
+        _TemplateHandler._to_bool("tru")  # codespell:ignore tru
     with pytest.raises(InconsistentEnvVariableError):
         _TemplateHandler._to_bool("tru_e")
 

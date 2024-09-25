@@ -12,8 +12,8 @@
 from datetime import datetime
 from typing import Any
 
-from taipy.config import Config
-from taipy.config._config import _Config
+from taipy.common.config import Config
+from taipy.common.config._config import _Config
 
 from .._entity._entity import _Entity
 

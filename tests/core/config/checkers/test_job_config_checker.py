@@ -11,8 +11,8 @@
 
 import pytest
 
-from taipy.config.checker.issue_collector import IssueCollector
-from taipy.config.config import Config
+from taipy.common.config.checker.issue_collector import IssueCollector
+from taipy.common.config.config import Config
 from taipy.core.config.job_config import JobConfig
 
 

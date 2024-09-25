@@ -12,8 +12,8 @@
 import json
 from datetime import timedelta
 
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
+from taipy.common.config.common.scope import Scope
+from taipy.common.config.config import Config
 from taipy.core.common.mongo_default_document import MongoDefaultDocument
 
 
@@ -138,11 +138,9 @@ def test_set_default_csv_data_node_configuration():
 
 
 def test_set_default_json_data_node_configuration():
-    class MyCustomEncoder(json.JSONEncoder):
-        ...
+    class MyCustomEncoder(json.JSONEncoder): ...
 
-    class MyCustomDecoder(json.JSONDecoder):
-        ...
+    class MyCustomDecoder(json.JSONDecoder): ...
 
     Config.set_default_data_node_configuration(
         storage_type="json",
@@ -426,8 +424,7 @@ def test_set_default_sql_table_data_node_configuration():
 
 
 def test_set_default_sql_data_node_configuration():
-    def query_builder():
-        ...
+    def query_builder(): ...
 
     Config.set_default_data_node_configuration(
         storage_type="sql",

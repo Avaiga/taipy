@@ -11,7 +11,7 @@
 import typing
 from typing import Optional, Type
 
-from taipy.config.config import Config
+from taipy.common.config.config import Config
 
 from ..common._check_dependencies import _TAIPY_ENTERPRISE_MODULE, _using_enterprise
 from ..common._utils import _load_fct

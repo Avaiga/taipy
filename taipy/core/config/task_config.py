@@ -12,10 +12,10 @@
 from copy import copy
 from typing import Any, Callable, Dict, List, Optional, Union, cast
 
-from taipy.config._config import _Config
-from taipy.config.common._template_handler import _TemplateHandler as _tpl
-from taipy.config.config import Config
-from taipy.config.section import Section
+from taipy.common.config._config import _Config
+from taipy.common.config.common._template_handler import _TemplateHandler as _tpl
+from taipy.common.config.config import Config
+from taipy.common.config.section import Section
 
 from ..common._warnings import _warn_deprecated
 from .data_node_config import DataNodeConfig

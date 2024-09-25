@@ -11,7 +11,7 @@
 from typing import cast
 
 from taipy import Job, JobId, Status
-from taipy.config import Config
+from taipy.common.config import Config
 from taipy.core import taipy
 from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory

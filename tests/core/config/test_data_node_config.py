@@ -15,9 +15,9 @@ from unittest import mock
 
 import pytest
 
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
-from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
+from taipy.common.config.common.scope import Scope
+from taipy.common.config.config import Config
+from taipy.common.config.exceptions.exceptions import ConfigurationUpdateBlocked
 from taipy.core import MongoDefaultDocument
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.config import DataNodeConfig
@@ -273,11 +273,9 @@ def test_data_node_with_env_variable_value():
 
 
 def test_data_node_with_env_variable_in_write_fct_args():
-    def read_fct():
-        ...
+    def read_fct(): ...
 
-    def write_fct():
-        ...
+    def write_fct(): ...
 
     with mock.patch.dict(os.environ, {"FOO": "bar", "BAZ": "qux"}):
         Config.configure_data_node(
@@ -291,11 +289,9 @@ def test_data_node_with_env_variable_in_write_fct_args():
 
 
 def test_data_node_with_env_variable_in_read_fct_args():
-    def read_fct():
-        ...
+    def read_fct(): ...
 
-    def write_fct():
-        ...
+    def write_fct(): ...
 
     with mock.patch.dict(os.environ, {"FOO": "bar", "BAZ": "qux"}):
         Config.configure_data_node(

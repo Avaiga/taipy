@@ -11,8 +11,8 @@
 
 import pytest
 
-from taipy.config.config import Config
-from taipy.config.section import Section
+from taipy.common.config.config import Config
+from taipy.common.config.section import Section
 from tests.config.utils.section_for_tests import SectionForTest
 from tests.config.utils.unique_section_for_tests import UniqueSectionForTest
 

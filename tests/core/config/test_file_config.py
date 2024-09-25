@@ -13,9 +13,9 @@ import os
 from datetime import timedelta
 from unittest import mock
 
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
+from taipy.common.config.common.frequency import Frequency
+from taipy.common.config.common.scope import Scope
+from taipy.common.config.config import Config
 from taipy.core.config import DataNodeConfig, ScenarioConfig, TaskConfig
 from taipy.core.config.core_section import CoreSection
 from tests.core.utils.named_temporary_file import NamedTemporaryFile

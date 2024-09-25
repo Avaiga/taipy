@@ -12,7 +12,7 @@
 from flask import request
 from flask_restful import Resource
 
-from taipy.config.config import Config
+from taipy.common.config.config import Config
 from taipy.core import Scenario
 from taipy.core.exceptions.exceptions import NonExistingScenario, NonExistingScenarioConfig
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory

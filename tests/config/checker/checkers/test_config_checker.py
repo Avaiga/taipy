@@ -12,10 +12,10 @@
 import logging
 from unittest import mock
 
-from taipy.config._config import _Config
-from taipy.config.checker._checkers._config_checker import _ConfigChecker
-from taipy.config.checker.issue import Issue
-from taipy.config.checker.issue_collector import IssueCollector
+from taipy.common.config._config import _Config
+from taipy.common.config.checker._checkers._config_checker import _ConfigChecker
+from taipy.common.config.checker.issue import Issue
+from taipy.common.config.checker.issue_collector import IssueCollector
 
 
 class MyCustomChecker(_ConfigChecker):

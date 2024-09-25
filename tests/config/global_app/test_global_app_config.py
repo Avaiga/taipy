@@ -14,8 +14,8 @@ from unittest import mock
 
 import pytest
 
-from taipy.config.config import Config
-from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
+from taipy.common.config.config import Config
+from taipy.common.config.exceptions.exceptions import ConfigurationUpdateBlocked
 
 
 def test_global_config_with_env_variable_value():
