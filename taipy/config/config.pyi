@@ -111,12 +111,15 @@ class Config:
     """
     @_Classproperty
     def unique_sections(cls) -> Dict[str, UniqueSection]:
+        """"""
 
     @_Classproperty
     def sections(cls) -> Dict[str, Dict[str, Section]]:
+        """"""
 
     @_Classproperty
     def global_config(cls) -> GlobalAppConfig:
+        """"""
 
     @classmethod
     @_ConfigBlocker._check()
