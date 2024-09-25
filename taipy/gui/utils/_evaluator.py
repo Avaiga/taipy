@@ -100,19 +100,23 @@ class _Evaluator:
             st = ast.parse('f"{' + e + '}"' if _Evaluator.__EXPR_EDGE_CASE_F_STRING.match(e) else e)
             args = [arg.arg for node in ast.walk(st) if isinstance(node, ast.arguments) for arg in node.args]
             targets = [
-                compr.target.id  # type: ignore[attr-defined]
+                comprehension.target.id  # type: ignore[attr-defined]
                 for node in ast.walk(st)
                 if isinstance(node, ast.ListComp)
-                for compr in node.generators
+                for comprehension in node.generators
             ]
+            functionsCalls = set()
             for node in ast.walk(st):
-                if isinstance(node, ast.Name):
+                if isinstance(node, ast.Call):
+                    functionsCalls.add(node.func)
+                elif isinstance(node, ast.Name):
                     var_name = node.id.split(sep=".")[0]
                     if var_name in builtin_vars:
-                        _warn(
-                            f"Variable '{var_name}' cannot be used in Taipy expressions "
-                            "as its name collides with a Python built-in identifier."
-                        )
+                        if node not in functionsCalls:
+                            _warn(
+                                f"Variable '{var_name}' cannot be used in Taipy expressions "
+                                "as its name collides with a Python built-in identifier."
+                            )
                     elif var_name not in args and var_name not in targets and var_name not in non_vars:
                         try:
                             if lazy_declare and var_name.startswith("__"):
@@ -136,6 +140,7 @@ class _Evaluator:
         expr_hash: t.Optional[str],
         expr_evaluated: t.Optional[t.Any],
         var_map: t.Dict[str, str],
+        lambda_expr: t.Optional[bool] = False,
     ):
         if expr in self.__expr_to_hash:
             expr_hash = self.__expr_to_hash[expr]
@@ -143,7 +148,7 @@ class _Evaluator:
             return expr_hash
         if expr_hash is None:
             expr_hash = _get_expr_var_name(expr)
-        else:
+        elif not lambda_expr:
             # edge case, only a single variable
             expr_hash = f"tpec_{_get_client_var_name(expr)}"
         self.__expr_to_hash[expr] = expr_hash
@@ -223,6 +228,9 @@ class _Evaluator:
     ) -> t.Any:
         if not self._is_expression(expr) and not lambda_expr:
             return expr
+        if not lambda_expr and expr.startswith("{lambda ") and expr.endswith("}"):
+            lambda_expr = True
+            expr = expr[1:-1]
         var_val, var_map = ({}, {}) if lambda_expr else self._analyze_expression(gui, expr, lazy_declare)
         expr_hash = None
         is_edge_case = False
@@ -252,8 +260,10 @@ class _Evaluator:
         except Exception as e:
             _warn(f"Cannot evaluate expression '{not_encoded_expr if is_edge_case else expr_string}'", e)
             expr_evaluated = None
+        if lambda_expr and callable(expr_evaluated):
+            expr_hash = gui._get_lambda_id(expr_evaluated)
         # save the expression if it needs to be re-evaluated
-        return self.__save_expression(gui, expr, expr_hash, expr_evaluated, var_map)
+        return self.__save_expression(gui, expr, expr_hash, expr_evaluated, var_map, lambda_expr)
 
     def refresh_expr(self, gui: Gui, var_name: str, holder: t.Optional[_TaipyBase]):
         """

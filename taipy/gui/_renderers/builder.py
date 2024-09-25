@@ -153,18 +153,22 @@ class _Builder:
         hashes = {}
         # Bind potential function and expressions in self.attributes
         for k, v in attributes.items():
-            val = v
             hash_name = hash_names.get(k)
             if hash_name is None:
-                if callable(v):
-                    if v.__name__ == "<lambda>":
-                        hash_name = f"__lambda_{id(v)}"
-                        gui._bind_var_val(hash_name, v)
-                    else:
-                        hash_name = _get_expr_var_name(v.__name__)
-                elif isinstance(v, str):
+                if isinstance(v, str):
+                    looks_like_a_lambda = v.startswith("{lambda ") and v.endswith("}")
                     # need to unescape the double quotes that were escaped during preprocessing
                     (val, hash_name) = _Builder.__parse_attribute_value(gui, v.replace('\\"', '"'))
+                else:
+                    looks_like_a_lambda = False
+                    val = v
+                if callable(val):
+                    if val.__name__ == "<lambda>":
+                        if looks_like_a_lambda:
+                            hash_name = gui._get_lambda_id(val)
+                            gui._bind_var_val(hash_name, val)  # type: ignore[arg-type]
+                    else:
+                        hash_name = _get_expr_var_name(val.__name__)
 
                 if val is not None or hash_name:
                     attributes[k] = val
