@@ -755,7 +755,7 @@
                     {
                         "name": "columns",
                         "type": "Union[str,list[str],dict[str,dict[str,Union[str,int]]]]",
-                        "default_value": "<i>shows all columns when empty</i>",
+                        "default_value": "<i>All columns</i>",
                         "doc": "The list of the column names to display.\n<ul>\n<li>str: Semicolon (';')-separated list of column names.</li>\n<li>list[str]: The list of column names.</li>\n<li>dict: A dictionary with entries matching: {\"&lt;column_name&gt;\": {\"format\": \"&lt;format&gt;\", \"index\": 1}}.<br/>\nif <i>index</i> is specified, it represents the display order of this column.\nIf <i>index</i> is not specified, the list order defines the index.<br/>\nIf <i>format</i> is specified, it is used for numbers or dates.</li>\n</ul><br/>If <i>columns</i> is omitted or set to None, all columns of <i>data</i> are represented."
                     },
                     {
@@ -1409,13 +1409,13 @@
                     },
                     {
                         "name": "value",
-                        "type": "dynamic(int,float)",
+                        "type": "dynamic(Union[int, float])",
                         "default_value": "<i>min</i>",
-                        "doc": "The location of the label on the [<i>min</i>, <i>max</i>] range."
+                        "doc": "The location of the label on the [<i>min</i>, <i>max</i>] range.<br/>The default value is the <i>min</i> value."
                     },
                     {
                         "name": "min",
-                        "type": "Union[int,float]",
+                        "type": "Union[int, float]",
                         "default_value": "0",
                         "doc": "The minimum value of the range."
                     },
@@ -1471,14 +1471,14 @@
                     {
                         "name": "adapter",
                         "type": "Function",
-                        "default_value": "<tt>\"lambda x: str(x)\"</tt>",
-                        "doc": "The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>."
+                        "default_value": "<tt>lambda x: str(x)</tt>",
+                        "doc": "The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>.<br/>The default value is a function that returns the string representation of the <i>lov</i> element."
                     },
                     {
                         "name": "type",
                         "type": "str",
-                        "default_value": "<i>Type of the first lov element</i>",
-                        "doc": "This property is required if <i>lov</i> contains a non-specific type of data (e.g., a dictionary).<br/>Then:<ul><li><i>value</i> must be of that type</li><li><i>lov</i> must be an iterable containing elements of this type</li><li>The function set to <i>adapter</i> will receive an object of this type.</li></ul>."
+                        "default_value": "<i>Type name of the first lov element</i>",
+                        "doc": "This property is required if <i>lov</i> contains a non-specific type of data (e.g., a dictionary).<br/>Then:<ul><li><i>value</i> must be of that type</li><li><i>lov</i> must be an iterable containing elements of this type</li><li>The function set to <i>adapter</i> will receive an object of this type.</li></ul><br/>The default value is the type of the first element in <i>lov</i>."
                     },
                     {
                         "name": "label",
@@ -1967,14 +1967,14 @@
                     {
                         "name": "adapter",
                         "type": "Function",
-                        "default_value": "<tt>\"lambda x: str(x)\"</tt>",
-                        "doc": "The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>."
+                        "default_value": "<tt>lambda x: str(x)</tt>",
+                        "doc": "The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>.<br/>The default value is a function that returns the string representation of the <i>lov</i> element."
                     },
                     {
                         "name": "type",
                         "type": "str",
-                        "default_value": "<i>Type name of the lov element</i>",
-                        "doc": "This property is required if <i>lov</i> contains a non-specific type of data (e.g., a dictionary).<br/>Then:<ul><li><i>value</i> must be of that type</li><li><i>lov</i> must be an iterable containing elements of this type</li><li>The function set to <i>adapter</i> will receive an object of this type.</li></ul>"
+                        "default_value": "<i>Type name of the first lov element</i>",
+                        "doc": "This property is required if <i>lov</i> contains a non-specific type of data (e.g., a dictionary).<br/>Then:<ul><li><i>value</i> must be of that type</li><li><i>lov</i> must be an iterable containing elements of this type</li><li>The function set to <i>adapter</i> will receive an object of this type.</li></ul><br/>The default value is the type of the first element in <i>lov</i>."
                     },
                     {
                         "name": "value_by_id",
