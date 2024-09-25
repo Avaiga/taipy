@@ -209,15 +209,20 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     @classmethod
     def _is_submittable(cls, scenario: Union[Scenario, ScenarioId]) -> ReasonCollection:
         if isinstance(scenario, str):
+            scenario_id = scenario
             scenario = cls._get(scenario)
+        else:
+            scenario_id = scenario.id
 
-        if not isinstance(scenario, Scenario):
-            scenario = str(scenario)
-            reason_collector = ReasonCollection()
-            reason_collector._add_reason(scenario, EntityIsNotSubmittableEntity(scenario))
-            return reason_collector
+        reason_collector = ReasonCollection()
+        if scenario is None:
+            reason_collector._add_reason(scenario_id, EntityDoesNotExist(scenario_id))
+        elif not isinstance(scenario, Scenario):
+            reason_collector._add_reason(scenario_id, EntityIsNotSubmittableEntity(scenario_id))
+        else:
+            return scenario.is_ready_to_run()
 
-        return scenario.is_ready_to_run()
+        return reason_collector
 
     @classmethod
     def _submit(
@@ -425,8 +430,14 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         reason_collection = ReasonCollection()
 
         if isinstance(scenario, str):
+            scenario_id = scenario
             scenario = cls._get(scenario)
-        if scenario.is_primary:
+        else:
+            scenario_id = scenario.id
+
+        if scenario is None:
+            reason_collection._add_reason(scenario_id, EntityDoesNotExist(scenario_id))
+        elif scenario.is_primary:
             if len(cls._get_all_by_cycle(scenario.cycle)) > 1:
                 reason_collection._add_reason(scenario.id, ScenarioIsThePrimaryScenario(scenario.id, scenario.cycle.id))
         return reason_collection

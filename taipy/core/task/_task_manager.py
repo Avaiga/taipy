@@ -26,7 +26,13 @@ from ..cycle.cycle_id import CycleId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import NonExistingTask
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
-from ..reason import DataNodeEditInProgress, DataNodeIsNotWritten, EntityIsNotSubmittableEntity, ReasonCollection
+from ..reason import (
+    DataNodeEditInProgress,
+    DataNodeIsNotWritten,
+    EntityDoesNotExist,
+    EntityIsNotSubmittableEntity,
+    ReasonCollection,
+)
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
 from ..submission.submission import Submission
@@ -166,10 +172,15 @@ class _TaskManager(_Manager[Task], _VersionMixin):
     @classmethod
     def _is_submittable(cls, task: Union[Task, TaskId]) -> ReasonCollection:
         if isinstance(task, str):
+            task_id = task
             task = cls._get(task)
+        else:
+            task_id = task.id
 
         reason_collection = ReasonCollection()
-        if not isinstance(task, Task):
+        if task is None:
+            reason_collection._add_reason(task_id, EntityDoesNotExist(task_id))
+        elif not isinstance(task, Task):
             task = str(task)
             reason_collection._add_reason(task, EntityIsNotSubmittableEntity(task))
         else:
