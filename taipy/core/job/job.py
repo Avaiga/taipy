@@ -212,7 +212,7 @@ class Job(_Entity, _Labeled):
 
     @property
     @_self_reload(_MANAGER_NAME)
-    def pending_time(self) -> Optional[float]:
+    def pending_duration(self) -> Optional[float]:
         """Get the duration of the job in the pending state in seconds.
 
         Returns:
@@ -231,7 +231,7 @@ class Job(_Entity, _Labeled):
 
     @property
     @_self_reload(_MANAGER_NAME)
-    def blocked_time(self) -> Optional[float]:
+    def blocked_duration(self) -> Optional[float]:
         """Get the duration of the job in the blocked state in seconds.
 
         Returns:
