@@ -13,6 +13,7 @@ from functools import lru_cache
 from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
+from ..common._check_dependencies import _using_enterprise
 from ..common._utils import _load_fct
 from ..cycle._cycle_manager import _CycleManager
 from ._cycle_fs_repository import _CycleFSRepository
@@ -24,7 +25,7 @@ class _CycleManagerFactory(_ManagerFactory):
     @classmethod
     @lru_cache
     def _build_manager(cls) -> Type[_CycleManager]:
-        if cls._using_enterprise():
+        if _using_enterprise():
             cycle_manager = _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".cycle._cycle_manager", "_CycleManager")  # type: ignore
             build_repository = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + ".cycle._cycle_manager_factory", "_CycleManagerFactory"

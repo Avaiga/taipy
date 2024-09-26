@@ -12,6 +12,7 @@ from functools import lru_cache
 from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
+from ..common._check_dependencies import _TAIPY_ENTERPRISE_CORE_MODULE, _using_enterprise
 from ..common._utils import _load_fct
 from ._sequence_manager import _SequenceManager
 
@@ -20,9 +21,9 @@ class _SequenceManagerFactory(_ManagerFactory):
     @classmethod
     @lru_cache
     def _build_manager(cls) -> Type[_SequenceManager]:  # type: ignore
-        if cls._using_enterprise():
+        if _using_enterprise():
             sequence_manager = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".sequence._sequence_manager", "_SequenceManager"
+                _TAIPY_ENTERPRISE_CORE_MODULE + ".sequence._sequence_manager", "_SequenceManager"
             )  # type: ignore
         else:
             sequence_manager = _SequenceManager
