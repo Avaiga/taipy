@@ -148,7 +148,7 @@ class Job(_Entity, _Labeled):
 
     @property
     @_self_reload(_MANAGER_NAME)
-    def submitted_time(self) -> datetime:
+    def submitted_at(self) -> datetime:
         """Get the date time when the job was submitted.
 
         Returns:
@@ -158,7 +158,7 @@ class Job(_Entity, _Labeled):
 
     @property
     @_self_reload(_MANAGER_NAME)
-    def run_time(self) -> Optional[datetime]:
+    def run_at(self) -> Optional[datetime]:
         """Get the date time when the job was run.
 
         Returns:
@@ -169,7 +169,7 @@ class Job(_Entity, _Labeled):
 
     @property
     @_self_reload(_MANAGER_NAME)
-    def finished_time(self) -> Optional[datetime]:
+    def finished_at(self) -> Optional[datetime]:
         """Get the date time when the job was finished.
 
         Returns:
@@ -206,7 +206,7 @@ class Job(_Entity, _Labeled):
             return None
 
         if self.is_finished():
-            return (self.finished_time - self._status_change_records[Status.RUNNING.name]).total_seconds()
+            return (self.finished_at - self._status_change_records[Status.RUNNING.name]).total_seconds()
 
         return (datetime.now() - self._status_change_records[Status.RUNNING.name]).total_seconds()
 
@@ -245,13 +245,15 @@ class Job(_Entity, _Labeled):
         if Status.BLOCKED.name not in self._status_change_records:
             return None
 
-        if self.is_finished():
-            return (self.finished_time - self._status_change_records[Status.BLOCKED.name]).total_seconds()
-        if self.is_running():
+        if Status.PENDING.name in self._status_change_records:
             return (
-                self._status_change_records[Status.RUNNING.name] - self._status_change_records[Status.BLOCKED.name]
+                self._status_change_records[Status.PENDING.name] - self._status_change_records[Status.BLOCKED.name]
             ).total_seconds()
+        if self.is_finished():
+            return (self.finished_at - self._status_change_records[Status.BLOCKED.name]).total_seconds()
 
+        # If pending time is not recorded, and the job is not finished, the only possible status left is blocked
+        # which means the current status is blocked.
         return (datetime.now() - self._status_change_records[Status.BLOCKED.name]).total_seconds()
 
     @property  # type: ignore
