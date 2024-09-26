@@ -544,9 +544,9 @@ def test_submit_duration_development_mode():
     assert jobs_2s.execution_duration >= 2
 
     assert submission.execution_duration >= 3
-    assert submission.submitted_time == min(jobs_1s.submitted_time, jobs_2s.submitted_time)
-    assert submission.run_time == min(jobs_1s.run_time, jobs_2s.run_time)
-    assert submission.finished_time == max(jobs_1s.finished_time, jobs_2s.finished_time)
+    assert submission.submitted_at == min(jobs_1s.submitted_at, jobs_2s.submitted_at)
+    assert submission.run_at == min(jobs_1s.run_at, jobs_2s.run_at)
+    assert submission.finished_at == max(jobs_1s.finished_at, jobs_2s.finished_at)
 
 
 @pytest.mark.standalone
@@ -579,6 +579,6 @@ def test_submit_duration_standalone_mode():
     assert jobs_2s.execution_duration >= 2
 
     assert submission.execution_duration >= 2  # Both tasks are executed in parallel so the duration may smaller than 3
-    assert submission.submitted_time == min(jobs_1s.submitted_time, jobs_2s.submitted_time)
-    assert submission.run_time == min(jobs_1s.run_time, jobs_2s.run_time)
-    assert submission.finished_time == max(jobs_1s.finished_time, jobs_2s.finished_time)
+    assert submission.submitted_at == min(jobs_1s.submitted_at, jobs_2s.submitted_at)
+    assert submission.run_at == min(jobs_1s.run_at, jobs_2s.run_at)
+    assert submission.finished_at == max(jobs_1s.finished_at, jobs_2s.finished_at)

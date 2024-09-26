@@ -141,25 +141,25 @@ class Submission(_Entity, _Labeled):
 
     @property
     @_self_reload(_MANAGER_NAME)
-    def submitted_time(self) -> Optional[datetime]:
-        jobs_submitted_time = [job.submitted_time for job in self.jobs if job.submitted_time]
-        if jobs_submitted_time:
-            return min(jobs_submitted_time)
+    def submitted_at(self) -> Optional[datetime]:
+        jobs_submitted_at = [job.submitted_at for job in self.jobs if job.submitted_at]
+        if jobs_submitted_at:
+            return min(jobs_submitted_at)
         return None
 
     @property
     @_self_reload(_MANAGER_NAME)
-    def run_time(self) -> Optional[datetime]:
-        jobs_run_time = [job.run_time for job in self.jobs if job.run_time]
-        if jobs_run_time:
-            return min(jobs_run_time)
+    def run_at(self) -> Optional[datetime]:
+        jobs_run_at = [job.run_at for job in self.jobs if job.run_at]
+        if jobs_run_at:
+            return min(jobs_run_at)
         return None
 
     @property
     @_self_reload(_MANAGER_NAME)
-    def finished_time(self) -> Optional[datetime]:
-        if all(job.finished_time for job in self.jobs):
-            return max([job.finished_time for job in self.jobs if job.finished_time])
+    def finished_at(self) -> Optional[datetime]:
+        if all(job.finished_at for job in self.jobs):
+            return max([job.finished_at for job in self.jobs if job.finished_at])
         return None
 
     @property
@@ -174,10 +174,10 @@ class Submission(_Entity, _Labeled):
                 - If one of the jobs is not finished, the execution time is the duration
                   from the running time of the first job to the current time.
         """
-        if self.finished_time and self.run_time:
-            return (self.finished_time - self.run_time).total_seconds()
-        elif self.run_time and self.finished_time is None:
-            return (datetime.now() - self.run_time).total_seconds()
+        if self.finished_at and self.run_at:
+            return (self.finished_at - self.run_at).total_seconds()
+        elif self.run_at and self.finished_at is None:
+            return (datetime.now() - self.run_at).total_seconds()
         return None
 
     def get_label(self) -> str:

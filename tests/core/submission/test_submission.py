@@ -924,20 +924,20 @@ def test_execution_duration():
         job_1.running()
         job_2.pending()
 
-    assert submission.run_time == datetime(2024, 9, 25, 13, 30, 35)
+    assert submission.run_at == datetime(2024, 9, 25, 13, 30, 35)
     assert submission.execution_duration > 0
 
     with freezegun.freeze_time("2024-09-25 13:33:45"):
         job_1.completed()
         job_2.running()
         assert submission.execution_duration == 190  # = 13:33:45 - 13:30:35
-        assert submission.run_time == datetime(2024, 9, 25, 13, 30, 35)
+        assert submission.run_at == datetime(2024, 9, 25, 13, 30, 35)
 
         # Job 2 is not completed, so the submission is not completed
-        assert submission.finished_time is None
+        assert submission.finished_at is None
 
     with freezegun.freeze_time("2024-09-25 13:35:50"):
         job_2.completed()
 
-    assert submission.finished_time == datetime(2024, 9, 25, 13, 35, 50)
+    assert submission.finished_at == datetime(2024, 9, 25, 13, 35, 50)
     assert submission.execution_duration == 315  # = 13:35:50 - 13:30:35
