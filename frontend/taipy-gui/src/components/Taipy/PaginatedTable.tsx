@@ -69,6 +69,7 @@ import {
     getTooltip,
     OnRowClick,
     DownloadAction,
+    getFormatFn,
 } from "./tableUtils";
 import {
     useClassNames,
@@ -108,6 +109,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         downloadable = false,
         compare = false,
         onCompare = "",
+        useCheckbox = false,
     } = props;
     const pageSize = props.pageSize === undefined || props.pageSize < 1 ? 100 : Math.round(props.pageSize);
     const [value, setValue] = useState<Record<string, unknown>>({});
@@ -131,7 +133,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const baseColumns = useDynamicJsonProperty(props.columns, props.defaultColumns, defaultColumns);
 
-    const [colsOrder, columns, styles, tooltips, handleNan, filter, partialEditable] = useMemo(() => {
+    const [colsOrder, columns, styles, tooltips, formats, handleNan, filter, partialEditable] = useMemo(() => {
         let hNan = !!props.nanValue;
         if (baseColumns) {
             try {
@@ -163,12 +165,16 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 const styTt = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
                     if (newCols[col].style) {
                         pv.styles = pv.styles || {};
-                        pv.styles[newCols[col].dfid] = newCols[col].style as string;
+                        pv.styles[newCols[col].dfid] = newCols[col].style;
                     }
                     hNan = hNan || !!newCols[col].nanValue;
                     if (newCols[col].tooltip) {
                         pv.tooltips = pv.tooltips || {};
-                        pv.tooltips[newCols[col].dfid] = newCols[col].tooltip as string;
+                        pv.tooltips[newCols[col].dfid] = newCols[col].tooltip;
+                    }
+                    if (newCols[col].formatFn) {
+                        pv.formats = pv.formats || {};
+                        pv.formats[newCols[col].dfid] = newCols[col].formatFn;
                     }
                     return pv;
                 }, {});
@@ -176,7 +182,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     styTt.styles = styTt.styles || {};
                     styTt.styles[LINE_STYLE] = props.lineStyle;
                 }
-                return [colsOrder, newCols, styTt.styles, styTt.tooltips, hNan, filter, partialEditable];
+                return [colsOrder, newCols, styTt.styles, styTt.tooltips, styTt.formats, hNan, filter, partialEditable];
             } catch (e) {
                 console.info("PaginatedTable.columns: ", (e as Error).message || e);
             }
@@ -184,6 +190,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         return [
             [] as string[],
             {} as Record<string, ColumnDesc>,
+            {} as Record<string, string>,
             {} as Record<string, string>,
             {} as Record<string, string>,
             hNan,
@@ -266,6 +273,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     applies,
                     styles,
                     tooltips,
+                    formats,
                     handleNan,
                     afs,
                     compare ? onCompare : undefined,
@@ -287,6 +295,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         colsOrder,
         columns,
         showAll,
+        styles,
+        tooltips,
+        formats,
         rowsPerPage,
         order,
         orderBy,
@@ -591,6 +602,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     tableClassName={className}
                                                     colDesc={columns[col]}
                                                     value={row[col]}
+                                                    formattedVal={getFormatFn(row, columns[col].formatFn, col)}
                                                     formatConfig={formatConfig}
                                                     rowIndex={index}
                                                     onValidation={
@@ -607,6 +619,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     nanValue={columns[col].nanValue || props.nanValue}
                                                     tooltip={getTooltip(row, columns[col].tooltip, col)}
                                                     comp={compRows && compRows[index] && compRows[index][col]}
+                                                    useCheckbox={useCheckbox}
                                                 />
                                             ))}
                                         </TableRow>

@@ -1701,33 +1701,35 @@ class Gui:
         return self.__adapter._get_adapted_lov(lov, var_type)
 
     def table_on_edit(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
-        """
-        TODO: Default implementation of on_edit for tables
+        """Default implementation of the `on_edit` callback for tables.
+
+        Arguments:
+            state: the state instance received in the callback.
         """
         try:
             setattr(state, var_name, self._get_accessor().on_edit(getattr(state, var_name), payload))
         except Exception as e:
             _warn("TODO: Table.on_edit", e)
 
-    def table_on_delete(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
-        """
-        TODO: Default implementation of on_delete for tables
-        """
-        try:
-            setattr(state, var_name, self._get_accessor().on_delete(getattr(state, var_name), payload))
-        except Exception as e:
-            _warn("TODO: Table.on_delete", e)
-
     def table_on_add(
         self, state: State, var_name: str, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None
     ):
-        """
+        """Default implementation of the `on_add` callback for tables.
         TODO: Default implementation of on_add for tables
         """
         try:
             setattr(state, var_name, self._get_accessor().on_add(getattr(state, var_name), payload, new_row))
         except Exception as e:
             _warn("TODO: Table.on_add", e)
+
+    def table_on_delete(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
+        """Default implementation of the `on_delete` callback for tables.
+
+        """
+        try:
+            setattr(state, var_name, self._get_accessor().on_delete(getattr(state, var_name), payload))
+        except Exception as e:
+            _warn("TODO: Table.on_delete", e)
 
     def _tbl_cols(
         self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs

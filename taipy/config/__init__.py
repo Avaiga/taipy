@@ -9,12 +9,43 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-"""# Taipy Config
+"""---
+title: Taipy Config package
+---
 
-The Taipy Config package is a Python library designed to configure a Taipy application.
+The `taipy.config` package provides features to configure a Taipy application.
 
-The main entrypoint is the `Config^` singleton class. It exposes some methods to configure the
-Taipy application and some attributes to retrieve the configuration values.
+Its main class is the `Config^` singleton. It exposes various static methods
+and attributes to configure the Taipy application and retrieve the configuration values.
+
+!!! example "Standard usage"
+
+    ```python
+    from taipy.config import Config
+    from taipy.config import Frequency
+    from taipy.config import Scope
+
+    data_node_cfg = Config.configure_data_node("my_data_node", scope=Scope.SCENARIO)
+    Config.configure_scenario("my_scenario", additional_data_node_configs=[data_node_cfg], frequency=Frequency.DAILY)
+    Config.configure_core(repository_type="filesystem", storage_folder="my/storage/folder")
+    Config.configure_authentication(protocol="taipy",roles={"user1": ["role1", "TAIPY_READER"]})
+
+    print(Config.data_nodes["my_data_node"].scope)  # Output: SCENARIO
+    print(len(Config.scenarios["my_scenario"].data_nodes))  # Output: 1
+    ```
+
+    In this example, the static methods of the `Config^` singleton are used to configure
+    a Taipy application. The application has one data node configuration and one scenario
+    configuration.
+    We also configure the application to use a filesystem repository and set up authentication.
+
+!!! note "`Frequency^` and `Scope^` for scenario and data nodes configurations"
+
+    Besides the `Config^` class which is the main entrypoint, the `taipy.config` package exposes
+    the `Frequency^` and `Scope^` enums that are frequently used to configure data nodes and
+    scenarios.
+
+    The three objects are exposed in the `taipy^` package directly for convenience.
 
 """
 

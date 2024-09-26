@@ -16,7 +16,7 @@ from .orchestrator import Orchestrator
 
 
 class Core:
-    """Deprecated. Use the `Orchestrator^` service class with `taipy.Orchestrator()` instead."""
+    """Deprecated. Use the `Orchestrator^` service class instead."""
 
     __logger = _TaipyLogger._get_logger()
 

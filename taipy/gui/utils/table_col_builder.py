@@ -92,7 +92,7 @@ def _enhance_columns(  # noqa: C901
             else:
                 value = None
             if value in columns.keys():
-                _warn(f"{elt_name}: style[{k}]={value} cannot be a column's name.")
+                _warn(f"{elt_name}: style[{k}] cannot reference a column's name '{value}'.")
             elif value:
                 col_desc["style"] = value
         else:
@@ -107,26 +107,46 @@ def _enhance_columns(  # noqa: C901
             else:
                 value = None
             if value in columns.keys():
-                _warn(f"{elt_name}: tooltip[{k}]={value} cannot be a column's name.")
+                _warn(f"{elt_name}: tooltip[{k}] cannot reference a column's name '{value}'.")
             elif value:
                 col_desc["tooltip"] = value
         else:
             _warn(f"{elt_name}: tooltip[{k}] is not in the list of displayed columns.")
-    editable = attributes.get("editable", False)
-    if _is_boolean(editable) and _is_true(editable):
-        lovs = _get_name_indexed_property(attributes, "lov")
-        for k, v in lovs.items():  # pragma: no cover
-            if col_desc := _get_column_desc(columns, k):
-                value = v.strip().split(";") if isinstance(v, str) else v  # type: ignore[assignment]
-                if value is not None and not isinstance(value, (list, tuple)):
-                    _warn(f"{elt_name}: lov[{k}] should be a list.")
-                    value = None
-                if value is not None:
-                    new_value = list(filter(lambda i: i is not None, value))
-                    if len(new_value) < len(value):
-                        col_desc["freeLov"] = True
-                        value = new_value
-                    col_desc["lov"] = value
+    formats = _get_name_indexed_property(attributes, "format_fn")
+    for k, v in formats.items():  # pragma: no cover
+        if col_desc := _get_column_desc(columns, k):
+            if callable(v):
+                value = hash_names.get(f"format_fn[{k}]")
+            elif isinstance(v, str):
+                value = v.strip()
             else:
-                _warn(f"{elt_name}: lov[{k}] is not in the list of displayed columns.")
+                value = None
+            if value in columns.keys():
+                _warn(f"{elt_name}: format_fn[{k}] cannot reference a column's name '{value}'.")
+            elif value:
+                col_desc["formatFn"] = value
+        else:
+            _warn(f"{elt_name}: format_fn[{k}] is not in the list of displayed columns.")
+    editable = attributes.get("editable", False)
+    loveable = _is_boolean(editable) and _is_true(editable)
+    loves = _get_name_indexed_property(attributes, "lov")
+    for k, v in loves.items():  # pragma: no cover
+        col_desc = _get_column_desc(columns, k)
+        if col_desc and (
+            loveable
+            or not col_desc.get("notEditable", True)
+            or t.cast(str, col_desc.get("type", "")).startswith("bool")
+        ):
+            value = v.strip().split(";") if isinstance(v, str) else v  # type: ignore[assignment]
+            if value is not None and not isinstance(value, (list, tuple)):
+                _warn(f"{elt_name}: lov[{k}] should be a list.")
+                value = None
+            if value is not None:
+                new_value = list(filter(lambda i: i is not None, value))
+                if len(new_value) < len(value):
+                    col_desc["freeLov"] = True
+                    value = new_value
+                col_desc["lov"] = value
+        elif not col_desc:
+            _warn(f"{elt_name}: lov[{k}] is not in the list of displayed columns.")
     return columns
