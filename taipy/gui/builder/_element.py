@@ -121,10 +121,10 @@ class _Element(ABC):
                 return None
             args = [arg.arg for arg in lambda_fn.args.args]
             targets = [
-                compr.target.id  # type: ignore[attr-defined]
+                comprehension.target.id  # type: ignore[attr-defined]
                 for node in ast.walk(lambda_fn.body)
                 if isinstance(node, ast.ListComp)
-                for compr in node.generators
+                for comprehension in node.generators
             ]
             tree = _TransformVarToValue(self.__calling_frame, args + targets + _python_builtins).visit(lambda_fn)
             ast.fix_missing_locations(tree)

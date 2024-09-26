@@ -813,17 +813,17 @@ class Gui:
             on_change_fn = self._get_user_function("on_change")
         if callable(on_change_fn):
             try:
-                argcount = on_change_fn.__code__.co_argcount
-                if argcount > 0 and inspect.ismethod(on_change_fn):
-                    argcount -= 1
-                args: t.List[t.Any] = [None for _ in range(argcount)]
-                if argcount > 0:
+                arg_count = on_change_fn.__code__.co_argcount
+                if arg_count > 0 and inspect.ismethod(on_change_fn):
+                    arg_count -= 1
+                args: t.List[t.Any] = [None for _ in range(arg_count)]
+                if arg_count > 0:
                     args[0] = self.__get_state()
-                if argcount > 1:
+                if arg_count > 1:
                     args[1] = var_name
-                if argcount > 2:
+                if arg_count > 2:
                     args[2] = value
-                if argcount > 3:
+                if arg_count > 3:
                     args[3] = current_context
                 on_change_fn(*args)
             except Exception as e:  # pragma: no cover
@@ -849,22 +849,22 @@ class Gui:
     def _get_user_content_url(
         self, path: t.Optional[str] = None, query_args: t.Optional[t.Dict[str, str]] = None
     ) -> t.Optional[str]:
-        qargs = query_args or {}
-        qargs.update({Gui.__ARG_CLIENT_ID: self._get_client_id()})
-        return f"/{Gui.__USER_CONTENT_URL}/{path or 'TaIpY'}?{urlencode(qargs)}"
+        q_args = query_args or {}
+        q_args.update({Gui.__ARG_CLIENT_ID: self._get_client_id()})
+        return f"/{Gui.__USER_CONTENT_URL}/{path or 'TaIpY'}?{urlencode(q_args)}"
 
     def __serve_user_content(self, path: str) -> t.Any:
         self.__set_client_id_in_context()
-        qargs: t.Dict[str, str] = {}
-        qargs.update(request.args)
-        qargs.pop(Gui.__ARG_CLIENT_ID, None)
+        q_args: t.Dict[str, str] = {}
+        q_args.update(request.args)
+        q_args.pop(Gui.__ARG_CLIENT_ID, None)
         cb_function: t.Optional[t.Union[t.Callable, str]] = None
         cb_function_name = None
-        if qargs.get(Gui._HTML_CONTENT_KEY):
+        if q_args.get(Gui._HTML_CONTENT_KEY):
             cb_function = self.__process_content_provider
             cb_function_name = cb_function.__name__
         else:
-            cb_function_name = qargs.get(Gui.__USER_CONTENT_CB)
+            cb_function_name = q_args.get(Gui.__USER_CONTENT_CB)
             if cb_function_name:
                 cb_function = self._get_user_function(cb_function_name)
                 if not callable(cb_function):
@@ -891,8 +891,8 @@ class Gui:
                 args: t.List[t.Any] = []
                 if path:
                     args.append(path)
-                if len(qargs):
-                    args.append(qargs)
+                if len(q_args):
+                    args.append(q_args)
                 ret = self._call_function_with_state(cb_function, args)
                 if ret is None:
                     _warn(f"{cb_function_name}() callback function must return a value.")
@@ -932,8 +932,8 @@ class Gui:
                 if libs is None:
                     libs = []
                     libraries[lib.get_name()] = libs
-                elts: t.List[t.Dict[str, str]] = []
-                libs.append({"js module": lib.get_js_module_name(), "elements": elts})
+                elements: t.List[t.Dict[str, str]] = []
+                libs.append({"js module": lib.get_js_module_name(), "elements": elements})
                 for element_name, elt in lib.get_elements().items():
                     if not isinstance(elt, Element):
                         continue
@@ -942,7 +942,7 @@ class Gui:
                         elt_dict["render function"] = elt._render_xhtml.__code__.co_name
                     else:
                         elt_dict["react name"] = elt._get_js_name(element_name)
-                    elts.append(elt_dict)
+                    elements.append(elt_dict)
         status.update({"libraries": libraries})
 
     def _serve_status(self, template: Path) -> t.Dict[str, t.Dict[str, str]]:

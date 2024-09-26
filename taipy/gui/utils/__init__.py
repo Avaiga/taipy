@@ -17,6 +17,7 @@ from ._attributes import (
     _setscopeattr,
     _setscopeattr_drill,
 )
+from ._lambda import _get_lambda_id
 from ._locals_context import _LocalsContext
 from ._map_dict import _MapDict
 from ._runtime_manager import _RuntimeManager
