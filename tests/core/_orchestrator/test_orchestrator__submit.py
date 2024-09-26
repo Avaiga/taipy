@@ -28,7 +28,6 @@ from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from taipy.core.submission.submission_status import SubmissionStatus
 from taipy.core.task._task_manager import _TaskManager
-from tests.core.utils import assert_true_after_time
 
 
 def nothing(*args, **kwargs):
@@ -559,12 +558,13 @@ def test_submit_duration_standalone_mode():
     scenario = Scenario("scenario", {task_1, task_2}, {})
     _ScenarioManager._set(scenario)
     submission = taipy.submit(scenario)
-    jobs = submission.jobs
 
-    assert_true_after_time(jobs[0].is_completed)
-    assert_true_after_time(jobs[1].is_completed)
+    while not all(job is not None and job.is_completed() for job in submission.jobs):
+        sleep(1)  # Limit CPU usage
 
     orchestrator.stop()
+
+    jobs = submission.jobs
 
     assert all(isinstance(job.submitted_time, datetime) for job in jobs)
     assert all(isinstance(job.run_time, datetime) for job in jobs)
