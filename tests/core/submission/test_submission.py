@@ -11,6 +11,7 @@
 
 from datetime import datetime
 
+import freezegun
 import pytest
 
 from taipy.core import TaskId
@@ -903,3 +904,40 @@ def test_is_finished():
     submission.submission_status = SubmissionStatus.COMPLETED
     assert submission.submission_status == SubmissionStatus.COMPLETED
     assert submission.is_finished()
+
+
+def test_execution_duration():
+    task = Task(config_id="task_1", properties={}, function=print, id=TaskId("task_1"))
+    submission = Submission(task.id, task._ID_PREFIX, task.config_id, properties={})
+    job_1 = Job("job_1", task, submission.id, submission.entity_id)
+    job_2 = Job("job_2", task, submission.id, submission.entity_id)
+
+    _TaskManagerFactory._build_manager()._set(task)
+    _SubmissionManagerFactory._build_manager()._set(submission)
+    _JobManagerFactory._build_manager()._set(job_1)
+    _JobManagerFactory._build_manager()._set(job_2)
+
+    submission.jobs = [job_1, job_2]
+    _SubmissionManagerFactory._build_manager()._set(submission)
+
+    with freezegun.freeze_time("2024-09-25 13:30:35"):
+        job_1.running()
+        job_2.pending()
+
+    assert submission.run_time == datetime(2024, 9, 25, 13, 30, 35)
+    assert submission.execution_duration > 0
+
+    with freezegun.freeze_time("2024-09-25 13:33:45"):
+        job_1.completed()
+        job_2.running()
+        assert submission.execution_duration == 190  # = 13:33:45 - 13:30:35
+        assert submission.run_time == datetime(2024, 9, 25, 13, 30, 35)
+
+        # Job 2 is not completed, so the submission is not completed
+        assert submission.finished_time is None
+
+    with freezegun.freeze_time("2024-09-25 13:35:50"):
+        job_2.completed()
+
+    assert submission.finished_time == datetime(2024, 9, 25, 13, 35, 50)
+    assert submission.execution_duration == 315  # = 13:35:50 - 13:30:35
