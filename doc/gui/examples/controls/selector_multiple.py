@@ -19,7 +19,6 @@ value="Item 2"
 
 page = """
 Selector - Multiple
-
 <|{value}|selector|lov=Item 1;Item 2;Item 3|multiple|>
 """
 
