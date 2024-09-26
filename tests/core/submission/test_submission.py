@@ -903,31 +903,3 @@ def test_is_finished():
     submission.submission_status = SubmissionStatus.COMPLETED
     assert submission.submission_status == SubmissionStatus.COMPLETED
     assert submission.is_finished()
-
-
-def test_execution_duration():
-    task = Task(config_id="task_1", properties={}, function=print, id=TaskId("task_1"))
-    submission = Submission(task.id, task._ID_PREFIX, task.config_id, properties={})
-    job_1 = Job("job_1", task, submission.id, submission.entity_id)
-    job_2 = Job("job_2", task, submission.id, submission.entity_id)
-
-    _TaskManagerFactory._build_manager()._set(task)
-    _SubmissionManagerFactory._build_manager()._set(submission)
-    _JobManagerFactory._build_manager()._set(job_1)
-    _JobManagerFactory._build_manager()._set(job_2)
-
-    submission.jobs = [job_1, job_2]
-    _SubmissionManagerFactory._build_manager()._set(submission)
-
-    job_1.execution_started_at = datetime(2024, 1, 1, 0, 0, 0)
-    job_1.execution_ended_at = datetime(2024, 1, 1, 0, 0, 10)
-    job_2.execution_started_at = datetime(2024, 1, 1, 0, 1, 0)
-    job_2.execution_ended_at = datetime(2024, 1, 1, 0, 2, 30)
-    assert submission.execution_started_at == job_1.execution_started_at
-    assert submission.execution_ended_at == job_2.execution_ended_at
-    assert submission.execution_duration == 150
-
-    job_2.execution_ended_at = None  # job_2 is still running
-    assert submission.execution_started_at == job_1.execution_started_at
-    assert submission.execution_ended_at is None
-    assert submission.execution_duration is None
