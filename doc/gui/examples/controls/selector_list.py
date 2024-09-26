@@ -18,7 +18,6 @@ from taipy.gui import Gui
 value="Item 2"
 
 page = """
-Selector - List
 <|{value}|selector|lov=Item 1;Item 2;Item 3|>
 """
 

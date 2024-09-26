@@ -30,7 +30,6 @@ users = [
 user_sel = users[2]
 
 page = """
-Selector - Adapter
 <|{user_sel}|selector|lov={users}|type=User|adapter={lambda u: (u.id, u.name)}|>
 """
 

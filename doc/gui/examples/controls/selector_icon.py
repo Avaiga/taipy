@@ -18,7 +18,6 @@ from taipy.gui import Gui
 sel = "id2"
 
 page = """
-Selector - Icon
 <|{sel}|selector|lov={[("id1", "Label 1"), ("id2", Icon("/images/icon.png", "Label 2"),("id3", "Label 3")]}|>
 """
 
