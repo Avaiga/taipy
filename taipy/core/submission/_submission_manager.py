@@ -180,12 +180,11 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
         if isinstance(submission, str):
             submission_id = submission
             submission = cls._get(submission)
-        else:
-            submission_id = submission.id
+            if submission is None:
+                reason_collector._add_reason(submission_id, EntityDoesNotExist(submission_id))
+                return reason_collector
 
-        if submission is None:
-            reason_collector._add_reason(submission_id, EntityDoesNotExist(submission_id))
-        elif not submission.is_finished() and submission.submission_status != SubmissionStatus.UNDEFINED:
-            reason_collector._add_reason(submission_id, SubmissionIsNotFinished(submission_id))
+        if not submission.is_finished() and submission.submission_status != SubmissionStatus.UNDEFINED:
+            reason_collector._add_reason(submission.id, SubmissionIsNotFinished(submission.id))
 
         return reason_collector

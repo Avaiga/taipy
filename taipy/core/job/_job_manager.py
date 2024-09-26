@@ -94,12 +94,11 @@ class _JobManager(_Manager[Job], _VersionMixin):
         if isinstance(job, str):
             job_id = job
             job = cls._get(job, None)
-        else:
-            job_id = job.id
+            if job is None:
+                reason_collector._add_reason(job_id, EntityDoesNotExist(job_id))
+                return reason_collector
 
-        if job is None:
-            reason_collector._add_reason(job_id, EntityDoesNotExist(job_id))
-        elif not job.is_finished():
+        if not job.is_finished():
             reason_collector._add_reason(job.id, JobIsNotFinished(job.id))
 
         return reason_collector

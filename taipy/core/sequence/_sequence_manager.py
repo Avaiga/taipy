@@ -342,17 +342,17 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
 
     @classmethod
     def _is_submittable(cls, sequence: Union[Sequence, SequenceId]) -> ReasonCollection:
+        reason_collector = ReasonCollection()
+
         if isinstance(sequence, str):
             sequence_id = sequence
             sequence = cls._get(sequence)
-        else:
-            sequence_id = sequence.id
+            if sequence is None:
+                reason_collector._add_reason(sequence_id, EntityDoesNotExist(sequence_id))
+                return reason_collector
 
-        reason_collector = ReasonCollection()
-        if sequence is None:
-            reason_collector._add_reason(sequence_id, EntityDoesNotExist(sequence_id))
-        elif not isinstance(sequence, Sequence):
-            reason_collector._add_reason(sequence_id, EntityIsNotSubmittableEntity(sequence_id))
+        if not isinstance(sequence, Sequence):
+            reason_collector._add_reason(str(sequence), EntityIsNotSubmittableEntity(str(sequence)))
         else:
             return sequence.is_ready_to_run()
 
