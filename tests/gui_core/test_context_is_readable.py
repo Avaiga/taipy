@@ -17,8 +17,14 @@ from unittest.mock import Mock, patch
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.core import Cycle, CycleId, Job, JobId, Scenario, Task
+from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.pickle import PickleDataNode
+from taipy.core.job._job_manager_factory import _JobManagerFactory
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
+from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from taipy.core.submission.submission import Submission, SubmissionStatus
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.gui import Gui
 from taipy.gui_core._context import _GuiCoreContext
 
@@ -34,6 +40,13 @@ a_submission = Submission(
     a_scenario.config_id,
     properties={"client_id": "client_id", "on_submission": "on_submission"},
 )
+
+_CycleManagerFactory._build_manager()._set(a_cycle)
+_ScenarioManagerFactory._build_manager()._set(a_scenario)
+_TaskManagerFactory._build_manager()._set(a_task)
+_JobManagerFactory._build_manager()._set(a_job)
+_DataManagerFactory._build_manager()._set(a_datanode)
+_SubmissionManagerFactory._build_manager()._set(a_submission)
 
 
 def mock_is_readable_false(entity_id):
@@ -222,8 +235,9 @@ class TestGuiCoreContext_is_readable:
                 assert outcome is None
 
     def test_act_on_jobs(self):
-        with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get), patch(
-            "taipy.gui_core._context.is_deletable", side_effect=mock_is_true
+        with (
+            patch("taipy.gui_core._context.core_get", side_effect=mock_core_get),
+            patch("taipy.gui_core._context.is_deletable", side_effect=mock_is_true),
         ):
             gui_core_context = _GuiCoreContext(Mock())
             assign = Mock()
