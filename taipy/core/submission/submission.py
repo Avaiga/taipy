@@ -139,33 +139,6 @@ class Submission(_Entity, _Labeled):
     def creation_date(self):
         return self._creation_date
 
-    @property
-    @_self_reload(_MANAGER_NAME)
-    def execution_started_at(self) -> Optional[datetime]:
-        if all(job.execution_started_at is not None for job in self.jobs):
-            return min(job.execution_started_at for job in self.jobs)
-        return None
-
-    @property
-    @_self_reload(_MANAGER_NAME)
-    def execution_ended_at(self) -> Optional[datetime]:
-        if all(job.execution_ended_at is not None for job in self.jobs):
-            return max(job.execution_ended_at for job in self.jobs)
-        return None
-
-    @property
-    @_self_reload(_MANAGER_NAME)
-    def execution_duration(self) -> Optional[float]:
-        """Get the duration of the submission in seconds.
-
-        Returns:
-            Optional[float]: The duration of the submission in seconds. If the job is not
-            completed, None is returned.
-        """
-        if self.execution_started_at and self.execution_ended_at:
-            return (self.execution_ended_at - self.execution_started_at).total_seconds()
-        return None
-
     def get_label(self) -> str:
         """Returns the submission simple label prefixed by its owner label.
 

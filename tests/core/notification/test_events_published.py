@@ -178,16 +178,16 @@ def test_events_published_for_scenario_submission():
     # 1 submission update event for is_completed
     scenario.submit()
     snapshot = all_evts.capture()
-    assert len(snapshot.collected_events) == 19
+    assert len(snapshot.collected_events) == 17
     assert snapshot.entity_type_collected.get(EventEntityType.CYCLE, 0) == 0
     assert snapshot.entity_type_collected.get(EventEntityType.DATA_NODE, 0) == 7
     assert snapshot.entity_type_collected.get(EventEntityType.TASK, 0) == 0
     assert snapshot.entity_type_collected.get(EventEntityType.SEQUENCE, 0) == 0
     assert snapshot.entity_type_collected.get(EventEntityType.SCENARIO, 0) == 1
-    assert snapshot.entity_type_collected.get(EventEntityType.JOB, 0) == 6
+    assert snapshot.entity_type_collected.get(EventEntityType.JOB, 0) == 4
     assert snapshot.entity_type_collected.get(EventEntityType.SUBMISSION, 0) == 5
     assert snapshot.operation_collected.get(EventOperation.CREATION, 0) == 2
-    assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 16
+    assert snapshot.operation_collected.get(EventOperation.UPDATE, 0) == 14
     assert snapshot.operation_collected.get(EventOperation.SUBMISSION, 0) == 1
 
     assert snapshot.attr_name_collected["last_edit_date"] == 1
