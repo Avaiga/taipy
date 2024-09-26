@@ -18,10 +18,10 @@ from taipy.gui import Gui
 value="Item 2"
 
 page = """
-# Selector - List
+Selector - List
 
 <|{value}|selector|lov=Item 1;Item 2;Item 3|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="Selector List")
+    Gui(page).run(title="Selector - List")

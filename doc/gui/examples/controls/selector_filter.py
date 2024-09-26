@@ -21,10 +21,10 @@ _python_builtins = dir(builtins)
 value = _python_builtins[0]
 
 page = """
-# Selector - Filter
+Selector - Filter
 
 <|{value}|selector|lov={_python_builtins}|filter|multiple|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="Selector Filter")
+    Gui(page).run(title="Selector - Filter")

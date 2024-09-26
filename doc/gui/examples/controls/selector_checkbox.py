@@ -18,10 +18,10 @@ from taipy.gui import Gui
 value="Item 2"
 
 page = """
-# Selector - Checkbox
+Selector - Checkbox
 
 <|{value}|selector|lov=Item 1;Item 2;Item 3|mode=check|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="Selector Checkbox")
+    Gui(page).run(title="Selector - Checkbox")

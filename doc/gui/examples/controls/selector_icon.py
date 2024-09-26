@@ -18,10 +18,10 @@ from taipy.gui import Gui
 sel = "id2"
 
 page = """
-# Selector - Icon
+Selector - Icon
 
 <|{sel}|selector|lov={[("id1", "Label 1"), ("id2", Icon("/images/icon.png", "Label 2"),("id3", "Label 3")]}|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="Selector Icon")
+    Gui(page).run(title="Selector - Icon")

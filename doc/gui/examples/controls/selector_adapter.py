@@ -30,10 +30,10 @@ users = [
 user_sel = users[2]
 
 page = """
-# Selector - Adapter
+Selector - Adapter
 
 <|{user_sel}|selector|lov={users}|type=User|adapter={lambda u: (u.id, u.name)}|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="Selector Adapter")
+    Gui(page).run(title="Selector - Adapter")

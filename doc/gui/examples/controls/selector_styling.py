@@ -22,9 +22,9 @@ value = _python_builtins[0]
 
 page = Markdown(
     """
-# Selector - Style every other row
+Selector - Style every other row
 
-<|{value}|selector|lov={_python_builtins}|filter|multiple|>
+<|{value}|selector|lov={_python_builtins}|>
 """,
     style={
         ".taipy-selector": {
@@ -52,4 +52,4 @@ page = Markdown(
 )
 
 if __name__ == "__main__":
-    Gui(page).run(title="Selector Filter")
+    Gui(page).run(title="Selector - Filter")

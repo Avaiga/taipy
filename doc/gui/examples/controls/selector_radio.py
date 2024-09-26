@@ -18,10 +18,10 @@ from taipy.gui import Gui
 value="Item 2"
 
 page = """
-# Selector - Radio
+Selector - Radio
 
 <|{value}|selector|lov=Item 1;Item 2;Item 3|mode=radio|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="Selector Radio")
+    Gui(page).run(title="Selector - Radio")
