@@ -15,7 +15,7 @@ import pytest
 
 from taipy.common.config.config import Config
 from taipy.common.config.exceptions.exceptions import ConfigurationUpdateBlocked
-from tests.config.utils.named_temporary_file import NamedTemporaryFile
+from tests.common.config.utils.named_temporary_file import NamedTemporaryFile
 
 config_from_filename = NamedTemporaryFile(
     """

@@ -275,7 +275,7 @@ class _Config(object):
                 section = TaipyConfig.unique_sections["gui"]
                 self.config.update(section._to_dict())
             except KeyError:
-                _warn("taipy-config section for taipy-gui is not initialized.")
+                _warn("taipy-common section for taipy-gui is not initialized.")
 
         # Load from system arguments
         self._handle_argparse()

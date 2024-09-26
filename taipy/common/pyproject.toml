@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "taipy-config"
-description = "A Taipy package dedicated to easily configure a Taipy application."
+description = "A Taipy package dedicated to provide common data structures, types, classes and functions."
 readme = "package_desc.md"
 requires-python = ">=3.9"
 license = {text = "Apache License 2.0"}
@@ -23,10 +23,20 @@ classifiers = [
 dynamic = ["version", "dependencies"]
 
 [project.optional-dependencies]
-testing = ["pytest>=3.8"]
+testing = ["pytest>=3.9"]
 
 [tool.setuptools.packages]
-find = {include = ["taipy", "taipy.config", "taipy.config.*", "taipy.logger", "taipy.logger.*", "taipy._cli", "taipy._cli.*"]}
+find = {include = [
+    "taipy",
+    "taipy.common",
+    "taipy.common.*",
+    "taipy.common.config",
+    "taipy.common.config.*",
+    "taipy.common.logger",
+    "taipy.common.logger.*",
+    "taipy.common._cli",
+    "taipy.common._cli.*"
+]}
 
 [project.urls]
 homepage = "https://github.com/avaiga/taipy"

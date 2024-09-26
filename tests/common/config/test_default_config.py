@@ -12,8 +12,8 @@
 from taipy.common.config.config import Config
 from taipy.common.config.global_app.global_app_config import GlobalAppConfig
 from taipy.common.config.section import Section
-from tests.config.utils.section_for_tests import SectionForTest
-from tests.config.utils.unique_section_for_tests import UniqueSectionForTest
+from tests.common.config.utils.section_for_tests import SectionForTest
+from tests.common.config.utils.unique_section_for_tests import UniqueSectionForTest
 
 
 def _test_default_global_app_config(global_config: GlobalAppConfig):

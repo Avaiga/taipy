@@ -13,7 +13,7 @@ import pytest
 
 from taipy.common.config.config import Config
 from taipy.common.config.exceptions.exceptions import LoadingError
-from tests.config.utils.named_temporary_file import NamedTemporaryFile
+from tests.common.config.utils.named_temporary_file import NamedTemporaryFile
 
 
 def test_node_can_not_appear_twice():

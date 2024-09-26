@@ -9,21 +9,20 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-#        http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
-# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
-# specific language governing permissions and limitations under the License.
+"""The setup script for taipy-common package"""
 
-"""The setup script."""
 import json
-import os
-from setuptools import find_namespace_packages, find_packages, setup
+from pathlib import Path
 
-with open("README.md") as readme_file:
-    readme = readme_file.read()
+from setuptools import find_packages, setup
 
-version_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "version.json")
+root_folder = Path(__file__).parent
+
+package_desc = Path(root_folder / "package_desc.md").read_text("UTF-8")
+
+version_path = "taipy/common/version.json"
+
+setup_requirements = Path("taipy/common/setup.requirements.txt")
 
 with open(version_path) as version_file:
     version = json.load(version_file)
@@ -31,25 +30,27 @@ with open(version_path) as version_file:
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
-requirements = ["toml>=0.10,<0.11", "deepdiff>=6.2,<6.3"]
+requirements = [r for r in (setup_requirements).read_text("UTF-8").splitlines() if r]
 
 test_requirements = ["pytest>=3.8"]
 
 setup(
     version=version_string,
     install_requires=requirements,
-    packages=find_namespace_packages(where=".")+ find_packages(
-        include=[
+    packages=find_packages(
+        where=root_folder, include=[
             "taipy",
-            "taipy.config",
-            "taipy.config.*",
-            "taipy.logger",
-            "taipy.logger.*",
-            "taipy._cli",
-            "taipy._cli.*"
+            "taipy.common",
+            "taipy.common.*",
+            "taipy.common.config",
+            "taipy.common.config.*",
+            "taipy.common.logger",
+            "taipy.common.logger.*",
+            "taipy.common._cli",
+            "taipy.common._cli.*"
         ]
     ),
     include_package_data=True,
-    data_files=[('version', ['version.json'])],
+    data_files=[('version', [version_path])],
     tests_require=test_requirements,
 )

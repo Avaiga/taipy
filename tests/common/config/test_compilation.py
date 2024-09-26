@@ -13,9 +13,9 @@ import pytest
 
 from taipy.common.config.config import Config
 from taipy.common.config.section import Section
-from tests.config.utils.named_temporary_file import NamedTemporaryFile
-from tests.config.utils.section_for_tests import SectionForTest
-from tests.config.utils.section_of_sections_list_for_tests import SectionOfSectionsListForTest
+from tests.common.config.utils.named_temporary_file import NamedTemporaryFile
+from tests.common.config.utils.section_for_tests import SectionForTest
+from tests.common.config.utils.section_of_sections_list_for_tests import SectionOfSectionsListForTest
 
 
 @pytest.fixture

@@ -16,32 +16,32 @@ and limitations under the License.
 ## What is Taipy Config
 
 Taipy is a Python library for creating Business Applications. More information on our
-[website](https://www.taipy.io). Taipy is split into multiple packages including *taipy-config*
+[website](https://www.taipy.io). Taipy is split into multiple packages including *taipy-common*
 to let users install the minimum they need.
 
 Taipy Config is a package designed to help users configure their Taipy application.
 
 ## Installation
 
-The latest stable version of *taipy-config* is available through *pip*:
+The latest stable version of *taipy-common* is available through *pip*:
 ```bash
-pip install taipy-config
+pip install taipy-common
 ```
 
-You can install the development version of *taipy-config* with *pip* and *git* via the taipy repository:
+You can install the development version of *taipy-common* with *pip* and *git* via the taipy repository:
 ```bash
 pip install git+https://git@github.com/Avaiga/taipy
 ```
 
 This command installs the development version of *taipy* package in the Python environment with all
-its dependencies, including the *taipy-config* package.
+its dependencies, including the *taipy-common* package.
 
-If you need the source code for *taipy-config* on your system so you can see how things are done or
+If you need the source code for *taipy-common* on your system so you can see how things are done or
 maybe participate in the improvement of the packages, you can clone the GitHub repository:
 
 ```bash
 git clone https://github.com/Avaiga/taipy.git
 ```
 
-This creates the 'taipy' directory holding all the package's source code, and the 'taipy-config'
-source code is in the 'taipy/config' directory.
+This creates the 'taipy' directory holding all the package's source code, and the 'taipy-common'
+source code is in the 'taipy/common' directory.

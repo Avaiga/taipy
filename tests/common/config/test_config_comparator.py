@@ -15,8 +15,8 @@ from taipy.common.config import Config
 from taipy.common.config._config import _Config
 from taipy.common.config._config_comparator._comparator_result import _ComparatorResult
 from taipy.common.config.global_app.global_app_config import GlobalAppConfig
-from tests.config.utils.section_for_tests import SectionForTest
-from tests.config.utils.unique_section_for_tests import UniqueSectionForTest
+from tests.common.config.utils.section_for_tests import SectionForTest
+from tests.common.config.utils.unique_section_for_tests import UniqueSectionForTest
 
 
 class TestConfigComparator:

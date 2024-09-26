@@ -35,8 +35,8 @@ jobs:
           filters: |
             cli:
               - 'taipy/_cli/**'
-            config:
-              - 'taipy/config/**'
+            common:
+              - 'taipy/common/**'
             core:
               - 'taipy/core/**'
             gui:
@@ -107,9 +107,9 @@ jobs:
         if: steps.changes.outputs.cli == 'true'
         run: pipenv run pytest tests/cli
 
-      - name: Pytest Config
-        if: steps.changes.outputs.config == 'true'
-        run: pipenv run pytest tests/config
+      - name: Pytest Common
+        if: steps.changes.outputs.common == 'true'
+        run: pipenv run pytest tests/common
 
       - name: Pytest Core
         if: steps.changes.outputs.core == 'true'
