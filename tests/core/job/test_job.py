@@ -335,53 +335,53 @@ def test_status_records(job_id):
     _JobManager._set(job_1)
 
     assert job_1._status_change_records == {"SUBMITTED": datetime(2024, 9, 25, 13, 30, 30)}
-    assert job_1.submitted_time == datetime(2024, 9, 25, 13, 30, 30)
+    assert job_1.submitted_at == datetime(2024, 9, 25, 13, 30, 30)
     assert job_1.execution_duration is None
 
     with freezegun.freeze_time("2024-09-25 13:35:30"):
-        job_1.pending()
-    assert job_1._status_change_records == {
-        "SUBMITTED": datetime(2024, 9, 25, 13, 30, 30),
-        "PENDING": datetime(2024, 9, 25, 13, 35, 30),
-    }
-    assert job_1.execution_duration is None
-    with freezegun.freeze_time("2024-09-25 13:36:00"):
-        assert job_1.pending_duration == 30
-
-    with freezegun.freeze_time("2024-09-25 13:40:30"):
         job_1.blocked()
     assert job_1._status_change_records == {
         "SUBMITTED": datetime(2024, 9, 25, 13, 30, 30),
-        "PENDING": datetime(2024, 9, 25, 13, 35, 30),
-        "BLOCKED": datetime(2024, 9, 25, 13, 40, 30),
+        "BLOCKED": datetime(2024, 9, 25, 13, 35, 30),
+    }
+    assert job_1.execution_duration is None
+    with freezegun.freeze_time("2024-09-25 13:36:00"):
+        assert job_1.blocked_duration == 30  # = 13:36:00 - 13:35:30
+
+    with freezegun.freeze_time("2024-09-25 13:40:30"):
+        job_1.pending()
+    assert job_1._status_change_records == {
+        "SUBMITTED": datetime(2024, 9, 25, 13, 30, 30),
+        "BLOCKED": datetime(2024, 9, 25, 13, 35, 30),
+        "PENDING": datetime(2024, 9, 25, 13, 40, 30),
     }
     assert job_1.execution_duration is None
     with freezegun.freeze_time("2024-09-25 13:41:00"):
-        assert job_1.blocked_duration == 30
+        assert job_1.pending_duration == 30  # = 13:41:00 - 13:40:30
 
     with freezegun.freeze_time("2024-09-25 13:50:30"):
         job_1.running()
     assert job_1._status_change_records == {
         "SUBMITTED": datetime(2024, 9, 25, 13, 30, 30),
-        "PENDING": datetime(2024, 9, 25, 13, 35, 30),
-        "BLOCKED": datetime(2024, 9, 25, 13, 40, 30),
+        "BLOCKED": datetime(2024, 9, 25, 13, 35, 30),
+        "PENDING": datetime(2024, 9, 25, 13, 40, 30),
         "RUNNING": datetime(2024, 9, 25, 13, 50, 30),
     }
-    assert job_1.run_time == datetime(2024, 9, 25, 13, 50, 30)
-    assert job_1.pending_duration == 900
-    assert job_1.blocked_duration == 600
+    assert job_1.run_at == datetime(2024, 9, 25, 13, 50, 30)
+    assert job_1.blocked_duration == 300  # = 13:40:30 - 13:35:30
+    assert job_1.pending_duration == 600  # = 13:50:30 - 13:40:30
     assert job_1.execution_duration > 0
 
     with freezegun.freeze_time("2024-09-25 13:56:35"):
         job_1.completed()
     assert job_1._status_change_records == {
         "SUBMITTED": datetime(2024, 9, 25, 13, 30, 30),
-        "PENDING": datetime(2024, 9, 25, 13, 35, 30),
-        "BLOCKED": datetime(2024, 9, 25, 13, 40, 30),
+        "BLOCKED": datetime(2024, 9, 25, 13, 35, 30),
+        "PENDING": datetime(2024, 9, 25, 13, 40, 30),
         "RUNNING": datetime(2024, 9, 25, 13, 50, 30),
         "COMPLETED": datetime(2024, 9, 25, 13, 56, 35),
     }
-    assert job_1.execution_duration == 365
+    assert job_1.execution_duration == 365  # = 13:56:35 - 13:50:30
 
 
 def test_is_deletable():
