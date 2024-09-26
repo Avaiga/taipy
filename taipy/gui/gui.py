@@ -1652,9 +1652,6 @@ class Gui:
         except RuntimeError:
             return False
 
-    def _get_lambda_id(self, lambda_fn: LambdaType):
-        return f"__lambda_{id(lambda_fn)}"
-
     # Proxy methods for Evaluator
     def _evaluate_expr(
         self, expr: str, lazy_declare: t.Optional[bool] = False, lambda_expr: t.Optional[bool] = False

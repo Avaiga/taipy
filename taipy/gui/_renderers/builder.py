@@ -28,6 +28,7 @@ from ..utils import (
     _get_client_var_name,
     _get_data_type,
     _get_expr_var_name,
+    _get_lambda_id,
     _getscopeattr,
     _getscopeattr_drill,
     _is_boolean,
@@ -167,7 +168,7 @@ class _Builder:
                     if val.__name__ == "<lambda>":
                         # if it is a lambda and it has already a hash_name, we're fine
                         if looks_like_a_lambda or not hash_name:
-                            hash_name = gui._get_lambda_id(val)
+                            hash_name = _get_lambda_id(val)
                             gui._bind_var_val(hash_name, val)  # type: ignore[arg-type]
                     else:
                         hash_name = _get_expr_var_name(val.__name__)
