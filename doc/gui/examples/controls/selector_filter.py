@@ -22,7 +22,6 @@ value = _python_builtins[0]
 
 page = """
 Selector - Filter
-
 <|{value}|selector|lov={_python_builtins}|filter|multiple|>
 """
 
