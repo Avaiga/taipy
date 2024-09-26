@@ -80,11 +80,11 @@ class Config:
 
         The Config class also provides a few methods to manage the configuration.
 
-        ??? example "Method to manage configuration"
+        ??? example "Manage the configuration"
 
             - *Check the configuration for issues*: Use the `Config.check()^` method to check the
-                configuration. It returns an `IssueCollector^` containing all the `Issue^`s
-                found representing the issues with their severity.
+                configuration. It returns an `IssueCollector^` containing all the
+                 `Issue^`s found. The issues are logged to the console for debugging.
             - *Block the configuration update*: Use the `Config.block_update()^` method to forbid
                 any update on the configuration. This can be useful when you want to ensure that
                 the configuration is not modified at run time. Note that running the `Orchestrator^`
