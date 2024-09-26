@@ -543,6 +543,11 @@ def test_submit_duration_development_mode():
     assert jobs_1s.execution_duration >= 1
     assert jobs_2s.execution_duration >= 2
 
+    assert submission.execution_duration >= 3
+    assert submission.submitted_at == min(jobs_1s.submitted_at, jobs_2s.submitted_at)
+    assert submission.run_at == min(jobs_1s.run_at, jobs_2s.run_at)
+    assert submission.finished_at == max(jobs_1s.finished_at, jobs_2s.finished_at)
+
 
 @pytest.mark.standalone
 def test_submit_duration_standalone_mode():
@@ -572,3 +577,8 @@ def test_submit_duration_standalone_mode():
     jobs_2s = jobs[0] if jobs[0].task.config_id == "task_config_id_2" else jobs[1]
     assert jobs_1s.execution_duration >= 1
     assert jobs_2s.execution_duration >= 2
+
+    assert submission.execution_duration >= 2  # Both tasks are executed in parallel so the duration may smaller than 3
+    assert submission.submitted_at == min(jobs_1s.submitted_at, jobs_2s.submitted_at)
+    assert submission.run_at == min(jobs_1s.run_at, jobs_2s.run_at)
+    assert submission.finished_at == max(jobs_1s.finished_at, jobs_2s.finished_at)
