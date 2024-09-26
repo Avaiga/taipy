@@ -28,6 +28,7 @@ from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from taipy.core.submission.submission_status import SubmissionStatus
 from taipy.core.task._task_manager import _TaskManager
+from tests.core.utils import assert_true_after_time
 
 
 def nothing(*args, **kwargs):
@@ -534,9 +535,9 @@ def test_submit_duration_development_mode():
     jobs = submission.jobs
     orchestrator.stop()
 
-    assert all(isinstance(job.submitted_time, datetime) for job in jobs)
-    assert all(isinstance(job.run_time, datetime) for job in jobs)
-    assert all(isinstance(job.finished_time, datetime) for job in jobs)
+    assert all(isinstance(job.submitted_at, datetime) for job in jobs)
+    assert all(isinstance(job.run_at, datetime) for job in jobs)
+    assert all(isinstance(job.finished_at, datetime) for job in jobs)
     jobs_1s = jobs[0] if jobs[0].task.config_id == "task_config_id_1" else jobs[1]
     jobs_2s = jobs[0] if jobs[0].task.config_id == "task_config_id_2" else jobs[1]
     assert jobs_1s.execution_duration >= 1
@@ -559,16 +560,14 @@ def test_submit_duration_standalone_mode():
     _ScenarioManager._set(scenario)
     submission = taipy.submit(scenario)
 
-    while not all(job is not None and job.is_completed() for job in submission.jobs):
-        sleep(1)  # Limit CPU usage
-
+    assert_true_after_time(lambda: all(job is not None and job.is_completed() for job in submission.jobs))
     orchestrator.stop()
 
     jobs = submission.jobs
 
-    assert all(isinstance(job.submitted_time, datetime) for job in jobs)
-    assert all(isinstance(job.run_time, datetime) for job in jobs)
-    assert all(isinstance(job.finished_time, datetime) for job in jobs)
+    assert all(isinstance(job.submitted_at, datetime) for job in jobs)
+    assert all(isinstance(job.run_at, datetime) for job in jobs)
+    assert all(isinstance(job.finished_at, datetime) for job in jobs)
     jobs_1s = jobs[0] if jobs[0].task.config_id == "task_config_id_1" else jobs[1]
     jobs_2s = jobs[0] if jobs[0].task.config_id == "task_config_id_2" else jobs[1]
     assert jobs_1s.execution_duration >= 1
