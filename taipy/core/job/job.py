@@ -165,7 +165,7 @@ class Job(_Entity, _Labeled):
             Optional[datetime]: The date time when the job was run.
                 If the job is not run, None is returned.
         """
-        return self._status_change_records.get("RUNNING", None)
+        return self._status_change_records.get(Status.RUNNING.name, None)
 
     @property
     @_self_reload(_MANAGER_NAME)
@@ -178,15 +178,15 @@ class Job(_Entity, _Labeled):
         """
         if self.is_finished():
             if self.is_completed():
-                return self._status_change_records["COMPLETED"]
+                return self._status_change_records[Status.COMPLETED.name]
             elif self.is_failed():
-                return self._status_change_records["FAILED"]
+                return self._status_change_records[Status.FAILED.name]
             elif self.is_canceled():
-                return self._status_change_records["CANCELED"]
+                return self._status_change_records[Status.CANCELED.name]
             elif self.is_skipped():
-                return self._status_change_records["SKIPPED"]
+                return self._status_change_records[Status.SKIPPED.name]
             elif self.is_abandoned():
-                return self._status_change_records["ABANDONED"]
+                return self._status_change_records[Status.ABANDONED.name]
 
         return None
 
@@ -202,13 +202,13 @@ class Job(_Entity, _Labeled):
                 - If the job is not finished, the execution time is the duration
                   from the running time to the current time.
         """
-        if "RUNNING" not in self._status_change_records:
+        if Status.RUNNING.name not in self._status_change_records:
             return None
 
         if self.is_finished():
-            return (self.finished_time - self._status_change_records["RUNNING"]).total_seconds()
+            return (self.finished_time - self._status_change_records[Status.RUNNING.name]).total_seconds()
 
-        return (datetime.now() - self._status_change_records["RUNNING"]).total_seconds()
+        return (datetime.now() - self._status_change_records[Status.RUNNING.name]).total_seconds()
 
     @property
     @_self_reload(_MANAGER_NAME)
@@ -221,13 +221,15 @@ class Job(_Entity, _Labeled):
                 - If the job is not pending, the pending time is the duration
                   from the submission to the current time.
         """
-        if "PENDING" not in self._status_change_records:
+        if Status.PENDING.name not in self._status_change_records:
             return None
 
         if self.is_finished() or self.is_running():
-            return (self._status_change_records["RUNNING"] - self._status_change_records["PENDING"]).total_seconds()
+            return (
+                self._status_change_records[Status.RUNNING.name] - self._status_change_records[Status.PENDING.name]
+            ).total_seconds()
 
-        return (datetime.now() - self._status_change_records["PENDING"]).total_seconds()
+        return (datetime.now() - self._status_change_records[Status.PENDING.name]).total_seconds()
 
     @property
     @_self_reload(_MANAGER_NAME)
@@ -240,15 +242,17 @@ class Job(_Entity, _Labeled):
                 - If the job is not blocked, the blocked time is the duration
                   from the submission to the current time.
         """
-        if "BLOCKED" not in self._status_change_records:
+        if Status.BLOCKED.name not in self._status_change_records:
             return None
 
         if self.is_finished():
-            return (self.finished_time - self._status_change_records["BLOCKED"]).total_seconds()
+            return (self.finished_time - self._status_change_records[Status.BLOCKED.name]).total_seconds()
         if self.is_running():
-            return (self._status_change_records["RUNNING"] - self._status_change_records["BLOCKED"]).total_seconds()
+            return (
+                self._status_change_records[Status.RUNNING.name] - self._status_change_records[Status.BLOCKED.name]
+            ).total_seconds()
 
-        return (datetime.now() - self._status_change_records["BLOCKED"]).total_seconds()
+        return (datetime.now() - self._status_change_records[Status.BLOCKED.name]).total_seconds()
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -285,50 +289,42 @@ class Job(_Entity, _Labeled):
     @_run_callbacks
     def blocked(self):
         """Set the status to _blocked_ and notify subscribers."""
-        self._status_change_records["BLOCKED"] = datetime.now()
         self.status = Status.BLOCKED
 
     @_run_callbacks
     def pending(self):
         """Set the status to _pending_ and notify subscribers."""
-        self._status_change_records["PENDING"] = datetime.now()
         self.status = Status.PENDING
 
     @_run_callbacks
     def running(self):
         """Set the status to _running_ and notify subscribers."""
-        self._status_change_records["RUNNING"] = datetime.now()
         self.status = Status.RUNNING
 
     @_run_callbacks
     def canceled(self):
         """Set the status to _canceled_ and notify subscribers."""
-        self._status_change_records["CANCELED"] = datetime.now()
         self.status = Status.CANCELED
 
     @_run_callbacks
     def abandoned(self):
         """Set the status to _abandoned_ and notify subscribers."""
-        self._status_change_records["ABANDONED"] = datetime.now()
         self.status = Status.ABANDONED
 
     @_run_callbacks
     def failed(self):
         """Set the status to _failed_ and notify subscribers."""
-        self._status_change_records["FAILED"] = datetime.now()
         self.status = Status.FAILED
 
     @_run_callbacks
     def completed(self):
         """Set the status to _completed_ and notify subscribers."""
-        self._status_change_records["COMPLETED"] = datetime.now()
         self.status = Status.COMPLETED
         self.__logger.info(f"job {self.id} is completed.")
 
     @_run_callbacks
     def skipped(self):
         """Set the status to _skipped_ and notify subscribers."""
-        self._status_change_records["SKIPPED"] = datetime.now()
         self.status = Status.SKIPPED
 
     def is_failed(self) -> bool:
