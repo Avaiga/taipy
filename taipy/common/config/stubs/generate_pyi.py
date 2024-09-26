@@ -141,9 +141,9 @@ def _build_header(filename) -> str:
 
 
 if __name__ == "__main__":
-    header_file = "taipy/config/stubs/pyi_header.py"
+    header_file = "taipy/common/config/stubs/pyi_header.py"
     config_init = Path("taipy/core/config/__init__.py")
-    base_config = "taipy/config/config.py"
+    base_config = "taipy/common/config/config.py"
 
     dn_filename = "taipy/core/config/data_node_config.py"
     job_filename = "taipy/core/config/job_config.py"
@@ -164,5 +164,5 @@ if __name__ == "__main__":
     # Remove the final redundant \n
     pyi = pyi[:-1]
 
-    with open("taipy/config/config.pyi", "w") as f:
+    with open("taipy/common/config/config.pyi", "w") as f:
         f.writelines(pyi)
