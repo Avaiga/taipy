@@ -51,4 +51,4 @@ page = Markdown(
 )
 
 if __name__ == "__main__":
-    Gui(page).run(title="Selector - Filter")
+    Gui(page).run(title="Selector - Style every other row")
