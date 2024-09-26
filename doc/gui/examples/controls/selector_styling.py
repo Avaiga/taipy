@@ -22,7 +22,6 @@ value = _python_builtins[0]
 
 page = Markdown(
     """
-Selector - Style every other row
 
 <|{value}|selector|lov={_python_builtins}|>
 """,
