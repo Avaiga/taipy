@@ -16,7 +16,7 @@ from taipy.core import Core, Orchestrator
 
 
 class TestCore:
-    def test_run_core_with_depracated_message(self, caplog):
+    def test_run_core_with_deprecated_message(self, caplog):
         with pytest.warns(DeprecationWarning):
             core = Core()
         core.run()

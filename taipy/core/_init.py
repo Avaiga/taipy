@@ -30,7 +30,6 @@ from .taipy import (
     can_create,
     cancel_job,
     clean_all_entities,
-    clean_all_entities_by_version,
     compare_scenarios,
     create_global_data_node,
     create_scenario,
