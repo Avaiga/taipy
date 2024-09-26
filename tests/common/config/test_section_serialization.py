@@ -208,8 +208,8 @@ def test_read_write_toml_configuration_file_with_function_and_class():
 [unique_section_name]
 attribute = "my_attribute"
 prop = "my_prop"
-prop_list = [ "tests.config.test_section_serialization.CustomEncoder:class", \
-"tests.config.test_section_serialization.CustomDecoder:class",]
+prop_list = [ "tests.common.config.test_section_serialization.CustomEncoder:class", \
+"tests.common.config.test_section_serialization.CustomDecoder:class",]
 
 [section_name.default]
 attribute = "default_attribute"
@@ -220,8 +220,8 @@ prop_int = "0:int"
 attribute = "my_attribute"
 prop = "default_prop"
 prop_int = "0:int"
-prop_fct_list = [ "tests.config.test_section_serialization.add:function",]
-prop_class_list = [ "tests.config.test_section_serialization.CustomClass:class",]
+prop_fct_list = [ "tests.common.config.test_section_serialization.add:function",]
+prop_class_list = [ "tests.common.config.test_section_serialization.CustomClass:class",]
 
 [section_name.my_id_2]
 attribute = "my_attribute_2"
@@ -412,8 +412,8 @@ def test_read_write_json_configuration_file_with_function_and_class():
 "attribute": "my_attribute",
 "prop": "my_prop",
 "prop_list": [
-"tests.config.test_section_serialization.CustomEncoder:class",
-"tests.config.test_section_serialization.CustomDecoder:class"
+"tests.common.config.test_section_serialization.CustomEncoder:class",
+"tests.common.config.test_section_serialization.CustomDecoder:class"
 ]
 },
 "section_name": {
@@ -427,10 +427,10 @@ def test_read_write_json_configuration_file_with_function_and_class():
 "prop": "default_prop",
 "prop_int": "0:int",
 "prop_fct_list": [
-"tests.config.test_section_serialization.add:function"
+"tests.common.config.test_section_serialization.add:function"
 ],
 "prop_class_list": [
-"tests.config.test_section_serialization.CustomClass:class"
+"tests.common.config.test_section_serialization.CustomClass:class"
 ]
 },
 "my_id_2": {

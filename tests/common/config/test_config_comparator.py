@@ -34,7 +34,7 @@ class TestConfigComparator:
         _config_2 = _Config._default_config()
 
         with mock.patch(
-            "taipy.config._config_comparator._config_comparator._ConfigComparator._find_conflict_config"
+            "taipy.common.config._config_comparator._config_comparator._ConfigComparator._find_conflict_config"
         ) as mck:
             Config._comparator._find_conflict_config(_config_1, _config_2)
             mck.assert_called_once_with(_config_1, _config_2)

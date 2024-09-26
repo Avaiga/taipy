@@ -116,6 +116,7 @@ def test_gui_service_arguments_hierarchy():
     with patch("sys.argv", ["prog"]):
         gui.run(run_server=False, watermark="", host="my_host", port=5001)
     service_config = gui._config.config
+
     assert not service_config["dark_mode"]
     assert service_config["host"] == "my_2nd_host"
     assert service_config["watermark"] == ""
