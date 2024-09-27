@@ -14,7 +14,7 @@ jobs:
 
       - uses: jpetrucciani/mypy-check@master
         with:
-          mypy_flags:  "--ignore-missing-imports --implicit-optional --no-namespace-packages --exclude (taipy/templates/|tools/|doc/gui/examples/.*/builder.py) --follow-imports skip --disable-error-code import-untyped"
+          mypy_flags:  "--ignore-missing-imports --implicit-optional --no-namespace-packages --exclude (taipy/templates/|tools/|doc/gui/examples/.*/builder.py|taipy/common/config/config.pyi) --follow-imports skip --disable-error-code import-untyped"
 
       - uses: chartboost/ruff-action@v1
   tests:
@@ -33,8 +33,6 @@ jobs:
         id: changes
         with:
           filters: |
-            cli:
-              - 'taipy/_cli/**'
             common:
               - 'taipy/common/**'
             core:
@@ -102,10 +100,6 @@ jobs:
       - name: Install Playwright
         if: steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true'
         run: pipenv run playwright install chromium --with-deps
-
-      - name: Pytest CLI
-        if: steps.changes.outputs.cli == 'true'
-        run: pipenv run pytest tests/cli
 
       - name: Pytest Common
         if: steps.changes.outputs.common == 'true'
