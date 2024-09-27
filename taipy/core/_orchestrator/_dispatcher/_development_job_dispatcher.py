@@ -12,8 +12,6 @@
 import datetime
 from typing import Optional
 
-from ...common._check_dependencies import _TAIPY_ENTERPRISE_CORE_MODULE, _using_enterprise
-from ...common._utils import _load_fct
 from ...job.job import Job
 from .._abstract_orchestrator import _AbstractOrchestrator
 from ._job_dispatcher import _JobDispatcher
@@ -48,13 +46,6 @@ class _DevelopmentJobDispatcher(_JobDispatcher):
             job (Job^): The job to submit on an executor with an available worker.
         """
         job.execution_started_at = datetime.datetime.now()
-        if _using_enterprise():
-            task_fct_wrapper = _load_fct(
-                _TAIPY_ENTERPRISE_CORE_MODULE + "._orchestrator._dispatcher._task_function_wrapper",
-                "_TaskFunctionWrapper",
-            )
-        else:
-            task_fct_wrapper = _TaskFunctionWrapper
-        rs = task_fct_wrapper(job.id, job.task).execute()
+        rs = _TaskFunctionWrapper(job.id, job.task).execute()
         self._update_job_status(job, rs)
         job.execution_ended_at = datetime.datetime.now()

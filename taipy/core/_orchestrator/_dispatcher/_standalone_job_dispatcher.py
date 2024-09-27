@@ -19,8 +19,6 @@ from typing import Callable, Optional
 from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.config import Config
 
-from ...common._check_dependencies import _TAIPY_ENTERPRISE_CORE_MODULE, _using_enterprise
-from ...common._utils import _load_fct
 from ...job.job import Job
 from .._abstract_orchestrator import _AbstractOrchestrator
 from ._job_dispatcher import _JobDispatcher
@@ -64,16 +62,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         config_as_string = _TomlSerializer()._serialize(Config._applied_config)  # type: ignore[attr-defined]
 
         job.execution_started_at = datetime.datetime.now()
-
-        if _using_enterprise():
-            task_fct_wrapper = _load_fct(
-                _TAIPY_ENTERPRISE_CORE_MODULE + "._orchestrator._dispatcher._task_function_wrapper",
-                "_TaskFunctionWrapper",
-            )
-        else:
-            task_fct_wrapper = _TaskFunctionWrapper
-
-        future = self._executor.submit(task_fct_wrapper(job.id, job.task), config_as_string=config_as_string)
+        future = self._executor.submit(_TaskFunctionWrapper(job.id, job.task), config_as_string=config_as_string)
         future.add_done_callback(partial(self._update_job_status_from_future, job))
 
     def _update_job_status_from_future(self, job: Job, ft):
