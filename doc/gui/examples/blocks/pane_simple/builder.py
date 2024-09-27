@@ -35,4 +35,4 @@ with tgb.Page() as page:
     tgb.button("Show pane")
 
 if __name__ == "__main__":
-    Gui(page).run()
+    Gui(page).run(title="Pane - Simple")

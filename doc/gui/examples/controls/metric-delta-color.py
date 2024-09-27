@@ -25,4 +25,5 @@ page = """
 <|{co2_2024}|metric|delta={delta}|delta_color=invert|format=%.1f ppm|delta_format=%.1f ppm|min=300|max=500|>
 """
 
-Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Metric - Delta color")

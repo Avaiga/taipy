@@ -89,7 +89,9 @@ class _Element(ABC):
         return key
 
     def _is_callable(self, name: str):
-        return "callable" in self._TYPES.get(name, "").lower()
+        return (
+            "callable" in self._TYPES.get(f"{parts[0]}__" if len(parts := name.split("__")) > 1 else name, "").lower()
+        )
 
     def _parse_property(self, key: str, value: t.Any) -> t.Any:
         if isinstance(value, (str, dict, Iterable)):

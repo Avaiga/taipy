@@ -20,23 +20,21 @@ from sklearn.linear_model import LinearRegression
 
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # Let scikit-learn generate a random regression problem
-    n_samples = 300
-    X, y, coef = make_regression(n_samples=n_samples, n_features=1, n_informative=1, n_targets=1, noise=25, coef=True)
+# Let scikit-learn generate a random regression problem
+n_samples = 300
+X, y, coef = make_regression(n_samples=n_samples, n_features=1, n_informative=1, n_targets=1, noise=25, coef=True)
 
-    model = LinearRegression().fit(X, y)
+model = LinearRegression().fit(X, y)
 
-    x_data = X.flatten()
-    y_data = y.flatten()
-    predict = model.predict(X)
+x_data = X.flatten()
+y_data = y.flatten()
+predict = model.predict(X)
 
-    data = {"x": x_data, "y": y_data, "Regression": predict}
+data = {"x": x_data, "y": y_data, "Regression": predict}
 
-    page = """
-# Scatter - Regression
-
+page = """
 <|{data}|chart|x=x|y[1]=y|mode[1]=markers|y[2]=Regression|mode[2]=line|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Scatter - Regression")

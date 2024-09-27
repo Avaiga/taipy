@@ -12,6 +12,7 @@ from functools import lru_cache
 from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
+from ..common._check_dependencies import _TAIPY_ENTERPRISE_CORE_MODULE, _using_enterprise
 from ..common._utils import _load_fct
 from ._job_fs_repository import _JobFSRepository
 from ._job_manager import _JobManager
@@ -23,10 +24,10 @@ class _JobManagerFactory(_ManagerFactory):
     @classmethod
     @lru_cache
     def _build_manager(cls) -> Type[_JobManager]:
-        if cls._using_enterprise():
-            job_manager = _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".job._job_manager", "_JobManager")  # type: ignore
+        if _using_enterprise():
+            job_manager = _load_fct(_TAIPY_ENTERPRISE_CORE_MODULE + ".job._job_manager", "_JobManager")  # type: ignore
             build_repository = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".job._job_manager_factory", "_JobManagerFactory"
+                _TAIPY_ENTERPRISE_CORE_MODULE + ".job._job_manager_factory", "_JobManagerFactory"
             )._build_repository  # type: ignore
         else:
             job_manager = _JobManager

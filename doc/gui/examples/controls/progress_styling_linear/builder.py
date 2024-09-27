@@ -35,4 +35,4 @@ with tgb.Page(
     tgb.progress("{value}", linear=True)
 
 if __name__ == "__main__":
-    Gui(page).run()
+    Gui(page).run(title="Progress - Styling - Linear")

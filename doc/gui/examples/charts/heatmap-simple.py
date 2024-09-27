@@ -15,22 +15,20 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    data = {
-        "Temperatures": [
-            [17.2, 27.4, 28.6, 21.5],
-            [5.6, 15.1, 20.2, 8.1],
-            [26.6, 22.8, 21.8, 24.0],
-            [22.3, 15.5, 13.4, 19.6],
-        ],
-        "Cities": ["Hanoi", "Paris", "Rio", "Sydney"],
-        "Seasons": ["Winter", "Spring", "Summer", "Autumn"],
-    }
+data = {
+    "Temperatures": [
+        [17.2, 27.4, 28.6, 21.5],
+        [5.6, 15.1, 20.2, 8.1],
+        [26.6, 22.8, 21.8, 24.0],
+        [22.3, 15.5, 13.4, 19.6],
+    ],
+    "Cities": ["Hanoi", "Paris", "Rio", "Sydney"],
+    "Seasons": ["Winter", "Spring", "Summer", "Autumn"],
+}
 
-    page = """
-# Heatmap - Basic
-
+page = """
 <|{data}|chart|type=heatmap|z=Temperatures|x=Seasons|y=Cities|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Heatmap - Basic")
