@@ -15,21 +15,19 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    data = {
-        "Day": ["Mon", "Tue", "Wed", "Thu", "Fri"],
-        "Items": [32, 25, 86, 60, 70],
-    }
+data = {
+    "Day": ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    "Items": [32, 25, 86, 60, 70],
+}
 
-    options = {
-        # Fill to x axis
-        "fill": "tozeroy"
-    }
+options = {
+    # Fill to x axis
+    "fill": "tozeroy"
+}
 
-    page = """
-# Filled Area - Simple
-
+page = """
 <|{data}|chart|x=Day|y=Items|options={options}|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Filled Area - Simple")

@@ -82,4 +82,4 @@ discuss_page = """
 """
 
 pages = {"register": register_page, "discuss": discuss_page}
-gui = Gui(pages=pages).run()
+gui = Gui(pages=pages).run(title="Chat - Discuss")

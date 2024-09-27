@@ -15,23 +15,21 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # x values are [-10..10]
-    x_range = range(-10, 11)
+# x values are [-10..10]
+x_range = range(-10, 11)
 
-    # The data set holds the _x_ series and two distinct series for _y_
-    data = {
-        "x": x_range,
-        # y1 = x*x
-        "y1": [x * x for x in x_range],
-        # y2 = 100-x*x
-        "y2": [100 - x * x for x in x_range],
-    }
+# The data set holds the _x_ series and two distinct series for _y_
+data = {
+    "x": x_range,
+    # y1 = x*x
+    "y1": [x * x for x in x_range],
+    # y2 = 100-x*x
+    "y2": [100 - x * x for x in x_range],
+}
 
-    page = """
-# Basics - Multiple traces
-
+page = """
 <|{data}|chart|x=x|y[1]=y1|y[2]=y2|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Multiple traces")

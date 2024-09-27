@@ -25,20 +25,18 @@ def draw_heart(angle):
     return 2 - 2 * sa + sa * (math.sqrt(math.fabs(math.cos(a))) / (sa + 1.4))
 
 
-if __name__ == "__main__":
-    # One data point for each degree
-    theta = range(0, 360)
+# One data point for each degree
+theta = range(0, 360)
 
-    data = {
-        # Create the heart shape
-        "r": [draw_heart(angle) for angle in theta],
-        "theta": theta,
-    }
+data = {
+    # Create the heart shape
+    "r": [draw_heart(angle) for angle in theta],
+    "theta": theta,
+}
 
-    page = """
-# Polar - Simple
-
+page = """
 <|{data}|chart|type=scatterpolar|mode=lines|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Polar - Simple")

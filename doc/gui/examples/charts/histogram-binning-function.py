@@ -15,42 +15,40 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # Initial data set. y = count_of(x)
-    samples = {"x": ["Apples", "Apples", "Apples", "Oranges", "Bananas", "Oranges"], "y": [5, 10, 3, 8, 5, 2]}
+# Initial data set. y = count_of(x)
+samples = {"x": ["Apples", "Apples", "Apples", "Oranges", "Bananas", "Oranges"], "y": [5, 10, 3, 8, 5, 2]}
 
-    # Create a data set array to allow for two traces
-    data = [samples, samples]
+# Create a data set array to allow for two traces
+data = [samples, samples]
 
-    # Gather those settings in a single dictionary
-    properties = {
-        # 'x' of the first trace is the 'x' data from the first element of data
-        "x[1]": "0/x",
-        # 'y' of the first trace is the 'y' data from the first element of data
-        "y[1]": "0/y",
-        # 'x' of the second trace is the 'x' data from the second element of data
-        "x[2]": "1/x",
-        # 'y' of the second trace is the 'y' data from the second element of data
-        "y[2]": "1/y",
-        # Data set colors
-        "color": ["#cd5c5c", "#505070"],
-        # Data set names (for the legend)
-        "name": ["Count", "Sum"],
-        # Configure the binning functions
-        "options": [
-            # First trace: count the bins
-            {"histfunc": "count"},
-            # Second trace: sum the bin occurrences
-            {"histfunc": "sum"},
-        ],
-        # Set x axis name
-        "layout": {"xaxis": {"title": "Fruit"}},
-    }
+# Gather those settings in a single dictionary
+properties = {
+    # 'x' of the first trace is the 'x' data from the first element of data
+    "x[1]": "0/x",
+    # 'y' of the first trace is the 'y' data from the first element of data
+    "y[1]": "0/y",
+    # 'x' of the second trace is the 'x' data from the second element of data
+    "x[2]": "1/x",
+    # 'y' of the second trace is the 'y' data from the second element of data
+    "y[2]": "1/y",
+    # Data set colors
+    "color": ["#cd5c5c", "#505070"],
+    # Data set names (for the legend)
+    "name": ["Count", "Sum"],
+    # Configure the binning functions
+    "options": [
+        # First trace: count the bins
+        {"histfunc": "count"},
+        # Second trace: sum the bin occurrences
+        {"histfunc": "sum"},
+    ],
+    # Set x axis name
+    "layout": {"xaxis": {"title": "Fruit"}},
+}
 
-    page = """
-# Histogram - Binning function
-
+page = """
 <|{data}|chart|type=histogram|properties={properties}|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Histogram - Binning function")

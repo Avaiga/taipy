@@ -42,10 +42,8 @@ layout = {
 }
 
 page = """
-# Advanced - Annotations
-
 <|{data}|chart|layout={layout}|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run()
+    Gui(page).run(title="Chart - Advanced - Annotations")

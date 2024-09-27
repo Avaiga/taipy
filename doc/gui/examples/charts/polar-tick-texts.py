@@ -51,61 +51,60 @@ def on_navigate(state, page):
     return page
 
 
-if __name__ == "__main__":
-    # Initialize the data set with the current time
-    data = generate_hand_shapes()
+# Initialize the data set with the current time
+data = generate_hand_shapes()
 
-    layout = {
-        "polar": {
-            "angularaxis": {
-                "rotation": 90,
-                "direction": "clockwise",
-                # One tick every 30 degrees
-                "tickvals": list(numpy.arange(0.0, 360.0, 30)),
-                # Text value for every tick
-                "ticktext": ["XII", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"],
-            },
-            "radialaxis": {"angle": 90, "visible": False, "range": [0, 12]},
+layout = {
+    "polar": {
+        "angularaxis": {
+            "rotation": 90,
+            "direction": "clockwise",
+            # One tick every 30 degrees
+            "tickvals": list(numpy.arange(0.0, 360.0, 30)),
+            # Text value for every tick
+            "ticktext": ["XII", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"],
         },
-        "showlegend": False,
-    }
+        "radialaxis": {"angle": 90, "visible": False, "range": [0, 12]},
+    },
+    "showlegend": False,
+}
 
-    # Options to be used for all three traces
-    base_opts = {"fill": "toself"}
-    # Specific for hours
-    hours_opts = dict(base_opts)
-    hours_opts["fillcolor"] = "#FF0000"
-    # Specific for minutes
-    minutes_opts = dict(base_opts)
-    minutes_opts["fillcolor"] = "#00FF00"
-    # Specific for seconds
-    seconds_opts = dict(base_opts)
-    seconds_opts["fillcolor"] = "#0000FF"
+# Options to be used for all three traces
+base_opts = {"fill": "toself"}
+# Specific for hours
+hours_opts = dict(base_opts)
+hours_opts["fillcolor"] = "#FF0000"
+# Specific for minutes
+minutes_opts = dict(base_opts)
+minutes_opts["fillcolor"] = "#00FF00"
+# Specific for seconds
+seconds_opts = dict(base_opts)
+seconds_opts["fillcolor"] = "#0000FF"
 
-    # Store all the chart control properties in a single object
-    properties = {
-        # Don't show data point markers
-        "mode": "lines",
-        # Data for the hours
-        "theta[1]": "0/a",
-        "r[1]": "0/r",
-        # Data for the minutes
-        "theta[2]": "1/a",
-        "r[2]": "1/r",
-        # Data for the seconds
-        "theta[3]": "2/a",
-        "r[3]": "2/r",
-        # Options for the three traces
-        "options[1]": hours_opts,
-        "options[2]": minutes_opts,
-        "options[3]": seconds_opts,
-        "line": {"color": "black"},
-        "layout": layout,
-    }
+# Store all the chart control properties in a single object
+properties = {
+    # Don't show data point markers
+    "mode": "lines",
+    # Data for the hours
+    "theta[1]": "0/a",
+    "r[1]": "0/r",
+    # Data for the minutes
+    "theta[2]": "1/a",
+    "r[2]": "1/r",
+    # Data for the seconds
+    "theta[3]": "2/a",
+    "r[3]": "2/r",
+    # Options for the three traces
+    "options[1]": hours_opts,
+    "options[2]": minutes_opts,
+    "options[3]": seconds_opts,
+    "line": {"color": "black"},
+    "layout": layout,
+}
 
-    page = """
-# Polar - Tick texts
-
+page = """
 <|{data}|chart|type=scatterpolar|properties={properties}|>
-    """
-    Gui(page).run()
+"""
+
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Polar - Tick texts")

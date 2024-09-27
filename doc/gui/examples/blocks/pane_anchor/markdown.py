@@ -28,4 +28,4 @@ This is the content of the page.
 """
 
 if __name__ == "__main__":
-    Gui(page).run()
+    Gui(page).run(title="Pane - Anchor")
