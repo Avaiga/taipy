@@ -63,20 +63,34 @@ __version__ = _get_version()
 
 
 def _config_doc(func):
-    def func_with_doc(section, attribute_name, default, configuration_methods, add_to_unconflicted_sections=False):
+    def func_with_doc(section, attr_name, default, configuration_methods, add_to_unconflicted_sections=False):
         import os
 
         if os.environ.get("GENERATING_TAIPY_DOC", None) and os.environ["GENERATING_TAIPY_DOC"] == "true":
-            with open("config_doc.txt", "a") as f:
+            with open("config_methods_doc.txt", "a") as f:
                 from inspect import signature
 
+                # Add the documentation fo configure methods
                 for exposed_configuration_method, configuration_method in configuration_methods:
                     annotation = "    @staticmethod\n"
                     sign = "    def " + exposed_configuration_method + str(signature(configuration_method)) + ":\n"
                     doc = '        """' + configuration_method.__doc__ + '"""\n'
                     content = "        pass\n\n"
                     f.write(annotation + sign + doc + content)
-        return func(section, attribute_name, default, configuration_methods, add_to_unconflicted_sections)
+
+            with open("config_attributes_doc.txt", "a") as f:
+                clazz = section.__class__
+                # Add the documentation for the attribute
+                attr_doc = '        '
+                if issubclass(section, UniqueSection):
+                    attr_doc += f'{attr_name} ({clazz}): The configured {clazz} section.\n'
+                elif issubclass(section, Section):
+                    attr_doc += f'{attr_name} (Dict[str, {clazz}]): The configured {clazz} sections.\n'
+                else:
+                    raise TypeError
+                f.write(attr_doc)
+
+        return func(section, attr_name, default, configuration_methods, add_to_unconflicted_sections)
 
     return func_with_doc
 
