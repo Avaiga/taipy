@@ -15,24 +15,22 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    data = {
-        "Types": ["Website visit", "Downloads", "Prospects", "Invoice sent", "Closed"],
-        "Visits_us": [13873, 10533, 5443, 2703, 908],
-        "Visits_eu": [7063, 4533, 3443, 1003, 1208],
-        "Visits_ap": [6873, 2533, 3443, 1703, 508],
-    }
+data = {
+    "Types": ["Website visit", "Downloads", "Prospects", "Invoice sent", "Closed"],
+    "Visits_us": [13873, 10533, 5443, 2703, 908],
+    "Visits_eu": [7063, 4533, 3443, 1003, 1208],
+    "Visits_ap": [6873, 2533, 3443, 1703, 508],
+}
 
-    # Columns for each trace
-    x = ["Visits_us", "Visits_eu", "Visits_ap"]
+# Columns for each trace
+x = ["Visits_us", "Visits_eu", "Visits_ap"]
 
-    # Legend text for each trace
-    names = ["US", "EU", "AP"]
+# Legend text for each trace
+names = ["US", "EU", "AP"]
 
-    page = """
-# Funnel - Multiple traces
-
+page = """
 <|{data}|chart|type=funnel|x={x}|y=Types|name={names}|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Funnel - Multiple traces")

@@ -15,21 +15,21 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    value = 45
-    # The layout object reference can be found in Plotly's documentation:
-    #         https://plotly.com/python/reference/layout/
-    layout = {
-        "paper_bgcolor": "lightblue",
-        "font": {
-            "size": 30,
-            "color": "blue",
-            "family": "Arial",
-        },
-    }
+value = 45
+# The layout object reference can be found in Plotly's documentation:
+#         https://plotly.com/python/reference/layout/
+layout = {
+    "paper_bgcolor": "lightblue",
+    "font": {
+        "size": 30,
+        "color": "blue",
+        "family": "Arial",
+    },
+}
 
-    page = """
+page = """
 <|{value}|metric|layout={layout}|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Metric - Layout")

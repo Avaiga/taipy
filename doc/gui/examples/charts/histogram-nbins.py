@@ -17,30 +17,29 @@ import random
 
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # Random set of 100 samples
-    samples = {"x": [random.gauss(mu=0.0, sigma=1.0) for _ in range(100)]}
+# Random set of 100 samples
+samples = {"x": [random.gauss(mu=0.0, sigma=1.0) for _ in range(100)]}
 
-    # Use the same data for both traces
-    data = [samples, samples]
+# Use the same data for both traces
+data = [samples, samples]
 
-    options = [
-        # First data set displayed as green-ish, and 5 bins
-        {"marker": {"color": "#4A4"}, "nbinsx": 5},
-        # Second data set displayed as red-ish, and 25 bins
-        {"marker": {"color": "#A33"}, "nbinsx": 25},
-    ]
+options = [
+    # First data set displayed as green-ish, and 5 bins
+    {"marker": {"color": "#4A4"}, "nbinsx": 5},
+    # Second data set displayed as red-ish, and 25 bins
+    {"marker": {"color": "#A33"}, "nbinsx": 25},
+]
 
-    layout = {
-        # Overlay the two histograms
-        "barmode": "overlay",
-        # Hide the legend
-        "showlegend": False,
-    }
+layout = {
+    # Overlay the two histograms
+    "barmode": "overlay",
+    # Hide the legend
+    "showlegend": False,
+}
 
-    page = """
-# Histogram - NBins
-
+page = """
 <|{data}|chart|type=histogram|options={options}|layout={layout}|>
-    """
-    Gui(page).run()
+"""
+
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Histogram - NBins")

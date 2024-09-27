@@ -27,13 +27,10 @@ def on_action(state, id):
             state.label = state.label[1:]
 
 
-if __name__ == "__main__":
-    # Initial value
-    label = "Here is some text"
+# Initial value
+label = "Here is some text"
 
-    page = """
-# Custom elements example
-
+page = """
 ## Fraction:
 
 No denominator: <|123|example.fraction|>
@@ -48,6 +45,7 @@ Colored text: <|{label}|example.label|>
 
 <|Add a character|button|id=addChar|>
 <|Remove a character|button|id=removeChar|>
-    """
+"""
 
-    Gui(page, libraries=[ExampleLibrary()]).run(debug=True)
+if __name__ == "__main__":
+    Gui(page, libraries=[ExampleLibrary()]).run(title="Extension Library - Custom elements example")

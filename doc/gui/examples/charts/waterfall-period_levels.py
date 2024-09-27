@@ -15,23 +15,21 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # Data set
-    data = [
-        {
-            # The quarterly periods are grouped by year
-            "Period": [["Carry", "Q1", "Q2", "Q3", "Q4", "Current"], ["N-1", "N", "N", "N", "N", "N+1"]]
-        },
-        {
-            "Cash Flow": [25, -17, 12, 18, -8, None],
-            "Measure": ["absolute", "relative", "relative", "relative", "relative", "total"],
-        },
-    ]
+# Data set
+data = [
+    {
+        # The quarterly periods are grouped by year
+        "Period": [["Carry", "Q1", "Q2", "Q3", "Q4", "Current"], ["N-1", "N", "N", "N", "N", "N+1"]]
+    },
+    {
+        "Cash Flow": [25, -17, 12, 18, -8, None],
+        "Measure": ["absolute", "relative", "relative", "relative", "relative", "total"],
+    },
+]
 
-    page = """
-# Waterfall - Period levels
-
+page = """
 <|{data}|chart|type=waterfall|x=0/Period|y=1/Cash Flow|measure=1/Measure|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Waterfall - Period levels")

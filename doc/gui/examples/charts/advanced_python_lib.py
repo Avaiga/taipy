@@ -48,4 +48,4 @@ page = """
 
 
 if __name__ == "__main__":
-    Gui(page).run()
+    Gui(page).run(title="Chart - Advanced - Python lib")

@@ -49,7 +49,7 @@ class _PandasDataAccessor(_DataAccessor):
             return pd.DataFrame(value)
         return t.cast(pd.DataFrame, value)
 
-    def _from_pandas(self, value: pd.DataFrame, data_type: t.Type):
+    def _from_pandas(self, value: pd.DataFrame, data_type: t.Type) -> t.Any:
         if data_type is pd.Series:
             return value.iloc[:, 0]
         return value

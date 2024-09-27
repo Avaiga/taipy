@@ -29,4 +29,4 @@ with tgb.Page() as page:
     tgb.button("Show pane", on_action=lambda s: s.assign("show_pane", True))
 
 if __name__ == "__main__":
-    Gui(page).run()
+    Gui(page).run(title="Pane - Lambda")
