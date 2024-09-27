@@ -89,7 +89,9 @@ class _Element(ABC):
         return key
 
     def _is_callable(self, name: str):
-        return "callable" in self._TYPES.get(name, "").lower()
+        return (
+            "callable" in self._TYPES.get(f"{parts[0]}__" if len(parts := name.split("__")) > 1 else name, "").lower()
+        )
 
     def _parse_property(self, key: str, value: t.Any) -> t.Any:
         if isinstance(value, (str, dict, Iterable)):
@@ -121,10 +123,10 @@ class _Element(ABC):
                 return None
             args = [arg.arg for arg in lambda_fn.args.args]
             targets = [
-                compr.target.id  # type: ignore[attr-defined]
+                comprehension.target.id  # type: ignore[attr-defined]
                 for node in ast.walk(lambda_fn.body)
                 if isinstance(node, ast.ListComp)
-                for compr in node.generators
+                for comprehension in node.generators
             ]
             tree = _TransformVarToValue(self.__calling_frame, args + targets + _python_builtins).visit(lambda_fn)
             ast.fix_missing_locations(tree)

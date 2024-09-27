@@ -788,22 +788,22 @@
                     },
                     {
                         "name": "style[<i>column_name</i>]",
-                        "type": "str",
+                        "type": "Union[str, Callable]",
                         "doc": "Allows the styling of table cells.<br/>See <a href=\"#dynamic-styling\">below</a> for details."
                     },
                     {
                         "name": "tooltip",
-                        "type": "str",
+                        "type": "Union[str, Callable]",
                         "doc": "The name of the function that must return a tooltip text for a cell.<br/>See <a href=\"#cell-tooltips\">below</a> for details."
                     },
                     {
                         "name": "tooltip[<i>column_name</i>]",
-                        "type": "str",
+                        "type": "Union[str, Callable]",
                         "doc": "The name of the function that must return a tooltip text for a cell.<br/>See <a href=\"#cell-tooltips\">below</a> for details."
                     },
                     {
                         "name": "format_fn[<i>column_name</i>]",
-                        "type": "str",
+                        "type": "Union[str, Callable]",
                         "doc": "TODO: The name of the function that must return a formatted value for a cell.<br/>See <a href=\"#cell-formats\">below</a> for details."
                     },
                     {

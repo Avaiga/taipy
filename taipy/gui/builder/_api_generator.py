@@ -139,5 +139,9 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
         return type(
             classname,
             (ElementBaseClass,),
-            {"_ELEMENT_NAME": element_name, "_DEFAULT_PROPERTY": default_property, "_TYPES": properties},
+            {
+                "_ELEMENT_NAME": element_name,
+                "_DEFAULT_PROPERTY": default_property,
+                "_TYPES": {f"{parts[0]}__" if len(parts := k.split("[")) > 1 else k: v for k, v in properties.items()},
+            },
         )

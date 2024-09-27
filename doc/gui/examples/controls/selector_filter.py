@@ -8,22 +8,21 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+# -----------------------------------------------------------------------------------------
+# To execute this script, make sure that the taipy-gui package is installed in your
+# Python environment and run:
+#     python <script>
+# -----------------------------------------------------------------------------------------
+import builtins
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.gui import Gui
 
-from .common._warnings import _warn_deprecated
-from .orchestrator import Orchestrator
+_python_builtins = dir(builtins)
+value = _python_builtins[0]
 
+page = """
+<|{value}|selector|lov={_python_builtins}|filter|multiple|>
+"""
 
-class Core:
-    """NOT DOCUMENTED"""
-
-    __logger = _TaipyLogger._get_logger()
-
-    def __new__(cls) -> Orchestrator:  # type: ignore
-        _warn_deprecated("'Core'", suggest="the 'Orchestrator' class")
-        cls.__logger.warning(
-            "The `Core` service is deprecated and replaced by the `Orchestrator` service. "
-            "An `Orchestrator` instance has been instantiated instead."
-        )
-        return Orchestrator()
+if __name__ == "__main__":
+    Gui(page).run(title="Selector - Filter")

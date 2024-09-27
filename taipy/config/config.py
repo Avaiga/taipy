@@ -37,15 +37,7 @@ class Config:
         The Config class provides various methods to configure the application. Each method adds
         a specific section to the configuration and returns it.
 
-        Here is a non-exhaustive list of configuration method examples:
-
-        - `configure_data_node()`: Configure a data node adding and returning a `DataNodeConfig^`.
-        - `configure_task()`: Configure a task adding and returning a `TaskConfig^`.
-        - `configure_scenario()`: Configure a scenario adding and returning a `ScenarioConfig^`.
-        - `load()`: Load a TOML configuration file. (This overrides the Python configuration)
-        - more...
-
-        !!! example "Most frequently used configuration methods"
+        ??? example "Most frequently used configuration methods"
 
             ```python
             from taipy import Config
@@ -61,7 +53,7 @@ class Config:
             Config.load("config.toml") # Load a configuration file
             ```
 
-        !!! example "Advanced use case"
+        ??? example "Advanced use case"
 
             The configuration can be done in three ways: Python code, configuration files, or
             environment variables. All configuration manners are ultimately merged (overriding the previous way
@@ -74,7 +66,7 @@ class Config:
         Once the configuration is done, you can retrieve the configuration values using the exposed
         attributes.
 
-        !!! Example "Retrieve configuration values"
+        ??? Example "Retrieve configuration values"
 
             ```python
             from taipy import Config
@@ -82,35 +74,41 @@ class Config:
             global_cfg = Config.global_config  # Retrieve the global application configuration
             data_node_cfgs = Config.data_nodes  # Retrieve all data node configurations
             scenario_cfgs = Config.scenarios  # Retrieve all scenario configurations
-        ```
+            ```
 
     3. A few methods to manage the configuration:
 
-        The Config class also provides a few methods to manage the configuration. For example,
-        you can:
+        The Config class also provides a few methods to manage the configuration.
 
-        - *Check the configuration for issues*: Use the `Config.check()^` method to check the
-            configuration. It returns an `IssueCollector^` containing all the `Issue^`s
-            found representing the issues with their severity.
-        - *Block the configuration update*: Use the `Config.block_update()^` method to forbid
-            any update on the configuration. This can be useful when you want to ensure that
-            the configuration is not modified at run time. Note that running the `Orchestrator^`
-            service` automatically blocks the configuration update.
-        - *Unblock the configuration update*: Use the `Config.unblock_update()^` method to allow
-            again the update on the configuration.
-        - *Backup the configuration*: Use the `Config.backup()^` method to back up as a TOML
-            file the applied configuration. The applied configuration backed up is the result
-            of the compilation of the three possible configuration methods that overrides each
-            others.
-        - *Restore the configuration*: Use the `Config.restore()^` method to restore a TOML
-            configuration file and replace the current applied configuration.
-        - *Export the configuration*: Use the `Config.export()^` method to export as a TOML file
-            the Python code configuration.
-        - *Load the configuration*: Use the `Config.load()^` method to load a TOML configuration
-            file and replace the current Python configuration.
-        - *Override the configuration*: Use the `Config.override()^` method to load a TOML
-            configuration file and override the current Python configuration.
+        ??? example "Manage the configuration"
 
+            - *Check the configuration for issues*: Use the `Config.check()^` method to check the
+                configuration. It returns an `IssueCollector^` containing all the
+                 `Issue^`s found. The issues are logged to the console for debugging.
+            - *Block the configuration update*: Use the `Config.block_update()^` method to forbid
+                any update on the configuration. This can be useful when you want to ensure that
+                the configuration is not modified at run time. Note that running the `Orchestrator^`
+                service` automatically blocks the configuration update.
+            - *Unblock the configuration update*: Use the `Config.unblock_update()^` method to allow
+                again the update on the configuration.
+            - *Backup the configuration*: Use the `Config.backup()^` method to back up as a TOML
+                file the applied configuration. The applied configuration backed up is the result
+                of the compilation of the three possible configuration methods that overrides each
+                others.
+            - *Restore the configuration*: Use the `Config.restore()^` method to restore a TOML
+                configuration file and replace the current applied configuration.
+            - *Export the configuration*: Use the `Config.export()^` method to export as a TOML file
+                the Python code configuration.
+            - *Load the configuration*: Use the `Config.load()^` method to load a TOML configuration
+                file and replace the current Python configuration.
+            - *Override the configuration*: Use the `Config.override()^` method to load a TOML
+                configuration file and override the current Python configuration.
+
+    Attributes:
+        global_config (GlobalAppConfig): configuration values related to the global
+            application as a `GlobalAppConfig^`.
+        unique_sections (Dict[str, UniqueSection]): A dictionary containing all unique sections.
+        sections (Dict[str, Dict[str, Section]]): A dictionary containing all non-unique sections.
     """
 
     _ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH = "TAIPY_CONFIG_PATH"
@@ -127,17 +125,14 @@ class Config:
 
     @_Classproperty
     def unique_sections(cls) -> Dict[str, UniqueSection]:
-        """Return all unique sections."""
         return cls._applied_config._unique_sections
 
     @_Classproperty
     def sections(cls) -> Dict[str, Dict[str, Section]]:
-        """Return all non unique sections."""
         return cls._applied_config._sections
 
     @_Classproperty
     def global_config(cls) -> GlobalAppConfig:
-        """Return configuration values related to the global application as a `GlobalAppConfig^`."""
         return cls._applied_config._global_config
 
     @classmethod
@@ -249,6 +244,10 @@ class Config:
 
         Returns:
             Collector containing the info, warning and error issues.
+
+        Raises:
+            SystemExit: If configuration errors are found, the application
+                exits with an error message.
         """
         cls._collector = _Checker._check(cls._applied_config)
         cls.__log_message(cls)
