@@ -89,7 +89,13 @@ class _OrchestratorFactory:
     def __build_development_job_dispatcher(cls):
         if isinstance(cls._dispatcher, _StandaloneJobDispatcher):
             cls._dispatcher.stop()
-        cls._dispatcher = _DevelopmentJobDispatcher(typing.cast(_AbstractOrchestrator, cls._orchestrator))
+
+        if util.find_spec(cls._TAIPY_ENTERPRISE_MODULE) is not None:
+            cls._dispatcher = _load_fct(
+                cls._TAIPY_ENTERPRISE_CORE_DISPATCHER_MODULE, cls.__TAIPY_ENTERPRISE_BUILD_DISPATCHER_METHOD
+            )(cls._orchestrator)
+        else:
+            cls._dispatcher = _DevelopmentJobDispatcher(typing.cast(_AbstractOrchestrator, cls._orchestrator))
 
     @classmethod
     def __build_enterprise_job_dispatcher(cls, force_restart=False):
