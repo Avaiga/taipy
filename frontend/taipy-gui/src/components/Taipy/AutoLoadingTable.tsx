@@ -51,7 +51,7 @@ import {
     RowValue,
     EDIT_COL,
     OnRowDeletion,
-    addDeleteColumn,
+    addActionColumn,
     headBoxSx,
     getClassName,
     LINE_STYLE,
@@ -129,7 +129,7 @@ const Row = ({
         <TableRow
             hover
             tabIndex={-1}
-            key={"row" + index}
+            key={`row${index}`}
             component="div"
             sx={style}
             className={(classes && classes.row) + " " + getClassName(rows[index], lineStyle)}
@@ -139,7 +139,7 @@ const Row = ({
         >
             {colsOrder.map((col, cIdx) => (
                 <EditableCell
-                    key={"val" + index + "-" + cIdx}
+                    key={`cell${index}${columns[col].dfid}`}
                     className={getClassName(rows[index], columns[col].style, col)}
                     tableClassName={tableClassName}
                     colDesc={columns[col]}
@@ -305,7 +305,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         nDesc.tooltip = props.tooltip;
                     }
                 });
-                addDeleteColumn(
+                addActionColumn(
                     (active && partialEditable && (onAdd || onDelete) ? 1 : 0) +
                         (active && filter ? 1 : 0) +
                         (active && downloadable ? 1 : 0),
@@ -607,9 +607,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         <MuiTable sx={tableSx} aria-labelledby="tableTitle" size={size} stickyHeader={true}>
                             <TableHead>
                                 <TableRow ref={headerRow}>
-                                    {colsOrder.map((col, idx) => (
+                                    {colsOrder.map((col) => (
                                         <TableCell
-                                            key={col + idx}
+                                            key={`head${columns[col].dfid}`}
                                             sortDirection={orderBy === columns[col].dfid && order}
                                             sx={columns[col].width ? { width: columns[col].width } : {}}
                                         >

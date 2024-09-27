@@ -250,7 +250,7 @@ const getCellProps = (col: ColumnDesc, base: Partial<TableCellProps> = {}): Part
 export const getRowIndex = (row: Record<string, RowValue>, rowIndex: number, startIndex = 0) =>
     typeof row["_tp_index"] === "number" ? row["_tp_index"] : rowIndex + startIndex;
 
-export const addDeleteColumn = (nbToRender: number, columns: Record<string, ColumnDesc>) => {
+export const addActionColumn = (nbToRender: number, columns: Record<string, ColumnDesc>) => {
     if (nbToRender) {
         Object.keys(columns).forEach((key) => columns[key].index++);
         columns[EDIT_COL] = {

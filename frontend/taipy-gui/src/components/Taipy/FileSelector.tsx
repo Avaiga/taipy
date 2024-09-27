@@ -71,7 +71,7 @@ const FileSelector = (props: FileSelectorProps) => {
         withBorder = true,
     } = props;
     const [dropLabel, setDropLabel] = useState("");
-    const [dropSx, setDropSx] = useState<SxProps>(defaultSx);
+    const [dropSx, setDropSx] = useState<SxProps | undefined>(defaultSx);
     const [upload, setUpload] = useState(false);
     const [progress, setProgress] = useState(0);
     const { state, dispatch } = useContext(TaipyContext);
@@ -85,7 +85,7 @@ const FileSelector = (props: FileSelectorProps) => {
 
     useEffect(
         () =>
-            setDropSx((sx: SxProps) =>
+            setDropSx((sx: SxProps | undefined) =>
                 expandSx(
                     sx,
                     props.width ? { width: getCssSize(props.width) } : undefined,
@@ -139,7 +139,7 @@ const FileSelector = (props: FileSelectorProps) => {
     const handleDrop = useCallback(
         (e: DragEvent) => {
             setDropLabel("");
-            setDropSx((sx: SxProps) => ({ ...sx, ...defaultSx }));
+            setDropSx((sx: SxProps | undefined) => expandSx(sx, defaultSx));
             handleFiles(e.dataTransfer?.files, e);
         },
         [handleFiles]
@@ -147,13 +147,13 @@ const FileSelector = (props: FileSelectorProps) => {
 
     const handleDragLeave = useCallback(() => {
         setDropLabel("");
-        setDropSx((sx: SxProps) => ({ ...sx, ...defaultSx }));
+        setDropSx((sx: SxProps | undefined) => expandSx(sx, defaultSx));
     }, []);
 
     const handleDragOverWithLabel = useCallback(
         (evt: DragEvent) => {
             const target = evt.currentTarget as HTMLElement;
-            setDropSx((sx: SxProps) =>
+            setDropSx((sx: SxProps | undefined) =>
                 expandSx(
                     sx,
                     (sx as CSSProperties).minWidth === defaultSx.minWidth && target
