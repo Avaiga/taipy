@@ -43,7 +43,7 @@ import Download from "@mui/icons-material/Download";
 
 import { createRequestTableUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
 import {
-    addDeleteColumn,
+    addActionColumn,
     baseBoxSx,
     defaultColumns,
     EditableCell,
@@ -133,82 +133,99 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const baseColumns = useDynamicJsonProperty(props.columns, props.defaultColumns, defaultColumns);
 
-    const [colsOrder, columns, styles, tooltips, formats, handleNan, filter, partialEditable] = useMemo(() => {
-        let hNan = !!props.nanValue;
-        if (baseColumns) {
-            try {
-                let filter = false;
-                let partialEditable = editable;
-                const newCols: Record<string, ColumnDesc> = {};
-                Object.entries(baseColumns).forEach(([cId, cDesc]) => {
-                    const nDesc = (newCols[cId] = { ...cDesc });
-                    if (typeof nDesc.filter != "boolean") {
-                        nDesc.filter = !!props.filter;
+    const [colsOrder, columns, styles, tooltips, formats, handleNan, filter, partialEditable, nbWidth] =
+        useMemo(() => {
+            let hNan = !!props.nanValue;
+            if (baseColumns) {
+                try {
+                    let filter = false;
+                    let partialEditable = editable;
+                    const newCols: Record<string, ColumnDesc> = {};
+                    Object.entries(baseColumns).forEach(([cId, cDesc]) => {
+                        const nDesc = (newCols[cId] = { ...cDesc });
+                        if (typeof nDesc.filter != "boolean") {
+                            nDesc.filter = !!props.filter;
+                        }
+                        filter = filter || nDesc.filter;
+                        if (typeof nDesc.notEditable == "boolean") {
+                            partialEditable = partialEditable || !nDesc.notEditable;
+                        } else {
+                            nDesc.notEditable = !editable;
+                        }
+                        if (nDesc.tooltip === undefined) {
+                            nDesc.tooltip = props.tooltip;
+                        }
+                    });
+                    addActionColumn(
+                        (active && partialEditable && (onAdd || onDelete) ? 1 : 0) +
+                            (active && filter ? 1 : 0) +
+                            (active && downloadable ? 1 : 0),
+                        newCols
+                    );
+                    const colsOrder = Object.keys(newCols).sort(getSortByIndex(newCols));
+                    let nbWidth = 0;
+                    const styTt = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
+                        if (newCols[col].style) {
+                            pv.styles = pv.styles || {};
+                            pv.styles[newCols[col].dfid] = newCols[col].style;
+                        }
+                        hNan = hNan || !!newCols[col].nanValue;
+                        if (newCols[col].tooltip) {
+                            pv.tooltips = pv.tooltips || {};
+                            pv.tooltips[newCols[col].dfid] = newCols[col].tooltip;
+                        }
+                        if (newCols[col].formatFn) {
+                            pv.formats = pv.formats || {};
+                            pv.formats[newCols[col].dfid] = newCols[col].formatFn;
+                        }
+                        if (newCols[col].width !== undefined) {
+                            nbWidth ++;
+                        }
+                        return pv;
+                    }, {});
+                    nbWidth = colsOrder.length - nbWidth;
+                    if (props.lineStyle) {
+                        styTt.styles = styTt.styles || {};
+                        styTt.styles[LINE_STYLE] = props.lineStyle;
                     }
-                    filter = filter || nDesc.filter;
-                    if (typeof nDesc.notEditable == "boolean") {
-                        partialEditable = partialEditable || !nDesc.notEditable;
-                    } else {
-                        nDesc.notEditable = !editable;
-                    }
-                    if (nDesc.tooltip === undefined) {
-                        nDesc.tooltip = props.tooltip;
-                    }
-                });
-                addDeleteColumn(
-                    (active && partialEditable && (onAdd || onDelete) ? 1 : 0) +
-                        (active && filter ? 1 : 0) +
-                        (active && downloadable ? 1 : 0),
-                    newCols
-                );
-                const colsOrder = Object.keys(newCols).sort(getSortByIndex(newCols));
-                const styTt = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
-                    if (newCols[col].style) {
-                        pv.styles = pv.styles || {};
-                        pv.styles[newCols[col].dfid] = newCols[col].style;
-                    }
-                    hNan = hNan || !!newCols[col].nanValue;
-                    if (newCols[col].tooltip) {
-                        pv.tooltips = pv.tooltips || {};
-                        pv.tooltips[newCols[col].dfid] = newCols[col].tooltip;
-                    }
-                    if (newCols[col].formatFn) {
-                        pv.formats = pv.formats || {};
-                        pv.formats[newCols[col].dfid] = newCols[col].formatFn;
-                    }
-                    return pv;
-                }, {});
-                if (props.lineStyle) {
-                    styTt.styles = styTt.styles || {};
-                    styTt.styles[LINE_STYLE] = props.lineStyle;
+                    return [
+                        colsOrder,
+                        newCols,
+                        styTt.styles,
+                        styTt.tooltips,
+                        styTt.formats,
+                        hNan,
+                        filter,
+                        partialEditable,
+                        nbWidth,
+                    ];
+                } catch (e) {
+                    console.info("PaginatedTable.columns: ", (e as Error).message || e);
                 }
-                return [colsOrder, newCols, styTt.styles, styTt.tooltips, styTt.formats, hNan, filter, partialEditable];
-            } catch (e) {
-                console.info("PaginatedTable.columns: ", (e as Error).message || e);
             }
-        }
-        return [
-            [] as string[],
-            {} as Record<string, ColumnDesc>,
-            {} as Record<string, string>,
-            {} as Record<string, string>,
-            {} as Record<string, string>,
-            hNan,
-            false,
-            false,
-        ];
-    }, [
-        active,
-        editable,
-        onAdd,
-        onDelete,
-        baseColumns,
-        props.lineStyle,
-        props.tooltip,
-        props.nanValue,
-        props.filter,
-        downloadable,
-    ]);
+            return [
+                [] as string[],
+                {} as Record<string, ColumnDesc>,
+                {} as Record<string, string>,
+                {} as Record<string, string>,
+                {} as Record<string, string>,
+                hNan,
+                false,
+                false,
+                0,
+            ];
+        }, [
+            active,
+            editable,
+            onAdd,
+            onDelete,
+            baseColumns,
+            props.lineStyle,
+            props.tooltip,
+            props.nanValue,
+            props.filter,
+            downloadable,
+        ]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
 
@@ -489,11 +506,17 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                         <Table sx={tableSx} aria-labelledby="tableTitle" size={size} stickyHeader={true}>
                             <TableHead>
                                 <TableRow>
-                                    {colsOrder.map((col, idx) => (
+                                    {colsOrder.map((col) => (
                                         <TableCell
-                                            key={col + idx}
+                                            key={`head${columns[col].dfid}`}
                                             sortDirection={orderBy === columns[col].dfid && order}
-                                            sx={columns[col].width ? { width: columns[col].width } : {}}
+                                            sx={
+                                                columns[col].width
+                                                    ? { width: columns[col].width }
+                                                    : nbWidth
+                                                    ? { width: `${100/nbWidth}%`, maxWidth: 0 }
+                                                    : undefined
+                                            }
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [
@@ -588,16 +611,16 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                         <TableRow
                                             hover
                                             tabIndex={-1}
-                                            key={"row" + index}
+                                            key={`row${index}`}
                                             selected={sel > -1}
                                             ref={sel == 0 ? selectedRowRef : undefined}
                                             className={getClassName(row, props.lineStyle)}
                                             data-index={index}
                                             onClick={active && onAction ? onRowClick : undefined}
                                         >
-                                            {colsOrder.map((col, cIdx) => (
+                                            {colsOrder.map((col) => (
                                                 <EditableCell
-                                                    key={"val" + index + "-" + cIdx}
+                                                    key={`cell${index}${columns[col].dfid}`}
                                                     className={getClassName(row, columns[col].style, col)}
                                                     tableClassName={className}
                                                     colDesc={columns[col]}
