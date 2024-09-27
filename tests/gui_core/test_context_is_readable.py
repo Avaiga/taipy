@@ -14,6 +14,8 @@ import typing as t
 from datetime import datetime
 from unittest.mock import Mock, patch
 
+import pytest
+
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.core import Cycle, CycleId, Job, JobId, Scenario, Task
@@ -40,13 +42,6 @@ a_submission = Submission(
     a_scenario.config_id,
     properties={"client_id": "client_id", "on_submission": "on_submission"},
 )
-
-_CycleManagerFactory._build_manager()._set(a_cycle)
-_ScenarioManagerFactory._build_manager()._set(a_scenario)
-_TaskManagerFactory._build_manager()._set(a_task)
-_JobManagerFactory._build_manager()._set(a_job)
-_DataManagerFactory._build_manager()._set(a_datanode)
-_SubmissionManagerFactory._build_manager()._set(a_submission)
 
 
 def mock_is_readable_false(entity_id):
@@ -77,6 +72,15 @@ class MockState:
 
 
 class TestGuiCoreContext_is_readable:
+    @pytest.fixture(scope="class", autouse=True)
+    def set_entity(self):
+        _CycleManagerFactory._build_manager()._set(a_cycle)
+        _ScenarioManagerFactory._build_manager()._set(a_scenario)
+        _TaskManagerFactory._build_manager()._set(a_task)
+        _JobManagerFactory._build_manager()._set(a_job)
+        _DataManagerFactory._build_manager()._set(a_datanode)
+        _SubmissionManagerFactory._build_manager()._set(a_submission)
+
     def test_scenario_adapter(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
             gui_core_context = _GuiCoreContext(Mock())
