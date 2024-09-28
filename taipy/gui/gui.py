@@ -2609,6 +2609,8 @@ class Gui:
         # server URL Rule for flask rendered react-router
         pages_bp.add_url_rule(f"/{Gui.__INIT_URL}", view_func=self.__init_route)
 
+        _Hooks()._add_external_blueprint(self, __name__)
+
         # Register Flask Blueprint if available
         for bp in self._flask_blueprint:
             t.cast(Flask, self._server.get_flask()).register_blueprint(bp)
