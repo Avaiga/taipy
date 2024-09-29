@@ -39,6 +39,7 @@ import {
 } from "../../context/taipyReducers";
 import {
     ColumnDesc,
+    FilterDesc,
     getSortByIndex,
     Order,
     TaipyTableProps,
@@ -64,6 +65,7 @@ import {
     OnRowClick,
     DownloadAction,
     getFormatFn,
+    getPageKey,
 } from "./tableUtils";
 import {
     useClassNames,
@@ -74,7 +76,7 @@ import {
     useFormatConfig,
     useModule,
 } from "../../utils/hooks";
-import TableFilter, { FilterDesc } from "./TableFilter";
+import TableFilter from "./TableFilter";
 import { getSuffixedClassNames, getUpdateVar } from "./utils";
 import { emptyArray } from "../../utils";
 
@@ -383,19 +385,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 page.current.promises[startIndex].reject();
             }
             return new Promise<void>((resolve, reject) => {
-                const agg = aggregates.length
-                    ? colsOrder.reduce((pv, col, idx) => {
-                          if (aggregates.includes(columns[col].dfid)) {
-                              return pv + "-" + idx;
-                          }
-                          return pv;
-                      }, "-agg")
-                    : "";
                 const cols = colsOrder.map((col) => columns[col].dfid).filter((c) => c != EDIT_COL);
                 const afs = appliedFilters.filter((fd) => Object.values(columns).some((cd) => cd.dfid === fd.col));
-                const key = `Infinite-${cols.join()}-${orderBy}-${order}${agg}${afs.map(
-                    (af) => `${af.col}${af.action}${af.value}`
-                )}`;
+                const key = getPageKey(columns, "Infinite", cols, orderBy, order, afs, aggregates, styles, tooltips, formats);
                 page.current = {
                     key: key,
                     promises: { ...page.current.promises, [startIndex]: { resolve: resolve, reject: reject } },

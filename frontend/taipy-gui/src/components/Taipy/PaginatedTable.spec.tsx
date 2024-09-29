@@ -311,7 +311,7 @@ describe("PaginatedTable Component", () => {
                 end: 199,
                 id: "table",
                 orderby: "",
-                pagekey: "100-199-Entity,Daily hospital occupancy--asc",
+                pagekey: "100-199-Entity,Daily hospital occupancy-asc",
                 handlenan: false,
                 sort: "asc",
                 start: 100,
