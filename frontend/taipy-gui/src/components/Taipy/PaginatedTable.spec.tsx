@@ -21,7 +21,7 @@ import { TaipyContext } from "../../context/taipyContext";
 import { TaipyState, INITIAL_STATE } from "../../context/taipyReducers";
 import { TableValueType } from "./tableUtils";
 
-const valueKey = "0-99-Entity,Daily hospital occupancy--asc";
+const valueKey = "0-99-Entity,Daily hospital occupancy-asc";
 const tableValue = {
     [valueKey]: {
         data: [
