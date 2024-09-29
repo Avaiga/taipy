@@ -23,30 +23,28 @@ def create_rose(n_petals):
     return [math.cos(math.radians(n_petals * angle)) for angle in theta]
 
 
-if __name__ == "__main__":
-    # One data point for each degree
-    theta = range(0, 360)
+# One data point for each degree
+theta = range(0, 360)
 
-    data = {"theta": theta, "r1": create_rose(2), "r2": create_rose(3), "r3": create_rose(4)}
+data = {"theta": theta, "r1": create_rose(2), "r2": create_rose(3), "r3": create_rose(4)}
 
-    # We want three traces in the same chart
-    r = ["r1", "r2", "r3"]
+# We want three traces in the same chart
+r = ["r1", "r2", "r3"]
 
-    layout = {
-        # Hide the legend
-        "showlegend": False,
-        "polar": {
-            # Hide the angular axis
-            "angularaxis": {"visible": False},
-            # Hide the radial axis
-            "radialaxis": {"visible": False},
-        },
-    }
+layout = {
+    # Hide the legend
+    "showlegend": False,
+    "polar": {
+        # Hide the angular axis
+        "angularaxis": {"visible": False},
+        # Hide the radial axis
+        "radialaxis": {"visible": False},
+    },
+}
 
-    page = """
-# Polar - Multiple
-
+page = """
 <|{data}|chart|type=scatterpolar|mode=lines|r={r}|theta=theta|layout={layout}|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Polar - Multiple")

@@ -50,14 +50,16 @@ class _OrchestratorFactory:
     def _build_dispatcher(cls, force_restart=False) -> Optional[_JobDispatcher]:
         if not cls._orchestrator:
             raise OrchestratorNotBuilt
-        if Config.job_config.is_standalone:
+
+        if util.find_spec(cls._TAIPY_ENTERPRISE_MODULE):
+            cls.__build_enterprise_job_dispatcher(force_restart=force_restart)
+        elif Config.job_config.is_standalone:
             cls.__build_standalone_job_dispatcher(force_restart=force_restart)
         elif Config.job_config.is_development:
             cls.__build_development_job_dispatcher()
-        elif util.find_spec(cls._TAIPY_ENTERPRISE_MODULE):
-            cls.__build_enterprise_job_dispatcher(force_restart=force_restart)
         else:
             raise ModeNotAvailable(f"Job mode {Config.job_config.mode} is not available.")
+
         return cls._dispatcher
 
     @classmethod

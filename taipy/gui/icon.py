@@ -35,8 +35,8 @@ class Icon:
         self,
         path: str,
         text: t.Optional[str] = None,
-        light_path: t.Optional[bool] = None,
-        dark_path: t.Optional[bool] = None,
+        light_path: t.Optional[str] = None,
+        dark_path: t.Optional[str] = None,
     ) -> None:
         """Initialize a new Icon.
 

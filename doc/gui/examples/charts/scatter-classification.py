@@ -20,26 +20,24 @@ from sklearn.datasets import make_classification
 
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # Let scikit-learn generate a random 2-class classification problem
-    features, label = make_classification(n_samples=1000, n_features=2, n_informative=2, n_redundant=0)
+# Let scikit-learn generate a random 2-class classification problem
+features, label = make_classification(n_samples=1000, n_features=2, n_informative=2, n_redundant=0)
 
-    random_data = pandas.DataFrame({"x": features[:, 0], "y": features[:, 1], "label": label})
+random_data = pandas.DataFrame({"x": features[:, 0], "y": features[:, 1], "label": label})
 
-    data_x = random_data["x"]
-    class_A = [
-        random_data.loc[i, "y"] if random_data.loc[i, "label"] == 0 else numpy.nan for i in range(len(random_data))
-    ]
-    class_B = [
-        random_data.loc[i, "y"] if random_data.loc[i, "label"] == 1 else numpy.nan for i in range(len(random_data))
-    ]
+data_x = random_data["x"]
+class_A = [
+    random_data.loc[i, "y"] if random_data.loc[i, "label"] == 0 else numpy.nan for i in range(len(random_data))
+]
+class_B = [
+    random_data.loc[i, "y"] if random_data.loc[i, "label"] == 1 else numpy.nan for i in range(len(random_data))
+]
 
-    data = {"x": random_data["x"], "Class A": class_A, "Class B": class_B}
+data = {"x": random_data["x"], "Class A": class_A, "Class B": class_B}
 
-    page = """
-# Scatter - Classification
-
+page = """
 <|{data}|chart|mode=markers|x=x|y[1]=Class A|y[2]=Class B|width=60%|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Scatter - Classification")

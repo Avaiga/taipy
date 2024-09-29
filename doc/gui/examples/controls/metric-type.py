@@ -15,13 +15,13 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    value = 72
-    delta = 15
-    threshold = 60
+value = 72
+delta = 15
+threshold = 60
 
-    page = """
+page = """
 <|{value}|metric|threshold={threshold}|type=linear|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Metric - Linear")

@@ -32,9 +32,8 @@ columns = {
 }
 
 page = """
-# Formatting cells in a table
-
 <|{stock}|table|columns={columns}|>
 """
 
-Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Table - Formatting cells")

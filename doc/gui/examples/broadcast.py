@@ -54,21 +54,19 @@ def start_or_stop(state: State):
     state.assign("button_text", button_texts[1 if thread else 0])
 
 
-if __name__ == "__main__":
-    button_texts = ["Start", "Stop"]
-    # Text in the start/stop button (initially "Start")
-    button_text = button_texts[0]
+button_texts = ["Start", "Stop"]
+# Text in the start/stop button (initially "Start")
+button_text = button_texts[0]
 
-    page = """
-# Broadcasting values
-
+page = """
 Counter: <|{counter}|>
 
 Timer: <|{button_text}|button|on_action=start_or_stop|>
-    """
+"""
 
+if __name__ == "__main__":
     # Declare "button_text" as a shared variable.
     # Assigning a value to a state's 'button_text' property is propagated to all clients
     Gui.add_shared_variable("button_text")
 
-    Gui(page).run()
+    Gui(page).run(title="Broadcasting values")

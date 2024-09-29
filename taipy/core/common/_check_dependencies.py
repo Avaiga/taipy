@@ -10,6 +10,9 @@
 # specific language governing permissions and limitations under the License.
 from importlib import util
 
+_TAIPY_ENTERPRISE_MODULE = "taipy.enterprise"
+_TAIPY_ENTERPRISE_CORE_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core"
+
 
 def _check_dependency_is_installed(module_name: str, package_name: str) -> None:
     """
@@ -29,3 +32,7 @@ def _check_dependency_is_installed(module_name: str, package_name: str) -> None:
             f"Cannot use {module_name} as {package_name} package is not installed. Please install it  "
             f"using `pip install taipy[{extras.get(package_name)}]`."
         )
+
+
+def _using_enterprise() -> bool:
+    return util.find_spec(_TAIPY_ENTERPRISE_MODULE) is not None

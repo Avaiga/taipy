@@ -15,11 +15,11 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    value = 50
+value = 50
 
-    page = """
+page = """
 <|{value}|number|min=10|max=60|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Number - Min/max")

@@ -12,6 +12,7 @@ from functools import lru_cache
 from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
+from ..common._check_dependencies import _TAIPY_ENTERPRISE_CORE_MODULE, _using_enterprise
 from ..common._utils import _load_fct
 from ._task_fs_repository import _TaskFSRepository
 from ._task_manager import _TaskManager
@@ -23,10 +24,10 @@ class _TaskManagerFactory(_ManagerFactory):
     @classmethod
     @lru_cache
     def _build_manager(cls) -> Type[_TaskManager]:
-        if cls._using_enterprise():
-            task_manager = _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".task._task_manager", "_TaskManager")  # type: ignore
+        if _using_enterprise():
+            task_manager = _load_fct(_TAIPY_ENTERPRISE_CORE_MODULE + ".task._task_manager", "_TaskManager")  # type: ignore
             build_repository = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".task._task_manager_factory", "_TaskManagerFactory"
+                _TAIPY_ENTERPRISE_CORE_MODULE + ".task._task_manager_factory", "_TaskManagerFactory"
             )._build_repository  # type: ignore
         else:
             task_manager = _TaskManager

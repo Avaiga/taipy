@@ -15,25 +15,23 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    data = {
-        "Day": ["Mon", "Tue", "Wed", "Thu", "Fri"],
-        "Items": [32, 25, 86, 60, 70],
-        "Price": [80, 50, 140, 10, 70],
-    }
+data = {
+    "Day": ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    "Items": [32, 25, 86, 60, 70],
+    "Price": [80, 50, 140, 10, 70],
+}
 
-    options = [
-        # For items
-        {"fill": "tozeroy"},
-        # For price
-        # Using "tonexty" not to cover the first trace
-        {"fill": "tonexty"},
-    ]
+options = [
+    # For items
+    {"fill": "tozeroy"},
+    # For price
+    # Using "tonexty" not to cover the first trace
+    {"fill": "tonexty"},
+]
 
-    page = """
-# Filled Area - Overlay
-
+page = """
 <|{data}|chart|mode=none|x=Day|y[1]=Items|y[2]=Price|options={options}|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Filled Area - Overlay")

@@ -11,6 +11,7 @@
 
 from datetime import datetime
 
+import freezegun
 import pytest
 
 from taipy.core import TaskId
@@ -919,15 +920,24 @@ def test_execution_duration():
     submission.jobs = [job_1, job_2]
     _SubmissionManagerFactory._build_manager()._set(submission)
 
-    job_1.execution_started_at = datetime(2024, 1, 1, 0, 0, 0)
-    job_1.execution_ended_at = datetime(2024, 1, 1, 0, 0, 10)
-    job_2.execution_started_at = datetime(2024, 1, 1, 0, 1, 0)
-    job_2.execution_ended_at = datetime(2024, 1, 1, 0, 2, 30)
-    assert submission.execution_started_at == job_1.execution_started_at
-    assert submission.execution_ended_at == job_2.execution_ended_at
-    assert submission.execution_duration == 150
+    with freezegun.freeze_time("2024-09-25 13:30:35"):
+        job_1.running()
+        job_2.pending()
 
-    job_2.execution_ended_at = None  # job_2 is still running
-    assert submission.execution_started_at == job_1.execution_started_at
-    assert submission.execution_ended_at is None
-    assert submission.execution_duration is None
+    assert submission.run_at == datetime(2024, 9, 25, 13, 30, 35)
+    assert submission.execution_duration > 0
+
+    with freezegun.freeze_time("2024-09-25 13:33:45"):
+        job_1.completed()
+        job_2.running()
+        assert submission.execution_duration == 190  # = 13:33:45 - 13:30:35
+        assert submission.run_at == datetime(2024, 9, 25, 13, 30, 35)
+
+        # Job 2 is not completed, so the submission is not completed
+        assert submission.finished_at is None
+
+    with freezegun.freeze_time("2024-09-25 13:35:50"):
+        job_2.completed()
+
+    assert submission.finished_at == datetime(2024, 9, 25, 13, 35, 50)
+    assert submission.execution_duration == 315  # = 13:35:50 - 13:30:35

@@ -21,4 +21,5 @@ page = """
 <|Hello {name}!|>
 """
 
-Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Text - Simple")

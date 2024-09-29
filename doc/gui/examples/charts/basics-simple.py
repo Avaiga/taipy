@@ -15,13 +15,11 @@
 # -----------------------------------------------------------------------------------------
 from taipy import Gui
 
-if __name__ == "__main__":
-    # The chart control's data is defined as inline
-    # code.
-    page = """
-# Basics - Simple line
-
+# The chart control's data is defined as inline
+# code.
+page = """
 <|{[x*x for x in range(0, 11)]}|chart|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Simple")
