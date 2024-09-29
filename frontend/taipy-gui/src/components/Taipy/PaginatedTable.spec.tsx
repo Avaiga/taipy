@@ -110,7 +110,7 @@ const changedValue = {
 };
 
 const editableValue = {
-    "0--1-bool,int,float,Code--asc": {
+    "0--1-bool,int,float,Code-asc": {
         data: [
             {
                 bool: true,
@@ -137,7 +137,7 @@ const editableColumns = JSON.stringify({
 });
 
 const buttonImgValue = {
-    "0--1-bool,int,float,Code--asc": {
+    "0--1-bool,int,float,Code-asc": {
         data: [
             {
                 bool: true,
