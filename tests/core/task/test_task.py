@@ -13,8 +13,8 @@ from unittest import mock
 
 import pytest
 
+from taipy.common.config import Config
 from taipy.common.config.common.scope import Scope
-from taipy.common.config.config import Config
 from taipy.common.config.exceptions.exceptions import InvalidConfigurationId
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.data._data_manager import _DataManager

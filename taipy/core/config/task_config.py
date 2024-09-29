@@ -12,9 +12,9 @@
 from copy import copy
 from typing import Any, Callable, Dict, List, Optional, Union, cast
 
+from taipy.common.config import Config
 from taipy.common.config._config import _Config
 from taipy.common.config.common._template_handler import _TemplateHandler as _tpl
-from taipy.common.config.config import Config
 from taipy.common.config.section import Section
 
 from ..common._warnings import _warn_deprecated

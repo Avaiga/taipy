@@ -14,7 +14,7 @@ import pathlib
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
-from taipy.common.config.config import Config
+from taipy.common.config import Config
 from taipy.core._repository._abstract_converter import _AbstractConverter
 from taipy.core._repository._filesystem_repository import _FileSystemRepository
 from taipy.core._version._version_manager import _VersionManager

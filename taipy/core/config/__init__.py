@@ -10,11 +10,13 @@
 # specific language governing permissions and limitations under the License.
 """Configuration of the core package functionalities."""
 
-from taipy.common.config import _inject_section
+from taipy.common.config import (
+    Config,  # type: ignore
+    _inject_section,
+)
 from taipy.common.config.checker._checker import _Checker
 from taipy.common.config.common.frequency import Frequency  # type: ignore
 from taipy.common.config.common.scope import Scope  # type: ignore
-from taipy.common.config.config import Config  # type: ignore
 from taipy.common.config.global_app.global_app_config import GlobalAppConfig  # type: ignore
 
 from .checkers._config_id_checker import _ConfigIdChecker

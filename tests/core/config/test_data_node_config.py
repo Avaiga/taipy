@@ -15,8 +15,8 @@ from unittest import mock
 
 import pytest
 
+from taipy.common.config import Config
 from taipy.common.config.common.scope import Scope
-from taipy.common.config.config import Config
 from taipy.common.config.exceptions.exceptions import ConfigurationUpdateBlocked
 from taipy.core import MongoDefaultDocument
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory

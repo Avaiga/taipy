@@ -49,8 +49,6 @@ and attributes to configure the Taipy application and retrieve the configuration
 
 from typing import List
 
-from taipy.common.version import _get_version
-
 from ._init import Config
 from .checker.issue import Issue
 from .checker.issue_collector import IssueCollector
@@ -59,8 +57,6 @@ from .common.scope import Scope
 from .global_app.global_app_config import GlobalAppConfig
 from .section import Section
 from .unique_section import UniqueSection
-
-__version__ = _get_version()
 
 
 def _config_doc(func):

@@ -12,8 +12,8 @@
 import json
 from datetime import timedelta
 
+from taipy.common.config import Config
 from taipy.common.config.common.scope import Scope
-from taipy.common.config.config import Config
 from taipy.core.common.mongo_default_document import MongoDefaultDocument
 
 

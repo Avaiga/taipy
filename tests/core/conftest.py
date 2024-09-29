@@ -21,10 +21,10 @@ import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import close_all_sessions
 
+from taipy.common.config import Config
 from taipy.common.config.checker._checker import _Checker
 from taipy.common.config.common.frequency import Frequency
 from taipy.common.config.common.scope import Scope
-from taipy.common.config.config import Config
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core._version._version import _Version
 from taipy.core._version._version_manager_factory import _VersionManagerFactory

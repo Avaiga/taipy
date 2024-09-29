@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 
-from taipy.common.config.config import Config
+from taipy.common.config import Config
 from taipy.core.notification.event import EventEntityType, EventOperation
 from taipy.core.notification.notifier import Notifier
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory

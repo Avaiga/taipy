@@ -14,7 +14,7 @@ from unittest import mock
 
 import pytest
 
-from taipy.common.config.config import Config
+from taipy.common.config import Config
 from taipy.common.config.exceptions.exceptions import ConfigurationUpdateBlocked
 
 

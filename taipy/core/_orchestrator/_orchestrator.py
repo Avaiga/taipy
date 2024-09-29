@@ -16,7 +16,7 @@ from threading import Lock
 from time import sleep
 from typing import Callable, Iterable, List, Optional, Set, Union
 
-from taipy.common.config.config import Config
+from taipy.common.config import Config
 from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from .._entity.submittable import Submittable

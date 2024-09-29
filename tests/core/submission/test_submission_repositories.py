@@ -13,7 +13,7 @@ import os
 
 import pytest
 
-from taipy.common.config.config import Config
+from taipy.common.config import Config
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.exceptions import ModelNotFound
 from taipy.core.job._job_manager_factory import _JobManagerFactory

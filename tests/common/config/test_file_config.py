@@ -11,7 +11,7 @@
 
 import pytest
 
-from taipy.common.config.config import Config
+from taipy.common.config import Config
 from taipy.common.config.exceptions.exceptions import LoadingError
 from tests.common.config.utils.named_temporary_file import NamedTemporaryFile
 

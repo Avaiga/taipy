@@ -15,9 +15,9 @@ from unittest import mock
 import pytest
 
 import taipy.core.taipy as tp
+from taipy.common.config import Config
 from taipy.common.config.common.frequency import Frequency
 from taipy.common.config.common.scope import Scope
-from taipy.common.config.config import Config
 from taipy.common.config.exceptions.exceptions import ConfigurationUpdateBlocked
 from taipy.core import (
     Cycle,

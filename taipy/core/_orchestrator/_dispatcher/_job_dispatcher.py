@@ -16,7 +16,7 @@ from abc import abstractmethod
 from queue import Empty
 from typing import Optional
 
-from taipy.common.config.config import Config
+from taipy.common.config import Config
 from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ...data._data_manager_factory import _DataManagerFactory

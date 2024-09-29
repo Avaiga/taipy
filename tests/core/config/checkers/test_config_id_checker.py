@@ -11,8 +11,8 @@
 
 import pytest
 
+from taipy.common.config import Config
 from taipy.common.config.checker.issue_collector import IssueCollector
-from taipy.common.config.config import Config
 
 
 class TestConfigIdChecker:

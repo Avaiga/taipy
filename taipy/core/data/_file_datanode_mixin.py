@@ -16,7 +16,7 @@ from datetime import datetime
 from os.path import isfile
 from typing import Any, Callable, Dict, Optional
 
-from taipy.common.config.config import Config
+from taipy.common.config import Config
 from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from .._entity._reload import _self_reload

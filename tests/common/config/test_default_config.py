@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from taipy.common.config.config import Config
+from taipy.common.config import Config
 from taipy.common.config.global_app.global_app_config import GlobalAppConfig
 from taipy.common.config.section import Section
 from tests.common.config.utils.section_for_tests import SectionForTest
