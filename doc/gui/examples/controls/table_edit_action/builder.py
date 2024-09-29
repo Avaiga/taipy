@@ -52,7 +52,7 @@ def update(state: State, var_name: str, payload: dict):
 
 
 with tgb.Page() as page:
-    tgb.table("{data}", editable__Amount=True, on_edit=update, show_all=True)
+    tgb.table("{data}", editable__Amount=True, on_edit=update, on_add=False, on_delete=False, show_all=True)
 
 if __name__ == "__main__":
-    Gui(page).run(title="Table - Custom edit")
+    Gui(page).run(title="Table - Action on edit")

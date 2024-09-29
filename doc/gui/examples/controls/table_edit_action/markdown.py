@@ -50,7 +50,7 @@ def update(state: State, var_name: str, payload: dict):
         state.refresh(var_name)
 
 
-page = "<|{data}|table|editable[Amount]|on_edit=update|show_all|>"
+page = "<|{data}|table|editable[Amount]|on_edit=update|no on_add|no on_delete|show_all|>"
 
 if __name__ == "__main__":
-    Gui(page).run(title="Table - Custom edit")
+    Gui(page).run(title="Table - Action on edit")
