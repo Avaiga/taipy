@@ -70,7 +70,7 @@ def _config_doc(func):
             with open("config_methods_doc.txt", "a") as f:
                 from inspect import signature
 
-                # Add the documentation fo configure methods
+                # Add the documentation for configure methods
                 for exposed_configuration_method, configuration_method in configuration_methods:
                     annotation = "    @staticmethod\n"
                     sign = "    def " + exposed_configuration_method + str(signature(configuration_method)) + ":\n"
