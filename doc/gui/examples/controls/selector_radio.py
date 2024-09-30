@@ -22,4 +22,4 @@ page = """
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="Selector - Radio")
+    Gui(page).run(title="Selector - Radio mode")

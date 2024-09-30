@@ -1701,33 +1701,48 @@ class Gui:
         return self.__adapter._get_adapted_lov(lov, var_type)
 
     def table_on_edit(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
-        """
-        TODO: Default implementation of on_edit for tables
+        """Default implementation of the `on_edit` callback for tables.
+
+        Arguments:
+            state: the state instance received in the callback.
+            var_name: the name of the variable bound to the table's *data* property.
+            payload: the payload dictionary as it was received from the `on_edit` callback.
         """
         try:
             setattr(state, var_name, self._get_accessor().on_edit(getattr(state, var_name), payload))
         except Exception as e:
-            _warn("TODO: Table.on_edit", e)
-
-    def table_on_delete(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
-        """
-        TODO: Default implementation of on_delete for tables
-        """
-        try:
-            setattr(state, var_name, self._get_accessor().on_delete(getattr(state, var_name), payload))
-        except Exception as e:
-            _warn("TODO: Table.on_delete", e)
+            _warn("Gui.table_on_edit() failed potentially from a table's on_edit callback.", e)
 
     def table_on_add(
         self, state: State, var_name: str, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None
     ):
-        """
-        TODO: Default implementation of on_add for tables
+        """Default implementation of the `on_add` callback for tables.
+
+        Arguments:
+            state: the state instance received in the callback.
+            var_name: the name of the variable bound to the table's *data* property.
+            payload: the payload dictionary as it was received from the `on_add` callback.
+            new_row: the initial values to be stored in the new row.<br/>
+                This defaults to all values being set to 0, whatever that means depending on the
+                column data type.
         """
         try:
             setattr(state, var_name, self._get_accessor().on_add(getattr(state, var_name), payload, new_row))
         except Exception as e:
-            _warn("TODO: Table.on_add", e)
+            _warn("Gui.table_on_add() failed potentially from a table's on_add callback.", e)
+
+    def table_on_delete(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
+        """Default implementation of the `on_delete` callback for tables.
+
+        Arguments:
+            state: the state instance received in the callback.
+            var_name: the name of the variable bound to the table's *data* property.
+            payload: the payload dictionary as it was received from the `on_delete` callback.
+        """
+        try:
+            setattr(state, var_name, self._get_accessor().on_delete(getattr(state, var_name), payload))
+        except Exception as e:
+            _warn("Gui.table_on_delete() failed potentially from a table's on_delete callback.", e)
 
     def _tbl_cols(
         self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs
@@ -2815,11 +2830,15 @@ class Gui:
     def set_favicon(self, favicon_path: t.Union[str, Path], state: t.Optional[State] = None):
         """Change the favicon for all clients.
 
-        This function dynamically changes the favicon of Taipy GUI pages for all connected client.
-        favicon_path can be an URL (relative or not) or a file path.
-        TODO The *favicon* parameter to `(Gui.)run()^` can also be used to change
+        This function dynamically changes the favicon of Taipy GUI pages for a single or all
+        connected clients.
+        Note that the *favicon* parameter to `(Gui.)run()^` can also be used to change
          the favicon when the application starts.
 
+        Arguments:
+            favicon_path: the path to the image file to use.<br/>
+                This can be expressed as a path name or a URL (relative or not).
+            state: the state to apply the change to.
         """
         if state or self.__favicon != favicon_path:
             if not state:

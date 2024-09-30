@@ -25,4 +25,4 @@ Selection: <|{values}|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="Slider - Range")
+    Gui(page).run(title="Slider - Multiple values")
