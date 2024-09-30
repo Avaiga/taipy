@@ -23,23 +23,23 @@ x_range = range(0, 11)
 # The dataset is made of three arrays:
 # x: an integer value from 0 to 5
 # y: the square of the value in the "x" column
-# z: a random integer betweewn 0 and 5
+# z: a random integer between 0 and 5
 data = {"x": x_range, "y": [x * x for x in x_range], "z": [randrange(6) for _ in x_range]}
 
 
-def xy_style(_1, _2, index, _3, column_name):
+def xy_class(_1, _2, index, _3, column_name):
     return (
         # The background color of the 'x' column alternates between two shades of green,
         # varying in lightness.
-        ("greenish" if index % 2 else "lightgreenish")
+        ("greenish" if index % 2 else "light-greenish")
         if column_name == "x"
         # The background color of the 'y' column alternates between two shades of green,
         # varying in lightness
-        else ("reddish" if index % 2 else "lightreddish")
+        else ("reddish" if index % 2 else "light-reddish")
     )
 
 
-def z_style(_, value):
+def z_class(_, value):
     # Build a CSS classname from the value.
     # The lower the value is, the lighter the color is.
     return f"col{value}"
@@ -48,9 +48,9 @@ def z_style(_, value):
 with tgb.Page(
     style={
         ".reddish": {"color": "white", "background-color": "#bf1313"},
-        ".lightreddish": {"color": "black", "background-color": "#ff1919", "font-weight": "bold"},
+        ".light-reddish": {"color": "black", "background-color": "#ff1919", "font-weight": "bold"},
         ".greenish": {"color": "white", "background-color": "#75bf75"},
-        ".lightgreenish": {"color": "black", "background-color": "#9cff9c", "font-weight": "bold"},
+        ".light-greenish": {"color": "black", "background-color": "#9cff9c", "font-weight": "bold"},
         ".col0": {"background-color": "#d0d0d0"},
         ".col1": {"background-color": "#a4a0cf"},
         ".col2": {"background-color": "#7970cf"},
@@ -59,9 +59,17 @@ with tgb.Page(
         ".col5": {"background-color": "#1b02a8", "color": "white"},
     }
 ) as page:
-    tgb.table("{data}", style__x=xy_style, style__y=xy_style, style__z=z_style, show_all=True)
-    # Using a lambda function instead of z_style:
-    #tgb.table("{data}", style__x=xy_style, style__y=xy_style, style__z=lambda _, v: f"col{v}", show_all=True)
+    tgb.table(
+        "{data}", cell_class_name__x=xy_class, cell_class_name__y=xy_class, cell_class_name__z=z_class, show_all=True
+    )
+    # Using a lambda function instead of z_class:
+    # tgb.table(
+    #     "{data}",
+    #     cell_class_name__x=xy_class,
+    #     cell_class_name__y=xy_class,
+    #     cell_class_name__z=lambda _, v: f"col{v}",
+    #     show_all=True,
+    # )
 
 
 if __name__ == "__main__":

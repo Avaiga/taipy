@@ -161,7 +161,7 @@ describe("AutoLoadingTable Component", () => {
                 start: 0,
                 aggregates: [],
                 applies: undefined,
-                styles: undefined,
+                cellClassNames: undefined,
                 tooltips: undefined,
                 filters: []
             },
@@ -211,9 +211,9 @@ describe("AutoLoadingTable Component", () => {
                 />
             </TaipyContext.Provider>
         );
-        const elts = getAllByText("Austria");
-        expect(elts.length).toBeGreaterThan(1);
-        expect(elts[0].tagName).toBe("SPAN");
+        const elements = getAllByText("Austria");
+        expect(elements.length).toBeGreaterThan(1);
+        expect(elements[0].tagName).toBe("SPAN");
     });
     it("selects the rows", async () => {
         const dispatch = jest.fn();
@@ -235,8 +235,8 @@ describe("AutoLoadingTable Component", () => {
                 />
             </TaipyContext.Provider>
         );
-        const elts = getAllByText("Austria");
-        elts.forEach((elt: HTMLElement, idx: number) =>
+        const elements = getAllByText("Austria");
+        elements.forEach((elt: HTMLElement, idx: number) =>
             selected.indexOf(idx) == -1
                 ? expect(elt.parentElement?.parentElement?.parentElement?.parentElement).not.toHaveClass("Mui-selected")
                 : expect(elt.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("Mui-selected")

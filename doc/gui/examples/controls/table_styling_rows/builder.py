@@ -21,7 +21,7 @@ x_range = range(-10, 11, 4)
 data = {"x": x_range, "y": [x * x for x in x_range]}
 
 
-def even_odd_style(_, row):
+def even_odd_class(_, row):
     if row % 2:
         # Odd rows are blue
         return "blue-row"
@@ -36,9 +36,9 @@ with tgb.Page(
         ".red-row>td": {"color": "yellow", "background-color": "red"},
     }
 ) as page:
-    tgb.table("{data}", style=even_odd_style, show_all=True)
-    # Lambda version, getting rid of even_odd_style():
-    # tgb.table("{data}", style=lambda _, row: "blue-row" if row % 2 else "red-row", show_all=True)
+    tgb.table("{data}", row_class_name=even_odd_class, show_all=True)
+    # Lambda version, getting rid of even_odd_class():
+    # tgb.table("{data}", row_class_name=lambda _, row: "blue-row" if row % 2 else "red-row", show_all=True)
 
 
 if __name__ == "__main__":
