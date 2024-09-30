@@ -383,6 +383,7 @@ class _Builder:
     ):
         property_name = var_name if property_name is None else property_name
         lov_name = self.__hashes.get(var_name)
+        real_var_name = self.__gui._get_real_var_name(lov_name)[0] if lov_name else None
         lov = self.__attributes.get(var_name)
         adapter: t.Any = None
         var_type: t.Optional[str] = None
@@ -394,9 +395,10 @@ class _Builder:
             lov = list(lov)
         if not isinstance(lov, list) and hasattr(lov, "tolist"):
             try:
-                return lov.tolist()  # type: ignore[union-attr]
+                lov = lov.tolist()  # type: ignore[union-attr]
             except Exception as e:
-                _warn("Error accessing List of values", e)
+                _warn(f"Error accessing List of values for '{real_var_name or property_name}'", e)
+                lov = None
 
         default_lov: t.Optional[t.List[t.Any]] = [] if with_default or not lov_name else None
 
@@ -474,13 +476,10 @@ class _Builder:
             self.__set_json_attribute(_to_camel_case(f"default_{property_name}"), default_lov)
 
         # LoV expression binding
-        if lov_name:
+        if lov_name and real_var_name:
             typed_lov_hash = (
                 self.__gui._evaluate_expr(
-                    "{"
-                    + f"{self.__gui._get_call_method_name('_get_adapted_lov')}"
-                    + f"({self.__gui._get_real_var_name(lov_name)[0]},'{var_type}')"
-                    + "}"
+                    f"{{{self.__gui._get_call_method_name('_get_adapted_lov')}({real_var_name},'{var_type}')}}"
                 )
                 if var_type
                 else lov_name
