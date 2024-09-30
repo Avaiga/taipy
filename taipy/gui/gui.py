@@ -2838,7 +2838,7 @@ class Gui:
         Arguments:
             favicon_path: the path to the image file to use.<br/>
                 This can be expressed as a path name or a URL (relative or not).
-            state: the 
+            state: the state to apply the change to.
         """
         if state or self.__favicon != favicon_path:
             if not state:

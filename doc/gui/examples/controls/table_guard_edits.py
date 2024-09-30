@@ -38,10 +38,10 @@ def pick_user() -> tuple[str, int]:
             return (new_user, salary)
         except ValueError:
             # There was a back-end error
-            print("ERROR: Invoking the Random User Generator API")
+            print("ERROR: Invoking the Random User Generator API")  # noqa: F401, T201
             return ("ERROR", 0)
     # The API cannot be reached
-    print("ERROR: Could not invoke the Random User Generator API")
+    print("ERROR: Could not invoke the Random User Generator API")  # noqa: F401, T201
     return ("ERROR", 0)
 
 # Generate four random persons with their salary expectation and store them in a dictionary
