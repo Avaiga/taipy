@@ -20,7 +20,7 @@ x_range = range(-10, 11, 4)
 data = {"x": x_range, "y": [x * x for x in x_range]}
 
 
-def even_odd_style(_1, row):
+def even_odd_class(_, row):
     if row % 2:
         # Odd rows are blue
         return "blue-row"
@@ -29,11 +29,11 @@ def even_odd_style(_1, row):
         return "red-row"
 
 
-# Lambda version, getting rid of even_odd_style():
+# Lambda version, getting rid of even_odd_class():
 # Replace the table control definition with
-#    <|{data}|table|style={lambda _, row: 'blue-row' if row % 2 else 'red-row'}|show_all|>
+#    <|{data}|table|row_class_name={lambda _, row: 'blue-row' if row % 2 else 'red-row'}|show_all|>
 page = Markdown(
-    "<|{data}|table|style=even_odd_style|show_all|>",
+    "<|{data}|table|row_class_name=even_odd_class|show_all|>",
     style={
         ".blue-row>td": {"color": "white", "background-color": "blue"},
         ".red-row>td": {"color": "yellow", "background-color": "red"},

@@ -82,24 +82,21 @@ def _enhance_columns(  # noqa: C901
                 col_desc["apply"] = value
         else:
             _warn(f"{elt_name}: '{k}' is not a displayed column in apply[].")
-    # TODO: rename to cell_class_name
-    styles = _get_name_indexed_property(attributes, "style")
-    for k, v in styles.items():  # pragma: no cover
+    cell_class_names = _get_name_indexed_property(attributes, "cell_class_name")
+    for k, v in cell_class_names.items():  # pragma: no cover
         if col_desc := _get_column_desc(columns, k):
             if callable(v):
-                # TODO: rename to row_class_name
-                value = hash_names.get(f"style[{k}]")
+                value = hash_names.get(f"cell_class_name[{k}]")
             elif isinstance(v, str):
                 value = v.strip()
             else:
                 value = None
             if value in columns.keys():
-                # TODO: rename to cell_class_name
-                _warn(f"{elt_name}: '{k}' is not a valid column in style[].")
+                _warn(f"{elt_name}: cell_class_name[{k}] cannot be set to an column name '{value}'.")
             elif value:
-                col_desc["style"] = value
+                col_desc["className"] = value
         else:
-            _warn(f"{elt_name}: '{k}' is not a displayed column in style[].")
+            _warn(f"{elt_name}: '{k}' is not a displayed column in cell_class_name[].")
     tooltips = _get_name_indexed_property(attributes, "tooltip")
     for k, v in tooltips.items():  # pragma: no cover
         if col_desc := _get_column_desc(columns, k):
@@ -110,7 +107,7 @@ def _enhance_columns(  # noqa: C901
             else:
                 value = None
             if value in columns.keys():
-                _warn(f"{elt_name}: '{k}' is not a valid column in tooltip[].")
+                _warn(f"{elt_name}: tooltip[{k}] cannot be set to an column name '{value}'.")
             elif value:
                 col_desc["tooltip"] = value
         else:
@@ -125,7 +122,7 @@ def _enhance_columns(  # noqa: C901
             else:
                 value = None
             if value in columns.keys():
-                _warn(f"{elt_name}: '{k}' is not a valid column in format_fn[].")
+                _warn(f"{elt_name}: format_fn[{k}] cannot be set to an column name '{value}'.")
             elif value:
                 col_desc["formatFn"] = value
         else:

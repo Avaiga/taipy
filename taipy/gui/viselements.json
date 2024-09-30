@@ -782,14 +782,12 @@
                         "doc": "The name of the aggregation function to use.<br/>This is used only if <i>group_by[column_name]</i> is set to True.<br/>See <a href=\"#aggregation\">below</a> for more details."
                     },
                     {
-                        "//TODO": "rename to 'row_class_name",
-                        "name": "style",
+                        "name": "row_class_name",
                         "type": "Union[str, Callable]",
                         "doc": "Allows for styling rows.<br/>This property must be a function or the name of a function that return the name of a CSS class for table rows.<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>index</i> (int): the index of the row.</li><li><i>row</i> (Any): all the values for this row.</li></ul><br/>See <a href=\"#dynamic-styling\">below</a> for more details."
                     },
                     {
-                        "//TODO": "rename to 'cell_class_name",
-                        "name": "style[<i>column_name</i>]",
+                        "name": "cell_class_name[<i>column_name</i>]",
                         "type": "Union[str, Callable]",
                         "doc": "Allows for styling cells.<br/>This property must be a function or the name of a function that return the name of a CSS class for table cells.<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>value</i> (Any): the value of the cell.</li><li><i>index</i> (int): the index of the row.</li><li><i>row</i> (Any): all the values for this row.</li><li><i>column_name</i> (str): the name of the column.</li></ul><br/>See <a href=\"#dynamic-styling\">below</a> for more details."
                     },
@@ -1496,7 +1494,7 @@
                         "name": "adapter",
                         "type": "Union[str, Callable]",
                         "default_value": "<tt>lambda x: str(x)</tt>",
-                        "doc": "The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>.<br/>The default value is a function that returns the string representation of the <i>lov</i> element."
+                        "doc": "A function or the name of the function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>.<br/>The default value is a function that returns the string representation of the <i>lov</i> element."
                     },
                     {
                         "name": "type",
@@ -1992,7 +1990,7 @@
                         "name": "adapter",
                         "type": "Union[str, Callable]",
                         "default_value": "<tt>lambda x: str(x)</tt>",
-                        "doc": "The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>.<br/>The default value is a function that returns the string representation of the <i>lov</i> element."
+                        "doc": "A function or the name of the function  that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>.<br/>The default value is a function that returns the string representation of the <i>lov</i> element."
                     },
                     {
                         "name": "type",

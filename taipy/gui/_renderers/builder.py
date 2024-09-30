@@ -571,17 +571,17 @@ class _Builder:
             self.set_boolean_attribute("compare", True)
             self.__set_string_attribute("on_compare")
 
-        if line_style := self.__attributes.get("style"):
-            if isfunction(line_style):
-                value = self.__hashes.get("style")
-            elif isinstance(line_style, str):
-                value = line_style.strip()
+        if row_class_name := self.__attributes.get("row_class_name"):
+            if isfunction(row_class_name):
+                value = self.__hashes.get("row_class_name")
+            elif isinstance(row_class_name, str):
+                value = row_class_name.strip()
             else:
                 value = None
             if value in col_types.keys():
-                _warn(f"{self.__element_name}: style={value} must not be a column name.")
+                _warn(f"{self.__element_name}: row_class_name={value} must not be a column name.")
             elif value:
-                self.set_attribute("lineStyle", value)
+                self.set_attribute("rowClassName", value)
         if tooltip := self.__attributes.get("tooltip"):
             if isfunction(tooltip):
                 value = self.__hashes.get("tooltip")

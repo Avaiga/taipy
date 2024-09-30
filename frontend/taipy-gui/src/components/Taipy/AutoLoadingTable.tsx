@@ -55,7 +55,7 @@ import {
     addActionColumn,
     headBoxSx,
     getClassName,
-    LINE_STYLE,
+    ROW_CLASS_NAME,
     iconInRowSx,
     DEFAULT_SIZE,
     OnRowSelection,
@@ -94,7 +94,7 @@ interface RowData {
     onDeletion?: OnRowDeletion;
     onRowSelection?: OnRowSelection;
     onRowClick?: OnRowClick;
-    lineStyle?: string;
+    rowClassName?: string;
     nanValue?: string;
     compRows?: RowType[];
     useCheckbox?: boolean;
@@ -102,7 +102,7 @@ interface RowData {
 
 const Row = ({
     index,
-    style,
+    style: rowSx,
     data: {
         colsOrder,
         columns,
@@ -117,7 +117,7 @@ const Row = ({
         onDeletion,
         onRowSelection,
         onRowClick,
-        lineStyle,
+        rowClassName,
         nanValue,
         compRows,
         useCheckbox,
@@ -133,8 +133,8 @@ const Row = ({
             tabIndex={-1}
             key={`row${index}`}
             component="div"
-            sx={style}
-            className={(classes && classes.row) + " " + getClassName(rows[index], lineStyle)}
+            sx={rowSx}
+            className={(classes && classes.row) + " " + getClassName(rows[index], rowClassName)}
             data-index={index}
             selected={selection.indexOf(index) > -1}
             onClick={onRowClick}
@@ -142,7 +142,7 @@ const Row = ({
             {colsOrder.map((col, cIdx) => (
                 <EditableCell
                     key={`cell${index}${columns[col].dfid}`}
-                    className={getClassName(rows[index], columns[col].style, col)}
+                    className={getClassName(rows[index], columns[col].className, col)}
                     tableClassName={tableClassName}
                     colDesc={columns[col]}
                     value={rows[index][col]}
@@ -161,7 +161,7 @@ const Row = ({
             ))}
         </TableRow>
     ) : (
-        <Skeleton sx={style} key={"Skeleton" + index} />
+        <Skeleton sx={rowSx} key={"Skeleton" + index} />
     );
 
 interface PromiseProps {
@@ -285,7 +285,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         e.stopPropagation();
     }, []);
 
-    const [colsOrder, columns, styles, tooltips, formats, handleNan, filter, partialEditable] = useMemo(() => {
+    const [colsOrder, columns, cellClassNames, tooltips, formats, handleNan, filter, partialEditable] = useMemo(() => {
         let hNan = !!props.nanValue;
         if (baseColumns) {
             try {
@@ -315,9 +315,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 );
                 const colsOrder = Object.keys(newCols).sort(getSortByIndex(newCols));
                 const styTt = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
-                    if (newCols[col].style) {
-                        pv.styles = pv.styles || {};
-                        pv.styles[newCols[col].dfid] = newCols[col].style as string;
+                    if (newCols[col].className) {
+                        pv.classNames = pv.classNames || {};
+                        pv.classNames[newCols[col].dfid] = newCols[col].className as string;
                     }
                     hNan = hNan || !!newCols[col].nanValue;
                     if (newCols[col].tooltip) {
@@ -330,11 +330,11 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     }
                     return pv;
                 }, {});
-                if (props.lineStyle) {
-                    styTt.styles = styTt.styles || {};
-                    styTt.styles[LINE_STYLE] = props.lineStyle;
+                if (props.rowClassName) {
+                    styTt.classNames = styTt.classNames || {};
+                    styTt.classNames[ROW_CLASS_NAME] = props.rowClassName;
                 }
-                return [colsOrder, newCols, styTt.styles, styTt.tooltips, styTt.formats, hNan, filter, partialEditable];
+                return [colsOrder, newCols, styTt.classNames, styTt.tooltips, styTt.formats, hNan, filter, partialEditable];
             } catch (e) {
                 console.info("ATable.columns: " + ((e as Error).message || e));
             }
@@ -355,7 +355,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         onAdd,
         onDelete,
         baseColumns,
-        props.lineStyle,
+        props.rowClassName,
         props.tooltip,
         props.nanValue,
         props.filter,
@@ -387,7 +387,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             return new Promise<void>((resolve, reject) => {
                 const cols = colsOrder.map((col) => columns[col].dfid).filter((c) => c != EDIT_COL);
                 const afs = appliedFilters.filter((fd) => Object.values(columns).some((cd) => cd.dfid === fd.col));
-                const key = getPageKey(columns, "Infinite", cols, orderBy, order, afs, aggregates, styles, tooltips, formats);
+                const key = getPageKey(columns, "Infinite", cols, orderBy, order, afs, aggregates, cellClassNames, tooltips, formats);
                 page.current = {
                     key: key,
                     promises: { ...page.current.promises, [startIndex]: { resolve: resolve, reject: reject } },
@@ -413,7 +413,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         order,
                         aggregates,
                         applies,
-                        styles,
+                        cellClassNames,
                         tooltips,
                         formats,
                         handleNan,
@@ -429,7 +429,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         },
         [
             aggregates,
-            styles,
+            cellClassNames,
             tooltips,
             formats,
             updateVarName,
@@ -558,7 +558,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 onDeletion: active && (editable || partialEditable) && onDelete ? onRowDeletion : undefined,
                 onRowSelection: active && onAction ? onRowSelection : undefined,
                 onRowClick: active && onAction ? onRowClick : undefined,
-                lineStyle: props.lineStyle,
+                rowClassName: props.rowClassName,
                 nanValue: props.nanValue,
                 compRows: compRows,
                 useCheckbox: useCheckbox,
@@ -583,7 +583,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             onAction,
             onRowSelection,
             onRowClick,
-            props.lineStyle,
+            props.rowClassName,
             props.nanValue,
             size,
         ]

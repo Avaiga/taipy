@@ -765,7 +765,7 @@ describe("PaginatedTable Component", () => {
                     <PaginatedTable
                         data={tableValue}
                         defaultColumns={styledColumns}
-                        lineStyle={"class_name=rows-bordered"}
+                        rowClassName={"class_name=rows-bordered"}
                     />
                 </TaipyContext.Provider>
             );
