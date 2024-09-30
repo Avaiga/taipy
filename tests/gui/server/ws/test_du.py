@@ -44,7 +44,7 @@ def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
             "name": "_TpD_tpec_TpExPr_csvdata_TPMDL_0",
             "payload": {
                 "columns": ["Day", "Entity", "Code", "Daily hospital occupancy"],
-                "pagekey": "0-100--asc",
+                "pagekey": "0-100-asc",
                 "start": 0,
                 "end": 9,
                 "orderby": "",

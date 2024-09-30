@@ -17,7 +17,7 @@ import merge from "lodash/merge";
 import { Dispatch } from "react";
 import { io, Socket } from "socket.io-client";
 
-import { FilterDesc } from "../components/Taipy/TableFilter";
+import { FilterDesc } from "../components/Taipy/tableUtils";
 import { stylekitModeThemes, stylekitTheme } from "../themes/stylekit";
 import { getBaseURL, TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
