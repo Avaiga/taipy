@@ -96,10 +96,3 @@ demo_*/
 data_sources
 pipelines
 pickles
-
-# FLE files
-/doc-*.py
-/doc-*.png
-/issue*-*.py
-/issue*-*.css
-
