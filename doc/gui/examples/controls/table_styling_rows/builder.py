@@ -42,4 +42,4 @@ with tgb.Page(
 
 
 if __name__ == "__main__":
-    Gui(page=page).run(title="Table - Styling rows")
+    Gui(page).run(title="Table - Styling rows")
