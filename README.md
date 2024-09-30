@@ -1,5 +1,5 @@
 
-![Hactoberfestnew](https://github.com/user-attachments/assets/149a5cee-6af1-4d4e-9c43-6fcf82a9b07e)
+[![Hactoberfestnew](https://github.com/user-attachments/assets/149a5cee-6af1-4d4e-9c43-6fcf82a9b07e)](https://assorted-son-815.notion.site/Hacktoberfest-2024-with-Taipy-2a5032a3f01642709e88ffaa5d0d169e)
 
 
 <div align="center">
