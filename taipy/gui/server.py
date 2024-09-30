@@ -327,7 +327,7 @@ class _Server:
                 _TaipyLogger._get_logger().info(f" * Server reloaded on http://{host_value}:{port}")
             _TaipyLogger._get_logger().info(f" * Application is accessible at {client_url}")
         if not is_running_from_reloader() and self._gui._get_config("run_browser", False):
-            webbrowser.open(f"http://{host_value}{f':{port}' if port else ''}", new=2)
+            webbrowser.open(client_url, new=2)
         if _is_in_notebook() or run_in_thread:
             self._thread = KThread(target=self._run_notebook)
             self._thread.start()
