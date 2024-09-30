@@ -16,7 +16,8 @@ import time as _time
 import typing as t
 import xml.etree.ElementTree as etree
 from datetime import date, datetime, time
-from inspect import isclass
+from enum import Enum
+from inspect import isclass, isfunction
 from urllib.parse import quote
 
 from .._warnings import _warn
@@ -138,7 +139,7 @@ class _Builder:
             hash_value = gui._evaluate_expr(value)
             try:
                 func = gui._get_user_function(hash_value)
-                if callable(func):
+                if isfunction(func):
                     return (func, hash_value)
                 return (_getscopeattr_drill(gui, hash_value), hash_value)
             except AttributeError:
@@ -163,7 +164,7 @@ class _Builder:
                 else:
                     looks_like_a_lambda = False
                     val = v
-                if callable(val):
+                if isfunction(val):
                     # if it's not a callable (and not a string), forget it
                     if val.__name__ == "<lambda>":
                         # if it is a lambda and it has already a hash_name, we're fine
@@ -192,17 +193,6 @@ class _Builder:
     @staticmethod
     def _reset_key() -> None:
         _Builder.__keys = {}
-
-    def __get_list_of_(self, name: str):
-        lof = self.__attributes.get(name)
-        if isinstance(lof, str):
-            lof = list(lof.split(";"))
-        if not isinstance(lof, list) and hasattr(lof, "tolist"):
-            try:
-                return lof.tolist()  # type: ignore[union-attr]
-            except Exception as e:
-                _warn("Error accessing List of values", e)
-        return lof
 
     def get_name_indexed_property(self, name: str) -> t.Dict[str, t.Any]:
         """
@@ -359,11 +349,11 @@ class _Builder:
             if not optional:
                 _warn(f"Property {name} is required for control {self.__control_type}.")
             return self
-        elif callable(str_attr):
+        elif isfunction(str_attr):
             str_attr = self.__hashes.get(name)
             if str_attr is None:
                 return self
-        elif _is_boolean(str_attr) and not _is_true(str_attr):
+        elif _is_boolean(str_attr) and not _is_true(t.cast(str, str_attr)):
             return self.__set_react_attribute(_to_camel_case(name), False)
         elif str_attr:
             str_attr = str(str_attr)
@@ -384,21 +374,39 @@ class _Builder:
     def __set_react_attribute(self, name: str, value: t.Any):
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
 
+    @staticmethod
+    def enum_adapter(e: Enum):
+        return (e.value, e.name)
+
     def _get_lov_adapter(  # noqa: C901
         self, var_name: str, property_name: t.Optional[str] = None, multi_selection=True, with_default=True
     ):
         property_name = var_name if property_name is None else property_name
         lov_name = self.__hashes.get(var_name)
-        lov = self.__get_list_of_(var_name)
+        lov = self.__attributes.get(var_name)
+        adapter: t.Any = None
+        var_type: t.Optional[str] = None
+        if isinstance(lov, str):
+            lov = list(lov.split(";"))
+        if isclass(lov) and issubclass(lov, Enum):
+            adapter = _Builder.enum_adapter
+            var_type = "Enum"
+            lov = list(lov)
+        if not isinstance(lov, list) and hasattr(lov, "tolist"):
+            try:
+                return lov.tolist()  # type: ignore[union-attr]
+            except Exception as e:
+                _warn("Error accessing List of values", e)
+
         default_lov: t.Optional[t.List[t.Any]] = [] if with_default or not lov_name else None
 
-        adapter = self.__attributes.get("adapter")
+        adapter = self.__attributes.get("adapter", adapter)
         if adapter and isinstance(adapter, str):
             adapter = self.__gui._get_user_function(adapter)
         if adapter and not callable(adapter):
             _warn(f"{self.__element_name}: adapter property value is invalid.")
             adapter = None
-        var_type = self.__attributes.get("type")
+        var_type = self.__attributes.get("type", var_type)
         if isclass(var_type):
             var_type = var_type.__name__  # type: ignore
 
@@ -565,7 +573,7 @@ class _Builder:
             self.__set_string_attribute("on_compare")
 
         if line_style := self.__attributes.get("style"):
-            if callable(line_style):
+            if isfunction(line_style):
                 value = self.__hashes.get("style")
             elif isinstance(line_style, str):
                 value = line_style.strip()
@@ -576,7 +584,7 @@ class _Builder:
             elif value:
                 self.set_attribute("lineStyle", value)
         if tooltip := self.__attributes.get("tooltip"):
-            if callable(tooltip):
+            if isfunction(tooltip):
                 value = self.__hashes.get("tooltip")
             elif isinstance(tooltip, str):
                 value = tooltip.strip()
