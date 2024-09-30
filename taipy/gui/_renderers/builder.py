@@ -375,8 +375,8 @@ class _Builder:
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
 
     @staticmethod
-    def enum_adapter(e: Enum):
-        return (e.value, e.name)
+    def enum_adapter(e: t.Union[Enum, str]):
+        return (e.value, e.name) if isinstance(e, Enum) else e
 
     def _get_lov_adapter(  # noqa: C901
         self, var_name: str, property_name: t.Optional[str] = None, multi_selection=True, with_default=True
