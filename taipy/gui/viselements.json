@@ -901,7 +901,7 @@
                     {
                         "name": "on_add",
                         "type": "Union[bool, Callable]",
-                        "doc": "A function or the name of a function that is triggered when the user requests a row to be added to the table.<br/>This function is invoked with the following parameters:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the tabular data variable.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li><i>index</i> (int): the row index.</li></ul></li></ul><br/>If this property is not set and the type of <i>data</i> supports it, the table uses the default implementation for adding a new row<br/>If this property is set to False, you cannot add new rows.",
+                        "doc": "A function or the name of a function that is triggered when the user requests a row to be added to the table.<br/>This function is invoked with the following parameters:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the tabular data variable.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following key:\n<ul>\n<li><i>index</i> (int): the row index.</li></ul></li></ul><br/>If this property is not set, the table uses the default implementation for adding a new row<br/>If this property is set to False, you cannot add new rows.",
                         "signature": [
                             [
                                 "state",
@@ -921,7 +921,7 @@
                         "name": "on_delete",
                         "type": "Union[bool, Callable]",
                         "default_value": "<i>default implementation</i>",
-                        "doc": "A function or the name of a function triggered when a row is deleted.<br/>This function is invoked with the following parameters:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the tabular data variable.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>\nThis dictionary has one key:\n<ul>\n<li><i>index</i> (int): the row index.</li></ul></li></ul><br/>If this property is not set and the type of <i>data</i> allows it, the table uses the default implementation for deleting rows.",
+                        "doc": "A function or the name of a function triggered when a row is deleted.<br/>This function is invoked with the following parameters:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the tabular data variable.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>\nThis dictionary has one key:\n<ul>\n<li><i>index</i> (int): the row index.</li></ul></li></ul><br/>If this property is not set, the table uses the default implementation for deleting rows.",
                         "signature": [
                             [
                                 "state",
