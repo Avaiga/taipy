@@ -28,7 +28,7 @@ jest.mock(
             children({ height: 600, width: 600 })
 );
 
-const valueKey = "Infinite-Entity--asc";
+const valueKey = "Infinite-Entity-asc";
 const tableValue = {
     [valueKey]: {
         data: [
