@@ -39,6 +39,7 @@ import {
 } from "../../context/taipyReducers";
 import {
     ColumnDesc,
+    FilterDesc,
     getSortByIndex,
     Order,
     TaipyTableProps,
@@ -51,7 +52,7 @@ import {
     RowValue,
     EDIT_COL,
     OnRowDeletion,
-    addDeleteColumn,
+    addActionColumn,
     headBoxSx,
     getClassName,
     LINE_STYLE,
@@ -64,6 +65,7 @@ import {
     OnRowClick,
     DownloadAction,
     getFormatFn,
+    getPageKey,
 } from "./tableUtils";
 import {
     useClassNames,
@@ -74,7 +76,7 @@ import {
     useFormatConfig,
     useModule,
 } from "../../utils/hooks";
-import TableFilter, { FilterDesc } from "./TableFilter";
+import TableFilter from "./TableFilter";
 import { getSuffixedClassNames, getUpdateVar } from "./utils";
 import { emptyArray } from "../../utils";
 
@@ -129,7 +131,7 @@ const Row = ({
         <TableRow
             hover
             tabIndex={-1}
-            key={"row" + index}
+            key={`row${index}`}
             component="div"
             sx={style}
             className={(classes && classes.row) + " " + getClassName(rows[index], lineStyle)}
@@ -139,7 +141,7 @@ const Row = ({
         >
             {colsOrder.map((col, cIdx) => (
                 <EditableCell
-                    key={"val" + index + "-" + cIdx}
+                    key={`cell${index}${columns[col].dfid}`}
                     className={getClassName(rows[index], columns[col].style, col)}
                     tableClassName={tableClassName}
                     colDesc={columns[col]}
@@ -305,7 +307,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         nDesc.tooltip = props.tooltip;
                     }
                 });
-                addDeleteColumn(
+                addActionColumn(
                     (active && partialEditable && (onAdd || onDelete) ? 1 : 0) +
                         (active && filter ? 1 : 0) +
                         (active && downloadable ? 1 : 0),
@@ -383,19 +385,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 page.current.promises[startIndex].reject();
             }
             return new Promise<void>((resolve, reject) => {
-                const agg = aggregates.length
-                    ? colsOrder.reduce((pv, col, idx) => {
-                          if (aggregates.includes(columns[col].dfid)) {
-                              return pv + "-" + idx;
-                          }
-                          return pv;
-                      }, "-agg")
-                    : "";
                 const cols = colsOrder.map((col) => columns[col].dfid).filter((c) => c != EDIT_COL);
                 const afs = appliedFilters.filter((fd) => Object.values(columns).some((cd) => cd.dfid === fd.col));
-                const key = `Infinite-${cols.join()}-${orderBy}-${order}${agg}${afs.map(
-                    (af) => `${af.col}${af.action}${af.value}`
-                )}`;
+                const key = getPageKey(columns, "Infinite", cols, orderBy, order, afs, aggregates, styles, tooltips, formats);
                 page.current = {
                     key: key,
                     promises: { ...page.current.promises, [startIndex]: { resolve: resolve, reject: reject } },
@@ -607,9 +599,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         <MuiTable sx={tableSx} aria-labelledby="tableTitle" size={size} stickyHeader={true}>
                             <TableHead>
                                 <TableRow ref={headerRow}>
-                                    {colsOrder.map((col, idx) => (
+                                    {colsOrder.map((col) => (
                                         <TableCell
-                                            key={col + idx}
+                                            key={`head${columns[col].dfid}`}
                                             sortDirection={orderBy === columns[col].dfid && order}
                                             sx={columns[col].width ? { width: columns[col].width } : {}}
                                         >

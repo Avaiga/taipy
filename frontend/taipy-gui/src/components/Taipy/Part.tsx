@@ -56,7 +56,7 @@ const Part = (props: PartProps) => {
         return false;
     }, [state.locations, page, defaultPartial]);
 
-    const boxSx = useMemo(() => expandSx({}, height ? { height: height } : undefined, props.width ? {width: getCssSize(props.width)}: undefined), [height, props.width]);
+    const boxSx = useMemo(() => expandSx(height ? { height: height } : undefined, props.width ? {width: getCssSize(props.width)}: undefined), [height, props.width]);
     return render ? (
         <Box id={id} className={className} sx={boxSx}>
             {iFrame ? (

@@ -28,4 +28,4 @@ page = """
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="Text - Pre")
+    Gui(page).run(title="Text - Pre mode")

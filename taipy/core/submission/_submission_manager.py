@@ -21,7 +21,7 @@ from .._version._version_mixin import _VersionMixin
 from ..exceptions.exceptions import SubmissionNotDeletedException
 from ..job.job import Job, Status
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
-from ..reason import ReasonCollection, SubmissionIsNotFinished
+from ..reason import EntityDoesNotExist, ReasonCollection, SubmissionIsNotFinished
 from ..scenario.scenario import Scenario
 from ..sequence.sequence import Sequence
 from ..submission.submission import Submission, SubmissionId, SubmissionStatus
@@ -178,7 +178,11 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
         reason_collector = ReasonCollection()
 
         if isinstance(submission, str):
+            submission_id = submission
             submission = cls._get(submission)
+            if submission is None:
+                reason_collector._add_reason(submission_id, EntityDoesNotExist(submission_id))
+                return reason_collector
 
         if not submission.is_finished() and submission.submission_status != SubmissionStatus.UNDEFINED:
             reason_collector._add_reason(submission.id, SubmissionIsNotFinished(submission.id))

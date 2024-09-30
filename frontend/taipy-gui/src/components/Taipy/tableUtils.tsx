@@ -201,6 +201,13 @@ interface EditableCellProps {
     formattedVal?: string;
 }
 
+export interface FilterDesc {
+    col: string;
+    action: string;
+    value: string | number | boolean | Date;
+    type: string;
+}
+
 export const defaultColumns = {} as Record<string, ColumnDesc>;
 
 export const getSortByIndex = (cols: Record<string, ColumnDesc>) => (key1: string, key2: string) =>
@@ -250,7 +257,7 @@ const getCellProps = (col: ColumnDesc, base: Partial<TableCellProps> = {}): Part
 export const getRowIndex = (row: Record<string, RowValue>, rowIndex: number, startIndex = 0) =>
     typeof row["_tp_index"] === "number" ? row["_tp_index"] : rowIndex + startIndex;
 
-export const addDeleteColumn = (nbToRender: number, columns: Record<string, ColumnDesc>) => {
+export const addActionColumn = (nbToRender: number, columns: Record<string, ColumnDesc>) => {
     if (nbToRender) {
         Object.keys(columns).forEach((key) => columns[key].index++);
         columns[EDIT_COL] = {
@@ -277,6 +284,52 @@ export const getFormatFn = (row: Record<string, unknown>, formatFn?: string, col
 
 const getToolFn = (prefix: string, row: Record<string, unknown>, toolFn?: string, col?: string) =>
     toolFn ? (((col && row[`${prefix}__${col}__${toolFn}`]) || row[toolFn]) as string) : undefined;
+
+export const getPageKey = (
+    columns: Record<string, ColumnDesc>,
+    prefix: string,
+    cols: string[],
+    orderBy: string,
+    order: string,
+    filters: FilterDesc[],
+    aggregates?: string[],
+    styles?: Record<string, string>,
+    tooltips?: Record<string, string>,
+    formats?: Record<string, string>
+) =>
+    [
+        prefix,
+        cols.join(),
+        orderBy,
+        order,
+        aggregates?.length
+            ? cols.reduce((pv, col, idx) => {
+                  if (aggregates.includes(columns[col].dfid)) {
+                      return `${pv}${idx}`;
+                  }
+                  return pv;
+              }, "-")
+            : undefined,
+        filters.map((filter) => `${filter.col}${filter.action}${filter.value}`).join(),
+        [
+            styles &&
+                Object.entries(styles)
+                    .map((col, style) => `${col}:${style}`)
+                    .join(),
+            tooltips &&
+                Object.entries(tooltips)
+                    .map((col, tooltip) => `${col}:${tooltip}`)
+                    .join(),
+            formats &&
+                Object.entries(formats)
+                    .map((col, format) => `${col}:${format}`)
+                    .join(),
+        ]
+            .filter((v) => v)
+            .join(";"),
+    ]
+        .filter((v) => v)
+        .join("-");
 
 const setInputFocus = (input: HTMLInputElement) => input && input.focus();
 
