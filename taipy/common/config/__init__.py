@@ -11,7 +11,7 @@
 
 """# Taipy `config` Package
 
-The `taipy.config` package provides features to configure a Taipy application.
+The `taipy.common.config` package provides features to configure a Taipy application.
 
 Its main class is the `Config^` singleton. It exposes various static methods
 and attributes to configure the Taipy application and retrieve the configuration values.
@@ -39,7 +39,7 @@ and attributes to configure the Taipy application and retrieve the configuration
 
 !!! note "`Frequency^` and `Scope^` for scenario and data nodes configurations"
 
-    Besides the `Config^` class which is the main entrypoint, the `taipy.config` package exposes
+    Besides the `Config^` class which is the main entrypoint, the `taipy.common.config` package exposes
     the `Frequency^` and `Scope^` enums that are frequently used to configure data nodes and
     scenarios.
 

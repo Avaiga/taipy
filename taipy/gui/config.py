@@ -268,7 +268,7 @@ class _Config(object):
                         )
 
         # Taipy-config
-        if find_spec("taipy") and find_spec("taipy.config"):
+        if find_spec("taipy") and find_spec("taipy.common.config"):
             from taipy.common.config import Config as TaipyConfig
 
             try:
