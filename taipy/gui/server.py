@@ -246,6 +246,9 @@ class _Server:
     def get_flask(self):
         return self._flask
 
+    def get_port(self):
+        return self._port
+
     def test_client(self):
         return t.cast(Flask, self._flask).test_client()
 
@@ -286,6 +289,7 @@ class _Server:
         self,
         host,
         port,
+        client_url,
         debug,
         use_reloader,
         flask_log,
@@ -299,6 +303,7 @@ class _Server:
         if port == "auto":
             port = self._get_random_port(port_auto_ranges)
         self._port = port
+        client_url = client_url.format(port=port)
         if _is_in_notebook() and notebook_proxy:  # pragma: no cover
             from .utils.proxy import NotebookProxy
 
@@ -320,6 +325,7 @@ class _Server:
                 _TaipyLogger._get_logger().info(f" * Server starting on http://{host_value}:{port}")
             else:
                 _TaipyLogger._get_logger().info(f" * Server reloaded on http://{host_value}:{port}")
+            _TaipyLogger._get_logger().info(f" * Application is accessible at {client_url}")
         if not is_running_from_reloader() and self._gui._get_config("run_browser", False):
             webbrowser.open(f"http://{host_value}{f':{port}' if port else ''}", new=2)
         if _is_in_notebook() or run_in_thread:

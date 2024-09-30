@@ -2412,6 +2412,9 @@ class Gui:
             return t.cast(Flask, self._server.get_flask())
         raise RuntimeError("get_flask_app() cannot be invoked before run() has been called.")
 
+    def _get_port(self) -> int:
+        return self._server.get_port()
+
     def _set_frame(self, frame: t.Optional[FrameType]):
         if not isinstance(frame, FrameType):  # pragma: no cover
             raise RuntimeError("frame must be a FrameType where Gui can collect the local variables.")
@@ -2777,6 +2780,7 @@ class Gui:
         return self._server.run(
             host=app_config.get("host"),
             port=app_config.get("port"),
+            client_url=app_config.get("client_url"),
             debug=app_config.get("debug"),
             use_reloader=app_config.get("use_reloader"),
             flask_log=app_config.get("flask_log"),
