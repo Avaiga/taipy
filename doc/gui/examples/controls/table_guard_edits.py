@@ -96,4 +96,4 @@ def force_salary(state: State, var_name: str, payload: dict):
 page = "<|{candidates}|table|on_delete=check_delete|on_add=check_add|editable[Salary]|on_edit=force_salary|show_all|>"
 
 if __name__ == "__main__":
-    Gui(page).run(title="Table - Control edits", use_reloader=True, run_browser=False, dark_mode=True)
+    Gui(page).run(title="Table - Guard edits")

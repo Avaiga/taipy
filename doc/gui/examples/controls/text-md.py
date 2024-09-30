@@ -30,4 +30,4 @@ page = """
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="Text - Markdown")
+    Gui(page).run(title="Text - Markdown mode")

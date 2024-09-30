@@ -46,4 +46,4 @@ data = {
 page = "<|{data}|table|lov[Continent]={all_continents}|editable|no on_add|no on_delete|show_all|>"
 
 if __name__ == "__main__":
-    Gui(page).run()
+    Gui(page).run(title="Table - Enumerated values")
