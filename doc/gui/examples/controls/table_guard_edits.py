@@ -45,7 +45,7 @@ def pick_user() -> tuple[str, int]:
     return ("ERROR", 0)
 
 # Generate four random persons with their salary expectation and store them in a dictionary
-candidates = {"Name": [], "Salary": []}
+candidates: dict[str, list] = {"Name": [], "Salary": []}
 for candidate in [pick_user() for _ in range(4)]:
     candidates["Name"].append(candidate[0])
     candidates["Salary"].append(candidate[1])
