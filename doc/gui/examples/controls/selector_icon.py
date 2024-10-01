@@ -13,12 +13,16 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
+from taipy.gui import Gui, Icon
 
 sel = "id2"
-
+lov = [
+    ("id1", "Framework X"),
+    ("id2", Icon("https://docs.taipy.io/en/latest/assets/images/favicon.png", "Taipy")),
+    ("id3", "Framework Y"),
+]
 page = """
-<|{sel}|selector|lov={[("id1", "Label 1"), ("id2", Icon("/images/icon.png", "Label 2"),("id3", "Label 3")]}|>
+<|{sel}|selector|lov={lov}|>
 """
 
 if __name__ == "__main__":
