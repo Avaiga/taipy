@@ -85,6 +85,7 @@ import {
 import TableFilter from "./TableFilter";
 import { getSuffixedClassNames, getUpdateVar } from "./utils";
 import { emptyArray } from "../../utils";
+import { get_class_name } from "./TaipyStyle";
 
 const loadingStyle: CSSProperties = { width: "100%", height: "3em", textAlign: "right", verticalAlign: "center" };
 const skeletonSx = { width: "100%", height: "3em" };
@@ -490,7 +491,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const boxSx = useMemo(() => ({ ...baseBoxSx, width: width }), [width]);
 
     return (
-        <Box id={id} sx={boxSx} className={`${className} ${getSuffixedClassNames(className, "-paginated")}`}>
+        <Box id={id} sx={boxSx} className={`${className} ${getSuffixedClassNames(className, "-paginated")} ${get_class_name(props.children)}`}>
             <Paper sx={paperSx}>
                 <Tooltip title={hover || ""}>
                     <TableContainer sx={tableContainerSx}>
@@ -673,6 +674,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                         />
                     ))}
             </Paper>
+            {props.children}
         </Box>
     );
 };

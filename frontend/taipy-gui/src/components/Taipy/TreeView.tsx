@@ -43,6 +43,7 @@ import {
 import { LovItem } from "../../utils/lov";
 import { getUpdateVar } from "./utils";
 import { Icon } from "../../utils/icon";
+import { get_class_name } from "./TaipyStyle";
 
 const treeSlots = { expandIcon: ChevronRightIcon };
 
@@ -280,10 +281,13 @@ const TreeView = (props: TreeViewProps) => {
         [oneExpanded, refreshExpanded, lovList, propagate, updateVars, dispatch, props.onChange, module]
     );
 
-    const treeProps = useMemo(() => ({ multiSelect: multiple, selectedItems: selectedValue }), [multiple, selectedValue]);
+    const treeProps = useMemo(
+        () => ({ multiSelect: multiple, selectedItems: selectedValue }),
+        [multiple, selectedValue]
+    );
 
     return (
-        <Box id={id} sx={boxSx} className={className}>
+        <Box id={id} sx={boxSx} className={`${className} ${get_class_name(props.children)}`}>
             <Tooltip title={hover || ""}>
                 <Paper sx={paperSx}>
                     <Box>
@@ -311,6 +315,7 @@ const TreeView = (props: TreeViewProps) => {
                     </MuiTreeView>
                 </Paper>
             </Tooltip>
+            {props.children}
         </Box>
     );
 };

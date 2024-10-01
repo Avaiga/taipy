@@ -27,6 +27,7 @@ import { createSendActionNameAction, createSendUpdateAction } from "../../contex
 import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 import TaipyRendered from "../pages/TaipyRendered";
 import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps } from "./utils";
+import { get_class_name } from "./TaipyStyle";
 
 type AnchorType = "left" | "bottom" | "right" | "top" | undefined;
 
@@ -141,7 +142,7 @@ const Pane = (props: PaneProps) => {
             anchor={anchor}
             open={open}
             onClose={handleClose}
-            className={className}
+            className={`${className} ${get_class_name(props.children)}`}
         >
             {persistent ? (
                 <>

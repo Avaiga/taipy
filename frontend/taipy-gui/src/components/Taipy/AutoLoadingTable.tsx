@@ -79,6 +79,7 @@ import {
 import TableFilter from "./TableFilter";
 import { getSuffixedClassNames, getUpdateVar } from "./utils";
 import { emptyArray } from "../../utils";
+import { get_class_name } from "./TaipyStyle";
 
 interface RowData {
     colsOrder: string[];
@@ -592,7 +593,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const boxSx = useMemo(() => ({ ...baseBoxSx, width: width }), [width]);
 
     return (
-        <Box id={id} sx={boxSx} className={`${className} ${getSuffixedClassNames(className, "-autoloading")}`}>
+        <Box id={id} sx={boxSx} className={`${className} ${getSuffixedClassNames(className, "-autoloading")} ${get_class_name(props.children)}`}>
             <Paper sx={paperSx}>
                 <Tooltip title={hover || ""}>
                     <TableContainer>
@@ -715,6 +716,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     </TableContainer>
                 </Tooltip>
             </Paper>
+            {props.children}
         </Box>
     );
 };

@@ -16,6 +16,7 @@ import Box from "@mui/material/Box";
 
 import { useClassNames, useIsMobile } from "../../utils/hooks";
 import { TaipyBaseProps } from "./utils";
+import { get_class_name } from "./TaipyStyle";
 
 interface LayoutProps extends TaipyBaseProps {
     columns?: string;
@@ -51,7 +52,7 @@ const Layout = (props: LayoutProps) => {
     }, [columns, columns_Mobile_, gap, isMobile]);
 
     return (
-        <Box id={props.id} className={className} sx={sx}>
+        <Box id={props.id} className={`${className} ${get_class_name(props.children)}`} sx={sx}>
             {props.children}
         </Box>
     );

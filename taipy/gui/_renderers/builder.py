@@ -713,6 +713,14 @@ class _Builder:
 
     def __set_class_names(self):
         self.set_attribute("libClassName", self.__lib_name + "-" + self.__control_type.replace("_", "-"))
+        if (private_css := self.__attributes.get("style")) and isinstance(private_css, (dict, _MapDict)):
+            taipy_style = etree.Element("TaipyStyle")
+            taipy_style.set("className", f"tpcss-{id(private_css)}")
+            taipy_style.set(
+                "content",
+                json.dumps(private_css if isinstance(private_css, dict) else private_css._dict),
+            )
+            self.el.append(taipy_style)
         return self.__set_dynamic_string_attribute("class_name", dynamic_property_name="dynamic_class_name")
 
     def _set_dataType(self):

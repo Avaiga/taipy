@@ -28,6 +28,7 @@ import { createSendActionNameAction } from "../../context/taipyReducers";
 import { MenuProps } from "../../utils/lov";
 import { useClassNames, useDispatch, useModule } from "../../utils/hooks";
 import { emptyArray } from "../../utils";
+import { get_class_name } from "./TaipyStyle";
 
 const boxDrawerStyle = { overflowX: "hidden" } as CSSProperties;
 const headerSx = { padding: 0 };
@@ -78,7 +79,7 @@ const Menu = (props: MenuProps) => {
     }, [opened, width, theme]);
 
     return lov && lov.length ? (
-        <Drawer variant="permanent" anchor="left" sx={drawerSx} className={className}>
+        <Drawer variant="permanent" anchor="left" sx={drawerSx} className={`${className} ${get_class_name(props.children)}`}>
             <Box style={boxDrawerStyle}>
                 <List>
                     <ListItemButton key="taipy_menu_0" onClick={openHandler}>
@@ -109,6 +110,7 @@ const Menu = (props: MenuProps) => {
                     ))}
                 </List>
             </Box>
+            {props.children}
         </Drawer>
     ) : null;
 };
