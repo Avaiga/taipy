@@ -251,9 +251,14 @@ class State:
     def set_favicon(self, favicon_path: t.Union[str, Path]):
         """Change the favicon for the client of this state.
 
-        This function dynamically changes the favicon of Taipy GUI pages for a specific client.
-        favicon_path can be an URL (relative or not) or a file path.
-        TODO The *favicon* parameter to `(Gui.)run()^` can also be used to change
-         the favicon when the application starts.
+        This function dynamically changes the favicon (the icon associated with the application's
+        pages) of Taipy GUI pages for the specific client of this state.
+
+        Note that the *favicon* parameter to `(Gui.)run()^` can also be used to change
+        the favicon when the application starts.
+
+        Arguments:
+            favicon_path: The path to the image file to use.<br/>
+                This can be expressed as a path name or a URL (relative or not).
         """
         super().__getattribute__(State.__gui_attr).set_favicon(favicon_path, self)

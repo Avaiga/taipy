@@ -1990,7 +1990,7 @@
                         "name": "adapter",
                         "type": "Union[str, Callable]",
                         "default_value": "<tt>lambda x: str(x)</tt>",
-                        "doc": "A function or the name of the function  that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>.<br/>The default value is a function that returns the string representation of the <i>lov</i> element."
+                        "doc": "A function or the name of the function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>.<br/>The default value is a function that returns the string representation of the <i>lov</i> element."
                     },
                     {
                         "name": "type",
