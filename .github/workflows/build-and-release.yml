@@ -147,6 +147,7 @@ jobs:
         run: |
           python -m build
           for file in ./dist/*; do mv "$file" "${file//_/-}"; done
+          ls -lah ./dist
 
       - name: Create tag and release
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
