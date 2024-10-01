@@ -86,17 +86,7 @@ class S3ObjectDataNode(DataNode):
         self,
         config_id: str,
         scope: Scope,
-        id: Optional[DataNodeId] = None,
-        owner_id: Optional[str] = None,
-        parent_ids: Optional[Set[str]] = None,
-        last_edit_date: Optional[datetime] = None,
-        edits: Optional[List[Edit]] = None,
-        version: str = None,
-        validity_period: Optional[timedelta] = None,
-        edit_in_progress: bool = False,
-        editor_id: Optional[str] = None,
-        editor_expiration_date: Optional[datetime] = None,
-        properties: Optional[Dict] = None,
+        **properties: Any,
     ) -> None:
         _check_dependency_is_installed("S3 Data Node", "boto3")
         if properties is None:
@@ -109,16 +99,6 @@ class S3ObjectDataNode(DataNode):
         super().__init__(
             config_id,
             scope,
-            id,
-            owner_id,
-            parent_ids,
-            last_edit_date,
-            edits,
-            version or _VersionManagerFactory._build_manager()._get_latest_version(),
-            validity_period,
-            edit_in_progress,
-            editor_id,
-            editor_expiration_date,
             **properties,
         )
 
@@ -126,6 +106,8 @@ class S3ObjectDataNode(DataNode):
             "s3",
             aws_access_key_id=properties.get(self.__AWS_ACCESS_KEY_ID),
             aws_secret_access_key=properties.get(self.__AWS_SECRET_ACCESS_KEY),
+            region_name=properties.get(self.__AWS_REGION), 
+            **properties.get(self.__AWS_S3_OBJECT_PARAMETERS, {}),
         )
 
         if not self._last_edit_date:  # type: ignore
@@ -151,6 +133,7 @@ class S3ObjectDataNode(DataNode):
         aws_s3_object = self._s3_client.get_object(
             Bucket=properties[self.__AWS_STORAGE_BUCKET_NAME],
             Key=properties[self.__AWS_S3_OBJECT_KEY],
+            **properties.get(self.__AWS_S3_OBJECT_PARAMETERS, {}),
         )
         return aws_s3_object["Body"].read()
 
@@ -160,4 +143,5 @@ class S3ObjectDataNode(DataNode):
             Bucket=properties[self.__AWS_STORAGE_BUCKET_NAME],
             Key=properties[self.__AWS_S3_OBJECT_KEY],
             Body=data,
+            **properties.get(self.__AWS_S3_OBJECT_PARAMETERS, {}),
         )
