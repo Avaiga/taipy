@@ -35,6 +35,14 @@ class _GuiCLI(_AbstractCLI):
             "const": "",
             "help": "Specify server host",
         },
+        ("--client-url", "-H"): {
+            "dest": "taipy_client_url",
+            "metavar": "CLIENT_URL",
+            "nargs": "?",
+            "default": "",
+            "const": "",
+            "help": "Specify client url",
+        },
         ("--ngrok-token",): {
             "dest": "taipy_ngrok_token",
             "metavar": "NGROK_TOKEN",
