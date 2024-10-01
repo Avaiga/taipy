@@ -94,5 +94,8 @@ class Scope(_OrderedEnum):
     """
 
     GLOBAL = 3
+    """Global scope, the data node is shared by all the scenarios."""
     CYCLE = 2
+    """Cycle scope, the data node is shared by all the scenarios of the same cycle."""
     SCENARIO = 1
+    """Scenario scope, the data node is unique to a scenario."""

@@ -15,6 +15,14 @@ from ..common._repr_enum import _ReprEnum
 class Frequency(_ReprEnum):
     """Frequency of the recurrence of `Cycle^` and `Scenario^` objects.
 
+    This enumeration can have the following values:
+
+    - `DAILY`
+    - `WEEKLY`
+    - `MONTHLY`
+    - `QUARTERLY`
+    - `YEARLY`
+
     The frequency must be provided in the `ScenarioConfig^`.
 
     Each recurrent scenario is attached to the cycle corresponding to the creation date and the
@@ -24,22 +32,15 @@ class Frequency(_ReprEnum):
     For instance, when scenarios have a _MONTHLY_ frequency, one cycle will be created for each
     month (January, February, March, etc.). A new scenario created on February 10th, gets
     attached to the _February_ cycle.
-
-    The frequency is implemented as an enumeration with the following possible values:
-
-    - With a _DAILY_ frequency, a new cycle is created for each day.
-
-    - With a _WEEKLY_ frequency, a new cycle is created for each week (from Monday to Sunday).
-
-    - With a _MONTHLY_ frequency, a new cycle is created for each month.
-
-    - With a _QUARTERLY_ frequency, a new cycle is created for each quarter.
-
-    - With a _YEARLY_ frequency, a new cycle is created for each year.
     """
 
     DAILY = 1
+    """Daily frequency, a new cycle is created for each day."""
     WEEKLY = 2
+    """Weekly frequency, a new cycle is created for each week (from Monday to Sunday)."""
     MONTHLY = 3
+    """Monthly frequency, a new cycle is created for each month."""
     QUARTERLY = 4
+    """Quarterly frequency, a new cycle is created for each quarter."""
     YEARLY = 5
+    """Yearly frequency, a new cycle is created for each year."""
