@@ -156,7 +156,6 @@ class DataNodeConfig(Section):
     _OPTIONAL_AWS_S3_CLIENT_PARAMETERS_PROPERTY = "aws_s3_client_parameters"
     _OPTIONAL_AWS_S3_GET_OBJECT_PARAMETERS_PROPERTY = "aws_s3_get_object_parameters"
     _OPTIONAL_AWS_S3_PUT_OBJECT_PARAMETERS_PROPERTY = "aws_s3_put_object_parameters"
-    _OPTIONAL_AWS_S3_OBJECT_PARAMETERS_PROPERTY = "aws_s3_object_parameters"
 
     _REQUIRED_PROPERTIES: Dict[str, List] = {
         _STORAGE_TYPE_VALUE_PICKLE: [],
@@ -1133,7 +1132,7 @@ class DataNodeConfig(Section):
             properties[cls._OPTIONAL_AWS_S3_GET_OBJECT_PARAMETERS_PROPERTY] = aws_s3_get_object_parameters
         if aws_s3_put_object_parameters is not None:
             properties[cls._OPTIONAL_AWS_S3_PUT_OBJECT_PARAMETERS_PROPERTY] = aws_s3_put_object_parameters
-            return cls.__configure(id, DataNodeConfig._STORAGE_TYPE_VALUE_S3_OBJECT, scope, validity_period, **properties)
+        return cls.__configure(id, DataNodeConfig._STORAGE_TYPE_VALUE_S3_OBJECT, scope, validity_period, **properties)
 
     @staticmethod
     def __configure(
