@@ -2860,7 +2860,8 @@ class Gui:
         Arguments:
             favicon_path: The path to the image file to use.<br/>
                 This can be expressed as a path name or a URL (relative or not).
-            state: The state to apply the change to.
+            state: The state to apply the change to.<br/>
+                If no set or set to None, all the application's clients are impacted.
         """
         if state or self.__favicon != favicon_path:
             if not state:
