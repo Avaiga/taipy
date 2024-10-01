@@ -12,8 +12,6 @@
 import inspect
 import json
 
-from flask import g
-
 from taipy.gui import Gui, Markdown
 
 
