@@ -12,6 +12,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+
 from taipy.common.config.common.scope import Scope
 from taipy.core import Job, JobId, Scenario, Task
 from taipy.core.data._data_manager_factory import _DataManagerFactory
