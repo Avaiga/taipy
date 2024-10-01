@@ -62,8 +62,10 @@ class S3ObjectDataNode(DataNode):
                     Storage Service (S3).\n
             - _"aws_s3_object_key"_ `(str)`:  unique idntifier for the name of the object(file) that has to be read
                     or written. \n
-            - _"aws _s3_object_parameters"_ `(str)`: A dictionary of additional arguments to be passed to interact with
-                    the AWS service\n
+            - _"aws_s3_client_parameters"_ `(Optional[Dict[str, Any])`: Additional parameters for S3 client creation\n
+            - _"aws_s3_get_object_parameters"_ `(Optional[Dict[str, Any])`: : A dictionary of additional arguments to be passed
+                into AWS S3 bucket access string\n
+            - _"aws_s3_client_parameters"_ `(Optional[Dict[str, Any])`: Additional parameters for uploading the object\n
     """
 
     __STORAGE_TYPE = "s3_object"
@@ -73,10 +75,9 @@ class S3ObjectDataNode(DataNode):
     __AWS_STORAGE_BUCKET_NAME = "aws_s3_bucket_name"
     __AWS_S3_OBJECT_KEY = "aws_s3_object_key"
     __AWS_REGION = "aws_region"
-    __AWS_S3_OBJECT_PARAMETERS = "aws_s3_object_parameters"
-    __AWS_S3_CLIENT_PARAMETERS = "aws_s3_client_parameters"  # New parameter for client
-    __AWS_S3_GET_OBJECT_PARAMETERS = "aws_s3_get_object_parameters"  # New for get_object
-    __AWS_S3_PUT_OBJECT_PARAMETERS = "aws_s3_put_object_parameters"  # New for put_object
+    __AWS_S3_CLIENT_PARAMETERS = "aws_s3_client_parameters"  
+    __AWS_S3_GET_OBJECT_PARAMETERS = "aws_s3_get_object_parameters"  
+    __AWS_S3_PUT_OBJECT_PARAMETERS = "aws_s3_put_object_parameters"  
 
 
     _REQUIRED_PROPERTIES: List[str] = [
@@ -144,7 +145,6 @@ class S3ObjectDataNode(DataNode):
                 self.__AWS_STORAGE_BUCKET_NAME,
                 self.__AWS_S3_OBJECT_KEY,
                 self.__AWS_REGION,
-                self.__AWS_S3_OBJECT_PARAMETERS,
                 self.__AWS_S3_CLIENT_PARAMETERS,
                 self.__AWS_S3_GET_OBJECT_PARAMETERS,
                 self.__AWS_S3_PUT_OBJECT_PARAMETERS,
