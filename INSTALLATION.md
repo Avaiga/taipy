@@ -55,7 +55,7 @@ This code is written in [TypeScript](https://www.typescriptlang.org/), relies on
 [React](https://reactjs.org/) components, and is packaged into JavaScript bundles that are sent to
 browsers when they connect to all Taipy applications that have a graphical interface.
 
-There are two main JavaScript bundles that can be built:
+Two main JavaScript bundles can be built:
 - Taipy GUI: All the graphical interfaces that Taipy GUI can generate are based on a set of
   generated files, including the web application and all the predefined visual elements.
 - Taipy: A set of visual elements dedicated to Scenario Management.
@@ -73,7 +73,7 @@ The build process is described in the [Taipy GUI front-end](frontend/taipy-gui/R
 Here is the sequence of commands that can be issued to build both sets of files:
 
 ```bash
-# Current directory is the repository's root directory
+# The current directory is the repository's root directory
 #
 # Build the Taipy GUI bundle
 cd frontend/taipy-gui
@@ -90,7 +90,7 @@ npm run build
 ```
 
 These commands should create the directories `taipy/gui/webapp` and `taipy/gui_core/lib` in the
-root directory of the taipy repository.
+the root directory of the taipy repository.
 
 ### Debugging the JavaScript bundles
 
@@ -109,17 +109,17 @@ TypeScript code from your debugger.
 >
 > When you are developing front-end code for the Taipy GUI package, it may
 > be cumbersome to have to install the package over and over when you know
-> that all that has changed is the JavaScript bundle that makes the Taipy
+> That all that has changed is the JavaScript bundle that makes the Taipy
 > web app.
 >
 > By default, the Taipy GUI application searches for the front-end code
 > in the `[taipy-gui-package-dir]/taipy/gui/webapp` directory.<br/>
 > You can, however, set the environment variable `TAIPY_GUI_WEBAPP_PATH`
 > to the location of your choice, and Taipy GUI will look for the web
-> app in that directory.<br/>
-> If you set this variable to the location where you build the web app
-> repeatedly, you will no longer have to reinstall Taipy GUI before you
-> try your code again.
+> App in that directory.<br/>
+> If you set this variable to the location where you build the web app.
+> Repeatedly, you will no longer have to reinstall Taipy GUI before you.
+> Try your code again.
 
 
 ## Running the tests
