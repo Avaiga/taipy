@@ -571,6 +571,8 @@ class _Builder:
             self.set_boolean_attribute("compare", True)
             self.__set_string_attribute("on_compare")
 
+        if not isinstance(self.__attributes.get("style"), (type(None), dict, _MapDict)):
+            _warn("Table: property 'style' has been renamed to 'row_class_name'.")
         if row_class_name := self.__attributes.get("row_class_name"):
             if isfunction(row_class_name):
                 value = self.__hashes.get("row_class_name")
