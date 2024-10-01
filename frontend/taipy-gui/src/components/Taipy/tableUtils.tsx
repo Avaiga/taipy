@@ -62,12 +62,15 @@ export interface ColumnDesc {
     width?: number | string;
     /** If true, the column cannot be edited. */
     notEditable?: boolean;
-    /** The name of the column that holds the CSS classname to
+    /** The name of the column that holds the CSS className to
      *  apply to the cells. */
-    style?: string;
+    className?: string;
     /** The name of the column that holds the tooltip to
      *  show on the cells. */
     tooltip?: string;
+    /** The name of the column that holds the formatted value to
+     *  show on the cells. */
+    formatFn?: string;
     /** The value that would replace a NaN value. */
     nanValue?: string;
     /** The TimeZone identifier used if the type is `date`. */
@@ -83,9 +86,6 @@ export interface ColumnDesc {
     lov?: string[];
     /** If true the user can enter any value besides the lov values. */
     freeLov?: boolean;
-    /** The name of the column that holds the formatted value to
-     *  show on the cells. */
-    formatFn?: string;
 }
 
 export const DEFAULT_SIZE = "small";
@@ -106,7 +106,7 @@ export type RowType = Record<string, RowValue>;
 
 export const EDIT_COL = "taipy_edit";
 
-export const LINE_STYLE = "__taipy_line_style__";
+export const ROW_CLASS_NAME = "__taipyRowClassName__";
 
 export const defaultDateFormat = "yyyy/MM/dd";
 
@@ -128,7 +128,7 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     onAction?: string;
     editable?: boolean;
     defaultEditable?: boolean;
-    lineStyle?: string;
+    rowClassName?: string;
     tooltip?: string;
     cellTooltip?: string;
     nanValue?: string;
@@ -273,8 +273,8 @@ export const addActionColumn = (nbToRender: number, columns: Record<string, Colu
     return columns;
 };
 
-export const getClassName = (row: Record<string, unknown>, style?: string, col?: string) =>
-    getToolFn("tps", row, style, col);
+export const getClassName = (row: Record<string, unknown>, className?: string, col?: string) =>
+    getToolFn("tps", row, className, col);
 
 export const getTooltip = (row: Record<string, unknown>, tooltip?: string, col?: string) =>
     getToolFn("tpt", row, tooltip, col);
@@ -293,7 +293,7 @@ export const getPageKey = (
     order: string,
     filters: FilterDesc[],
     aggregates?: string[],
-    styles?: Record<string, string>,
+    cellClassNames?: Record<string, string>,
     tooltips?: Record<string, string>,
     formats?: Record<string, string>
 ) =>
@@ -312,9 +312,9 @@ export const getPageKey = (
             : undefined,
         filters.map((filter) => `${filter.col}${filter.action}${filter.value}`).join(),
         [
-            styles &&
-                Object.entries(styles)
-                    .map((col, style) => `${col}:${style}`)
+            cellClassNames &&
+                Object.entries(cellClassNames)
+                    .map((col, className) => `${col}:${className}`)
                     .join(),
             tooltips &&
                 Object.entries(tooltips)
