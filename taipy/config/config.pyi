@@ -55,9 +55,9 @@ class Config:
         ??? example "Advanced use case"
 
             The configuration can be done in three ways: Python code, configuration files, or
-            environment variables. All configuration manners are ultimately merged (overriding the previous way
+            environment variables. All configuration manners are ultimately merged (overriding the previous
             way) to create a final applied configuration. Please refer to the
-            [advanced configuration](../../userman/advanced_features/configuration/advanced-config.md)
+            [advanced configuration](../../../../../userman/advanced_features/configuration/advanced-config.md)
             section from the user manual for more details.
 
     2. Attributes and methods to retrieve the configuration values.
@@ -102,24 +102,18 @@ class Config:
                 file and replace the current Python configuration.
             - *Override the configuration*: Use the `Config.override()^` method to load a TOML
                 configuration file and override the current Python configuration.
-
-    Attributes:
-        global_config (GlobalAppConfig): configuration values related to the global
-            application as a `GlobalAppConfig^`.
-        unique_sections (Dict[str, UniqueSection]): A dictionary containing all unique sections.
-        sections (Dict[str, Dict[str, Section]]): A dictionary containing all non-unique sections.
     """
     @_Classproperty
     def unique_sections(cls) -> Dict[str, UniqueSection]:
-        """"""
+        """A dictionary containing all unique sections."""
 
     @_Classproperty
     def sections(cls) -> Dict[str, Dict[str, Section]]:
-        """"""
+        """A dictionary containing all non-unique sections."""
 
     @_Classproperty
     def global_config(cls) -> GlobalAppConfig:
-        """"""
+        """configuration values related to the global application as a `GlobalAppConfig^`."""
 
     @classmethod
     @_ConfigBlocker._check()
