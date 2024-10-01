@@ -18,7 +18,6 @@ import xml.etree.ElementTree as etree
 from datetime import date, datetime, time
 from enum import Enum
 from inspect import isclass, isfunction
-from types import NoneType
 from urllib.parse import quote
 
 from .._warnings import _warn
@@ -572,7 +571,7 @@ class _Builder:
             self.set_boolean_attribute("compare", True)
             self.__set_string_attribute("on_compare")
 
-        if not isinstance(self.__attributes.get("style"), (NoneType, dict, _MapDict)):
+        if not isinstance(self.__attributes.get("style"), (type(None), dict, _MapDict)):
             _warn("Table: property 'style' has been renamed to 'row_class_name'.")
         if row_class_name := self.__attributes.get("row_class_name"):
             if isfunction(row_class_name):
