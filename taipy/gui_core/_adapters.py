@@ -344,7 +344,7 @@ def _get_entity_property(col: str, *types: t.Type):
     col_parts = col.split("(", 2)  # handle the case where the col is a method (ie get_simple_label())
     col_fn = (
         next(
-            (col_parts[0] for i in inspect.getmembers(types[0], predicate=inspect.isfunction) if i[0] == col_parts[0]),
+            (col_parts[0] for i in inspect.getmembers(types[0], predicate=inspect.isroutine) if i[0] == col_parts[0]),
             None,
         )
         if len(col_parts) > 1
