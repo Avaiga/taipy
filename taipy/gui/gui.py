@@ -2427,6 +2427,9 @@ class Gui:
             return t.cast(Flask, self._server.get_flask())
         raise RuntimeError("get_flask_app() cannot be invoked before run() has been called.")
 
+    def _get_port(self) -> int:
+        return self._server.get_port()
+
     def _set_frame(self, frame: t.Optional[FrameType]):
         if not isinstance(frame, FrameType):  # pragma: no cover
             raise RuntimeError("frame must be a FrameType where Gui can collect the local variables.")
@@ -2624,6 +2627,8 @@ class Gui:
         # server URL Rule for flask rendered react-router
         pages_bp.add_url_rule(f"/{Gui.__INIT_URL}", view_func=self.__init_route)
 
+        _Hooks()._add_external_blueprint(self, __name__)
+
         # Register Flask Blueprint if available
         for bp in self._flask_blueprint:
             t.cast(Flask, self._server.get_flask()).register_blueprint(bp)
@@ -2790,6 +2795,7 @@ class Gui:
         return self._server.run(
             host=app_config.get("host"),
             port=app_config.get("port"),
+            client_url=app_config.get("client_url"),
             debug=app_config.get("debug"),
             use_reloader=app_config.get("use_reloader"),
             flask_log=app_config.get("flask_log"),
