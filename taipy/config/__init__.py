@@ -9,9 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-"""# Taipy `config` Package
-
-The `taipy.config` package provides features to configure a Taipy application.
+"""The `taipy.config` package provides features to configure a Taipy application.
 
 Its main class is the `Config^` singleton. It exposes various static methods
 and attributes to configure the Taipy application and retrieve the configuration values.
