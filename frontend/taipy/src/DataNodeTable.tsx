@@ -52,7 +52,7 @@ interface DataNodeTableProps {
     data?: Record<string, TraceValueType>;
     columns?: Record<string, ColumnDesc>;
     updateVarName?: string;
-    uniqid: string;
+    uniqId: string;
     onEdit?: string;
     onViewTypeChange: (e: MouseEvent, value?: string) => void;
     onLock?: string;
@@ -65,7 +65,7 @@ interface DataNodeTableProps {
 const pushRightSx = { ml: "auto" };
 
 const DataNodeTable = (props: DataNodeTableProps) => {
-    const { uniqid, configId, nodeId, columns = "", onViewTypeChange, notEditableReason, updateDnVars = "" } = props;
+    const { uniqId, configId, nodeId, columns = "", onViewTypeChange, notEditableReason, updateDnVars = "" } = props;
 
     const dispatch = useDispatch();
     const module = useModule();
@@ -108,9 +108,9 @@ const DataNodeTable = (props: DataNodeTableProps) => {
     useEffect(() => {
         if (columns) {
             const res = {} as Record<string, ColumnDesc>;
-            const dfids = {} as Record<string, string>;
-            Object.entries(columns).forEach(([k, v]) => (dfids[v.dfid] = k));
-            selectedCols.forEach((c) => dfids[c] && (res[dfids[c]] = columns[dfids[c]]));
+            const dfIds = {} as Record<string, string>;
+            Object.entries(columns).forEach(([k, v]) => (dfIds[v.dfid] = k));
+            selectedCols.forEach((c) => dfIds[c] && (res[dfIds[c]] = columns[dfIds[c]]));
             setTabCols(res);
         }
     }, [columns, selectedCols]);
@@ -164,9 +164,9 @@ const DataNodeTable = (props: DataNodeTableProps) => {
                 </Grid>
                 <Grid>
                     <FormControl sx={selectSx} fullWidth className="taipy-selector">
-                        <InputLabel id={uniqid + "-cols-label"}>Columns</InputLabel>
+                        <InputLabel id={uniqId + "-cols-label"}>Columns</InputLabel>
                         <Select
-                            labelId={uniqid + "-cols-label"}
+                            labelId={uniqId + "-cols-label"}
                             multiple
                             value={selectedCols}
                             onChange={onColsChange}

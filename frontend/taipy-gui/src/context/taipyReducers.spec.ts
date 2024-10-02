@@ -38,7 +38,7 @@ import {
     messageToAction,
     NamePayload,
     NavigateMessage,
-    retreiveBlockUi,
+    retrieveBlockUi,
     storeBlockUi,
     TaipyBaseAction,
     taipyReducer,
@@ -777,19 +777,19 @@ describe("retreiveBlockUi function", () => {
     it("should retrieve block message from localStorage", () => {
         const mockBlockMessage = { action: "testAction", noCancel: false, close: false, message: "testMessage" };
         Storage.prototype.getItem = jest.fn(() => JSON.stringify(mockBlockMessage));
-        const result = retreiveBlockUi();
+        const result = retrieveBlockUi();
         expect(result).toEqual(mockBlockMessage);
     });
 
     it("should return an empty object if localStorage is empty", () => {
         Storage.prototype.getItem = jest.fn(() => null);
-        const result = retreiveBlockUi();
+        const result = retrieveBlockUi();
         expect(result).toEqual({});
     });
 
     it("should return an empty object if localStorage contains invalid JSON", () => {
         Storage.prototype.getItem = jest.fn(() => "{ invalid json");
-        const result = retreiveBlockUi();
+        const result = retrieveBlockUi();
         expect(result).toEqual({});
     });
 });
