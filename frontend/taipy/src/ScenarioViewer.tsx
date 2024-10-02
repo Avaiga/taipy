@@ -40,6 +40,7 @@ import deepEqual from "fast-deep-equal/es6";
 import {
     createRequestUpdateAction,
     createSendActionNameAction,
+    createUnBroadcastAction,
     getUpdateVar,
     useDispatch,
     useDynamicProperty,
@@ -49,6 +50,7 @@ import {
 import {
     AccordionIconSx,
     AccordionSummarySx,
+    CoreProps,
     FieldNoMaxWidth,
     FlagSx,
     IconPaddingSx,
@@ -64,20 +66,14 @@ import ConfirmDialog from "./utils/ConfirmDialog";
 import PropertiesEditor from "./PropertiesEditor";
 import StatusChip, { Status } from "./StatusChip";
 
-interface ScenarioViewerProps {
-    id?: string;
+interface ScenarioViewerProps extends CoreProps {
     expandable?: boolean;
     expanded?: boolean;
-    updateVarName?: string;
     defaultScenario?: string;
     scenario?: ScenarioFull | Array<ScenarioFull>;
     onSubmit?: string;
     onEdit?: string;
     onDelete?: string;
-    error?: string;
-    coreChanged?: Record<string, unknown>;
-    defaultActive: boolean;
-    active: boolean;
     showConfig?: boolean;
     showCreationDate?: boolean;
     showCycle?: boolean;
@@ -87,9 +83,6 @@ interface ScenarioViewerProps {
     showSubmit?: boolean;
     showSubmitSequences?: boolean;
     showTags?: boolean;
-    libClassName?: string;
-    className?: string;
-    dynamicClassName?: string;
     onSubmissionChange?: string;
     updateScVars?: string;
 }
@@ -348,6 +341,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         showSubmitSequences = true,
         showTags = true,
         updateScVars = "",
+        coreChanged,
     } = props;
 
     const dispatch = useDispatch();
@@ -610,14 +604,25 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
     // Refresh on broadcast
     useEffect(() => {
-        const ids = props.coreChanged?.scenario;
-        if (typeof ids === "string" ? ids === scId : Array.isArray(ids) ? ids.includes(scId) : ids) {
-            if (typeof props.coreChanged?.submission === "number") {
-                setSubmissionStatus(props.coreChanged?.submission as number);
-            }
-            props.updateVarName && dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
+        if (coreChanged?.name) {
+            const toRemove = [...coreChanged.stack]
+                .map((bc) => {
+                    const ids = (bc as Record<string, unknown>).scenario;
+                    if (typeof ids === "string" ? ids === scId : Array.isArray(ids) ? ids.includes(scId) : ids) {
+                        const submission = (bc as Record<string, unknown>).submission
+                        if (typeof submission === "number") {
+                            setSubmissionStatus(submission as number);
+                        }
+                        props.updateVarName &&
+                            dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
+                        return bc;
+                    }
+                    return undefined;
+                })
+                .filter((v) => v);
+            toRemove.length && dispatch(createUnBroadcastAction(coreChanged.name, ...toRemove));
         }
-    }, [props.coreChanged, props.updateVarName, id, module, dispatch, scId]);
+    }, [coreChanged, props.updateVarName, id, module, dispatch, scId]);
 
     const disabled = !valid || !active || !!scNotSubmittableReason;
 
@@ -712,31 +717,33 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                             sx={FieldNoMaxWidth}
                                             value={label || ""}
                                             onChange={onLabelChange}
-                                            slotProps={{input: {
-                                                onKeyDown: onLabelKeyDown,
-                                                endAdornment: (
-                                                    <InputAdornment position="end">
-                                                        <Tooltip title="Apply">
-                                                            <IconButton
-                                                                sx={IconPaddingSx}
-                                                                onClick={editLabel}
-                                                                size="small"
-                                                            >
-                                                                <CheckCircle color="primary" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                        <Tooltip title="Cancel">
-                                                            <IconButton
-                                                                sx={IconPaddingSx}
-                                                                onClick={cancelLabel}
-                                                                size="small"
-                                                            >
-                                                                <Cancel color="inherit" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    </InputAdornment>
-                                                ),
-                                            }}}
+                                            slotProps={{
+                                                input: {
+                                                    onKeyDown: onLabelKeyDown,
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <Tooltip title="Apply">
+                                                                <IconButton
+                                                                    sx={IconPaddingSx}
+                                                                    onClick={editLabel}
+                                                                    size="small"
+                                                                >
+                                                                    <CheckCircle color="primary" />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                            <Tooltip title="Cancel">
+                                                                <IconButton
+                                                                    sx={IconPaddingSx}
+                                                                    onClick={cancelLabel}
+                                                                    size="small"
+                                                                >
+                                                                    <Cancel color="inherit" />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
                                             disabled={!valid}
                                         />
                                     ) : (
@@ -787,32 +794,34 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                         label="Tags"
                                                         sx={tagsAutocompleteSx}
                                                         fullWidth
-                                                        slotProps={{input: {
-                                                            ...params.InputProps,
-                                                            onKeyDown: onTagsKeyDown,
-                                                            endAdornment: (
-                                                                <>
-                                                                    <Tooltip title="Apply">
-                                                                        <IconButton
-                                                                            sx={IconPaddingSx}
-                                                                            onClick={editTags}
-                                                                            size="small"
-                                                                        >
-                                                                            <CheckCircle color="primary" />
-                                                                        </IconButton>
-                                                                    </Tooltip>
-                                                                    <Tooltip title="Cancel">
-                                                                        <IconButton
-                                                                            sx={IconPaddingSx}
-                                                                            onClick={cancelTags}
-                                                                            size="small"
-                                                                        >
-                                                                            <Cancel color="inherit" />
-                                                                        </IconButton>
-                                                                    </Tooltip>
-                                                                </>
-                                                            ),
-                                                        }}}
+                                                        slotProps={{
+                                                            input: {
+                                                                ...params.InputProps,
+                                                                onKeyDown: onTagsKeyDown,
+                                                                endAdornment: (
+                                                                    <>
+                                                                        <Tooltip title="Apply">
+                                                                            <IconButton
+                                                                                sx={IconPaddingSx}
+                                                                                onClick={editTags}
+                                                                                size="small"
+                                                                            >
+                                                                                <CheckCircle color="primary" />
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                        <Tooltip title="Cancel">
+                                                                            <IconButton
+                                                                                sx={IconPaddingSx}
+                                                                                onClick={cancelTags}
+                                                                                size="small"
+                                                                            >
+                                                                                <Cancel color="inherit" />
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                    </>
+                                                                ),
+                                                            },
+                                                        }}
                                                     />
                                                 )}
                                                 disabled={!valid}
@@ -847,7 +856,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 onFocus={onFocus}
                                 onEdit={props.onEdit}
                                 notEditableReason={scNotEditableReason}
-                                updatePropVars={updateScVars}
+                                updateVars={updateScVars}
                             />
                             {showSequences ? (
                                 <>
@@ -866,7 +875,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         const [label, taskIds, notSubmittableReason, notEditableReason] = item;
                                         return (
                                             <SequenceRow
-                                                active={active}
+                                                active={!!active}
                                                 number={index}
                                                 label={label}
                                                 taskIds={taskIds}

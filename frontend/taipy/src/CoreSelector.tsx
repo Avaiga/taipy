@@ -49,6 +49,7 @@ import {
     TableFilter,
     SortDesc,
     TableSort,
+    createUnBroadcastAction,
 } from "taipy-gui";
 
 import { Cycles, Cycle, DataNodes, NodeType, Scenarios, Scenario, DataNode, Sequence, Sequences } from "./utils/types";
@@ -62,6 +63,7 @@ import {
     BadgePos,
     BadgeSx,
     BaseTreeViewSx,
+    CoreProps,
     FlagSx,
     ParentItemSx,
     getUpdateVarNames,
@@ -81,25 +83,14 @@ type Entities = Cycles | Scenarios | DataNodes;
 type Entity = Cycle | Scenario | Sequence | DataNode;
 type Pinned = Record<string, boolean>;
 
-interface CoreSelectorProps {
-    id?: string;
-    active?: boolean;
-    defaultActive?: boolean;
-    updateVarName?: string;
+interface CoreSelectorProps extends CoreProps {
     entities?: Entities;
-    coreChanged?: Record<string, unknown>;
-    updateVars: string;
     onChange?: string;
-    error?: string;
     displayCycles?: boolean;
     showPrimaryFlag?: boolean;
-    propagate?: boolean;
     value?: string | string[];
     defaultValue?: string;
     height: string;
-    libClassName?: string;
-    className?: string;
-    dynamicClassName?: string;
     multiple?: boolean;
     lovPropertyName: string;
     leafType: NodeType;
@@ -167,7 +158,7 @@ const CoreItem = (props: {
             data-selectable={nodeType === props.leafType}
             label={
                 <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={1}>
-                    <Grid  size="grow" sx={iconLabelSx}>
+                    <Grid size="grow" sx={iconLabelSx}>
                         {nodeType === NodeType.CYCLE ? (
                             <CycleIcon fontSize="small" color="primary" />
                         ) : nodeType === NodeType.SCENARIO ? (
@@ -441,9 +432,18 @@ const CoreSelector = (props: CoreSelectorProps) => {
 
     // Refresh on broadcast
     useEffect(() => {
-        if (coreChanged?.scenario) {
-            const updateVar = getUpdateVar(updateVars, lovPropertyName);
-            updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
+        if (coreChanged?.name) {
+            const toRemove = [...coreChanged.stack]
+                .map((bc) => {
+                    if ((bc as Record<string, unknown>).scenario) {
+                        const updateVar = getUpdateVar(updateVars, lovPropertyName);
+                        updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
+                        return bc;
+                    }
+                    return undefined;
+                })
+                .filter((v) => v);
+            toRemove.length && dispatch(createUnBroadcastAction(coreChanged.name, ...toRemove));
         }
     }, [coreChanged, updateVars, module, dispatch, id, lovPropertyName]);
 
@@ -712,6 +712,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                       )
                     : null}
             </SimpleTreeView>
+            {props.children}
         </>
     );
 };

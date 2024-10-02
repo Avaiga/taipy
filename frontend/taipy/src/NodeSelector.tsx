@@ -14,27 +14,19 @@
 import React from "react";
 import Box from "@mui/material/Box";
 
-import { MainTreeBoxSx, useClassNames } from "./utils";
+import { CoreProps, MainTreeBoxSx, useClassNames } from "./utils";
 import { Cycles, DataNodes, NodeType, Scenarios } from "./utils/types";
 import CoreSelector from "./CoreSelector";
 
-interface NodeSelectorProps {
-    id?: string;
-    updateVarName?: string;
+interface NodeSelectorProps extends CoreProps {
     innerDatanodes?: Cycles | Scenarios | DataNodes;
-    coreChanged?: Record<string, unknown>;
-    updateVars: string;
     onChange?: string;
     error?: string;
     displayCycles: boolean;
     showPrimaryFlag: boolean;
-    propagate?: boolean;
     value?: string;
     defaultValue?: string;
     height: string;
-    libClassName?: string;
-    className?: string;
-    dynamicClassName?: string;
     showPins?: boolean;
     multiple?: boolean;
     updateDnVars?: string;
