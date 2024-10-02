@@ -1378,7 +1378,7 @@ class Gui:
     ):
         self.__broadcast_ws(
             {
-                "type": _WsType.UPDATE.value if message_type is None else message_type.value,
+                "type": _WsType.BROADCAST.value if message_type is None else message_type.value,
                 "name": _get_broadcast_var_name(var_name),
                 "payload": {"value": var_value},
             },

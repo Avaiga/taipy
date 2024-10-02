@@ -23,29 +23,23 @@ import {
     createRequestUpdateAction,
     createSendActionNameAction,
     createSendUpdateAction,
+    createUnBroadcastAction,
     getUpdateVar,
     useDispatch,
     useDynamicProperty,
     useModule,
 } from "taipy-gui";
-import { useClassNames } from "./utils";
+import { CoreProps, useClassNames } from "./utils";
 import { TaipyDiagramModel } from "./projectstorm/models";
 
-interface ScenarioDagProps {
-    id?: string;
+interface ScenarioDagProps extends CoreProps {
     defaultScenario?: string;
     scenario?: DisplayModel | DisplayModel[];
-    coreChanged?: Record<string, unknown>;
-    updateVarName?: string;
     render?: boolean;
     defaultRender?: boolean;
     showToolbar?: boolean;
     width?: string;
     height?: string;
-    updateVars: string;
-    libClassName?: string;
-    className?: string;
-    dynamicClassName?: string;
     onAction?: string;
     onSelect?: string;
 }
@@ -69,17 +63,17 @@ const DagTitle = (props: DagTitleProps) => (
     </AppBar>
 );
 
-const getValidScenario = (scenar: DisplayModel | DisplayModel[]) =>
-    scenar.length == 3 && typeof scenar[0] === "string"
-        ? (scenar as DisplayModel)
-        : scenar.length == 1
-        ? (scenar[0] as DisplayModel)
+const getValidScenario = (scenario: DisplayModel | DisplayModel[]) =>
+    scenario.length == 3 && typeof scenario[0] === "string"
+        ? (scenario as DisplayModel)
+        : scenario.length == 1
+        ? (scenario[0] as DisplayModel)
         : undefined;
 
 const preventWheel = (e: Event) => e.preventDefault();
 
 const ScenarioDag = (props: ScenarioDagProps) => {
-    const { showToolbar = true, onSelect, onAction } = props;
+    const { showToolbar = true, onSelect, onAction, coreChanged } = props;
     const [scenarioId, setScenarioId] = useState("");
     const [engine] = useState(createEngine);
     const [dagreEngine] = useState(createDagreEngine);
@@ -105,15 +99,32 @@ const ScenarioDag = (props: ScenarioDagProps) => {
 
     // Refresh on broadcast
     useEffect(() => {
-        const ids = props.coreChanged?.scenario;
-        if (typeof ids === "string" ? ids === scenarioId : Array.isArray(ids) ? ids.includes(scenarioId) : ids) {
-            props.updateVarName && dispatch(createRequestUpdateAction(props.id, module, [props.updateVarName], true));
+        if (coreChanged?.name) {
+            const toRemove = [...coreChanged.stack]
+                .map((bc) => {
+                    const ids = (bc as Record<string, unknown>).scenario;
+                    if (
+                        typeof ids === "string"
+                            ? ids === scenarioId
+                            : Array.isArray(ids)
+                            ? ids.includes(scenarioId)
+                            : ids
+                    ) {
+                        props.updateVarName &&
+                            dispatch(createRequestUpdateAction(props.id, module, [props.updateVarName], true));
+                        return bc;
+                    }
+                    const tasks = (bc as Record<string, unknown>).tasks;
+                    if (tasks) {
+                        setTaskStatuses(tasks as TaskStatuses);
+                        return bc;
+                    }
+                    return undefined;
+                })
+                .filter((v) => v);
+            toRemove.length && dispatch(createUnBroadcastAction(coreChanged.name, ...toRemove));
         }
-        const tasks = props.coreChanged?.tasks;
-        if (tasks) {
-            setTaskStatuses(tasks as TaskStatuses);
-        }
-    }, [props.coreChanged, props.updateVarName, scenarioId, module, dispatch, props.id]);
+    }, [coreChanged, props.updateVarName, scenarioId, module, dispatch, props.id]);
 
     useEffect(() => {
         let dm: DisplayModel | undefined = undefined;
@@ -184,6 +195,7 @@ const ScenarioDag = (props: ScenarioDagProps) => {
         <Paper sx={sizeSx} id={props.id} className={className}>
             {showToolbar ? <DagTitle zoomToFit={zoomToFit} /> : null}
             <CanvasWidget engine={engine} ref={canvasRef} />
+            {props.children}
         </Paper>
     ) : null;
 };
