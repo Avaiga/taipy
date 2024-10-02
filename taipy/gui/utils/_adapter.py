@@ -12,6 +12,8 @@
 from __future__ import annotations
 
 import typing as t
+from enum import Enum
+from inspect import isclass
 from operator import add
 
 from .._warnings import _warn
@@ -66,6 +68,8 @@ class _Adapter:
     def run(self, var_name: str, value: t.Any, id_only=False) -> t.Any:
         lov = _AdaptedLov.get_lov(value)
         adapter = self.__get_for_var(var_name, value)
+        if isclass(lov) and issubclass(lov, Enum):
+            lov = list(lov)
         if isinstance(lov, (list, tuple)):
             res = []
             for elt in lov:

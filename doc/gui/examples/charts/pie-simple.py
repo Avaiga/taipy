@@ -15,28 +15,26 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # Source https://www.fao.org/faostat/en/#data/SDGB
-    data = {
-        "Country": [
-            "Rest of the world",
-            "Russian Federation",
-            "Brazil",
-            "Canada",
-            "United States of America",
-            "China",
-            "Australia",
-            "Democratic Republic of the Congo",
-            "Indonesia",
-            "Peru",
-        ],
-        "Area": [1445674.66, 815312, 496620, 346928, 309795, 219978, 134005, 126155, 92133.2, 72330.4],
-    }
+# Source https://www.fao.org/faostat/en/#data/SDGB
+data = {
+    "Country": [
+        "Rest of the world",
+        "Russian Federation",
+        "Brazil",
+        "Canada",
+        "United States of America",
+        "China",
+        "Australia",
+        "Democratic Republic of the Congo",
+        "Indonesia",
+        "Peru",
+    ],
+    "Area": [1445674.66, 815312, 496620, 346928, 309795, 219978, 134005, 126155, 92133.2, 72330.4],
+}
 
-    page = """
-# Pie - Simple
-
+page = """
 <|{data}|chart|type=pie|values=Area|label=Country|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Pie - Simple")

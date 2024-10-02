@@ -148,11 +148,13 @@ export const getProps = (p: DateProps, start: boolean, val: Date | null, withTim
     return { ...p, [propName]: val };
 };
 
-export const expandSx = (sx: SxProps, ...partials: (SxProps | undefined)[]) => {
-    return partials.reduce((prevSx: SxProps, partialSx) => {
+export const expandSx = (sx: SxProps | undefined, ...partials: (SxProps | undefined)[]) => {
+    const start = sx || {};
+    const end = partials.reduce((prevSx: SxProps, partialSx) => {
         if (partialSx) {
             return { ...prevSx, ...partialSx } as SxProps;
         }
         return prevSx;
-    }, sx);
+    }, start);
+    return start === end ? sx : end;
 };

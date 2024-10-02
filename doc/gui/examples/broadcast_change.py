@@ -32,13 +32,13 @@ def update_time(gui):
         sleep(1)
 
 
-if __name__ == "__main__":
-    current_time = datetime.now()
+current_time = datetime.now()
 
-    page = """
+page = """
 Current time is: <|{current_time}|format=HH:mm:ss|>
-    """
+"""
 
+if __name__ == "__main__":
     gui = Gui(page)
 
     # Run thread that regularly updates the current time
@@ -46,4 +46,4 @@ Current time is: <|{current_time}|format=HH:mm:ss|>
     thread.daemon = True
     thread.start()
 
-    gui.run()
+    gui.run(title="Broadcast - Change")

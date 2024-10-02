@@ -16,24 +16,22 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    data = {
-        "x": [1, 2, 3, 4, 5],
-        "y": [10, 7, 4, 1, 5],
-        "Sizes": [20, 30, 40, 50, 30],
-        "Symbols": ["circle-open", "triangle-up", "hexagram", "star-diamond", "circle-cross"],
-    }
+data = {
+    "x": [1, 2, 3, 4, 5],
+    "y": [10, 7, 4, 1, 5],
+    "Sizes": [20, 30, 40, 50, 30],
+    "Symbols": ["circle-open", "triangle-up", "hexagram", "star-diamond", "circle-cross"],
+}
 
-    marker = {
-        "color": "#77A",
-        "size": "Sizes",
-        "symbol": "Symbols",
-    }
+marker = {
+    "color": "#77A",
+    "size": "Sizes",
+    "symbol": "Symbols",
+}
 
-    page = """
-# Bubble - Symbols
-
+page = """
 <|{data}|chart|mode=markers|x=x|y=y|marker={marker}|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Bubble - Symbols")

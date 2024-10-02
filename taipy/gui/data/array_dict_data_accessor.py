@@ -52,17 +52,17 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
             return pd.DataFrame(value._dict)
         return pd.DataFrame(value)
 
-    def _from_pandas(self, value: pd.DataFrame, type: t.Type):
-        if type is dict:
+    def _from_pandas(self, value: pd.DataFrame, data_type: t.Type):
+        if data_type is dict:
             return value.to_dict("list")
-        if type is _MapDict:
+        if data_type is _MapDict:
             return _MapDict(value.to_dict("list"))
         if len(value.columns) == 1:
-            if type is list:
+            if data_type is list:
                 return value.iloc[:, 0].to_list()
-            if type is tuple:
+            if data_type is tuple:
                 return tuple(value.iloc[:, 0].to_list())
-        return super()._from_pandas(value, type)
+        return super()._from_pandas(value, data_type)
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
         return super().get_col_types(var_name, self.to_pandas(value))

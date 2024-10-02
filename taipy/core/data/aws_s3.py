@@ -152,7 +152,7 @@ class S3ObjectDataNode(DataNode):
             Bucket=properties[self.__AWS_STORAGE_BUCKET_NAME],
             Key=properties[self.__AWS_S3_OBJECT_KEY],
         )
-        return aws_s3_object["Body"].read().decode("utf-8")
+        return aws_s3_object["Body"].read()
 
     def _write(self, data: Any):
         properties = self.properties

@@ -18,19 +18,17 @@ import yfinance
 
 from taipy import Gui
 
-if __name__ == "__main__":
-    # Extraction of a month of stock data for AAPL using the
-    # yfinance package (see https://pypi.org/project/yfinance/).
-    ticker = yfinance.Ticker("AAPL")
-    # The returned value is a Pandas DataFrame.
-    stock = ticker.history(interval="1d", start="2018-08-01", end="2018-08-31")
-    # Copy the DataFrame's index to a new column
-    stock["Date"] = stock.index
+# Extraction of a month of stock data for AAPL using the
+# yfinance package (see https://pypi.org/project/yfinance/).
+ticker = yfinance.Ticker("AAPL")
+# The returned value is a Pandas DataFrame.
+stock = ticker.history(interval="1d", start="2018-08-01", end="2018-08-31")
+# Copy the DataFrame's index to a new column
+stock["Date"] = stock.index
 
-    page = """
-# Candlestick - Simple
-
+page = """
 <|{stock}|chart|type=candlestick|x=Date|open=Open|close=Close|low=Low|high=High|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Candlestick - Simple")

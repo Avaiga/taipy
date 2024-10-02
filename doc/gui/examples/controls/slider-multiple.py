@@ -15,16 +15,14 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # Initial values
-    values = [20, 40, 80]
+# Initial values
+values = [20, 40, 80]
 
-    page = """
-# Slider - Range
-
+page = """
 <|{values}|slider|>
 
 Selection: <|{values}|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Slider - Multiple values")

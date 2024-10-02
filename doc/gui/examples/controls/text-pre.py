@@ -27,4 +27,5 @@ page = """
 <|{code}|text|mode=pre|>
 """
 
-Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Text - Pre mode")

@@ -21,4 +21,5 @@ page = """
 π≈<|{pi}|text|format=%.3f|>
 """
 
-Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Text - Format")

@@ -16,7 +16,9 @@ import time as _time
 import typing as t
 import xml.etree.ElementTree as etree
 from datetime import date, datetime, time
-from inspect import isclass
+from enum import Enum
+from inspect import isclass, isroutine
+from types import LambdaType
 from urllib.parse import quote
 
 from .._warnings import _warn
@@ -138,7 +140,7 @@ class _Builder:
             hash_value = gui._evaluate_expr(value)
             try:
                 func = gui._get_user_function(hash_value)
-                if callable(func):
+                if isroutine(func):
                     return (func, hash_value)
                 return (_getscopeattr_drill(gui, hash_value), hash_value)
             except AttributeError:
@@ -163,14 +165,14 @@ class _Builder:
                 else:
                     looks_like_a_lambda = False
                     val = v
-                if callable(val):
+                if isroutine(val):
                     # if it's not a callable (and not a string), forget it
                     if val.__name__ == "<lambda>":
                         # if it is a lambda and it has already a hash_name, we're fine
                         if looks_like_a_lambda or not hash_name:
-                            hash_name = _get_lambda_id(val)
+                            hash_name = _get_lambda_id(t.cast(LambdaType, val))
                             gui._bind_var_val(hash_name, val)  # type: ignore[arg-type]
-                    else:
+                    elif not hash_name:
                         hash_name = _get_expr_var_name(val.__name__)
 
                 if val is not None or hash_name:
@@ -192,17 +194,6 @@ class _Builder:
     @staticmethod
     def _reset_key() -> None:
         _Builder.__keys = {}
-
-    def __get_list_of_(self, name: str):
-        lof = self.__attributes.get(name)
-        if isinstance(lof, str):
-            lof = list(lof.split(";"))
-        if not isinstance(lof, list) and hasattr(lof, "tolist"):
-            try:
-                return lof.tolist()  # type: ignore[union-attr]
-            except Exception as e:
-                _warn("Error accessing List of values", e)
-        return lof
 
     def get_name_indexed_property(self, name: str) -> t.Dict[str, t.Any]:
         """
@@ -359,11 +350,11 @@ class _Builder:
             if not optional:
                 _warn(f"Property {name} is required for control {self.__control_type}.")
             return self
-        elif callable(str_attr):
+        elif isroutine(str_attr):
             str_attr = self.__hashes.get(name)
             if str_attr is None:
                 return self
-        elif _is_boolean(str_attr) and not _is_true(str_attr):
+        elif _is_boolean(str_attr) and not _is_true(t.cast(str, str_attr)):
             return self.__set_react_attribute(_to_camel_case(name), False)
         elif str_attr:
             str_attr = str(str_attr)
@@ -384,21 +375,41 @@ class _Builder:
     def __set_react_attribute(self, name: str, value: t.Any):
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
 
+    @staticmethod
+    def enum_adapter(e: t.Union[Enum, str]):
+        return (e.value, e.name) if isinstance(e, Enum) else e
+
     def _get_lov_adapter(  # noqa: C901
         self, var_name: str, property_name: t.Optional[str] = None, multi_selection=True, with_default=True
     ):
         property_name = var_name if property_name is None else property_name
         lov_name = self.__hashes.get(var_name)
-        lov = self.__get_list_of_(var_name)
+        real_var_name = self.__gui._get_real_var_name(lov_name)[0] if lov_name else None
+        lov = self.__attributes.get(var_name)
+        adapter: t.Any = None
+        var_type: t.Optional[str] = None
+        if isinstance(lov, str):
+            lov = list(lov.split(";"))
+        if isclass(lov) and issubclass(lov, Enum):
+            adapter = _Builder.enum_adapter
+            var_type = "Enum"
+            lov = list(lov)
+        if not isinstance(lov, list) and hasattr(lov, "tolist"):
+            try:
+                lov = lov.tolist()  # type: ignore[union-attr]
+            except Exception as e:
+                _warn(f"Error accessing List of values for '{real_var_name or property_name}'", e)
+                lov = None
+
         default_lov: t.Optional[t.List[t.Any]] = [] if with_default or not lov_name else None
 
-        adapter = self.__attributes.get("adapter")
+        adapter = self.__attributes.get("adapter", adapter)
         if adapter and isinstance(adapter, str):
             adapter = self.__gui._get_user_function(adapter)
         if adapter and not callable(adapter):
             _warn(f"{self.__element_name}: adapter property value is invalid.")
             adapter = None
-        var_type = self.__attributes.get("type")
+        var_type = self.__attributes.get("type", var_type)
         if isclass(var_type):
             var_type = var_type.__name__  # type: ignore
 
@@ -466,13 +477,10 @@ class _Builder:
             self.__set_json_attribute(_to_camel_case(f"default_{property_name}"), default_lov)
 
         # LoV expression binding
-        if lov_name:
+        if lov_name and real_var_name:
             typed_lov_hash = (
                 self.__gui._evaluate_expr(
-                    "{"
-                    + f"{self.__gui._get_call_method_name('_get_adapted_lov')}"
-                    + f"({self.__gui._get_real_var_name(lov_name)[0]},'{var_type}')"
-                    + "}"
+                    f"{{{self.__gui._get_call_method_name('_get_adapted_lov')}({real_var_name},'{var_type}')}}"
                 )
                 if var_type
                 else lov_name
@@ -564,19 +572,21 @@ class _Builder:
             self.set_boolean_attribute("compare", True)
             self.__set_string_attribute("on_compare")
 
-        if line_style := self.__attributes.get("style"):
-            if callable(line_style):
-                value = self.__hashes.get("style")
-            elif isinstance(line_style, str):
-                value = line_style.strip()
+        if not isinstance(self.__attributes.get("style"), (type(None), dict, _MapDict)):
+            _warn("Table: property 'style' has been renamed to 'row_class_name'.")
+        if row_class_name := self.__attributes.get("row_class_name"):
+            if isroutine(row_class_name):
+                value = self.__hashes.get("row_class_name")
+            elif isinstance(row_class_name, str):
+                value = row_class_name.strip()
             else:
                 value = None
             if value in col_types.keys():
-                _warn(f"{self.__element_name}: style={value} must not be a column name.")
+                _warn(f"{self.__element_name}: row_class_name={value} must not be a column name.")
             elif value:
-                self.set_attribute("lineStyle", value)
+                self.set_attribute("rowClassName", value)
         if tooltip := self.__attributes.get("tooltip"):
-            if callable(tooltip):
+            if isroutine(tooltip):
                 value = self.__hashes.get("tooltip")
             elif isinstance(tooltip, str):
                 value = tooltip.strip()

@@ -30,16 +30,9 @@ import Tooltip from "@mui/material/Tooltip";
 import { DateField, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 
-import { ColumnDesc, defaultDateFormat, getSortByIndex, iconInRowSx } from "./tableUtils";
+import { ColumnDesc, defaultDateFormat, getSortByIndex, iconInRowSx, FilterDesc } from "./tableUtils";
 import { getDateTime, getTypeFromDf } from "../../utils";
 import { getSuffixedClassNames } from "./utils";
-
-export interface FilterDesc {
-    col: string;
-    action: string;
-    value: string | number | boolean | Date;
-    type: string;
-}
 
 interface TableFilterProps {
     columns: Record<string, ColumnDesc>;
@@ -173,7 +166,7 @@ const FilterRow = (props: FilterRowProps) => {
     );
     const onDateChange = useCallback(
         (v: Date | null) => {
-            const dv = (!(v instanceof Date) || isNaN(v.valueOf())) ?  "": v.toISOString();
+            const dv = !(v instanceof Date) || isNaN(v.valueOf()) ? "" : v.toISOString();
             setVal(dv);
             setEnableCheck(!!getFilterDesc(columns, colId, action, dv));
         },

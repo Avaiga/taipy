@@ -19,7 +19,7 @@ value = 72
 
 page = Markdown(
     "<|{value}|progress|linear|>",
-    stylex={
+    style={
         ".taipy-progress": {
             "background-color": "red",
             "height": "30px",
@@ -34,4 +34,4 @@ page = Markdown(
 )
 
 if __name__ == "__main__":
-    Gui(page).run()
+    Gui(page).run(title="Progress - Styling - Linear")

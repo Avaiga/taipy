@@ -15,17 +15,15 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # x values are [-10..10]
-    x_range = range(-10, 11)
+# x values are [-10..10]
+x_range = range(-10, 11)
 
-    # The data set that holds both the x and the y values
-    data = {"X": x_range, "Y": [x * x for x in x_range]}
+# The data set that holds both the x and the y values
+data = {"X": x_range, "Y": [x * x for x in x_range]}
 
-    page = """
-# Basics - X range
-
+page = """
 <|{data}|chart|x=X|y=Y|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - X range")

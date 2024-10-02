@@ -343,10 +343,13 @@ export interface ColumnDesc {
     notEditable?: boolean;
     /** The name of the column that holds the CSS classname to
      *  apply to the cells. */
-    style?: string;
+    className?: string;
     /** The name of the column that holds the tooltip to
      *  show on the cells. */
     tooltip?: string;
+    /** The name of the column that holds the formatted value to
+     *  show on the cells. */
+    formatFn?: string;
     /** The value that would replace a NaN value. */
     nanValue?: string;
     /** The TimeZone identifier used if the type is `date`. */
@@ -362,9 +365,6 @@ export interface ColumnDesc {
     lov?: string[];
     /** If true the user can enter any value besides the lov values. */
     freeLov?: boolean;
-    /** The name of the column that holds the formatted value to
-     *  show on the cells. */
-    formatFn?: string;
 }
 /**
  * A cell value type.

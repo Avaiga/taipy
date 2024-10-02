@@ -13,28 +13,25 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-import datetime
-
 from taipy.gui import Gui
 
-stock = {
-    "date": [datetime.datetime(year=2000, month=12, day=d) for d in range(20, 30)],
-    "price": [119.88, 112.657, 164.5, 105.42, 188.36, 103.9, 143.97, 160.11, 136.3, 174.06],
-    "change": [7.814, -5.952, 0.01, 8.781, 7.335, 6.623, -6.635, -6.9, 0.327, -0.089],
-    "volume": [773, 2622, 2751, 1108, 7400, 3772, 9398, 4444, 9264, 1108],
-}
 
-columns = {
-    "date": {"title": "Data", "format": "MMM d"},
-    "price": {"title": "Price", "format": "$%.02f"},
-    "change": {"title": "% change", "format": "%.01f"},
-    "volume": {"title": "Volume"},
-}
+class User:
+    def __init__(self, id, name, birth_year):
+        self.id, self.name, self.birth_year = (id, name, birth_year)
+
+users = [
+    User(231, "Johanna", 1987),
+    User(125, "John", 1979),
+    User(4,   "Peter", 1968),
+    User(31,  "Mary", 1974)
+    ]
+
+user_sel = users[2]
 
 page = """
-# Formatting cells in a table
-
-<|{stock}|table|columns={columns}|>
+<|{user_sel}|selector|lov={users}|type=User|adapter={lambda u: (u.id, u.name)}|>
 """
 
-Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Selector - Adapter")

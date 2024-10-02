@@ -33,6 +33,7 @@ ConfigParameter = t.Literal[
     "change_delay",
     "chart_dark_template",
     "base_url",
+    "client_url",
     "dark_mode",
     "dark_theme",
     "data_url_max_size",
@@ -106,6 +107,7 @@ Config = t.TypedDict(
         "change_delay": t.Optional[int],
         "chart_dark_template": t.Optional[t.Dict[str, t.Any]],
         "base_url": t.Optional[str],
+        "client_url": str,
         "dark_mode": bool,
         "dark_theme": t.Optional[t.Dict[str, t.Any]],
         "data_url_max_size": t.Optional[int],
@@ -221,6 +223,8 @@ class _Config(object):
             config["upload_folder"] = args.taipy_upload_folder
         elif os.environ.get("TAIPY_GUI_UPLOAD_FOLDER"):
             config["webapp_path"] = os.environ.get("TAIPY_GUI_UPLOAD_FOLDER")
+        if args.taipy_client_url:
+            config["client_url"] = args.taipy_client_url
 
     def _build_config(self, root_dir, env_filename, kwargs):  # pragma: no cover
         config = self.config

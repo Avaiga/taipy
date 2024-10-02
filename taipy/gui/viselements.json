@@ -56,8 +56,8 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callable",
-                        "doc": "The name of a function that is triggered when the button is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button it it has one.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function that is triggered when the button is pressed.<br/>This function is invoked with the following parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button it it has one.</li><li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -126,7 +126,7 @@
                         "name": "type",
                         "type": "str",
                         "default_value": "\"text\"",
-                        "doc": "The type of generated input HTML element, as defined in [HTML input types](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#input_types).<br/>This value forces certain values to be entered and can be set to \"text\", \"tel\", \"url\", \"url\"..., among other choices."
+                        "doc": "The type of generated input HTML element, as defined in [HTML input types](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#input_types).<br/>This value forces certain values to be entered and can be set to \"text\", \"tel\", \"email\", \"url\"..., among other choices."
                     }
                 ]
             }
@@ -213,7 +213,7 @@
                         "name": "text_anchor",
                         "type": "str",
                         "default_value": "\"bottom\"",
-                        "doc": "When the <i>lov</i> property is used, this property indicates the location of the label.<br/>Possible values are:\n<ul>\n<li>\"bottom\"</li>\n<li>\"top\"</li>\n<li>\"left\"</li>\n<li>\"right\"</li>\n<li>\"none\" (no label is displayed)</li>\n</ul>"
+                        "doc": "When the <i>lov</i> property is used, this property indicates the location of the label.<br/>Possible values are:\n<ul>\n<li>\"bottom\"</li><li>\"top\"</li><li>\"left\"</li><li>\"right\"</li><li>\"none\" (no label is displayed)</li></ul>"
                     },
                     {
                         "name": "labels",
@@ -418,19 +418,19 @@
                         "default_property": true,
                         "required": true,
                         "type": "dynamic(Any)",
-                        "doc": "The data object bound to this chart control.<br/>See the section on the <a href=\"#the-data-property\"><i>data</i> property</a> below for details."
+                        "doc": "The data object bound to this chart control.<br/>See the section on the <a href=\"#the-data-property\"><i>data</i> property</a> below for more details."
                     },
                     {
                         "name": "type",
                         "type": "indexed(str)",
                         "default_value": "\"scatter\"",
-                        "doc": "Chart type.<br/>See the Plotly <a href=\"https://plotly.com/javascript/reference/\">chart type</a> documentation for details."
+                        "doc": "Chart type.<br/>See the Plotly <a href=\"https://plotly.com/javascript/reference/\">chart type</a> documentation for more details."
                     },
                     {
                         "name": "mode",
                         "type": "indexed(str)",
                         "default_value": "\"lines+markers\"",
-                        "doc": "Chart mode.<br/>See the Plotly <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-mode\">chart mode</a> documentation for details."
+                        "doc": "Chart mode.<br/>See the Plotly <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-mode\">chart mode</a> documentation for more details."
                     },
                     {
                         "name": "x",
@@ -520,7 +520,7 @@
                     {
                         "name": "base",
                         "type": "indexed(str)",
-                        "doc": "Column name for the <i>base</i> value. Used in bar charts only.<br/>See the Plotly <a href=\"https://plotly.com/javascript/reference/bar/#bar-base\">bar chart base</a> documentation for details.\""
+                        "doc": "Column name for the <i>base</i> value. Used in bar charts only.<br/>See the Plotly <a href=\"https://plotly.com/javascript/reference/bar/#bar-base\">bar chart base</a> documentation for more details.\""
                     },
                     {
                         "name": "title",
@@ -535,8 +535,8 @@
                     },
                     {
                         "name": "on_range_change",
-                        "type": "Callable",
-                        "doc": "The callback function that is invoked when the visible part of the x axis changes.<br/>The function receives three parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the chart control if it has one.</li>\n<li>payload (dict[str, Any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">Plotly</a>.</li>\n</ul>",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function that is triggered when the visible part of the x axis changes.<br/>This function is invoked with the following parameters:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the chart control if it has one.</li><li>payload (dict[str, Any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">Plotly</a>.</li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -556,7 +556,7 @@
                         "name": "columns",
                         "type": "Union[str,list[str],dict[str,dict[str,str]]]",
                         "default_value": "<i>All columns</i>",
-                        "doc": "The list of column names to represent.\n<ul>\n<li>str: ;-separated list of column names</li>\n<li>list[str]: list of names</li>\n<li>dict: {\"column_name\": {format: \"format\", index: 1}} if index is specified, it represents the display order of the columns.\nIf not, the list order defines the index</li>\n</ul><br/>If <i>columns</i> is omitted or set to None, all columns of <i>data</i> are represented."
+                        "doc": "The list of column names to represent.\n<ul>\n<li>str: ;-separated list of column names</li><li>list[str]: list of names</li><li>dict: {\"column_name\": {format: \"format\", index: 1}} if index is specified, it represents the display order of the columns.\nIf not, the list order defines the index</li></ul><br/>If <i>columns</i> is omitted or set to None, all columns of <i>data</i> are represented."
                     },
                     {
                         "name": "label",
@@ -586,17 +586,17 @@
                     {
                         "name": "marker",
                         "type": "indexed(dict[str, Any])",
-                        "doc": "The type of markers used for the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-marker\">marker</a> for details.<br/>Color, opacity, size and symbol can be column name."
+                        "doc": "The type of markers used for the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-marker\">marker</a> for more details.<br/>Color, opacity, size and symbol can be column names."
                     },
                     {
                         "name": "line",
                         "type": "indexed(Union[str,dict[str,Any]])",
-                        "doc": "The configuration of the line used for the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-line\">line</a> for details.<br/>If the value is a string, it must be a dash type or pattern (see <a href=\"https://plotly.com/python/reference/scatter/#scatter-line-dash\">dash style of lines</a> for details)."
+                        "doc": "The configuration of the line used for the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-line\">line</a> for more details.<br/>If the value is a string, it must be a dash type or pattern (see <a href=\"https://plotly.com/python/reference/scatter/#scatter-line-dash\">dash style of lines</a> for more details)."
                     },
                     {
                         "name": "selected_marker",
                         "type": "indexed(dict[str, Any])",
-                        "doc": "The type of markers used for selected points in the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-selected-marker\">selected marker for details."
+                        "doc": "The type of markers used for selected points in the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-selected-marker\">selected marker for more details."
                     },
                     {
                         "name": "layout",
@@ -677,8 +677,8 @@
                     },
                     {
                         "name": "on_click",
-                        "type": "Callable",
-                        "doc": "The callback that is invoked when the user clicks in the chart background.<br/>The function receives three parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the chart control if it has one.</li>\n<li>payload (dict[str, Any]): a dictionary containing the <i>x</i> and <i>y</i> coordinates of the click <b>or</b> <i>latitude</i> and <i>longitude</i> in the case of a map. This feature relies on non-public Plotly structured information.</li>\n</ul>",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function that is triggered when the user clicks in the chart background.<br/>This function is invoked with the following parameters:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the chart control if it has one.</li><li>payload (dict[str, Any]): a dictionary containing the <i>x</i> and <i>y</i> coordinates of the click <b>or</b> <i>latitude</i> and <i>longitude</i> in the case of a map. This feature relies on non-public Plotly structured information.</li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -756,7 +756,7 @@
                         "name": "columns",
                         "type": "Union[str,list[str],dict[str,dict[str,Union[str,int]]]]",
                         "default_value": "<i>All columns</i>",
-                        "doc": "The list of the column names to display.\n<ul>\n<li>str: Semicolon (';')-separated list of column names.</li>\n<li>list[str]: The list of column names.</li>\n<li>dict: A dictionary with entries matching: {\"&lt;column_name&gt;\": {\"format\": \"&lt;format&gt;\", \"index\": 1}}.<br/>\nif <i>index</i> is specified, it represents the display order of this column.\nIf <i>index</i> is not specified, the list order defines the index.<br/>\nIf <i>format</i> is specified, it is used for numbers or dates.</li>\n</ul><br/>If <i>columns</i> is omitted or set to None, all columns of <i>data</i> are represented."
+                        "doc": "The list of the column names to display.\n<ul>\n<li>str: semicolon (';')-separated list of column names.</li><li>list[str]: the list of column names.</li><li>dict: a dictionary with entries matching: {\"&lt;column_name&gt;\": {\"format\": \"&lt;format&gt;\", \"index\": 1}}.<br/>\nif <i>index</i> is specified, it represents the display order of this column.\nIf <i>index</i> is not specified, the list order defines the index.<br/>\nIf <i>format</i> is specified, it is used for numbers or dates.</li></ul><br/>If <i>columns</i> is omitted or set to None, all columns of <i>data</i> are represented."
                     },
                     {
                         "name": "date_format",
@@ -773,38 +773,60 @@
                         "name": "group_by[<i>column_name</i>]",
                         "type": "bool",
                         "default_value": "False",
-                        "doc": "Indicates, if True, that the given column can be aggregated.<br/>See <a href=\"#aggregation\">below</a> for details."
+                        "doc": "Indicates, if True, that the given column can be aggregated.<br/>See <a href=\"#aggregation\">below</a> for more details."
                     },
                     {
                         "name": "apply[<i>column_name</i>]",
                         "type": "str",
                         "default_value": "\"first\"",
-                        "doc": "The name of the aggregation function to use.<br/>This is used only if <i>group_by[column_name]</i> is set to True.<br/>See <a href=\"#aggregation\">below</a> for details."
+                        "doc": "The name of the aggregation function to use.<br/>This is used only if <i>group_by[column_name]</i> is set to True.<br/>See <a href=\"#aggregation\">below</a> for more details."
                     },
                     {
-                        "name": "style",
+                        "name": "row_class_name",
                         "type": "Union[str, Callable]",
-                        "doc": "Allows the styling of table lines.<br/>See <a href=\"#dynamic-styling\">below</a> for details."
+                        "doc": "Allows for styling rows.<br/>This property must be a function or the name of a function that return the name of a CSS class for table rows.<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>index</i> (int): the index of the row.</li><li><i>row</i> (Any): all the values for this row.</li></ul><br/>See <a href=\"#dynamic-styling\">below</a> for more details."
                     },
                     {
-                        "name": "style[<i>column_name</i>]",
+                        "name": "cell_class_name[<i>column_name</i>]",
                         "type": "Union[str, Callable]",
-                        "doc": "Allows the styling of table cells.<br/>See <a href=\"#dynamic-styling\">below</a> for details."
+                        "doc": "Allows for styling cells.<br/>This property must be a function or the name of a function that return the name of a CSS class for table cells.<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>value</i> (Any): the value of the cell.</li><li><i>index</i> (int): the index of the row.</li><li><i>row</i> (Any): all the values for this row.</li><li><i>column_name</i> (str): the name of the column.</li></ul><br/>See <a href=\"#dynamic-styling\">below</a> for more details."
                     },
                     {
                         "name": "tooltip",
                         "type": "Union[str, Callable]",
-                        "doc": "The name of the function that must return a tooltip text for a cell.<br/>See <a href=\"#cell-tooltips\">below</a> for details."
+                        "doc": "Enables tooltips on cells.<br/>This property must be a function or the name of a function that must return a tooltip text for a cell.<br/>See <a href=\"#cell-tooltips\">below</a> for more details."
                     },
                     {
                         "name": "tooltip[<i>column_name</i>]",
                         "type": "Union[str, Callable]",
-                        "doc": "The name of the function that must return a tooltip text for a cell.<br/>See <a href=\"#cell-tooltips\">below</a> for details."
+                        "doc": "Enables tooltips on cells at a column level.<br/>This property must be a function or the name of a the function that must return a tooltip text for a cell.<br/>See <a href=\"#cell-tooltips\">below</a> for more details."
                     },
                     {
                         "name": "format_fn[<i>column_name</i>]",
                         "type": "Union[str, Callable]",
-                        "doc": "TODO: The name of the function that must return a formatted value for a cell.<br/>See <a href=\"#cell-formats\">below</a> for details."
+                        "doc": "Defines custom formatting for table cells. This property must be a function or the name of a function that returns a formatted string for each cell.<br/>The function is invoked when the cells in the specified column (<i>column_name</i>) are rendered. It should return a string that represents the cell value to provide the best user experience.<br/>This function is invoked with the following parameters:<ul>  <li><i>state</i> (<code>State^</code>): the state instance.</li>  <li><i>value</i> (Any): the value of the cell.</li>  <li><i>index</i> (int): the index of the row.</li>  <li><i>row</i> (Any): the entire row. The type depends on the type of <i>data</i>.</li>  <li><i>column_name</i> (str): the name of the column.</li></ul>By default, no custom formatting is applied to the column.<br/>For more details, see the <a href=\"#cell-formats\">section</a>.",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "value",
+                                "Any"
+                            ],
+                            [
+                                "index",
+                                "int"
+                            ],
+                            [
+                                "row",
+                                "Any"
+                            ],
+                            [
+                                "column_name",
+                                "str"
+                            ]
+                        ]
                     },
                     {
                         "name": "width",
@@ -846,7 +868,7 @@
                         "name": "editable",
                         "type": "dynamic(bool)",
                         "default_value": "False",
-                        "doc": "Indicates, if True, that all columns can be edited."
+                        "doc": "Indicates, if True, that all cells can be edited."
                     },
                     {
                         "name": "editable[<i>column_name</i>]",
@@ -856,9 +878,9 @@
                     },
                     {
                         "name": "on_edit",
-                        "type": "Union[Callable, bool]",
+                        "type": "Union[bool, Callable]",
                         "default_value": "<i>default implementation</i>",
-                        "doc": "The name of the function triggered when a cell edition is validated.<br/>All the parameters of that function are optional:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li>\n<li><i>var_name</i> (str): the name of the tabular data variable.</li>\n<li><i>payload</i> (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li><i>index</i> (int): the row index.</li>\n<li><i>col</i> (str): the column name.</li>\n<li><i>value</i> (Any): the new cell value cast to the type of the column.</li>\n<li><i>user_value</i> (str): the new cell value, as it was provided by the user.</li>\n<li><i>tz</i> (str): the timezone if the column type is <tt>date</tt>.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set and the type of <i>data</i> allows it, the table uses the default implementation for editing cells.",
+                        "doc": "A function or the name of a function triggered when an edited cell is validated.<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the tabular data variable.</li><li><i>payload</i> (dict): a dictionary containing details about the callback invocation, with the following keys:<ul><li><i>index</i> (int): the row index.</li><li><i>col</i> (str): the column name.</li><li><i>value</i> (Any): the new cell value, cast to the column's data type.</li><li><i>user_value</i> (str): the new cell value, as entered by the user.</li><li><i>tz</i> (str): the timezone, if the column type is <tt>date</tt>.</li></ul></li></ul>If this property is set to False, the table does not provide the cell editing functionality.<br/>If this property is not set, the table will use the default implementation for editing cells.",
                         "signature": [
                             [
                                 "state",
@@ -876,8 +898,8 @@
                     },
                     {
                         "name": "on_add",
-                        "type": "Union[Callable, bool]",
-                        "doc": "The name of a function that is triggered when the user requests a row to be added to the table.<br/>All parameters of that function are optional:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li>\n<li><i>var_name</i> (str): the name of the tabular data variable.</li>\n<li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li><i>index</i> (int): the row index.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set and the type of <i>data</i> supports it, the table uses the default implementation for adding a new row<br/>If this property is set to False, you cannot add new rows.",
+                        "type": "Union[bool, Callable]",
+                        "doc": "A function or the name of a function that is triggered when the user requests a row to be added to the table.<br/>This function is invoked with the following parameters:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the tabular data variable.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following key:\n<ul>\n<li><i>index</i> (int): the row index.</li></ul></li></ul><br/>If this property is not set, the table uses the default implementation for adding a new row<br/>If this property is set to False, you cannot add new rows.",
                         "signature": [
                             [
                                 "state",
@@ -895,9 +917,9 @@
                     },
                     {
                         "name": "on_delete",
-                        "type": "Union[Callable, bool]",
+                        "type": "Union[bool, Callable]",
                         "default_value": "<i>default implementation</i>",
-                        "doc": "The name of the function triggered when a row is deleted.<br/>All the parameters of that function are optional:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li>\n<li><i>var_name</i> (str): the name of the tabular data variable.</li>\n<li><i>payload</i> (dict): the details on this callback's invocation.<br/>\nThis dictionary has one key:\n<ul>\n<li><i>index</i> (int): the row index.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set and the type of <i>data</i> allows it, the table uses the default implementation for deleting rows.",
+                        "doc": "A function or the name of a function triggered when a row is deleted.<br/>This function is invoked with the following parameters:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the tabular data variable.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>\nThis dictionary has one key:\n<ul>\n<li><i>index</i> (int): the row index.</li></ul></li></ul><br/>If this property is not set, the table uses the default implementation for deleting rows.",
                         "signature": [
                             [
                                 "state",
@@ -915,8 +937,8 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callable",
-                        "doc": "The name of a function that is triggered when the user selects a row.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>reason (str): the origin of the action: \"click\", or \"button\" if the cell contains a Markdown link syntax.</li>\n<li>value (str): the <i>link value</i> indicated in the cell when using a Markdown link syntax (that is, <i>reason</i> is set to \"button\").</li></ul></li></ul>.",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function that is triggered when the user selects a row.<br/>This function is invoked with the following parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>var_name (str): the name of the tabular data variable.</li><li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li><li>index (int): the row index.</li><li>col (str): the column name.</li><li>reason (str): the origin of the action: \"click\", or \"button\" if the cell contains a Markdown link syntax.</li><li>value (str): the <i>link value</i> indicated in the cell when using a Markdown link syntax (that is, <i>reason</i> is set to \"button\").</li></ul></li></ul>.",
                         "signature": [
                             [
                                 "state",
@@ -957,8 +979,8 @@
                     },
                     {
                         "name": "on_compare",
-                        "type": "Callable",
-                        "doc": "A data comparison function that would return a structure that identifies the differences between the different data passed as name. The default implementation compares the default data with the data[1] value.",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function that compares data. This function should return a structure that identifies the differences between the different data passed as name. The default implementation compares the default data with the data[1] value.",
                         "signature": [
                             [
                                 "state",
@@ -1000,7 +1022,7 @@
                     {
                         "name": "mode",
                         "type": "str",
-                        "doc": "Define the way the selector is displayed:\n<ul><li>&quot;radio&quot;: list of radio buttons</li><li>&quot;check&quot;: list of check buttons</li><li>any other value: selector as usual."
+                        "doc": "Define the way the selector is displayed:\n<ul><li>&quot;radio&quot;: as a list of radio buttons</li><li>&quot;check&quot;: as a list of check boxes</li><li>any other value: a plain list."
                     },
                     {
                         "name": "dropdown",
@@ -1046,7 +1068,7 @@
                         "name": "content",
                         "default_property": true,
                         "type": "dynamic(Union[path,file,URL,ReadableBuffer,None])",
-                        "doc": "The content to transfer.<br/>If this is a string, a URL, or a file, then the content is read from this source.<br/>If a readable buffer is provided (such as an array of bytes...), and to prevent the bandwidth from being consumed too much, the way the data is transferred depends on the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the buffer size is smaller than this setting, then the raw content is generated as a data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li>\n<li>If the buffer size exceeds this setting, then it is transferred through a temporary file.</li>\n</ul>If this property is set to None, that indicates that dynamic content is generated. Please take a look at the examples below for details on dynamic generation."
+                        "doc": "The content to transfer.<br/>If this is a string, a URL, or a file, then the content is read from this source.<br/>If a readable buffer is provided (such as an array of bytes...), and to prevent the bandwidth from being consumed too much, the way the data is transferred depends on the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the buffer size is smaller than this setting, then the raw content is generated as a data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li><li>If the buffer size exceeds this setting, then it is transferred through a temporary file.</li></ul>If this property is set to None, that indicates that dynamic content is generated. Please take a look at the examples below for more details on dynamic generation."
                     },
                     {
                         "name": "label",
@@ -1055,8 +1077,8 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callable",
-                        "doc": "The name of a function that is triggered when the download is terminated (or on user action if <i>content</i> is None).<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button if it has one.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has two keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: A list of two elements: <i>args[0]</i> reflects the <i>name</i> property and <i>args[1]</i> holds the file URL.</li>\n</ul>\n</li>\n</ul>",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function that is triggered when the download is terminated (or on user action if <i>content</i> is None).<br/>This function is invoked with the following parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button if it has one.</li><li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has two keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li><li>args: a list of two elements: <i>args[0]</i> reflects the <i>name</i> property and <i>args[1]</i> holds the file URL.</li></ul></li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -1125,8 +1147,8 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callable",
-                        "doc": "The name of the function that will be triggered.<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button if it has one.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function that will be triggered.<br/>This function is invoked with the following parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button if it has one.</li><li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -1187,7 +1209,7 @@
                         "name": "content",
                         "default_property": true,
                         "type": "dynamic(Union[path,URL,file,ReadableBuffer])",
-                        "doc": "The image source.<br/>If a buffer is provided (string, array of bytes...), and in order to prevent the bandwidth to be consumed too much, the way the image data is transferred depends on the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the size of the buffer is smaller than this setting, then the raw content is generated as a\n  data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li>\n<li>If the size of the buffer is greater than this setting, then it is transferred through a temporary\n  file.</li>\n</ul>"
+                        "doc": "The image source.<br/>If a buffer is provided (string, array of bytes...), and in order to prevent the bandwidth to be consumed too much, the way the image data is transferred depends on the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the size of the buffer is smaller than this setting, then the raw content is generated as a\n  data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li><li>If the size of the buffer is greater than this setting, then it is transferred through a temporary\n  file.</li></ul>"
                     },
                     {
                         "name": "label",
@@ -1196,8 +1218,8 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callable",
-                        "doc": "The name of a function that is triggered when the user clicks on the image.<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button if it has one.</li>\n<li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li>\n</ul>",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function that is triggered when the user clicks on the image.<br/>This function is invoked with the following parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button if it has one.</li><li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -1244,7 +1266,7 @@
                         "name": "type",
                         "default_value": "\"circular\"",
                         "type": "str",
-                        "doc": "The type of the gauge.<br/>Possible values are:\n<ul>\n<li>\"none\"</li>\n<li>\"circular\"</li>\n<li>\"linear\"</li></ul>Setting this value to \"none\" remove the gauge."
+                        "doc": "The type of the gauge.<br/>Possible values are:\n<ul>\n<li>\"none\"</li><li>\"circular\"</li><li>\"linear\"</li></ul>Setting this value to \"none\" remove the gauge."
                     },
                     {
                         "name": "min",
@@ -1377,7 +1399,7 @@
                         "name": "title_anchor",
                         "type": "str",
                         "default_value": "\"bottom\"",
-                        "doc": "The anchor of the title.<br/>Possible values are:\n<ul>\n<li>\"bottom\"</li>\n<li>\"top\"</li>\n<li>\"left\"</li>\n<li>\"right\"</li>\n<li>\"none\" (no title is displayed)</li>\n</ul>"
+                        "doc": "The anchor of the title.<br/>Possible values are:\n<ul>\n<li>\"bottom\"</li><li>\"top\"</li><li>\"left\"</li><li>\"right\"</li><li>\"none\" (no title is displayed)</li></ul>"
                     },
                     {
                         "name": "render",
@@ -1470,9 +1492,9 @@
                     },
                     {
                         "name": "adapter",
-                        "type": "Function",
+                        "type": "Union[str, Callable]",
                         "default_value": "<tt>lambda x: str(x)</tt>",
-                        "doc": "The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>.<br/>The default value is a function that returns the string representation of the <i>lov</i> element."
+                        "doc": "A function or the name of the function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>.<br/>The default value is a function that returns the string representation of the <i>lov</i> element."
                     },
                     {
                         "name": "type",
@@ -1504,8 +1526,8 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callable",
-                        "doc": "The name of the function that is triggered when a menu option is selected.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button if it has one.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: List where the first element contains the id of the selected option.</li>\n</ul>\n</li>\n</ul>",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function that is triggered when a menu option is selected.<br/><br/>This function is invoked with the following parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button, if it has one.</li><li>payload (dict): a dictionary containing details about the callback invocation, with the following keys:<ul>\n<li>action: the name of the action that triggered this callback.</li><li>args: a list where the first element contains the identifier of the selected option.</li></ul></li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -1536,7 +1558,7 @@
                         "name": "lov",
                         "default_property": true,
                         "type": "dict[str, Any]",
-                        "doc": "The list of pages. The keys should be:\n<ul>\n<li>page id (start with \"/\")</li>\n<li>or full URL</li>\n</ul>\nThe values are labels. See the <a href=\"../../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for details."
+                        "doc": "The list of pages. The keys should be:\n<ul>\n<li>page id (start with \"/\")</li><li>or full URL</li></ul>\nThe values are labels. See the <a href=\"../../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for more details."
                     }
                 ]
             }
@@ -1579,8 +1601,8 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callable",
-                        "doc": "The name of the function that is triggered when the dialog button is pressed.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button if it has one.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: a list with three elements:\n<ul><li>The first element is the username</li><li>The second element is the password</li><li>The third element is the current page name</li></ul></li></li>\n</ul>\n</li>\n</ul><br/>When the button is pressed, and if this property is not set, Taipy will try to find a callback function called <i>on_login()</i> and invoke it with the parameters listed above.",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function that is triggered when the dialog button is pressed.<br/><br/>This function is invoked with the following parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button if it has one.</li><li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li><li>args: a list with three elements:\n<ul><li>The first element is the username</li><li>The second element is the password</li><li>The third element is the current page name</li></ul></li></li></ul></li></ul><br/>When the button is pressed, and if this property is not set, Taipy will try to find a callback function called <i>on_login()</i> and invoke it with the parameters listed above.",
                         "signature": [
                             [
                                 "state",
@@ -1622,7 +1644,7 @@
                     {
                         "name": "users",
                         "type": "dynamic(list[Union[str,Icon]])",
-                        "doc": "The list of users. See the <a href=\"../../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for details."
+                        "doc": "The list of users. See the <a href=\"../../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for more details."
                     },
                     {
                         "name": "sender_id",
@@ -1638,8 +1660,8 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callable",
-                        "doc": "The name of a function that is triggered when the user enters a new message.<br/>All the parameters of that function are optional:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li>\n<li><i>var_name</i> (str): the name of the variable bound to the <i>messages</i> property.</li>\n<li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li><i>action</i>: the name of the action that triggered this callback.</li>\n<li><i>args</i> (list): A list composed of a reason (\"click\" or \"Enter\"), the variable name, message, the user identifier of the sender.</li></ul></li></ul>",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function that is triggered when the user enters a new message.<br/>This function is invoked with the following parameters:<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the variable bound to the <i>messages</i> property.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li><i>action</i>: the name of the action that triggered this callback.</li><li><i>args</i> (list): a list composed of a reason (\"click\" or \"Enter\"), the variable name, the message, and the user identifier of the sender.</li></ul></li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -1676,7 +1698,7 @@
                         "name": "mode",
                         "type": "str",
                         "default_value": "\"markdown\"",
-                        "doc": "Define the way the messages are processed:\n<ul><li>&quot;raw&quot; no processing</li><li>&quot;pre&quot;: keeps spaces and new lines</li><li>&quot;markdown&quot; or &quot;md&quot;: basic support for Markdown.</li></ul>"
+                        "doc": "Define the way the messages are processed when they are displayed:\n<ul><li>&quot;raw&quot; no processing</li><li>&quot;pre&quot;: keeps spaces and new lines</li><li>&quot;markdown&quot; or &quot;md&quot;: basic support for Markdown.</li></ul>"
                     }
                 ]
             }
@@ -1796,8 +1818,8 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callable",
-                        "doc": "Name of a function triggered when a button is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the dialog if it has one.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args: a list where the first element contains the index of the selected label.</li>\n</ul>\n</li>\n</ul>",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function triggered when a button is pressed.<br/>This function is invoked with the following parameters:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the dialog if it has one.</li><li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li><li>args: a list where the first element contains the index of the selected label.</li></ul></li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -1849,7 +1871,7 @@
                         "default_property": true,
                         "type": "str",
                         "default_value": "\"1 1\"",
-                        "doc": "The list of weights for each column.<br/>For example, \"1 2\" creates a 2 column grid:\n<ul>\n<li>1fr</li>\n<li>2fr</li>\n</ul><br/>The creation of multiple same size columns can be simplified by using the multiply sign eg. \"5*1\" is equivalent to \"1 1 1 1 1\"."
+                        "doc": "The list of weights for each column.<br/>For example, \"1 2\" creates a 2 column grid:\n<ul>\n<li>1fr</li><li>2fr</li></ul><br/>The creation of multiple same size columns can be simplified by using the multiply sign eg. \"5*1\" is equivalent to \"1 1 1 1 1\"."
                     },
                     {
                         "name": "columns[mobile]",
@@ -1885,8 +1907,8 @@
                     },
                     {
                         "name": "on_close",
-                        "type": "Callable",
-                        "doc": "The name of a function that is triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the close button if it has one.</li>\n</ul><br/>If this property is not set, no function is called when this pane is closed.",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function that is triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).<br/>This function is invoked with the following parameters:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (optional[str]): the identifier of the <i>close</i> button if it has one.</li></ul><br/>If this property is not set, no function is called when this pane is closed.",
                         "signature": [
                             [
                                 "state",
@@ -1962,13 +1984,13 @@
                     {
                         "name": "lov",
                         "type": "dict[str, Any]",
-                        "doc": "The list of values. See the <a href=\"../../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for details."
+                        "doc": "The list of values. See the <a href=\"../../../../../userman/gui/binding/#list-of-values\">section on List of Values</a> for more details."
                     },
                     {
                         "name": "adapter",
-                        "type": "Function",
+                        "type": "Union[str, Callable]",
                         "default_value": "<tt>lambda x: str(x)</tt>",
-                        "doc": "The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>.<br/>The default value is a function that returns the string representation of the <i>lov</i> element."
+                        "doc": "A function or the name of the function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>.<br/>The default value is a function that returns the string representation of the <i>lov</i> element."
                     },
                     {
                         "name": "type",
@@ -1991,8 +2013,8 @@
                 "properties": [
                     {
                         "name": "on_change",
-                        "type": "Callable",
-                        "doc": "The name of a function that is triggered when the value is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (Any): the new value.</li>\n</ul>",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function that is triggered when the value is updated.<br/>This function is invoked with the following parameters:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>var_name (str): the variable name.</li><li>value (Any): the new value.</li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -2057,8 +2079,8 @@
                     },
                     {
                         "name": "on_action",
-                        "type": "Callable",
-                        "doc": "Name of a function that is triggered when a specific key is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the control if it has one.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li>\n<li>args (list):\n<ul><li>key name</li><li>variable name</li><li>current value</li></ul>\n</li>\n</ul>\n</li>\n</ul>",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function that is triggered when a specific key is pressed.<br/>This function is invoked with the following parameters:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the control if it has one.</li><li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li><li>args (list):\n<ul><li>key name</li><li>variable name</li><li>current value</li></ul></li></ul></li></ul>",
                         "signature": [
                             [
                                 "state",

@@ -17,18 +17,18 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # x values: [-10..10]
-    x_range = range(-10, 11)
-    data = {"X": x_range, "Y": [x * x for x in x_range]}
+# x values: [-10..10]
+x_range = range(-10, 11)
+data = {"X": x_range, "Y": [x * x for x in x_range]}
 
-    types = [("bar", "Bar"), ("line", "Line")]
-    selected_type = types[0]
+types = [("bar", "Bar"), ("line", "Line")]
+selected_type = types[0]
 
-    page = """
+page = """
 <|{data}|chart|type={selected_type[0]}|x=X|y=Y|rebuild|>
 
 <|{selected_type}|toggle|lov={types}|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Rebuild")

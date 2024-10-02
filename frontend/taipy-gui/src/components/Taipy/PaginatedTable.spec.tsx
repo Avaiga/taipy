@@ -21,7 +21,7 @@ import { TaipyContext } from "../../context/taipyContext";
 import { TaipyState, INITIAL_STATE } from "../../context/taipyReducers";
 import { TableValueType } from "./tableUtils";
 
-const valueKey = "0-99-Entity,Daily hospital occupancy--asc";
+const valueKey = "0-99-Entity,Daily hospital occupancy-asc";
 const tableValue = {
     [valueKey]: {
         data: [
@@ -110,7 +110,7 @@ const changedValue = {
 };
 
 const editableValue = {
-    "0--1-bool,int,float,Code--asc": {
+    "0--1-bool,int,float,Code-asc": {
         data: [
             {
                 bool: true,
@@ -137,7 +137,7 @@ const editableColumns = JSON.stringify({
 });
 
 const buttonImgValue = {
-    "0--1-bool,int,float,Code--asc": {
+    "0--1-bool,int,float,Code-asc": {
         data: [
             {
                 bool: true,
@@ -311,7 +311,7 @@ describe("PaginatedTable Component", () => {
                 end: 199,
                 id: "table",
                 orderby: "",
-                pagekey: "100-199-Entity,Daily hospital occupancy--asc",
+                pagekey: "100-199-Entity,Daily hospital occupancy-asc",
                 handlenan: false,
                 sort: "asc",
                 start: 100,
@@ -765,7 +765,7 @@ describe("PaginatedTable Component", () => {
                     <PaginatedTable
                         data={tableValue}
                         defaultColumns={styledColumns}
-                        lineStyle={"class_name=rows-bordered"}
+                        rowClassName={"class_name=rows-bordered"}
                     />
                 </TaipyContext.Provider>
             );

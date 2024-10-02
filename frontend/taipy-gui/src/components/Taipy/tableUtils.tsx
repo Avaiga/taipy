@@ -62,12 +62,15 @@ export interface ColumnDesc {
     width?: number | string;
     /** If true, the column cannot be edited. */
     notEditable?: boolean;
-    /** The name of the column that holds the CSS classname to
+    /** The name of the column that holds the CSS className to
      *  apply to the cells. */
-    style?: string;
+    className?: string;
     /** The name of the column that holds the tooltip to
      *  show on the cells. */
     tooltip?: string;
+    /** The name of the column that holds the formatted value to
+     *  show on the cells. */
+    formatFn?: string;
     /** The value that would replace a NaN value. */
     nanValue?: string;
     /** The TimeZone identifier used if the type is `date`. */
@@ -83,9 +86,6 @@ export interface ColumnDesc {
     lov?: string[];
     /** If true the user can enter any value besides the lov values. */
     freeLov?: boolean;
-    /** The name of the column that holds the formatted value to
-     *  show on the cells. */
-    formatFn?: string;
 }
 
 export const DEFAULT_SIZE = "small";
@@ -106,7 +106,7 @@ export type RowType = Record<string, RowValue>;
 
 export const EDIT_COL = "taipy_edit";
 
-export const LINE_STYLE = "__taipy_line_style__";
+export const ROW_CLASS_NAME = "__taipyRowClassName__";
 
 export const defaultDateFormat = "yyyy/MM/dd";
 
@@ -128,7 +128,7 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     onAction?: string;
     editable?: boolean;
     defaultEditable?: boolean;
-    lineStyle?: string;
+    rowClassName?: string;
     tooltip?: string;
     cellTooltip?: string;
     nanValue?: string;
@@ -201,6 +201,13 @@ interface EditableCellProps {
     formattedVal?: string;
 }
 
+export interface FilterDesc {
+    col: string;
+    action: string;
+    value: string | number | boolean | Date;
+    type: string;
+}
+
 export const defaultColumns = {} as Record<string, ColumnDesc>;
 
 export const getSortByIndex = (cols: Record<string, ColumnDesc>) => (key1: string, key2: string) =>
@@ -250,7 +257,7 @@ const getCellProps = (col: ColumnDesc, base: Partial<TableCellProps> = {}): Part
 export const getRowIndex = (row: Record<string, RowValue>, rowIndex: number, startIndex = 0) =>
     typeof row["_tp_index"] === "number" ? row["_tp_index"] : rowIndex + startIndex;
 
-export const addDeleteColumn = (nbToRender: number, columns: Record<string, ColumnDesc>) => {
+export const addActionColumn = (nbToRender: number, columns: Record<string, ColumnDesc>) => {
     if (nbToRender) {
         Object.keys(columns).forEach((key) => columns[key].index++);
         columns[EDIT_COL] = {
@@ -266,8 +273,8 @@ export const addDeleteColumn = (nbToRender: number, columns: Record<string, Colu
     return columns;
 };
 
-export const getClassName = (row: Record<string, unknown>, style?: string, col?: string) =>
-    getToolFn("tps", row, style, col);
+export const getClassName = (row: Record<string, unknown>, className?: string, col?: string) =>
+    getToolFn("tps", row, className, col);
 
 export const getTooltip = (row: Record<string, unknown>, tooltip?: string, col?: string) =>
     getToolFn("tpt", row, tooltip, col);
@@ -277,6 +284,52 @@ export const getFormatFn = (row: Record<string, unknown>, formatFn?: string, col
 
 const getToolFn = (prefix: string, row: Record<string, unknown>, toolFn?: string, col?: string) =>
     toolFn ? (((col && row[`${prefix}__${col}__${toolFn}`]) || row[toolFn]) as string) : undefined;
+
+export const getPageKey = (
+    columns: Record<string, ColumnDesc>,
+    prefix: string,
+    cols: string[],
+    orderBy: string,
+    order: string,
+    filters: FilterDesc[],
+    aggregates?: string[],
+    cellClassNames?: Record<string, string>,
+    tooltips?: Record<string, string>,
+    formats?: Record<string, string>
+) =>
+    [
+        prefix,
+        cols.join(),
+        orderBy,
+        order,
+        aggregates?.length
+            ? cols.reduce((pv, col, idx) => {
+                  if (aggregates.includes(columns[col].dfid)) {
+                      return `${pv}${idx}`;
+                  }
+                  return pv;
+              }, "-")
+            : undefined,
+        filters.map((filter) => `${filter.col}${filter.action}${filter.value}`).join(),
+        [
+            cellClassNames &&
+                Object.entries(cellClassNames)
+                    .map((col, className) => `${col}:${className}`)
+                    .join(),
+            tooltips &&
+                Object.entries(tooltips)
+                    .map((col, tooltip) => `${col}:${tooltip}`)
+                    .join(),
+            formats &&
+                Object.entries(formats)
+                    .map((col, format) => `${col}:${format}`)
+                    .join(),
+        ]
+            .filter((v) => v)
+            .join(";"),
+    ]
+        .filter((v) => v)
+        .join("-");
 
 const setInputFocus = (input: HTMLInputElement) => input && input.focus();
 
