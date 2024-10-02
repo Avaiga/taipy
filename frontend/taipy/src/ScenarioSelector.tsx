@@ -45,7 +45,7 @@ import {
 } from "taipy-gui";
 
 import ConfirmDialog from "./utils/ConfirmDialog";
-import { MainTreeBoxSx, ScFProps, ScenarioFull, useClassNames, tinyIconButtonSx } from "./utils";
+import { MainTreeBoxSx, ScFProps, ScenarioFull, useClassNames, tinyIconButtonSx, CoreProps } from "./utils";
 import CoreSelector, { EditProps } from "./CoreSelector";
 import { Cycles, NodeType, Scenarios } from "./utils/types";
 
@@ -67,31 +67,20 @@ interface ScenarioDict {
     properties: Array<Property>;
 }
 
-interface ScenarioSelectorProps {
-    id?: string;
-    active?: boolean;
-    defaultActive?: boolean;
+interface ScenarioSelectorProps extends CoreProps {
     showAddButton?: boolean;
     displayCycles?: boolean;
     showPrimaryFlag?: boolean;
-    updateVarName?: string;
-    updateVars: string;
     innerScenarios?: Cycles | Scenarios;
     onScenarioCrud: string;
     onChange?: string;
     onCreation?: string;
-    coreChanged?: Record<string, unknown>;
     configs?: Array<[string, string]>;
-    error?: string;
-    propagate?: boolean;
     scenarioEdit?: ScenarioFull;
     onScenarioSelect: string;
     value?: string;
     defaultValue?: string;
     height: string;
-    libClassName?: string;
-    className?: string;
-    dynamicClassName?: string;
     showPins?: boolean;
     showDialog?: boolean;
     multiple?: boolean;
@@ -569,6 +558,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                 scenario={props.scenarioEdit}
                 submit={onSubmit}
             ></ScenarioEditDialog>
+            {props.children}
         </>
     );
 };
