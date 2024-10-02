@@ -28,7 +28,7 @@ from .assets6_page_load.page1 import page as page1
 def test_page_scopes(page: "Page", gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
 
-    x = 15
+    x = 15  # noqa: F841
 
     def on_page_load(state):
         state.x = 30
