@@ -1551,7 +1551,7 @@ class Gui:
             callback (Callable[[State^, ...], None]): The user-defined function that is invoked.<br/>
                 The first parameter of this function **must** be a `State^`.
             args (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
-            module_context (Optional[str]): the name of the module that will be used.
+            module_context (Optional[str]): The name of the module that will be used.
         """  # noqa: E501
         this_sid = None
         if request:
@@ -1703,10 +1703,20 @@ class Gui:
     def table_on_edit(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
         """Default implementation of the `on_edit` callback for tables.
 
+           This function sets the value of a specific cell in the tabular dataset stored in
+           *var_name*, typically bound to the *data* property of a table control.
+
         Arguments:
             state: the state instance received in the callback.
             var_name: the name of the variable bound to the table's *data* property.
-            payload: the payload dictionary as it was received from the `on_edit` callback.
+            payload: the payload dictionary received from the `on_edit` callback.<br/>
+                This dictionary has the following keys:
+
+                - *"index"*: The row index of the cell to be modified.
+                - *"col"*: Specifies the name of the column of the cell to be modified.
+                - *"value"*: Specifies the new value to be assigned to the cell.
+                - *"user_value"*: Contains the text entered by the user.
+                - *"tz"*: Specifies the timezone to be used, if applicable.
         """
         try:
             setattr(state, var_name, self._get_accessor().on_edit(getattr(state, var_name), payload))
@@ -1718,13 +1728,16 @@ class Gui:
     ):
         """Default implementation of the `on_add` callback for tables.
 
+        This function creates a new row in the tabular dataset stored in *var_name*.<br/>
+        The row is added at the index specified in *payload["index"]*.
+
         Arguments:
-            state: the state instance received in the callback.
-            var_name: the name of the variable bound to the table's *data* property.
-            payload: the payload dictionary as it was received from the `on_add` callback.
-            new_row: the initial values to be stored in the new row.<br/>
-                This defaults to all values being set to 0, whatever that means depending on the
-                column data type.
+            state: The state instance received from the callback.
+            var_name: The name of the variable bound to the table's *data* property.
+            payload: The payload dictionary received from the `on_add` callback.
+            new_row: The initial values for the new row.<br/>
+                If this parameter is not specified, the new row is initialized with all values set
+                to 0, with the exact meaning depending on the column data type.
         """
         try:
             setattr(state, var_name, self._get_accessor().on_add(getattr(state, var_name), payload, new_row))
@@ -1734,10 +1747,13 @@ class Gui:
     def table_on_delete(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
         """Default implementation of the `on_delete` callback for tables.
 
+        This function removes a row from the tabular dataset stored in *var_name*.<br/>
+        The row to be removed is located at the index specified in *payload["index"]*.
+
         Arguments:
-            state: the state instance received in the callback.
-            var_name: the name of the variable bound to the table's *data* property.
-            payload: the payload dictionary as it was received from the `on_delete` callback.
+            state: The state instance received in the callback.
+            var_name: The name of the variable bound to the table's *data* property.
+            payload: The payload dictionary received from the `on_delete` callback.
         """
         try:
             setattr(state, var_name, self._get_accessor().on_delete(getattr(state, var_name), payload))
@@ -1923,9 +1939,9 @@ class Gui:
                   Markdown text.
             style (Optional[str]): Additional CSS style to apply to this page.
 
-                - if there is style associated with a page, it is used at a global level
-                - if there is no style associated with the page, the style is cleared at a global level
-                - if the page is embedded in a block control, the style is ignored
+                - If there is style associated with a page, it is used at a global level
+                - If there is no style associated with the page, the style is cleared at a global level
+                - If the page is embedded in a block control, the style is ignored
 
         Note that page names cannot start with the slash ('/') character and that each
         page must have a unique name.
@@ -2836,15 +2852,16 @@ class Gui:
     def set_favicon(self, favicon_path: t.Union[str, Path], state: t.Optional[State] = None):
         """Change the favicon for all clients.
 
-        This function dynamically changes the favicon of Taipy GUI pages for a single or all
-        connected clients.
+        This function dynamically changes the favicon (the icon associated with the application's
+        pages) of Taipy GUI pages for a single or all connected clients.
         Note that the *favicon* parameter to `(Gui.)run()^` can also be used to change
-         the favicon when the application starts.
+        the favicon when the application starts.
 
         Arguments:
-            favicon_path: the path to the image file to use.<br/>
+            favicon_path: The path to the image file to use.<br/>
                 This can be expressed as a path name or a URL (relative or not).
-            state: the state to apply the change to.
+            state: The state to apply the change to.<br/>
+                If no set or set to None, all the application's clients are impacted.
         """
         if state or self.__favicon != favicon_path:
             if not state:
