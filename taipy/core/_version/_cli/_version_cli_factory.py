@@ -15,15 +15,15 @@ from typing import Type
 
 from taipy._cli._base_cli._abstract_cli import _AbstractCLI
 
-from ...common._check_dependencies import _TAIPY_ENTERPRISE_CORE_MODULE, _using_enterprise
+from ...common._check_dependencies import EnterpriseChecker
 from ._version_cli import _VersionCLI
 
 
 class _VersionCLIFactory:
     @staticmethod
     def _build_cli() -> Type[_AbstractCLI]:
-        if _using_enterprise():
-            module = import_module(_TAIPY_ENTERPRISE_CORE_MODULE + "._version._cli._version_cli")
+        if EnterpriseChecker._using_enterprise():
+            module = import_module(EnterpriseChecker._TAIPY_ENTERPRISE_CORE_MODULE + "._version._cli._version_cli")
             core_cli = attrgetter("_VersionCLI")(module)
         else:
             core_cli = _VersionCLI
