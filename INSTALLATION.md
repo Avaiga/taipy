@@ -32,7 +32,7 @@ pip install taipy
 These commands install the `taipy` package in the Python environment with all its
 dependencies.
 
-## Installing a Specific Version
+## Installing a Specific Version from PyPI
 
 To install a specific version of Taipy, use the following command:
 ```bash
