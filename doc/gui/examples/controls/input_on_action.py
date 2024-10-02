@@ -14,6 +14,7 @@
 #     python <script>
 # -----------------------------------------------------------------------------------------
 import logging
+
 from taipy.gui import Gui
 
 # Configure logging
