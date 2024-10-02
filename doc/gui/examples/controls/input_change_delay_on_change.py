@@ -13,8 +13,8 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
 import logging
+
 from taipy.gui import Gui
 
 # Configure logging

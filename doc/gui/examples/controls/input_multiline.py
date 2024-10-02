@@ -15,7 +15,6 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-
 LOREM_IPSUM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus et nunc lacinia gravida. " \
 
 
