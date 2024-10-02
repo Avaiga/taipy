@@ -19,6 +19,7 @@
 import numpy as np
 import plotly.graph_objects as go
 
+
 from taipy.gui import Gui
 
 # Create the Plotly figure object

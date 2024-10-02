@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from __future__ import annotations
-
+from taipy.gui.utils.mapbox_token import get_mapbox_token
 import contextlib
 import importlib
 import inspect
@@ -445,6 +445,10 @@ class Gui:
                     if isinstance(content, PlotlyFigure):
 
                         def get_plotly_content(figure: PlotlyFigure):
+                            mapbox_token = get_mapbox_token()
+                            figure.update_layout(mapbox_style="mapbox://styles/mapbox/streets-v11",
+                            mapbox_center_lat=37.7749, mapbox_center_lon=-122.4194,
+                            mapbox_zoom=12, mapbox_access_token=mapbox_token)
                             return figure.to_html()
 
                         Gui.register_content_provider(PlotlyFigure, get_plotly_content)
