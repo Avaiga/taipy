@@ -15,9 +15,7 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-
 numbered_lines = "1 \n2 \n3 \n4 \n5"
-
 
 page = """
 Multi-line input: <|{numbered_lines}|input|multiline|lines_shown=5|>

@@ -14,17 +14,22 @@
 #     python <script>
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
+import logging
+from taipy.gui import Gui
 
-init_value = ""
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+INIT_VALUE = ""
 
 
 def on_change(state, var_name, value):
-    print(f"Value of {var_name} changed to {value}")
+    logging.info(f"Value of {var_name} changed to {value}")
 
 
 # If change_delay is set to -1, the change event is triggered on Enter key press
 page = """
-Enter a number (changes triggered on Enter key press): <|{init_value}|input|change_delay=-1|on_change=on_change|>
+Enter a number (changes triggered on Enter key press): <|{INIT_VALUE}|input|change_delay=-1|on_change=on_change|>
 """
 
 

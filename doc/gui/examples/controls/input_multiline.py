@@ -14,26 +14,13 @@
 #     python <script>
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
-import random
 
 
-def generate_lorem_paragraph(word_count=100):
-    words = (
-        "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore "
-        "magna aliqua"
-        "ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat "
-        "duis aute irure"
-        "dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint "
-        "occaecat cupidatat non"
-        "proident sunt in culpa qui officia deserunt mollit anim id est laborum"
-    ).split()
-
-    paragraph = ' '.join(random.choices(words, k=word_count))
-    return paragraph
+LOREM_IPSUM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus et nunc lacinia gravida. " \
 
 
 page = """
-Multi-line input: <|{generate_lorem_paragraph()}|input|multiline|>
+Multi-line input: <|{LOREM_IPSUM}|input|multiline|>
 """
 
 if __name__ == "__main__":
