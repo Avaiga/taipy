@@ -38,7 +38,8 @@ To install a specific version of Taipy, use the following command:
 ```bash
 pip install taipy==<version>
 ```
-Replace `<version>` with the desired version number.
+Replace `<version>` with a specific version number of Taipy.
+The list of all released Taipy versions can be found [here](https://pypi.org/project/taipy/#history).
 
 ## Installing from GitHub
 
