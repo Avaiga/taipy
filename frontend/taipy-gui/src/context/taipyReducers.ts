@@ -162,9 +162,9 @@ export interface FormatConfig {
  * Broadcast stack definition.
  */
 export interface BroadcastDesc {
-    /** Name of the broadcast. */
+    /** Name of the variable identifying the broadcast. */
     name: string;
-    /** Broadcast stack */
+    /** Broadcast stack. */
     stack: Array<unknown>;
 }
 

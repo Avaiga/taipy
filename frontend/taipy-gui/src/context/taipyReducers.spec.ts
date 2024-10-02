@@ -16,6 +16,7 @@ import {
     addRows,
     AlertMessage,
     BlockMessage,
+    BroadcastDesc,
     createAckAction,
     createAlertAction,
     createBlockAction,
@@ -30,6 +31,7 @@ import {
     createRequestUpdateAction,
     createSendActionNameAction,
     createSendUpdateAction,
+    createUnBroadcastAction,
     FileDownloadProps,
     getPayload,
     getWsMessageListener,
@@ -207,6 +209,29 @@ describe("reducer", () => {
         expect(createAlertAction({ atype: "sUc", message: "message" } as AlertMessage).atype).toBe("success");
         expect(createAlertAction({ atype: "  ", message: "message" } as AlertMessage).atype).toBe("");
     });
+    it("creates a broadcast action", () => {
+        expect(
+            (
+                taipyReducer({ ...INITIAL_STATE }, {
+                    type: "BROADCAST",
+                    name: "broadcast",
+                    payload: { value: 1 },
+                } as TaipyBaseAction).data.broadcast as BroadcastDesc
+            ).stack
+        ).toHaveLength(1);
+    });
+    it("un broadcast", () => {
+        const value = { scenario: "scenario id" };
+        const broadcastState = taipyReducer({ ...INITIAL_STATE }, {
+            type: "BROADCAST",
+            name: "broadcast",
+            payload: { value },
+        } as TaipyBaseAction);
+        expect(
+            (taipyReducer(broadcastState, createUnBroadcastAction("broadcast", value)).data.broadcast as BroadcastDesc)
+                .stack
+        ).toHaveLength(0);
+    });
 });
 
 describe("storeBlockUi function", () => {
@@ -321,7 +346,7 @@ describe("createRequestInfiniteTableUpdateAction function", () => {
         const applies = { key: "value" };
         const styles = { styleKey: "styleValue" };
         const tooltips = { tooltipKey: "tooltipValue" };
-        const formats = { formatKey: "formatValue"};
+        const formats = { formatKey: "formatValue" };
         const handleNan = true;
         const compare = "testCompare";
         const compareDatas = "testCompareDatas";
@@ -400,7 +425,14 @@ describe("createRequestTableUpdateAction function", () => {
         const formats = { formatKey: "formatValue" };
         const handleNan = true;
         const filters = [
-            { field: "testField", operator: "testOperator", value: "testValue", col: "testCol", action: "testAction", type: "type" },
+            {
+                field: "testField",
+                operator: "testOperator",
+                value: "testValue",
+                col: "testCol",
+                action: "testAction",
+                type: "type",
+            },
         ];
         const compare = "testCompare";
         const compareDatas = "testCompareDatas";
