@@ -26,6 +26,7 @@ from .reason import (
     DataNodeEditInProgress,
     DataNodeIsNotWritten,
     EntityDoesNotExist,
+    EntityIsNotAScenario,
     EntityIsNotSubmittableEntity,
     InvalidUploadFile,
     JobIsNotFinished,

@@ -43,9 +43,13 @@ class Page(_Renderer):
         """Initialize a new page.
 
         Arguments:
-            element (*Element*): An optional element, defined in the `taipy.gui.builder` module,
+            element (*Element*): An optional element, defined in the `taipy.gui.builder^` module,
                 that is created in the page.<br/>
                 The default creates a `part` where several elements can be stored.
+
+        The `Page` constructor supports the *style* parameter as explained in the
+        [section on Styling](../../userman/gui/styling/index.md#style-sheets) and in the
+        `(taipy.gui.Page.)set_style()^` method.
         """
         if element is None:
             element = _DefaultBlock()

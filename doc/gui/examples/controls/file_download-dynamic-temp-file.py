@@ -61,20 +61,18 @@ def download_pi(state):
     download(state, content=temp_file.name, name="pi.csv", on_action=clean_up)
 
 
-if __name__ == "__main__":
-    # Initial precision
-    precision = 10
-    # Stores the path to the temporary file
-    temp_path = None
+# Initial precision
+precision = 10
+# Stores the path to the temporary file
+temp_path = None
 
-    page = """
-# File Download - Dynamic content
-
+page = """
 Precision:
 
 <|{precision}|slider|min=2|max=10000|>
 
 <|{None}|file_download|on_action=download_pi|label=Download Pi digits|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="File Download - Dynamic content")

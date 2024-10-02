@@ -50,9 +50,11 @@ def on_change(state, var_name: str):
     state.final_amount = state.initial_investment * progress
 
 
+pages = {
+    "main": page,
+    "_rate_pane": rate_page,
+}
+
+
 if __name__ == "__main__":
-    pages = {
-        "main": page,
-        "_rate_pane": rate_page,
-    }
-    Gui(pages=pages).run()
+    Gui(pages=pages).run(title="Pane - As page")

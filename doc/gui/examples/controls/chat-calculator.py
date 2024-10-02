@@ -45,4 +45,4 @@ page = """
 <|{messages}|chat|users={users}|sender_id={users[0]}|on_action=evaluate|>
 """
 
-Gui(page).run()
+Gui(page).run(title="Chat - Calculator")

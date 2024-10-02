@@ -11,9 +11,15 @@
 
 from unittest.mock import Mock, patch
 
+import pytest
+
 from taipy.config.common.scope import Scope
 from taipy.core import Job, JobId, Scenario, Task
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.pickle import PickleDataNode
+from taipy.core.job._job_manager_factory import _JobManagerFactory
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.gui import Gui
 from taipy.gui_core._context import _GuiCoreContext
 
@@ -48,6 +54,13 @@ class MockState:
 
 
 class TestGuiCoreContext_is_editable:
+    @pytest.fixture(scope="class", autouse=True)
+    def set_entity(self):
+        _ScenarioManagerFactory._build_manager()._set(a_scenario)
+        _TaskManagerFactory._build_manager()._set(a_task)
+        _JobManagerFactory._build_manager()._set(a_job)
+        _DataManagerFactory._build_manager()._set(a_datanode)
+
     def test_crud_scenario(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
             gui_core_context = _GuiCoreContext(Mock())
@@ -125,8 +138,9 @@ class TestGuiCoreContext_is_editable:
                 assert "is not editable" in str(assign.call_args.args[1])
 
     def test_act_on_jobs(self):
-        with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get), patch(
-            "taipy.gui_core._context.is_deletable", side_effect=mock_is_true
+        with (
+            patch("taipy.gui_core._context.core_get", side_effect=mock_core_get),
+            patch("taipy.gui_core._context.is_deletable", side_effect=mock_is_true),
         ):
             gui_core_context = _GuiCoreContext(Mock())
             assign = Mock()

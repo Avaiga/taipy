@@ -17,36 +17,34 @@ import random
 
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # Number of samples
-    n_samples = 10
-    # y values: [0..n_samples-1]
-    y = range(0, n_samples)
+# Number of samples
+n_samples = 10
+# y values: [0..n_samples-1]
+y = range(0, n_samples)
 
-    data = {
-        # The x series is made of random numbers between 1 and 10
-        "x": [random.uniform(1, 10) for _ in y],
-        "y": y,
+data = {
+    # The x series is made of random numbers between 1 and 10
+    "x": [random.uniform(1, 10) for _ in y],
+    "y": y,
+}
+
+options = {
+    "error_x": {
+        "type": "data",
+        # Allows for a 'plus' and a 'minus' error data
+        "symmetric": False,
+        # The 'plus' error data is a series of random numbers
+        "array": [random.uniform(0, 5) for _ in y],
+        # The 'minus' error data is a series of random numbers
+        "arrayminus": [random.uniform(0, 2) for _ in y],
+        # Color of the error bar
+        "color": "red",
     }
+}
 
-    options = {
-        "error_x": {
-            "type": "data",
-            # Allows for a 'plus' and a 'minus' error data
-            "symmetric": False,
-            # The 'plus' error data is a series of random numbers
-            "array": [random.uniform(0, 5) for _ in y],
-            # The 'minus' error data is a series of random numbers
-            "arrayminus": [random.uniform(0, 2) for _ in y],
-            # Color of the error bar
-            "color": "red",
-        }
-    }
-
-    page = """
-# Error bars - Asymmetric
-
+page = """
 <|{data}|chart|type=bar|x=x|y=y|orientation=h|options={options}|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Error bars - Asymmetric")

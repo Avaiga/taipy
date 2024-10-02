@@ -15,24 +15,24 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # Color wavelength
-    color_wl = 530
-    # Color ranges by wavelength
-    color_map = {
-        200: None,
-        380: "violet",
-        435: "blue",
-        500: "cyan",
-        520: "green",
-        565: "yellow",
-        590: "orange",
-        625: "red",
-        740: None,
-    }
+# Color wavelength
+color_wl = 530
+# Color ranges by wavelength
+color_map = {
+    200: None,
+    380: "violet",
+    435: "blue",
+    500: "cyan",
+    520: "green",
+    565: "yellow",
+    590: "orange",
+    625: "red",
+    740: None,
+}
 
-    page = """
+page = """
 <|{color_wl}|metric|color_map={color_map}|format=%d nm|min=200|max=800|bar_color=gray|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Metric - Color Map")

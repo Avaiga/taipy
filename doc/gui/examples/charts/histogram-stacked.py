@@ -17,22 +17,20 @@ import random
 
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # Data set made of two series of random numbers
-    data = {"A": [random.random() for _ in range(200)], "B": [random.random() for _ in range(200)]}
+# Data set made of two series of random numbers
+data = {"A": [random.random() for _ in range(200)], "B": [random.random() for _ in range(200)]}
 
-    # Names of the two traces
-    names = ["A samples", "B samples"]
+# Names of the two traces
+names = ["A samples", "B samples"]
 
-    layout = {
-        # Make the histogram stack the data sets
-        "barmode": "stack"
-    }
+layout = {
+    # Make the histogram stack the data sets
+    "barmode": "stack"
+}
 
-    page = """
-# Histogram - Stacked
-
+page = """
 <|{data}|chart|type=histogram|x[1]=A|x[2]=B|name={names}|layout={layout}|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Histogram - Stacked")

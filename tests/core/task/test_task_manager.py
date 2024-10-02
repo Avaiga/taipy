@@ -308,6 +308,10 @@ def test_is_submittable():
     task_config = Config.configure_task("task", print, [dn_config])
     task = _TaskManager._bulk_get_or_create([task_config])[0]
 
+    rc = _TaskManager._is_submittable("some_task")
+    assert not rc
+    assert "Entity some_task does not exist in the repository" in rc.reasons
+
     assert len(_TaskManager._get_all()) == 1
     assert _TaskManager._is_submittable(task)
     assert _TaskManager._is_submittable(task.id)

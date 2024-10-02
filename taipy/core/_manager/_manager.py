@@ -161,8 +161,14 @@ class _Manager(Generic[EntityType]):
 
     @classmethod
     def _is_editable(cls, entity: Union[EntityType, str]) -> ReasonCollection:
-        return ReasonCollection()
+        reason_collection = ReasonCollection()
+        if cls._get(entity) is None:
+            reason_collection._add_reason(str(entity), EntityDoesNotExist(str(entity)))
+        return reason_collection
 
     @classmethod
     def _is_readable(cls, entity: Union[EntityType, str]) -> ReasonCollection:
-        return ReasonCollection()
+        reason_collection = ReasonCollection()
+        if cls._get(entity) is None:
+            reason_collection._add_reason(str(entity), EntityDoesNotExist(str(entity)))
+        return reason_collection
