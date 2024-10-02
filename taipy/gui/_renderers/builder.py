@@ -17,7 +17,8 @@ import typing as t
 import xml.etree.ElementTree as etree
 from datetime import date, datetime, time
 from enum import Enum
-from inspect import isclass, isfunction
+from inspect import isclass, isroutine
+from types import LambdaType
 from urllib.parse import quote
 
 from .._warnings import _warn
@@ -139,7 +140,7 @@ class _Builder:
             hash_value = gui._evaluate_expr(value)
             try:
                 func = gui._get_user_function(hash_value)
-                if isfunction(func):
+                if isroutine(func):
                     return (func, hash_value)
                 return (_getscopeattr_drill(gui, hash_value), hash_value)
             except AttributeError:
@@ -164,14 +165,14 @@ class _Builder:
                 else:
                     looks_like_a_lambda = False
                     val = v
-                if isfunction(val):
+                if isroutine(val):
                     # if it's not a callable (and not a string), forget it
                     if val.__name__ == "<lambda>":
                         # if it is a lambda and it has already a hash_name, we're fine
                         if looks_like_a_lambda or not hash_name:
-                            hash_name = _get_lambda_id(val)
+                            hash_name = _get_lambda_id(t.cast(LambdaType, val))
                             gui._bind_var_val(hash_name, val)  # type: ignore[arg-type]
-                    else:
+                    elif not hash_name:
                         hash_name = _get_expr_var_name(val.__name__)
 
                 if val is not None or hash_name:
@@ -349,7 +350,7 @@ class _Builder:
             if not optional:
                 _warn(f"Property {name} is required for control {self.__control_type}.")
             return self
-        elif isfunction(str_attr):
+        elif isroutine(str_attr):
             str_attr = self.__hashes.get(name)
             if str_attr is None:
                 return self
@@ -571,8 +572,10 @@ class _Builder:
             self.set_boolean_attribute("compare", True)
             self.__set_string_attribute("on_compare")
 
+        if not isinstance(self.__attributes.get("style"), (type(None), dict, _MapDict)):
+            _warn("Table: property 'style' has been renamed to 'row_class_name'.")
         if row_class_name := self.__attributes.get("row_class_name"):
-            if isfunction(row_class_name):
+            if isroutine(row_class_name):
                 value = self.__hashes.get("row_class_name")
             elif isinstance(row_class_name, str):
                 value = row_class_name.strip()
@@ -583,7 +586,7 @@ class _Builder:
             elif value:
                 self.set_attribute("rowClassName", value)
         if tooltip := self.__attributes.get("tooltip"):
-            if isfunction(tooltip):
+            if isroutine(tooltip):
                 value = self.__hashes.get("tooltip")
             elif isinstance(tooltip, str):
                 value = tooltip.strip()
