@@ -24,9 +24,9 @@ lov = [
 value = lov[0]
 
 with tgb.Page() as page:
-    tgb.toggle("{value}", lov="{lov}")
+    tgb.toggle("{value}", lov="{lov}")  # type: ignore[attr-defined]
     tgb.html(None, "Value: ")
-    tgb.text("{value[1].text if isinstance(value[1], Icon) else value[1]}", inline=True)
+    tgb.text("{value[1].text if isinstance(value[1], Icon) else value[1]}", inline=True)  # type: ignore[attr-defined]
 
 
 if __name__ == "__main__":
