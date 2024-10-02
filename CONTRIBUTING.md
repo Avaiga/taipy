@@ -12,10 +12,10 @@ For questions, please get in touch on [Discord](https://discord.com/invite/SJyz2
 
 Taipy is organised in two main repositories:
 
-- [taipy](https://github.com/Avaiga/taipy) is the main repository that containing the code of Taipy packages.
+- [taipy](https://github.com/Avaiga/taipy) is the main repository that contains the code of Taipy packages.
 - [taipy-doc](https://github.com/Avaiga/taipy-doc) is the documentation repository.
 
-## Never contributed on an open source project before ?
+## Never contributed to an open source project before ?
 
 Have a look on this [GitHub documentation](https://docs.github.com/en/get-started/quickstart/contributing-to-projects).
 

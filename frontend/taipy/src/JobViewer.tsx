@@ -22,25 +22,19 @@ import Typography from "@mui/material/Typography";
 import {
     createRequestUpdateAction,
     createSendActionNameAction,
+    createUnBroadcastAction,
     getUpdateVar,
     useDispatch,
     useDispatchRequestUpdateOnFirstRender,
     useModule,
 } from "taipy-gui";
 
-import { useClassNames, EllipsisSx, SecondaryEllipsisProps } from "./utils";
+import { useClassNames, EllipsisSx, SecondaryEllipsisProps, CoreProps } from "./utils";
 import StatusChip from "./StatusChip";
 
-interface JobViewerProps {
-    updateVarName?: string;
-    coreChanged?: Record<string, unknown>;
-    error?: string;
+interface JobViewerProps extends CoreProps {
     job: JobDetail;
     onDelete?: string;
-    id?: string;
-    libClassName?: string;
-    className?: string;
-    dynamicClassName?: string;
     updateJbVars?: string;
     inDialog?: boolean;
     width?: string;
@@ -51,7 +45,7 @@ export type JobDetail = [string, string, string, string, string, string, number,
 const invalidJob: JobDetail = ["", "", "", "", "", "", 0, "", "", []];
 
 const JobViewer = (props: JobViewerProps) => {
-    const { updateVarName = "", id = "", updateJbVars = "", inDialog = false, width = "50vw" } = props;
+    const { updateVarName = "", id = "", updateJbVars = "", inDialog = false, width = "50vw", coreChanged } = props;
 
     const [
         jobId,
@@ -61,7 +55,7 @@ const JobViewer = (props: JobViewerProps) => {
         submissionId,
         creationDate,
         status,
-        notDeleteable,
+        notDeletable,
         executionTime,
         stacktrace,
     ] = props.job || invalidJob;
@@ -92,10 +86,19 @@ const JobViewer = (props: JobViewerProps) => {
     );
 
     useEffect(() => {
-        if (props.coreChanged?.job == jobId) {
-            updateVarName && dispatch(createRequestUpdateAction(id, module, [updateVarName], true));
+        if (coreChanged?.name) {
+            const toRemove = [...coreChanged.stack]
+                .map((bc) => {
+                    if ((bc as Record<string, unknown>).job  == jobId) {
+                        updateVarName && dispatch(createRequestUpdateAction(id, module, [updateVarName], true));
+                        return bc;
+                    }
+                    return undefined;
+                })
+                .filter((v) => v);
+            toRemove.length && dispatch(createUnBroadcastAction(coreChanged.name, ...toRemove));
         }
-    }, [props.coreChanged, updateVarName, jobId, module, dispatch, id]);
+    }, [coreChanged, updateVarName, jobId, module, dispatch, id]);
 
     return (
         <Grid container className={className} sx={{ maxWidth: width }}>
@@ -169,9 +172,9 @@ const JobViewer = (props: JobViewerProps) => {
                 <>
                     <Divider />
                     <Grid size={6}>
-                        <Tooltip title={notDeleteable}>
+                        <Tooltip title={notDeletable}>
                             <span>
-                                <Button variant="outlined" onClick={handleDeleteJob} disabled={!!notDeleteable}>
+                                <Button variant="outlined" onClick={handleDeleteJob} disabled={!!notDeletable}>
                                     Delete
                                 </Button>
                             </span>
@@ -179,6 +182,7 @@ const JobViewer = (props: JobViewerProps) => {
                     </Grid>
                 </>
             ) : null}
+            {props.children}
         </Grid>
     );
 };
