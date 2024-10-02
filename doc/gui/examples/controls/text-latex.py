@@ -21,7 +21,7 @@ latex = """
 You can insert *LaTeX* in a `text` control to
 display math equations.
 
-Display Equations:
+Displayed Equations:
 $$Attention(Q, K, V) = softmax(\\frac{QK^T}{\\sqrt{d_k}})V$$
 
 Inline Equations:
