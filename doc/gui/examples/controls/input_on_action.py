@@ -13,26 +13,30 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
+import logging
 from taipy.gui import Gui
 
-init_value = ""
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 def print_value_on_key_pressed(state, id, payload):
     key = payload.get('args', [None])[0]
     if key == 'F1':
-        print("F1 key pressed")
+        logging.info("F1 key pressed")
     elif key == 'F2':
-        print("F2 key pressed")
+        logging.info("F2 key pressed")
     elif key == 'F3':
-        print("F3 key pressed")
+        logging.info("F3 key pressed")
     else:
         return None
 
 
+init_value = 0
+
 # on_action function is called when the action_keys are pressed
 page = """
-Enter a number (on_action triggered on F1, F2, F3 key press): 
+Enter a number (on_action triggered on F1, F2, F3 key press):
 <|{init_value}|input|change_delay=300|on_action=print_value_on_key_pressed|action_keys=F1;F2;F3|>
 """
 
