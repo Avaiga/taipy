@@ -38,7 +38,8 @@ class _Element(ABC):
     __RE_INDEXED_PROPERTY = re.compile(r"^(.*?)__([\w\d]+)$")
     _TAIPY_EMBEDDED_PREFIX = "_tp_embedded_"
     _EMBEDDED_PROPERTIES = ["decimator"]
-    _TYPES: t.Dict[str, str] = {}
+    _PROPERTY_TYPES: t.Dict[str, str] = {}
+    _CALLABLES: t.Optional[t.Set[str]] = None
     __LAMBDA_VALUE_IDX = 0
 
     def __new__(cls, *args, **kwargs):
@@ -94,9 +95,13 @@ class _Element(ABC):
         return key
 
     def _is_callable(self, name: str):
-        return (
-            "callable" in self._TYPES.get(f"{parts[0]}__" if len(parts := name.split("__")) > 1 else name, "").lower()
-        )
+        if self._CALLABLES is None:
+            self._CALLABLES = {
+                f"{parts[0]}{'' if len(parts)==1 else '__'}"
+                for prop, prop_type in self._PROPERTY_TYPES.items()
+                if (parts := prop.split("[")) and "callable" in prop_type.lower()
+            }
+        return (parts[0] if len(parts := name.split("__")) == 1 else f"{parts[0]}__") in self._CALLABLES
 
     def _parse_property(self, key: str, value: t.Any) -> t.Any:
         if isinstance(value, (str, dict, Iterable)):
