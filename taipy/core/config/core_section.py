@@ -408,7 +408,7 @@ class CoreSection(UniqueSection):
             mode (Optional[str]): Indicates the mode of the version management system.
                 Possible values are *"development"* or *"experiment"*. On Enterprise edition of Taipy,
                 *production* mode is also available. Please refer to the
-                [Versioning management](../../../../../userman/advanced_features/versioning/index.md)
+                [Versioning management](../../../../../../userman/advanced_features/versioning/index.md)
                 documentation page for more details.
             version_number (Optional[str]): The string identifier of the version.
                  In development mode, the version number is ignored.

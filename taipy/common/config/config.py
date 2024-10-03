@@ -58,7 +58,7 @@ class Config:
             The configuration can be done in three ways: Python code, configuration files, or
             environment variables. All configuration manners are ultimately merged (overriding the previous
             way) to create a final applied configuration. Please refer to the
-            [advanced configuration](../../../../../userman/advanced_features/configuration/advanced-config.md)
+            [advanced configuration](../../../../../../userman/advanced_features/configuration/advanced-config.md)
             section from the user manual for more details.
 
     2. Attributes and methods to retrieve the configuration values.
