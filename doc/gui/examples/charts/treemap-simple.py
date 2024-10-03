@@ -15,19 +15,17 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # Data set: the first 10 elements of the Fibonacci sequence
-    n_numbers = 10
-    fibonacci = [0, 1]
-    for i in range(2, n_numbers):
-        fibonacci.append(fibonacci[i - 1] + fibonacci[i - 2])
+# Data set: the first 10 elements of the Fibonacci sequence
+n_numbers = 10
+fibonacci = [0, 1]
+for i in range(2, n_numbers):
+    fibonacci.append(fibonacci[i - 1] + fibonacci[i - 2])
 
-    data = {"index": list(range(1, n_numbers + 1)), "fibonacci": fibonacci}
+data = {"index": list(range(1, n_numbers + 1)), "fibonacci": fibonacci}
 
-    page = """
-# TreeMap - Simple
-
+page = """
 <|{data}|chart|type=treemap|labels=index|values=fibonacci|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - TreeMap - Simple")

@@ -42,13 +42,13 @@ class Orchestrator:
 
     def __init__(self) -> None:
         """
-        Initialize a Orchestrator service.
+        Initialize an Orchestrator service.
         """
         pass
 
     def run(self, force_restart=False):
         """
-        Start a Orchestrator service.
+        Start an Orchestrator service.
 
         This function checks and locks the configuration, manages application's version,
         and starts a job dispatcher.

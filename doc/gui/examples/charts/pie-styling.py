@@ -15,31 +15,31 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    n_slices = 20
-    # List: [1..n_slices]
-    # Slices are bigger and bigger
-    values = list(range(1, n_slices + 1))
+n_slices = 20
+# List: [1..n_slices]
+# Slices are bigger and bigger
+values = list(range(1, n_slices + 1))
 
-    marker = {
-        # Colors move around the Hue color disk
-        "colors": [f"hsl({360 * (i - 1)/(n_slices - 1)},90%,60%)" for i in values]
-    }
+marker = {
+    # Colors move around the Hue color disk
+    "colors": [f"hsl({360 * (i - 1)/(n_slices - 1)},90%,60%)" for i in values]
+}
 
-    layout = {
-        # Hide the legend
-        "showlegend": False
-    }
+layout = {
+    # Hide the legend
+    "showlegend": False
+}
 
-    options = {
-        # Hide the texts
-        "textinfo": "none"
-    }
+options = {
+    # Hide the texts
+    "textinfo": "none"
+}
 
-    page = """
-# Pie - Style
+page = """
+#
 
 <|{values}|chart|type=pie|marker={marker}|options={options}|layout={layout}|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Pie - Style")

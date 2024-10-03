@@ -15,18 +15,16 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # Data set
-    data = {
-        "Day": ["Mon", "Tue", "Wed", "Thu", "Fri"],
-        "Values": [10, -5, 20, -10, 30],
-        "Measure": ["absolute", "relative", "relative", "relative", "relative"],
-    }
+# Data set
+data = {
+    "Day": ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    "Values": [10, -5, 20, -10, 30],
+    "Measure": ["absolute", "relative", "relative", "relative", "relative"],
+}
 
-    page = """
-# Waterfall - Simple
-
+page = """
 <|{data}|chart|type=waterfall|x=Day|y=Values|measure=Measure|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Waterfall - Simple")

@@ -15,23 +15,21 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    data = {
-        "Types": ["Visits", "Downloads", "Prospects", "Invoiced", "Closed"],
-        "Visits": [13873, 10533, 5443, 2703, 908],
-    }
+data = {
+    "Types": ["Visits", "Downloads", "Prospects", "Invoiced", "Closed"],
+    "Visits": [13873, 10533, 5443, 2703, 908],
+}
 
-    layout = {
-        # Stack the areas
-        "funnelmode": "stack",
-        # Hide the legend
-        "showlegend": False,
-    }
+layout = {
+    # Stack the areas
+    "funnelmode": "stack",
+    # Hide the legend
+    "showlegend": False,
+}
 
-    page = """
-# Funnel - Area
-
+page = """
 <|{data}|chart|type=funnelarea|values=Visits|text=Types|layout={layout}|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Funnel - Area")

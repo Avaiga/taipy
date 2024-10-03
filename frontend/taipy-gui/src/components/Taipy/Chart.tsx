@@ -45,7 +45,7 @@ import {
 } from "../../utils/hooks";
 import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
 import { Figure } from "react-plotly.js";
-import { ligthenPayload } from "../../context/wsUtils";
+import { lightenPayload } from "../../context/wsUtils";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -616,7 +616,7 @@ const Chart = (props: ChartProp) => {
                 createSendActionNameAction(
                     id,
                     module,
-                    ligthenPayload({
+                    lightenPayload({
                         action: onClick,
                         lat: map ? yaxis.p2c() : undefined,
                         y: map ? undefined : transform(yaxis, "top")(evt?.clientY),

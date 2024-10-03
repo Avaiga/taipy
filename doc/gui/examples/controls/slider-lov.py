@@ -15,13 +15,11 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    value = "XS"
+value = "XS"
 
-    page = """
-# Slider - List of values
-
+page = """
 <|{value}|slider|lov=XXS;XS;S;M;L;XL;XXL|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Slider - List of values")

@@ -16,36 +16,22 @@
 from taipy.gui import Gui
 
 
-# Function to plot: x^3/3 - x
-def f(x):
-    return x * x * x / 3 - x
+class User:
+    def __init__(self, id, name, birth_year):
+        self.id, self.name, self.birth_year = (id, name, birth_year)
 
+users = [
+    User(231, "Johanna", 1987),
+    User(125, "John", 1979),
+    User(4,   "Peter", 1968),
+    User(31,  "Mary", 1974)
+    ]
+
+user_sel = users[2]
+
+page = """
+<|{user_sel}|selector|lov={users}|type=User|adapter={lambda u: (u.id, u.name)}|>
+"""
 
 if __name__ == "__main__":
-    # x values: [-2.2, ..., 2.2]
-    x = [(x - 10) / 4.5 for x in range(0, 21)]
-
-    data = {
-        "x": x,
-        # y: [f(-2.2), ..., f(2.2)]
-        "y": [f(x) for x in x],
-    }
-
-    layout = {
-        # Chart title
-        "title": "Local extrema",
-        "annotations": [
-            # Annotation for local maximum (x = -1)
-            {"text": "Local <b>max</b>", "font": {"size": 20}, "x": -1, "y": f(-1)},
-            # Annotation for local minimum (x = 1)
-            {"text": "Local <b>min</b>", "font": {"size": 20}, "x": 1, "y": f(1), "xanchor": "left"},
-        ],
-    }
-
-    page = """
-# Advanced - Annotations
-
-<|{data}|chart|layout={layout}|>
-    """
-
-    Gui(page).run()
+    Gui(page).run(title="Selector - Adapter")

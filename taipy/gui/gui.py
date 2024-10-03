@@ -813,17 +813,17 @@ class Gui:
             on_change_fn = self._get_user_function("on_change")
         if callable(on_change_fn):
             try:
-                argcount = on_change_fn.__code__.co_argcount
-                if argcount > 0 and inspect.ismethod(on_change_fn):
-                    argcount -= 1
-                args: t.List[t.Any] = [None for _ in range(argcount)]
-                if argcount > 0:
+                arg_count = on_change_fn.__code__.co_argcount
+                if arg_count > 0 and inspect.ismethod(on_change_fn):
+                    arg_count -= 1
+                args: t.List[t.Any] = [None for _ in range(arg_count)]
+                if arg_count > 0:
                     args[0] = self.__get_state()
-                if argcount > 1:
+                if arg_count > 1:
                     args[1] = var_name
-                if argcount > 2:
+                if arg_count > 2:
                     args[2] = value
-                if argcount > 3:
+                if arg_count > 3:
                     args[3] = current_context
                 on_change_fn(*args)
             except Exception as e:  # pragma: no cover
@@ -849,22 +849,22 @@ class Gui:
     def _get_user_content_url(
         self, path: t.Optional[str] = None, query_args: t.Optional[t.Dict[str, str]] = None
     ) -> t.Optional[str]:
-        qargs = query_args or {}
-        qargs.update({Gui.__ARG_CLIENT_ID: self._get_client_id()})
-        return f"/{Gui.__USER_CONTENT_URL}/{path or 'TaIpY'}?{urlencode(qargs)}"
+        q_args = query_args or {}
+        q_args.update({Gui.__ARG_CLIENT_ID: self._get_client_id()})
+        return f"/{Gui.__USER_CONTENT_URL}/{path or 'TaIpY'}?{urlencode(q_args)}"
 
     def __serve_user_content(self, path: str) -> t.Any:
         self.__set_client_id_in_context()
-        qargs: t.Dict[str, str] = {}
-        qargs.update(request.args)
-        qargs.pop(Gui.__ARG_CLIENT_ID, None)
+        q_args: t.Dict[str, str] = {}
+        q_args.update(request.args)
+        q_args.pop(Gui.__ARG_CLIENT_ID, None)
         cb_function: t.Optional[t.Union[t.Callable, str]] = None
         cb_function_name = None
-        if qargs.get(Gui._HTML_CONTENT_KEY):
+        if q_args.get(Gui._HTML_CONTENT_KEY):
             cb_function = self.__process_content_provider
             cb_function_name = cb_function.__name__
         else:
-            cb_function_name = qargs.get(Gui.__USER_CONTENT_CB)
+            cb_function_name = q_args.get(Gui.__USER_CONTENT_CB)
             if cb_function_name:
                 cb_function = self._get_user_function(cb_function_name)
                 if not callable(cb_function):
@@ -891,8 +891,8 @@ class Gui:
                 args: t.List[t.Any] = []
                 if path:
                     args.append(path)
-                if len(qargs):
-                    args.append(qargs)
+                if len(q_args):
+                    args.append(q_args)
                 ret = self._call_function_with_state(cb_function, args)
                 if ret is None:
                     _warn(f"{cb_function_name}() callback function must return a value.")
@@ -932,8 +932,8 @@ class Gui:
                 if libs is None:
                     libs = []
                     libraries[lib.get_name()] = libs
-                elts: t.List[t.Dict[str, str]] = []
-                libs.append({"js module": lib.get_js_module_name(), "elements": elts})
+                elements: t.List[t.Dict[str, str]] = []
+                libs.append({"js module": lib.get_js_module_name(), "elements": elements})
                 for element_name, elt in lib.get_elements().items():
                     if not isinstance(elt, Element):
                         continue
@@ -942,7 +942,7 @@ class Gui:
                         elt_dict["render function"] = elt._render_xhtml.__code__.co_name
                     else:
                         elt_dict["react name"] = elt._get_js_name(element_name)
-                    elts.append(elt_dict)
+                    elements.append(elt_dict)
         status.update({"libraries": libraries})
 
     def _serve_status(self, template: Path) -> t.Dict[str, t.Dict[str, str]]:
@@ -1377,7 +1377,7 @@ class Gui:
     ):
         self.__broadcast_ws(
             {
-                "type": _WsType.UPDATE.value if message_type is None else message_type.value,
+                "type": _WsType.BROADCAST.value if message_type is None else message_type.value,
                 "name": _get_broadcast_var_name(var_name),
                 "payload": {"value": var_value},
             },
@@ -1551,7 +1551,7 @@ class Gui:
             callback (Callable[[State^, ...], None]): The user-defined function that is invoked.<br/>
                 The first parameter of this function **must** be a `State^`.
             args (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
-            module_context (Optional[str]): the name of the module that will be used.
+            module_context (Optional[str]): The name of the module that will be used.
         """  # noqa: E501
         this_sid = None
         if request:
@@ -1701,33 +1701,64 @@ class Gui:
         return self.__adapter._get_adapted_lov(lov, var_type)
 
     def table_on_edit(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
-        """
-        TODO: Default implementation of on_edit for tables
+        """Default implementation of the `on_edit` callback for tables.
+
+           This function sets the value of a specific cell in the tabular dataset stored in
+           *var_name*, typically bound to the *data* property of a table control.
+
+        Arguments:
+            state: the state instance received in the callback.
+            var_name: the name of the variable bound to the table's *data* property.
+            payload: the payload dictionary received from the `on_edit` callback.<br/>
+                This dictionary has the following keys:
+
+                - *"index"*: The row index of the cell to be modified.
+                - *"col"*: Specifies the name of the column of the cell to be modified.
+                - *"value"*: Specifies the new value to be assigned to the cell.
+                - *"user_value"*: Contains the text entered by the user.
+                - *"tz"*: Specifies the timezone to be used, if applicable.
         """
         try:
             setattr(state, var_name, self._get_accessor().on_edit(getattr(state, var_name), payload))
         except Exception as e:
-            _warn("TODO: Table.on_edit", e)
-
-    def table_on_delete(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
-        """
-        TODO: Default implementation of on_delete for tables
-        """
-        try:
-            setattr(state, var_name, self._get_accessor().on_delete(getattr(state, var_name), payload))
-        except Exception as e:
-            _warn("TODO: Table.on_delete", e)
+            _warn("Gui.table_on_edit() failed potentially from a table's on_edit callback.", e)
 
     def table_on_add(
         self, state: State, var_name: str, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None
     ):
-        """
-        TODO: Default implementation of on_add for tables
+        """Default implementation of the `on_add` callback for tables.
+
+        This function creates a new row in the tabular dataset stored in *var_name*.<br/>
+        The row is added at the index specified in *payload["index"]*.
+
+        Arguments:
+            state: The state instance received from the callback.
+            var_name: The name of the variable bound to the table's *data* property.
+            payload: The payload dictionary received from the `on_add` callback.
+            new_row: The initial values for the new row.<br/>
+                If this parameter is not specified, the new row is initialized with all values set
+                to 0, with the exact meaning depending on the column data type.
         """
         try:
             setattr(state, var_name, self._get_accessor().on_add(getattr(state, var_name), payload, new_row))
         except Exception as e:
-            _warn("TODO: Table.on_add", e)
+            _warn("Gui.table_on_add() failed potentially from a table's on_add callback.", e)
+
+    def table_on_delete(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
+        """Default implementation of the `on_delete` callback for tables.
+
+        This function removes a row from the tabular dataset stored in *var_name*.<br/>
+        The row to be removed is located at the index specified in *payload["index"]*.
+
+        Arguments:
+            state: The state instance received in the callback.
+            var_name: The name of the variable bound to the table's *data* property.
+            payload: The payload dictionary received from the `on_delete` callback.
+        """
+        try:
+            setattr(state, var_name, self._get_accessor().on_delete(getattr(state, var_name), payload))
+        except Exception as e:
+            _warn("Gui.table_on_delete() failed potentially from a table's on_delete callback.", e)
 
     def _tbl_cols(
         self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs
@@ -1908,9 +1939,9 @@ class Gui:
                   Markdown text.
             style (Optional[str]): Additional CSS style to apply to this page.
 
-                - if there is style associated with a page, it is used at a global level
-                - if there is no style associated with the page, the style is cleared at a global level
-                - if the page is embedded in a block control, the style is ignored
+                - If there is style associated with a page, it is used at a global level
+                - If there is no style associated with the page, the style is cleared at a global level
+                - If the page is embedded in a block control, the style is ignored
 
         Note that page names cannot start with the slash ('/') character and that each
         page must have a unique name.
@@ -2412,6 +2443,9 @@ class Gui:
             return t.cast(Flask, self._server.get_flask())
         raise RuntimeError("get_flask_app() cannot be invoked before run() has been called.")
 
+    def _get_port(self) -> int:
+        return self._server.get_port()
+
     def _set_frame(self, frame: t.Optional[FrameType]):
         if not isinstance(frame, FrameType):  # pragma: no cover
             raise RuntimeError("frame must be a FrameType where Gui can collect the local variables.")
@@ -2609,6 +2643,8 @@ class Gui:
         # server URL Rule for flask rendered react-router
         pages_bp.add_url_rule(f"/{Gui.__INIT_URL}", view_func=self.__init_route)
 
+        _Hooks()._add_external_blueprint(self, __name__)
+
         # Register Flask Blueprint if available
         for bp in self._flask_blueprint:
             t.cast(Flask, self._server.get_flask()).register_blueprint(bp)
@@ -2775,6 +2811,7 @@ class Gui:
         return self._server.run(
             host=app_config.get("host"),
             port=app_config.get("port"),
+            client_url=app_config.get("client_url"),
             debug=app_config.get("debug"),
             use_reloader=app_config.get("use_reloader"),
             flask_log=app_config.get("flask_log"),
@@ -2815,11 +2852,16 @@ class Gui:
     def set_favicon(self, favicon_path: t.Union[str, Path], state: t.Optional[State] = None):
         """Change the favicon for all clients.
 
-        This function dynamically changes the favicon of Taipy GUI pages for all connected client.
-        favicon_path can be an URL (relative or not) or a file path.
-        TODO The *favicon* parameter to `(Gui.)run()^` can also be used to change
-         the favicon when the application starts.
+        This function dynamically changes the favicon (the icon associated with the application's
+        pages) of Taipy GUI pages for a single or all connected clients.
+        Note that the *favicon* parameter to `(Gui.)run()^` can also be used to change
+        the favicon when the application starts.
 
+        Arguments:
+            favicon_path: The path to the image file to use.<br/>
+                This can be expressed as a path name or a URL (relative or not).
+            state: The state to apply the change to.<br/>
+                If no set or set to None, all the application's clients are impacted.
         """
         if state or self.__favicon != favicon_path:
             if not state:

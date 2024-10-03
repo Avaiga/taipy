@@ -17,27 +17,27 @@ import random
 
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # Data set made of two series of random numbers
-    data = [{"x": [random.random() + 1 for _ in range(100)]}, {"x": [random.random() + 1.1 for _ in range(100)]}]
+# Data set made of two series of random numbers
+data = [{"x": [random.random() + 1 for _ in range(100)]}, {"x": [random.random() + 1.1 for _ in range(100)]}]
 
-    options = [
-        # First data set displayed as semi-transparent, green bars
-        {"opacity": 0.5, "marker": {"color": "green"}},
-        # Second data set displayed as semi-transparent, gray bars
-        {"opacity": 0.5, "marker": {"color": "#888"}},
-    ]
+options = [
+    # First data set displayed as semi-transparent, green bars
+    {"opacity": 0.5, "marker": {"color": "green"}},
+    # Second data set displayed as semi-transparent, gray bars
+    {"opacity": 0.5, "marker": {"color": "#888"}},
+]
 
-    layout = {
-        # Overlay the two histograms
-        "barmode": "overlay",
-        # Hide the legend
-        "showlegend": False,
-    }
+layout = {
+    # Overlay the two histograms
+    "barmode": "overlay",
+    # Hide the legend
+    "showlegend": False,
+}
 
-    page = """
-# Histogram - Overlay
+page = """
 
 <|{data}|chart|type=histogram|options={options}|layout={layout}|>
-    """
-    Gui(page).run()
+"""
+
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Histogram - Overlay")

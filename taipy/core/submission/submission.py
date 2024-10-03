@@ -141,29 +141,43 @@ class Submission(_Entity, _Labeled):
 
     @property
     @_self_reload(_MANAGER_NAME)
-    def execution_started_at(self) -> Optional[datetime]:
-        if all(job.execution_started_at is not None for job in self.jobs):
-            return min(job.execution_started_at for job in self.jobs)
+    def submitted_at(self) -> Optional[datetime]:
+        jobs_submitted_at = [job.submitted_at for job in self.jobs if job.submitted_at]
+        if jobs_submitted_at:
+            return min(jobs_submitted_at)
         return None
 
     @property
     @_self_reload(_MANAGER_NAME)
-    def execution_ended_at(self) -> Optional[datetime]:
-        if all(job.execution_ended_at is not None for job in self.jobs):
-            return max(job.execution_ended_at for job in self.jobs)
+    def run_at(self) -> Optional[datetime]:
+        jobs_run_at = [job.run_at for job in self.jobs if job.run_at]
+        if jobs_run_at:
+            return min(jobs_run_at)
+        return None
+
+    @property
+    @_self_reload(_MANAGER_NAME)
+    def finished_at(self) -> Optional[datetime]:
+        if all(job.finished_at for job in self.jobs):
+            return max([job.finished_at for job in self.jobs if job.finished_at])
         return None
 
     @property
     @_self_reload(_MANAGER_NAME)
     def execution_duration(self) -> Optional[float]:
-        """Get the duration of the submission in seconds.
+        """Get the duration of the submission execution in seconds.
+        The execution time is the duration from the first job running to the last job completion.
 
         Returns:
-            Optional[float]: The duration of the submission in seconds. If the job is not
-            completed, None is returned.
+            Optional[float]: The duration of the job execution in seconds.
+                - If no job was run, None is returned.
+                - If one of the jobs is not finished, the execution time is the duration
+                  from the running time of the first job to the current time.
         """
-        if self.execution_started_at and self.execution_ended_at:
-            return (self.execution_ended_at - self.execution_started_at).total_seconds()
+        if self.finished_at and self.run_at:
+            return (self.finished_at - self.run_at).total_seconds()
+        elif self.run_at and self.finished_at is None:
+            return (datetime.now() - self.run_at).total_seconds()
         return None
 
     def get_label(self) -> str:

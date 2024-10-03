@@ -39,7 +39,8 @@ class _Element(ABC):
     __RE_INDEXED_PROPERTY = re.compile(r"^(.*?)__([\w\d]+)$")
     _NEW_LAMBDA_NAME = "new_lambda"
     _TAIPY_EMBEDDED_PREFIX = "_tp_embedded_"
-    _EMBEDED_PROPERTIES = ["decimator"]
+    _EMBEDDED_PROPERTIES = ["decimator"]
+    _TYPES: t.Dict[str, str] = {}
 
     def __new__(cls, *args, **kwargs):
         obj = super(_Element, cls).__new__(cls)
@@ -87,17 +88,22 @@ class _Element(ABC):
             return f"{match.group(1)}[{match.group(2)}]"
         return key
 
+    def _is_callable(self, name: str):
+        return (
+            "callable" in self._TYPES.get(f"{parts[0]}__" if len(parts := name.split("__")) > 1 else name, "").lower()
+        )
+
     def _parse_property(self, key: str, value: t.Any) -> t.Any:
         if isinstance(value, (str, dict, Iterable)):
             return value
         if isinstance(value, FunctionType):
-            if key.startswith("on_"):
+            if key.startswith("on_") or self._is_callable(key):
                 return value if value.__name__.startswith("<") else value.__name__
-            # Parse lambda function
+            # Parse lambda function_is_callable
             if (lambda_name := self.__parse_lambda_property(key, value)) is not None:
                 return lambda_name
         # Embed value in the caller frame
-        if not isinstance(value, str) and key in self._EMBEDED_PROPERTIES:
+        if not isinstance(value, str) and key in self._EMBEDDED_PROPERTIES:
             return self.__embed_object(value, is_expression=False)
         if hasattr(value, "__name__"):
             return str(getattr(value, "__name__"))  # noqa: B009
@@ -117,10 +123,10 @@ class _Element(ABC):
                 return None
             args = [arg.arg for arg in lambda_fn.args.args]
             targets = [
-                compr.target.id  # type: ignore[attr-defined]
+                comprehension.target.id  # type: ignore[attr-defined]
                 for node in ast.walk(lambda_fn.body)
                 if isinstance(node, ast.ListComp)
-                for compr in node.generators
+                for comprehension in node.generators
             ]
             tree = _TransformVarToValue(self.__calling_frame, args + targets + _python_builtins).visit(lambda_fn)
             ast.fix_missing_locations(tree)

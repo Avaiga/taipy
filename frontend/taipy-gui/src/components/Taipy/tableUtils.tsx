@@ -62,12 +62,15 @@ export interface ColumnDesc {
     width?: number | string;
     /** If true, the column cannot be edited. */
     notEditable?: boolean;
-    /** The name of the column that holds the CSS classname to
+    /** The name of the column that holds the CSS className to
      *  apply to the cells. */
-    style?: string;
+    className?: string;
     /** The name of the column that holds the tooltip to
      *  show on the cells. */
     tooltip?: string;
+    /** The name of the column that holds the formatted value to
+     *  show on the cells. */
+    formatFn?: string;
     /** The value that would replace a NaN value. */
     nanValue?: string;
     /** The TimeZone identifier used if the type is `date`. */
@@ -103,7 +106,7 @@ export type RowType = Record<string, RowValue>;
 
 export const EDIT_COL = "taipy_edit";
 
-export const LINE_STYLE = "__taipy_line_style__";
+export const ROW_CLASS_NAME = "__taipyRowClassName__";
 
 export const defaultDateFormat = "yyyy/MM/dd";
 
@@ -125,7 +128,7 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     onAction?: string;
     editable?: boolean;
     defaultEditable?: boolean;
-    lineStyle?: string;
+    rowClassName?: string;
     tooltip?: string;
     cellTooltip?: string;
     nanValue?: string;
@@ -136,6 +139,7 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     downloadable?: boolean;
     onCompare?: string;
     compare?: boolean;
+    useCheckbox?: boolean;
 }
 
 export const DownloadAction = "__Taipy__download_csv";
@@ -193,6 +197,15 @@ interface EditableCellProps {
     tooltip?: string;
     tableCellProps?: Partial<TableCellProps>;
     comp?: RowValue;
+    useCheckbox?: boolean;
+    formattedVal?: string;
+}
+
+export interface FilterDesc {
+    col: string;
+    action: string;
+    value: string | number | boolean | Date;
+    type: string;
 }
 
 export const defaultColumns = {} as Record<string, ColumnDesc>;
@@ -244,7 +257,7 @@ const getCellProps = (col: ColumnDesc, base: Partial<TableCellProps> = {}): Part
 export const getRowIndex = (row: Record<string, RowValue>, rowIndex: number, startIndex = 0) =>
     typeof row["_tp_index"] === "number" ? row["_tp_index"] : rowIndex + startIndex;
 
-export const addDeleteColumn = (nbToRender: number, columns: Record<string, ColumnDesc>) => {
+export const addActionColumn = (nbToRender: number, columns: Record<string, ColumnDesc>) => {
     if (nbToRender) {
         Object.keys(columns).forEach((key) => columns[key].index++);
         columns[EDIT_COL] = {
@@ -260,11 +273,63 @@ export const addDeleteColumn = (nbToRender: number, columns: Record<string, Colu
     return columns;
 };
 
-export const getClassName = (row: Record<string, unknown>, style?: string, col?: string) =>
-    style ? (((col && row[`tps__${col}__${style}`]) || row[style]) as string) : undefined;
+export const getClassName = (row: Record<string, unknown>, className?: string, col?: string) =>
+    getToolFn("tps", row, className, col);
 
 export const getTooltip = (row: Record<string, unknown>, tooltip?: string, col?: string) =>
-    tooltip ? (((col && row[`tpt__${col}__${tooltip}`]) || row[tooltip]) as string) : undefined;
+    getToolFn("tpt", row, tooltip, col);
+
+export const getFormatFn = (row: Record<string, unknown>, formatFn?: string, col?: string) =>
+    getToolFn("tpf", row, formatFn, col);
+
+const getToolFn = (prefix: string, row: Record<string, unknown>, toolFn?: string, col?: string) =>
+    toolFn ? (((col && row[`${prefix}__${col}__${toolFn}`]) || row[toolFn]) as string) : undefined;
+
+export const getPageKey = (
+    columns: Record<string, ColumnDesc>,
+    prefix: string,
+    cols: string[],
+    orderBy: string,
+    order: string,
+    filters: FilterDesc[],
+    aggregates?: string[],
+    cellClassNames?: Record<string, string>,
+    tooltips?: Record<string, string>,
+    formats?: Record<string, string>
+) =>
+    [
+        prefix,
+        cols.join(),
+        orderBy,
+        order,
+        aggregates?.length
+            ? cols.reduce((pv, col, idx) => {
+                  if (aggregates.includes(columns[col].dfid)) {
+                      return `${pv}${idx}`;
+                  }
+                  return pv;
+              }, "-")
+            : undefined,
+        filters.map((filter) => `${filter.col}${filter.action}${filter.value}`).join(),
+        [
+            cellClassNames &&
+                Object.entries(cellClassNames)
+                    .map((col, className) => `${col}:${className}`)
+                    .join(),
+            tooltips &&
+                Object.entries(tooltips)
+                    .map((col, tooltip) => `${col}:${tooltip}`)
+                    .join(),
+            formats &&
+                Object.entries(formats)
+                    .map((col, format) => `${col}:${format}`)
+                    .join(),
+        ]
+            .filter((v) => v)
+            .join(";"),
+    ]
+        .filter((v) => v)
+        .join("-");
 
 const setInputFocus = (input: HTMLInputElement) => input && input.focus();
 
@@ -293,6 +358,8 @@ export const EditableCell = (props: EditableCellProps) => {
         tooltip,
         tableCellProps = emptyObject,
         comp,
+        useCheckbox = false,
+        formattedVal: formattedValue,
     } = props;
     const [val, setVal] = useState<RowValue | Date>(value);
     const [edit, setEdit] = useState(false);
@@ -306,14 +373,16 @@ export const EditableCell = (props: EditableCellProps) => {
     const onBoolChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setVal(e.target.checked), []);
     const onDateChange = useCallback((date: Date | null) => setVal(date), []);
 
+    const boolVal = colDesc.type?.startsWith("bool") && (val as boolean);
+
     const withTime = useMemo(() => !!colDesc.format && colDesc.format.toLowerCase().includes("h"), [colDesc.format]);
 
     const buttonImg = useMemo(() => {
         let m;
         if (typeof value == "string" && (m = imgButtonRe.exec(value)) !== null) {
             return {
-                text: !!m[1] ? m[3]: m[2],
-                value: !!m[1] ? m[2]: m[3],
+                text: !!m[1] ? m[3] : m[2],
+                value: !!m[1] ? m[2] : m[3],
                 img: !!m[1],
                 action: !!onSelection,
             };
@@ -450,6 +519,13 @@ export const EditableCell = (props: EditableCellProps) => {
         [colDesc.freeLov]
     );
 
+    const boolTitle = useMemo(() => {
+        if (!colDesc.type?.startsWith("bool") || !colDesc.lov || colDesc.lov.length == 0) {
+            return boolVal ? "True" : "False";
+        }
+        return colDesc.lov[boolVal ? 1 : 0];
+    }, [colDesc.type, boolVal, colDesc.lov]);
+
     useEffect(() => {
         !onValidation && setEdit(false);
     }, [onValidation]);
@@ -472,14 +548,27 @@ export const EditableCell = (props: EditableCellProps) => {
                 {edit ? (
                     colDesc.type?.startsWith("bool") ? (
                         <Box sx={cellBoxSx}>
+                            lightBool ? (
+                            <input
+                                type="checkbox"
+                                checked={val as boolean}
+                                title={boolTitle}
+                                style={iconInRowSx}
+                                className={getSuffixedClassNames(tableClassName, "-bool")}
+                                ref={setInputFocus}
+                                onChange={onBoolChange}
+                            />
+                            ) : (
                             <Switch
                                 checked={val as boolean}
                                 size="small"
-                                title={val ? "True" : "False"}
+                                title={boolTitle}
                                 sx={iconInRowSx}
                                 onChange={onBoolChange}
                                 inputRef={setInputFocus}
+                                className={getSuffixedClassNames(tableClassName, "-bool")}
                             />
+                            )
                             <Box sx={iconsWrapperSx}>
                                 <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
                                     <CheckIcon fontSize="inherit" />
@@ -498,6 +587,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                     slotProps={textFieldProps}
                                     inputRef={setInputFocus}
                                     sx={tableFontSx}
+                                    className={getSuffixedClassNames(tableClassName, "-date")}
                                 />
                             ) : (
                                 <DatePicker
@@ -506,6 +596,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                     slotProps={textFieldProps}
                                     inputRef={setInputFocus}
                                     sx={tableFontSx}
+                                    className={getSuffixedClassNames(tableClassName, "-date")}
                                 />
                             )}
                             <Box sx={iconsWrapperSx}>
@@ -542,6 +633,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                         margin="dense"
                                         variant="standard"
                                         sx={tableFontSx}
+                                        className={getSuffixedClassNames(tableClassName, "-input")}
                                     />
                                 )}
                                 disableClearable={!colDesc.freeLov}
@@ -563,6 +655,7 @@ export const EditableCell = (props: EditableCellProps) => {
                             inputRef={setInputFocus}
                             margin="dense"
                             sx={tableFontSx}
+                            className={getSuffixedClassNames(tableClassName, "-input")}
                             endAdornment={
                                 <Box sx={iconsWrapperSx}>
                                     <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
@@ -582,6 +675,7 @@ export const EditableCell = (props: EditableCellProps) => {
                             onKeyDown={onDeleteKeyDown}
                             inputRef={setInputFocus}
                             sx={tableFontSx}
+                            className={getSuffixedClassNames(tableClassName, "-delete")}
                             endAdornment={
                                 <Box sx={iconsWrapperSx}>
                                     <IconButton onClick={onDeleteCheckClick} size="small" sx={iconInRowSx}>
@@ -624,16 +718,31 @@ export const EditableCell = (props: EditableCellProps) => {
                                 </Button>
                             )
                         ) : value !== null && value !== undefined && colDesc.type && colDesc.type.startsWith("bool") ? (
-                            <Switch
-                                checked={value as boolean}
-                                size="small"
-                                title={value ? "True" : "False"}
-                                sx={defaultCursorIcon}
-                                className={getSuffixedClassNames(tableClassName, "-bool")}
-                            />
+                            useCheckbox ? (
+                                <input
+                                    type="checkbox"
+                                    checked={value as boolean}
+                                    title={boolTitle}
+                                    style={defaultCursor}
+                                    className={getSuffixedClassNames(tableClassName, "-bool")}
+                                />
+                            ) : (
+                                <Switch
+                                    checked={value as boolean}
+                                    size="small"
+                                    title={boolTitle}
+                                    sx={defaultCursorIcon}
+                                    className={getSuffixedClassNames(tableClassName, "-bool")}
+                                />
+                            )
                         ) : (
                             <span style={defaultCursor}>
-                                {formatValue(value as RowValue, colDesc, formatConfig, nanValue)}
+                                {formatValue(
+                                    formattedValue == undefined ? value : (formattedValue as RowValue),
+                                    colDesc,
+                                    formatConfig,
+                                    nanValue
+                                )}
                             </span>
                         )}
                         {onValidation && !buttonImg ? (

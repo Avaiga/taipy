@@ -412,6 +412,10 @@ def test_is_deletable():
     task = _create_task(print, 0, "task")
     job = _OrchestratorFactory._orchestrator.submit_task(task).jobs[0]
 
+    rc = _JobManager._is_deletable("some_job")
+    assert not rc
+    assert "Entity some_job does not exist in the repository." in rc.reasons
+
     assert job.is_completed()
     assert _JobManager._is_deletable(job)
     assert _JobManager._is_deletable(job.id)

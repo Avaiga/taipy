@@ -18,8 +18,7 @@ from ..common._template_handler import _TemplateHandler as _tpl
 
 
 class GlobalAppConfig:
-    """
-    Configuration fields related to the global application.
+    """Configuration attributes related to the global application.
 
     Attributes:
         **properties (Dict[str, Any]): A dictionary of additional properties.

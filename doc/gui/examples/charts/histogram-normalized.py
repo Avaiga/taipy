@@ -17,17 +17,15 @@ import random
 
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # Random data set
-    data = [random.random() for _ in range(100)]
+# Random data set
+data = [random.random() for _ in range(100)]
 
-    # Normalize to show bin probabilities
-    options = {"histnorm": "probability"}
+# Normalize to show bin probabilities
+options = {"histnorm": "probability"}
 
-    page = """
-# Histogram - Normalized
-
+page = """
 <|{data}|chart|type=histogram|options={options}|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Histogram - Normalized")

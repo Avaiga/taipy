@@ -15,42 +15,40 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-if __name__ == "__main__":
-    # Create a star shape
-    data = {"r": [3, 1] * 5 + [3], "theta": list(range(0, 360, 36)) + [0]}
+# Create a star shape
+data = {"r": [3, 1] * 5 + [3], "theta": list(range(0, 360, 36)) + [0]}
 
-    options = [
-        # First plot is filled with a yellow-ish color
-        {"subplot": "polar", "fill": "toself", "fillcolor": "#E4FF87"},
-        # Second plot is filled with a blue-ish color
-        {"fill": "toself", "subplot": "polar2", "fillcolor": "#709BFF"},
-    ]
+options = [
+    # First plot is filled with a yellow-ish color
+    {"subplot": "polar", "fill": "toself", "fillcolor": "#E4FF87"},
+    # Second plot is filled with a blue-ish color
+    {"fill": "toself", "subplot": "polar2", "fillcolor": "#709BFF"},
+]
 
-    layout = {
-        "polar": {
-            # This actually is the default value
-            "angularaxis": {
-                "direction": "counterclockwise",
-            },
+layout = {
+    "polar": {
+        # This actually is the default value
+        "angularaxis": {
+            "direction": "counterclockwise",
         },
-        "polar2": {
-            "angularaxis": {
-                # Rotate the axis 180° (0 is on the left)
-                "rotation": 180,
-                # Orient the axis clockwise
-                "direction": "clockwise",
-                # Show the angles as radians
-                "thetaunit": "radians",
-            },
+    },
+    "polar2": {
+        "angularaxis": {
+            # Rotate the axis 180° (0 is on the left)
+            "rotation": 180,
+            # Orient the axis clockwise
+            "direction": "clockwise",
+            # Show the angles as radians
+            "thetaunit": "radians",
         },
-        # Hide the legend
-        "showlegend": False,
-    }
+    },
+    # Hide the legend
+    "showlegend": False,
+}
 
-    page = """
-# Polar Charts - Direction
-
+page = """
 <|{data}|chart|type=scatterpolar|layout={layout}|options={options}|>
-    """
+"""
 
-    Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Polar - Direction")

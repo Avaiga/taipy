@@ -53,11 +53,9 @@ if __name__ == "__main__":
     mean_value = 0.0
 
     page = """
-# Advanced - Selection
-
 ## Mean of <|{len(selected_indices)}|raw|> selected points: <|{mean_value}|format=%.2f|raw|>
 
 <|{data}|chart|selected={selected_indices}|layout={layout}|plot_config={config}|>
     """
 
-    Gui(page).run()
+    Gui(page).run(title="Chart - Advanced - Selection")

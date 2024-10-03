@@ -25,6 +25,7 @@ if t.TYPE_CHECKING:
 from . import (
     _get_client_var_name,
     _get_expr_var_name,
+    _get_lambda_id,
     _getscopeattr,
     _getscopeattr_drill,
     _hasscopeattr,
@@ -44,7 +45,8 @@ class _Evaluator:
     __EXPR_IS_EDGE_CASE = re.compile(r"^\s*{([^}]*)}\s*$")
     __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_0-9\[\]]*)$")
     __EXPR_EDGE_CASE_F_STRING = re.compile(r"[\{]*[a-zA-Z_][a-zA-Z0-9_]*:.+")
-    __IS_TAIPYEXPR_RE = re.compile(r"TpExPr_(.*)")
+    __IS_TAIPY_EXPR_RE = re.compile(r"TpExPr_(.*)")
+    __IS_ARRAY_EXPR_RE = re.compile(r"[^[]*\[(\d+)][^]]*")
 
     def __init__(self, default_bindings: t.Dict[str, t.Any], shared_variable: t.List[str]) -> None:
         # key = expression, value = hashed value of the expression
@@ -68,7 +70,7 @@ class _Evaluator:
 
     @staticmethod
     def _expr_decode(s: str):
-        return str(result[1]) if (result := _Evaluator.__IS_TAIPYEXPR_RE.match(s)) else s
+        return str(result[1]) if (result := _Evaluator.__IS_TAIPY_EXPR_RE.match(s)) else s
 
     def get_hash_from_expr(self, expr: str) -> str:
         return self.__expr_to_hash.get(expr, expr)
@@ -99,16 +101,23 @@ class _Evaluator:
             st = ast.parse('f"{' + e + '}"' if _Evaluator.__EXPR_EDGE_CASE_F_STRING.match(e) else e)
             args = [arg.arg for node in ast.walk(st) if isinstance(node, ast.arguments) for arg in node.args]
             targets = [
-                compr.target.id  # type: ignore[attr-defined]
+                comprehension.target.id  # type: ignore[attr-defined]
                 for node in ast.walk(st)
                 if isinstance(node, ast.ListComp)
-                for compr in node.generators
+                for comprehension in node.generators
             ]
+            functionsCalls = set()
             for node in ast.walk(st):
-                if isinstance(node, ast.Name):
+                if isinstance(node, ast.Call):
+                    functionsCalls.add(node.func)
+                elif isinstance(node, ast.Name):
                     var_name = node.id.split(sep=".")[0]
                     if var_name in builtin_vars:
-                        _warn(f"Variable '{var_name}' cannot be used in Taipy expressions as its name collides with a Python built-in identifier.")  # noqa: E501
+                        if node not in functionsCalls:
+                            _warn(
+                                f"Variable '{var_name}' cannot be used in Taipy expressions "
+                                "as its name collides with a Python built-in identifier."
+                            )
                     elif var_name not in args and var_name not in targets and var_name not in non_vars:
                         try:
                             if lazy_declare and var_name.startswith("__"):
@@ -132,6 +141,7 @@ class _Evaluator:
         expr_hash: t.Optional[str],
         expr_evaluated: t.Optional[t.Any],
         var_map: t.Dict[str, str],
+        lambda_expr: t.Optional[bool] = False,
     ):
         if expr in self.__expr_to_hash:
             expr_hash = self.__expr_to_hash[expr]
@@ -139,7 +149,8 @@ class _Evaluator:
             return expr_hash
         if expr_hash is None:
             expr_hash = _get_expr_var_name(expr)
-        else:
+        elif not lambda_expr:
+            # if lambda expr, it has a hasname, we work with that
             # edge case, only a single variable
             expr_hash = f"tpec_{_get_client_var_name(expr)}"
         self.__expr_to_hash[expr] = expr_hash
@@ -198,6 +209,7 @@ class _Evaluator:
         return f"{holder.get_hash()}_{_get_client_var_name(expr_hash)}"
 
     def __evaluate_holder(self, gui: Gui, holder: t.Type[_TaipyBase], expr: str) -> t.Optional[_TaipyBase]:
+        expr_hash = ""
         try:
             expr_hash = self.__expr_to_hash.get(expr, "unknownExpr")
             holder_hash = self.__get_holder_hash(holder, expr_hash)
@@ -218,6 +230,9 @@ class _Evaluator:
     ) -> t.Any:
         if not self._is_expression(expr) and not lambda_expr:
             return expr
+        if not lambda_expr and expr.startswith("{lambda ") and expr.endswith("}"):
+            lambda_expr = True
+            expr = expr[1:-1]
         var_val, var_map = ({}, {}) if lambda_expr else self._analyze_expression(gui, expr, lazy_declare)
         expr_hash = None
         is_edge_case = False
@@ -247,8 +262,10 @@ class _Evaluator:
         except Exception as e:
             _warn(f"Cannot evaluate expression '{not_encoded_expr if is_edge_case else expr_string}'", e)
             expr_evaluated = None
+        if lambda_expr and callable(expr_evaluated):
+            expr_hash = _get_lambda_id(expr_evaluated)
         # save the expression if it needs to be re-evaluated
-        return self.__save_expression(gui, expr, expr_hash, expr_evaluated, var_map)
+        return self.__save_expression(gui, expr, expr_hash, expr_evaluated, var_map, lambda_expr)
 
     def refresh_expr(self, gui: Gui, var_name: str, holder: t.Optional[_TaipyBase]):
         """
@@ -276,7 +293,7 @@ class _Evaluator:
         except Exception as e:
             _warn(f"Exception raised evaluating {expr_string}", e)
 
-    def re_evaluate_expr(self, gui: Gui, var_name: str) -> t.Set[str]:
+    def re_evaluate_expr(self, gui: Gui, var_name: str) -> t.Set[str]:  # noqa C901
         """
         This function will execute when the _update_var function is handling
         an expression with only a single variable
@@ -293,15 +310,23 @@ class _Evaluator:
             expr_original = self.__hash_to_expr[var_name]
             temp_expr_var_map = self.__expr_to_var_map[expr_original]
             if len(temp_expr_var_map) <= 1:
+                index_in_array = int(m[0]) if (m := _Evaluator.__IS_ARRAY_EXPR_RE.findall(expr_original)) else -1
                 # since this is an edge case --> only 1 item in the dict and that item is the original var
-                for v in temp_expr_var_map.values():
-                    var_name = v
+                var_name = next(iter(temp_expr_var_map.values()), var_name)
                 # construct correct var_path to reassign values
                 var_name_full, _ = _variable_decode(expr_original)
                 var_name_full = var_name_full.split(".")
                 var_name_full[0] = var_name
                 var_name_full = ".".join(var_name_full)
-                _setscopeattr_drill(gui, var_name_full, _getscopeattr(gui, var_name_original))
+                if index_in_array >= 0:
+                    array_val = _getscopeattr(gui, var_name)
+                    if isinstance(array_val, list) and len(array_val) > index_in_array:
+                        array_val[index_in_array] = _getscopeattr(gui, var_name_original)
+                    else:
+                        index_in_array = -1
+
+                if index_in_array < 0:
+                    _setscopeattr_drill(gui, var_name_full, _getscopeattr(gui, var_name_original))
             else:
                 # multiple key-value pair in expr_var_map --> expr is special case a["b"]
                 key = ""

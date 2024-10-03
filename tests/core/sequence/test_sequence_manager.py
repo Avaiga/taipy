@@ -206,6 +206,10 @@ def test_is_submittable():
     scenario = Scenario("scenario", {task}, {}, set())
     _ScenarioManager._set(scenario)
 
+    rc = _SequenceManager._is_submittable("some_sequence")
+    assert not rc
+    assert "Entity some_sequence does not exist in the repository." in rc.reasons
+
     scenario.add_sequences({"sequence": [task]})
     sequence = scenario.sequences["sequence"]
 
@@ -445,16 +449,13 @@ def test_get_or_create_data():
         sequence.WRONG.write(7)
 
 
-def notify1(*args, **kwargs):
-    ...
+def notify1(*args, **kwargs): ...
 
 
-def notify2(*args, **kwargs):
-    ...
+def notify2(*args, **kwargs): ...
 
 
-def notify_multi_param(*args, **kwargs):
-    ...
+def notify_multi_param(*args, **kwargs): ...
 
 
 def test_sequence_notification_subscribe(mocker):

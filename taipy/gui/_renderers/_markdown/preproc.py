@@ -55,10 +55,10 @@ class _Preprocessor(MdPreprocessor):
     #   If <prop_value> is omitted:
     #     '<prop_name>' is equivalent to '<prop_name>=true'
     #     'not <prop_name>' is equivalent to '<prop_name>=false'
-    #       'not', 'dont', 'don't' are equivalent in this context
+    #     'no', 'not', 'dont', 'don't' are equivalent in this context
     #  Note 1: 'not <prop_name>=<prop_value>' is an invalid syntax
     #  Note 2: Space characters after the equal sign are significative
-    __PROPERTY_RE = re.compile(r"((?:don'?t|not)\s+)?([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)\s*(?:=(.*))?$")
+    __PROPERTY_RE = re.compile(r"((?:don'?t|not?)\s+)?([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)\s*(?:=(.*))?$")
 
     # Error syntax detection regex
     __MISSING_LEADING_PIPE_RE = re.compile(r"<[^|](.*?)\|>")

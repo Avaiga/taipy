@@ -323,6 +323,26 @@ export declare const createRequestUpdateAction: (
     forceRefresh?: boolean,
     stateContext?: Record<string, unknown>
 ) => Action;
+
+/**
+ * Broadcast stack definition.
+ */
+export interface BroadcastDesc {
+    /** Name of the broadcast. */
+    name: string;
+    /** Broadcast stack */
+    stack: Array<unknown>;
+}
+
+/**
+ * Create an *un broadcast* `Action` that will be used to update local state.
+ *
+ * This action will remove a value from a broadcasted stacked variable identified by name.
+ * @param name - The name of the variable identifying the broadcast.
+ * @param values - The values to remove.
+ * @returns The action fed to the reducer.
+ */
+export declare const createUnBroadcastAction: (name: string, ...values: Array<unknown>) => Action;
 /**
  * A column description as received by the backend.
  */
@@ -343,10 +363,13 @@ export interface ColumnDesc {
     notEditable?: boolean;
     /** The name of the column that holds the CSS classname to
      *  apply to the cells. */
-    style?: string;
+    className?: string;
     /** The name of the column that holds the tooltip to
      *  show on the cells. */
     tooltip?: string;
+    /** The name of the column that holds the formatted value to
+     *  show on the cells. */
+    formatFn?: string;
     /** The value that would replace a NaN value. */
     nanValue?: string;
     /** The TimeZone identifier used if the type is `date`. */

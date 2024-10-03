@@ -13,28 +13,37 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-import datetime
-
 from taipy.gui import Gui
 
-stock = {
-    "date": [datetime.datetime(year=2000, month=12, day=d) for d in range(20, 30)],
-    "price": [119.88, 112.657, 164.5, 105.42, 188.36, 103.9, 143.97, 160.11, 136.3, 174.06],
-    "change": [7.814, -5.952, 0.01, 8.781, 7.335, 6.623, -6.635, -6.9, 0.327, -0.089],
-    "volume": [773, 2622, 2751, 1108, 7400, 3772, 9398, 4444, 9264, 1108],
+
+# Function to plot: x^3/3 - x
+def f(x):
+    return x * x * x / 3 - x
+
+
+# x values: [-2.2, ..., 2.2]
+x = [(x - 10) / 4.5 for x in range(0, 21)]
+
+data = {
+    "x": x,
+    # y: [f(-2.2), ..., f(2.2)]
+    "y": [f(x) for x in x],
 }
 
-columns = {
-    "date": {"title": "Data", "format": "MMM d"},
-    "price": {"title": "Price", "format": "$%.02f"},
-    "change": {"title": "% change", "format": "%.01f"},
-    "volume": {"title": "Volume"},
+layout = {
+    # Chart title
+    "title": "Local extrema",
+    "annotations": [
+        # Annotation for local maximum (x = -1)
+        {"text": "Local <b>max</b>", "font": {"size": 20}, "x": -1, "y": f(-1)},
+        # Annotation for local minimum (x = 1)
+        {"text": "Local <b>min</b>", "font": {"size": 20}, "x": 1, "y": f(1), "xanchor": "left"},
+    ],
 }
 
 page = """
-# Formatting cells in a table
-
-<|{stock}|table|columns={columns}|>
+<|{data}|chart|layout={layout}|>
 """
 
-Gui(page).run()
+if __name__ == "__main__":
+    Gui(page).run(title="Chart - Advanced - Annotations")
