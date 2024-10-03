@@ -16,7 +16,6 @@ import {
     addRows,
     AlertMessage,
     BlockMessage,
-    BroadcastDesc,
     createAckAction,
     createAlertAction,
     createBlockAction,
@@ -31,7 +30,6 @@ import {
     createRequestUpdateAction,
     createSendActionNameAction,
     createSendUpdateAction,
-    createUnBroadcastAction,
     FileDownloadProps,
     getPayload,
     getWsMessageListener,
@@ -208,29 +206,6 @@ describe("reducer", () => {
         expect(createAlertAction({ atype: "Wa", message: "message" } as AlertMessage).atype).toBe("warning");
         expect(createAlertAction({ atype: "sUc", message: "message" } as AlertMessage).atype).toBe("success");
         expect(createAlertAction({ atype: "  ", message: "message" } as AlertMessage).atype).toBe("");
-    });
-    it("creates a broadcast action", () => {
-        expect(
-            (
-                taipyReducer({ ...INITIAL_STATE }, {
-                    type: "BROADCAST",
-                    name: "broadcast",
-                    payload: { value: 1 },
-                } as TaipyBaseAction).data.broadcast as BroadcastDesc
-            ).stack
-        ).toHaveLength(1);
-    });
-    it("un broadcast", () => {
-        const value = { scenario: "scenario id" };
-        const broadcastState = taipyReducer({ ...INITIAL_STATE }, {
-            type: "BROADCAST",
-            name: "broadcast",
-            payload: { value },
-        } as TaipyBaseAction);
-        expect(
-            (taipyReducer(broadcastState, createUnBroadcastAction("broadcast", value)).data.broadcast as BroadcastDesc)
-                .stack
-        ).toHaveLength(0);
     });
 });
 
