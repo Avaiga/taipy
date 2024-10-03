@@ -11,7 +11,7 @@
 
 import pytest
 
-from taipy.config import Config
+from taipy.common.config import Config
 from taipy.core.common._utils import _retry_repository_operation
 from taipy.core.exceptions import InvalidExposedType
 

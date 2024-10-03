@@ -18,7 +18,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 from taipy.core.data.operator import JoinOperator, Operator
 from taipy.core.data.parquet import ParquetDataNode
 

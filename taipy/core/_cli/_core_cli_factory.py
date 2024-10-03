@@ -13,7 +13,7 @@ from importlib import import_module
 from operator import attrgetter
 from typing import Type
 
-from taipy._cli._base_cli._abstract_cli import _AbstractCLI
+from taipy.common._cli._base_cli._abstract_cli import _AbstractCLI
 
 from ..common._check_dependencies import _TAIPY_ENTERPRISE_CORE_MODULE, _using_enterprise
 from ._core_cli import _CoreCLI

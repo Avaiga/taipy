@@ -12,8 +12,8 @@
 from flask import Blueprint, current_app
 from flask_restful import Api
 
+from taipy.common.logger._taipy_logger import _TaipyLogger
 from taipy.core.common._utils import _load_fct
-from taipy.logger._taipy_logger import _TaipyLogger
 
 from ..extensions import apispec
 from .middlewares._middleware import _using_enterprise

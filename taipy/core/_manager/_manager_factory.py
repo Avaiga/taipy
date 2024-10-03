@@ -12,7 +12,7 @@
 from abc import abstractmethod
 from typing import Type
 
-from taipy.config import Config
+from taipy.common.config import Config
 
 from ._manager import _Manager
 
