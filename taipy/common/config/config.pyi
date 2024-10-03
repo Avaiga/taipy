@@ -116,7 +116,7 @@ class Config:
 
     @classmethod
     @_ConfigBlocker._check()
-    def load(cls, filename):
+    def load(cls, filename: str) -> None:
         """Load a configuration file.
 
         The current Python configuration is replaced and the Config compilation is triggered.
@@ -126,21 +126,21 @@ class Config:
         """
 
     @classmethod
-    def export(cls, filename):
+    def export(cls, filename: str) -> None:
         """Export a configuration.
 
-        The export is done in a toml file.
+        The export is done in a toml file. The exported configuration is taken
+        from the Python code configuration.
 
-        The exported configuration is taken from the Python code configuration.
+        Note:
+            If *filename* already exists, it is overwritten.
 
         Parameters:
             filename (Union[str, Path]): The path of the file to export.
-        Note:
-            If *filename* already exists, it is overwritten.
         """
 
     @classmethod
-    def backup(cls, filename):
+    def backup(cls, filename: str) -> None:
         """Backup a configuration.
 
         The backup is done in a toml file.
@@ -149,15 +149,16 @@ class Config:
         the application: the Python code configuration, the file configuration and the environment
         configuration.
 
-        Parameters:
-            filename (Union[str, Path]): The path of the file to export.
         Note:
             If *filename* already exists, it is overwritten.
+
+        Parameters:
+            filename (Union[str, Path]): The path of the file to export.
         """
 
     @classmethod
     @_ConfigBlocker._check()
-    def restore(cls, filename):
+    def restore(cls, filename: str) -> None:
         """Restore a configuration file and replace the current applied configuration.
 
         Parameters:
@@ -166,7 +167,7 @@ class Config:
 
     @classmethod
     @_ConfigBlocker._check()
-    def override(cls, filename):
+    def override(cls, filename: str) -> None:
         """Load a configuration from a file and overrides the current config.
 
         Parameters:
@@ -174,11 +175,11 @@ class Config:
         """
 
     @classmethod
-    def block_update(cls):
+    def block_update(cls) -> None:
         """Block update on the configuration signgleton."""
 
     @classmethod
-    def unblock_update(cls):
+    def unblock_update(cls) -> None:
         """Unblock update on the configuration signgleton."""
 
     @classmethod
@@ -209,20 +210,20 @@ class Config:
 
     @classmethod
     @_ConfigBlocker._check()
-    def _register_default(cls, default_section: Section):
+    def _register_default(cls, default_section: Section) -> None:
         """"""
 
     @classmethod
     @_ConfigBlocker._check()
-    def _register(cls, section):
+    def _register(cls, section) -> None:
         """"""
 
     @classmethod
-    def _override_env_file(cls):
+    def _override_env_file(cls) -> None:
         """"""
 
     @classmethod
-    def _compile_configs(cls):
+    def _compile_configs(cls) -> None:
         """"""
 
     @classmethod
@@ -348,7 +349,7 @@ class Config:
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
                 relevant tasks will run even if they are skippable (see the Task configuration
-                [page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
+                [page](../../../../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
                 for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
@@ -401,7 +402,7 @@ class Config:
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
                 relevant tasks will run even if they are skippable (see the Task configuration
-                [page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
+                [page](../../../../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
                 for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
@@ -436,7 +437,7 @@ class Config:
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
                 relevant tasks will run even if they are skippable (see the Task configuration
-                [page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
+                [page](../../../../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
                 for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
@@ -470,10 +471,11 @@ class Config:
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
                 relevant tasks will run even if they are skippable (see the Task configuration
-                [page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
+                [page](../../../../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
                 for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
             The new JSON data node configuration.
         """  # noqa: E501
@@ -515,7 +517,7 @@ class Config:
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
                 relevant tasks will run even if they are skippable (see the Task configuration
-                [page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
+                [page](../../../../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
                 for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
@@ -551,7 +553,7 @@ class Config:
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
                 relevant tasks will run even if they are skippable (see the Task configuration
-                [page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
+                [page](../../../../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
                 for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
@@ -588,10 +590,11 @@ class Config:
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
                 relevant tasks will run even if they are skippable (see the Task configuration
-                [page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
+                [page](../../../../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
                 for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
             The new Generic data node configuration.
         """  # noqa: E501
@@ -618,7 +621,7 @@ class Config:
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
                 relevant tasks will run even if they are skippable (see the Task configuration
-                [page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
+                [page](../../../../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
                 for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
@@ -651,7 +654,7 @@ class Config:
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
                 relevant tasks will run even if they are skippable (see the Task configuration
-                [page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
+                [page](../../../../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
                 for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
@@ -710,7 +713,7 @@ class Config:
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
                 relevant tasks will run even if they are skippable (see the Task configuration
-                [page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
+                [page](../../../../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
                 for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
@@ -775,10 +778,11 @@ class Config:
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
                 relevant tasks will run even if they are skippable (see the Task configuration
-                [page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
+                [page](../../../../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
                 for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
             The new SQL data node configuration.
         """  # noqa: E501
@@ -825,7 +829,7 @@ class Config:
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
                 relevant tasks will run even if they are skippable (see the Task configuration
-                [page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
+                [page](../../../../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
                 for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
@@ -864,7 +868,7 @@ class Config:
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
                 relevant tasks will run even if they are skippable (see the Task configuration
-                [page](../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
+                [page](../../../../../userman/scenario_features/task-orchestration/scenario-config.md#from-task-configurations)
                 for more details).
                 If *validity_period* is set to None, the data node is always up-to-date.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
@@ -929,6 +933,7 @@ class Config:
                 The default value is False.
             **properties (dict[str, any]): A keyworded variable length list of additional
                 arguments.
+
         Returns:
             The default task configuration.
         """
@@ -987,7 +992,7 @@ class Config:
             mode (Optional[str]): Indicates the mode of the version management system.
                 Possible values are *"development"* or *"experiment"*. On Enterprise edition of Taipy,
                 *production* mode is also available. Please refer to the
-                [Versioning management](../../userman/advanced_features/versioning/index.md)
+                [Versioning management](../../../../../userman/advanced_features/versioning/index.md)
                 documentation page for more details.
             version_number (Optional[str]): The string identifier of the version.
                  In development mode, the version number is ignored.
@@ -995,6 +1000,7 @@ class Config:
                 has changed and run the application.
             **properties (Dict[str, Any]): A keyworded variable length list of additional arguments configure the
                 behavior of the `Orchestrator^` service.
+
         Returns:
             The Core configuration.
         """
