@@ -8,25 +8,16 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+# -----------------------------------------------------------------------------------------
+# To execute this script, make sure that the taipy-gui package is installed in your
+# Python environment and run:
+#     python <script>
+# -----------------------------------------------------------------------------------------
+from taipy.gui import Gui
 
-from abc import abstractmethod
-from typing import Type
+page = """
+<|input|password|>
+"""
 
-from taipy.common.config import Config
-
-from ._manager import _Manager
-
-
-class _ManagerFactory:
-    @classmethod
-    @abstractmethod
-    def _build_manager(cls) -> Type[_Manager]:  # type: ignore
-        raise NotImplementedError
-
-    @classmethod
-    def _build_repository(cls):
-        raise NotImplementedError
-
-    @staticmethod
-    def _get_repository_with_repo_map(repository_map: dict):
-        return repository_map.get(Config.core.repository_type, repository_map.get("default"))
+if __name__ == "__main__":
+    Gui(page).run(title="Input - Password")
