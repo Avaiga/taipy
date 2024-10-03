@@ -460,7 +460,10 @@ class _Builder:
             val_list = value if isinstance(value, list) else [value]
             for val in val_list:
                 ret = self.__gui._run_adapter(
-                    t.cast(t.Callable, adapter), val, adapter.__name__ if isroutine(adapter) else "adapter", id_only=True
+                    t.cast(t.Callable, adapter),
+                    val,
+                    adapter.__name__ if isroutine(adapter) else "adapter",
+                    id_only=True,
                 )  # type: ignore
                 if ret is not None:
                     ret_list.append(ret)
