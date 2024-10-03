@@ -13,7 +13,7 @@ from typing import Optional, Type
 
 from taipy.config.config import Config
 
-from ..common._check_dependencies import _TAIPY_ENTERPRISE_MODULE, _using_enterprise
+from ..common._check_dependencies import EnterpriseEditionUtils
 from ..common._utils import _load_fct
 from ..exceptions.exceptions import ModeNotAvailable, OrchestratorNotBuilt
 from ._abstract_orchestrator import _AbstractOrchestrator
@@ -22,8 +22,12 @@ from ._orchestrator import _Orchestrator
 
 
 class _OrchestratorFactory:
-    _TAIPY_ENTERPRISE_CORE_ORCHESTRATOR_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core._orchestrator._orchestrator"
-    _TAIPY_ENTERPRISE_CORE_DISPATCHER_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core._orchestrator._dispatcher"
+    _TAIPY_ENTERPRISE_CORE_ORCHESTRATOR_MODULE = (
+        EnterpriseEditionUtils._TAIPY_ENTERPRISE_MODULE + ".core._orchestrator._orchestrator"
+    )
+    _TAIPY_ENTERPRISE_CORE_DISPATCHER_MODULE = (
+        EnterpriseEditionUtils._TAIPY_ENTERPRISE_MODULE + ".core._orchestrator._dispatcher"
+    )
     __TAIPY_ENTERPRISE_BUILD_DISPATCHER_METHOD = "_build_dispatcher"
 
     _orchestrator: Optional[_AbstractOrchestrator] = None
@@ -33,7 +37,7 @@ class _OrchestratorFactory:
     def _build_orchestrator(cls) -> Type[_AbstractOrchestrator]:
         if cls._orchestrator:
             return cls._orchestrator  # type: ignore
-        if _using_enterprise():
+        if EnterpriseEditionUtils._using_enterprise():
             cls._orchestrator = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_ORCHESTRATOR_MODULE,
                 "Orchestrator",
@@ -50,7 +54,7 @@ class _OrchestratorFactory:
         if not cls._orchestrator:
             raise OrchestratorNotBuilt
 
-        if _using_enterprise():
+        if EnterpriseEditionUtils._using_enterprise():
             cls.__build_enterprise_job_dispatcher(force_restart=force_restart)
         elif Config.job_config.is_standalone:
             cls.__build_standalone_job_dispatcher(force_restart=force_restart)
@@ -76,7 +80,7 @@ class _OrchestratorFactory:
             else:
                 return
 
-        if _using_enterprise():
+        if EnterpriseEditionUtils._using_enterprise():
             cls._dispatcher = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_DISPATCHER_MODULE, cls.__TAIPY_ENTERPRISE_BUILD_DISPATCHER_METHOD
             )(cls._orchestrator)
@@ -89,7 +93,7 @@ class _OrchestratorFactory:
         if isinstance(cls._dispatcher, _StandaloneJobDispatcher):
             cls._dispatcher.stop()
 
-        if _using_enterprise():
+        if EnterpriseEditionUtils._using_enterprise():
             cls._dispatcher = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_DISPATCHER_MODULE, cls.__TAIPY_ENTERPRISE_BUILD_DISPATCHER_METHOD
             )(cls._orchestrator)
