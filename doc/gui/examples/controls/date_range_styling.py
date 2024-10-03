@@ -27,8 +27,8 @@ page = Markdown(
     "<|{dates}|date_range|label_start=Check-in|label_end=Check-out|>",
     style={
         ".taipy-date-range": {
-            ".taipy-date-picker-start": {".MuiInputBase-root": {"&": green, ".MuiIconButton-root": green}},
-            ".taipy-date-picker-end": {".MuiInputBase-root": {"&": green, ".MuiIconButton-root": green}},
+            ".taipy-date-range-picker-start": {".MuiInputBase-root": {"&": green, ".MuiIconButton-root": green}},
+            ".taipy-date-range-picker-end": {".MuiInputBase-root": {"&": orange, ".MuiIconButton-root": orange}},
         }
     },
 )
