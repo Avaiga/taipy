@@ -15,12 +15,12 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-LOREM_IPSUM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus et nunc lacinia gravida. " \
+text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus et nunc lacinia gravida. " \
 
 
 page = """
-Multi-line input: <|{LOREM_IPSUM}|input|multiline|>
+<|{text}|input|multiline|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run()
+    Gui(page).run(title="Input - Multiline")

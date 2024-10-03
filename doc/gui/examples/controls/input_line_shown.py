@@ -15,11 +15,11 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-numbered_lines = "1 \n2 \n3 \n4 \n5"
+lines = "1 \n2 \n3 \n4 \n5"
 
 page = """
-Multi-line input: <|{numbered_lines}|input|multiline|lines_shown=5|>
+<|{lines}|input|multiline|lines_shown=5|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run()
+    Gui(page).run(title="Input - Lines shown")

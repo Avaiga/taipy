@@ -21,7 +21,7 @@ from taipy.gui import Gui
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-def print_value_on_key_pressed(state, id, payload):
+def key_pressed(state, id, payload):
     key = payload.get('args', [None])[0]
     if key == 'F1':
         logging.info("F1 key pressed")
@@ -33,13 +33,12 @@ def print_value_on_key_pressed(state, id, payload):
         return None
 
 
-init_value = 0
+value = 0
 
 # on_action function is called when the action_keys are pressed
 page = """
-Enter a number (on_action triggered on F1, F2, F3 key press):
-<|{init_value}|input|change_delay=300|on_action=print_value_on_key_pressed|action_keys=F1;F2;F3|>
+<|{value}|input|change_delay=300|on_action=key_pressed|action_keys=F1;F2;F3|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run()
+    Gui(page).run(title="Input - On change")

@@ -15,11 +15,11 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-init_value = 20
+value = 20
 
 page = """
-Input field has been disabled: <|{init_value}|input|active=false|>
+<|{value}|input|active=false|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run()
+    Gui(page).run(title="Input - Inactive")

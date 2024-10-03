@@ -20,18 +20,20 @@ from taipy.gui import Gui
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-INIT_VALUE = ""
+value = ""
 
 
-def on_change(state, var_name, value):
-    logging.info(f"Value of {var_name} changed to {value}")
+# The [on_change] property is not set: Taipy GUI automatically finds and binds the global on_change()
+# function to handle changes in the input control. You could set this property to your own function if necessary.
+def on_change(state, var_name, v):
+    logging.info(f"Value of {var_name} changed to {v}")
 
 
 # If change_delay is set to -1, the change event is triggered on Enter key press
 page = """
-Enter a number (changes triggered on Enter key press): <|{INIT_VALUE}|input|change_delay=-1|on_change=on_change|>
+<|{value}|input|change_delay=-1|>
 """
 
 
 if __name__ == "__main__":
-    Gui(page).run()
+    Gui(page).run(title="Input - on_change")
