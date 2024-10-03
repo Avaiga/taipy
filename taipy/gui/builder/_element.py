@@ -69,7 +69,7 @@ class _Element(ABC):
     @staticmethod
     def __get_lambda_index():
         _Element.__LAMBDA_VALUE_IDX += 1
-        _Element.__LAMBDA_VALUE_IDX %= 10000
+        _Element.__LAMBDA_VALUE_IDX %= 0xFFFFFFF0
         return _Element.__LAMBDA_VALUE_IDX
 
     def _evaluate_lambdas(self, gui: Gui):
