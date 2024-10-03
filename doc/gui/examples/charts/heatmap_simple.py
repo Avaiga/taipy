@@ -15,31 +15,20 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-n_slices = 20
-# List: [1..n_slices]
-# Slices are bigger and bigger
-values = list(range(1, n_slices + 1))
-
-marker = {
-    # Colors move around the Hue color disk
-    "colors": [f"hsl({360 * (i - 1)/(n_slices - 1)},90%,60%)" for i in values]
-}
-
-layout = {
-    # Hide the legend
-    "showlegend": False
-}
-
-options = {
-    # Hide the texts
-    "textinfo": "none"
+data = {
+    "Temperatures": [
+        [17.2, 27.4, 28.6, 21.5],
+        [5.6, 15.1, 20.2, 8.1],
+        [26.6, 22.8, 21.8, 24.0],
+        [22.3, 15.5, 13.4, 19.6],
+    ],
+    "Cities": ["Hanoi", "Paris", "Rio", "Sydney"],
+    "Seasons": ["Winter", "Spring", "Summer", "Autumn"],
 }
 
 page = """
-#
-
-<|{values}|chart|type=pie|marker={marker}|options={options}|layout={layout}|>
+<|{data}|chart|type=heatmap|z=Temperatures|x=Seasons|y=Cities|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="Chart - Pie - Style")
+    Gui(page).run(title="Chart - Heatmap - Simple")

@@ -13,22 +13,29 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
+from enum import Enum
+
 from taipy.gui import Gui
 
-data = {
-    "Temperatures": [
-        [17.2, 27.4, 28.6, 21.5],
-        [5.6, 15.1, 20.2, 8.1],
-        [26.6, 22.8, 21.8, 24.0],
-        [22.3, 15.5, 13.4, 19.6],
-    ],
-    "Cities": ["Hanoi", "Paris", "Rio", "Sydney"],
-    "Seasons": ["Winter", "Spring", "Summer", "Autumn"],
-}
+
+# Color values are enumerated
+class Color(Enum):
+    RED = 0
+    GREEN = 1
+    BLUE = 2
+
+
+# Initial selected color
+# Note that [color] is an enumeration member
+color = Color.RED
 
 page = """
-<|{data}|chart|type=heatmap|z=Temperatures|x=Seasons|y=Cities|>
+<|{color}|toggle|lov={Color}|>
+
+Selected enum: <|{str(color)}|>
+
+Selected value: <|{color.value}|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="Chart - Heatmap - Basic")
+    Gui(page).run(title="Binding - LoV as Enum")

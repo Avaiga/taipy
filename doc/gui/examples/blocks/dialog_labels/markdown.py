@@ -15,50 +15,26 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-
-# Function to plot: x^3/3-x
-def f(x):
-    return x * x * x / 3 - x
+show_dialog = False
 
 
-# x values: [-2.2, ..., 2.2]
-x = [(x - 10) / 4.5 for x in range(0, 21)]
+def dialog_action(state, _, payload):
+    if payload["args"][0] == 0:  # First button
+        print("Good to hear!")
+    elif payload["args"][0] == 1:  # Second button
+        print("Sorry to hear that.")
+    else:  # Close button (index == -1)
+        print("Ok bye.")
+    state.show_dialog = False
 
-data = {
-    "x": x,
-    # y: [f(-2.2), ..., f(2.2)]
-    "y": [f(x) for x in x],
-}
-
-shape_size = 0.1
-
-layout = {
-    "shapes": [
-        # Shape for local maximum (x = -1)
-        {
-            "x0": -1 - shape_size,
-            "y0": f(-1) - 2 * shape_size,
-            "x1": -1 + shape_size,
-            "y1": f(-1) + 2 * shape_size,
-            "fillcolor": "green",
-            "opacity": 0.5,
-        },
-        # Shape for local minimum (x = 1)
-        {
-            "x0": 1 - shape_size,
-            "y0": f(1) - 2 * shape_size,
-            "x1": 1 + shape_size,
-            "y1": f(1) + 2 * shape_size,
-            "fillcolor": "red",
-            "opacity": 0.5,
-        },
-    ]
-}
 
 page = """
-<|{data}|chart|layout={layout}|>
+<|{show_dialog}|dialog|title=Welcome!|on_action=dialog_action|labels=Couldn't be better;Not my day|
+## Hello!
+|>
+
+<|Show|button|on_action={lambda s: s.assign("show_dialog", True)}|>
 """
 
-
 if __name__ == "__main__":
-    Gui(page).run(title="Chart - Advanced - Annotations")
+    Gui(page).run(title="Dialog - Labels")
