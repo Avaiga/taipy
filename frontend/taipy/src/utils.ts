@@ -14,7 +14,7 @@ import { Theme, alpha } from "@mui/material";
 import { PopoverOrigin } from "@mui/material/Popover";
 import { ReactNode } from "react";
 
-import { BroadcastDesc, getUpdateVar, useDynamicProperty } from "taipy-gui";
+import { getUpdateVar, useDynamicProperty } from "taipy-gui";
 
 
 export interface CoreProps {
@@ -22,7 +22,7 @@ export interface CoreProps {
     updateVarName?: string;
     active?: boolean;
     defaultActive?: boolean;
-    coreChanged?: BroadcastDesc;
+    coreChanged?: Record<string, unknown>;
     error?: string;
     updateVars: string;
     libClassName?: string;
