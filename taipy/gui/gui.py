@@ -2746,10 +2746,6 @@ class Gui:
         #
         #         The default value is None.
         # --------------------------------------------------------------------------------
-
-        # setup run function with gui hooks
-        _Hooks().run(self, **kwargs)
-
         app_config = self._config.config
 
         run_root_dir = os.path.dirname(inspect.getabsfile(self.__frame))
@@ -2773,6 +2769,9 @@ class Gui:
 
         self._config.resolve()
         TaipyGuiWarning.set_debug_mode(self._get_config("debug", False))
+
+        # setup run function with gui hooks
+        _Hooks().run(self, **kwargs)
 
         self.__init_server()
 

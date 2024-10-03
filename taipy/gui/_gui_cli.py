@@ -14,6 +14,8 @@ from typing import Dict, Tuple
 from taipy.common._cli._base_cli._abstract_cli import _AbstractCLI
 from taipy.common._cli._base_cli._taipy_parser import _TaipyParser
 
+from ._hook import _Hooks
+
 
 class _GuiCLI(_AbstractCLI):
     """Command-line interface of GUI."""
@@ -95,6 +97,10 @@ class _GuiCLI(_AbstractCLI):
         for reloader_arg, reloader_arg_dict in cls.__RELOADER_ARGS.items():
             reloader_group.add_argument(reloader_arg, cls.__add_taipy_prefix(reloader_arg), **reloader_arg_dict)
 
+        hook_group = gui_parser.add_mutually_exclusive_group()
+        for hook_arg, hook_arg_dict in _Hooks()._get_cli_args().items():
+            hook_group.add_argument(hook_arg, cls.__add_taipy_prefix(hook_arg), **hook_arg_dict)
+
     @classmethod
     def create_run_parser(cls):
         run_parser = _TaipyParser._add_subparser("run", help="Run a Taipy application.")
@@ -108,6 +114,10 @@ class _GuiCLI(_AbstractCLI):
         reloader_group = run_parser.add_mutually_exclusive_group()
         for reloader_arg, reloader_arg_dict in cls.__RELOADER_ARGS.items():
             reloader_group.add_argument(reloader_arg, **reloader_arg_dict)
+
+        hook_group = run_parser.add_mutually_exclusive_group()
+        for hook_arg, hook_arg_dict in _Hooks()._get_cli_args().items():
+            hook_group.add_argument(hook_arg, **hook_arg_dict)
 
     @classmethod
     def handle_command(cls):
