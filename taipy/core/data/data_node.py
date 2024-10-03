@@ -526,7 +526,7 @@ class DataNode(_Entity, _Labeled):
             The filtered data.
 
         Raises:
-            NotImplementedError^: If the data type is not supported.
+            NotImplementedError: If the data type is not supported.
         """
         data = self._read()
         return _FilterDataNode._filter(data, operators, join_operator)

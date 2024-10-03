@@ -31,20 +31,20 @@ class S3ObjectDataNode(DataNode):
 
     The *properties* attribute must contain the following required entries:
 
-        - *aws_access_key* `(str)`: Amazon Web Services ID for to identify account
-        - *aws_secret_access_key* `(str)`: Amazon Web Services access key to
-            authenticate programmatic requests.
-        - *aws_s3_bucket_name*  `(str)`: unique identifier for a container that stores
-            objects in Amazon Simple Storage Service (S3).
-        - *aws_s3_object_key* `(str)`:  unique identifier for the name of the object (file)
-            that has to be read or written.
+    - *aws_access_key* (`str`): Amazon Web Services ID for to identify account
+    - *aws_secret_access_key* (`str`): Amazon Web Services access key to
+        authenticate programmatic requests.
+    - *aws_s3_bucket_name*  (`str`): unique identifier for a container that stores
+        objects in Amazon Simple Storage Service (S3).
+    - *aws_s3_object_key* (`str`):  unique identifier for the name of the object (file)
+        that has to be read or written.
 
     The *properties* attribute can also contain the following optional entries:
 
-        - *aws_region* `(Any)`: Self-contained geographic area where Amazon Web Services
-            (AWS) infrastructure is located.
-        - *aws _s3_object_parameters* `(str)`: A dictionary of additional arguments to be
-            passed to interact with the AWS service
+    - *aws_region* (`Any`): Self-contained geographic area where Amazon Web Services
+        (AWS) infrastructure is located.
+    - *aws _s3_object_parameters* (`str`): A dictionary of additional arguments to be
+        passed to interact with the AWS service
     """
 
     __STORAGE_TYPE = "s3_object"

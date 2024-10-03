@@ -33,36 +33,16 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
     The Excel file format is _xlsx_.
 
-    Attributes:
-        config_id (str): Identifier of this data node configuration. It must be a valid Python
-            identifier.
-        scope (Scope^): The scope of this data node.
-        id (str): The unique identifier of this data node.
-        owner_id (str): The identifier of the owner (sequence_id, scenario_id, cycle_id) or
-            `None`.
-        parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
-        last_edit_date (datetime): The date and time of the last modification.
-        edits (List[Edit]): The ordered list of edits for that job.
-        version (str): The string indicates the application version of the data node to instantiate. If not provided,
-            the current version is used.
-        validity_period (Optional[timedelta]): The duration implemented as a timedelta since the last edit date for
-            which the data node can be considered up-to-date. Once the validity period has passed, the data node is
-            considered stale and relevant tasks will run even if they are skippable (see the
-            [Task management](../../../../../../userman/scenario_features/sdm/task/index.md) page for more details).
-            If _validity_period_ is set to `None`, the data node is always up-to-date.
-        edit_in_progress (bool): True if a task computing the data node has been submitted
-            and not completed yet. False otherwise.
-        editor_id (Optional[str]): The identifier of the user who is currently editing the data node.
-        editor_expiration_date (Optional[datetime]): The expiration date of the editor lock.
-        path (str): The path to the Excel file.
-        properties (dict[str, Any]): A dictionary of additional properties. The _properties_
-            must have a _"default_path"_ or _"path"_ entry with the path of the Excel file:
+    The *properties* attribute can contain the following optional entries:
 
-            - _"default_path"_ `(str)`: The path of the Excel file.\n
-            - _"has_header"_ `(bool)`: If True, indicates that the Excel file has a header.\n
-            - _"sheet_name"_ `(Union[List[str], str])`: The list of sheet names to be used. This
-                can be a unique name.\n
-            - _"exposed_type"_: The exposed type of the data read from Excel file. The default value is `pandas`.\n
+    - *sheet_name* (`Union[str, List[str]]`): The name of the sheet(s) to be used.
+    - *default_path* (`str`): The default path of the Excel file used at the instantiation of the
+        data node.
+    - *default_data*: The default data of the data node. It is used at the data node instantiation
+        to write the data to the Excel file.
+    - *has_header* (`bool`): If True, indicates that the Excel file has a header.
+    - *exposed_type* (`str`): The exposed type of the data read from Excel file. The default value
+        is `pandas`.
     """
 
     __STORAGE_TYPE = "excel"
@@ -136,7 +116,25 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
     @classmethod
     def storage_type(cls) -> str:
+        """Return the storage type of the data node: "excel"."""
         return cls.__STORAGE_TYPE
+
+    def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None) -> None:
+        """Write a set of columns.
+
+        Parameters:
+            data (Any): The data to write.
+            columns (List[str]): The list of column names to write.
+            job_id (Optional[JobId]): An optional identifier of the writer.
+        """
+        if isinstance(data, Dict) and all(isinstance(x, (pd.DataFrame, np.ndarray)) for x in data.values()):
+            self._write_excel_with_multiple_sheets(data, columns=columns)
+        else:
+            df = pd.DataFrame(data)
+            if columns:
+                df = self._set_column_if_dataframe(df, columns)
+            self._write_excel_with_single_sheet(df.to_excel, self.path, index=False)
+        self.track_edit(timestamp=datetime.now(), job_id=job_id)
 
     @staticmethod
     def _check_exposed_type(exposed_type):
@@ -338,20 +336,3 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             self._write_excel_with_single_sheet(
                 data.to_excel, self._path, index=False, header=properties[self._HAS_HEADER_PROPERTY] or None
             )
-
-    def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None):
-        """Write a set of columns.
-
-        Parameters:
-            data (Any): The data to write.
-            columns (List[str]): The list of column names to write.
-            job_id (JobId): An optional identifier of the writer.
-        """
-        if isinstance(data, Dict) and all(isinstance(x, (pd.DataFrame, np.ndarray)) for x in data.values()):
-            self._write_excel_with_multiple_sheets(data, columns=columns)
-        else:
-            df = pd.DataFrame(data)
-            if columns:
-                df = self._set_column_if_dataframe(df, columns)
-            self._write_excel_with_single_sheet(df.to_excel, self.path, index=False)
-        self.track_edit(timestamp=datetime.now(), job_id=job_id)

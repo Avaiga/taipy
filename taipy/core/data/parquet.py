@@ -31,46 +31,28 @@ from .data_node_id import DataNodeId, Edit
 class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     """Data Node stored as a Parquet file.
 
-    Attributes:
-        config_id (str): Identifier of the data node configuration. This string must be a valid
-            Python identifier.
-        scope (Scope^): The scope of this data node.
-        id (str): The unique identifier of this data node.
-        owner_id (str): The identifier of the owner (sequence_id, scenario_id, cycle_id) or `None`.
-        parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
-        last_edit_date (datetime): The date and time of the last modification.
-        edits (List[Edit]): The ordered list of edits for that job.
-        version (str): The string indicates the application version of the data node to instantiate. If not provided,
-            the current version is used.
-        validity_period (Optional[timedelta]): The duration implemented as a timedelta since the last edit date for
-            which the data node can be considered up-to-date. Once the validity period has passed, the data node is
-            considered stale and relevant tasks will run even if they are skippable (see the
-            [Task management](../../../../../../userman/scenario_features/sdm/task/index.md) page for more details).
-            If _validity_period_ is set to `None`, the data node is always up-to-date.
-        edit_in_progress (bool): True if a task computing the data node has been submitted
-            and not completed yet. False otherwise.
-        editor_id (Optional[str]): The identifier of the user who is currently editing the data node.
-        editor_expiration_date (Optional[datetime]): The expiration date of the editor lock.
-        path (str): The path to the Parquet file.
-        properties (dict[str, Any]): A dictionary of additional properties. *properties*
-            must have a *"default_path"* or *"path"* entry with the path of the Parquet file:
+    The *properties* attribute can contain the following optional entries:
 
-            - *"default_path"* (`str`): The default path of the Parquet file.
-            - *"exposed_type"*: The exposed type of the data read from Parquet file. The default
-                value is `pandas`.
-            - *"engine"* (`Optional[str]`): Parquet library to use. Possible values are
-                *"fastparquet"* or *"pyarrow"*.<br/>
-                The default value is *"pyarrow"*.
-            - *"compression"* (`Optional[str]`): Name of the compression to use. Possible values
-                are *"snappy"*, *"gzip"*, *"brotli"*, or *"none"* (no compression).<br/>
-                The default value is *"snappy"*.
-            - *"read_kwargs"* (`Optional[dict]`): Additional parameters passed to the
-                *pandas.read_parquet()* function.
-            - *"write_kwargs"* (`Optional[dict]`): Additional parameters passed to the
-                *pandas.DataFrame.write_parquet()* function.
-                The parameters in *"read_kwargs"* and *"write_kwargs"* have a
-                **higher precedence** than the top-level parameters which are also passed to
-                Pandas.
+    - *default_path* (`str`): The default path of the Parquet file used at the instantiation of
+        the data node.
+    - *default_data* (`Any`): The default data of the data node. It is used at the data node
+        instantiation to write the data to the Parquet file.
+    - *has_header* (`bool`): If True, indicates that the Parquet file has a header.
+    - *exposed_type* (`str`): The exposed type of the data read from Parquet
+        file.<br/> The default value is `pandas`.
+    - *"engine"* (`Optional[str]`): Parquet library to use. Possible values are
+        *"fastparquet"* or *"pyarrow"*.<br/> The default value is *"pyarrow"*.
+    - *"compression"* (`Optional[str]`): Name of the compression to use. Possible values
+        are *"snappy"*, *"gzip"*, *"brotli"*, or *"none"* (no compression).<br/>
+        The default value is *"snappy"*.
+    - *"read_kwargs"* (`Optional[dict]`): Additional parameters passed to the
+        *pandas.read_parquet()* function when reading the data.<br/>
+        The parameters in *"read_kwargs"* have a **higher precedence** than the top-level
+        parameters which are also passed to Pandas.
+    - *"write_kwargs"* (`Optional[dict]`): Additional parameters passed to the
+        *pandas.DataFrame.write_parquet()* function when writing the data. <br/>
+        The parameters in *"write_kwargs"* have a **higher precedence** than the 
+        top-level parameters which are also passed to Pandas.
     """
 
     __STORAGE_TYPE = "parquet"
@@ -178,7 +160,47 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
     @classmethod
     def storage_type(cls) -> str:
+        """Return the storage type of the data node: "parquet"."""
         return cls.__STORAGE_TYPE
+
+    def _write_with_kwargs(self, data: Any, job_id: Optional[JobId] = None, **write_kwargs):
+        """Write the data referenced by this data node.
+
+        Keyword arguments here which are also present in the Data Node config will overwrite them.
+
+        Parameters:
+            data (Any): The data to write.
+            job_id (JobId): An optional identifier of the writer.
+            **write_kwargs (dict[str, any]): The keyword arguments passed to the function
+                `pandas.DataFrame.to_parquet()`.
+        """
+        properties = self.properties
+        kwargs = {
+            self.__ENGINE_PROPERTY: properties[self.__ENGINE_PROPERTY],
+            self.__COMPRESSION_PROPERTY: properties[self.__COMPRESSION_PROPERTY],
+        }
+        kwargs.update(properties[self.__WRITE_KWARGS_PROPERTY])
+        kwargs.update(write_kwargs)
+
+        df = self._convert_data_to_dataframe(properties[self._EXPOSED_TYPE_PROPERTY], data)
+        if isinstance(df, pd.Series):
+            df = pd.DataFrame(df)
+
+        # Ensure that the columns are strings, otherwise writing will fail with pandas 1.3.5
+        df.columns = df.columns.astype(str)
+        df.to_parquet(self._path, **kwargs)
+        self.track_edit(timestamp=datetime.now(), job_id=job_id)
+
+    def read_with_kwargs(self, **read_kwargs):
+        """Read data from this data node.
+
+        Keyword arguments here which are also present in the Data Node config will overwrite them.
+
+        Parameters:
+            **read_kwargs (dict[str, any]): The keyword arguments passed to the function
+                `pandas.read_parquet()`.
+        """
+        return self._read_from_path(**read_kwargs)
 
     def _read(self):
         return self._read_from_path()
@@ -224,46 +246,8 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         return pd.read_parquet(path, **read_kwargs)
 
     def _append(self, data: Any):
-        self.write_with_kwargs(data, engine="fastparquet", append=True)
+        self._write_with_kwargs(data, engine="fastparquet", append=True)
 
     def _write(self, data: Any):
-        self.write_with_kwargs(data)
+        self._write_with_kwargs(data)
 
-    def write_with_kwargs(self, data: Any, job_id: Optional[JobId] = None, **write_kwargs):
-        """Write the data referenced by this data node.
-
-        Keyword arguments here which are also present in the Data Node config will overwrite them.
-
-        Parameters:
-            data (Any): The data to write.
-            job_id (JobId): An optional identifier of the writer.
-            **write_kwargs (dict[str, any]): The keyword arguments passed to the function
-                `pandas.DataFrame.to_parquet()`.
-        """
-        properties = self.properties
-        kwargs = {
-            self.__ENGINE_PROPERTY: properties[self.__ENGINE_PROPERTY],
-            self.__COMPRESSION_PROPERTY: properties[self.__COMPRESSION_PROPERTY],
-        }
-        kwargs.update(properties[self.__WRITE_KWARGS_PROPERTY])
-        kwargs.update(write_kwargs)
-
-        df = self._convert_data_to_dataframe(properties[self._EXPOSED_TYPE_PROPERTY], data)
-        if isinstance(df, pd.Series):
-            df = pd.DataFrame(df)
-
-        # Ensure that the columns are strings, otherwise writing will fail with pandas 1.3.5
-        df.columns = df.columns.astype(str)
-        df.to_parquet(self._path, **kwargs)
-        self.track_edit(timestamp=datetime.now(), job_id=job_id)
-
-    def read_with_kwargs(self, **read_kwargs):
-        """Read data from this data node.
-
-        Keyword arguments here which are also present in the Data Node config will overwrite them.
-
-        Parameters:
-            **read_kwargs (dict[str, any]): The keyword arguments passed to the function
-                `pandas.read_parquet()`.
-        """
-        return self._read_from_path(**read_kwargs)

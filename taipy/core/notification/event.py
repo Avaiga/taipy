@@ -23,17 +23,19 @@ class EventOperation(_ReprEnum):
 
     `EventOperation` is used as an attribute of the `Event^` object to describe the
     operation performed on an entity.<br>
-    The possible operations are `CREATION`, `UPDATE`, `DELETION`, or `SUBMISSION`.
+    The possible operations are:
+
+     - `CREATION`: Event related to a creation operation.
+     - `UPDATE`: Event related to an update operation.
+     - `DELETION`: Event related to a deletion operation.
+     - `SUBMISSION`: Event related to a submission operation.
+
     """
 
     CREATION = 1
-    """Event related to a creation operation."""
     UPDATE = 2
-    """Event related to an update operation."""
     DELETION = 3
-    """Event related to a deletion operation."""
     SUBMISSION = 4
-    """Event related to a submission operation."""
 
 
 class EventEntityType(_ReprEnum):
@@ -41,23 +43,24 @@ class EventEntityType(_ReprEnum):
 
     `EventEntityType` is used as an attribute of the `Event^` object to describe
     an entity that was changed.<br>
-    The possible operations are `CYCLE`, `SCENARIO`, `SEQUENCE`, `TASK`, `DATA_NODE`, `JOB` or `SUBMISSION`.
+    The possible operations are:
+
+    - `CYCLE`: Event related to a cycle entity.
+    - `SCENARIO`: Event related to a scenario entity.
+    - `SEQUENCE`: Event related to a sequence entity.
+    - `TASK`: Event related to a task entity.
+    - `DATA_NODE`: Event related to a data node entity.
+    - `JOB`: Event related to a job entity.
+    - `SUBMISSION`: Event related to a submission entity.
     """
 
     CYCLE = 1
-    """Event related to a cycle entity."""
     SCENARIO = 2
-    """Event related to a scenario entity."""
     SEQUENCE = 3
-    """Event related to a sequence entity."""
     TASK = 4
-    """Event related to a task entity."""
     DATA_NODE = 5
-    """Event related to a data node entity."""
     JOB = 6
-    """Event related to a job entity."""
     SUBMISSION = 7
-    """Event related to a submission entity."""
 
 
 _NO_ATTRIBUTE_NAME_OPERATIONS = {EventOperation.CREATION, EventOperation.DELETION, EventOperation.SUBMISSION}
@@ -80,32 +83,29 @@ _ENTITY_TO_EVENT_ENTITY_TYPE = {
 
 @dataclass(frozen=True)
 class Event:
-    """Event object used to notify any change in the Core service.
+    """Event object used to notify any change in a Taipy application.
 
     An event holds the necessary attributes to identify the change.
-
-    Attributes:
-        entity_type (EventEntityType^): Type of the entity that was changed (`DataNode^`,
-            `Scenario^`, `Cycle^`, etc. ).
-        entity_id (Optional[str]): Unique identifier of the entity that was changed.
-        operation (EventOperation^): Enum describing the operation (among `CREATION`, `UPDATE`, `DELETION`,
-            and `SUBMISSION`) that was performed on the entity.
-        attribute_name (Optional[str]): Name of the entity's attribute changed. Only relevant for `UPDATE`
-            operations
-        attribute_value (Optional[str]): Name of the entity's attribute changed. Only relevant for `UPDATE`
-            operations
-        metadata (dict): A dict of additional medata about the source of this event
-        creation_date (datetime): Date and time of the event creation.
     """
 
     entity_type: EventEntityType
+    """Type of the entity that was changed (`DataNode^`, `Scenario^`, `Cycle^`, etc. )."""
     operation: EventOperation
+    """Enum describing the operation that was performed on the entity.
+
+    The operation is among `CREATION`, `UPDATE`, `DELETION`, and `SUBMISSION`.
+    """
     entity_id: Optional[str] = None
+    """Unique identifier of the entity that was changed."""
     attribute_name: Optional[str] = None
+    """Name of the entity's attribute changed. Only relevant for `UPDATE` operations."""
     attribute_value: Optional[Any] = None
+    """Value of the entity's attribute changed. Only relevant for `UPDATE` operations."""
 
     metadata: dict = field(default_factory=dict)
+    """A dictionary of additional metadata about the source of this event."""
     creation_date: datetime = field(init=False)
+    """Date and time of the event creation."""
 
     def __post_init__(self):
         # Creation date
