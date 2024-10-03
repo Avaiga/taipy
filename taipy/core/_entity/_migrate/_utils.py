@@ -13,7 +13,7 @@ import json
 from importlib.metadata import version
 from typing import Dict, List, Optional, Tuple
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 __logger = _TaipyLogger._get_logger()
 

@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     packages = [
         f"taipy-{_version}.tar.gz",
-        f"taipy-config-{_version}.tar.gz",
+        f"taipy-common-{_version}.tar.gz",
         f"taipy-core-{_version}.tar.gz",
         f"taipy-rest-{_version}.tar.gz",
         f"taipy-gui-{_version}.tar.gz",
