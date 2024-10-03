@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 from __future__ import annotations
-from taipy.gui.utils.mapbox_token import get_mapbox_token
 import contextlib
 import importlib
 import inspect
@@ -442,46 +441,58 @@ class Gui:
                 if find_spec("plotly") and find_spec("plotly.graph_objs"):
                     from plotly.graph_objs import Figure as PlotlyFigure  # type: ignore[reportMissingImports]
 
-                    if isinstance(content, PlotlyFigure):
+                    if isinstance(content, (PlotlyFigure, dict)):
+                        def get_plotly_content(content):
+                            mapbox_token = os.environ.get("MAPBOX_TOKEN")
+                            if mapbox_token is None:
+                                raise ValueError("MAPBOX_TOKEN environment variable is not set")
+                            if isinstance(content, PlotlyFigure):
+                                content.update_layout(mapbox_style="mapbox://styles/mapbox/streets-v11",
+                                mapbox_center_lat=37.7749, mapbox_center_lon=-122.4194,
+                                mapbox_zoom=12, mapbox_access_token=mapbox_token)
+                                return content.to_html()
+                            elif isinstance(content, dict):
+                                import plotly.graph_objects as go
+                                import json
 
-                        def get_plotly_content(figure: PlotlyFigure):
-                            mapbox_token = get_mapbox_token()
-                            figure.update_layout(mapbox_style="mapbox://styles/mapbox/streets-v11",
-                            mapbox_center_lat=37.7749, mapbox_center_lon=-122.4194,
-                            mapbox_zoom=12, mapbox_access_token=mapbox_token)
-                            return figure.to_html()
+                                fig = go.Figure(data=content['data'], layout=content['layout'])
+                                fig.update_layout(mapbox_style="mapbox://styles/mapbox/streets-v11",
+                                mapbox_center_lat=37.7749, mapbox_center_lon=-122.4194,
+                                mapbox_zoom=12, mapbox_access_token=mapbox_token)
+                                html = fig.to_html(include_plotlyjs='cdn')
+                                return html
 
-                        Gui.register_content_provider(PlotlyFigure, get_plotly_content)
+                        Gui.register_content_provider((PlotlyFigure, dict), get_plotly_content)
                         provider_fn = get_plotly_content
-            if provider_fn is None:
-                # try matplotlib
-                if find_spec("matplotlib") and find_spec("matplotlib.figure"):
-                    from matplotlib.figure import Figure as MatplotlibFigure
+                if provider_fn is None:
+                    # try matplotlib
+                    if find_spec("matplotlib") and find_spec("matplotlib.figure"):
+                        from matplotlib.figure import Figure as MatplotlibFigure
 
-                    if isinstance(content, MatplotlibFigure):
+                        if isinstance(content, MatplotlibFigure):
 
-                        def get_matplotlib_content(figure: MatplotlibFigure):
-                            import base64
-                            from io import BytesIO
+                            def get_matplotlib_content(figure: MatplotlibFigure):
+                                import base64
+                                from io import BytesIO
 
-                            buf = BytesIO()
-                            figure.savefig(buf, format="png")
-                            data = base64.b64encode(buf.getbuffer()).decode("ascii")
-                            return f'<img src="data:image/png;base64,{data}"/>'
+                                buf = BytesIO()
+                                figure.savefig(buf, format="png")
+                                data = base64.b64encode(buf.getbuffer()).decode("ascii")
+                                return f'<img src="data:image/png;base64,{data}"/>'
 
-                        Gui.register_content_provider(MatplotlibFigure, get_matplotlib_content)
-                        provider_fn = get_matplotlib_content
+                            Gui.register_content_provider(MatplotlibFigure, get_matplotlib_content)
+                            provider_fn = get_matplotlib_content
 
-            if callable(provider_fn):
-                try:
-                    return provider_fn(t.cast(t.Any, content))
-                except Exception as e:
-                    _warn(f"Error in content provider for type {str(type(content))}", e)
-        return (
-            '<div style="background:white;color:red;">'
-            + (f"No valid provider for type {type(content).__name__}" if content else "Wrong context.")
-            + "</div>"
-        )
+                if callable(provider_fn):
+                    try:
+                        return provider_fn(t.cast(t.Any, content))
+                    except Exception as e:
+                        _warn(f"Error in content provider for type {str(type(content))}", e)
+            return (
+                '<div style="background:white;color:red;">'
+                + (f"No valid provider for type {type(content).__name__}" if content else "Wrong context.")
+                + "</div>"
+            )
 
     @staticmethod
     def add_shared_variable(*names: str) -> None:
