@@ -112,8 +112,8 @@ class Element:
         *react_component* is ignored.
 
         Arguments:
-            default_property (str): the name of the default property for this element.
-            properties (Dict[ElementProperty]): The dictionary of properties for this element.
+            default_property (str): The name of the default property for this element.
+            properties (Dict[ElementProperty]): The dictionary containing the properties of this element, where the keys are the property names and the values are instances of ElementProperty.
             inner_properties (Optional[List[ElementProperty]]): The optional list of inner properties for this element.<br/>
                 Default values are set/binded automatically.
             react_component (Optional[str]): The name of the component to be created on the front-end.<br/>
