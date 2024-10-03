@@ -25,6 +25,34 @@ pipenv install taipy
 These commands install the `taipy` package in the Python environment with all its
 dependencies.
 
+**Basic Usage**
+
+```bash 
+from taipy import Config
+from taipy import DataSequence
+from taipy import Scenario
+
+# Create a configuration
+config = Config(
+    id="my_config",
+    data_sequences=[
+        DataSequence(
+            id="my_data",
+            csv_path="data.csv"
+        )
+    ]
+)
+
+# Create a scenario
+scenario = Scenario(
+    config=config,
+    id="my_scenario"
+)
+
+# Run the scenario
+scenario.run()
+```
+
 ## Installing from GitHub
 
 The development version of Taipy is updated daily with changes from the Taipy R&D and external
@@ -47,8 +75,33 @@ git clone https://github.com/Avaiga/taipy.git
 
 This creates the 'taipy' directory holding all the package's source code.
 
-### Building the JavaScript bundles
+## Running Taipy in Jupyter Notebook
 
+```bash
+import taipy as tp
+
+# Create a configuration
+config = tp.Config(...)
+
+# Create a scenario
+scenario = tp.Scenario(config)
+
+# Run the scenario
+scenario.run()
+```
+## Running Taipy from Command Line
+
+```
+bash
+taipy run --scenario-id my_scenario
+### Building the JavaScript bundles
+```
+## Running Taipy with Docker
+
+```
+bash
+docker run -p 8080:8080 taipy/taipy:latest
+```
 Taipy (and Taipy GUI that it embeds) has some code dealing with the client side of the web
 applications.<br/>
 This code is written in [TypeScript](https://www.typescriptlang.org/), relies on
