@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import contextlib
 import importlib
-import inspect
 import json
 import math
 import os
@@ -25,6 +24,7 @@ import typing as t
 import warnings
 from importlib import metadata, util
 from importlib.util import find_spec
+from inspect import currentframe, getabsfile, ismethod, ismodule, isroutine
 from pathlib import Path
 from threading import Timer
 from types import FrameType, FunctionType, LambdaType, ModuleType, SimpleNamespace
@@ -81,6 +81,7 @@ from .utils import (
     _get_client_var_name,
     _get_css_var_value,
     _get_expr_var_name,
+    _get_lambda_id,
     _get_module_name_from_frame,
     _get_non_existent_file_path,
     _get_page_from_module,
@@ -311,7 +312,7 @@ class Gui:
                 own Flask application instance and use it to serve the pages.
         """
         # store suspected local containing frame
-        self.__frame = t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back)
+        self.__frame = t.cast(FrameType, t.cast(FrameType, currentframe()).f_back)
         self.__default_module_name = _get_module_name_from_frame(self.__frame)
         self._set_css_file(css_file)
 
@@ -824,7 +825,7 @@ class Gui:
         if callable(on_change_fn):
             try:
                 arg_count = on_change_fn.__code__.co_argcount
-                if arg_count > 0 and inspect.ismethod(on_change_fn):
+                if arg_count > 0 and ismethod(on_change_fn):
                     arg_count -= 1
                 args: t.List[t.Any] = [None for _ in range(arg_count)]
                 if arg_count > 0:
@@ -1509,7 +1510,7 @@ class Gui:
         if callable(action_function):
             try:
                 argcount = action_function.__code__.co_argcount
-                if argcount > 0 and inspect.ismethod(action_function):
+                if argcount > 0 and ismethod(action_function):
                     argcount -= 1
                 args = t.cast(list, [None for _ in range(argcount)])
                 if argcount > 0:
@@ -1532,7 +1533,7 @@ class Gui:
         cp_args = [] if args is None else args.copy()
         cp_args.insert(0, self.__get_state())
         argcount = user_function.__code__.co_argcount
-        if argcount > 0 and inspect.ismethod(user_function):
+        if argcount > 0 and ismethod(user_function):
             argcount -= 1
         if argcount > len(cp_args):
             cp_args += (argcount - len(cp_args)) * [None]
@@ -2073,7 +2074,7 @@ class Gui:
                 self.add_page(name=k, page=v)
         elif isinstance(folder_name := pages, str):
             if not hasattr(self, "_root_dir"):
-                self._root_dir = os.path.dirname(inspect.getabsfile(self.__frame))
+                self._root_dir = os.path.dirname(getabsfile(self.__frame))
             folder_path = folder_name if os.path.isabs(folder_name) else os.path.join(self._root_dir, folder_name)
             folder_name = os.path.basename(folder_path)
             if not os.path.isdir(folder_path):  # pragma: no cover
@@ -2224,9 +2225,9 @@ class Gui:
     def _download(
         self, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[t.Union[str, t.Callable]] = ""
     ):
-        if callable(on_action) and on_action.__name__:
+        if isroutine(on_action) and on_action.__name__:
             on_action_name = (
-                _get_expr_var_name(str(on_action.__code__))
+                _get_lambda_id(t.cast(LambdaType, on_action))
                 if on_action.__name__ == "<lambda>"
                 else _get_expr_var_name(on_action.__name__)
             )
@@ -2377,7 +2378,7 @@ class Gui:
             return
         try:
             arg_count = on_page_load_fn.__code__.co_argcount
-            if arg_count > 0 and inspect.ismethod(on_page_load_fn):
+            if arg_count > 0 and ismethod(on_page_load_fn):
                 arg_count -= 1
             args: t.List[t.Any] = [None for _ in range(arg_count)]
             if arg_count > 0:
@@ -2752,7 +2753,7 @@ class Gui:
 
         app_config = self._config.config
 
-        run_root_dir = os.path.dirname(inspect.getabsfile(self.__frame))
+        run_root_dir = os.path.dirname(getabsfile(self.__frame))
 
         # Register _root_dir for abs path
         if not hasattr(self, "_root_dir"):
@@ -2797,7 +2798,7 @@ class Gui:
         glob_ctx: t.Dict[str, t.Any] = {t.__name__: t for t in _TaipyBase.__subclasses__()}
         glob_ctx[Gui.__SELF_VAR] = self
         glob_ctx["state"] = self.__state
-        glob_ctx.update({k: v for k, v in locals_bind.items() if inspect.ismodule(v) or callable(v)})
+        glob_ctx.update({k: v for k, v in locals_bind.items() if ismodule(v) or callable(v)})
 
         # Call on_init on each library
         for name, libs in self.__extensions.items():
