@@ -31,7 +31,7 @@ def _check_dependency_is_installed(module_name: str, package_name: str) -> None:
         )
 
 
-class EnterpriseChecker:
+class EnterpriseEditionUtils:
     _TAIPY_ENTERPRISE_MODULE = "taipy.enterprise"
     _TAIPY_ENTERPRISE_CORE_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core"
 
