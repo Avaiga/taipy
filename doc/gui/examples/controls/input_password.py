@@ -16,8 +16,8 @@
 from taipy.gui import Gui
 
 page = """
-Input your password: <|input|password|>
+<|input|password|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run()
+    Gui(page).run(title="Input - Password")
