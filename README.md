@@ -16,7 +16,7 @@ Build Python Data & AI web applications
 
 <div align="center">
 From simple pilots to production-ready web applications in no time. <br />
-No more compromise on performance, customization, and scalability.
+No more compromise on performance, customization and scalability.
 </div>
 
 <br />
@@ -33,19 +33,19 @@ No more compromise on performance, customization, and scalability.
     <br />
     <a href="https://discord.com/invite/SJyz2VJGxV"><strong>  🫱🏼‍🫲🏼 Discord support </strong></a>
     <br />
-    <a href="https://docs.taipy.io/en/latest/gallery/"><strong> 👀 Demos & Examples </strong></a>
+    <a href="https://docs.taipy.io/en/latest/gallery/"><strong> 👀Want some Demos & Examples </strong></a>
   </p>
 
 &nbsp;
 
-## ⭐️ What's Taipy?
+## ⭐️ What's Taipy🤔?
 
 Taipy is designed for data scientists and machine learning engineers to build data & AI web applications.
 &nbsp;
 
-⭐️ Enables building production-ready web applications. <br />
-⭐️ No need to learn new languages. Only Python is needed.<br />
-⭐️ Concentrate on Data and AI algorithms without development and deployment complexities.<br />
+⭐️->Enables building production-ready web applications. <br />
+⭐️-> No need to learn new languages. Only Python is needed.<br />
+⭐️-> Concentrate on Data and AI algorithms without development and deployment complexities.<br />
 
 &nbsp;
 
@@ -104,7 +104,7 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
     return filtered_data
 ```
 
-This is the execution graph of the scenario we are implementing
+This is the execution graph of the scenario we are implementing:
 
 <p align="center">
 <img src="https://github.com/Avaiga/taipy/raw/develop/readme_img/readme_exec_graph.png" width="600" align="center" />
@@ -116,7 +116,7 @@ You can use the Taipy Studio extension in Visual Studio Code to configure your s
 Your configuration is automatically saved as a TOML file.<br />
 Check out Taipy Studio [Documentation](https://docs.taipy.io/en/latest/manuals/studio/)
 
-For more advanced use cases or if you prefer coding your configurations instead of using Taipy Studio,<br />
+For more advanced use cases or if you want to make your own configurations instead of using Taipy Studio,<br />
 Check out the movie genre demo scenario creation with this [Demo](https://docs.taipy.io/en/latest/gallery/other/movie_genre_selector/).
 
 ![TaipyStudio](https://github.com/Avaiga/taipy/raw/develop/readme_img/readme_demo_studio.gif)
@@ -125,7 +125,7 @@ Check out the movie genre demo scenario creation with this [Demo](https://docs.t
 
 ## User Interface Generation and Scenario & Data Management
 
-This simple Taipy application demonstrates how to create a basic film recommendation system using Taipy.<br />
+This is a simple Taipy application that demonstrates how to create a basic film recommendation system using Taipy.<br />
 The application filters a dataset of films based on the user's selected genre and displays the top seven films in that genre by popularity.
 Here is the full code for both the frontend and backend of the application.
 
