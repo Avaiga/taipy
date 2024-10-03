@@ -49,7 +49,6 @@ import {
     TableFilter,
     SortDesc,
     TableSort,
-    createUnBroadcastAction,
 } from "taipy-gui";
 
 import { Cycles, Cycle, DataNodes, NodeType, Scenarios, Scenario, DataNode, Sequence, Sequences } from "./utils/types";
@@ -136,7 +135,7 @@ const CoreItem = (props: {
     return !props.displayCycles && nodeType === NodeType.CYCLE ? (
         <>
             {items
-                ? items.map((item) => (
+                ? items.filter(v=>v).map((item) => (
                       <CoreItem
                           key={item[0]}
                           item={item}
@@ -206,7 +205,7 @@ const CoreItem = (props: {
             sx={nodeType === NodeType.NODE ? undefined : ParentItemSx}
         >
             {items
-                ? items.map((item) => (
+                ? items.filter(v=>v).map((item) => (
                       <CoreItem
                           key={item[0]}
                           item={item}
@@ -432,19 +431,10 @@ const CoreSelector = (props: CoreSelectorProps) => {
 
     // Refresh on broadcast
     useEffect(() => {
-        if (coreChanged?.name) {
-            const toRemove = [...coreChanged.stack]
-                .map((bc) => {
-                    if ((bc as Record<string, unknown>).scenario) {
-                        const updateVar = getUpdateVar(updateVars, lovPropertyName);
-                        updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
-                        return bc;
-                    }
-                    return undefined;
-                })
-                .filter((v) => v);
-            toRemove.length && dispatch(createUnBroadcastAction(coreChanged.name, ...toRemove));
-        }
+        if (coreChanged?.scenario) {
+            const updateVar = getUpdateVar(updateVars, lovPropertyName);
+            updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
+    }
     }, [coreChanged, updateVars, module, dispatch, id, lovPropertyName]);
 
     const treeViewSx = useMemo(() => ({ ...BaseTreeViewSx, maxHeight: props.height || "50vh" }), [props.height]);

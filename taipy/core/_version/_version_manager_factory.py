@@ -14,7 +14,7 @@ from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
 from ..common import _utils
-from ..common._check_dependencies import _TAIPY_ENTERPRISE_CORE_MODULE, _using_enterprise
+from ..common._check_dependencies import EnterpriseEditionUtils
 from ._version_fs_repository import _VersionFSRepository
 from ._version_manager import _VersionManager
 
@@ -25,12 +25,13 @@ class _VersionManagerFactory(_ManagerFactory):
     @classmethod
     @lru_cache
     def _build_manager(cls) -> Type[_VersionManager]:
-        if _using_enterprise():
+        if EnterpriseEditionUtils._using_enterprise():
             version_manager = _utils._load_fct(
-                _TAIPY_ENTERPRISE_CORE_MODULE + "._version._version_manager", "_VersionManager"
+                EnterpriseEditionUtils._TAIPY_ENTERPRISE_CORE_MODULE + "._version._version_manager", "_VersionManager"
             )  # type: ignore
             build_repository = _utils._load_fct(
-                _TAIPY_ENTERPRISE_CORE_MODULE + "._version._version_manager_factory", "_VersionManagerFactory"
+                EnterpriseEditionUtils._TAIPY_ENTERPRISE_CORE_MODULE + "._version._version_manager_factory",
+                "_VersionManagerFactory",
             )._build_repository  # type: ignore
         else:
             version_manager = _VersionManager

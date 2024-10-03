@@ -14,8 +14,8 @@ from unittest import mock
 
 import pytest
 
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
+from taipy.common.config import Config
+from taipy.common.config.common.scope import Scope
 from taipy.core import taipy
 from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._version._version_manager import _VersionManager

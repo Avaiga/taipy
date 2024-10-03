@@ -103,7 +103,7 @@ if __name__ == "__main__":
         [sys.argv[1]]
         if sys.argv[1] != "ALL"
         else [
-            f"taipy{os.sep}config",
+            f"taipy{os.sep}common",
             f"taipy{os.sep}core",
             f"taipy{os.sep}rest",
             f"taipy{os.sep}gui",

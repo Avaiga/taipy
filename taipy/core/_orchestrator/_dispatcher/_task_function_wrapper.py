@@ -11,9 +11,9 @@
 
 from typing import Any, List
 
-from taipy.config._serializer._toml_serializer import _TomlSerializer
-from taipy.config.config import Config
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.config import Config
+from taipy.common.config._serializer._toml_serializer import _TomlSerializer
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ...data._data_manager_factory import _DataManagerFactory
 from ...data.data_node import DataNode

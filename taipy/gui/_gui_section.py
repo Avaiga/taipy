@@ -12,14 +12,14 @@
 import typing as t
 from copy import copy
 
-from taipy.config import Config as TaipyConfig
-from taipy.config import UniqueSection
+from taipy.common.config import Config as TaipyConfig
+from taipy.common.config import UniqueSection
 
 from ._default_config import default_config
 
 
 class _GuiSection(UniqueSection):
-    name = "gui" # type: ignore[reportAssignmentType]
+    name = "gui"  # type: ignore[reportAssignmentType]
 
     def __init__(self, property_list: t.Optional[t.List] = None, **properties):
         self._property_list = property_list
