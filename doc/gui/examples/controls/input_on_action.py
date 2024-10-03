@@ -17,20 +17,12 @@ import logging
 
 from taipy.gui import Gui
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
+logging.basicConfig(level=logging.INFO)
 
 def key_pressed(state, id, payload):
     key = payload.get('args', [None])[0]
-    if key == 'F1':
-        logging.info("F1 key pressed")
-    elif key == 'F2':
-        logging.info("F2 key pressed")
-    elif key == 'F3':
-        logging.info("F3 key pressed")
-    else:
-        return None
+    if key in ["F1", "F2", "F3"]:
+        logging.info(f"{key} key pressed")
 
 
 value = 0

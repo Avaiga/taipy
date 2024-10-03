@@ -15,7 +15,7 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus et nunc lacinia gravida. " \
+text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus et nunc lacinia gravida. "
 
 
 page = """
