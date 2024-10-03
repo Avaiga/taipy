@@ -21,8 +21,7 @@ class Frequency(_ReprEnum):
     - `WEEKLY`: Weekly frequency, a new cycle is created for each week (from Monday to Sunday).
     - `MONTHLY`: Monthly frequency, a new cycle is created for each month.
     - `QUARTERLY`: Quarterly frequency, a new cycle is created for each quarter.
-    - `YEARLY`:
-
+    - `YEARLY`: Yearly frequency, a new cycle is created for each year.
 
     The frequency must be provided in the `ScenarioConfig^`.
 

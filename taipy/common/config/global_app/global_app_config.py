@@ -30,7 +30,7 @@ class GlobalAppConfig:
 
     @properties.setter  # type: ignore
     @_ConfigBlocker._check()
-    def properties(self, val):
+    def properties(self, val) -> None:
         self._properties = val
 
     def __getattr__(self, item: str) -> Optional[Any]:
