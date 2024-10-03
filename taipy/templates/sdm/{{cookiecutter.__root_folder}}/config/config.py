@@ -11,7 +11,7 @@
 
 from algos import clean_data
 
-from taipy import Config, Frequency, Scope
+from taipy.common.config import Config, Frequency, Scope
 
 
 def configure():

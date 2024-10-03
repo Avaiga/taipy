@@ -22,7 +22,7 @@ into a complete back-end application. In  particular, it helps with:
 More details on the Core functionalities are available in the user manual.
 
 To use such functionalities, the first step consists of setting up the Taipy configuration to design
-your application's characteristics and behaviors. Use the `Config^` singleton class (from `taipy.config`)
+your application's characteristics and behaviors. Use the `Config^` singleton class (from `taipy.common.config`)
 to configure your application. Please refer to the
 [data nodes](../../../../userman/scenario_features/data-integration/data-node-config.md),
 [tasks](../../../../userman/scenario_features/task-orchestration/scenario-config.md),

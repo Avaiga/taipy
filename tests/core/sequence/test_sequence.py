@@ -13,8 +13,8 @@ from unittest import mock
 
 import pytest
 
-from taipy.config import Config
-from taipy.config.common.scope import Scope
+from taipy.common.config import Config
+from taipy.common.config.common.scope import Scope
 from taipy.core.common._utils import _Subscriber
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node import DataNode

@@ -13,10 +13,10 @@ import re
 from copy import copy
 from typing import Any, Dict, Optional, Union
 
-from taipy.config import Config, UniqueSection
-from taipy.config._config import _Config
-from taipy.config.common._config_blocker import _ConfigBlocker
-from taipy.config.common._template_handler import _TemplateHandler as _tpl
+from taipy.common.config import Config, UniqueSection
+from taipy.common.config._config import _Config
+from taipy.common.config.common._config_blocker import _ConfigBlocker
+from taipy.common.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.core._version._version_manager_factory import _VersionManagerFactory
 from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from taipy.core.data._data_manager_factory import _DataManagerFactory

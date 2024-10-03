@@ -12,10 +12,10 @@
 from datetime import timedelta
 from typing import Dict, List, cast
 
-from taipy.config._config import _Config
-from taipy.config.checker._checkers._config_checker import _ConfigChecker
-from taipy.config.checker.issue_collector import IssueCollector
-from taipy.config.common.scope import Scope
+from taipy.common.config._config import _Config
+from taipy.common.config.checker._checkers._config_checker import _ConfigChecker
+from taipy.common.config.checker.issue_collector import IssueCollector
+from taipy.common.config.common.scope import Scope
 
 from ...scenario.scenario import Scenario
 from ...task.task import Task

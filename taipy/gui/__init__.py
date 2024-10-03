@@ -95,8 +95,8 @@ from .partial import Partial
 from .state import State
 from .utils import is_debugging
 
-if find_spec("taipy") and find_spec("taipy.config"):
-    from taipy.config import _inject_section
+if find_spec("taipy") and find_spec("taipy.common.config"):
+    from taipy.common.config import _inject_section
 
     from ._default_config import default_config
     from ._gui_section import _GuiSection

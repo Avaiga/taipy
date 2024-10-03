@@ -16,7 +16,7 @@ from os import path
 
 from charset_normalizer import detect
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ..page import Page
 from ..utils import _is_in_notebook, _varname_from_content

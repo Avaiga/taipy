@@ -18,7 +18,7 @@ from ..common._check_dependencies import _check_dependency_is_installed
 if util.find_spec("boto3"):
     import boto3
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..exceptions.exceptions import MissingRequiredProperty

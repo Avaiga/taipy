@@ -12,8 +12,8 @@
 from multiprocessing import Lock
 from typing import Optional
 
-from taipy.config import Config
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.config import Config
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ._cli._core_cli_factory import _CoreCLIFactory
 from ._orchestrator._dispatcher._job_dispatcher import _JobDispatcher

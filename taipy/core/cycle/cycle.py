@@ -14,7 +14,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from taipy.config.common.frequency import Frequency
+from taipy.common.config.common.frequency import Frequency
 
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled

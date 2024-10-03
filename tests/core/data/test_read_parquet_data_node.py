@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 from taipy.core.data.parquet import ParquetDataNode
 from taipy.core.exceptions.exceptions import NoData
 

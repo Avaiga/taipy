@@ -13,7 +13,7 @@ from unittest import mock
 
 import pytest
 
-from taipy.config.config import Config
+from taipy.common.config import Config
 from taipy.core._init_version import _read_version
 from taipy.core.config.core_section import CoreSection
 from taipy.core.exceptions import ConfigCoreVersionMismatched

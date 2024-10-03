@@ -16,7 +16,7 @@ from enum import Enum
 from pydoc import locate
 from typing import Any, Dict, List, Optional, Set
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 
 from .._entity._reload import _Reloader, _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory

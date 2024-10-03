@@ -21,7 +21,7 @@ from threading import Lock
 import pandas as pd
 from dateutil import parser
 
-from taipy.config import Config
+from taipy.common.config import Config
 from taipy.core import (
     Cycle,
     DataNode,
