@@ -143,7 +143,8 @@ class Gui:
             The signature of the *on_init* callback function must be:
 
             - *state*: the `State^` instance of the caller.
-        on_page_load (Callable): The function that is called when a page is loaded.<br/>
+        on_page_load (Callable): This callback is invoked just before the page content is sent
+            to the front-end.<br/>
             It defaults to the `on_page_load()` global function defined in the Python
             application. If there is no such function, page loads will not trigger
             anything.<br/>
