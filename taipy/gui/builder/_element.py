@@ -39,6 +39,7 @@ class _Element(ABC):
     _TAIPY_EMBEDDED_PREFIX = "_tp_embedded_"
     _EMBEDDED_PROPERTIES = ["decimator"]
     _TYPES: t.Dict[str, str] = {}
+    __LAMBDA_VALUE_IDX = 0
 
     def __new__(cls, *args, **kwargs):
         obj = super(_Element, cls).__new__(cls)
@@ -64,6 +65,12 @@ class _Element(ABC):
     def update(self, **kwargs):
         self._properties.update(kwargs)
         self.parse_properties()
+
+    @staticmethod
+    def __get_lambda_index():
+        _Element.__LAMBDA_VALUE_IDX += 1
+        _Element.__LAMBDA_VALUE_IDX %= 10000
+        return _Element.__LAMBDA_VALUE_IDX
 
     def _evaluate_lambdas(self, gui: Gui):
         for k, lmbd in self._lambdas.items():
@@ -129,7 +136,7 @@ class _Element(ABC):
             tree = _TransformVarToValue(self.__calling_frame, args + targets + _python_builtins).visit(lambda_fn)
             ast.fix_missing_locations(tree)
             lambda_text = ast.unparse(tree)
-            lambda_name = _get_lambda_id(value)
+            lambda_name = _get_lambda_id(value, index=(_Element.__get_lambda_index()))
             self._lambdas[lambda_name] = lambda_text
             return f'{{{lambda_name}({", ".join(args)})}}'
         except Exception as e:

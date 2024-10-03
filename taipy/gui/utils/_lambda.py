@@ -15,5 +15,7 @@ from types import LambdaType
 from ._variable_directory import _variable_encode
 
 
-def _get_lambda_id(lambda_fn: LambdaType, module: t.Optional[str] = None):
-    return _variable_encode(f"__lambda_{id(lambda_fn)}", lambda_fn.__module__ or module)
+def _get_lambda_id(lambda_fn: LambdaType, module: t.Optional[str] = None, index: t.Optional[int] = None):
+    return _variable_encode(
+        f"__lambda_{id(lambda_fn)}{f'_{index}' if index is not None else ''}", lambda_fn.__module__ or module
+    )
