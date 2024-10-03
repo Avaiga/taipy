@@ -30,8 +30,7 @@
     "react-window": "^1.8.6",
     "react-window-infinite-loader": "^1.0.7",
     "socket.io-client": "^4.3.2",
-    "sprintf-js": "^1.1.2",
-    "uuid": "^10.0.0"
+    "sprintf-js": "^1.1.2"
   },
   "overrides": {
     "react": "$react",
@@ -90,7 +89,6 @@
     "@types/react-window": "^1.8.5",
     "@types/react-window-infinite-loader": "^1.0.5",
     "@types/sprintf-js": "^1.1.2",
-    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.5.0",
     "@typescript-eslint/parser": "^8.5.0",
     "add-asset-html-webpack-plugin": "^6.0.0",
