@@ -9,8 +9,11 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import typing as t
 from types import LambdaType
 
+from ._variable_directory import _variable_encode
 
-def _get_lambda_id(lambda_fn: LambdaType):
-    return f"__lambda_{id(lambda_fn)}"
+
+def _get_lambda_id(lambda_fn: LambdaType, module: t.Optional[str] = None):
+    return _variable_encode(f"__lambda_{id(lambda_fn)}", lambda_fn.__module__ or module)

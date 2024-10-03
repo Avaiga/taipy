@@ -263,7 +263,7 @@ class _Evaluator:
             _warn(f"Cannot evaluate expression '{not_encoded_expr if is_edge_case else expr_string}'", e)
             expr_evaluated = None
         if lambda_expr and callable(expr_evaluated):
-            expr_hash = _get_lambda_id(expr_evaluated)
+            expr_hash = _get_lambda_id(expr_evaluated, module_name)
         # save the expression if it needs to be re-evaluated
         return self.__save_expression(gui, expr, expr_hash, expr_evaluated, var_map, lambda_expr)
 

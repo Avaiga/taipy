@@ -16,13 +16,12 @@ import copy
 import inspect
 import re
 import typing as t
-import uuid
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from types import FrameType, FunctionType
 
 from .._warnings import _warn
-from ..utils import _getscopeattr
+from ..utils import _get_lambda_id, _getscopeattr
 from ._context_manager import _BuilderContextManager
 from ._factory import _BuilderFactory
 from ._utils import _LambdaByName, _python_builtins, _TransformVarToValue
@@ -37,7 +36,6 @@ class _Element(ABC):
     _ELEMENT_NAME = ""
     _DEFAULT_PROPERTY = ""
     __RE_INDEXED_PROPERTY = re.compile(r"^(.*?)__([\w\d]+)$")
-    _NEW_LAMBDA_NAME = "new_lambda"
     _TAIPY_EMBEDDED_PREFIX = "_tp_embedded_"
     _EMBEDDED_PROPERTIES = ["decimator"]
     _TYPES: t.Dict[str, str] = {}
@@ -100,8 +98,8 @@ class _Element(ABC):
             if key.startswith("on_") or self._is_callable(key):
                 return value if value.__name__.startswith("<") else value.__name__
             # Parse lambda function_is_callable
-            if (lambda_name := self.__parse_lambda_property(key, value)) is not None:
-                return lambda_name
+            if (lambda_call := self.__parse_lambda_property(key, value)) is not None:
+                return lambda_call
         # Embed value in the caller frame
         if not isinstance(value, str) and key in self._EMBEDDED_PROPERTIES:
             return self.__embed_object(value, is_expression=False)
@@ -131,7 +129,7 @@ class _Element(ABC):
             tree = _TransformVarToValue(self.__calling_frame, args + targets + _python_builtins).visit(lambda_fn)
             ast.fix_missing_locations(tree)
             lambda_text = ast.unparse(tree)
-            lambda_name = f"__lambda_{uuid.uuid4().hex}"
+            lambda_name = _get_lambda_id(value)
             self._lambdas[lambda_name] = lambda_text
             return f'{{{lambda_name}({", ".join(args)})}}'
         except Exception as e:
