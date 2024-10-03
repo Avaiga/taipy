@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 
 import freezegun
 
-from taipy.config import Config
+from taipy.common.config import Config
 from taipy.core._orchestrator._dispatcher import _JobDispatcher
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.task._task_manager import _TaskManager

@@ -16,7 +16,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import networkx as nx
 
-from taipy.config.common._validate_id import _validate_id
+from taipy.common.config.common._validate_id import _validate_id
 
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
