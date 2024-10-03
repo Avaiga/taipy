@@ -289,7 +289,7 @@ class Gui:
                 of the main Python file is allowed.
             env_filename (Optional[str]): An optional file from which to load application
                 configuration variables (see the
-                [Configuration](../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
+                [Configuration](../../../../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
                 section of the User Manual for details.)<br/>
                 The default value is "taipy.gui.env"
             libraries (Optional[List[ElementLibrary]]): An optional list of extension library
@@ -414,7 +414,8 @@ class Gui:
     def register_content_provider(content_type: type, content_provider: t.Callable[..., str]) -> None:
         """Add a custom content provider.
 
-        The application can use custom content for the `part` block when its *content* property is set to an object with type *type*.
+        The application can use custom content for the `part` block when its *content* property
+        is set to an object with type *type*.
 
         Arguments:
             content_type: The type of the content that triggers the content provider.
@@ -1542,8 +1543,8 @@ class Gui:
     ) -> t.Any:
         """Invoke a user callback for a given state.
 
-        See the
-        [section on Long Running Callbacks in a Thread](../../userman/gui/callbacks.md#long-running-callbacks-in-a-thread)
+        See the section on
+        [Long Running Callbacks in a Thread](../../../../../userman/gui/callbacks.md#long-running-callbacks-in-a-thread)
         in the User Manual for details on when and how this function can be used.
 
         Arguments:
@@ -2083,8 +2084,8 @@ class Gui:
     ) -> Partial:
         """Create a new `Partial^`.
 
-        The [User Manual section on Partials](../../userman/gui/pages/partial/index.md) gives details on
-        when and how to use this class.
+        The [User Manual section on Partials](../../../../../userman/gui/pages/partial/index.md)
+        gives details on when and how to use this class.
 
         Arguments:
             page (Union[str, Page^]): The page to create a new Partial from.<br/>
@@ -2667,7 +2668,7 @@ class Gui:
         URL that `Gui` serves. The default is to listen to the *localhost* address
         (127.0.0.1) on the port number 5000. However, the configuration of this `Gui`
         object may impact that (see the
-        [Configuration](../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
+        [Configuration](../../../../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
         section of the User Manual for details).
 
         Arguments:
@@ -2693,7 +2694,7 @@ class Gui:
                 Also note that setting the *debug* argument to True forces *async_mode* to "threading".
             **kwargs (dict[str, any]): Additional keyword arguments that configure how this `Gui` is run.
                 Please refer to the gui config section
-                [page](../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
+                [page](../../../../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
                 of the User Manual for more information.
 
         Returns:

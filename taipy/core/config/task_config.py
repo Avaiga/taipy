@@ -22,26 +22,22 @@ from .data_node_config import DataNodeConfig
 
 
 class TaskConfig(Section):
-    """
-    Configuration fields needed to instantiate an actual `Task^`.
+    """Configuration fields needed to instantiate an actual `Task^`."""
 
-    Attributes:
-        id (str): Identifier of the task config. Must be a valid Python variable name.
-        inputs (Union[DataNodeConfig^, List[DataNodeConfig^]]): The optional list of
-            `DataNodeConfig^` inputs.<br/>
-            The default value is [].
-        outputs (Union[DataNodeConfig^, List[DataNodeConfig^]]): The optional list of
-            `DataNodeConfig^` outputs.<br/>
-            The default value is [].
-        skippable (bool): If True, indicates that the task can be skipped if no change has
-            been made on inputs.<br/>
-            The default value is False.
-        function (Callable): User function taking as inputs some parameters compatible with the
-            exposed types (*exposed_type* field) of the input data nodes and returning results
-            compatible with the exposed types (*exposed_type* field) of the outputs list.<br/>
-            The default value is None.
-        **properties (dict[str, any]): A dictionary of additional properties.
-    """
+    # Attributes:
+    #     inputs (Union[DataNodeConfig^, List[DataNodeConfig^]]): The optional list of
+    #         `DataNodeConfig^` inputs.<br/>
+    #         The default value is [].
+    #     outputs (Union[DataNodeConfig^, List[DataNodeConfig^]]): The optional list of
+    #         `DataNodeConfig^` outputs.<br/>
+    #         The default value is [].
+    #     skippable (bool): If True, indicates that the task can be skipped if no change has
+    #         been made on inputs.<br/>
+    #         The default value is False.
+    #     function (Callable): User function taking as inputs some parameters compatible with the
+    #         exposed types (*exposed_type* field) of the input data nodes and returning results
+    #         compatible with the exposed types (*exposed_type* field) of the outputs list.<br/>
+    #         The default value is None.
 
     name = "TASK"
 
@@ -49,6 +45,11 @@ class TaskConfig(Section):
     _FUNCTION = "function"
     _OUTPUT_KEY = "outputs"
     _IS_SKIPPABLE_KEY = "skippable"
+
+    function: Callable
+    """User function taking as inputs some parameters compatible with the data type
+    (*exposed_type* field) of the input data nodes and returning results compatible with the
+    data type (*exposed_type* field) of the outputs list."""
 
     def __init__(
         self,
@@ -65,10 +66,6 @@ class TaskConfig(Section):
             self._inputs = []
         if outputs:
             self._outputs = [outputs] if isinstance(outputs, DataNodeConfig) else copy(outputs)
-            outputs_all_cacheable = all(output.cacheable for output in self._outputs)
-            if not skippable and outputs_all_cacheable:
-                _warn_deprecated("cacheable", suggest="the skippable feature")
-                skippable = True
         else:
             self._outputs = []
         self._skippable: bool = skippable
@@ -85,26 +82,36 @@ class TaskConfig(Section):
 
     @property
     def input_configs(self) -> List[DataNodeConfig]:
+        """The list of the input data node configurations."""
         return list(self._inputs)
 
     @property
     def inputs(self) -> List[DataNodeConfig]:
+        """The list of the input data node configurations."""
         return list(self._inputs)
 
     @property
     def output_configs(self) -> List[DataNodeConfig]:
+        """The list of the output data node configurations."""
         return list(self._outputs)
 
     @property
     def outputs(self) -> List[DataNodeConfig]:
+        """The list of the output data node configurations."""
         return list(self._outputs)
 
     @property
     def skippable(self) -> bool:
+        """Indicates if the task can be skipped if no change has been made on inputs."""
         return _tpl._replace_templates(self._skippable)
 
     @classmethod
-    def default_config(cls):
+    def default_config(cls) -> "TaskConfig":
+        """Get the default task configuration.
+
+        Returns:
+            The default task configuration.
+        """
         return TaskConfig(cls._DEFAULT_KEY, None, [], [], False)
 
     def _clean(self) -> None:
@@ -214,6 +221,7 @@ class TaskConfig(Section):
                 The default value is False.
             **properties (dict[str, any]): A keyworded variable length list of additional
                 arguments.
+
         Returns:
             The default task configuration.
         """

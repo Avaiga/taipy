@@ -148,7 +148,7 @@ class Notifier:
         ```
 
         Parameters:
-            registration_id (RegistrationId^): The registration id returned by the `register` method.
+            registration_id (RegistrationId): The registration id returned by the `register` method.
         """
         to_remove_registration: Optional[_Registration] = None
 

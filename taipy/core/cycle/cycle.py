@@ -33,7 +33,7 @@ class Cycle(_Entity, _Labeled):
     The data applications to solve these business problems often require modeling the
     corresponding periods (i.e., cycles).
 
-    For this purpose, a `Cycle^` represents a single iteration of such a time pattern.
+    For this purpose, a `Cycle` represents a single iteration of such a time pattern.
     Each _cycle_ has a start date and a duration. Examples of cycles are:
 
     - Monday, 2. January 2023 as a daily cycle
@@ -41,7 +41,7 @@ class Cycle(_Entity, _Labeled):
     - January 2023 as a monthly cycle
     - etc.
 
-    `Cycle^`s are created along with the `Scenario^`s that are attached to them.
+    `Cycle`s are created along with the `Scenario^`s that are attached to them.
     At its creation, a new scenario is attached to a single cycle, the one that
     matches its optional _frequency_ and its _creation_date_.
 
@@ -53,18 +53,9 @@ class Cycle(_Entity, _Labeled):
     - `Frequency.QUARTERLY`
     - `Frequency.YEARLY`
 
-    Attributes:
-        id (str): The unique identifier of the cycle.
-        frequency (Frequency^): The frequency of this cycle.
-        creation_date (datetime): The date and time of the creation of this cycle.
-        start_date (datetime): The date and time of the start of this cycle.
-        end_date (datetime): The date and time of the end of this cycle.
-        name (str): The name of this cycle.
-        properties (dict[str, Any]): A dictionary of additional properties.
-
     !!! example "Example for January cycle"
 
-        ![cycles](../img/cycles_january_colored.svg){ align=left width="250" }
+        ![cycles](../../../../img/cycles_january_colored.svg){ align=left width="250" }
 
         Let's assume an end-user publishes production orders (i.e., a production plan) every
         month. During each month (the cycle), he/she will be interested in experimenting with
@@ -82,7 +73,7 @@ class Cycle(_Entity, _Labeled):
 
     !!! example "Example for February cycle"
 
-        ![cycles](../img/cycles_colored.svg){ align=left width="250" }
+        ![cycles](../../../../img/cycles_colored.svg){ align=left width="250" }
         Now the user starts working on the February work cycle. He or she creates two
         scenarios for the February cycle (one with a low capacity assumption and one with
         a high capacity assumption). The user can then decide to elect the low capacity
@@ -102,6 +93,9 @@ class Cycle(_Entity, _Labeled):
     _ID_PREFIX = "CYCLE"
     __SEPARATOR = "_"
     _MANAGER_NAME = "cycle"
+
+    id:str
+    """The unique identifier of the cycle."""
 
     def __init__(
         self,
@@ -143,7 +137,8 @@ class Cycle(_Entity, _Labeled):
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def frequency(self):
+    def frequency(self) -> Frequency:
+        """The frequency of this cycle."""
         return self._frequency
 
     @frequency.setter  # type: ignore
@@ -153,7 +148,8 @@ class Cycle(_Entity, _Labeled):
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def creation_date(self):
+    def creation_date(self) -> datetime:
+        """The date and time of the creation of this cycle."""
         return self._creation_date
 
     @creation_date.setter  # type: ignore
@@ -163,7 +159,8 @@ class Cycle(_Entity, _Labeled):
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def start_date(self):
+    def start_date(self) -> datetime:
+        """The date and time of the start of this cycle."""
         return self._start_date
 
     @start_date.setter  # type: ignore
@@ -173,7 +170,8 @@ class Cycle(_Entity, _Labeled):
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def end_date(self):
+    def end_date(self) -> datetime:
+        """The date and time of the end of this cycle."""
         return self._end_date
 
     @end_date.setter  # type: ignore
@@ -183,7 +181,8 @@ class Cycle(_Entity, _Labeled):
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def name(self):
+    def name(self) -> str:
+        """The name of this cycle."""
         return self._name
 
     @name.setter  # type: ignore
@@ -192,7 +191,8 @@ class Cycle(_Entity, _Labeled):
         self._name = val
 
     @property
-    def properties(self):
+    def properties(self) -> Dict[str, Any]:
+        """A dictionary of additional properties."""
         self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties
 
@@ -214,7 +214,7 @@ class Cycle(_Entity, _Labeled):
     def __eq__(self, other):
         return isinstance(other, Cycle) and self.id == other.id
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.id)
 
     def get_label(self) -> str:

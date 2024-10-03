@@ -47,6 +47,9 @@ class Section:
     _DEFAULT_KEY = "default"
     _ID_KEY = "id"
 
+    id: str
+    """A valid python identifier that uniquely identifies the section."""
+
     def __init__(self, id, **properties):
         self.id = _validate_id(id)
         self._properties = properties or {}

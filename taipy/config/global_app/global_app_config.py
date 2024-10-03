@@ -38,7 +38,11 @@ class GlobalAppConfig:
 
     @classmethod
     def default_config(cls) -> GlobalAppConfig:
-        """Return the GlobalAppConfig section used by default."""
+        """Return the GlobalAppConfig section used by default.
+
+        Returns:
+            The default configuration.
+        """
         return GlobalAppConfig()
 
     def _clean(self):

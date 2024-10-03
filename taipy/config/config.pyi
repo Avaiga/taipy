@@ -189,6 +189,7 @@ class Config:
 
         Parameters:
             **properties (Dict[str, Any]): A dictionary of additional properties.
+
         Returns:
             The global application configuration.
         """

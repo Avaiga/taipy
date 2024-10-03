@@ -34,13 +34,13 @@ class SQLDataNode(_AbstractSQLDataNode):
             None.
         parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
         last_edit_date (datetime): The date and time of the last modification.
-        edits (List[Edit^]): The ordered list of edits for that job.
+        edits (List[Edit]): The ordered list of edits for that job.
         version (str): The string indicates the application version of the data node to instantiate. If not provided,
             the current version is used.
         validity_period (Optional[timedelta]): The duration implemented as a timedelta since the last edit date for
             which the data node can be considered up-to-date. Once the validity period has passed, the data node is
             considered stale and relevant tasks will run even if they are skippable (see the
-            [Task management](../../userman/scenario_features/sdm/task/index.md) page for more details).
+            [Task management](../../../../../../userman/scenario_features/sdm/task/index.md) page for more details).
             If _validity_period_ is set to `None`, the data node is always up-to-date.
         edit_in_progress (bool): True if a task computing the data node has been submitted
             and not completed yet. False otherwise.

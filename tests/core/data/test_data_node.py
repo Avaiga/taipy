@@ -652,18 +652,6 @@ class TestDataNode:
             data_node.get_parents()
             mck.assert_called_once_with(data_node)
 
-    def test_cacheable_deprecated_false(self):
-        dn = FakeDataNode("foo")
-        with pytest.warns(DeprecationWarning):
-            _ = dn.cacheable
-        assert dn.cacheable is False
-
-    def test_cacheable_deprecated_true(self):
-        dn = FakeDataNode("foo", properties={"cacheable": True})
-        with pytest.warns(DeprecationWarning):
-            _ = dn.cacheable
-        assert dn.cacheable is True
-
     def test_data_node_with_env_variable_value_not_stored(self):
         dn_config = Config.configure_data_node("A", prop="ENV[FOO]")
         with mock.patch.dict(os.environ, {"FOO": "bar"}):

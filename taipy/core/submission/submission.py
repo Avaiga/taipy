@@ -36,17 +36,7 @@ class Submission(_Entity, _Labeled):
     The submission holds the jobs created by the execution of the submittable and the
     `SubmissionStatus^`. The status is lively updated by Taipy during the execution of the jobs.
 
-    Attributes:
-        entity_id (str): The identifier of the entity that was submitted.
-        id (str): The identifier of the `Submission^` entity.
-        jobs (Optional[Union[List[Job], List[JobId]]]): A list of jobs.
-        properties (dict[str, Any]): A dictionary of additional properties.
-        creation_date (Optional[datetime]): The date of this submission's creation.
-        submission_status (Optional[SubmissionStatus]): The current status of this submission.
-        version (Optional[str]): The string indicates the application version of the submission to instantiate.
-            If not provided, the latest version is used.
-
-    !!! example
+    ??? example
 
         ```python
         import taipy as tp
@@ -81,6 +71,9 @@ class Submission(_Entity, _Labeled):
     __SEPARATOR = "_"
     lock = threading.Lock()
 
+    id: SubmissionId
+    """The identifier of the `Submission` entity."""
+
     def __init__(
         self,
         entity_id: str,
@@ -113,35 +106,63 @@ class Submission(_Entity, _Labeled):
         self._blocked_jobs: Set = set()
         self._pending_jobs: Set = set()
 
-    @staticmethod
-    def __new_id() -> SubmissionId:
-        """Generate a unique Submission identifier."""
-        return SubmissionId(Submission.__SEPARATOR.join([Submission._ID_PREFIX, str(uuid.uuid4())]))
+    def __lt__(self, other) -> bool:
+        """Compare the creation date of two submissions."""
+        return self.creation_date.timestamp() < other.creation_date.timestamp()
+
+    def __le__(self, other) -> bool:
+        """Compare the creation date of two submissions."""
+        return self.creation_date.timestamp() <= other.creation_date.timestamp()
+
+    def __gt__(self, other) -> bool:
+        """Compare the creation date of two submissions."""
+        return self.creation_date.timestamp() > other.creation_date.timestamp()
+
+    def __ge__(self, other) -> bool:
+        """Compare the creation date of two submissions."""
+        return self.creation_date.timestamp() >= other.creation_date.timestamp()
+
+    def __hash__(self) -> int:
+        return hash(self.id)
+
+    def __eq__(self, other) -> bool:
+        """Check if a submission is equal to another submission."""
+        return isinstance(other, Submission) and self.id == other.id
 
     @property
     def entity_id(self) -> str:
+        """The identifier of the entity that was submitted."""
         return self._entity_id
 
     @property
     def entity_type(self) -> str:
+        """The type of the entity that was submitted."""
         return self._entity_type
 
     @property
     def entity_config_id(self) -> Optional[str]:
+        """The config id of the entity that was submitted."""
         return self._entity_config_id
 
     @property
-    def properties(self):
+    def properties(self) -> Dict[str, Any]:
+        """A dictionary of additional properties."""
         self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties
 
     @property
-    def creation_date(self):
+    def creation_date(self) -> datetime:
+        """The date and time when the submission was created."""
         return self._creation_date
 
     @property
     @_self_reload(_MANAGER_NAME)
     def submitted_at(self) -> Optional[datetime]:
+        """The date and time when the submission was submitted.
+
+        The submitted date and time corresponds to the date and time of the first job
+        that was submitted. If no job was submitted, the submitted date and time is None.
+        """
         jobs_submitted_at = [job.submitted_at for job in self.jobs if job.submitted_at]
         if jobs_submitted_at:
             return min(jobs_submitted_at)
@@ -150,6 +171,11 @@ class Submission(_Entity, _Labeled):
     @property
     @_self_reload(_MANAGER_NAME)
     def run_at(self) -> Optional[datetime]:
+        """The date and time when the submission was run.
+
+        The run date and time corresponds to the date and time of the first job
+        that was run. If no job was run, the run date and time is None.
+        """
         jobs_run_at = [job.run_at for job in self.jobs if job.run_at]
         if jobs_run_at:
             return min(jobs_run_at)
@@ -158,6 +184,12 @@ class Submission(_Entity, _Labeled):
     @property
     @_self_reload(_MANAGER_NAME)
     def finished_at(self) -> Optional[datetime]:
+        """The date and time when the submission was finished.
+
+        The finished date and time corresponds to the date and time of the last job
+        that was completed. If at least one of the jobs is not finished, the finished
+        date and time is None.
+        """
         if all(job.finished_at for job in self.jobs):
             return max([job.finished_at for job in self.jobs if job.finished_at])
         return None
@@ -165,20 +197,84 @@ class Submission(_Entity, _Labeled):
     @property
     @_self_reload(_MANAGER_NAME)
     def execution_duration(self) -> Optional[float]:
-        """Get the duration of the submission execution in seconds.
-        The execution time is the duration from the first job running to the last job completion.
+        """The duration of the submission execution in seconds.
 
-        Returns:
-            Optional[float]: The duration of the job execution in seconds.
-                - If no job was run, None is returned.
-                - If one of the jobs is not finished, the execution time is the duration
-                  from the running time of the first job to the current time.
+        The execution duration in seconds is the duration from the first job running
+        to the last job completion. If no job was run, the execution duration is None.
+        If at least one job is not finished, the execution duration is the duration
+        from the first job running time to the current time.
         """
         if self.finished_at and self.run_at:
             return (self.finished_at - self.run_at).total_seconds()
         elif self.run_at and self.finished_at is None:
             return (datetime.now() - self.run_at).total_seconds()
         return None
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def jobs(self) -> List[Job]:
+        """The list of jobs created by the submission."""
+        from ..job._job_manager_factory import _JobManagerFactory
+
+        job_manager = _JobManagerFactory._build_manager()
+        return [job_manager._get(job) for job in self._jobs]
+
+    @jobs.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def jobs(self, jobs: Union[List[Job], List[JobId]]) -> None:
+        self._jobs = jobs
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def submission_status(self) -> SubmissionStatus:
+        """The status of the submission."""
+        return self._submission_status
+
+    @submission_status.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def submission_status(self, submission_status) -> None:
+        self._submission_status = submission_status
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def is_abandoned(self) -> bool:
+        """Indicate if the submission is abandoned."""
+        return self._is_abandoned
+
+    @is_abandoned.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def is_abandoned(self, val) -> None:
+        self._is_abandoned = val
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def is_completed(self) -> bool:
+        """Indicate if the submission is completed."""
+        return self._is_completed
+
+    @is_completed.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def is_completed(self, val) -> None:
+        self._is_completed = val
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def is_canceled(self) -> bool:
+        """Indicate if the submission is canceled."""
+        return self._is_canceled
+
+    @is_canceled.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def is_canceled(self, val) -> None:
+        self._is_canceled = val
+
+    @property
+    def version(self) -> str:
+        """The application version of the submission.
+
+        The string indicates the application version of the submission. If not
+        provided, the latest version is used."""
+        return self._version
 
     def get_label(self) -> str:
         """Returns the submission simple label prefixed by its owner label.
@@ -196,79 +292,11 @@ class Submission(_Entity, _Labeled):
         """
         return self._get_simple_label()
 
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def jobs(self) -> List[Job]:
-        from ..job._job_manager_factory import _JobManagerFactory
-
-        job_manager = _JobManagerFactory._build_manager()
-        return [job_manager._get(job) for job in self._jobs]
-
-    @jobs.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
-    def jobs(self, jobs: Union[List[Job], List[JobId]]):
-        self._jobs = jobs
-
-    def __hash__(self):
-        return hash(self.id)
-
-    def __eq__(self, other):
-        return isinstance(other, Submission) and self.id == other.id
-
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def submission_status(self) -> SubmissionStatus:
-        return self._submission_status
-
-    @submission_status.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
-    def submission_status(self, submission_status):
-        self._submission_status = submission_status
-
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def is_abandoned(self) -> bool:
-        return self._is_abandoned
-
-    @is_abandoned.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
-    def is_abandoned(self, val):
-        self._is_abandoned = val
-
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def is_completed(self) -> bool:
-        return self._is_completed
-
-    @is_completed.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
-    def is_completed(self, val):
-        self._is_completed = val
-
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def is_canceled(self) -> bool:
-        return self._is_canceled
-
-    @is_canceled.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
-    def is_canceled(self, val):
-        self._is_canceled = val
-
-    def __lt__(self, other):
-        return self.creation_date.timestamp() < other.creation_date.timestamp()
-
-    def __le__(self, other):
-        return self.creation_date.timestamp() <= other.creation_date.timestamp()
-
-    def __gt__(self, other):
-        return self.creation_date.timestamp() > other.creation_date.timestamp()
-
-    def __ge__(self, other):
-        return self.creation_date.timestamp() >= other.creation_date.timestamp()
-
     def is_finished(self) -> bool:
         """Indicate if the submission is finished.
+
+        A submission is considered as finished if its submission status is
+        `COMPLETED`, `FAILED`, or `CANCELED`.
 
         Returns:
             True if the submission is finished.
@@ -284,11 +312,16 @@ class Submission(_Entity, _Labeled):
 
         Returns:
             A ReasonCollection object that can function as a Boolean value,
-            which is True if the submission can be deleted. False otherwise.
+                which is True if the submission can be deleted. False otherwise.
         """
         from ... import core as tp
 
         return tp.is_deletable(self)
+
+    @staticmethod
+    def __new_id() -> SubmissionId:
+        """Generate a unique Submission identifier."""
+        return SubmissionId(Submission.__SEPARATOR.join([Submission._ID_PREFIX, str(uuid.uuid4())]))
 
 
 @_make_event.register(Submission)

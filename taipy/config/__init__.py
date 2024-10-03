@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-"""The `taipy.config` package provides features to configure a Taipy application.
+""" The `taipy.config` package provides features to configure a Taipy application.
 
 Its main class is the `Config^` singleton. It exposes various static methods
 and attributes to configure the Taipy application and retrieve the configuration values.
@@ -48,8 +48,6 @@ and attributes to configure the Taipy application and retrieve the configuration
 from typing import List
 
 from ._init import Config
-from .checker.issue import Issue
-from .checker.issue_collector import IssueCollector
 from .common.frequency import Frequency
 from .common.scope import Scope
 from .global_app.global_app_config import GlobalAppConfig

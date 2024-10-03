@@ -139,7 +139,8 @@ class _Element(ABC):
         return None
 
     def __embed_object(self, obj: t.Any, is_expression=True) -> str:
-        """Embed an object in the caller frame
+        """NOT DOCUMENTED
+        Embed an object in the caller frame
 
         Return the Taipy expression of the embedded object
         """
@@ -283,7 +284,7 @@ class content(_Control):
     by the content of the page the user navigates to.
 
     The usage of this pseudo-element is described in
-    [this page](../../userman/gui/pages/index.md#application-header-and-footer).
+    [this page](../../../../../../userman/gui/pages/index.md#application-header-and-footer).
     """
 
     def _render(self, gui: "Gui") -> str:

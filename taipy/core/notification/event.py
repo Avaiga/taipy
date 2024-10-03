@@ -27,9 +27,13 @@ class EventOperation(_ReprEnum):
     """
 
     CREATION = 1
+    """Event related to a creation operation."""
     UPDATE = 2
+    """Event related to an update operation."""
     DELETION = 3
+    """Event related to a deletion operation."""
     SUBMISSION = 4
+    """Event related to a submission operation."""
 
 
 class EventEntityType(_ReprEnum):
@@ -41,12 +45,19 @@ class EventEntityType(_ReprEnum):
     """
 
     CYCLE = 1
+    """Event related to a cycle entity."""
     SCENARIO = 2
+    """Event related to a scenario entity."""
     SEQUENCE = 3
+    """Event related to a sequence entity."""
     TASK = 4
+    """Event related to a task entity."""
     DATA_NODE = 5
+    """Event related to a data node entity."""
     JOB = 6
+    """Event related to a job entity."""
     SUBMISSION = 7
+    """Event related to a submission entity."""
 
 
 _NO_ATTRIBUTE_NAME_OPERATIONS = {EventOperation.CREATION, EventOperation.DELETION, EventOperation.SUBMISSION}

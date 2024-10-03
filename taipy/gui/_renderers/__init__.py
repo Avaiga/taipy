@@ -139,7 +139,7 @@ class Markdown(_Renderer):
     user interfaces.
 
     You can find details on the Taipy Markdown-specific syntax and how to add
-    Taipy Visual Elements in the [section on Markdown](../../userman/gui/pages/markdown.md)
+    Taipy Visual Elements in the [section on Markdown](../../../../../userman/gui/pages/markdown.md)
     of the User Manual.
     """
 
@@ -153,7 +153,7 @@ class Markdown(_Renderer):
                 template content.
 
         The `Markdown` constructor supports the *style* parameter as explained in the
-        [section on Styling](../../userman/gui/styling/index.md#style-sheets) and in the
+        [section on Styling](../../../../../userman/gui/styling/index.md#style-sheets) and in the
         `(taipy.gui.Page.)set_style()^` method.
         """
         kwargs["content"] = content
@@ -171,7 +171,7 @@ class Html(_Renderer):
     user interfaces.
 
     You can find details on HTML-specific constructs and how to add
-    Taipy Visual Elements in the [section on HTML](../../userman/gui/pages/html.md)
+    Taipy Visual Elements in the [section on HTML](../../../../../userman/gui/pages/html.md)
     of the User Manual.
     """
 
@@ -185,7 +185,7 @@ class Html(_Renderer):
                 template content.
 
         The `Html` constructor supports the *style* parameter as explained in the
-        [section on Styling](../../userman/gui/styling/index.md#style-sheets) and in the
+        [section on Styling](../../../../../userman/gui/styling/index.md#style-sheets) and in the
         `(taipy.gui.Page.)set_style()^` method.
         """
         kwargs["content"] = content

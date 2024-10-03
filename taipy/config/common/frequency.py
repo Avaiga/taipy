@@ -17,11 +17,12 @@ class Frequency(_ReprEnum):
 
     This enumeration can have the following values:
 
-    - `DAILY`
-    - `WEEKLY`
-    - `MONTHLY`
-    - `QUARTERLY`
-    - `YEARLY`
+    - `DAILY`: Daily frequency, a new cycle is created for each day.
+    - `WEEKLY`: Weekly frequency, a new cycle is created for each week (from Monday to Sunday).
+    - `MONTHLY`: Monthly frequency, a new cycle is created for each month.
+    - `QUARTERLY`: Quarterly frequency, a new cycle is created for each quarter.
+    - `YEARLY`:
+
 
     The frequency must be provided in the `ScenarioConfig^`.
 
@@ -35,12 +36,7 @@ class Frequency(_ReprEnum):
     """
 
     DAILY = 1
-    """Daily frequency, a new cycle is created for each day."""
     WEEKLY = 2
-    """Weekly frequency, a new cycle is created for each week (from Monday to Sunday)."""
     MONTHLY = 3
-    """Monthly frequency, a new cycle is created for each month."""
     QUARTERLY = 4
-    """Quarterly frequency, a new cycle is created for each quarter."""
     YEARLY = 5
-    """Yearly frequency, a new cycle is created for each year."""
