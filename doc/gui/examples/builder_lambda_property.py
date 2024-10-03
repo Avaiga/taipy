@@ -25,7 +25,7 @@ with tgb.Page() as page:
     tgb.slider("{current_year}", min=1990, max=2050, inline=True)
 
     for name, birth_year in persons.items():
-        tgb.text(lambda current_year: f"{name} would be {current_year-birth_year}")
+        tgb.text(lambda current_year: f"{name} would be {current_year-birth_year}")  # noqa: B023
 
 if __name__ == "__main__":
     Gui(page).run(title="Page Builder - Using lambdas in property values")

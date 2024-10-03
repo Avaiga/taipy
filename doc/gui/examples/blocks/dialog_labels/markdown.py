@@ -20,11 +20,11 @@ show_dialog = False
 
 def dialog_action(state, _, payload):
     if payload["args"][0] == 0:  # First button
-        print("Good to hear!")
+        print("Good to hear!")  # noqa: T201
     elif payload["args"][0] == 1:  # Second button
-        print("Sorry to hear that.")
+        print("Sorry to hear that.")  # noqa: T201
     else:  # Close button (index == -1)
-        print("Ok bye.")
+        print("Ok bye.")  # noqa: T201
     state.show_dialog = False
 
 

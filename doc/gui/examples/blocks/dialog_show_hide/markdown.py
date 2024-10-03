@@ -17,17 +17,20 @@ from taipy.gui import Gui
 
 show_dialog = False
 
+
 def show(state):
     state.show_dialog = True
 
+
 def hide(state):
     state.show_dialog = False
+
 
 # Using lambda functions instead of the show() and hide() functions
 #
 # dialog:
 # <|{show_dialog}|dialog|on_action={lambda s: s.assign("show_dialog", False)}|>
-# 
+#
 # button:
 # <|Show|button|on_action={lambda s: s.assign("show_dialog", True)}|>
 page = """
