@@ -1554,8 +1554,7 @@ class Gui:
     ) -> t.Any:
         """Invoke a user callback for a given state.
 
-        See the section on
-        [Long Running Callbacks in a Thread](../../../../../userman/gui/callbacks.md#long-running-callbacks-in-a-thread)
+        See the [section on Long Running Callbacks in a Thread](../../../../../userman/gui/callbacks.md#long-running-callbacks-in-a-thread)
         in the User Manual for details on when and how this function can be used.
 
         Arguments:
