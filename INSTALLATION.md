@@ -100,7 +100,7 @@ code, you must use the following:
 npm run build:dev
 ```
 
-instead of the *standard* build option.
+Instead of the *standard* build option.
 
 This will preserve the debugging symbols, and you will be able to navigate in the
 TypeScript code from your debugger.
