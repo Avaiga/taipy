@@ -22,7 +22,6 @@ import Typography from "@mui/material/Typography";
 import {
     createRequestUpdateAction,
     createSendActionNameAction,
-    createUnBroadcastAction,
     getUpdateVar,
     useDispatch,
     useDispatchRequestUpdateOnFirstRender,
@@ -86,17 +85,8 @@ const JobViewer = (props: JobViewerProps) => {
     );
 
     useEffect(() => {
-        if (coreChanged?.name) {
-            const toRemove = [...coreChanged.stack]
-                .map((bc) => {
-                    if ((bc as Record<string, unknown>).job  == jobId) {
-                        updateVarName && dispatch(createRequestUpdateAction(id, module, [updateVarName], true));
-                        return bc;
-                    }
-                    return undefined;
-                })
-                .filter((v) => v);
-            toRemove.length && dispatch(createUnBroadcastAction(coreChanged.name, ...toRemove));
+        if (coreChanged?.job  == jobId) {
+            updateVarName && dispatch(createRequestUpdateAction(id, module, [updateVarName], true));
         }
     }, [coreChanged, updateVarName, jobId, module, dispatch, id]);
 

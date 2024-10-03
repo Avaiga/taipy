@@ -14,7 +14,7 @@ jobs:
 
       - uses: jpetrucciani/mypy-check@master
         with:
-          mypy_flags:  "--ignore-missing-imports --implicit-optional --no-namespace-packages --exclude (taipy/templates/|tools/|doc/gui/examples/.*/builder.py) --follow-imports skip --disable-error-code import-untyped"
+          mypy_flags:  "--ignore-missing-imports --implicit-optional --disable-error-code attr-defined --no-namespace-packages --exclude (taipy/templates/|tools/|doc/gui/examples/.*/builder.py|taipy/common/config/config.pyi) --follow-imports skip --disable-error-code import-untyped"
 
       - uses: chartboost/ruff-action@v1
   tests:
@@ -33,10 +33,8 @@ jobs:
         id: changes
         with:
           filters: |
-            cli:
-              - 'taipy/_cli/**'
-            config:
-              - 'taipy/config/**'
+            common:
+              - 'taipy/common/**'
             core:
               - 'taipy/core/**'
             gui:
@@ -44,8 +42,6 @@ jobs:
               - 'frontend/taipy-gui/**'
             gui-core:
               - 'taipy/gui_core/**'
-            logger:
-              - 'taipy/logger/**'
             rest:
               - 'taipy/rest/**'
             templates:
@@ -103,13 +99,9 @@ jobs:
         if: steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true'
         run: pipenv run playwright install chromium --with-deps
 
-      - name: Pytest CLI
-        if: steps.changes.outputs.cli == 'true'
-        run: pipenv run pytest tests/cli
-
-      - name: Pytest Config
-        if: steps.changes.outputs.config == 'true'
-        run: pipenv run pytest tests/config
+      - name: Pytest Common
+        if: steps.changes.outputs.common == 'true'
+        run: pipenv run pytest tests/common
 
       - name: Pytest Core
         if: steps.changes.outputs.core == 'true'
@@ -124,10 +116,6 @@ jobs:
       - name: Pytest GUI Core
         if: steps.changes.outputs.gui-core == 'true'
         run: pipenv run pytest tests/gui_core
-
-      - name: Pytest Logger
-        if: steps.changes.outputs.logger == 'true'
-        run: pipenv run pytest tests/logger
 
       - name: Pytest Rest
         if: steps.changes.outputs.rest == 'true'

@@ -18,7 +18,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 from taipy.core.data.excel import ExcelDataNode
 from taipy.core.exceptions.exceptions import SheetNameLengthMismatch
 
@@ -35,7 +35,7 @@ def cleanup(tmp_excel_file):
         try:
             os.remove(tmp_excel_file)
         except Exception as e:
-            from taipy.logger._taipy_logger import _TaipyLogger
+            from taipy.common.logger._taipy_logger import _TaipyLogger
 
             logger = _TaipyLogger._get_logger()
             logger.error(f"Failed to delete {tmp_excel_file}. {e}")

@@ -12,7 +12,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 
 from .._repository._base_taipy_model import _BaseModel
 from .data_node_id import Edit

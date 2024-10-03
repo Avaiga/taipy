@@ -40,8 +40,6 @@ import {
     createSendUpdateAction,
     createRequestDataUpdateAction,
     createRequestUpdateAction,
-    createUnBroadcastAction,
-    BroadcastDesc
 } from "../context/taipyReducers";
 
 export {
@@ -55,7 +53,6 @@ export {
     TableSort,
     Metric,
     TaipyContext as Context,
-    createUnBroadcastAction,
     createRequestDataUpdateAction,
     createRequestUpdateAction,
     createSendActionNameAction,
@@ -71,7 +68,6 @@ export {
 };
 
 export type {
-    BroadcastDesc,
     ColumnDesc,
     FilterDesc,
     LoV,

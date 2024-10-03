@@ -12,7 +12,7 @@
 from queue import SimpleQueue
 from typing import Any, Dict, List
 
-from taipy.config import Config, Frequency
+from taipy.common.config import Config, Frequency
 from taipy.core import taipy as tp
 from taipy.core.job.status import Status
 from taipy.core.notification.core_event_consumer import CoreEventConsumerBase

@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from taipy import Status
-from taipy.config import Config
+from taipy.common.config import Config
 from taipy.core import taipy
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.job._job_manager_factory import _JobManagerFactory

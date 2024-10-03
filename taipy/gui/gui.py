@@ -45,7 +45,7 @@ from flask import (
 from werkzeug.utils import secure_filename
 
 import __main__  # noqa: F401
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 if util.find_spec("pyngrok"):
     from pyngrok import ngrok  # type: ignore[reportMissingImports]
@@ -143,6 +143,15 @@ class Gui:
             The signature of the *on_init* callback function must be:
 
             - *state*: the `State^` instance of the caller.
+        on_page_load (Callable): This callback is invoked just before the page content is sent
+            to the front-end.<br/>
+            It defaults to the `on_page_load()` global function defined in the Python
+            application. If there is no such function, page loads will not trigger
+            anything.<br/>
+
+            The signature of the *on_page_load* callback function must be:
+            - *state*: the `State^` instance of the caller.
+            - *page_name*: the name of the page that is being loaded.
         on_navigate (Callable): The function that is called when a page is requested.<br/>
             It defaults to the `on_navigate()` global function defined in the Python
             application. If there is no such function, page requests will not trigger
@@ -329,6 +338,7 @@ class Gui:
         self.on_action: t.Optional[t.Callable] = None
         self.on_change: t.Optional[t.Callable] = None
         self.on_init: t.Optional[t.Callable] = None
+        self.on_page_load: t.Optional[t.Callable] = None
         self.on_navigate: t.Optional[t.Callable] = None
         self.on_exception: t.Optional[t.Callable] = None
         self.on_status: t.Optional[t.Callable] = None
@@ -2363,6 +2373,26 @@ class Gui:
                     _warn("Exception raised in on_navigate()", e)
         return nav_page
 
+    def _call_on_page_load(self, page_name: str) -> None:
+        if page_name == Gui.__root_page_name:
+            page_name = "/"
+        on_page_load_fn = self._get_user_function("on_page_load")
+        if not callable(on_page_load_fn):
+            return
+        try:
+            arg_count = on_page_load_fn.__code__.co_argcount
+            if arg_count > 0 and inspect.ismethod(on_page_load_fn):
+                arg_count -= 1
+            args: t.List[t.Any] = [None for _ in range(arg_count)]
+            if arg_count > 0:
+                args[0] = self.__get_state()
+            if arg_count > 1:
+                args[1] = page_name
+            on_page_load_fn(*args)
+        except Exception as e:
+            if not self._call_on_exception("on_page_load", e):
+                _warn("Exception raised in on_page_load()", e)
+
     def _get_page(self, page_name: str):
         return next((page_i for page_i in self._config.pages if page_i._route == page_name), None)
 
@@ -2419,6 +2449,8 @@ class Gui:
             page._rendered_jsx += "<PageContent />"
         # Return jsx page
         if page._rendered_jsx is not None:
+            with self._set_locals_context(context):
+                self._call_on_page_load(nav_page)
             return self._server._render(
                 page._rendered_jsx, page._style if page._style is not None else "", page._head, context
             )
@@ -2566,6 +2598,7 @@ class Gui:
             self.__bind_local_func("on_init")
             self.__bind_local_func("on_change")
             self.__bind_local_func("on_action")
+            self.__bind_local_func("on_page_load")
             self.__bind_local_func("on_navigate")
             self.__bind_local_func("on_exception")
             self.__bind_local_func("on_status")

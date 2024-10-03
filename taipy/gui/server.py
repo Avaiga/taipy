@@ -31,7 +31,7 @@ from kthread import KThread
 from werkzeug.serving import is_running_from_reloader
 
 import __main__
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ._renderers.json import _TaipyJsonProvider
 from .config import ServerConfig
