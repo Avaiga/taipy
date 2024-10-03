@@ -8,19 +8,14 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+# -----------------------------------------------------------------------------------------
+# To execute this script, make sure that the taipy-gui package is installed in your
+# Python environment and run:
+#     python <script>
+# -----------------------------------------------------------------------------------------
+from taipy.gui import Gui
 
-import re
+page = "<|toggle|theme|>"
 
-import pandas as pd
-
-
-def _get_data_type(value):
-    if not isinstance(value, str):
-        if pd.api.types.is_bool_dtype(value):
-            return "bool"
-        elif pd.api.types.is_integer_dtype(value):
-            return "int"
-        elif pd.api.types.is_float_dtype(value):
-            return "float"
-    m = re.match(r"^<class '(.*\.)?(.*?)(\d\d)?'>", str(type(value)))
-    return m.group(2) if m else None
+if __name__ == "__main__":
+    Gui(page).run(title="Toggle - Theme")
