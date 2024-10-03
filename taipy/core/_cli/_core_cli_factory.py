@@ -13,17 +13,17 @@ from importlib import import_module
 from operator import attrgetter
 from typing import Type
 
-from taipy._cli._base_cli._abstract_cli import _AbstractCLI
+from taipy.common._cli._base_cli._abstract_cli import _AbstractCLI
 
-from ..common._check_dependencies import _TAIPY_ENTERPRISE_CORE_MODULE, _using_enterprise
+from ..common._check_dependencies import EnterpriseEditionUtils
 from ._core_cli import _CoreCLI
 
 
 class _CoreCLIFactory:
     @staticmethod
     def _build_cli() -> Type[_AbstractCLI]:
-        if _using_enterprise():
-            module = import_module(_TAIPY_ENTERPRISE_CORE_MODULE + "._cli._core_cli")
+        if EnterpriseEditionUtils._using_enterprise():
+            module = import_module(EnterpriseEditionUtils._TAIPY_ENTERPRISE_CORE_MODULE + "._cli._core_cli")
             core_cli = attrgetter("_CoreCLI")(module)
         else:
             core_cli = _CoreCLI

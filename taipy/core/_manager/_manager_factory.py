@@ -12,15 +12,12 @@
 from abc import abstractmethod
 from typing import Type
 
-from taipy.config import Config
+from taipy.common.config import Config
 
 from ._manager import _Manager
 
 
 class _ManagerFactory:
-    _TAIPY_ENTERPRISE_MODULE = "taipy.enterprise"
-    _TAIPY_ENTERPRISE_CORE_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core"
-
     @classmethod
     @abstractmethod
     def _build_manager(cls) -> Type[_Manager]:  # type: ignore

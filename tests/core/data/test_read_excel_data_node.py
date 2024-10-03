@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 from taipy.core.data.excel import ExcelDataNode
 from taipy.core.exceptions.exceptions import (
     ExposedTypeLengthMismatch,

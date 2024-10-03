@@ -16,8 +16,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.frequency import Frequency
+from taipy.common.config.common.scope import Scope
 from taipy.core import Cycle, CycleId, Job, JobId, Scenario, Task
 from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from taipy.core.data._data_manager_factory import _DataManagerFactory
