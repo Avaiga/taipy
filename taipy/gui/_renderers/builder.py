@@ -159,20 +159,17 @@ class _Builder:
             hash_name = hash_names.get(k)
             if hash_name is None:
                 if isinstance(v, str):
-                    looks_like_a_lambda = v.startswith("{lambda ") and v.endswith("}")
                     # need to unescape the double quotes that were escaped during preprocessing
                     (val, hash_name) = _Builder.__parse_attribute_value(gui, v.replace('\\"', '"'))
                 else:
-                    looks_like_a_lambda = False
                     val = v
-                if isroutine(val):
+                if isroutine(val) and not hash_name:
                     # if it's not a callable (and not a string), forget it
                     if val.__name__ == "<lambda>":
                         # if it is a lambda and it has already a hash_name, we're fine
-                        if looks_like_a_lambda or not hash_name:
-                            hash_name = _get_lambda_id(t.cast(LambdaType, val))
-                            gui._bind_var_val(hash_name, val)  # type: ignore[arg-type]
-                    elif not hash_name:
+                        hash_name = _get_lambda_id(t.cast(LambdaType, val))
+                        gui._bind_var_val(hash_name, val)  # type: ignore[arg-type]
+                    else:
                         hash_name = _get_expr_var_name(val.__name__)
 
                 if val is not None or hash_name:
@@ -428,9 +425,9 @@ class _Builder:
                 var_type = self.__gui._get_unique_type_adapter(type(elt).__name__)
             if adapter is None:
                 adapter = self.__gui._get_adapter_for_type(var_type)
-            elif var_type == str.__name__ and callable(adapter):
+            elif var_type == str.__name__ and isroutine(adapter):
                 var_type += (
-                    f"__lambda_{id(adapter)}"
+                    _get_lambda_id(t.cast(LambdaType, adapter))
                     if adapter.__name__ == "<lambda>"
                     else _get_expr_var_name(adapter.__name__)
                 )
@@ -438,19 +435,19 @@ class _Builder:
                 if adapter is None:
                     adapter = self.__gui._get_adapter_for_type(lov_name)
                 else:
-                    self.__gui._add_type_for_var(lov_name, var_type)
+                    self.__gui._add_type_for_var(lov_name, t.cast(str, var_type))
             if value_name := self.__hashes.get("value"):
                 if adapter is None:
                     adapter = self.__gui._get_adapter_for_type(value_name)
                 else:
-                    self.__gui._add_type_for_var(value_name, var_type)
+                    self.__gui._add_type_for_var(value_name, t.cast(str, var_type))
             if adapter is not None:
                 self.__gui._add_adapter_for_type(var_type, adapter)  # type: ignore
 
             if default_lov is not None and lov:
                 for elt in lov:
                     ret = self.__gui._run_adapter(
-                        t.cast(t.Callable, adapter), elt, adapter.__name__ if callable(adapter) else "adapter"
+                        t.cast(t.Callable, adapter), elt, adapter.__name__ if isroutine(adapter) else "adapter"
                     )  # type: ignore
                     if ret is not None:
                         default_lov.append(ret)
@@ -460,7 +457,10 @@ class _Builder:
             val_list = value if isinstance(value, list) else [value]
             for val in val_list:
                 ret = self.__gui._run_adapter(
-                    t.cast(t.Callable, adapter), val, adapter.__name__ if callable(adapter) else "adapter", id_only=True
+                    t.cast(t.Callable, adapter),
+                    val,
+                    adapter.__name__ if isroutine(adapter) else "adapter",
+                    id_only=True,
                 )  # type: ignore
                 if ret is not None:
                     ret_list.append(ret)

@@ -15,50 +15,20 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-
-# Function to plot: x^3/3-x
-def f(x):
-    return x * x * x / 3 - x
-
-
-# x values: [-2.2, ..., 2.2]
-x = [(x - 10) / 4.5 for x in range(0, 21)]
-
 data = {
-    "x": x,
-    # y: [f(-2.2), ..., f(2.2)]
-    "y": [f(x) for x in x],
-}
-
-shape_size = 0.1
-
-layout = {
-    "shapes": [
-        # Shape for local maximum (x = -1)
-        {
-            "x0": -1 - shape_size,
-            "y0": f(-1) - 2 * shape_size,
-            "x1": -1 + shape_size,
-            "y1": f(-1) + 2 * shape_size,
-            "fillcolor": "green",
-            "opacity": 0.5,
-        },
-        # Shape for local minimum (x = 1)
-        {
-            "x0": 1 - shape_size,
-            "y0": f(1) - 2 * shape_size,
-            "x1": 1 + shape_size,
-            "y1": f(1) + 2 * shape_size,
-            "fillcolor": "red",
-            "opacity": 0.5,
-        },
-    ]
+    "Temperatures": [
+        [17.2, 27.4, 28.6, 21.5],
+        [5.6, 15.1, 20.2, 8.1],
+        [26.6, 22.8, 21.8, 24.0],
+        [22.3, 15.5, 13.4, 19.6],
+    ],
+    "Cities": ["Hanoi", "Paris", "Rio", "Sydney"],
+    "Seasons": ["Winter", "Spring", "Summer", "Autumn"],
 }
 
 page = """
-<|{data}|chart|layout={layout}|>
+<|{data}|chart|type=heatmap|z=Temperatures|x=Seasons|y=Cities|>
 """
 
-
 if __name__ == "__main__":
-    Gui(page).run(title="Chart - Advanced - Annotations")
+    Gui(page).run(title="Chart - Heatmap - Simple")

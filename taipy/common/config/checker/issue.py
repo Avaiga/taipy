@@ -20,22 +20,21 @@ class Issue:
     `Issue` is a dataclass that represents an issue detected during the configuration check
     process. It contains the necessary information to understand the issue and help the user to fix
     it.
-
-    Attributes:
-        level (str): Level of the issue among ERROR, WARNING, INFO.
-        field (str): Configuration field on which the issue has been detected.
-        value (Any): Value of the field on which the issue has been detected.
-        message (str): Human readable message to help the user fix the issue.
-        tag (Optional[str]): Optional tag to be used to filter issues.
     """
 
     level: str
+    """Level of the issue among ERROR, WARNING, INFO."""
     field: str
+    """Configuration field on which the issue has been detected."""
     value: Any
+    """Value of the field on which the issue has been detected."""
     message: str
+    """Human readable message to help the user fix the issue."""
     tag: Optional[str]
+    """Optional tag to be used to filter issues."""
 
     def __str__(self) -> str:
+        """Return a human-readable string representation of the issue."""
         message = self.message
 
         if self.value:

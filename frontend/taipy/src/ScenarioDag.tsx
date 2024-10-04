@@ -23,7 +23,6 @@ import {
     createRequestUpdateAction,
     createSendActionNameAction,
     createSendUpdateAction,
-    createUnBroadcastAction,
     getUpdateVar,
     useDispatch,
     useDynamicProperty,
@@ -99,30 +98,13 @@ const ScenarioDag = (props: ScenarioDagProps) => {
 
     // Refresh on broadcast
     useEffect(() => {
-        if (coreChanged?.name) {
-            const toRemove = [...coreChanged.stack]
-                .map((bc) => {
-                    const ids = (bc as Record<string, unknown>).scenario;
-                    if (
-                        typeof ids === "string"
-                            ? ids === scenarioId
-                            : Array.isArray(ids)
-                            ? ids.includes(scenarioId)
-                            : ids
-                    ) {
-                        props.updateVarName &&
-                            dispatch(createRequestUpdateAction(props.id, module, [props.updateVarName], true));
-                        return bc;
-                    }
-                    const tasks = (bc as Record<string, unknown>).tasks;
-                    if (tasks) {
-                        setTaskStatuses(tasks as TaskStatuses);
-                        return bc;
-                    }
-                    return undefined;
-                })
-                .filter((v) => v);
-            toRemove.length && dispatch(createUnBroadcastAction(coreChanged.name, ...toRemove));
+        const ids = coreChanged?.scenario;
+        if (typeof ids === "string" ? ids === scenarioId : Array.isArray(ids) ? ids.includes(scenarioId) : ids) {
+            props.updateVarName && dispatch(createRequestUpdateAction(props.id, module, [props.updateVarName], true));
+        }
+        const tasks = coreChanged?.tasks;
+        if (tasks) {
+            setTaskStatuses(tasks as TaskStatuses);
         }
     }, [coreChanged, props.updateVarName, scenarioId, module, dispatch, props.id]);
 
@@ -155,11 +137,13 @@ const ScenarioDag = (props: ScenarioDagProps) => {
         let doLayout = false;
         if (displayModel) {
             setScenarioId(displayModel[0]);
+            model.scenarioId = displayModel[0];
             // populate model
             doLayout = populateModel(addStatusToDisplayModel(displayModel, taskStatuses), model);
         }
         const rects =
             engine.getModel() &&
+            (engine.getModel() as TaipyDiagramModel).scenarioId == model.scenarioId &&
             engine
                 .getModel()
                 .getNodes()

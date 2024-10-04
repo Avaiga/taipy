@@ -41,7 +41,7 @@ class _Topic:
             raise InvalidEventOperation
         return operation
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.entity_type, self.entity_id, self.operation, self.attribute_name))
 
     def __eq__(self, __value) -> bool:

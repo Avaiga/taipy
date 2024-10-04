@@ -13,22 +13,27 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
+import taipy.gui.builder as tgb
 from taipy.gui import Gui
 
-data = {
-    "Temperatures": [
-        [17.2, 27.4, 28.6, 21.5],
-        [5.6, 15.1, 20.2, 8.1],
-        [26.6, 22.8, 21.8, 24.0],
-        [22.3, 15.5, 13.4, 19.6],
-    ],
-    "Cities": ["Hanoi", "Paris", "Rio", "Sydney"],
-    "Seasons": ["Winter", "Spring", "Summer", "Autumn"],
-}
+show_dialog = False
 
-page = """
-<|{data}|chart|type=heatmap|z=Temperatures|x=Seasons|y=Cities|>
-"""
+
+def dialog_action(state, _, payload):
+    if payload["args"][0] == 0:  # First button
+        print("Good to hear!")  # noqa: T201
+    elif payload["args"][0] == 1:  # Second button
+        print("Sorry to hear that.")  # noqa: T201
+    else:  # Close button (index == -1)
+        print("Ok bye.")  # noqa: T201
+    state.show_dialog = False
+
+
+with tgb.Page() as page:
+    with tgb.dialog("{show_dialog}", title="Welcome!", on_action=dialog_action, labels="Couldn't be better;Not my day"):  # type: ignore
+        tgb.html("h2", "Hello!")
+
+    tgb.button("Show", on_action=lambda s: s.assign("show_dialog", True))
 
 if __name__ == "__main__":
-    Gui(page).run(title="Chart - Heatmap - Basic")
+    Gui(page).run(title="Dialog - Labels")

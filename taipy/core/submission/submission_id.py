@@ -12,4 +12,5 @@
 from typing import NewType
 
 SubmissionId = NewType("SubmissionId", str)
+"""Type that holds a `Submission^` identifier."""
 SubmissionId.__doc__ = """Type that holds a `Submission^` identifier."""

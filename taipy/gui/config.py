@@ -22,6 +22,7 @@ from werkzeug.serving import is_running_from_reloader
 from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ._gui_cli import _GuiCLI
+from ._hook import _Hooks
 from ._page import _Page
 from ._warnings import _warn
 from .partial import Partial
@@ -225,6 +226,7 @@ class _Config(object):
             config["webapp_path"] = os.environ.get("TAIPY_GUI_UPLOAD_FOLDER")
         if args.taipy_client_url:
             config["client_url"] = args.taipy_client_url
+        _Hooks()._handle_argparse(args, config)
 
     def _build_config(self, root_dir, env_filename, kwargs):  # pragma: no cover
         config = self.config

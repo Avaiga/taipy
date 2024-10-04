@@ -13,33 +13,24 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
+import logging
+
 from taipy.gui import Gui
 
-n_slices = 20
-# List: [1..n_slices]
-# Slices are bigger and bigger
-values = list(range(1, n_slices + 1))
+logging.basicConfig(level=logging.INFO)
 
-marker = {
-    # Colors move around the Hue color disk
-    "colors": [f"hsl({360 * (i - 1)/(n_slices - 1)},90%,60%)" for i in values]
-}
+def key_pressed(state, id, payload):
+    key = payload.get('args', [None])[0]
+    if key in ["F1", "F2", "F3"]:
+        logging.info(f"{key} key pressed")
 
-layout = {
-    # Hide the legend
-    "showlegend": False
-}
 
-options = {
-    # Hide the texts
-    "textinfo": "none"
-}
+value = 0
 
+# on_action function is called when the action_keys are pressed
 page = """
-#
-
-<|{values}|chart|type=pie|marker={marker}|options={options}|layout={layout}|>
+<|{value}|input|change_delay=300|on_action=key_pressed|action_keys=F1;F2;F3|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="Chart - Pie - Style")
+    Gui(page).run(title="Input - On change")

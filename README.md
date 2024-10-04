@@ -27,13 +27,14 @@ No more compromise on performance, customization, and scalability.
 
 </div>
 
-<p align="left">
+<p align="center"><h4>
     <br />
     <a href="https://docs.taipy.io/en/latest/"><strong>📚 Explore the docs </strong></a>
     <br />
     <a href="https://discord.com/invite/SJyz2VJGxV"><strong>  🫱🏼‍🫲🏼 Discord support </strong></a>
     <br />
     <a href="https://docs.taipy.io/en/latest/gallery/"><strong> 👀 Demos & Examples </strong></a>
+</h4>
   </p>
 
 &nbsp;
@@ -70,17 +71,20 @@ Taipy is a Two-in-One Tool for UI Generation and Scenario/Data Management
 
 ## ⚙️ Quickstart
 
-To install Taipy stable release run:
+To install the Taipy stable release run:
 
 ```bash
 pip install taipy
 ```
+
 
 Ready to Install Taipy? 🚀<br>
 Get everything set up in no time! Whether you're using a Conda environment or installing from source, follow our [Installation Guide](https://docs.taipy.io/en/latest/installation/) for step-by-step instructions.<br />
 
 Excited to Dive In? 💡 <br>
 Start building with Taipy today! Our [Getting Started Guide](https://docs.taipy.io/en/latest/getting_started/) is the perfect place to begin your journey and unlock the full potential of Taipy.
+
+
 
 &nbsp;
 
@@ -130,7 +134,7 @@ Check out the movie genre demo scenario creation with this [Demo](https://docs.t
 
 This simple Taipy application demonstrates how to create a basic film recommendation system using Taipy.<br />
 The application filters a dataset of films based on the user's selected genre and displays the top seven films in that genre by popularity.
-Here is the full code for both the frontend and backend of the application.
+Here is the full code for both the front-end and back-end of the application.
 
 ```python
 import taipy as tp
@@ -172,10 +176,10 @@ if __name__ == "__main__":
     # Taipy User Interface
     # Let's add a GUI to our Scenario Management for a full application
 
-    # Get list of genres
+    # Get the list of genres
     genres = [
         "Action", "Adventure", "Animation", "Children", "Comedy", "Fantasy", "IMAX"
-        "Romance","Sci-FI", "Western", "Crime", "Mystery", "Drama", "Horror", "Thriller", "Film-Noir","War", "Musical", "Documentary"
+        "Romance", "Sci-FI", "Western", "Crime", "Mystery", "Drama", "Horror", "Thriller", "Film-Noir", "War", "Musical", "Documentary"
     ]
 
     # Initialization of variables
