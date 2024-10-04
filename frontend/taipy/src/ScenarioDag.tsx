@@ -137,11 +137,13 @@ const ScenarioDag = (props: ScenarioDagProps) => {
         let doLayout = false;
         if (displayModel) {
             setScenarioId(displayModel[0]);
+            model.scenarioId = displayModel[0];
             // populate model
             doLayout = populateModel(addStatusToDisplayModel(displayModel, taskStatuses), model);
         }
         const rects =
             engine.getModel() &&
+            (engine.getModel() as TaipyDiagramModel).scenarioId == model.scenarioId &&
             engine
                 .getModel()
                 .getNodes()
