@@ -59,7 +59,7 @@ import {
 } from "../../utils/hooks";
 import { Icon } from "../../utils/icon";
 import { LovItem } from "../../utils/lov";
-import { get_class_name } from "./TaipyStyle";
+import { getComponentClassName } from "./TaipyStyle";
 
 const MultipleItem = ({ value, clickHandler, selectedValue, item, disabled }: ItemProps) => (
     <ListItemButton onClick={clickHandler} data-id={value} dense disabled={disabled}>
@@ -325,7 +325,7 @@ const Selector = (props: SelTreeProps) => {
     return (
         <>
             {isRadio || isCheck ? (
-                <FormControl sx={controlSx} className={`${className} ${get_class_name(props.children)}`}>
+                <FormControl sx={controlSx} className={`${className} ${getComponentClassName(props.children)}`}>
                     {props.label ? <FormLabel>{props.label}</FormLabel> : null}
                     <Tooltip title={hover || ""}>
                         {isRadio ? (
@@ -392,13 +392,13 @@ const Selector = (props: SelTreeProps) => {
                             getOptionKey={getOptionKey}
                             isOptionEqualToValue={isOptionEqualToValue}
                             sx={controlSx}
-                            className={`${className} ${get_class_name(props.children)}`}
+                            className={`${className} ${getComponentClassName(props.children)}`}
                             renderInput={(params) => <TextField {...params} label={props.label} margin="dense" />}
                             renderOption={renderOption}
                         />
                     </Tooltip>
                 ) : (
-                    <FormControl sx={controlSx} className={`${className} ${get_class_name(props.children)}`}>
+                    <FormControl sx={controlSx} className={`${className} ${getComponentClassName(props.children)}`}>
                         {props.label ? <InputLabel disableAnimation>{props.label}</InputLabel> : null}
                         <Tooltip title={hover || ""} placement="top">
                             <Select
@@ -466,7 +466,7 @@ const Selector = (props: SelTreeProps) => {
                     </FormControl>
                 )
             ) : (
-                <FormControl sx={controlSx} className={`${className} ${get_class_name(props.children)}`}>
+                <FormControl sx={controlSx} className={`${className} ${getComponentClassName(props.children)}`}>
                     {props.label ? (
                         <InputLabel disableAnimation className="static-label">
                             {props.label}

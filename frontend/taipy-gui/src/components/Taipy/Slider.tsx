@@ -24,7 +24,7 @@ import { LovImage, LovProps, useLovListMemo } from "./lovUtils";
 import { getCssSize, getUpdateVar } from "./utils";
 import { Icon } from "../../utils/icon";
 import { SyntheticEvent } from "react";
-import { get_class_name } from "./TaipyStyle";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface SliderProps extends LovProps<number | string | number[] | string[], number | string | number[] | string[]> {
     width?: string;
@@ -271,7 +271,7 @@ const Slider = (props: SliderProps) => {
     }, [props.value, lovList, parsedDefaultValue, convertValue]);
 
     return (
-        <Box sx={textAnchorSx} className={`${className} ${get_class_name(props.children)}`}>
+        <Box sx={textAnchorSx} className={`${className} ${getComponentClassName(props.children)}`}>
             {getText(value, true)}
             <Tooltip title={hover || ""}>
                 {Array.isArray(parsedDefaultValue)

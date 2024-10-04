@@ -33,7 +33,7 @@ import { useClassNames, useDynamicProperty, useModule } from "../../utils/hooks"
 import { expandSx, getCssSize, noDisplayStyle, TaipyActiveProps } from "./utils";
 import { uploadFile } from "../../workers/fileupload";
 import { SxProps } from "@mui/material";
-import { get_class_name } from "./TaipyStyle";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface FileSelectorProps extends TaipyActiveProps {
     onAction?: string;
@@ -186,7 +186,7 @@ const FileSelector = (props: FileSelectorProps) => {
     }, [handleDrop, handleDragLeave, handleDragOverWithLabel]);
 
     return (
-        <label htmlFor={inputId} className={`${className} ${get_class_name(props.children)}`}>
+        <label htmlFor={inputId} className={`${className} ${getComponentClassName(props.children)}`}>
             <input
                 style={noDisplayStyle}
                 id={inputId}

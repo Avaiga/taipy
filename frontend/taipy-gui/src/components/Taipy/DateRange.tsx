@@ -27,7 +27,7 @@ import { dateToString, getDateTime, getTimeZonedDate } from "../../utils";
 import { useClassNames, useDispatch, useDynamicProperty, useFormatConfig, useModule } from "../../utils/hooks";
 import Field from "./Field";
 import ErrorFallback from "../../utils/ErrorBoundary";
-import { get_class_name } from "./TaipyStyle";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface DateRangeProps extends TaipyActiveProps, TaipyChangeProps {
     withTime?: boolean;
@@ -133,7 +133,7 @@ const DateRange = (props: DateRangeProps) => {
             <Tooltip title={hover || ""}>
                 <Stack
                     id={id}
-                    className={`${className} ${get_class_name(props.children)}`}
+                    className={`${className} ${getComponentClassName(props.children)}`}
                     gap={0.5}
                     direction="row"
                     display="inline-flex"

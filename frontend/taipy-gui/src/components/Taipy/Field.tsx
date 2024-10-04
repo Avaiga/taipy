@@ -18,7 +18,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { formatWSValue } from "../../utils";
 import { useClassNames, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import { TaipyBaseProps, TaipyHoverProps, getCssSize } from "./utils";
-import { get_class_name } from "./TaipyStyle";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface TaipyFieldProps extends TaipyBaseProps, TaipyHoverProps {
     dataType?: string;
@@ -68,18 +68,18 @@ const Field = (props: TaipyFieldProps) => {
         <Tooltip title={hover || ""}>
             <>
                 {mode == "pre" ? (
-                    <pre className={`${className} ${get_class_name(props.children)}`} id={id} style={style}>
+                    <pre className={`${className} ${getComponentClassName(props.children)}`} id={id} style={style}>
                         {value}
                     </pre>
                 ) : mode == "markdown" || mode == "md" ? (
-                    <Markdown className={`${className} ${get_class_name(props.children)}`}>{value}</Markdown>
+                    <Markdown className={`${className} ${getComponentClassName(props.children)}`}>{value}</Markdown>
                 ) : raw || mode == "raw" ? (
                     <span className={className} id={id} style={style}>
                         {value}
                     </span>
                 ) : (
                     <Typography
-                        className={`${className} ${get_class_name(props.children)}`}
+                        className={`${className} ${getComponentClassName(props.children)}`}
                         id={id}
                         component="span"
                         sx={typoSx}

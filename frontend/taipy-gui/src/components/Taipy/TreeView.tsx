@@ -43,7 +43,7 @@ import {
 import { LovItem } from "../../utils/lov";
 import { getUpdateVar } from "./utils";
 import { Icon } from "../../utils/icon";
-import { get_class_name } from "./TaipyStyle";
+import { getComponentClassName } from "./TaipyStyle";
 
 const treeSlots = { expandIcon: ChevronRightIcon };
 
@@ -287,7 +287,7 @@ const TreeView = (props: TreeViewProps) => {
     );
 
     return (
-        <Box id={id} sx={boxSx} className={`${className} ${get_class_name(props.children)}`}>
+        <Box id={id} sx={boxSx} className={`${className} ${getComponentClassName(props.children)}`}>
             <Tooltip title={hover || ""}>
                 <Paper sx={paperSx}>
                     <Box>

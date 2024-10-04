@@ -19,7 +19,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 import { TaipyActiveProps } from "./utils";
-import { get_class_name } from "./TaipyStyle";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface ImageProps extends TaipyActiveProps {
     onAction?: string;
@@ -84,7 +84,7 @@ const Image = (props: ImageProps) => {
                     <span>
                         <Button
                             id={id}
-                            className={`${className} ${get_class_name(props.children)}`}
+                            className={`${className} ${getComponentClassName(props.children)}`}
                             onClick={handleClick}
                             aria-label={label}
                             variant="outlined"
@@ -101,7 +101,7 @@ const Image = (props: ImageProps) => {
                 ) : inlineSvg ? (
                     <div
                         id={id}
-                        className={`${className} ${get_class_name(props.children)}`}
+                        className={`${className} ${getComponentClassName(props.children)}`}
                         style={style}
                         ref={divRef}
                         title={label}
@@ -111,7 +111,7 @@ const Image = (props: ImageProps) => {
                         id={id}
                         src={content}
                         style={style}
-                        className={`${className} ${get_class_name(props.children)}`}
+                        className={`${className} ${getComponentClassName(props.children)}`}
                         alt={label}
                     />
                 )}

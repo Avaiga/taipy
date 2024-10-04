@@ -21,7 +21,7 @@ import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import { getSuffixedClassNames, getCssSize, TaipyBaseProps } from "./utils";
 import { SxProps } from "@mui/material/styles";
 import { Theme } from "@mui/system";
-import { get_class_name } from "./TaipyStyle";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface ProgressBarProps extends TaipyBaseProps {
     value?: number;
@@ -105,7 +105,7 @@ const Progress = (props: ProgressBarProps) => {
     return (
         <Box
             sx={linear ? boxWithFlexDirectionSx : circularBoxSx}
-            className={`${className} ${get_class_name(props.children)}`}
+            className={`${className} ${getComponentClassName(props.children)}`}
             id={props.id}
         >
             {title && titleAnchor !== "none" ? (

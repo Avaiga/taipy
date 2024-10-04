@@ -17,7 +17,7 @@ import { sprintf } from "sprintf-js";
 
 import { TaipyBaseProps } from "./utils";
 import { useClassNames } from "../../utils/hooks";
-import { get_class_name } from "./TaipyStyle";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface IndicatorProps extends TaipyBaseProps {
     min?: number;
@@ -97,7 +97,7 @@ const Indicator = (props: IndicatorProps) => {
         <>
             <Slider
                 id={props.id}
-                className={`${className} ${get_class_name(props.children)}`}
+                className={`${className} ${getComponentClassName(props.children)}`}
                 min={0}
                 max={100}
                 value={getValue(value === undefined ? defaultValue : value, min, max)}

@@ -89,8 +89,8 @@ user_data/
 Data
 
 # demo files
-demo-*
-demo_*
+demo[_\-]*
+demo_*/
 .airflow
 *.dags
 data_sources

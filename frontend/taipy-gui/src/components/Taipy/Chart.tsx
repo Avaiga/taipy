@@ -46,7 +46,7 @@ import {
 import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
 import { Figure } from "react-plotly.js";
 import { lightenPayload } from "../../context/wsUtils";
-import { get_class_name } from "./TaipyStyle";
+import { getComponentClassName } from "./TaipyStyle";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -697,7 +697,7 @@ const Chart = (props: ChartProp) => {
         <Tooltip title={hover || ""}>
             <Box
                 id={id}
-                className={`${className} ${get_class_name(props.children)}`}
+                className={`${className} ${getComponentClassName(props.children)}`}
                 ref={plotRef}
             >
                 <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>

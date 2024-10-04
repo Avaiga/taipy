@@ -26,7 +26,7 @@ import { createSendActionNameAction } from "../../context/taipyReducers";
 import TaipyRendered from "../pages/TaipyRendered";
 import { TaipyActiveProps } from "./utils";
 import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
-import { get_class_name } from "./TaipyStyle";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface DialogProps extends TaipyActiveProps {
     title: string;
@@ -115,7 +115,7 @@ const Dialog = (props: DialogProps) => {
             id={id}
             onClose={handleAction}
             open={open === undefined ? defaultOpen === "true" || defaultOpen === true : !!open}
-            className={`${className} ${get_class_name(props.children)}`}
+            className={`${className} ${getComponentClassName(props.children)}`}
             PaperProps={paperProps}
         >
             <Tooltip title={hover || ""}>

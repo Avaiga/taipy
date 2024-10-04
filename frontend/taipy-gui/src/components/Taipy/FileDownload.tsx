@@ -21,7 +21,7 @@ import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../..
 import { getCssSize, noDisplayStyle, TaipyActiveProps } from "./utils";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { runXHR } from "../../utils/downloads";
-import { get_class_name } from "./TaipyStyle";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface FileDownloadProps extends TaipyActiveProps {
     content?: string;
@@ -97,7 +97,7 @@ const FileDownload = (props: FileDownloadProps) => {
     const aProps = useMemo(() => (bypassPreview ? {} : { target: "_blank", rel: "noreferrer" }), [bypassPreview]);
 
     return render ? (
-        <label htmlFor={linkId} className={`${className} ${get_class_name(props.children)}`}>
+        <label htmlFor={linkId} className={`${className} ${getComponentClassName(props.children)}`}>
             <a style={noDisplayStyle} id={linkId} download={download} {...aProps} ref={aRef} />
             {auto ? null : (
                 <Tooltip title={hover || ""}>

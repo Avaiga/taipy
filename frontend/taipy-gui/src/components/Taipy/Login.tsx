@@ -30,7 +30,7 @@ import { SxProps, Theme } from "@mui/system";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { TaipyBaseProps, getSuffixedClassNames } from "./utils";
 import { useClassNames, useDispatch, useModule } from "../../utils/hooks";
-import { get_class_name } from "./TaipyStyle";
+import { getComponentClassName } from "./TaipyStyle";
 
 // allow only one instance of this component
 let nbLogins = 0;
@@ -129,7 +129,7 @@ const Login = (props: LoginProps) => {
     }, []);
 
     return onlyOne ? (
-        <Dialog id={id} open={true} className={`${className} ${get_class_name(props.children)}`}>
+        <Dialog id={id} open={true} className={`${className} ${getComponentClassName(props.children)}`}>
             <DialogTitle sx={titleSx}>
                 {title}
                 <IconButton aria-label="close" onClick={handleAction} sx={closeSx} title="close" data-close>

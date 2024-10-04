@@ -19,14 +19,14 @@ interface TaipyStyleProps {
     content: string;
 }
 
-export const get_class_name = (children: ReactNode) =>
+export const getComponentClassName = (children: ReactNode) =>
     (
         React.Children.map(children, (element) =>
             React.isValidElement(element) && element.type == TaipyStyle ? element.props.className : undefined
         )?.filter((v) => v) || []
     ).join(" ");
 
-const get_style = (style: Record<string, unknown>): string =>
+const getStyle = (style: Record<string, unknown>): string =>
     Object.entries(style)
         .map(
             ([k, v]) =>
@@ -34,7 +34,7 @@ const get_style = (style: Record<string, unknown>): string =>
                     typeof v == "string"
                         ? v
                         : Object.entries(v as Record<string, unknown>)
-                              .map(([vk, vv]) => (typeof vv == "string" ? `${vk}:${vv}` : get_style({ [vk]: vv })))
+                              .map(([vk, vv]) => (typeof vv == "string" ? `${vk}:${vv}` : getStyle({ [vk]: vv })))
                               .join(";")
                 }}`
         )
@@ -45,7 +45,7 @@ const TaipyStyle = (props: TaipyStyleProps) => {
         const style = JSON.parse(props.content);
         return (
             <Helmet>
-                <style>{get_style({ [`.${props.className}`]: style })}</style>
+                <style>{getStyle({ [`.${props.className}`]: style })}</style>
             </Helmet>
         );
     } catch (e) {

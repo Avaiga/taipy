@@ -30,7 +30,7 @@ import { useClassNames, useDynamicProperty, useIsMobile } from "../../utils/hook
 import { TaipyContext } from "../../context/taipyContext";
 import { LovItem } from "../../utils/lov";
 import { getBaseURL } from "../../utils";
-import { get_class_name } from "./TaipyStyle";
+import { getComponentClassName } from "./TaipyStyle";
 
 const boxSx = { borderBottom: 1, borderColor: "divider", width: "fit-content" };
 
@@ -76,7 +76,7 @@ const NavBar = (props: LovProps) => {
                 <Drawer
                     open={opened}
                     onClose={() => setOpened(false)}
-                    className={`${className} ${get_class_name(props.children)}`}
+                    className={`${className} ${getComponentClassName(props.children)}`}
                 >
                     <List>
                         {lov.map((val) => (
@@ -102,7 +102,7 @@ const NavBar = (props: LovProps) => {
             </>
         </Tooltip>
     ) : (
-        <Box sx={boxSx} className={`${className} ${get_class_name(props.children)}`}>
+        <Box sx={boxSx} className={`${className} ${getComponentClassName(props.children)}`}>
             <Tooltip title={hover || ""}>
                 <Tabs value={selectedVal} id={id} onChange={linkChange}>
                     {lov.map((val) => (

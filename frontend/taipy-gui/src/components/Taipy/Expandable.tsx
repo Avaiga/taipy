@@ -22,7 +22,7 @@ import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../..
 import { TaipyActiveProps, TaipyChangeProps, getUpdateVar } from "./utils";
 import TaipyRendered from "../pages/TaipyRendered";
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import { get_class_name } from "./TaipyStyle";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface ExpandableProps extends TaipyActiveProps, TaipyChangeProps {
     expanded?: boolean;
@@ -63,7 +63,7 @@ const Expandable = (props: ExpandableProps) => {
 
     return (
         <Tooltip title={hover || ""}>
-            <Accordion expanded={opened} onChange={onChange} className={`${className} ${get_class_name(props.children)}`} id={id} disabled={!active}>
+            <Accordion expanded={opened} onChange={onChange} className={`${className} ${getComponentClassName(props.children)}`} id={id} disabled={!active}>
                 {title || defaultTitle ? (
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>{title || defaultTitle}</AccordionSummary>
                 ) : null}

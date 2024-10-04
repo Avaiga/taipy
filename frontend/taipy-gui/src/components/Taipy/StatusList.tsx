@@ -21,7 +21,7 @@ import Popover, { PopoverOrigin } from "@mui/material/Popover";
 import Status, { StatusType } from "./Status";
 import { TaipyBaseProps, TaipyHoverProps } from "./utils";
 import { useClassNames, useDynamicProperty } from "../../utils/hooks";
-import { get_class_name } from "./TaipyStyle";
+import { getComponentClassName } from "./TaipyStyle";
 
 export const getStatusIntValue = (status: string) => {
     status = status.toLowerCase();
@@ -159,7 +159,7 @@ const StatusList = (props: StatusListProps) => {
     return (
         <Tooltip title={hover || ""}>
             <>
-                <Status id={props.id} value={getGlobalStatus(values)} className={`${className} ${get_class_name(props.children)}`} {...globalProps} />
+                <Status id={props.id} value={getGlobalStatus(values)} className={`${className} ${getComponentClassName(props.children)}`} {...globalProps} />
                 <Popover open={opened} anchorEl={anchorEl} onClose={onOpen} anchorOrigin={ORIGIN}>
                     <Stack direction="column" spacing={1}>
                         {values
@@ -171,7 +171,7 @@ const StatusList = (props: StatusListProps) => {
                                         key={getId(props.id, idx)}
                                         id={getId(props.id, idx)}
                                         value={val}
-                                        className={`${className} ${get_class_name(props.children)}`}
+                                        className={`${className} ${getComponentClassName(props.children)}`}
                                         {...closeProp}
                                     />
                                 );

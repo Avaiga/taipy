@@ -20,7 +20,7 @@ import { createSendActionNameAction } from "../../context/taipyReducers";
 import { getCssSize, getSuffixedClassNames, TaipyActiveProps } from "./utils";
 import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 import { stringIcon, Icon, IconAvatar } from "../../utils/icon";
-import { get_class_name } from "./TaipyStyle";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface ButtonProps extends TaipyActiveProps {
     onAction?: string;
@@ -68,7 +68,7 @@ const Button = (props: ButtonProps) => {
             <MuiButton
                 id={id}
                 variant="outlined"
-                className={`${className} ${get_class_name(props.children)}`}
+                className={`${className} ${getComponentClassName(props.children)}`}
                 onClick={handleClick}
                 disabled={!active}
                 sx={buttonSx}
