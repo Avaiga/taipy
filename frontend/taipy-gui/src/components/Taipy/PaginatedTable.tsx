@@ -491,7 +491,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const boxSx = useMemo(() => ({ ...baseBoxSx, width: width }), [width]);
 
     return (
-        <Box id={id} sx={boxSx} className={`${className} ${getSuffixedClassNames(className, "-paginated")} ${getClassName(props.children)}`}>
+        <Box id={id} sx={boxSx} className={`${className} ${getSuffixedClassNames(className, "-paginated")} ${getComponentClassName(props.children)}`}>
             <Paper sx={paperSx}>
                 <Tooltip title={hover || ""}>
                     <TableContainer sx={tableContainerSx}>

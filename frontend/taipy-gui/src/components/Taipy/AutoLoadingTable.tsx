@@ -593,7 +593,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const boxSx = useMemo(() => ({ ...baseBoxSx, width: width }), [width]);
 
     return (
-        <Box id={id} sx={boxSx} className={`${className} ${getSuffixedClassNames(className, "-autoloading")} ${getClassName(props.children)}`}>
+        <Box id={id} sx={boxSx} className={`${className} ${getSuffixedClassNames(className, "-autoloading")} ${getComponentClassName(props.children)}`}>
             <Paper sx={paperSx}>
                 <Tooltip title={hover || ""}>
                     <TableContainer>
