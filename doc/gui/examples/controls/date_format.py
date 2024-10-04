@@ -8,14 +8,18 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+# -----------------------------------------------------------------------------------------
+# To execute this script, make sure that the taipy-gui package is installed in your
+# Python environment and run:
+#     python <script>
+# -----------------------------------------------------------------------------------------
+import datetime
 
-import typing as t
-from types import LambdaType
+from taipy.gui import Gui
 
-from ._variable_directory import _variable_encode
+date = datetime.datetime(1789, 7, 14, 17, 5, 12)
 
+page = "<|{date}|date|format=eeee LLLL do, y|>"
 
-def _get_lambda_id(lambda_fn: LambdaType, module: t.Optional[str] = None, index: t.Optional[int] = None):
-    return _variable_encode(
-        f"__lambda_{id(lambda_fn)}{f'_{index}' if index is not None else ''}", lambda_fn.__module__ or module
-    )
+if __name__ == "__main__":
+    Gui(page).run(title="Date - Format")

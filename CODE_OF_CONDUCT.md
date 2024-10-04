@@ -77,7 +77,7 @@ the consequences for any action they deem in violation of this Code of Conduct:
 unprofessional or unwelcome in the community.
 
 **Consequence**: A private, written warning from community leaders, providing
-clarity around the nature of the violation and an explanation of why the
+clarity about the nature of the violation and an explanation of why the
 behavior was inappropriate. A public apology may be requested.
 
 ### 2. Warning
@@ -109,7 +109,7 @@ Violating these terms may lead to a permanent ban.
 standards, including sustained inappropriate behavior,  harassment of an
 individual, or aggression toward or disparagement of classes of individuals.
 
-**Consequence**: A permanent ban from any sort of public interaction within
+**Consequence**: A permanent ban on any sort of public interaction within
 the community.
 
 ## Attribution
