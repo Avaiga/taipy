@@ -41,13 +41,13 @@ class _ReadyToRunProperty:
 
         for scenario_parent in parent_entities.get(Scenario._MANAGER_NAME, []):
             if dn in scenario_parent.get_inputs():
-                cls.__add(scenario_parent, dn, reason)
+                cls.__add(scenario_parent, dn, reason)  # type: ignore
         for sequence_parent in parent_entities.get(Sequence._MANAGER_NAME, []):
             if dn in sequence_parent.get_inputs():
-                cls.__add(sequence_parent, dn, reason)
+                cls.__add(sequence_parent, dn, reason)  # type: ignore
         for task_parent in parent_entities.get(Task._MANAGER_NAME, []):
             if dn in task_parent.input.values():
-                cls.__add(task_parent, dn, reason)
+                cls.__add(task_parent, dn, reason)  # type: ignore
 
     @classmethod
     def _remove(cls, datanode: "DataNode", reason: Reason) -> None:

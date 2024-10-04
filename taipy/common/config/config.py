@@ -56,9 +56,9 @@ class Config:
         ??? example "Advanced use case"
 
             The configuration can be done in three ways: Python code, configuration files, or
-            environment variables. All configuration manners are ultimately merged (overriding the previous way
+            environment variables. All configuration manners are ultimately merged (overriding the previous
             way) to create a final applied configuration. Please refer to the
-            [advanced configuration](../../userman/advanced_features/configuration/advanced-config.md)
+            [advanced configuration](../../../../../../userman/advanced_features/configuration/advanced-config.md)
             section from the user manual for more details.
 
     2. Attributes and methods to retrieve the configuration values.
@@ -103,12 +103,6 @@ class Config:
                 file and replace the current Python configuration.
             - *Override the configuration*: Use the `Config.override()^` method to load a TOML
                 configuration file and override the current Python configuration.
-
-    Attributes:
-        global_config (GlobalAppConfig): configuration values related to the global
-            application as a `GlobalAppConfig^`.
-        unique_sections (Dict[str, UniqueSection]): A dictionary containing all unique sections.
-        sections (Dict[str, Dict[str, Section]]): A dictionary containing all non-unique sections.
     """
 
     _ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH = "TAIPY_CONFIG_PATH"
@@ -125,19 +119,22 @@ class Config:
 
     @_Classproperty
     def unique_sections(cls) -> Dict[str, UniqueSection]:
+        """A dictionary containing all unique sections."""
         return cls._applied_config._unique_sections
 
     @_Classproperty
     def sections(cls) -> Dict[str, Dict[str, Section]]:
+        """A dictionary containing all non-unique sections."""
         return cls._applied_config._sections
 
     @_Classproperty
     def global_config(cls) -> GlobalAppConfig:
+        """configuration values related to the global application as a `GlobalAppConfig^`."""
         return cls._applied_config._global_config
 
     @classmethod
     @_ConfigBlocker._check()
-    def load(cls, filename):
+    def load(cls, filename: str) -> None:
         """Load a configuration file.
 
         The current Python configuration is replaced and the Config compilation is triggered.
@@ -151,22 +148,22 @@ class Config:
         cls.__logger.info(f"Configuration '{filename}' successfully loaded.")
 
     @classmethod
-    def export(cls, filename):
+    def export(cls, filename: str) -> None:
         """Export a configuration.
 
-        The export is done in a toml file.
+        The export is done in a toml file. The exported configuration is taken
+        from the Python code configuration.
 
-        The exported configuration is taken from the Python code configuration.
+        Note:
+            If *filename* already exists, it is overwritten.
 
         Parameters:
             filename (Union[str, Path]): The path of the file to export.
-        Note:
-            If *filename* already exists, it is overwritten.
         """
         cls._serializer._write(cls._python_config, filename)
 
     @classmethod
-    def backup(cls, filename):
+    def backup(cls, filename: str) -> None:
         """Backup a configuration.
 
         The backup is done in a toml file.
@@ -175,16 +172,17 @@ class Config:
         the application: the Python code configuration, the file configuration and the environment
         configuration.
 
-        Parameters:
-            filename (Union[str, Path]): The path of the file to export.
         Note:
             If *filename* already exists, it is overwritten.
+
+        Parameters:
+            filename (Union[str, Path]): The path of the file to export.
         """
         cls._serializer._write(cls._applied_config, filename)
 
     @classmethod
     @_ConfigBlocker._check()
-    def restore(cls, filename):
+    def restore(cls, filename: str) -> None:
         """Restore a configuration file and replace the current applied configuration.
 
         Parameters:
@@ -196,7 +194,7 @@ class Config:
 
     @classmethod
     @_ConfigBlocker._check()
-    def override(cls, filename):
+    def override(cls, filename: str) -> None:
         """Load a configuration from a file and overrides the current config.
 
         Parameters:
@@ -209,12 +207,12 @@ class Config:
         cls.__logger.info(f"Configuration '{filename}' successfully loaded.")
 
     @classmethod
-    def block_update(cls):
+    def block_update(cls) -> None:
         """Block update on the configuration signgleton."""
         _ConfigBlocker._block()
 
     @classmethod
-    def unblock_update(cls):
+    def unblock_update(cls) -> None:
         """Unblock update on the configuration signgleton."""
         _ConfigBlocker._unblock()
 
@@ -225,6 +223,7 @@ class Config:
 
         Parameters:
             **properties (Dict[str, Any]): A dictionary of additional properties.
+
         Returns:
             The global application configuration.
         """
@@ -255,7 +254,7 @@ class Config:
 
     @classmethod
     @_ConfigBlocker._check()
-    def _register_default(cls, default_section: Section):
+    def _register_default(cls, default_section: Section) -> None:
         if isinstance(default_section, UniqueSection):
             if cls._default_config._unique_sections.get(default_section.name, None):
                 cls._default_config._unique_sections[default_section.name]._update(default_section._to_dict())
@@ -271,7 +270,7 @@ class Config:
 
     @classmethod
     @_ConfigBlocker._check()
-    def _register(cls, section):
+    def _register(cls, section) -> None:
         if isinstance(section, UniqueSection):
             if cls._python_config._unique_sections.get(section.name, None):
                 cls._python_config._unique_sections[section.name]._update(section._to_dict())
@@ -289,7 +288,7 @@ class Config:
         cls._compile_configs()
 
     @classmethod
-    def _override_env_file(cls):
+    def _override_env_file(cls) -> None:
         if cfg_filename := os.environ.get(cls._ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH):
             if not os.path.exists(cfg_filename):
                 cls.__logger.error(
@@ -303,7 +302,7 @@ class Config:
             cls.__logger.info(f"Configuration '{cfg_filename}' successfully loaded.")
 
     @classmethod
-    def _compile_configs(cls):
+    def _compile_configs(cls) -> None:
         Config._override_env_file()
         cls._applied_config._clean()
         if cls._default_config:
@@ -316,7 +315,7 @@ class Config:
             cls._applied_config._update(cls._env_file_config)
 
     @classmethod
-    def __log_message(cls, config):
+    def __log_message(cls, config) -> None:
         for issue in config._collector._warnings:
             cls.__logger.warning(str(issue))
         for issue in config._collector._infos:

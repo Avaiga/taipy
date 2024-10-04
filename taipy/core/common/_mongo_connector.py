@@ -29,6 +29,7 @@ def _connect_mongodb(
         db_password (str): the database password.
         db_extra_args (frozenset): A frozenset converted from a dictionary of additional arguments to be passed into
             database connection string.
+
     Returns:
         pymongo.MongoClient
     """
