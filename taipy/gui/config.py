@@ -19,7 +19,7 @@ import tzlocal
 from dotenv import dotenv_values
 from werkzeug.serving import is_running_from_reloader
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ._gui_cli import _GuiCLI
 from ._page import _Page
@@ -268,14 +268,14 @@ class _Config(object):
                         )
 
         # Taipy-config
-        if find_spec("taipy") and find_spec("taipy.config"):
-            from taipy.config import Config as TaipyConfig
+        if find_spec("taipy") and find_spec("taipy.common.config"):
+            from taipy.common.config import Config as TaipyConfig
 
             try:
                 section = TaipyConfig.unique_sections["gui"]
                 self.config.update(section._to_dict())
             except KeyError:
-                _warn("taipy-config section for taipy-gui is not initialized.")
+                _warn("taipy-common section for taipy-gui is not initialized.")
 
         # Load from system arguments
         self._handle_argparse()

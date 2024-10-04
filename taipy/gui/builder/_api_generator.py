@@ -16,7 +16,7 @@ import sys
 import types
 import typing as t
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ..utils.singleton import _Singleton
 from ..utils.viselements import VisElementProperties, VisElements, resolve_inherits

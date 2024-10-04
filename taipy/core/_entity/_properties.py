@@ -11,7 +11,7 @@
 
 from collections import UserDict
 
-from taipy.config.common._template_handler import _TemplateHandler as _tpl
+from taipy.common.config.common._template_handler import _TemplateHandler as _tpl
 
 from ..notification import EventOperation, Notifier, _make_event
 

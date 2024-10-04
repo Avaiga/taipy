@@ -12,10 +12,10 @@
 from copy import copy
 from typing import Any, Dict, Optional, Union
 
-from taipy.config import Config
-from taipy.config._config import _Config
-from taipy.config.common._template_handler import _TemplateHandler as _tpl
-from taipy.config.unique_section import UniqueSection
+from taipy.common.config import Config
+from taipy.common.config._config import _Config
+from taipy.common.config.common._template_handler import _TemplateHandler as _tpl
+from taipy.common.config.unique_section import UniqueSection
 
 
 class JobConfig(UniqueSection):

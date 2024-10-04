@@ -40,7 +40,6 @@ import deepEqual from "fast-deep-equal/es6";
 import {
     createRequestUpdateAction,
     createSendActionNameAction,
-    createUnBroadcastAction,
     getUpdateVar,
     useDispatch,
     useDynamicProperty,
@@ -604,23 +603,13 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
     // Refresh on broadcast
     useEffect(() => {
-        if (coreChanged?.name) {
-            const toRemove = [...coreChanged.stack]
-                .map((bc) => {
-                    const ids = (bc as Record<string, unknown>).scenario;
-                    if (typeof ids === "string" ? ids === scId : Array.isArray(ids) ? ids.includes(scId) : ids) {
-                        const submission = (bc as Record<string, unknown>).submission
-                        if (typeof submission === "number") {
-                            setSubmissionStatus(submission as number);
-                        }
-                        props.updateVarName &&
-                            dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
-                        return bc;
-                    }
-                    return undefined;
-                })
-                .filter((v) => v);
-            toRemove.length && dispatch(createUnBroadcastAction(coreChanged.name, ...toRemove));
+        const ids = coreChanged?.scenario;
+        if (typeof ids === "string" ? ids === scId : Array.isArray(ids) ? ids.includes(scId) : ids) {
+            const submission = coreChanged?.submission;
+            if (typeof submission === "number") {
+                setSubmissionStatus(submission as number);
+            }
+            props.updateVarName && dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
         }
     }, [coreChanged, props.updateVarName, id, module, dispatch, scId]);
 

@@ -14,8 +14,8 @@ import pathlib
 
 import pytest
 
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
+from taipy.common.config import Config
+from taipy.common.config.common.scope import Scope
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.data._data_manager import _DataManager

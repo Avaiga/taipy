@@ -47,7 +47,6 @@ export enum Types {
     Partial = "PARTIAL",
     Acknowledgement = "ACKNOWLEDGEMENT",
     Broadcast = "BROADCAST",
-    UnBroadcast = "UNBROADCAST",
 }
 
 /**
@@ -158,16 +157,6 @@ export interface FormatConfig {
     number: string;
 }
 
-/**
- * Broadcast stack definition.
- */
-export interface BroadcastDesc {
-    /** Name of the variable identifying the broadcast. */
-    name: string;
-    /** Broadcast stack. */
-    stack: Array<unknown>;
-}
-
 const getUserTheme = (mode: PaletteMode) => {
     const tkTheme = (window.taipyConfig?.stylekit && stylekitTheme) || {};
     const tkModeTheme = (window.taipyConfig?.stylekit && stylekitModeThemes[mode]) || {};
@@ -243,7 +232,7 @@ export const messageToAction = (message: WsMessage) => {
         } else if (message.type === "FV") {
             changeFavicon((message.payload as Record<string, string>)?.value);
         } else if (message.type == "BC") {
-            return createBroadcastAction(message as unknown as NamePayload);
+            stackBroadcast((message as NamePayload).name, (message as NamePayload).payload.value);
         }
     }
     return {} as TaipyBaseAction;
@@ -254,8 +243,8 @@ export const getWsMessageListener = (dispatch: Dispatch<TaipyBaseAction>) => {
         if (message.type === "MU" && Array.isArray(message.payload)) {
             const payloads = message.payload as NamePayload[];
             Promise.all(payloads.map((pl) => parseData(pl.payload.value as Record<string, unknown>)))
-                .then((vals) => {
-                    vals.forEach((val, idx) => (payloads[idx].payload.value = val));
+                .then((values) => {
+                    values.forEach((val, idx) => (payloads[idx].payload.value = val));
                     dispatch(messageToAction(message));
                 })
                 .catch(console.warn);
@@ -267,6 +256,24 @@ export const getWsMessageListener = (dispatch: Dispatch<TaipyBaseAction>) => {
         dispatch(messageToAction(message));
     };
     return dispatchWsMessage;
+};
+
+// Broadcast
+const __BroadcastRepo: Record<string, Array<unknown>> = {};
+
+const stackBroadcast = (name: string, value: unknown) => (__BroadcastRepo[name] = __BroadcastRepo[name] || []).push(value);
+
+const broadcast_timeout = 250;
+
+const initializeBroadcastManagement = (dispatch: Dispatch<TaipyBaseAction>) => {
+    setInterval(() => {
+        Object.entries(__BroadcastRepo).forEach(([name, stack]) => {
+            const broadcastValue = stack.shift();
+            if (broadcastValue !== undefined) {
+                dispatch(createUpdateAction({ name, payload: { value: broadcastValue } }));
+            }
+        });
+    }, broadcast_timeout);
 };
 
 export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispatch<TaipyBaseAction>): void => {
@@ -294,7 +301,10 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
         socket.on("message", getWsMessageListener(dispatch));
         // only now does the socket tries to open/connect
         socket.connect();
+        // favicon
         changeFavicon();
+        // broadcast
+        initializeBroadcastManagement(dispatch);
     }
 };
 
@@ -354,30 +364,6 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                     [action.name]: action.payload.pagekey
                         ? { ...oldValue, [action.payload.pagekey as string]: newValue }
                         : newValue,
-                },
-            };
-        case Types.Broadcast:
-            return {
-                ...state,
-                data: {
-                    ...state.data,
-                    [action.name]: {
-                        name: action.name,
-                        stack: [...((state.data[action.name] || {stack: []}) as BroadcastDesc).stack , action.payload.value],
-                    },
-                },
-            };
-        case Types.UnBroadcast:
-            return {
-                ...state,
-                data: {
-                    ...state.data,
-                    [action.name]: {
-                        name: action.name,
-                        stack: ((state.data[action.name] || {stack: []}) as BroadcastDesc).stack.filter(
-                            (v) => !(action.payload.value as Array<unknown>).includes(v)
-                        ),
-                    },
                 },
             };
         case Types.SetLocations:
@@ -521,25 +507,6 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
 export const createUpdateAction = (payload: NamePayload): TaipyAction => ({
     ...payload,
     type: Types.Update,
-});
-
-export const createBroadcastAction = (payload: NamePayload): TaipyAction => ({
-    ...payload,
-    type: Types.Broadcast,
-});
-
-/**
- * Create an *un broadcast* `Action` that will be used to update local state.
- *
- * This action will remove a value from a broadcasted stacked variable identified by name.
- * @param name - The name of the variable identifying the broadcast.
- * @param values - The values to remove.
- * @returns The action fed to the reducer.
- */
-export const createUnBroadcastAction = (name: string, ...values: Array<unknown>): TaipyAction => ({
-    type: Types.UnBroadcast,
-    name,
-    payload: getPayload(values),
 });
 
 export const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction => ({

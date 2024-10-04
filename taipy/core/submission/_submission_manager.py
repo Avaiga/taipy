@@ -12,7 +12,7 @@
 from threading import Lock
 from typing import List, Optional, Union
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
