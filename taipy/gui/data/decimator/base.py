@@ -90,9 +90,9 @@ class Decimator(ABC):
         y1: t.Optional[float],
         is_copied: bool,
     ):
-        if chart_mode not in ["lines+markers", "markers"]:
+        if chart_mode not in ["lines+markers", "lines", "markers"]:
             _warn(
-                f"Decimator zoom feature is not applicable for '{chart_mode}' chart_mode. It is only applicable for 'lines+markers' or 'markers' chart modes."  # noqa: E501
+                f"Decimator zoom feature is not applicable for '{chart_mode}' chart_mode. It is only applicable for 'lines+markers', 'lines', and 'markers' chart modes."  # noqa: E501
             )
             return dataframe, is_copied
         # if chart data is invalid
@@ -113,7 +113,7 @@ class Decimator(ABC):
         if x1 is not None:
             df_filter_conditions.append(df[x_column] < x1)
         # y column will be filtered only if chart_mode is not lines+markers (eg. markers)
-        if chart_mode != "lines+markers":
+        if chart_mode not in ["lines+markers", "lines"]:
             if y0 is not None:
                 df_filter_conditions.append(df[y_column] > y0)
             if y1 is not None:
