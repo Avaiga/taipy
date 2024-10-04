@@ -60,8 +60,9 @@ class Decimator(ABC):
 
     def _is_applicable(self, data: t.Any, nb_rows_max: int, chart_mode: str):
         if chart_mode not in self._CHART_MODES:
-            _warn(f"{type(self).__name__} is only applicable for {' '.join(self._CHART_MODES)}.")
-            return False
+            _warn(
+                f"Decimator '{type(self).__name__}' is not optimized for chart mode '{chart_mode}'. Consider using other chart mode such as '{f'{chr(39)}, {chr(39)}'.join(self._CHART_MODES)}.'"  # noqa: E501
+            )
         if self.threshold is None:
             if nb_rows_max < len(data):
                 return True
@@ -91,8 +92,8 @@ class Decimator(ABC):
     ):
         if chart_mode not in ["lines+markers", "markers"]:
             _warn(
-                f"Decimator zoom feature is not applicable for '{chart_mode}' chart_mode. It is only applicable for 'lines+markers' or 'markers' chart modes."
-            )  # noqa: E501
+                f"Decimator zoom feature is not applicable for '{chart_mode}' chart_mode. It is only applicable for 'lines+markers' or 'markers' chart modes."  # noqa: E501
+            )
             return dataframe, is_copied
         # if chart data is invalid
         if x0 is None and x1 is None and y0 is None and y1 is None:
@@ -215,7 +216,9 @@ class Decimator(ABC):
         """
         if self.__user_defined_on_decimate and callable(self.__user_defined_on_decimate):
             try:
-                return self.__user_defined_on_decimate(df, decimator_instance_payload, decimator_payload, is_copied, filter_unused_columns)
+                return self.__user_defined_on_decimate(
+                    df, decimator_instance_payload, decimator_payload, is_copied, filter_unused_columns
+                )
             except Exception as e:
                 _warn("Error executing user defined on_decimate function: ", e)
         return self._on_decimate_df(df, decimator_instance_payload, decimator_payload, filter_unused_columns)
