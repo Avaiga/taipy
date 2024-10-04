@@ -94,7 +94,7 @@ class Cycle(_Entity, _Labeled):
     __SEPARATOR = "_"
     _MANAGER_NAME = "cycle"
 
-    id:str
+    id:CycleId
     """The unique identifier of the cycle."""
 
     def __init__(
@@ -191,7 +191,7 @@ class Cycle(_Entity, _Labeled):
         self._name = val
 
     @property
-    def properties(self) -> Dict[str, Any]:
+    def properties(self) -> _Properties:
         """A dictionary of additional properties."""
         self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties

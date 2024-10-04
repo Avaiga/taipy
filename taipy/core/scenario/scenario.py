@@ -269,7 +269,7 @@ class Scenario(_Entity, Submittable, _Labeled):
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def cycle(self) -> Cycle:
+    def cycle(self) -> Optional[Cycle]:
         """The cycle of the scenario"""
         return self._cycle
 
@@ -291,7 +291,7 @@ class Scenario(_Entity, Submittable, _Labeled):
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def subscribers(self) -> List[_Subscriber]:
+    def subscribers(self) -> _ListAttributes:
         """The list of callbacks to be called on `Job^`'s status change."""
         return self._subscribers
 
@@ -320,12 +320,12 @@ class Scenario(_Entity, Submittable, _Labeled):
         return self._version
 
     @property
-    def owner_id(self) -> str:
+    def owner_id(self) -> Optional[str]:
         """The identifier of the scenario cycle."""
-        return self._cycle.id
+        return self._cycle.id if self._cycle else None
 
     @property
-    def properties(self) -> Dict[str, Any]:
+    def properties(self) -> _Properties:
         """The dictionary of additional properties."""
         self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties

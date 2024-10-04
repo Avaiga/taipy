@@ -224,14 +224,14 @@ class Sequence(_Entity, Submittable, _Labeled):
         return self._version
 
     @property
-    def properties(self) -> Dict[str, Any]:
+    def properties(self) -> _Properties:
         """The dictionary of additional properties."""
         self._properties = _Reloader()._reload("sequence", self)._properties
         return self._properties
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def subscribers(self) -> List[_Subscriber]:
+    def subscribers(self) -> _ListAttributes:
         """The list of callbacks to be called on `Job^`'s status change."""
         return self._subscribers
 

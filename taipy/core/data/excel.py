@@ -167,7 +167,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         if sheet_exposed_type == self._EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy(path, sheet_name)
         elif sheet_exposed_type == self._EXPOSED_TYPE_PANDAS:
-            return self._read_as_pandas_dataframe(path, sheet_name)
+            return self._read_as_pandas_dataframe(path, sheet_name)  # type: ignore
         return None
 
     def _read_as(self, path: str):
@@ -218,7 +218,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                 else:
                     for i, row in enumerate(res):
                         res[i] = sheet_exposed_type(*row)
-                work_books[sheet_name] = res
+                work_books[sheet_name] = res  # type: ignore
         finally:
             excel_file.close()
 

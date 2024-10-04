@@ -159,7 +159,7 @@ class Task(_Entity, _Labeled):
         raise AttributeError(f"{attribute_name} is not an attribute of task {self.id}")
 
     @property
-    def properties(self) -> Dict[str, Any]:
+    def properties(self) -> _Properties:
         """Dictionary of additional properties."""
         self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties

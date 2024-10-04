@@ -427,7 +427,7 @@ class Job(_Entity, _Labeled):
         Parameters:
             functions: Callables that will be called on each status change.
         """
-        functions = list(functions)
+        functions = list(functions)  # type: ignore
         function = functions.pop()
         self._subscribers.append(function)
 

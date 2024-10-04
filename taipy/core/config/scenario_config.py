@@ -38,7 +38,7 @@ class ScenarioConfig(Section):
 
     frequency: Optional[Frequency]
     """The frequency of the scenario's cycle. The default value is None."""
-    comparators: Optional[Dict[str, Union[List[Callable], Callable]]]
+    comparators: Dict[str, List[Callable]]
     """The comparator functions used to compare scenarios.
 
     The default value is None.
@@ -48,7 +48,7 @@ class ScenarioConfig(Section):
     The value is a list of functions that are applied to all the data nodes instantiated
     from the data node configuration attached to the comparator.
     """
-    sequences: Optional[Dict[str, List[TaskConfig]]]
+    sequences: Dict[str, List[TaskConfig]]
     """Dictionary of sequence descriptions. The default value is None."""
 
     def __init__(

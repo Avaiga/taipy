@@ -145,7 +145,7 @@ class Submission(_Entity, _Labeled):
         return self._entity_config_id
 
     @property
-    def properties(self) -> Dict[str, Any]:
+    def properties(self) -> _Properties:
         """A dictionary of additional properties."""
         self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties

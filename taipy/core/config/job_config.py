@@ -30,7 +30,7 @@ class JobConfig(UniqueSection):
     _DEFAULT_MAX_NB_OF_WORKERS = 2
     _MODES = [_DEVELOPMENT_MODE, _STANDALONE_MODE]
 
-    mode: str
+    mode: Optional[str]
     """The task orchestration mode.
 
     By default, the "development" mode is set for testing and debugging the
