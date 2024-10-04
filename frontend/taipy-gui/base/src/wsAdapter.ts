@@ -58,6 +58,7 @@ export class TaipyWsAdapter extends WsAdapter {
                 const { id } = message as unknown as IdMessage;
                 storeClientId(id);
                 taipyApp.clientId = id;
+                taipyApp.initApp();
                 taipyApp.updateContext(taipyApp.path);
             } else if (message.type === "GMC") {
                 const payload = message.payload as Record<string, unknown>;
