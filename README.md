@@ -79,7 +79,9 @@ pip install taipy
 
 
 Ready to Install Taipy? 🚀<br>
-Get everything set up in no time! Whether you're using a Conda environment or installing from source, follow our [Installation Guide](https://docs.taipy.io/en/latest/installation/) for step-by-step instructions.<br />
+Get everything set up in no time! Whether you're using a Conda environment or installing from
+source, follow our [Installation Guide](https://docs.taipy.io/en/latest/installation/) for
+step-by-step instructions.<br/>
 
 Excited to Dive In? 💡 <br>
 Start building with Taipy today! Our [Getting Started Guide](https://docs.taipy.io/en/develop/tutorials/getting_started/) is the perfect place to begin your journey and unlock the full potential of Taipy.
