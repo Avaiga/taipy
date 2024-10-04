@@ -61,4 +61,4 @@ page = """
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="Chart - Heatmap - Unequal block sizes")
+    Gui(page).run(title="Chart - Heatmap - Unequal cell sizes")

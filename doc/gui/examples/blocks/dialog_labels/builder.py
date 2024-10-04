@@ -13,33 +13,27 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
+import taipy.gui.builder as tgb
 from taipy.gui import Gui
 
-n_slices = 20
-# List: [1..n_slices]
-# Slices are bigger and bigger
-values = list(range(1, n_slices + 1))
+show_dialog = False
 
-marker = {
-    # Colors move around the Hue color disk
-    "colors": [f"hsl({360 * (i - 1)/(n_slices - 1)},90%,60%)" for i in values]
-}
 
-layout = {
-    # Hide the legend
-    "showlegend": False
-}
+def dialog_action(state, _, payload):
+    if payload["args"][0] == 0:  # First button
+        print("Good to hear!")  # noqa: T201
+    elif payload["args"][0] == 1:  # Second button
+        print("Sorry to hear that.")  # noqa: T201
+    else:  # Close button (index == -1)
+        print("Ok bye.")  # noqa: T201
+    state.show_dialog = False
 
-options = {
-    # Hide the texts
-    "textinfo": "none"
-}
 
-page = """
-#
+with tgb.Page() as page:
+    with tgb.dialog("{show_dialog}", title="Welcome!", on_action=dialog_action, labels="Couldn't be better;Not my day"):  # type: ignore
+        tgb.html("h2", "Hello!")
 
-<|{values}|chart|type=pie|marker={marker}|options={options}|layout={layout}|>
-"""
+    tgb.button("Show", on_action=lambda s: s.assign("show_dialog", True))
 
 if __name__ == "__main__":
-    Gui(page).run(title="Chart - Pie - Style")
+    Gui(page).run(title="Dialog - Labels")
