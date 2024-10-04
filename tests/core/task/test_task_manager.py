@@ -14,8 +14,8 @@ from unittest import mock
 
 import pytest
 
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
+from taipy.common.config import Config
+from taipy.common.config.common.scope import Scope
 from taipy.core import taipy
 from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._version._version_manager import _VersionManager
@@ -307,6 +307,10 @@ def test_is_submittable():
     dn_config = Config.configure_in_memory_data_node("dn", 10)
     task_config = Config.configure_task("task", print, [dn_config])
     task = _TaskManager._bulk_get_or_create([task_config])[0]
+
+    rc = _TaskManager._is_submittable("some_task")
+    assert not rc
+    assert "Entity some_task does not exist in the repository" in rc.reasons
 
     assert len(_TaskManager._get_all()) == 1
     assert _TaskManager._is_submittable(task)

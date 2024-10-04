@@ -47,19 +47,21 @@ class _DataAccessor(ABC):
         pass
 
     @abstractmethod
-    def on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
+    def on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]) -> t.Optional[t.Any]:
         pass
 
     @abstractmethod
-    def on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
+    def on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]) -> t.Optional[t.Any]:
         pass
 
     @abstractmethod
-    def on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
+    def on_add(
+        self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None
+    ) -> t.Optional[t.Any]:
         pass
 
     @abstractmethod
-    def to_csv(self, var_name: str, value: t.Any):
+    def to_csv(self, var_name: str, value: t.Any) -> t.Optional[str]:
         pass
 
 

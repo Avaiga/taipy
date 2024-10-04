@@ -14,11 +14,19 @@ import typing as t
 from datetime import datetime
 from unittest.mock import Mock, patch
 
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
+import pytest
+
+from taipy.common.config.common.frequency import Frequency
+from taipy.common.config.common.scope import Scope
 from taipy.core import Cycle, CycleId, Job, JobId, Scenario, Task
+from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.pickle import PickleDataNode
+from taipy.core.job._job_manager_factory import _JobManagerFactory
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
+from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from taipy.core.submission.submission import Submission, SubmissionStatus
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.gui import Gui
 from taipy.gui_core._context import _GuiCoreContext
 
@@ -64,6 +72,15 @@ class MockState:
 
 
 class TestGuiCoreContext_is_readable:
+    @pytest.fixture(scope="class", autouse=True)
+    def set_entity(self):
+        _CycleManagerFactory._build_manager()._set(a_cycle)
+        _ScenarioManagerFactory._build_manager()._set(a_scenario)
+        _TaskManagerFactory._build_manager()._set(a_task)
+        _JobManagerFactory._build_manager()._set(a_job)
+        _DataManagerFactory._build_manager()._set(a_datanode)
+        _SubmissionManagerFactory._build_manager()._set(a_submission)
+
     def test_scenario_adapter(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
             gui_core_context = _GuiCoreContext(Mock())
@@ -178,7 +195,7 @@ class TestGuiCoreContext_is_readable:
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get) as mockget:
             mockget.reset_mock()
             mockGui = Mock(Gui)
-            mockGui._get_autorization = lambda s: contextlib.nullcontext()
+            mockGui._get_authorization = lambda s: contextlib.nullcontext()
             gui_core_context = _GuiCoreContext(mockGui)
 
             def sub_cb():
@@ -222,8 +239,9 @@ class TestGuiCoreContext_is_readable:
                 assert outcome is None
 
     def test_act_on_jobs(self):
-        with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get), patch(
-            "taipy.gui_core._context.is_deletable", side_effect=mock_is_true
+        with (
+            patch("taipy.gui_core._context.core_get", side_effect=mock_core_get),
+            patch("taipy.gui_core._context.is_deletable", side_effect=mock_is_true),
         ):
             gui_core_context = _GuiCoreContext(Mock())
             assign = Mock()
@@ -420,10 +438,7 @@ class TestGuiCoreContext_is_readable:
             )
             assign.assert_called_once()
             assert assign.call_args_list[0].args[0] == "error_var"
-            assert (
-                assign.call_args_list[0].args[1]
-                == "Error updating Datanode tabular value: type does not support at[] indexer."
-            )
+            assert "tabular value: type does not support at[] indexer" in assign.call_args_list[0].args[1]
             assign.reset_mock()
 
             with patch("taipy.gui_core._context.is_readable", side_effect=mock_is_readable_false):

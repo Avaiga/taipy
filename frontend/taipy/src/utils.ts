@@ -12,8 +12,25 @@
  */
 import { Theme, alpha } from "@mui/material";
 import { PopoverOrigin } from "@mui/material/Popover";
+import { ReactNode } from "react";
 
 import { getUpdateVar, useDynamicProperty } from "taipy-gui";
+
+
+export interface CoreProps {
+    id?: string;
+    updateVarName?: string;
+    active?: boolean;
+    defaultActive?: boolean;
+    coreChanged?: Record<string, unknown>;
+    error?: string;
+    updateVars: string;
+    libClassName?: string;
+    className?: string;
+    dynamicClassName?: string;
+    propagate?: boolean;
+    children?: ReactNode;
+}
 
 export type ScenarioFull = [
     string, // id

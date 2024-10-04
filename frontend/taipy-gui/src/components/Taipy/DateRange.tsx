@@ -52,7 +52,9 @@ const getRangeDateTime = (
     if (typeof json == "string") {
         try {
             dates = JSON.parse(json);
-        } catch (e) {}
+        } catch {
+            // too bad
+        }
     } else {
         dates = json as string[];
     }

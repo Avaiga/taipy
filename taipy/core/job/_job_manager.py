@@ -18,7 +18,7 @@ from .._version._version_manager_factory import _VersionManagerFactory
 from .._version._version_mixin import _VersionMixin
 from ..exceptions.exceptions import JobNotDeletedException
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
-from ..reason import JobIsNotFinished, ReasonCollection
+from ..reason import EntityDoesNotExist, JobIsNotFinished, ReasonCollection
 from ..task.task import Task
 from .job import Job
 from .job_id import JobId
@@ -92,7 +92,11 @@ class _JobManager(_Manager[Job], _VersionMixin):
         reason_collector = ReasonCollection()
 
         if isinstance(job, str):
-            job = cls._get(job)
+            job_id = job
+            job = cls._get(job, None)
+            if job is None:
+                reason_collector._add_reason(job_id, EntityDoesNotExist(job_id))
+                return reason_collector
 
         if not job.is_finished():
             reason_collector._add_reason(job.id, JobIsNotFinished(job.id))

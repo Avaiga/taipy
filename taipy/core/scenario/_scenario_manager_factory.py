@@ -12,6 +12,7 @@ from functools import lru_cache
 from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
+from ..common._check_dependencies import EnterpriseEditionUtils
 from ..common._utils import _load_fct
 from ._scenario_fs_repository import _ScenarioFSRepository
 from ._scenario_manager import _ScenarioManager
@@ -23,12 +24,13 @@ class _ScenarioManagerFactory(_ManagerFactory):
     @classmethod
     @lru_cache
     def _build_manager(cls) -> Type[_ScenarioManager]:
-        if cls._using_enterprise():
+        if EnterpriseEditionUtils._using_enterprise():
             scenario_manager = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".scenario._scenario_manager", "_ScenarioManager"
+                EnterpriseEditionUtils._TAIPY_ENTERPRISE_CORE_MODULE + ".scenario._scenario_manager", "_ScenarioManager"
             )  # type: ignore
             build_repository = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".scenario._scenario_manager_factory", "_ScenarioManagerFactory"
+                EnterpriseEditionUtils._TAIPY_ENTERPRISE_CORE_MODULE + ".scenario._scenario_manager_factory",
+                "_ScenarioManagerFactory",
             )._build_repository  # type: ignore
         else:
             scenario_manager = _ScenarioManager

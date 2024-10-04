@@ -16,9 +16,9 @@ from unittest.mock import ANY, patch
 import freezegun
 import pytest
 
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
+from taipy.common.config import Config
+from taipy.common.config.common.frequency import Frequency
+from taipy.common.config.common.scope import Scope
 from taipy.core import Job
 from taipy.core import taipy as tp
 from taipy.core._orchestrator._orchestrator import _Orchestrator
@@ -404,6 +404,10 @@ def test_is_deletable():
     scenario_1_primary = _ScenarioManager._create(scenario_config, creation_date=creation_date, name="1")
     scenario_2 = _ScenarioManager._create(scenario_config, creation_date=creation_date, name="2")
 
+    rc = _ScenarioManager._is_deletable("some_scenario")
+    assert not rc
+    assert "Entity some_scenario does not exist in the repository." in rc.reasons
+
     assert len(_ScenarioManager._get_all()) == 2
     assert scenario_1_primary.is_primary
     assert not _ScenarioManager._is_deletable(scenario_1_primary)
@@ -681,12 +685,10 @@ def notify_multi_param(param, *args):
     assert len(param) == 3
 
 
-def notify1(*args, **kwargs):
-    ...
+def notify1(*args, **kwargs): ...
 
 
-def notify2(*args, **kwargs):
-    ...
+def notify2(*args, **kwargs): ...
 
 
 def test_notification_unsubscribe(mocker):
@@ -1044,6 +1046,10 @@ def test_is_submittable():
     task_config = Config.configure_task("task", print, [dn_config])
     scenario_config = Config.configure_scenario("sc", {task_config}, set(), Frequency.DAILY)
     scenario = _ScenarioManager._create(scenario_config)
+
+    rc = _ScenarioManager._is_submittable("some_scenario")
+    assert not rc
+    assert "Entity some_scenario does not exist in the repository." in rc.reasons
 
     assert len(_ScenarioManager._get_all()) == 1
     assert _ScenarioManager._is_submittable(scenario)

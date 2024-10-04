@@ -70,10 +70,14 @@ class Helpers:
         args = received_message["args"]
         assert "type" in args and args["type"] == type
         assert "payload" in args
-        payload = args["payload"][0]
-        assert "name" in payload and varname in payload["name"]
-        assert "payload" in payload and "value" in payload["payload"] and payload["payload"]["value"] == value
-        logging.getLogger().debug(payload["payload"]["value"])
+        payload_arr = args["payload"]
+        found_payload = False
+        for payload in payload_arr:
+            if "name" in payload and varname in payload["name"]:
+                assert "payload" in payload and "value" in payload["payload"] and payload["payload"]["value"] == value
+                found_payload = True
+                logging.getLogger().debug(payload["payload"]["value"])
+        assert found_payload
 
     @staticmethod
     def assert_outward_simple_ws_message(received_message, type, varname, value):
@@ -147,12 +151,14 @@ class Helpers:
             gui._server.run(
                 host=gui._get_config("host", "127.0.0.1"),
                 port=gui._get_config("port", 5000),
+                client_url=gui._get_config("client_url", "http://localhost:{port}"),
                 debug=False,
                 use_reloader=False,
                 flask_log=False,
                 run_in_thread=True,
                 allow_unsafe_werkzeug=False,
                 notebook_proxy=False,
+                port_auto_ranges=gui._get_config("port_auto_ranges", None),
             )
         while not Helpers.port_check():
             time.sleep(0.1)

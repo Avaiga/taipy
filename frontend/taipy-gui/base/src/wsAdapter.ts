@@ -2,7 +2,7 @@ import merge from "lodash/merge";
 import { TaipyApp } from "./app";
 import { IdMessage, storeClientId } from "../../src/context/utils";
 import { WsMessage } from "../../src/context/wsUtils";
-import { DataManager, ModuleData } from "./dataManager";
+import { DataManager, getRequestedDataKey, ModuleData } from "./dataManager";
 
 export abstract class WsAdapter {
     abstract supportedMessageTypes: string[];
@@ -34,13 +34,31 @@ export class TaipyWsAdapter extends WsAdapter {
                 for (const muPayload of message.payload as [MultipleUpdatePayload]) {
                     const encodedName = muPayload.name;
                     const { value } = muPayload.payload;
-                    taipyApp.variableData?.update(encodedName, value);
-                    taipyApp.onChangeEvent(encodedName, value);
+                    if (value && typeof (value as any).__taipy_refresh === "boolean") {
+                        // refresh all requested data for this encodedName var
+                        const requestDataOptions = taipyApp.variableData?._requested_data[encodedName];
+                        for (const dataKey in requestDataOptions) {
+                            const requestDataEntry = requestDataOptions[dataKey];
+                            const { options } = requestDataEntry;
+                            taipyApp.sendWsMessage("DU", encodedName, options);
+                        }
+                        return true;
+                    }
+                    const dataKey = getRequestedDataKey(muPayload.payload);
+                    taipyApp.variableData?.update(encodedName, value, dataKey);
+                    // call the callback if it exists for request data
+                    if (dataKey && (encodedName in taipyApp._rdc && dataKey in taipyApp._rdc[encodedName])) {
+                        const cb = taipyApp._rdc[encodedName]?.[dataKey];
+                        cb(taipyApp, encodedName, dataKey, value);
+                        delete taipyApp._rdc[encodedName][dataKey];
+                    }
+                    taipyApp.onChangeEvent(encodedName, value, dataKey);
                 }
             } else if (message.type === "ID") {
                 const { id } = message as unknown as IdMessage;
                 storeClientId(id);
                 taipyApp.clientId = id;
+                taipyApp.initApp();
                 taipyApp.updateContext(taipyApp.path);
             } else if (message.type === "GMC") {
                 const payload = message.payload as Record<string, unknown>;

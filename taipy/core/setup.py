@@ -43,7 +43,7 @@ extras_require = {
     "mssql": ["pyodbc>=4,<4.1"],
     "mysql": ["pymysql>1,<1.1"],
     "postgresql": ["psycopg2>2.9,<2.10"],
-    "parquet": ["fastparquet==2022.11.0", "pyarrow>=14.0.2,<15.0"],
+    "parquet": ["fastparquet==2022.11.0", "pyarrow>=17.0.0,<18.0"],
     "s3": ["boto3==1.29.1"],
     "mongo": ["pymongo[srv]>=4.2.0,<5.0"],
 }

@@ -15,9 +15,9 @@ from unittest import mock
 
 import pytest
 
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
-from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
+from taipy.common.config import Config
+from taipy.common.config.common.scope import Scope
+from taipy.common.config.exceptions.exceptions import ConfigurationUpdateBlocked
 from taipy.core import MongoDefaultDocument
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.config import DataNodeConfig
@@ -236,7 +236,6 @@ def test_data_node_getitem():
     assert Config.data_nodes[data_node_id].storage_type == data_node_config.storage_type
     assert Config.data_nodes[data_node_id].scope == data_node_config.scope
     assert Config.data_nodes[data_node_id].properties == data_node_config.properties
-    assert Config.data_nodes[data_node_id].cacheable == data_node_config.cacheable
 
 
 def test_data_node_creation_no_duplication():
@@ -273,11 +272,9 @@ def test_data_node_with_env_variable_value():
 
 
 def test_data_node_with_env_variable_in_write_fct_args():
-    def read_fct():
-        ...
+    def read_fct(): ...
 
-    def write_fct():
-        ...
+    def write_fct(): ...
 
     with mock.patch.dict(os.environ, {"FOO": "bar", "BAZ": "qux"}):
         Config.configure_data_node(
@@ -291,11 +288,9 @@ def test_data_node_with_env_variable_in_write_fct_args():
 
 
 def test_data_node_with_env_variable_in_read_fct_args():
-    def read_fct():
-        ...
+    def read_fct(): ...
 
-    def write_fct():
-        ...
+    def write_fct(): ...
 
     with mock.patch.dict(os.environ, {"FOO": "bar", "BAZ": "qux"}):
         Config.configure_data_node(
@@ -333,9 +328,6 @@ def test_block_datanode_config_update_in_development_mode():
         data_node_config.scope = Scope.SCENARIO
 
     with pytest.raises(ConfigurationUpdateBlocked):
-        data_node_config.cacheable = True
-
-    with pytest.raises(ConfigurationUpdateBlocked):
         data_node_config.properties = {"foo": "bar"}
 
     assert Config.data_nodes[data_node_id].id == data_node_id
@@ -368,9 +360,6 @@ def test_block_datanode_config_update_in_standalone_mode():
 
     with pytest.raises(ConfigurationUpdateBlocked):
         data_node_config.scope = Scope.SCENARIO
-
-    with pytest.raises(ConfigurationUpdateBlocked):
-        data_node_config.cacheable = True
 
     with pytest.raises(ConfigurationUpdateBlocked):
         data_node_config.properties = {"foo": "bar"}
@@ -416,52 +405,3 @@ def test_clean_config():
     assert dn1_config.validity_period is dn2_config.validity_period is None
     assert dn1_config.default_path is dn2_config.default_path is None
     assert dn1_config.properties == dn2_config.properties == {}
-
-
-def test_deprecated_cacheable_attribute_remains_compatible():
-    dn_1_id = "dn_1_id"
-    dn_1_config = Config.configure_data_node(
-        id=dn_1_id,
-        storage_type="pickle",
-        cacheable=False,
-        scope=Scope.SCENARIO,
-    )
-    assert Config.data_nodes[dn_1_id].id == dn_1_id
-    assert Config.data_nodes[dn_1_id].storage_type == "pickle"
-    assert Config.data_nodes[dn_1_id].scope == Scope.SCENARIO
-    assert Config.data_nodes[dn_1_id].properties == {"cacheable": False}
-    assert not Config.data_nodes[dn_1_id].cacheable
-    dn_1_config.cacheable = True
-    assert Config.data_nodes[dn_1_id].properties == {"cacheable": True}
-    assert Config.data_nodes[dn_1_id].cacheable
-
-    dn_2_id = "dn_2_id"
-    dn_2_config = Config.configure_data_node(
-        id=dn_2_id,
-        storage_type="pickle",
-        cacheable=True,
-        scope=Scope.SCENARIO,
-    )
-    assert Config.data_nodes[dn_2_id].id == dn_2_id
-    assert Config.data_nodes[dn_2_id].storage_type == "pickle"
-    assert Config.data_nodes[dn_2_id].scope == Scope.SCENARIO
-    assert Config.data_nodes[dn_2_id].properties == {"cacheable": True}
-    assert Config.data_nodes[dn_2_id].cacheable
-    dn_2_config.cacheable = False
-    assert Config.data_nodes[dn_1_id].properties == {"cacheable": False}
-    assert not Config.data_nodes[dn_1_id].cacheable
-
-    dn_3_id = "dn_3_id"
-    dn_3_config = Config.configure_data_node(
-        id=dn_3_id,
-        storage_type="pickle",
-        scope=Scope.SCENARIO,
-    )
-    assert Config.data_nodes[dn_3_id].id == dn_3_id
-    assert Config.data_nodes[dn_3_id].storage_type == "pickle"
-    assert Config.data_nodes[dn_3_id].scope == Scope.SCENARIO
-    assert Config.data_nodes[dn_3_id].properties == {}
-    assert not Config.data_nodes[dn_3_id].cacheable
-    dn_3_config.cacheable = True
-    assert Config.data_nodes[dn_3_id].properties == {"cacheable": True}
-    assert Config.data_nodes[dn_3_id].cacheable

@@ -228,7 +228,7 @@ const TreeView = (props: TreeViewProps) => {
             let parsedValue;
             try {
                 parsedValue = JSON.parse(defaultValue);
-            } catch (e) {
+            } catch {
                 parsedValue = defaultValue;
             }
             setSelectedValue(Array.isArray(parsedValue) ? parsedValue : [parsedValue]);

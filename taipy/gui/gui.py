@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import contextlib
 import importlib
-import inspect
 import json
 import math
 import os
@@ -25,6 +24,7 @@ import typing as t
 import warnings
 from importlib import metadata, util
 from importlib.util import find_spec
+from inspect import currentframe, getabsfile, ismethod, ismodule, isroutine
 from pathlib import Path
 from threading import Timer
 from types import FrameType, FunctionType, LambdaType, ModuleType, SimpleNamespace
@@ -37,7 +37,6 @@ from flask import (
     Flask,
     g,
     has_app_context,
-    has_request_context,
     jsonify,
     request,
     send_file,
@@ -46,12 +45,13 @@ from flask import (
 from werkzeug.utils import secure_filename
 
 import __main__  # noqa: F401
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 if util.find_spec("pyngrok"):
     from pyngrok import ngrok  # type: ignore[reportMissingImports]
 
 from ._default_config import _default_stylekit, default_config
+from ._hook import _Hooks
 from ._page import _Page
 from ._renderers import _EmptyPage
 from ._renderers._markdown import _TaipyMarkdownExtension
@@ -62,12 +62,12 @@ from ._warnings import TaipyGuiWarning, _warn
 from .builder import _ElementApiGenerator
 from .config import Config, ConfigParameter, _Config
 from .custom import Page as CustomPage
+from .custom.utils import get_current_resource_handler, is_in_custom_page_context
 from .data.content_accessor import _ContentAccessor
 from .data.data_accessor import _DataAccessors
 from .data.data_format import _DataFormat
 from .data.data_scope import _DataScopes
 from .extension.library import Element, ElementLibrary
-from .hook import Hooks
 from .page import Page
 from .partial import Partial
 from .server import _Server
@@ -81,6 +81,7 @@ from .utils import (
     _get_client_var_name,
     _get_css_var_value,
     _get_expr_var_name,
+    _get_lambda_id,
     _get_module_name_from_frame,
     _get_non_existent_file_path,
     _get_page_from_module,
@@ -106,7 +107,7 @@ from .utils import (
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
-from .utils._variable_directory import _MODULE_ID, _VariableDirectory
+from .utils._variable_directory import _is_moduled_variable, _VariableDirectory
 from .utils.chart_config_builder import _build_chart_config
 from .utils.table_col_builder import _enhance_columns
 
@@ -143,6 +144,15 @@ class Gui:
             The signature of the *on_init* callback function must be:
 
             - *state*: the `State^` instance of the caller.
+        on_page_load (Callable): This callback is invoked just before the page content is sent
+            to the front-end.<br/>
+            It defaults to the `on_page_load()` global function defined in the Python
+            application. If there is no such function, page loads will not trigger
+            anything.<br/>
+
+            The signature of the *on_page_load* callback function must be:
+            - *state*: the `State^` instance of the caller.
+            - *page_name*: the name of the page that is being loaded.
         on_navigate (Callable): The function that is called when a page is requested.<br/>
             It defaults to the `on_navigate()` global function defined in the Python
             application. If there is no such function, page requests will not trigger
@@ -289,7 +299,7 @@ class Gui:
                 of the main Python file is allowed.
             env_filename (Optional[str]): An optional file from which to load application
                 configuration variables (see the
-                [Configuration](../../userman/configuration/gui-config.md#configuring-the-gui-instance)
+                [Configuration](../../../../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
                 section of the User Manual for details.)<br/>
                 The default value is "taipy.gui.env"
             libraries (Optional[List[ElementLibrary]]): An optional list of extension library
@@ -302,7 +312,7 @@ class Gui:
                 own Flask application instance and use it to serve the pages.
         """
         # store suspected local containing frame
-        self.__frame = t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back)
+        self.__frame = t.cast(FrameType, t.cast(FrameType, currentframe()).f_back)
         self.__default_module_name = _get_module_name_from_frame(self.__frame)
         self._set_css_file(css_file)
 
@@ -329,6 +339,7 @@ class Gui:
         self.on_action: t.Optional[t.Callable] = None
         self.on_change: t.Optional[t.Callable] = None
         self.on_init: t.Optional[t.Callable] = None
+        self.on_page_load: t.Optional[t.Callable] = None
         self.on_navigate: t.Optional[t.Callable] = None
         self.on_exception: t.Optional[t.Callable] = None
         self.on_status: t.Optional[t.Callable] = None
@@ -368,7 +379,7 @@ class Gui:
         )
 
         # Init Gui Hooks
-        Hooks()._init(self)
+        _Hooks()._init(self)
 
         if page:
             self.add_page(name=Gui.__root_page_name, page=page)
@@ -414,7 +425,8 @@ class Gui:
     def register_content_provider(content_type: type, content_provider: t.Callable[..., str]) -> None:
         """Add a custom content provider.
 
-        The application can use custom content for the `part` block when its *content* property is set to an object with type *type*.
+        The application can use custom content for the `part` block when its *content* property
+        is set to an object with type *type*.
 
         Arguments:
             content_type: The type of the content that triggers the content provider.
@@ -470,7 +482,7 @@ class Gui:
 
             if callable(provider_fn):
                 try:
-                    return provider_fn(content)
+                    return provider_fn(t.cast(t.Any, content))
                 except Exception as e:
                     _warn(f"Error in content provider for type {str(type(content))}", e)
         return (
@@ -608,10 +620,10 @@ class Gui:
             return None
 
     def _handle_connect(self):
-        Hooks().handle_connect(self)
+        _Hooks().handle_connect(self)
 
     def _handle_disconnect(self):
-        Hooks()._handle_disconnect(self)
+        _Hooks()._handle_disconnect(self)
         if (sid := getattr(request, "sid", None)) and (st_to := self._get_config("state_retention_period", 0)) > 0:
             for cl_id, sids in self.__client_id_2_sid.items():
                 if sid in sids:
@@ -639,7 +651,7 @@ class Gui:
             self.__set_client_id_in_context(expected_client_id)
             g.ws_client_id = expected_client_id
             with self._set_locals_context(message.get("module_context") or None):
-                with self._get_autorization():
+                with self._get_authorization():
                     payload = message.get("payload", {})
                     if msg_type == _WsType.UPDATE.value:
                         self.__front_end_update(
@@ -688,7 +700,7 @@ class Gui:
     # To be expanded by inheriting classes
     # this will be used to handle ws messages that is not handled by the base Gui class
     def _manage_external_message(self, msg_type: _WsType, message: dict) -> None:
-        Hooks()._manage_external_message(self, msg_type, message)
+        _Hooks()._manage_external_message(self, msg_type, message)
 
     def __front_end_update(
         self,
@@ -813,17 +825,17 @@ class Gui:
             on_change_fn = self._get_user_function("on_change")
         if callable(on_change_fn):
             try:
-                argcount = on_change_fn.__code__.co_argcount
-                if argcount > 0 and inspect.ismethod(on_change_fn):
-                    argcount -= 1
-                args: t.List[t.Any] = [None for _ in range(argcount)]
-                if argcount > 0:
+                arg_count = on_change_fn.__code__.co_argcount
+                if arg_count > 0 and ismethod(on_change_fn):
+                    arg_count -= 1
+                args: t.List[t.Any] = [None for _ in range(arg_count)]
+                if arg_count > 0:
                     args[0] = self.__get_state()
-                if argcount > 1:
+                if arg_count > 1:
                     args[1] = var_name
-                if argcount > 2:
+                if arg_count > 2:
                     args[2] = value
-                if argcount > 3:
+                if arg_count > 3:
                     args[3] = current_context
                 on_change_fn(*args)
             except Exception as e:  # pragma: no cover
@@ -849,22 +861,22 @@ class Gui:
     def _get_user_content_url(
         self, path: t.Optional[str] = None, query_args: t.Optional[t.Dict[str, str]] = None
     ) -> t.Optional[str]:
-        qargs = query_args or {}
-        qargs.update({Gui.__ARG_CLIENT_ID: self._get_client_id()})
-        return f"/{Gui.__USER_CONTENT_URL}/{path or 'TaIpY'}?{urlencode(qargs)}"
+        q_args = query_args or {}
+        q_args.update({Gui.__ARG_CLIENT_ID: self._get_client_id()})
+        return f"/{Gui.__USER_CONTENT_URL}/{path or 'TaIpY'}?{urlencode(q_args)}"
 
     def __serve_user_content(self, path: str) -> t.Any:
         self.__set_client_id_in_context()
-        qargs: t.Dict[str, str] = {}
-        qargs.update(request.args)
-        qargs.pop(Gui.__ARG_CLIENT_ID, None)
+        q_args: t.Dict[str, str] = {}
+        q_args.update(request.args)
+        q_args.pop(Gui.__ARG_CLIENT_ID, None)
         cb_function: t.Optional[t.Union[t.Callable, str]] = None
         cb_function_name = None
-        if qargs.get(Gui._HTML_CONTENT_KEY):
+        if q_args.get(Gui._HTML_CONTENT_KEY):
             cb_function = self.__process_content_provider
             cb_function_name = cb_function.__name__
         else:
-            cb_function_name = qargs.get(Gui.__USER_CONTENT_CB)
+            cb_function_name = q_args.get(Gui.__USER_CONTENT_CB)
             if cb_function_name:
                 cb_function = self._get_user_function(cb_function_name)
                 if not callable(cb_function):
@@ -891,8 +903,8 @@ class Gui:
                 args: t.List[t.Any] = []
                 if path:
                     args.append(path)
-                if len(qargs):
-                    args.append(qargs)
+                if len(q_args):
+                    args.append(q_args)
                 ret = self._call_function_with_state(cb_function, args)
                 if ret is None:
                     _warn(f"{cb_function_name}() callback function must return a value.")
@@ -932,8 +944,8 @@ class Gui:
                 if libs is None:
                     libs = []
                     libraries[lib.get_name()] = libs
-                elts: t.List[t.Dict[str, str]] = []
-                libs.append({"js module": lib.get_js_module_name(), "elements": elts})
+                elements: t.List[t.Dict[str, str]] = []
+                libs.append({"js module": lib.get_js_module_name(), "elements": elements})
                 for element_name, elt in lib.get_elements().items():
                     if not isinstance(elt, Element):
                         continue
@@ -942,7 +954,7 @@ class Gui:
                         elt_dict["render function"] = elt._render_xhtml.__code__.co_name
                     else:
                         elt_dict["react name"] = elt._get_js_name(element_name)
-                    elts.append(elt_dict)
+                    elements.append(elt_dict)
         status.update({"libraries": libraries})
 
     def _serve_status(self, template: Path) -> t.Dict[str, t.Dict[str, str]]:
@@ -965,20 +977,23 @@ class Gui:
 
     def __upload_files(self):
         self.__set_client_id_in_context()
-        if "var_name" not in request.form:
-            _warn("No var name")
-            return ("No var name", 400)
-        var_name = request.form["var_name"]
+        on_upload_action = request.form.get("on_action", None)
+        var_name = t.cast(str, request.form.get("var_name", None))
+        if not var_name and not on_upload_action:
+            _warn("upload files: No var name")
+            return ("upload files: No var name", 400)
+        context = request.form.get("context", None)
+        upload_data = request.form.get("upload_data", None)
         multiple = "multiple" in request.form and request.form["multiple"] == "True"
-        if "blob" not in request.files:
-            _warn("No file part")
-            return ("No file part", 400)
-        file = request.files["blob"]
+        file = request.files.get("blob", None)
+        if not file:
+            _warn("upload files: No file part")
+            return ("upload files: No file part", 400)
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
         if file.filename == "":
-            _warn("No selected file")
-            return ("No selected file", 400)
+            _warn("upload files: No selected file")
+            return ("upload files: No selected file", 400)
         suffix = ""
         complete = True
         part = 0
@@ -1007,16 +1022,28 @@ class Gui:
                         return (f"Cannot group file after chunk upload for {file.filename}", 500)
                 # notify the file is uploaded
                 newvalue = str(file_path)
-                if multiple:
+                if multiple and var_name:
                     value = _getscopeattr(self, var_name)
                     if not isinstance(value, t.List):
                         value = [] if value is None else [value]
                     value.append(newvalue)
                     newvalue = value
-                setattr(self._bindings(), var_name, newvalue)
+                with self._set_locals_context(context):
+                    if on_upload_action:
+                        data = {}
+                        if upload_data:
+                            try:
+                                data = json.loads(upload_data)
+                            except Exception:
+                                pass
+                        data["path"] = file_path
+                        file_fn = self._get_user_function(on_upload_action)
+                        if not callable(file_fn):
+                            file_fn = _getscopeattr(self, on_upload_action)
+                        self._call_function_with_state(file_fn, ["file_upload", {"args": [data]}])
+                    else:
+                        setattr(self._bindings(), var_name, newvalue)
         return ("", 200)
-
-    _data_request_counter = 1
 
     def __send_var_list_update(  # noqa C901
         self,
@@ -1024,7 +1051,10 @@ class Gui:
         front_var: t.Optional[str] = None,
     ):
         ws_dict = {}
-        values = {v: _getscopeattr_drill(self, v) for v in modified_vars}
+        is_custom_page = is_in_custom_page_context()
+        values = {v: _getscopeattr_drill(self, v) for v in modified_vars if is_custom_page or _is_moduled_variable(v)}
+        if not values:
+            return
         for k, v in values.items():
             if isinstance(v, (_TaipyData, _TaipyContentHtml)) and v.get_name() in modified_vars:
                 modified_vars.remove(v.get_name())
@@ -1032,14 +1062,14 @@ class Gui:
                 modified_vars.remove(k)
         for _var in modified_vars:
             newvalue = values.get(_var)
-            if isinstance(newvalue, _TaipyData):
-                # A changing integer that triggers a data request
-                newvalue = Gui._data_request_counter
-                Gui._data_request_counter = (Gui._data_request_counter % 100) + 1
+            resource_handler = get_current_resource_handler()
+            custom_page_filtered_types = resource_handler.data_layer_supported_types if resource_handler else ()
+            if isinstance(newvalue, (_TaipyData)) or isinstance(newvalue, custom_page_filtered_types):
+                newvalue = {"__taipy_refresh": True}
             else:
                 if isinstance(newvalue, (_TaipyContent, _TaipyContentImage)):
                     ret_value = self.__get_content_accessor().get_info(
-                        front_var, newvalue.get(), isinstance(newvalue, _TaipyContentImage)
+                        t.cast(str, front_var), newvalue.get(), isinstance(newvalue, _TaipyContentImage)
                     )
                     if isinstance(ret_value, tuple):
                         newvalue = f"/{Gui.__CONTENT_ROOT}/{ret_value[0]}"
@@ -1055,14 +1085,9 @@ class Gui:
                     )
                 elif isinstance(newvalue, _TaipyBase):
                     newvalue = newvalue.get()
-                if isinstance(newvalue, (dict, _MapDict)):
-                    # Skip in taipy-gui, available in custom frontend
-                    resource_handler_id = None
-                    with contextlib.suppress(Exception):
-                        if has_request_context():
-                            resource_handler_id = request.cookies.get(_Server._RESOURCE_HANDLER_ARG, None)
-                    if resource_handler_id is None:
-                        continue  # this var has no transformer
+                # Skip in taipy-gui, available in custom frontend
+                if isinstance(newvalue, (dict, _MapDict)) and not is_in_custom_page_context():
+                    continue
                 if isinstance(newvalue, float) and math.isnan(newvalue):
                     # do not let NaN go through json, it is not handle well (dies silently through websocket)
                     newvalue = None
@@ -1098,6 +1123,10 @@ class Gui:
     def __request_data_update(self, var_name: str, payload: t.Any) -> None:
         # Use custom attrgetter function to allow value binding for _MapDict
         newvalue = _getscopeattr_drill(self, var_name)
+        resource_handler = get_current_resource_handler()
+        custom_page_filtered_types = resource_handler.data_layer_supported_types if resource_handler else ()
+        if not isinstance(newvalue, _TaipyData) and isinstance(newvalue, custom_page_filtered_types):
+            newvalue = _TaipyData(newvalue, "")
         if isinstance(newvalue, _TaipyData):
             ret_payload = None
             if isinstance(payload, dict):
@@ -1143,8 +1172,8 @@ class Gui:
                 page_path = Gui.__root_page_name
             # Get Module Context
             if mc := self._get_page_context(page_path):
-                page_renderer = self._get_page(page_path)._renderer
-                self._bind_custom_page_variables(page_renderer, self._get_client_id())
+                page_renderer = t.cast(_Page, self._get_page(page_path))._renderer
+                self._bind_custom_page_variables(t.cast(t.Any, page_renderer), self._get_client_id())
                 # get metadata if there is one
                 metadata: t.Dict[str, t.Any] = {}
                 if hasattr(page_renderer, "_metadata"):
@@ -1161,6 +1190,9 @@ class Gui:
     def __get_variable_tree(self, data: t.Dict[str, t.Any]):
         # Module Context -> Variable -> Variable data (name, type, initial_value)
         variable_tree: t.Dict[str, t.Dict[str, t.Dict[str, t.Any]]] = {}
+        # Types of data to be handled by the data layer and filtered out here
+        resource_handler = get_current_resource_handler()
+        filtered_value_types = resource_handler.data_layer_supported_types if resource_handler else ()
         for k, v in data.items():
             if isinstance(v, _TaipyBase):
                 data[k] = v.get()
@@ -1169,10 +1201,14 @@ class Gui:
                 var_module_name = "__main__"
             if var_module_name not in variable_tree:
                 variable_tree[var_module_name] = {}
+            data_update = isinstance(v, filtered_value_types)
+            value = None if data_update else data[k]
+            # if _is_moduled_variable(k):
             variable_tree[var_module_name][var_name] = {
                 "type": type(v).__name__,
-                "value": data[k],
+                "value": value,
                 "encoded_name": k,
+                "data_update": data_update,
             }
         return variable_tree
 
@@ -1221,12 +1257,12 @@ class Gui:
 
     def __handle_ws_get_routes(self):
         routes = (
-            [[self._config.root_page._route, self._config.root_page._renderer.page_type]]
+            [[self._config.root_page._route, t.cast(t.Any, self._config.root_page._renderer).page_type]]
             if self._config.root_page
             else []
         )
         routes += [
-            [page._route, page._renderer.page_type]
+            [page._route, t.cast(t.Any, page._renderer).page_type]
             for page in self._config.pages
             if page._route != Gui.__root_page_name
         ]
@@ -1245,7 +1281,7 @@ class Gui:
                 self._server._ws.emit(
                     "message",
                     payload,
-                    to=self.__get_ws_receiver(send_back_only),
+                    to=t.cast(str, self.__get_ws_receiver(send_back_only)),
                 )
                 time.sleep(0.001)
             except Exception as e:  # pragma: no cover
@@ -1256,7 +1292,7 @@ class Gui:
     def __broadcast_ws(self, payload: dict, client_id: t.Optional[str] = None):
         try:
             to = list(self.__get_sids(client_id)) if client_id else []
-            self._server._ws.emit("message", payload, to=to if to else None, include_self=True)
+            self._server._ws.emit("message", payload, to=t.cast(str, to) if to else None, include_self=True)
             time.sleep(0.001)
         except Exception as e:  # pragma: no cover
             _warn(f"Exception raised in WebSocket communication in '{self.__frame.f_code.co_name}'", e)
@@ -1267,7 +1303,7 @@ class Gui:
                 self._server._ws.emit(
                     "message",
                     {"type": _WsType.ACKNOWLEDGEMENT.value, "id": ack_id},
-                    to=self.__get_ws_receiver(True),
+                    to=t.cast(str, self.__get_ws_receiver(True)),
                 )
                 time.sleep(0.001)
             except Exception as e:  # pragma: no cover
@@ -1353,7 +1389,7 @@ class Gui:
     ):
         self.__broadcast_ws(
             {
-                "type": _WsType.UPDATE.value if message_type is None else message_type.value,
+                "type": _WsType.BROADCAST.value if message_type is None else message_type.value,
                 "name": _get_broadcast_var_name(var_name),
                 "payload": {"value": var_value},
             },
@@ -1469,15 +1505,15 @@ class Gui:
 
     def __call_function_with_args(self, **kwargs):
         action_function = kwargs.get("action_function")
-        id = kwargs.get("id")
+        id = t.cast(str, kwargs.get("id"))
         payload = kwargs.get("payload")
 
         if callable(action_function):
             try:
                 argcount = action_function.__code__.co_argcount
-                if argcount > 0 and inspect.ismethod(action_function):
+                if argcount > 0 and ismethod(action_function):
                     argcount -= 1
-                args = [None for _ in range(argcount)]
+                args = t.cast(list, [None for _ in range(argcount)])
                 if argcount > 0:
                     args[0] = self.__get_state()
                 if argcount > 1:
@@ -1498,7 +1534,7 @@ class Gui:
         cp_args = [] if args is None else args.copy()
         cp_args.insert(0, self.__get_state())
         argcount = user_function.__code__.co_argcount
-        if argcount > 0 and inspect.ismethod(user_function):
+        if argcount > 0 and ismethod(user_function):
             argcount -= 1
         if argcount > len(cp_args):
             cp_args += (argcount - len(cp_args)) * [None]
@@ -1518,8 +1554,7 @@ class Gui:
     ) -> t.Any:
         """Invoke a user callback for a given state.
 
-        See the
-        [section on Long Running Callbacks in a Thread](../../userman/gui/callbacks.md#long-running-callbacks-in-a-thread)
+        See the [section on Long Running Callbacks in a Thread](../../../../../userman/gui/callbacks.md#long-running-callbacks-in-a-thread)
         in the User Manual for details on when and how this function can be used.
 
         Arguments:
@@ -1527,7 +1562,7 @@ class Gui:
             callback (Callable[[State^, ...], None]): The user-defined function that is invoked.<br/>
                 The first parameter of this function **must** be a `State^`.
             args (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
-            module_context (Optional[str]): the name of the module that will be used.
+            module_context (Optional[str]): The name of the module that will be used.
         """  # noqa: E501
         this_sid = None
         if request:
@@ -1677,33 +1712,64 @@ class Gui:
         return self.__adapter._get_adapted_lov(lov, var_type)
 
     def table_on_edit(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
-        """
-        TODO: Default implementation of on_edit for tables
+        """Default implementation of the `on_edit` callback for tables.
+
+           This function sets the value of a specific cell in the tabular dataset stored in
+           *var_name*, typically bound to the *data* property of a table control.
+
+        Arguments:
+            state: the state instance received in the callback.
+            var_name: the name of the variable bound to the table's *data* property.
+            payload: the payload dictionary received from the `on_edit` callback.<br/>
+                This dictionary has the following keys:
+
+                - *"index"*: The row index of the cell to be modified.
+                - *"col"*: Specifies the name of the column of the cell to be modified.
+                - *"value"*: Specifies the new value to be assigned to the cell.
+                - *"user_value"*: Contains the text entered by the user.
+                - *"tz"*: Specifies the timezone to be used, if applicable.
         """
         try:
             setattr(state, var_name, self._get_accessor().on_edit(getattr(state, var_name), payload))
         except Exception as e:
-            _warn("TODO: Table.on_edit", e)
-
-    def table_on_delete(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
-        """
-        TODO: Default implementation of on_delete for tables
-        """
-        try:
-            setattr(state, var_name, self._get_accessor().on_delete(getattr(state, var_name), payload))
-        except Exception as e:
-            _warn("TODO: Table.on_delete", e)
+            _warn("Gui.table_on_edit() failed potentially from a table's on_edit callback.", e)
 
     def table_on_add(
         self, state: State, var_name: str, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None
     ):
-        """
-        TODO: Default implementation of on_add for tables
+        """Default implementation of the `on_add` callback for tables.
+
+        This function creates a new row in the tabular dataset stored in *var_name*.<br/>
+        The row is added at the index specified in *payload["index"]*.
+
+        Arguments:
+            state: The state instance received from the callback.
+            var_name: The name of the variable bound to the table's *data* property.
+            payload: The payload dictionary received from the `on_add` callback.
+            new_row: The initial values for the new row.<br/>
+                If this parameter is not specified, the new row is initialized with all values set
+                to 0, with the exact meaning depending on the column data type.
         """
         try:
             setattr(state, var_name, self._get_accessor().on_add(getattr(state, var_name), payload, new_row))
         except Exception as e:
-            _warn("TODO: Table.on_add", e)
+            _warn("Gui.table_on_add() failed potentially from a table's on_add callback.", e)
+
+    def table_on_delete(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
+        """Default implementation of the `on_delete` callback for tables.
+
+        This function removes a row from the tabular dataset stored in *var_name*.<br/>
+        The row to be removed is located at the index specified in *payload["index"]*.
+
+        Arguments:
+            state: The state instance received in the callback.
+            var_name: The name of the variable bound to the table's *data* property.
+            payload: The payload dictionary received from the `on_delete` callback.
+        """
+        try:
+            setattr(state, var_name, self._get_accessor().on_delete(getattr(state, var_name), payload))
+        except Exception as e:
+            _warn("Gui.table_on_delete() failed potentially from a table's on_delete callback.", e)
 
     def _tbl_cols(
         self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs
@@ -1722,7 +1788,7 @@ class Gui:
                         attributes.get("date_format"),
                         attributes.get("number_format"),
                     )
-                    _enhance_columns(attributes, hashes, col_dict, "table(cols)")
+                    _enhance_columns(attributes, hashes, t.cast(dict, col_dict), "table(cols)")
 
                     return json.dumps(col_dict, cls=_TaipyJsonEncoder)
             except Exception as e:  # pragma: no cover
@@ -1822,7 +1888,7 @@ class Gui:
 
     def _get_locals_context(self) -> str:
         current_context = self.__locals_context.get_context()
-        return current_context if current_context is not None else self.__default_module_name
+        return current_context if current_context is not None else t.cast(str, self.__default_module_name)
 
     def _set_locals_context(self, context: t.Optional[str]) -> t.ContextManager[None]:
         return self.__locals_context.set_locals_context(context)
@@ -1884,9 +1950,9 @@ class Gui:
                   Markdown text.
             style (Optional[str]): Additional CSS style to apply to this page.
 
-                - if there is style associated with a page, it is used at a global level
-                - if there is no style associated with the page, the style is cleared at a global level
-                - if the page is embedded in a block control, the style is ignored
+                - If there is style associated with a page, it is used at a global level
+                - If there is no style associated with the page, the style is cleared at a global level
+                - If the page is embedded in a block control, the style is ignored
 
         Note that page names cannot start with the slash ('/') character and that each
         page must have a unique name.
@@ -1914,7 +1980,7 @@ class Gui:
         new_page = _Page()
         new_page._route = name
         new_page._renderer = page
-        new_page._style = style
+        new_page._style = style or page._get_style()
         # Append page to _config
         self._config.pages.append(new_page)
         self._config.routes.append(name)
@@ -1922,7 +1988,7 @@ class Gui:
         if name == Gui.__root_page_name:
             self._config.root_page = new_page
         # Validate Page
-        Hooks().validate_page(self, page)
+        _Hooks().validate_page(self, page)
         # Update locals context
         self.__locals_context.add(page._get_module_name(), page._get_locals())
         # Update variable directory
@@ -1933,7 +1999,7 @@ class Gui:
             page._notebook_gui = self
             page._notebook_page = new_page
         # add page to hook
-        Hooks().add_page(self, page)
+        _Hooks().add_page(self, page)
 
     def add_pages(self, pages: t.Optional[t.Union[t.Mapping[str, t.Union[str, Page]], str]] = None) -> None:
         """Add several pages to the Graphical User Interface.
@@ -2008,7 +2074,7 @@ class Gui:
                 self.add_page(name=k, page=v)
         elif isinstance(folder_name := pages, str):
             if not hasattr(self, "_root_dir"):
-                self._root_dir = os.path.dirname(inspect.getabsfile(self.__frame))
+                self._root_dir = os.path.dirname(getabsfile(self.__frame))
             folder_path = folder_name if os.path.isabs(folder_name) else os.path.join(self._root_dir, folder_name)
             folder_name = os.path.basename(folder_path)
             if not os.path.isdir(folder_path):  # pragma: no cover
@@ -2028,8 +2094,8 @@ class Gui:
     ) -> Partial:
         """Create a new `Partial^`.
 
-        The [User Manual section on Partials](../../userman/gui/pages/index.md#partials) gives details on
-        when and how to use this class.
+        The [User Manual section on Partials](../../../../../userman/gui/pages/partial/index.md)
+        gives details on when and how to use this class.
 
         Arguments:
             page (Union[str, Page^]): The page to create a new Partial from.<br/>
@@ -2099,7 +2165,7 @@ class Gui:
         return encoded_var_name
 
     def _bind_var_val(self, var_name: str, value: t.Any) -> bool:
-        if _MODULE_ID not in var_name:
+        if not _is_moduled_variable(var_name):
             var_name = self.__var_dir.add_var(var_name, self._get_locals_context())
         if not hasattr(self._bindings(), var_name):
             self._bind(var_name, value)
@@ -2159,9 +2225,9 @@ class Gui:
     def _download(
         self, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[t.Union[str, t.Callable]] = ""
     ):
-        if callable(on_action) and on_action.__name__:
+        if isroutine(on_action) and on_action.__name__:
             on_action_name = (
-                _get_expr_var_name(str(on_action.__code__))
+                _get_lambda_id(t.cast(LambdaType, on_action))
                 if on_action.__name__ == "<lambda>"
                 else _get_expr_var_name(on_action.__name__)
             )
@@ -2304,6 +2370,26 @@ class Gui:
                     _warn("Exception raised in on_navigate()", e)
         return nav_page
 
+    def _call_on_page_load(self, page_name: str) -> None:
+        if page_name == Gui.__root_page_name:
+            page_name = "/"
+        on_page_load_fn = self._get_user_function("on_page_load")
+        if not callable(on_page_load_fn):
+            return
+        try:
+            arg_count = on_page_load_fn.__code__.co_argcount
+            if arg_count > 0 and ismethod(on_page_load_fn):
+                arg_count -= 1
+            args: t.List[t.Any] = [None for _ in range(arg_count)]
+            if arg_count > 0:
+                args[0] = self.__get_state()
+            if arg_count > 1:
+                args[1] = page_name
+            on_page_load_fn(*args)
+        except Exception as e:
+            if not self._call_on_exception("on_page_load", e):
+                _warn("Exception raised in on_page_load()", e)
+
     def _get_page(self, page_name: str):
         return next((page_i for page_i in self._config.pages if page_i._route == page_name), None)
 
@@ -2314,8 +2400,12 @@ class Gui:
         with self.get_flask_app().app_context() if has_app_context() else contextlib.nullcontext():  # type: ignore[attr-defined]
             self.__set_client_id_in_context(client_id)
             with self._set_locals_context(page._get_module_name()):
-                for k in self._get_locals_bind().keys():
-                    if (not page._binding_variables or k in page._binding_variables) and not k.startswith("_"):
+                for k, v in self._get_locals_bind().items():
+                    if (
+                        (not page._binding_variables or k in page._binding_variables)
+                        and not k.startswith("_")
+                        and not isinstance(v, ModuleType)
+                    ):
                         self._bind_var(k)
 
     def __render_page(self, page_name: str) -> t.Any:
@@ -2356,6 +2446,8 @@ class Gui:
             page._rendered_jsx += "<PageContent />"
         # Return jsx page
         if page._rendered_jsx is not None:
+            with self._set_locals_context(context):
+                self._call_on_page_load(nav_page)
             return self._server._render(
                 page._rendered_jsx, page._style if page._style is not None else "", page._head, context
             )
@@ -2381,8 +2473,11 @@ class Gui:
             The Flask instance used.
         """
         if hasattr(self, "_server"):
-            return self._server.get_flask()
+            return t.cast(Flask, self._server.get_flask())
         raise RuntimeError("get_flask_app() cannot be invoked before run() has been called.")
+
+    def _get_port(self) -> int:
+        return self._server.get_port()
 
     def _set_frame(self, frame: t.Optional[FrameType]):
         if not isinstance(frame, FrameType):  # pragma: no cover
@@ -2398,8 +2493,8 @@ class Gui:
             elif script_file.is_dir() and (script_file / "taipy.css").exists():
                 css_file = "taipy.css"
         if css_file is None:
-             script_file = script_file.with_name("taipy").with_suffix(".css")
-             if script_file.exists():
+            script_file = script_file.with_name("taipy").with_suffix(".css")
+            if script_file.exists():
                 css_file = f"{script_file.stem}.css"
         self.__css_file = css_file
 
@@ -2458,21 +2553,21 @@ class Gui:
                 self,
                 path_mapping=self._path_mapping,
                 flask=self._flask,
-                async_mode=app_config["async_mode"],
-                allow_upgrades=not app_config["notebook_proxy"],
+                async_mode=app_config.get("async_mode"),
+                allow_upgrades=not app_config.get("notebook_proxy"),
                 server_config=app_config.get("server_config"),
             )
 
         # Stop and reinitialize the server if it is still running as a thread
-        if (_is_in_notebook() or app_config["run_in_thread"]) and hasattr(self._server, "_thread"):
+        if (_is_in_notebook() or app_config.get("run_in_thread")) and hasattr(self._server, "_thread"):
             self.stop()
             self._flask_blueprint = []
             self._server = _Server(
                 self,
                 path_mapping=self._path_mapping,
                 flask=self._flask,
-                async_mode=app_config["async_mode"],
-                allow_upgrades=not app_config["notebook_proxy"],
+                async_mode=app_config.get("async_mode"),
+                allow_upgrades=not app_config.get("notebook_proxy"),
                 server_config=app_config.get("server_config"),
             )
             self._bindings()._new_scopes()
@@ -2481,16 +2576,16 @@ class Gui:
         app_config = self._config.config
         if hasattr(self, "_ngrok"):
             # Keep the ngrok instance if token has not changed
-            if app_config["ngrok_token"] == self._ngrok[1]:
+            if app_config.get("ngrok_token") == self._ngrok[1]:
                 _TaipyLogger._get_logger().info(f" * NGROK Public Url: {self._ngrok[0].public_url}")
                 return
             # Close the old tunnel so new tunnel can open for new token
-            ngrok.disconnect(self._ngrok[0].public_url)
-        if app_config["run_server"] and (token := app_config["ngrok_token"]):  # pragma: no cover
+            ngrok.disconnect(self._ngrok[0].public_url)  # type: ignore[reportPossiblyUnboundVariable]
+        if app_config.get("run_server") and (token := app_config.get("ngrok_token")):  # pragma: no cover
             if not util.find_spec("pyngrok"):
                 raise RuntimeError("Cannot use ngrok as pyngrok package is not installed.")
-            ngrok.set_auth_token(token)
-            self._ngrok = (ngrok.connect(app_config["port"], "http"), token)
+            ngrok.set_auth_token(token)  # type: ignore[reportPossiblyUnboundVariable]
+            self._ngrok = (ngrok.connect(app_config.get("port"), "http"), token)  # type: ignore[reportPossiblyUnboundVariable]
             _TaipyLogger._get_logger().info(f" * NGROK Public Url: {self._ngrok[0].public_url}")
 
     def __bind_default_function(self):
@@ -2500,6 +2595,7 @@ class Gui:
             self.__bind_local_func("on_init")
             self.__bind_local_func("on_change")
             self.__bind_local_func("on_action")
+            self.__bind_local_func("on_page_load")
             self.__bind_local_func("on_navigate")
             self.__bind_local_func("on_exception")
             self.__bind_local_func("on_status")
@@ -2581,9 +2677,11 @@ class Gui:
         # server URL Rule for flask rendered react-router
         pages_bp.add_url_rule(f"/{Gui.__INIT_URL}", view_func=self.__init_route)
 
+        _Hooks()._add_external_blueprint(self, __name__)
+
         # Register Flask Blueprint if available
         for bp in self._flask_blueprint:
-            self._server.get_flask().register_blueprint(bp)
+            t.cast(Flask, self._server.get_flask()).register_blueprint(bp)
 
     def _get_accessor(self):
         if self.__accessors is None:
@@ -2603,7 +2701,7 @@ class Gui:
         URL that `Gui` serves. The default is to listen to the *localhost* address
         (127.0.0.1) on the port number 5000. However, the configuration of this `Gui`
         object may impact that (see the
-        [Configuration](../../userman/configuration/gui-config.md#configuring-the-gui-instance)
+        [Configuration](../../../../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
         section of the User Manual for details).
 
         Arguments:
@@ -2628,8 +2726,8 @@ class Gui:
                 ignored.<br/>
                 Also note that setting the *debug* argument to True forces *async_mode* to "threading".
             **kwargs (dict[str, any]): Additional keyword arguments that configure how this `Gui` is run.
-                Please refer to the
-                [Configuration section](../../userman/configuration/gui-config.md#configuring-the-gui-instance)
+                Please refer to the gui config section
+                [page](../../../../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
                 of the User Manual for more information.
 
         Returns:
@@ -2649,13 +2747,9 @@ class Gui:
         #
         #         The default value is None.
         # --------------------------------------------------------------------------------
-
-        # setup run function with gui hooks
-        Hooks().run(self, **kwargs)
-
         app_config = self._config.config
 
-        run_root_dir = os.path.dirname(inspect.getabsfile(self.__frame))
+        run_root_dir = os.path.dirname(getabsfile(self.__frame))
 
         # Register _root_dir for abs path
         if not hasattr(self, "_root_dir"):
@@ -2677,13 +2771,16 @@ class Gui:
         self._config.resolve()
         TaipyGuiWarning.set_debug_mode(self._get_config("debug", False))
 
+        # setup run function with gui hooks
+        _Hooks().run(self, **kwargs)
+
         self.__init_server()
 
         self.__init_ngrok()
 
         locals_bind = _filter_locals(self.__frame.f_locals)
 
-        self.__locals_context.set_default(locals_bind, self.__default_module_name)
+        self.__locals_context.set_default(locals_bind, t.cast(str, self.__default_module_name))
 
         self.__var_dir.set_default(self.__frame)
 
@@ -2700,7 +2797,7 @@ class Gui:
         glob_ctx: t.Dict[str, t.Any] = {t.__name__: t for t in _TaipyBase.__subclasses__()}
         glob_ctx[Gui.__SELF_VAR] = self
         glob_ctx["state"] = self.__state
-        glob_ctx.update({k: v for k, v in locals_bind.items() if inspect.ismodule(v) or callable(v)})
+        glob_ctx.update({k: v for k, v in locals_bind.items() if ismodule(v) or callable(v)})
 
         # Call on_init on each library
         for name, libs in self.__extensions.items():
@@ -2733,24 +2830,28 @@ class Gui:
         self.__register_blueprint()
 
         # Register data accessor communication data format (JSON, Apache Arrow)
-        self._get_accessor().set_data_format(_DataFormat.APACHE_ARROW if app_config["use_arrow"] else _DataFormat.JSON)
+        self._get_accessor().set_data_format(
+            _DataFormat.APACHE_ARROW if app_config.get("use_arrow") else _DataFormat.JSON
+        )
 
         # Use multi user or not
-        self._bindings()._set_single_client(bool(app_config["single_client"]))
+        self._bindings()._set_single_client(bool(app_config.get("single_client")))
 
         # Start Flask Server
         if not run_server:
             return self.get_flask_app()
 
         return self._server.run(
-            host=app_config["host"],
-            port=app_config["port"],
-            debug=app_config["debug"],
-            use_reloader=app_config["use_reloader"],
-            flask_log=app_config["flask_log"],
-            run_in_thread=app_config["run_in_thread"],
-            allow_unsafe_werkzeug=app_config["allow_unsafe_werkzeug"],
-            notebook_proxy=app_config["notebook_proxy"],
+            host=app_config.get("host"),
+            port=app_config.get("port"),
+            client_url=app_config.get("client_url"),
+            debug=app_config.get("debug"),
+            use_reloader=app_config.get("use_reloader"),
+            flask_log=app_config.get("flask_log"),
+            run_in_thread=app_config.get("run_in_thread"),
+            allow_unsafe_werkzeug=app_config.get("allow_unsafe_werkzeug"),
+            notebook_proxy=app_config.get("notebook_proxy"),
+            port_auto_ranges=app_config.get("port_auto_ranges"),
         )
 
     def reload(self):  # pragma: no cover
@@ -2778,17 +2879,22 @@ class Gui:
             self._server.stop_thread()
             _TaipyLogger._get_logger().info("Gui server has been stopped.")
 
-    def _get_autorization(self, client_id: t.Optional[str] = None, system: t.Optional[bool] = False):
+    def _get_authorization(self, client_id: t.Optional[str] = None, system: t.Optional[bool] = False):
         return contextlib.nullcontext()
 
     def set_favicon(self, favicon_path: t.Union[str, Path], state: t.Optional[State] = None):
         """Change the favicon for all clients.
 
-        This function dynamically changes the favicon of Taipy GUI pages for all connected client.
-        favicon_path can be an URL (relative or not) or a file path.
-        TODO The *favicon* parameter to `(Gui.)run()^` can also be used to change
-         the favicon when the application starts.
+        This function dynamically changes the favicon (the icon associated with the application's
+        pages) of Taipy GUI pages for a single or all connected clients.
+        Note that the *favicon* parameter to `(Gui.)run()^` can also be used to change
+        the favicon when the application starts.
 
+        Arguments:
+            favicon_path: The path to the image file to use.<br/>
+                This can be expressed as a path name or a URL (relative or not).
+            state: The state to apply the change to.<br/>
+                If no set or set to None, all the application's clients are impacted.
         """
         if state or self.__favicon != favicon_path:
             if not state:

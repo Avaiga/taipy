@@ -1,3 +1,6 @@
+# Taipy GUI stuff
+gui.pyi
+
 # Django stuff:
 *.log
 local_settings.py

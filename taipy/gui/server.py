@@ -21,7 +21,7 @@ import time
 import typing as t
 import webbrowser
 from importlib import util
-from random import randint
+from random import choices, randint
 
 from flask import Blueprint, Flask, json, jsonify, render_template, request, send_from_directory
 from flask_cors import CORS
@@ -31,12 +31,13 @@ from kthread import KThread
 from werkzeug.serving import is_running_from_reloader
 
 import __main__
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ._renderers.json import _TaipyJsonProvider
 from .config import ServerConfig
 from .custom._page import _ExternalResourceHandlerManager
 from .utils import _is_in_notebook, _is_port_open, _RuntimeManager
+from .utils._css import get_style
 
 if t.TYPE_CHECKING:
     from .gui import Gui
@@ -229,6 +230,7 @@ class _Server:
         template_str = _Server.__RE_CLOSING_CURLY.sub(_Server.__CLOSING_CURLY, template_str)
         template_str = template_str.replace('"{!', "{")
         template_str = template_str.replace('!}"', "}")
+        style = get_style(style)
         return self._direct_render_json(
             {
                 "jsx": template_str,
@@ -244,41 +246,64 @@ class _Server:
     def get_flask(self):
         return self._flask
 
+    def get_port(self):
+        return self._port
+
     def test_client(self):
-        return self._flask.test_client()
+        return t.cast(Flask, self._flask).test_client()
 
     def _run_notebook(self):
         self._is_running = True
         self._ws.run(self._flask, host=self._host, port=self._port, debug=False, use_reloader=False)
 
     def _get_async_mode(self) -> str:
-        return self._ws.async_mode
+        return self._ws.async_mode  # type: ignore[reportAttributeAccessIssue]
 
     def _apply_patch(self):
         if self._get_async_mode() == "gevent" and util.find_spec("gevent"):
             from gevent import get_hub, monkey
 
-            get_hub().NOT_ERROR += (KeyboardInterrupt, )
+            get_hub().NOT_ERROR += (KeyboardInterrupt,)
             if not monkey.is_module_patched("time"):
                 monkey.patch_time()
         if self._get_async_mode() == "eventlet" and util.find_spec("eventlet"):
-            from eventlet import monkey_patch, patcher
+            from eventlet import monkey_patch, patcher  # type: ignore[reportMissingImport]
 
             if not patcher.is_monkey_patched("time"):
                 monkey_patch(time=True)
 
-    def _get_random_port(self):  # pragma: no cover
+    def _get_random_port(
+        self, port_auto_ranges: t.Optional[t.List[t.Union[int, t.Tuple[int, int]]]] = None
+    ):  # pragma: no cover
+        port_auto_ranges = port_auto_ranges or [(49152, 65535)]
+        random_weights = [1 if isinstance(r, int) else abs(r[1] - r[0]) + 1 for r in port_auto_ranges]
         while True:
-            port = randint(49152, 65535)
+            random_choices = [
+                r if isinstance(r, int) else randint(min(r[0], r[1]), max(r[0], r[1])) for r in port_auto_ranges
+            ]
+            port = choices(random_choices, weights=random_weights)[0]
             if port not in _RuntimeManager().get_used_port() and not _is_port_open(self._host, port):
                 return port
 
-    def run(self, host, port, debug, use_reloader, flask_log, run_in_thread, allow_unsafe_werkzeug, notebook_proxy):
+    def run(
+        self,
+        host,
+        port,
+        client_url,
+        debug,
+        use_reloader,
+        flask_log,
+        run_in_thread,
+        allow_unsafe_werkzeug,
+        notebook_proxy,
+        port_auto_ranges,
+    ):
         host_value = host if host != "0.0.0.0" else "localhost"
         self._host = host
         if port == "auto":
-            port = self._get_random_port()
+            port = self._get_random_port(port_auto_ranges)
         self._port = port
+        client_url = client_url.format(port=port)
         if _is_in_notebook() and notebook_proxy:  # pragma: no cover
             from .utils.proxy import NotebookProxy
 
@@ -300,8 +325,9 @@ class _Server:
                 _TaipyLogger._get_logger().info(f" * Server starting on http://{host_value}:{port}")
             else:
                 _TaipyLogger._get_logger().info(f" * Server reloaded on http://{host_value}:{port}")
+            _TaipyLogger._get_logger().info(f" * Application is accessible at {client_url}")
         if not is_running_from_reloader() and self._gui._get_config("run_browser", False):
-            webbrowser.open(f"http://{host_value}{f':{port}' if port else ''}", new=2)
+            webbrowser.open(client_url, new=2)
         if _is_in_notebook() or run_in_thread:
             self._thread = KThread(target=self._run_notebook)
             self._thread.start()
@@ -329,8 +355,8 @@ class _Server:
             self._is_running = False
             with contextlib.suppress(Exception):
                 if self._get_async_mode() == "gevent":
-                    if self._ws.wsgi_server is not None:
-                        self._ws.wsgi_server.stop()
+                    if self._ws.wsgi_server is not None:  # type: ignore[reportAttributeAccessIssue]
+                        self._ws.wsgi_server.stop()  # type: ignore[reportAttributeAccessIssue]
                     else:
                         self._thread.kill()
                 else:

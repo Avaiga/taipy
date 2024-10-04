@@ -48,7 +48,7 @@ class _PandasDataAccessor(_DataAccessor):
             return pd.DataFrame(value)
         return t.cast(pd.DataFrame, value)
 
-    def _from_pandas(self, value: pd.DataFrame, data_type: t.Type):
+    def _from_pandas(self, value: pd.DataFrame, data_type: t.Type) -> t.Any:
         if data_type is pd.Series:
             return value.iloc[:, 0]
         return value
@@ -86,6 +86,7 @@ class _PandasDataAccessor(_DataAccessor):
         is_copied: t.Optional[bool] = False,
         new_indexes: t.Optional[np.ndarray] = None,
         handle_nan: t.Optional[bool] = False,
+        formats: t.Optional[t.Dict[str, str]] = None,
     ) -> pd.DataFrame:
         dataframe = dataframe.iloc[new_indexes] if new_indexes is not None else dataframe
         if isinstance(payload_cols, list) and len(payload_cols):
@@ -97,6 +98,7 @@ class _PandasDataAccessor(_DataAccessor):
         if styles:
             for k, v in styles.items():
                 col_applied = ""
+                new_data = None
                 func = self._gui._get_user_function(v)
                 if callable(func):
                     col_applied, new_data = self.__apply_user_function(
@@ -105,7 +107,6 @@ class _PandasDataAccessor(_DataAccessor):
                 new_cols[col_applied or v] = new_data if col_applied else v
         if tooltips:
             for k, v in tooltips.items():
-                col_applied = ""
                 func = self._gui._get_user_function(v)
                 if callable(func):
                     col_applied, new_data = self.__apply_user_function(
@@ -113,19 +114,28 @@ class _PandasDataAccessor(_DataAccessor):
                     )
                     if col_applied:
                         new_cols[col_applied] = new_data
+        if formats:
+            for k, v in formats.items():
+                func = self._gui._get_user_function(v)
+                if callable(func):
+                    col_applied, new_data = self.__apply_user_function(
+                        func, k if k in cols else None, v, dataframe, "tpf__"
+                    )
+                    if col_applied:
+                        new_cols[col_applied] = new_data
         # deal with dates
-        datecols = col_types[col_types.astype(str).str.startswith("datetime")].index.tolist()
-        if len(datecols) != 0:
+        date_cols = col_types[col_types.astype(str).str.startswith("datetime")].index.tolist()
+        if len(date_cols) != 0:
             if not is_copied:
                 # copy the df so that we don't "mess" with the user's data
                 dataframe = dataframe.copy()
             tz = Gui._get_timezone()
-            for col in datecols:
-                newcol = _get_date_col_str_name(cols, col)
+            for col in date_cols:
+                new_col = _get_date_col_str_name(cols, col)
                 re_type = _RE_PD_TYPE.match(str(col_types[col]))
-                grps = re_type.groups() if re_type else ()
-                if len(grps) > 4 and grps[4]:
-                    new_cols[newcol] = (
+                groups = re_type.groups() if re_type else ()
+                if len(groups) > 4 and groups[4]:
+                    new_cols[new_col] = (
                         dataframe[col]
                         .dt.tz_convert("UTC")
                         .dt.strftime(_DataAccessor._WS_DATE_FORMAT)
@@ -133,7 +143,7 @@ class _PandasDataAccessor(_DataAccessor):
                         .replace("nan", "NaT" if handle_nan else None)
                     )
                 else:
-                    new_cols[newcol] = (
+                    new_cols[new_col] = (
                         dataframe[col]
                         .dt.tz_localize(tz)
                         .dt.tz_convert("UTC")
@@ -143,7 +153,7 @@ class _PandasDataAccessor(_DataAccessor):
                     )
 
             # remove the date columns from the list of columns
-            cols = list(set(cols) - set(datecols))
+            cols = list(set(cols) - set(date_cols))
         if new_cols:
             dataframe = dataframe.assign(**new_cols)
         cols += list(new_cols.keys())
@@ -195,11 +205,11 @@ class _PandasDataAccessor(_DataAccessor):
             if not _has_arrow_module:
                 raise RuntimeError("Cannot use Arrow as pyarrow package is not installed")
             # Convert from pandas to Arrow
-            table = pa.Table.from_pandas(data)
+            table = pa.Table.from_pandas(data)  # type: ignore[reportPossiblyUnboundVariable]
             # Create sink buffer stream
-            sink = pa.BufferOutputStream()
+            sink = pa.BufferOutputStream()  # type: ignore[reportPossiblyUnboundVariable]
             # Create Stream writer
-            writer = pa.ipc.new_stream(sink, table.schema)
+            writer = pa.ipc.new_stream(sink, table.schema)  # type: ignore[reportPossiblyUnboundVariable]
             # Write data to table
             writer.write_table(table)
             writer.close()
@@ -272,7 +282,7 @@ class _PandasDataAccessor(_DataAccessor):
             except Exception as e:
                 _warn(f"Dataframe filtering: invalid query '{query}' on {df.head()}", e)
 
-        dictret: t.Optional[t.Dict[str, t.Any]]
+        dict_ret: t.Optional[t.Dict[str, t.Any]]
         if paged:
             aggregates = payload.get("aggregates")
             applies = payload.get("applies")
@@ -295,16 +305,16 @@ class _PandasDataAccessor(_DataAccessor):
             # real number of rows is needed to calculate the number of pages
             rowcount = len(df)
             # here we'll deal with start and end values from payload if present
-            if isinstance(payload["start"], int):
-                start = int(payload["start"])
+            if isinstance(payload.get("start", 0), int):
+                start = int(payload.get("start", 0))
             else:
                 try:
                     start = int(str(payload["start"]), base=10)
                 except Exception:
                     _warn(f'start should be an int value {payload["start"]}.')
                     start = 0
-            if isinstance(payload["end"], int):
-                end = int(payload["end"])
+            if isinstance(payload.get("end", -1), int):
+                end = int(payload.get("end", -1))
             else:
                 try:
                     end = int(str(payload["end"]), base=10)
@@ -344,10 +354,11 @@ class _PandasDataAccessor(_DataAccessor):
                 styles=payload.get("styles"),
                 tooltips=payload.get("tooltips"),
                 is_copied=is_copied,
-                new_indexes=new_indexes,
+                new_indexes=t.cast(np.ndarray, new_indexes),
                 handle_nan=payload.get("handlenan", False),
+                formats=payload.get("formats"),
             )
-            dictret = self.__format_data(
+            dict_ret = self.__format_data(
                 df,
                 data_format,
                 "records",
@@ -368,8 +379,10 @@ class _PandasDataAccessor(_DataAccessor):
                             comp_df = t.cast(pd.DataFrame, comp_df.get(cols))
                             comp_df.columns = t.cast(pd.Index, [t.cast(tuple, c)[0] for c in cols])
                         comp_df.dropna(axis=1, how="all", inplace=True)
-                        comp_df = self.__build_transferred_cols(columns, comp_df, new_indexes=new_indexes)
-                        dictret["comp"] = self.__format_data(comp_df, data_format, "records").get("data")
+                        comp_df = self.__build_transferred_cols(
+                            columns, comp_df, new_indexes=t.cast(np.ndarray, new_indexes)
+                        )
+                        dict_ret["comp"] = self.__format_data(comp_df, data_format, "records").get("data")
                     except Exception as e:
                         _warn("Pandas accessor compare raised an exception", e)
 
@@ -410,12 +423,27 @@ class _PandasDataAccessor(_DataAccessor):
                 df = pd.merge(*decimated_dfs, how="outer", left_index=True, right_index=True)
             df = self.__build_transferred_cols(columns, t.cast(pd.DataFrame, df), is_copied=is_copied)
             if data_format is _DataFormat.CSV:
+                df = self.__build_transferred_cols(
+                    columns,
+                    t.cast(pd.DataFrame, df),
+                    is_copied=is_copied,
+                    handle_nan=payload.get("handlenan", False),
+                )
                 ret_payload["df"] = df
-                dictret = None
+                dict_ret = None
             else:
-                dictret = self.__format_data(df, data_format, "list", data_extraction=True)
+                df = self.__build_transferred_cols(
+                    columns,
+                    t.cast(pd.DataFrame, df),
+                    styles=payload.get("styles"),
+                    tooltips=payload.get("tooltips"),
+                    is_copied=is_copied,
+                    handle_nan=payload.get("handlenan", False),
+                    formats=payload.get("formats"),
+                )
+                dict_ret = self.__format_data(df, data_format, "list", data_extraction=True)
 
-        ret_payload["value"] = dictret
+        ret_payload["value"] = dict_ret
         return ret_payload
 
     def get_data(

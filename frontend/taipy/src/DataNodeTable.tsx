@@ -22,7 +22,7 @@ import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import InputLabel from "@mui/material/InputLabel";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import ListItemText from "@mui/material/ListItemText";
@@ -52,7 +52,7 @@ interface DataNodeTableProps {
     data?: Record<string, TraceValueType>;
     columns?: Record<string, ColumnDesc>;
     updateVarName?: string;
-    uniqid: string;
+    uniqId: string;
     onEdit?: string;
     onViewTypeChange: (e: MouseEvent, value?: string) => void;
     onLock?: string;
@@ -65,7 +65,7 @@ interface DataNodeTableProps {
 const pushRightSx = { ml: "auto" };
 
 const DataNodeTable = (props: DataNodeTableProps) => {
-    const { uniqid, configId, nodeId, columns = "", onViewTypeChange, notEditableReason, updateDnVars = "" } = props;
+    const { uniqId, configId, nodeId, columns = "", onViewTypeChange, notEditableReason, updateDnVars = "" } = props;
 
     const dispatch = useDispatch();
     const module = useModule();
@@ -108,9 +108,9 @@ const DataNodeTable = (props: DataNodeTableProps) => {
     useEffect(() => {
         if (columns) {
             const res = {} as Record<string, ColumnDesc>;
-            const dfids = {} as Record<string, string>;
-            Object.entries(columns).forEach(([k, v]) => (dfids[v.dfid] = k));
-            selectedCols.forEach((c) => dfids[c] && (res[dfids[c]] = columns[dfids[c]]));
+            const dfIds = {} as Record<string, string>;
+            Object.entries(columns).forEach(([k, v]) => (dfIds[v.dfid] = k));
+            selectedCols.forEach((c) => dfIds[c] && (res[dfIds[c]] = columns[dfIds[c]]));
             setTabCols(res);
         }
     }, [columns, selectedCols]);
@@ -150,7 +150,7 @@ const DataNodeTable = (props: DataNodeTableProps) => {
     return (
         <>
             <Grid container sx={tabularHeaderSx}>
-                <Grid item>
+                <Grid>
                     <Box className="taipy-toggle">
                         <ToggleButtonGroup onChange={onViewTypeChange} exclusive value={TableViewType} color="primary">
                             <ToggleButton value={TableViewType}>
@@ -162,11 +162,11 @@ const DataNodeTable = (props: DataNodeTableProps) => {
                         </ToggleButtonGroup>
                     </Box>
                 </Grid>
-                <Grid item>
+                <Grid>
                     <FormControl sx={selectSx} fullWidth className="taipy-selector">
-                        <InputLabel id={uniqid + "-cols-label"}>Columns</InputLabel>
+                        <InputLabel id={uniqId + "-cols-label"}>Columns</InputLabel>
                         <Select
-                            labelId={uniqid + "-cols-label"}
+                            labelId={uniqId + "-cols-label"}
                             multiple
                             value={selectedCols}
                             onChange={onColsChange}
@@ -184,7 +184,7 @@ const DataNodeTable = (props: DataNodeTableProps) => {
                         </Select>
                     </FormControl>
                 </Grid>
-                <Grid item>
+                <Grid>
                     <Button
                         onClick={resetCols}
                         variant="text"
@@ -196,11 +196,11 @@ const DataNodeTable = (props: DataNodeTableProps) => {
                     </Button>
                 </Grid>
                 {tableEdit ? (
-                    <Grid item sx={pushRightSx}>
+                    <Grid sx={pushRightSx}>
                         <TextField value={comment} onChange={changeComment} label="Comment"></TextField>
                     </Grid>
                 ) : null}
-                <Grid item sx={tableEdit ? undefined : pushRightSx}>
+                <Grid sx={tableEdit ? undefined : pushRightSx}>
                     <FormControlLabel
                         disabled={!props.active || !!notEditableReason || !!props.editInProgress}
                         control={<Switch color="primary" checked={tableEdit} onChange={toggleTableEdit} />}

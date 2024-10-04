@@ -9,23 +9,21 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from importlib import import_module, util
+from importlib import import_module
 from operator import attrgetter
 from typing import Type
 
-from taipy._cli._base_cli._abstract_cli import _AbstractCLI
+from taipy.common._cli._base_cli._abstract_cli import _AbstractCLI
 
+from ..common._check_dependencies import EnterpriseEditionUtils
 from ._core_cli import _CoreCLI
 
 
 class _CoreCLIFactory:
-    _TAIPY_ENTERPRISE_MODULE = "taipy.enterprise"
-    _TAIPY_ENTERPRISE_CORE_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core"
-
-    @classmethod
-    def _build_cli(cls) -> Type[_AbstractCLI]:
-        if util.find_spec(cls._TAIPY_ENTERPRISE_MODULE) is not None:
-            module = import_module(cls._TAIPY_ENTERPRISE_CORE_MODULE + "._cli._core_cli")
+    @staticmethod
+    def _build_cli() -> Type[_AbstractCLI]:
+        if EnterpriseEditionUtils._using_enterprise():
+            module = import_module(EnterpriseEditionUtils._TAIPY_ENTERPRISE_CORE_MODULE + "._cli._core_cli")
             core_cli = attrgetter("_CoreCLI")(module)
         else:
             core_cli = _CoreCLI

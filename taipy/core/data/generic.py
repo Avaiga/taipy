@@ -12,7 +12,7 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..exceptions.exceptions import MissingReadFunction, MissingRequiredProperty, MissingWriteFunction
@@ -23,34 +23,17 @@ from .data_node_id import DataNodeId, Edit
 class GenericDataNode(DataNode):
     """Generic Data Node that uses custom read and write functions.
 
-    The read and write function for this data node type can be implemented is Python.
+    The read and write functions for this data node type are Python functions.
 
-    Attributes:
-        config_id (str): Identifier of the data node configuration. It must be a valid Python
-            identifier.
-        scope (Scope^): The scope of this data node.
-        id (str): The unique identifier of the data node.
-        owner_id (str): The identifier of the owner (sequence_id, scenario_id, cycle_id) or
-            `None`.
-        parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
-        last_edit_date (datetime): The date and time of the last modification.
-        edits (List[Edit^]): The ordered list of edits for that job.
-        version (str): The string indicates the application version of the data node to instantiate. If not provided,
-            the current version is used.
-        validity_period (Optional[timedelta]): The duration implemented as a timedelta since the last edit date for
-            which the data node can be considered up-to-date. Once the validity period has passed, the data node is
-            considered stale and relevant tasks will run even if they are skippable (see the
-            [Task management](../../userman/sdm/task/index.md) page for more details).
-            If _validity_period_ is set to `None`, the data node is always up-to-date.
-        edit_in_progress (bool): True if a task computing the data node has been submitted
-            and not completed yet. False otherwise.
-        editor_id (Optional[str]): The identifier of the user who is currently editing the data node.
-        editor_expiration_date (Optional[datetime]): The expiration date of the editor lock.
-        properties (dict[str, Any]): A dictionary of additional properties. Note that the
-            _properties_ parameter must at least contain an entry for either _"read_fct"_ or
-            _"write_fct"_ representing the read and write functions.
-            Entries for _"read_fct_args"_ and _"write_fct_args"_ respectively represent
-            potential parameters for the _"read_fct"_ and _"write_fct"_ functions.
+    The *properties* attribute must contain at least one of the two following entries:
+
+    - *read_fct* (`Callable`): The read function for the data node.
+    - *write_fct* (`Callable`): The write function for the data node.
+
+    The *properties* attribute can also contain the following optional entries:
+
+    - *read_fct_args* (`List[Any]`): The arguments to be passed to the read function.
+    - *write_fct_args* (`List[Any]`): The arguments to be passed to the write function.
     """
 
     __STORAGE_TYPE = "generic"
@@ -122,6 +105,7 @@ class GenericDataNode(DataNode):
 
     @classmethod
     def storage_type(cls) -> str:
+        """Returns the storage type of the data node: "generic"."""
         return cls.__STORAGE_TYPE
 
     def _read(self):

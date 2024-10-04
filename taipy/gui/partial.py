@@ -28,9 +28,9 @@ class Partial(_Page):
     and not related pages. This allows not to have to repeat yourself when
     creating your page templates.
 
-    Visual elements such as [`part`](../../userman/gui/viselements/generic/part.md),
-    [`dialog`](../..//userman/gui/viselements/generic/dialog.md) or
-    [`pane`](../../userman/gui/viselements/generic/pane.md) can use Partials.
+    Visual elements such as [`part`](../../../../../refmans/gui/viselements/generic/part.md),
+    [`dialog`](../../../../../refmans/gui/viselements/generic/dialog.md) or
+    [`pane`](../../../../../refmans/gui/viselements/generic/pane.md) can use Partials.
 
     Note that `Partial` has no constructor (no `__init__()` method): to create a
     `Partial`, you must call the `Gui.add_partial()^` function.
@@ -53,7 +53,7 @@ class Partial(_Page):
         else:
             self._route = route
 
-    def update_content(self, state: State, content: str | "Page"):
+    def update_content(self, state: State, content: t.Union[str, "Page"]):
         """Update partial content.
 
         Arguments:
@@ -65,7 +65,7 @@ class Partial(_Page):
         else:
             _warn("'Partial.update_content()' must be called in the context of a callback.")
 
-    def __copy(self, content: str | "Page") -> Partial:
+    def __copy(self, content:  t.Union[str, "Page"]) -> Partial:
         new_partial = Partial(self._route)
         from .page import Page
 

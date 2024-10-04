@@ -1,6 +1,6 @@
 repos:
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.8.0
+    rev: v1.11.2
     hooks:
     -   id: mypy
         additional_dependencies: [
@@ -13,10 +13,10 @@ repos:
         - --ignore-missing-imports
         - --implicit-optional
         - --no-namespace-packages
-        - --exclude=(taipy/templates/|generate_pyi.py|tools)
+        - --exclude=(taipy/templates/|tools/|doc/gui/examples/.*/builder.py)
         - --follow-imports=skip
 -   repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.1.10
+    rev: v1.5.5
     hooks:
     -   id: forbid-crlf
     -   id: remove-crlf
@@ -28,7 +28,7 @@ repos:
         - --license-filepath
         - .license-header
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
+    rev: v4.6.0
     hooks:
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
@@ -36,13 +36,13 @@ repos:
     -   id: check-yaml
         args: [--unsafe]
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.8
+    rev: v0.6.4
     hooks:
     -   id: ruff
         args: [ --fix ]
     -   id: ruff-format
 -   repo: https://github.com/codespell-project/codespell
-    rev: v2.2.6
+    rev: v2.3.0
     hooks:
     -   id: codespell
         additional_dependencies: [tomli]

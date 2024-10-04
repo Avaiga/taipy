@@ -11,8 +11,8 @@
 
 from typing import Callable, List, Optional, Type, Union, cast
 
-from taipy.config import Config
-from taipy.config.common.scope import Scope
+from taipy.common.config import Config
+from taipy.common.config.common.scope import Scope
 
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
@@ -26,7 +26,13 @@ from ..cycle.cycle_id import CycleId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import NonExistingTask
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
-from ..reason import DataNodeEditInProgress, DataNodeIsNotWritten, EntityIsNotSubmittableEntity, ReasonCollection
+from ..reason import (
+    DataNodeEditInProgress,
+    DataNodeIsNotWritten,
+    EntityDoesNotExist,
+    EntityIsNotSubmittableEntity,
+    ReasonCollection,
+)
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
 from ..submission.submission import Submission
@@ -165,13 +171,16 @@ class _TaskManager(_Manager[Task], _VersionMixin):
 
     @classmethod
     def _is_submittable(cls, task: Union[Task, TaskId]) -> ReasonCollection:
-        if isinstance(task, str):
-            task = cls._get(task)
-
         reason_collection = ReasonCollection()
+
+        if isinstance(task, str):
+            task_id = task
+            task = cls._get(task)
+            if task is None:
+                reason_collection._add_reason(task_id, EntityDoesNotExist(task_id))
+
         if not isinstance(task, Task):
-            task = str(task)
-            reason_collection._add_reason(task, EntityIsNotSubmittableEntity(task))
+            reason_collection._add_reason(str(task), EntityIsNotSubmittableEntity(str(task)))
         else:
             data_manager = _DataManagerFactory._build_manager()
             for node in task.input.values():

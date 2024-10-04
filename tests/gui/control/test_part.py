@@ -32,6 +32,16 @@ def test_part_md_2(gui: Gui, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
+def test_part_md_width(gui: Gui, helpers):
+    md_string = """
+<|part|width=70%|>
+# This is a part
+<|>
+"""
+    expected_list = ["<Part", 'width="70%"']
+    helpers.test_control_md(gui, md_string, expected_list)
+
+
 def test_part_html(gui: Gui, helpers):
     html_string = '<taipy:part class_name="class1"><h1>This is a part</h1></taipy:part>'
     expected_list = ["<Part", "<h1", "This is a part"]

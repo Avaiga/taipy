@@ -16,7 +16,7 @@ import pandas as pd
 from flask import request
 from flask_restful import Resource
 
-from taipy.config.config import Config
+from taipy.common.config import Config
 from taipy.core import DataNode
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.operator import Operator
@@ -97,7 +97,6 @@ class DataNodeResource(Resource):
                     "last_edit_date": "2022-08-10T16:03:40.855082",
                     "job_ids": [],
                     "version": "latest",
-                    "cacheable": false,
                     "validity_days": null,
                     "validity_seconds": null,
                     "edit_in_progress": false,
@@ -138,7 +137,6 @@ class DataNodeResource(Resource):
                     "last_edit_date": "2022-08-10T16:03:40.855082",
                     "job_ids": [],
                     "version": "latest",
-                    "cacheable": false,
                     "validity_days": null,
                     "validity_seconds": null,
                     "edit_in_progress": false,
@@ -306,7 +304,6 @@ class DataNodeList(Resource):
                         "last_edit_date": "2022-08-10T16:03:40.855082",
                         "job_ids": [],
                         "version": "latest",
-                        "cacheable": false,
                         "validity_days": null,
                         "validity_seconds": null,
                         "edit_in_progress": false,
@@ -345,7 +342,6 @@ class DataNodeList(Resource):
                         "last_edit_date": "2022-08-10T16:03:40.855082",
                         "job_ids": [],
                         "version": "latest",
-                        "cacheable": false,
                         "validity_days": null,
                         "validity_seconds": null,
                         "edit_in_progress": false,

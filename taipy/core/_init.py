@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from ._core import Core
 from ._entity.submittable import Submittable
 from .cycle.cycle import Cycle
 from .cycle.cycle_id import CycleId
@@ -26,9 +27,9 @@ from .submission.submission import Submission
 from .submission.submission_id import SubmissionId
 from .submission.submission_status import SubmissionStatus
 from .taipy import (
+    can_create,
     cancel_job,
     clean_all_entities,
-    clean_all_entities_by_version,
     compare_scenarios,
     create_global_data_node,
     create_scenario,

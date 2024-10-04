@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "taipy"
 description = "A 360° open-source platform from Python pilots to production-ready web apps."
 readme = "package_desc.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = {text = "Apache License 2.0"}
 authors = [{name = "Avaiga", email = "dev@taipy.io"}]
 keywords = ["taipy"]
@@ -15,7 +15,6 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -30,7 +29,7 @@ image = [
     "python-magic-bin>=0.4.14,<0.5",
 ]
 rdp = ["rdp>=0.8"]
-arrow = ["pyarrow>=14.0.2,<15.0"]
+arrow = ["pyarrow>=17.0.0,<18.0"]
 mssql = ["pyodbc>=4"]
 
 [project.scripts]
@@ -81,7 +80,7 @@ unfixable = []
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401", "F403"]  # unused import
 "_init.py" = ["F401", "F403"]  # unused import
-"taipy/config/stubs/pyi_header.py" = ["F401", "F403"]  # unused import
+"taipy/common/config/stubs/pyi_header.py" = ["F401", "F403"]  # unused import
 "taipy/templates/*" = ["F401", "F403", "T201"]  # unused import, `print` found
 "taipy/gui/utils/types.py" = ["B024"] # abstract base class with no abstract methods
 
@@ -95,7 +94,7 @@ convention = "google"
 ignore_missing_imports = true
 implicit_optional = true
 namespace_packages = false
-exclude = "(taipy/templates/|generate_pyi.py|tools)"
+exclude = "(taipy/templates/|tools/|doc/gui/examples/.*/builder.py)"
 follow_imports = "skip"
 
 [tool.pyright]

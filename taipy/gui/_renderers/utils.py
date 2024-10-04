@@ -16,7 +16,7 @@ from pathlib import Path
 import pandas as pd
 from watchdog.events import FileSystemEventHandler
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from .._warnings import _warn
 from ..types import NumberTypes

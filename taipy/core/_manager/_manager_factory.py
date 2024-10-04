@@ -10,18 +10,14 @@
 # specific language governing permissions and limitations under the License.
 
 from abc import abstractmethod
-from importlib import util
 from typing import Type
 
-from taipy.config import Config
+from taipy.common.config import Config
 
 from ._manager import _Manager
 
 
 class _ManagerFactory:
-    _TAIPY_ENTERPRISE_MODULE = "taipy.enterprise"
-    _TAIPY_ENTERPRISE_CORE_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core"
-
     @classmethod
     @abstractmethod
     def _build_manager(cls) -> Type[_Manager]:  # type: ignore
@@ -30,10 +26,6 @@ class _ManagerFactory:
     @classmethod
     def _build_repository(cls):
         raise NotImplementedError
-
-    @classmethod
-    def _using_enterprise(cls) -> bool:
-        return util.find_spec(cls._TAIPY_ENTERPRISE_MODULE) is not None
 
     @staticmethod
     def _get_repository_with_repo_map(repository_map: dict):

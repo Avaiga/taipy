@@ -22,14 +22,15 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
-from taipy.config.exceptions.exceptions import InvalidConfigurationId
+from taipy.common.config import Config
+from taipy.common.config.common.scope import Scope
+from taipy.common.config.exceptions.exceptions import InvalidConfigurationId
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.exceptions.exceptions import InvalidExposedType
+from taipy.core.reason import NoFileToDownload, NotAFile
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -194,6 +195,29 @@ class TestCSVDataNode:
         assert ".data" not in dn.path
         assert os.path.exists(dn.path)
 
+    def test_is_downloadable(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
+        dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+        reasons = dn.is_downloadable()
+        assert reasons
+        assert reasons.reasons == ""
+
+    def test_is_not_downloadable_no_file(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/wrong_example.csv")
+        dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+        reasons = dn.is_downloadable()
+        assert not reasons
+        assert len(reasons._reasons) == 1
+        assert str(NoFileToDownload(path, dn.id)) in reasons.reasons
+
+    def test_is_not_downloadable_not_a_file(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample")
+        dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+        reasons = dn.is_downloadable()
+        assert not reasons
+        assert len(reasons._reasons) == 1
+        assert str(NotAFile(path, dn.id)) in reasons.reasons
+
     def test_get_downloadable_path(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
@@ -202,6 +226,11 @@ class TestCSVDataNode:
     def test_get_downloadable_path_with_not_existing_file(self):
         dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": "NOT_EXISTING.csv", "exposed_type": "pandas"})
         assert dn._get_downloadable_path() == ""
+
+    def is_uploadable(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
+        dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
+        assert dn.is_uploadable()
 
     def test_upload(self, csv_file, tmpdir_factory):
         old_csv_path = tmpdir_factory.mktemp("data").join("df.csv").strpath
@@ -219,6 +248,20 @@ class TestCSVDataNode:
         assert_frame_equal(dn.read(), upload_content)  # The content of the dn should change to the uploaded content
         assert dn.last_edit_date > old_last_edit_date
         assert dn.path == old_csv_path  # The path of the dn should not change
+
+    def test_upload_with_upload_check_with_exception(self, csv_file, tmpdir_factory, caplog):
+        old_csv_path = tmpdir_factory.mktemp("data").join("df.csv").strpath
+        dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": old_csv_path, "exposed_type": "pandas"})
+
+        def check_with_exception(upload_path, upload_data):
+            raise Exception("An error with check_with_exception")
+
+        reasons = dn._upload(csv_file, upload_checker=check_with_exception)
+        assert bool(reasons) is False
+        assert (
+            f"Error while checking if df.csv can be uploaded to data node {dn.id} using "
+            "the upload checker check_with_exception: An error with check_with_exception" in caplog.text
+        )
 
     def test_upload_with_upload_check_pandas(self, csv_file, tmpdir_factory):
         old_csv_path = tmpdir_factory.mktemp("data").join("df.csv").strpath

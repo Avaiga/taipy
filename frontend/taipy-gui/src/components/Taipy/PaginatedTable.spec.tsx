@@ -21,7 +21,7 @@ import { TaipyContext } from "../../context/taipyContext";
 import { TaipyState, INITIAL_STATE } from "../../context/taipyReducers";
 import { TableValueType } from "./tableUtils";
 
-const valueKey = "0-99-Entity,Daily hospital occupancy--asc";
+const valueKey = "0-99-Entity,Daily hospital occupancy-asc";
 const tableValue = {
     [valueKey]: {
         data: [
@@ -110,7 +110,7 @@ const changedValue = {
 };
 
 const editableValue = {
-    "0--1-bool,int,float,Code--asc": {
+    "0--1-bool,int,float,Code-asc": {
         data: [
             {
                 bool: true,
@@ -136,8 +136,8 @@ const editableColumns = JSON.stringify({
     Code: { dfid: "Code", type: "str", index: 3 },
 });
 
-const buttonValue = {
-    "0--1-bool,int,float,Code--asc": {
+const buttonImgValue = {
+    "0--1-bool,int,float,Code-asc": {
         data: [
             {
                 bool: true,
@@ -150,6 +150,12 @@ const buttonValue = {
                 int: 823,
                 float: 2.5,
                 Code: "ZZZ",
+            },
+            {
+                bool: true,
+                int: 478,
+                float: 3.5,
+                Code: "![Taipy!](https://docs.taipy.io/en/latest/assets/images/favicon.png)",
             },
         ],
         rowcount: 2,
@@ -170,6 +176,7 @@ const styledColumns = JSON.stringify({
         type: "int64",
         style: "some style function",
         tooltip: "some tooltip",
+        formatFn: "someFormat"
     },
 });
 
@@ -240,9 +247,6 @@ describe("PaginatedTable Component", () => {
                 sort: "asc",
                 start: 0,
                 aggregates: [],
-                applies: undefined,
-                styles: undefined,
-                tooltips: undefined,
                 filters: [],
             },
             type: "REQUEST_DATA_UPDATE",
@@ -263,16 +267,12 @@ describe("PaginatedTable Component", () => {
             payload: {
                 columns: ["Entity", "Daily hospital occupancy"],
                 end: 99,
-                id: undefined,
                 orderby: "Entity",
                 pagekey: "0-99-Entity,Daily hospital occupancy-Entity-asc",
                 handlenan: false,
                 sort: "asc",
                 start: 0,
                 aggregates: [],
-                applies: undefined,
-                styles: undefined,
-                tooltips: undefined,
                 filters: [],
             },
             type: "REQUEST_DATA_UPDATE",
@@ -311,14 +311,11 @@ describe("PaginatedTable Component", () => {
                 end: 199,
                 id: "table",
                 orderby: "",
-                pagekey: "100-199-Entity,Daily hospital occupancy--asc",
+                pagekey: "100-199-Entity,Daily hospital occupancy-asc",
                 handlenan: false,
                 sort: "asc",
                 start: 100,
                 aggregates: [],
-                applies: undefined,
-                styles: undefined,
-                tooltips: undefined,
                 filters: [],
             },
             type: "REQUEST_DATA_UPDATE",
@@ -668,7 +665,22 @@ describe("PaginatedTable Component", () => {
         rerender(
             <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
                 <PaginatedTable
-                    data={buttonValue as TableValueType}
+                    data={buttonImgValue as TableValueType}
+                    defaultColumns={buttonColumns}
+                    showAll={true}
+                />
+            </TaipyContext.Provider>
+        );
+
+        dispatch.mockClear();
+        const elt = getByText("Button Label");
+        expect(elt.tagName).toBe("BUTTON");
+        expect(elt).toBeDisabled();
+
+        rerender(
+            <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
+                <PaginatedTable
+                    data={buttonImgValue as TableValueType}
                     defaultColumns={buttonColumns}
                     showAll={true}
                     onAction="onSelect"
@@ -677,9 +689,9 @@ describe("PaginatedTable Component", () => {
         );
 
         dispatch.mockClear();
-        const elt = getByText("Button Label");
-        expect(elt.tagName).toBe("BUTTON");
-        await userEvent.click(elt);
+        const elt2 = getByText("Button Label");
+        expect(elt2.tagName).toBe("BUTTON");
+        await userEvent.click(elt2);
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
             payload: {
@@ -693,6 +705,57 @@ describe("PaginatedTable Component", () => {
             type: "SEND_ACTION_ACTION",
         });
     });
+    it("can show an image", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByAltText, rerender } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <PaginatedTable data={undefined} defaultColumns={editableColumns} showAll={true} onAction="onSelect" />
+            </TaipyContext.Provider>
+        );
+
+        rerender(
+            <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
+                <PaginatedTable
+                    data={buttonImgValue as TableValueType}
+                    defaultColumns={buttonColumns}
+                    showAll={true}
+                />
+            </TaipyContext.Provider>
+        );
+
+        dispatch.mockClear();
+        const elt = getByAltText("Taipy!");
+        expect(elt.tagName).toBe("IMG");
+
+        rerender(
+            <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
+                <PaginatedTable
+                    data={buttonImgValue as TableValueType}
+                    defaultColumns={buttonColumns}
+                    showAll={true}
+                    onAction="onSelect"
+                />
+            </TaipyContext.Provider>
+        );
+
+        dispatch.mockClear();
+        const elt2 = getByAltText("Taipy!");
+        expect(elt2.tagName).toBe("IMG");
+        await userEvent.click(elt2);
+        expect(dispatch).toHaveBeenCalledWith({
+            name: "",
+            payload: {
+                action: "onSelect",
+                args: [],
+                col: "Code",
+                index: 2,
+                reason: "button",
+                value: "Taipy!",
+            },
+            type: "SEND_ACTION_ACTION",
+        });
+    });
     it("should render correctly when style is applied to columns", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
@@ -702,7 +765,7 @@ describe("PaginatedTable Component", () => {
                     <PaginatedTable
                         data={tableValue}
                         defaultColumns={styledColumns}
-                        lineStyle={"class_name=rows-bordered"}
+                        rowClassName={"class_name=rows-bordered"}
                     />
                 </TaipyContext.Provider>
             );
@@ -727,7 +790,7 @@ describe("PaginatedTable Component", () => {
         const option = queryByRole("option", { selected: false, name: "50" });
         fireEvent.click(option as Element);
         const table = document.querySelector(
-            'table[aria-labelledby="tableTitle"].MuiTable-root.MuiTable-stickyHeader.css-cz602z-MuiTable-root'
+            'table[aria-labelledby="tableTitle"].MuiTable-root.MuiTable-stickyHeader'
         );
         expect(table).toBeInTheDocument();
     });

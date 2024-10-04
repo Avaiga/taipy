@@ -14,7 +14,7 @@ import pathlib
 from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional, Union
 
-from taipy.config.config import Config
+from taipy.common.config import Config
 from taipy.core._manager._manager import _Manager
 from taipy.core._repository._abstract_converter import _AbstractConverter
 from taipy.core._repository._abstract_repository import _AbstractRepository
@@ -166,7 +166,15 @@ class TestManager:
         MockManager._set(m)
         assert MockManager._is_editable(m)
 
+        rc = MockManager._is_editable("some_entity")
+        assert not rc
+        assert "Entity some_entity does not exist in the repository." in rc.reasons
+
     def test_is_readable(self):
         m = MockEntity("uuid", "Foo")
         MockManager._set(m)
         assert MockManager._is_readable(m)
+
+        rc = MockManager._is_editable("some_entity")
+        assert not rc
+        assert "Entity some_entity does not exist in the repository." in rc.reasons

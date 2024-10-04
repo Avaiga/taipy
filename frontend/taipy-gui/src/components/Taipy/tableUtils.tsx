@@ -62,12 +62,15 @@ export interface ColumnDesc {
     width?: number | string;
     /** If true, the column cannot be edited. */
     notEditable?: boolean;
-    /** The name of the column that holds the CSS classname to
+    /** The name of the column that holds the CSS className to
      *  apply to the cells. */
-    style?: string;
+    className?: string;
     /** The name of the column that holds the tooltip to
      *  show on the cells. */
     tooltip?: string;
+    /** The name of the column that holds the formatted value to
+     *  show on the cells. */
+    formatFn?: string;
     /** The value that would replace a NaN value. */
     nanValue?: string;
     /** The TimeZone identifier used if the type is `date`. */
@@ -103,9 +106,11 @@ export type RowType = Record<string, RowValue>;
 
 export const EDIT_COL = "taipy_edit";
 
-export const LINE_STYLE = "__taipy_line_style__";
+export const ROW_CLASS_NAME = "__taipyRowClassName__";
 
 export const defaultDateFormat = "yyyy/MM/dd";
+
+const imgButtonRe = /^(!)?\[([^\]]*)]\(([^)]*)\)$/;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type TableValueType = Record<string, Record<string, any>>;
@@ -123,7 +128,7 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     onAction?: string;
     editable?: boolean;
     defaultEditable?: boolean;
-    lineStyle?: string;
+    rowClassName?: string;
     tooltip?: string;
     cellTooltip?: string;
     nanValue?: string;
@@ -134,6 +139,7 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     downloadable?: boolean;
     onCompare?: string;
     compare?: boolean;
+    useCheckbox?: boolean;
 }
 
 export const DownloadAction = "__Taipy__download_csv";
@@ -187,14 +193,24 @@ interface EditableCellProps {
     onSelection?: OnRowSelection;
     nanValue?: string;
     className?: string;
+    tableClassName?: string;
     tooltip?: string;
     tableCellProps?: Partial<TableCellProps>;
     comp?: RowValue;
+    useCheckbox?: boolean;
+    formattedVal?: string;
+}
+
+export interface FilterDesc {
+    col: string;
+    action: string;
+    value: string | number | boolean | Date;
+    type: string;
 }
 
 export const defaultColumns = {} as Record<string, ColumnDesc>;
 
-export const getsortByIndex = (cols: Record<string, ColumnDesc>) => (key1: string, key2: string) =>
+export const getSortByIndex = (cols: Record<string, ColumnDesc>) => (key1: string, key2: string) =>
     cols[key1].index < cols[key2].index ? -1 : cols[key1].index > cols[key2].index ? 1 : 0;
 
 const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string): string => {
@@ -241,7 +257,7 @@ const getCellProps = (col: ColumnDesc, base: Partial<TableCellProps> = {}): Part
 export const getRowIndex = (row: Record<string, RowValue>, rowIndex: number, startIndex = 0) =>
     typeof row["_tp_index"] === "number" ? row["_tp_index"] : rowIndex + startIndex;
 
-export const addDeleteColumn = (nbToRender: number, columns: Record<string, ColumnDesc>) => {
+export const addActionColumn = (nbToRender: number, columns: Record<string, ColumnDesc>) => {
     if (nbToRender) {
         Object.keys(columns).forEach((key) => columns[key].index++);
         columns[EDIT_COL] = {
@@ -257,11 +273,63 @@ export const addDeleteColumn = (nbToRender: number, columns: Record<string, Colu
     return columns;
 };
 
-export const getClassName = (row: Record<string, unknown>, style?: string, col?: string) =>
-    style ? (((col && row[`tps__${col}__${style}`]) || row[style]) as string) : undefined;
+export const getClassName = (row: Record<string, unknown>, className?: string, col?: string) =>
+    getToolFn("tps", row, className, col);
 
 export const getTooltip = (row: Record<string, unknown>, tooltip?: string, col?: string) =>
-    tooltip ? (((col && row[`tpt__${col}__${tooltip}`]) || row[tooltip]) as string) : undefined;
+    getToolFn("tpt", row, tooltip, col);
+
+export const getFormatFn = (row: Record<string, unknown>, formatFn?: string, col?: string) =>
+    getToolFn("tpf", row, formatFn, col);
+
+const getToolFn = (prefix: string, row: Record<string, unknown>, toolFn?: string, col?: string) =>
+    toolFn ? (((col && row[`${prefix}__${col}__${toolFn}`]) || row[toolFn]) as string) : undefined;
+
+export const getPageKey = (
+    columns: Record<string, ColumnDesc>,
+    prefix: string,
+    cols: string[],
+    orderBy: string,
+    order: string,
+    filters: FilterDesc[],
+    aggregates?: string[],
+    cellClassNames?: Record<string, string>,
+    tooltips?: Record<string, string>,
+    formats?: Record<string, string>
+) =>
+    [
+        prefix,
+        cols.join(),
+        orderBy,
+        order,
+        aggregates?.length
+            ? cols.reduce((pv, col, idx) => {
+                  if (aggregates.includes(columns[col].dfid)) {
+                      return `${pv}${idx}`;
+                  }
+                  return pv;
+              }, "-")
+            : undefined,
+        filters.map((filter) => `${filter.col}${filter.action}${filter.value}`).join(),
+        [
+            cellClassNames &&
+                Object.entries(cellClassNames)
+                    .map((col, className) => `${col}:${className}`)
+                    .join(),
+            tooltips &&
+                Object.entries(tooltips)
+                    .map((col, tooltip) => `${col}:${tooltip}`)
+                    .join(),
+            formats &&
+                Object.entries(formats)
+                    .map((col, format) => `${col}:${format}`)
+                    .join(),
+        ]
+            .filter((v) => v)
+            .join(";"),
+    ]
+        .filter((v) => v)
+        .join("-");
 
 const setInputFocus = (input: HTMLInputElement) => input && input.focus();
 
@@ -286,9 +354,12 @@ export const EditableCell = (props: EditableCellProps) => {
         onSelection,
         nanValue,
         className,
+        tableClassName,
         tooltip,
         tableCellProps = emptyObject,
         comp,
+        useCheckbox = false,
+        formattedVal: formattedValue,
     } = props;
     const [val, setVal] = useState<RowValue | Date>(value);
     const [edit, setEdit] = useState(false);
@@ -302,14 +373,19 @@ export const EditableCell = (props: EditableCellProps) => {
     const onBoolChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setVal(e.target.checked), []);
     const onDateChange = useCallback((date: Date | null) => setVal(date), []);
 
+    const boolVal = colDesc.type?.startsWith("bool") && (val as boolean);
+
     const withTime = useMemo(() => !!colDesc.format && colDesc.format.toLowerCase().includes("h"), [colDesc.format]);
 
-    const button = useMemo(() => {
-        if (onSelection && typeof value == "string" && value.startsWith("[") && value.endsWith(")")) {
-            const parts = value.slice(1, -1).split("](");
-            if (parts.length == 2) {
-                return parts as [string, string];
-            }
+    const buttonImg = useMemo(() => {
+        let m;
+        if (typeof value == "string" && (m = imgButtonRe.exec(value)) !== null) {
+            return {
+                text: !!m[1] ? m[3] : m[2],
+                value: !!m[1] ? m[2] : m[3],
+                img: !!m[1],
+                action: !!onSelection,
+            };
         }
         return undefined;
     }, [value, onSelection]);
@@ -325,14 +401,14 @@ export const EditableCell = (props: EditableCellProps) => {
                 case "int":
                     try {
                         castVal = parseInt(val as string, 10);
-                    } catch (e) {
+                    } catch {
                         // ignore
                     }
                     break;
                 case "float":
                     try {
                         castVal = parseFloat(val as string);
-                    } catch (e) {
+                    } catch {
                         // ignore
                     }
                     break;
@@ -421,9 +497,9 @@ export const EditableCell = (props: EditableCellProps) => {
     const onSelect = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            onSelection && onSelection(rowIndex, colDesc.dfid, button && button[1]);
+            onSelection && onSelection(rowIndex, colDesc.dfid, buttonImg && buttonImg.value);
         },
-        [onSelection, rowIndex, colDesc.dfid, button]
+        [onSelection, rowIndex, colDesc.dfid, buttonImg]
     );
 
     const filterOptions = useCallback(
@@ -443,6 +519,13 @@ export const EditableCell = (props: EditableCellProps) => {
         [colDesc.freeLov]
     );
 
+    const boolTitle = useMemo(() => {
+        if (!colDesc.type?.startsWith("bool") || !colDesc.lov || colDesc.lov.length == 0) {
+            return boolVal ? "True" : "False";
+        }
+        return colDesc.lov[boolVal ? 1 : 0];
+    }, [colDesc.type, boolVal, colDesc.lov]);
+
     useEffect(() => {
         !onValidation && setEdit(false);
     }, [onValidation]);
@@ -453,104 +536,39 @@ export const EditableCell = (props: EditableCellProps) => {
             className={
                 onValidation ? getSuffixedClassNames(className || "tpc", edit ? "-editing" : "-editable") : className
             }
-            title={tooltip || comp ? `${tooltip ? tooltip : ""}${comp ? " " + formatValue(comp as RowValue, colDesc, formatConfig, nanValue) : ""}` : undefined}
+            title={
+                tooltip || comp
+                    ? `${tooltip ? tooltip : ""}${
+                          comp ? " " + formatValue(comp as RowValue, colDesc, formatConfig, nanValue) : ""
+                      }`
+                    : undefined
+            }
         >
             <Badge color="primary" variant="dot" invisible={comp === undefined || comp === null}>
-            {edit ? (
-                colDesc.type?.startsWith("bool") ? (
-                    <Box sx={cellBoxSx}>
-                        <Switch
-                            checked={val as boolean}
-                            size="small"
-                            title={val ? "True" : "False"}
-                            sx={iconInRowSx}
-                            onChange={onBoolChange}
-                            inputRef={setInputFocus}
-                        />
-                        <Box sx={iconsWrapperSx}>
-                            <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
-                                <CheckIcon fontSize="inherit" />
-                            </IconButton>
-                            <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
-                                <ClearIcon fontSize="inherit" />
-                            </IconButton>
-                        </Box>
-                    </Box>
-                ) : colDesc.type?.startsWith("date") ? (
-                    <Box sx={cellBoxSx}>
-                        {withTime ? (
-                            <DateTimePicker
-                                value={val as Date}
-                                onChange={onDateChange}
-                                slotProps={textFieldProps}
-                                inputRef={setInputFocus}
-                                sx={tableFontSx}
+                {edit ? (
+                    colDesc.type?.startsWith("bool") ? (
+                        <Box sx={cellBoxSx}>
+                            lightBool ? (
+                            <input
+                                type="checkbox"
+                                checked={val as boolean}
+                                title={boolTitle}
+                                style={iconInRowSx}
+                                className={getSuffixedClassNames(tableClassName, "-bool")}
+                                ref={setInputFocus}
+                                onChange={onBoolChange}
                             />
-                        ) : (
-                            <DatePicker
-                                value={val as Date}
-                                onChange={onDateChange}
-                                slotProps={textFieldProps}
+                            ) : (
+                            <Switch
+                                checked={val as boolean}
+                                size="small"
+                                title={boolTitle}
+                                sx={iconInRowSx}
+                                onChange={onBoolChange}
                                 inputRef={setInputFocus}
-                                sx={tableFontSx}
+                                className={getSuffixedClassNames(tableClassName, "-bool")}
                             />
-                        )}
-                        <Box sx={iconsWrapperSx}>
-                            <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
-                                <CheckIcon fontSize="inherit" />
-                            </IconButton>
-                            <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
-                                <ClearIcon fontSize="inherit" />
-                            </IconButton>
-                        </Box>
-                    </Box>
-                ) : colDesc.lov ? (
-                    <Box sx={cellBoxSx}>
-                        <Autocomplete
-                            autoComplete={true}
-                            fullWidth
-                            selectOnFocus={!!colDesc.freeLov}
-                            clearOnBlur={!!colDesc.freeLov}
-                            handleHomeEndKeys={!!colDesc.freeLov}
-                            options={colDesc.lov}
-                            getOptionKey={getOptionKey}
-                            getOptionLabel={getOptionLabel}
-                            filterOptions={filterOptions}
-                            freeSolo={!!colDesc.freeLov}
-                            value={val as string}
-                            onChange={onCompleteChange}
-                            onOpen={onCompleteClose}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    fullWidth
-                                    inputRef={setInputFocus}
-                                    onChange={colDesc.freeLov ? onChange : undefined}
-                                    margin="dense"
-                                    variant="standard"
-                                    sx={tableFontSx}
-                                />
-                            )}
-                            disableClearable={!colDesc.freeLov}
-                        />
-                        <Box sx={iconsWrapperSx}>
-                            <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
-                                <CheckIcon fontSize="inherit" />
-                            </IconButton>
-                            <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
-                                <ClearIcon fontSize="inherit" />
-                            </IconButton>
-                        </Box>
-                    </Box>
-                ) : (
-                    <Input
-                        value={val}
-                        onChange={onChange}
-                        onKeyDown={onKeyDown}
-                        inputRef={setInputFocus}
-                        margin="dense"
-                        sx={tableFontSx}
-                        endAdornment={
+                            )
                             <Box sx={iconsWrapperSx}>
                                 <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
                                     <CheckIcon fontSize="inherit" />
@@ -559,61 +577,183 @@ export const EditableCell = (props: EditableCellProps) => {
                                     <ClearIcon fontSize="inherit" />
                                 </IconButton>
                             </Box>
-                        }
-                    />
-                )
-            ) : EDIT_COL === colDesc.dfid ? (
-                deletion ? (
-                    <Input
-                        value="Confirm"
-                        onKeyDown={onDeleteKeyDown}
-                        inputRef={setInputFocus}
-                        sx={tableFontSx}
-                        endAdornment={
+                        </Box>
+                    ) : colDesc.type?.startsWith("date") ? (
+                        <Box sx={cellBoxSx}>
+                            {withTime ? (
+                                <DateTimePicker
+                                    value={val as Date}
+                                    onChange={onDateChange}
+                                    slotProps={textFieldProps}
+                                    inputRef={setInputFocus}
+                                    sx={tableFontSx}
+                                    className={getSuffixedClassNames(tableClassName, "-date")}
+                                />
+                            ) : (
+                                <DatePicker
+                                    value={val as Date}
+                                    onChange={onDateChange}
+                                    slotProps={textFieldProps}
+                                    inputRef={setInputFocus}
+                                    sx={tableFontSx}
+                                    className={getSuffixedClassNames(tableClassName, "-date")}
+                                />
+                            )}
                             <Box sx={iconsWrapperSx}>
-                                <IconButton onClick={onDeleteCheckClick} size="small" sx={iconInRowSx}>
+                                <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
                                     <CheckIcon fontSize="inherit" />
                                 </IconButton>
-                                <IconButton onClick={onDeleteClick} size="small" sx={iconInRowSx}>
+                                <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
                                     <ClearIcon fontSize="inherit" />
                                 </IconButton>
                             </Box>
-                        }
-                    />
-                ) : onDeletion ? (
-                    <Box sx={iconsWrapperSx}>
-                        <IconButton onClick={onDeleteClick} size="small" sx={iconInRowSx}>
-                            <DeleteIcon fontSize="inherit" />
-                        </IconButton>
-                    </Box>
-                ) : null
-            ) : (
-                <Box sx={cellBoxSx} onClick={onSelect}>
-                    {button ? (
-                        <Button size="small" onClick={onSelect} sx={ButtonSx}>
-                            {formatValue(button[0] as RowValue, colDesc, formatConfig, nanValue)}
-                        </Button>
-                    ) : value !== null && value !== undefined && colDesc.type && colDesc.type.startsWith("bool") ? (
-                        <Switch
-                            checked={value as boolean}
-                            size="small"
-                            title={value ? "True" : "False"}
-                            sx={defaultCursorIcon}
-                        />
+                        </Box>
+                    ) : colDesc.lov ? (
+                        <Box sx={cellBoxSx}>
+                            <Autocomplete
+                                autoComplete={true}
+                                fullWidth
+                                selectOnFocus={!!colDesc.freeLov}
+                                clearOnBlur={!!colDesc.freeLov}
+                                handleHomeEndKeys={!!colDesc.freeLov}
+                                options={colDesc.lov}
+                                getOptionKey={getOptionKey}
+                                getOptionLabel={getOptionLabel}
+                                filterOptions={filterOptions}
+                                freeSolo={!!colDesc.freeLov}
+                                value={val as string}
+                                onChange={onCompleteChange}
+                                onOpen={onCompleteClose}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        fullWidth
+                                        inputRef={setInputFocus}
+                                        onChange={colDesc.freeLov ? onChange : undefined}
+                                        margin="dense"
+                                        variant="standard"
+                                        sx={tableFontSx}
+                                        className={getSuffixedClassNames(tableClassName, "-input")}
+                                    />
+                                )}
+                                disableClearable={!colDesc.freeLov}
+                            />
+                            <Box sx={iconsWrapperSx}>
+                                <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
+                                    <CheckIcon fontSize="inherit" />
+                                </IconButton>
+                                <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
+                                    <ClearIcon fontSize="inherit" />
+                                </IconButton>
+                            </Box>
+                        </Box>
                     ) : (
-                        <span style={defaultCursor}>
-                            {formatValue(value as RowValue, colDesc, formatConfig, nanValue)}
-                        </span>
-                    )}
-                    {onValidation && !button ? (
+                        <Input
+                            value={val}
+                            onChange={onChange}
+                            onKeyDown={onKeyDown}
+                            inputRef={setInputFocus}
+                            margin="dense"
+                            sx={tableFontSx}
+                            className={getSuffixedClassNames(tableClassName, "-input")}
+                            endAdornment={
+                                <Box sx={iconsWrapperSx}>
+                                    <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
+                                        <CheckIcon fontSize="inherit" />
+                                    </IconButton>
+                                    <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
+                                        <ClearIcon fontSize="inherit" />
+                                    </IconButton>
+                                </Box>
+                            }
+                        />
+                    )
+                ) : EDIT_COL === colDesc.dfid ? (
+                    deletion ? (
+                        <Input
+                            value="Confirm"
+                            onKeyDown={onDeleteKeyDown}
+                            inputRef={setInputFocus}
+                            sx={tableFontSx}
+                            className={getSuffixedClassNames(tableClassName, "-delete")}
+                            endAdornment={
+                                <Box sx={iconsWrapperSx}>
+                                    <IconButton onClick={onDeleteCheckClick} size="small" sx={iconInRowSx}>
+                                        <CheckIcon fontSize="inherit" />
+                                    </IconButton>
+                                    <IconButton onClick={onDeleteClick} size="small" sx={iconInRowSx}>
+                                        <ClearIcon fontSize="inherit" />
+                                    </IconButton>
+                                </Box>
+                            }
+                        />
+                    ) : onDeletion ? (
                         <Box sx={iconsWrapperSx}>
-                            <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
-                                <EditIcon fontSize="inherit" />
+                            <IconButton onClick={onDeleteClick} size="small" sx={iconInRowSx}>
+                                <DeleteIcon fontSize="inherit" />
                             </IconButton>
                         </Box>
-                    ) : null}
-                </Box>
-            )}
+                    ) : null
+                ) : (
+                    <Box sx={cellBoxSx} onClick={onSelect}>
+                        {buttonImg ? (
+                            buttonImg.img ? (
+                                <img
+                                    src={buttonImg.text}
+                                    className={getSuffixedClassNames(tableClassName, "-img")}
+                                    alt={buttonImg.value}
+                                    onClick={onSelect}
+                                    title={buttonImg.value}
+                                />
+                            ) : (
+                                <Button
+                                    size="small"
+                                    onClick={onSelect}
+                                    sx={ButtonSx}
+                                    className={getSuffixedClassNames(tableClassName, "-btn")}
+                                    disabled={!buttonImg.action}
+                                    title={buttonImg.value}
+                                >
+                                    {formatValue(buttonImg.text, colDesc, formatConfig, nanValue)}
+                                </Button>
+                            )
+                        ) : value !== null && value !== undefined && colDesc.type && colDesc.type.startsWith("bool") ? (
+                            useCheckbox ? (
+                                <input
+                                    type="checkbox"
+                                    checked={value as boolean}
+                                    title={boolTitle}
+                                    style={defaultCursor}
+                                    className={getSuffixedClassNames(tableClassName, "-bool")}
+                                />
+                            ) : (
+                                <Switch
+                                    checked={value as boolean}
+                                    size="small"
+                                    title={boolTitle}
+                                    sx={defaultCursorIcon}
+                                    className={getSuffixedClassNames(tableClassName, "-bool")}
+                                />
+                            )
+                        ) : (
+                            <span style={defaultCursor}>
+                                {formatValue(
+                                    formattedValue == undefined ? value : (formattedValue as RowValue),
+                                    colDesc,
+                                    formatConfig,
+                                    nanValue
+                                )}
+                            </span>
+                        )}
+                        {onValidation && !buttonImg ? (
+                            <Box sx={iconsWrapperSx}>
+                                <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
+                                    <EditIcon fontSize="inherit" />
+                                </IconButton>
+                            </Box>
+                        ) : null}
+                    </Box>
+                )}
             </Badge>
         </TableCell>
     );

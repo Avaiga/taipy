@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -39,48 +39,64 @@ const searchMsg = messages[valueKey].data[0][1];
 
 describe("Chat Component", () => {
     it("renders", async () => {
-        const { getByText, getByLabelText } = render(<Chat messages={messages} defaultKey={valueKey} />);
+        const { getByText, getByLabelText } = render(<Chat messages={messages} defaultKey={valueKey} mode="raw" />);
         const elt = getByText(searchMsg);
         expect(elt.tagName).toBe("DIV");
         const input = getByLabelText("message (taipy)");
         expect(input.tagName).toBe("INPUT");
     });
     it("uses the class", async () => {
-        const { getByText } = render(<Chat messages={messages} className="taipy-chat" defaultKey={valueKey} />);
+        const { getByText } = render(<Chat messages={messages} className="taipy-chat" defaultKey={valueKey} mode="raw" />);
         const elt = getByText(searchMsg);
         expect(elt.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("taipy-chat");
     });
     it("can display an avatar", async () => {
-        const { getByAltText } = render(<Chat messages={messages} users={users} defaultKey={valueKey} />);
+        const { getByAltText } = render(<Chat messages={messages} users={users} defaultKey={valueKey} mode="raw"/>);
         const elt = getByAltText("Fred.png");
         expect(elt.tagName).toBe("IMG");
     });
     it("is disabled", async () => {
-        const { getAllByRole } = render(<Chat messages={messages} active={false} defaultKey={valueKey} />);
+        const { getAllByRole } = render(<Chat messages={messages} active={false} defaultKey={valueKey} mode="raw"/>);
         const elts = getAllByRole("button");
         elts.forEach((elt) => expect(elt).toHaveClass("Mui-disabled"));
     });
     it("is enabled by default", async () => {
-        const { getAllByRole } = render(<Chat messages={messages} defaultKey={valueKey} />);
+        const { getAllByRole } = render(<Chat messages={messages} defaultKey={valueKey} mode="raw"/>);
         const elts = getAllByRole("button");
         elts.forEach((elt) => expect(elt).not.toHaveClass("Mui-disabled"));
     });
     it("is enabled by active", async () => {
-        const { getAllByRole } = render(<Chat messages={messages} active={true} defaultKey={valueKey} />);
+        const { getAllByRole } = render(<Chat messages={messages} active={true} defaultKey={valueKey} mode="raw"/>);
         const elts = getAllByRole("button");
         elts.forEach((elt) => expect(elt).not.toHaveClass("Mui-disabled"));
     });
     it("can hide input", async () => {
-        render(<Chat messages={messages} withInput={false} className="taipy-chat" defaultKey={valueKey} />);
+        render(<Chat messages={messages} withInput={false} className="taipy-chat" defaultKey={valueKey} mode="raw"/>);
         const elt = document.querySelector(".taipy-chat input");
         expect(elt).toBeNull();
+    });
+    it("renders markdown by default", async () => {
+        render(<Chat messages={messages} className="taipy-chat" defaultKey={valueKey} />);
+        const elt = document.querySelector(".taipy-chat .taipy-chat-received .MuiPaper-root");
+        await waitFor(() => expect(elt?.querySelector("p")).not.toBeNull());
+    });
+    it("can render pre", async () => {
+        const { getByText } = render(<Chat messages={messages} defaultKey={valueKey} className="taipy-chat"  mode="pre" />);
+        const elt = getByText(searchMsg);
+        expect(elt.tagName).toBe("PRE");
+        expect(elt.parentElement).toHaveClass("taipy-chat-pre");
+    });
+    it("can render raw", async () => {
+        const { getByText } = render(<Chat messages={messages} defaultKey={valueKey} className="taipy-chat"  mode="raw" />);
+        const elt = getByText(searchMsg);
+        expect(elt).toHaveClass("taipy-chat-raw");
     });
     it("dispatch a well formed message by Keyboard", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByLabelText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Chat messages={messages} updateVarName="varname" defaultKey={valueKey} />
+                <Chat messages={messages} updateVarName="varName" defaultKey={valueKey} mode="raw"/>
             </TaipyContext.Provider>
         );
         const elt = getByLabelText("message (taipy)");
@@ -92,7 +108,7 @@ describe("Chat Component", () => {
             context: undefined,
             payload: {
                 action: undefined,
-                args: ["Enter", "varname", "new message", "taipy"],
+                args: ["Enter", "varName", "new message", "taipy"],
             },
         });
     });
@@ -101,7 +117,7 @@ describe("Chat Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByLabelText, getByRole } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Chat messages={messages} updateVarName="varname" defaultKey={valueKey} />
+                <Chat messages={messages} updateVarName="varName" defaultKey={valueKey} mode="raw"/>
             </TaipyContext.Provider>
         );
         const elt = getByLabelText("message (taipy)");
@@ -114,7 +130,7 @@ describe("Chat Component", () => {
             context: undefined,
             payload: {
                 action: undefined,
-                args: ["click", "varname", "new message", "taipy"],
+                args: ["click", "varName", "new message", "taipy"],
             },
         });
     });

@@ -69,10 +69,14 @@ __CHART_AXIS: t.Dict[str, t.Tuple[_Chart_iprops, ...]] = {
         _Chart_iprops.low,
     ),
     "choropleth": (_Chart_iprops.locations, _Chart_iprops.z),
+    "choroplethmap": (_Chart_iprops.locations, _Chart_iprops.z),
+    "choroplethmapbox": (_Chart_iprops.locations, _Chart_iprops.z),
+    "densitymap": (_Chart_iprops.lon, _Chart_iprops.lat, _Chart_iprops.z),
     "densitymapbox": (_Chart_iprops.lon, _Chart_iprops.lat, _Chart_iprops.z),
     "funnelarea": (_Chart_iprops.values,),
     "pie": (_Chart_iprops.values, _Chart_iprops.labels),
     "scattergeo": (_Chart_iprops.lon, _Chart_iprops.lat),
+    "scattermap": (_Chart_iprops.lon, _Chart_iprops.lat),
     "scattermapbox": (_Chart_iprops.lon, _Chart_iprops.lat),
     "scatterpolar": (_Chart_iprops.r, _Chart_iprops.theta),
     "scatterpolargl": (_Chart_iprops.r, _Chart_iprops.theta),
@@ -109,6 +113,8 @@ def __get_col_from_indexed(col_name: str, idx: int) -> t.Optional[str]:
 
 
 def _build_chart_config(gui: "Gui", attributes: t.Dict[str, t.Any], col_types: t.Dict[str, str]):  # noqa: C901
+    if "data" not in attributes and "figure" in attributes:
+        return {"traces": []}
     default_type = attributes.get("_default_type", "scatter")
     default_mode = attributes.get("_default_mode", "lines+markers")
     trace = __get_multiple_indexed_attributes(attributes, _CHART_NAMES)
@@ -201,7 +207,10 @@ def _build_chart_config(gui: "Gui", attributes: t.Dict[str, t.Any], col_types: t
         decimators.append(None)
 
     # set default columns if not defined
-    icols = [[c2 for c2 in [__get_col_from_indexed(c1, i) for c1 in col_dict.keys()] if c2] for i in range(len(traces))]
+    icols = [
+        [c2 for c2 in [__get_col_from_indexed(c1, i) for c1 in t.cast(dict, col_dict).keys()] if c2]
+        for i in range(len(traces))
+    ]
 
     for i, tr in enumerate(traces):
         if i < len(axis):

@@ -14,20 +14,14 @@ from __future__ import annotations
 import ast
 import copy
 import inspect
-import io
 import re
-import sys
 import typing as t
-import uuid
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from types import FrameType, FunctionType
 
 from .._warnings import _warn
-from ..utils import _getscopeattr
-
-if sys.version_info < (3, 9):
-    from ..utils.unparse import _Unparser
+from ..utils import _get_lambda_id, _getscopeattr
 from ._context_manager import _BuilderContextManager
 from ._factory import _BuilderFactory
 from ._utils import _LambdaByName, _python_builtins, _TransformVarToValue
@@ -42,7 +36,10 @@ class _Element(ABC):
     _ELEMENT_NAME = ""
     _DEFAULT_PROPERTY = ""
     __RE_INDEXED_PROPERTY = re.compile(r"^(.*?)__([\w\d]+)$")
-    _NEW_LAMBDA_NAME = "new_lambda"
+    _TAIPY_EMBEDDED_PREFIX = "_tp_embedded_"
+    _EMBEDDED_PROPERTIES = ["decimator"]
+    _TYPES: t.Dict[str, str] = {}
+    __LAMBDA_VALUE_IDX = 0
 
     def __new__(cls, *args, **kwargs):
         obj = super(_Element, cls).__new__(cls)
@@ -60,12 +57,20 @@ class _Element(ABC):
 
         if args and self._DEFAULT_PROPERTY != "":
             self._properties = {self._DEFAULT_PROPERTY: args[0]}
+        # special attribute for inline
+        self._is_inline = kwargs.pop("inline", False)
         self._properties.update(kwargs)
         self.parse_properties()
 
     def update(self, **kwargs):
         self._properties.update(kwargs)
         self.parse_properties()
+
+    @staticmethod
+    def __get_lambda_index():
+        _Element.__LAMBDA_VALUE_IDX += 1
+        _Element.__LAMBDA_VALUE_IDX %= 0xFFFFFFF0
+        return _Element.__LAMBDA_VALUE_IDX
 
     def _evaluate_lambdas(self, gui: Gui):
         for k, lmbd in self._lambdas.items():
@@ -88,51 +93,70 @@ class _Element(ABC):
             return f"{match.group(1)}[{match.group(2)}]"
         return key
 
+    def _is_callable(self, name: str):
+        return (
+            "callable" in self._TYPES.get(f"{parts[0]}__" if len(parts := name.split("__")) > 1 else name, "").lower()
+        )
+
     def _parse_property(self, key: str, value: t.Any) -> t.Any:
         if isinstance(value, (str, dict, Iterable)):
             return value
         if isinstance(value, FunctionType):
-            if key.startswith("on_"):
-                if value.__name__.startswith("<"):
-                    return value
-                return value.__name__
-
-            try:
-                source = inspect.findsource(value)
-                st = ast.parse("".join(source[0]))
-                lambda_by_name: t.Dict[str, ast.Lambda] = {}
-                _LambdaByName(self._ELEMENT_NAME, source[1], lambda_by_name).visit(st)
-                lambda_fn = lambda_by_name.get(
-                    key,
-                    lambda_by_name.get(_LambdaByName._DEFAULT_NAME, None) if key == self._DEFAULT_PROPERTY else None,
-                )
-                if lambda_fn is not None:
-                    args = [arg.arg for arg in lambda_fn.args.args]
-                    targets = [
-                        compr.target.id  # type: ignore[attr-defined]
-                        for node in ast.walk(lambda_fn.body)
-                        if isinstance(node, ast.ListComp)
-                        for compr in node.generators
-                    ]
-                    tree = _TransformVarToValue(self.__calling_frame, args + targets + _python_builtins).visit(
-                        lambda_fn
-                    )
-                    ast.fix_missing_locations(tree)
-                    if sys.version_info < (3, 9):  # python 3.8 ast has no unparse
-                        string_fd = io.StringIO()
-                        _Unparser(tree, string_fd)
-                        string_fd.seek(0)
-                        lambda_text = string_fd.read()
-                    else:
-                        lambda_text = ast.unparse(tree)
-                    lambda_name = f"__lambda_{uuid.uuid4().hex}"
-                    self._lambdas[lambda_name] = lambda_text
-                    return f'{{{lambda_name}({", ".join(args)})}}'
-            except Exception as e:
-                _warn("Error in lambda expression", e)
+            if key.startswith("on_") or self._is_callable(key):
+                return value if value.__name__.startswith("<") else value.__name__
+            # Parse lambda function_is_callable
+            if (lambda_call := self.__parse_lambda_property(key, value)) is not None:
+                return lambda_call
+        # Embed value in the caller frame
+        if not isinstance(value, str) and key in self._EMBEDDED_PROPERTIES:
+            return self.__embed_object(value, is_expression=False)
         if hasattr(value, "__name__"):
             return str(getattr(value, "__name__"))  # noqa: B009
         return str(value)
+
+    def __parse_lambda_property(self, key: str, value: t.Any) -> t.Any:
+        try:
+            source = inspect.findsource(value)
+            st = ast.parse("".join(source[0]))
+            lambda_by_name: t.Dict[str, ast.Lambda] = {}
+            _LambdaByName(self._ELEMENT_NAME, source[1], lambda_by_name).visit(st)
+            lambda_fn = lambda_by_name.get(
+                key,
+                lambda_by_name.get(_LambdaByName._DEFAULT_NAME, None) if key == self._DEFAULT_PROPERTY else None,
+            )
+            if lambda_fn is None:
+                return None
+            args = [arg.arg for arg in lambda_fn.args.args]
+            targets = [
+                comprehension.target.id  # type: ignore[attr-defined]
+                for node in ast.walk(lambda_fn.body)
+                if isinstance(node, ast.ListComp)
+                for comprehension in node.generators
+            ]
+            tree = _TransformVarToValue(self.__calling_frame, args + targets + _python_builtins).visit(lambda_fn)
+            ast.fix_missing_locations(tree)
+            lambda_text = ast.unparse(tree)
+            lambda_name = _get_lambda_id(value, index=(_Element.__get_lambda_index()))
+            self._lambdas[lambda_name] = lambda_text
+            return f'{{{lambda_name}({", ".join(args)})}}'
+        except Exception as e:
+            _warn("Error in lambda expression", e)
+        return None
+
+    def __embed_object(self, obj: t.Any, is_expression=True) -> str:
+        """NOT DOCUMENTED
+        Embed an object in the caller frame
+
+        Return the Taipy expression of the embedded object
+        """
+        frame_locals = self.__calling_frame.f_locals
+        obj_var_name = self._TAIPY_EMBEDDED_PREFIX + obj.__class__.__name__
+        index = 0
+        while f"{obj_var_name}_{index}" in frame_locals:
+            index += 1
+        obj_var_name = f"{obj_var_name}_{index}"
+        frame_locals[obj_var_name] = obj
+        return f"{{{obj_var_name}}}" if is_expression else obj_var_name
 
     @abstractmethod
     def _render(self, gui: "Gui") -> str:
@@ -243,10 +267,11 @@ class _Control(_Element):
     def _render(self, gui: "Gui") -> str:
         self._evaluate_lambdas(gui)
         el = _BuilderFactory.create_element(gui, self._ELEMENT_NAME, self._deepcopy_properties())
+        inline_block = 'style="display:inline-block;"' if self._is_inline else ""
         return (
-            f"<div>{el[0]}</{el[1]}></div>"
+            f"<div {inline_block}>{el[0]}</{el[1]}></div>"
             if f"<{el[1]}" in el[0] and f"</{el[1]}" not in el[0]
-            else f"<div>{el[0]}</div>"
+            else f"<div {inline_block}>{el[0]}</div>"
         )
 
     def __enter__(self):
@@ -260,14 +285,11 @@ class content(_Control):
     """
     Create a `content` pseudo-element
 
-    Arguments:
-            None
+    This pseudo-element can be used in the root page of your application. It is replaced at runtime
+    by the content of the page the user navigates to.
 
-        Examples:
-            - To generate `content`, use:
-               ```
-               content()
-               ```
+    The usage of this pseudo-element is described in
+    [this page](../../../../../../userman/gui/pages/index.md#application-header-and-footer).
     """
 
     def _render(self, gui: "Gui") -> str:

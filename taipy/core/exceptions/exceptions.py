@@ -13,11 +13,12 @@ from typing import List, Optional
 
 
 class ConfigCoreVersionMismatched(Exception):
-    """Raised if core version in Config does not match with the version of Taipy Core."""
+    """Raised if the version in Config does not match with the version of Taipy Version management."""
 
     def __init__(self, config_core_version: str, core_version: str) -> None:
         self.message = (
-            f"The version {config_core_version} of Core's entities does not match version of Taipy Core {core_version}."
+            f"The version {config_core_version} of Taipy's entities does not match version of the Taipy"
+            f" Version management {core_version}."
             f" Please update the core entities to be compatible with Taipy Core {core_version}"
             " using the `taipy migrate ...` command. For more information, please run `taipy help migrate`"
         )

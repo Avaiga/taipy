@@ -13,7 +13,7 @@ import typing as t
 from copy import deepcopy
 
 
-class VisElementProperties(t.TypedDict, total=False):
+class VisElementProperties(t.TypedDict):
     name: str
     type: str
     doc: str
@@ -21,7 +21,7 @@ class VisElementProperties(t.TypedDict, total=False):
     default_property: t.Any
 
 
-class VisElementDetail(t.TypedDict, total=False):
+class VisElementDetail(t.TypedDict):
     inherits: t.List[str]
     properties: t.List[VisElementProperties]
 
@@ -53,6 +53,7 @@ def _resolve_inherit_property(element: VisElement, viselements: VisElements) -> 
 
 
 def resolve_inherits(viselements: VisElements) -> VisElements:
+    """NOT DOCUMENTED"""
     for element_type in "blocks", "controls":
         for element in viselements[element_type]:  # type: ignore[literal-required]
             element[1]["properties"] = _resolve_inherit_property(element, viselements)

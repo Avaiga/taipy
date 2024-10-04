@@ -18,7 +18,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import Badge from "@mui/material/Badge";
 import FormControl from "@mui/material/FormControl";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -30,16 +30,9 @@ import Tooltip from "@mui/material/Tooltip";
 import { DateField, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 
-import { ColumnDesc, defaultDateFormat, getsortByIndex, iconInRowSx } from "./tableUtils";
+import { ColumnDesc, defaultDateFormat, getSortByIndex, iconInRowSx, FilterDesc } from "./tableUtils";
 import { getDateTime, getTypeFromDf } from "../../utils";
 import { getSuffixedClassNames } from "./utils";
-
-export interface FilterDesc {
-    col: string;
-    action: string;
-    value: string | number | boolean | Date;
-    type: string;
-}
 
 interface TableFilterProps {
     columns: Record<string, ColumnDesc>;
@@ -173,7 +166,7 @@ const FilterRow = (props: FilterRowProps) => {
     );
     const onDateChange = useCallback(
         (v: Date | null) => {
-            const dv = (!(v instanceof Date) || isNaN(v.valueOf())) ?  "": v.toISOString();
+            const dv = !(v instanceof Date) || isNaN(v.valueOf()) ? "" : v.toISOString();
             setVal(dv);
             setEnableCheck(!!getFilterDesc(columns, colId, action, dv));
         },
@@ -208,8 +201,8 @@ const FilterRow = (props: FilterRowProps) => {
     const colLov = colId in columns && columns[colId].lov ? columns[colId].lov : undefined;
 
     return (
-        <Grid container item xs={12} alignItems="center">
-            <Grid item xs={3.5}>
+        <Grid container size={12} alignItems="center">
+            <Grid size={3.5}>
                 <FormControl margin="dense">
                     <InputLabel>Column</InputLabel>
                     <Select value={colId || ""} onChange={onColSelect} input={<OutlinedInput label="Column" />}>
@@ -223,7 +216,7 @@ const FilterRow = (props: FilterRowProps) => {
                     </Select>
                 </FormControl>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={3}>
                 <FormControl margin="dense">
                     <InputLabel>Action</InputLabel>
                     <Select value={action || ""} onChange={onActSelect} input={<OutlinedInput label="Action" />}>
@@ -235,7 +228,7 @@ const FilterRow = (props: FilterRowProps) => {
                     </Select>
                 </FormControl>
             </Grid>
-            <Grid item xs={3.5}>
+            <Grid size={3.5}>
                 {colType == "number" ? (
                     <TextField
                         type="number"
@@ -290,7 +283,7 @@ const FilterRow = (props: FilterRowProps) => {
                     />
                 )}
             </Grid>
-            <Grid item xs={1}>
+            <Grid size={1}>
                 <Tooltip title="Validate">
                     <span>
                         <IconButton onClick={onCheckClick} disabled={!enableCheck} sx={iconInRowSx}>
@@ -299,7 +292,7 @@ const FilterRow = (props: FilterRowProps) => {
                     </span>
                 </Tooltip>
             </Grid>
-            <Grid item xs={1}>
+            <Grid size={1}>
                 <Tooltip title="Delete">
                     <span>
                         <IconButton onClick={onDeleteClick} disabled={!enableDel} sx={iconInRowSx}>
@@ -323,7 +316,7 @@ const TableFilter = (props: TableFilterProps) => {
         if (props.colsOrder) {
             return props.colsOrder;
         }
-        return Object.keys(columns).sort(getsortByIndex(columns));
+        return Object.keys(columns).sort(getSortByIndex(columns));
     }, [props.colsOrder, columns]);
 
     const onShowFilterClick = useCallback(() => setShowFilter((f) => !f), []);

@@ -56,7 +56,7 @@ setup(
             "python-magic-bin>=0.4.14,<0.5;platform_system=='Windows'",
         ],
         "rdp": ["rdp>=0.8"],
-        "arrow": ["pyarrow>=14.0.2,<15.0"],
+        "arrow": ["pyarrow>=17.0.0,<18.0"],
         "mssql": ["pyodbc>=4"],
     },
     cmdclass={"build_py": NPMInstall},

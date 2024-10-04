@@ -16,7 +16,7 @@ from os import path
 
 from charset_normalizer import detect
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ..page import Page
 from ..utils import _is_in_notebook, _varname_from_content
@@ -139,7 +139,7 @@ class Markdown(_Renderer):
     user interfaces.
 
     You can find details on the Taipy Markdown-specific syntax and how to add
-    Taipy Visual Elements in the [section on Markdown](../../userman/gui/pages/markdown.md)
+    Taipy Visual Elements in the [section on Markdown](../../../../../userman/gui/pages/markdown.md)
     of the User Manual.
     """
 
@@ -149,8 +149,12 @@ class Markdown(_Renderer):
         Arguments:
             content (str): The text content or the path to the file holding the Markdown text
                 to be transformed.<br/>
-                If _content_ is a path to a readable file, the file is read as the Markdown
+                If *content* is a path to a readable file, the file is read as the Markdown
                 template content.
+
+        The `Markdown` constructor supports the *style* parameter as explained in the
+        [section on Styling](../../../../../userman/gui/styling/index.md#style-sheets) and in the
+        `(taipy.gui.Page.)set_style()^` method.
         """
         kwargs["content"] = content
         super().__init__(**kwargs)
@@ -167,7 +171,7 @@ class Html(_Renderer):
     user interfaces.
 
     You can find details on HTML-specific constructs and how to add
-    Taipy Visual Elements in the [section on HTML](../../userman/gui/pages/html.md)
+    Taipy Visual Elements in the [section on HTML](../../../../../userman/gui/pages/html.md)
     of the User Manual.
     """
 
@@ -179,6 +183,10 @@ class Html(_Renderer):
                 be transformed.<br/>
                 If *content* is a path to a readable file, the file is read as the HTML
                 template content.
+
+        The `Html` constructor supports the *style* parameter as explained in the
+        [section on Styling](../../../../../userman/gui/styling/index.md#style-sheets) and in the
+        `(taipy.gui.Page.)set_style()^` method.
         """
         kwargs["content"] = content
         super().__init__(**kwargs)

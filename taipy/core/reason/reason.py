@@ -13,10 +13,9 @@ from typing import Any, Optional
 
 
 class Reason:
-    """
-    A reason explains why a specific action cannot be performed.
+    """A reason explains why a specific action cannot be performed.
 
-    This is a parent class aiming at being implemented by specific sub-classes.
+    This is a parent class aiming at being implemented by specific subclasses.
 
     Because Taipy applications are natively multiuser, asynchronous, and dynamic,
     some functions might not be called in some specific contexts. You can protect
@@ -143,6 +142,36 @@ class UploadFileCanNotBeRead(Reason, _DataNodeReasonMixin):
         _DataNodeReasonMixin.__init__(self, datanode_id)
 
 
+class NoFileToDownload(Reason, _DataNodeReasonMixin):
+    """
+    There is no file to download, therefore the download action cannot be performed.
+
+    Attributes:
+        datanode_id (str): The id of the data node that the file is intended to download from.
+    """
+
+    def __init__(self, file_path: str, datanode_id: str):
+        Reason.__init__(
+            self, f"Path '{file_path}' from data node '{datanode_id}'" f" does not exist and cannot be downloaded"
+        )
+        _DataNodeReasonMixin.__init__(self, datanode_id)
+
+
+class NotAFile(Reason, _DataNodeReasonMixin):
+    """
+    The data node path is not a file, therefore the download action cannot be performed.
+
+    Attributes:
+        datanode_id (str): The datanode id that the file is intended to download from.
+    """
+
+    def __init__(self, file_path: str, datanode_id: str):
+        Reason.__init__(
+            self, f"Path '{file_path}' from data node '{datanode_id}'" f" is not a file and can t be downloaded"
+        )
+        _DataNodeReasonMixin.__init__(self, datanode_id)
+
+
 class InvalidUploadFile(Reason, _DataNodeReasonMixin):
     """
     The uploaded file has invalid data, therefore is not a valid data file for the data node.
@@ -166,7 +195,7 @@ class EntityDoesNotExist(Reason, _DataNodeReasonMixin):
     """
 
     def __init__(self, entity_id: str):
-        Reason.__init__(self, f"Entity {entity_id} does not exist in the repository.")
+        Reason.__init__(self, f"Entity {entity_id} does not exist in the repository")
 
 
 class JobIsNotFinished(Reason, _DataNodeReasonMixin):
@@ -178,7 +207,19 @@ class JobIsNotFinished(Reason, _DataNodeReasonMixin):
     """
 
     def __init__(self, job_id: str):
-        Reason.__init__(self, f"The job {job_id} is not finished yet.")
+        Reason.__init__(self, f"The job {job_id} is not finished yet")
+
+
+class EntityIsNotAScenario(Reason, _DataNodeReasonMixin):
+    """
+    The entity is not a scenario, which prevents specific actions from being performed.
+
+    Attributes:
+        entity_id (str): The entity identifier.
+    """
+
+    def __init__(self, entity_id: str):
+        Reason.__init__(self, f"The entity {entity_id} is not a scenario")
 
 
 class ScenarioIsThePrimaryScenario(Reason, _DataNodeReasonMixin):
@@ -191,7 +232,7 @@ class ScenarioIsThePrimaryScenario(Reason, _DataNodeReasonMixin):
     """
 
     def __init__(self, scenario_id: str, cycle: str):
-        Reason.__init__(self, f"The scenario {scenario_id} is the primary scenario of cycle {cycle}.")
+        Reason.__init__(self, f"The scenario {scenario_id} is the primary scenario of cycle {cycle}")
 
 
 class ScenarioDoesNotBelongToACycle(Reason, _DataNodeReasonMixin):
@@ -203,7 +244,7 @@ class ScenarioDoesNotBelongToACycle(Reason, _DataNodeReasonMixin):
     """
 
     def __init__(self, scenario_id: str):
-        Reason.__init__(self, f"The scenario {scenario_id} does not belong to any cycle.")
+        Reason.__init__(self, f"The scenario {scenario_id} does not belong to any cycle")
 
 
 class SubmissionIsNotFinished(Reason, _DataNodeReasonMixin):
@@ -215,7 +256,7 @@ class SubmissionIsNotFinished(Reason, _DataNodeReasonMixin):
     """
 
     def __init__(self, submission_id: str):
-        Reason.__init__(self, f"The submission {submission_id} is not finished yet.")
+        Reason.__init__(self, f"The submission {submission_id} is not finished yet")
 
 
 class SubmissionStatusIsUndefined(Reason, _DataNodeReasonMixin):
@@ -227,4 +268,4 @@ class SubmissionStatusIsUndefined(Reason, _DataNodeReasonMixin):
     """
 
     def __init__(self, submission_id: str):
-        Reason.__init__(self, f"The status of submission {submission_id} is undefined.")
+        Reason.__init__(self, f"The status of submission {submission_id} is undefined")

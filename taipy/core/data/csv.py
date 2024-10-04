@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional, Set
 import numpy as np
 import pandas as pd
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 
 from .._entity._reload import _Reloader
 from .._version._version_manager_factory import _VersionManagerFactory
@@ -30,35 +30,15 @@ from .data_node_id import DataNodeId, Edit
 class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     """Data Node stored as a CSV file.
 
-    Attributes:
-        config_id (str): Identifier of the data node configuration. This string must be a valid
-            Python identifier.
-        scope (Scope^): The scope of this data node.
-        id (str): The unique identifier of this data node.
-        owner_id (str): The identifier of the owner (sequence_id, scenario_id, cycle_id) or `None`.
-        parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
-        last_edit_date (datetime): The date and time of the last modification.
-        edits (List[Edit^]): The ordered list of edits for that job.
-        version (str): The string indicates the application version of the data node to instantiate. If not provided,
-            the current version is used.
-        validity_period (Optional[timedelta]): The duration implemented as a timedelta since the last edit date for
-            which the data node can be considered up-to-date. Once the validity period has passed, the data node is
-            considered stale and relevant tasks will run even if they are skippable (see the
-            [Task management](../../userman/sdm/task/index.md) page for more details).
-            If _validity_period_ is set to `None`, the data node is always up-to-date.
-        edit_in_progress (bool): True if a task computing the data node has been submitted
-            and not completed yet. False otherwise.
-        editor_id (Optional[str]): The identifier of the user who is currently editing the data node.
-        editor_expiration_date (Optional[datetime]): The expiration date of the editor lock.
-        path (str): The path to the CSV file.
-        properties (dict[str, Any]): A dictionary of additional properties. The _properties_
-            must have a _"default_path"_ or _"path"_ entry with the path of the CSV file:
+    The *properties* attribute can contain the following optional entries:
 
-            - _"default_path"_ `(str)`: The default path of the CSV file.\n
-            - _"encoding"_ `(str)`: The encoding of the CSV file. The default value is `utf-8`.\n
-            - _"default_data"_: The default data of the data nodes instantiated from this csv data node.\n
-            - _"has_header"_ `(bool)`: If True, indicates that the CSV file has a header.\n
-            - _"exposed_type"_: The exposed type of the data read from CSV file. The default value is `pandas`.\n
+    - *encoding* (`str`): The encoding of the CSV file. The default value is `utf-8`.
+    - *default_path* (`str`): The default path of the CSV file used at the instantiation of the
+        data node.
+    - *default_data*: The default data of the data node. It is used at the data node instantiation
+        to write the data to the CSV file.
+    - *has_header* (`bool`): If True, indicates that the CSV file has a header.
+    - *exposed_type*: The exposed type of the data read from CSV file. The default value is `pandas`.
     """
 
     __STORAGE_TYPE = "csv"
@@ -136,6 +116,17 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
 
+    def write_with_column_names(self, data: Any, columns: Optional[List[str]] = None, job_id: Optional[JobId] = None):
+        """Write a selection of columns.
+
+        Parameters:
+            data (Any): The data to write.
+            columns (Optional[List[str]]): The list of column names to write.
+            job_id (JobId): An optional identifier of the writer.
+        """
+        self._write(data, columns)
+        self.track_edit(timestamp=datetime.now(), job_id=job_id)
+
     def _read(self):
         return self._read_from_path()
 
@@ -202,14 +193,3 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             encoding=properties[self.__ENCODING_KEY],
             header=properties[self._HAS_HEADER_PROPERTY],
         )
-
-    def write_with_column_names(self, data: Any, columns: Optional[List[str]] = None, job_id: Optional[JobId] = None):
-        """Write a selection of columns.
-
-        Parameters:
-            data (Any): The data to write.
-            columns (Optional[List[str]]): The list of column names to write.
-            job_id (JobId^): An optional identifier of the writer.
-        """
-        self._write(data, columns)
-        self.track_edit(timestamp=datetime.now(), job_id=job_id)

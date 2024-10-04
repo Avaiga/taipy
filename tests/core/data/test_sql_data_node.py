@@ -17,8 +17,8 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from taipy.config import Config
-from taipy.config.common.scope import Scope
+from taipy.common.config import Config
+from taipy.common.config.common.scope import Scope
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.operator import JoinOperator, Operator

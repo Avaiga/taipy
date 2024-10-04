@@ -12,17 +12,24 @@
  */
 
 import React, { useEffect, useState, useCallback, useMemo, MouseEvent, useRef } from "react";
+
 import Add from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import FilterList from "@mui/icons-material/FilterList";
 import StopCircleOutlined from "@mui/icons-material/StopCircleOutlined";
+
+import { Theme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material//DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
 import FormControl from "@mui/material/FormControl";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import InputLabel from "@mui/material/InputLabel";
 import ListItemText from "@mui/material/ListItemText";
@@ -30,6 +37,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import Popover from "@mui/material/Popover";
 import Select from "@mui/material/Select";
+import Stack from "@mui/material/Stack";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -40,6 +48,7 @@ import TextField from "@mui/material/TextField";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+
 import { useFormik } from "formik";
 
 import {
@@ -59,10 +68,10 @@ import {
     useClassNames,
     EllipsisSx,
     SecondaryEllipsisProps,
+    CoreProps,
 } from "./utils";
 import StatusChip, { Status } from "./StatusChip";
 import JobViewer, { JobDetail } from "./JobViewer";
-import { Dialog, DialogActions, DialogContent, DialogTitle, Theme } from "@mui/material";
 
 const CloseDialogSx = {
     position: "absolute",
@@ -71,19 +80,11 @@ const CloseDialogSx = {
     color: (theme: Theme) => theme.palette.grey[500],
 };
 
-const RightButtonSx = { marginLeft: "auto ! important" };
+const RightButtonSx = { marginLeft: "auto !important" };
 
-interface JobSelectorProps {
-    updateVarName?: string;
-    coreChanged?: Record<string, unknown>;
-    error?: string;
+interface JobSelectorProps extends CoreProps {
     jobs: Jobs;
     onSelect?: string;
-    updateVars: string;
-    id?: string;
-    libClassName?: string;
-    className?: string;
-    dynamicClassName?: string;
     height: string;
     showId?: boolean;
     showSubmittedLabel?: boolean;
@@ -96,7 +97,6 @@ interface JobSelectorProps {
     onChange?: string;
     value?: string;
     defaultValue?: string;
-    propagate?: boolean;
     updateJbVars?: string;
     details?: JobDetail;
     onDetails?: string | boolean;
@@ -125,7 +125,6 @@ const containerSx = { width: "100%", mb: 2 };
 const selectSx = { height: 50 };
 const containerPopupSx = { width: "619px" };
 const tableWidthSx = { minWidth: 750 };
-const toolbarRightSx = { mr: 6 };
 
 type JobSelectorColumns = {
     id: string;
@@ -218,8 +217,8 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                     {form && form.values.filters && form.values.filters.length > 0
                         ? form.values.filters.map((filter, index) => {
                               return (
-                                  <Grid item xs={12} container spacing={2} mb={1} key={index}>
-                                      <Grid item xs={3}>
+                                  <Grid size={12} container spacing={2} mb={1} key={index}>
+                                      <Grid size={3}>
                                           <FormControl fullWidth>
                                               <InputLabel id="data">Column</InputLabel>
                                               <Select
@@ -242,7 +241,7 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                                               </Select>
                                           </FormControl>
                                       </Grid>
-                                      <Grid item xs={3}>
+                                      <Grid size={3}>
                                           <FormControl fullWidth>
                                               <InputLabel id="operator">Operator</InputLabel>
                                               <Select
@@ -256,14 +255,14 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                                               </Select>
                                           </FormControl>
                                       </Grid>
-                                      <Grid item xs={5}>
+                                      <Grid size={5}>
                                           <TextField
                                               label="Value"
                                               variant="outlined"
                                               {...form.getFieldProps(`filters.${index}.value`)}
                                           />
                                       </Grid>
-                                      <Grid item xs={1}>
+                                      <Grid size={1}>
                                           <Tooltip title="Delete Filter">
                                               <IconButton data-idx={index} onClick={removeFilter}>
                                                   <DeleteOutline />
@@ -274,8 +273,8 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                               );
                           })
                         : null}
-                    <Grid item xs={12} container spacing={2} justifyContent="space-between">
-                        <Grid item xs={3}>
+                    <Grid size={12} container spacing={2} justifyContent="space-between">
+                        <Grid size={3}>
                             <FormControl fullWidth>
                                 <InputLabel id="data-new">Column</InputLabel>
                                 <Select
@@ -298,7 +297,7 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid size={3}>
                             <FormControl fullWidth>
                                 <InputLabel id="operator-new">Operator</InputLabel>
                                 <Select
@@ -312,10 +311,10 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid item xs={5}>
+                        <Grid size={5}>
                             <TextField label="Value" variant="outlined" {...form.getFieldProps(`newValue`)} />
                         </Grid>
-                        <Grid item xs={1}>
+                        <Grid size={1}>
                             <Tooltip
                                 title={typeof form.values.newData === "string" ? "Cannot Add Filter" : "Add Filter"}
                             >
@@ -325,7 +324,7 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                             </Tooltip>
                         </Grid>
                     </Grid>
-                    <Grid item xs={12} container justifyContent="space-between" mt={2}>
+                    <Grid size={12} container justifyContent="space-between" mt={2}>
                         <Button
                             variant="outlined"
                             color="inherit"
@@ -494,6 +493,7 @@ const JobSelector = (props: JobSelectorProps) => {
         showDelete = true,
         propagate = true,
         updateJbVars = "",
+        coreChanged,
     } = props;
     const [checked, setChecked] = useState<string[]>([]);
     const [selected, setSelected] = useState<string[]>([]);
@@ -778,11 +778,11 @@ const JobSelector = (props: JobSelectorProps) => {
     }, [props.value, props.defaultValue]);
 
     useEffect(() => {
-        if (props.coreChanged?.jobs) {
+        if (coreChanged?.jobs) {
             const updateVar = getUpdateVar(props.updateVars, "jobs");
             updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
         }
-    }, [props.coreChanged, props.updateVars, module, dispatch, id]);
+    }, [coreChanged, props.updateVars, module, dispatch, id]);
 
     const tableHeightSx = useMemo(() => ({ maxHeight: props.height || "50vh" }), [props.height]);
 
@@ -795,7 +795,7 @@ const JobSelector = (props: JobSelectorProps) => {
                         <CloseIcon />
                     </IconButton>
                     <DialogContent dividers>
-                        <JobViewer job={props.details} inDialog={true}></JobViewer>
+                        <JobViewer job={props.details} inDialog={true} updateVars=""></JobViewer>
                     </DialogContent>
                     <DialogActions>
                         <Button variant="outlined" color="primary" onClick={deleteJob} data-id={props.details[0]}>
@@ -809,68 +809,58 @@ const JobSelector = (props: JobSelectorProps) => {
             ) : null}
             <Paper sx={containerSx}>
                 <Toolbar sx={headerToolbarSx}>
-                    <Grid container spacing={2} alignItems="center">
-                        <Grid item container xs={3} alignItems="center">
-                            <Tooltip title="Filter">
-                                <IconButton onClick={handleFilterOpen}>
-                                    <FilterList />
-                                </IconButton>
-                            </Tooltip>
-                            {filters && filters.length ? (
-                                <Typography component="div">
-                                    {filters.length} filter{filters.length > 1 ? "s" : ""}
-                                </Typography>
-                            ) : null}
-                        </Grid>
-                        {checked.length ? (
-                            <>
-                                <Grid item xs={7}>
-                                    <Typography variant="subtitle1">{checked.length} selected</Typography>
-                                </Grid>
-                                <Grid item container justifyContent="flex-end" spacing={1} xs={2}>
-                                    {showCancel ? (
-                                        <Tooltip title="Cancel Jobs">
-                                            <span>
-                                                <IconButton
-                                                    disabled={!allowCancelJobs}
-                                                    data-id={JSON.stringify(checked)}
-                                                    data-multiple
-                                                    onClick={handleCancelJobs}
-                                                >
-                                                    <StopCircleOutlined
-                                                        color={disableColor("inherit", !allowCancelJobs)}
-                                                    />
-                                                </IconButton>
-                                            </span>
-                                        </Tooltip>
-                                    ) : null}
-                                    {showDelete ? (
-                                        <Tooltip title="Delete Jobs">
-                                            <span>
-                                                <IconButton
-                                                    disabled={!allowDeleteJobs}
-                                                    data-id={JSON.stringify(checked)}
-                                                    data-multiple
-                                                    onClick={handleDeleteJobs}
-                                                >
-                                                    <DeleteOutline color={disableColor("primary", !allowDeleteJobs)} />
-                                                </IconButton>
-                                            </span>
-                                        </Tooltip>
-                                    ) : null}
-                                    <Box sx={toolbarRightSx} />
-                                </Grid>
-                            </>
+                    <Stack direction="row" justifyContent="space-between" width="100%" marginRight={4}>
+                        <Tooltip title="Filter">
+                            <IconButton onClick={handleFilterOpen}>
+                                <FilterList />
+                            </IconButton>
+                        </Tooltip>
+                        {filters && filters.length ? (
+                            <Typography component="div">
+                                {filters.length} filter{filters.length > 1 ? "s" : ""}
+                            </Typography>
                         ) : null}
-
-                        <Filter
-                            open={!!anchorEl}
-                            anchorEl={anchorEl}
-                            handleFilterClose={handleFilterClose}
-                            handleApplyFilter={setFilters}
-                            columns={jobSelectorColumns}
-                        />
-                    </Grid>
+                        {checked.length ? (
+                            <Stack direction="row" alignItems="center">
+                                <Typography variant="subtitle1">{checked.length} selected</Typography>
+                                {showCancel ? (
+                                    <Tooltip title="Cancel Jobs">
+                                        <span>
+                                            <IconButton
+                                                disabled={!allowCancelJobs}
+                                                data-id={JSON.stringify(checked)}
+                                                data-multiple
+                                                onClick={handleCancelJobs}
+                                            >
+                                                <StopCircleOutlined color={disableColor("inherit", !allowCancelJobs)} />
+                                            </IconButton>
+                                        </span>
+                                    </Tooltip>
+                                ) : null}
+                                {showDelete ? (
+                                    <Tooltip title="Delete Jobs">
+                                        <span>
+                                            <IconButton
+                                                disabled={!allowDeleteJobs}
+                                                data-id={JSON.stringify(checked)}
+                                                data-multiple
+                                                onClick={handleDeleteJobs}
+                                            >
+                                                <DeleteOutline color={disableColor("primary", !allowDeleteJobs)} />
+                                            </IconButton>
+                                        </span>
+                                    </Tooltip>
+                                ) : null}
+                            </Stack>
+                        ) : null}
+                    </Stack>
+                    <Filter
+                        open={!!anchorEl}
+                        anchorEl={anchorEl}
+                        handleFilterClose={handleFilterClose}
+                        handleApplyFilter={setFilters}
+                        columns={jobSelectorColumns}
+                    />
                 </Toolbar>
                 <TableContainer sx={tableHeightSx}>
                     <Table sx={tableWidthSx} aria-labelledby="tableTitle" size="medium">
@@ -905,6 +895,7 @@ const JobSelector = (props: JobSelectorProps) => {
                     </Table>
                 </TableContainer>
             </Paper>
+            {props.children}
         </Box>
     );
 };

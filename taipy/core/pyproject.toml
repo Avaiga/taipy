@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "taipy-core"
 description = "A Python library to build powerful and customized data-driven back-end applications."
 readme = "package_desc.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = {text = "Apache License 2.0"}
 authors = [{name = "Avaiga", email = "dev@taipy.io"}]
 keywords = ["taipy-core"]
@@ -15,7 +15,6 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -27,7 +26,7 @@ dynamic = ["version", "dependencies"]
 mssql = ["pyodbc>=4,<4.1"]
 mysql = ["pymysql>1,<1.1"]
 postgresql = ["psycopg2>2.9,<2.10"]
-parquet = ["fastparquet==2022.11.0", "pyarrow>=14.0.2,<15.0"]
+parquet = ["fastparquet==2022.11.0", "pyarrow>=17.0.0,<18.0"]
 s3 = ["boto3==1.29.1"]
 mongo = ["pymongo[srv]>=4.2.0,<5.0"]
 

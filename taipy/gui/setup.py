@@ -45,14 +45,14 @@ extras_require = {
         "python-magic>=0.4.24,<0.5;platform_system!='Windows'",
         "python-magic-bin>=0.4.14,<0.5;platform_system=='Windows'",
     ],
-    "arrow": ["pyarrow>=14.0.2,<15.0"],
+    "arrow": ["pyarrow>=17.0.0,<18.0"],
 }
 
 def _build_webapp():
     already_exists = Path("./taipy/gui/webapp/index.html").exists()
     if not already_exists:
         os.system("cd ../../frontend/taipy-gui/dom && npm ci")
-        os.system("cd ../../frontend/taipy-gui && npm ci --omit=optional && npm run build")
+        os.system("cd ../../frontend/taipy-gui && npm ci && npm run build")
 
 class NPMInstall(build_py):
     def run(self):

@@ -164,7 +164,7 @@ const Slider = (props: SliderProps) => {
                             if (idx == -1) {
                                 try {
                                     idx = parseInt(key, 10);
-                                } catch (e) {
+                                } catch {
                                     // too bad
                                 }
                             }
@@ -176,7 +176,7 @@ const Slider = (props: SliderProps) => {
                     if (marks.length) {
                         return marks;
                     }
-                } catch (e) {
+                } catch {
                     // won't happen
                 }
             }
@@ -221,7 +221,7 @@ const Slider = (props: SliderProps) => {
                         const val = lovList.findIndex((item) => item.id === arr[0])
                         return val === -1 ? 0 : val
                     }
-                } catch (e) {
+                } catch {
                     throw new Error("Slider lov value couldn't be parsed");
                 }
             }
@@ -234,7 +234,7 @@ const Slider = (props: SliderProps) => {
                             throw new Error("Slider values should all be numbers")
                         }
                         return arr
-                    } catch (e) {
+                    } catch {
                         // Invalid values
                         return 0
                     }

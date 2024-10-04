@@ -148,6 +148,23 @@ export interface TableSortProps {
 
 export declare const TableSort: (props: TableSortProps) => JSX.Element;
 
+export interface FileSelectorProps extends TaipyActiveProps {
+    onAction?: string;
+    defaultLabel?: string;
+    label?: string;
+    multiple?: boolean;
+    extensions?: string;
+    dropMessage?: string;
+    notify?: boolean;
+    width?: string | number;
+    icon?: React.ReactNode;
+    withBorder?: boolean;
+    onUploadAction?: string;
+    uploadData?: string;
+}
+
+export declare const FileSelector: (props: FileSelectorProps) => JSX.Element;
+
 export declare const Router: () => JSX.Element;
 
 /**
@@ -306,6 +323,7 @@ export declare const createRequestUpdateAction: (
     forceRefresh?: boolean,
     stateContext?: Record<string, unknown>
 ) => Action;
+
 /**
  * A column description as received by the backend.
  */
@@ -326,10 +344,13 @@ export interface ColumnDesc {
     notEditable?: boolean;
     /** The name of the column that holds the CSS classname to
      *  apply to the cells. */
-    style?: string;
+    className?: string;
     /** The name of the column that holds the tooltip to
      *  show on the cells. */
     tooltip?: string;
+    /** The name of the column that holds the formatted value to
+     *  show on the cells. */
+    formatFn?: string;
     /** The value that would replace a NaN value. */
     nanValue?: string;
     /** The TimeZone identifier used if the type is `date`. */

@@ -12,6 +12,8 @@
 from __future__ import annotations
 
 import typing as t
+from enum import Enum
+from inspect import isclass
 from operator import add
 
 from .._warnings import _warn
@@ -66,6 +68,8 @@ class _Adapter:
     def run(self, var_name: str, value: t.Any, id_only=False) -> t.Any:
         lov = _AdaptedLov.get_lov(value)
         adapter = self.__get_for_var(var_name, value)
+        if isclass(lov) and issubclass(lov, Enum):
+            lov = list(lov)
         if isinstance(lov, (list, tuple)):
             res = []
             for elt in lov:
@@ -137,7 +141,7 @@ class _Adapter:
                 return (
                     add(type(result)(tpl_res), result[len(tpl_res) :])
                     if isinstance(result, (tuple, list)) and isinstance(tpl_res, (tuple, list))
-                    else tpl_res
+                    else tpl_res # type: ignore[reportReturnType]
                 )
         except Exception as e:
             _warn(f"Cannot run adapter for {var_name}", e)
@@ -168,9 +172,9 @@ class _Adapter:
             if isinstance(value, (list, tuple)) and len(value):
                 return self.__get_id(value[0], False)
             elif hasattr(value, "id"):
-                return self.__get_id(value.id, False)
+                return self.__get_id(t.cast(t.Any, value).id, False)
             elif hasattr(value, "__getitem__") and "id" in value:
-                return self.__get_id(value.get("id"), False)
+                return self.__get_id(t.cast(dict, value).get("id"), False)
         if value is not None and type(value).__name__ not in self.__warning_by_type:
             _warn(f"LoV id must be a string, using a string representation of {type(value)}.")
             self.__warning_by_type.add(type(value).__name__)
@@ -183,9 +187,9 @@ class _Adapter:
             if isinstance(value, (list, tuple)) and len(value) > 1:
                 return self.__get_label(value[1], False)
             elif hasattr(value, "label"):
-                return self.__get_label(value.label, False)
+                return self.__get_label(t.cast(t.Any, value).label, False)
             elif hasattr(value, "__getitem__") and "label" in value:
-                return self.__get_label(value["label"], False)
+                return self.__get_label(t.cast(dict, value).get("label"), False)
         return None
 
     def __get_children(self, value: t.Any) -> t.Optional[t.List[t.Any]]:
@@ -193,18 +197,18 @@ class _Adapter:
             return value[2] if isinstance(value[2], list) else None if value[2] is None else [value[2]]
         elif hasattr(value, "children"):
             return (
-                value.children
-                if isinstance(value.children, list)
+                t.cast(t.Any, value).children
+                if isinstance(t.cast(t.Any, value).children, list)
                 else None
-                if value.children is None
-                else [value.children]
+                if t.cast(t.Any, value).children is None
+                else [t.cast(t.Any, value).children]
             )
         elif hasattr(value, "__getitem__") and "children" in value:
             return (
-                value["children"]
-                if isinstance(value["children"], list)
+                t.cast(dict, value).get("children")
+                if isinstance(t.cast(dict, value).get("children"), list)
                 else None
-                if value["children"] is None
-                else [value["children"]]
+                if t.cast(dict, value).get("children") is None
+                else [t.cast(dict, value).get("children")]
             )
         return None

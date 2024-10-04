@@ -23,7 +23,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import InputLabel from "@mui/material/InputLabel";
 import OutlinedInput from "@mui/material/OutlinedInput";
@@ -47,7 +47,7 @@ interface DataNodeChartProps {
     columns?: Record<string, ColumnDesc>;
     defaultConfig?: string;
     updateVarName?: string;
-    uniqid: string;
+    uniqId: string;
     chartConfigs?: string;
     onViewTypeChange: (e: MouseEvent, value?: string) => void;
 }
@@ -240,7 +240,7 @@ const getBaseConfig = (defaultConfig?: string, chartConfigs?: string, configId?:
 };
 
 const DataNodeChart = (props: DataNodeChartProps) => {
-    const { defaultConfig = "", uniqid, configId, chartConfigs = "", onViewTypeChange } = props;
+    const { defaultConfig = "", uniqId, configId, chartConfigs = "", onViewTypeChange } = props;
 
     const [config, setConfig] = useState<ChartConfig | undefined>(undefined);
     useEffect(() => {
@@ -370,7 +370,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
     return (
         <>
             <Grid container sx={tabularHeaderSx}>
-                <Grid item>
+                <Grid>
                     <Box className="taipy-toggle">
                         <ToggleButtonGroup onChange={onViewTypeChange} exclusive value={ChartViewType} color="primary">
                             <ToggleButton value={TableViewType}>
@@ -382,7 +382,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                         </ToggleButtonGroup>
                     </Box>
                 </Grid>
-                <Grid item>
+                <Grid>
                     <FormControlLabel
                         control={
                             <Switch checked={!!config?.cumulative} onChange={onCumulativeChange} color="primary" />
@@ -390,7 +390,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                         label="Cumulative"
                     />
                 </Grid>
-                <Grid item>
+                <Grid>
                     <Button
                         onClick={resetConfig}
                         variant="text"
@@ -406,13 +406,13 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                 <Grid container alignItems="center">
                     {config?.traces && config?.types
                         ? config?.traces.map((tc, idx) => {
-                              const baseLabelId = `${uniqid}-trace${idx}-"`;
+                              const baseLabelId = `${uniqId}-trace${idx}-"`;
                               return (
                                   <Fragment key={idx}>
-                                      <Grid item xs={2} sx={TraceSx}>
+                                      <Grid size={2} sx={TraceSx}>
                                           Trace {idx + 1}
                                       </Grid>
-                                      <Grid item xs={3}>
+                                      <Grid size={3}>
                                           <TypeSelect
                                               trace={idx}
                                               label="Category"
@@ -421,7 +421,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                                               value={config.types ? config.types[idx] : ""}
                                           />
                                       </Grid>
-                                      <Grid item xs={3}>
+                                      <Grid size={3}>
                                           <ColSelect
                                               trace={idx}
                                               axis={0}
@@ -432,7 +432,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                                               setColConf={setColConf}
                                           />{" "}
                                       </Grid>
-                                      <Grid item xs={3}>
+                                      <Grid size={3}>
                                           <ColSelect
                                               trace={idx}
                                               axis={1}
@@ -444,7 +444,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                                               withNone
                                           />
                                       </Grid>
-                                      <Grid item xs={1}>
+                                      <Grid size={1}>
                                           {config.traces && config.traces.length > 1 ? (
                                               <Tooltip title="Remove Trace">
                                                   <IconButton onClick={onRemoveTrace} data-idx={idx}>
@@ -457,7 +457,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                               );
                           })
                         : null}
-                    <Grid item xs={12}>
+                    <Grid size={12}>
                         <Button onClick={onAddTrace} startIcon={<Add color="primary" />}>
                             Add trace
                         </Button>

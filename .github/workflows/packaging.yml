@@ -12,12 +12,15 @@ on:
         required: false
         default: ""
 
+env:
+  NODE_OPTIONS: --max-old-space-size=4096
+
 jobs:
   standard-packages:
     timeout-minutes: 30
     strategy:
       matrix:
-        python-versions: [ '3.8', '3.9', '3.10', '3.11', '3.12']
+        python-versions: ['3.9', '3.10', '3.11', '3.12']
         os: [ubuntu-latest, macos-13, windows-latest]
 
     runs-on: ${{ matrix.os }}

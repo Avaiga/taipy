@@ -12,8 +12,8 @@
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Literal, Optional, Set, Union, overload
 
-from taipy.config import Scope
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.config import Scope
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ._entity._entity import _Entity
 from ._version._version_manager_factory import _VersionManagerFactory
@@ -26,7 +26,7 @@ from .common._check_instance import (
     _is_submission,
     _is_task,
 )
-from .common._warnings import _warn_deprecated, _warn_no_orchestrator_service
+from .common._warnings import _warn_no_orchestrator_service
 from .config.data_node_config import DataNodeConfig
 from .config.scenario_config import ScenarioConfig
 from .cycle._cycle_manager_factory import _CycleManagerFactory
@@ -261,43 +261,35 @@ def submit(
 
 
 @overload
-def exists(entity_id: TaskId) -> ReasonCollection:
-    ...
+def exists(entity_id: TaskId) -> ReasonCollection: ...
 
 
 @overload
-def exists(entity_id: DataNodeId) -> ReasonCollection:
-    ...
+def exists(entity_id: DataNodeId) -> ReasonCollection: ...
 
 
 @overload
-def exists(entity_id: SequenceId) -> ReasonCollection:
-    ...
+def exists(entity_id: SequenceId) -> ReasonCollection: ...
 
 
 @overload
-def exists(entity_id: ScenarioId) -> ReasonCollection:
-    ...
+def exists(entity_id: ScenarioId) -> ReasonCollection: ...
 
 
 @overload
-def exists(entity_id: CycleId) -> ReasonCollection:
-    ...
+def exists(entity_id: CycleId) -> ReasonCollection: ...
 
 
 @overload
-def exists(entity_id: JobId) -> ReasonCollection:
-    ...
+def exists(entity_id: JobId) -> ReasonCollection: ...
 
 
 @overload
-def exists(entity_id: SubmissionId) -> ReasonCollection:
-    ...
+def exists(entity_id: SubmissionId) -> ReasonCollection: ...
 
 
 @overload
-def exists(entity_id: str) -> ReasonCollection:
-    ...
+def exists(entity_id: str) -> ReasonCollection: ...
 
 
 def exists(
@@ -306,12 +298,12 @@ def exists(
     """Check if an entity with the specified identifier exists.
 
     This function checks if an entity with the given identifier exists.
-    It supports various types of entity identifiers, including `TaskId^`,
-    `DataNodeId^`, `SequenceId^`, `ScenarioId^`, `JobId^`, `CycleId^`, `SubmissionId^`, and string
+    It supports various types of entity identifiers, including `TaskId`,
+    `DataNodeId`, `SequenceId`, `ScenarioId`, `JobId`, `CycleId`, `SubmissionId`, and string
     representations.
 
     Parameters:
-        entity_id (Union[DataNodeId^, TaskId^, SequenceId^, ScenarioId^, JobId^, CycleId^, SubmissionId^, str]): The
+        entity_id (Union[DataNodeId, TaskId, SequenceId, ScenarioId, JobId, CycleId, SubmissionId, str]): The
             identifier of the entity to check for existence.
 
     Returns:
@@ -344,43 +336,35 @@ def exists(
 
 
 @overload
-def get(entity_id: TaskId) -> Task:
-    ...
+def get(entity_id: TaskId) -> Task: ...
 
 
 @overload
-def get(entity_id: DataNodeId) -> DataNode:
-    ...
+def get(entity_id: DataNodeId) -> DataNode: ...
 
 
 @overload
-def get(entity_id: SequenceId) -> Sequence:
-    ...
+def get(entity_id: SequenceId) -> Sequence: ...
 
 
 @overload
-def get(entity_id: ScenarioId) -> Scenario:
-    ...
+def get(entity_id: ScenarioId) -> Scenario: ...
 
 
 @overload
-def get(entity_id: CycleId) -> Cycle:
-    ...
+def get(entity_id: CycleId) -> Cycle: ...
 
 
 @overload
-def get(entity_id: JobId) -> Job:
-    ...
+def get(entity_id: JobId) -> Job: ...
 
 
 @overload
-def get(entity_id: SubmissionId) -> Submission:
-    ...
+def get(entity_id: SubmissionId) -> Submission: ...
 
 
 @overload
-def get(entity_id: str) -> Union[Task, DataNode, Sequence, Scenario, Job, Cycle, Submission]:
-    ...
+def get(entity_id: str) -> Union[Task, DataNode, Sequence, Scenario, Job, Cycle, Submission]: ...
 
 
 def get(
@@ -445,8 +429,8 @@ def is_deletable(entity: Union[Scenario, Job, Submission, ScenarioId, JobId, Sub
             job or submission to check.
 
     Returns:
-        A ReasonCollection object that can function as a Boolean value,
-        which is True if the given scenario, job or submission can be deleted. False otherwise.
+        A ReasonCollection object that can function as a Boolean value, which is True
+            if the given scenario, job or submission can be deleted. False otherwise.
     """
     if isinstance(entity, Job):
         return _JobManagerFactory._build_manager()._is_deletable(entity)
@@ -477,16 +461,16 @@ def delete(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, C
     - If a `SequenceId` is provided, the related jobs are deleted.
     - If a `TaskId` is provided, the related data nodes, and jobs are deleted.
     - If a `DataNodeId` is provided, the data node is deleted.
-    - If a `SubmissionId^` is provided, the related jobs are deleted.
+    - If a `SubmissionId` is provided, the related jobs are deleted.
       The submission can only be deleted if the execution has been finished.
-    - If a `JobId^` is provided, the job entity can only be deleted if the execution has been finished.
+    - If a `JobId` is provided, the job entity can only be deleted if the execution has been finished.
 
     Parameters:
         entity_id (Union[TaskId, DataNodeId, SequenceId, ScenarioId, SubmissionId, JobId, CycleId]):
             The identifier of the entity to delete.
 
     Raises:
-        ModelNotFound: No entity corresponds to the specified *entity_id*.
+        ModelNotFound^: No entity corresponds to the specified *entity_id*.
     """
     if _is_job(entity_id):
         job_manager = _JobManagerFactory._build_manager()
@@ -756,7 +740,7 @@ def subscribe_sequence(
 
 def unsubscribe_sequence(
     callback: Callable[[Sequence, Job], None], params: Optional[List[Any]] = None, sequence: Optional[Sequence] = None
-):
+) -> None:
     """Unsubscribe a function that is called when the status of a Job changes.
 
     Parameters:
@@ -950,12 +934,6 @@ def create_global_data_node(config: DataNodeConfig) -> DataNode:
     if dns := _DataManagerFactory._build_manager()._get_by_config_id(config.id):
         return dns[0]
     return _DataManagerFactory._build_manager()._create_and_set(config, None, None)
-
-
-def clean_all_entities_by_version(version_number=None) -> bool:
-    """Deprecated. Use `clean_all_entities` function instead."""
-    _warn_deprecated("'clean_all_entities_by_version'", suggest="the 'clean_all_entities' function")
-    return clean_all_entities(version_number)
 
 
 def clean_all_entities(version_number: str) -> bool:

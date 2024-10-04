@@ -12,10 +12,10 @@ For questions, please get in touch on [Discord](https://discord.com/invite/SJyz2
 
 Taipy is organised in two main repositories:
 
-- [taipy](https://github.com/Avaiga/taipy) is the main repository that containing the code of Taipy packages.
+- [taipy](https://github.com/Avaiga/taipy) is the main repository that contains the code of Taipy packages.
 - [taipy-doc](https://github.com/Avaiga/taipy-doc) is the documentation repository.
 
-## Never contributed on an open source project before ?
+## Never contributed to an open source project before ?
 
 Have a look on this [GitHub documentation](https://docs.github.com/en/get-started/quickstart/contributing-to-projects).
 
@@ -26,7 +26,7 @@ Reporting bugs is through [GitHub issues](https://github.com/Avaiga/taipy/issues
 Please report relevant information and preferably code that exhibits the problem. We provide templates to help you
 describe the issue.
 
-The Taipy team will analyse and try to reproduce the bug to provide feedback. If confirmed, we will add a priority
+The Taipy team will analyze and try to reproduce the bug to provide feedback. If confirmed, we will add a priority
 to the issue and add it in our backlog. Feel free to propose a pull request to fix it.
 
 ## Issue reporting, feedback, proposal, design or any other comment
@@ -44,12 +44,12 @@ Do not hesitate to create an issue or pull request directly on the
 ## Implement Features
 
 The Taipy team manages its backlog in private. Each issue that is or is going to be engaged by the
-Taipy team is attached to the "🔒 Staff only" label or has already assigned to a Taipy team member.
+Taipy team is attached to the "🔒 Staff only" label or has already been assigned to a Taipy team member.
 Please, do not work on it, the Taipy team is on it.
 
 All other issues are sorted by labels and are available for a contribution. If you are new to the
 project, you can start with the "good first issue" or "🆘 Help wanted" label. You can also start with
-issue with higher priority like "Critical" or "High". The higher the priority, the more value it
+issues with higher priority, like "Critical" or "High". The higher the priority, the more value it
 will bring to Taipy.
 
 If you want to work on an issue, please add a comment and wait to be assigned to the issue to inform

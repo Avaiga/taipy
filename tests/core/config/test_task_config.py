@@ -12,8 +12,7 @@
 import os
 from unittest import mock
 
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
+from taipy.common.config import Config
 from taipy.core.config import DataNodeConfig
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
@@ -181,52 +180,3 @@ def test_clean_config():
     assert task1_config.output_configs == task1_config.output_configs == []
     assert task1_config.skippable is task1_config.skippable is False
     assert task1_config.properties == task1_config.properties == {}
-
-
-def test_deprecated_cacheable_attribute_remains_compatible():
-    dn_1_id = "dn_1_id"
-    dn_1_config = Config.configure_data_node(
-        id=dn_1_id,
-        storage_type="pickle",
-        cacheable=False,
-        scope=Scope.SCENARIO,
-    )
-    assert Config.data_nodes[dn_1_id].id == dn_1_id
-    assert Config.data_nodes[dn_1_id].storage_type == "pickle"
-    assert Config.data_nodes[dn_1_id].scope == Scope.SCENARIO
-    assert Config.data_nodes[dn_1_id].properties == {"cacheable": False}
-    assert not Config.data_nodes[dn_1_id].cacheable
-    dn_1_config.cacheable = True
-    assert Config.data_nodes[dn_1_id].properties == {"cacheable": True}
-    assert Config.data_nodes[dn_1_id].cacheable
-
-    dn_2_id = "dn_2_id"
-    dn_2_config = Config.configure_data_node(
-        id=dn_2_id,
-        storage_type="pickle",
-        cacheable=True,
-        scope=Scope.SCENARIO,
-    )
-    assert Config.data_nodes[dn_2_id].id == dn_2_id
-    assert Config.data_nodes[dn_2_id].storage_type == "pickle"
-    assert Config.data_nodes[dn_2_id].scope == Scope.SCENARIO
-    assert Config.data_nodes[dn_2_id].properties == {"cacheable": True}
-    assert Config.data_nodes[dn_2_id].cacheable
-    dn_2_config.cacheable = False
-    assert Config.data_nodes[dn_1_id].properties == {"cacheable": False}
-    assert not Config.data_nodes[dn_1_id].cacheable
-
-    dn_3_id = "dn_3_id"
-    dn_3_config = Config.configure_data_node(
-        id=dn_3_id,
-        storage_type="pickle",
-        scope=Scope.SCENARIO,
-    )
-    assert Config.data_nodes[dn_3_id].id == dn_3_id
-    assert Config.data_nodes[dn_3_id].storage_type == "pickle"
-    assert Config.data_nodes[dn_3_id].scope == Scope.SCENARIO
-    assert Config.data_nodes[dn_3_id].properties == {}
-    assert not Config.data_nodes[dn_3_id].cacheable
-    dn_3_config.cacheable = True
-    assert Config.data_nodes[dn_3_id].properties == {"cacheable": True}
-    assert Config.data_nodes[dn_3_id].cacheable

@@ -22,16 +22,16 @@ class _MapDict(object):
 
     __local_vars = ("_dict", "_update_var")
 
-    def __init__(self, dict_import: dict, app_update_var=None):
+    def __init__(self, dict_import: dict, app_update_var: t.Optional[t.Callable]=None):
         self._dict = dict_import
         # Bind app update var function
-        self._update_var = app_update_var
+        self._update_var = t.cast(t.Callable, app_update_var)
 
     def __len__(self):
         return self._dict.__len__()
 
     def __length_hint__(self):
-        return self._dict.__length_hint__()
+        return self._dict.__length_hint__() # type: ignore[reportAttributeAccessIssue]
 
     def __getitem__(self, key):
         value = self._dict.__getitem__(key)
@@ -52,7 +52,7 @@ class _MapDict(object):
         self._dict.__delitem__(key)
 
     def __missing__(self, key):
-        return self._dict.__missing__(key)
+        return self._dict.__missing__(key) # type: ignore[reportAttributeAccessIssue]
 
     def __iter__(self):
         return self._dict.__iter__()

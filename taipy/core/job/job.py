@@ -12,9 +12,9 @@
 __all__ = ["Job"]
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Callable, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
@@ -49,26 +49,17 @@ class Job(_Entity, _Labeled):
 
     Every time a task is submitted for execution, a new *Job* is created. A job represents a
     single execution of a task. It holds all the information related to the task execution,
-    including the **creation date**, the execution `Status^`, and the **stacktrace** of any
-    exception that may be raised by the user function.
+    including the **creation date**, the execution `Status^`, the timestamp of status changes,
+    and the **stacktrace** of any exception that may be raised by the user function.
 
     In addition, a job notifies scenario or sequence subscribers on its status change.
-
-    Attributes:
-        id (str): The identifier of this job.
-        task (Task^): The task of this job.
-        force (bool): Enforce the job's execution whatever the output data nodes are in cache or
-            not.
-        status (Status^): The current status of this job.
-        creation_date (datetime): The date of this job's creation.
-        stacktrace (List[str]): The list of stacktraces of the exceptions raised during the
-            execution.
-        version (str): The string indicates the application version of the job to instantiate.
-            If not provided, the latest version is used.
     """
 
     _MANAGER_NAME = "job"
     _ID_PREFIX = "JOB"
+
+    id: JobId
+    """The identifier of this job."""
 
     def __init__(self, id: JobId, task: "Task", submit_id: str, submit_entity_id: str, force=False, version=None):
         self.id = id
@@ -78,19 +69,20 @@ class Job(_Entity, _Labeled):
         self._creation_date = datetime.now()
         self._submit_id: str = submit_id
         self._submit_entity_id: str = submit_entity_id
-        self._execution_started_at: Optional[datetime] = None
-        self._execution_ended_at: Optional[datetime] = None
+        self._status_change_records: Dict[str, datetime] = {"SUBMITTED": self._creation_date}
         self._subscribers: List[Callable] = []
         self._stacktrace: List[str] = []
         self.__logger = _TaipyLogger._get_logger()
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
-    def get_event_context(self):
-        return {"task_config_id": self._task.config_id}
+    def __hash__(self) -> int:
+        """Return the hash of the job id."""
+        return hash(self.id)
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def task(self):
+    def task(self) -> "Task":
+        """The task associated to this job."""
         return self._task
 
     @task.setter  # type: ignore
@@ -100,11 +92,13 @@ class Job(_Entity, _Labeled):
 
     @property
     def owner_id(self) -> str:
+        """The identifier of the task of this job."""
         return self.task.id
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def force(self):
+    def force(self) -> bool:
+        """Enforce the job's execution whatever the output data nodes are in cache or not."""
         return self._force
 
     @force.setter  # type: ignore
@@ -113,32 +107,38 @@ class Job(_Entity, _Labeled):
         self._force = val
 
     @property
-    def submit_id(self):
+    def submit_id(self) -> str:
+        """The identifier of the submission that triggered the job creation."""
         return self._submit_id
 
     @property
-    def submit_entity_id(self):
+    def submit_entity_id(self) -> str:
+        """The identifier of the submitted entity that triggered the job creation."""
         return self._submit_entity_id
 
     @property  # type: ignore
     def submit_entity(self):
+        """The submitted entity that triggered the job creation."""
         from ..taipy import get as tp_get
 
         return tp_get(self._submit_entity_id)
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def status(self):
+    def status(self) -> Status:
+        """The current status of this job."""
         return self._status
 
     @status.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
     def status(self, val):
+        self._status_change_records[val.name] = datetime.now()
         self._status = val
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def creation_date(self):
+    def creation_date(self) -> datetime:
+        """The date time when the job was created."""
         return self._creation_date
 
     @creation_date.setter  # type: ignore
@@ -148,40 +148,103 @@ class Job(_Entity, _Labeled):
 
     @property
     @_self_reload(_MANAGER_NAME)
-    def execution_started_at(self) -> Optional[datetime]:
-        return self._execution_started_at
-
-    @execution_started_at.setter
-    @_self_setter(_MANAGER_NAME)
-    def execution_started_at(self, val):
-        self._execution_started_at = val
+    def submitted_at(self) -> datetime:
+        """The date time when the job was submitted."""
+        return self._status_change_records["SUBMITTED"]
 
     @property
     @_self_reload(_MANAGER_NAME)
-    def execution_ended_at(self) -> Optional[datetime]:
-        return self._execution_ended_at
+    def run_at(self) -> Optional[datetime]:
+        """The date time when the job was run.
 
-    @execution_ended_at.setter
-    @_self_setter(_MANAGER_NAME)
-    def execution_ended_at(self, val):
-        self._execution_ended_at = val
+        If the job has not been run, the run_at time is None.
+        """
+        return self._status_change_records.get(Status.RUNNING.name, None)
+
+    @property
+    @_self_reload(_MANAGER_NAME)
+    def finished_at(self) -> Optional[datetime]:
+        """The date time when the job was finished.
+
+        If the job is not finished, the finished_at time is None.
+        """
+        if self.is_finished():
+            if self.is_completed():
+                return self._status_change_records[Status.COMPLETED.name]
+            elif self.is_failed():
+                return self._status_change_records[Status.FAILED.name]
+            elif self.is_canceled():
+                return self._status_change_records[Status.CANCELED.name]
+            elif self.is_skipped():
+                return self._status_change_records[Status.SKIPPED.name]
+            elif self.is_abandoned():
+                return self._status_change_records[Status.ABANDONED.name]
+
+        return None
 
     @property
     @_self_reload(_MANAGER_NAME)
     def execution_duration(self) -> Optional[float]:
-        """Get the duration of the job execution in seconds.
+        """The duration of the job execution in seconds.
 
-        Returns:
-            Optional[float]: The duration of the job execution in seconds. If the job is not
-            completed, None is returned.
+        The execution duration is the duration in seconds from the job running time to the
+        job completion time. If the job was not run, the execution duration is None. If the
+        job is not finished yet, the execution duration is the duration from the running time
+        to the current time.
         """
-        if self._execution_started_at and self._execution_ended_at:
-            return (self._execution_ended_at - self._execution_started_at).total_seconds()
-        return None
+        if Status.RUNNING.name not in self._status_change_records:
+            return None
+
+        if self.is_finished():
+            return (self.finished_at - self._status_change_records[Status.RUNNING.name]).total_seconds()
+
+        return (datetime.now() - self._status_change_records[Status.RUNNING.name]).total_seconds()
+
+    @property
+    @_self_reload(_MANAGER_NAME)
+    def pending_duration(self) -> Optional[float]:
+        """The duration of the job in seconds spent in the pending status.
+
+        If the job has never been pending, the pending_duration is None. If the
+        job is currently pending, the pending duration is the duration from the submission to the current time.
+        """
+        if Status.PENDING.name not in self._status_change_records:
+            return None
+
+        if self.is_finished() or self.is_running():
+            return (
+                self._status_change_records[Status.RUNNING.name] - self._status_change_records[Status.PENDING.name]
+            ).total_seconds()
+
+        return (datetime.now() - self._status_change_records[Status.PENDING.name]).total_seconds()
+
+    @property
+    @_self_reload(_MANAGER_NAME)
+    def blocked_duration(self) -> Optional[float]:
+        """The duration of the job in seconds spent in the blocked status.
+
+        The duration of the job in seconds spent in the blocked status. If the job has
+        never been blocked, None is returned. If the job is currently blocked, the blocked
+        duration is the duration from the submission to the current time.
+        """
+        if Status.BLOCKED.name not in self._status_change_records:
+            return None
+
+        if Status.PENDING.name in self._status_change_records:
+            return (
+                self._status_change_records[Status.PENDING.name] - self._status_change_records[Status.BLOCKED.name]
+            ).total_seconds()
+        if self.is_finished():
+            return (self.finished_at - self._status_change_records[Status.BLOCKED.name]).total_seconds()
+
+        # If pending time is not recorded, and the job is not finished, the only possible status left is blocked
+        # which means the current status is blocked.
+        return (datetime.now() - self._status_change_records[Status.BLOCKED.name]).total_seconds()
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def stacktrace(self) -> List[str]:
+        """The list of stacktraces of the exceptions raised during the execution."""
         return self._stacktrace
 
     @stacktrace.setter  # type: ignore
@@ -190,65 +253,75 @@ class Job(_Entity, _Labeled):
         self._stacktrace = val
 
     @property
-    def version(self):
+    def version(self) -> str:
+        """The application version of the job.
+
+        If not provided, the latest version is used.
+        """
         return self._version
 
-    def __contains__(self, task: "Task"):
+    def __contains__(self, task: "Task") -> bool:
+        """Check if the job contains the task."""
         return self.task.id == task.id
 
-    def __lt__(self, other):
+    def __lt__(self, other) -> bool:
+        """Compare the creation date of the job with another job."""
         return self.creation_date.timestamp() < other.creation_date.timestamp()
 
-    def __le__(self, other):
+    def __le__(self, other) -> bool:
+        """Compare the creation date of the job with another job."""
         return self.creation_date.timestamp() <= other.creation_date.timestamp()
 
-    def __gt__(self, other):
+    def __gt__(self, other) -> bool:
+        """Compare the creation date of the job with another job."""
         return self.creation_date.timestamp() > other.creation_date.timestamp()
 
-    def __ge__(self, other):
+    def __ge__(self, other) -> bool:
+        """Compare the creation date of the job with another job."""
         return self.creation_date.timestamp() >= other.creation_date.timestamp()
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
+        """Check if the job is equal to another job."""
         return isinstance(other, Job) and self.id == other.id
 
     @_run_callbacks
-    def blocked(self):
+    def blocked(self) -> None:
         """Set the status to _blocked_ and notify subscribers."""
         self.status = Status.BLOCKED
 
     @_run_callbacks
-    def pending(self):
+    def pending(self) -> None:
         """Set the status to _pending_ and notify subscribers."""
         self.status = Status.PENDING
 
     @_run_callbacks
-    def running(self):
+    def running(self) -> None:
         """Set the status to _running_ and notify subscribers."""
         self.status = Status.RUNNING
 
     @_run_callbacks
-    def canceled(self):
+    def canceled(self) -> None:
         """Set the status to _canceled_ and notify subscribers."""
         self.status = Status.CANCELED
 
     @_run_callbacks
-    def abandoned(self):
+    def abandoned(self) -> None:
         """Set the status to _abandoned_ and notify subscribers."""
         self.status = Status.ABANDONED
 
     @_run_callbacks
-    def failed(self):
+    def failed(self) -> None:
         """Set the status to _failed_ and notify subscribers."""
         self.status = Status.FAILED
 
     @_run_callbacks
-    def completed(self):
+    def completed(self) -> None:
         """Set the status to _completed_ and notify subscribers."""
         self.status = Status.COMPLETED
         self.__logger.info(f"job {self.id} is completed.")
 
     @_run_callbacks
-    def skipped(self):
+    def skipped(self) -> None:
         """Set the status to _skipped_ and notify subscribers."""
         self.status = Status.SKIPPED
 
@@ -327,20 +400,24 @@ class Job(_Entity, _Labeled):
     def is_finished(self) -> bool:
         """Indicate if the job is finished.
 
+        A job is considered finished if it is completed, failed, canceled, skipped, or abandoned.
+
         Returns:
             True if the job is finished.
         """
         return self.is_completed() or self.is_failed() or self.is_canceled() or self.is_skipped() or self.is_abandoned()
 
     def _is_finished(self) -> bool:
-        """Indicate if the job is finished. This function will not trigger the persistence feature like is_finished().
+        """Indicate if the job is finished.
+
+        This function will not trigger the persistence feature unlike is_finished().
 
         Returns:
             True if the job is finished.
         """
         return self._status in [Status.COMPLETED, Status.FAILED, Status.CANCELED, Status.SKIPPED, Status.ABANDONED]
 
-    def _on_status_change(self, *functions):
+    def _on_status_change(self, *functions) -> None:
         """Get a notification when the status of the job changes.
 
         Job are assigned different statuses (_submitted_, _pending_, etc.) before being finished.
@@ -350,23 +427,12 @@ class Job(_Entity, _Labeled):
         Parameters:
             functions: Callables that will be called on each status change.
         """
-        functions = list(functions)
+        functions = list(functions)  # type: ignore
         function = functions.pop()
         self._subscribers.append(function)
 
         if functions:
             self._on_status_change(*functions)
-
-    def __hash__(self):
-        return hash(self.id)
-
-    def _unlock_edit_on_outputs(self):
-        for dn in self.task.output.values():
-            dn.unlock_edit()
-
-    @staticmethod
-    def _serialize_subscribers(subscribers: List) -> List:
-        return _fcts_to_dict(subscribers)
 
     def get_label(self) -> str:
         """Returns the job simple label prefixed by its owner label.
@@ -389,11 +455,22 @@ class Job(_Entity, _Labeled):
 
         Returns:
             A ReasonCollection object that can function as a Boolean value,
-            which is True if the job can be deleted. False otherwise.
+                which is True if the job can be deleted. False otherwise.
         """
         from ... import core as tp
 
         return tp.is_deletable(self)
+
+    def get_event_context(self):
+        return {"task_config_id": self._task.config_id}
+
+    def _unlock_edit_on_outputs(self) -> None:
+        for dn in self.task.output.values():
+            dn.unlock_edit()
+
+    @staticmethod
+    def _serialize_subscribers(subscribers: List) -> List:
+        return _fcts_to_dict(subscribers)
 
 
 @_make_event.register(Job)

@@ -11,8 +11,8 @@
 
 
 from taipy import ScenarioId, SequenceId, TaskId
-from taipy.config.common.frequency import Frequency
-from taipy.config.config import Config
+from taipy.common.config import Config
+from taipy.common.config.common.frequency import Frequency
 from taipy.core._entity._ready_to_run_property import _ReadyToRunProperty
 from taipy.core.reason import DataNodeEditInProgress, DataNodeIsNotWritten, ReasonCollection
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory

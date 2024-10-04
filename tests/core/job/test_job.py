@@ -9,16 +9,17 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from time import sleep
 from typing import Union, cast
 from unittest import mock
 from unittest.mock import MagicMock
 
+import freezegun
 import pytest
 
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
+from taipy.common.config import Config
+from taipy.common.config.common.scope import Scope
 from taipy.core import JobId, TaskId
 from taipy.core._orchestrator._abstract_orchestrator import _AbstractOrchestrator
 from taipy.core._orchestrator._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
@@ -321,6 +322,66 @@ def test_auto_set_and_reload(current_datetime, job_id):
     assert job_1.status == Status.COMPLETED
     assert job_1.creation_date == new_datetime_2
     assert not job_1._is_in_context
+
+
+def test_status_records(job_id):
+    task_1 = Task(config_id="name_1", properties={}, function=_foo, id=TaskId("task_1"))
+    submission = _SubmissionManagerFactory._build_manager()._create(task_1.id, task_1._ID_PREFIX, task_1.config_id)
+    with freezegun.freeze_time("2024-09-25 13:30:30"):
+        job_1 = Job(job_id, task_1, submission.id, "scenario_entity_id")
+    submission.jobs = [job_1]
+
+    _TaskManager._set(task_1)
+    _JobManager._set(job_1)
+
+    assert job_1._status_change_records == {"SUBMITTED": datetime(2024, 9, 25, 13, 30, 30)}
+    assert job_1.submitted_at == datetime(2024, 9, 25, 13, 30, 30)
+    assert job_1.execution_duration is None
+
+    with freezegun.freeze_time("2024-09-25 13:35:30"):
+        job_1.blocked()
+    assert job_1._status_change_records == {
+        "SUBMITTED": datetime(2024, 9, 25, 13, 30, 30),
+        "BLOCKED": datetime(2024, 9, 25, 13, 35, 30),
+    }
+    assert job_1.execution_duration is None
+    with freezegun.freeze_time("2024-09-25 13:36:00"):
+        assert job_1.blocked_duration == 30  # = 13:36:00 - 13:35:30
+
+    with freezegun.freeze_time("2024-09-25 13:40:30"):
+        job_1.pending()
+    assert job_1._status_change_records == {
+        "SUBMITTED": datetime(2024, 9, 25, 13, 30, 30),
+        "BLOCKED": datetime(2024, 9, 25, 13, 35, 30),
+        "PENDING": datetime(2024, 9, 25, 13, 40, 30),
+    }
+    assert job_1.execution_duration is None
+    with freezegun.freeze_time("2024-09-25 13:41:00"):
+        assert job_1.pending_duration == 30  # = 13:41:00 - 13:40:30
+
+    with freezegun.freeze_time("2024-09-25 13:50:30"):
+        job_1.running()
+    assert job_1._status_change_records == {
+        "SUBMITTED": datetime(2024, 9, 25, 13, 30, 30),
+        "BLOCKED": datetime(2024, 9, 25, 13, 35, 30),
+        "PENDING": datetime(2024, 9, 25, 13, 40, 30),
+        "RUNNING": datetime(2024, 9, 25, 13, 50, 30),
+    }
+    assert job_1.run_at == datetime(2024, 9, 25, 13, 50, 30)
+    assert job_1.blocked_duration == 300  # = 13:40:30 - 13:35:30
+    assert job_1.pending_duration == 600  # = 13:50:30 - 13:40:30
+    assert job_1.execution_duration > 0
+
+    with freezegun.freeze_time("2024-09-25 13:56:35"):
+        job_1.completed()
+    assert job_1._status_change_records == {
+        "SUBMITTED": datetime(2024, 9, 25, 13, 30, 30),
+        "BLOCKED": datetime(2024, 9, 25, 13, 35, 30),
+        "PENDING": datetime(2024, 9, 25, 13, 40, 30),
+        "RUNNING": datetime(2024, 9, 25, 13, 50, 30),
+        "COMPLETED": datetime(2024, 9, 25, 13, 56, 35),
+    }
+    assert job_1.execution_duration == 365  # = 13:56:35 - 13:50:30
 
 
 def test_is_deletable():

@@ -15,8 +15,9 @@ import typing as t
 class Icon:
     """Small image in the User Interface.
 
-    Icons are typically used in controls like [button](../../userman/gui/viselements/generic/button.md)
-    or items in a [menu](../../userman/gui/viselements/generic/menu.md).
+    Icons are typically used in controls like
+    [button](../../../../../refmans/gui/viselements/generic/button.md)
+    or items in a [menu](../../../../../refmans/gui/viselements/generic/menu.md).
 
     Attributes:
         path (str): The path to the image file.
@@ -35,8 +36,8 @@ class Icon:
         self,
         path: str,
         text: t.Optional[str] = None,
-        light_path: t.Optional[bool] = None,
-        dark_path: t.Optional[bool] = None,
+        light_path: t.Optional[str] = None,
+        dark_path: t.Optional[str] = None,
     ) -> None:
         """Initialize a new Icon.
 

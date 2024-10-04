@@ -15,8 +15,8 @@ from unittest.mock import ANY
 
 import pytest
 
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
+from taipy.common.config import Config
+from taipy.common.config.common.scope import Scope
 from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core.common import _utils
@@ -205,6 +205,10 @@ def test_is_submittable():
     task = Task("task", {}, print, [dn])
     scenario = Scenario("scenario", {task}, {}, set())
     _ScenarioManager._set(scenario)
+
+    rc = _SequenceManager._is_submittable("some_sequence")
+    assert not rc
+    assert "Entity some_sequence does not exist in the repository." in rc.reasons
 
     scenario.add_sequences({"sequence": [task]})
     sequence = scenario.sequences["sequence"]
@@ -445,16 +449,13 @@ def test_get_or_create_data():
         sequence.WRONG.write(7)
 
 
-def notify1(*args, **kwargs):
-    ...
+def notify1(*args, **kwargs): ...
 
 
-def notify2(*args, **kwargs):
-    ...
+def notify2(*args, **kwargs): ...
 
 
-def notify_multi_param(*args, **kwargs):
-    ...
+def notify_multi_param(*args, **kwargs): ...
 
 
 def test_sequence_notification_subscribe(mocker):

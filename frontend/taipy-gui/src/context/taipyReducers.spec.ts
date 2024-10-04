@@ -38,7 +38,7 @@ import {
     messageToAction,
     NamePayload,
     NavigateMessage,
-    retreiveBlockUi,
+    retrieveBlockUi,
     storeBlockUi,
     TaipyBaseAction,
     taipyReducer,
@@ -321,6 +321,7 @@ describe("createRequestInfiniteTableUpdateAction function", () => {
         const applies = { key: "value" };
         const styles = { styleKey: "styleValue" };
         const tooltips = { tooltipKey: "tooltipValue" };
+        const formats = { formatKey: "formatValue" };
         const handleNan = true;
         const compare = "testCompare";
         const compareDatas = "testCompareDatas";
@@ -350,6 +351,7 @@ describe("createRequestInfiniteTableUpdateAction function", () => {
             applies,
             styles,
             tooltips,
+            formats,
             handleNan,
             filters,
             compare,
@@ -395,9 +397,17 @@ describe("createRequestTableUpdateAction function", () => {
         const applies = { key: "value" };
         const styles = { styleKey: "styleValue" };
         const tooltips = { tooltipKey: "tooltipValue" };
+        const formats = { formatKey: "formatValue" };
         const handleNan = true;
         const filters = [
-            { field: "testField", operator: "testOperator", value: "testValue", col: "testCol", action: "testAction", type: "type" },
+            {
+                field: "testField",
+                operator: "testOperator",
+                value: "testValue",
+                col: "testCol",
+                action: "testAction",
+                type: "type",
+            },
         ];
         const compare = "testCompare";
         const compareDatas = "testCompareDatas";
@@ -416,6 +426,7 @@ describe("createRequestTableUpdateAction function", () => {
             applies,
             styles,
             tooltips,
+            formats,
             handleNan,
             filters,
             compare,
@@ -773,19 +784,19 @@ describe("retreiveBlockUi function", () => {
     it("should retrieve block message from localStorage", () => {
         const mockBlockMessage = { action: "testAction", noCancel: false, close: false, message: "testMessage" };
         Storage.prototype.getItem = jest.fn(() => JSON.stringify(mockBlockMessage));
-        const result = retreiveBlockUi();
+        const result = retrieveBlockUi();
         expect(result).toEqual(mockBlockMessage);
     });
 
     it("should return an empty object if localStorage is empty", () => {
         Storage.prototype.getItem = jest.fn(() => null);
-        const result = retreiveBlockUi();
+        const result = retrieveBlockUi();
         expect(result).toEqual({});
     });
 
     it("should return an empty object if localStorage contains invalid JSON", () => {
         Storage.prototype.getItem = jest.fn(() => "{ invalid json");
-        const result = retreiveBlockUi();
+        const result = retrieveBlockUi();
         expect(result).toEqual({});
     });
 });

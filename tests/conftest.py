@@ -13,14 +13,13 @@ import argparse
 
 import pytest
 
-from taipy._cli._base_cli._taipy_parser import _TaipyParser
-from taipy.config import _inject_section
-from taipy.config._config import _Config
-from taipy.config._config_comparator._config_comparator import _ConfigComparator
-from taipy.config._serializer._toml_serializer import _TomlSerializer
-from taipy.config.checker._checker import _Checker
-from taipy.config.checker.issue_collector import IssueCollector
-from taipy.config.config import Config
+from taipy.common._cli._base_cli._taipy_parser import _TaipyParser
+from taipy.common.config import Config, _inject_section
+from taipy.common.config._config import _Config
+from taipy.common.config._config_comparator._config_comparator import _ConfigComparator
+from taipy.common.config._serializer._toml_serializer import _TomlSerializer
+from taipy.common.config.checker._checker import _Checker
+from taipy.common.config.checker.issue_collector import IssueCollector
 from taipy.core.config import CoreSection, DataNodeConfig, JobConfig, ScenarioConfig, TaskConfig
 
 

@@ -19,9 +19,10 @@ import tzlocal
 from dotenv import dotenv_values
 from werkzeug.serving import is_running_from_reloader
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ._gui_cli import _GuiCLI
+from ._hook import _Hooks
 from ._page import _Page
 from ._warnings import _warn
 from .partial import Partial
@@ -33,6 +34,7 @@ ConfigParameter = t.Literal[
     "change_delay",
     "chart_dark_template",
     "base_url",
+    "client_url",
     "dark_mode",
     "dark_theme",
     "data_url_max_size",
@@ -47,6 +49,7 @@ ConfigParameter = t.Literal[
     "notebook_proxy",
     "notification_duration",
     "port",
+    "port_auto_ranges",
     "propagate",
     "run_browser",
     "run_in_thread",
@@ -105,6 +108,7 @@ Config = t.TypedDict(
         "change_delay": t.Optional[int],
         "chart_dark_template": t.Optional[t.Dict[str, t.Any]],
         "base_url": t.Optional[str],
+        "client_url": str,
         "dark_mode": bool,
         "dark_theme": t.Optional[t.Dict[str, t.Any]],
         "data_url_max_size": t.Optional[int],
@@ -119,6 +123,7 @@ Config = t.TypedDict(
         "notebook_proxy": bool,
         "notification_duration": int,
         "port": t.Union[t.Literal["auto"], int],
+        "port_auto_ranges": t.List[t.Union[int, t.Tuple[int, int]]],
         "propagate": bool,
         "run_browser": bool,
         "run_in_thread": bool,
@@ -160,14 +165,16 @@ class _Config(object):
         self.get_time_zone()
 
     def _get_config(self, name: ConfigParameter, default_value: t.Any) -> t.Any:  # pragma: no cover
-        if name in self.config and self.config[name] is not None:
-            if default_value is not None and not isinstance(self.config[name], type(default_value)):
+        if name in self.config and self.config.get(name) is not None:
+            if default_value is not None and not isinstance(self.config.get(name), type(default_value)):
                 try:
-                    return type(default_value)(self.config[name])
+                    return type(default_value)(self.config.get(name))
                 except Exception as e:
-                    _warn(f'app_config "{name}" value "{self.config[name]}" is not of type {type(default_value)}', e)
+                    _warn(
+                        f'app_config "{name}" value "{self.config.get(name)}" is not of type {type(default_value)}', e
+                    )
                     return default_value
-            return self.config[name]
+            return self.config.get(name)
         return default_value
 
     def get_time_zone(self) -> t.Optional[str]:
@@ -217,6 +224,9 @@ class _Config(object):
             config["upload_folder"] = args.taipy_upload_folder
         elif os.environ.get("TAIPY_GUI_UPLOAD_FOLDER"):
             config["webapp_path"] = os.environ.get("TAIPY_GUI_UPLOAD_FOLDER")
+        if args.taipy_client_url:
+            config["client_url"] = args.taipy_client_url
+        _Hooks()._handle_argparse(args, config)
 
     def _build_config(self, root_dir, env_filename, kwargs):  # pragma: no cover
         config = self.config
@@ -232,12 +242,12 @@ class _Config(object):
                     config[key] = _default_stylekit if value else {}
                     continue
                 try:
-                    if isinstance(value, dict) and isinstance(config[key], dict):
-                        config[key].update(value)
+                    if isinstance(value, dict) and isinstance(config.get(key), dict):
+                        t.cast(dict, config.get(key)).update(value)
                     elif key == "port" and str(value).strip() == "auto":
                         config["port"] = "auto"
                     else:
-                        config[key] = value if config[key] is None else type(config[key])(value)
+                        config[key] = value if config.get(key) is None else type(config.get(key))(value)  # type: ignore[reportCallIssue]
                 except Exception as e:
                     _warn(
                         f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse value to the correct type",  # noqa: E501
@@ -260,14 +270,14 @@ class _Config(object):
                         )
 
         # Taipy-config
-        if find_spec("taipy") and find_spec("taipy.config"):
-            from taipy.config import Config as TaipyConfig
+        if find_spec("taipy") and find_spec("taipy.common.config"):
+            from taipy.common.config import Config as TaipyConfig
 
             try:
                 section = TaipyConfig.unique_sections["gui"]
                 self.config.update(section._to_dict())
             except KeyError:
-                _warn("taipy-config section for taipy-gui is not initialized.")
+                _warn("taipy-common section for taipy-gui is not initialized.")
 
         # Load from system arguments
         self._handle_argparse()
@@ -280,29 +290,29 @@ class _Config(object):
         app_config = self.config
         logger = _TaipyLogger._get_logger()
         # Special config for notebook runtime
-        if _is_in_notebook() or app_config["run_in_thread"] and not app_config["single_client"]:
+        if _is_in_notebook() or app_config.get("run_in_thread") and not app_config.get("single_client"):
             app_config["single_client"] = True
             self.__log_outside_reloader(logger, "Running in 'single_client' mode in notebook environment")
 
-        if app_config["run_server"] and app_config["ngrok_token"] and app_config["use_reloader"]:
+        if app_config.get("run_server") and app_config.get("ngrok_token") and app_config.get("use_reloader"):
             app_config["use_reloader"] = False
             self.__log_outside_reloader(
                 logger, "'use_reloader' parameter will not be used when 'ngrok_token' parameter is available"
             )
 
-        if app_config["use_reloader"] and _is_in_notebook():
+        if app_config.get("use_reloader") and _is_in_notebook():
             app_config["use_reloader"] = False
             self.__log_outside_reloader(logger, "'use_reloader' parameter is not available in notebook environment")
 
-        if app_config["use_reloader"] and not app_config["debug"]:
+        if app_config.get("use_reloader") and not app_config.get("debug"):
             app_config["debug"] = True
             self.__log_outside_reloader(logger, "Application is running in 'debug' mode")
 
-        if app_config["debug"] and not app_config["allow_unsafe_werkzeug"]:
+        if app_config.get("debug") and not app_config.get("allow_unsafe_werkzeug"):
             app_config["allow_unsafe_werkzeug"] = True
             self.__log_outside_reloader(logger, "'allow_unsafe_werkzeug' has been set to True")
 
-        if app_config["debug"] and app_config["async_mode"] != "threading":
+        if app_config.get("debug") and app_config.get("async_mode") != "threading":
             app_config["async_mode"] = "threading"
             self.__log_outside_reloader(
                 logger,
@@ -316,17 +326,15 @@ class _Config(object):
     def _resolve_stylekit(self):
         app_config = self.config
         # support legacy margin variable
-        stylekit_config = app_config["stylekit"]
+        stylekit_config = app_config.get("stylekit")
 
-        if isinstance(app_config["stylekit"], dict) and "root_margin" in app_config["stylekit"]:
+        if isinstance(stylekit_config, dict) and "root_margin" in stylekit_config:
             from ._default_config import _default_stylekit, default_config
 
-            stylekit_config = app_config["stylekit"]
-            if (
-                stylekit_config["root_margin"] == _default_stylekit["root_margin"]
-                and app_config["margin"] != default_config["margin"]
-            ):
-                app_config["stylekit"]["root_margin"] = str(app_config["margin"])
+            if stylekit_config.get("root_margin") == _default_stylekit.get("root_margin") and app_config.get(
+                "margin"
+            ) != default_config.get("margin"):
+                stylekit_config["root_margin"] = str(app_config.get("margin"))
             app_config["margin"] = None
 
     def _resolve_url_prefix(self):
@@ -341,4 +349,4 @@ class _Config(object):
 
     def _resolve_notebook_proxy(self):
         app_config = self.config
-        app_config["notebook_proxy"] = app_config["notebook_proxy"] if _is_in_notebook() else False
+        app_config["notebook_proxy"] = app_config.get("notebook_proxy", False) if _is_in_notebook() else False

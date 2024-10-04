@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 from taipy.core.data import InMemoryDataNode
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.task._task_model import _TaskModel

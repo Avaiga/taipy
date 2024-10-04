@@ -44,6 +44,8 @@ import {
     useModule,
 } from "../../utils/hooks";
 import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
+import { Figure } from "react-plotly.js";
+import { lightenPayload } from "../../context/wsUtils";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -66,6 +68,7 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     template_Light_?: string;
     //[key: `selected_${number}`]: number[];
     figure?: Array<Record<string, unknown>>;
+    onClick?: string;
 }
 
 interface ChartConfig {
@@ -180,6 +183,23 @@ const MARKER_TO_COL = ["color", "size", "symbol", "opacity", "colors"];
 
 const isOnClick = (types: string[]) => (types?.length ? types.every((t) => t === "pie") : false);
 
+interface Axis {
+    p2c: () => number;
+    p2d: (a: number) => number;
+}
+interface PlotlyMap {
+    _subplot?: { xaxis: Axis; yaxis: Axis };
+}
+interface PlotlyDiv extends HTMLDivElement {
+    _fullLayout?: {
+        map?: PlotlyMap;
+        geo?: PlotlyMap;
+        mapbox?: PlotlyMap;
+        xaxis?: Axis;
+        yaxis?: Axis;
+    };
+}
+
 interface WithpointNumbers {
     pointNumbers: number[];
 }
@@ -268,6 +288,7 @@ const Chart = (props: ChartProp) => {
         data = emptyData,
         onRangeChange,
         propagate = true,
+        onClick,
     } = props;
     const dispatch = useDispatch();
     const [selected, setSelected] = useState<number[][]>([]);
@@ -277,7 +298,7 @@ const Chart = (props: ChartProp) => {
     const theme = useTheme();
     const module = useModule();
 
-    const refresh = typeof data === "number" ? data : 0;
+    const refresh = typeof data.__taipy_refresh === "boolean";
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
@@ -299,7 +320,7 @@ const Chart = (props: ChartProp) => {
                         if (typeof val === "string") {
                             try {
                                 val = JSON.parse(val) as number[];
-                            } catch (e) {
+                            } catch {
                                 // too bad
                                 val = [];
                             }
@@ -580,9 +601,45 @@ const Chart = (props: ChartProp) => {
         ]
     );
 
-    const onAfterPlot = useCallback(() => {
-        // Manage loading Animation ... One day
-    }, []);
+    const clickHandler = useCallback(
+        (evt?: MouseEvent) => {
+            const map =
+                (evt?.currentTarget as PlotlyDiv)?._fullLayout?.map ||
+                (evt?.currentTarget as PlotlyDiv)?._fullLayout?.geo ||
+                (evt?.currentTarget as PlotlyDiv)?._fullLayout?.mapbox;
+            const xaxis = map ? map._subplot?.xaxis : (evt?.currentTarget as PlotlyDiv)?._fullLayout?.xaxis;
+            const yaxis = map ? map._subplot?.xaxis : (evt?.currentTarget as PlotlyDiv)?._fullLayout?.yaxis;
+            if (!xaxis || !yaxis) {
+                console.info("clickHandler: Plotly div does not have an xaxis object", evt);
+                return;
+            }
+            const transform = (axis: Axis, delta: keyof DOMRect) => {
+                const bb = (evt?.target as HTMLDivElement).getBoundingClientRect();
+                return (pos?: number) => axis.p2d((pos || 0) - (bb[delta] as number));
+            };
+            dispatch(
+                createSendActionNameAction(
+                    id,
+                    module,
+                    lightenPayload({
+                        action: onClick,
+                        lat: map ? yaxis.p2c() : undefined,
+                        y: map ? undefined : transform(yaxis, "top")(evt?.clientY),
+                        lon: map ? xaxis.p2c() : undefined,
+                        x: map ? undefined : transform(xaxis, "left")(evt?.clientX),
+                    })
+                )
+            );
+        },
+        [dispatch, module, id, onClick]
+    );
+
+    const onInitialized = useCallback(
+        (figure: Readonly<Figure>, graphDiv: Readonly<HTMLElement>) => {
+            onClick && graphDiv.addEventListener("click", clickHandler);
+        },
+        [onClick, clickHandler]
+    );
 
     const getRealIndex = useCallback(
         (index?: number) =>
@@ -590,8 +647,8 @@ const Chart = (props: ChartProp) => {
                 ? props.figure
                     ? index
                     : data[dataKey].tp_index
-                      ? (data[dataKey].tp_index[index] as number)
-                      : index
+                    ? (data[dataKey].tp_index[index] as number)
+                    : index
                 : 0,
         [data, dataKey, props.figure]
     );
@@ -604,10 +661,16 @@ const Chart = (props: ChartProp) => {
                     tr[pt.curveNumber].push(getRealIndex(getPlotIndex(pt)));
                     return tr;
                 }, [] as number[][]);
+                if (config.traces.length === 0) { // figure
+                    const theVar = getUpdateVar(updateVars, "selected");
+                    theVar && dispatch(createSendUpdateAction(theVar, traces, module, props.onChange, propagate));
+                    return;
+                }
                 if (traces.length) {
                     const upvars = traces.map((_, idx) => getUpdateVar(updateVars, `selected${idx}`));
-                    if (traces.length > 1 && new Set(upvars).size === 1) {
-                        dispatch(createSendUpdateAction(upvars[0], traces, module, props.onChange, propagate));
+                    const setVars = new Set(upvars.filter((v) => v));
+                    if (traces.length > 1 && setVars.size === 1) {
+                        dispatch(createSendUpdateAction(setVars.values().next().value, traces, module, props.onChange, propagate));
                         return;
                     }
                     traces.forEach((tr, idx) => {
@@ -636,11 +699,11 @@ const Chart = (props: ChartProp) => {
                             layout={layout}
                             style={style}
                             onRelayout={onRelayout}
-                            onAfterPlot={onAfterPlot}
                             onSelected={onSelect}
                             onDeselect={onSelect}
                             config={plotConfig}
                             useResizeHandler
+                            onInitialized={onInitialized}
                         />
                     ) : (
                         <Plot
@@ -648,12 +711,12 @@ const Chart = (props: ChartProp) => {
                             layout={layout}
                             style={style}
                             onRelayout={onRelayout}
-                            onAfterPlot={onAfterPlot}
                             onSelected={isOnClick(config.types) ? undefined : onSelect}
                             onDeselect={isOnClick(config.types) ? undefined : onSelect}
                             onClick={isOnClick(config.types) ? onSelect : undefined}
                             config={plotConfig}
                             useResizeHandler
+                            onInitialized={onInitialized}
                         />
                     )}
                 </Suspense>

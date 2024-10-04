@@ -11,13 +11,23 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useMemo, useCallback, KeyboardEvent, MouseEvent, useState, useRef, useEffect, ReactNode } from "react";
+import React, {
+    useMemo,
+    useCallback,
+    KeyboardEvent,
+    MouseEvent,
+    useState,
+    useRef,
+    useEffect,
+    ReactNode,
+    lazy,
+} from "react";
 import { SxProps, Theme, darken, lighten } from "@mui/material/styles";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Paper from "@mui/material/Paper";
@@ -28,8 +38,6 @@ import Send from "@mui/icons-material/Send";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
 
-// import InfiniteLoader from "react-window-infinite-loader";
-
 import { createRequestInfiniteTableUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
 import { TaipyActiveProps, disableColor, getSuffixedClassNames } from "./utils";
 import { useClassNames, useDispatch, useDynamicProperty, useElementVisible, useModule } from "../../utils/hooks";
@@ -38,6 +46,8 @@ import { IconAvatar, avatarSx } from "../../utils/icon";
 import { emptyArray, getInitials } from "../../utils";
 import { RowType, TableValueType } from "./tableUtils";
 import { Stack } from "@mui/material";
+
+const Markdown = lazy(() => import("react-markdown"));
 
 interface ChatProps extends TaipyActiveProps {
     messages?: TableValueType;
@@ -49,6 +59,8 @@ interface ChatProps extends TaipyActiveProps {
     height?: string;
     defaultKey?: string; // for testing purposes only
     pageSize?: number;
+    showSender?: boolean;
+    mode?: string;
 }
 
 const ENTER_KEY = "Enter";
@@ -56,16 +68,22 @@ const ENTER_KEY = "Enter";
 const indicWidth = 0.7;
 const avatarWidth = 24;
 const chatAvatarSx = { ...avatarSx, width: avatarWidth, height: avatarWidth };
-const avatarColSx = { width: 1.5 * avatarWidth, minWidth: 1.5 * avatarWidth };
+const avatarColSx = { width: 1.5 * avatarWidth, minWidth: 1.5 * avatarWidth, pt: 1 };
 const senderMsgSx = {
     width: "fit-content",
     maxWidth: "80%",
-    color: (theme: Theme) => theme.palette.text.disabled,
 } as SxProps<Theme>;
 const gridSx = { pb: "1em", mt: "unset", flex: 1, overflow: "auto" };
 const loadMoreSx = { width: "fit-content", marginLeft: "auto", marginRight: "auto" };
 const inputSx = { maxWidth: "unset" };
-const nameSx = { fontSize: "0.6em", fontWeight: "bolder" };
+const leftNameSx = { fontSize: "0.6em", fontWeight: "bolder", pl: `${indicWidth}em` };
+const rightNameSx: SxProps = {
+    ...leftNameSx,
+    pr: `${2 * indicWidth}em`,
+    width: "100%",
+    display: "flex",
+    justifyContent: "flex-end",
+};
 const senderPaperSx = {
     pr: `${indicWidth}em`,
     pl: `${indicWidth}em`,
@@ -84,7 +102,6 @@ const senderPaperSx = {
         top: "0",
         right: `-${indicWidth}em`,
     },
-    color: (theme: Theme) => theme.palette.text.disabled,
 } as SxProps<Theme>;
 const otherPaperSx = {
     position: "relative",
@@ -126,38 +143,58 @@ interface ChatRowProps {
     className?: string;
     getAvatar: (id: string, sender: boolean) => ReactNode;
     index: number;
+    showSender: boolean;
+    mode: string;
 }
 
 const ChatRow = (props: ChatRowProps) => {
-    const { senderId, message, name, className, getAvatar, index } = props;
+    const { senderId, message, name, className, getAvatar, index, showSender, mode } = props;
     const sender = senderId == name;
     const avatar = getAvatar(name, sender);
+
     return (
         <Grid
-            item
             container
             className={getSuffixedClassNames(className, sender ? "-sent" : "-received")}
-            xs={12}
+            size={12}
             sx={noAnchorSx}
             justifyContent={sender ? "flex-end" : undefined}
         >
-            <Grid item sx={sender ? senderMsgSx : undefined}>
-                {avatar ? (
-                    <Stack>
-                        <Stack direction="row" gap={1}>
-                            <Box sx={avatarColSx}></Box>
-                            <Box sx={nameSx}>{name}</Box>
-                        </Stack>
-                        <Stack direction="row" gap={1}>
-                            <Box sx={avatarColSx}>{avatar}</Box>
-                            <Paper sx={sender ? senderPaperSx : otherPaperSx} data-idx={index}>
-                                {message}
+            <Grid sx={sender ? senderMsgSx : undefined}>
+                {(!sender || showSender) && avatar ? (
+                    <Stack direction="row" gap={1}>
+                        {!sender ? <Box sx={avatarColSx}>{avatar}</Box> : null}
+                        <Stack>
+                            <Box sx={sender ? rightNameSx : leftNameSx}>{name}</Box>
+                            <Paper
+                                sx={sender ? senderPaperSx : otherPaperSx}
+                                data-idx={index}
+                                className={getSuffixedClassNames(className, "-" + mode)}
+                            >
+                                {mode == "pre" ? (
+                                    <pre>{message}</pre>
+                                ) : mode == "raw" ? (
+                                    message
+                                ) : (
+                                    <Markdown>{message}</Markdown>
+                                )}
                             </Paper>
                         </Stack>
+                        {sender ? <Box sx={avatarColSx}>{avatar}</Box> : null}
                     </Stack>
                 ) : (
-                    <Paper sx={sender ? senderPaperSx : otherPaperSx} data-idx={index}>
-                        {message}
+                    <Paper
+                        sx={sender ? senderPaperSx : otherPaperSx}
+                        data-idx={index}
+                        className={getSuffixedClassNames(className, mode)}
+                    >
+                        {mode == "pre" ? (
+                            <pre>{message}</pre>
+                        ) : mode == "raw" ? (
+                            message
+                        ) : (
+                            <Markdown>{message}</Markdown>
+                        )}
                     </Paper>
                 )}
             </Grid>
@@ -168,7 +205,16 @@ const ChatRow = (props: ChatRowProps) => {
 const getChatKey = (start: number, page: number) => `Chat-${start}-${start + page}`;
 
 const Chat = (props: ChatProps) => {
-    const { id, updateVarName, senderId = "taipy", onAction, withInput = true, defaultKey = "", pageSize = 50 } = props;
+    const {
+        id,
+        updateVarName,
+        senderId = "taipy",
+        onAction,
+        withInput = true,
+        defaultKey = "",
+        pageSize = 50,
+        showSender = false,
+    } = props;
     const dispatch = useDispatch();
     const module = useModule();
 
@@ -186,6 +232,10 @@ const Chat = (props: ChatProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const users = useLovListMemo(props.users, props.defaultUsers || "");
 
+    const mode = useMemo(
+        () => (["pre", "raw"].includes(props.mode || "") ? (props.mode as string) : "markdown"),
+        [props.mode]
+    );
     const boxSx = useMemo(
         () =>
             props.height
@@ -198,6 +248,7 @@ const Chat = (props: ChatProps) => {
                 : defaultBoxSx,
         [props.height]
     );
+
     const handleAction = useCallback(
         (evt: KeyboardEvent<HTMLDivElement>) => {
             if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && ENTER_KEY == evt.key) {
@@ -281,6 +332,7 @@ const Chat = (props: ChatProps) => {
                     undefined,
                     undefined,
                     undefined,
+                    undefined,
                     true // reverse
                 )
             );
@@ -293,7 +345,8 @@ const Chat = (props: ChatProps) => {
         setShowMessage(false);
     }, []);
 
-    const refresh = typeof props.messages === "number";
+    // const refresh = typeof props.messages === "number";
+    const refresh = props.messages && typeof props.messages.__taipy_refresh === "boolean";
 
     useEffect(() => {
         if (!refresh && props.messages && page.current.key && props.messages[page.current.key] !== undefined) {
@@ -352,7 +405,7 @@ const Chat = (props: ChatProps) => {
             <Paper className={className} sx={boxSx} id={id}>
                 <Grid container rowSpacing={2} sx={gridSx} ref={scrollDivRef}>
                     {rows.length && !rows[0] ? (
-                        <Grid item className={getSuffixedClassNames(className, "-load")} xs={12} sx={noAnchorSx}>
+                        <Grid className={getSuffixedClassNames(className, "-load")} size={12} sx={noAnchorSx}>
                             <Box sx={loadMoreSx}>
                                 <Button
                                     endIcon={<ArrowUpward />}
@@ -374,6 +427,8 @@ const Chat = (props: ChatProps) => {
                                 className={className}
                                 getAvatar={getAvatar}
                                 index={idx}
+                                showSender={showSender}
+                                mode={mode}
                             />
                         ) : null
                     )}
@@ -395,19 +450,21 @@ const Chat = (props: ChatProps) => {
                         label={`message (${senderId})`}
                         disabled={!active}
                         onKeyDown={handleAction}
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="send message"
-                                        onClick={handleClick}
-                                        edge="end"
-                                        disabled={!active}
-                                    >
-                                        <Send color={disableColor("primary", !active)} />
-                                    </IconButton>
-                                </InputAdornment>
-                            ),
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="send message"
+                                            onClick={handleClick}
+                                            edge="end"
+                                            disabled={!active}
+                                        >
+                                            <Send color={disableColor("primary", !active)} />
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            },
                         }}
                         sx={inputSx}
                     />

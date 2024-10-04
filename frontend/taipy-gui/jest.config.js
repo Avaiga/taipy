@@ -11,11 +11,23 @@
  * specific language governing permissions and limitations under the License.
  */
 
+const { createJsWithTsPreset } = require('ts-jest')
+
+
 /** @type {import('ts-jest/dist/types').JestConfigWithTsJest} */
 module.exports = {
- // testEnvironment: 'jest-environment-jsdom',
-  preset: 'ts-jest',
-  testEnvironment: 'jsdom',
-  setupFiles: ['./test-config/jest.env.js', './test-config/createObjectUrl.js', './test-config/Canvas.js', './test-config/mockFileUpload.js', './test-config/intersectionObserver.js'],
-  coverageReporters: ["json", "html", "text"],
+    testEnvironment: "jsdom",
+    setupFiles: [
+        "./test-config/jest.env.js",
+        "./test-config/createObjectUrl.js",
+        "./test-config/Canvas.js",
+        "./test-config/mockFileUpload.js",
+        "./test-config/intersectionObserver.js",
+        "./test-config/nanoid.js",
+    ],
+    coverageReporters: ["json", "html", "text"],
+    modulePathIgnorePatterns: ["<rootDir>/packaging/"],
+    moduleNameMapper: {"react-markdown": "<rootDir>/node_modules/react-markdown/react-markdown.min.js"},
+    transformIgnorePatterns: ["<rootDir>/node_modules/(?!react-jsx-parser|react-markdown/)"],
+    ...createJsWithTsPreset()
 };

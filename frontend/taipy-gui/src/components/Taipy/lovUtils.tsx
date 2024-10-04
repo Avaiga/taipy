@@ -93,7 +93,7 @@ export const useLovListMemo = (lov: LoV | undefined, defaultLov: string, tree = 
             let parsedLov;
             try {
                 parsedLov = JSON.parse(defaultLov);
-            } catch (e) {
+            } catch {
                 parsedLov = [];
             }
             return parsedLov.map((elt: LoVElt) => getLovItem(elt, tree));

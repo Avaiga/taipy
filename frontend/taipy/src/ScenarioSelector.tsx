@@ -22,7 +22,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import FormControl from "@mui/material/FormControl";
 import FormGroup from "@mui/material/FormGroup";
 import FormHelperText from "@mui/material/FormHelperText";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -45,7 +45,7 @@ import {
 } from "taipy-gui";
 
 import ConfirmDialog from "./utils/ConfirmDialog";
-import { MainTreeBoxSx, ScFProps, ScenarioFull, useClassNames, tinyIconButtonSx } from "./utils";
+import { MainTreeBoxSx, ScFProps, ScenarioFull, useClassNames, tinyIconButtonSx, CoreProps } from "./utils";
 import CoreSelector, { EditProps } from "./CoreSelector";
 import { Cycles, NodeType, Scenarios } from "./utils/types";
 
@@ -67,31 +67,20 @@ interface ScenarioDict {
     properties: Array<Property>;
 }
 
-interface ScenarioSelectorProps {
-    id?: string;
-    active?: boolean;
-    defaultActive?: boolean;
+interface ScenarioSelectorProps extends CoreProps {
     showAddButton?: boolean;
     displayCycles?: boolean;
     showPrimaryFlag?: boolean;
-    updateVarName?: string;
-    updateVars: string;
     innerScenarios?: Cycles | Scenarios;
     onScenarioCrud: string;
     onChange?: string;
     onCreation?: string;
-    coreChanged?: Record<string, unknown>;
     configs?: Array<[string, string]>;
-    error?: string;
-    propagate?: boolean;
     scenarioEdit?: ScenarioFull;
     onScenarioSelect: string;
     value?: string;
     defaultValue?: string;
     height: string;
-    libClassName?: string;
-    className?: string;
-    dynamicClassName?: string;
     showPins?: boolean;
     showDialog?: boolean;
     multiple?: boolean;
@@ -248,7 +237,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                 <form onSubmit={form.handleSubmit}>
                     <DialogContent sx={DialogContentSx} dividers>
                         <Grid container rowSpacing={2}>
-                            <Grid item xs={12}>
+                            <Grid size={12}>
                                 <FormGroup>
                                     <FormControl fullWidth>
                                         <InputLabel id="select-config">Configuration</InputLabel>
@@ -276,7 +265,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                                     </FormControl>
                                 </FormGroup>
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={12}>
                                 <FormGroup>
                                     <TextField
                                         {...form.getFieldProps("name")}
@@ -287,7 +276,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                                     />
                                 </FormGroup>
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={12}>
                                 <FormGroup>
                                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                                         <DatePicker
@@ -301,13 +290,13 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                                     </LocalizationProvider>
                                 </FormGroup>
                             </Grid>
-                            <Grid item xs={12} container justifyContent="space-between">
+                            <Grid size={12} container justifyContent="space-between">
                                 <Typography variant="h6">Custom Properties</Typography>
                             </Grid>
                             {properties
                                 ? properties.map((item, index) => (
-                                      <Grid item xs={12} key={item.id} container spacing={1} alignItems="end">
-                                          <Grid item xs={4}>
+                                      <Grid size={12} key={item.id} container spacing={1} alignItems="end">
+                                          <Grid size={4}>
                                               <TextField
                                                   value={item.key}
                                                   label="Key"
@@ -317,7 +306,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                                                   onChange={updatePropertyField}
                                               />
                                           </Grid>
-                                          <Grid item xs>
+                                          <Grid size="grow">
                                               <TextField
                                                   value={item.value}
                                                   label="Value"
@@ -327,7 +316,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                                                   onChange={updatePropertyField}
                                               />
                                           </Grid>
-                                          <Grid item xs="auto">
+                                          <Grid size="auto">
                                               <Tooltip title="Delete Property">
                                                   <Button
                                                       variant="outlined"
@@ -343,8 +332,8 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                                       </Grid>
                                   ))
                                 : null}
-                            <Grid item xs={12} container spacing={1} justifyContent="space-between" alignItems="end">
-                                <Grid item xs={4}>
+                            <Grid size={12} container spacing={1} justifyContent="space-between" alignItems="end">
+                                <Grid size={4}>
                                     <TextField
                                         value={newProp.key}
                                         data-name="key"
@@ -353,7 +342,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                                         variant="outlined"
                                     />
                                 </Grid>
-                                <Grid item xs>
+                                <Grid size="grow">
                                     <TextField
                                         value={newProp.value}
                                         data-name="value"
@@ -362,7 +351,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                                         variant="outlined"
                                     />
                                 </Grid>
-                                <Grid item xs="auto">
+                                <Grid size="auto">
                                     <Tooltip title="Add Property">
                                         <span>
                                             <Button
@@ -383,7 +372,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                     <DialogActions>
                         <Grid container justifyContent="space-between" sx={ActionContentSx}>
                             {actionEdit && (
-                                <Grid item xs={6}>
+                                <Grid size={6}>
                                     <Button
                                         variant="outlined"
                                         color="error"
@@ -394,13 +383,13 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                                     </Button>
                                 </Grid>
                             )}
-                            <Grid item container xs={actionEdit ? 6 : 12} justifyContent="flex-end">
-                                <Grid item sx={CancelBtnSx}>
+                            <Grid container size={actionEdit ? 6 : 12} justifyContent="flex-end">
+                                <Grid sx={CancelBtnSx}>
                                     <Button variant="outlined" color="inherit" onClick={close}>
                                         Cancel
                                     </Button>
                                 </Grid>
-                                <Grid item>
+                                <Grid>
                                     <Button
                                         variant="contained"
                                         type="submit"
@@ -569,6 +558,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                 scenario={props.scenarioEdit}
                 submit={onSubmit}
             ></ScenarioEditDialog>
+            {props.children}
         </>
     );
 };

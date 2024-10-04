@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger taipy-benchmark computation
-        uses: peter-evans/repository-dispatch@v1
+        uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{secrets.TAIPY_INTEGRATION_TESTING_ACCESS_TOKEN}}
           repository: avaiga/taipy-benchmark

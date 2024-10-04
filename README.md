@@ -1,8 +1,11 @@
+[![Hacktoberfest_clickable](https://github.com/user-attachments/assets/b1b5a430-6df9-40c2-999f-de3433f61251)](https://assorted-son-815.notion.site/Hacktoberfest-2024-with-Taipy-2a5032a3f01642709e88ffaa5d0d169e)
+
+
 <div align="center">
   <a href="https://taipy.io?utm_source=github" target="_blank">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Avaiga/taipy/assets/100117126/509bf101-54c2-4321-adaf-a2af63af9682">
-    <img alt="Taipy" src="https://github.com/Avaiga/taipy/assets/100117126/4df8a733-d8d0-4893-acf0-d24ef9e8b58a" width="400" />
+    <img alt="Taipy" src="https://github.com/Avaiga/taipy/assets/100117126/4df8a733-d8d0-4893-acf0-d24ef9e8b58a" width="300" />
   </picture>
   </a>
 </div>
@@ -24,13 +27,14 @@ No more compromise on performance, customization, and scalability.
 
 </div>
 
-<p align="left">
+<p align="center"><h4>
     <br />
     <a href="https://docs.taipy.io/en/latest/"><strong>📚 Explore the docs </strong></a>
     <br />
     <a href="https://discord.com/invite/SJyz2VJGxV"><strong>  🫱🏼‍🫲🏼 Discord support </strong></a>
     <br />
     <a href="https://docs.taipy.io/en/latest/gallery/"><strong> 👀 Demos & Examples </strong></a>
+</h4>
   </p>
 
 &nbsp;
@@ -67,13 +71,13 @@ Taipy is a Two-in-One Tool for UI Generation and Scenario/Data Management
 
 ## ⚙️ Quickstart
 
-To install Taipy stable release run:
+To install the Taipy stable release run:
 
 ```bash
 pip install taipy
 ```
 
-To install Taipy on a Conda Environment or from source, please refer to the [Installation Guide](https://docs.taipy.io/en/latest/installation/).<br />
+To install Taipy on a Conda Environment or from a source, please refer to the [Installation Guide](https://docs.taipy.io/en/latest/installation/).<br />
 To get started with Taipy, please refer to the [Getting Started Guide](https://docs.taipy.io/en/latest/getting_started/).
 
 &nbsp;
@@ -124,7 +128,7 @@ Check out the movie genre demo scenario creation with this [Demo](https://docs.t
 
 This simple Taipy application demonstrates how to create a basic film recommendation system using Taipy.<br />
 The application filters a dataset of films based on the user's selected genre and displays the top seven films in that genre by popularity.
-Here is the full code for both the frontend and backend of the application.
+Here is the full code for both the front-end and back-end of the application.
 
 ```python
 import taipy as tp
@@ -166,10 +170,10 @@ if __name__ == "__main__":
     # Taipy User Interface
     # Let's add a GUI to our Scenario Management for a full application
 
-    # Get list of genres
+    # Get the list of genres
     genres = [
         "Action", "Adventure", "Animation", "Children", "Comedy", "Fantasy", "IMAX"
-        "Romance","Sci-FI", "Western", "Crime", "Mystery", "Drama", "Horror", "Thriller", "Film-Noir","War", "Musical", "Documentary"
+        "Romance", "Sci-FI", "Western", "Crime", "Mystery", "Drama", "Horror", "Thriller", "Film-Noir", "War", "Musical", "Documentary"
     ]
 
     # Initialization of variables

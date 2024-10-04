@@ -16,10 +16,10 @@ import sys
 import types
 import typing as t
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ..utils.singleton import _Singleton
-from ..utils.viselements import VisElements, resolve_inherits
+from ..utils.viselements import VisElementProperties, VisElements, resolve_inherits
 from ._element import _Block, _Control
 
 if t.TYPE_CHECKING:
@@ -31,13 +31,19 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
         self.__module: t.Optional[types.ModuleType] = None
 
     @staticmethod
-    def find_default_property(property_list: t.List[t.Dict[str, t.Any]]) -> str:
+    def find_default_property(property_list: t.List[VisElementProperties]) -> str:
         for property in property_list:
-            if "default_property" in property and property["default_property"] is True:
+            if property.get("default_property", False) is True:
                 return property["name"]
         return ""
 
+    @staticmethod
+    def get_properties_dict(property_list: t.List[VisElementProperties]) -> t.Dict[str, t.Any]:
+        return {prop["name"]: prop.get("type", "str") for prop in property_list}
+
     def add_default(self):
+        if self.__module is not None:
+            return
         current_frame = inspect.currentframe()
         error_message = "Cannot generate elements API for the current module"
         if current_frame is None:
@@ -56,14 +62,24 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
                 setattr(
                     module,
                     blockElement[0],
-                    _ElementApiGenerator.create_block_api(blockElement[0], blockElement[0], default_property),
+                    _ElementApiGenerator.create_block_api(
+                        blockElement[0],
+                        blockElement[0],
+                        default_property,
+                        _ElementApiGenerator.get_properties_dict(blockElement[1]["properties"]),
+                    ),
                 )
             for controlElement in viselements["controls"]:
                 default_property = _ElementApiGenerator.find_default_property(controlElement[1]["properties"])
                 setattr(
                     module,
                     controlElement[0],
-                    _ElementApiGenerator.create_control_api(controlElement[0], controlElement[0], default_property),
+                    _ElementApiGenerator.create_control_api(
+                        controlElement[0],
+                        controlElement[0],
+                        default_property,
+                        _ElementApiGenerator.get_properties_dict(controlElement[1]["properties"]),
+                    ),
                 )
 
     def add_library(self, library: "ElementLibrary"):
@@ -82,7 +98,10 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
                 library_module,
                 element_name,
                 _ElementApiGenerator().create_control_api(
-                    element_name, f"{library_name}.{element_name}", element.default_attribute
+                    element_name,
+                    f"{library_name}.{element_name}",
+                    element.default_attribute,
+                    {name: str(prop.property_type) for name, prop in element.attributes.items()},
                 ),
             )
             # Allow element to be accessed from the root module
@@ -98,22 +117,25 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
         classname: str,
         element_name: str,
         default_property: str,
+        properties: t.Dict[str, str],
     ):
-        return _ElementApiGenerator.create_element_api(classname, element_name, default_property, _Block)
+        return _ElementApiGenerator.create_element_api(classname, element_name, default_property, properties, _Block)
 
     @staticmethod
     def create_control_api(
         classname: str,
         element_name: str,
         default_property: str,
+        properties: t.Dict[str, str],
     ):
-        return _ElementApiGenerator.create_element_api(classname, element_name, default_property, _Control)
+        return _ElementApiGenerator.create_element_api(classname, element_name, default_property, properties, _Control)
 
     @staticmethod
     def create_element_api(
         classname: str,
         element_name: str,
         default_property: str,
+        properties: t.Dict[str, str],
         ElementBaseClass: t.Union[t.Type[_Block], t.Type[_Control]],
     ):
         return type(
@@ -122,5 +144,6 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
             {
                 "_ELEMENT_NAME": element_name,
                 "_DEFAULT_PROPERTY": default_property,
+                "_TYPES": {f"{parts[0]}__" if len(parts := k.split("[")) > 1 else k: v for k, v in properties.items()},
             },
         )

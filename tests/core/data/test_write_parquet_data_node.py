@@ -18,7 +18,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 from taipy.core.data.parquet import ParquetDataNode
 
 
@@ -175,7 +175,7 @@ class TestWriteParquetDataNode:
                 "write_kwargs": {"compression": comp2},
             },
         )
-        dn.write_with_kwargs(df, compression=comp1)
+        dn._write_with_kwargs(df, compression=comp1)
         df.to_parquet(path=temp_file_2_path, compression=comp1, engine=engine)
         with open(temp_file_2_path, "rb") as tf:
             with pathlib.Path(temp_file_path).open("rb") as f:

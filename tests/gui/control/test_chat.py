@@ -63,7 +63,7 @@ def test_chat_md_2(gui: Gui, test_client, helpers):
         "users", [["Fred", Icon("/images/favicon.png", "Fred.png")], ["Fredi", Icon("/images/fred.png", "Fred.png")]]
     )
     gui._bind_var_val("winp", False)
-    md_string = "<|{messages}|chat|users={users}|with_input={winp}|>"
+    md_string = "<|{messages}|chat|users={users}|with_input={winp}|show_sender|>"
     expected_list = [
         "<Chat",
         'defaultUsers="[[&quot;Fred&quot;, &#x7B;&quot;path&quot;: &quot;/images/favicon.png&quot;, &quot;text&quot;: &quot;Fred.png&quot;&#x7D;], [&quot;Fredi&quot;, &#x7B;&quot;path&quot;: &quot;/images/fred.png&quot;, &quot;text&quot;: &quot;Fred.png&quot;&#x7D;]]"',  # noqa: E501
@@ -73,6 +73,7 @@ def test_chat_md_2(gui: Gui, test_client, helpers):
         "users={_TpL_tp_TpExPr_gui_get_adapted_lov_users_list_TPMDL_0_0}",
         "withInput={_TpB_tpec_TpExPr_winp_TPMDL_0}>",
         "defaultWithInput={false}",
+        "showSender={true}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 

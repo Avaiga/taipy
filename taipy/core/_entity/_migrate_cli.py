@@ -12,9 +12,9 @@
 import sys
 from typing import List
 
-from taipy._cli._base_cli._abstract_cli import _AbstractCLI
-from taipy._cli._base_cli._taipy_parser import _TaipyParser
-from taipy.config.config import Config
+from taipy.common._cli._base_cli._abstract_cli import _AbstractCLI
+from taipy.common._cli._base_cli._taipy_parser import _TaipyParser
+from taipy.common.config import Config
 
 from ._migrate import (
     _migrate_fs_entities,

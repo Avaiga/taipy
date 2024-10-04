@@ -24,7 +24,7 @@ import React, {
 import { TextField, Theme, alpha } from "@mui/material";
 import Badge, { BadgeOrigin } from "@mui/material/Badge";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import Switch from "@mui/material/Switch";
 import Tooltip from "@mui/material/Tooltip";
@@ -62,6 +62,7 @@ import {
     BadgePos,
     BadgeSx,
     BaseTreeViewSx,
+    CoreProps,
     FlagSx,
     ParentItemSx,
     getUpdateVarNames,
@@ -81,25 +82,14 @@ type Entities = Cycles | Scenarios | DataNodes;
 type Entity = Cycle | Scenario | Sequence | DataNode;
 type Pinned = Record<string, boolean>;
 
-interface CoreSelectorProps {
-    id?: string;
-    active?: boolean;
-    defaultActive?: boolean;
-    updateVarName?: string;
+interface CoreSelectorProps extends CoreProps {
     entities?: Entities;
-    coreChanged?: Record<string, unknown>;
-    updateVars: string;
     onChange?: string;
-    error?: string;
     displayCycles?: boolean;
     showPrimaryFlag?: boolean;
-    propagate?: boolean;
     value?: string | string[];
     defaultValue?: string;
     height: string;
-    libClassName?: string;
-    className?: string;
-    dynamicClassName?: string;
     multiple?: boolean;
     lovPropertyName: string;
     leafType: NodeType;
@@ -145,7 +135,7 @@ const CoreItem = (props: {
     return !props.displayCycles && nodeType === NodeType.CYCLE ? (
         <>
             {items
-                ? items.map((item) => (
+                ? items.filter(v=>v).map((item) => (
                       <CoreItem
                           key={item[0]}
                           item={item}
@@ -167,7 +157,7 @@ const CoreItem = (props: {
             data-selectable={nodeType === props.leafType}
             label={
                 <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={1}>
-                    <Grid item xs sx={iconLabelSx}>
+                    <Grid size="grow" sx={iconLabelSx}>
                         {nodeType === NodeType.CYCLE ? (
                             <CycleIcon fontSize="small" color="primary" />
                         ) : nodeType === NodeType.SCENARIO ? (
@@ -191,12 +181,12 @@ const CoreItem = (props: {
                         {label}
                     </Grid>
                     {props.editComponent && nodeType === props.leafType ? (
-                        <Grid item xs="auto">
+                        <Grid size="auto">
                             <props.editComponent id={id} active={props.active} />
                         </Grid>
                     ) : null}
                     {props.onPin ? (
-                        <Grid item xs="auto">
+                        <Grid size="auto">
                             <Tooltip title={isPinned ? "Unpin" : "Pin"}>
                                 <IconButton
                                     data-id={id}
@@ -215,7 +205,7 @@ const CoreItem = (props: {
             sx={nodeType === NodeType.NODE ? undefined : ParentItemSx}
         >
             {items
-                ? items.map((item) => (
+                ? items.filter(v=>v).map((item) => (
                       <CoreItem
                           key={item[0]}
                           item={item}
@@ -304,7 +294,7 @@ const localStoreSet = (val: string, ...ids: string[]) => {
     }
     try {
         id && localStorage && localStorage.setItem(id, val);
-    } catch (e) {
+    } catch {
         // Too bad
     }
 };
@@ -320,7 +310,7 @@ const localStoreGet = (...ids: string[]) => {
     }
     try {
         return JSON.parse(val);
-    } catch (e) {
+    } catch {
         return undefined;
     }
 };
@@ -444,7 +434,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
         if (coreChanged?.scenario) {
             const updateVar = getUpdateVar(updateVars, lovPropertyName);
             updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
-        }
+    }
     }, [coreChanged, updateVars, module, dispatch, id, lovPropertyName]);
 
     const treeViewSx = useMemo(() => ({ ...BaseTreeViewSx, maxHeight: props.height || "50vh" }), [props.height]);
@@ -525,7 +515,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                       return pv;
                   }, {} as Record<string, ColumnDesc>)
                 : undefined;
-        } catch (e) {
+        } catch {
             return undefined;
         }
     }, [props.filter]);
@@ -568,7 +558,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                       return pv;
                   }, {} as Record<string, ColumnDesc>)
                 : undefined;
-        } catch (e) {
+        } catch {
             return undefined;
         }
     }, [props.sort]);
@@ -631,7 +621,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
         <>
             <Grid container sx={switchBoxSx} gap={1}>
                 {active && colFilters ? (
-                    <Grid item>
+                    <Grid>
                         <TableFilter
                             columns={colFilters}
                             appliedFilters={filters}
@@ -641,12 +631,12 @@ const CoreSelector = (props: CoreSelectorProps) => {
                     </Grid>
                 ) : null}
                 {active && colSorts ? (
-                    <Grid item>
+                    <Grid>
                         <TableSort columns={colSorts} appliedSorts={sorts} onValidate={applySorts}></TableSort>
                     </Grid>
                 ) : null}
                 {showSearch ? (
-                    <Grid item>
+                    <Grid>
                         <IconButton onClick={onRevealSearch} size="small" sx={iconInRowSx}>
                             {revealSearch ? (
                                 <SearchOffOutlined fontSize="inherit" />
@@ -657,7 +647,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                     </Grid>
                 ) : null}
                 {showPins ? (
-                    <Grid item>
+                    <Grid>
                         <FormControlLabel
                             control={
                                 <Switch
@@ -673,7 +663,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                     </Grid>
                 ) : null}
                 {showSearch && revealSearch ? (
-                    <Grid item xs={12}>
+                    <Grid size={12}>
                         <TextField
                             margin="dense"
                             value={searchValue}
@@ -712,6 +702,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                       )
                     : null}
             </SimpleTreeView>
+            {props.children}
         </>
     );
 };

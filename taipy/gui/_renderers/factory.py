@@ -46,6 +46,7 @@ class _Factory:
         "layout": "columns",
         "login": "title",
         "menu": "lov",
+        "metric": "value",
         "navbar": "value",
         "number": "value",
         "pane": "open",
@@ -58,7 +59,6 @@ class _Factory:
         "text": "value",
         "toggle": "value",
         "tree": "value",
-        "metric": "value",
     }
 
     _TEXT_ATTRIBUTES = ["format", "id", "hover_text", "raw"]
@@ -98,6 +98,8 @@ class _Factory:
                 ("sender_id",),
                 ("height",),
                 ("page_size", PropertyType.number, 50),
+                ("show_sender", PropertyType.boolean, False),
+                ("mode",),
             ]
         ),
         "chart": lambda gui, control_type, attrs: _Builder(
@@ -120,6 +122,7 @@ class _Factory:
                 ("template[dark]", PropertyType.dict, gui._get_config("chart_dark_template", None)),
                 ("template[light]", PropertyType.dict),
                 ("figure", PropertyType.to_json),
+                ("on_click", PropertyType.function),
             ]
         )
         ._get_chart_config("scatter", "lines+markers")
@@ -276,7 +279,7 @@ class _Factory:
                 ("max", PropertyType.number),
                 ("value", PropertyType.dynamic_number),
                 ("format",),
-                ("orientation"),
+                ("orientation",),
                 ("width",),
                 ("height",),
             ]
@@ -406,6 +409,7 @@ class _Factory:
                 ("on_action", PropertyType.function),
                 ("label",),
                 ("change_delay", PropertyType.number, gui._get_config("change_delay", None)),
+                ("width", PropertyType.string_or_number),
             ]
         ),
         "pane": lambda gui, control_type, attrs: _Builder(
@@ -424,6 +428,7 @@ class _Factory:
                 ("height", PropertyType.string_or_number, "30vh"),
                 ("hover_text", PropertyType.dynamic_string),
                 ("on_change", PropertyType.function),
+                ("show_button", PropertyType.boolean, False),
             ]
         )
         ._set_propagate(),
@@ -437,6 +442,24 @@ class _Factory:
                 ("render", PropertyType.dynamic_boolean, True),
                 ("height", PropertyType.dynamic_string),
                 ("content", PropertyType.toHtmlContent),
+                ("width", PropertyType.string_or_number),
+            ]
+        ),
+        "progress": lambda gui, control_type, attrs: _Builder(
+            gui=gui,
+            control_type=control_type,
+            element_name="Progress",
+            attributes=attrs,
+        )
+        .set_value_and_default(var_type=PropertyType.dynamic_number, native_type=True)
+        .set_attributes(
+            [
+                ("linear", PropertyType.boolean, False),
+                ("show_value", PropertyType.boolean, False),
+                ("title", PropertyType.dynamic_string),
+                ("title_anchor", PropertyType.string, "bottom"),
+                ("render", PropertyType.dynamic_boolean, True),
+                ("width", PropertyType.string_or_number),
             ]
         ),
         "selector": lambda gui, control_type, attrs: _Builder(
@@ -480,7 +503,7 @@ class _Factory:
                 ("orientation",),
                 ("width", PropertyType.string, "300px"),
                 ("on_change", PropertyType.function),
-                ("continuous", PropertyType.boolean, True),
+                ("continuous", PropertyType.boolean, None),
                 ("lov", PropertyType.lov),
                 ("change_delay", PropertyType.number, gui._get_config("change_delay", None)),
             ]
@@ -529,6 +552,7 @@ class _Factory:
                 ("hover_text", PropertyType.dynamic_string),
                 ("size",),
                 ("downloadable", PropertyType.boolean),
+                ("use_checkbox", PropertyType.boolean),
             ]
         )
         ._set_propagate()
@@ -591,21 +615,6 @@ class _Factory:
                 ("select_leafs_only", PropertyType.boolean),
                 ("row_height", PropertyType.string),
                 ("lov", PropertyType.lov),
-            ]
-        )
-        ._set_propagate(),
-        "progress": lambda gui, control_type, attrs: _Builder(
-            gui=gui,
-            control_type=control_type,
-            element_name="Progress",
-            attributes=attrs,
-        )
-        .set_value_and_default(var_type=PropertyType.dynamic_number, native_type=True)
-        .set_attributes(
-            [
-                ("linear", PropertyType.boolean, False),
-                ("show_value", PropertyType.boolean, False),
-                ("render", PropertyType.dynamic_boolean, True),
             ]
         )
         ._set_propagate(),
@@ -676,7 +685,7 @@ class _Factory:
         builder = _Factory.__CONTROL_BUILDERS.get(name)
         built = None
         _Factory.__COUNTER += 1
-        with gui._get_autorization():
+        with gui._get_authorization():
             if builder is None:
                 lib, element_name, element = _Factory.__get_library_element(name)
                 if lib:

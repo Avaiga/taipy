@@ -39,7 +39,8 @@ import {
 } from "../../context/taipyReducers";
 import {
     ColumnDesc,
-    getsortByIndex,
+    FilterDesc,
+    getSortByIndex,
     Order,
     TaipyTableProps,
     baseBoxSx,
@@ -51,10 +52,10 @@ import {
     RowValue,
     EDIT_COL,
     OnRowDeletion,
-    addDeleteColumn,
+    addActionColumn,
     headBoxSx,
     getClassName,
-    LINE_STYLE,
+    ROW_CLASS_NAME,
     iconInRowSx,
     DEFAULT_SIZE,
     OnRowSelection,
@@ -63,6 +64,8 @@ import {
     defaultColumns,
     OnRowClick,
     DownloadAction,
+    getFormatFn,
+    getPageKey,
 } from "./tableUtils";
 import {
     useClassNames,
@@ -73,7 +76,7 @@ import {
     useFormatConfig,
     useModule,
 } from "../../utils/hooks";
-import TableFilter, { FilterDesc } from "./TableFilter";
+import TableFilter from "./TableFilter";
 import { getSuffixedClassNames, getUpdateVar } from "./utils";
 import { emptyArray } from "../../utils";
 
@@ -82,6 +85,7 @@ interface RowData {
     columns: Record<string, ColumnDesc>;
     rows: RowType[];
     classes: Record<string, string>;
+    tableClassName: string;
     cellProps: Partial<TableCellProps>[];
     isItemLoaded: (index: number) => boolean;
     selection: number[];
@@ -90,19 +94,21 @@ interface RowData {
     onDeletion?: OnRowDeletion;
     onRowSelection?: OnRowSelection;
     onRowClick?: OnRowClick;
-    lineStyle?: string;
+    rowClassName?: string;
     nanValue?: string;
     compRows?: RowType[];
+    useCheckbox?: boolean;
 }
 
 const Row = ({
     index,
-    style,
+    style: rowSx,
     data: {
         colsOrder,
         columns,
         rows,
         classes,
+        tableClassName,
         cellProps,
         isItemLoaded,
         selection,
@@ -111,9 +117,10 @@ const Row = ({
         onDeletion,
         onRowSelection,
         onRowClick,
-        lineStyle,
+        rowClassName,
         nanValue,
         compRows,
+        useCheckbox,
     },
 }: {
     index: number;
@@ -124,34 +131,37 @@ const Row = ({
         <TableRow
             hover
             tabIndex={-1}
-            key={"row" + index}
+            key={`row${index}`}
             component="div"
-            sx={style}
-            className={(classes && classes.row) + " " + getClassName(rows[index], lineStyle)}
+            sx={rowSx}
+            className={(classes && classes.row) + " " + getClassName(rows[index], rowClassName)}
             data-index={index}
             selected={selection.indexOf(index) > -1}
             onClick={onRowClick}
         >
-            {colsOrder.map((col, cidx) => (
+            {colsOrder.map((col, cIdx) => (
                 <EditableCell
-                    key={"val" + index + "-" + cidx}
-                    className={getClassName(rows[index], columns[col].style, col)}
+                    key={`cell${index}${columns[col].dfid}`}
+                    className={getClassName(rows[index], columns[col].className, col)}
+                    tableClassName={tableClassName}
                     colDesc={columns[col]}
                     value={rows[index][col]}
+                    formattedVal={getFormatFn(rows[index], columns[col].formatFn, col)}
                     formatConfig={formatConfig}
                     rowIndex={index}
                     onValidation={!columns[col].notEditable ? onValidation : undefined}
                     onDeletion={onDeletion}
                     onSelection={onRowSelection}
                     nanValue={columns[col].nanValue || nanValue}
-                    tableCellProps={cellProps[cidx]}
+                    tableCellProps={cellProps[cIdx]}
                     tooltip={getTooltip(rows[index], columns[col].tooltip, col)}
                     comp={compRows && compRows[index] && compRows[index][col]}
+                    useCheckbox={useCheckbox}
                 />
             ))}
         </TableRow>
     ) : (
-        <Skeleton sx={style} key={"Skeleton" + index} />
+        <Skeleton sx={rowSx} key={"Skeleton" + index} />
     );
 
 interface PromiseProps {
@@ -190,6 +200,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         downloadable = false,
         compare = false,
         onCompare = "",
+        useCheckbox = false,
     } = props;
     const [rows, setRows] = useState<RowType[]>([]);
     const [compRows, setCompRows] = useState<RowType[]>([]);
@@ -213,7 +224,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const baseColumns = useDynamicJsonProperty(props.columns, props.defaultColumns, defaultColumns);
 
-    const refresh = typeof props.data === "number";
+    const refresh = props.data && typeof props.data.__taipy_refresh === "boolean";
 
     useEffect(() => {
         if (!refresh && props.data && page.current.key && props.data[page.current.key] !== undefined) {
@@ -274,11 +285,12 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         e.stopPropagation();
     }, []);
 
-    const [colsOrder, columns, styles, tooltips, handleNan, filter] = useMemo(() => {
+    const [colsOrder, columns, cellClassNames, tooltips, formats, handleNan, filter, partialEditable] = useMemo(() => {
         let hNan = !!props.nanValue;
         if (baseColumns) {
             try {
                 let filter = false;
+                let partialEditable = editable;
                 const newCols: Record<string, ColumnDesc> = {};
                 Object.entries(baseColumns).forEach(([cId, cDesc]) => {
                     const nDesc = (newCols[cId] = { ...cDesc });
@@ -286,37 +298,43 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         nDesc.filter = !!props.filter;
                     }
                     filter = filter || nDesc.filter;
-                    if (typeof nDesc.notEditable != "boolean") {
+                    if (typeof nDesc.notEditable == "boolean") {
                         nDesc.notEditable = !editable;
+                    } else {
+                        partialEditable = partialEditable || !nDesc.notEditable;
                     }
                     if (nDesc.tooltip === undefined) {
                         nDesc.tooltip = props.tooltip;
                     }
                 });
-                addDeleteColumn(
-                    (active && editable && (onAdd || onDelete) ? 1 : 0) +
+                addActionColumn(
+                    (active && partialEditable && (onAdd || onDelete) ? 1 : 0) +
                         (active && filter ? 1 : 0) +
                         (active && downloadable ? 1 : 0),
                     newCols
                 );
-                const colsOrder = Object.keys(newCols).sort(getsortByIndex(newCols));
+                const colsOrder = Object.keys(newCols).sort(getSortByIndex(newCols));
                 const styTt = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
-                    if (newCols[col].style) {
-                        pv.styles = pv.styles || {};
-                        pv.styles[newCols[col].dfid] = newCols[col].style as string;
+                    if (newCols[col].className) {
+                        pv.classNames = pv.classNames || {};
+                        pv.classNames[newCols[col].dfid] = newCols[col].className as string;
                     }
                     hNan = hNan || !!newCols[col].nanValue;
                     if (newCols[col].tooltip) {
                         pv.tooltips = pv.tooltips || {};
                         pv.tooltips[newCols[col].dfid] = newCols[col].tooltip as string;
                     }
+                    if (newCols[col].formatFn) {
+                        pv.formats = pv.formats || {};
+                        pv.formats[newCols[col].dfid] = newCols[col].formatFn;
+                    }
                     return pv;
                 }, {});
-                if (props.lineStyle) {
-                    styTt.styles = styTt.styles || {};
-                    styTt.styles[LINE_STYLE] = props.lineStyle;
+                if (props.rowClassName) {
+                    styTt.classNames = styTt.classNames || {};
+                    styTt.classNames[ROW_CLASS_NAME] = props.rowClassName;
                 }
-                return [colsOrder, newCols, styTt.styles, styTt.tooltips, hNan, filter];
+                return [colsOrder, newCols, styTt.classNames, styTt.tooltips, styTt.formats, hNan, filter, partialEditable];
             } catch (e) {
                 console.info("ATable.columns: " + ((e as Error).message || e));
             }
@@ -326,7 +344,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             {} as Record<string, ColumnDesc>,
             {} as Record<string, string>,
             {} as Record<string, string>,
+            {} as Record<string, string>,
             hNan,
+            false,
             false,
         ];
     }, [
@@ -335,7 +355,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         onAdd,
         onDelete,
         baseColumns,
-        props.lineStyle,
+        props.rowClassName,
         props.tooltip,
         props.nanValue,
         props.filter,
@@ -365,19 +385,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 page.current.promises[startIndex].reject();
             }
             return new Promise<void>((resolve, reject) => {
-                const agg = aggregates.length
-                    ? colsOrder.reduce((pv, col, idx) => {
-                          if (aggregates.includes(columns[col].dfid)) {
-                              return pv + "-" + idx;
-                          }
-                          return pv;
-                      }, "-agg")
-                    : "";
                 const cols = colsOrder.map((col) => columns[col].dfid).filter((c) => c != EDIT_COL);
                 const afs = appliedFilters.filter((fd) => Object.values(columns).some((cd) => cd.dfid === fd.col));
-                const key = `Infinite-${cols.join()}-${orderBy}-${order}${agg}${afs.map(
-                    (af) => `${af.col}${af.action}${af.value}`
-                )}`;
+                const key = getPageKey(columns, "Infinite", cols, orderBy, order, afs, aggregates, cellClassNames, tooltips, formats);
                 page.current = {
                     key: key,
                     promises: { ...page.current.promises, [startIndex]: { resolve: resolve, reject: reject } },
@@ -403,8 +413,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         order,
                         aggregates,
                         applies,
-                        styles,
+                        cellClassNames,
                         tooltips,
+                        formats,
                         handleNan,
                         afs,
                         compare ? onCompare : undefined,
@@ -418,8 +429,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         },
         [
             aggregates,
-            styles,
+            cellClassNames,
             tooltips,
+            formats,
             updateVarName,
             updateVars,
             orderBy,
@@ -526,38 +538,44 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     );
 
     const rowData: RowData = useMemo(
-        () => ({
-            colsOrder: colsOrder,
-            columns: columns,
-            rows: rows,
-            classes: {},
-            cellProps: colsOrder.map((col) => ({
-                sx: getCellSx(columns[col].width || columns[col].widthHint, size),
-                component: "div",
-                variant: "body",
-            })),
+        () =>
+            ({
+                colsOrder: colsOrder,
+                columns: columns,
+                rows: rows,
+                classes: {},
+                tableClassName: className,
+                cellProps: colsOrder.map((col) => ({
+                    sx: getCellSx(columns[col].width || columns[col].widthHint, size),
+                    component: "div",
+                    variant: "body",
+                })),
 
-            isItemLoaded: isItemLoaded,
-            selection: selected,
-            formatConfig: formatConfig,
-            onValidation: active && onEdit ? onCellValidation : undefined,
-            onDeletion: active && editable && onDelete ? onRowDeletion : undefined,
-            onRowSelection: active && onAction ? onRowSelection : undefined,
-            onRowClick: active && onAction ? onRowClick : undefined,
-            lineStyle: props.lineStyle,
-            nanValue: props.nanValue,
-            compRows: compRows,
-        }),
+                isItemLoaded: isItemLoaded,
+                selection: selected,
+                formatConfig: formatConfig,
+                onValidation: active && onEdit ? onCellValidation : undefined,
+                onDeletion: active && (editable || partialEditable) && onDelete ? onRowDeletion : undefined,
+                onRowSelection: active && onAction ? onRowSelection : undefined,
+                onRowClick: active && onAction ? onRowClick : undefined,
+                rowClassName: props.rowClassName,
+                nanValue: props.nanValue,
+                compRows: compRows,
+                useCheckbox: useCheckbox,
+            } as RowData),
         [
             rows,
             compRows,
+            useCheckbox,
             isItemLoaded,
             active,
             colsOrder,
             columns,
+            className,
             selected,
             formatConfig,
             editable,
+            partialEditable,
             onEdit,
             onCellValidation,
             onDelete,
@@ -565,7 +583,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             onAction,
             onRowSelection,
             onRowClick,
-            props.lineStyle,
+            props.rowClassName,
             props.nanValue,
             size,
         ]
@@ -581,15 +599,15 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         <MuiTable sx={tableSx} aria-labelledby="tableTitle" size={size} stickyHeader={true}>
                             <TableHead>
                                 <TableRow ref={headerRow}>
-                                    {colsOrder.map((col, idx) => (
+                                    {colsOrder.map((col) => (
                                         <TableCell
-                                            key={col + idx}
+                                            key={`head${columns[col].dfid}`}
                                             sortDirection={orderBy === columns[col].dfid && order}
                                             sx={columns[col].width ? { width: columns[col].width } : {}}
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [
-                                                    active && editable && onAdd ? (
+                                                    active && (editable || partialEditable) && onAdd ? (
                                                         <Tooltip title="Add a row" key="addARow">
                                                             <IconButton
                                                                 onClick={onAddRowClick}

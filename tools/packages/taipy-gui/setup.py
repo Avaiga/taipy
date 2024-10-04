@@ -44,7 +44,7 @@ extras_require = {
         "python-magic>=0.4.24,<0.5;platform_system!='Windows'",
         "python-magic-bin>=0.4.14,<0.5;platform_system=='Windows'",
     ],
-    "arrow": ["pyarrow>=14.0.2,<15.0"],
+    "arrow": ["pyarrow>=17.0.0,<18.0"],
 }
 
 
@@ -60,10 +60,7 @@ class NPMInstall(build_py):
                 ["npm", "ci"], cwd=root_folder / "frontend" / "taipy-gui" / "dom", check=True, shell=with_shell
             )
             subprocess.run(
-                ["npm", "ci", "--omit=optional"],
-                cwd=root_folder / "frontend" / "taipy-gui",
-                check=True,
-                shell=with_shell,
+                ["npm", "ci"], cwd=root_folder / "frontend" / "taipy-gui", check=True, shell=with_shell,
             )
             subprocess.run(
                 ["npm", "run", "build"], cwd=root_folder / "frontend" / "taipy-gui", check=True, shell=with_shell

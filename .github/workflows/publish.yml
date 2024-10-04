@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - name: Extract Github Tag Version
         id: vars
@@ -38,7 +38,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        package: [ config, core, gui, rest, templates ]
+        package: [ common, core, gui, rest, templates ]
       max-parallel: 1
     environment: publish
     runs-on: ubuntu-latest
@@ -104,7 +104,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        python-versions: ['3.8','3.9','3.10', '3.11', '3.12']
+        python-versions: ['3.9','3.10', '3.11', '3.12']
         os: [ubuntu-latest,windows-latest,macos-13]
     runs-on: ${{ matrix.os }}
     steps:

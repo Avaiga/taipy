@@ -12,7 +12,7 @@ you plan to use it:
 - [Debugging the JavaScript bundle](#debugging-the-javascript-bundle)
 - [Running the tests](#running-the-tests)
 
-Taipy GUI needs your system to have **Python 3.8** or above installed.
+Taipy GUI needs your system to have **Python 3.9** or above installed.
 
 ## Installing the latest release
 
@@ -67,7 +67,7 @@ npm i
 - Install the web app dependencies
 ```bash
 cd ..
-npm i --omit=optional
+npm i
 ```
 - Build the web app
 ```bash

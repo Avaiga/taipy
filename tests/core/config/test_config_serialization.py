@@ -12,10 +12,10 @@
 import datetime
 import json
 
-from taipy.config import Config
-from taipy.config._serializer._json_serializer import _JsonSerializer
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
+from taipy.common.config import Config
+from taipy.common.config._serializer._json_serializer import _JsonSerializer
+from taipy.common.config.common.frequency import Frequency
+from taipy.common.config.common.scope import Scope
 from taipy.core.config import CoreSection, DataNodeConfig, JobConfig, ScenarioConfig, TaskConfig
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
