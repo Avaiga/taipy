@@ -110,3 +110,8 @@ def _inject_section(
 
     for exposed_configuration_method, configuration_method in configuration_methods:
         setattr(Config, exposed_configuration_method, configuration_method)
+
+
+def _inject_method(configuration_methods: List[tuple]):
+    for exposed_configuration_method, configuration_method in configuration_methods:
+        setattr(Config, exposed_configuration_method, configuration_method)
