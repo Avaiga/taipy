@@ -51,7 +51,7 @@ jobs:
       - name: Checks if package is already on Pypi
         id: check-version
         run: |
-          if curl https://pypi.org/simple/taipy-${{ matrix.package }} | grep -o ">taipy-${{ matrix.package }}-${{ github.event.inputs.version }}\.tar\.gz<"; then
+          if curl https://pypi.org/simple/taipy-${{ matrix.package }}/ | grep -o ">taipy-${{ matrix.package }}-${{ github.event.inputs.version }}\.tar\.gz<"; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
