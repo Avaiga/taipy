@@ -205,9 +205,8 @@ class DataNode(_Entity, _Labeled):
     def last_edit_date(self) -> Optional[datetime]:
         """The date and time of the last modification."""
         last_modified_datetime = self._get_last_modified_datetime(self._properties.get(self._PATH_KEY, None))
-        if last_modified_datetime:
-            if not self._last_edit_date or last_modified_datetime > self._last_edit_date:
-                return last_modified_datetime
+        if last_modified_datetime and last_modified_datetime > self._last_edit_date: # type: ignore
+            return last_modified_datetime
         else:
             return self._last_edit_date
 
