@@ -43,9 +43,9 @@ No more compromise on performance, customization and scalability.
 Taipy is designed for data scientists and machine learning engineers to build data & AI web applications.
 &nbsp;
 
-⭐️->Enables building production-ready web applications. <br />
-⭐️-> No need to learn new languages. Only Python is needed.<br />
-⭐️-> Concentrate on Data and AI algorithms without development and deployment complexities.<br />
+⭐️ Enables building production-ready web applications. <br />
+⭐️  No need to learn new languages. Only Python is needed.<br />
+⭐️ Concentrate on Data and AI algorithms without development and deployment complexities.<br />
 
 &nbsp;
 
@@ -91,7 +91,7 @@ It then displays the top seven most popular movies in that genre.
 <br />
 
 > ⚠️ Keep in mind, in this example, we're using a very basic pipeline that consists of just one task. However,<br />
-> Taipy is capable of handling much more complex pipelines 🚀
+> Taipy is capable of handling operations of much more complex pipelines 🚀
 
 <br />
 
@@ -217,3 +217,5 @@ the License. You may obtain a copy of the License at
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
+
+We ❤️ you!
