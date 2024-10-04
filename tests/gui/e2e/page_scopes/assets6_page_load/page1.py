@@ -9,18 +9,13 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import re
+from taipy.gui import Markdown
 
-import pandas as pd
+a = 10
 
 
-def _get_data_type(value):
-    if not isinstance(value, str):
-        if pd.api.types.is_bool_dtype(value):
-            return "bool"
-        elif pd.api.types.is_integer_dtype(value):
-            return "int"
-        elif pd.api.types.is_float_dtype(value):
-            return "float"
-    m = re.match(r"^<class '(.*\.)?(.*?)(\d\d)?'>", str(type(value)))
-    return m.group(2) if m else None
+def on_page_load(state):
+    state.a = 20
+
+
+page = Markdown("<|{a}|id=text_a|>")
