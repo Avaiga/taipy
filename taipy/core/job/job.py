@@ -14,7 +14,7 @@ __all__ = ["Job"]
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled

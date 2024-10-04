@@ -14,8 +14,8 @@ from unittest.mock import patch
 
 import pytest
 
-from taipy.config import Config
-from taipy.config.common.scope import Scope
+from taipy.common.config import Config
+from taipy.common.config.common.scope import Scope
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.sql_table import SQLTableDataNode
@@ -161,8 +161,9 @@ class TestSQLTableDataNode:
 
         assert dn._engine is None
 
-        with patch("sqlalchemy.engine.Engine.connect") as engine_mock, patch(
-            "taipy.core.data.sql_table.SQLTableDataNode._create_table"
+        with (
+            patch("sqlalchemy.engine.Engine.connect") as engine_mock,
+            patch("taipy.core.data.sql_table.SQLTableDataNode._create_table"),
         ):
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None

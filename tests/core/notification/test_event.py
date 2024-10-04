@@ -11,7 +11,7 @@
 
 import pytest
 
-from taipy.config.common.frequency import Frequency
+from taipy.common.config.common.frequency import Frequency
 from taipy.core.exceptions.exceptions import InvalidEventAttributeName, InvalidEventOperation
 from taipy.core.notification.event import Event, EventEntityType, EventOperation, _make_event
 from taipy.core.submission.submission import Submission

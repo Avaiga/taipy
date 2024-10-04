@@ -15,9 +15,9 @@ from unittest.mock import patch
 import pytest
 
 from taipy._entrypoint import _entrypoint
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
+from taipy.common.config import Config
+from taipy.common.config.common.frequency import Frequency
+from taipy.common.config.common.scope import Scope
 from taipy.core import Orchestrator
 from taipy.core._version._cli._version_cli_factory import _VersionCLIFactory
 from taipy.core._version._version_manager import _VersionManager
