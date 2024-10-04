@@ -146,3 +146,9 @@ your issue.
 If you need to add a new dependency to Taipy, do not forget to add it in the `Pipfile` and the `setup.py`.
 Keep in mind that dependency is a vector of attack. The Taipy team limits the usage of external dependencies at the
 minimum.
+
+## Contributors
+
+<a href="https://github.com/avaiga/taipy/graphs/contributors">
+  <img alt="contributors" src="https://contrib.rocks/image?repo=avaiga/taipy"/>
+</a>
