@@ -72,7 +72,6 @@ def _config_doc(func):
                     f.write(annotation + sign + doc + content)
 
                 # Add the documentation for the attribute
-                clazz = section.__class__
                 annotation = '    @property\n'
                 sign = f"    def {attr_name} (self) -> {section.__name__}:\n"
                 if issubclass(section, UniqueSection):
@@ -80,7 +79,7 @@ def _config_doc(func):
                 elif issubclass(section, Section):
                     doc = f'        """The configured {section.__name__} sections ."""\n'
                 else:
-                    print(f" ERROR - Invalid section class: {section.__name__}")
+                    print(f" ERROR - Invalid section class: {section.__name__}")  # noqa: T201
                     return
                 content = "        pass\n\n"
                 f.write(annotation + sign + doc + content)

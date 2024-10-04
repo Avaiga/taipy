@@ -51,7 +51,7 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         parameters which are also passed to Pandas.
     - *"write_kwargs"* (`Optional[dict]`): Additional parameters passed to the
         *pandas.DataFrame.write_parquet()* function when writing the data. <br/>
-        The parameters in *"write_kwargs"* have a **higher precedence** than the 
+        The parameters in *"write_kwargs"* have a **higher precedence** than the
         top-level parameters which are also passed to Pandas.
     """
 

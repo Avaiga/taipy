@@ -13,7 +13,6 @@ import os
 from unittest import mock
 
 from taipy.common.config import Config
-from taipy.common.config.common.scope import Scope
 from taipy.core.config import DataNodeConfig
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
