@@ -16,6 +16,7 @@ import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 
 import { formatWSValue } from "../../utils";
+import { getSuffixedClassNames } from "./utils";
 import { useClassNames, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import { TaipyBaseProps, TaipyHoverProps, getCssSize } from "./utils";
 
@@ -35,6 +36,14 @@ const Markdown = lazy(() => import("react-markdown"));
 const MathJax = lazy(() => import("better-react-mathjax").then(module => ({ default: module.MathJax })));
 const MathJaxContext = lazy(() => import("better-react-mathjax").then(module => ({ default: module.MathJaxContext })));
 
+const mathJaxConfig = {
+    tex: {
+        inlineMath: [["$", "$"], ["\\(", "\\)"]],
+        displayMath: [["$$", "$$"], ["\\[", "\\]"]],
+    }
+}
+
+
 const Field = (props: TaipyFieldProps) => {
     const { id, dataType, format, defaultValue, raw } = props;
     const formatConfig = useFormatConfig();
@@ -43,13 +52,6 @@ const Field = (props: TaipyFieldProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const mode = typeof props.mode === "string" ? props.mode.toLowerCase() : undefined;
-
-    const mathJaxConfig = {
-        tex: {
-            inlineMath: [["$", "$"], ["\\(", "\\)"]],
-            displayMath: [["$$", "$$"], ["\\[", "\\]"]],
-        }
-    }
 
     const style = useMemo(
         () => ({ overflow: "auto", width: props.width ? getCssSize(props.width) : undefined }),
@@ -75,19 +77,19 @@ const Field = (props: TaipyFieldProps) => {
     return (
         <Tooltip title={hover || ""}>
             {mode == "pre" ? (
-                <pre className={className} id={id} style={style}>
+                <pre className={`${className} ${getSuffixedClassNames(className, '-' + mode)}`} id={id} style={style}>
                     {value}
                 </pre>
             ) : mode == "markdown" || mode == "md" ? (
-                <Markdown className={className}>{value}</Markdown>
+                <Markdown className={`${className} ${getSuffixedClassNames(className, '-' + mode)}`}>{value}</Markdown>
             ) : raw || mode == "raw" ? (
-                <span className={className} id={id} style={style}>
+                <span className={`${className} ${getSuffixedClassNames(className, '-' + mode)}`} id={id} style={style}>
                     {value}
                 </span>
             ) : mode == 'latex' ? (
                 <Suspense fallback={<div>Loading LaTex...</div>}>
                     <MathJaxContext config={mathJaxConfig}>
-                        <MathJax className={className} id={id}>
+                        <MathJax className={`${className} ${getSuffixedClassNames(className, '-' + mode)}`} id={id}>
                             {value}
                         </MathJax>
                     </MathJaxContext>
