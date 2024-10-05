@@ -720,6 +720,7 @@ class _Builder:
                 "content",
                 json.dumps(private_css if isinstance(private_css, dict) else private_css._dict),
             )
+            taipy_style.text = "style"
             self.el.append(taipy_style)
         return self.__set_dynamic_string_attribute("class_name", dynamic_property_name="dynamic_class_name")
 

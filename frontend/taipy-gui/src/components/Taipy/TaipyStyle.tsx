@@ -19,6 +19,13 @@ interface TaipyStyleProps {
     content: string;
 }
 
+/**
+ * A function that retrieves the dynamic className associated
+ * to an instance of component through the style property
+ *
+ * @param children - The react children of the component
+ * @returns The associated className.
+ */
 export const getComponentClassName = (children: ReactNode) =>
     (
         React.Children.map(children, (element) =>
