@@ -7,6 +7,8 @@ on:
 jobs:
   clean_issue_body:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: Remove 'No response', 'NA', and 'N/A' sections
         uses: actions/github-script@v6
