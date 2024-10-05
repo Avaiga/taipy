@@ -90,7 +90,7 @@ Data
 
 # demo files
 demo[_\-]*
-demo_*/
+demo[_|-]*/
 .airflow
 *.dags
 data_sources
