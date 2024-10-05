@@ -42,6 +42,8 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
         return {prop["name"]: prop.get("type", "str") for prop in property_list}
 
     def add_default(self):
+        if self.__module is not None:
+            return
         current_frame = inspect.currentframe()
         error_message = "Cannot generate elements API for the current module"
         if current_frame is None:

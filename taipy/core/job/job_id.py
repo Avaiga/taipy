@@ -12,4 +12,5 @@
 from typing import NewType
 
 JobId = NewType("JobId", str)
+"""Type that holds a `Job^` identifier."""
 JobId.__doc__ = """Type that holds a `Job^` identifier."""

@@ -25,8 +25,14 @@ from .exceptions.exceptions import OrchestratorServiceIsAlreadyRunning
 
 
 class Orchestrator:
-    """
-    Orchestrator service
+    """ The Taipy Orchestrator service.
+
+    When run, the Orchestrator starts a job dispatcher which is responsible for
+    dispatching the submitted jobs to an available executor for their execution.
+
+    !!! Note "Configuration update"
+        The Orchestrator service blocks the Config from updates while running.
+
     """
 
     _is_running = False
@@ -41,14 +47,11 @@ class Orchestrator:
     _dispatcher: Optional[_JobDispatcher] = None
 
     def __init__(self) -> None:
-        """
-        Initialize an Orchestrator service.
-        """
+        """Initialize an Orchestrator service."""
         pass
 
-    def run(self, force_restart=False):
-        """
-        Start an Orchestrator service.
+    def run(self, force_restart=False) -> None:
+        """ Start the Orchestrator service.
 
         This function checks and locks the configuration, manages application's version,
         and starts a job dispatcher.
@@ -63,9 +66,8 @@ class Orchestrator:
         self.__start_dispatcher(force_restart)
         self.__logger.info("Orchestrator service has been started.")
 
-    def stop(self, wait: bool = True, timeout: Optional[float] = None):
-        """
-        Stop the Orchestrator service.
+    def stop(self, wait: bool = True, timeout: Optional[float] = None) -> None:
+        """Stop the Orchestrator service.
         This function stops the dispatcher and unblock the Config for update.
 
         Parameters:
@@ -86,9 +88,7 @@ class Orchestrator:
 
     @classmethod
     def _manage_version_and_block_config(cls):
-        """
-        Manage the application's version and block the Config from updates.
-        """
+        """Manage the application's version and block the Config from updates."""
         if cls._version_is_initialized:
             return
 

@@ -25,22 +25,7 @@ from .task_config import TaskConfig
 
 
 class ScenarioConfig(Section):
-    """
-    Configuration fields needed to instantiate an actual `Scenario^`.
-
-    Attributes:
-        id (str): Identifier of the scenario config. It must be a valid Python variable name.
-        tasks (Optional[Union[TaskConfig, List[TaskConfig]]]): List of task configs.<br/>
-            The default value is None.
-        additional_data_nodes (Optional[Union[DataNodeConfig, List[DataNodeConfig]]]): <br/>
-            List of additional data node configs. The default value is None.
-        frequency (Optional[Frequency]): The frequency of the scenario's cycle. The default value is None.
-        comparators: Optional[Dict[str, Union[List[Callable], Callable]]]: Dictionary of the data node <br/>
-            config id as key and a list of Callable used to compare the data nodes as value.
-        sequences (Optional[Dict[str, List[TaskConfig]]]): Dictionary of sequence descriptions.
-            The default value is None.
-        **properties (dict[str, any]): A dictionary of additional properties.
-    """
+    """Configuration fields needed to instantiate an actual `Scenario^`."""
 
     name = "SCENARIO"
 
@@ -50,6 +35,21 @@ class ScenarioConfig(Section):
     _FREQUENCY_KEY = "frequency"
     _SEQUENCES_KEY = "sequences"
     _COMPARATOR_KEY = "comparators"
+
+    frequency: Optional[Frequency]
+    """The frequency of the scenario's cycle. The default value is None."""
+    comparators: Dict[str, List[Callable]]
+    """The comparator functions used to compare scenarios.
+
+    The default value is None.
+
+    Each comparator function is attached to a scenario's data node configuration.
+    The key of the dictionary parameter corresponds to the data node configuration id.
+    The value is a list of functions that are applied to all the data nodes instantiated
+    from the data node configuration attached to the comparator.
+    """
+    sequences: Dict[str, List[TaskConfig]]
+    """Dictionary of sequence descriptions. The default value is None."""
 
     def __init__(
         self,
@@ -104,38 +104,80 @@ class ScenarioConfig(Section):
 
     @property
     def task_configs(self) -> List[TaskConfig]:
+        """List of task configurations used by this scenario configuration."""
         return self._tasks
 
     @property
     def tasks(self) -> List[TaskConfig]:
+        """List of task configurations used by this scenario configuration."""
         return self._tasks
 
     @property
     def additional_data_node_configs(self) -> List[DataNodeConfig]:
+        """List of additional data nodes used by this scenario configuration."""
         return self._additional_data_nodes
 
     @property
     def additional_data_nodes(self) -> List[DataNodeConfig]:
+        """List of additional data nodes used by this scenario configuration."""
         return self._additional_data_nodes
 
     @property
     def data_node_configs(self) -> List[DataNodeConfig]:
+        """List of all data nodes used by this scenario configuration."""
         return self.__get_all_unique_data_nodes()
 
     @property
     def data_nodes(self) -> List[DataNodeConfig]:
+        """List of all data nodes used by this scenario configuration."""
         return self.__get_all_unique_data_nodes()
 
-    def __get_all_unique_data_nodes(self) -> List[DataNodeConfig]:
-        data_node_configs = set(self._additional_data_nodes)
-        for task in self._tasks:
-            data_node_configs.update(task.inputs)
-            data_node_configs.update(task.outputs)
+    def add_comparator(self, dn_config_id: str, comparator: Callable) -> None:
+        """Add a comparator to the scenario configuration.
 
-        return list(data_node_configs)
+        Parameters:
+            dn_config_id (str): The data node configuration id to which the comparator
+                will be applied.
+            comparator (Callable): The comparator function to be added.
+        """
+        self.comparators[dn_config_id].append(comparator)
+
+    def delete_comparator(self, dn_config_id: str) -> None:
+        """Delete a comparator from the scenario configuration."""
+        if dn_config_id in self.comparators:
+            del self.comparators[dn_config_id]
+
+    def add_sequences(self, sequences: Dict[str, List[TaskConfig]]) -> None:
+        """Add sequence descriptions to the scenario configuration.
+
+        When a `Scenario^` is instantiated from this configuration, the
+        sequence descriptions are used to add new sequences to the scenario.
+
+        Parameters:
+            sequences (Dict[str, List[TaskConfig]]): Dictionary of sequence descriptions.
+        """
+        self.sequences.update(sequences)
+
+    def remove_sequences(self, sequence_names: Union[str, List[str]]) -> None:
+        """Remove sequence descriptions from the scenario configuration.
+
+        Parameters:
+            sequence_names (Union[str, List[str]]): The name of the sequence or a list
+                of sequence names.
+        """
+        if isinstance(sequence_names, List):
+            for sequence_name in sequence_names:
+                self.sequences.pop(sequence_name)
+        else:
+            self.sequences.pop(sequence_names)
 
     @classmethod
-    def default_config(cls):
+    def default_config(cls) -> "ScenarioConfig":
+        """Get a scenario configuration with all the default values.
+
+        Returns:
+            A scenario configuration with all the default values.
+        """
         return ScenarioConfig(cls._DEFAULT_KEY, [], [], None, {})
 
     def _clean(self):
@@ -182,6 +224,14 @@ class ScenarioConfig(Section):
             **as_dict,
         )
 
+    def __get_all_unique_data_nodes(self) -> List[DataNodeConfig]:
+        data_node_configs = set(self._additional_data_nodes)
+        for task in self._tasks:
+            data_node_configs.update(task.inputs)
+            data_node_configs.update(task.outputs)
+
+        return list(data_node_configs)
+
     @staticmethod
     def __get_task_configs(task_config_ids: List[str], config: Optional[_Config]):
         task_configs = set()
@@ -226,13 +276,6 @@ class ScenarioConfig(Section):
         self._properties.update(as_dict)
         if default_section:
             self._properties = {**default_section.properties, **self._properties}
-
-    def add_comparator(self, dn_config_id: str, comparator: Callable):
-        self.comparators[dn_config_id].append(comparator)
-
-    def delete_comparator(self, dn_config_id: str):
-        if dn_config_id in self.comparators:
-            del self.comparators[dn_config_id]
 
     @staticmethod
     def _configure(
@@ -330,13 +373,3 @@ class ScenarioConfig(Section):
         )
         Config._register(section)
         return Config.sections[ScenarioConfig.name][_Config.DEFAULT_KEY]
-
-    def add_sequences(self, sequences: Dict[str, List[TaskConfig]]):
-        self.sequences.update(sequences)
-
-    def remove_sequences(self, sequence_names: Union[str, List[str]]):
-        if isinstance(sequence_names, List):
-            for sequence_name in sequence_names:
-                self.sequences.pop(sequence_name)
-        else:
-            self.sequences.pop(sequence_names)

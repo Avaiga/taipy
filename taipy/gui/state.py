@@ -29,14 +29,14 @@ class State:
     """Accessor to the bound variables from callbacks.
 
     `State` is used when you need to access the value of variables
-    bound to visual elements (see [Binding](../../userman/gui/binding.md)).<br/>
+    bound to visual elements (see [Binding](../../../../../userman/gui/binding.md)).<br/>
     Because each browser connected to the application server may represent and
     modify any variable at any moment as the result of user interaction, each
     connection holds its own set of variables along with their values. We call
     the set of these the application variables the application _state_, as seen
     by a given client.
 
-    Each callback (see [Callbacks](../../userman/gui/callbacks.md)) receives a specific
+    Each callback (see [Callbacks](../../../../../userman/gui/callbacks.md)) receives a specific
     instance of the `State` class, where you can find all the variables bound to
     visual elements in your application.
 

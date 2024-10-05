@@ -298,12 +298,12 @@ def exists(
     """Check if an entity with the specified identifier exists.
 
     This function checks if an entity with the given identifier exists.
-    It supports various types of entity identifiers, including `TaskId^`,
-    `DataNodeId^`, `SequenceId^`, `ScenarioId^`, `JobId^`, `CycleId^`, `SubmissionId^`, and string
+    It supports various types of entity identifiers, including `TaskId`,
+    `DataNodeId`, `SequenceId`, `ScenarioId`, `JobId`, `CycleId`, `SubmissionId`, and string
     representations.
 
     Parameters:
-        entity_id (Union[DataNodeId^, TaskId^, SequenceId^, ScenarioId^, JobId^, CycleId^, SubmissionId^, str]): The
+        entity_id (Union[DataNodeId, TaskId, SequenceId, ScenarioId, JobId, CycleId, SubmissionId, str]): The
             identifier of the entity to check for existence.
 
     Returns:
@@ -429,8 +429,8 @@ def is_deletable(entity: Union[Scenario, Job, Submission, ScenarioId, JobId, Sub
             job or submission to check.
 
     Returns:
-        A ReasonCollection object that can function as a Boolean value,
-        which is True if the given scenario, job or submission can be deleted. False otherwise.
+        A ReasonCollection object that can function as a Boolean value, which is True
+            if the given scenario, job or submission can be deleted. False otherwise.
     """
     if isinstance(entity, Job):
         return _JobManagerFactory._build_manager()._is_deletable(entity)
@@ -461,16 +461,16 @@ def delete(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, C
     - If a `SequenceId` is provided, the related jobs are deleted.
     - If a `TaskId` is provided, the related data nodes, and jobs are deleted.
     - If a `DataNodeId` is provided, the data node is deleted.
-    - If a `SubmissionId^` is provided, the related jobs are deleted.
+    - If a `SubmissionId` is provided, the related jobs are deleted.
       The submission can only be deleted if the execution has been finished.
-    - If a `JobId^` is provided, the job entity can only be deleted if the execution has been finished.
+    - If a `JobId` is provided, the job entity can only be deleted if the execution has been finished.
 
     Parameters:
         entity_id (Union[TaskId, DataNodeId, SequenceId, ScenarioId, SubmissionId, JobId, CycleId]):
             The identifier of the entity to delete.
 
     Raises:
-        ModelNotFound: No entity corresponds to the specified *entity_id*.
+        ModelNotFound^: No entity corresponds to the specified *entity_id*.
     """
     if _is_job(entity_id):
         job_manager = _JobManagerFactory._build_manager()
@@ -740,7 +740,7 @@ def subscribe_sequence(
 
 def unsubscribe_sequence(
     callback: Callable[[Sequence, Job], None], params: Optional[List[Any]] = None, sequence: Optional[Sequence] = None
-):
+) -> None:
     """Unsubscribe a function that is called when the status of a Job changes.
 
     Parameters:

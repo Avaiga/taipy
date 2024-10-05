@@ -23,7 +23,6 @@ class DataNodeSchema(Schema):
     last_edit_date = fields.String()
     job_ids = fields.List(fields.String)
     version = fields.String()
-    cacheable = fields.Boolean()
     validity_days = fields.Float()
     validity_seconds = fields.Float()
     edit_in_progress = fields.Boolean()
@@ -34,7 +33,6 @@ class DataNodeConfigSchema(Schema):
     name = fields.String()
     storage_type = fields.String()
     scope = fields.Integer()
-    cacheable = fields.Boolean()
 
     @pre_dump
     def serialize_scope(self, obj, **kwargs):

@@ -48,18 +48,18 @@ class _GuiSection(UniqueSection):
 
     @staticmethod
     def _configure(**properties) -> "_GuiSection":
-        """NOT DOCUMENTED
-        Configure the Graphical User Interface.
+        """Configure the Graphical User Interface.
 
         Parameters:
             **properties (dict[str, any]): Keyword arguments that configure the behavior of the `Gui^` instances.<br/>
                 Please refer to the gui config section
-                [page](../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
+                [page](../../../../../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
                 of the User Manual for more information on the accepted arguments.
+
         Returns:
             The GUI configuration.
 
-        """
+        """  # noqa: E501
         section = _GuiSection(property_list=list(default_config), **properties)
         TaipyConfig._register(section)
         return TaipyConfig.unique_sections[_GuiSection.name]
