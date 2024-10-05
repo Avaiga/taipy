@@ -8,7 +8,9 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-"""Reasons for the Taipy actions why they can't be performed.
+""" # Package for managing reasons why some Taipy operations are not allowed.
+
+Reasons for the Taipy actions why they can't be performed.
 
 Because Taipy applications are natively multiuser, asynchronous, and dynamic,
 some functions should not be invoked in some specific contexts. You can protect

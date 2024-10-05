@@ -37,7 +37,7 @@ class Section:
     can exist. They are subclasses of the `UniqueSection^` abstract class such as:
 
     - `GlobalAppConfig^` for configuring global application settings.
-    - `GuiConfig` for configuring the GUI service.
+    - `_GuiConfig` for configuring the GUI service.
     - `CoreSection^` for configuring the core package behavior.
     - `JobConfig^` for configuring the job orchestration.
     - `AuthenticationConfig^` for configuring authentication settings.
@@ -46,6 +46,9 @@ class Section:
 
     _DEFAULT_KEY = "default"
     _ID_KEY = "id"
+
+    id: str
+    """A valid python identifier that uniquely identifies the section."""
 
     def __init__(self, id, **properties):
         self.id = _validate_id(id)
@@ -58,6 +61,12 @@ class Section:
     @property
     @abstractmethod
     def name(self):
+        """The name of the section.
+
+        This property is used to identify the section in the configuration. It is used as a key in the
+        dictionary of sections in the `Config^` class.
+        Note also that the name of the section is exposed as a `Config^` property.
+        """
         raise NotImplementedError
 
     @abstractmethod
@@ -82,6 +91,7 @@ class Section:
 
     @property
     def properties(self):
+        """A dictionary of additional properties."""
         return {k: _tpl._replace_templates(v) for k, v in self._properties.items()}
 
     @properties.setter  # type: ignore

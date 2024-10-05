@@ -3,7 +3,7 @@ import { sendWsMessage, TAIPY_CLIENT_ID } from "../../src/context/wsUtils";
 import { uploadFile } from "../../src/workers/fileupload";
 
 import { Socket, io } from "socket.io-client";
-import { nanoid } from 'nanoid';
+import { nanoid } from "nanoid";
 import { DataManager, ModuleData, RequestDataOptions } from "./dataManager";
 import { initSocket } from "./socket";
 import { TaipyWsAdapter, WsAdapter } from "./wsAdapter";
@@ -25,7 +25,6 @@ export type OnEvent =
     | OnWsStatusUpdate;
 type Route = [string, string];
 type RequestDataCallback = (taipyApp: TaipyApp, encodedName: string, dataEventKey: string, value: unknown) => void;
-
 
 export class TaipyApp {
     socket: Socket;
@@ -51,7 +50,7 @@ export class TaipyApp {
         onInit: OnInitHandler | undefined = undefined,
         onChange: OnChangeHandler | undefined = undefined,
         path: string | undefined = undefined,
-        socket: Socket | undefined = undefined
+        socket: Socket | undefined = undefined,
     ) {
         socket = socket || io("/", { autoConnect: false, path: `${this.getBaseUrl()}socket.io` });
         this.onInit = onInit;
@@ -168,12 +167,16 @@ export class TaipyApp {
         this.routes = undefined;
         const id = getLocalStorageValue(TAIPY_CLIENT_ID, "");
         this.sendWsMessage("ID", TAIPY_CLIENT_ID, id);
-        this.sendWsMessage("AID", "connect", "");
-        this.sendWsMessage("GR", "", "");
         if (id !== "") {
             this.clientId = id;
+            this.initApp()
             this.updateContext(this.path);
         }
+    }
+
+    initApp() {
+        this.sendWsMessage("AID", "connect", "");
+        this.sendWsMessage("GR", "", "");
     }
 
     sendWsMessage(type: WsMessageType, id: string, payload: unknown, context: string | undefined = undefined) {
@@ -234,7 +237,6 @@ export class TaipyApp {
     update(encodedName: string, value: unknown) {
         this.sendWsMessage("U", encodedName, { value: value });
     }
-
 
     // Request Data from taipy backend
     // This will trigger the backend to send the data to the frontend

@@ -159,20 +159,17 @@ class _Builder:
             hash_name = hash_names.get(k)
             if hash_name is None:
                 if isinstance(v, str):
-                    looks_like_a_lambda = v.startswith("{lambda ") and v.endswith("}")
                     # need to unescape the double quotes that were escaped during preprocessing
                     (val, hash_name) = _Builder.__parse_attribute_value(gui, v.replace('\\"', '"'))
                 else:
-                    looks_like_a_lambda = False
                     val = v
-                if isroutine(val):
+                if isroutine(val) and not hash_name:
                     # if it's not a callable (and not a string), forget it
                     if val.__name__ == "<lambda>":
                         # if it is a lambda and it has already a hash_name, we're fine
-                        if looks_like_a_lambda or not hash_name:
-                            hash_name = _get_lambda_id(t.cast(LambdaType, val))
-                            gui._bind_var_val(hash_name, val)  # type: ignore[arg-type]
-                    elif not hash_name:
+                        hash_name = _get_lambda_id(t.cast(LambdaType, val))
+                        gui._bind_var_val(hash_name, val)  # type: ignore[arg-type]
+                    else:
                         hash_name = _get_expr_var_name(val.__name__)
 
                 if val is not None or hash_name:

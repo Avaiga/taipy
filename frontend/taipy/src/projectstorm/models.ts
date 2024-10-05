@@ -19,6 +19,7 @@ import { DataNode, Task } from "../utils/names";
 import { OnClick, TaskStatus } from "../utils/types";
 
 export class TaipyDiagramModel extends DiagramModel {
+    scenarioId?: string;
     onClick?: OnClick;
     constructor(onClick?: OnClick) {
         super();

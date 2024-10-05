@@ -31,33 +31,9 @@ from ..exceptions.exceptions import ConfigCoreVersionMismatched
 
 
 class CoreSection(UniqueSection):
-    """Configuration parameters for running the `Orchestrator^` service.
+    """Configuration parameters for running the `Orchestrator^` service."""
 
-    Attributes:
-        root_folder (str): Path of the base folder for the taipy application. The default value is "./taipy/"
-        storage_folder (str): Folder name used to store user data. The default value is "user_data/". The default
-            path is "user_data/".
-        taipy_storage_folder (str): Folder name used to store Taipy data. The default value is ".taipy/". The default
-            path is "./taipy/".
-        repository_type (str): Type of the repository to be used to store Taipy data. The default value is
-            "filesystem".
-        repository_properties (Dict[str, Union[str, int]]): A dictionary of additional properties to be used by the
-            repository.
-        read_entity_retry (int): Number of retries to read an entity from the repository before return failure.
-            The default value is 3.
-        mode (str): The Taipy operating mode. By default, the `Orchestrator^` service runs in "development" mode.
-            Please refer to the [Versioning management](../../userman/advanced_features/versioning/index.md)
-            documentation page for more details.
-        version_number (str)): The identifier of the user application version. Please refer to the
-            [Versioning management](../../userman/advanced_features/versioning/index.md)
-            documentation page for more details.
-        force (bool): If True, force the application run even if there are some conflicts in the
-            configuration.
-        core_version (str): The Taipy Core package version.
-        **properties (dict[str, any]): A dictionary of additional properties.
-    """
-
-    name = "CORE"
+    name: str = "CORE"
 
     _ROOT_FOLDER_KEY = "root_folder"
     _DEFAULT_ROOT_FOLDER = "./taipy/"
@@ -117,7 +93,7 @@ class CoreSection(UniqueSection):
 
         super().__init__(**properties)
 
-    def __copy__(self):
+    def __copy__(self) -> "CoreSection":
         return CoreSection(
             self.root_folder,
             self.storage_folder,
@@ -133,44 +109,64 @@ class CoreSection(UniqueSection):
         )
 
     @property
-    def storage_folder(self):
-        return _tpl._replace_templates(self._storage_folder)
+    def root_folder(self) -> str:
+        """ Path of the base folder for the taipy application.
 
-    @storage_folder.setter  # type: ignore
-    @_ConfigBlocker._check()
-    def storage_folder(self, val):
-        self._storage_folder = val
-
-    @property
-    def taipy_storage_folder(self):
-        return _tpl._replace_templates(self._taipy_storage_folder)
-
-    @taipy_storage_folder.setter  # type: ignore
-    @_ConfigBlocker._check()
-    def taipy_storage_folder(self, val):
-        self._taipy_storage_folder = val
-
-    @property
-    def root_folder(self):
+        The default value is "./taipy/".
+        """
         return _tpl._replace_templates(self._root_folder)
 
     @root_folder.setter  # type: ignore
     @_ConfigBlocker._check()
-    def root_folder(self, val):
+    def root_folder(self, val) -> None:
         self._root_folder = val
 
     @property
-    def repository_type(self):
+    def storage_folder(self) -> str:
+        """Folder name used to store user data.
+
+        The default value is "user_data/".
+
+        It is used in conjunction with the *root_folder* attribute. That means the storage path is
+        <root_folder><storage_folder> (The default path is "./taipy/user_data/").
+        """
+        return _tpl._replace_templates(self._storage_folder)
+
+    @storage_folder.setter  # type: ignore
+    @_ConfigBlocker._check()
+    def storage_folder(self, val) -> None:
+        self._storage_folder = val
+
+    @property
+    def taipy_storage_folder(self) -> str:
+        """Folder name used to store internal Taipy data.
+
+        The default value is ".taipy/".
+        """
+        return _tpl._replace_templates(self._taipy_storage_folder)
+
+    @taipy_storage_folder.setter  # type: ignore
+    @_ConfigBlocker._check()
+    def taipy_storage_folder(self, val) -> None:
+        self._taipy_storage_folder = val
+
+    @property
+    def repository_type(self) -> str:
+        """Type of the repository to be used to store Taipy data.
+
+        The default value is "filesystem".
+        """
         return _tpl._replace_templates(self._repository_type)
 
     @repository_type.setter  # type: ignore
     @_ConfigBlocker._check()
-    def repository_type(self, val):
+    def repository_type(self, val) -> None:
         self._repository_type = val
         CoreSection.__reload_repositories()
 
     @property
-    def repository_properties(self):
+    def repository_properties(self) -> Dict[str, Union[str, int]]:
+        """A dictionary of additional properties to be used by the repository."""
         return (
             {k: _tpl._replace_templates(v) for k, v in self._repository_properties.items()}
             if self._repository_properties
@@ -179,47 +175,85 @@ class CoreSection(UniqueSection):
 
     @repository_properties.setter  # type: ignore
     @_ConfigBlocker._check()
-    def repository_properties(self, val):
+    def repository_properties(self, val) -> None:
         self._repository_properties = val
 
     @property
-    def read_entity_retry(self):
+    def read_entity_retry(self) -> int:
+        """Number of retries to read an entity from the repository before return failure.
+
+        The default value is 3.
+        """
         return _tpl._replace_templates(self._read_entity_retry)
 
     @read_entity_retry.setter  # type: ignore
     @_ConfigBlocker._check()
-    def read_entity_retry(self, val):
+    def read_entity_retry(self, val) -> None:
         self._read_entity_retry = val
 
     @property
-    def mode(self):
+    def mode(self) -> str:
+        """The operating mode of Taipy.
+
+        Taipy applications are versioned. The versioning system is used to manage
+        the different versions of the user application. Depending on the
+        operating mode, Taipy will behave differently when a version of the
+        application runs. Three modes are available: "development", "experiment",
+        and "production". Please refer to the
+        [Versioning management](../../../../../../userman/advanced_features/versioning/index.md)
+        documentation page for more details.
+
+        By default, Taipy runs in "development" mode.
+        """
         return _tpl._replace_templates(self._mode)
 
     @mode.setter  # type: ignore
     @_ConfigBlocker._check()
-    def mode(self, val):
+    def mode(self, val) -> None:
         self._mode = val
 
     @property
-    def version_number(self):
+    def version_number(self) -> str:
+        """The identifier of the user application version.
+
+        Please refer to the
+        [Versioning management](../../../../../../userman/advanced_features/versioning/index.md)
+        documentation page for more details.
+        """
         return _tpl._replace_templates(self._version_number)
 
     @version_number.setter  # type: ignore
     @_ConfigBlocker._check()
-    def version_number(self, val):
+    def version_number(self, val) -> None:
         self._version_number = val
 
     @property
-    def force(self):
+    def force(self) -> bool:
+        """If True, force the run of a user application.
+
+        If the configuration of the application current version has some conflicts with
+        the configuration of the last run application, Taipy will exit. If the *force*
+        attribute is set to True, Taipy will run even if there are some conflicts.
+        """
         return _tpl._replace_templates(self._force)
 
     @force.setter  # type: ignore
     @_ConfigBlocker._check()
-    def force(self, val):
+    def force(self, val) -> None:
         self._force = val
 
+    @property
+    def core_version(self) -> str:
+        """The version of the Taipy core library."""
+        return _tpl._replace_templates(self._core_version)
+
     @classmethod
-    def default_config(cls):
+    def default_config(cls) -> "CoreSection":
+        """Return a core section with all the default values.
+
+        Returns:
+            The default core section.
+        """
         return CoreSection(
             cls._DEFAULT_ROOT_FOLDER,
             cls._DEFAULT_STORAGE_FOLDER,
@@ -374,7 +408,7 @@ class CoreSection(UniqueSection):
             mode (Optional[str]): Indicates the mode of the version management system.
                 Possible values are *"development"* or *"experiment"*. On Enterprise edition of Taipy,
                 *production* mode is also available. Please refer to the
-                [Versioning management](../../userman/advanced_features/versioning/index.md)
+                [Versioning management](../../../../../../userman/advanced_features/versioning/index.md)
                 documentation page for more details.
             version_number (Optional[str]): The string identifier of the version.
                  In development mode, the version number is ignored.
@@ -382,6 +416,7 @@ class CoreSection(UniqueSection):
                 has changed and run the application.
             **properties (Dict[str, Any]): A keyworded variable length list of additional arguments configure the
                 behavior of the `Orchestrator^` service.
+
         Returns:
             The Core configuration.
         """

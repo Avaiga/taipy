@@ -22,8 +22,24 @@ If you are running in a virtual environment, you will have to issue the command:
 pipenv install taipy
 ```
 
+Alternatively, you can use `venv` to create a virtual environment:
+```bash
+python -m venv myenv
+source myenv/bin/activate  # On Windows use `myenv\Scripts\activate`
+pip install taipy
+```
+
 These commands install the `taipy` package in the Python environment with all its
 dependencies.
+
+## Installing a Specific Version from PyPI
+
+To install a specific version of Taipy, use the following command:
+```bash
+pip install taipy==<version>
+```
+Replace `<version>` with a specific version number of Taipy.
+The list of all released Taipy versions can be found [here](https://pypi.org/project/taipy/#history).
 
 ## Installing from GitHub
 
@@ -120,7 +136,6 @@ TypeScript code from your debugger.
 > If you set this variable to the location where you build the web app
 > repeatedly, you will no longer have to reinstall Taipy GUI before you
 > try your code again.
-
 
 ## Running the tests
 

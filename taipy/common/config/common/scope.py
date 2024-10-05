@@ -39,9 +39,9 @@ class Scope(_OrderedEnum):
 
     This enumeration can have the following values:
 
-    - `GLOBAL`
-    - `CYCLE`
-    - `SCENARIO` (Default value)
+    - `GLOBAL`: Global scope, the data node is shared by all the scenarios.
+    - `CYCLE`: Cycle scope, the data node is shared by all the scenarios of the same cycle.
+    - `SCENARIO` (Default value): Scenario scope, the data node is unique to a scenario.
 
     Each data node config has a scope. It is an attribute propagated to the `DataNode^`
     when instantiated from a `DataNodeConfig^`. The scope is used to determine the

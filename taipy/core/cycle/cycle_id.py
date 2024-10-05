@@ -12,4 +12,5 @@
 from typing import NewType
 
 CycleId = NewType("CycleId", str)
+"""Type that holds a `Cycle^` identifier."""
 CycleId.__doc__ = """Type that holds a `Cycle^` identifier."""

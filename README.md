@@ -27,13 +27,14 @@ No more compromise on performance, customization, and scalability.
 
 </div>
 
-<p align="left">
+<p align="center"><h4>
     <br />
     <a href="https://docs.taipy.io/en/latest/"><strong>📚 Explore the docs </strong></a>
     <br />
     <a href="https://discord.com/invite/SJyz2VJGxV"><strong>  🫱🏼‍🫲🏼 Discord support </strong></a>
     <br />
     <a href="https://docs.taipy.io/en/latest/gallery/"><strong> 👀 Demos & Examples </strong></a>
+</h4>
   </p>
 
 &nbsp;
