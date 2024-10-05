@@ -26,17 +26,17 @@ export const getComponentClassName = (children: ReactNode) =>
         )?.filter((v) => v) || []
     ).join(" ");
 
-const getStyle = (style: Record<string, unknown>): string =>
+export const getStyle = (style: Record<string, unknown>): string =>
     Object.entries(style)
         .map(
             ([k, v]) =>
-                `${k}{${
-                    typeof v == "string"
-                        ? v
-                        : Object.entries(v as Record<string, unknown>)
+                `${k}${v &&
+                          typeof v == "object" &&
+                          !Array.isArray(v) ?
+                          `{${Object.entries(v as Record<string, unknown>)
                               .map(([vk, vv]) => (typeof vv == "string" ? `${vk}:${vv}` : getStyle({ [vk]: vv })))
-                              .join(";")
-                }}`
+                              .join(";")}}` : `:${v}`
+                }`
         )
         .join("\n");
 

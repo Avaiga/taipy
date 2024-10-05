@@ -16,7 +16,7 @@ import { render, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import { HelmetProvider } from "react-helmet-async";
-import TaipyStyle from "./TaipyStyle";
+import TaipyStyle, { getStyle } from "./TaipyStyle";
 import Button from "./Button";
 
 const style = { td: { color: "blue" } };
@@ -42,5 +42,11 @@ describe("TaipyStyle Component", () => {
             </HelmetProvider>
         );
         expect(getByRole("button")).toHaveClass("test");
+    });
+    it("get the style", () => {
+        expect(getStyle({cls: {a: "b"}})).toBe("cls{a:b}");
+        expect(getStyle({cls: {a: "b", subCls: {c: "d"}}})).toBe("cls{a:b;subCls{c:d}}");
+        expect(getStyle({cls: {a: [1, 2], subCls: {c: "d"}, e: 1, f: undefined}})).toBe("cls{a:1,2;subCls{c:d};e:1;f:undefined}");
+        expect(getStyle({cls: {a: "b", subCls: {c: "d", ssCls: {e: "f"}}}})).toBe("cls{a:b;subCls{c:d;ssCls{e:f}}}");
     });
 });
