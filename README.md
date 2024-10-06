@@ -1,5 +1,6 @@
 [![Hacktoberfest_clickable](https://github.com/user-attachments/assets/b1b5a430-6df9-40c2-999f-de3433f61251)](https://assorted-son-815.notion.site/Hacktoberfest-2024-with-Taipy-2a5032a3f01642709e88ffaa5d0d169e)
 
+
 <div align="center">
   <a href="https://taipy.io?utm_source=github" target="_blank">
   <picture>
@@ -34,7 +35,7 @@ No more compromise on performance, customization, and scalability.
     <br />
     <a href="https://docs.taipy.io/en/latest/gallery/"><strong> 👀 Demos & Examples </strong></a>
 </h4>
-</p>
+  </p>
 
 &nbsp;
 
@@ -55,18 +56,36 @@ Taipy is a Two-in-One Tool for UI Generation and Scenario/Data Management
 
 <br />
 
-| User Interface Generation | Scenario and Data Management |
-|--------------------------|------------------------------|
-| <img src="readme_img/taipy_github_GUI_video.gif" alt="Interface Animation" width="100%" /> | <img src="readme_img/taipy_github_scenarios_video.gif" alt="Back-End Animation" width="100%"/> |
+| User Interface Generation                                                                       | Scenario and Data Management                                                                        |
+| ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| <img src="readme_img/taipy_github_GUI_video.gif" alt="Interface Animation"  width="100%" /> | <img src="readme_img/taipy_github_scenarios_video.gif" alt="Back-End Animation"  width="100%"/> |
 
 &nbsp;
 
 ## ✨ Key Features
 
-<img src="readme_img/taipy_github_scenario.png" alt="Scenario Banner" width="49%" />  <img src="readme_img/taipy-github-optimized.png" alt="Back-End Animation" width="49.7%"/>
-<img src="readme_img/taipy_github_data_support.png" alt="Back-End Animation" width="49.7%" />
+<img src="readme_img/taipy_github_scenario.png" alt="Scenario Banner"  width="49%" />  <img src="readme_img/taipy-github-optimized.png" alt="Back-End Animation"  width="49.7%"/>
+<img src="readme_img/taipy_github_data_support.png" alt="Back-End Animation"  width="49.7%" />
 
 &nbsp;
+
+<br>
+## 🌟 Contributors
+
+<div align="center">
+  <img src="readme_img/Ani.png" alt="Contributor 1" width="100" />
+  
+  
+  <img src="readme_img/Arnab.jpeg" alt="Contributor 2" width="100" />
+ 
+  
+  <img src="readme_img/Arnab.jpeg" alt="Contributor 3" width="100" />
+
+  <img src="readme_img/vasu.png" alt="Contributor 3" width="100" />
+  
+</div>
+
+
 
 ## ⚙️ Quickstart
 
@@ -202,9 +221,14 @@ And the final result:
 
 Want to help build Taipy? Check out our [**Contributing Guide**](https://github.com/Avaiga/taipy/blob/develop/CONTRIBUTING.md).
 
-## 🪄 Code of conduct
+## 🪄 Code of Conduct
 
-Want to be part of the Taipy community? Check out our **[Code of Conduct](https://github.com/Avaiga/taipy/blob/develop/CODE_OF_CONDUCT.md)**
+Want to be part of the Taipy community? Check out our **[Code of Conduct](https://github.com/Avaiga/taipy/blob/develop/CODE_OF_CONDUCT.md)**.
+
+### Contribution Guidelines
+- [ ] I have checked the existing issues.
+- [ ] I am willing to work on this issue (optional).
+
 
 ## 🪪 License
 
@@ -212,7 +236,7 @@ Copyright 2021-2024 Avaiga Private Limited
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 the License. You may obtain a copy of the License at
-[Apache License](https://www.apache.org/licenses/LICENSE-2.0.txt)
+(Apache License)[http://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
