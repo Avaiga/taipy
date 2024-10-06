@@ -64,26 +64,28 @@ Taipy is a Two-in-One Tool for UI Generation and Scenario/Data Management
 
 ## ✨ Key Features
 
-<img src="readme_img/taipy_github_scenario.png" alt="Scenario Banner"  width="49%" />  <img src="readme_img/taipy-github-optimized.png" alt="Back-End Animation"  width="49.7%"/>
-<img src="readme_img/taipy_github_data_support.png" alt="Back-End Animation"  width="49.7%" />
+
+![taipy_github_scenario](https://github.com/user-attachments/assets/0dea9499-4ac4-4ee8-9d07-ca436ad86500)
+![taipy_github_scenarios_video](https://github.com/user-attachments/assets/7f131008-5a4a-467a-8c42-b3aa9f6c8e3a)
+<img width="660" alt="taipy-github-optimized" src="https://github.com/user-attachments/assets/3d0c6a44-dc38-4b3f-8ecc-3eeb34bf305c">
 
 &nbsp;
 
-<br>
-## 🌟 Contributors
+
+##  Our Valueable Contributors 🌟❤️
+
 
 <div align="center">
-  <img src="readme_img/Ani.png" alt="Contributor 1" width="100" />
-  
-  
-  <img src="readme_img/Arnab.jpeg" alt="Contributor 2" width="100" />
- 
-  
-  <img src="readme_img/Arnab.jpeg" alt="Contributor 3" width="100" />
-
-  <img src="readme_img/vasu.png" alt="Contributor 3" width="100" />
-  
+<div style="display: inline-block; text-align: center; margin: 10px;">
+        <img src="https://github.com/user-attachments/assets/85130c10-ba4c-49b4-867e-6a2789b6531e" width="60" height="60" style="border-radius: 50%; border: 2px solid #000;"/> 
+      
+ <img src="https://github.com/user-attachments/assets/4dfb7835-5dbd-49ea-8b96-dd20328ea0de" width="60" height="60" style="border-radius: 50%; border: 2px solid #000;"/>
+ <img src="https://github.com/user-attachments/assets/144d11ca-3761-415c-8a65-1b2c6949507b" width="60" height="60" style="border-radius: 50%; border: 2px solid #000;"/>
+ <img src="https://github.com/user-attachments/assets/2570f9ca-5719-4eb6-9f9d-1c5795e36478" width="60" height="60" style="border-radius: 50%; border: 2px solid #000;"/>
 </div>
+</div>
+
+
 
 
 
