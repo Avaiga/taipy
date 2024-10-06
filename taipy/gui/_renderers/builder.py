@@ -1129,4 +1129,5 @@ class _Builder:
         el_str = str(etree.tostring(self.el, encoding="utf8").decode("utf8"))
         el_str = el_str.replace("<?xml version='1.0' encoding='utf8'?>\n", "")
         el_str = el_str.replace("/>", ">")
+        el_str = el_str.replace(">style</TaipyStyle>", "/>")
         return el_str, self.__element_name
