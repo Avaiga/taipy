@@ -153,3 +153,16 @@ Then you can run the tests with the following command:
 ```bash
 pipenv run pytest
 ```
+
+
+## Known Installation Issues
+
+### On Mac OS M1 pro
+If you are getting error running `pipenv install --dev` run the below command
+```bash
+brew install libmagic
+pip install python-libmagic
+```
+
+After this you can proceed with installation.
+
