@@ -399,8 +399,8 @@ class _PandasDataAccessor(_DataAccessor):
                     x_column = decimator_pl.get("xAxis", "")
                     y_column = decimator_pl.get("yAxis", "")
                     z_column = decimator_pl.get("zAxis", "")
-                    filterd_columns = [x_column, y_column, z_column] if z_column else [x_column, y_column]
-                    decimated_df = df.copy().filter(filterd_columns, axis=1)
+                    filtered_columns = [x_column, y_column, z_column] if z_column else [x_column, y_column]
+                    decimated_df = df.copy().filter(filtered_columns, axis=1)
                     decimated_dfs.append(decimated_df)
                     continue
                 decimator_instance = (
@@ -418,12 +418,26 @@ class _PandasDataAccessor(_DataAccessor):
                     decimated_dfs.append(decimated_df)
                     if is_decimator_applied:
                         self._gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(decimated_df))
-            # merge the decimated dataframes
+            # merge the decimated dataFrames
             if len(decimated_dfs) > 1:
-                df = pd.merge(*decimated_dfs, how="outer", left_index=True, right_index=True)
+                # get the unique columns from all decimated dataFrames
+                decimated_columns = pd.Index([])
+                for _df in decimated_dfs:
+                    decimated_columns = decimated_columns.append(_df.columns)
+                # find the columns that are duplicated across dataFrames
+                overlapping_columns = decimated_columns[decimated_columns.duplicated()].unique()
+                # concatenate the dataFrames without overwriting columns
+                merged_df = pd.concat(decimated_dfs, axis=1)
+                # resolve overlapping columns by combining values
+                for col in overlapping_columns:
+                    # for each overlapping column, combine the values across dataFrames
+                    # (e.g., take the first non-null value)
+                    cols_to_combine = merged_df.loc[:, col].columns
+                    merged_df[col] = merged_df[cols_to_combine].bfill(axis=1).iloc[:, 0]
+                # drop duplicated col since they are now the same
+                df = merged_df.loc[:,~merged_df.columns.duplicated()]
             elif len(decimated_dfs) == 1:
                 df = decimated_dfs[0]
-            df = self.__build_transferred_cols(columns, t.cast(pd.DataFrame, df), is_copied=is_copied)
             if data_format is _DataFormat.CSV:
                 df = self.__build_transferred_cols(
                     columns,
