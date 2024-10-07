@@ -420,7 +420,22 @@ class _PandasDataAccessor(_DataAccessor):
                         self._gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(decimated_df))
             # merge the decimated dataFrames
             if len(decimated_dfs) > 1:
-                df = decimated_dfs[0].join(t.cast(list, decimated_dfs[1:]), how="outer")
+                # get the unique columns from all decimated dataFrames
+                decimated_columns = pd.Index([])
+                for _df in decimated_dfs:
+                    decimated_columns = decimated_columns.append(_df.columns)
+                # find the columns that are duplicated across dataFrames
+                overlapping_columns = decimated_columns[decimated_columns.duplicated()].unique()
+                # concatenate the dataFrames without overwriting columns
+                merged_df = pd.concat(decimated_dfs, axis=1)
+                # resolve overlapping columns by combining values
+                for col in overlapping_columns:
+                    # for each overlapping column, combine the values across dataFrames
+                    # (e.g., take the first non-null value)
+                    cols_to_combine = merged_df.loc[:, col].columns
+                    merged_df[col] = merged_df[cols_to_combine].bfill(axis=1).iloc[:, 0]
+                # drop duplicated col since they are now the same
+                df = merged_df.loc[:,~merged_df.columns.duplicated()]
             elif len(decimated_dfs) == 1:
                 df = decimated_dfs[0]
             if data_format is _DataFormat.CSV:
