@@ -24,7 +24,7 @@ def test_taipy_base():
     assert tb.get_name() == "hash"
     tb.set("a value")
     assert tb.get() == "a value"
-    assert tb.get_hash() == NotImplementedError
+    assert tb.get_hash() is NotImplementedError
 
 
 def test_taipy_bool():
