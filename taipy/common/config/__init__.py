@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-""" The `taipy.common.config` package provides features to configure a Taipy application.
+"""The `taipy.common.config` package provides features to configure a Taipy application.
 
 Its main class is the `Config^` singleton. It exposes various static methods
 and attributes to configure the Taipy application and retrieve the configuration values.
@@ -56,9 +56,9 @@ from .section import Section
 from .unique_section import UniqueSection
 
 
-def __write_func_to_doc(attr_name, configuration_methods):
+def __write_func_to_doc(section, attr_name, configuration_methods):
     if os.environ.get("GENERATING_TAIPY_DOC", None) and os.environ["GENERATING_TAIPY_DOC"] == "true":
-        with (open("config_doc.txt", "a") as f):
+        with open("config_doc.txt", "a") as f:
             from inspect import signature
 
             # Add the documentation for configure methods
@@ -70,7 +70,7 @@ def __write_func_to_doc(attr_name, configuration_methods):
                 f.write(annotation + sign + doc + content)
 
             # Add the documentation for the attribute
-            annotation = '    @property\n'
+            annotation = "    @property\n"
             sign = f"    def {attr_name} (self) -> {section.__name__}:\n"
             if issubclass(section, UniqueSection):
                 doc = f'        """The configured {section.__name__} section."""\n'
@@ -85,15 +85,15 @@ def __write_func_to_doc(attr_name, configuration_methods):
 
 def _config_doc_for_config_section(func):
     def func_with_doc(section, attribute_name, default, configuration_methods, add_to_unconflicted_sections=False):
-        __write_func_to_doc(attribute_name, configuration_methods)
+        __write_func_to_doc(section, attribute_name, configuration_methods)
         return func(section, attribute_name, default, configuration_methods, add_to_unconflicted_sections)
 
     return func_with_doc
 
 
 def _config_doc_for_config_method(func):
-    def func_with_doc(attribute_name, configuration_methods):
-        __write_func_to_doc(attribute_name, configuration_methods)
+    def func_with_doc(section, attribute_name, configuration_methods):
+        __write_func_to_doc(section, attribute_name, configuration_methods)
         return func(attribute_name, configuration_methods)
 
     return func_with_doc
