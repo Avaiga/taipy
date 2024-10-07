@@ -224,7 +224,7 @@ def test_read_configuration_file():
     assert Config.scenarios["my_scenario"].id == "my_scenario"
     assert Config.scenarios["my_scenario"].owner == "John Doe"
     assert len(Config.scenarios["my_scenario"].tasks) == 1
-    assert type(Config.scenarios["my_scenario"].tasks[0]) =is TaskConfig
+    assert type(Config.scenarios["my_scenario"].tasks[0]) is TaskConfig
     assert len(Config.scenarios["my_scenario"].additional_data_nodes) == 1
     assert type(Config.scenarios["my_scenario"].additional_data_nodes[0]) is DataNodeConfig
     assert Config.scenarios["my_scenario"].tasks[0].id == "my_task"
