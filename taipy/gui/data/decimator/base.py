@@ -261,7 +261,8 @@ class Decimator(ABC):
 
     @abstractmethod
     def decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
-        """Decimate function.
+        """NOT DOCUMENTED
+        Decimate the dataset.
 
         This method is executed when the appropriate conditions specified in the
         constructor are met. This function implements the algorithm that determines
