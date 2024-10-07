@@ -790,7 +790,7 @@ class _Builder:
         var_name: str,
         value: t.Optional[t.Any] = None,
         native_type: bool = False,
-        var_type: t.Optional[PropertyType] = None,
+        var_type: t.Optional[t.Union[PropertyType, t.Type[_TaipyBase]]] = None,
     ):
         if value is None:
             value = self.__attributes.get(var_name)
@@ -820,7 +820,7 @@ class _Builder:
         with_update=True,
         with_default=True,
         native_type=False,
-        var_type: t.Optional[PropertyType] = None,
+        var_type: t.Optional[t.Union[PropertyType, t.Type[_TaipyBase]]] = None,
         default_val: t.Any = None,
     ):
         """
@@ -941,7 +941,9 @@ class _Builder:
             self.set_attribute("mode", "theme")
         return self
 
-    def __get_typed_hash_name(self, hash_name: str, var_type: t.Optional[PropertyType]) -> str:
+    def __get_typed_hash_name(
+        self, hash_name: str, var_type: t.Optional[t.Union[PropertyType, t.Type[_TaipyBase]]]
+    ) -> str:
         if taipy_type := _get_taipy_type(var_type):
             expr = self.__gui._get_expr_from_hash(hash_name)
             hash_name = self.__gui._evaluate_bind_holder(t.cast(t.Type[_TaipyBase], taipy_type), expr)
