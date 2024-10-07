@@ -45,6 +45,7 @@ and attributes to configure the Taipy application and retrieve the configuration
 
 """
 
+import os
 from typing import List
 
 from ._init import Config
@@ -55,40 +56,50 @@ from .section import Section
 from .unique_section import UniqueSection
 
 
-def _config_doc(func):
-    def func_with_doc(section, attr_name, default, configuration_methods, add_to_unconflicted_sections=False):
-        import os
+def __write_func_to_doc(attr_name, configuration_methods):
+    if os.environ.get("GENERATING_TAIPY_DOC", None) and os.environ["GENERATING_TAIPY_DOC"] == "true":
+        with (open("config_doc.txt", "a") as f):
+            from inspect import signature
 
-        if os.environ.get("GENERATING_TAIPY_DOC", None) and os.environ["GENERATING_TAIPY_DOC"] == "true":
-            with (open("config_doc.txt", "a") as f):
-                from inspect import signature
-
-                # Add the documentation for configure methods
-                for exposed_configuration_method, configuration_method in configuration_methods:
-                    annotation = "    @staticmethod\n"
-                    sign = "    def " + exposed_configuration_method + str(signature(configuration_method)) + ":\n"
-                    doc = '        """' + configuration_method.__doc__ + '"""\n'
-                    content = "        pass\n\n"
-                    f.write(annotation + sign + doc + content)
-
-                # Add the documentation for the attribute
-                annotation = '    @property\n'
-                sign = f"    def {attr_name} (self) -> {section.__name__}:\n"
-                if issubclass(section, UniqueSection):
-                    doc = f'        """The configured {section.__name__} section."""\n'
-                elif issubclass(section, Section):
-                    doc = f'        """The configured {section.__name__} sections ."""\n'
-                else:
-                    print(f" ERROR - Invalid section class: {section.__name__}")  # noqa: T201
-                    return
+            # Add the documentation for configure methods
+            for exposed_configuration_method, configuration_method in configuration_methods:
+                annotation = "    @staticmethod\n"
+                sign = "    def " + exposed_configuration_method + str(signature(configuration_method)) + ":\n"
+                doc = '        """' + configuration_method.__doc__ + '"""\n'
                 content = "        pass\n\n"
                 f.write(annotation + sign + doc + content)
-        return func(section, attr_name, default, configuration_methods, add_to_unconflicted_sections)
+
+            # Add the documentation for the attribute
+            annotation = '    @property\n'
+            sign = f"    def {attr_name} (self) -> {section.__name__}:\n"
+            if issubclass(section, UniqueSection):
+                doc = f'        """The configured {section.__name__} section."""\n'
+            elif issubclass(section, Section):
+                doc = f'        """The configured {section.__name__} sections ."""\n'
+            else:
+                print(f" ERROR - Invalid section class: {section.__name__}")  # noqa: T201
+                return
+            content = "        pass\n\n"
+            f.write(annotation + sign + doc + content)
+
+
+def _config_doc_for_config_section(func):
+    def func_with_doc(section, attribute_name, default, configuration_methods, add_to_unconflicted_sections=False):
+        __write_func_to_doc(attribute_name, configuration_methods)
+        return func(section, attribute_name, default, configuration_methods, add_to_unconflicted_sections)
 
     return func_with_doc
 
 
-@_config_doc
+def _config_doc_for_config_method(func):
+    def func_with_doc(attribute_name, configuration_methods):
+        __write_func_to_doc(attribute_name, configuration_methods)
+        return func(attribute_name, configuration_methods)
+
+    return func_with_doc
+
+
+@_config_doc_for_config_section
 def _inject_section(
     section_clazz,
     attribute_name: str,
@@ -112,6 +123,7 @@ def _inject_section(
         setattr(Config, exposed_configuration_method, configuration_method)
 
 
-def _inject_method(configuration_methods: List[tuple]):
+@_config_doc_for_config_method
+def _inject_method(attribute_name, configuration_methods: List[tuple]):
     for exposed_configuration_method, configuration_method in configuration_methods:
         setattr(Config, exposed_configuration_method, configuration_method)
