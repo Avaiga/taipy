@@ -399,8 +399,8 @@ class _PandasDataAccessor(_DataAccessor):
                     x_column = decimator_pl.get("xAxis", "")
                     y_column = decimator_pl.get("yAxis", "")
                     z_column = decimator_pl.get("zAxis", "")
-                    filterd_columns = [x_column, y_column, z_column] if z_column else [x_column, y_column]
-                    decimated_df = df.copy().filter(filterd_columns, axis=1)
+                    filtered_columns = [x_column, y_column, z_column] if z_column else [x_column, y_column]
+                    decimated_df = df.copy().filter(filtered_columns, axis=1)
                     decimated_dfs.append(decimated_df)
                     continue
                 decimator_instance = (
@@ -418,12 +418,11 @@ class _PandasDataAccessor(_DataAccessor):
                     decimated_dfs.append(decimated_df)
                     if is_decimator_applied:
                         self._gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(decimated_df))
-            # merge the decimated dataframes
+            # merge the decimated dataFrames
             if len(decimated_dfs) > 1:
-                df = pd.merge(*decimated_dfs, how="outer", left_index=True, right_index=True)
+                df = decimated_dfs[0].join(t.cast(list, decimated_dfs[1:]), how="outer")
             elif len(decimated_dfs) == 1:
                 df = decimated_dfs[0]
-            df = self.__build_transferred_cols(columns, t.cast(pd.DataFrame, df), is_copied=is_copied)
             if data_format is _DataFormat.CSV:
                 df = self.__build_transferred_cols(
                     columns,
