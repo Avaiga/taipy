@@ -196,7 +196,9 @@ class Decimator(ABC):
         is_copied: bool = False,
         filter_unused_columns: bool = True,
     ):
-        """This function is executed whenever a decimator is found during runtime.
+        """NOT DOCUMENTED
+        
+        This function is executed whenever a decimator is found during runtime.
 
         Users can override this function by providing an alternate implementation inside the constructor
         to provide custom decimation logic.
