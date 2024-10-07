@@ -157,7 +157,16 @@ const getDecimatorsPayload = (
             width: plotDiv?.clientWidth,
             height: plotDiv?.clientHeight,
             decimators: decimators.map((d, i) =>
-                d
+                desc = {
+                        xAxis: getAxis(traces, i, columns, 0),
+                        yAxis: getAxis(traces, i, columns, 1),
+                        zAxis: getAxis(traces, i, columns, 2),
+                        chartMode: modes[i],
+                }
+                if (d) {
+                    desc["decimator"] = d;
+                }
+                return desc
                     ? {
                         decimator: d,
                         xAxis: getAxis(traces, i, columns, 0),
