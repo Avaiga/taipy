@@ -96,12 +96,12 @@ is the perfect place to begin your journey and unlock the full potential of Taip
 
 Let's create a scenario in Taipy that allows you to filter movie data based on your chosen genre.<br />
 This scenario is designed as a straightforward pipeline.<br />
-Every time you change your genre selection, the scenario runs to process your request.<br />
+Every time you change your genre selection, the scenario processes your request.<br />
 It then displays the top seven most popular movies in that genre.
 
 <br />
 
-> ⚠️ Keep in mind, in this example, we're using a very basic pipeline that consists of just one task. However,<br />
+> ⚠️ Keep in mind that in this example, we're using a fundamental pipeline of just one task. However,<br />
 > Taipy is capable of handling much more complex pipelines 🚀
 
 <br />
@@ -137,8 +137,8 @@ Check out the movie genre demo scenario creation with this [Demo](https://docs.t
 ## User Interface Generation and Scenario & Data Management
 
 This simple Taipy application demonstrates how to create a basic film recommendation system using Taipy.<br />
-The application filters a dataset of films based on the user's selected genre and displays the top seven films in that genre by popularity.
-Here is the full code for both the front-end and back-end of the application.
+The program ranks the top seven films in a certain genre by popularity after filtering a movie dataset according to the user's chosen genre.
+This is the complete code for the application's front end and back end.
 
 ```python
 import taipy as tp
@@ -204,7 +204,8 @@ if __name__ == "__main__":
     Gui(page=my_page).run()
 ```
 
-And the final result:
+## And the final result:
+
 <img src="readme_img/readme_app.gif" />
 
 &nbsp;
