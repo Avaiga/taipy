@@ -30,7 +30,7 @@ Taipy is a Python library for creating Business Applications. More information o
 *taipy-core* and *taipy-rest* to let users install the minimum they need.
 
 Taipy Core mostly includes business-oriented
-features. It helps users create and manage business applications and improve analyses
+features. It helps users create and manage business applications and improve analysis
 capability through time, conditions and hypothesis.
 
 Taipy REST is a set of APIs built on top of the
