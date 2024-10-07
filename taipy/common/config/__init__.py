@@ -124,6 +124,6 @@ def _inject_section(
 
 
 @_config_doc_for_config_method
-def _inject_method(attribute_name, configuration_methods: List[tuple]):
+def _inject_method(section, attribute_name, configuration_methods: List[tuple]):
     for exposed_configuration_method, configuration_method in configuration_methods:
         setattr(Config, exposed_configuration_method, configuration_method)
