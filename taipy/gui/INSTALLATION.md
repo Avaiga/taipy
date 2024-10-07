@@ -16,7 +16,7 @@ Taipy GUI needs your system to have **Python 3.9** or above installed.
 
 ## Installing the latest release
 
-The easiest way to install Taipy GUI is using pip
+The easiest way to install Taipy GUI is by using pip
 
 Run the command:
 ```bash
