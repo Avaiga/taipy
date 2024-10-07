@@ -67,6 +67,9 @@ jobs:
       - name: Publish to PyPI
         if: steps.check-version.outputs.exists == 'false'
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
+          skip-existing: true
 
   publish-main-package-to-pypi:
     permissions:
