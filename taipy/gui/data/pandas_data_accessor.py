@@ -417,7 +417,7 @@ class _PandasDataAccessor(_DataAccessor):
                     # add decimated dataframe to the list of decimated
                     decimated_dfs.append(decimated_df)
                     if is_decimator_applied:
-                        self._gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(df))
+                        self._gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(decimated_df))
             # merge the decimated dataframes
             if len(decimated_dfs) > 1:
                 df = pd.merge(*decimated_dfs, how="outer", left_index=True, right_index=True)
