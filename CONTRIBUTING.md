@@ -67,7 +67,7 @@ the community that you are working on it.
 3. For convention help, we provide a [pre-commit](https://pre-commit.com/hooks.html) file.
    This tool will run before each commit and will automatically reformat code or raise warnings and errors based on the
    code format or Python typing.
-   You can install and setup it up by doing:
+   You can install and set it up by doing:
    ```bash
    $ pipenv install pre-commit
    $ pipenv run python -m pre-commit install
@@ -84,13 +84,13 @@ the community that you are working on it.
    Before you submit a pull request for review from your forked repo, check that it meets these guidelines:
      - The code and the branch name follow the [Taipy coding style](#coding-style-and-best-practices).
      - Include tests.
-     - Code is [rebase](http://stackoverflow.com/a/7244456/1110993).
+     - Code is [rebased](http://stackoverflow.com/a/7244456/1110993).
      - License is present.
      - pre-commit works - without mypy error.
      - Taipy tests are passing.
 
 6. The Taipy team will have a look at your Pull Request and will give feedback. If every requirement is valid, your
-   work will be added in the next release, congratulation!
+   work will be added in the next release, congratulations!
 
 ## Coding style and best practices
 

@@ -13,9 +13,24 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
+from taipy.gui import Gui, Markdown
 
-page = "<|Button Label|button|>"
+data = {
+    "User Name": ["johndoe", "janedoe", "admin", "sampleuser", "guestaccount"],
+    "Password": ["Password123!", "Test@2023", "Admin#789", "SamplePass#1", "Guest!2024"],
+}
+
+
+def hide_text(p0, p1, p2, p3, p4):
+    return "*" * 8
+
+
+def hide_text2(_1, _2, index, _3, _4):
+    return "*" * 8
+
+
+page = Markdown("<|{data}|table|format_fn[Password]=hide_text|editable[Password]|show_all|no on_add|no on_delete|>")
+
 
 if __name__ == "__main__":
-    Gui(page).run(title="Button - Simple")
+    Gui(page).run(title="Table - Custom formatting")

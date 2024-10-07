@@ -257,7 +257,7 @@ def test_filter_by_date(gui: Gui, helpers, small_dataframe):
 
 
 def test_decimator(gui: Gui, helpers, small_dataframe):
-    a_decimator = ScatterDecimator()  # noqa: F841
+    a_decimator = ScatterDecimator(threshold=1)  # noqa: F841
 
     accessor = _PandasDataAccessor(gui)
     pd = pandas.DataFrame(data=small_dataframe)
@@ -265,7 +265,7 @@ def test_decimator(gui: Gui, helpers, small_dataframe):
     # set gui frame
     gui._set_frame(inspect.currentframe())
 
-    gui.add_page("test", "<|Hello {a_decimator}|button|id={btn_id}|>")
+    gui.add_page("test", "<|Hello {a_decimator}|button|>")
     gui.run(run_server=False)
     flask_client = gui._server.test_client()
 
@@ -283,7 +283,9 @@ def test_decimator(gui: Gui, helpers, small_dataframe):
                 "end": -1,
                 "alldata": True,
                 "decimatorPayload": {
-                    "decimators": [{"decimator": "a_decimator", "chartMode": "markers"}],
+                    "decimators": [
+                        {"decimator": "a_decimator", "chartMode": "markers", "xAxis": "name", "yAxis": "value"}
+                    ],
                     "width": 100,
                 },
             },

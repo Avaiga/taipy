@@ -15,7 +15,7 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui, Icon
 
-icon = Icon("./charles-avatar.png", "charles")
+icon = Icon("charles-avatar.png", "Charles")
 
 page = """
 <|{icon}|button|>
