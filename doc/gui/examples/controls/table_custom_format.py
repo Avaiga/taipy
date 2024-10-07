@@ -13,8 +13,6 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from random import randrange
-
 from taipy.gui import Gui, Markdown
 
 data = {

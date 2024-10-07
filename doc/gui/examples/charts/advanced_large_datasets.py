@@ -74,7 +74,7 @@ elif processing == Processing.DECIMATION:
     # Use Taipy's decimation processing
     decimator = MinMaxDecimator(200)
 
-print(f"Using {str(processing)}: Dataset has {y_values_noise.size} data points")
+print(f"Using {str(processing)}: Dataset has {y_values_noise.size} data points")  # noqa: F401, T201
 
 # Create the DataFrame
 data = pd.DataFrame({"X": x_values, "Y": y_values_noise})
