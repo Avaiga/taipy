@@ -14,7 +14,6 @@
 #     python <script>
 # -----------------------------------------------------------------------------------------
 from enum import Enum
-import random
 
 import numpy as np
 import pandas as pd

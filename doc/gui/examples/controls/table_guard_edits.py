@@ -33,7 +33,7 @@ def pick_user() -> tuple[str, int]:
         try:
             person = response.json()["results"][0]
             name = person["name"]
-            new_user = f"{name["first"]} {name["last"]}"
+            new_user = f"{name['first']} {name['last']}"
             # Generate a random salary expectation amount
             salary = random.randint(8, 24) * 5000
             return (new_user, salary)
