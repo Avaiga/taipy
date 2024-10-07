@@ -234,7 +234,8 @@ class Decimator(ABC):
         payload: t.Dict[str, t.Any],
         is_copied: bool,
     ):
-        """This function is executed whenever a decimator is applied to the data.
+        """NOT DOCUMENTED
+        This function is executed whenever a decimator is applied to the data.
 
         This function is used by default the `on_decimate` function.
         Users can override this function by providing an alternate function inside the constructor
