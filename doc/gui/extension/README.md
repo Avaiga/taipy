@@ -50,7 +50,7 @@ To complete the build of the extension library, we need the following tools:
 - [Node.js](https://nodejs.org/en/) 18.0 or higher: a JavaScript runtime.<br/>
   This embeds [npm](https://www.npmjs.com/), the Node Package Manager.
 
-The build process needs that you set the environment variable `TAIPY_DIR` to the location of
+The build process needs you to set the environment variable `TAIPY_DIR` to the location of
 the Taipy installation:
 
 - If you build from a local copy (a clone, for example) of the
