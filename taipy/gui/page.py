@@ -160,7 +160,7 @@ class Page:
           }
           "class2": {
             "class3": {
-                "css_property2": "css_value2",
+              "css_property2": "css_value2",
             }
           }
         }
