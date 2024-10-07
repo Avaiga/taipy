@@ -51,11 +51,11 @@ class _TemplateHandler:
                 if required:
                     raise MissingEnvVariableError(f"Environment variable {var} is not set.")
                 return default
-            if type == bool:
+            if type is bool:
                 return cls._to_bool(val)
-            elif type == int:
+            elif type is int:
                 return cls._to_int(val)
-            elif type == float:
+            elif type is float:
                 return cls._to_float(val)
             elif type == Scope:
                 return cls._to_scope(val)
