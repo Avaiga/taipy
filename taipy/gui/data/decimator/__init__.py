@@ -15,5 +15,5 @@ from .minmax import MinMaxDecimator
 from .rdp import RDP
 from .scatter_decimator import ScatterDecimator
 
-# Export the following namespace
+# Export the following classes
 __all__ = ["LTTB", "MinMaxDecimator", "RDP", "ScatterDecimator", "Decimator"]
