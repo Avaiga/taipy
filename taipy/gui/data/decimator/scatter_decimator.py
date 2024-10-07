@@ -34,8 +34,8 @@ class ScatterDecimator(Decimator):
         max_overlap_points: t.Optional[int] = None,
         threshold: t.Optional[int] = None,
         zoom: t.Optional[bool] = True,
-        on_decimate: t.Optional[t.Callable] = None,
-        apply_decimator: t.Optional[t.Callable] = None,
+        # on_decimate: t.Optional[t.Callable] = None,
+        # apply_decimator: t.Optional[t.Callable] = None,
     ):
         """Initialize a new `ScatterDecimator`.
 
@@ -49,11 +49,11 @@ class ScatterDecimator(Decimator):
                 decimation is applied.
             zoom (Optional[bool]): set to True to reapply the decimation
                 when zoom or re-layout events are triggered.
-            on_decimate (Optional[Callable]): an user-defined function that is executed when the decimator
-                is found during runtime. This function can be used to provide custom decimation logic.
-            apply_decimator (Optional[Callable]): an user-defined function that is executed when the decimator
-                is applied to modify the data.
         """
+        # on_decimate (Optional[Callable]): an user-defined function that is executed when the decimator
+        #     is found during runtime. This function can be used to provide custom decimation logic.
+        # apply_decimator (Optional[Callable]): an user-defined function that is executed when the decimator
+        #     is applied to modify the data.
         super().__init__(threshold, zoom)
         binning_ratio = binning_ratio if binning_ratio is not None else 1
         self._binning_ratio = binning_ratio if binning_ratio > 0 else 1

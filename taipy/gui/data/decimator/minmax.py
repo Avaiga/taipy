@@ -32,8 +32,8 @@ class MinMaxDecimator(Decimator):
         n_out: int,
         threshold: t.Optional[int] = None,
         zoom: t.Optional[bool] = True,
-        on_decimate: t.Optional[t.Callable] = None,
-        apply_decimator: t.Optional[t.Callable] = None,
+        # on_decimate: t.Optional[t.Callable] = None,
+        # apply_decimator: t.Optional[t.Callable] = None,
     ):
         """Initialize a new `MinMaxDecimator`.
 
@@ -43,12 +43,12 @@ class MinMaxDecimator(Decimator):
                 decimation is applied.
             zoom (Optional[bool]): set to True to reapply the decimation
                 when zoom or re-layout events are triggered.
-            on_decimate (Optional[Callable]): an user-defined function that is executed when the decimator
-                is found during runtime. This function can be used to provide custom decimation logic.
-            apply_decimator (Optional[Callable]): an user-defined function that is executed when the decimator
-                is applied to modify the data.
         """
-        super().__init__(threshold, zoom, on_decimate, apply_decimator)
+        # on_decimate (Optional[Callable]): an user-defined function that is executed when the decimator
+        #     is found during runtime. This function can be used to provide custom decimation logic.
+        # apply_decimator (Optional[Callable]): an user-defined function that is executed when the decimator
+        #     is applied to modify the data.
+        super().__init__(threshold, zoom)
         self._n_out = n_out // 2
 
     def decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:

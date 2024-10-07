@@ -37,8 +37,8 @@ class Decimator(ABC):
         self,
         threshold: t.Optional[int],
         zoom: t.Optional[bool],
-        on_decimate: t.Optional[t.Callable] = None,
-        apply_decimator: t.Optional[t.Callable] = None,
+        # apply_decimator: t.Optional[t.Callable] = None,
+        # on_decimate: t.Optional[t.Callable] = None,
     ) -> None:  # noqa: E501
         """Initialize a new `Decimator`.
 
@@ -47,16 +47,16 @@ class Decimator(ABC):
                 decimator class is applied.
             zoom (Optional[bool]): set to True to reapply the decimation
                 when zoom or re-layout events are triggered.
-            on_decimate (Optional[Callable]): an user-defined function that is executed when the decimator
-                is found during runtime. This function can be used to provide custom decimation logic.
-            apply_decimator (Optional[Callable]): an user-defined function that is executed when the decimator
-                is applied to modify the data.
         """
+        # on_decimate (Optional[Callable]): an user-defined function that is executed when the decimator
+        #     is found during runtime. This function can be used to provide custom decimation logic.
+        # apply_decimator (Optional[Callable]): an user-defined function that is executed when the decimator
+        #     is applied to modify the data.
         super().__init__()
         self.threshold = threshold
         self._zoom = zoom if zoom is not None else True
-        self.__user_defined_on_decimate = on_decimate
-        self.__user_defined_apply_decimator = apply_decimator
+        self.__user_defined_on_decimate = None
+        self.__user_defined_apply_decimator = None
 
     def _is_applicable(self, data: t.Any, nb_rows_max: int, chart_mode: str):
         if chart_mode not in self._CHART_MODES:
@@ -197,7 +197,7 @@ class Decimator(ABC):
         filter_unused_columns: bool = True,
     ):
         """NOT DOCUMENTED
-        
+
         This function is executed whenever a decimator is found during runtime.
 
         Users can override this function by providing an alternate implementation inside the constructor
