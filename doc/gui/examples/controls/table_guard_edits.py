@@ -20,7 +20,8 @@ import requests
 from taipy.gui import Gui, State, notify
 
 # The RandomAPI API used to generate random user names
-randomuser_url = 'https://randomuser.me/api'
+randomuser_url = "https://randomuser.me/api"
+
 
 # Create a random person name and salary
 def pick_user() -> tuple[str, int]:
@@ -32,7 +33,7 @@ def pick_user() -> tuple[str, int]:
         try:
             person = response.json()["results"][0]
             name = person["name"]
-            new_user = f"{name['first']} {name['last']}"
+            new_user = f"{name["first"]} {name["last"]}"
             # Generate a random salary expectation amount
             salary = random.randint(8, 24) * 5000
             return (new_user, salary)
@@ -43,6 +44,7 @@ def pick_user() -> tuple[str, int]:
     # The API cannot be reached
     print("ERROR: Could not invoke the Random User Generator API")  # noqa: F401, T201
     return ("ERROR", 0)
+
 
 # Generate four random persons with their salary expectation and store them in a dictionary
 candidates: dict[str, list] = {"Name": [], "Salary": []}
