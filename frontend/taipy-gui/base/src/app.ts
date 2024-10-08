@@ -9,6 +9,7 @@ import { initSocket } from "./socket";
 import { TaipyWsAdapter, WsAdapter } from "./wsAdapter";
 import { WsMessageType } from "../../src/context/wsUtils";
 import { getBase } from "./utils";
+import { CookieHandler } from "./cookieHandler";
 
 export type OnInitHandler = (taipyApp: TaipyApp) => void;
 export type OnChangeHandler = (taipyApp: TaipyApp, encodedName: string, value: unknown, dataEventKey?: string) => void;
@@ -26,6 +27,7 @@ export type OnEvent =
 type Route = [string, string];
 type RequestDataCallback = (taipyApp: TaipyApp, encodedName: string, dataEventKey: string, value: unknown) => void;
 
+
 export class TaipyApp {
     socket: Socket;
     _onInit: OnInitHandler | undefined;
@@ -36,6 +38,7 @@ export class TaipyApp {
     _onWsStatusUpdate: OnWsStatusUpdate | undefined;
     _ackList: string[];
     _rdc: Record<string, Record<string, RequestDataCallback>>;
+    _cookieHandler: CookieHandler | undefined;
     variableData: DataManager | undefined;
     functionData: DataManager | undefined;
     appId: string;
@@ -51,6 +54,7 @@ export class TaipyApp {
         onChange: OnChangeHandler | undefined = undefined,
         path: string | undefined = undefined,
         socket: Socket | undefined = undefined,
+        handleCookie: boolean = true,
     ) {
         socket = socket || io("/", { autoConnect: false, path: `${this.getBaseUrl()}socket.io` });
         this.onInit = onInit;
@@ -67,8 +71,10 @@ export class TaipyApp {
         this.wsAdapters = [new TaipyWsAdapter()];
         this._ackList = [];
         this._rdc = {};
-        // Init socket io connection
-        initSocket(socket, this);
+        this._cookieHandler = handleCookie ? new CookieHandler() : undefined;
+        // Init socket io connection only when cookie is not handled
+        // Socket will be initialized by cookie handler when it is used
+        this._cookieHandler ? this._cookieHandler?.init(socket, this) : initSocket(socket, this);
     }
 
     // Getter and setter
@@ -169,7 +175,7 @@ export class TaipyApp {
         this.sendWsMessage("ID", TAIPY_CLIENT_ID, id);
         if (id !== "") {
             this.clientId = id;
-            this.initApp()
+            this.initApp();
             this.updateContext(this.path);
         }
     }

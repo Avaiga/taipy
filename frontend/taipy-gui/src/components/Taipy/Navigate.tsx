@@ -67,7 +67,9 @@ const Navigate = ({ to, params, tab, force }: NavigateProps) => {
                     // Handle Resource Handler Id
                     const tprh = params?.tprh;
                     if (tprh !== undefined) {
+                        localStorage.setItem("tprh", tprh);
                         axios.post(`taipy-rh`, { tprh, redirected_url: window.location.href }).catch((error) => {
+                            localStorage.removeItem("tprh");
                             console.error(
                                 "Cannot resolve resource handler. Route `/taipy-rh` might be missing.",
                                 error,
