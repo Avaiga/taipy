@@ -89,7 +89,7 @@ class _DAG:
     @staticmethod
     def __lcm(*integers) -> int:
         # Function math.lcm is only implemented for Python 3.9+
-        # For compatibility with Python 3.8 it has been re implemented.
+        # For compatibility with Python 3. it has been re implemented.
         if 0 in integers:
             return 0
         return reduce(lambda x, y: (x * y) // math.gcd(x, y), integers)

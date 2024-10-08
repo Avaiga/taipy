@@ -7,7 +7,7 @@ version = "1.0.0"
 authors = [ { name = "Taipy" } ]
 description = "A Taipy GUI extension library example."
 readme = { file = "README.md", content-type = "text/markdown" }
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 keywords = [ "taipy" ]
 license = { text = "Apache License 2.0" }
 classifiers = [
@@ -15,7 +15,6 @@ classifiers = [
     # "License :: OSI Approved :: Apache Software License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",

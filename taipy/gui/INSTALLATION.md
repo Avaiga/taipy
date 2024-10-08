@@ -14,7 +14,7 @@ you plan to use it:
 
 
 
-Taipy GUI needs your system to have **Python 3.8** or above installed.
+Taipy GUI needs your system to have **Python 3.9** or above installed.
 
 ## Installing the latest release
 
