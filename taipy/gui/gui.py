@@ -2880,7 +2880,11 @@ class Gui:
             _TaipyLogger._get_logger().info("Gui server has been stopped.")
 
     def _get_authorization(self, client_id: t.Optional[str] = None, system: t.Optional[bool] = False):
-        return contextlib.nullcontext()
+        try:
+            return _Hooks()._get_authorization(self, client_id, system) or contextlib.nullcontext()
+        except Exception as e:
+            _warn("No Hook:", e)
+            return contextlib.nullcontext()
 
     def set_favicon(self, favicon_path: t.Union[str, Path], state: t.Optional[State] = None):
         """Change the favicon for all clients.
