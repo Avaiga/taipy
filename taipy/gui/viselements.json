@@ -1735,7 +1735,34 @@
                     }
                 ]
             }
-        ]
+        ],
+        [
+            "alert",
+            {
+                "inherits": ["shared"],
+                "properties": [
+                    {
+                        "name": "severity",
+                        "type": "dynamic(str)",
+                        "default_value": "\"info\"",
+                        "doc": "Defines the severity level of the alert. Valid values: \"error\", \"warning\", \"info\", \"success\"."
+                    },
+                    {
+                        "name": "message",
+                        "default_property": true,
+                        "type": "dynamic(str)",
+                        "default_value": "\"\"",
+                        "doc": "The message displayed in the alert."
+                    },
+                    {
+                        "name": "variant",
+                        "type": "dynamic(str)",
+                        "default_value": "\"filled\"",
+                        "doc": "Defines the variant of the alert. Can be \"filled\", \"outlined\", or \"standard\"."
+                    }
+                ]
+            }
+        ]                   
     ],
     "blocks": [
         [

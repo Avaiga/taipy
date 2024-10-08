@@ -59,6 +59,7 @@ class _Factory:
         "text": "value",
         "toggle": "value",
         "tree": "value",
+        "alert": "message",
     }
 
     _TEXT_ATTRIBUTES = ["format", "id", "hover_text", "raw"]
@@ -618,6 +619,19 @@ class _Factory:
             ]
         )
         ._set_propagate(),
+        "alert": lambda gui, control_type, attrs: _Builder(
+            gui=gui,
+            control_type=control_type,
+            element_name="AlertComponent",  
+            attributes=attrs,
+        )
+        .set_value_and_default(with_update=True)  # Enable dynamic updates for the 'message'
+        .set_attributes(
+            [
+                ("severity", PropertyType.string),  # Define 'severity' as an attribute
+                ("variant", PropertyType.string),   # Define 'variant' as an attribute
+            ]
+        ),
     }
 
     # TODO: process \" in property value
