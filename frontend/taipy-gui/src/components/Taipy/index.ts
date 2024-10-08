@@ -40,6 +40,7 @@ import Slider from "./Slider";
 import StatusList from "./StatusList";
 import Table from "./Table";
 import Toggle from "./Toggle";
+import TimeSelector from "./TimeSelector";
 import TreeView from "./TreeView";
 
 const registeredComponents: Record<string, ComponentType> = {};
@@ -74,6 +75,7 @@ export const getRegisteredComponents = () => {
             Status: StatusList,
             Table: Table,
             Toggle: Toggle,
+            TimeSelector: TimeSelector,
             TreeView: TreeView,
             Progress: Progress,
         }).forEach(([name, comp]) => (registeredComponents[name] = comp  as ComponentType));
