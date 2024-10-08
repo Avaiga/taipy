@@ -184,6 +184,7 @@ export declare const createApp: (
     onChange?: OnChangeHandler,
     path?: string,
     socket?: Socket,
+    handleCookie?: boolean,
 ) => TaipyApp;
 
 export { TaipyApp as default };

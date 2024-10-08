@@ -27,7 +27,6 @@ export type OnEvent =
 type Route = [string, string];
 type RequestDataCallback = (taipyApp: TaipyApp, encodedName: string, dataEventKey: string, value: unknown) => void;
 
-
 export class TaipyApp {
     socket: Socket;
     _onInit: OnInitHandler | undefined;
@@ -298,6 +297,12 @@ export class TaipyApp {
     }
 }
 
-export const createApp = (onInit?: OnInitHandler, onChange?: OnChangeHandler, path?: string, socket?: Socket) => {
-    return new TaipyApp(onInit, onChange, path, socket);
+export const createApp = (
+    onInit?: OnInitHandler,
+    onChange?: OnChangeHandler,
+    path?: string,
+    socket?: Socket,
+    handleCookie?: boolean,
+) => {
+    return new TaipyApp(onInit, onChange, path, socket, handleCookie);
 };
