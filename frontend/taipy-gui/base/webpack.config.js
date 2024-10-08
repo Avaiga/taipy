@@ -13,7 +13,6 @@ module.exports = [
         target: "web",
         entry: {
             default: "./base/src/index.ts",
-            preview: "./base/src/index-preview.ts",
         },
         output: {
             filename: (arg) => {
