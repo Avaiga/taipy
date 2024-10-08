@@ -138,7 +138,7 @@ class Decimator(ABC):
             x_column_name = self.__get_indexed_df_col(df)
         column_list = [x_column_name, y_column_name, z_column_name] if z_column_name else [x_column_name, y_column_name]
         points = df[column_list].to_numpy()
-        mask = self.decimate(points, payload)
+        mask = self._decimate(points, payload)
         return df[mask], is_copied
 
     def _on_decimate_df(
@@ -171,7 +171,7 @@ class Decimator(ABC):
         is_decimator_applied = False
         if nb_rows_max and self._is_applicable(df, nb_rows_max, chart_mode):
             try:
-                df, is_copied = self.apply_decimator(
+                df, is_copied = self._apply_decimator(
                     t.cast(pd.DataFrame, df),
                     x_column,
                     y_column,
@@ -188,16 +188,15 @@ class Decimator(ABC):
             df = df.filter(filterd_columns, axis=1)
         return df, is_decimator_applied, is_copied
 
-    def on_decimate(
+    def _on_decimate(
         self,
         df: pd.DataFrame,
         decimator_instance_payload: t.Dict[str, t.Any],
         decimator_payload: t.Dict[str, t.Any],
         is_copied: bool = False,
         filter_unused_columns: bool = True,
-    ):
+    ) -> t.Tuple:
         """NOT DOCUMENTED
-
         This function is executed whenever a decimator is found during runtime.
 
         Users can override this function by providing an alternate implementation inside the constructor
@@ -225,7 +224,7 @@ class Decimator(ABC):
                 _warn("Error executing user defined on_decimate function: ", e)
         return self._on_decimate_df(df, decimator_instance_payload, decimator_payload, filter_unused_columns)
 
-    def apply_decimator(
+    def _apply_decimator(
         self,
         dataframe: pd.DataFrame,
         x_column_name: t.Optional[str],
@@ -233,7 +232,7 @@ class Decimator(ABC):
         z_column_name: str,
         payload: t.Dict[str, t.Any],
         is_copied: bool,
-    ):
+    ) -> t.Tuple:
         """NOT DOCUMENTED
         This function is executed whenever a decimator is applied to the data.
 
@@ -263,7 +262,7 @@ class Decimator(ABC):
         return self._df_apply_decimator(dataframe, x_column_name, y_column_name, z_column_name, payload, is_copied)
 
     @abstractmethod
-    def decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
+    def _decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
         """NOT DOCUMENTED
         Decimate the dataset.
 
