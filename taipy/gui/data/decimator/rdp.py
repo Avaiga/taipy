@@ -13,7 +13,7 @@ import typing as t
 
 import numpy as np
 
-from ..utils import Decimator
+from .base import Decimator
 
 
 class RDP(Decimator):
@@ -34,6 +34,8 @@ class RDP(Decimator):
         n_out: t.Optional[int] = None,
         threshold: t.Optional[int] = None,
         zoom: t.Optional[bool] = True,
+        # on_decimate: t.Optional[t.Callable] = None,
+        # apply_decimator: t.Optional[t.Callable] = None,
     ):
         """Initialize a new `RDP`.
 
@@ -49,12 +51,16 @@ class RDP(Decimator):
             zoom (Optional[bool]): set to True to reapply the decimation
                 when zoom or re-layout events are triggered.
         """
+        # on_decimate (Optional[Callable]): an user-defined function that is executed when the decimator
+        #     is found during runtime. This function can be used to provide custom decimation logic.
+        # apply_decimator (Optional[Callable]): an user-defined function that is executed when the decimator
+        #     is applied to modify the data.
         super().__init__(threshold, zoom)
         self._epsilon = epsilon
         self._n_out = n_out
 
     @staticmethod
-    def dsquared_line_points(P1, P2, points):
+    def __dsquared_line_points(P1, P2, points):
         """
         Calculate only squared distance, only needed for comparison
         """
@@ -87,7 +93,7 @@ class RDP(Decimator):
             P1 = data[start]
             P2 = data[end]
             points = data[start + 1 : end]
-            dsq = RDP.dsquared_line_points(P1, P2, points)
+            dsq = RDP.__dsquared_line_points(P1, P2, points)
 
             mask_eps = dsq > epsilon**2
 
@@ -123,7 +129,7 @@ class RDP(Decimator):
             (start, end) = stack.pop()
             if end - start <= 1:
                 continue
-            dsq = RDP.dsquared_line_points(M[start], M[end], M[start + 1 : end])
+            dsq = RDP.__dsquared_line_points(M[start], M[end], M[start + 1 : end])
             max_dist_index = np.argmax(dsq) + start + 1
             weights[max_dist_index] = np.amax(dsq)
             stack.append((start, max_dist_index))
@@ -132,9 +138,9 @@ class RDP(Decimator):
 
         return weights >= maxTolerance
 
-    def decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
+    def _decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
         if self._epsilon:
             return RDP.__rdp_epsilon(data, self._epsilon)
         elif self._n_out:
             return RDP.__rdp_points(data, self._n_out)
-        raise RuntimeError("RDP Decimator failed to run. Fill in either 'epsilon' or 'n_out' value")
+        raise RuntimeError("RDP Decimator failed to run. One of 'epsilon' or 'n_out' values must be specified")
