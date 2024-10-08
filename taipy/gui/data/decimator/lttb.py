@@ -58,7 +58,7 @@ class LTTB(Decimator):
         a_minus_bs = a - bs
         return 0.5 * abs((a[0] - c[0]) * (bs_minus_a[:, 1]) - (a_minus_bs[:, 0]) * (c[1] - a[1]))
 
-    def decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
+    def _decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
         n_out = self._n_out
         if n_out >= data.shape[0]:
             return np.full(len(data), True)
