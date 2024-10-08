@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useMemo, useState, MouseEvent, CSSProperties } from "react";
+import React, { useCallback, useMemo, useState, MouseEvent, CSSProperties, useEffect } from "react";
 import MenuIco from "@mui/icons-material/Menu";
 import ListItemButton from "@mui/material/ListItemButton";
 import Drawer from "@mui/material/Drawer";
@@ -20,14 +20,15 @@ import Avatar from "@mui/material/Avatar";
 import CardHeader from "@mui/material/CardHeader";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Box from "@mui/material/Box";
-import Tooltip from '@mui/material/Tooltip';
+import Tooltip from "@mui/material/Tooltip";
 import { Theme, useTheme } from "@mui/system";
 
 import { SingleItem } from "./lovUtils";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { MenuProps } from "../../utils/lov";
 import { useClassNames, useDispatch, useModule } from "../../utils/hooks";
-import { emptyArray } from "../../utils";
+import { emptyArray, getBaseURL } from "../../utils";
+import { useLocation } from "react-router";
 
 const boxDrawerStyle = { overflowX: "hidden" } as CSSProperties;
 const headerSx = { padding: 0 };
@@ -41,7 +42,7 @@ const Menu = (props: MenuProps) => {
     const dispatch = useDispatch();
     const theme = useTheme();
     const module = useModule();
-
+    const location = useLocation();
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     const clickHandler = useCallback(
@@ -64,18 +65,30 @@ const Menu = (props: MenuProps) => {
 
     const [drawerSx, titleProps] = useMemo(() => {
         const drawerWidth = opened ? width : `calc(${theme.spacing(9)} + 1px)`;
-        const titleWidth = opened ? `calc(${width} - ${theme.spacing(10)})`: undefined;
-        return [{
-            width: drawerWidth,
-            flexShrink: 0,
-            "& .MuiDrawer-paper": {
+        const titleWidth = opened ? `calc(${width} - ${theme.spacing(10)})` : undefined;
+        return [
+            {
                 width: drawerWidth,
-                boxSizing: "border-box",
+                flexShrink: 0,
+                "& .MuiDrawer-paper": {
+                    width: drawerWidth,
+                    boxSizing: "border-box",
+                    transition: "width 0.3s",
+                },
                 transition: "width 0.3s",
             },
-            transition: "width 0.3s",
-        }, {...baseTitleProps, width: titleWidth}];
+            { ...baseTitleProps, width: titleWidth },
+        ];
     }, [opened, width, theme]);
+
+    useEffect(() => {
+        if (lov && lov.length) {
+            const value = lov.find((it) => getBaseURL() + it.id === location.pathname);
+            if (value) {
+                setSelectedValue(value.id);
+            }
+        }
+    }, [location.pathname, lov]);
 
     return lov && lov.length ? (
         <Drawer variant="permanent" anchor="left" sx={drawerSx} className={className}>
@@ -86,9 +99,11 @@ const Menu = (props: MenuProps) => {
                             <CardHeader
                                 sx={headerSx}
                                 avatar={
-                                    <Tooltip title={label || false}><Avatar sx={avatarSx}>
-                                        <MenuIco />
-                                    </Avatar></Tooltip>
+                                    <Tooltip title={label || false}>
+                                        <Avatar sx={avatarSx}>
+                                            <MenuIco />
+                                        </Avatar>
+                                    </Tooltip>
                                 }
                                 title={label}
                                 titleTypographyProps={titleProps}
