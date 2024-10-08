@@ -79,7 +79,7 @@ print(f"Using {str(processing)}: Dataset has {y_values_noise.size} data points")
 # Create the DataFrame
 data = pd.DataFrame({"X": x_values, "Y": y_values_noise})
 
-page = "<|{data}|chart|x=X|y=Y|mode=lines|decimator=decimator|>"
+page = "<|{data}|chart|x=X|y=Y|mode=markers|decimator=decimator|>"
 
 if __name__ == "__main__":
     Gui(page).run(title="Chart - Advanced - Large datasets")
