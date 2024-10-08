@@ -8,17 +8,20 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+import inspect
 import json
+from contextlib import nullcontext
 
 import pandas as pd
 import pytest
 
 from taipy.gui import Gui
-from taipy.gui.utils import _TaipyContent
+from taipy.gui.utils import _get_module_name_from_frame, _TaipyContent
 
 
 def test__get_real_var_name(gui: Gui):
+    frame = inspect.currentframe()
+    gui._set_frame(frame)
     res = gui._get_real_var_name("")
     assert isinstance(res, tuple)
     assert res[0] == ""
@@ -26,8 +29,10 @@ def test__get_real_var_name(gui: Gui):
 
     gui.run(run_server=False)
     with gui.get_flask_app().app_context():
-        with pytest.raises(NameError):
-            res = gui._get_real_var_name(f"{_TaipyContent.get_hash()}_var")
+        with gui._set_locals_context(_get_module_name_from_frame(frame)) if frame else nullcontext():
+            with pytest.raises(NameError):
+                res = gui._get_real_var_name(f"{_TaipyContent.get_hash()}_var")
+
 
 
 def test__get_user_instance(gui: Gui):
