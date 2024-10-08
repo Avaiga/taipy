@@ -45,8 +45,8 @@ def mock_core_get(entity_id):
 
 
 class MockState:
-    def __init__(self, **kwargs) -> None:
-        self.assign = kwargs.get("assign")
+    def __init__(self, **kwarguments) -> None:
+        self.assign = kwarguments.get("assign")
 
 
 class TestGuiCoreContext_is_submittable:
@@ -61,15 +61,15 @@ class TestGuiCoreContext_is_submittable:
                 MockState(assign=assign),
                 "",
                 {
-                    "args": [
+                    "arguments": [
                         {"name": "name", "id": a_scenario.id},
                     ],
                     "error_id": "error_var",
                 },
             )
             assign.assert_called_once()
-            assert assign.call_args.args[0] == "error_var"
-            assert str(assign.call_args.args[1]).startswith("Error submitting entity.")
+            assert assign.call_arguments.arguments[0] == "error_var"
+            assert str(assign.call_arguments.arguments[1]).startswith("Error submitting entity.")
 
             with patch("taipy.gui_core._context.is_submittable", side_effect=mock_is_submittable_reason):
                 assign.reset_mock()
@@ -77,12 +77,12 @@ class TestGuiCoreContext_is_submittable:
                     MockState(assign=assign),
                     "",
                     {
-                        "args": [
+                        "arguments": [
                             {"name": "name", "id": a_scenario.id},
                         ],
                         "error_id": "error_var",
                     },
                 )
                 assign.assert_called_once()
-                assert assign.call_args.args[0] == "error_var"
-                assert "is not submittable" in str(assign.call_args.args[1])
+                assert assign.call_arguments.arguments[0] == "error_var"
+                assert "is not submittable" in str(assign.call_arguments.arguments[1])

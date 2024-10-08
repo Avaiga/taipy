@@ -41,7 +41,7 @@ class _AbstractSQLDataNode(DataNode, _TabularDataNodeMixin):
     __DB_PORT_KEY = "db_port"
     __DB_ENGINE_KEY = "db_engine"
     __DB_DRIVER_KEY = "db_driver"
-    __DB_EXTRA_ARGS_KEY = "db_extra_args"
+    __DB_EXTRA_ARGS_KEY = "db_extra_arguments"
     __SQLITE_FOLDER_PATH = "sqlite_folder_path"
     __SQLITE_FILE_EXTENSION = "sqlite_file_extension"
 
@@ -185,20 +185,20 @@ class _AbstractSQLDataNode(DataNode, _TabularDataNodeMixin):
         host = properties.get(self.__DB_HOST_KEY, self.__DB_HOST_DEFAULT)
         port = properties.get(self.__DB_PORT_KEY, self.__DB_PORT_DEFAULT)
         driver = properties.get(self.__DB_DRIVER_KEY, self.__DB_DRIVER_DEFAULT)
-        extra_args = properties.get(self.__DB_EXTRA_ARGS_KEY, {})
+        extra_arguments = properties.get(self.__DB_EXTRA_ARGS_KEY, {})
 
         if driver:
-            extra_args = {**extra_args, "driver": driver}
-        for k, v in extra_args.items():
-            extra_args[k] = re.sub(r"\s+", "+", v)
-        extra_args_str = "&".join(f"{k}={str(v)}" for k, v in extra_args.items())
+            extra_arguments = {**extra_arguments, "driver": driver}
+        for k, v in extra_arguments.items():
+            extra_arguments[k] = re.sub(r"\s+", "+", v)
+        extra_arguments_str = "&".join(f"{k}={str(v)}" for k, v in extra_arguments.items())
 
         if engine == self.__ENGINE_MSSQL:
-            return f"mssql+pyodbc://{username}:{password}@{host}:{port}/{db_name}?{extra_args_str}"
+            return f"mssql+pyodbc://{username}:{password}@{host}:{port}/{db_name}?{extra_arguments_str}"
         elif engine == self.__ENGINE_MYSQL:
-            return f"mysql+pymysql://{username}:{password}@{host}:{port}/{db_name}?{extra_args_str}"
+            return f"mysql+pymysql://{username}:{password}@{host}:{port}/{db_name}?{extra_arguments_str}"
         elif engine == self.__ENGINE_POSTGRESQL:
-            return f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{db_name}?{extra_args_str}"
+            return f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{db_name}?{extra_arguments_str}"
         elif engine == self.__ENGINE_SQLITE:
             folder_path = properties.get(self.__SQLITE_FOLDER_PATH, self.__SQLITE_FOLDER_PATH_DEFAULT)
             file_extension = properties.get(self.__SQLITE_FILE_EXTENSION, self.__SQLITE_FILE_EXTENSION_DEFAULT)

@@ -32,7 +32,7 @@ from taipy.core.task._task_manager import _TaskManager
 from tests.core.utils import assert_true_after_time
 
 
-def nothing(*args, **kwargs):
+def nothing(*arguments, **kwarguments):
     pass
 
 

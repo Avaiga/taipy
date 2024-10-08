@@ -85,7 +85,7 @@ describe("FileDownload Component", () => {
         await waitFor(() =>
             expect(dispatch).toHaveBeenCalledWith({
                 name: "anId",
-                payload: { args: ["from.png", ""], action: "on_action" },
+                payload: { arguments: ["from.png", ""], action: "on_action" },
                 type: "SEND_ACTION_ACTION",
             })
         );
@@ -120,7 +120,7 @@ describe("FileDownload Component", () => {
         await waitFor(() =>
             expect(dispatch).toHaveBeenCalledWith({
                 name: "anId",
-                payload: { args: ["from.png", "/some/link/to.png?bypass="], action: "on_action" },
+                payload: { arguments: ["from.png", "/some/link/to.png?bypass="], action: "on_action" },
                 type: "SEND_ACTION_ACTION",
             })
         );

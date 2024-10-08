@@ -199,8 +199,8 @@ class CycleResource(Resource):
           description: No cycle has the  *cycle_id* identifier.
     """
 
-    def __init__(self, **kwargs):
-        self.logger = kwargs.get("logger")
+    def __init__(self, **kwarguments):
+        self.logger = kwarguments.get("logger")
 
     @_middleware
     def get(self, cycle_id):
@@ -385,8 +385,8 @@ class CycleList(Resource):
                   cycle: CycleSchema
     """
 
-    def __init__(self, **kwargs):
-        self.logger = kwargs.get("logger")
+    def __init__(self, **kwarguments):
+        self.logger = kwarguments.get("logger")
 
     @_middleware
     def get(self):

@@ -20,7 +20,7 @@ from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
 
 
-def nothing(*args):
+def nothing(*arguments):
     return
 
 

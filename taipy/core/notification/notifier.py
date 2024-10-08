@@ -24,7 +24,7 @@ def _publish_event(
     entity_id: Optional[str] = None,
     attribute_name: Optional[str] = None,
     attribute_value: Optional[Any] = None,
-    **kwargs,
+    **kwarguments,
 ) -> None:
     """Internal helper function to send events.
 
@@ -37,7 +37,7 @@ def _publish_event(
         entity_id (Optional[str])
         attribute_name (Optional[str])
         attribute_value (Optional[Any])
-        **kwargs
+        **kwarguments
     """
     event = Event(
         entity_id=entity_id,
@@ -45,7 +45,7 @@ def _publish_event(
         operation=operation,
         attribute_name=attribute_name,
         attribute_value=attribute_value,
-        metadata=kwargs,
+        metadata=kwarguments,
     )
     Notifier.publish(event)
 

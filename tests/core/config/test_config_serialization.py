@@ -56,8 +56,8 @@ class CustomEncoder(json.JSONEncoder):
 
 
 class CustomDecoder(json.JSONDecoder):
-    def __init__(self, *args, **kwargs):
-        json.JSONDecoder.__init__(self, *args, **kwargs, object_hook=self.object_hook)
+    def __init__(self, *arguments, **kwarguments):
+        json.JSONDecoder.__init__(self, *arguments, **kwarguments, object_hook=self.object_hook)
 
     def object_hook(self, source):
         if source.get("__type__") == "Datetime":

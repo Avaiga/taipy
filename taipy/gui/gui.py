@@ -576,7 +576,7 @@ class Gui:
 
     def __set_client_id_in_context(self, client_id: t.Optional[str] = None, force=False):
         if not client_id and request:
-            client_id = request.args.get(Gui.__ARG_CLIENT_ID, "")
+            client_id = request.arguments.get(Gui.__ARG_CLIENT_ID, "")
         if not client_id and (ws_client_id := getattr(g, "ws_client_id", None)):
             client_id = ws_client_id
         if not client_id and force:
@@ -828,16 +828,16 @@ class Gui:
                 arg_count = on_change_fn.__code__.co_argcount
                 if arg_count > 0 and ismethod(on_change_fn):
                     arg_count -= 1
-                args: t.List[t.Any] = [None for _ in range(arg_count)]
+                arguments: t.List[t.Any] = [None for _ in range(arg_count)]
                 if arg_count > 0:
-                    args[0] = self.__get_state()
+                    arguments[0] = self.__get_state()
                 if arg_count > 1:
-                    args[1] = var_name
+                    arguments[1] = var_name
                 if arg_count > 2:
-                    args[2] = value
+                    arguments[2] = value
                 if arg_count > 3:
-                    args[3] = current_context
-                on_change_fn(*args)
+                    arguments[3] = current_context
+                on_change_fn(*arguments)
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception(on_change or "on_change", e):
                     _warn(f"{on_change or 'on_change'}(): callback function raised an exception", e)
@@ -852,31 +852,31 @@ class Gui:
         if len(parts) > 1:
             file_name = parts[-1]
             (dir_path, as_attachment) = self.__get_content_accessor().get_content_path(
-                path[: -len(file_name) - 1], file_name, request.args.get("bypass")
+                path[: -len(file_name) - 1], file_name, request.arguments.get("bypass")
             )
             if dir_path:
                 return send_from_directory(str(dir_path), file_name, as_attachment=as_attachment)
         return ("", 404)
 
     def _get_user_content_url(
-        self, path: t.Optional[str] = None, query_args: t.Optional[t.Dict[str, str]] = None
+        self, path: t.Optional[str] = None, query_arguments: t.Optional[t.Dict[str, str]] = None
     ) -> t.Optional[str]:
-        q_args = query_args or {}
-        q_args.update({Gui.__ARG_CLIENT_ID: self._get_client_id()})
-        return f"/{Gui.__USER_CONTENT_URL}/{path or 'TaIpY'}?{urlencode(q_args)}"
+        q_arguments = query_arguments or {}
+        q_arguments.update({Gui.__ARG_CLIENT_ID: self._get_client_id()})
+        return f"/{Gui.__USER_CONTENT_URL}/{path or 'TaIpY'}?{urlencode(q_arguments)}"
 
     def __serve_user_content(self, path: str) -> t.Any:
         self.__set_client_id_in_context()
-        q_args: t.Dict[str, str] = {}
-        q_args.update(request.args)
-        q_args.pop(Gui.__ARG_CLIENT_ID, None)
+        q_arguments: t.Dict[str, str] = {}
+        q_arguments.update(request.arguments)
+        q_arguments.pop(Gui.__ARG_CLIENT_ID, None)
         cb_function: t.Optional[t.Union[t.Callable, str]] = None
         cb_function_name = None
-        if q_args.get(Gui._HTML_CONTENT_KEY):
+        if q_arguments.get(Gui._HTML_CONTENT_KEY):
             cb_function = self.__process_content_provider
             cb_function_name = cb_function.__name__
         else:
-            cb_function_name = q_args.get(Gui.__USER_CONTENT_CB)
+            cb_function_name = q_arguments.get(Gui.__USER_CONTENT_CB)
             if cb_function_name:
                 cb_function = self._get_user_function(cb_function_name)
                 if not callable(cb_function):
@@ -900,12 +900,12 @@ class Gui:
                 _warn("on_user_content() callback function has not been defined.")
         if callable(cb_function):
             try:
-                args: t.List[t.Any] = []
+                arguments: t.List[t.Any] = []
                 if path:
-                    args.append(path)
-                if len(q_args):
-                    args.append(q_args)
-                ret = self._call_function_with_state(cb_function, args)
+                    arguments.append(path)
+                if len(q_arguments):
+                    arguments.append(q_arguments)
+                ret = self._call_function_with_state(cb_function, arguments)
                 if ret is None:
                     _warn(f"{cb_function_name}() callback function must return a value.")
                 else:
@@ -1040,7 +1040,7 @@ class Gui:
                         file_fn = self._get_user_function(on_upload_action)
                         if not callable(file_fn):
                             file_fn = _getscopeattr(self, on_upload_action)
-                        self._call_function_with_state(file_fn, ["file_upload", {"args": [data]}])
+                        self._call_function_with_state(file_fn, ["file_upload", {"arguments": [data]}])
                     else:
                         setattr(self._bindings(), var_name, newvalue)
         return ("", 200)
@@ -1477,7 +1477,7 @@ class Gui:
 
     def __delete_csv(self, state: State, var_name: str, payload: dict):
         try:
-            (Path(tempfile.gettempdir()) / t.cast(str, payload.get("args", [])[-1]).split("/")[-1]).unlink(True)
+            (Path(tempfile.gettempdir()) / t.cast(str, payload.get("arguments", [])[-1]).split("/")[-1]).unlink(True)
         except Exception:
             pass
 
@@ -1496,51 +1496,51 @@ class Gui:
                 action_fn = self.__delete_csv
             else:
                 action_fn = self._get_user_function(action)
-            if self.__call_function_with_args(action_function=action_fn, id=id, payload=payload):
+            if self.__call_function_with_arguments(action_function=action_fn, id=id, payload=payload):
                 return
             else:  # pragma: no cover
                 _warn(f"on_action(): '{action}' is not a valid function.")
         if hasattr(self, "on_action"):
-            self.__call_function_with_args(action_function=self.on_action, id=id, payload=payload)
+            self.__call_function_with_arguments(action_function=self.on_action, id=id, payload=payload)
 
-    def __call_function_with_args(self, **kwargs):
-        action_function = kwargs.get("action_function")
-        id = t.cast(str, kwargs.get("id"))
-        payload = kwargs.get("payload")
+    def __call_function_with_arguments(self, **kwarguments):
+        action_function = kwarguments.get("action_function")
+        id = t.cast(str, kwarguments.get("id"))
+        payload = kwarguments.get("payload")
 
         if callable(action_function):
             try:
                 argcount = action_function.__code__.co_argcount
                 if argcount > 0 and ismethod(action_function):
                     argcount -= 1
-                args = t.cast(list, [None for _ in range(argcount)])
+                arguments = t.cast(list, [None for _ in range(argcount)])
                 if argcount > 0:
-                    args[0] = self.__get_state()
+                    arguments[0] = self.__get_state()
                 if argcount > 1:
                     try:
-                        args[1] = self._get_real_var_name(id)[0]
+                        arguments[1] = self._get_real_var_name(id)[0]
                     except Exception:
-                        args[1] = id
+                        arguments[1] = id
                 if argcount > 2:
-                    args[2] = payload
-                action_function(*args)
+                    arguments[2] = payload
+                action_function(*arguments)
                 return True
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception(action_function.__name__, e):
                     _warn(f"on_action(): Exception raised in '{action_function.__name__}()'", e)
         return False
 
-    def _call_function_with_state(self, user_function: t.Callable, args: t.Optional[t.List[t.Any]] = None) -> t.Any:
-        cp_args = [] if args is None else args.copy()
-        cp_args.insert(0, self.__get_state())
+    def _call_function_with_state(self, user_function: t.Callable, arguments: t.Optional[t.List[t.Any]] = None) -> t.Any:
+        cp_arguments = [] if arguments is None else arguments.copy()
+        cp_arguments.insert(0, self.__get_state())
         argcount = user_function.__code__.co_argcount
         if argcount > 0 and ismethod(user_function):
             argcount -= 1
-        if argcount > len(cp_args):
-            cp_args += (argcount - len(cp_args)) * [None]
+        if argcount > len(cp_arguments):
+            cp_arguments += (argcount - len(cp_arguments)) * [None]
         else:
-            cp_args = cp_args[:argcount]
-        return user_function(*cp_args)
+            cp_arguments = cp_arguments[:argcount]
+        return user_function(*cp_arguments)
 
     def _set_module_context(self, module_context: t.Optional[str]) -> t.ContextManager[None]:
         return self._set_locals_context(module_context) if module_context is not None else contextlib.nullcontext()
@@ -1549,7 +1549,7 @@ class Gui:
         self,
         state_id: str,
         callback: t.Callable,
-        args: t.Optional[t.Sequence[t.Any]] = None,
+        arguments: t.Optional[t.Sequence[t.Any]] = None,
         module_context: t.Optional[str] = None,
     ) -> t.Any:
         """Invoke a user callback for a given state.
@@ -1561,7 +1561,7 @@ class Gui:
             state_id: The identifier of the state to use, as returned by `get_state_id()^`.
             callback (Callable[[State^, ...], None]): The user-defined function that is invoked.<br/>
                 The first argument of this function **must** be a `State^`.
-            args (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
+            arguments (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
             module_context (Optional[str]): The name of the module that will be used.
         """  # noqa: E501
         this_sid = None
@@ -1578,7 +1578,7 @@ class Gui:
                     if not callable(callback):
                         _warn(f"invoke_callback(): {callback} is not callable.")
                         return None
-                    return self._call_function_with_state(callback, list(args) if args else None)
+                    return self._call_function_with_state(callback, list(arguments) if arguments else None)
         except Exception as e:  # pragma: no cover
             if not self._call_on_exception(callback.__name__ if callable(callback) else callback, e):
                 _warn(
@@ -1594,7 +1594,7 @@ class Gui:
     def broadcast_callback(
         self,
         callback: t.Callable,
-        args: t.Optional[t.Sequence[t.Any]] = None,
+        arguments: t.Optional[t.Sequence[t.Any]] = None,
         module_context: t.Optional[str] = None,
     ) -> t.Dict[str, t.Any]:
         """Invoke a callback for every client.
@@ -1607,13 +1607,13 @@ class Gui:
             callback: The user-defined function to be invoked.<br/>
                 The first argument of this function must be a `State^` object representing the
                 client for which it is invoked.<br/>
-                The other arguments should reflect the ones provided in the *args* collection.
-            args: The arguments to send to *callback*, if any.
+                The other arguments should reflect the ones provided in the *arguments* collection.
+            arguments: The arguments to send to *callback*, if any.
         """
         # Iterate over all the scopes
         res = {}
         for id in [id for id in self.__bindings._get_all_scopes() if id != _DataScopes._GLOBAL_ID]:
-            ret = self.invoke_callback(id, callback, args, module_context)
+            ret = self.invoke_callback(id, callback, arguments, module_context)
             res[id] = ret
         return res
 
@@ -1636,7 +1636,7 @@ class Gui:
             for n, v in values.items():
                 state.assign(n, v)
 
-    def broadcast_changes(self, values: t.Optional[dict[str, t.Any]] = None, **kwargs):
+    def broadcast_changes(self, values: t.Optional[dict[str, t.Any]] = None, **kwarguments):
         """Propagates new values for several variables to all states.
 
         This callback gets invoked for every client connected to the application to update the value
@@ -1647,13 +1647,13 @@ class Gui:
             values: An optional dictionary where each key is the name of a variable to change, and
                 where the associated value is the new value to set for that variable, in each state
                 for the application.
-            **kwargs (dict[str, any]): A collection of variable name-value pairs that are updated
+            **kwarguments (dict[str, any]): A collection of variable name-value pairs that are updated
                 for each state of the application. Name-value pairs overload the ones in *values*
                 if the name exists as a key in the dictionary.
         """
-        if kwargs:
+        if kwarguments:
             values = values.copy() if values else {}
-            for n, v in kwargs.items():
+            for n, v in kwarguments.items():
                 values[n] = v
         self.broadcast_callback(Gui.__broadcast_changes_fn, [values])
 
@@ -1699,10 +1699,10 @@ class Gui:
     def _get_call_method_name(self, name: str):
         return f"{Gui.__SELF_VAR}.{name}"
 
-    def __get_attributes(self, attr_json: str, hash_json: str, args_dict: t.Dict[str, t.Any]):
+    def __get_attributes(self, attr_json: str, hash_json: str, arguments_dict: t.Dict[str, t.Any]):
         attributes: t.Dict[str, t.Any] = json.loads(unquote(attr_json))
         hashes: t.Dict[str, str] = json.loads(unquote(hash_json))
-        attributes.update({k: args_dict.get(v) for k, v in hashes.items()})
+        attributes.update({k: arguments_dict.get(v) for k, v in hashes.items()})
         return attributes, hashes
 
     def _compare_data(self, *data):
@@ -1772,15 +1772,15 @@ class Gui:
             _warn("Gui.table_on_delete() failed potentially from a table's on_delete callback.", e)
 
     def _tbl_cols(
-        self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs
+        self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwarguments
     ) -> t.Union[str, _DoNotUpdate]:
         if not self.__is_building():
             try:
                 rebuild = rebuild_val if rebuild_val is not None else rebuild
                 if rebuild:
-                    attributes, hashes = self.__get_attributes(attr_json, hash_json, kwargs)
+                    attributes, hashes = self.__get_attributes(attr_json, hash_json, kwarguments)
                     data_hash = hashes.get("data", "")
-                    data = kwargs.get(data_hash)
+                    data = kwarguments.get(data_hash)
                     col_dict = _get_columns_dict(
                         data,
                         attributes.get("columns", {}),
@@ -1796,18 +1796,18 @@ class Gui:
         return Gui.__DO_NOT_UPDATE_VALUE
 
     def _chart_conf(
-        self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs
+        self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwarguments
     ) -> t.Union[str, _DoNotUpdate]:
         if not self.__is_building():
             try:
                 rebuild = rebuild_val if rebuild_val is not None else rebuild
                 if rebuild:
-                    attributes, hashes = self.__get_attributes(attr_json, hash_json, kwargs)
+                    attributes, hashes = self.__get_attributes(attr_json, hash_json, kwarguments)
                     data_hash = hashes.get("data", "")
                     config = _build_chart_config(
                         self,
                         attributes,
-                        self._get_accessor().get_col_types(data_hash, _TaipyData(kwargs.get(data_hash), data_hash)),
+                        self._get_accessor().get_col_types(data_hash, _TaipyData(kwarguments.get(data_hash), data_hash)),
                     )
 
                     return json.dumps(config, cls=_TaipyJsonEncoder)
@@ -2354,7 +2354,7 @@ class Gui:
                 if self.on_navigate.__code__.co_argcount == 2:
                     nav_page = self.on_navigate(self.__get_state(), page_name)
                 else:
-                    params = request.args.to_dict() if hasattr(request, "args") else {}
+                    params = request.arguments.to_dict() if hasattr(request, "arguments") else {}
                     params.pop("client_id", None)
                     params.pop("v", None)
                     nav_page = self.on_navigate(self.__get_state(), page_name, params)
@@ -2380,12 +2380,12 @@ class Gui:
             arg_count = on_page_load_fn.__code__.co_argcount
             if arg_count > 0 and ismethod(on_page_load_fn):
                 arg_count -= 1
-            args: t.List[t.Any] = [None for _ in range(arg_count)]
+            arguments: t.List[t.Any] = [None for _ in range(arg_count)]
             if arg_count > 0:
-                args[0] = self.__get_state()
+                arguments[0] = self.__get_state()
             if arg_count > 1:
-                args[1] = page_name
-            on_page_load_fn(*args)
+                arguments[1] = page_name
+            on_page_load_fn(*arguments)
         except Exception as e:
             if not self._call_on_exception("on_page_load", e):
                 _warn("Exception raised in on_page_load()", e)
@@ -2693,7 +2693,7 @@ class Gui:
         run_server: bool = True,
         run_in_thread: bool = False,
         async_mode: str = "gevent",
-        **kwargs,
+        **kwarguments,
     ) -> t.Optional[Flask]:
         """Start the server that delivers pages to web clients.
 
@@ -2725,7 +2725,7 @@ class Gui:
                 functionality (*use_reloader* option). Any other value makes the *use_reloader* configuration argument
                 ignored.<br/>
                 Also note that setting the *debug* argument to True forces *async_mode* to "threading".
-            **kwargs (dict[str, any]): Additional keyword arguments that configure how this `Gui` is run.
+            **kwarguments (dict[str, any]): Additional keyword arguments that configure how this `Gui` is run.
                 Please refer to the gui config section
                 [page](../../../../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
                 of the User Manual for more information.
@@ -2755,24 +2755,24 @@ class Gui:
         if not hasattr(self, "_root_dir"):
             self._root_dir = run_root_dir
 
-        is_reloading = kwargs.pop("_reload", False)
+        is_reloading = kwarguments.pop("_reload", False)
 
         if not is_reloading:
-            self.__run_kwargs = kwargs = {
-                **kwargs,
+            self.__run_kwarguments = kwarguments = {
+                **kwarguments,
                 "run_server": run_server,
                 "run_in_thread": run_in_thread,
                 "async_mode": async_mode,
             }
 
-        # Load application config from multiple sources (env files, kwargs, command line)
-        self._config._build_config(run_root_dir, self.__env_filename, kwargs)
+        # Load application config from multiple sources (env files, kwarguments, command line)
+        self._config._build_config(run_root_dir, self.__env_filename, kwarguments)
 
         self._config.resolve()
         TaipyGuiWarning.set_debug_mode(self._get_config("debug", False))
 
         # setup run function with gui hooks
-        _Hooks().run(self, **kwargs)
+        _Hooks().run(self, **kwarguments)
 
         self.__init_server()
 
@@ -2864,7 +2864,7 @@ class Gui:
         """
         if hasattr(self, "_server") and hasattr(self._server, "_thread") and self._server._is_running:
             self._server.stop_thread()
-            self.run(**self.__run_kwargs, _reload=True)
+            self.run(**self.__run_kwarguments, _reload=True)
             _TaipyLogger._get_logger().info("Gui server has been reloaded.")
 
     def stop(self):

@@ -386,9 +386,9 @@ def _make_event_for_sequence(
     /,
     attribute_name: Optional[str] = None,
     attribute_value: Optional[Any] = None,
-    **kwargs,
+    **kwarguments,
 ) -> Event:
-    metadata = {**kwargs}
+    metadata = {**kwarguments}
     return Event(
         entity_type=EventEntityType.SEQUENCE,
         entity_id=sequence.id,

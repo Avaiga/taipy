@@ -150,7 +150,7 @@ def _migrate_mongo_entities(
 ) -> bool:
     """Migrate entities from mongodb to the current version.
 
-    Args:
+    Arguments:
         hostname (str, optional): The hostname of the mongodb. Defaults to "localhost".
         port (int, optional): The port of the mongodb. Defaults to 27017.
         user (str, optional): The username of the mongodb. Defaults to "".

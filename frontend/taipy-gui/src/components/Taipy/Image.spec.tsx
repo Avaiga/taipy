@@ -78,7 +78,7 @@ describe("Image Component", () => {
         await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
-            payload: { args: [], action: "on_action" },
+            payload: { arguments: [], action: "on_action" },
             type: "SEND_ACTION_ACTION",
         });
     });

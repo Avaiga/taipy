@@ -13,9 +13,9 @@ import pytest
 
 
 @pytest.fixture(scope="session")
-def browser_context_args(browser_context_args, e2e_port, e2e_base_url):
+def browser_context_arguments(browser_context_arguments, e2e_port, e2e_base_url):
     return {
-        **browser_context_args,
+        **browser_context_arguments,
         "base_url": f"http://127.0.0.1:{e2e_port}{e2e_base_url}",
         "timezone_id": "Europe/Paris",
     }

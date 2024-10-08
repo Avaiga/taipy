@@ -479,25 +479,25 @@ describe("createSendActionNameAction function", () => {
         const name = "testName";
         const context = "testContext";
         const value = { key: "value" };
-        const args = ["arg1", "arg2"];
-        const action = createSendActionNameAction(name, context, value, ...args);
+        const arguments = ["arg1", "arg2"];
+        const action = createSendActionNameAction(name, context, value, ...arguments);
         expect(action.type).toEqual(Types.Action);
         expect(action.name).toEqual(name);
         expect(action.context).toEqual(context);
         expect(action.payload.key).toEqual(value.key);
-        expect(action.payload.args).toEqual(args);
+        expect(action.payload.arguments).toEqual(arguments);
     });
     it("should create a send action name action with value as action when value is not an object", () => {
         const name = "testName";
         const context = "testContext";
         const value = "testValue";
-        const args = ["arg1", "arg2"];
-        const action = createSendActionNameAction(name, context, value, ...args);
+        const arguments = ["arg1", "arg2"];
+        const action = createSendActionNameAction(name, context, value, ...arguments);
         expect(action.type).toEqual(Types.Action);
         expect(action.name).toEqual(name);
         expect(action.context).toEqual(context);
         expect(action.payload.action).toEqual(value);
-        expect(action.payload.args).toEqual(args);
+        expect(action.payload.arguments).toEqual(arguments);
     });
 });
 

@@ -150,7 +150,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     def _read(self):
         return self._read_from_path()
 
-    def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
+    def _read_from_path(self, path: Optional[str] = None, **read_kwarguments) -> Any:
         if path is None:
             path = self._path
 
@@ -234,29 +234,29 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         return sheets.to_numpy()
 
     def _do_read_excel(
-        self, path: str, sheet_names, kwargs
+        self, path: str, sheet_names, kwarguments
     ) -> Union[Dict[Union[int, str], pd.DataFrame], pd.DataFrame]:
-        return pd.read_excel(path, sheet_name=sheet_names, **kwargs)
+        return pd.read_excel(path, sheet_name=sheet_names, **kwarguments)
 
     def __get_sheet_names_and_header(self, sheet_names):
-        kwargs = {}
+        kwarguments = {}
         properties = self.properties
         if sheet_names is None:
             sheet_names = properties[self.__SHEET_NAME_PROPERTY]
         if not properties[self._HAS_HEADER_PROPERTY]:
-            kwargs["header"] = None
-        return sheet_names, kwargs
+            kwarguments["header"] = None
+        return sheet_names, kwarguments
 
     def _read_as_pandas_dataframe(
         self, path: str, sheet_names=None
     ) -> Union[Dict[Union[int, str], pd.DataFrame], pd.DataFrame]:
-        sheet_names, kwargs = self.__get_sheet_names_and_header(sheet_names)
+        sheet_names, kwarguments = self.__get_sheet_names_and_header(sheet_names)
         try:
-            return self._do_read_excel(path, sheet_names, kwargs)
+            return self._do_read_excel(path, sheet_names, kwarguments)
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 
-    def _append_excel_with_single_sheet(self, append_excel_fct, *args, **kwargs):
+    def _append_excel_with_single_sheet(self, append_excel_fct, *arguments, **kwarguments):
         sheet_name = self.properties.get(self.__SHEET_NAME_PROPERTY)
 
         with pd.ExcelWriter(self._path, mode="a", engine="openpyxl", if_sheet_exists="overlay") as writer:
@@ -264,11 +264,11 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                 if not isinstance(sheet_name, str):
                     sheet_name = sheet_name[0]
                 append_excel_fct(
-                    writer, *args, **kwargs, sheet_name=sheet_name, startrow=writer.sheets[sheet_name].max_row
+                    writer, *arguments, **kwarguments, sheet_name=sheet_name, startrow=writer.sheets[sheet_name].max_row
                 )
             else:
                 sheet_name = list(writer.sheets.keys())[0]
-                append_excel_fct(writer, *args, **kwargs, startrow=writer.sheets[sheet_name].max_row)
+                append_excel_fct(writer, *arguments, **kwarguments, startrow=writer.sheets[sheet_name].max_row)
 
     def _set_column_if_dataframe(self, data: Any, columns) -> Union[pd.DataFrame, Any]:
         if isinstance(data, pd.DataFrame):
@@ -304,16 +304,16 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         else:
             self._append_excel_with_single_sheet(pd.DataFrame(data).to_excel, index=False, header=False)
 
-    def _write_excel_with_single_sheet(self, write_excel_fct, *args, **kwargs):
+    def _write_excel_with_single_sheet(self, write_excel_fct, *arguments, **kwarguments):
         if sheet_name := self.properties.get(self.__SHEET_NAME_PROPERTY):
             if not isinstance(sheet_name, str):
                 if len(sheet_name) > 1:
                     raise SheetNameLengthMismatch
                 else:
                     sheet_name = sheet_name[0]
-            write_excel_fct(*args, **kwargs, sheet_name=sheet_name)
+            write_excel_fct(*arguments, **kwarguments, sheet_name=sheet_name)
         else:
-            write_excel_fct(*args, **kwargs)
+            write_excel_fct(*arguments, **kwarguments)
 
     def _write_excel_with_multiple_sheets(self, data: Any, columns: List[str] = None):
         with pd.ExcelWriter(self._path) as writer:

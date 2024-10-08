@@ -50,108 +50,108 @@ api.add_resource(
     DataNodeResource,
     "/datanodes/<string:datanode_id>/",
     endpoint="datanode_by_id",
-    resource_class_kwargs={"logger": _logger},
+    resource_class_kwarguments={"logger": _logger},
 )
 
 api.add_resource(
     DataNodeReader,
     "/datanodes/<string:datanode_id>/read/",
     endpoint="datanode_reader",
-    resource_class_kwargs={"logger": _logger},
+    resource_class_kwarguments={"logger": _logger},
 )
 
 api.add_resource(
     DataNodeWriter,
     "/datanodes/<string:datanode_id>/write/",
     endpoint="datanode_writer",
-    resource_class_kwargs={"logger": _logger},
+    resource_class_kwarguments={"logger": _logger},
 )
 
 api.add_resource(
     DataNodeList,
     "/datanodes/",
     endpoint="datanodes",
-    resource_class_kwargs={"logger": _logger},
+    resource_class_kwarguments={"logger": _logger},
 )
 
 api.add_resource(
     TaskResource,
     "/tasks/<string:task_id>/",
     endpoint="task_by_id",
-    resource_class_kwargs={"logger": _logger},
+    resource_class_kwarguments={"logger": _logger},
 )
 
-api.add_resource(TaskList, "/tasks/", endpoint="tasks", resource_class_kwargs={"logger": _logger})
+api.add_resource(TaskList, "/tasks/", endpoint="tasks", resource_class_kwarguments={"logger": _logger})
 api.add_resource(
     TaskExecutor,
     "/tasks/submit/<string:task_id>/",
     endpoint="task_submit",
-    resource_class_kwargs={"logger": _logger},
+    resource_class_kwarguments={"logger": _logger},
 )
 
 api.add_resource(
     SequenceResource,
     "/sequences/<string:sequence_id>/",
     endpoint="sequence_by_id",
-    resource_class_kwargs={"logger": _logger},
+    resource_class_kwarguments={"logger": _logger},
 )
 api.add_resource(
     SequenceList,
     "/sequences/",
     endpoint="sequences",
-    resource_class_kwargs={"logger": _logger},
+    resource_class_kwarguments={"logger": _logger},
 )
 api.add_resource(
     SequenceExecutor,
     "/sequences/submit/<string:sequence_id>/",
     endpoint="sequence_submit",
-    resource_class_kwargs={"logger": _logger},
+    resource_class_kwarguments={"logger": _logger},
 )
 
 api.add_resource(
     ScenarioResource,
     "/scenarios/<string:scenario_id>/",
     endpoint="scenario_by_id",
-    resource_class_kwargs={"logger": _logger},
+    resource_class_kwarguments={"logger": _logger},
 )
 api.add_resource(
     ScenarioList,
     "/scenarios/",
     endpoint="scenarios",
-    resource_class_kwargs={"logger": _logger},
+    resource_class_kwarguments={"logger": _logger},
 )
 api.add_resource(
     ScenarioExecutor,
     "/scenarios/submit/<string:scenario_id>/",
     endpoint="scenario_submit",
-    resource_class_kwargs={"logger": _logger},
+    resource_class_kwarguments={"logger": _logger},
 )
 
 api.add_resource(
     CycleResource,
     "/cycles/<string:cycle_id>/",
     endpoint="cycle_by_id",
-    resource_class_kwargs={"logger": _logger},
+    resource_class_kwarguments={"logger": _logger},
 )
 api.add_resource(
     CycleList,
     "/cycles/",
     endpoint="cycles",
-    resource_class_kwargs={"logger": _logger},
+    resource_class_kwarguments={"logger": _logger},
 )
 
 api.add_resource(
     JobResource,
     "/jobs/<string:job_id>/",
     endpoint="job_by_id",
-    resource_class_kwargs={"logger": _logger},
+    resource_class_kwarguments={"logger": _logger},
 )
-api.add_resource(JobList, "/jobs/", endpoint="jobs", resource_class_kwargs={"logger": _logger})
+api.add_resource(JobList, "/jobs/", endpoint="jobs", resource_class_kwarguments={"logger": _logger})
 api.add_resource(
     JobExecutor,
     "/jobs/cancel/<string:job_id>/",
     endpoint="job_cancel",
-    resource_class_kwargs={"logger": _logger},
+    resource_class_kwarguments={"logger": _logger},
 )
 
 

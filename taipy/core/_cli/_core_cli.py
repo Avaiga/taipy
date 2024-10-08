@@ -20,7 +20,7 @@ from ..config import CoreSection
 class _CoreCLI(_AbstractCLI):
     """Command-line interface for Taipy Core application."""
 
-    _mode_args: Dict[str, Dict] = {
+    _mode_arguments: Dict[str, Dict] = {
         "--development": {
             "action": "store_true",
             "dest": "taipy_development",
@@ -31,7 +31,7 @@ class _CoreCLI(_AbstractCLI):
         },
         "--experiment": {
             "dest": "taipy_experiment",
-            "nargs": "?",
+            "narguments": "?",
             "const": "",
             "metavar": "VERSION",
             "help": """
@@ -62,7 +62,7 @@ class _CoreCLI(_AbstractCLI):
         core_parser = _TaipyParser._add_groupparser("Taipy Core", "Optional arguments for Taipy Core service")
 
         mode_group = core_parser.add_mutually_exclusive_group()
-        for mode_arg, mode_arg_dict in cls._mode_args.items():
+        for mode_arg, mode_arg_dict in cls._mode_arguments.items():
             mode_group.add_argument(mode_arg, cls.__add_taipy_prefix(mode_arg), **mode_arg_dict)
 
         force_group = core_parser.add_mutually_exclusive_group()
@@ -73,7 +73,7 @@ class _CoreCLI(_AbstractCLI):
     def create_run_parser(cls):
         run_parser = _TaipyParser._add_subparser("run", help="Run a Taipy application.")
         mode_group = run_parser.add_mutually_exclusive_group()
-        for mode_arg, mode_arg_dict in cls._mode_args.items():
+        for mode_arg, mode_arg_dict in cls._mode_arguments.items():
             mode_group.add_argument(mode_arg, **mode_arg_dict)
 
         force_group = run_parser.add_mutually_exclusive_group()
@@ -82,18 +82,18 @@ class _CoreCLI(_AbstractCLI):
 
     @classmethod
     def handle_command(cls):
-        args, _ = _TaipyParser._parser.parse_known_args()
+        arguments, _ = _TaipyParser._parser.parse_known_arguments()
 
         as_dict = {}
-        if args.taipy_development:
+        if arguments.taipy_development:
             as_dict[CoreSection._MODE_KEY] = "development"
-        elif args.taipy_experiment is not None:
+        elif arguments.taipy_experiment is not None:
             as_dict[CoreSection._MODE_KEY] = "experiment"
-            as_dict[CoreSection._VERSION_NUMBER_KEY] = args.taipy_experiment
+            as_dict[CoreSection._VERSION_NUMBER_KEY] = arguments.taipy_experiment
 
-        if args.taipy_force:
+        if arguments.taipy_force:
             as_dict[CoreSection._FORCE_KEY] = True
-        elif args.no_taipy_force:
+        elif arguments.no_taipy_force:
             as_dict[CoreSection._FORCE_KEY] = False
 
         return as_dict

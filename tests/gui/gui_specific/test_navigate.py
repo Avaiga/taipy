@@ -67,7 +67,7 @@ def test_on_navigate_to_inexistant(gui: Gui, helpers):
         client.get(f"/taipy-jsx/test?client_id={sid}")
         warns = helpers.get_taipy_warnings(records)
         assert len(warns) == 1
-        text = warns[0].message.args[0] if isinstance(warns[0].message, Warning) else warns[0].message
+        text = warns[0].message.arguments[0] if isinstance(warns[0].message, Warning) else warns[0].message
         assert text == 'Cannot navigate to "test2": unknown page.'
 
 

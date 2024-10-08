@@ -38,27 +38,27 @@ class _AbstractCLI:
 
     @classmethod
     def _parse_arguments(cls):
-        args, unknown_args = _TaipyParser._parser.parse_known_args()
+        arguments, unknown_arguments = _TaipyParser._parser.parse_known_arguments()
 
-        if getattr(args, "which", None) != cls._COMMAND_NAME:
+        if getattr(arguments, "which", None) != cls._COMMAND_NAME:
             return
 
-        if unknown_args:
+        if unknown_arguments:
             _TaipyParser._sub_taipyparsers.get(cls._COMMAND_NAME).print_help()
-            for unknown_arg in unknown_args:
+            for unknown_arg in unknown_arguments:
                 if not unknown_arg.startswith("-"):
                     continue
 
                 error_message = f"Unknown arguments: {unknown_arg}."
-                similar_args = [
+                similar_arguments = [
                     arg
                     for arg in cls._ARGUMENTS
                     if SequenceMatcher(None, unknown_arg, arg).ratio() > cls.SIMILARITY_THRESHOLD
                 ]
-                if similar_args:
-                    error_message += f" Did you mean: {' or '.join(similar_args)}?"
+                if similar_arguments:
+                    error_message += f" Did you mean: {' or '.join(similar_arguments)}?"
                 cls._logger.error(error_message)
             cls._logger.error("Please refer to the help message above for more information.")
             sys.exit(1)
 
-        return args
+        return arguments

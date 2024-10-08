@@ -255,8 +255,8 @@ class DataNodeResource(Resource):
           description: No data node has the *datanode_id* identifier.
     """
 
-    def __init__(self, **kwargs):
-        self.logger = kwargs.get("logger")
+    def __init__(self, **kwarguments):
+        self.logger = kwarguments.get("logger")
 
     @_middleware
     def get(self, datanode_id):
@@ -452,8 +452,8 @@ class DataNodeList(Resource):
                   datanode: DataNodeSchema
     """
 
-    def __init__(self, **kwargs):
-        self.logger = kwargs.get("logger")
+    def __init__(self, **kwarguments):
+        self.logger = kwarguments.get("logger")
 
     def fetch_config(self, config_id):
         if config := Config.data_nodes.get(config_id):
@@ -470,8 +470,8 @@ class DataNodeList(Resource):
 
     @_middleware
     def post(self):
-        args = request.args
-        config_id = args.get("config_id")
+        arguments = request.arguments
+        config_id = arguments.get("config_id")
 
         if not config_id:
             raise ConfigIdMissingException
@@ -574,8 +574,8 @@ class DataNodeReader(Resource):
           description: No data node has the *datanode_id* identifier.
     """
 
-    def __init__(self, **kwargs):
-        self.logger = kwargs.get("logger")
+    def __init__(self, **kwarguments):
+        self.logger = kwarguments.get("logger")
 
     def __make_operators(self, schema: DataNodeFilterSchema) -> List:
         return [
@@ -649,8 +649,8 @@ class DataNodeWriter(Resource):
           description: No data node has the *datanode_id* identifier.
     """
 
-    def __init__(self, **kwargs):
-        self.logger = kwargs.get("logger")
+    def __init__(self, **kwarguments):
+        self.logger = kwarguments.get("logger")
 
     @_middleware
     def put(self, datanode_id):

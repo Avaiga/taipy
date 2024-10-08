@@ -25,7 +25,7 @@ def read_fct():
     return TestGenericDataNode.data
 
 
-def read_fct_with_args(inp):
+def read_fct_with_arguments(inp):
     return [i + inp for i in TestGenericDataNode.data]
 
 
@@ -33,7 +33,7 @@ def write_fct(data):
     data.append(data[-1] + 1)
 
 
-def write_fct_with_args(data, inp):
+def write_fct_with_arguments(data, inp):
     for _ in range(inp):
         data.append(data[-1] + 1)
 
@@ -151,13 +151,13 @@ class TestGenericDataNode:
             properties={
                 "read_fct": read_fct,
                 "write_fct": write_fct,
-                "read_fct_args": 1,
-                "write_fct_args": 2,
+                "read_fct_arguments": 1,
+                "write_fct_arguments": 2,
                 "foo": "bar",
             },
         )
 
-        # read_fct, read_fct_args, write_fct, write_fct_args are filtered out
+        # read_fct, read_fct_arguments, write_fct, write_fct_arguments are filtered out
         assert dn_1._get_user_properties() == {"foo": "bar"}
 
     def test_create_with_missing_arguments(self):
@@ -206,10 +206,10 @@ class TestGenericDataNode:
             "foo",
             Scope.SCENARIO,
             properties={
-                "read_fct": read_fct_with_args,
-                "write_fct": write_fct_with_args,
-                "read_fct_args": [1],
-                "write_fct_args": [2],
+                "read_fct": read_fct_with_arguments,
+                "write_fct": write_fct_with_arguments,
+                "read_fct_arguments": [1],
+                "write_fct_arguments": [2],
             },
         )
 
@@ -226,10 +226,10 @@ class TestGenericDataNode:
             "foo",
             Scope.SCENARIO,
             properties={
-                "read_fct": read_fct_with_args,
-                "write_fct": write_fct_with_args,
-                "read_fct_args": 1,
-                "write_fct_args": 2,
+                "read_fct": read_fct_with_arguments,
+                "write_fct": write_fct_with_arguments,
+                "read_fct_arguments": 1,
+                "write_fct_arguments": 2,
             },
         )
 
@@ -245,6 +245,6 @@ class TestGenericDataNode:
         generic_dn = GenericDataNode(
             "foo", Scope.SCENARIO, properties={"read_fct": read_fct_modify_data_node_name, "write_fct": write_fct}
         )
-        generic_dn._properties["read_fct_args"] = (generic_dn.id, "bar")
+        generic_dn._properties["read_fct_arguments"] = (generic_dn.id, "bar")
         generic_dn.read()
         assert generic_dn.name == "bar"

@@ -26,7 +26,7 @@ from tests.core._orchestrator._dispatcher.mock_standalone_dispatcher import Mock
 from tests.core.utils import assert_true_after_time
 
 
-def nothing(*args):
+def nothing(*arguments):
     return
 
 

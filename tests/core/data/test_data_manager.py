@@ -411,8 +411,8 @@ class TestDataManager:
         assert not any(_DataManager._exists(dn.id) for dn in [dn_2, dn_3])
 
     def test_get_or_create(self):
-        def _get_or_create_dn(config, *args):
-            return _DataManager._bulk_get_or_create([config], *args)[config]
+        def _get_or_create_dn(config, *arguments):
+            return _DataManager._bulk_get_or_create([config], *arguments)[config]
 
         _DataManager._delete_all()
 

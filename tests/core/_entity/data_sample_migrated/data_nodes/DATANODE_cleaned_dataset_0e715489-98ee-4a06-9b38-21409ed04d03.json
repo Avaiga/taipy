@@ -27,8 +27,8 @@
 "engine": "pyarrow",
 "compression": "snappy",
 "exposed_type": "pandas",
-"read_kwargs": {},
-"write_kwargs": {},
+"read_kwarguments": {},
+"write_kwarguments": {},
 "name": null
 }
 }

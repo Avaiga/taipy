@@ -57,11 +57,11 @@ class _CreateCLI(_AbstractCLI):
 
     @classmethod
     def handle_command(cls):
-        args = cls._parse_arguments()
-        if not args:
+        arguments = cls._parse_arguments()
+        if not arguments:
             return
         try:
-            cookiecutter(cls._template_map[args.application])
+            cookiecutter(cls._template_map[arguments.application])
         except OutputDirExistsException as err:
             error_msg = f"{str(err)}. Please remove the existing directory or provide a new folder name."
             print(error_msg)  # noqa: T201

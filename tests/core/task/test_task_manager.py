@@ -481,5 +481,5 @@ def test_get_scenarios_by_config_id_in_multiple_versions_environment():
     assert len(_TaskManager._get_by_config_id(task_config_2.id)) == 2
 
 
-def _create_task_from_config(task_config, *args, **kwargs):
-    return _TaskManager._bulk_get_or_create([task_config], *args, **kwargs)[0]
+def _create_task_from_config(task_config, *arguments, **kwarguments):
+    return _TaskManager._bulk_get_or_create([task_config], *arguments, **kwarguments)[0]

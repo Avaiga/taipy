@@ -22,11 +22,11 @@ from taipy.core.data.sql_table import SQLTableDataNode
 
 
 class MyCustomObject:
-    def __init__(self, foo=None, bar=None, *args, **kwargs):
+    def __init__(self, foo=None, bar=None, *arguments, **kwarguments):
         self.foo = foo
         self.bar = bar
-        self.args = args
-        self.kwargs = kwargs
+        self.arguments = arguments
+        self.kwarguments = kwarguments
 
 
 class TestReadSQLTableDataNode:
@@ -35,7 +35,7 @@ class TestReadSQLTableDataNode:
             "db_name": "taipy",
             "db_engine": "sqlite",
             "table_name": "example",
-            "db_extra_args": {
+            "db_extra_arguments": {
                 "TrustServerCertificate": "yes",
                 "other": "value",
             },
@@ -50,7 +50,7 @@ class TestReadSQLTableDataNode:
                 "db_name": "taipy",
                 "db_engine": "mssql",
                 "table_name": "example",
-                "db_extra_args": {
+                "db_extra_arguments": {
                     "TrustServerCertificate": "yes",
                 },
             },
@@ -64,7 +64,7 @@ class TestReadSQLTableDataNode:
                 "db_name": "taipy",
                 "db_engine": "mysql",
                 "table_name": "example",
-                "db_extra_args": {
+                "db_extra_arguments": {
                     "TrustServerCertificate": "yes",
                 },
             },
@@ -78,7 +78,7 @@ class TestReadSQLTableDataNode:
                 "db_name": "taipy",
                 "db_engine": "postgresql",
                 "table_name": "example",
-                "db_extra_args": {
+                "db_extra_arguments": {
                     "TrustServerCertificate": "yes",
                 },
             },
@@ -114,7 +114,7 @@ class TestReadSQLTableDataNode:
             "db_engine": "mssql",
             "table_name": "example",
             "db_driver": "default server",
-            "db_extra_args": {
+            "db_extra_arguments": {
                 "TrustServerCertificate": "yes",
                 "other": "value",
             },
@@ -226,7 +226,7 @@ class TestReadSQLTableDataNode:
     def test_read_custom_exposed_type(self, sql_properties):
         custom_properties = sql_properties.copy()
 
-        custom_properties.pop("db_extra_args")
+        custom_properties.pop("db_extra_arguments")
         custom_properties["exposed_type"] = MyCustomObject
         sql_data_node = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
@@ -248,7 +248,7 @@ class TestReadSQLTableDataNode:
             assert isinstance(row_custom, MyCustomObject)
             assert row_custom.foo == row_mock_data.pop("foo", None)
             assert row_custom.bar == row_mock_data.pop("bar", None)
-            assert row_custom.kwargs == row_mock_data
+            assert row_custom.kwarguments == row_mock_data
 
     @pytest.mark.parametrize(
         "tmp_sqlite_path",

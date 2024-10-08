@@ -36,15 +36,15 @@ class Page:
 
     page_type: str = "Taipy"
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwarguments) -> None:
         from .custom import Page as CustomPage
 
         self._class_module_name = ""
         self._class_locals: t.Dict[str, t.Any] = {}
         self._frame: t.Optional[FrameType] = None
         self._renderer: t.Optional[Page] = self.create_page()
-        if "frame" in kwargs:
-            self._frame = kwargs.get("frame")
+        if "frame" in kwarguments:
+            self._frame = kwarguments.get("frame")
         elif self._renderer:
             self._frame = self._renderer._frame
         elif isinstance(self, CustomPage):
@@ -74,7 +74,7 @@ class Page:
         # Special variables only use for page reloading in notebook context
         self._notebook_gui: t.Optional["Gui"] = None
         self._notebook_page: t.Optional["_Page"] = None
-        self.set_style(kwargs.get("style", None))
+        self.set_style(kwarguments.get("style", None))
 
     def create_page(self) -> t.Optional[Page]:
         """Create the page content for page modules.

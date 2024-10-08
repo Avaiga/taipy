@@ -41,7 +41,7 @@ describe("GuiDownload Component", () => {
             expect(dispatch).toHaveBeenCalledWith({
                 name: "Gui.download",
                 context: undefined,
-                payload: { args: ["from.png", "/some/link/to.png"], action: "onActionMsg" },
+                payload: { arguments: ["from.png", "/some/link/to.png"], action: "onActionMsg" },
                 type: "SEND_ACTION_ACTION",
             })
         );

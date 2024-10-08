@@ -204,8 +204,8 @@ def test_set_default_parquet_data_node_configuration():
     assert dn1.default_path == "default.parquet"
     assert dn1.engine == "pyarrow"
     assert dn1.compression == "gzip"
-    assert dn1.read_kwargs is None
-    assert dn1.write_kwargs is None
+    assert dn1.read_kwarguments is None
+    assert dn1.write_kwarguments is None
     assert dn1.exposed_type == "numpy"
     assert dn1.scope == Scope.GLOBAL
     assert dn1.validity_period == timedelta(2)
@@ -221,8 +221,8 @@ def test_set_default_parquet_data_node_configuration():
     assert dn2.default_path == "dn2.parquet"
     assert dn2.engine == "fastparquet"
     assert dn2.compression == "gzip"
-    assert dn2.read_kwargs is None
-    assert dn2.write_kwargs is None
+    assert dn2.read_kwarguments is None
+    assert dn2.write_kwarguments is None
     assert dn2.exposed_type == "numpy"
     assert dn2.scope == Scope.GLOBAL
     assert dn2.validity_period == timedelta(2)
@@ -233,7 +233,7 @@ def test_set_default_parquet_data_node_configuration():
         id="dn3",
         storage_type="parquet",
         default_path="dn3.parquet",
-        read_kwargs={"filter": "foo"},
+        read_kwarguments={"filter": "foo"},
         scope=Scope.SCENARIO,
         validity_period=timedelta(1),
     )
@@ -241,8 +241,8 @@ def test_set_default_parquet_data_node_configuration():
     assert dn3.default_path == "dn3.parquet"
     assert dn3.engine == "pyarrow"
     assert dn3.compression == "gzip"
-    assert dn3.read_kwargs == {"filter": "foo"}
-    assert dn3.write_kwargs is None
+    assert dn3.read_kwarguments == {"filter": "foo"}
+    assert dn3.write_kwarguments is None
     assert dn3.exposed_type == "numpy"
     assert dn3.scope == Scope.SCENARIO
     assert dn3.validity_period == timedelta(1)
@@ -355,7 +355,7 @@ def test_set_default_sql_table_data_node_configuration():
         db_port=1010,
         db_host="default_host",
         db_driver="default server",
-        db_extra_args={"default": "default"},
+        db_extra_arguments={"default": "default"},
         scope=Scope.GLOBAL,
         validity_period=timedelta(2),
     )
@@ -372,7 +372,7 @@ def test_set_default_sql_table_data_node_configuration():
     assert dn1.db_port == 1010
     assert dn1.db_host == "default_host"
     assert dn1.db_driver == "default server"
-    assert dn1.db_extra_args == {"default": "default"}
+    assert dn1.db_extra_arguments == {"default": "default"}
     assert dn1.scope == Scope.GLOBAL
     assert dn1.validity_period == timedelta(2)
 
@@ -393,7 +393,7 @@ def test_set_default_sql_table_data_node_configuration():
     assert dn2.db_port == 2020
     assert dn2.db_host == "host_2"
     assert dn2.db_driver == "default server"
-    assert dn2.db_extra_args == {"default": "default"}
+    assert dn2.db_extra_arguments == {"default": "default"}
     assert dn2.scope == Scope.GLOBAL
     assert dn2.validity_period == timedelta(2)
 
@@ -418,7 +418,7 @@ def test_set_default_sql_table_data_node_configuration():
     assert dn3.db_port == 1010
     assert dn3.db_host == "default_host"
     assert dn3.db_driver == "default server"
-    assert dn3.db_extra_args == {"default": "default"}
+    assert dn3.db_extra_arguments == {"default": "default"}
     assert dn3.scope == Scope.GLOBAL
     assert dn3.validity_period == timedelta(1)
 
@@ -438,7 +438,7 @@ def test_set_default_sql_data_node_configuration():
         db_port=1010,
         db_host="default_host",
         db_driver="default server",
-        db_extra_args={"default": "default"},
+        db_extra_arguments={"default": "default"},
         scope=Scope.GLOBAL,
         validity_period=timedelta(2),
     )
@@ -457,7 +457,7 @@ def test_set_default_sql_data_node_configuration():
     assert dn1.db_port == 1010
     assert dn1.db_host == "default_host"
     assert dn1.db_driver == "default server"
-    assert dn1.db_extra_args == {"default": "default"}
+    assert dn1.db_extra_arguments == {"default": "default"}
     assert dn1.scope == Scope.GLOBAL
     assert dn1.validity_period == timedelta(2)
 
@@ -477,7 +477,7 @@ def test_set_default_sql_data_node_configuration():
     assert dn2.db_port == 2020
     assert dn2.db_host == "host_2"
     assert dn2.db_driver == "default server"
-    assert dn2.db_extra_args == {"default": "default"}
+    assert dn2.db_extra_arguments == {"default": "default"}
     assert dn2.scope == Scope.GLOBAL
     assert dn2.validity_period == timedelta(2)
 
@@ -505,7 +505,7 @@ def test_set_default_sql_data_node_configuration():
     assert dn3.db_port == 1010
     assert dn3.db_host == "default_host"
     assert dn3.db_driver == "default server"
-    assert dn3.db_extra_args == {"default": "default"}
+    assert dn3.db_extra_arguments == {"default": "default"}
     assert dn3.scope == Scope.GLOBAL
     assert dn3.validity_period == timedelta(1)
 
@@ -518,7 +518,7 @@ def test_set_default_mongo_collection_data_node_configuration():
         db_port=1010,
         db_host="default_host",
         db_driver="default server",
-        db_extra_args={"default": "default"},
+        db_extra_arguments={"default": "default"},
         scope=Scope.GLOBAL,
         validity_period=timedelta(2),
     )
@@ -535,7 +535,7 @@ def test_set_default_mongo_collection_data_node_configuration():
     assert dn1.db_host == "default_host"
     assert dn1.db_port == 1010
     assert dn1.db_driver == "default server"
-    assert dn1.db_extra_args == {"default": "default"}
+    assert dn1.db_extra_arguments == {"default": "default"}
     assert dn1.scope == Scope.GLOBAL
     assert dn1.validity_period == timedelta(2)
 
@@ -556,7 +556,7 @@ def test_set_default_mongo_collection_data_node_configuration():
     assert dn2.db_host == "host_2"
     assert dn2.db_port == 2020
     assert dn2.db_driver == "default server"
-    assert dn2.db_extra_args == {"default": "default"}
+    assert dn2.db_extra_arguments == {"default": "default"}
     assert dn2.scope == Scope.GLOBAL
     assert dn2.validity_period == timedelta(2)
 
@@ -580,7 +580,7 @@ def test_set_default_mongo_collection_data_node_configuration():
     assert dn3.db_port == 1010
     assert dn3.db_host == "default_host"
     assert dn3.db_driver == "default server"
-    assert dn3.db_extra_args == {"default": "default"}
+    assert dn3.db_extra_arguments == {"default": "default"}
     assert dn3.scope == Scope.GLOBAL
     assert dn3.validity_period == timedelta(1)
 

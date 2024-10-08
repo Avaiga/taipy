@@ -133,7 +133,7 @@ class JSONDataNode(DataNode, _FileDataNodeMixin):
     def _read(self):
         return self._read_from_path()
 
-    def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
+    def _read_from_path(self, path: Optional[str] = None, **read_kwarguments) -> Any:
         if path is None:
             path = self._path
 
@@ -180,8 +180,8 @@ class _DefaultJSONEncoder(json.JSONEncoder):
 
 
 class _DefaultJSONDecoder(json.JSONDecoder):
-    def __init__(self, *args, **kwargs):
-        json.JSONDecoder.__init__(self, *args, **kwargs, object_hook=self.object_hook)
+    def __init__(self, *arguments, **kwarguments):
+        json.JSONDecoder.__init__(self, *arguments, **kwarguments, object_hook=self.object_hook)
 
     def object_hook(self, source):
         if _type := source.get("__type__"):

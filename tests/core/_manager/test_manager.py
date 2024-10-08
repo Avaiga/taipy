@@ -58,8 +58,8 @@ class MockConverter(_AbstractConverter):
 
 
 class MockRepository(_AbstractRepository):  # type: ignore
-    def __init__(self, **kwargs):
-        self.repo = _FileSystemRepository(**kwargs, converter=MockConverter)
+    def __init__(self, **kwarguments):
+        self.repo = _FileSystemRepository(**kwarguments, converter=MockConverter)
 
     def _to_model(self, obj: MockEntity):
         return MockModel(obj.id, obj.name, obj._version)

@@ -66,11 +66,11 @@ class Helpers:
     def assert_outward_ws_message(received_message, type, varname, value):
         assert isinstance(received_message, dict)
         assert "name" in received_message and received_message["name"] == "message"
-        assert "args" in received_message
-        args = received_message["args"]
-        assert "type" in args and args["type"] == type
-        assert "payload" in args
-        payload_arr = args["payload"]
+        assert "arguments" in received_message
+        arguments = received_message["arguments"]
+        assert "type" in arguments and arguments["type"] == type
+        assert "payload" in arguments
+        payload_arr = arguments["payload"]
         found_payload = False
         for payload in payload_arr:
             if "name" in payload and varname in payload["name"]:
@@ -83,12 +83,12 @@ class Helpers:
     def assert_outward_simple_ws_message(received_message, type, varname, value):
         assert isinstance(received_message, dict)
         assert "name" in received_message and received_message["name"] == "message"
-        assert "args" in received_message
-        args = received_message["args"]
-        assert "type" in args and args["type"] == type
-        assert "name" in args and args["name"] == varname
-        assert "payload" in args
-        payload = args["payload"]
+        assert "arguments" in received_message
+        arguments = received_message["arguments"]
+        assert "type" in arguments and arguments["type"] == type
+        assert "name" in arguments and arguments["name"] == varname
+        assert "payload" in arguments
+        payload = arguments["payload"]
         assert "value" in payload and payload["value"] == value
         logging.getLogger().debug(payload["value"])
 
@@ -96,22 +96,22 @@ class Helpers:
     def assert_outward_ws_simple_message(received_message, aType, values):
         assert isinstance(received_message, dict)
         assert "name" in received_message and received_message["name"] == "message"
-        assert "args" in received_message
-        args = received_message["args"]
-        assert "type" in args and args["type"] == aType
+        assert "arguments" in received_message
+        arguments = received_message["arguments"]
+        assert "type" in arguments and arguments["type"] == aType
         for k, v in values.items():
-            assert k in args and args[k] == v
-            logging.getLogger().debug(f"{k}: {args[k]}")
+            assert k in arguments and arguments[k] == v
+            logging.getLogger().debug(f"{k}: {arguments[k]}")
 
     @staticmethod
     def assert_outward_ws_multiple_message(received_message, type, array_len: int):
         assert isinstance(received_message, dict)
         assert "name" in received_message and received_message["name"] == "message"
-        assert "args" in received_message
-        args = received_message["args"]
-        assert "type" in args and args["type"] == type
-        assert "payload" in args
-        payload = args["payload"]
+        assert "arguments" in received_message
+        arguments = received_message["arguments"]
+        assert "type" in arguments and arguments["type"] == type
+        assert "payload" in arguments
+        payload = arguments["payload"]
         assert isinstance(payload, list)
         assert len(payload) == array_len
         logging.getLogger().debug(payload)
@@ -134,13 +134,13 @@ class Helpers:
             return False
 
     @staticmethod
-    def run_e2e(gui, **kwargs):
-        kwargs["run_in_thread"] = True
-        kwargs["single_client"] = True
-        kwargs["run_browser"] = False
-        kwargs["stylekit"] = kwargs.get("stylekit", False)
+    def run_e2e(gui, **kwarguments):
+        kwarguments["run_in_thread"] = True
+        kwarguments["single_client"] = True
+        kwarguments["run_browser"] = False
+        kwarguments["stylekit"] = kwarguments.get("stylekit", False)
         with warnings.catch_warnings(record=True):
-            gui.run(**kwargs)
+            gui.run(**kwarguments)
         while not Helpers.port_check():
             time.sleep(0.1)
 

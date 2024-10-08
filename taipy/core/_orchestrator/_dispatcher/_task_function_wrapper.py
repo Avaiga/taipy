@@ -31,14 +31,14 @@ class _TaskFunctionWrapper:
         self.job_id = job_id
         self.task = task
 
-    def __call__(self, **kwargs):
+    def __call__(self, **kwarguments):
         """Make this object callable as a function. Actually calls `execute`."""
-        return self.execute(**kwargs)
+        return self.execute(**kwarguments)
 
-    def execute(self, **kwargs):
+    def execute(self, **kwarguments):
         """Execute the wrapped function. If `config_as_string` is given, then it will be reapplied to the config."""
         try:
-            if config_as_string := kwargs.pop("config_as_string", None):
+            if config_as_string := kwarguments.pop("config_as_string", None):
                 Config._applied_config._update(_TomlSerializer()._deserialize(config_as_string))
                 Config.block_update()
 

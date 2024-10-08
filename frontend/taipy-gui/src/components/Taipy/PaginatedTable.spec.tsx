@@ -475,7 +475,7 @@ describe("PaginatedTable Component", () => {
                 name: "",
                 payload: {
                     action: "onEdit",
-                    args: [],
+                    arguments: [],
                     col: "float",
                     index: 0,
                     user_value: 1.5,
@@ -512,7 +512,7 @@ describe("PaginatedTable Component", () => {
                 name: "",
                 payload: {
                     action: "onEdit",
-                    args: [],
+                    arguments: [],
                     col: "int",
                     index: 1,
                     user_value: 823,
@@ -544,7 +544,7 @@ describe("PaginatedTable Component", () => {
             name: "",
             payload: {
                 action: "onAdd",
-                args: [],
+                arguments: [],
                 index: 0,
             },
             type: "SEND_ACTION_ACTION",
@@ -611,7 +611,7 @@ describe("PaginatedTable Component", () => {
             name: "",
             payload: {
                 action: "onDelete",
-                args: [],
+                arguments: [],
                 index: 0,
             },
             type: "SEND_ACTION_ACTION",
@@ -644,7 +644,7 @@ describe("PaginatedTable Component", () => {
             name: "",
             payload: {
                 action: "onSelect",
-                args: [],
+                arguments: [],
                 col: "int",
                 index: 1,
                 reason: "click",
@@ -696,7 +696,7 @@ describe("PaginatedTable Component", () => {
             name: "",
             payload: {
                 action: "onSelect",
-                args: [],
+                arguments: [],
                 col: "Code",
                 index: 0,
                 reason: "button",
@@ -747,7 +747,7 @@ describe("PaginatedTable Component", () => {
             name: "",
             payload: {
                 action: "onSelect",
-                args: [],
+                arguments: [],
                 col: "Code",
                 index: 2,
                 reason: "button",

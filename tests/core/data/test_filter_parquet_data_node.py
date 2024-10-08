@@ -44,8 +44,8 @@ class MyOtherCustomObject:
         self.sentence = sentence
 
 
-def create_custom_class(**kwargs):
-    return MyOtherCustomObject(id=kwargs["id"], sentence=kwargs["text"])
+def create_custom_class(**kwarguments):
+    return MyOtherCustomObject(id=kwarguments["id"], sentence=kwarguments["text"])
 
 
 class TestFilterParquetDataNode:

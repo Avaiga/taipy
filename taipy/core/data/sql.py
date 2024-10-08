@@ -50,7 +50,7 @@ class SQLDataNode(_AbstractSQLDataNode):
     - *sqlite_folder_path* (str): The path to the folder that contains SQLite file. The default value
         is the current working folder.
     - *sqlite_file_extension* (str): The filename extension of the SQLite file. The default value is ".db".
-    - *db_extra_args* (`Dict[str, Any]`): A dictionary of additional arguments to be passed into database
+    - *db_extra_arguments* (`Dict[str, Any]`): A dictionary of additional arguments to be passed into database
         connection string.
     """
 

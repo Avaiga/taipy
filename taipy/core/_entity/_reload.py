@@ -22,9 +22,9 @@ class _Reloader:
 
     _no_reload_context = False
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *arguments, **kwarguments):
         if not isinstance(cls._instance, cls):
-            cls._instance = object.__new__(cls, *args, **kwargs)
+            cls._instance = object.__new__(cls, *arguments, **kwarguments)
         return cls._instance
 
     def _reload(self, manager: str, obj):
@@ -51,9 +51,9 @@ class _Reloader:
 def _self_reload(manager: str):
     def __reload(fct):
         @functools.wraps(fct)
-        def _do_reload(self, *args, **kwargs):
+        def _do_reload(self, *arguments, **kwarguments):
             self = _Reloader()._reload(manager, self)
-            return fct(self, *args, **kwargs)
+            return fct(self, *arguments, **kwarguments)
 
         return _do_reload
 
@@ -63,10 +63,10 @@ def _self_reload(manager: str):
 def _self_setter(manager):
     def __set_entity(fct):
         @functools.wraps(fct)
-        def _do_set_entity(self, *args, **kwargs):
-            fct(self, *args, **kwargs)
+        def _do_set_entity(self, *arguments, **kwarguments):
+            fct(self, *arguments, **kwarguments)
             entity_manager = _get_manager(manager)
-            value = args[0] if len(args) == 1 else args
+            value = arguments[0] if len(arguments) == 1 else arguments
             event = _make_event(
                 self,
                 EventOperation.UPDATE,
@@ -75,7 +75,7 @@ def _self_setter(manager):
             )
             if not self._is_in_context:
                 entity = _Reloader()._reload(manager, self)
-                fct(entity, *args, **kwargs)
+                fct(entity, *arguments, **kwarguments)
                 entity_manager._set(entity)
                 Notifier.publish(event)
             else:

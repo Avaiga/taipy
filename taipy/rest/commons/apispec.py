@@ -41,13 +41,13 @@ class FlaskRestfulPlugin(FlaskPlugin):
 class APISpecExt:
     """Very simple and small extension to use apispec with this API as a flask extension"""
 
-    def __init__(self, app=None, **kwargs):
+    def __init__(self, app=None, **kwarguments):
         self.spec = None
 
         if app is not None:
-            self.init_app(app, **kwargs)
+            self.init_app(app, **kwarguments)
 
-    def init_app(self, app, **kwargs):
+    def init_app(self, app, **kwarguments):
         app.config.setdefault("APISPEC_TITLE", "Taipy Rest")
         app.config.setdefault("APISPEC_VERSION", "1.0.0")
         app.config.setdefault("OPENAPI_VERSION", "3.0.2")
@@ -62,7 +62,7 @@ class APISpecExt:
             version=app.config["APISPEC_VERSION"],
             openapi_version=app.config["OPENAPI_VERSION"],
             plugins=[MarshmallowPlugin(), FlaskRestfulPlugin()],
-            **kwargs,
+            **kwarguments,
         )
 
         blueprint = Blueprint(

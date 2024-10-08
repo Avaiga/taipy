@@ -37,7 +37,7 @@ class _ConfigBlocker:
     def _check(cls):
         def inner(f):
             @functools.wraps(f)
-            def _check_if_is_blocking(*args, **kwargs):
+            def _check_if_is_blocking(*arguments, **kwarguments):
                 if cls.__block_config_update:
                     error_message = (
                         "The Orchestrator service should be stopped by running orchestrator.stop() before"
@@ -46,7 +46,7 @@ class _ConfigBlocker:
                     cls.__logger.error(f"ConfigurationUpdateBlocked: {error_message}")
                     raise ConfigurationUpdateBlocked(error_message)
 
-                return f(*args, **kwargs)
+                return f(*arguments, **kwarguments)
 
             return _check_if_is_blocking
 

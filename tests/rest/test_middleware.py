@@ -17,8 +17,8 @@ from taipy.rest.api.middlewares._middleware import _middleware
 
 def mock_enterprise_middleware(f):
     @wraps(f)
-    def wrapper(*args, **kwargs):
-        return f(*args, **kwargs)
+    def wrapper(*arguments, **kwarguments):
+        return f(*arguments, **kwarguments)
 
     return wrapper
 

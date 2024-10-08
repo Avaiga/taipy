@@ -51,7 +51,7 @@ if __name__ == "__main__":
     gui = Gui(page)
 
     # Run thread that regularly updates the current time
-    thread = Thread(target=update_time, args=[gui], name="clock")
+    thread = Thread(target=update_time, arguments=[gui], name="clock")
     thread.daemon = True
     thread.start()
 

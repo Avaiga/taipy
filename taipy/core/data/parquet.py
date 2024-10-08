@@ -45,13 +45,13 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     - *compression* (`Optional[str]`): Name of the compression to use. Possible values
         are *"snappy"*, *"gzip"*, *"brotli"*, or *"none"* (no compression).<br/>
         The default value is *"snappy"*.
-    - *read_kwargs* (`Optional[dict]`): Additional arguments passed to the
+    - *read_kwarguments* (`Optional[dict]`): Additional arguments passed to the
         *pandas.read_parquet()* function when reading the data.<br/>
-        The arguments in *"read_kwargs"* have a **higher precedence** than the top-level
+        The arguments in *"read_kwarguments"* have a **higher precedence** than the top-level
         arguments which are also passed to Pandas.
-    - *write_kwargs* (`Optional[dict]`): Additional arguments passed to the
+    - *write_kwarguments* (`Optional[dict]`): Additional arguments passed to the
         *pandas.DataFrame.write_parquet()* function when writing the data. <br/>
-        The arguments in *"write_kwargs"* have a **higher precedence** than the
+        The arguments in *"write_kwarguments"* have a **higher precedence** than the
         top-level arguments which are also passed to Pandas.
     """
 
@@ -60,8 +60,8 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     __VALID_PARQUET_ENGINES = ["pyarrow", "fastparquet"]
     __COMPRESSION_PROPERTY = "compression"
     __VALID_COMPRESSION_ALGORITHMS = ["snappy", "gzip", "brotli", "none"]
-    __READ_KWARGS_PROPERTY = "read_kwargs"
-    __WRITE_KWARGS_PROPERTY = "write_kwargs"
+    __READ_KWARGS_PROPERTY = "read_kwarguments"
+    __WRITE_KWARGS_PROPERTY = "write_kwarguments"
     _REQUIRED_PROPERTIES: List[str] = []
 
     def __init__(
@@ -163,7 +163,7 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         """Return the storage type of the data node: "parquet"."""
         return cls.__STORAGE_TYPE
 
-    def _write_with_kwargs(self, data: Any, job_id: Optional[JobId] = None, **write_kwargs):
+    def _write_with_kwarguments(self, data: Any, job_id: Optional[JobId] = None, **write_kwarguments):
         """Write the data referenced by this data node.
 
         Keyword arguments here which are also present in the Data Node config will overwrite them.
@@ -171,16 +171,16 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         Arguments:
             data (Any): The data to write.
             job_id (JobId): An optional identifier of the writer.
-            **write_kwargs (dict[str, any]): The keyword arguments passed to the function
+            **write_kwarguments (dict[str, any]): The keyword arguments passed to the function
                 `pandas.DataFrame.to_parquet()`.
         """
         properties = self.properties
-        kwargs = {
+        kwarguments = {
             self.__ENGINE_PROPERTY: properties[self.__ENGINE_PROPERTY],
             self.__COMPRESSION_PROPERTY: properties[self.__COMPRESSION_PROPERTY],
         }
-        kwargs.update(properties[self.__WRITE_KWARGS_PROPERTY])
-        kwargs.update(write_kwargs)
+        kwarguments.update(properties[self.__WRITE_KWARGS_PROPERTY])
+        kwarguments.update(write_kwarguments)
 
         df = self._convert_data_to_dataframe(properties[self._EXPOSED_TYPE_PROPERTY], data)
         if isinstance(df, pd.Series):
@@ -188,24 +188,24 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
         # Ensure that the columns are strings, otherwise writing will fail with pandas 1.3.5
         df.columns = df.columns.astype(str)
-        df.to_parquet(self._path, **kwargs)
+        df.to_parquet(self._path, **kwarguments)
         self.track_edit(timestamp=datetime.now(), job_id=job_id)
 
-    def read_with_kwargs(self, **read_kwargs):
+    def read_with_kwarguments(self, **read_kwarguments):
         """Read data from this data node.
 
         Keyword arguments here which are also present in the Data Node config will overwrite them.
 
         Arguments:
-            **read_kwargs (dict[str, any]): The keyword arguments passed to the function
+            **read_kwarguments (dict[str, any]): The keyword arguments passed to the function
                 `pandas.read_parquet()`.
         """
-        return self._read_from_path(**read_kwargs)
+        return self._read_from_path(**read_kwarguments)
 
     def _read(self):
         return self._read_from_path()
 
-    def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
+    def _read_from_path(self, path: Optional[str] = None, **read_kwarguments) -> Any:
         if path is None:
             path = self._path
 
@@ -218,36 +218,36 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
         properties = self.properties
 
-        kwargs = properties[self.__READ_KWARGS_PROPERTY]
-        kwargs.update(
+        kwarguments = properties[self.__READ_KWARGS_PROPERTY]
+        kwarguments.update(
             {
                 self.__ENGINE_PROPERTY: properties[self.__ENGINE_PROPERTY],
             }
         )
-        kwargs.update(read_kwargs)
-        return self._do_read_from_path(path, properties[self._EXPOSED_TYPE_PROPERTY], kwargs)
+        kwarguments.update(read_kwarguments)
+        return self._do_read_from_path(path, properties[self._EXPOSED_TYPE_PROPERTY], kwarguments)
 
-    def _do_read_from_path(self, path: str, exposed_type: str, kwargs: Dict) -> Any:
+    def _do_read_from_path(self, path: str, exposed_type: str, kwarguments: Dict) -> Any:
         if exposed_type == self._EXPOSED_TYPE_PANDAS:
-            return self._read_as_pandas_dataframe(path, kwargs)
+            return self._read_as_pandas_dataframe(path, kwarguments)
         if exposed_type == self._EXPOSED_TYPE_NUMPY:
-            return self._read_as_numpy(path, kwargs)
-        return self._read_as(path, kwargs)
+            return self._read_as_numpy(path, kwarguments)
+        return self._read_as(path, kwarguments)
 
-    def _read_as(self, path: str, read_kwargs: Dict):
+    def _read_as(self, path: str, read_kwarguments: Dict):
         custom_class = self.properties[self._EXPOSED_TYPE_PROPERTY]
-        list_of_dicts = self._read_as_pandas_dataframe(path, read_kwargs).to_dict(orient="records")
+        list_of_dicts = self._read_as_pandas_dataframe(path, read_kwarguments).to_dict(orient="records")
         return [custom_class(**dct) for dct in list_of_dicts]
 
-    def _read_as_numpy(self, path: str, read_kwargs: Dict) -> np.ndarray:
-        return self._read_as_pandas_dataframe(path, read_kwargs).to_numpy()
+    def _read_as_numpy(self, path: str, read_kwarguments: Dict) -> np.ndarray:
+        return self._read_as_pandas_dataframe(path, read_kwarguments).to_numpy()
 
-    def _read_as_pandas_dataframe(self, path: str, read_kwargs: Dict) -> pd.DataFrame:
-        return pd.read_parquet(path, **read_kwargs)
+    def _read_as_pandas_dataframe(self, path: str, read_kwarguments: Dict) -> pd.DataFrame:
+        return pd.read_parquet(path, **read_kwarguments)
 
     def _append(self, data: Any):
-        self._write_with_kwargs(data, engine="fastparquet", append=True)
+        self._write_with_kwarguments(data, engine="fastparquet", append=True)
 
     def _write(self, data: Any):
-        self._write_with_kwargs(data)
+        self._write_with_kwarguments(data)
 

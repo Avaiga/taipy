@@ -24,5 +24,5 @@ entity_to_models = {
 }
 
 
-def _to_model(repository, entity, **kwargs):
+def _to_model(repository, entity, **kwarguments):
     return entity_to_models[repository](entity)

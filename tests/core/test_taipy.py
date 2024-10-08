@@ -348,7 +348,7 @@ class TestTaipy:
                 tp.submit(scenario)
 
         assert len(warning) == 1
-        assert "The Orchestrator service is NOT running" in warning[0].message.args[0]
+        assert "The Orchestrator service is NOT running" in warning[0].message.arguments[0]
 
     def test_get_tasks(self):
         with mock.patch("taipy.core.task._task_manager._TaskManager._get_all") as mck:

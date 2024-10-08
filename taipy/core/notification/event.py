@@ -127,7 +127,7 @@ def _make_event(
     /,
     attribute_name: Optional[str] = None,
     attribute_value: Optional[Any] = None,
-    **kwargs,
+    **kwarguments,
 ) -> Event:
     """Helper function to make an event for this entity with the given `EventOperation^` type.
     In case of `EventOperation.UPDATE^` events, an attribute name and value must be given.
@@ -145,6 +145,6 @@ def _make_event(
             This argument is always given in case of an UPDATE.
         attribute_value (Optional[Any]): The value of the updated attribute for a `EventOperation.UPDATE`.
             This argument is always given in case of an UPDATE.
-        **kwargs (dict[str, any]): Any extra information that would be passed to the metadata event.
+        **kwarguments (dict[str, any]): Any extra information that would be passed to the metadata event.
             Note: you should pass only simple types: str, float, double as values."""
     raise Exception(f"Unexpected entity type: {type(entity)}")

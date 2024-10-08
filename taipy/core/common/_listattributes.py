@@ -13,8 +13,8 @@ from collections import UserList
 
 
 class _ListAttributes(UserList):
-    def __init__(self, parent, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, parent, *arguments, **kwarguments):
+        super().__init__(*arguments, **kwarguments)
         self._parent = parent
 
     def __add_iterable(self, iterable):

@@ -25,7 +25,7 @@ def test_user_content_without_callback(gui: Gui, helpers):
 
 
 def test_user_content_with_wrong_callback(gui: Gui, helpers):
-    def on_user_content_cb(state, path, args):
+    def on_user_content_cb(state, path, arguments):
         return None
 
     on_user_content = on_user_content_cb  # noqa: F841
@@ -38,7 +38,7 @@ def test_user_content_with_wrong_callback(gui: Gui, helpers):
 
 
 def test_user_content_with_callback(gui: Gui, helpers):
-    def on_user_content_cb(state, path, args):
+    def on_user_content_cb(state, path, arguments):
         return ""
 
     on_user_content = on_user_content_cb  # noqa: F841

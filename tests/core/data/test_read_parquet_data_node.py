@@ -49,12 +49,12 @@ class MyCustomXYObject:
         self.y = y
 
 
-def create_custom_class(**kwargs):
-    return MyOtherCustomObject(id=kwargs["id"], sentence=kwargs["text"])
+def create_custom_class(**kwarguments):
+    return MyOtherCustomObject(id=kwarguments["id"], sentence=kwarguments["text"])
 
 
-def create_custom_xy_class(**kwargs):
-    return MyCustomXYObject(x=kwargs["x"], y=kwargs["y"])
+def create_custom_xy_class(**kwarguments):
+    return MyCustomXYObject(x=kwarguments["x"], y=kwarguments["y"])
 
 
 class TestReadParquetDataNode:
@@ -164,25 +164,25 @@ class TestReadParquetDataNode:
         assert dn.read() == []
 
     @pytest.mark.parametrize("engine", __engine)
-    def test_read_pandas_parquet_config_kwargs(self, engine, tmpdir_factory):
-        read_kwargs = {"filters": [("integer", "<", 10)], "columns": ["integer"]}
+    def test_read_pandas_parquet_config_kwarguments(self, engine, tmpdir_factory):
+        read_kwarguments = {"filters": [("integer", "<", 10)], "columns": ["integer"]}
         temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.parquet"))
         dn = ParquetDataNode(
-            "foo", Scope.SCENARIO, properties={"path": temp_file_path, "engine": engine, "read_kwargs": read_kwargs}
+            "foo", Scope.SCENARIO, properties={"path": temp_file_path, "engine": engine, "read_kwarguments": read_kwarguments}
         )
 
         df = pd.read_csv(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv"))
         dn.write(df)
 
         assert set(pd.read_parquet(temp_file_path).columns) == {"id", "integer", "text"}
-        assert set(dn.read().columns) == set(read_kwargs["columns"])
+        assert set(dn.read().columns) == set(read_kwarguments["columns"])
 
         # !!! filter doesn't work with `fastparquet` without partition_cols
         if engine == "pyarrow":
             assert len(dn.read()) != len(df)
             assert len(dn.read()) == 2
 
-    def test_read_with_kwargs_never_written(self):
+    def test_read_with_kwarguments_never_written(self):
         path = "data/node/path"
         dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": path})
-        assert dn.read_with_kwargs() is None
+        assert dn.read_with_kwarguments() is None

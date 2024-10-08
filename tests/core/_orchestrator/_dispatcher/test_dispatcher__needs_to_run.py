@@ -19,7 +19,7 @@ from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.task._task_manager import _TaskManager
 
 
-def nothing(*args):
+def nothing(*arguments):
     pass
 
 

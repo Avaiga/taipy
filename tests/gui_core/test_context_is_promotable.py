@@ -48,8 +48,8 @@ def mock_is_true(entity_id):
 
 
 class MockState:
-    def __init__(self, **kwargs) -> None:
-        self.assign = kwargs.get("assign")
+    def __init__(self, **kwarguments) -> None:
+        self.assign = kwarguments.get("assign")
 
 
 class TestGuiCoreContext_is_promotable:
@@ -71,15 +71,15 @@ class TestGuiCoreContext_is_promotable:
                 MockState(assign=assign),
                 "",
                 {
-                    "args": [
+                    "arguments": [
                         {"name": "name", "id": a_scenario.id, "primary": True},
                     ],
                     "error_id": "error_var",
                 },
             )
             assign.assert_called_once()
-            assert assign.call_args.args[0] == "error_var"
-            assert "to primary because it doesn't belong to a cycle" in assign.call_args.args[1]
+            assert assign.call_arguments.arguments[0] == "error_var"
+            assert "to primary because it doesn't belong to a cycle" in assign.call_arguments.arguments[1]
             assign.reset_mock()
 
             with patch("taipy.gui_core._context.is_promotable", side_effect=mock_is_promotable_false):
@@ -87,12 +87,12 @@ class TestGuiCoreContext_is_promotable:
                     MockState(assign=assign),
                     "",
                     {
-                        "args": [
+                        "arguments": [
                             {"name": "name", "id": a_scenario.id, "primary": True},
                         ],
                         "error_id": "error_var",
                     },
                 )
                 assign.assert_called_once()
-                assert assign.call_args.args[0] == "error_var"
-                assert "is not promotable" in assign.call_args.args[1]
+                assert assign.call_arguments.arguments[0] == "error_var"
+                assert "is not promotable" in assign.call_arguments.arguments[1]

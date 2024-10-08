@@ -26,20 +26,20 @@ class _HelpCLI(_AbstractCLI):
             add_help=False,
         )
         create_parser.add_argument(
-            "command", nargs="?", type=str, const="", default="", help="Show the help message of the command."
+            "command", narguments="?", type=str, const="", default="", help="Show the help message of the command."
         )
 
     @classmethod
     def handle_command(cls):
-        args = cls._parse_arguments()
-        if not args:
+        arguments = cls._parse_arguments()
+        if not arguments:
             return
 
-        if args.command:
-            if args.command in _TaipyParser._sub_taipyparsers.keys():
-                _TaipyParser._sub_taipyparsers.get(args.command).print_help()
+        if arguments.command:
+            if arguments.command in _TaipyParser._sub_taipyparsers.keys():
+                _TaipyParser._sub_taipyparsers.get(arguments.command).print_help()
             else:
-                cls._logger.error(f"{args.command} is not a valid command.")
+                cls._logger.error(f"{arguments.command} is not a valid command.")
         else:
             _TaipyParser._parser.print_help()
 

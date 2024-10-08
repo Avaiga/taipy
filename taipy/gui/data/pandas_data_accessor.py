@@ -61,14 +61,14 @@ class _PandasDataAccessor(_DataAccessor):
     def __user_function(
         row: pd.Series, gui: Gui, column_name: t.Optional[str], user_function: t.Callable, function_name: str
     ) -> str:  # pragma: no cover
-        args = []
+        arguments = []
         if column_name:
-            args.append(row[column_name])
-        args.extend((row.name, row))  # type: ignore[arg-type]
+            arguments.append(row[column_name])
+        arguments.extend((row.name, row))  # type: ignore[arg-type]
         if column_name:
-            args.append(column_name)  # type: ignore[arg-type]
+            arguments.append(column_name)  # type: ignore[arg-type]
         try:
-            return str(gui._call_function_with_state(user_function, args))
+            return str(gui._call_function_with_state(user_function, arguments))
         except Exception as e:
             _warn(f"Exception raised when calling user function {function_name}()", e)
         return ""
@@ -173,7 +173,7 @@ class _PandasDataAccessor(_DataAccessor):
             return new_col_name, data.apply(
                 _PandasDataAccessor.__user_function,
                 axis=1,
-                args=(self._gui, column_name, user_function, function_name),
+                arguments=(self._gui, column_name, user_function, function_name),
             )
         except Exception as e:
             _warn(f"Exception raised when invoking user function {function_name}()", e)
@@ -338,7 +338,7 @@ class _PandasDataAccessor(_DataAccessor):
                 try:
                     if df.columns.dtype.name == "int64":
                         order_by = int(order_by)
-                    new_indexes = t.cast(pd.DataFrame, df)[order_by].values.argsort(axis=0)
+                    new_indexes = t.cast(pd.DataFrame, df)[order_by].values.argumentsort(axis=0)
                     if payload.get("sort") == "desc":
                         # reverse order
                         new_indexes = new_indexes[::-1]

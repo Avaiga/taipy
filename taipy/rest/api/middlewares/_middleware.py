@@ -17,11 +17,11 @@ from taipy.core.common._utils import _load_fct
 
 def _middleware(f):
     @wraps(f)
-    def wrapper(*args, **kwargs):
+    def wrapper(*arguments, **kwarguments):
         if _using_enterprise():
-            return _enterprise_middleware()(f)(*args, **kwargs)
+            return _enterprise_middleware()(f)(*arguments, **kwarguments)
         else:
-            return f(*args, **kwargs)
+            return f(*arguments, **kwarguments)
 
     return wrapper
 

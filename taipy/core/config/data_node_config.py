@@ -82,9 +82,9 @@ class DataNodeConfig(Section):
 
     # Generic
     _OPTIONAL_READ_FUNCTION_GENERIC_PROPERTY = "read_fct"
-    _OPTIONAL_READ_FUNCTION_ARGS_GENERIC_PROPERTY = "read_fct_args"
+    _OPTIONAL_READ_FUNCTION_ARGS_GENERIC_PROPERTY = "read_fct_arguments"
     _OPTIONAL_WRITE_FUNCTION_GENERIC_PROPERTY = "write_fct"
-    _OPTIONAL_WRITE_FUNCTION_ARGS_GENERIC_PROPERTY = "write_fct_args"
+    _OPTIONAL_WRITE_FUNCTION_ARGS_GENERIC_PROPERTY = "write_fct_arguments"
     # CSV
     _OPTIONAL_EXPOSED_TYPE_CSV_PROPERTY = "exposed_type"
     _OPTIONAL_DEFAULT_PATH_CSV_PROPERTY = "default_path"
@@ -107,7 +107,7 @@ class DataNodeConfig(Section):
     _OPTIONAL_PORT_SQL_PROPERTY = "db_port"
     _OPTIONAL_HOST_SQL_PROPERTY = "db_host"
     _OPTIONAL_DRIVER_SQL_PROPERTY = "db_driver"
-    _OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY = "db_extra_args"
+    _OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY = "db_extra_arguments"
     _OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY = "exposed_type"
     # SQL_TABLE
     _REQUIRED_TABLE_NAME_SQL_TABLE_PROPERTY = "table_name"
@@ -124,7 +124,7 @@ class DataNodeConfig(Section):
     _OPTIONAL_HOST_MONGO_PROPERTY = "db_host"
     _OPTIONAL_PORT_MONGO_PROPERTY = "db_port"
     _OPTIONAL_DRIVER_MONGO_PROPERTY = "db_driver"
-    _OPTIONAL_DB_EXTRA_ARGS_MONGO_PROPERTY = "db_extra_args"
+    _OPTIONAL_DB_EXTRA_ARGS_MONGO_PROPERTY = "db_extra_arguments"
     # Pickle
     _OPTIONAL_DEFAULT_PATH_PICKLE_PROPERTY = "default_path"
     _OPTIONAL_DEFAULT_DATA_PICKLE_PROPERTY = "default_data"
@@ -137,8 +137,8 @@ class DataNodeConfig(Section):
     _OPTIONAL_DEFAULT_PATH_PARQUET_PROPERTY = "default_path"
     _OPTIONAL_ENGINE_PARQUET_PROPERTY = "engine"
     _OPTIONAL_COMPRESSION_PARQUET_PROPERTY = "compression"
-    _OPTIONAL_READ_KWARGS_PARQUET_PROPERTY = "read_kwargs"
-    _OPTIONAL_WRITE_KWARGS_PARQUET_PROPERTY = "write_kwargs"
+    _OPTIONAL_READ_KWARGS_PARQUET_PROPERTY = "read_kwarguments"
+    _OPTIONAL_WRITE_KWARGS_PARQUET_PROPERTY = "write_kwarguments"
     # S3object
     _REQUIRED_AWS_ACCESS_KEY_ID_PROPERTY = "aws_access_key"
     _REQUIRED_AWS_SECRET_ACCESS_KEY_PROPERTY = "aws_secret_access_key"
@@ -601,8 +601,8 @@ class DataNodeConfig(Section):
         default_path: Optional[str] = None,
         engine: Optional[str] = None,
         compression: Optional[str] = None,
-        read_kwargs: Optional[Dict] = None,
-        write_kwargs: Optional[Dict] = None,
+        read_kwarguments: Optional[Dict] = None,
+        write_kwarguments: Optional[Dict] = None,
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
         validity_period: Optional[timedelta] = None,
@@ -618,11 +618,11 @@ class DataNodeConfig(Section):
                 The default value is *"pyarrow"*.
             compression (Optional[str]): Name of the compression to use. Possible values are *"snappy"*,
                 *"gzip"*, *"brotli"*, or *"none"* (no compression). The default value is *"snappy"*.
-            read_kwargs (Optional[dict]): Additional arguments passed to the `pandas.read_parquet()`
+            read_kwarguments (Optional[dict]): Additional arguments passed to the `pandas.read_parquet()`
                 function.
-            write_kwargs (Optional[dict]): Additional arguments passed to the
+            write_kwarguments (Optional[dict]): Additional arguments passed to the
                 `pandas.DataFrame.write_parquet()` function.<br/>
-                The arguments in *read_kwargs* and *write_kwargs* have a **higher precedence** than the
+                The arguments in *read_kwarguments* and *write_kwarguments* have a **higher precedence** than the
                 top-level arguments which are also passed to Pandas.
             exposed_type (Optional[str]): The exposed type of the data read from Parquet file.<br/>
                 The default value is `pandas`.
@@ -645,10 +645,10 @@ class DataNodeConfig(Section):
             properties[cls._OPTIONAL_ENGINE_PARQUET_PROPERTY] = engine
         if compression is not None:
             properties[cls._OPTIONAL_COMPRESSION_PARQUET_PROPERTY] = compression
-        if read_kwargs is not None:
-            properties[cls._OPTIONAL_READ_KWARGS_PARQUET_PROPERTY] = read_kwargs
-        if write_kwargs is not None:
-            properties[cls._OPTIONAL_WRITE_KWARGS_PARQUET_PROPERTY] = write_kwargs
+        if read_kwarguments is not None:
+            properties[cls._OPTIONAL_READ_KWARGS_PARQUET_PROPERTY] = read_kwarguments
+        if write_kwarguments is not None:
+            properties[cls._OPTIONAL_WRITE_KWARGS_PARQUET_PROPERTY] = write_kwarguments
         if exposed_type is not None:
             properties[cls._OPTIONAL_EXPOSED_TYPE_PARQUET_PROPERTY] = exposed_type
 
@@ -706,8 +706,8 @@ class DataNodeConfig(Section):
         id: str,
         read_fct: Optional[Callable] = None,
         write_fct: Optional[Callable] = None,
-        read_fct_args: Optional[List] = None,
-        write_fct_args: Optional[List] = None,
+        read_fct_arguments: Optional[List] = None,
+        write_fct_arguments: Optional[List] = None,
         scope: Optional[Scope] = None,
         validity_period: Optional[timedelta] = None,
         **properties,
@@ -719,9 +719,9 @@ class DataNodeConfig(Section):
             read_fct (Optional[Callable]): The Python function called to read the data.
             write_fct (Optional[Callable]): The Python function called to write the data.
                 The provided function must have at least one argument that receives the data to be written.
-            read_fct_args (Optional[List]): The list of arguments that are passed to the function
+            read_fct_arguments (Optional[List]): The list of arguments that are passed to the function
                 *read_fct* to read data.
-            write_fct_args (Optional[List]): The list of arguments that are passed to the function
+            write_fct_arguments (Optional[List]): The list of arguments that are passed to the function
                 *write_fct* to write the data.
             scope (Optional[Scope^]): The scope of the Generic data node configuration.<br/>
                 The default value is `Scope.SCENARIO`.
@@ -740,10 +740,10 @@ class DataNodeConfig(Section):
             properties[cls._OPTIONAL_READ_FUNCTION_GENERIC_PROPERTY] = read_fct
         if write_fct is not None:
             properties[cls._OPTIONAL_WRITE_FUNCTION_GENERIC_PROPERTY] = write_fct
-        if read_fct_args is not None:
-            properties[cls._OPTIONAL_READ_FUNCTION_ARGS_GENERIC_PROPERTY] = read_fct_args
-        if write_fct_args is not None:
-            properties[cls._OPTIONAL_WRITE_FUNCTION_ARGS_GENERIC_PROPERTY] = write_fct_args
+        if read_fct_arguments is not None:
+            properties[cls._OPTIONAL_READ_FUNCTION_ARGS_GENERIC_PROPERTY] = read_fct_arguments
+        if write_fct_arguments is not None:
+            properties[cls._OPTIONAL_WRITE_FUNCTION_ARGS_GENERIC_PROPERTY] = write_fct_arguments
 
         return cls.__configure(id, DataNodeConfig._STORAGE_TYPE_VALUE_GENERIC, scope, validity_period, **properties)
 
@@ -835,7 +835,7 @@ class DataNodeConfig(Section):
         db_driver: Optional[str] = None,
         sqlite_folder_path: Optional[str] = None,
         sqlite_file_extension: Optional[str] = None,
-        db_extra_args: Optional[Dict[str, Any]] = None,
+        db_extra_arguments: Optional[Dict[str, Any]] = None,
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
         validity_period: Optional[timedelta] = None,
@@ -862,7 +862,7 @@ class DataNodeConfig(Section):
                 The default value is the current working folder.
             sqlite_file_extension (Optional[str]): The file extension of the SQLite file.<br/>
                 The default value is ".db".
-            db_extra_args (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
+            db_extra_arguments (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
                 into database connection string.
             exposed_type (Optional[str]): The exposed type of the data read from SQL table.<br/>
                 The default value is "pandas".
@@ -901,8 +901,8 @@ class DataNodeConfig(Section):
             properties[cls._OPTIONAL_FOLDER_PATH_SQLITE_PROPERTY] = sqlite_folder_path
         if sqlite_file_extension is not None:
             properties[cls._OPTIONAL_FILE_EXTENSION_SQLITE_PROPERTY] = sqlite_file_extension
-        if db_extra_args is not None:
-            properties[cls._OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY] = db_extra_args
+        if db_extra_arguments is not None:
+            properties[cls._OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY] = db_extra_arguments
         if exposed_type is not None:
             properties[cls._OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY] = exposed_type
 
@@ -924,7 +924,7 @@ class DataNodeConfig(Section):
         db_driver: Optional[str] = None,
         sqlite_folder_path: Optional[str] = None,
         sqlite_file_extension: Optional[str] = None,
-        db_extra_args: Optional[Dict[str, Any]] = None,
+        db_extra_arguments: Optional[Dict[str, Any]] = None,
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
         validity_period: Optional[timedelta] = None,
@@ -955,7 +955,7 @@ class DataNodeConfig(Section):
                 The default value is the current working folder.
             sqlite_file_extension (Optional[str]): The file extension of the SQLite file.<br/>
                 The default value is ".db".
-            db_extra_args (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
+            db_extra_arguments (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
                 into database connection string.
             exposed_type (Optional[str]): The exposed type of the data read from SQL query.<br/>
                 The default value is "pandas".
@@ -997,8 +997,8 @@ class DataNodeConfig(Section):
             properties[cls._OPTIONAL_FOLDER_PATH_SQLITE_PROPERTY] = sqlite_folder_path
         if sqlite_file_extension is not None:
             properties[cls._OPTIONAL_FILE_EXTENSION_SQLITE_PROPERTY] = sqlite_file_extension
-        if db_extra_args is not None:
-            properties[cls._OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY] = db_extra_args
+        if db_extra_arguments is not None:
+            properties[cls._OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY] = db_extra_arguments
         if exposed_type is not None:
             properties[cls._OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY] = exposed_type
 
@@ -1016,7 +1016,7 @@ class DataNodeConfig(Section):
         db_host: Optional[str] = None,
         db_port: Optional[int] = None,
         db_driver: Optional[str] = None,
-        db_extra_args: Optional[Dict[str, Any]] = None,
+        db_extra_arguments: Optional[Dict[str, Any]] = None,
         scope: Optional[Scope] = None,
         validity_period: Optional[timedelta] = None,
         **properties,
@@ -1039,7 +1039,7 @@ class DataNodeConfig(Section):
             db_port (Optional[int]): The database port.<br/>
                 The default value is 27017.
             db_driver (Optional[str]): The database driver.
-            db_extra_args (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
+            db_extra_arguments (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
                 into database connection string.
             scope (Optional[Scope^]): The scope of the Mongo collection data node configuration.<br/>
                 The default value is `Scope.SCENARIO`.
@@ -1073,8 +1073,8 @@ class DataNodeConfig(Section):
             properties[cls._OPTIONAL_PORT_MONGO_PROPERTY] = db_port
         if db_driver is not None:
             properties[cls._OPTIONAL_DRIVER_MONGO_PROPERTY] = db_driver
-        if db_extra_args is not None:
-            properties[cls._OPTIONAL_DB_EXTRA_ARGS_MONGO_PROPERTY] = db_extra_args
+        if db_extra_arguments is not None:
+            properties[cls._OPTIONAL_DB_EXTRA_ARGS_MONGO_PROPERTY] = db_extra_arguments
 
         return cls.__configure(
             id, DataNodeConfig._STORAGE_TYPE_VALUE_MONGO_COLLECTION, scope, validity_period, **properties

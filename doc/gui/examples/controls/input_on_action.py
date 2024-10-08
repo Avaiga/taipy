@@ -20,7 +20,7 @@ from taipy.gui import Gui
 logging.basicConfig(level=logging.INFO)
 
 def key_pressed(state, id, payload):
-    key = payload.get('args', [None])[0]
+    key = payload.get('arguments', [None])[0]
     if key in ["F1", "F2", "F3"]:
         logging.info(f"{key} key pressed")
 

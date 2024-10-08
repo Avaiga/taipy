@@ -566,22 +566,22 @@ export const getPayload = (value: unknown, onChange?: string, relName?: string) 
  * @param context - The execution context.
  * @param value - The value associated with the action. This can be an object or
  *   any type of value.
- * @param args - Additional information associated to the action.
+ * @param arguments - Additional information associated to the action.
  * @returns The action fed to the reducer.
  */
 export const createSendActionNameAction = (
     name: string | undefined,
     context: string | undefined,
     value: unknown,
-    ...args: unknown[]
+    ...arguments: unknown[]
 ): TaipyAction => ({
     type: Types.Action,
     name: name || "",
     context: context,
     payload:
         typeof value === "object" && !Array.isArray(value) && value !== null
-            ? { ...(value as object), args: args }
-            : { action: value, args: args },
+            ? { ...(value as object), arguments: arguments }
+            : { action: value, arguments: arguments },
 });
 
 export const createRequestChartUpdateAction = (

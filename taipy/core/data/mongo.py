@@ -45,7 +45,7 @@ class MongoCollectionDataNode(DataNode):
     - *db_host* (`str`): The database host. The default value is *"localhost"*.
     - *db_port* (`str`): The database port. The default value is *27017*.
     - *db_driver* (`str`): The database driver.
-    - *db_extra_args* (`Dict[str, Any]`): A dictionary of additional arguments to be passed into
+    - *db_extra_arguments* (`Dict[str, Any]`): A dictionary of additional arguments to be passed into
         database connection string.
     """
 
@@ -57,7 +57,7 @@ class MongoCollectionDataNode(DataNode):
     __DB_PASSWORD_KEY = "db_password"
     __DB_HOST_KEY = "db_host"
     __DB_PORT_KEY = "db_port"
-    __DB_EXTRA_ARGS_KEY = "db_extra_args"
+    __DB_EXTRA_ARGS_KEY = "db_extra_arguments"
     __DB_DRIVER_KEY = "db_driver"
 
     __DB_HOST_DEFAULT = "localhost"
@@ -118,7 +118,7 @@ class MongoCollectionDataNode(DataNode):
             db_username=properties.get(self.__DB_USERNAME_KEY, ""),
             db_password=properties.get(self.__DB_PASSWORD_KEY, ""),
             db_driver=properties.get(self.__DB_DRIVER_KEY, ""),
-            db_extra_args=frozenset(properties.get(self.__DB_EXTRA_ARGS_KEY, {}).items()),
+            db_extra_arguments=frozenset(properties.get(self.__DB_EXTRA_ARGS_KEY, {}).items()),
         )
         self.collection = mongo_client[properties.get(self.__DB_NAME_KEY, "")][
             properties.get(self.__COLLECTION_KEY, "")
@@ -263,7 +263,7 @@ class MongoCollectionDataNode(DataNode):
     def _default_encoder(self, document_object: Any) -> Dict:
         """Encode a custom document object to a dictionary for writing to MongoDB.
 
-        Args:
+        Arguments:
             document_object: the custom document class.
 
         Returns:

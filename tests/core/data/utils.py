@@ -18,9 +18,9 @@ class FakeDataNode(InMemoryDataNode):
     read_has_been_called = 0
     write_has_been_called = 0
 
-    def __init__(self, config_id, **kwargs):
-        scope = kwargs.pop("scope", Scope.SCENARIO)
-        super().__init__(config_id=config_id, scope=scope, **kwargs)
+    def __init__(self, config_id, **kwarguments):
+        scope = kwarguments.pop("scope", Scope.SCENARIO)
+        super().__init__(config_id=config_id, scope=scope, **kwarguments)
 
     def _read(self, query=None):
         self.read_has_been_called += 1
@@ -39,8 +39,8 @@ class FakeDataframeDataNode(DataNode):
     COLUMN_NAME_1 = "a"
     COLUMN_NAME_2 = "b"
 
-    def __init__(self, config_id, default_data_frame, **kwargs):
-        super().__init__(config_id, **kwargs)
+    def __init__(self, config_id, default_data_frame, **kwarguments):
+        super().__init__(config_id, **kwarguments)
         self.data = default_data_frame
 
     def _read(self):
@@ -52,8 +52,8 @@ class FakeDataframeDataNode(DataNode):
 
 
 class FakeNumpyarrayDataNode(DataNode):
-    def __init__(self, config_id, default_array, **kwargs):
-        super().__init__(config_id, **kwargs)
+    def __init__(self, config_id, default_array, **kwarguments):
+        super().__init__(config_id, **kwarguments)
         self.data = default_array
 
     def _read(self):
@@ -69,8 +69,8 @@ class FakeListDataNode(DataNode):
         def __init__(self, value):
             self.value = value
 
-    def __init__(self, config_id, **kwargs):
-        super().__init__(config_id, **kwargs)
+    def __init__(self, config_id, **kwarguments):
+        super().__init__(config_id, **kwarguments)
         self.data = [self.Row(i) for i in range(10)]
 
     def _read(self):
@@ -88,8 +88,8 @@ class CustomClass:
 
 
 class FakeCustomDataNode(DataNode):
-    def __init__(self, config_id, **kwargs):
-        super().__init__(config_id, **kwargs)
+    def __init__(self, config_id, **kwarguments):
+        super().__init__(config_id, **kwarguments)
         self.data = [CustomClass(i, i * 2) for i in range(10)]
 
     def _read(self):
@@ -97,8 +97,8 @@ class FakeCustomDataNode(DataNode):
 
 
 class FakeMultiSheetExcelDataFrameDataNode(DataNode):
-    def __init__(self, config_id, default_data_frame, **kwargs):
-        super().__init__(config_id, **kwargs)
+    def __init__(self, config_id, default_data_frame, **kwarguments):
+        super().__init__(config_id, **kwarguments)
         self.data = {
             "Sheet1": default_data_frame,
             "Sheet2": default_data_frame,
@@ -109,8 +109,8 @@ class FakeMultiSheetExcelDataFrameDataNode(DataNode):
 
 
 class FakeMultiSheetExcelCustomDataNode(DataNode):
-    def __init__(self, config_id, **kwargs):
-        super().__init__(config_id, **kwargs)
+    def __init__(self, config_id, **kwarguments):
+        super().__init__(config_id, **kwarguments)
         self.data = {
             "Sheet1": [CustomClass(i, i * 2) for i in range(10)],
             "Sheet2": [CustomClass(i, i * 2) for i in range(10)],

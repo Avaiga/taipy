@@ -188,7 +188,7 @@ describe("Dialog Component", () => {
         await userEvent.click(getByTitle("Close"));
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "testId",
-            payload: { action: "testValidateAction", args: [-1] },
+            payload: { action: "testValidateAction", arguments: [-1] },
             type: "SEND_ACTION_ACTION",
         });
     });
@@ -213,7 +213,7 @@ describe("Dialog Component", () => {
         await userEvent.click(getByText("testValidate"));
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "testId",
-            payload: { action: "testValidateAction", args: [0] },
+            payload: { action: "testValidateAction", arguments: [0] },
             type: "SEND_ACTION_ACTION",
         });
     });
@@ -238,7 +238,7 @@ describe("Dialog Component", () => {
         await userEvent.click(getByText("Another One"));
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "testId",
-            payload: { action: "testValidateAction", args: [2] },
+            payload: { action: "testValidateAction", arguments: [2] },
             type: "SEND_ACTION_ACTION",
         });
     });

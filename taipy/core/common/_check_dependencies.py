@@ -15,7 +15,7 @@ def _check_dependency_is_installed(module_name: str, package_name: str) -> None:
     """
         Check if a package is installed.
 
-        Args:
+        Arguments:
             module_name: Name of the taipy module importing the package.
             package_name: Name of the package.
     .

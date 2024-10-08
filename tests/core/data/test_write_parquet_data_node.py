@@ -46,8 +46,8 @@ class MyOtherCustomObject:
         self.sentence = sentence
 
 
-def create_custom_class(**kwargs):
-    return MyOtherCustomObject(id=kwargs["id"], sentence=kwargs["text"])
+def create_custom_class(**kwarguments):
+    return MyOtherCustomObject(id=kwarguments["id"], sentence=kwarguments["text"])
 
 
 class TestWriteParquetDataNode:
@@ -126,7 +126,7 @@ class TestWriteParquetDataNode:
     def test_write_kwarg_precedence(self, engine, tmpdir_factory, default_data_frame):
         # Precedence:
         # 1. Class read/write methods
-        # 2. Defined in read_kwargs and write_kwargs, in properties
+        # 2. Defined in read_kwarguments and write_kwarguments, in properties
         # 3. Defined top-level in properties
 
         temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.parquet"))
@@ -154,7 +154,7 @@ class TestWriteParquetDataNode:
                 "path": temp_file_path,
                 "engine": engine,
                 "compression": comp3,
-                "write_kwargs": {"compression": comp2},
+                "write_kwarguments": {"compression": comp2},
             },
         )
         dn.write(df)
@@ -172,10 +172,10 @@ class TestWriteParquetDataNode:
                 "path": temp_file_path,
                 "engine": engine,
                 "compression": comp3,
-                "write_kwargs": {"compression": comp2},
+                "write_kwarguments": {"compression": comp2},
             },
         )
-        dn._write_with_kwargs(df, compression=comp1)
+        dn._write_with_kwarguments(df, compression=comp1)
         df.to_parquet(path=temp_file_2_path, compression=comp1, engine=engine)
         with open(temp_file_2_path, "rb") as tf:
             with pathlib.Path(temp_file_path).open("rb") as f:
@@ -188,7 +188,7 @@ class TestWriteParquetDataNode:
         dn = ParquetDataNode(
             "foo",
             Scope.SCENARIO,
-            properties={"path": temp_file_path, "engine": engine, "read_kwargs": {"columns": cols2}},
+            properties={"path": temp_file_path, "engine": engine, "read_kwarguments": {"columns": cols2}},
         )
         assert set(dn.read().columns) == set(cols2)
 
@@ -197,15 +197,15 @@ class TestWriteParquetDataNode:
         dn = ParquetDataNode(
             "foo",
             Scope.SCENARIO,
-            properties={"path": temp_file_path, "engine": engine, "read_kwargs": {"columns": cols2}},
+            properties={"path": temp_file_path, "engine": engine, "read_kwarguments": {"columns": cols2}},
         )
-        assert set(dn.read_with_kwargs(columns=cols1).columns) == set(cols1)
+        assert set(dn.read_with_kwarguments(columns=cols1).columns) == set(cols1)
 
     def test_partition_cols(self, tmpdir_factory, default_data_frame: pd.DataFrame):
         temp_dir_path = str(tmpdir_factory.mktemp("data").join("temp_dir"))
 
-        write_kwargs = {"partition_cols": ["a", "b"]}
-        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": temp_dir_path, "write_kwargs": write_kwargs})  # type: ignore
+        write_kwarguments = {"partition_cols": ["a", "b"]}
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": temp_dir_path, "write_kwarguments": write_kwarguments})  # type: ignore
         dn.write(default_data_frame)
 
         assert pathlib.Path(temp_dir_path).is_dir()

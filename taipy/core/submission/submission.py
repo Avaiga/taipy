@@ -331,7 +331,7 @@ def _make_event_for_submission(
     /,
     attribute_name: Optional[str] = None,
     attribute_value: Optional[Any] = None,
-    **kwargs,
+    **kwarguments,
 ) -> Event:
     metadata = {
         "origin_entity_id": submission.entity_id,
@@ -339,7 +339,7 @@ def _make_event_for_submission(
         "origin_entity_config_id": submission.entity_config_id,
         "creation_date": submission.creation_date,
         "version": submission._version,
-        **kwargs,
+        **kwarguments,
     }
     return Event(
         entity_type=EventEntityType.SUBMISSION,

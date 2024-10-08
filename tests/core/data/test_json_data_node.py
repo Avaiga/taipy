@@ -77,8 +77,8 @@ class MyCustomEncoder(json.JSONEncoder):
 
 
 class MyCustomDecoder(json.JSONDecoder):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs, object_hook=self.object_hook)
+    def __init__(self, *arguments, **kwarguments):
+        super().__init__(*arguments, **kwarguments, object_hook=self.object_hook)
 
     def object_hook(self, o):
         if o.get("__type__") == "MyCustomObject":

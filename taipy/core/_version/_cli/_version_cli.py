@@ -42,12 +42,12 @@ class _VersionCLI(_AbstractCLI):
         )
 
         version_parser.add_argument(
-            "--rename", nargs=2, metavar=("OLD_VERSION", "NEW_VERSION"), help="Rename a Taipy version."
+            "--rename", narguments=2, metavar=("OLD_VERSION", "NEW_VERSION"), help="Rename a Taipy version."
         )
 
         version_parser.add_argument(
             "--compare-config",
-            nargs=2,
+            narguments=2,
             metavar=("VERSION_1", "VERSION_2"),
             help="Compare the Configuration of 2 Taipy versions.",
         )
@@ -58,34 +58,34 @@ class _VersionCLI(_AbstractCLI):
 
     @classmethod
     def handle_command(cls):
-        args = cls._parse_arguments()
-        if not args:
+        arguments = cls._parse_arguments()
+        if not arguments:
             return
 
-        if args.list:
+        if arguments.list:
             print(cls.__list_versions())  # noqa: T201
             sys.exit(0)
 
-        if args.rename:
+        if arguments.rename:
             try:
-                cls.__rename_version(args.rename[0], args.rename[1])
+                cls.__rename_version(arguments.rename[0], arguments.rename[1])
             except InconsistentEnvVariableError as error:
                 cls._logger.error(
-                    f"Fail to rename version {args.rename[0]} to {args.rename[1]} due to outdated Configuration."
+                    f"Fail to rename version {arguments.rename[0]} to {arguments.rename[1]} due to outdated Configuration."
                     f"Detail: {str(error)}"
                 )
                 sys.exit(1)
 
-            cls._logger.info(f"Successfully renamed version '{args.rename[0]}' to '{args.rename[1]}'.")
+            cls._logger.info(f"Successfully renamed version '{arguments.rename[0]}' to '{arguments.rename[1]}'.")
             sys.exit(0)
 
-        if args.compare_config:
-            cls.__compare_version_config(args.compare_config[0], args.compare_config[1])
+        if arguments.compare_config:
+            cls.__compare_version_config(arguments.compare_config[0], arguments.compare_config[1])
             sys.exit(0)
 
-        if args.delete:
-            if clean_all_entities(args.delete):
-                cls._logger.info(f"Successfully delete version {args.delete}.")
+        if arguments.delete:
+            if clean_all_entities(arguments.delete):
+                cls._logger.info(f"Successfully delete version {arguments.delete}.")
             else:
                 sys.exit(1)
 

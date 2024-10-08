@@ -22,11 +22,11 @@ class MockProcessPoolExecutor(Executor):
     submit_called: List = []
     f: List = []
 
-    def submit(self, fn, *args, **kwargs):
-        self.submit_called.append((fn, args, kwargs))
+    def submit(self, fn, *arguments, **kwarguments):
+        self.submit_called.append((fn, arguments, kwarguments))
         f = Future()
         try:
-            result = fn(*args, **kwargs)
+            result = fn(*arguments, **kwarguments)
         except BaseException as e:
             f.set_exception(e)
         else:

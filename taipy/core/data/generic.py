@@ -32,15 +32,15 @@ class GenericDataNode(DataNode):
 
     The *properties* attribute can also contain the following optional entries:
 
-    - *read_fct_args* (`List[Any]`): The arguments to be passed to the read function.
-    - *write_fct_args* (`List[Any]`): The arguments to be passed to the write function.
+    - *read_fct_arguments* (`List[Any]`): The arguments to be passed to the read function.
+    - *write_fct_arguments* (`List[Any]`): The arguments to be passed to the write function.
     """
 
     __STORAGE_TYPE = "generic"
     _OPTIONAL_READ_FUNCTION_PROPERTY = "read_fct"
-    __READ_FUNCTION_ARGS_PROPERTY = "read_fct_args"
+    __READ_FUNCTION_ARGS_PROPERTY = "read_fct_arguments"
     _OPTIONAL_WRITE_FUNCTION_PROPERTY = "write_fct"
-    __WRITE_FUNCTION_ARGS_PROPERTY = "write_fct_args"
+    __WRITE_FUNCTION_ARGS_PROPERTY = "write_fct_arguments"
     _REQUIRED_PROPERTIES: List[str] = []
     _REQUIRED_AT_LEAST_ONE_PROPERTY: List[str] = [_OPTIONAL_READ_FUNCTION_PROPERTY, _OPTIONAL_WRITE_FUNCTION_PROPERTY]
 
@@ -111,19 +111,19 @@ class GenericDataNode(DataNode):
     def _read(self):
         properties = self.properties
         if read_fct := properties[self._OPTIONAL_READ_FUNCTION_PROPERTY]:
-            if read_fct_args := properties.get(self.__READ_FUNCTION_ARGS_PROPERTY, None):
-                if not isinstance(read_fct_args, list):
-                    return read_fct(*[read_fct_args])
-                return read_fct(*read_fct_args)
+            if read_fct_arguments := properties.get(self.__READ_FUNCTION_ARGS_PROPERTY, None):
+                if not isinstance(read_fct_arguments, list):
+                    return read_fct(*[read_fct_arguments])
+                return read_fct(*read_fct_arguments)
             return read_fct()
         raise MissingReadFunction(f"The read function is not defined in data node config {self.config_id}.")
 
     def _write(self, data: Any):
         properties = self.properties
         if write_fct := properties[self._OPTIONAL_WRITE_FUNCTION_PROPERTY]:
-            if write_fct_args := properties.get(self.__WRITE_FUNCTION_ARGS_PROPERTY, None):
-                if not isinstance(write_fct_args, list):
-                    return write_fct(data, *[write_fct_args])
-                return write_fct(data, *write_fct_args)
+            if write_fct_arguments := properties.get(self.__WRITE_FUNCTION_ARGS_PROPERTY, None):
+                if not isinstance(write_fct_arguments, list):
+                    return write_fct(data, *[write_fct_arguments])
+                return write_fct(data, *write_fct_arguments)
             return write_fct(data)
         raise MissingWriteFunction(f"The write function is not defined in data node config {self.config_id}.")

@@ -15,7 +15,7 @@ from typing import Dict
 class _Singleton(type):
     _instances: Dict = {}
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *arguments, **kwarguments):
         if self not in self._instances:
-            self._instances[self] = super(_Singleton, self).__call__(*args, **kwargs)
+            self._instances[self] = super(_Singleton, self).__call__(*arguments, **kwarguments)
         return self._instances[self]

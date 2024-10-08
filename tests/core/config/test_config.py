@@ -47,7 +47,7 @@ class TestConfig:
         assert len(Config.data_nodes) == 2
 
     def test_configure_sql_table_data_node(self):
-        a, b, c, d, e, f, g, h, i, extra_args, exposed_type, scope, vp, k = (
+        a, b, c, d, e, f, g, h, i, extra_arguments, exposed_type, scope, vp, k = (
             "foo",
             "user",
             "pwd",
@@ -63,11 +63,11 @@ class TestConfig:
             timedelta(1),
             "qux",
         )
-        Config.configure_sql_table_data_node(a, b, c, d, e, f, g, h, i, extra_args, exposed_type, scope, vp, property=k)
+        Config.configure_sql_table_data_node(a, b, c, d, e, f, g, h, i, extra_arguments, exposed_type, scope, vp, property=k)
         assert len(Config.data_nodes) == 2
 
     def test_configure_sql_data_node(self):
-        a, b, c, d, e, f, g, h, i, j, k, extra_args, exposed_type, scope, vp, k = (
+        a, b, c, d, e, f, g, h, i, j, k, extra_arguments, exposed_type, scope, vp, k = (
             "foo",
             "user",
             "pwd",
@@ -85,11 +85,11 @@ class TestConfig:
             timedelta(1),
             "qux",
         )
-        Config.configure_sql_data_node(a, b, c, d, e, f, g, h, i, j, k, extra_args, exposed_type, scope, vp, property=k)
+        Config.configure_sql_data_node(a, b, c, d, e, f, g, h, i, j, k, extra_arguments, exposed_type, scope, vp, property=k)
         assert len(Config.data_nodes) == 2
 
     def test_configure_mongo_data_node(self):
-        a, b, c, d, e, f, g, h, extra_args, scope, vp, k = (
+        a, b, c, d, e, f, g, h, extra_arguments, scope, vp, k = (
             "foo",
             "db_name",
             "collection_name",
@@ -103,11 +103,11 @@ class TestConfig:
             timedelta(1),
             "qux",
         )
-        Config.configure_mongo_collection_data_node(a, b, c, d, e, f, g, h, extra_args, scope, vp, property=k)
+        Config.configure_mongo_collection_data_node(a, b, c, d, e, f, g, h, extra_arguments, scope, vp, property=k)
         assert len(Config.data_nodes) == 2
 
     def test_configure_s3_object_data_node(self):
-        a, b, c, d, e, f, extra_args, scope, vp, k = (
+        a, b, c, d, e, f, extra_arguments, scope, vp, k = (
             "foo",
             "access_key",
             "secret_acces_key",
@@ -119,5 +119,5 @@ class TestConfig:
             timedelta(1),
             "qux",
         )
-        Config.configure_s3_object_data_node(a, b, c, d, e, f, extra_args, scope, vp, property=k)
+        Config.configure_s3_object_data_node(a, b, c, d, e, f, extra_arguments, scope, vp, property=k)
         assert len(Config.data_nodes) == 2

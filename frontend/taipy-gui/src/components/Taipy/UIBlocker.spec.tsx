@@ -47,6 +47,6 @@ describe("UIBlocker Component", () => {
             </TaipyContext.Provider>);
         const elt = getByText("Cancel");
         await userEvent.click(elt);
-        expect(dispatch).toHaveBeenCalledWith({"name": "UIBlocker", "payload": {"action": "action", "args": []}, "type": "SEND_ACTION_ACTION"});
+        expect(dispatch).toHaveBeenCalledWith({"name": "UIBlocker", "payload": {"action": "action", "arguments": []}, "type": "SEND_ACTION_ACTION"});
     });
 });

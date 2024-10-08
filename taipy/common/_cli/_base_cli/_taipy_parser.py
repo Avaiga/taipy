@@ -24,7 +24,7 @@ class _TaipyParser:
     _arg_groups: Dict[str, argparse._ArgumentGroup] = {}
 
     @classmethod
-    def _add_subparser(cls, name: str, **kwargs) -> argparse.ArgumentParser:
+    def _add_subparser(cls, name: str, **kwarguments) -> argparse.ArgumentParser:
         """Create a new subparser and return a argparse handler."""
         if subparser := cls._sub_taipyparsers.get(name):
             return subparser
@@ -35,7 +35,7 @@ class _TaipyParser:
         subparser = cls._subparser_action.add_parser(
             name=name,
             conflict_handler="resolve",
-            **kwargs,
+            **kwarguments,
         )
         cls._sub_taipyparsers[name] = subparser
         subparser.set_defaults(which=name)

@@ -19,8 +19,8 @@ from ..notification import EventOperation, Notifier, _make_event
 class _Properties(UserDict):
     __PROPERTIES_ATTRIBUTE_NAME = "properties"
 
-    def __init__(self, entity_owner, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, entity_owner, **kwarguments):
+        super().__init__(**kwarguments)
         self._entity_owner = entity_owner
         self._pending_changes = {}
         self._pending_deletions = set()

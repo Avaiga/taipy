@@ -42,8 +42,8 @@ def mock_is_true(entity_id):
 
 
 class MockState:
-    def __init__(self, **kwargs) -> None:
-        self.assign = kwargs.get("assign")
+    def __init__(self, **kwarguments) -> None:
+        self.assign = kwarguments.get("assign")
 
 
 class TestGuiCoreContext_is_deletable:
@@ -58,7 +58,7 @@ class TestGuiCoreContext_is_deletable:
                 MockState(assign=assign),
                 "",
                 {
-                    "args": [
+                    "arguments": [
                         "",
                         "",
                         "",
@@ -70,8 +70,8 @@ class TestGuiCoreContext_is_deletable:
                 },
             )
             assign.assert_called_once()
-            assert assign.call_args.args[0] == "error_var"
-            assert str(assign.call_args.args[1]).startswith("Error deleting Scenario.")
+            assert assign.call_arguments.arguments[0] == "error_var"
+            assert str(assign.call_arguments.arguments[1]).startswith("Error deleting Scenario.")
 
             with patch("taipy.gui_core._context.is_deletable", side_effect=mock_is_deletable_false):
                 assign.reset_mock()
@@ -79,7 +79,7 @@ class TestGuiCoreContext_is_deletable:
                     MockState(assign=assign),
                     "",
                     {
-                        "args": [
+                        "arguments": [
                             "",
                             "",
                             "",
@@ -91,8 +91,8 @@ class TestGuiCoreContext_is_deletable:
                     },
                 )
                 assign.assert_called_once()
-                assert assign.call_args.args[0] == "error_var"
-                assert "is not deletable" in str(assign.call_args.args[1])
+                assert assign.call_arguments.arguments[0] == "error_var"
+                assert "is not deletable" in str(assign.call_arguments.arguments[1])
 
     def test_act_on_jobs(self):
         with (
@@ -105,15 +105,15 @@ class TestGuiCoreContext_is_deletable:
                 MockState(assign=assign),
                 "",
                 {
-                    "args": [
+                    "arguments": [
                         {"id": [a_job.id], "action": "delete"},
                     ],
                     "error_id": "error_var",
                 },
             )
             assign.assert_called_once()
-            assert assign.call_args.args[0] == "error_var"
-            assert str(assign.call_args.args[1]).find("is not deletable.") == -1
+            assert assign.call_arguments.arguments[0] == "error_var"
+            assert str(assign.call_arguments.arguments[1]).find("is not deletable.") == -1
             assign.reset_mock()
 
             with patch("taipy.gui_core._context.is_readable", side_effect=mock_is_deletable_false):
@@ -121,12 +121,12 @@ class TestGuiCoreContext_is_deletable:
                     MockState(assign=assign),
                     "",
                     {
-                        "args": [
+                        "arguments": [
                             {"id": [a_job.id], "action": "delete"},
                         ],
                         "error_id": "error_var",
                     },
                 )
                 assign.assert_called_once()
-                assert assign.call_args.args[0] == "error_var"
-                assert "is not readable" in str(assign.call_args.args[1])
+                assert assign.call_arguments.arguments[0] == "error_var"
+                assert "is not readable" in str(assign.call_arguments.arguments[1])

@@ -480,13 +480,13 @@ def _make_event_for_job(
     /,
     attribute_name: Optional[str] = None,
     attribute_value: Optional[Any] = None,
-    **kwargs,
+    **kwarguments,
 ) -> Event:
     metadata = {
         "creation_date": job._creation_date,
         "task_config_id": job._task.config_id,
         "version": job._version,
-        **kwargs,
+        **kwarguments,
     }
     return Event(
         entity_type=EventEntityType.JOB,

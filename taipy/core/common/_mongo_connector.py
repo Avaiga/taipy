@@ -16,18 +16,18 @@ import pymongo
 
 @lru_cache
 def _connect_mongodb(
-    db_host: str, db_port: int, db_username: str, db_password: str, db_extra_args: frozenset, db_driver: str
+    db_host: str, db_port: int, db_username: str, db_password: str, db_extra_arguments: frozenset, db_driver: str
 ) -> pymongo.MongoClient:
     """Create a connection to a Mongo database.
-    The `"mongodb_extra_args"` passed by the user is originally a dictionary, but since `@lru_cache` wrapper only
-    accepts hashable arguments, the `"mongodb_extra_args"` should be converted into a frozenset beforehand.
+    The `"mongodb_extra_arguments"` passed by the user is originally a dictionary, but since `@lru_cache` wrapper only
+    accepts hashable arguments, the `"mongodb_extra_arguments"` should be converted into a frozenset beforehand.
 
     Arguments:
         db_host (str): the database host.
         db_port (int): the database port.
         db_username (str): the database username.
         db_password (str): the database password.
-        db_extra_args (frozenset): A frozenset converted from a dictionary of additional arguments to be passed into
+        db_extra_arguments (frozenset): A frozenset converted from a dictionary of additional arguments to be passed into
             database connection string.
 
     Returns:
@@ -37,9 +37,9 @@ def _connect_mongodb(
     if db_username and db_password:
         auth_str = f"{db_username}:{db_password}@"
 
-    extra_args_str = "&".join(f"{k}={str(v)}" for k, v in db_extra_args)
-    if extra_args_str:
-        extra_args_str = "/?" + extra_args_str
+    extra_arguments_str = "&".join(f"{k}={str(v)}" for k, v in db_extra_arguments)
+    if extra_arguments_str:
+        extra_arguments_str = "/?" + extra_arguments_str
 
     driver = "mongodb"
     if db_driver:
@@ -47,6 +47,6 @@ def _connect_mongodb(
 
     connection_string = f"{driver}://{auth_str}{db_host}"
     connection_string = connection_string if db_driver else f"{connection_string}:{db_port}"
-    connection_string += extra_args_str
+    connection_string += extra_arguments_str
 
     return pymongo.MongoClient(connection_string)

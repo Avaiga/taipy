@@ -21,11 +21,11 @@ from taipy.core.data.sql_table import SQLTableDataNode
 
 
 class MyCustomObject:
-    def __init__(self, foo=None, bar=None, *args, **kwargs):
+    def __init__(self, foo=None, bar=None, *arguments, **kwarguments):
         self.foo = foo
         self.bar = bar
-        self.args = args
-        self.kwargs = kwargs
+        self.arguments = arguments
+        self.kwarguments = kwarguments
 
 
 class TestFilterSQLTableDataNode:

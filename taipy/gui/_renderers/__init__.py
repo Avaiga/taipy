@@ -29,7 +29,7 @@ if t.TYPE_CHECKING:
 
 
 class _Renderer(Page, ABC):
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwarguments) -> None:
         """NOT DOCUMENTED
         Initialize a new _Renderer with the indicated content.
 
@@ -40,15 +40,15 @@ class _Renderer(Page, ABC):
         """
         from ..builder._element import _Element  # noqa: F811
 
-        super().__init__(**kwargs)
-        content: t.Optional[t.Union[str, _Element]] = kwargs.get("content", None)
+        super().__init__(**kwarguments)
+        content: t.Optional[t.Union[str, _Element]] = kwarguments.get("content", None)
         if content is None:
             raise ValueError("'content' argument is missing for class '_Renderer'")
         self._content = ""
         self._base_element: t.Optional[_Element] = None
         self._filepath = ""
         self._observer: t.Optional["BaseObserver"] = None
-        self._encoding: t.Optional[str] = kwargs.get("encoding", None)
+        self._encoding: t.Optional[str] = kwarguments.get("encoding", None)
         if isinstance(content, str):
             self.__process_content(content)
         elif isinstance(content, _Element):
@@ -143,7 +143,7 @@ class Markdown(_Renderer):
     of the User Manual.
     """
 
-    def __init__(self, content: str, **kwargs) -> None:
+    def __init__(self, content: str, **kwarguments) -> None:
         """Initialize a new `Markdown` page.
 
         Arguments:
@@ -156,8 +156,8 @@ class Markdown(_Renderer):
         [section on Styling](../../../../../userman/gui/styling/index.md#style-sheets) and in the
         `(taipy.gui.Page.)set_style()^` method.
         """
-        kwargs["content"] = content
-        super().__init__(**kwargs)
+        kwarguments["content"] = content
+        super().__init__(**kwarguments)
 
     # Generate JSX from Markdown
     def render(self, gui: "Gui") -> str:
@@ -175,7 +175,7 @@ class Html(_Renderer):
     of the User Manual.
     """
 
-    def __init__(self, content: str, **kwargs) -> None:
+    def __init__(self, content: str, **kwarguments) -> None:
         """Initialize a new `Html` page.
 
         Arguments:
@@ -188,8 +188,8 @@ class Html(_Renderer):
         [section on Styling](../../../../../userman/gui/styling/index.md#style-sheets) and in the
         `(taipy.gui.Page.)set_style()^` method.
         """
-        kwargs["content"] = content
-        super().__init__(**kwargs)
+        kwarguments["content"] = content
+        super().__init__(**kwarguments)
         self.head = None
 
     # Modify path routes

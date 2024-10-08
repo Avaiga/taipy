@@ -228,7 +228,7 @@ def test_raise_sequence_task_configs_not_in_scenario_config():
     scenario_config_1.add_sequences({"sequence_1": [task_config_1]})
     with pytest.raises(SequenceTaskConfigDoesNotExistInSameScenarioConfig) as err:
         _ScenarioManager._create(scenario_config_1)
-    assert err.value.args == ([task_config_1.id], "sequence_1", scenario_config_1.id)
+    assert err.value.arguments == ([task_config_1.id], "sequence_1", scenario_config_1.id)
 
     scenario_config_1._tasks = [task_config_1]
     _ScenarioManager._create(scenario_config_1)
@@ -239,7 +239,7 @@ def test_raise_sequence_task_configs_not_in_scenario_config():
     scenario_config_1.add_sequences({"sequence_3": [task_config_1, task_config_2]})
     with pytest.raises(SequenceTaskConfigDoesNotExistInSameScenarioConfig) as err:
         _ScenarioManager._create(scenario_config_1)
-    assert err.value.args == ([task_config_2.id], "sequence_3", scenario_config_1.id)
+    assert err.value.arguments == ([task_config_2.id], "sequence_3", scenario_config_1.id)
 
     scenario_config_1._tasks = [task_config_1, task_config_2]
     _ScenarioManager._create(scenario_config_1)
@@ -681,14 +681,14 @@ def test_notification_subscribe_multiple_params(mocker):
     notify.assert_called_with("foobar", 123, 1.2, scenario, ANY)
 
 
-def notify_multi_param(param, *args):
+def notify_multi_param(param, *arguments):
     assert len(param) == 3
 
 
-def notify1(*args, **kwargs): ...
+def notify1(*arguments, **kwarguments): ...
 
 
-def notify2(*args, **kwargs): ...
+def notify2(*arguments, **kwarguments): ...
 
 
 def test_notification_unsubscribe(mocker):

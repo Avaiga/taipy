@@ -49,8 +49,8 @@ def mock_is_true(entity_id):
 
 
 class MockState:
-    def __init__(self, **kwargs) -> None:
-        self.assign = kwargs.get("assign")
+    def __init__(self, **kwarguments) -> None:
+        self.assign = kwarguments.get("assign")
 
 
 class TestGuiCoreContext_is_editable:
@@ -69,7 +69,7 @@ class TestGuiCoreContext_is_editable:
                 MockState(assign=assign),
                 "",
                 {
-                    "args": [
+                    "arguments": [
                         "",
                         "",
                         "",
@@ -88,7 +88,7 @@ class TestGuiCoreContext_is_editable:
                     MockState(assign=assign),
                     "",
                     {
-                        "args": [
+                        "arguments": [
                             "",
                             "",
                             "",
@@ -100,8 +100,8 @@ class TestGuiCoreContext_is_editable:
                     },
                 )
                 assign.assert_called_once()
-                assert assign.call_args.args[0] == "error_var"
-                assert "is not editable" in str(assign.call_args.args[1])
+                assert assign.call_arguments.arguments[0] == "error_var"
+                assert "is not editable" in str(assign.call_arguments.arguments[1])
 
     def test_edit_entity(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
@@ -111,15 +111,15 @@ class TestGuiCoreContext_is_editable:
                 MockState(assign=assign),
                 "",
                 {
-                    "args": [
+                    "arguments": [
                         {"name": "name", "id": a_scenario.id},
                     ],
                     "error_id": "error_var",
                 },
             )
             assign.assert_called_once()
-            assert assign.call_args.args[0] == "error_var"
-            assert assign.call_args.args[1] == ""
+            assert assign.call_arguments.arguments[0] == "error_var"
+            assert assign.call_arguments.arguments[1] == ""
 
             with patch("taipy.gui_core._context.is_editable", side_effect=mock_is_editable_false):
                 assign.reset_mock()
@@ -127,15 +127,15 @@ class TestGuiCoreContext_is_editable:
                     MockState(assign=assign),
                     "",
                     {
-                        "args": [
+                        "arguments": [
                             {"name": "name", "id": a_scenario.id},
                         ],
                         "error_id": "error_var",
                     },
                 )
                 assign.assert_called_once()
-                assert assign.call_args.args[0] == "error_var"
-                assert "is not editable" in str(assign.call_args.args[1])
+                assert assign.call_arguments.arguments[0] == "error_var"
+                assert "is not editable" in str(assign.call_arguments.arguments[1])
 
     def test_act_on_jobs(self):
         with (
@@ -148,15 +148,15 @@ class TestGuiCoreContext_is_editable:
                 MockState(assign=assign),
                 "",
                 {
-                    "args": [
+                    "arguments": [
                         {"id": [a_job.id], "action": "cancel"},
                     ],
                     "error_id": "error_var",
                 },
             )
             assign.assert_called_once()
-            assert assign.call_args.args[0] == "error_var"
-            assert "is not editable" not in assign.call_args.args[1]
+            assert assign.call_arguments.arguments[0] == "error_var"
+            assert "is not editable" not in assign.call_arguments.arguments[1]
             assign.reset_mock()
 
             with patch("taipy.gui_core._context.is_readable", side_effect=mock_is_editable_false):
@@ -164,15 +164,15 @@ class TestGuiCoreContext_is_editable:
                     MockState(assign=assign),
                     "",
                     {
-                        "args": [
+                        "arguments": [
                             {"id": [a_job.id], "action": "cancel"},
                         ],
                         "error_id": "error_var",
                     },
                 )
                 assign.assert_called_once()
-                assert assign.call_args.args[0] == "error_var"
-                assert "is not readable" in assign.call_args.args[1]
+                assert assign.call_arguments.arguments[0] == "error_var"
+                assert "is not readable" in assign.call_arguments.arguments[1]
 
     def test_edit_data_node(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
@@ -182,15 +182,15 @@ class TestGuiCoreContext_is_editable:
                 MockState(assign=assign),
                 "",
                 {
-                    "args": [
+                    "arguments": [
                         {"id": a_datanode.id},
                     ],
                     "error_id": "error_var",
                 },
             )
             assign.assert_called_once()
-            assert assign.call_args.args[0] == "error_var"
-            assert assign.call_args.args[1] == ""
+            assert assign.call_arguments.arguments[0] == "error_var"
+            assert assign.call_arguments.arguments[1] == ""
 
             with patch("taipy.gui_core._context.is_editable", side_effect=mock_is_editable_false):
                 assign.reset_mock()
@@ -198,15 +198,15 @@ class TestGuiCoreContext_is_editable:
                     MockState(assign=assign),
                     "",
                     {
-                        "args": [
+                        "arguments": [
                             {"id": a_datanode.id},
                         ],
                         "error_id": "error_var",
                     },
                 )
                 assign.assert_called_once()
-                assert assign.call_args.args[0] == "error_var"
-                assert "is not editable" in assign.call_args.args[1]
+                assert assign.call_arguments.arguments[0] == "error_var"
+                assert "is not editable" in assign.call_arguments.arguments[1]
 
     def test_lock_datanode_for_edit(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
@@ -218,15 +218,15 @@ class TestGuiCoreContext_is_editable:
                 MockState(assign=assign),
                 "",
                 {
-                    "args": [
+                    "arguments": [
                         {"id": a_datanode.id},
                     ],
                     "error_id": "error_var",
                 },
             )
             assign.assert_called_once()
-            assert assign.call_args.args[0] == "error_var"
-            assert assign.call_args.args[1] == ""
+            assert assign.call_arguments.arguments[0] == "error_var"
+            assert assign.call_arguments.arguments[1] == ""
 
             with patch("taipy.gui_core._context.is_editable", side_effect=mock_is_editable_false):
                 assign.reset_mock()
@@ -234,15 +234,15 @@ class TestGuiCoreContext_is_editable:
                     MockState(assign=assign),
                     "",
                     {
-                        "args": [
+                        "arguments": [
                             {"id": a_datanode.id},
                         ],
                         "error_id": "error_var",
                     },
                 )
                 assign.assert_called_once()
-                assert assign.call_args.args[0] == "error_var"
-                assert "is not editable" in assign.call_args.args[1]
+                assert assign.call_arguments.arguments[0] == "error_var"
+                assert "is not editable" in assign.call_arguments.arguments[1]
 
     def test_update_data(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
@@ -254,15 +254,15 @@ class TestGuiCoreContext_is_editable:
                 MockState(assign=assign),
                 "",
                 {
-                    "args": [
+                    "arguments": [
                         {"id": a_datanode.id},
                     ],
                     "error_id": "error_var",
                 },
             )
             assign.assert_called()
-            assert assign.call_args_list[0].args[0] == "error_var"
-            assert assign.call_args_list[0].args[1] == ""
+            assert assign.call_arguments_list[0].arguments[0] == "error_var"
+            assert assign.call_arguments_list[0].arguments[1] == ""
             assign.reset_mock()
 
             with patch("taipy.gui_core._context.is_editable", side_effect=mock_is_editable_false):
@@ -270,15 +270,15 @@ class TestGuiCoreContext_is_editable:
                     MockState(assign=assign),
                     "",
                     {
-                        "args": [
+                        "arguments": [
                             {"id": a_datanode.id},
                         ],
                         "error_id": "error_var",
                     },
                 )
                 assign.assert_called_once()
-                assert assign.call_args.args[0] == "error_var"
-                assert "is not editable" in assign.call_args.args[1]
+                assert assign.call_arguments.arguments[0] == "error_var"
+                assert "is not editable" in assign.call_arguments.arguments[1]
 
     def test_tabular_data_edit(self):
         with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get):
@@ -295,8 +295,8 @@ class TestGuiCoreContext_is_editable:
                 },
             )
             assign.assert_called_once()
-            assert assign.call_args_list[0].args[0] == "error_var"
-            assert "tabular value: type does not support at[] indexer" in assign.call_args_list[0].args[1]
+            assert assign.call_arguments_list[0].arguments[0] == "error_var"
+            assert "tabular value: type does not support at[] indexer" in assign.call_arguments_list[0].arguments[1]
             assign.reset_mock()
 
             with patch("taipy.gui_core._context.is_editable", side_effect=mock_is_editable_false):
@@ -309,5 +309,5 @@ class TestGuiCoreContext_is_editable:
                     },
                 )
                 assign.assert_called_once()
-                assert assign.call_args.args[0] == "error_var"
-                assert "is not editable" in assign.call_args.args[1]
+                assert assign.call_arguments.arguments[0] == "error_var"
+                assert "is not editable" in assign.call_arguments.arguments[1]

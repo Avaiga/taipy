@@ -31,5 +31,5 @@ def test_favicon(gui: Gui, helpers):
         # assert for received message (message that would be sent to the front-end client)
         msgs = ws_client.get_received()
         assert msgs
-        assert msgs[0].get("args", {}).get("type", None) == "FV"
-        assert msgs[0].get("args", {}).get("payload", {}).get("value", None) == "https://newfavicon.com/favicon.png"
+        assert msgs[0].get("arguments", {}).get("type", None) == "FV"
+        assert msgs[0].get("arguments", {}).get("payload", {}).get("value", None) == "https://newfavicon.com/favicon.png"

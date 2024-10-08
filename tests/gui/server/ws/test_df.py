@@ -38,8 +38,8 @@ def test_download_file(gui: Gui, helpers):
     assert len(received_messages) == 1
     assert isinstance(received_messages[0], dict)
     assert "name" in received_messages[0] and received_messages[0]["name"] == "message"
-    assert "args" in received_messages[0]
-    args = received_messages[0]["args"]
-    assert "type" in args and args["type"] == "DF"
-    assert "content" in args and args["content"] == "/taipy-content/taipyStatic0/taipan.jpg"
-    logging.getLogger().debug(args["content"])
+    assert "arguments" in received_messages[0]
+    arguments = received_messages[0]["arguments"]
+    assert "type" in arguments and arguments["type"] == "DF"
+    assert "content" in arguments and arguments["content"] == "/taipy-content/taipyStatic0/taipan.jpg"
+    logging.getLogger().debug(arguments["content"])

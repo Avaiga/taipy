@@ -86,7 +86,7 @@ describe("Menu Component", () => {
         await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "menu",
-            payload: { action: "action", args: [lov[0].id] },
+            payload: { action: "action", arguments: [lov[0].id] },
             type: "SEND_ACTION_ACTION",
         });
     });

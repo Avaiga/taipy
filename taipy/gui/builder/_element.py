@@ -41,29 +41,29 @@ class _Element(ABC):
     _TYPES: t.Dict[str, str] = {}
     __LAMBDA_VALUE_IDX = 0
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *arguments, **kwarguments):
         obj = super(_Element, cls).__new__(cls)
         parent = _BuilderContextManager().peek()
         if parent is not None:
             parent.add(obj)
         return obj
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *arguments, **kwarguments) -> None:
         self._properties: t.Dict[str, t.Any] = {}
         self._lambdas: t.Dict[str, str] = {}
         self.__calling_frame = t.cast(
             FrameType, t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_back
         )
 
-        if args and self._DEFAULT_PROPERTY != "":
-            self._properties = {self._DEFAULT_PROPERTY: args[0]}
+        if arguments and self._DEFAULT_PROPERTY != "":
+            self._properties = {self._DEFAULT_PROPERTY: arguments[0]}
         # special attribute for inline
-        self._is_inline = kwargs.pop("inline", False)
-        self._properties.update(kwargs)
+        self._is_inline = kwarguments.pop("inline", False)
+        self._properties.update(kwarguments)
         self.parse_properties()
 
-    def update(self, **kwargs):
-        self._properties.update(kwargs)
+    def update(self, **kwarguments):
+        self._properties.update(kwarguments)
         self.parse_properties()
 
     @staticmethod
@@ -126,19 +126,19 @@ class _Element(ABC):
             )
             if lambda_fn is None:
                 return None
-            args = [arg.arg for arg in lambda_fn.args.args]
+            arguments = [arg.arg for arg in lambda_fn.arguments.arguments]
             targets = [
                 comprehension.target.id  # type: ignore[attr-defined]
                 for node in ast.walk(lambda_fn.body)
                 if isinstance(node, ast.ListComp)
                 for comprehension in node.generators
             ]
-            tree = _TransformVarToValue(self.__calling_frame, args + targets + _python_builtins).visit(lambda_fn)
+            tree = _TransformVarToValue(self.__calling_frame, arguments + targets + _python_builtins).visit(lambda_fn)
             ast.fix_missing_locations(tree)
             lambda_text = ast.unparse(tree)
             lambda_name = _get_lambda_id(value, index=(_Element.__get_lambda_index()))
             self._lambdas[lambda_name] = lambda_text
-            return f'{{{lambda_name}({", ".join(args)})}}'
+            return f'{{{lambda_name}({", ".join(arguments)})}}'
         except Exception as e:
             _warn("Error in lambda expression", e)
         return None
@@ -166,8 +166,8 @@ class _Element(ABC):
 class _Block(_Element):
     """NOT DOCUMENTED"""
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, *arguments, **kwarguments) -> None:
+        super().__init__(*arguments, **kwarguments)
         self._children: t.List[_Element] = []
 
     def add(self, *elements: _Element):
@@ -195,8 +195,8 @@ class _Block(_Element):
 class _DefaultBlock(_Block):
     _ELEMENT_NAME = "part"
 
-    def __init__(self, *args, **kwargs):  # do not remove as it could break the search in frames
-        super().__init__(*args, **kwargs)
+    def __init__(self, *arguments, **kwarguments):  # do not remove as it could break the search in frames
+        super().__init__(*arguments, **kwarguments)
 
 
 class html(_Block):
@@ -207,17 +207,17 @@ class html(_Block):
     This element can be used as a block element.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *arguments, **kwarguments):
         """Create a new `html` block.
 
         Arguments:
-            args (any[]): A list of one or two unnamed arguments:
+            arguments (any[]): A list of one or two unnamed arguments:
 
-                - *args[0]* is the HTML tag name. If empty or None, this represents an HTML text
+                - *arguments[0]* is the HTML tag name. If empty or None, this represents an HTML text
                   node.
-                - *args[1]* (optional) is the text of this element.<br/>
+                - *arguments[1]* (optional) is the text of this element.<br/>
                   Note that special HTML characters (such as '&lt;' or '&amp;') do not need to be protected.
-            kwargs (dict[str, any]): the HTML attributes for this element.<br/>
+            kwarguments (dict[str, any]): the HTML attributes for this element.<br/>
                 These should be valid attribute names, with valid attribute values.
 
         Examples:
@@ -241,11 +241,11 @@ class html(_Block):
                    html(None, " element.")
                ```
         """
-        super().__init__(*args, **kwargs)
-        if not args:
+        super().__init__(*arguments, **kwarguments)
+        if not arguments:
             raise RuntimeError("Can't render html element. Missing html tag name.")
-        self._ELEMENT_NAME = args[0] if args[0] else None
-        self._content = args[1] if len(args) > 1 else ""
+        self._ELEMENT_NAME = arguments[0] if arguments[0] else None
+        self._content = arguments[1] if len(arguments) > 1 else ""
 
     def _render(self, gui: "Gui") -> str:
         self._evaluate_lambdas(gui)
@@ -261,8 +261,8 @@ class html(_Block):
 class _Control(_Element):
     """NOT DOCUMENTED"""
 
-    def __init__(self, *args, **kwargs):  # do not remove as it could break the search in frames
-        super().__init__(*args, **kwargs)
+    def __init__(self, *arguments, **kwarguments):  # do not remove as it could break the search in frames
+        super().__init__(*arguments, **kwarguments)
 
     def _render(self, gui: "Gui") -> str:
         self._evaluate_lambdas(gui)

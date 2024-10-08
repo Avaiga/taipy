@@ -58,8 +58,8 @@ class MyOtherCustomObject:
         self.sentence = sentence
 
 
-def create_custom_class(**kwargs):
-    return MyOtherCustomObject(id=kwargs["id"], sentence=kwargs["text"])
+def create_custom_class(**kwarguments):
+    return MyOtherCustomObject(id=kwarguments["id"], sentence=kwarguments["text"])
 
 
 class TestParquetDataNode:
@@ -112,13 +112,13 @@ class TestParquetDataNode:
                 "default_path": parquet_file_path,
                 "engine": "pyarrow",
                 "compression": "snappy",
-                "read_kwargs": {"columns": ["a", "b"]},
-                "write_kwargs": {"index": False},
+                "read_kwarguments": {"columns": ["a", "b"]},
+                "write_kwarguments": {"index": False},
                 "foo": "bar",
             },
         )
 
-        # exposed_type, default_data, default_path, path, engine, compression, read_kwargs, write_kwargs
+        # exposed_type, default_data, default_path, path, engine, compression, read_kwarguments, write_kwarguments
         # are filtered out
         assert dn_2._get_user_properties() == {"foo": "bar"}
 

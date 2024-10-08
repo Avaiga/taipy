@@ -61,7 +61,7 @@ class _LambdaByName(ast.NodeVisitor):
                 a_lambda := next(
                     (
                         arg
-                        for arg in node.args
+                        for arg in node.arguments
                         if isinstance(arg, ast.Lambda)
                         and arg.lineno is not None
                         and arg.end_lineno is not None

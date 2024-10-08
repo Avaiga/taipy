@@ -99,7 +99,7 @@ class _Evaluator:
         for e in self._fetch_expression_list(expr):
             var_name = e.split(sep=".")[0]
             st = ast.parse('f"{' + e + '}"' if _Evaluator.__EXPR_EDGE_CASE_F_STRING.match(e) else e)
-            args = [arg.arg for node in ast.walk(st) if isinstance(node, ast.arguments) for arg in node.args]
+            arguments = [arg.arg for node in ast.walk(st) if isinstance(node, ast.arguments) for arg in node.arguments]
             targets = [
                 comprehension.target.id  # type: ignore[attr-defined]
                 for node in ast.walk(st)
@@ -118,7 +118,7 @@ class _Evaluator:
                                 f"Variable '{var_name}' cannot be used in Taipy expressions "
                                 "as its name collides with a Python built-in identifier."
                             )
-                    elif var_name not in args and var_name not in targets and var_name not in non_vars:
+                    elif var_name not in arguments and var_name not in targets and var_name not in non_vars:
                         try:
                             if lazy_declare and var_name.startswith("__"):
                                 with warnings.catch_warnings(record=True) as warns:

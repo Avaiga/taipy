@@ -162,8 +162,8 @@
             "description": "storage_type: sql, sql_table specific.",
             "type": "string"
           },
-          "db_extra_args": {
-            "description": "storage_type: sql, sql_table, mongo_collection specific. The default value of db_extra_args is None",
+          "db_extra_arguments": {
+            "description": "storage_type: sql, sql_table, mongo_collection specific. The default value of db_extra_arguments is None",
             "type": "array"
           },
           "table_name": {
@@ -203,11 +203,11 @@
             "type": "string",
             "taipy_function": true
           },
-          "read_fct_args": {
+          "read_fct_arguments": {
             "description": "storage_type: generic specific.",
             "type": "array"
           },
-          "write_fct_args": {
+          "write_fct_arguments": {
             "description": "storage_type: generic specific.",
             "type": "array"
           },
@@ -229,11 +229,11 @@
             "description": "storage_type: parquet specific.The name of the parquet library to use, default is pyarrow",
             "type": "string"
           },
-          "read_kwargs": {
+          "read_kwarguments": {
             "description": "storage_type: parquet specific. Additional arguments when reading parquet files, default is an empty dictionary",
             "type": "object"
           },
-          "write_kwargs": {
+          "write_kwarguments": {
             "description": "storage_type: parquet specific.Additional arguments when writing parquet files, default is an empty dictionary",
             "type": "object"
           },

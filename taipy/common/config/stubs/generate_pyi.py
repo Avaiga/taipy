@@ -112,11 +112,11 @@ def _generate_entity_and_property_maps(filename):
     ]
 
     for f in functions:
-        entity = ast.unparse(f.args[0])
+        entity = ast.unparse(f.arguments[0])
         entities_map[entity] = {}
-        property_map[eval(ast.unparse(f.args[1]))] = entity
+        property_map[eval(ast.unparse(f.arguments[1]))] = entity
         # Remove class name from function map
-        text = ast.unparse(f.args[-1]).replace(f"{entity}.", "")
+        text = ast.unparse(f.arguments[-1]).replace(f"{entity}.", "")
         matches = re.findall(r"\((.*?)\)", text)
 
         for m in matches:

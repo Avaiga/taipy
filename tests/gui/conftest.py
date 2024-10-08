@@ -64,6 +64,6 @@ def test_client():
 
 
 @pytest.fixture(scope="function", autouse=True)
-def patch_cli_args():
+def patch_cli_arguments():
     with patch("sys.argv", ["prog"]):
         yield

@@ -300,9 +300,9 @@ def _make_event_for_task(
     /,
     attribute_name: Optional[str] = None,
     attribute_value: Optional[Any] = None,
-    **kwargs,
+    **kwarguments,
 ) -> Event:
-    metadata = {"version": task.version, "config_id": task.config_id, **kwargs}
+    metadata = {"version": task.version, "config_id": task.config_id, **kwarguments}
     return Event(
         entity_type=EventEntityType.TASK,
         entity_id=task.id,

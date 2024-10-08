@@ -23,7 +23,7 @@ from taipy.core.submission._submission_manager_factory import _SubmissionManager
 from taipy.core.submission.submission_status import SubmissionStatus
 
 
-def nothing(*args, **kwargs):
+def nothing(*arguments, **kwarguments):
     pass
 
 

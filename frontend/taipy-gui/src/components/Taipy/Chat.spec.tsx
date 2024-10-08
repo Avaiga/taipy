@@ -108,7 +108,7 @@ describe("Chat Component", () => {
             context: undefined,
             payload: {
                 action: undefined,
-                args: ["Enter", "varName", "new message", "taipy"],
+                arguments: ["Enter", "varName", "new message", "taipy"],
             },
         });
     });
@@ -130,7 +130,7 @@ describe("Chat Component", () => {
             context: undefined,
             payload: {
                 action: undefined,
-                args: ["click", "varName", "new message", "taipy"],
+                arguments: ["click", "varName", "new message", "taipy"],
             },
         });
     });

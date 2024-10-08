@@ -35,7 +35,7 @@ class DataNodeConfigSchema(Schema):
     scope = fields.Integer()
 
     @pre_dump
-    def serialize_scope(self, obj, **kwargs):
+    def serialize_scope(self, obj, **kwarguments):
         obj.scope = obj.scope.value
         return obj
 

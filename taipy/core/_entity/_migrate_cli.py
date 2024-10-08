@@ -39,7 +39,7 @@ class _MigrateCLI(_AbstractCLI):
         )
         migrate_parser.add_argument(
             "--repository-type",
-            nargs="+",
+            narguments="+",
             help="The type of repository to migrate. If filesystem, a path to the database folder should be informed. "
             "In case of mongo host, port, user and password must be informed, if left empty it "
             "is assumed default values",
@@ -62,31 +62,31 @@ class _MigrateCLI(_AbstractCLI):
 
     @classmethod
     def handle_command(cls):
-        args = cls._parse_arguments()
-        if not args:
+        arguments = cls._parse_arguments()
+        if not arguments:
             return
 
-        if not args.repository_type:
+        if not arguments.repository_type:
             _TaipyParser._sub_taipyparsers.get(cls._COMMAND_NAME).print_help()
             cls._logger.error("The following arguments are required: --repository-type")
             sys.exit(1)
 
-        repository_type = args.repository_type[0]
-        repository_args = args.repository_type[1:] if len(args.repository_type) > 1 else [None]
+        repository_type = arguments.repository_type[0]
+        repository_arguments = arguments.repository_type[1:] if len(arguments.repository_type) > 1 else [None]
 
-        if args.restore:
-            cls.__handle_restore_backup(repository_type, repository_args)
-        if args.remove_backup:
-            cls.__handle_remove_backup(repository_type, repository_args)
+        if arguments.restore:
+            cls.__handle_restore_backup(repository_type, repository_arguments)
+        if arguments.remove_backup:
+            cls.__handle_remove_backup(repository_type, repository_arguments)
 
-        do_backup = not args.skip_backup
-        cls.__migrate_entities(repository_type, repository_args, do_backup)
+        do_backup = not arguments.skip_backup
+        cls.__migrate_entities(repository_type, repository_arguments, do_backup)
         sys.exit(0)
 
     @classmethod
-    def __handle_remove_backup(cls, repository_type: str, repository_args: List):
+    def __handle_remove_backup(cls, repository_type: str, repository_arguments: List):
         if repository_type == "filesystem":
-            path = repository_args[0] or Config.core.taipy_storage_folder
+            path = repository_arguments[0] or Config.core.taipy_storage_folder
             if not _remove_backup_file_entities(path):
                 sys.exit(1)
         elif repository_type == "mongo":
@@ -99,14 +99,14 @@ class _MigrateCLI(_AbstractCLI):
         sys.exit(0)
 
     @classmethod
-    def __handle_restore_backup(cls, repository_type: str, repository_args: List):
+    def __handle_restore_backup(cls, repository_type: str, repository_arguments: List):
         if repository_type == "filesystem":
-            path = repository_args[0] or Config.core.taipy_storage_folder
+            path = repository_arguments[0] or Config.core.taipy_storage_folder
             if not _restore_migrate_file_entities(path):
                 sys.exit(1)
         elif repository_type == "mongo":
-            mongo_args = repository_args[1:5] if repository_args[0] else []
-            if not _restore_migrate_mongo_entities(*mongo_args):
+            mongo_arguments = repository_arguments[1:5] if repository_arguments[0] else []
+            if not _restore_migrate_mongo_entities(*mongo_arguments):
                 sys.exit(1)
         else:
             cls._logger.error(f"Unknown repository type {repository_type}")
@@ -114,15 +114,15 @@ class _MigrateCLI(_AbstractCLI):
         sys.exit(0)
 
     @classmethod
-    def __migrate_entities(cls, repository_type: str, repository_args: List, do_backup: bool):
+    def __migrate_entities(cls, repository_type: str, repository_arguments: List, do_backup: bool):
         if repository_type == "filesystem":
-            path = repository_args[0] or Config.core.taipy_storage_folder
+            path = repository_arguments[0] or Config.core.taipy_storage_folder
             if not _migrate_fs_entities(path, do_backup):
                 sys.exit(1)
 
         elif repository_type == "mongo":
-            mongo_args = repository_args[1:5] if repository_args[0] else []
-            _migrate_mongo_entities(*mongo_args, backup=do_backup)  # type: ignore
+            mongo_arguments = repository_arguments[1:5] if repository_arguments[0] else []
+            _migrate_mongo_entities(*mongo_arguments, backup=do_backup)  # type: ignore
 
         else:
             cls._logger.error(f"Unknown repository type {repository_type}")

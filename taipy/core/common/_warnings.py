@@ -27,14 +27,14 @@ def _warn_deprecated(deprecated: str, suggest: Optional[str] = None, stacklevel:
 def _warn_no_orchestrator_service(specific_message, stacklevel: int = 3):
     def inner(f):
         @functools.wraps(f)
-        def _check_if_core_service_is_running(*args, **kwargs):
+        def _check_if_core_service_is_running(*arguments, **kwarguments):
             from .._orchestrator._orchestrator_factory import _OrchestratorFactory
 
             if not _OrchestratorFactory._dispatcher:
                 message = f"The Orchestrator service is NOT running. {specific_message}"
                 warnings.warn(message=message, category=ResourceWarning, stacklevel=stacklevel)
 
-            return f(*args, **kwargs)
+            return f(*arguments, **kwarguments)
 
         return _check_if_core_service_is_running
 

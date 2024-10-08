@@ -16,7 +16,7 @@ class MongoDefaultDocument:
     """The default class for \"custom_document\" property to configure a `MongoCollectionDataNode^`.
 
     Attributes:
-        **kwargs (dict[str, Any]): Attributes of the MongoDefaultDocument object.
+        **kwarguments (dict[str, Any]): Attributes of the MongoDefaultDocument object.
 
     Example:
         - `document = MongoDefaultDocument(name="example", age=30)`
@@ -27,6 +27,6 @@ class MongoDefaultDocument:
         and `document.temperature` returns `20`.
     """
 
-    def __init__(self, **kwargs):
-        for attribute_name, value in kwargs.items():
+    def __init__(self, **kwarguments):
+        for attribute_name, value in kwarguments.items():
             setattr(self, _validate_id(attribute_name), value)

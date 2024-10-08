@@ -27,11 +27,11 @@ from taipy.core.exceptions.exceptions import MissingAppendQueryBuilder, MissingR
 
 
 class MyCustomObject:
-    def __init__(self, foo=None, bar=None, *args, **kwargs):
+    def __init__(self, foo=None, bar=None, *arguments, **kwarguments):
         self.foo = foo
         self.bar = bar
-        self.args = args
-        self.kwargs = kwargs
+        self.arguments = arguments
+        self.kwarguments = kwarguments
 
 
 def my_write_query_builder_with_pandas(data: pd.DataFrame):
@@ -55,7 +55,7 @@ class TestSQLDataNode:
             "db_engine": "sqlite",
             "read_query": "SELECT * FROM example",
             "write_query_builder": my_write_query_builder_with_pandas,
-            "db_extra_args": {
+            "db_extra_arguments": {
                 "TrustServerCertificate": "yes",
                 "other": "value",
             },
@@ -71,7 +71,7 @@ class TestSQLDataNode:
                 "db_engine": "mssql",
                 "read_query": "SELECT * FROM example",
                 "write_query_builder": my_write_query_builder_with_pandas,
-                "db_extra_args": {
+                "db_extra_arguments": {
                     "TrustServerCertificate": "yes",
                 },
             },
@@ -86,7 +86,7 @@ class TestSQLDataNode:
                 "db_engine": "mysql",
                 "read_query": "SELECT * FROM example",
                 "write_query_builder": my_write_query_builder_with_pandas,
-                "db_extra_args": {
+                "db_extra_arguments": {
                     "TrustServerCertificate": "yes",
                 },
             },
@@ -101,7 +101,7 @@ class TestSQLDataNode:
                 "db_engine": "postgresql",
                 "read_query": "SELECT * FROM example",
                 "write_query_builder": my_write_query_builder_with_pandas,
-                "db_extra_args": {
+                "db_extra_arguments": {
                     "TrustServerCertificate": "yes",
                 },
             },
@@ -197,16 +197,16 @@ class TestSQLDataNode:
     @pytest.mark.parametrize("properties", __sql_properties)
     def test_write_query_builder(self, properties):
         custom_properties = properties.copy()
-        custom_properties.pop("db_extra_args")
+        custom_properties.pop("db_extra_arguments")
         dn = SQLDataNode("foo_bar", Scope.SCENARIO, properties=custom_properties)
         with patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             # mock connection execute
             dn.write(pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
-            assert len(engine_mock.mock_calls[4].args) == 1
-            assert engine_mock.mock_calls[4].args[0].text == "DELETE FROM example"
-            assert len(engine_mock.mock_calls[5].args) == 2
-            assert engine_mock.mock_calls[5].args[0].text == "INSERT INTO example VALUES (:foo, :bar)"
-            assert engine_mock.mock_calls[5].args[1] == [
+            assert len(engine_mock.mock_calls[4].arguments) == 1
+            assert engine_mock.mock_calls[4].arguments[0].text == "DELETE FROM example"
+            assert len(engine_mock.mock_calls[5].arguments) == 2
+            assert engine_mock.mock_calls[5].arguments[0].text == "INSERT INTO example VALUES (:foo, :bar)"
+            assert engine_mock.mock_calls[5].arguments[1] == [
                 {"foo": 1, "bar": 4},
                 {"foo": 2, "bar": 5},
                 {"foo": 3, "bar": 6},
@@ -218,8 +218,8 @@ class TestSQLDataNode:
         with patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             # mock connection execute
             dn.write(pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
-            assert len(engine_mock.mock_calls[4].args) == 1
-            assert engine_mock.mock_calls[4].args[0].text == "DELETE FROM example"
+            assert len(engine_mock.mock_calls[4].arguments) == 1
+            assert engine_mock.mock_calls[4].arguments[0].text == "DELETE FROM example"
 
     @pytest.mark.parametrize(
         "tmp_sqlite_path",

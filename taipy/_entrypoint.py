@@ -58,8 +58,8 @@ def _entrypoint():
 
         _enterprise_entrypoint_handling()
 
-    args, _ = _TaipyParser._parser.parse_known_args()
-    if args.version:
+    arguments, _ = _TaipyParser._parser.parse_known_arguments()
+    if arguments.version:
         print(f"Taipy {_get_version()}")  # noqa: T201
         sys.exit(0)
 

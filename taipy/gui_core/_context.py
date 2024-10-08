@@ -378,10 +378,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def select_scenario(self, state: State, id: str, payload: t.Dict[str, str]):
         self.__lazy_start()
-        args = payload.get("args")
-        if args is None or not isinstance(args, list) or len(args) < 2:
+        arguments = payload.get("arguments")
+        if arguments is None or not isinstance(arguments, list) or len(arguments) < 2:
             return
-        state.assign(args[0], args[1])
+        state.assign(arguments[0], arguments[1])
 
     def get_scenario_by_id(self, id: str) -> t.Optional[Scenario]:
         self.__lazy_start()
@@ -403,22 +403,22 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def crud_scenario(self, state: State, id: str, payload: t.Dict[str, str]):  # noqa: C901
         self.__lazy_start()
-        args = payload.get("args")
+        arguments = payload.get("arguments")
         start_idx = 3
         if (
-            args is None
-            or not isinstance(args, list)
-            or len(args) < start_idx + 3
-            or not isinstance(args[start_idx], bool)
-            or not isinstance(args[start_idx + 1], bool)
-            or not isinstance(args[start_idx + 2], dict)
+            arguments is None
+            or not isinstance(arguments, list)
+            or len(arguments) < start_idx + 3
+            or not isinstance(arguments[start_idx], bool)
+            or not isinstance(arguments[start_idx + 1], bool)
+            or not isinstance(arguments[start_idx + 2], dict)
         ):
             return
         error_var = t.cast(str, payload.get("error_id"))
-        update = args[start_idx]
-        delete = args[start_idx + 1]
-        data = t.cast(dict, args[start_idx + 2])
-        with_dialog = True if len(args) < start_idx + 4 else bool(args[start_idx + 3])
+        update = arguments[start_idx]
+        delete = arguments[start_idx + 1]
+        data = t.cast(dict, arguments[start_idx + 2])
+        with_dialog = True if len(arguments) < start_idx + 4 else bool(arguments[start_idx + 3])
         scenario = None
         user_scenario = None
 
@@ -456,7 +456,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             scenario_id = None
             gui = state.get_gui()
             try:
-                on_creation = args[0] if isinstance(args[0], str) else None
+                on_creation = arguments[0] if isinstance(arguments[0], str) else None
                 on_creation_function = gui._get_user_function(on_creation) if on_creation else None
                 if callable(on_creation_function) and on_creation:
                     try:
@@ -509,10 +509,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 state.assign(error_var, f"Error creating Scenario. {e}")
             finally:
                 self.scenario_refresh(scenario_id)
-                if (scenario or user_scenario) and (sel_scenario_var := args[1] if isinstance(args[1], str) else None):
+                if (scenario or user_scenario) and (sel_scenario_var := arguments[1] if isinstance(arguments[1], str) else None):
                     try:
                         var_name, _ = gui._get_real_var_name(sel_scenario_var)
-                        self.gui._update_var(var_name, scenario or user_scenario, on_change=args[2])
+                        self.gui._update_var(var_name, scenario or user_scenario, on_change=arguments[2])
                     except Exception as e:  # pragma: no cover
                         _warn("Can't find value variable name in context", e)
         if scenario:
@@ -542,11 +542,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def edit_entity(self, state: State, id: str, payload: t.Dict[str, str]):
         self.__lazy_start()
-        args = payload.get("args")
-        if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
+        arguments = payload.get("arguments")
+        if arguments is None or not isinstance(arguments, list) or len(arguments) < 1 or not isinstance(arguments[0], dict):
             return
         error_var = payload.get("error_id")
-        data = t.cast(dict, args[0])
+        data = t.cast(dict, arguments[0])
         entity_id = t.cast(str, data.get(_GuiCoreContext.__PROP_ENTITY_ID))
         sequence = data.get("sequence")
         if not self.__check_readable_editable(state, entity_id, "Scenario", error_var):
@@ -591,10 +591,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def submit_entity(self, state: State, id: str, payload: t.Dict[str, str]):
         self.__lazy_start()
-        args = payload.get("args")
-        if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
+        arguments = payload.get("arguments")
+        if arguments is None or not isinstance(arguments, list) or len(arguments) < 1 or not isinstance(arguments[0], dict):
             return
-        data = t.cast(dict, args[0])
+        data = t.cast(dict, arguments[0])
         error_var = payload.get("error_id")
         try:
             scenario_id = t.cast(str, data.get(_GuiCoreContext.__PROP_ENTITY_ID))
@@ -827,10 +827,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def act_on_jobs(self, state: State, id: str, payload: t.Dict[str, str]):
         self.__lazy_start()
-        args = payload.get("args")
-        if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
+        arguments = payload.get("arguments")
+        if arguments is None or not isinstance(arguments, list) or len(arguments) < 1 or not isinstance(arguments[0], dict):
             return
-        data = t.cast(dict, args[0])
+        data = t.cast(dict, arguments[0])
         job_ids = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
         job_action = data.get(_GuiCoreContext.__ACTION)
         if job_action and isinstance(job_ids, list):
@@ -886,11 +886,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def edit_data_node(self, state: State, id: str, payload: t.Dict[str, str]):
         self.__lazy_start()
-        args = payload.get("args")
-        if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
+        arguments = payload.get("arguments")
+        if arguments is None or not isinstance(arguments, list) or len(arguments) < 1 or not isinstance(arguments[0], dict):
             return
         error_var = payload.get("error_id")
-        data = t.cast(dict, args[0])
+        data = t.cast(dict, arguments[0])
         entity_id = t.cast(str, data.get(_GuiCoreContext.__PROP_ENTITY_ID))
         if not self.__check_readable_editable(state, entity_id, "DataNode", error_var):
             return
@@ -904,10 +904,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def lock_datanode_for_edit(self, state: State, id: str, payload: t.Dict[str, str]):
         self.__lazy_start()
-        args = payload.get("args")
-        if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
+        arguments = payload.get("arguments")
+        if arguments is None or not isinstance(arguments, list) or len(arguments) < 1 or not isinstance(arguments[0], dict):
             return
-        data = t.cast(dict, args[0])
+        data = t.cast(dict, arguments[0])
         error_var = payload.get("error_id")
         entity_id = t.cast(str, data.get(_GuiCoreContext.__PROP_ENTITY_ID))
         if not self.__check_readable_editable(state, entity_id, "Data node", error_var):
@@ -1005,10 +1005,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def update_data(self, state: State, id: str, payload: t.Dict[str, str]):
         self.__lazy_start()
-        args = payload.get("args")
-        if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
+        arguments = payload.get("arguments")
+        if arguments is None or not isinstance(arguments, list) or len(arguments) < 1 or not isinstance(arguments[0], dict):
             return
-        data = t.cast(dict, args[0])
+        data = t.cast(dict, arguments[0])
         error_var = payload.get("error_id")
         entity_id = t.cast(str, data.get(_GuiCoreContext.__PROP_ENTITY_ID))
         if not self.__check_readable_editable(state, entity_id, "Data node", error_var):
@@ -1179,34 +1179,34 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def on_dag_select(self, state: State, id: str, payload: t.Dict[str, str]):
         self.__lazy_start()
-        args = payload.get("args")
-        if args is None or not isinstance(args, list) or len(args) < 2:
+        arguments = payload.get("arguments")
+        if arguments is None or not isinstance(arguments, list) or len(arguments) < 2:
             return
-        on_action_function = self.gui._get_user_function(args[1]) if args[1] else None
+        on_action_function = self.gui._get_user_function(arguments[1]) if arguments[1] else None
         if callable(on_action_function):
             try:
                 entity = (
-                    core_get(args[0])
-                    if (reason := is_readable(t.cast(ScenarioId, args[0])))
-                    else f"{args[0]} is not readable: {_get_reason(reason)}"
+                    core_get(arguments[0])
+                    if (reason := is_readable(t.cast(ScenarioId, arguments[0])))
+                    else f"{arguments[0]} is not readable: {_get_reason(reason)}"
                 )
                 self.gui._call_function_with_state(
                     on_action_function,
                     [entity],
                 )
             except Exception as e:
-                if not self.gui._call_on_exception(args[1], e):
-                    _warn(f"dag.on_action(): Exception raised in '{args[1]}()' with '{args[0]}'", e)
-        elif args[1]:
-            _warn(f"dag.on_action(): Invalid function '{args[1]}()'.")
+                if not self.gui._call_on_exception(arguments[1], e):
+                    _warn(f"dag.on_action(): Exception raised in '{arguments[1]}()' with '{arguments[0]}'", e)
+        elif arguments[1]:
+            _warn(f"dag.on_action(): Invalid function '{arguments[1]}()'.")
 
     def get_creation_reason(self):
         self.__lazy_start()
         return "" if (reason := can_create()) else f"Cannot create scenario: {_get_reason(reason)}"
 
     def on_file_action(self, state: State, id: str, payload: t.Dict[str, t.Any]):
-        args = t.cast(list, payload.get("args"))
-        act_payload = t.cast(t.Dict[str, str], args[0])
+        arguments = t.cast(list, payload.get("arguments"))
+        act_payload = t.cast(t.Dict[str, str], arguments[0])
         dn_id = t.cast(DataNodeId, act_payload.get("id"))
         error_id = act_payload.get("error_id", "")
         if reason := is_readable(dn_id):

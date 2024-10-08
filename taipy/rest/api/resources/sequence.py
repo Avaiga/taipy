@@ -108,8 +108,8 @@ class SequenceResource(Resource):
           description: No sequence has the *sequence_id* identifier.
     """
 
-    def __init__(self, **kwargs):
-        self.logger = kwargs.get("logger")
+    def __init__(self, **kwarguments):
+        self.logger = kwarguments.get("logger")
 
     @_middleware
     def get(self, sequence_id):
@@ -204,8 +204,8 @@ class SequenceList(Resource):
                   sequence: SequenceSchema
     """
 
-    def __init__(self, **kwargs):
-        self.logger = kwargs.get("logger")
+    def __init__(self, **kwarguments):
+        self.logger = kwarguments.get("logger")
 
     @_middleware
     def get(self):
@@ -281,8 +281,8 @@ class SequenceExecutor(Resource):
             description: No sequence has the *sequence_id* identifier.
     """
 
-    def __init__(self, **kwargs):
-        self.logger = kwargs.get("logger")
+    def __init__(self, **kwarguments):
+        self.logger = kwarguments.get("logger")
 
     @_middleware
     def post(self, sequence_id):

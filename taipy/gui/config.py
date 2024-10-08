@@ -194,45 +194,45 @@ class _Config(object):
 
     def _handle_argparse(self):
         _GuiCLI.create_parser()
-        args = _GuiCLI.handle_command()
+        arguments = _GuiCLI.handle_command()
 
         config = self.config
-        if args.taipy_port:
-            if str(args.taipy_port).strip() == "auto":
+        if arguments.taipy_port:
+            if str(arguments.taipy_port).strip() == "auto":
                 config["port"] = "auto"
-            elif not _Config.__RE_PORT_NUMBER.match(args.taipy_port):
+            elif not _Config.__RE_PORT_NUMBER.match(arguments.taipy_port):
                 _warn("Port value for --port option is not valid.")
             else:
-                config["port"] = int(args.taipy_port)
-        if args.taipy_host:
-            config["host"] = args.taipy_host
-        if args.taipy_debug:
+                config["port"] = int(arguments.taipy_port)
+        if arguments.taipy_host:
+            config["host"] = arguments.taipy_host
+        if arguments.taipy_debug:
             config["debug"] = True
-        if args.taipy_no_debug:
+        if arguments.taipy_no_debug:
             config["debug"] = False
-        if args.taipy_use_reloader:
+        if arguments.taipy_use_reloader:
             config["use_reloader"] = True
-        if args.taipy_no_reloader:
+        if arguments.taipy_no_reloader:
             config["use_reloader"] = False
-        if args.taipy_ngrok_token:
-            config["ngrok_token"] = args.taipy_ngrok_token
-        if args.taipy_webapp_path:
-            config["webapp_path"] = args.taipy_webapp_path
+        if arguments.taipy_ngrok_token:
+            config["ngrok_token"] = arguments.taipy_ngrok_token
+        if arguments.taipy_webapp_path:
+            config["webapp_path"] = arguments.taipy_webapp_path
         elif os.environ.get("TAIPY_GUI_WEBAPP_PATH"):
             config["webapp_path"] = os.environ.get("TAIPY_GUI_WEBAPP_PATH")
-        if args.taipy_upload_folder:
-            config["upload_folder"] = args.taipy_upload_folder
+        if arguments.taipy_upload_folder:
+            config["upload_folder"] = arguments.taipy_upload_folder
         elif os.environ.get("TAIPY_GUI_UPLOAD_FOLDER"):
             config["webapp_path"] = os.environ.get("TAIPY_GUI_UPLOAD_FOLDER")
-        if args.taipy_client_url:
-            config["client_url"] = args.taipy_client_url
-        _Hooks()._handle_argparse(args, config)
+        if arguments.taipy_client_url:
+            config["client_url"] = arguments.taipy_client_url
+        _Hooks()._handle_argparse(arguments, config)
 
-    def _build_config(self, root_dir, env_filename, kwargs):  # pragma: no cover
+    def _build_config(self, root_dir, env_filename, kwarguments):  # pragma: no cover
         config = self.config
         env_file_abs_path = env_filename if os.path.isabs(env_filename) else os.path.join(root_dir, env_filename)
         # Load keyword arguments
-        for key, value in kwargs.items():
+        for key, value in kwarguments.items():
             key = key.lower()
             if value is not None and key in config:
                 # Special case for "stylekit" that can be a Boolean or a dict

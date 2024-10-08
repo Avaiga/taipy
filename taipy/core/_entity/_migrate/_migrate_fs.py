@@ -86,7 +86,7 @@ def _remove_backup_file_entities(path: str) -> bool:
 def _migrate_fs_entities(path: str, backup: bool = True) -> bool:
     """Migrate entities from filesystem to the current version.
 
-    Args:
+    Arguments:
         path (str): The path to the folder containing the entities.
         backup (bool, optional): Whether to backup the entities before migrating. Defaults to True.
 

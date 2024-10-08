@@ -103,9 +103,9 @@ class _Server:
         self._is_running = False
 
         # Websocket (handle json message)
-        # adding args for the one call with a server ack request
+        # adding arguments for the one call with a server ack request
         @self._ws.on("message")
-        def handle_message(message, *args) -> None:
+        def handle_message(message, *arguments) -> None:
             if "status" in message:
                 _TaipyLogger._get_logger().info(message["status"])
             elif "type" in message:
@@ -342,7 +342,7 @@ class _Server:
         }
         if self.__ssl_context is not None:
             run_config["ssl_context"] = self.__ssl_context
-        # flask-socketio specific conditions for 'allow_unsafe_werkzeug' arguments to be popped out of kwargs
+        # flask-socketio specific conditions for 'allow_unsafe_werkzeug' arguments to be popped out of kwarguments
         if self._get_async_mode() == "threading" and (not sys.stdin or not sys.stdin.isatty()):
             run_config = {**run_config, "allow_unsafe_werkzeug": allow_unsafe_werkzeug}
         try:

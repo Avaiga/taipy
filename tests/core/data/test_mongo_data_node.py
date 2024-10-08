@@ -37,7 +37,7 @@ def clear_mongo_connection_cache():
 
 
 @dataclass
-class CustomObjectWithoutArgs:
+class CustomObjectWithoutArguments:
     def __init__(self, foo=None, bar=None):
         self.foo = foo
         self.bar = bar
@@ -68,7 +68,7 @@ class TestMongoCollectionDataNode:
             "db_name": "taipy",
             "collection_name": "foo",
             "custom_document": MongoDefaultDocument,
-            "db_extra_args": {
+            "db_extra_arguments": {
                 "ssl": "true",
                 "retrywrites": "false",
                 "maxIdleTimeMS": "120000",
@@ -195,7 +195,7 @@ class TestMongoCollectionDataNode:
     )
     def test_read_wrong_object_properties_name(self, properties, data):
         custom_properties = properties.copy()
-        custom_properties["custom_document"] = CustomObjectWithoutArgs
+        custom_properties["custom_document"] = CustomObjectWithoutArguments
         mongo_dn = MongoCollectionDataNode(
             "foo",
             Scope.SCENARIO,

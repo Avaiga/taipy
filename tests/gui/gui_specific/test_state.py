@@ -31,19 +31,19 @@ def test_state(gui: Gui):
         assert state._gui == gui
         with pytest.raises(Exception) as e:
             _ = state.b
-        assert e.value.args[0] == "Variable 'b' is not defined."
+        assert e.value.arguments[0] == "Variable 'b' is not defined."
 
         with pytest.raises(Exception) as e:
             state.b = 10
-        assert e.value.args[0] == "Variable 'b' is not accessible."
+        assert e.value.arguments[0] == "Variable 'b' is not accessible."
 
         with pytest.raises(Exception) as e:
             _ = state._taipy_p1
-        assert e.value.args[0] == "Variable '_taipy_p1' is protected and is not accessible."
+        assert e.value.arguments[0] == "Variable '_taipy_p1' is protected and is not accessible."
 
         with pytest.raises(Exception) as e:
             state._taipy_p1 = 10
-        assert e.value.args[0] == "Variable '_taipy_p1' is not accessible."
+        assert e.value.arguments[0] == "Variable '_taipy_p1' is not accessible."
 
         assert state._get_placeholder("_taipy_p1") is None
 

@@ -39,7 +39,7 @@ class Page(_Renderer):
     ```
     """
 
-    def __init__(self, element: t.Optional[_Element] = None, **kwargs) -> None:
+    def __init__(self, element: t.Optional[_Element] = None, **kwarguments) -> None:
         """Initialize a new page.
 
         Arguments:
@@ -53,8 +53,8 @@ class Page(_Renderer):
         """
         if element is None:
             element = _DefaultBlock()
-        kwargs["content"] = element
-        super().__init__(**kwargs)
+        kwarguments["content"] = element
+        super().__init__(**kwarguments)
 
     # Generate JSX from Element Object
     def render(self, gui) -> str:

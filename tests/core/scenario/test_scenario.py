@@ -325,7 +325,7 @@ def test_raise_sequence_tasks_not_in_scenario(data_node):
 
     with pytest.raises(SequenceTaskDoesNotExistInScenario) as err:
         Scenario("scenario", set(), {}, sequences={"sequence": {"tasks": [task_1]}}, scenario_id="SCENARIO_scenario")
-    assert err.value.args == ([task_1.id], "sequence", "SCENARIO_scenario")
+    assert err.value.arguments == ([task_1.id], "sequence", "SCENARIO_scenario")
 
     with pytest.raises(SequenceTaskDoesNotExistInScenario) as err:
         Scenario(
@@ -335,7 +335,7 @@ def test_raise_sequence_tasks_not_in_scenario(data_node):
             sequences={"sequence": {"tasks": [task_1, task_2]}},
             scenario_id="SCENARIO_scenario",
         )
-    assert err.value.args == ([task_2.id], "sequence", "SCENARIO_scenario")
+    assert err.value.arguments == ([task_2.id], "sequence", "SCENARIO_scenario")
 
     Scenario("scenario", {task_1}, {}, sequences={"sequence": {"tasks": [task_1]}})
     Scenario(
@@ -360,17 +360,17 @@ def test_adding_sequence_raises_tasks_not_in_scenario(data_node):
 
     with pytest.raises(SequenceTaskDoesNotExistInScenario) as err:
         scenario.add_sequence("sequence_2", [task_2])
-    assert err.value.args == ([task_2.id], "sequence_2", scenario.id)
+    assert err.value.arguments == ([task_2.id], "sequence_2", scenario.id)
 
     scenario.add_sequence("sequence_3", [task_1])
 
     with pytest.raises(SequenceTaskDoesNotExistInScenario) as err:
         scenario.add_sequences({"sequence_4": [task_2]})
-    assert err.value.args == ([task_2.id], "sequence_4", scenario.id)
+    assert err.value.arguments == ([task_2.id], "sequence_4", scenario.id)
 
     with pytest.raises(SequenceTaskDoesNotExistInScenario) as err:
         scenario.add_sequences({"sequence_5": [task_1, task_2]})
-    assert err.value.args == ([task_2.id], "sequence_5", scenario.id)
+    assert err.value.arguments == ([task_2.id], "sequence_5", scenario.id)
 
     scenario.tasks = [task_1, task_2]
     scenario.add_sequence("sequence_6", [task_1, task_2])

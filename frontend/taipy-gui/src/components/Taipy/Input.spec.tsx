@@ -100,7 +100,7 @@ describe("Input Component", () => {
         await waitFor(() => expect(dispatch).toHaveBeenCalled());
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "",
-            payload: { action: "on_action", args: ["Enter", "varname", "Valdata"] },
+            payload: { action: "on_action", arguments: ["Enter", "varname", "Valdata"] },
             type: "SEND_ACTION_ACTION",
         });
     });

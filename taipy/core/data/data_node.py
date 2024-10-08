@@ -40,8 +40,8 @@ from .operator import JoinOperator
 def _update_ready_for_reading(fct):
     # This decorator must be wrapped before self_setter decorator as self_setter will run the function twice.
     @functools.wraps(fct)
-    def _recompute_is_ready_for_reading(dn: "DataNode", *args, **kwargs):
-        fct(dn, *args, **kwargs)
+    def _recompute_is_ready_for_reading(dn: "DataNode", *arguments, **kwarguments):
+        fct(dn, *arguments, **kwarguments)
         if dn._edit_in_progress:
             _ReadyToRunProperty._add(dn, DataNodeEditInProgress(dn.id))
         else:
@@ -128,7 +128,7 @@ class DataNode(_Entity, _Labeled):
         edit_in_progress: bool = False,
         editor_id: Optional[str] = None,
         editor_expiration_date: Optional[datetime] = None,
-        **kwargs,
+        **kwarguments,
     ) -> None:
         self._config_id = _validate_id(config_id)
         self.id = id or self._new_id(self._config_id)
@@ -145,7 +145,7 @@ class DataNode(_Entity, _Labeled):
         # Track edits
         self._edits: List[Edit] = edits or []
 
-        self._properties: _Properties = _Properties(self, **kwargs)
+        self._properties: _Properties = _Properties(self, **kwarguments)
 
     def __eq__(self, other) -> bool:
         """Check if two data nodes are equal."""
@@ -415,35 +415,35 @@ class DataNode(_Entity, _Labeled):
             )
             return None
 
-    def append(self, data, job_id: Optional[JobId] = None, **kwargs: Dict[str, Any]):
+    def append(self, data, job_id: Optional[JobId] = None, **kwarguments: Dict[str, Any]):
         """Append some data to this data node.
 
         Arguments:
             data (Any): The data to write to this data node.
             job_id (JobId): An optional identifier of the writer.
-            **kwargs (dict[str, any]): Extra information to attach to the edit document
+            **kwarguments (dict[str, any]): Extra information to attach to the edit document
                 corresponding to this write.
         """
         from ._data_manager_factory import _DataManagerFactory
 
         self._append(data)
-        self.track_edit(job_id=job_id, **kwargs)
+        self.track_edit(job_id=job_id, **kwarguments)
         self.unlock_edit()
         _DataManagerFactory._build_manager()._set(self)
 
-    def write(self, data, job_id: Optional[JobId] = None, **kwargs: Dict[str, Any]):
+    def write(self, data, job_id: Optional[JobId] = None, **kwarguments: Dict[str, Any]):
         """Write some data to this data node.
 
         Arguments:
             data (Any): The data to write to this data node.
             job_id (JobId): An optional identifier of the writer.
-            **kwargs (dict[str, any]): Extra information to attach to the edit document
+            **kwarguments (dict[str, any]): Extra information to attach to the edit document
                 corresponding to this write.
         """
         from ._data_manager_factory import _DataManagerFactory
 
         self._write(data)
-        self.track_edit(job_id=job_id, **kwargs)
+        self.track_edit(job_id=job_id, **kwarguments)
         self.unlock_edit()
         _DataManagerFactory._build_manager()._set(self)
 
@@ -632,9 +632,9 @@ def _make_event_for_datanode(
     /,
     attribute_name: Optional[str] = None,
     attribute_value: Optional[Any] = None,
-    **kwargs,
+    **kwarguments,
 ) -> Event:
-    metadata = {"config_id": data_node.config_id, "version": data_node._version, **kwargs}
+    metadata = {"config_id": data_node.config_id, "version": data_node._version, **kwarguments}
     return Event(
         entity_type=EventEntityType.DATA_NODE,
         entity_id=data_node.id,

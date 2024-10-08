@@ -15,7 +15,7 @@ from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 
 
-def nothing(*args, **kwargs):
+def nothing(*arguments, **kwarguments):
     pass
 
 

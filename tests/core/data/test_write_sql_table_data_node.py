@@ -33,7 +33,7 @@ class TestWriteSQLTableDataNode:
             "db_name": "taipy",
             "db_engine": "sqlite",
             "table_name": "example",
-            "db_extra_args": {
+            "db_extra_arguments": {
                 "TrustServerCertificate": "yes",
                 "other": "value",
             },
@@ -48,7 +48,7 @@ class TestWriteSQLTableDataNode:
                 "db_name": "taipy",
                 "db_engine": "mssql",
                 "table_name": "example",
-                "db_extra_args": {
+                "db_extra_arguments": {
                     "TrustServerCertificate": "yes",
                 },
             },
@@ -62,7 +62,7 @@ class TestWriteSQLTableDataNode:
                 "db_name": "taipy",
                 "db_engine": "mysql",
                 "table_name": "example",
-                "db_extra_args": {
+                "db_extra_arguments": {
                     "TrustServerCertificate": "yes",
                 },
             },
@@ -76,7 +76,7 @@ class TestWriteSQLTableDataNode:
                 "db_name": "taipy",
                 "db_engine": "postgresql",
                 "table_name": "example",
-                "db_extra_args": {
+                "db_extra_arguments": {
                     "TrustServerCertificate": "yes",
                 },
             },
@@ -85,7 +85,7 @@ class TestWriteSQLTableDataNode:
     @pytest.mark.parametrize("properties", __sql_properties)
     def test_write_pandas(self, properties):
         custom_properties = properties.copy()
-        custom_properties.pop("db_extra_args")
+        custom_properties.pop("db_extra_arguments")
         sql_table_dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
         with (
@@ -117,7 +117,7 @@ class TestWriteSQLTableDataNode:
     def test_write_numpy(self, properties):
         custom_properties = properties.copy()
         custom_properties["exposed_type"] = "numpy"
-        custom_properties.pop("db_extra_args")
+        custom_properties.pop("db_extra_arguments")
         sql_table_dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
         with (
@@ -145,7 +145,7 @@ class TestWriteSQLTableDataNode:
     def test_write_custom_exposed_type(self, properties):
         custom_properties = properties.copy()
         custom_properties["exposed_type"] = MyCustomObject
-        custom_properties.pop("db_extra_args")
+        custom_properties.pop("db_extra_arguments")
         sql_table_dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
         with (

@@ -271,7 +271,7 @@ def test_data_node_with_env_variable_value():
         assert Config.data_nodes["data_node"]._storage_type == "ENV[FOO]"
 
 
-def test_data_node_with_env_variable_in_write_fct_args():
+def test_data_node_with_env_variable_in_write_fct_arguments():
     def read_fct(): ...
 
     def write_fct(): ...
@@ -282,12 +282,12 @@ def test_data_node_with_env_variable_in_write_fct_args():
             storage_type="generic",
             read_fct=read_fct,
             write_fct=write_fct,
-            write_fct_args=["ENV[FOO]", "my_param", "ENV[BAZ]"],
+            write_fct_arguments=["ENV[FOO]", "my_param", "ENV[BAZ]"],
         )
-        assert Config.data_nodes["data_node"].write_fct_args == ["bar", "my_param", "qux"]
+        assert Config.data_nodes["data_node"].write_fct_arguments == ["bar", "my_param", "qux"]
 
 
-def test_data_node_with_env_variable_in_read_fct_args():
+def test_data_node_with_env_variable_in_read_fct_arguments():
     def read_fct(): ...
 
     def write_fct(): ...
@@ -298,9 +298,9 @@ def test_data_node_with_env_variable_in_read_fct_args():
             storage_type="generic",
             read_fct=read_fct,
             write_fct=write_fct,
-            read_fct_args=["ENV[FOO]", "my_param", "ENV[BAZ]"],
+            read_fct_arguments=["ENV[FOO]", "my_param", "ENV[BAZ]"],
         )
-        assert Config.data_nodes["data_node"].read_fct_args == ["bar", "my_param", "qux"]
+        assert Config.data_nodes["data_node"].read_fct_arguments == ["bar", "my_param", "qux"]
 
 
 def test_block_datanode_config_update_in_development_mode():

@@ -47,7 +47,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
             self._check_validity_period(data_node_config_id, data_node_config)
             self._check_required_properties(data_node_config_id, data_node_config)
             self._check_callable(data_node_config_id, data_node_config)
-            self._check_generic_read_write_fct_and_args(data_node_config_id, data_node_config)
+            self._check_generic_read_write_fct_and_arguments(data_node_config_id, data_node_config)
             self._check_exposed_type(data_node_config_id, data_node_config)
         return self._collector
 
@@ -160,7 +160,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
                         f"property `{required_property}` for type `{storage_type}`.",
                     )
 
-    def _check_generic_read_write_fct_and_args(self, data_node_config_id: str, data_node_config: DataNodeConfig):
+    def _check_generic_read_write_fct_and_arguments(self, data_node_config_id: str, data_node_config: DataNodeConfig):
         if data_node_config.storage_type != DataNodeConfig._STORAGE_TYPE_VALUE_GENERIC:
             return
 

@@ -47,8 +47,8 @@ replaced_content = ""
 with open(gui_pyi_file, "r") as file:
     for line in file:
         if "def run(" in line:
-            replace_str = line[line.index(", run_server") : (line.index("**kwargs") + len("**kwargs"))]
-            # ", run_server: bool = ..., run_in_thread: bool = ..., async_mode: str = ..., **kwargs"
+            replace_str = line[line.index(", run_server") : (line.index("**kwarguments") + len("**kwarguments"))]
+            # ", run_server: bool = ..., run_in_thread: bool = ..., async_mode: str = ..., **kwarguments"
             line = line.replace(replace_str, gui_config)
         replaced_content += line
 

@@ -18,7 +18,7 @@ from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
 
 
-def nothing(*args, **kwargs):
+def nothing(*arguments, **kwarguments):
     pass
 
 

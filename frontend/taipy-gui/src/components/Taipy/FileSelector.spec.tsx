@@ -82,7 +82,7 @@ describe("FileSelector Component", () => {
         inputElt && (await userEvent.upload(inputElt, file));
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
-            payload: { args: [], action: "on_action" },
+            payload: { arguments: [], action: "on_action" },
             type: "SEND_ACTION_ACTION",
         });
     });
@@ -263,7 +263,7 @@ describe("FileSelector Component", () => {
             expect.objectContaining({
                 type: "SEND_ACTION_ACTION",
                 name: "",
-                payload: { args: [], action: "testAction" },
+                payload: { arguments: [], action: "testAction" },
             })
         );
     });

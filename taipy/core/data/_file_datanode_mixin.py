@@ -148,7 +148,7 @@ class _FileDataNodeMixin(object):
 
         return reason_collection
 
-    def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
+    def _read_from_path(self, path: Optional[str] = None, **read_kwarguments) -> Any:
         raise NotImplementedError
 
     def _write_default_data(self, default_value: Any):

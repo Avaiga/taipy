@@ -66,8 +66,8 @@ class MockConverter(_AbstractConverter):
 
 
 class MockFSRepository(_FileSystemRepository):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, **kwarguments):
+        super().__init__(**kwarguments)
 
     @property
     def _storage_folder(self) -> pathlib.Path:

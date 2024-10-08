@@ -9,7 +9,7 @@ repos:
                 'types-pytz',
                 'types-tzlocal',
         ]
-        args:
+        arguments:
         - --ignore-missing-imports
         - --implicit-optional
         - --no-namespace-packages
@@ -24,7 +24,7 @@ repos:
     -   id: remove-tabs
     -   id: insert-license
         files: \.py$
-        args:
+        arguments:
         - --license-filepath
         - .license-header
 -   repo: https://github.com/pre-commit/pre-commit-hooks
@@ -34,12 +34,12 @@ repos:
     -   id: end-of-file-fixer
     -   id: check-merge-conflict
     -   id: check-yaml
-        args: [--unsafe]
+        arguments: [--unsafe]
 -   repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.6.4
     hooks:
     -   id: ruff
-        args: [ --fix ]
+        arguments: [ --fix ]
     -   id: ruff-format
 -   repo: https://github.com/codespell-project/codespell
     rev: v2.3.0

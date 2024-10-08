@@ -48,7 +48,7 @@ def start_or_stop(state: State):
         thread = None
     else:  # Timer is stopped
         thread_event.clear()
-        thread = Thread(target=count, args=[thread_event, state.get_gui()])
+        thread = Thread(target=count, arguments=[thread_event, state.get_gui()])
         thread.start()
     # Update button status for all states.
     state.assign("button_text", button_texts[1 if thread else 0])

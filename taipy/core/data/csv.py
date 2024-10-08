@@ -130,7 +130,7 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     def _read(self):
         return self._read_from_path()
 
-    def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
+    def _read_from_path(self, path: Optional[str] = None, **read_kwarguments) -> Any:
         if path is None:
             path = self._path
 

@@ -37,13 +37,13 @@ def _retry_repository_operation(exceptions: Tuple, sleep_time: float = 0.2):
     """
 
     def decorator(func):
-        def newfn(*args, **kwargs):
+        def newfn(*arguments, **kwarguments):
             for _ in range(Config.core.read_entity_retry):
                 try:
-                    return func(*args, **kwargs)
+                    return func(*arguments, **kwarguments)
                 except exceptions:
                     time.sleep(sleep_time)
-            return func(*args, **kwargs)
+            return func(*arguments, **kwarguments)
 
         return newfn
 

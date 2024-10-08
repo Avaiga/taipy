@@ -16,7 +16,7 @@ from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.job._job_manager_factory import _JobManagerFactory
 
 
-def nothing(*args, **kwargs):
+def nothing(*arguments, **kwarguments):
     pass
 
 

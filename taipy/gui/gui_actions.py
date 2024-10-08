@@ -52,7 +52,7 @@ def download(
             - *payload* (optional): an optional payload from the caller.<br/>
               This is a dictionary with the following keys:
                 - *action*: the name of the callback;
-                - *args*: an array of two strings. The first element reflects the *name* argument,
+                - *arguments*: an array of two strings. The first element reflects the *name* argument,
                   and the second element reflects the server-side URL where the file is located.
     """
     if state and isinstance(state._gui, Gui):
@@ -271,63 +271,63 @@ def invoke_callback(
     gui: Gui,
     state_id: str,
     callback: t.Callable,
-    args: t.Optional[t.Sequence[t.Any]] = None,
+    arguments: t.Optional[t.Sequence[t.Any]] = None,
     module_context: t.Optional[str] = None,
 ) -> t.Any:
     """Invoke a user callback for a given state.
 
     Calling this function is equivalent to calling
-    *gui*.`(Gui.)invoke_callback(state_id, callback, args, module_context)^`.
+    *gui*.`(Gui.)invoke_callback(state_id, callback, arguments, module_context)^`.
 
     Arguments:
         gui (Gui^): The current Gui instance.
         state_id: The identifier of the state to use, as returned by `get_state_id()^`.
         callback (Callable[[State^, ...], None]): The user-defined function that is invoked.<br/>
             The first argument of this function **must** be a `State^`.
-        args (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
+        arguments (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
         module_context (Optional[str]): the name of the module that will be used.
     """
     if isinstance(gui, Gui):
-        return gui.invoke_callback(state_id, callback, args, module_context)
+        return gui.invoke_callback(state_id, callback, arguments, module_context)
     _warn("'invoke_callback()' must be called with a valid Gui instance.")
 
 
 def broadcast_callback(
     gui: Gui,
     callback: t.Callable,
-    args: t.Optional[t.Sequence[t.Any]] = None,
+    arguments: t.Optional[t.Sequence[t.Any]] = None,
     module_context: t.Optional[str] = None,
 ) -> t.Dict[str, t.Any]:
     """Invoke a callback for every client.
 
     Calling this function is equivalent to calling the method
-    *gui*.`(Gui.)broadcast_callback(callback, args)^`.
+    *gui*.`(Gui.)broadcast_callback(callback, arguments)^`.
 
     Arguments:
         gui (Gui^): The current Gui instance.
         callback: The user-defined function to be invoked.<br/>
             The first argument of this function must be a `State^` object representing the
             client for which it is invoked.<br/>
-            The other arguments should reflect the ones provided in the *args* collection.
-        args: The arguments to send to *callback*, if any.
+            The other arguments should reflect the ones provided in the *arguments* collection.
+        arguments: The arguments to send to *callback*, if any.
     """
     if isinstance(gui, Gui):
-        return gui.broadcast_callback(callback, args, module_context)
+        return gui.broadcast_callback(callback, arguments, module_context)
     _warn("'broadcast_callback()' must be called with a valid Gui instance.")
 
 
-def invoke_state_callback(gui: Gui, state_id: str, callback: t.Callable, args: t.Union[t.Tuple, t.List]) -> t.Any:
+def invoke_state_callback(gui: Gui, state_id: str, callback: t.Callable, arguments: t.Union[t.Tuple, t.List]) -> t.Any:
     """NOT DOCUMENTED"""
     _warn("'invoke_state_callback()' was deprecated in Taipy GUI 2.0. Use 'Gui.invoke_callback()' instead.")
-    return gui.invoke_callback(state_id, callback, args)
+    return gui.invoke_callback(state_id, callback, arguments)
 
 
 def invoke_long_callback(
     state: State,
     user_function: t.Callable,
-    user_function_args: t.Optional[t.Union[t.Tuple, t.List]] = None,
+    user_function_arguments: t.Optional[t.Union[t.Tuple, t.List]] = None,
     user_status_function: t.Optional[t.Callable] = None,
-    user_status_function_args: t.Optional[t.Union[t.Tuple, t.List]] = None,
+    user_status_function_arguments: t.Optional[t.Union[t.Tuple, t.List]] = None,
     period=0,
 ):
     """Invoke a long-running user callback.
@@ -346,7 +346,7 @@ def invoke_long_callback(
         state (State^): The `State^` instance, as received in any callback.
         user_function (Callable[[...], None]): The function that will be run independently of Taipy GUI. Note
             that this function must not use *state*, which is not persisted across threads.
-        user_function_args (Optional[List|Tuple]): The arguments to send to *user_function*.
+        user_function_arguments (Optional[List|Tuple]): The arguments to send to *user_function*.
         user_status_function (Optional(Callable[[State^, bool, ...], None])): The optional user-defined status
             function that is invoked at the end of and possibly during the runtime of *user_function*:
 
@@ -363,7 +363,7 @@ def invoke_long_callback(
                - If this argument is set to an int value, then this value indicates
                  how many periods (as lengthy as indicated in *period*) have elapsed since *user_function* was
                  started.
-        user_status_function_args (Optional[List|Tuple]): The remaining arguments of the user status function.
+        user_status_function_arguments (Optional[List|Tuple]): The remaining arguments of the user status function.
         period (int): The interval, in milliseconds, at which *user_status_function* is called.<br/>
             The default value is 0, meaning no call to *user_status_function* will happen until *user_function*
             terminates (then the second argument of that call will be ).</br>
@@ -373,10 +373,10 @@ def invoke_long_callback(
     if not state or not isinstance(state._gui, Gui):
         _warn("'invoke_long_callback()' must be called in the context of a callback.")
 
-    if user_status_function_args is None:
-        user_status_function_args = []
-    if user_function_args is None:
-        user_function_args = []
+    if user_status_function_arguments is None:
+        user_status_function_arguments = []
+    if user_function_arguments is None:
+        user_function_arguments = []
 
     state_id = get_state_id(state)
     module_context = get_module_context(state)
@@ -399,7 +399,7 @@ def invoke_long_callback(
             this_gui.invoke_callback(
                 str(state_id),
                 user_status_function,
-                [status] + list(user_status_function_args) + [function_result],  # type: ignore
+                [status] + list(user_status_function_arguments) + [function_result],  # type: ignore
                 str(module_context),
             )
         if e:
@@ -413,9 +413,9 @@ def invoke_long_callback(
                 str(module_context),
             )
 
-    def user_function_in_thread(*uf_args):
+    def user_function_in_thread(*uf_arguments):
         try:
-            res = user_function(*uf_args)
+            res = user_function(*uf_arguments)
             callback_on_status(True, function_result=res)
         except Exception as e:
             callback_on_status(False, e, user_function.__name__)
@@ -426,7 +426,7 @@ def invoke_long_callback(
             callback_on_status(count)
             threading.Timer(period_s, thread_status, (name, period_s, count + 1)).start()
 
-    thread = threading.Thread(target=user_function_in_thread, args=user_function_args)
+    thread = threading.Thread(target=user_function_in_thread, arguments=user_function_arguments)
     thread.start()
     if isinstance(period, int) and period >= 500 and callable(user_status_function):
         thread_status(thread.name, period / 1000.0, 0)

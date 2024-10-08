@@ -266,14 +266,14 @@ export declare const createSendUpdateAction: (
  * @param context - The execution context (property `context`).
  * @param value - The value associated with the action. This can be an object or
  *   any type of value.
- * @param args - Additional information associated to the action.
+ * @param arguments - Additional information associated to the action.
  * @returns The action fed to the reducer.
  */
 export declare const createSendActionNameAction: (
     name: string | undefined,
     context: string | undefined,
     value: unknown,
-    ...args: unknown[]
+    ...arguments: unknown[]
 ) => Action;
 /**
  * Create a *request data update* `Action` that will be used to update the `Context`.

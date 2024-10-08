@@ -23,11 +23,11 @@ from taipy.core.exceptions.exceptions import InvalidExposedType, MissingRequired
 
 
 class MyCustomObject:
-    def __init__(self, foo=None, bar=None, *args, **kwargs):
+    def __init__(self, foo=None, bar=None, *arguments, **kwarguments):
         self.foo = foo
         self.bar = bar
-        self.args = args
-        self.kwargs = kwargs
+        self.arguments = arguments
+        self.kwarguments = kwarguments
 
 
 class TestSQLTableDataNode:
@@ -36,7 +36,7 @@ class TestSQLTableDataNode:
             "db_name": "taipy",
             "db_engine": "sqlite",
             "table_name": "example",
-            "db_extra_args": {
+            "db_extra_arguments": {
                 "TrustServerCertificate": "yes",
                 "other": "value",
             },
@@ -51,7 +51,7 @@ class TestSQLTableDataNode:
                 "db_name": "taipy",
                 "db_engine": "mssql",
                 "table_name": "example",
-                "db_extra_args": {
+                "db_extra_arguments": {
                     "TrustServerCertificate": "yes",
                 },
             },
@@ -65,7 +65,7 @@ class TestSQLTableDataNode:
                 "db_name": "taipy",
                 "db_engine": "mysql",
                 "table_name": "example",
-                "db_extra_args": {
+                "db_extra_arguments": {
                     "TrustServerCertificate": "yes",
                 },
             },
@@ -79,7 +79,7 @@ class TestSQLTableDataNode:
                 "db_name": "taipy",
                 "db_engine": "postgresql",
                 "table_name": "example",
-                "db_extra_args": {
+                "db_extra_arguments": {
                     "TrustServerCertificate": "yes",
                 },
             },
@@ -145,7 +145,7 @@ class TestSQLTableDataNode:
     @pytest.mark.parametrize("properties", __sql_properties)
     def test_raise_error_invalid_exposed_type(self, properties):
         custom_properties = properties.copy()
-        custom_properties.pop("db_extra_args")
+        custom_properties.pop("db_extra_arguments")
         custom_properties["exposed_type"] = "foo"
         with pytest.raises(InvalidExposedType):
             SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)

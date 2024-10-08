@@ -107,8 +107,8 @@ class JobResource(Resource):
           description: No job has the *job_id* identifier.
     """
 
-    def __init__(self, **kwargs):
-        self.logger = kwargs.get("logger")
+    def __init__(self, **kwarguments):
+        self.logger = kwarguments.get("logger")
 
     @_middleware
     def get(self, job_id):
@@ -193,8 +193,8 @@ class JobList(Resource):
                   job: JobSchema
     """
 
-    def __init__(self, **kwargs):
-        self.logger = kwargs.get("logger")
+    def __init__(self, **kwarguments):
+        self.logger = kwarguments.get("logger")
 
     def fetch_config(self, config_id):
         if config := Config.tasks.get(config_id):
@@ -211,8 +211,8 @@ class JobList(Resource):
 
     @_middleware
     def post(self):
-        args = request.args
-        task_config_id = args.get("task_id")
+        arguments = request.arguments
+        task_config_id = arguments.get("task_id")
 
         if not task_config_id:
             raise ConfigIdMissingException
@@ -275,8 +275,8 @@ class JobExecutor(Resource):
           description: No job has the *job_id* identifier.
     """
 
-    def __init__(self, **kwargs):
-        self.logger = kwargs.get("logger")
+    def __init__(self, **kwarguments):
+        self.logger = kwarguments.get("logger")
 
     @_middleware
     def post(self, job_id):

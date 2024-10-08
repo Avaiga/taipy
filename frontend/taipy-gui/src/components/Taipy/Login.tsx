@@ -66,11 +66,11 @@ const Login = (props: LoginProps) => {
     const handleAction = useCallback(
         (evt: MouseEvent<HTMLElement>) => {
             const { close } = evt?.currentTarget.dataset || {};
-            const args = close
+            const arguments = close
                 ? [null, null, document.location.pathname.substring(1)]
                 : [user, password, document.location.pathname.substring(1)];
             setShowProgress(true);
-            dispatch(createSendActionNameAction(id, module, onAction, ...args));
+            dispatch(createSendActionNameAction(id, module, onAction, ...arguments));
         },
         [user, password, dispatch, id, onAction, module]
     );

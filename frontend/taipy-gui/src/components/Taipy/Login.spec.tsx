@@ -61,7 +61,7 @@ describe("Login Component", () => {
         await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "logg",
-            payload: { action: "action", args: [user, user, ""] },
+            payload: { action: "action", arguments: [user, user, ""] },
             type: "SEND_ACTION_ACTION",
         });
     });

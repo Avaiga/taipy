@@ -28,7 +28,7 @@ class _RunCLI(_AbstractCLI):
 
         sub_run_parser = run_parser.add_subparsers(title="subcommands")
         sub_run_parser.add_parser(
-            "external-args",
+            "external-arguments",
             help="""
                 Arguments defined after this keyword will be considered as external arguments
                 to be passed to the application
@@ -37,28 +37,28 @@ class _RunCLI(_AbstractCLI):
 
     @classmethod
     def handle_command(cls):
-        args, _ = _TaipyParser._parser.parse_known_args()
-        if getattr(args, "which", None) != "run":
+        arguments, _ = _TaipyParser._parser.parse_known_arguments()
+        if getattr(arguments, "which", None) != "run":
             return
 
-        # First 2 args are always (1) Python executable, (2) run
-        # Unknown args are passed when running the application but will be ignored
-        all_args = sys.argv[2:]
+        # First 2 arguments are always (1) Python executable, (2) run
+        # Unknown arguments are passed when running the application but will be ignored
+        all_arguments = sys.argv[2:]
 
-        external_args = []
+        external_arguments = []
         try:
-            external_args_index = all_args.index("external-args")
+            external_arguments_index = all_arguments.index("external-arguments")
         except ValueError:
             pass
         else:
-            external_args.extend(all_args[external_args_index + 1 :])
-            all_args = all_args[:external_args_index]
+            external_arguments.extend(all_arguments[external_arguments_index + 1 :])
+            all_arguments = all_arguments[:external_arguments_index]
 
-        taipy_args = [f"--taipy-{arg[2:]}" if arg.startswith("--") else arg for arg in all_args]
+        taipy_arguments = [f"--taipy-{arg[2:]}" if arg.startswith("--") else arg for arg in all_arguments]
 
         try:
             subprocess.run(
-                [sys.executable, args.application_main_file, *(external_args + taipy_args)],
+                [sys.executable, arguments.application_main_file, *(external_arguments + taipy_arguments)],
                 stdout=sys.stdout,
                 stderr=sys.stdout,
             )

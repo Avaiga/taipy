@@ -487,8 +487,8 @@ class Config:
         default_path: Optional[str] = None,
         engine: Optional[str] = None,
         compression: Optional[str] = None,
-        read_kwargs: Optional[Dict] = None,
-        write_kwargs: Optional[Dict] = None,
+        read_kwarguments: Optional[Dict] = None,
+        write_kwarguments: Optional[Dict] = None,
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
         validity_period: Optional[timedelta] = None,
@@ -504,11 +504,11 @@ class Config:
                 The default value is *"pyarrow"*.
             compression (Optional[str]): Name of the compression to use. Possible values are *"snappy"*,
                 *"gzip"*, *"brotli"*, or *"none"* (no compression). The default value is *"snappy"*.
-            read_kwargs (Optional[dict]): Additional arguments passed to the `pandas.read_parquet()`
+            read_kwarguments (Optional[dict]): Additional arguments passed to the `pandas.read_parquet()`
                 function.
-            write_kwargs (Optional[dict]): Additional arguments passed to the
+            write_kwarguments (Optional[dict]): Additional arguments passed to the
                 `pandas.DataFrame.write_parquet()` function.<br/>
-                The arguments in *read_kwargs* and *write_kwargs* have a **higher precedence** than the
+                The arguments in *read_kwarguments* and *write_kwarguments* have a **higher precedence** than the
                 top-level arguments which are also passed to Pandas.
             exposed_type (Optional[str]): The exposed type of the data read from Parquet file.<br/>
                 The default value is `pandas`.
@@ -568,8 +568,8 @@ class Config:
         id: str,
         read_fct: Optional[Callable] = None,
         write_fct: Optional[Callable] = None,
-        read_fct_args: Optional[List] = None,
-        write_fct_args: Optional[List] = None,
+        read_fct_arguments: Optional[List] = None,
+        write_fct_arguments: Optional[List] = None,
         scope: Optional[Scope] = None,
         validity_period: Optional[timedelta] = None,
         **properties,
@@ -581,9 +581,9 @@ class Config:
             read_fct (Optional[Callable]): The Python function called to read the data.
             write_fct (Optional[Callable]): The Python function called to write the data.
                 The provided function must have at least one argument that receives the data to be written.
-            read_fct_args (Optional[List]): The list of arguments that are passed to the function
+            read_fct_arguments (Optional[List]): The list of arguments that are passed to the function
                 *read_fct* to read data.
-            write_fct_args (Optional[List]): The list of arguments that are passed to the function
+            write_fct_arguments (Optional[List]): The list of arguments that are passed to the function
                 *write_fct* to write the data.
             scope (Optional[Scope^]): The scope of the Generic data node configuration.<br/>
                 The default value is `Scope.SCENARIO`.
@@ -677,7 +677,7 @@ class Config:
         db_driver: Optional[str] = None,
         sqlite_folder_path: Optional[str] = None,
         sqlite_file_extension: Optional[str] = None,
-        db_extra_args: Optional[Dict[str, Any]] = None,
+        db_extra_arguments: Optional[Dict[str, Any]] = None,
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
         validity_period: Optional[timedelta] = None,
@@ -704,7 +704,7 @@ class Config:
                 The default value is the current working folder.
             sqlite_file_extension (Optional[str]): The file extension of the SQLite file.<br/>
                 The default value is ".db".
-            db_extra_args (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
+            db_extra_arguments (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
                 into database connection string.
             exposed_type (Optional[str]): The exposed type of the data read from SQL table.<br/>
                 The default value is "pandas".
@@ -738,7 +738,7 @@ class Config:
         db_driver: Optional[str] = None,
         sqlite_folder_path: Optional[str] = None,
         sqlite_file_extension: Optional[str] = None,
-        db_extra_args: Optional[Dict[str, Any]] = None,
+        db_extra_arguments: Optional[Dict[str, Any]] = None,
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
         validity_period: Optional[timedelta] = None,
@@ -769,7 +769,7 @@ class Config:
                 The default value is the current working folder.
             sqlite_file_extension (Optional[str]): The file extension of the SQLite file.<br/>
                 The default value is ".db".
-            db_extra_args (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
+            db_extra_arguments (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
                 into database connection string.
             exposed_type (Optional[str]): The exposed type of the data read from SQL query.<br/>
                 The default value is "pandas".
@@ -799,7 +799,7 @@ class Config:
         db_host: Optional[str] = None,
         db_port: Optional[int] = None,
         db_driver: Optional[str] = None,
-        db_extra_args: Optional[Dict[str, Any]] = None,
+        db_extra_arguments: Optional[Dict[str, Any]] = None,
         scope: Optional[Scope] = None,
         validity_period: Optional[timedelta] = None,
         **properties,
@@ -822,7 +822,7 @@ class Config:
             db_port (Optional[int]): The database port.<br/>
                 The default value is 27017.
             db_driver (Optional[str]): The database driver.
-            db_extra_args (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
+            db_extra_arguments (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
                 into database connection string.
             scope (Optional[Scope^]): The scope of the Mongo collection data node configuration.<br/>
                 The default value is `Scope.SCENARIO`.
