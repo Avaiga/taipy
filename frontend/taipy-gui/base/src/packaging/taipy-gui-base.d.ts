@@ -75,7 +75,8 @@ export type WsMessageType =
     | "GDT"
     | "AID"
     | "GR"
-    | "FV";
+    | "FV"
+    | "BC";
 export interface WsMessage {
     type: WsMessageType | string;
     name: string;
@@ -88,6 +89,14 @@ export interface WsMessage {
 export declare abstract class WsAdapter {
     abstract supportedMessageTypes: string[];
     abstract handleWsMessage(message: WsMessage, app: TaipyApp): boolean;
+}
+declare class CookieHandler {
+    resourceHandlerId: string;
+    constructor();
+    init(socket: Socket, taipyApp: TaipyApp): Promise<void>;
+    verifyCookieStatus(): Promise<boolean>;
+    addBeforeUnloadListener(): void;
+    deleteCookie(): Promise<void>;
 }
 export type OnInitHandler = (taipyApp: TaipyApp) => void;
 export type OnChangeHandler = (taipyApp: TaipyApp, encodedName: string, value: unknown, dataEventKey?: string) => void;
@@ -112,6 +121,7 @@ export declare class TaipyApp {
     _onWsStatusUpdate: OnWsStatusUpdate | undefined;
     _ackList: string[];
     _rdc: Record<string, Record<string, RequestDataCallback>>;
+    _cookieHandler: CookieHandler | undefined;
     variableData: DataManager | undefined;
     functionData: DataManager | undefined;
     appId: string;
@@ -126,6 +136,7 @@ export declare class TaipyApp {
         onChange?: OnChangeHandler | undefined,
         path?: string | undefined,
         socket?: Socket | undefined,
+        handleCookie?: boolean,
     );
     get onInit(): OnInitHandler | undefined;
     set onInit(handler: OnInitHandler | undefined);
