@@ -2883,7 +2883,7 @@ class Gui:
         try:
             return _Hooks()._get_authorization(self, client_id, system) or contextlib.nullcontext()
         except Exception as e:
-            _warn("No Hook:", e)
+            _warn("Hooks:", e)
             return contextlib.nullcontext()
 
     def set_favicon(self, favicon_path: t.Union[str, Path], state: t.Optional[State] = None):
