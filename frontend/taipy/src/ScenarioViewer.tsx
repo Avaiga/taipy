@@ -382,8 +382,8 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         scSequences,
         scTasks,
         scAuthorizedTags,
-        scDeletable,
-        scPromotable,
+        scDeletableReason,
+        scPromotableReason,
         scNotSubmittableReason,
         scNotReadableReason,
         scNotEditableReason,
@@ -891,23 +891,31 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             ) : null}
                             <Grid size={12} container justifyContent="space-between">
                                 {showDelete ? (
-                                    <Button
-                                        variant="outlined"
-                                        color="primary"
-                                        disabled={!active || !valid || !scDeletable}
-                                        onClick={openDeleteDialog}
-                                    >
-                                        DELETE
-                                    </Button>
+                                    <Tooltip title={scDeletableReason}>
+                                        <span>
+                                            <Button
+                                                variant="outlined"
+                                                color="primary"
+                                                disabled={!active || !valid || !!scDeletableReason}
+                                                onClick={openDeleteDialog}
+                                            >
+                                                DELETE
+                                            </Button>
+                                        </span>
+                                    </Tooltip>
                                 ) : null}
-                                <Button
-                                    variant="outlined"
-                                    color="primary"
-                                    disabled={!active || !valid || scPrimary || !scPromotable}
-                                    onClick={openPrimaryDialog}
-                                >
-                                    PROMOTE TO PRIMARY
-                                </Button>
+                                <Tooltip title={scPromotableReason}>
+                                    <span>
+                                        <Button
+                                            variant="outlined"
+                                            color="primary"
+                                            disabled={!active || !valid || scPrimary || !!scPromotableReason}
+                                            onClick={openPrimaryDialog}
+                                        >
+                                            PROMOTE TO PRIMARY
+                                        </Button>
+                                    </span>
+                                </Tooltip>
                             </Grid>
                         </Grid>
                     </AccordionDetails>
