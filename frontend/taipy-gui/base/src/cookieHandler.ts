@@ -6,12 +6,6 @@ import { getLocalStorageValue } from "../../src/context/utils";
 
 export const TAIPY_RESOURCE_HANDLER = "tprh";
 
-declare global {
-    interface Window {
-        deleteCookie: () => void;
-    }
-}
-
 export class CookieHandler {
     resourceHandlerId: string;
     constructor() {
@@ -40,7 +34,7 @@ export class CookieHandler {
             // call to get cookie status
             const { data } = await axios.get("taipy-rh");
             // validate cookie status
-            if (!data || !data.rh_id || data.rh_id !== this.resourceHandlerId) {
+            if (data?.rh_id !== this.resourceHandlerId) {
                 return new Promise((resolve) => resolve(false));
             }
         } catch (error) {
@@ -51,12 +45,9 @@ export class CookieHandler {
     }
 
     addBeforeUnloadListener() {
-        window.deleteCookie = () => {
-            axios.delete("taipy-rh");
-        };
         window.addEventListener("beforeunload", () => {
             localStorage.removeItem(TAIPY_RESOURCE_HANDLER);
-            window.deleteCookie();
+            this.deleteCookie();
         });
     }
 
