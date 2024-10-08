@@ -297,12 +297,12 @@ class _Config(object):
         if app_config.get("run_server") and app_config.get("ngrok_token") and app_config.get("use_reloader"):
             app_config["use_reloader"] = False
             self.__log_outside_reloader(
-                logger, "'use_reloader' parameter will not be used when 'ngrok_token' parameter is available"
+                logger, "'use_reloader' argument will not be used when 'ngrok_token' argument is available"
             )
 
         if app_config.get("use_reloader") and _is_in_notebook():
             app_config["use_reloader"] = False
-            self.__log_outside_reloader(logger, "'use_reloader' parameter is not available in notebook environment")
+            self.__log_outside_reloader(logger, "'use_reloader' argument is not available in notebook environment")
 
         if app_config.get("use_reloader") and not app_config.get("debug"):
             app_config["debug"] = True
@@ -316,7 +316,7 @@ class _Config(object):
             app_config["async_mode"] = "threading"
             self.__log_outside_reloader(
                 logger,
-                "'async_mode' parameter has been overridden to 'threading'. Using Flask built-in development server with debug mode",  # noqa: E501
+                "'async_mode' argument has been overridden to 'threading'. Using Flask built-in development server with debug mode",  # noqa: E501
             )
 
         self._resolve_notebook_proxy()

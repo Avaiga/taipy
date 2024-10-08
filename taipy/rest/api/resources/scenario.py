@@ -53,7 +53,7 @@ class ScenarioResource(Resource):
                 In this example the REST API is served on port 5000 on localhost. We are using curl command line
                 client.
 
-                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the *scenario_id* parameter. It
+                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the *scenario_id* argument. It
                 represents the identifier of the Scenario we want to retrieve.
 
                 In case of success here is an example of the response:
@@ -87,7 +87,7 @@ class ScenarioResource(Resource):
                 print(response)
                 print(response.json())
                 ```
-                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the  *scenario_id* parameter. It
+                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the  *scenario_id* argument. It
                 represents the identifier of the Cycle we want to retrieve.
 
                 In case of success here is an output example:
@@ -118,7 +118,7 @@ class ScenarioResource(Resource):
             When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_READER` role.
 
-        parameters:
+        arguments:
         - in: path
           name: scenario_id
           schema:
@@ -138,7 +138,7 @@ class ScenarioResource(Resource):
       tags:
         - api
       description: |
-        Delete the `Scenario^` scenario identified by the *scenario_id* given as parameter. If the scenario does not
+        Delete the `Scenario^` scenario identified by the *scenario_id* given as argument. If the scenario does not
         exist, a 404 error is returned.
 
         !!! Example
@@ -150,7 +150,7 @@ class ScenarioResource(Resource):
                 In this example the REST API is served on port 5000 on localhost. We are using curl command line
                 client.
 
-                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the  *scenario_id* parameter. It
+                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the  *scenario_id* argument. It
                 represents the identifier of the scenario we want to delete.
 
                 In case of success here is an example of the response:
@@ -173,7 +173,7 @@ class ScenarioResource(Resource):
                 print(response)
                 print(response.json())
                 ```
-                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the *scenario_id* parameter. It
+                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the *scenario_id* argument. It
                 represents the identifier of the Scenario we want to delete.
 
                 In case of success here is an output example:
@@ -193,7 +193,7 @@ class ScenarioResource(Resource):
             When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_EDITOR` role.
 
-      parameters:
+      arguments:
         - in: path
           name: scenario_id
           schema:
@@ -338,7 +338,7 @@ class ScenarioList(Resource):
                 In this example the REST API is served on port 5000 on localhost. We are using curl command line
                 client.
 
-                In this example the *config_id* value ("my_scenario_config") is given as parameter directly in the
+                In this example the *config_id* value ("my_scenario_config") is given as argument directly in the
                 url. A corresponding `ScenarioConfig^` must exist and must have been configured before.
 
                 Here is the output message example:
@@ -367,7 +367,7 @@ class ScenarioList(Resource):
                 print(response)
                 print(response.json())
                 ```
-                In this example the *config_id* value ("my_scenario_config") is given as parameter directly in the
+                In this example the *config_id* value ("my_scenario_config") is given as argument directly in the
                 url. A corresponding `ScenarioConfig^` must exist and must have been configured before.
 
                 Here is the output example:
@@ -393,7 +393,7 @@ class ScenarioList(Resource):
             When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_EDITOR` role.
 
-      parameters:
+      arguments:
         - in: query
           name: config_id
           schema:
@@ -467,7 +467,7 @@ class ScenarioExecutor(Resource):
                 In this example the REST API is served on port 5000 on localhost. We are using curl command line
                 client.
 
-                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the *scenario_id* parameter. It
+                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the *scenario_id* argument. It
                 represents the identifier of the Scenario we want to submit.
 
                 Here is the output message example:
@@ -485,7 +485,7 @@ class ScenarioExecutor(Resource):
                 print(response)
                 print(response.json())
                 ```
-                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the *scenario_id* parameter. It
+                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the *scenario_id* argument. It
                 represents the identifier of the Scenario we want to submit.
 
                 Here is the output example:
@@ -498,7 +498,7 @@ class ScenarioExecutor(Resource):
             When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_EXECUTOR` role.
 
-      parameters:
+      arguments:
         - in: path
           name: scenario_id
           schema:

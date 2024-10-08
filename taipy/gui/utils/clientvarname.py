@@ -20,7 +20,7 @@ def _get_client_var_name(var_name: str) -> str:
 
 def _to_camel_case(value: str, upcase_first=False) -> str:
     if not isinstance(value, str):
-        raise Exception("_to_camel_case allows only string parameter")
+        raise Exception("_to_camel_case allows only string argument")
 
     if len(value) <= 1:
         return value.lower()

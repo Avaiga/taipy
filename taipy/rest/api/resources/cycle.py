@@ -42,7 +42,7 @@ class CycleResource(Resource):
         - api
       description: |
         Returns a `CycleSchema^` representing the unique `Cycle^` identified by the *cycle_id*
-        given as parameter. If no cycle corresponds to *cycle_id*, a `404` error is returned.
+        given as argument. If no cycle corresponds to *cycle_id*, a `404` error is returned.
 
         !!! Example
 
@@ -53,7 +53,7 @@ class CycleResource(Resource):
                 In this example the REST API is served on port 5000 on localhost. We are using curl command line
                 client.
 
-                `CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a` is the value of the *cycle_id* parameter. It
+                `CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a` is the value of the *cycle_id* argument. It
                 represents the identifier of the Cycle we want to retrieve.
 
                 In case of success here is an example of the response:
@@ -80,7 +80,7 @@ class CycleResource(Resource):
                 print(response)
                 print(response.json())
                 ```
-                `CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a` is the value of the  *cycle_id* parameter. It
+                `CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a` is the value of the  *cycle_id* argument. It
                 represents the identifier of the Cycle we want to retrieve.
 
                 In case of success here is an output example:
@@ -106,7 +106,7 @@ class CycleResource(Resource):
           When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_READER` role.
 
-      parameters:
+      arguments:
         - in: path
           name: cycle_id
           schema:
@@ -126,7 +126,7 @@ class CycleResource(Resource):
       tags:
         - api
       description: |
-        Deletes the `Cycle^` identified by the  *cycle_id* given as parameter. If the cycle does not exist,
+        Deletes the `Cycle^` identified by the  *cycle_id* given as argument. If the cycle does not exist,
         a 404 error is returned.
 
         !!! Example
@@ -138,7 +138,7 @@ class CycleResource(Resource):
                 In this example the REST API is served on port 5000 on localhost. We are using curl command line
                 client.
 
-                `CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a` is the value of the  *cycle_id* parameter. It
+                `CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a` is the value of the  *cycle_id* argument. It
                 represents the identifier of the Cycle we want to delete.
 
                 In case of success here is an example of the response:
@@ -159,7 +159,7 @@ class CycleResource(Resource):
                 print(response)
                 print(response.json())
                 ```
-                `CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a` is the value of the  *cycle_id* parameter. It
+                `CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a` is the value of the  *cycle_id* argument. It
                 represents the identifier of the Cycle we want to delete.
 
                 In case of success here is an output example:
@@ -179,7 +179,7 @@ class CycleResource(Resource):
             When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_EDITOR` role.
 
-      parameters:
+      arguments:
         - in: path
           name: cycle_id
           schema:
@@ -317,7 +317,7 @@ class CycleList(Resource):
                 In this example the REST API is served on port 5000 on localhost. We are using curl command line
                 client.
 
-                In the curl command line, a `CycleSchema^` is provided as JSON dictionary parameter with the curl
+                In the curl command line, a `CycleSchema^` is provided as JSON dictionary argument with the curl
                 option -d (--data) to specify the various attributes of the `Cycle^` to create:
                 ``` JSON
                 {

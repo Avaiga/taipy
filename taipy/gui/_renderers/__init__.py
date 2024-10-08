@@ -152,7 +152,7 @@ class Markdown(_Renderer):
                 If *content* is a path to a readable file, the file is read as the Markdown
                 template content.
 
-        The `Markdown` constructor supports the *style* parameter as explained in the
+        The `Markdown` constructor supports the *style* argument as explained in the
         [section on Styling](../../../../../userman/gui/styling/index.md#style-sheets) and in the
         `(taipy.gui.Page.)set_style()^` method.
         """
@@ -184,7 +184,7 @@ class Html(_Renderer):
                 If *content* is a path to a readable file, the file is read as the HTML
                 template content.
 
-        The `Html` constructor supports the *style* parameter as explained in the
+        The `Html` constructor supports the *style* argument as explained in the
         [section on Styling](../../../../../userman/gui/styling/index.md#style-sheets) and in the
         `(taipy.gui.Page.)set_style()^` method.
         """

@@ -57,7 +57,7 @@
                     {
                         "name": "on_action",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when the button is pressed.<br/>This function is invoked with the following parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button it it has one.</li><li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li></ul>",
+                        "doc": "A function or the name of a function that is triggered when the button is pressed.<br/>This function is invoked with the following arguments:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button it it has one.</li><li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -536,7 +536,7 @@
                     {
                         "name": "on_range_change",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when the visible part of the x axis changes.<br/>This function is invoked with the following parameters:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the chart control if it has one.</li><li>payload (dict[str, Any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">Plotly</a>.</li></ul>",
+                        "doc": "A function or the name of a function that is triggered when the visible part of the x axis changes.<br/>This function is invoked with the following arguments:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the chart control if it has one.</li><li>payload (dict[str, Any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">Plotly</a>.</li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -678,7 +678,7 @@
                     {
                         "name": "on_click",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when the user clicks in the chart background.<br/>This function is invoked with the following parameters:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the chart control if it has one.</li><li>payload (dict[str, Any]): a dictionary containing the <i>x</i> and <i>y</i> coordinates of the click <b>or</b> <i>latitude</i> and <i>longitude</i> in the case of a map. This feature relies on non-public Plotly structured information.</li></ul>",
+                        "doc": "A function or the name of a function that is triggered when the user clicks in the chart background.<br/>This function is invoked with the following arguments:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the chart control if it has one.</li><li>payload (dict[str, Any]): a dictionary containing the <i>x</i> and <i>y</i> coordinates of the click <b>or</b> <i>latitude</i> and <i>longitude</i> in the case of a map. This feature relies on non-public Plotly structured information.</li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -784,12 +784,12 @@
                     {
                         "name": "row_class_name",
                         "type": "Union[str, Callable]",
-                        "doc": "Allows for styling rows.<br/>This property must be a function or the name of a function that return the name of a CSS class for table rows.<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>index</i> (int): the index of the row.</li><li><i>row</i> (Any): all the values for this row.</li></ul><br/>See <a href=\"#dynamic-styling\">below</a> for more details."
+                        "doc": "Allows for styling rows.<br/>This property must be a function or the name of a function that return the name of a CSS class for table rows.<br/>This function is invoked with the following arguments:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>index</i> (int): the index of the row.</li><li><i>row</i> (Any): all the values for this row.</li></ul><br/>See <a href=\"#dynamic-styling\">below</a> for more details."
                     },
                     {
                         "name": "cell_class_name[<i>column_name</i>]",
                         "type": "Union[str, Callable]",
-                        "doc": "Allows for styling cells.<br/>This property must be a function or the name of a function that return the name of a CSS class for table cells.<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>value</i> (Any): the value of the cell.</li><li><i>index</i> (int): the index of the row.</li><li><i>row</i> (Any): all the values for this row.</li><li><i>column_name</i> (str): the name of the column.</li></ul><br/>See <a href=\"#dynamic-styling\">below</a> for more details."
+                        "doc": "Allows for styling cells.<br/>This property must be a function or the name of a function that return the name of a CSS class for table cells.<br/>This function is invoked with the following arguments:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>value</i> (Any): the value of the cell.</li><li><i>index</i> (int): the index of the row.</li><li><i>row</i> (Any): all the values for this row.</li><li><i>column_name</i> (str): the name of the column.</li></ul><br/>See <a href=\"#dynamic-styling\">below</a> for more details."
                     },
                     {
                         "name": "tooltip",
@@ -804,7 +804,7 @@
                     {
                         "name": "format_fn[<i>column_name</i>]",
                         "type": "Union[str, Callable]",
-                        "doc": "Defines custom formatting for table cells. This property must be a function or the name of a function that returns a formatted string for each cell.<br/>The function is invoked when the cells in the specified column (<i>column_name</i>) are rendered. It should return a string that represents the cell value to provide the best user experience.<br/>This function is invoked with the following parameters:<ul>  <li><i>state</i> (<code>State^</code>): the state instance.</li>  <li><i>value</i> (Any): the value of the cell.</li>  <li><i>index</i> (int): the index of the row.</li>  <li><i>row</i> (Any): the entire row. The type depends on the type of <i>data</i>.</li>  <li><i>column_name</i> (str): the name of the column.</li></ul>By default, no custom formatting is applied to the column.<br/>For more details, see the <a href=\"#cell-formats\">section</a>.",
+                        "doc": "Defines custom formatting for table cells. This property must be a function or the name of a function that returns a formatted string for each cell.<br/>The function is invoked when the cells in the specified column (<i>column_name</i>) are rendered. It should return a string that represents the cell value to provide the best user experience.<br/>This function is invoked with the following arguments:<ul>  <li><i>state</i> (<code>State^</code>): the state instance.</li>  <li><i>value</i> (Any): the value of the cell.</li>  <li><i>index</i> (int): the index of the row.</li>  <li><i>row</i> (Any): the entire row. The type depends on the type of <i>data</i>.</li>  <li><i>column_name</i> (str): the name of the column.</li></ul>By default, no custom formatting is applied to the column.<br/>For more details, see the <a href=\"#cell-formats\">section</a>.",
                         "signature": [
                             [
                                 "state",
@@ -880,7 +880,7 @@
                         "name": "on_edit",
                         "type": "Union[bool, Callable]",
                         "default_value": "<i>default implementation</i>",
-                        "doc": "A function or the name of a function triggered when an edited cell is validated.<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the tabular data variable.</li><li><i>payload</i> (dict): a dictionary containing details about the callback invocation, with the following keys:<ul><li><i>index</i> (int): the row index.</li><li><i>col</i> (str): the column name.</li><li><i>value</i> (Any): the new cell value, cast to the column's data type.</li><li><i>user_value</i> (str): the new cell value, as entered by the user.</li><li><i>tz</i> (str): the timezone, if the column type is <tt>date</tt>.</li></ul></li></ul>If this property is set to False, the table does not provide the cell editing functionality.<br/>If this property is not set, the table will use the default implementation for editing cells.",
+                        "doc": "A function or the name of a function triggered when an edited cell is validated.<br/>This function is invoked with the following arguments:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the tabular data variable.</li><li><i>payload</i> (dict): a dictionary containing details about the callback invocation, with the following keys:<ul><li><i>index</i> (int): the row index.</li><li><i>col</i> (str): the column name.</li><li><i>value</i> (Any): the new cell value, cast to the column's data type.</li><li><i>user_value</i> (str): the new cell value, as entered by the user.</li><li><i>tz</i> (str): the timezone, if the column type is <tt>date</tt>.</li></ul></li></ul>If this property is set to False, the table does not provide the cell editing functionality.<br/>If this property is not set, the table will use the default implementation for editing cells.",
                         "signature": [
                             [
                                 "state",
@@ -899,7 +899,7 @@
                     {
                         "name": "on_add",
                         "type": "Union[bool, Callable]",
-                        "doc": "A function or the name of a function that is triggered when the user requests a row to be added to the table.<br/>This function is invoked with the following parameters:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the tabular data variable.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following key:\n<ul>\n<li><i>index</i> (int): the row index.</li></ul></li></ul><br/>If this property is not set, the table uses the default implementation for adding a new row<br/>If this property is set to False, you cannot add new rows.",
+                        "doc": "A function or the name of a function that is triggered when the user requests a row to be added to the table.<br/>This function is invoked with the following arguments:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the tabular data variable.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following key:\n<ul>\n<li><i>index</i> (int): the row index.</li></ul></li></ul><br/>If this property is not set, the table uses the default implementation for adding a new row<br/>If this property is set to False, you cannot add new rows.",
                         "signature": [
                             [
                                 "state",
@@ -919,7 +919,7 @@
                         "name": "on_delete",
                         "type": "Union[bool, Callable]",
                         "default_value": "<i>default implementation</i>",
-                        "doc": "A function or the name of a function triggered when a row is deleted.<br/>This function is invoked with the following parameters:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the tabular data variable.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>\nThis dictionary has one key:\n<ul>\n<li><i>index</i> (int): the row index.</li></ul></li></ul><br/>If this property is not set, the table uses the default implementation for deleting rows.",
+                        "doc": "A function or the name of a function triggered when a row is deleted.<br/>This function is invoked with the following arguments:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the tabular data variable.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>\nThis dictionary has one key:\n<ul>\n<li><i>index</i> (int): the row index.</li></ul></li></ul><br/>If this property is not set, the table uses the default implementation for deleting rows.",
                         "signature": [
                             [
                                 "state",
@@ -938,7 +938,7 @@
                     {
                         "name": "on_action",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when the user selects a row.<br/>This function is invoked with the following parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>var_name (str): the name of the tabular data variable.</li><li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li><li>index (int): the row index.</li><li>col (str): the column name.</li><li>reason (str): the origin of the action: \"click\", or \"button\" if the cell contains a Markdown link syntax.</li><li>value (str): the <i>link value</i> indicated in the cell when using a Markdown link syntax (that is, <i>reason</i> is set to \"button\").</li></ul></li></ul>.",
+                        "doc": "A function or the name of a function that is triggered when the user selects a row.<br/>This function is invoked with the following arguments:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>var_name (str): the name of the tabular data variable.</li><li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li><li>index (int): the row index.</li><li>col (str): the column name.</li><li>reason (str): the origin of the action: \"click\", or \"button\" if the cell contains a Markdown link syntax.</li><li>value (str): the <i>link value</i> indicated in the cell when using a Markdown link syntax (that is, <i>reason</i> is set to \"button\").</li></ul></li></ul>.",
                         "signature": [
                             [
                                 "state",
@@ -1068,7 +1068,7 @@
                         "name": "content",
                         "default_property": true,
                         "type": "dynamic(Union[path,file,URL,ReadableBuffer,None])",
-                        "doc": "The content to transfer.<br/>If this is a string, a URL, or a file, then the content is read from this source.<br/>If a readable buffer is provided (such as an array of bytes...), and to prevent the bandwidth from being consumed too much, the way the data is transferred depends on the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the buffer size is smaller than this setting, then the raw content is generated as a data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li><li>If the buffer size exceeds this setting, then it is transferred through a temporary file.</li></ul>If this property is set to None, that indicates that dynamic content is generated. Please take a look at the examples below for more details on dynamic generation."
+                        "doc": "The content to transfer.<br/>If this is a string, a URL, or a file, then the content is read from this source.<br/>If a readable buffer is provided (such as an array of bytes...), and to prevent the bandwidth from being consumed too much, the way the data is transferred depends on the <i>data_url_max_size</i> argument of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the buffer size is smaller than this setting, then the raw content is generated as a data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li><li>If the buffer size exceeds this setting, then it is transferred through a temporary file.</li></ul>If this property is set to None, that indicates that dynamic content is generated. Please take a look at the examples below for more details on dynamic generation."
                     },
                     {
                         "name": "label",
@@ -1078,7 +1078,7 @@
                     {
                         "name": "on_action",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when the download is terminated (or on user action if <i>content</i> is None).<br/>This function is invoked with the following parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button if it has one.</li><li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has two keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li><li>args: a list of two elements: <i>args[0]</i> reflects the <i>name</i> property and <i>args[1]</i> holds the file URL.</li></ul></li></ul>",
+                        "doc": "A function or the name of a function that is triggered when the download is terminated (or on user action if <i>content</i> is None).<br/>This function is invoked with the following arguments:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button if it has one.</li><li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has two keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li><li>args: a list of two elements: <i>args[0]</i> reflects the <i>name</i> property and <i>args[1]</i> holds the file URL.</li></ul></li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -1148,7 +1148,7 @@
                     {
                         "name": "on_action",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that will be triggered.<br/>This function is invoked with the following parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button if it has one.</li><li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li></ul>",
+                        "doc": "A function or the name of a function that will be triggered.<br/>This function is invoked with the following arguments:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button if it has one.</li><li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -1209,7 +1209,7 @@
                         "name": "content",
                         "default_property": true,
                         "type": "dynamic(Union[path,URL,file,ReadableBuffer])",
-                        "doc": "The image source.<br/>If a buffer is provided (string, array of bytes...), and in order to prevent the bandwidth to be consumed too much, the way the image data is transferred depends on the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the size of the buffer is smaller than this setting, then the raw content is generated as a\n  data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li><li>If the size of the buffer is greater than this setting, then it is transferred through a temporary\n  file.</li></ul>"
+                        "doc": "The image source.<br/>If a buffer is provided (string, array of bytes...), and in order to prevent the bandwidth to be consumed too much, the way the image data is transferred depends on the <i>data_url_max_size</i> argument of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the size of the buffer is smaller than this setting, then the raw content is generated as a\n  data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li><li>If the size of the buffer is greater than this setting, then it is transferred through a temporary\n  file.</li></ul>"
                     },
                     {
                         "name": "label",
@@ -1219,7 +1219,7 @@
                     {
                         "name": "on_action",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when the user clicks on the image.<br/>This function is invoked with the following parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button if it has one.</li><li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li></ul>",
+                        "doc": "A function or the name of a function that is triggered when the user clicks on the image.<br/>This function is invoked with the following arguments:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button if it has one.</li><li>payload (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -1527,7 +1527,7 @@
                     {
                         "name": "on_action",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when a menu option is selected.<br/><br/>This function is invoked with the following parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button, if it has one.</li><li>payload (dict): a dictionary containing details about the callback invocation, with the following keys:<ul>\n<li>action: the name of the action that triggered this callback.</li><li>args: a list where the first element contains the identifier of the selected option.</li></ul></li></ul>",
+                        "doc": "A function or the name of a function that is triggered when a menu option is selected.<br/><br/>This function is invoked with the following arguments:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button, if it has one.</li><li>payload (dict): a dictionary containing details about the callback invocation, with the following keys:<ul>\n<li>action: the name of the action that triggered this callback.</li><li>args: a list where the first element contains the identifier of the selected option.</li></ul></li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -1602,7 +1602,7 @@
                     {
                         "name": "on_action",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when the dialog button is pressed.<br/><br/>This function is invoked with the following parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button if it has one.</li><li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li><li>args: a list with three elements:\n<ul><li>The first element is the username</li><li>The second element is the password</li><li>The third element is the current page name</li></ul></li></li></ul></li></ul><br/>When the button is pressed, and if this property is not set, Taipy will try to find a callback function called <i>on_login()</i> and invoke it with the parameters listed above.",
+                        "doc": "A function or the name of a function that is triggered when the dialog button is pressed.<br/><br/>This function is invoked with the following arguments:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the button if it has one.</li><li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li><li>args: a list with three elements:\n<ul><li>The first element is the username</li><li>The second element is the password</li><li>The third element is the current page name</li></ul></li></li></ul></li></ul><br/>When the button is pressed, and if this property is not set, Taipy will try to find a callback function called <i>on_login()</i> and invoke it with the arguments listed above.",
                         "signature": [
                             [
                                 "state",
@@ -1661,7 +1661,7 @@
                     {
                         "name": "on_action",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when the user enters a new message.<br/>This function is invoked with the following parameters:<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the variable bound to the <i>messages</i> property.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li><i>action</i>: the name of the action that triggered this callback.</li><li><i>args</i> (list): a list composed of a reason (\"click\" or \"Enter\"), the variable name, the message, and the user identifier of the sender.</li></ul></li></ul>",
+                        "doc": "A function or the name of a function that is triggered when the user enters a new message.<br/>This function is invoked with the following arguments:<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the variable bound to the <i>messages</i> property.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li><i>action</i>: the name of the action that triggered this callback.</li><li><i>args</i> (list): a list composed of a reason (\"click\" or \"Enter\"), the variable name, the message, and the user identifier of the sender.</li></ul></li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -1819,7 +1819,7 @@
                     {
                         "name": "on_action",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function triggered when a button is pressed.<br/>This function is invoked with the following parameters:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the dialog if it has one.</li><li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li><li>args: a list where the first element contains the index of the selected label.</li></ul></li></ul>",
+                        "doc": "A function or the name of a function triggered when a button is pressed.<br/>This function is invoked with the following arguments:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the dialog if it has one.</li><li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li><li>args: a list where the first element contains the index of the selected label.</li></ul></li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -1908,7 +1908,7 @@
                     {
                         "name": "on_close",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).<br/>This function is invoked with the following parameters:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (optional[str]): the identifier of the <i>close</i> button if it has one.</li></ul><br/>If this property is not set, no function is called when this pane is closed.",
+                        "doc": "A function or the name of a function that is triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).<br/>This function is invoked with the following arguments:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (optional[str]): the identifier of the <i>close</i> button if it has one.</li></ul><br/>If this property is not set, no function is called when this pane is closed.",
                         "signature": [
                             [
                                 "state",
@@ -2014,7 +2014,7 @@
                     {
                         "name": "on_change",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when the value is updated.<br/>This function is invoked with the following parameters:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>var_name (str): the variable name.</li><li>value (Any): the new value.</li></ul>",
+                        "doc": "A function or the name of a function that is triggered when the value is updated.<br/>This function is invoked with the following arguments:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>var_name (str): the variable name.</li><li>value (Any): the new value.</li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -2080,7 +2080,7 @@
                     {
                         "name": "on_action",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when a specific key is pressed.<br/>This function is invoked with the following parameters:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the control if it has one.</li><li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li><li>args (list):\n<ul><li>key name</li><li>variable name</li><li>current value</li></ul></li></ul></li></ul>",
+                        "doc": "A function or the name of a function that is triggered when a specific key is pressed.<br/>This function is invoked with the following arguments:<ul>\n<li>state (<code>State^</code>): the state instance.</li><li>id (str): the identifier of the control if it has one.</li><li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>action: the name of the action that triggered this callback.</li><li>args (list):\n<ul><li>key name</li><li>variable name</li><li>current value</li></ul></li></ul></li></ul>",
                         "signature": [
                             [
                                 "state",

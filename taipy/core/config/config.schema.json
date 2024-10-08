@@ -175,12 +175,12 @@
             "type": "string"
           },
           "write_query_builder": {
-            "description": "storage_type: sql specific. A callable function that takes in the data as an input parameter and returns a list of SQL queries to be executed when the write data node method is called.",
+            "description": "storage_type: sql specific. A callable function that takes in the data as an input argument and returns a list of SQL queries to be executed when the write data node method is called.",
             "type": "string",
             "taipy_function": true
           },
           "append_query_builder": {
-            "description": "storage_type: sql specific. A callable function that takes in the data as an input parameter and returns a list of SQL queries to be executed when the append data node method is called.",
+            "description": "storage_type: sql specific. A callable function that takes in the data as an input argument and returns a list of SQL queries to be executed when the append data node method is called.",
             "type": "string",
             "taipy_function": true
           },
@@ -230,11 +230,11 @@
             "type": "string"
           },
           "read_kwargs": {
-            "description": "storage_type: parquet specific. Additional parameters when reading parquet files, default is an empty dictionary",
+            "description": "storage_type: parquet specific. Additional arguments when reading parquet files, default is an empty dictionary",
             "type": "object"
           },
           "write_kwargs": {
-            "description": "storage_type: parquet specific.Additional parameters when writing parquet files, default is an empty dictionary",
+            "description": "storage_type: parquet specific.Additional arguments when writing parquet files, default is an empty dictionary",
             "type": "object"
           },
           "aws_access_key": {
@@ -258,7 +258,7 @@
             "type": "string"
           },
           "aws_s3_object_parameters": {
-            "description": "storage_type: s3_object specific.Additional parameters when accessing s3 object, default is an empty dictionary",
+            "description": "storage_type: s3_object specific.Additional arguments when accessing s3 object, default is an empty dictionary",
             "type": "array"
           }
         },
@@ -392,7 +392,7 @@
         "type": "object",
         "properties": {
           "inputs": {
-            "description": "The input data node configs referring to the data node whose data will be passed as a parameter of the function to be executed.",
+            "description": "The input data node configs referring to the data node whose data will be passed as a argument of the function to be executed.",
             "type": "array",
             "items": {
               "type": "string"

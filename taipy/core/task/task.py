@@ -28,7 +28,7 @@ from .task_id import TaskId
 
 
 class Task(_Entity, _Labeled):
-    """Hold a user function that will be executed, its parameters and the results.
+    """Hold a user function that will be executed, its arguments and the results.
 
     A `Task` brings together the user code as function, the inputs and the outputs
     as data nodes (instances of the `DataNode^` class).
@@ -80,7 +80,7 @@ class Task(_Entity, _Labeled):
     Attributes:
         config_id (str): The identifier of the `TaskConfig^`.
         properties (dict[str, Any]): A dictionary of additional properties.
-        function (callable): The python function to execute. The _function_ must take as parameter the
+        function (callable): The python function to execute. The _function_ must take as argument the
             data referenced by inputs data nodes, and must return the data referenced by outputs data nodes.
         input (Union[DataNode^, List[DataNode^]]): The list of inputs.
         output (Union[DataNode^, List[DataNode^]]): The list of outputs.
@@ -245,7 +245,7 @@ class Task(_Entity, _Labeled):
     ) -> Submission:
         """Submit the task for execution.
 
-        Parameters:
+        Arguments:
             callbacks (List[Callable]): The list of callable functions to be called on status
                 change.
             force (bool): Force execution even if the data nodes are in cache.

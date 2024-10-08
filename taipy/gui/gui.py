@@ -161,7 +161,7 @@ class Gui:
 
             - *state*: the `State^` instance of the caller.
             - *page_name*: the name of the page the user is navigating to.
-            - *params* (Optional): the query parameters provided in the URL.
+            - *params* (Optional): the query arguments provided in the URL.
 
             The *on_navigate* callback function must return the name of the page the user should be
             directed to.
@@ -195,10 +195,10 @@ class Gui:
 
             - *state*: the `State^` instance of the caller.
             - *path*: the path provided to the `get_user_content_url()^` to build the URL.
-            - *parameters*: An optional dictionary as defined in the `get_user_content_url()^` call.
+            - *arguments*: An optional dictionary as defined in the `get_user_content_url()^` call.
 
             The returned HTML content can therefore use both the variables stored in the *state*
-            and the parameters provided in the call to `get_user_content_url()^`.
+            and the arguments provided in the call to `get_user_content_url()^`.
         state (State^): **Only defined when running in an IPython notebook context.**<br/>
             The unique instance of `State^` that you can use to change bound variables
             directly, potentially impacting the user interface in real-time.
@@ -1560,7 +1560,7 @@ class Gui:
         Arguments:
             state_id: The identifier of the state to use, as returned by `get_state_id()^`.
             callback (Callable[[State^, ...], None]): The user-defined function that is invoked.<br/>
-                The first parameter of this function **must** be a `State^`.
+                The first argument of this function **must** be a `State^`.
             args (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
             module_context (Optional[str]): The name of the module that will be used.
         """  # noqa: E501
@@ -1605,10 +1605,10 @@ class Gui:
 
         Arguments:
             callback: The user-defined function to be invoked.<br/>
-                The first parameter of this function must be a `State^` object representing the
+                The first argument of this function must be a `State^` object representing the
                 client for which it is invoked.<br/>
-                The other parameters should reflect the ones provided in the *args* collection.
-            args: The parameters to send to *callback*, if any.
+                The other arguments should reflect the ones provided in the *args* collection.
+            args: The arguments to send to *callback*, if any.
         """
         # Iterate over all the scopes
         res = {}
@@ -1747,7 +1747,7 @@ class Gui:
             var_name: The name of the variable bound to the table's *data* property.
             payload: The payload dictionary received from the `on_add` callback.
             new_row: The initial values for the new row.<br/>
-                If this parameter is not specified, the new row is initialized with all values set
+                If this argument is not specified, the new row is initialized with all values set
                 to 0, with the exact meaning depending on the column data type.
         """
         try:
@@ -2722,7 +2722,7 @@ class Gui:
 
                 The default value is "gevent"<br/>
                 Note that only the "threading" value provides support for the development reloader
-                functionality (*use_reloader* option). Any other value makes the *use_reloader* configuration parameter
+                functionality (*use_reloader* option). Any other value makes the *use_reloader* configuration argument
                 ignored.<br/>
                 Also note that setting the *debug* argument to True forces *async_mode* to "threading".
             **kwargs (dict[str, any]): Additional keyword arguments that configure how this `Gui` is run.
@@ -2858,7 +2858,7 @@ class Gui:
         """Reload the web server.
 
         This function reloads the underlying web server only in the situation where
-        it was run in a separated thread: the *run_in_thread* parameter to the
+        it was run in a separated thread: the *run_in_thread* argument to the
         `(Gui.)run^` method was set to True, or you are running in an IPython notebook
         context.
         """
@@ -2871,7 +2871,7 @@ class Gui:
         """Stop the web server.
 
         This function stops the underlying web server only in the situation where
-        it was run in a separated thread: the *run_in_thread* parameter to the
+        it was run in a separated thread: the *run_in_thread* argument to the
         `(Gui.)run()^` method was set to True, or you are running in an IPython notebook
         context.
         """
@@ -2887,7 +2887,7 @@ class Gui:
 
         This function dynamically changes the favicon (the icon associated with the application's
         pages) of Taipy GUI pages for a single or all connected clients.
-        Note that the *favicon* parameter to `(Gui.)run()^` can also be used to change
+        Note that the *favicon* argument to `(Gui.)run()^` can also be used to change
         the favicon when the application starts.
 
         Arguments:

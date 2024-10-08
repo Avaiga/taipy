@@ -44,7 +44,7 @@ class ScenarioConfig(Section):
     The default value is None.
 
     Each comparator function is attached to a scenario's data node configuration.
-    The key of the dictionary parameter corresponds to the data node configuration id.
+    The key of the dictionary argument corresponds to the data node configuration id.
     The value is a list of functions that are applied to all the data nodes instantiated
     from the data node configuration attached to the comparator.
     """
@@ -135,7 +135,7 @@ class ScenarioConfig(Section):
     def add_comparator(self, dn_config_id: str, comparator: Callable) -> None:
         """Add a comparator to the scenario configuration.
 
-        Parameters:
+        Arguments:
             dn_config_id (str): The data node configuration id to which the comparator
                 will be applied.
             comparator (Callable): The comparator function to be added.
@@ -153,7 +153,7 @@ class ScenarioConfig(Section):
         When a `Scenario^` is instantiated from this configuration, the
         sequence descriptions are used to add new sequences to the scenario.
 
-        Parameters:
+        Arguments:
             sequences (Dict[str, List[TaskConfig]]): Dictionary of sequence descriptions.
         """
         self.sequences.update(sequences)
@@ -161,7 +161,7 @@ class ScenarioConfig(Section):
     def remove_sequences(self, sequence_names: Union[str, List[str]]) -> None:
         """Remove sequence descriptions from the scenario configuration.
 
-        Parameters:
+        Arguments:
             sequence_names (Union[str, List[str]]): The name of the sequence or a list
                 of sequence names.
         """
@@ -289,7 +289,7 @@ class ScenarioConfig(Section):
     ) -> "ScenarioConfig":
         """Configure a new scenario configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new scenario configuration.
             task_configs (Optional[List[TaskConfig^]]): The list of task configurations used by this
                 scenario configuration. The default value is None.
@@ -301,7 +301,7 @@ class ScenarioConfig(Section):
                 relevant cycle.
             comparators (Optional[Dict[str, Union[List[Callable], Callable]]]): The list of
                 functions used to compare scenarios. A comparator function is attached to a
-                scenario's data node configuration. The key of the dictionary parameter
+                scenario's data node configuration. The key of the dictionary argument
                 corresponds to the data node configuration id. During the scenarios'
                 comparison, each comparator is applied to all the data nodes instantiated from
                 the data node configuration attached to the comparator. See
@@ -340,7 +340,7 @@ class ScenarioConfig(Section):
         where all scenario configuration objects will find their default
         values when needed.
 
-        Parameters:
+        Arguments:
             task_configs (Optional[List[TaskConfig^]]): The list of task configurations used by this
                 scenario configuration.
             additional_data_node_configs (Optional[List[DataNodeConfig^]]): The list of additional data nodes
@@ -351,7 +351,7 @@ class ScenarioConfig(Section):
                 the relevant cycle.
             comparators (Optional[Dict[str, Union[List[Callable], Callable]]]): The list of
                 functions used to compare scenarios. A comparator function is attached to a
-                scenario's data node configuration. The key of the dictionary parameter
+                scenario's data node configuration. The key of the dictionary argument
                 corresponds to the data node configuration id. During the scenarios'
                 comparison, each comparator is applied to all the data nodes instantiated from
                 the data node configuration attached to the comparator. See

@@ -83,7 +83,7 @@ export class TaipyApp {
 
     set onInit(handler: OnInitHandler | undefined) {
         if (handler !== undefined && handler.length !== 1) {
-            throw new Error("onInit() requires one parameter");
+            throw new Error("onInit() requires one argument");
         }
         this._onInit = handler;
     }
@@ -98,7 +98,7 @@ export class TaipyApp {
 
     set onChange(handler: OnChangeHandler | undefined) {
         if (handler !== undefined && handler.length !== 3 && handler.length !== 4) {
-            throw new Error("onChange() requires three or four parameters");
+            throw new Error("onChange() requires three or four arguments");
         }
         this._onChange = handler;
     }
@@ -113,7 +113,7 @@ export class TaipyApp {
 
     set onNotify(handler: OnNotifyHandler | undefined) {
         if (handler !== undefined && handler.length !== 3) {
-            throw new Error("onNotify() requires three parameters");
+            throw new Error("onNotify() requires three arguments");
         }
         this._onNotify = handler;
     }
@@ -127,7 +127,7 @@ export class TaipyApp {
     }
     set onReload(handler: OnReloadHandler | undefined) {
         if (handler !== undefined && handler?.length !== 2) {
-            throw new Error("onReload() requires two parameters");
+            throw new Error("onReload() requires two arguments");
         }
         this._onReload = handler;
     }
@@ -141,7 +141,7 @@ export class TaipyApp {
     }
     set onWsMessage(handler: OnWsMessage | undefined) {
         if (handler !== undefined && handler?.length !== 3) {
-            throw new Error("onWsMessage() requires three parameters");
+            throw new Error("onWsMessage() requires three arguments");
         }
         this._onWsMessage = handler;
     }
@@ -155,7 +155,7 @@ export class TaipyApp {
     }
     set onWsStatusUpdate(handler: OnWsStatusUpdate | undefined) {
         if (handler !== undefined && handler?.length !== 2) {
-            throw new Error("onWsStatusUpdate() requires two parameters");
+            throw new Error("onWsStatusUpdate() requires two arguments");
         }
         this._onWsStatusUpdate = handler;
     }

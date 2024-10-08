@@ -511,7 +511,7 @@ describe("getPayload function", () => {
         expect(payload.on_change).toEqual(onChange);
         expect(payload.relvar).toEqual(relName);
     });
-    it("should create a payload with only value when other parameters are not provided", () => {
+    it("should create a payload with only value when other arguments are not provided", () => {
         const value = "testValue";
         const payload = getPayload(value);
         expect(payload.value).toEqual(value);
