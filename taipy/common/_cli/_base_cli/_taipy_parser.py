@@ -14,7 +14,7 @@ from typing import Dict
 
 
 class _TaipyParser:
-    """Argument parser for Taipy application."""
+    """Arguments parser for Taipy application."""
 
     # The conflict_handler is set to "resolve" to override conflict arguments
     _subparser_action = None
