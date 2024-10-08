@@ -51,7 +51,7 @@ class MinMaxDecimator(Decimator):
         super().__init__(threshold, zoom)
         self._n_out = n_out // 2
 
-    def decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
+    def _decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
         if self._n_out >= data.shape[0]:
             return np.full(len(data), False)
         # Create a boolean mask

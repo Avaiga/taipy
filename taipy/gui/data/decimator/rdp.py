@@ -60,7 +60,7 @@ class RDP(Decimator):
         self._n_out = n_out
 
     @staticmethod
-    def dsquared_line_points(P1, P2, points):
+    def __dsquared_line_points(P1, P2, points):
         """
         Calculate only squared distance, only needed for comparison
         """
@@ -93,7 +93,7 @@ class RDP(Decimator):
             P1 = data[start]
             P2 = data[end]
             points = data[start + 1 : end]
-            dsq = RDP.dsquared_line_points(P1, P2, points)
+            dsq = RDP.__dsquared_line_points(P1, P2, points)
 
             mask_eps = dsq > epsilon**2
 
@@ -129,7 +129,7 @@ class RDP(Decimator):
             (start, end) = stack.pop()
             if end - start <= 1:
                 continue
-            dsq = RDP.dsquared_line_points(M[start], M[end], M[start + 1 : end])
+            dsq = RDP.__dsquared_line_points(M[start], M[end], M[start + 1 : end])
             max_dist_index = np.argmax(dsq) + start + 1
             weights[max_dist_index] = np.amax(dsq)
             stack.append((start, max_dist_index))
@@ -138,9 +138,9 @@ class RDP(Decimator):
 
         return weights >= maxTolerance
 
-    def decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
+    def _decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
         if self._epsilon:
             return RDP.__rdp_epsilon(data, self._epsilon)
         elif self._n_out:
             return RDP.__rdp_points(data, self._n_out)
-        raise RuntimeError("RDP Decimator failed to run. Fill in either 'epsilon' or 'n_out' value")
+        raise RuntimeError("RDP Decimator failed to run. One of 'epsilon' or 'n_out' values must be specified")
