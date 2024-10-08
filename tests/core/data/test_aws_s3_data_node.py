@@ -34,7 +34,7 @@ class TestS3ObjectDataNode:
             "aws_s3_bucket_name": "taipy",
             "aws_s3_object_key": " taipy-object",
             "aws_region": "us-east-1",
-            "aws_s3_object_parameters": {},
+            "aws_s3_object_arguments": {},
         }
     ]
 

@@ -160,7 +160,7 @@ class TestGenericDataNode:
         # read_fct, read_fct_args, write_fct, write_fct_args are filtered out
         assert dn_1._get_user_properties() == {"foo": "bar"}
 
-    def test_create_with_missing_parameters(self):
+    def test_create_with_missing_arguments(self):
         with pytest.raises(MissingRequiredProperty):
             GenericDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"))
         with pytest.raises(MissingRequiredProperty):

@@ -357,7 +357,7 @@ class ElementLibrary(ABC):
         Defaults to return None?
         Returns a path for a resource name.
         Resource URL should be formed as /taipy-extension/<library_name>/<resource virtual path> with(see get_resource_url)
-        - <resource virtual path> being the `name` parameter
+        - <resource virtual path> being the `name` argument
         - <library_name> the value returned by `get_name()`
 
         Arguments:

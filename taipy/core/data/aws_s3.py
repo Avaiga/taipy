@@ -43,7 +43,7 @@ class S3ObjectDataNode(DataNode):
 
     - *aws_region* (`Any`): Self-contained geographic area where Amazon Web Services
         (AWS) infrastructure is located.
-    - *aws _s3_object_parameters* (`str`): A dictionary of additional arguments to be
+    - *aws _s3_object_arguments* (`str`): A dictionary of additional arguments to be
         passed to interact with the AWS service
     """
 
@@ -54,7 +54,7 @@ class S3ObjectDataNode(DataNode):
     __AWS_STORAGE_BUCKET_NAME = "aws_s3_bucket_name"
     __AWS_S3_OBJECT_KEY = "aws_s3_object_key"
     __AWS_REGION = "aws_region"
-    __AWS_S3_OBJECT_PARAMETERS = "aws_s3_object_parameters"
+    __AWS_S3_OBJECT_PARAMETERS = "aws_s3_object_arguments"
 
     _REQUIRED_PROPERTIES: List[str] = [
         __AWS_ACCESS_KEY_ID,

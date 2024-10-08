@@ -593,7 +593,7 @@ def test_set_default_s3_object_data_node_configuration():
         aws_s3_bucket_name="default_bucket_name",
         aws_s3_object_key="default_object_key",
         aws_region="",
-        aws_s3_object_parameters={"default": "default"},
+        aws_s3_object_arguments={"default": "default"},
         scope=Scope.GLOBAL,
         validity_period=timedelta(2),
     )
@@ -607,7 +607,7 @@ def test_set_default_s3_object_data_node_configuration():
     assert dn1.aws_s3_bucket_name == "default_bucket_name"
     assert dn1.aws_s3_object_key == "default_object_key"
     assert dn1.aws_region == ""
-    assert dn1.aws_s3_object_parameters == {"default": "default"}
+    assert dn1.aws_s3_object_arguments == {"default": "default"}
     assert dn1.scope == Scope.GLOBAL
     assert dn1.validity_period == timedelta(2)
 
@@ -626,7 +626,7 @@ def test_set_default_s3_object_data_node_configuration():
     assert dn2.aws_s3_bucket_name == "custom_bucket_name_2"
     assert dn2.aws_s3_object_key == "custom_object_key_2"
     assert dn2.aws_region == ""
-    assert dn2.aws_s3_object_parameters == {"default": "default"}
+    assert dn2.aws_s3_object_arguments == {"default": "default"}
     assert dn2.scope == Scope.GLOBAL
     assert dn2.validity_period == timedelta(2)
 
@@ -640,7 +640,7 @@ def test_set_default_s3_object_data_node_configuration():
         aws_s3_bucket_name="custom_bucket_name_3",
         aws_s3_object_key="custom_object_key_3",
         aws_region="",
-        aws_s3_object_parameters={"default": "default"},
+        aws_s3_object_arguments={"default": "default"},
         scope=Scope.GLOBAL,
         validity_period=timedelta(1),
     )
@@ -650,6 +650,6 @@ def test_set_default_s3_object_data_node_configuration():
     assert dn3.aws_s3_bucket_name == "custom_bucket_name_3"
     assert dn3.aws_s3_object_key == "custom_object_key_3"
     assert dn3.aws_region == ""
-    assert dn3.aws_s3_object_parameters == {"default": "default"}
+    assert dn3.aws_s3_object_arguments == {"default": "default"}
     assert dn3.scope == Scope.GLOBAL
     assert dn3.validity_period == timedelta(1)

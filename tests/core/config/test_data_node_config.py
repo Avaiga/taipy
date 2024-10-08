@@ -24,7 +24,7 @@ from taipy.core.config import DataNodeConfig
 from taipy.core.config.job_config import JobConfig
 
 
-def test_data_node_config_default_parameter():
+def test_data_node_config_default_argument():
     csv_dn_cfg = Config.configure_data_node("data_node_1", "csv")
     assert csv_dn_cfg.scope == Scope.SCENARIO
     assert csv_dn_cfg.has_header is True
@@ -108,7 +108,7 @@ def test_data_node_config_default_parameter():
     assert aws_s3_object_dn_cfg.aws_s3_bucket_name == "test_bucket"
     assert aws_s3_object_dn_cfg.aws_s3_object_key == "test_file.txt"
     assert aws_s3_object_dn_cfg.aws_region is None
-    assert aws_s3_object_dn_cfg.aws_s3_object_parameters is None
+    assert aws_s3_object_dn_cfg.aws_s3_object_arguments is None
     assert aws_s3_object_dn_cfg.validity_period is None
 
 

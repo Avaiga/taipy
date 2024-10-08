@@ -110,7 +110,7 @@ class TestMongoCollectionDataNode:
             {"db_username": "foo", "db_password": "foo", "db_name": "foo"},
         ],
     )
-    def test_create_with_missing_parameters(self, properties):
+    def test_create_with_missing_arguments(self, properties):
         with pytest.raises(MissingRequiredProperty):
             MongoCollectionDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"))
         with pytest.raises(MissingRequiredProperty):

@@ -145,14 +145,14 @@ class Page:
     def set_style(self, style: t.Dict[str, t.Dict[str, t.Any]]) -> Page:
         """Set the style for this page.
 
-        The *style* parameter must contain a series of CSS rules that apply to the generated
+        The *style* argument must contain a series of CSS rules that apply to the generated
         page.<br/>
         Each key of this dictionary should be a CSS selector and its associated value must be
         a CSS declaration or a CSS rule itself, benefiting from
         [nested CSS](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting/Using_CSS_nesting)
         features.
 
-        For example, you could set the *style* parameter to:
+        For example, you could set the *style* argument to:
         ```python
         {
           "class1": {

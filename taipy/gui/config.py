@@ -28,7 +28,7 @@ from ._warnings import _warn
 from .partial import Partial
 from .utils import _is_in_notebook
 
-ConfigParameter = t.Literal[
+ConfigArgument = t.Literal[
     "allow_unsafe_werkzeug",
     "async_mode",
     "change_delay",
@@ -164,7 +164,7 @@ class _Config(object):
         # Check that the user timezone configuration setting is valid
         self.get_time_zone()
 
-    def _get_config(self, name: ConfigParameter, default_value: t.Any) -> t.Any:  # pragma: no cover
+    def _get_config(self, name: ConfigArgument, default_value: t.Any) -> t.Any:  # pragma: no cover
         if name in self.config and self.config.get(name) is not None:
             if default_value is not None and not isinstance(self.config.get(name), type(default_value)):
                 try:
@@ -297,12 +297,12 @@ class _Config(object):
         if app_config.get("run_server") and app_config.get("ngrok_token") and app_config.get("use_reloader"):
             app_config["use_reloader"] = False
             self.__log_outside_reloader(
-                logger, "'use_reloader' parameter will not be used when 'ngrok_token' parameter is available"
+                logger, "'use_reloader' argument will not be used when 'ngrok_token' argument is available"
             )
 
         if app_config.get("use_reloader") and _is_in_notebook():
             app_config["use_reloader"] = False
-            self.__log_outside_reloader(logger, "'use_reloader' parameter is not available in notebook environment")
+            self.__log_outside_reloader(logger, "'use_reloader' argument is not available in notebook environment")
 
         if app_config.get("use_reloader") and not app_config.get("debug"):
             app_config["debug"] = True
@@ -316,7 +316,7 @@ class _Config(object):
             app_config["async_mode"] = "threading"
             self.__log_outside_reloader(
                 logger,
-                "'async_mode' parameter has been overridden to 'threading'. Using Flask built-in development server with debug mode",  # noqa: E501
+                "'async_mode' argument has been overridden to 'threading'. Using Flask built-in development server with debug mode",  # noqa: E501
             )
 
         self._resolve_notebook_proxy()

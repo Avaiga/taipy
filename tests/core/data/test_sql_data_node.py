@@ -183,7 +183,7 @@ class TestSQLDataNode:
             },
         ],
     )
-    def test_create_with_missing_parameters(self, properties):
+    def test_create_with_missing_arguments(self, properties):
         with pytest.raises(MissingRequiredProperty):
             SQLDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"))
         engine = properties.get("db_engine")

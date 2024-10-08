@@ -33,7 +33,7 @@ class TaskConfig(Section):
     #     skippable (bool): If True, indicates that the task can be skipped if no change has
     #         been made on inputs.<br/>
     #         The default value is False.
-    #     function (Callable): User function taking as inputs some parameters compatible with the
+    #     function (Callable): User function taking as inputs some arguments compatible with the
     #         exposed types (*exposed_type* field) of the input data nodes and returning results
     #         compatible with the exposed types (*exposed_type* field) of the outputs list.<br/>
     #         The default value is None.
@@ -46,7 +46,7 @@ class TaskConfig(Section):
     _IS_SKIPPABLE_KEY = "skippable"
 
     function: Optional[Callable]
-    """User function taking as inputs some parameters compatible with the data type
+    """User function taking as inputs some arguments compatible with the data type
     (*exposed_type* field) of the input data nodes and returning results compatible with the
     data type (*exposed_type* field) of the outputs list."""
 
@@ -172,7 +172,7 @@ class TaskConfig(Section):
     ) -> "TaskConfig":
         """Configure a new task configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of this task configuration.
             function (Callable): The python function called by Taipy to run the task.
             input (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
@@ -207,7 +207,7 @@ class TaskConfig(Section):
         where all task configuration objects will find their default
         values when needed.
 
-        Parameters:
+        Arguments:
             function (Callable): The python function called by Taipy to run the task.
             input (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
                 input data node configurations. This can be a unique data node
