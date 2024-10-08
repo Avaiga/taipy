@@ -246,9 +246,11 @@ class html(_Block):
                    html(None, " element.")
                ```
         """
-        super().__init__(*args, **kwargs)
         if not args:
             raise RuntimeError("Can't render html element. Missing html tag name.")
+        if isinstance(args[0], str):
+            args = (args[0].lower(), *args[1:])
+        super().__init__(*args, **kwargs)
         self._ELEMENT_NAME = args[0] if args[0] else None
         self._content = args[1] if len(args) > 1 else ""
 
