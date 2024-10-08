@@ -63,9 +63,7 @@ const Navigate = ({ to, params, tab, force }: NavigateProps) => {
                     // Handle Resource Handler Id
                     const tprh = params?.tprh;
                     if (tprh !== undefined) {
-                        // Add a session cookie for the resource handler id
-                        document.cookie = `tprh=${tprh};path=/;`;
-                        navigate(0);
+                        return
                     }
                 }
             } else {
