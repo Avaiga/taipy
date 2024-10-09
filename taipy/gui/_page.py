@@ -21,7 +21,7 @@ if t.TYPE_CHECKING:
     from ._renderers import Page
     from .gui import Gui
 
-_DETECT_CLOSING_TAGS = re.compile(r"<([A-Z][\w_\-]*)(([^>\"]+\"[^\"]*\")*\s*)?(><\/\1>)", flags=re.MULTILINE)
+_DETECT_CLOSING_TAGS = re.compile(r"<([A-Z][-\w]*)(([^>\"]+\"[^\"]*\")*\s*)?(><\/\1>)", flags=re.MULTILINE)
 _SUBSTR_CLOSING_TAG = "<\\1\\2/>"
 
 
