@@ -1743,6 +1743,7 @@
                 "properties": [
                     {
                         "name": "severity",
+                        "default_property": false,
                         "type": "dynamic(str)",
                         "default_value": "\"info\"",
                         "doc": "Defines the severity level of the alert. Valid values: \"error\", \"warning\", \"info\", \"success\"."
@@ -1752,17 +1753,18 @@
                         "default_property": true,
                         "type": "dynamic(str)",
                         "default_value": "\"\"",
-                        "doc": "The message displayed in the alert."
+                        "doc": "The message displayed in the alert. Can be dynamic."
                     },
                     {
                         "name": "variant",
-                        "type": "dynamic(str)",
+                        "default_property": false,
+                        "type": "str",
                         "default_value": "\"filled\"",
-                        "doc": "Defines the variant of the alert. Can be \"filled\", \"outlined\", or \"standard\"."
+                        "doc": "Defines the variant of the alert. Valid values: \"filled\", \"outlined\", \"standard\"."
                     }
                 ]
             }
-        ]                   
+        ]                          
     ],
     "blocks": [
         [

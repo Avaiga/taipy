@@ -625,11 +625,11 @@ class _Factory:
             element_name="AlertComponent",  
             attributes=attrs,
         )
-        .set_value_and_default(with_update=True)  # Enable dynamic updates for the 'message'
+        .set_value_and_default()  
         .set_attributes(
             [
-                ("severity", PropertyType.string),  # Define 'severity' as an attribute
-                ("variant", PropertyType.string),   # Define 'variant' as an attribute
+                ("severity", PropertyType.string),  # severity is a simple string property
+                ("message", PropertyType.dynamic_string),  # message is now a dynamic string
             ]
         ),
     }
