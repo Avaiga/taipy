@@ -1749,6 +1749,13 @@
                         "doc": "Defines the severity level of the notification. Valid values: \"error\", \"warning\", \"info\", \"success\"."
                     },
                     {
+                        "name": "message",
+                        "default_property": true, 
+                        "type": "dynamic(str)",
+                        "default_value": "\"\"",
+                        "doc": "The message displayed in the notification. Can be a dynamic string."
+                    },
+                    {
                         "name": "variant",
                         "default_property": false,
                         "type": "str",
@@ -1757,7 +1764,7 @@
                     }
                 ]
             }
-        ]                                 
+        ]                                        
     ],
     "blocks": [
         [
