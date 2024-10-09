@@ -85,7 +85,7 @@ step-by-step instructions.<br/>
 
 Excited to Dive In? 💡 <br>
 Start building with Taipy today! Our
-[Getting Started Guide]https://docs.taipy.io/en/develop/tutorials/getting_started/)
+[Getting Started Guide](https://docs.taipy.io/en/develop/tutorials/getting_started/)
 is the perfect place to begin your journey and unlock the full potential of Taipy.
 
 
