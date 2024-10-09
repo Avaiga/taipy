@@ -713,6 +713,15 @@ class _Builder:
 
     def __set_class_names(self):
         self.set_attribute("libClassName", self.__lib_name + "-" + self.__control_type.replace("_", "-"))
+        if (private_css := self.__attributes.get("style")) and isinstance(private_css, (dict, _MapDict)):
+            taipy_style = etree.Element("TaipyStyle")
+            taipy_style.set("className", f"tpcss-{id(private_css)}")
+            taipy_style.set(
+                "content",
+                json.dumps(private_css if isinstance(private_css, dict) else private_css._dict),
+            )
+            taipy_style.text = "style"
+            self.el.append(taipy_style)
         return self.__set_dynamic_string_attribute("class_name", dynamic_property_name="dynamic_class_name")
 
     def _set_dataType(self):
@@ -781,7 +790,7 @@ class _Builder:
         var_name: str,
         value: t.Optional[t.Any] = None,
         native_type: bool = False,
-        var_type: t.Optional[PropertyType] = None,
+        var_type: t.Optional[t.Union[PropertyType, t.Type[_TaipyBase]]] = None,
     ):
         if value is None:
             value = self.__attributes.get(var_name)
@@ -811,7 +820,7 @@ class _Builder:
         with_update=True,
         with_default=True,
         native_type=False,
-        var_type: t.Optional[PropertyType] = None,
+        var_type: t.Optional[t.Union[PropertyType, t.Type[_TaipyBase]]] = None,
         default_val: t.Any = None,
     ):
         """
@@ -932,7 +941,9 @@ class _Builder:
             self.set_attribute("mode", "theme")
         return self
 
-    def __get_typed_hash_name(self, hash_name: str, var_type: t.Optional[PropertyType]) -> str:
+    def __get_typed_hash_name(
+        self, hash_name: str, var_type: t.Optional[t.Union[PropertyType, t.Type[_TaipyBase]]]
+    ) -> str:
         if taipy_type := _get_taipy_type(var_type):
             expr = self.__gui._get_expr_from_hash(hash_name)
             hash_name = self.__gui._evaluate_bind_holder(t.cast(t.Type[_TaipyBase], taipy_type), expr)
@@ -1120,4 +1131,5 @@ class _Builder:
         el_str = str(etree.tostring(self.el, encoding="utf8").decode("utf8"))
         el_str = el_str.replace("<?xml version='1.0' encoding='utf8'?>\n", "")
         el_str = el_str.replace("/>", ">")
+        el_str = el_str.replace(">style</TaipyStyle>", "/>")
         return el_str, self.__element_name
