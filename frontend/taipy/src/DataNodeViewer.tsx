@@ -69,6 +69,7 @@ import {
     useModule,
     Store,
     FileSelector,
+    getComponentClassName,
 } from "taipy-gui";
 
 import { Cycle as CycleIcon, Scenario as ScenarioIcon } from "./icons";
@@ -671,7 +672,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
 
     return (
         <>
-            <Box sx={dnMainBoxSx} id={id} onClick={onFocus} className={className}>
+            <Box sx={dnMainBoxSx} id={id} onClick={onFocus} className={`${className} ${getComponentClassName(props.children)}`}>
                 <Accordion defaultExpanded={expanded} expanded={userExpanded} onChange={onExpand} disabled={!valid}>
                     <AccordionSummary
                         expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}

@@ -43,6 +43,7 @@ import {
     getUpdateVar,
     createSendUpdateAction,
     useDynamicProperty,
+    getComponentClassName,
 } from "taipy-gui";
 
 import ConfirmDialog from "./utils/ConfirmDialog";
@@ -509,7 +510,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
     return (
         <>
-            <Box sx={MainTreeBoxSx} id={props.id} className={className}>
+            <Box sx={MainTreeBoxSx} id={props.id} className={`${className} ${getComponentClassName(props.children)}`}>
                 <CoreSelector
                     {...props}
                     entities={props.innerScenarios}
