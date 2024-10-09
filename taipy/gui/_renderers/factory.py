@@ -580,7 +580,7 @@ class _Factory:
             control_type=control_type,
             element_name="TimeSelector",
             attributes=attrs,
-            default_value=datetime.fromtimestamp(0),
+            default_value=datetime.today(),
         )
         .set_value_and_default(var_type=PropertyType.time)
         .set_attributes(
