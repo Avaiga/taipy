@@ -2908,10 +2908,12 @@ class Gui:
                 "taipy_favicon", url, self._get_client_id() if state else None, message_type=_WsType.FAVICON
             )
 
+    @staticmethod
     def _add_event_listener(
-        self,
         event_name: str,
-        listener: t.Callable[[str, t.Dict[str, t.Any]], None],
+        listener: t.Union[
+            t.Callable[[str, t.Dict[str, t.Any]], None], t.Callable[[State, str, t.Dict[str, t.Any]], None]
+        ],
         with_state: t.Optional[bool] = False,
     ):
         try:
