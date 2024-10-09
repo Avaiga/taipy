@@ -26,6 +26,7 @@ import { createSendActionNameAction } from "../../context/taipyReducers";
 import TaipyRendered from "../pages/TaipyRendered";
 import { TaipyActiveProps } from "./utils";
 import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface DialogProps extends TaipyActiveProps {
     title: string;
@@ -75,7 +76,7 @@ const Dialog = (props: DialogProps) => {
         (evt: MouseEvent<HTMLElement>) => {
             const { idx = "-1" } = evt.currentTarget.dataset;
             if (localAction) {
-                 localAction(parseInt(idx, 10));
+                localAction(parseInt(idx, 10));
             } else {
                 dispatch(createSendActionNameAction(id, module, onAction, parseInt(idx, 10)));
             }
@@ -114,7 +115,7 @@ const Dialog = (props: DialogProps) => {
             id={id}
             onClose={handleAction}
             open={open === undefined ? defaultOpen === "true" || defaultOpen === true : !!open}
-            className={className}
+            className={`${className} ${getComponentClassName(props.children)}`}
             PaperProps={paperProps}
         >
             <Tooltip title={hover || ""}>

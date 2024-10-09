@@ -56,7 +56,6 @@ from taipy.core.notification.event import Event, EventOperation
 from taipy.core.notification.notifier import Notifier
 from taipy.core.reason import ReasonCollection
 from taipy.core.submission.submission_status import SubmissionStatus
-from taipy.core.taipy import can_create
 from taipy.gui import Gui, State
 from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
@@ -1202,7 +1201,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def get_creation_reason(self):
         self.__lazy_start()
-        return "" if (reason := can_create()) else f"Cannot create scenario: {_get_reason(reason)}"
+        # make this dynamic
+        # return "" if (reason := can_create()) else f"Cannot create scenario: {_get_reason(reason)}"
+        return ""
 
     def on_file_action(self, state: State, id: str, payload: t.Dict[str, t.Any]):
         args = t.cast(list, payload.get("args"))

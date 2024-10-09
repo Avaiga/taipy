@@ -30,6 +30,7 @@ import { useClassNames, useDynamicProperty, useIsMobile } from "../../utils/hook
 import { TaipyContext } from "../../context/taipyContext";
 import { LovItem } from "../../utils/lov";
 import { getBaseURL } from "../../utils";
+import { getComponentClassName } from "./TaipyStyle";
 
 const boxSx = { borderBottom: 1, borderColor: "divider", width: "fit-content" };
 
@@ -65,15 +66,26 @@ const NavBar = (props: LovProps) => {
         [state.locations, navigate]
     );
 
-    const selectedVal = lov.find((it) => (getBaseURL() + it.id.substring(1)) === location.pathname)?.id || (lov.length ? lov[0].id : false);
+    const selectedVal =
+        lov.find((it) => getBaseURL() + it.id.substring(1) === location.pathname)?.id ||
+        (lov.length ? lov[0].id : false);
 
     return isMobile ? (
         <Tooltip title={hover || ""}>
             <>
-                <Drawer open={opened} onClose={() => setOpened(false)} className={className}>
+                <Drawer
+                    open={opened}
+                    onClose={() => setOpened(false)}
+                    className={`${className} ${getComponentClassName(props.children)}`}
+                >
                     <List>
                         {lov.map((val) => (
-                            <ListItemButton key={val.id} onClick={() => setOpened(false)} disabled={!active} selected={selectedVal === val.id}>
+                            <ListItemButton
+                                key={val.id}
+                                onClick={() => setOpened(false)}
+                                disabled={!active}
+                                selected={selectedVal === val.id}
+                            >
                                 <ListItemText>
                                     <Link href={val.id}>
                                         {typeof val.item === "string" ? val.item : <LovImage item={val.item} />}
@@ -86,10 +98,11 @@ const NavBar = (props: LovProps) => {
                 <IconButton onClick={() => setOpened((o) => !o)}>
                     <Menu />
                 </IconButton>
+                {props.children}
             </>
         </Tooltip>
     ) : (
-        <Box sx={boxSx} className={className}>
+        <Box sx={boxSx} className={`${className} ${getComponentClassName(props.children)}`}>
             <Tooltip title={hover || ""}>
                 <Tabs value={selectedVal} id={id} onChange={linkChange}>
                     {lov.map((val) => (
@@ -102,6 +115,7 @@ const NavBar = (props: LovProps) => {
                     ))}
                 </Tabs>
             </Tooltip>
+            {props.children}
         </Box>
     );
 };

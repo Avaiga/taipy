@@ -9,5 +9,19 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from .data_accessor import _DataAccessor
-from .decimator import *
+import inspect
+
+from taipy.gui import Gui
+
+
+def test_style_in_builder(gui: Gui, helpers):
+    style = {"td": { "color": "blue"  }}  # noqa: F841
+    gui._set_frame(inspect.currentframe())
+    md_string = "<|label|button|style={style}|>"
+    expected_list = [
+        "<TaipyStyle",
+        'className="tpcss-',
+        'content="{&quot;td&quot;: &#x7B;&quot;color&quot;: &quot;blue',
+    ]
+    helpers.test_control_md(gui, md_string, expected_list)
+
