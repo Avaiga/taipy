@@ -10,14 +10,14 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import { ErrorBoundary } from "react-error-boundary";
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps, getCssSize } from "./utils";
-import { dateToString, getDateTime, getTimeZonedDate } from "../../utils";
-import { useClassNames, useDispatch, useDynamicProperty, useFormatConfig, useModule } from "../../utils/hooks";
+import { getDateTime } from "../../utils";
+import { useClassNames, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import ErrorFallback from "../../utils/ErrorBoundary";
 import Field from "./Field";
 
@@ -35,12 +35,10 @@ interface TimeSelectorProps extends TaipyActiveProps, TaipyChangeProps {
 
 const boxSx = { display: "inline-block" };
 const TimeSelector = (props: TimeSelectorProps) => {
-  const { withTime = false, id, propagate = true } = props;
-  const dispatch = useDispatch();
+  const { withTime = false, id } = props;
   const formatConfig = useFormatConfig();
   const tz = formatConfig.timeZone;
-  const [value, setValue] = useState(() => getDateTime(props.defaultDate, tz, withTime));
-  const module = useModule();
+  const [value] = useState(() => getDateTime(props.defaultDate, tz, withTime));
 
   const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
   const active = useDynamicProperty(props.active, props.defaultActive, true);
