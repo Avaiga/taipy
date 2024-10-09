@@ -20,6 +20,7 @@ import sys
 import time
 import typing as t
 import webbrowser
+from urllib.parse import urlparse
 from importlib import util
 from random import choices, randint
 
@@ -170,8 +171,9 @@ class _Server:
             if resource_handler_id is not None:
                 resource_handler = _ExternalResourceHandlerManager().get(resource_handler_id)
                 if resource_handler is None:
-                    if request.url:
-                        response = make_response(redirect(request.url))
+                    target_url = request.url.replace('\\', '/')
+                    if not urlparse(target_url).netloc and not urlparse(target_url).scheme:
+                        response = make_response(redirect(target_url))
                     else:
                         response = make_response(
                             {
