@@ -356,6 +356,50 @@
             }
         ],
         [
+            "time",
+            {
+                "inherits": [
+                    "propagate"
+                ],
+                "properties": [
+                    {
+                        "name": "with_time",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "Whether or not to show the time part of the date."
+                    },
+                    {
+                        "name": "format",
+                        "type": "str",
+                        "doc": "The format to apply to the value. See below."
+                    },
+                    {
+                        "name": "editable",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "Shows the time as a formatted string if not editable."
+                    },
+                    {
+                        "name": "time",
+                        "default_property": true,
+                        "type": "str",
+                        "doc": "The date that this control represents and can modify"
+                    },
+                    {
+                        "name": "label",
+                        "type": "str",
+                        "doc": "The label associated with the input."
+                    },
+                    {
+                        "name": "width",
+                        "type": "Union[str,int]",
+                        "default_value": "None",
+                        "doc": "The width of the date element."
+                    }
+                ]
+            }
+        ],
+        [
             "date_range",
             {
                 "inherits": [

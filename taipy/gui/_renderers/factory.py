@@ -35,6 +35,7 @@ class _Factory:
         "chart": "data",
         "content": "value",
         "date": "date",
+        "time": "value",
         "date_range": "dates",
         "dialog": "open",
         "expandable": "title",
@@ -148,6 +149,25 @@ class _Factory:
                 ("hover_text", PropertyType.dynamic_string),
                 ("label",),
                 ("on_change", PropertyType.function),
+                ("format",),
+                ("width", PropertyType.string_or_number),
+            ]
+        )
+        ._set_propagate(),
+        "time": lambda gui, control_type, attrs: _Builder(
+            gui=gui,
+            control_type=control_type,
+            element_name="TimeSelector",
+            attributes=attrs,
+            default_value=datetime.fromtimestamp(0),
+        )
+        .set_value_and_default(var_type=PropertyType.date)
+        .set_attributes(
+            [
+                ("active", PropertyType.dynamic_boolean, True),
+                ("editable", PropertyType.dynamic_boolean, True),
+                ("hover_text", PropertyType.dynamic_string),
+                ("label",),
                 ("format",),
                 ("width", PropertyType.string_or_number),
             ]
