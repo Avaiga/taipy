@@ -112,7 +112,7 @@ export const getValue = <T,>(
     values: TraceValueType | undefined,
     arr: T[],
     idx: number,
-    returnUndefined = false
+    returnUndefined = false,
 ): (string | number)[] | undefined => {
     const value = getValueFromCol(values, getArrayValue(arr, idx) as unknown as string);
     if (!returnUndefined || value.length) {
@@ -150,7 +150,7 @@ const getDecimatorsPayload = (
     modes: string[],
     columns: Record<string, ColumnDesc>,
     traces: string[][],
-    relayoutData?: PlotRelayoutEvent
+    relayoutData?: PlotRelayoutEvent,
 ) => {
     return decimators
         ? {
@@ -165,7 +165,12 @@ const getDecimatorsPayload = (
                             zAxis: getAxis(traces, i, columns, 2),
                             chartMode: modes[i],
                         }
-                      : undefined
+                      : {
+                            xAxis: getAxis(traces, i, columns, 0),
+                            yAxis: getAxis(traces, i, columns, 1),
+                            zAxis: getAxis(traces, i, columns, 2),
+                            chartMode: modes[i],
+                        },
               ),
               relayoutData: relayoutData,
           }
@@ -357,9 +362,9 @@ const Chart = (props: ChartProp) => {
                             plotRef.current,
                             config.modes,
                             config.columns,
-                            config.traces
-                        )
-                    )
+                            config.traces,
+                        ),
+                    ),
                 );
             }
         }
@@ -431,7 +436,7 @@ const Chart = (props: ChartProp) => {
             height === undefined
                 ? ({ ...defaultStyle, width: width } as CSSProperties)
                 : ({ ...defaultStyle, width: width, height: height } as CSSProperties),
-        [width, height]
+        [width, height],
     );
     const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
 
@@ -576,9 +581,9 @@ const Chart = (props: ChartProp) => {
                             config.modes,
                             config.columns,
                             config.traces,
-                            eventData
-                        )
-                    )
+                            eventData,
+                        ),
+                    ),
                 );
             }
         },
@@ -593,7 +598,7 @@ const Chart = (props: ChartProp) => {
             config.decimators,
             updateVarName,
             module,
-        ]
+        ],
     );
 
     const clickHandler = useCallback(
@@ -622,18 +627,18 @@ const Chart = (props: ChartProp) => {
                         y: map ? undefined : transform(yaxis, "top")(evt?.clientY),
                         lon: map ? xaxis.p2c() : undefined,
                         x: map ? undefined : transform(xaxis, "left")(evt?.clientX),
-                    })
-                )
+                    }),
+                ),
             );
         },
-        [dispatch, module, id, onClick]
+        [dispatch, module, id, onClick],
     );
 
     const onInitialized = useCallback(
         (figure: Readonly<Figure>, graphDiv: Readonly<HTMLElement>) => {
             onClick && graphDiv.addEventListener("click", clickHandler);
         },
-        [onClick, clickHandler]
+        [onClick, clickHandler],
     );
 
     const getRealIndex = useCallback(
@@ -642,10 +647,10 @@ const Chart = (props: ChartProp) => {
                 ? props.figure
                     ? index
                     : data[dataKey].tp_index
-                    ? (data[dataKey].tp_index[index] as number)
-                    : index
+                      ? (data[dataKey].tp_index[index] as number)
+                      : index
                 : 0,
-        [data, dataKey, props.figure]
+        [data, dataKey, props.figure],
     );
 
     const onSelect = useCallback(
@@ -656,7 +661,8 @@ const Chart = (props: ChartProp) => {
                     tr[pt.curveNumber].push(getRealIndex(getPlotIndex(pt)));
                     return tr;
                 }, [] as number[][]);
-                if (config.traces.length === 0) { // figure
+                if (config.traces.length === 0) {
+                    // figure
                     const theVar = getUpdateVar(updateVars, "selected");
                     theVar && dispatch(createSendUpdateAction(theVar, traces, module, props.onChange, propagate));
                     return;
@@ -665,7 +671,15 @@ const Chart = (props: ChartProp) => {
                     const upvars = traces.map((_, idx) => getUpdateVar(updateVars, `selected${idx}`));
                     const setVars = new Set(upvars.filter((v) => v));
                     if (traces.length > 1 && setVars.size === 1) {
-                        dispatch(createSendUpdateAction(setVars.values().next().value, traces, module, props.onChange, propagate));
+                        dispatch(
+                            createSendUpdateAction(
+                                setVars.values().next().value,
+                                traces,
+                                module,
+                                props.onChange,
+                                propagate,
+                            ),
+                        );
                         return;
                     }
                     traces.forEach((tr, idx) => {
@@ -681,7 +695,7 @@ const Chart = (props: ChartProp) => {
                 }
             }
         },
-        [getRealIndex, dispatch, updateVars, propagate, props.onChange, config.traces.length, module]
+        [getRealIndex, dispatch, updateVars, propagate, props.onChange, config.traces.length, module],
     );
 
     return render ? (

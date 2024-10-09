@@ -9,7 +9,11 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from .base import Decimator
 from .lttb import LTTB
 from .minmax import MinMaxDecimator
 from .rdp import RDP
 from .scatter_decimator import ScatterDecimator
+
+# Export the following classes
+__all__ = ["LTTB", "MinMaxDecimator", "RDP", "ScatterDecimator", "Decimator"]
