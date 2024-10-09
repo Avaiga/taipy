@@ -41,7 +41,7 @@ import StatusList from "./StatusList";
 import Table from "./Table";
 import Toggle from "./Toggle";
 import TreeView from "./TreeView";
-import AlertComponent from "./AlertComponent";
+import Notification from "./Notification";
 
 const registeredComponents: Record<string, ComponentType> = {};
 
@@ -67,6 +67,7 @@ export const getRegisteredComponents = () => {
             MenuCtl: MenuCtl,
             Metric: Metric,
             NavBar: NavBar,
+            Notification: Notification,
             PageContent: PageContent,
             Pane: Pane,
             Part: Part,
@@ -77,7 +78,6 @@ export const getRegisteredComponents = () => {
             Toggle: Toggle,
             TreeView: TreeView,
             Progress: Progress,
-            AlertComponent: AlertComponent
         }).forEach(([name, comp]) => (registeredComponents[name] = comp  as ComponentType));
         if (window.taipyConfig?.extensions) {
             Object.entries(window.taipyConfig.extensions).forEach(([libName, elts]) => {

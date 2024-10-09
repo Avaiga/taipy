@@ -1737,7 +1737,7 @@
             }
         ],
         [
-            "alert",
+            "notification",
             {
                 "inherits": ["shared"],
                 "properties": [

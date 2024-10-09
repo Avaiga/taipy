@@ -2,13 +2,13 @@ import React from "react";
 import Alert from "@mui/material/Alert";  
 import { TaipyBaseProps } from "./utils";
 
-interface AlertComponentProps extends TaipyBaseProps {
+interface NotificationProps extends TaipyBaseProps {
     severity?: "error" | "warning" | "info" | "success";
     message: string | (() => string);  // Dynamic string handling
     variant?: "filled" | "outlined" | "standard";
 }
 
-const AlertComponent = (props: AlertComponentProps) => {  
+const Notification = (props: NotificationProps) => {  
     const { severity = "info", message, variant = "filled" } = props;
 
     // Handle dynamic string by checking if `message` is a function and calling it
@@ -21,4 +21,4 @@ const AlertComponent = (props: AlertComponentProps) => {
     );
 };
 
-export default AlertComponent;
+export default Notification;

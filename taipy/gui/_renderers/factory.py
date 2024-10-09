@@ -619,10 +619,10 @@ class _Factory:
             ]
         )
         ._set_propagate(),
-        "alert": lambda gui, control_type, attrs: _Builder(
+        "notification": lambda gui, control_type, attrs: _Builder(
             gui=gui,
             control_type=control_type,
-            element_name="AlertComponent",  
+            element_name="Notification",  
             attributes=attrs,
         )
         .set_value_and_default()  
