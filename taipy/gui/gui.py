@@ -2907,3 +2907,34 @@ class Gui:
             self._broadcast(
                 "taipy_favicon", url, self._get_client_id() if state else None, message_type=_WsType.FAVICON
             )
+
+    def _add_event_listener(
+        self,
+        event_name: str,
+        listener: t.Callable[[str, t.Dict[str, t.Any]], None],
+        with_state: t.Optional[bool] = False,
+    ):
+        try:
+            _Hooks()._add_event_listener(event_name, listener, with_state)
+        except Exception as e:
+            _warn("Hooks: ", e)
+
+    def _fire_event(
+        self, event_name: str, client_id: t.Optional[str] = None, payload: t.Optional[t.Dict[str, t.Any]] = None
+    ):
+        this_sid = None
+        if request:
+            # avoid messing with the client_id => Set(ws id)
+            this_sid = getattr(request, "sid", None)
+            request.sid = None  # type: ignore[attr-defined]
+
+        try:
+            with self.get_flask_app().app_context():
+                if client_id:
+                    setattr(g, Gui.__ARG_CLIENT_ID, client_id)
+                _Hooks()._fire_event(event_name, client_id, payload)
+        except Exception as e:
+            _warn("Hooks: ", e)
+        finally:
+            if this_sid and request:
+                request.sid = this_sid  # type: ignore[attr-defined]
