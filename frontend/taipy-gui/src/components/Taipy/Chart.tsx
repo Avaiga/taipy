@@ -46,6 +46,7 @@ import {
 import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
 import { Figure } from "react-plotly.js";
 import { lightenPayload } from "../../context/wsUtils";
+import { getComponentClassName } from "./TaipyStyle";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -60,7 +61,6 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     layout?: string;
     plotConfig?: string;
     onRangeChange?: string;
-    testId?: string;
     render?: boolean;
     defaultRender?: boolean;
     template?: string;
@@ -112,7 +112,7 @@ export const getValue = <T,>(
     values: TraceValueType | undefined,
     arr: T[],
     idx: number,
-    returnUndefined = false,
+    returnUndefined = false
 ): (string | number)[] | undefined => {
     const value = getValueFromCol(values, getArrayValue(arr, idx) as unknown as string);
     if (!returnUndefined || value.length) {
@@ -150,7 +150,7 @@ const getDecimatorsPayload = (
     modes: string[],
     columns: Record<string, ColumnDesc>,
     traces: string[][],
-    relayoutData?: PlotRelayoutEvent,
+    relayoutData?: PlotRelayoutEvent
 ) => {
     return decimators
         ? {
@@ -170,7 +170,7 @@ const getDecimatorsPayload = (
                             yAxis: getAxis(traces, i, columns, 1),
                             zAxis: getAxis(traces, i, columns, 2),
                             chartMode: modes[i],
-                        },
+                        }
               ),
               relayoutData: relayoutData,
           }
@@ -200,15 +200,15 @@ interface PlotlyDiv extends HTMLDivElement {
     };
 }
 
-interface WithpointNumbers {
+interface WithPointNumbers {
     pointNumbers: number[];
 }
 
 export const getPlotIndex = (pt: PlotDatum) =>
     pt.pointIndex === undefined
         ? pt.pointNumber === undefined
-            ? (pt as unknown as WithpointNumbers).pointNumbers?.length
-                ? (pt as unknown as WithpointNumbers).pointNumbers[0]
+            ? (pt as unknown as WithPointNumbers).pointNumbers?.length
+                ? (pt as unknown as WithPointNumbers).pointNumbers[0]
                 : 0
             : pt.pointNumber
         : pt.pointIndex;
@@ -362,9 +362,9 @@ const Chart = (props: ChartProp) => {
                             plotRef.current,
                             config.modes,
                             config.columns,
-                            config.traces,
-                        ),
-                    ),
+                            config.traces
+                        )
+                    )
                 );
             }
         }
@@ -436,7 +436,7 @@ const Chart = (props: ChartProp) => {
             height === undefined
                 ? ({ ...defaultStyle, width: width } as CSSProperties)
                 : ({ ...defaultStyle, width: width, height: height } as CSSProperties),
-        [width, height],
+        [width, height]
     );
     const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
 
@@ -532,26 +532,26 @@ const Chart = (props: ChartProp) => {
     }, [props.figure, selected, data, config, dataKey]);
 
     const plotConfig = useMemo(() => {
-        let plconf: Partial<Config> = {};
+        let plConf: Partial<Config> = {};
         if (props.plotConfig) {
             try {
-                plconf = JSON.parse(props.plotConfig);
+                plConf = JSON.parse(props.plotConfig);
             } catch (e) {
                 console.info(`Error while parsing Chart.plot_config\n${(e as Error).message || e}`);
             }
-            if (typeof plconf !== "object" || plconf === null || Array.isArray(plconf)) {
+            if (typeof plConf !== "object" || plConf === null || Array.isArray(plConf)) {
                 console.info("Error Chart.plot_config is not a dictionary");
-                plconf = {};
+                plConf = {};
             }
         }
-        plconf.displaylogo = !!plconf.displaylogo;
-        plconf.modeBarButtonsToAdd = TaipyPlotlyButtons;
-        // plconf.responsive = true; // this is the source of the on/off height ...
-        plconf.autosizable = true;
+        plConf.displaylogo = !!plConf.displaylogo;
+        plConf.modeBarButtonsToAdd = TaipyPlotlyButtons;
+        // plConf.responsive = true; // this is the source of the on/off height ...
+        plConf.autosizable = true;
         if (!active) {
-            plconf.staticPlot = true;
+            plConf.staticPlot = true;
         }
-        return plconf;
+        return plConf;
     }, [active, props.plotConfig]);
 
     const onRelayout = useCallback(
@@ -581,9 +581,9 @@ const Chart = (props: ChartProp) => {
                             config.modes,
                             config.columns,
                             config.traces,
-                            eventData,
-                        ),
-                    ),
+                            eventData
+                        )
+                    )
                 );
             }
         },
@@ -598,7 +598,7 @@ const Chart = (props: ChartProp) => {
             config.decimators,
             updateVarName,
             module,
-        ],
+        ]
     );
 
     const clickHandler = useCallback(
@@ -627,18 +627,18 @@ const Chart = (props: ChartProp) => {
                         y: map ? undefined : transform(yaxis, "top")(evt?.clientY),
                         lon: map ? xaxis.p2c() : undefined,
                         x: map ? undefined : transform(xaxis, "left")(evt?.clientX),
-                    }),
-                ),
+                    })
+                )
             );
         },
-        [dispatch, module, id, onClick],
+        [dispatch, module, id, onClick]
     );
 
     const onInitialized = useCallback(
         (figure: Readonly<Figure>, graphDiv: Readonly<HTMLElement>) => {
             onClick && graphDiv.addEventListener("click", clickHandler);
         },
-        [onClick, clickHandler],
+        [onClick, clickHandler]
     );
 
     const getRealIndex = useCallback(
@@ -647,10 +647,10 @@ const Chart = (props: ChartProp) => {
                 ? props.figure
                     ? index
                     : data[dataKey].tp_index
-                      ? (data[dataKey].tp_index[index] as number)
-                      : index
+                    ? (data[dataKey].tp_index[index] as number)
+                    : index
                 : 0,
-        [data, dataKey, props.figure],
+        [data, dataKey, props.figure]
     );
 
     const onSelect = useCallback(
@@ -677,8 +677,8 @@ const Chart = (props: ChartProp) => {
                                 traces,
                                 module,
                                 props.onChange,
-                                propagate,
-                            ),
+                                propagate
+                            )
                         );
                         return;
                     }
@@ -688,19 +688,19 @@ const Chart = (props: ChartProp) => {
                         }
                     });
                 } else if (config.traces.length === 1) {
-                    const upvar = getUpdateVar(updateVars, "selected0");
-                    if (upvar) {
-                        dispatch(createSendUpdateAction(upvar, [], module, props.onChange, propagate));
+                    const upVar = getUpdateVar(updateVars, "selected0");
+                    if (upVar) {
+                        dispatch(createSendUpdateAction(upVar, [], module, props.onChange, propagate));
                     }
                 }
             }
         },
-        [getRealIndex, dispatch, updateVars, propagate, props.onChange, config.traces.length, module],
+        [getRealIndex, dispatch, updateVars, propagate, props.onChange, config.traces.length, module]
     );
 
     return render ? (
         <Tooltip title={hover || ""}>
-            <Box id={id} data-testid={props.testId} className={className} ref={plotRef}>
+            <Box id={id} className={`${className} ${getComponentClassName(props.children)}`} ref={plotRef}>
                 <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
                     {Array.isArray(props.figure) && props.figure.length && props.figure[0].data !== undefined ? (
                         <Plot
@@ -729,6 +729,7 @@ const Chart = (props: ChartProp) => {
                         />
                     )}
                 </Suspense>
+                {props.children}
             </Box>
         </Tooltip>
     ) : null;
