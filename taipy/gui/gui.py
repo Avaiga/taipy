@@ -1334,7 +1334,7 @@ class Gui:
                 "duration": duration,
             }
         )
-    
+
     def __send_ws_close_notification(self, notification_id: str) -> None:
         """Send a WebSocket message to close a notification by ID."""
         self.__send_ws(

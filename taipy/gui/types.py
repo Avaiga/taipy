@@ -52,7 +52,7 @@ class _WsType(Enum):
     GET_ROUTES = "GR"
     FAVICON = "FV"
     BROADCAST = "BC"
-    CLOSE_NOTIFICATION = "CN" 
+    CLOSE_NOTIFICATION = "CN"
 
 
 NumberTypes = {"int", "int64", "float", "float64"}
