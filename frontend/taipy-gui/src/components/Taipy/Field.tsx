@@ -14,6 +14,7 @@
 import React, { lazy, useMemo } from "react";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
+import { Components } from "react-markdown";
 
 import { formatWSValue } from "../../utils";
 import { useClassNames, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
@@ -39,6 +40,29 @@ const Field = (props: TaipyFieldProps) => {
     const formatConfig = useFormatConfig();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
+    const markdownComponent: Components = {
+        h1(props) {
+            return <h1 className={`${className} ${getComponentClassName(props.children)}`} {...props} />
+        },
+        h2(props) {
+            return <h2 className={`${className} ${getComponentClassName(props.children)}`} {...props} />
+        },
+        h3(props) {
+            return <h3 className={`${className} ${getComponentClassName(props.children)}`} {...props} />
+        },
+        h4(props) {
+            return <h4 className={`${className} ${getComponentClassName(props.children)}`} {...props} />
+        },
+        h5(props) {
+            return <h5 className={`${className} ${getComponentClassName(props.children)}`}  {...props} />
+        },
+        h6(props) {
+            return <h6 className={`${className} ${getComponentClassName(props.children)}`} {...props} />
+        },
+        p(props) {
+            return <span className={`${className} ${getComponentClassName(props.children)}`} {...props}/>
+        }
+    }
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const mode = typeof props.mode === "string" ? props.mode.toLowerCase() : undefined;
@@ -72,7 +96,7 @@ const Field = (props: TaipyFieldProps) => {
                         {value}
                     </pre>
                 ) : mode == "markdown" || mode == "md" ? (
-                    <Markdown className={`${className} ${getComponentClassName(props.children)}`}>{value}</Markdown>
+                    <Markdown components={markdownComponent}>{value}</Markdown>
                 ) : raw || mode == "raw" ? (
                     <span className={className} id={id} style={style}>
                         {value}
