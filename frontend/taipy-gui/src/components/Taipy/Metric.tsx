@@ -21,6 +21,7 @@ import { useClassNames, useDynamicJsonProperty, useDynamicProperty } from "../..
 import { extractPrefix, extractSuffix, sprintfToD3Converter } from "../../utils/formatConversion";
 import { TaipyBaseProps, TaipyHoverProps } from "./utils";
 import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
+import { getComponentClassName } from "./TaipyStyle";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -42,7 +43,6 @@ interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     showValue?: boolean;
     colorMap?: string;
     title?: string;
-    testId?: string;
     layout?: string;
     defaultLayout?: string;
     width?: string | number;
@@ -196,10 +196,11 @@ const Metric = (props: MetricProps) => {
 
     return (
         <Tooltip title={hover || ""}>
-            <Box data-testid={props.testId} className={className}>
+            <Box className={`${className} ${getComponentClassName(props.children)}`}>
                 <Suspense fallback={<Skeleton key="skeleton" sx={skeletonStyle} />}>
                     <Plot data={data} layout={layout} style={defaultStyle} config={plotConfig} useResizeHandler />
                 </Suspense>
+                {props.children}
             </Box>
         </Tooltip>
     );
