@@ -1737,7 +1737,7 @@
             }
         ],
         [
-            "notification",
+            "alert",  
             {
                 "inherits": ["shared"],
                 "properties": [
@@ -1746,25 +1746,18 @@
                         "default_property": false,
                         "type": "dynamic(str)",
                         "default_value": "\"info\"",
-                        "doc": "Defines the severity level of the alert. Valid values: \"error\", \"warning\", \"info\", \"success\"."
-                    },
-                    {
-                        "name": "message",
-                        "default_property": true,
-                        "type": "dynamic(str)",
-                        "default_value": "\"\"",
-                        "doc": "The message displayed in the alert. Can be dynamic."
+                        "doc": "Defines the severity level of the notification. Valid values: \"error\", \"warning\", \"info\", \"success\"."
                     },
                     {
                         "name": "variant",
                         "default_property": false,
                         "type": "str",
                         "default_value": "\"filled\"",
-                        "doc": "Defines the variant of the alert. Valid values: \"filled\", \"outlined\", \"standard\"."
+                        "doc": "Defines the variant of the notification. Valid values: \"filled\", \"outlined\", \"standard\"."
                     }
                 ]
             }
-        ]                          
+        ]                                 
     ],
     "blocks": [
         [

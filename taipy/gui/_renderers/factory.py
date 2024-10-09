@@ -30,6 +30,7 @@ class _Factory:
     __TAIPY_NAME_SPACE = "taipy."
 
     __CONTROL_DEFAULT_PROP_NAME = {
+        "alert": "message",
         "button": "label",
         "chat": "messages",
         "chart": "data",
@@ -59,7 +60,6 @@ class _Factory:
         "text": "value",
         "toggle": "value",
         "tree": "value",
-        "alert": "message",
     }
 
     _TEXT_ATTRIBUTES = ["format", "id", "hover_text", "raw"]
@@ -619,17 +619,16 @@ class _Factory:
             ]
         )
         ._set_propagate(),
-        "notification": lambda gui, control_type, attrs: _Builder(
+        "alert": lambda gui, control_type, attrs: _Builder(
             gui=gui,
             control_type=control_type,
             element_name="Notification",  
             attributes=attrs,
         )
-        .set_value_and_default()  
+        .set_value_and_default(var_type=PropertyType.dynamic_string)  
         .set_attributes(
             [
                 ("severity", PropertyType.string),  # severity is a simple string property
-                ("message", PropertyType.dynamic_string),  # message is now a dynamic string
             ]
         ),
     }
