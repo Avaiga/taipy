@@ -254,7 +254,7 @@ class State:
         This function dynamically changes the favicon (the icon associated with the application's
         pages) of Taipy GUI pages for the specific client of this state.
 
-        Note that the *favicon* argument to `(Gui.)run()^` can also be used to change
+        Note that the *favicon* parameter to `(Gui.)run()^` can also be used to change
         the favicon when the application starts.
 
         Arguments:

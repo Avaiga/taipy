@@ -20,7 +20,7 @@ def _connect_mongodb(
 ) -> pymongo.MongoClient:
     """Create a connection to a Mongo database.
     The `"mongodb_extra_args"` passed by the user is originally a dictionary, but since `@lru_cache` wrapper only
-    accepts hashable arguments, the `"mongodb_extra_args"` should be converted into a frozenset beforehand.
+    accepts hashable parameters, the `"mongodb_extra_args"` should be converted into a frozenset beforehand.
 
     Arguments:
         db_host (str): the database host.

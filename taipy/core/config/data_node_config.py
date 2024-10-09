@@ -618,12 +618,12 @@ class DataNodeConfig(Section):
                 The default value is *"pyarrow"*.
             compression (Optional[str]): Name of the compression to use. Possible values are *"snappy"*,
                 *"gzip"*, *"brotli"*, or *"none"* (no compression). The default value is *"snappy"*.
-            read_kwargs (Optional[dict]): Additional arguments passed to the `pandas.read_parquet()`
+            read_kwargs (Optional[dict]): Additional parameters passed to the `pandas.read_parquet()`
                 function.
-            write_kwargs (Optional[dict]): Additional arguments passed to the
+            write_kwargs (Optional[dict]): Additional parameters passed to the
                 `pandas.DataFrame.write_parquet()` function.<br/>
-                The arguments in *read_kwargs* and *write_kwargs* have a **higher precedence** than the
-                top-level arguments which are also passed to Pandas.
+                The parameters in *read_kwargs* and *write_kwargs* have a **higher precedence** than the
+                top-level parameters which are also passed to Pandas.
             exposed_type (Optional[str]): The exposed type of the data read from Parquet file.<br/>
                 The default value is `pandas`.
             scope (Optional[Scope^]): The scope of the Parquet data node configuration.<br/>
@@ -718,7 +718,7 @@ class DataNodeConfig(Section):
             id (str): The unique identifier of the new generic data node configuration.
             read_fct (Optional[Callable]): The Python function called to read the data.
             write_fct (Optional[Callable]): The Python function called to write the data.
-                The provided function must have at least one argument that receives the data to be written.
+                The provided function must have at least one parameter that receives the data to be written.
             read_fct_args (Optional[List]): The list of arguments that are passed to the function
                 *read_fct* to read data.
             write_fct_args (Optional[List]): The list of arguments that are passed to the function
@@ -763,7 +763,7 @@ class DataNodeConfig(Section):
             default_data (Optional[any]): The default data of the data nodes instantiated from
                 this in_memory data node configuration.
                 If provided, note that the default_data will be stored as a configuration attribute.
-                So it is designed to handle small data values like arguments, and it must be Json serializable.
+                So it is designed to handle small data values like parameters, and it must be Json serializable.
             scope (Optional[Scope^]): The scope of the in_memory data node configuration.<br/>
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
@@ -800,7 +800,7 @@ class DataNodeConfig(Section):
             default_data (Optional[any]): The default data of the data nodes instantiated from
                 this pickle data node configuration.
                 If provided, note that the default_data will be stored as a configuration attribute.
-                So it is designed to handle small data values like arguments, and it must be Json serializable.
+                So it is designed to handle small data values like parameters, and it must be Json serializable.
             scope (Optional[Scope^]): The scope of the pickle data node configuration.<br/>
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
@@ -938,9 +938,9 @@ class DataNodeConfig(Section):
             db_engine (str): The database engine. Possible values are *"sqlite"*, *"mssql"*, *"mysql"*,
                 or *"postgresql"*.
             read_query (str): The SQL query string used to read the data from the database.
-            write_query_builder (Callable): A callback function that takes the data as an input argument
+            write_query_builder (Callable): A callback function that takes the data as an input parameter
                 and returns a list of SQL queries to be executed when writing data to the data node.
-            append_query_builder (Optional[Callable]): A callback function that takes the data as an input argument
+            append_query_builder (Optional[Callable]): A callback function that takes the data as an input parameter
                 and returns a list of SQL queries to be executed when appending data to the data node.
             db_username (Optional[str]): The database username. Required by the *"mssql"*, *"mysql"*, and
                 *"postgresql"* engines.

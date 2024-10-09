@@ -177,7 +177,7 @@ element_template = """
 class {{name}}(_{{base_class}}):
     _ELEMENT_NAME: str
     def __init__(self, {{properties_decl}}) -> None:
-        \"\"\"Creates a{{n}} {{name}} element.\\n\\nArguments\\n----------\\n\\n{{properties_doc}}\"\"\"  # noqa: E501
+        \"\"\"Creates a{{n}} {{name}} element.\\n\\nParameters\\n----------\\n\\n{{properties_doc}}\"\"\"  # noqa: E501
         ...
 """
 
@@ -192,7 +192,7 @@ def generate_elements(category: str, base_class: str):
         properties = resolve_inherit(name, desc["properties"], desc.get("inherits", None), viselements)
         # Remove hidden properties
         properties = [p for p in properties if not p.get("hide", False)]
-        # Generate function arguments
+        # Generate function parameters
         properties_decl = [format_as_parameter(p) for p in properties]
         # Generate properties doc
         for property in properties:

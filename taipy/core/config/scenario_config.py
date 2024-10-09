@@ -44,7 +44,7 @@ class ScenarioConfig(Section):
     The default value is None.
 
     Each comparator function is attached to a scenario's data node configuration.
-    The key of the dictionary argument corresponds to the data node configuration id.
+    The key of the dictionary parameter corresponds to the data node configuration id.
     The value is a list of functions that are applied to all the data nodes instantiated
     from the data node configuration attached to the comparator.
     """
@@ -301,7 +301,7 @@ class ScenarioConfig(Section):
                 relevant cycle.
             comparators (Optional[Dict[str, Union[List[Callable], Callable]]]): The list of
                 functions used to compare scenarios. A comparator function is attached to a
-                scenario's data node configuration. The key of the dictionary argument
+                scenario's data node configuration. The key of the dictionary parameter
                 corresponds to the data node configuration id. During the scenarios'
                 comparison, each comparator is applied to all the data nodes instantiated from
                 the data node configuration attached to the comparator. See
@@ -351,7 +351,7 @@ class ScenarioConfig(Section):
                 the relevant cycle.
             comparators (Optional[Dict[str, Union[List[Callable], Callable]]]): The list of
                 functions used to compare scenarios. A comparator function is attached to a
-                scenario's data node configuration. The key of the dictionary argument
+                scenario's data node configuration. The key of the dictionary parameter
                 corresponds to the data node configuration id. During the scenarios'
                 comparison, each comparator is applied to all the data nodes instantiated from
                 the data node configuration attached to the comparator. See

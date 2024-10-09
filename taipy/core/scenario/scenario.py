@@ -346,7 +346,7 @@ class Scenario(_Entity, Submittable, _Labeled):
             tag (str): The tag to search among the set of scenario's tags.
 
         Returns:
-            True if the scenario has the tag given as argument. False otherwise.
+            True if the scenario has the tag given as parameter. False otherwise.
         """
         return tag in self.tags
 

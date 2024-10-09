@@ -34,10 +34,10 @@ class SQLDataNode(_AbstractSQLDataNode):
         *mysql*, or *postgresql*.
     - *read_query* (`str`): The SQL query string used to read the data from the database.
     - *write_query_builder* `(Callable)`: A callback function that takes the data as an input
-        argument and returns a list of SQL queries to be executed when writing data to the data
+        parameter and returns a list of SQL queries to be executed when writing data to the data
         node.
     - *append_query_builder* (`Callable`): A callback function that takes the data as an input
-        argument and returns a list of SQL queries to be executed when appending data to the
+        parameter and returns a list of SQL queries to be executed when appending data to the
         data node.
     - *db_username* (`str`): The database username.
     - *db_password* (`str`): The database password.
@@ -134,5 +134,5 @@ class SQLDataNode(_AbstractSQLDataNode):
                 connection.execute(text(query))
             else:
                 statement = query[0]
-                arguments = query[1]
-                connection.execute(text(statement), arguments)
+                parameters = query[1]
+                connection.execute(text(statement), parameters)

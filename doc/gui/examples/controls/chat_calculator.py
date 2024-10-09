@@ -25,7 +25,7 @@ messages: list[tuple[str, str, str]] = []
 
 
 def evaluate(state, var_name: str, payload: dict):
-    # Retrieve the callback arguments
+    # Retrieve the callback parameters
     (_, _, expression, sender_id) = payload.get("args", [])
     # Add the input content as a sent message
     messages.append((f"{len(messages)}", expression, sender_id))

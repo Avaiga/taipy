@@ -30,7 +30,7 @@ def download(
 
     <h4>Notes:</h4>
 
-    - *content*: this argument can hold several values depending on your use case:
+    - *content*: this parameter can hold several values depending on your use case:
         - a string: the value must be an existing path name to the file that gets downloaded or
           the URL to the resource you want to download.
         - a buffer (such as a `bytes` object): if the size of the buffer is smaller than the
@@ -44,7 +44,7 @@ def download(
         - *on_action*: this callback is triggered when the transfer of the content is achieved.</br>
           In this function, you can perform any clean-up operation that could be required after
           the download is completed.<br/>
-          This callback can use three optional arguments:
+          This callback can use three optional parameters:
             - *state*: the `State^` instance of the caller.
             - *id* (optional): a string representing the identifier of the caller. If this function
               is called directly, this will always be "Gui.download". Some controls may also trigger
@@ -52,7 +52,7 @@ def download(
             - *payload* (optional): an optional payload from the caller.<br/>
               This is a dictionary with the following keys:
                 - *action*: the name of the callback;
-                - *args*: an array of two strings. The first element reflects the *name* argument,
+                - *args*: an array of two strings. The first element reflects the *name* parameter,
                   and the second element reflects the server-side URL where the file is located.
     """
     if state and isinstance(state._gui, Gui):
@@ -74,13 +74,13 @@ def notify(
         state (State^): The current user state as received in any callback.
         notification_type: The notification type. This can be one of "success", "info",
             "warning", or "error".<br/>
-            To remove the last notification, set this argument to the empty string.
+            To remove the last notification, set this parameter to the empty string.
         message: The text message to display.
         system_notification: If True, the system will also show the notification.<br/>
-            If not specified or set to None, this argument will use the value of
+            If not specified or set to None, this parameter will use the value of
             *configuration[system_notification]*.
         duration: The time, in milliseconds, during which the notification is shown.
-            If not specified or set to None, this argument will use the value of
+            If not specified or set to None, this parameter will use the value of
             *configuration[notification_duration]*.
 
     Note that you can also call this function with *notification_type* set to the first letter
@@ -112,7 +112,7 @@ def hold_control(
     The application must call `resume_control()^` so that users can interact again
     with the visual elements.
 
-    You can set a callback function (or the name of a function) in the *callback* argument. Then,
+    You can set a callback function (or the name of a function) in the *callback* parameter. Then,
     a "Cancel" button will be displayed so the user can cancel whatever is happening in the
     application. When pressed, the callback is invoked.
 
@@ -127,7 +127,7 @@ def hold_control(
             - id (str): the id of the button that triggered the callback. That will always be
               "UIBlocker" since it is created and managed internally;
 
-            If this argument is None, no "Cancel" button is displayed.
+            If this parameter is None, no "Cancel" button is displayed.
         message: The message to show. The default value is the string "Work in Progress...".
     """
     if state and isinstance(state._gui, Gui):
@@ -165,7 +165,7 @@ def navigate(
         to: The name of the page to navigate to. This can be a page identifier (as created by
             `Gui.add_page()^` with no leading '/') or a URL.<br/>
             If omitted, the application navigates to the root page.
-        params: A dictionary of query arguments.
+        params: A dictionary of query parameters.
         tab: When navigating to a page that is not a known page, the page is opened in a tab identified by
             *tab* (as in [window.open](https://developer.mozilla.org/en-US/docs/Web/API/Window/open)).<br/>
             The default value creates a new tab for the page (which is equivalent to setting *tab* to "_blank").
@@ -190,7 +190,7 @@ def get_user_content_url(
         state (State^): The current user state as received in any callback.
         path: An optional additional path to the URL.
         params: An optional dictionary sent to the *on_user_content* callback.<br/>
-            These arguments are added as query arguments to the generated URL and converted into
+            These arguments are added as query parameters to the generated URL and converted into
             strings.
 
     Returns:
@@ -283,7 +283,7 @@ def invoke_callback(
         gui (Gui^): The current Gui instance.
         state_id: The identifier of the state to use, as returned by `get_state_id()^`.
         callback (Callable[[State^, ...], None]): The user-defined function that is invoked.<br/>
-            The first argument of this function **must** be a `State^`.
+            The first parameter of this function **must** be a `State^`.
         args (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
         module_context (Optional[str]): the name of the module that will be used.
     """
@@ -306,10 +306,10 @@ def broadcast_callback(
     Arguments:
         gui (Gui^): The current Gui instance.
         callback: The user-defined function to be invoked.<br/>
-            The first argument of this function must be a `State^` object representing the
+            The first parameter of this function must be a `State^` object representing the
             client for which it is invoked.<br/>
-            The other arguments should reflect the ones provided in the *args* collection.
-        args: The arguments to send to *callback*, if any.
+            The other parameters should reflect the ones provided in the *args* collection.
+        args: The parameters to send to *callback*, if any.
     """
     if isinstance(gui, Gui):
         return gui.broadcast_callback(callback, args, module_context)
@@ -336,7 +336,7 @@ def invoke_long_callback(
 
     This function expects to be provided a function to run in the background (in *user_function*).<br/>
     It can also be specified a *status function* that is called when the operation performed by
-    *user_function* is finished (successfully or not), or periodically (using the *period* argument).
+    *user_function* is finished (successfully or not), or periodically (using the *period* parameter).
 
     See the
     [User Manual section on Long Running Callbacks](../../../../../userman/gui/callbacks.md#long-running-callbacks)
@@ -366,7 +366,7 @@ def invoke_long_callback(
         user_status_function_args (Optional[List|Tuple]): The remaining arguments of the user status function.
         period (int): The interval, in milliseconds, at which *user_status_function* is called.<br/>
             The default value is 0, meaning no call to *user_status_function* will happen until *user_function*
-            terminates (then the second argument of that call will be ).</br>
+            terminates (then the second parameter of that call will be ).</br>
             When set to a value smaller than 500, *user_status_function* is called only when *user_function*
             terminates (as if *period* was set to 0).
     """

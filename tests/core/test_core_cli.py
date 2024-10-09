@@ -292,14 +292,14 @@ def test_force_override_experiment_version():
 
     Config.configure_global_app(foo="bar")
 
-    # Without --taipy-force argument, a SystemExit will be raised
+    # Without --taipy-force parameter, a SystemExit will be raised
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "--experiment", "1.0"]):
             orchestrator = Orchestrator()
             orchestrator.run()
     orchestrator.stop()
 
-    # With --taipy-force argument
+    # With --taipy-force parameter
     with patch("sys.argv", ["prog", "--experiment", "1.0", "--taipy-force"]):
         orchestrator = Orchestrator()
         orchestrator.run()

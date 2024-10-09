@@ -31,7 +31,7 @@ from ..exceptions.exceptions import ConfigCoreVersionMismatched
 
 
 class CoreSection(UniqueSection):
-    """Configuration arguments for running the `Orchestrator^` service."""
+    """Configuration parameters for running the `Orchestrator^` service."""
 
     name: str = "CORE"
 

@@ -561,7 +561,7 @@ export const getPayload = (value: unknown, onChange?: string, relName?: string) 
  * Create an *action* `Action` that will be used to update `Context`.
  *
  * This action will trigger the invocation of the `on_action` Python function on the backend,
- * providing all the arguments as a payload.
+ * providing all the parameters as a payload.
  * @param name - The name of the action function on the backend.
  * @param context - The execution context.
  * @param value - The value associated with the action. This can be an object or

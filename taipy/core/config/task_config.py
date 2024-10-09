@@ -33,7 +33,7 @@ class TaskConfig(Section):
     #     skippable (bool): If True, indicates that the task can be skipped if no change has
     #         been made on inputs.<br/>
     #         The default value is False.
-    #     function (Callable): User function taking as inputs some arguments compatible with the
+    #     function (Callable): User function taking as inputs some parameters compatible with the
     #         exposed types (*exposed_type* field) of the input data nodes and returning results
     #         compatible with the exposed types (*exposed_type* field) of the outputs list.<br/>
     #         The default value is None.
@@ -46,7 +46,7 @@ class TaskConfig(Section):
     _IS_SKIPPABLE_KEY = "skippable"
 
     function: Optional[Callable]
-    """User function taking as inputs some arguments compatible with the data type
+    """User function taking as inputs some parameters compatible with the data type
     (*exposed_type* field) of the input data nodes and returning results compatible with the
     data type (*exposed_type* field) of the outputs list."""
 

@@ -28,7 +28,7 @@ from .task_id import TaskId
 
 
 class Task(_Entity, _Labeled):
-    """Hold a user function that will be executed, its arguments and the results.
+    """Hold a user function that will be executed, its parameters and the results.
 
     A `Task` brings together the user code as function, the inputs and the outputs
     as data nodes (instances of the `DataNode^` class).
