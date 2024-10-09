@@ -170,10 +170,7 @@ class _Server:
                 resource_handler = _ExternalResourceHandlerManager().get(resource_handler_id)
                 if resource_handler is None:
                     response = make_response(
-                        {
-                            "error": "Cookie was deleted due to invalid resource handler id. Please restart the page manually."  # noqa: E501
-                        },
-                        400,
+                        "Cookie was deleted due to invalid resource handler id. Please restart the page manually.", 400
                     )
                     response.set_cookie(
                         _Server._RESOURCE_HANDLER_ARG, "", secure=request.is_secure, httponly=True, expires=0, path="/"
