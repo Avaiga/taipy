@@ -29,6 +29,7 @@ from .utils import (
     _TaipyLovValue,
     _TaipyNumber,
     _TaipyToJson,
+    _TaipyTime
 )
 
 
@@ -80,6 +81,7 @@ class PropertyType(Enum):
     date = _TaipyDate
     date_range = _TaipyDateRange
     dict = "dict"
+    time = _TaipyTime
     """
     The property holds a dictionary.
     """
