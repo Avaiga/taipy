@@ -20,7 +20,6 @@ import sys
 import time
 import typing as t
 import webbrowser
-from urllib.parse import urlparse
 from importlib import util
 from random import choices, randint
 
@@ -30,7 +29,6 @@ from flask import (
     json,
     jsonify,
     make_response,
-    redirect,
     render_template,
     request,
     send_from_directory,
@@ -171,16 +169,12 @@ class _Server:
             if resource_handler_id is not None:
                 resource_handler = _ExternalResourceHandlerManager().get(resource_handler_id)
                 if resource_handler is None:
-                    target_url = request.url.replace('\\', '/')
-                    if not urlparse(target_url).netloc and not urlparse(target_url).scheme:
-                        response = make_response(redirect(target_url))
-                    else:
-                        response = make_response(
-                            {
-                                "error": "Cookie was deleted due to invalid resource handler id. Please restart the page."  # noqa: E501
-                            },
-                            400,
-                        )
+                    response = make_response(
+                        {
+                            "error": "Cookie was deleted due to invalid resource handler id. Please restart the page manually."  # noqa: E501
+                        },
+                        400,
+                    )
                     response.set_cookie(
                         _Server._RESOURCE_HANDLER_ARG, "", secure=request.is_secure, httponly=True, expires=0, path="/"
                     )
