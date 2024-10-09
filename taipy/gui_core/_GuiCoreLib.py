@@ -13,7 +13,7 @@ import typing as t
 from datetime import datetime
 
 from taipy.core import Cycle, DataNode, Job, Scenario, Sequence, Task
-from taipy.gui import Gui
+from taipy.gui import Gui, State
 from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
 
 from ..version import _get_version
@@ -319,11 +319,14 @@ class _GuiCore(ElementLibrary):
         return ["lib/taipy-gui-core.js"]
 
     def on_init(self, gui: Gui) -> t.Optional[t.Tuple[str, t.Any]]:
-        ctx = _GuiCoreContext(gui)
-        gui._add_adapter_for_type(_GuiCore.__SCENARIO_ADAPTER, ctx.scenario_adapter)
-        gui._add_adapter_for_type(_GuiCore.__DATANODE_ADAPTER, ctx.data_node_adapter)
-        gui._add_adapter_for_type(_GuiCore.__JOB_ADAPTER, ctx.job_adapter)
-        return _GuiCore.__CTX_VAR_NAME, ctx
+        self.ctx = _GuiCoreContext(gui)
+        gui._add_adapter_for_type(_GuiCore.__SCENARIO_ADAPTER, self.ctx.scenario_adapter)
+        gui._add_adapter_for_type(_GuiCore.__DATANODE_ADAPTER, self.ctx.data_node_adapter)
+        gui._add_adapter_for_type(_GuiCore.__JOB_ADAPTER, self.ctx.job_adapter)
+        return _GuiCore.__CTX_VAR_NAME, self.ctx
+
+    def on_user_init(self, state: State):
+        self.ctx.on_user_init(state)
 
     def get_version(self) -> str:
         if not hasattr(self, "version"):

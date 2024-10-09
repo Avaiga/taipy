@@ -2306,7 +2306,7 @@ class Gui:
             _setscopeattr(self, Gui.__ON_INIT_NAME, True)
             self.__pre_render_pages()
             self.__init_libs()
-            if hasattr(self, "on_init") and callable(self.on_init):
+            if hasattr(self, "on_init") and isroutine(self.on_init):
                 try:
                     self._call_function_with_state(self.on_init)
                 except Exception as e:  # pragma: no cover

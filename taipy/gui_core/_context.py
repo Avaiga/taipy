@@ -57,7 +57,7 @@ from taipy.core.notification.event import Event, EventOperation
 from taipy.core.notification.notifier import Notifier
 from taipy.core.reason import ReasonCollection
 from taipy.core.submission.submission_status import SubmissionStatus
-from taipy.gui import Gui, State
+from taipy.gui import Gui, State, get_state_id
 from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
 from taipy.gui.utils._map_dict import _MapDict
@@ -103,6 +103,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
         gui._add_event_listener("authorization", self._auth_listener, with_state=True)
         # super
         super().__init__(reg_id, reg_queue)
+
+    def on_user_init(self, state: State):
+        self.gui._fire_event("authorization", get_state_id(state), {})
 
     def __lazy_start(self):
         if self.__started:
