@@ -383,7 +383,7 @@
                         "name": "time",
                         "default_property": true,
                         "type": "str",
-                        "doc": "The date that this control represents and can modify"
+                        "doc": "The time that this control represents and can modify"
                     },
                     {
                         "name": "label",
@@ -394,7 +394,7 @@
                         "name": "width",
                         "type": "Union[str,int]",
                         "default_value": "None",
-                        "doc": "The width of the date element."
+                        "doc": "The width of the time element."
                     }
                 ]
             }
