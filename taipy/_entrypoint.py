@@ -37,7 +37,7 @@ def _entrypoint():
     )
 
     if find_spec("taipy.enterprise"):
-        from taipy.enterprise._entrypoint import _entrypoint_initialize as _enterprise_entrypoint_initialize
+        from taipy.enterprise._entrypoint import _entrypoint_initialize as _enterprise_entrypoint_initialize # type: ignore
 
         _enterprise_entrypoint_initialize()
 
@@ -45,7 +45,7 @@ def _entrypoint():
 
     _RunCLI.create_parser()
     _GuiCLI.create_run_parser()
-    _core_cli.create_run_parser()
+    _core_cli.create_run_parser() # type: ignore
 
     _VersionCLIFactory._build_cli().create_parser()
     _CreateCLI.generate_template_map()
@@ -54,7 +54,7 @@ def _entrypoint():
     _HelpCLI.create_parser()
 
     if find_spec("taipy.enterprise"):
-        from taipy.enterprise._entrypoint import _entrypoint_handling as _enterprise_entrypoint_handling
+        from taipy.enterprise._entrypoint import _entrypoint_handling as _enterprise_entrypoint_handling # type: ignore
 
         _enterprise_entrypoint_handling()
 
