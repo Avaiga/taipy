@@ -1334,6 +1334,15 @@ class Gui:
                 "duration": duration,
             }
         )
+    
+    def __send_ws_close_notification(self, notification_id: str) -> None:
+        """Send a WebSocket message to close a notification by ID."""
+        self.__send_ws(
+            {
+                "type": _WsType.CLOSE_NOTIFICATION.value,  # You should have a defined type for closing notifications
+                "notification_id": notification_id,
+            }
+    )
 
     def __send_ws_partial(self, partial: str):
         self.__send_ws(
@@ -2245,6 +2254,7 @@ class Gui:
         message: str = "",
         system_notification: t.Optional[bool] = None,
         duration: t.Optional[int] = None,
+        notification_id: t.Optional[str] = None,
     ):
         self.__send_ws_alert(
             notification_type,
@@ -2252,6 +2262,14 @@ class Gui:
             self._get_config("system_notification", False) if system_notification is None else system_notification,
             self._get_config("notification_duration", 3000) if duration is None else duration,
         )
+
+    def _close_notification(
+        self,
+        notification_id: t.Optional[str] = None,
+    ):
+        if notification_id is not None:  # Check if notification_id is not None
+            self.__send_ws_close_notification(notification_id)
+
 
     def _hold_actions(
         self,
