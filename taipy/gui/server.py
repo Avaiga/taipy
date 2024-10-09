@@ -23,7 +23,17 @@ import webbrowser
 from importlib import util
 from random import choices, randint
 
-from flask import Blueprint, Flask, json, jsonify, render_template, request, send_from_directory
+from flask import (
+    Blueprint,
+    Flask,
+    json,
+    jsonify,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    send_from_directory,
+)
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from gitignore_parser import parse_gitignore
@@ -160,7 +170,19 @@ class _Server:
             if resource_handler_id is not None:
                 resource_handler = _ExternalResourceHandlerManager().get(resource_handler_id)
                 if resource_handler is None:
-                    return (f"Invalid value for query {_Server._RESOURCE_HANDLER_ARG}", 404)
+                    if request.url:
+                        response = make_response(redirect(request.url))
+                    else:
+                        response = make_response(
+                            {
+                                "error": "Cookie was deleted due to invalid resource handler id. Please restart the page."  # noqa: E501
+                            },
+                            400,
+                        )
+                    response.set_cookie(
+                        _Server._RESOURCE_HANDLER_ARG, "", secure=request.is_secure, httponly=True, expires=0, path="/"
+                    )
+                    return response
                 try:
                     return resource_handler.get_resources(path, static_folder, base_url)
                 except Exception as e:
