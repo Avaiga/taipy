@@ -361,7 +361,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         Arguments:
             callback (Callable[[Scenario^, Job^], None]): The callable function to be called
                 on status change.
-            params (Optional[List[Any]]): The arguments to be passed to the _callback_.
+            params (Optional[List[Any]]): The parameters to be passed to the _callback_.
         """
         from ... import core as tp
 
@@ -375,7 +375,7 @@ class Scenario(_Entity, Submittable, _Labeled):
 
         Arguments:
             callback (Callable[[Scenario^, Job^], None]): The callable function to unsubscribe.
-            params (Optional[List[Any]]): The arguments to be passed to the _callback_.
+            params (Optional[List[Any]]): The parameters to be passed to the _callback_.
         """
         from ... import core as tp
 

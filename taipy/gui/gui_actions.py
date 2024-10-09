@@ -350,17 +350,17 @@ def invoke_long_callback(
         user_status_function (Optional(Callable[[State^, bool, ...], None])): The optional user-defined status
             function that is invoked at the end of and possibly during the runtime of *user_function*:
 
-            - The first argument of this function is set to a `State^` instance.
-            - The second argument of this function is set to a bool or an int, depending on the
+            - The first parameter of this function is set to a `State^` instance.
+            - The second parameter of this function is set to a bool or an int, depending on the
               conditions under which it is called:
 
-               - If this argument is set to a bool value, then:
+               - If this parameter is set to a bool value, then:
 
                    - If True, this indicates that *user_function* has finished properly.
                         The last argument passed will be the result of the user_function call.
                    - If False, this indicates that *user_function* failed.
 
-               - If this argument is set to an int value, then this value indicates
+               - If this parameter is set to an int value, then this value indicates
                  how many periods (as lengthy as indicated in *period*) have elapsed since *user_function* was
                  started.
         user_status_function_args (Optional[List|Tuple]): The remaining arguments of the user status function.

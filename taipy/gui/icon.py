@@ -47,7 +47,7 @@ class Icon:
                 application (where the Python file that created the `Gui` instance
                 is located).<br/>
                 In situations where the image file is located outside the application
-                directory, a _path mapping_ must be used: the _path_mapping_ argument
+                directory, a _path mapping_ must be used: the _path_mapping_ parameter
                 of the `Gui^` constructor makes it possible to access a resource anywhere
                 on the server filesystem, as if it were located in a subdirectory of
                 the application directory.
