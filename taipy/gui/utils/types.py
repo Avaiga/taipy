@@ -13,7 +13,7 @@
 import json
 import typing as t
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, time
 from importlib.util import find_spec
 
 from .._warnings import _warn
@@ -197,6 +197,23 @@ class _TaipyDict(_TaipyBase):
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "Di"
 
+class _TaipyTime(_TaipyBase):
+    def get(self):
+        val = super().get()
+        if isinstance(val, time):
+            val = _date_to_string(val)
+        elif val is not None:
+            val = str(val)
+        return val
+
+    def cast_value(self, value: t.Any):
+        if isinstance(value, str):
+            return _string_to_date(value)
+        return super().cast_value(value)
+
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "Tm"
 
 class _TaipyToJson(_TaipyBase):
     def get(self):
