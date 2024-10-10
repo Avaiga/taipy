@@ -40,6 +40,7 @@ import deepEqual from "fast-deep-equal/es6";
 import {
     createRequestUpdateAction,
     createSendActionNameAction,
+    getComponentClassName,
     getUpdateVar,
     useDispatch,
     useDynamicProperty,
@@ -382,8 +383,8 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         scSequences,
         scTasks,
         scAuthorizedTags,
-        scDeletable,
-        scPromotable,
+        scDeletableReason,
+        scPromotableReason,
         scNotSubmittableReason,
         scNotReadableReason,
         scNotEditableReason,
@@ -617,7 +618,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
     return (
         <>
-            <Box sx={MainBoxSx} id={id} onClick={onFocus} className={className}>
+            <Box sx={MainBoxSx} id={id} onClick={onFocus} className={`${className} ${getComponentClassName(props.children)}`}>
                 <Accordion defaultExpanded={expanded} expanded={userExpanded} onChange={onExpand} disabled={!valid}>
                     <AccordionSummary
                         expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
@@ -891,23 +892,31 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             ) : null}
                             <Grid size={12} container justifyContent="space-between">
                                 {showDelete ? (
-                                    <Button
-                                        variant="outlined"
-                                        color="primary"
-                                        disabled={!active || !valid || !scDeletable}
-                                        onClick={openDeleteDialog}
-                                    >
-                                        DELETE
-                                    </Button>
+                                    <Tooltip title={scDeletableReason}>
+                                        <span>
+                                            <Button
+                                                variant="outlined"
+                                                color="primary"
+                                                disabled={!active || !valid || !!scDeletableReason}
+                                                onClick={openDeleteDialog}
+                                            >
+                                                DELETE
+                                            </Button>
+                                        </span>
+                                    </Tooltip>
                                 ) : null}
-                                <Button
-                                    variant="outlined"
-                                    color="primary"
-                                    disabled={!active || !valid || scPrimary || !scPromotable}
-                                    onClick={openPrimaryDialog}
-                                >
-                                    PROMOTE TO PRIMARY
-                                </Button>
+                                <Tooltip title={scPromotableReason}>
+                                    <span>
+                                        <Button
+                                            variant="outlined"
+                                            color="primary"
+                                            disabled={!active || !valid || scPrimary || !!scPromotableReason}
+                                            onClick={openPrimaryDialog}
+                                        >
+                                            PROMOTE TO PRIMARY
+                                        </Button>
+                                    </span>
+                                </Tooltip>
                             </Grid>
                         </Grid>
                     </AccordionDetails>
@@ -931,6 +940,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 onClose={closePrimaryDialog}
                 onConfirm={onPromote}
             />
+            {props.children}
         </>
     );
 };
