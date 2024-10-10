@@ -15,13 +15,18 @@ import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import { ErrorBoundary } from "react-error-boundary";
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+
+import { MobileTimePicker } from '@mui/x-date-pickers/MobileTimePicker';
 import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps, getCssSize } from "./utils";
 import { getDateTime } from "../../utils";
 import { useClassNames, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import ErrorFallback from "../../utils/ErrorBoundary";
 import Field from "./Field";
 
+
+
 interface TimeSelectorProps extends TaipyActiveProps, TaipyChangeProps {
+  as_clock?: boolean;
   withTime?: boolean;
   format?: string;
   defaultDate?: string;
@@ -35,7 +40,7 @@ interface TimeSelectorProps extends TaipyActiveProps, TaipyChangeProps {
 
 const boxSx = { display: "inline-block" };
 const TimeSelector = (props: TimeSelectorProps) => {
-  const { withTime = false, id } = props;
+  const { withTime = true, as_clock = false, id } = props;
   const formatConfig = useFormatConfig();
   const tz = formatConfig.timeZone;
   const [value] = useState(() => getDateTime(props.defaultDate, tz, withTime));
@@ -45,31 +50,41 @@ const TimeSelector = (props: TimeSelectorProps) => {
   const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
   const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
   const timeSx = useMemo(() => (props.width ? { maxWidth: getCssSize(props.width) } : undefined), [props.width]);
-  
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <Tooltip title={hover || ""}>
-        <Box id={id} className={className} sx={boxSx}>
-        {editable ? (
-          <TimePicker 
-            value={value}
-            className={getSuffixedClassNames(className, "-picker")}
-            disabled={!active}
-            label={props.label}
-            format={props.format}
-            sx={timeSx}
-          />
-        ):(
-          <Field 
-            dataType="string"
-            defaultValue={props.defaultTime}
-            id={id && id + "-field"}
-            value={props.time}
-            className={getSuffixedClassNames(className, "-text")}
-            format={props.format}
-          />
-        )}
+        <Box id={id} className={`${className}`} sx={boxSx}>
+          {editable ? (
+            as_clock ? (
+              <MobileTimePicker  
+                value={value}
+                className={getSuffixedClassNames(className, "-picker")}
+                disabled={!active}
+                label={props.label}
+                format={props.format}
+                sx={timeSx}
+              />
+            ):(
+              <TimePicker 
+                value={value}
+                className={getSuffixedClassNames(className, "-picker")}
+                disabled={!active}
+                label={props.label}
+                format={props.format}
+                sx={timeSx}
+              />
+            )
+          ):(
+            <Field 
+              dataType="string"
+              defaultValue={props.defaultTime}
+              id={id && id + "-field"}
+              value={props.time}
+              className={getSuffixedClassNames(className, "-text")}
+              format={props.format}
+            />
+          )}
         </Box>
       </Tooltip>
     </ErrorBoundary>

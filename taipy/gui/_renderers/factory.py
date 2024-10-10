@@ -35,7 +35,6 @@ class _Factory:
         "chart": "data",
         "content": "value",
         "date": "date",
-        "time": "value",
         "date_range": "dates",
         "dialog": "open",
         "expandable": "title",
@@ -58,6 +57,7 @@ class _Factory:
         "status": "value",
         "table": "data",
         "text": "value",
+        "time": "value",
         "toggle": "value",
         "tree": "value",
     }
@@ -586,6 +586,7 @@ class _Factory:
         .set_attributes(
             [
                 ("active", PropertyType.dynamic_boolean, True),
+                ("as_clock", PropertyType.boolean),
                 ("editable", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
                 ("label",),

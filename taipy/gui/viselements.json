@@ -369,6 +369,12 @@
                         "doc": "Whether or not to show the time part of the date."
                     },
                     {
+                        "name": "as_clock",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "Whether or not to show timepicker as a clock."
+                    },
+                    {
                         "name": "format",
                         "type": "str",
                         "doc": "The format to apply to the value. See below."
