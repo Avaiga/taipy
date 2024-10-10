@@ -59,7 +59,8 @@ def test_listener(gui: Gui):
 
     gui._add_event_listener(event, listener)
 
-    gui._fire_event(event, None, payload)
+    with gui._Gui__event_manager: # type: ignore[attr-defined]
+        gui._fire_event(event, None, payload)
 
     time.sleep(0.3)
     listener.assert_called_once_with(event, None, payload)

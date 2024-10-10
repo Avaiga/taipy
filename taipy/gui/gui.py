@@ -26,7 +26,7 @@ from importlib import metadata, util
 from importlib.util import find_spec
 from inspect import currentframe, getabsfile, ismethod, ismodule, isroutine
 from pathlib import Path
-from threading import Timer
+from threading import Thread, Timer
 from types import FrameType, FunctionType, LambdaType, ModuleType, SimpleNamespace
 from urllib.parse import unquote, urlencode, urlparse
 
@@ -51,6 +51,7 @@ if util.find_spec("pyngrok"):
     from pyngrok import ngrok  # type: ignore[reportMissingImports]
 
 from ._default_config import _default_stylekit, default_config
+from ._event_context_manager import _EventManager
 from ._hook import _Hooks
 from ._page import _Page
 from ._renderers import _EmptyPage
@@ -378,6 +379,8 @@ class Gui:
             ]
         )
 
+        self.__event_manager = _EventManager()
+
         # Init Gui Hooks
         _Hooks()._init(self)
 
@@ -436,7 +439,7 @@ class Gui:
         if Gui.__content_providers.get(content_type):
             _warn(f"The type {content_type} is already associated with a provider.")
             return
-        if not callable(content_provider):
+        if not isroutine(content_provider):
             _warn(f"The provider for {content_type} must be a function.")
             return
         Gui.__content_providers[content_type] = content_provider
@@ -480,7 +483,7 @@ class Gui:
                         Gui.register_content_provider(MatplotlibFigure, get_matplotlib_content)
                         provider_fn = get_matplotlib_content
 
-            if callable(provider_fn):
+            if isroutine(provider_fn):
                 try:
                     return provider_fn(t.cast(t.Any, content))
                 except Exception as e:
@@ -821,23 +824,11 @@ class Gui:
             _warn("", e)
             return
         on_change_fn = self._get_user_function(on_change) if on_change else None
-        if not callable(on_change_fn):
+        if not isroutine(on_change_fn):
             on_change_fn = self._get_user_function("on_change")
-        if callable(on_change_fn):
+        if isroutine(on_change_fn):
             try:
-                arg_count = on_change_fn.__code__.co_argcount
-                if arg_count > 0 and ismethod(on_change_fn):
-                    arg_count -= 1
-                args: t.List[t.Any] = [None for _ in range(arg_count)]
-                if arg_count > 0:
-                    args[0] = self.__get_state()
-                if arg_count > 1:
-                    args[1] = var_name
-                if arg_count > 2:
-                    args[2] = value
-                if arg_count > 3:
-                    args[3] = current_context
-                on_change_fn(*args)
+                self._call_function_with_state(on_change_fn, [var_name, value, current_context])
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception(on_change or "on_change", e):
                     _warn(f"{on_change or 'on_change'}(): callback function raised an exception", e)
@@ -879,7 +870,7 @@ class Gui:
             cb_function_name = q_args.get(Gui.__USER_CONTENT_CB)
             if cb_function_name:
                 cb_function = self._get_user_function(cb_function_name)
-                if not callable(cb_function):
+                if not isroutine(cb_function):
                     parts = cb_function_name.split(".", 1)
                     if len(parts) > 1:
                         base = _getscopeattr(self, parts[0], None)
@@ -889,16 +880,16 @@ class Gui:
                             base = self.__evaluator._get_instance_in_context(parts[0])
                             if base and (meth := getattr(base, parts[1], None)):
                                 cb_function = meth
-                if not callable(cb_function):
+                if not isroutine(cb_function):
                     _warn(f"{cb_function_name}() callback function has not been defined.")
                     cb_function = None
         if cb_function is None:
             cb_function_name = "on_user_content"
-            if hasattr(self, cb_function_name) and callable(self.on_user_content):
+            if hasattr(self, cb_function_name) and isroutine(self.on_user_content):
                 cb_function = self.on_user_content
             else:
                 _warn("on_user_content() callback function has not been defined.")
-        if callable(cb_function):
+        if isroutine(cb_function):
             try:
                 args: t.List[t.Any] = []
                 if path:
@@ -1038,7 +1029,7 @@ class Gui:
                                 pass
                         data["path"] = file_path
                         file_fn = self._get_user_function(on_upload_action)
-                        if not callable(file_fn):
+                        if not isroutine(file_fn):
                             file_fn = _getscopeattr(self, on_upload_action)
                         self._call_function_with_state(file_fn, ["file_upload", {"args": [data]}])
                     else:
@@ -1446,13 +1437,13 @@ class Gui:
         func = (
             getattr(self, func_name.split(".", 2)[1], func_name) if func_name.startswith(f"{Gui.__SELF_VAR}.") else None
         )
-        if not callable(func):
+        if not isroutine(func):
             func = _getscopeattr(self, func_name, None)
-        if not callable(func):
+        if not isroutine(func):
             func = self._get_locals_bind().get(func_name)
-        if not callable(func):
+        if not isroutine(func):
             func = self.__locals_context.get_default().get(func_name)
-        return func if callable(func) else func_name
+        return func if isroutine(func) else func_name
 
     def _get_user_instance(self, class_name: str, class_type: type) -> t.Union[object, str]:
         cls = _getscopeattr(self, class_name, None)
@@ -1508,22 +1499,13 @@ class Gui:
         id = t.cast(str, kwargs.get("id"))
         payload = kwargs.get("payload")
 
-        if callable(action_function):
+        if isroutine(action_function):
             try:
-                argcount = action_function.__code__.co_argcount
-                if argcount > 0 and ismethod(action_function):
-                    argcount -= 1
-                args = t.cast(list, [None for _ in range(argcount)])
-                if argcount > 0:
-                    args[0] = self.__get_state()
-                if argcount > 1:
-                    try:
-                        args[1] = self._get_real_var_name(id)[0]
-                    except Exception:
-                        args[1] = id
-                if argcount > 2:
-                    args[2] = payload
-                action_function(*args)
+                try:
+                    args = [self._get_real_var_name(id)[0], payload]
+                except Exception:
+                    args = [id, payload]
+                self._call_function_with_state(action_function, [args])
                 return True
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception(action_function.__name__, e):
@@ -1540,7 +1522,8 @@ class Gui:
             cp_args += (argcount - len(cp_args)) * [None]
         else:
             cp_args = cp_args[:argcount]
-        return user_function(*cp_args)
+        with self.__event_manager:
+            return user_function(*cp_args)
 
     def _set_module_context(self, module_context: t.Optional[str]) -> t.ContextManager[None]:
         return self._set_locals_context(module_context) if module_context is not None else contextlib.nullcontext()
@@ -1548,7 +1531,7 @@ class Gui:
     def invoke_callback(
         self,
         state_id: str,
-        callback: t.Callable,
+        callback: t.Union[str, t.Callable],
         args: t.Optional[t.Sequence[t.Any]] = None,
         module_context: t.Optional[str] = None,
     ) -> t.Any:
@@ -1559,7 +1542,7 @@ class Gui:
 
         Arguments:
             state_id: The identifier of the state to use, as returned by `get_state_id()^`.
-            callback (Callable[[State^, ...], None]): The user-defined function that is invoked.<br/>
+            callback (Union[str, Callable[[State^, ...], None]]): The user-defined function that is invoked.<br/>
                 The first parameter of this function **must** be a `State^`.
             args (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
             module_context (Optional[str]): The name of the module that will be used.
@@ -1573,9 +1556,9 @@ class Gui:
             with self.get_flask_app().app_context():
                 setattr(g, Gui.__ARG_CLIENT_ID, state_id)
                 with self._set_module_context(module_context):
-                    if not callable(callback):
-                        callback = self._get_user_function(callback)
-                    if not callable(callback):
+                    if not isroutine(callback):
+                        callback = self._get_user_function(t.cast(str, callback))
+                    if not isroutine(callback):
                         _warn(f"invoke_callback(): {callback} is not callable.")
                         return None
                     return self._call_function_with_state(callback, list(args) if args else None)
@@ -2174,13 +2157,13 @@ class Gui:
 
     def __bind_local_func(self, name: str):
         func = getattr(self, name, None)
-        if func is not None and not callable(func):  # pragma: no cover
+        if func is not None and not isroutine(func):  # pragma: no cover
             _warn(f"{self.__class__.__name__}.{name}: {func} should be a function; looking for {name} in the script.")
             func = None
         if func is None:
             func = self._get_locals_bind().get(name)
         if func is not None:
-            if callable(func):
+            if isroutine(func):
                 setattr(self, name, func)
             else:  # pragma: no cover
                 _warn(f"{name}: {func} should be a function.")
@@ -2258,7 +2241,7 @@ class Gui:
         callback: t.Optional[t.Union[str, t.Callable]] = None,
         message: t.Optional[str] = "Work in Progress...",
     ):  # pragma: no cover
-        action_name = callback.__name__ if callable(callback) else callback
+        action_name = callback.__name__ if isroutine(callback) else str(callback)
         # TODO: what if lambda? (it does work)
         func = self.__get_on_cancel_block_ui(action_name)
         def_action_name = func.__name__
@@ -2315,18 +2298,18 @@ class Gui:
         return self._render_route()
 
     def _call_on_exception(self, function_name: str, exception: Exception) -> bool:
-        if hasattr(self, "on_exception") and callable(self.on_exception):
+        if hasattr(self, "on_exception") and isroutine(self.on_exception):
             try:
-                self.on_exception(self.__get_state(), function_name, exception)
+                self._call_function_with_state(self.on_exception, [function_name, exception])
             except Exception as e:  # pragma: no cover
                 _warn("Exception raised in on_exception()", e)
             return True
         return False
 
     def __call_on_status(self) -> t.Optional[str]:
-        if hasattr(self, "on_status") and callable(self.on_status):
+        if hasattr(self, "on_status") and isroutine(self.on_status):
             try:
-                return self.on_status(self.__get_state())
+                return self._call_function_with_state(self.on_status)
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception("on_status", e):
                     _warn("Exception raised in on_status", e)
@@ -2349,15 +2332,12 @@ class Gui:
 
     def _get_navigated_page(self, page_name: str) -> t.Any:
         nav_page = page_name
-        if hasattr(self, "on_navigate") and callable(self.on_navigate):
+        if hasattr(self, "on_navigate") and isroutine(self.on_navigate):
             try:
-                if self.on_navigate.__code__.co_argcount == 2:
-                    nav_page = self.on_navigate(self.__get_state(), page_name)
-                else:
-                    params = request.args.to_dict() if hasattr(request, "args") else {}
-                    params.pop("client_id", None)
-                    params.pop("v", None)
-                    nav_page = self.on_navigate(self.__get_state(), page_name, params)
+                params = request.args.to_dict() if hasattr(request, "args") else {}
+                params.pop("client_id", None)
+                params.pop("v", None)
+                nav_page = self._call_function_with_state(self.on_navigate, [page_name, params])
                 if nav_page != page_name:
                     if isinstance(nav_page, str):
                         if self._navigate(nav_page):
@@ -2374,18 +2354,10 @@ class Gui:
         if page_name == Gui.__root_page_name:
             page_name = "/"
         on_page_load_fn = self._get_user_function("on_page_load")
-        if not callable(on_page_load_fn):
+        if not isroutine(on_page_load_fn):
             return
         try:
-            arg_count = on_page_load_fn.__code__.co_argcount
-            if arg_count > 0 and ismethod(on_page_load_fn):
-                arg_count -= 1
-            args: t.List[t.Any] = [None for _ in range(arg_count)]
-            if arg_count > 0:
-                args[0] = self.__get_state()
-            if arg_count > 1:
-                args[1] = page_name
-            on_page_load_fn(*args)
+            self._call_function_with_state(on_page_load_fn, [page_name])
         except Exception as e:
             if not self._call_on_exception("on_page_load", e):
                 _warn("Exception raised in on_page_load()", e)
@@ -2921,14 +2893,12 @@ class Gui:
     def _fire_event(
         self, event_name: str, client_id: t.Optional[str] = None, payload: t.Optional[t.Dict[str, t.Any]] = None
     ):
-        # fire event is executed after 0.1s to let the current state manipulation finish
-        # (that would change the credentials for example)
-        # in ts, we would use Promise.resolve(() => {__do_fire_event})
-        Timer(
-            interval=0.1,
-            function=self.__do_fire_event,
+        # the event manager will take care of starting the thread
+        # once the current callback (or the next one) is finished
+        self.__event_manager._add_thread(Thread(
+            target=self.__do_fire_event,
             args=(event_name, client_id, payload),
-        ).start()
+        ))
 
     def __do_fire_event(
         self, event_name: str, client_id: t.Optional[str] = None, payload: t.Optional[t.Dict[str, t.Any]] = None
@@ -2940,7 +2910,7 @@ class Gui:
             request.sid = None  # type: ignore[attr-defined]
 
         try:
-            with self.get_flask_app().app_context():
+            with self.get_flask_app().app_context(), self.__event_manager:
                 if client_id:
                     setattr(g, Gui.__ARG_CLIENT_ID, client_id)
                 _Hooks()._fire_event(event_name, client_id, payload)
