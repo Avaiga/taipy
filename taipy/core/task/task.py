@@ -80,7 +80,7 @@ class Task(_Entity, _Labeled):
     Attributes:
         config_id (str): The identifier of the `TaskConfig^`.
         properties (dict[str, Any]): A dictionary of additional properties.
-        function (callable): The python function to execute. The _function_ must take as argument the
+        function (callable): The python function to execute. The _function_ must take as parameter the
             data referenced by inputs data nodes, and must return the data referenced by outputs data nodes.
         input (Union[DataNode^, List[DataNode^]]): The list of inputs.
         output (Union[DataNode^, List[DataNode^]]): The list of outputs.

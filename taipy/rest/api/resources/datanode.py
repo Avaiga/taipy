@@ -82,7 +82,7 @@ class DataNodeResource(Resource):
                 In this example the REST API is served on port 5000 on localhost. We are using curl command line
                 client.
 
-                `DATANODE_hist_cfg_75750ed8-4e09-4e00-958d-e352ee426cc9` is the value of the *datanode_id* argument. It
+                `DATANODE_hist_cfg_75750ed8-4e09-4e00-958d-e352ee426cc9` is the value of the *datanode_id* parameter. It
                 represents the identifier of the data node we want to retrieve.
 
                 In case of success here is an example of the response:
@@ -121,7 +121,7 @@ class DataNodeResource(Resource):
                 print(response)
                 print(response.json())
                 ```
-                `DATANODE_hist_cfg_75750ed8-4e09-4e00-958d-e352ee426cc9` is the value of the *datanode_id* argument. It
+                `DATANODE_hist_cfg_75750ed8-4e09-4e00-958d-e352ee426cc9` is the value of the *datanode_id* parameter. It
                 represents the identifier of the data node we want to retrieve.
 
                 In case of success here is an output example:
@@ -179,7 +179,7 @@ class DataNodeResource(Resource):
         - api
       summary: Delete a data node.
       description: |
-        Deletes the `DataNode^` identified by the  *datanode_id* given as argument. If the data node does not exist,
+        Deletes the `DataNode^` identified by the  *datanode_id* given as parameter. If the data node does not exist,
         a 404 error is returned.
 
         !!! Example
@@ -193,7 +193,7 @@ class DataNodeResource(Resource):
                 client.
 
                 `DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d` is the value of the
-                *datanode_id* argument. It represents the identifier of the data node we want to delete.
+                *datanode_id* parameter. It represents the identifier of the data node we want to delete.
 
                 In case of success here is an example of the response:
                 ``` JSON
@@ -216,7 +216,7 @@ class DataNodeResource(Resource):
                 print(response.json())
                 ```
                 `DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d` is the value of the
-                *datanode_id* argument. It represents the identifier of the Cycle we want to delete.
+                *datanode_id* parameter. It represents the identifier of the Cycle we want to delete.
 
                 In case of success here is an output example:
                 ```
@@ -378,7 +378,7 @@ class DataNodeList(Resource):
       tags:
         - api
       description: |
-        Creates a new data node from the *config_id* given as argument.
+        Creates a new data node from the *config_id* given as parameter.
 
         !!! Example
 
@@ -389,7 +389,7 @@ class DataNodeList(Resource):
                 In this example the REST API is served on port 5000 on localhost. We are using curl command line
                 client.
 
-                In this example the *config_id* value ("historical_data_set") is given as argument directly in the
+                In this example the *config_id* value ("historical_data_set") is given as parameter directly in the
                 url. A corresponding `DataNodeConfig^` must exist and must have been configured before.
 
                 Here is the output message example:
@@ -413,7 +413,7 @@ class DataNodeList(Resource):
                 print(response)
                 print(response.json())
                 ```
-                In this example the *config_id* value ("historical_data_set") is given as argument directly in the
+                In this example the *config_id* value ("historical_data_set") is given as parameter directly in the
                 url. A corresponding `DataNodeConfig^` must exist and must have been configured before.
 
                 Here is the output example:
@@ -507,7 +507,7 @@ class DataNodeReader(Resource):
                 ```
 
                 `DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d` is the *datanode_id*
-                argument. It represents the identifier of the data node to read.
+                parameter. It represents the identifier of the data node to read.
 
                 Here is an output example. In this case, the storage type of the data node to read is `csv`,
                 and no exposed type is specified. The data is exposed as a list of dictionaries, each dictionary
@@ -531,7 +531,7 @@ class DataNodeReader(Resource):
                 print(response.json())
                 ```
                 `DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d` is the *datanode_id*
-                argument. It represents the identifier of the data node to read.
+                parameter. It represents the identifier of the data node to read.
 
                 Here is an output example. In this case, the storage type of the data node to read is `csv`,
                 and no exposed type is specified. The data is exposed as a list of dictionaries, each dictionary
