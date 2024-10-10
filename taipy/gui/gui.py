@@ -24,7 +24,7 @@ import typing as t
 import warnings
 from importlib import metadata, util
 from importlib.util import find_spec
-from inspect import currentframe, getabsfile, ismethod, ismodule, isroutine
+from inspect import currentframe, getabsfile, ismethod, ismodule
 from pathlib import Path
 from threading import Thread, Timer
 from types import FrameType, FunctionType, LambdaType, ModuleType, SimpleNamespace
@@ -89,6 +89,7 @@ from .utils import (
     _getscopeattr,
     _getscopeattr_drill,
     _hasscopeattr,
+    _is_function_like,
     _is_in_notebook,
     _LocalsContext,
     _MapDict,
@@ -439,7 +440,7 @@ class Gui:
         if Gui.__content_providers.get(content_type):
             _warn(f"The type {content_type} is already associated with a provider.")
             return
-        if not isroutine(content_provider):
+        if not _is_function_like(content_provider):
             _warn(f"The provider for {content_type} must be a function.")
             return
         Gui.__content_providers[content_type] = content_provider
@@ -483,9 +484,9 @@ class Gui:
                         Gui.register_content_provider(MatplotlibFigure, get_matplotlib_content)
                         provider_fn = get_matplotlib_content
 
-            if isroutine(provider_fn):
+            if _is_function_like(provider_fn):
                 try:
-                    return provider_fn(t.cast(t.Any, content))
+                    return t.cast(t.Callable, provider_fn)(t.cast(t.Any, content))
                 except Exception as e:
                     _warn(f"Error in content provider for type {str(type(content))}", e)
         return (
@@ -824,11 +825,11 @@ class Gui:
             _warn("", e)
             return
         on_change_fn = self._get_user_function(on_change) if on_change else None
-        if not isroutine(on_change_fn):
+        if not _is_function_like(on_change_fn):
             on_change_fn = self._get_user_function("on_change")
-        if isroutine(on_change_fn):
+        if _is_function_like(on_change_fn):
             try:
-                self._call_function_with_state(on_change_fn, [var_name, value, current_context])
+                self._call_function_with_state(t.cast(t.Callable, on_change_fn), [var_name, value, current_context])
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception(on_change or "on_change", e):
                     _warn(f"{on_change or 'on_change'}(): callback function raised an exception", e)
@@ -870,7 +871,7 @@ class Gui:
             cb_function_name = q_args.get(Gui.__USER_CONTENT_CB)
             if cb_function_name:
                 cb_function = self._get_user_function(cb_function_name)
-                if not isroutine(cb_function):
+                if not _is_function_like(cb_function):
                     parts = cb_function_name.split(".", 1)
                     if len(parts) > 1:
                         base = _getscopeattr(self, parts[0], None)
@@ -880,23 +881,23 @@ class Gui:
                             base = self.__evaluator._get_instance_in_context(parts[0])
                             if base and (meth := getattr(base, parts[1], None)):
                                 cb_function = meth
-                if not isroutine(cb_function):
+                if not _is_function_like(cb_function):
                     _warn(f"{cb_function_name}() callback function has not been defined.")
                     cb_function = None
         if cb_function is None:
             cb_function_name = "on_user_content"
-            if hasattr(self, cb_function_name) and isroutine(self.on_user_content):
+            if hasattr(self, cb_function_name) and _is_function_like(self.on_user_content):
                 cb_function = self.on_user_content
             else:
                 _warn("on_user_content() callback function has not been defined.")
-        if isroutine(cb_function):
+        if _is_function_like(cb_function):
             try:
                 args: t.List[t.Any] = []
                 if path:
                     args.append(path)
                 if len(q_args):
                     args.append(q_args)
-                ret = self._call_function_with_state(cb_function, args)
+                ret = self._call_function_with_state(t.cast(t.Callable, cb_function), args)
                 if ret is None:
                     _warn(f"{cb_function_name}() callback function must return a value.")
                 else:
@@ -1029,9 +1030,12 @@ class Gui:
                                 pass
                         data["path"] = file_path
                         file_fn = self._get_user_function(on_upload_action)
-                        if not isroutine(file_fn):
+                        if not _is_function_like(file_fn):
                             file_fn = _getscopeattr(self, on_upload_action)
-                        self._call_function_with_state(file_fn, ["file_upload", {"args": [data]}])
+                        if _is_function_like(file_fn):
+                            self._call_function_with_state(
+                                t.cast(t.Callable, file_fn), ["file_upload", {"args": [data]}]
+                            )
                     else:
                         setattr(self._bindings(), var_name, newvalue)
         return ("", 200)
@@ -1437,13 +1441,13 @@ class Gui:
         func = (
             getattr(self, func_name.split(".", 2)[1], func_name) if func_name.startswith(f"{Gui.__SELF_VAR}.") else None
         )
-        if not isroutine(func):
+        if not _is_function_like(func):
             func = _getscopeattr(self, func_name, None)
-        if not isroutine(func):
+        if not _is_function_like(func):
             func = self._get_locals_bind().get(func_name)
-        if not isroutine(func):
+        if not _is_function_like(func):
             func = self.__locals_context.get_default().get(func_name)
-        return func if isroutine(func) else func_name
+        return t.cast(t.Callable, func) if _is_function_like(func) else func_name
 
     def _get_user_instance(self, class_name: str, class_type: type) -> t.Union[object, str]:
         cls = _getscopeattr(self, class_name, None)
@@ -1499,17 +1503,17 @@ class Gui:
         id = t.cast(str, kwargs.get("id"))
         payload = kwargs.get("payload")
 
-        if isroutine(action_function):
+        if _is_function_like(action_function):
             try:
                 try:
                     args = [self._get_real_var_name(id)[0], payload]
                 except Exception:
                     args = [id, payload]
-                self._call_function_with_state(action_function, [args])
+                self._call_function_with_state(t.cast(t.Callable, action_function), [args])
                 return True
             except Exception as e:  # pragma: no cover
-                if not self._call_on_exception(action_function.__name__, e):
-                    _warn(f"on_action(): Exception raised in '{action_function.__name__}()'", e)
+                if not self._call_on_exception(t.cast(t.Callable, action_function).__name__, e):
+                    _warn(f"on_action(): Exception raised in '{t.cast(t.Callable, action_function).__name__}()'", e)
         return False
 
     def _call_function_with_state(self, user_function: t.Callable, args: t.Optional[t.List[t.Any]] = None) -> t.Any:
@@ -1556,12 +1560,12 @@ class Gui:
             with self.get_flask_app().app_context():
                 setattr(g, Gui.__ARG_CLIENT_ID, state_id)
                 with self._set_module_context(module_context):
-                    if not isroutine(callback):
+                    if not _is_function_like(callback):
                         callback = self._get_user_function(t.cast(str, callback))
-                    if not isroutine(callback):
+                    if not _is_function_like(callback):
                         _warn(f"invoke_callback(): {callback} is not callable.")
                         return None
-                    return self._call_function_with_state(callback, list(args) if args else None)
+                    return self._call_function_with_state(t.cast(t.Callable, callback), list(args) if args else None)
         except Exception as e:  # pragma: no cover
             if not self._call_on_exception(callback.__name__ if callable(callback) else callback, e):
                 _warn(
@@ -2157,13 +2161,13 @@ class Gui:
 
     def __bind_local_func(self, name: str):
         func = getattr(self, name, None)
-        if func is not None and not isroutine(func):  # pragma: no cover
+        if func is not None and not _is_function_like(func):  # pragma: no cover
             _warn(f"{self.__class__.__name__}.{name}: {func} should be a function; looking for {name} in the script.")
             func = None
         if func is None:
             func = self._get_locals_bind().get(name)
         if func is not None:
-            if isroutine(func):
+            if _is_function_like(func):
                 setattr(self, name, func)
             else:  # pragma: no cover
                 _warn(f"{name}: {func} should be a function.")
@@ -2208,11 +2212,11 @@ class Gui:
     def _download(
         self, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[t.Union[str, t.Callable]] = ""
     ):
-        if isroutine(on_action) and on_action.__name__:
+        if _is_function_like(on_action) and t.cast(t.Callable, on_action).__name__:
             on_action_name = (
                 _get_lambda_id(t.cast(LambdaType, on_action))
-                if on_action.__name__ == "<lambda>"
-                else _get_expr_var_name(on_action.__name__)
+                if t.cast(t.Callable, on_action).__name__ == "<lambda>"
+                else _get_expr_var_name(t.cast(t.Callable, on_action).__name__)
             )
             if on_action_name:
                 self._bind_var_val(on_action_name, on_action)
@@ -2241,7 +2245,7 @@ class Gui:
         callback: t.Optional[t.Union[str, t.Callable]] = None,
         message: t.Optional[str] = "Work in Progress...",
     ):  # pragma: no cover
-        action_name = callback.__name__ if isroutine(callback) else str(callback)
+        action_name = t.cast(t.Callable, callback).__name__ if _is_function_like(callback) else str(callback)
         # TODO: what if lambda? (it does work)
         func = self.__get_on_cancel_block_ui(action_name)
         def_action_name = func.__name__
@@ -2289,27 +2293,27 @@ class Gui:
             _setscopeattr(self, Gui.__ON_INIT_NAME, True)
             self.__pre_render_pages()
             self.__init_libs()
-            if hasattr(self, "on_init") and isroutine(self.on_init):
+            if hasattr(self, "on_init") and _is_function_like(self.on_init):
                 try:
-                    self._call_function_with_state(self.on_init)
+                    self._call_function_with_state(t.cast(t.Callable, self.on_init))
                 except Exception as e:  # pragma: no cover
                     if not self._call_on_exception("on_init", e):
                         _warn("Exception raised in on_init()", e)
         return self._render_route()
 
     def _call_on_exception(self, function_name: str, exception: Exception) -> bool:
-        if hasattr(self, "on_exception") and isroutine(self.on_exception):
+        if hasattr(self, "on_exception") and _is_function_like(self.on_exception):
             try:
-                self._call_function_with_state(self.on_exception, [function_name, exception])
+                self._call_function_with_state(t.cast(t.Callable, self.on_exception), [function_name, exception])
             except Exception as e:  # pragma: no cover
                 _warn("Exception raised in on_exception()", e)
             return True
         return False
 
     def __call_on_status(self) -> t.Optional[str]:
-        if hasattr(self, "on_status") and isroutine(self.on_status):
+        if hasattr(self, "on_status") and _is_function_like(self.on_status):
             try:
-                return self._call_function_with_state(self.on_status)
+                return self._call_function_with_state(t.cast(t.Callable, self.on_status))
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception("on_status", e):
                     _warn("Exception raised in on_status", e)
@@ -2332,12 +2336,12 @@ class Gui:
 
     def _get_navigated_page(self, page_name: str) -> t.Any:
         nav_page = page_name
-        if hasattr(self, "on_navigate") and isroutine(self.on_navigate):
+        if hasattr(self, "on_navigate") and _is_function_like(self.on_navigate):
             try:
                 params = request.args.to_dict() if hasattr(request, "args") else {}
                 params.pop("client_id", None)
                 params.pop("v", None)
-                nav_page = self._call_function_with_state(self.on_navigate, [page_name, params])
+                nav_page = self._call_function_with_state(t.cast(t.Callable, self.on_navigate), [page_name, params])
                 if nav_page != page_name:
                     if isinstance(nav_page, str):
                         if self._navigate(nav_page):
@@ -2354,10 +2358,10 @@ class Gui:
         if page_name == Gui.__root_page_name:
             page_name = "/"
         on_page_load_fn = self._get_user_function("on_page_load")
-        if not isroutine(on_page_load_fn):
+        if not _is_function_like(on_page_load_fn):
             return
         try:
-            self._call_function_with_state(on_page_load_fn, [page_name])
+            self._call_function_with_state(t.cast(t.Callable, on_page_load_fn), [page_name])
         except Exception as e:
             if not self._call_on_exception("on_page_load", e):
                 _warn("Exception raised in on_page_load()", e)
@@ -2895,10 +2899,12 @@ class Gui:
     ):
         # the event manager will take care of starting the thread
         # once the current callback (or the next one) is finished
-        self.__event_manager._add_thread(Thread(
-            target=self.__do_fire_event,
-            args=(event_name, client_id, payload),
-        ))
+        self.__event_manager._add_thread(
+            Thread(
+                target=self.__do_fire_event,
+                args=(event_name, client_id, payload),
+            )
+        )
 
     def __do_fire_event(
         self, event_name: str, client_id: t.Optional[str] = None, payload: t.Optional[t.Dict[str, t.Any]] = None
