@@ -34,7 +34,7 @@ from ..utils import (
     _getscopeattr,
     _getscopeattr_drill,
     _is_boolean,
-    _is_function_like,
+    _is_function,
     _is_true,
     _is_unnamed_function,
     _MapDict,
@@ -142,7 +142,7 @@ class _Builder:
             hash_value = gui._evaluate_expr(value)
             try:
                 func = gui._get_user_function(hash_value)
-                if _is_function_like(func):
+                if _is_function(func):
                     return (func, hash_value)
                 return (_getscopeattr_drill(gui, hash_value), hash_value)
             except AttributeError:
@@ -165,7 +165,7 @@ class _Builder:
                     (val, hash_name) = _Builder.__parse_attribute_value(gui, v.replace('\\"', '"'))
                 else:
                     val = v
-                if _is_function_like(val) and not hash_name:
+                if _is_function(val) and not hash_name:
                     # if it's not a callable (and not a string), forget it
                     if _is_unnamed_function(val):
                         # lambda or callable instance
@@ -349,7 +349,7 @@ class _Builder:
             if not optional:
                 _warn(f"Property {name} is required for control {self.__control_type}.")
             return self
-        elif _is_function_like(str_attr):
+        elif _is_function(str_attr):
             str_attr = self.__hashes.get(name)
             if str_attr is None:
                 return self
@@ -405,7 +405,7 @@ class _Builder:
         adapter = self.__attributes.get("adapter", adapter)
         if adapter and isinstance(adapter, str):
             adapter = self.__gui._get_user_function(adapter)
-        if adapter and not _is_function_like(adapter):
+        if adapter and not _is_function(adapter):
             _warn(f"{self.__element_name}: adapter property value is invalid.")
             adapter = None
         var_type = self.__attributes.get("type", var_type)
@@ -427,7 +427,7 @@ class _Builder:
                 var_type = self.__gui._get_unique_type_adapter(type(elt).__name__)
             if adapter is None:
                 adapter = self.__gui._get_adapter_for_type(var_type)
-            elif var_type == str.__name__ and _is_function_like(adapter):
+            elif var_type == str.__name__ and _is_function(adapter):
                 var_type += (
                     _get_lambda_id(t.cast(LambdaType, adapter))
                     if _is_unnamed_function(adapter)
@@ -579,7 +579,7 @@ class _Builder:
         if not isinstance(self.__attributes.get("style"), (type(None), dict, _MapDict)):
             _warn("Table: property 'style' has been renamed to 'row_class_name'.")
         if row_class_name := self.__attributes.get("row_class_name"):
-            if _is_function_like(row_class_name):
+            if _is_function(row_class_name):
                 value = self.__hashes.get("row_class_name")
             elif isinstance(row_class_name, str):
                 value = row_class_name.strip()
@@ -590,7 +590,7 @@ class _Builder:
             elif value:
                 self.set_attribute("rowClassName", value)
         if tooltip := self.__attributes.get("tooltip"):
-            if _is_function_like(tooltip):
+            if _is_function(tooltip):
                 value = self.__hashes.get("tooltip")
             elif isinstance(tooltip, str):
                 value = tooltip.strip()

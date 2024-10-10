@@ -82,7 +82,7 @@ from .utils import (
     _get_client_var_name,
     _get_css_var_value,
     _get_expr_var_name,
-    _get_function_like_name,
+    _function_name,
     _get_lambda_id,
     _get_module_name_from_frame,
     _get_non_existent_file_path,
@@ -90,7 +90,7 @@ from .utils import (
     _getscopeattr,
     _getscopeattr_drill,
     _hasscopeattr,
-    _is_function_like,
+    _is_function,
     _is_in_notebook,
     _is_unnamed_function,
     _LocalsContext,
@@ -442,7 +442,7 @@ class Gui:
         if Gui.__content_providers.get(content_type):
             _warn(f"The type {content_type} is already associated with a provider.")
             return
-        if not _is_function_like(content_provider):
+        if not _is_function(content_provider):
             _warn(f"The provider for {content_type} must be a function.")
             return
         Gui.__content_providers[content_type] = content_provider
@@ -486,7 +486,7 @@ class Gui:
                         Gui.register_content_provider(MatplotlibFigure, get_matplotlib_content)
                         provider_fn = get_matplotlib_content
 
-            if _is_function_like(provider_fn):
+            if _is_function(provider_fn):
                 try:
                     return t.cast(t.Callable, provider_fn)(t.cast(t.Any, content))
                 except Exception as e:
@@ -827,9 +827,9 @@ class Gui:
             _warn("", e)
             return
         on_change_fn = self._get_user_function(on_change) if on_change else None
-        if not _is_function_like(on_change_fn):
+        if not _is_function(on_change_fn):
             on_change_fn = self._get_user_function("on_change")
-        if _is_function_like(on_change_fn):
+        if _is_function(on_change_fn):
             try:
                 self._call_function_with_state(t.cast(t.Callable, on_change_fn), [var_name, value, current_context])
             except Exception as e:  # pragma: no cover
@@ -873,7 +873,7 @@ class Gui:
             cb_function_name = q_args.get(Gui.__USER_CONTENT_CB)
             if cb_function_name:
                 cb_function = self._get_user_function(cb_function_name)
-                if not _is_function_like(cb_function):
+                if not _is_function(cb_function):
                     parts = cb_function_name.split(".", 1)
                     if len(parts) > 1:
                         base = _getscopeattr(self, parts[0], None)
@@ -883,16 +883,16 @@ class Gui:
                             base = self.__evaluator._get_instance_in_context(parts[0])
                             if base and (meth := getattr(base, parts[1], None)):
                                 cb_function = meth
-                if not _is_function_like(cb_function):
+                if not _is_function(cb_function):
                     _warn(f"{cb_function_name}() callback function has not been defined.")
                     cb_function = None
         if cb_function is None:
             cb_function_name = "on_user_content"
-            if hasattr(self, cb_function_name) and _is_function_like(self.on_user_content):
+            if hasattr(self, cb_function_name) and _is_function(self.on_user_content):
                 cb_function = self.on_user_content
             else:
                 _warn("on_user_content() callback function has not been defined.")
-        if _is_function_like(cb_function):
+        if _is_function(cb_function):
             try:
                 args: t.List[t.Any] = []
                 if path:
@@ -1032,9 +1032,9 @@ class Gui:
                                 pass
                         data["path"] = file_path
                         file_fn = self._get_user_function(on_upload_action)
-                        if not _is_function_like(file_fn):
+                        if not _is_function(file_fn):
                             file_fn = _getscopeattr(self, on_upload_action)
-                        if _is_function_like(file_fn):
+                        if _is_function(file_fn):
                             self._call_function_with_state(
                                 t.cast(t.Callable, file_fn), ["file_upload", {"args": [data]}]
                             )
@@ -1443,13 +1443,13 @@ class Gui:
         func = (
             getattr(self, func_name.split(".", 2)[1], func_name) if func_name.startswith(f"{Gui.__SELF_VAR}.") else None
         )
-        if not _is_function_like(func):
+        if not _is_function(func):
             func = _getscopeattr(self, func_name, None)
-        if not _is_function_like(func):
+        if not _is_function(func):
             func = self._get_locals_bind().get(func_name)
-        if not _is_function_like(func):
+        if not _is_function(func):
             func = self.__locals_context.get_default().get(func_name)
-        return t.cast(t.Callable, func) if _is_function_like(func) else func_name
+        return t.cast(t.Callable, func) if _is_function(func) else func_name
 
     def _get_user_instance(self, class_name: str, class_type: type) -> t.Union[object, str]:
         cls = _getscopeattr(self, class_name, None)
@@ -1505,7 +1505,7 @@ class Gui:
         id = t.cast(str, kwargs.get("id"))
         payload = kwargs.get("payload")
 
-        if _is_function_like(action_function):
+        if _is_function(action_function):
             try:
                 try:
                     args = [self._get_real_var_name(id)[0], payload]
@@ -1515,7 +1515,7 @@ class Gui:
                 return True
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception(action_function, e):
-                    _warn(f"on_action(): Exception raised in '{_get_function_like_name(action_function)}()'", e)
+                    _warn(f"on_action(): Exception raised in '{_function_name(action_function)}()'", e)
         return False
 
     def _call_function_with_state(self, user_function: t.Callable, args: t.Optional[t.List[t.Any]] = None) -> t.Any:
@@ -1562,16 +1562,16 @@ class Gui:
             with self.get_flask_app().app_context():
                 setattr(g, Gui.__ARG_CLIENT_ID, state_id)
                 with self._set_module_context(module_context):
-                    if not _is_function_like(callback):
+                    if not _is_function(callback):
                         callback = self._get_user_function(t.cast(str, callback))
-                    if not _is_function_like(callback):
+                    if not _is_function(callback):
                         _warn(f"invoke_callback(): {callback} is not callable.")
                         return None
                     return self._call_function_with_state(t.cast(t.Callable, callback), list(args) if args else None)
         except Exception as e:  # pragma: no cover
             if not self._call_on_exception(callback, e):
                 _warn(
-                    f"Gui.invoke_callback(): Exception raised in {_get_function_like_name(callback)}",
+                    f"Gui.invoke_callback(): Exception raised in {_function_name(callback)}",
                     e,
                 )
         finally:
@@ -2162,13 +2162,13 @@ class Gui:
 
     def __bind_local_func(self, name: str):
         func = getattr(self, name, None)
-        if func is not None and not _is_function_like(func):  # pragma: no cover
+        if func is not None and not _is_function(func):  # pragma: no cover
             _warn(f"{self.__class__.__name__}.{name}: {func} should be a function; looking for {name} in the script.")
             func = None
         if func is None:
             func = self._get_locals_bind().get(name)
         if func is not None:
-            if _is_function_like(func):
+            if _is_function(func):
                 setattr(self, name, func)
             else:  # pragma: no cover
                 _warn(f"{name}: {func} should be a function.")
@@ -2213,7 +2213,7 @@ class Gui:
     def _download(
         self, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[t.Union[str, t.Callable]] = ""
     ):
-        if _is_function_like(on_action):
+        if _is_function(on_action):
             on_action_name = (
                 _get_lambda_id(t.cast(LambdaType, on_action))
                 if _is_unnamed_function(on_action)
@@ -2299,7 +2299,7 @@ class Gui:
             _setscopeattr(self, Gui.__ON_INIT_NAME, True)
             self.__pre_render_pages()
             self.__init_libs()
-            if hasattr(self, "on_init") and _is_function_like(self.on_init):
+            if hasattr(self, "on_init") and _is_function(self.on_init):
                 try:
                     self._call_function_with_state(t.cast(t.Callable, self.on_init))
                 except Exception as e:  # pragma: no cover
@@ -2308,8 +2308,8 @@ class Gui:
         return self._render_route()
 
     def _call_on_exception(self, function: t.Any, exception: Exception) -> bool:
-        if hasattr(self, "on_exception") and _is_function_like(self.on_exception):
-            function_name = _get_function_like_name(function) if callable(function) else str(function)
+        if hasattr(self, "on_exception") and _is_function(self.on_exception):
+            function_name = _function_name(function) if callable(function) else str(function)
             try:
                 self._call_function_with_state(t.cast(t.Callable, self.on_exception), [function_name, exception])
             except Exception as e:  # pragma: no cover
@@ -2318,7 +2318,7 @@ class Gui:
         return False
 
     def __call_on_status(self) -> t.Optional[str]:
-        if hasattr(self, "on_status") and _is_function_like(self.on_status):
+        if hasattr(self, "on_status") and _is_function(self.on_status):
             try:
                 return self._call_function_with_state(t.cast(t.Callable, self.on_status))
             except Exception as e:  # pragma: no cover
@@ -2343,7 +2343,7 @@ class Gui:
 
     def _get_navigated_page(self, page_name: str) -> t.Any:
         nav_page = page_name
-        if hasattr(self, "on_navigate") and _is_function_like(self.on_navigate):
+        if hasattr(self, "on_navigate") and _is_function(self.on_navigate):
             try:
                 params = request.args.to_dict() if hasattr(request, "args") else {}
                 params.pop("client_id", None)
@@ -2365,7 +2365,7 @@ class Gui:
         if page_name == Gui.__root_page_name:
             page_name = "/"
         on_page_load_fn = self._get_user_function("on_page_load")
-        if not _is_function_like(on_page_load_fn):
+        if not _is_function(on_page_load_fn):
             return
         try:
             self._call_function_with_state(t.cast(t.Callable, on_page_load_fn), [page_name])

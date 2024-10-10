@@ -14,11 +14,11 @@ from inspect import isclass
 from types import LambdaType
 
 
-def _is_function_like(s: t.Any) -> bool:
+def _is_function(s: t.Any) -> bool:
     return callable(s) and not isclass(s)
 
 
-def _get_function_like_name(s: t.Any) -> str:
+def _function_name(s: t.Any) -> str:
     if hasattr(s, "__name__"):
         return s.__name__
     elif callable(s):
