@@ -1743,27 +1743,31 @@
                 "properties": [
                     {
                         "name": "severity",
-                        "default_property": false,
                         "type": "dynamic(str)",
-                        "default_value": "\"info\"",
+                        "default_value": "\"error\"",
                         "doc": "Defines the severity level of the notification. Valid values: \"error\", \"warning\", \"info\", \"success\"."
                     },
                     {
                         "name": "message",
-                        "default_property": true, 
+                        "default_property": true,
                         "type": "dynamic(str)",
                         "default_value": "\"\"",
                         "doc": "The message displayed in the notification. Can be a dynamic string."
                     },
                     {
                         "name": "variant",
-                        "default_property": false,
                         "type": "str",
                         "default_value": "\"filled\"",
                         "doc": "Defines the variant of the notification. Valid values: \"filled\", \"outlined\", \"standard\"."
+                    },
+                    {
+                        "name": "defaultMessage",
+                        "type": "str",
+                        "default_value": "\"\"",
+                        "doc": "The default message displayed when the dynamic message is not provided."
                     }
                 ]
-            }
+            }                       
         ]                                        
     ],
     "blocks": [

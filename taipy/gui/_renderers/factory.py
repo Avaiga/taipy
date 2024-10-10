@@ -628,7 +628,9 @@ class _Factory:
         .set_value_and_default(var_type=PropertyType.dynamic_string)  
         .set_attributes(
             [
-                ("severity", PropertyType.string),  # severity is a simple string property
+                ("severity", PropertyType.string),  
+                ("variant", PropertyType.string),  
+                ("defaultMessage", PropertyType.string),
             ]
         ),
     }
