@@ -18,7 +18,7 @@
     <a target="_blank" href="https://discord.com/invite/SJyz2VJGxV"><img alt="Discord" height="20px" src="https://img.shields.io/discord/1125797687476887563?style=plastic&label=Discord&color=ff371a&link=https%3A%2F%2Fdiscord.com%2Finvite%2FSJyz2VJGxV">
     </a>
     <a target="_blank" href="https://docs.taipy.io/en/latest/"> <img height="20px" src="https://img.shields.io/badge/Docs-Taipy-ff371a?style=plastic" alt="Docs" /></a>
-    <a target="_blank" href="https://discord.com/invite/SJyz2VJGxV"><img alt="GitHub Release" height="20px" src="https://img.shields.io/github/v/release/Avaiga/taipy?display_name=release&style=plastic&color=ff371a"></a>
+    <a target="_blank" href="https://github.com/Avaiga/taipy/releases"><img alt="GitHub Release" height="20px" src="https://img.shields.io/github/v/release/Avaiga/taipy?display_name=release&style=plastic&color=ff371a"></a>
 </div>
 <br>
 
