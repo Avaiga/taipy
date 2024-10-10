@@ -376,7 +376,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                                             variant="outlined"
                                             color="error"
                                             onClick={onConfirmDialogOpen}
-                                            disabled={!scenario || !scenario[ScFProps.deletable]}
+                                            disabled={!scenario || !!scenario[ScFProps.deletable]}
                                         >
                                             Delete
                                         </Button>
