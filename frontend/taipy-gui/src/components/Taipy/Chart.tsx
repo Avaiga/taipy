@@ -46,6 +46,7 @@ import {
 import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
 import { Figure } from "react-plotly.js";
 import { lightenPayload } from "../../context/wsUtils";
+import { getComponentClassName } from "./TaipyStyle";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -60,7 +61,6 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     layout?: string;
     plotConfig?: string;
     onRangeChange?: string;
-    testId?: string;
     render?: boolean;
     defaultRender?: boolean;
     template?: string;
@@ -165,7 +165,12 @@ const getDecimatorsPayload = (
                             zAxis: getAxis(traces, i, columns, 2),
                             chartMode: modes[i],
                         }
-                      : undefined
+                      : {
+                            xAxis: getAxis(traces, i, columns, 0),
+                            yAxis: getAxis(traces, i, columns, 1),
+                            zAxis: getAxis(traces, i, columns, 2),
+                            chartMode: modes[i],
+                        }
               ),
               relayoutData: relayoutData,
           }
@@ -195,15 +200,15 @@ interface PlotlyDiv extends HTMLDivElement {
     };
 }
 
-interface WithpointNumbers {
+interface WithPointNumbers {
     pointNumbers: number[];
 }
 
 export const getPlotIndex = (pt: PlotDatum) =>
     pt.pointIndex === undefined
         ? pt.pointNumber === undefined
-            ? (pt as unknown as WithpointNumbers).pointNumbers?.length
-                ? (pt as unknown as WithpointNumbers).pointNumbers[0]
+            ? (pt as unknown as WithPointNumbers).pointNumbers?.length
+                ? (pt as unknown as WithPointNumbers).pointNumbers[0]
                 : 0
             : pt.pointNumber
         : pt.pointIndex;
@@ -527,26 +532,26 @@ const Chart = (props: ChartProp) => {
     }, [props.figure, selected, data, config, dataKey]);
 
     const plotConfig = useMemo(() => {
-        let plconf: Partial<Config> = {};
+        let plConf: Partial<Config> = {};
         if (props.plotConfig) {
             try {
-                plconf = JSON.parse(props.plotConfig);
+                plConf = JSON.parse(props.plotConfig);
             } catch (e) {
                 console.info(`Error while parsing Chart.plot_config\n${(e as Error).message || e}`);
             }
-            if (typeof plconf !== "object" || plconf === null || Array.isArray(plconf)) {
+            if (typeof plConf !== "object" || plConf === null || Array.isArray(plConf)) {
                 console.info("Error Chart.plot_config is not a dictionary");
-                plconf = {};
+                plConf = {};
             }
         }
-        plconf.displaylogo = !!plconf.displaylogo;
-        plconf.modeBarButtonsToAdd = TaipyPlotlyButtons;
-        // plconf.responsive = true; // this is the source of the on/off height ...
-        plconf.autosizable = true;
+        plConf.displaylogo = !!plConf.displaylogo;
+        plConf.modeBarButtonsToAdd = TaipyPlotlyButtons;
+        // plConf.responsive = true; // this is the source of the on/off height ...
+        plConf.autosizable = true;
         if (!active) {
-            plconf.staticPlot = true;
+            plConf.staticPlot = true;
         }
-        return plconf;
+        return plConf;
     }, [active, props.plotConfig]);
 
     const onRelayout = useCallback(
@@ -656,7 +661,8 @@ const Chart = (props: ChartProp) => {
                     tr[pt.curveNumber].push(getRealIndex(getPlotIndex(pt)));
                     return tr;
                 }, [] as number[][]);
-                if (config.traces.length === 0) { // figure
+                if (config.traces.length === 0) {
+                    // figure
                     const theVar = getUpdateVar(updateVars, "selected");
                     theVar && dispatch(createSendUpdateAction(theVar, traces, module, props.onChange, propagate));
                     return;
@@ -665,7 +671,15 @@ const Chart = (props: ChartProp) => {
                     const upvars = traces.map((_, idx) => getUpdateVar(updateVars, `selected${idx}`));
                     const setVars = new Set(upvars.filter((v) => v));
                     if (traces.length > 1 && setVars.size === 1) {
-                        dispatch(createSendUpdateAction(setVars.values().next().value, traces, module, props.onChange, propagate));
+                        dispatch(
+                            createSendUpdateAction(
+                                setVars.values().next().value,
+                                traces,
+                                module,
+                                props.onChange,
+                                propagate
+                            )
+                        );
                         return;
                     }
                     traces.forEach((tr, idx) => {
@@ -674,9 +688,9 @@ const Chart = (props: ChartProp) => {
                         }
                     });
                 } else if (config.traces.length === 1) {
-                    const upvar = getUpdateVar(updateVars, "selected0");
-                    if (upvar) {
-                        dispatch(createSendUpdateAction(upvar, [], module, props.onChange, propagate));
+                    const upVar = getUpdateVar(updateVars, "selected0");
+                    if (upVar) {
+                        dispatch(createSendUpdateAction(upVar, [], module, props.onChange, propagate));
                     }
                 }
             }
@@ -686,7 +700,7 @@ const Chart = (props: ChartProp) => {
 
     return render ? (
         <Tooltip title={hover || ""}>
-            <Box id={id} data-testid={props.testId} className={className} ref={plotRef}>
+            <Box id={id} className={`${className} ${getComponentClassName(props.children)}`} ref={plotRef}>
                 <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
                     {Array.isArray(props.figure) && props.figure.length && props.figure[0].data !== undefined ? (
                         <Plot
@@ -715,6 +729,7 @@ const Chart = (props: ChartProp) => {
                         />
                     )}
                 </Suspense>
+                {props.children}
             </Box>
         </Tooltip>
     ) : null;

@@ -206,11 +206,17 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                 )
                 if isinstance(value, float) and math.isnan(value):
                     value = None
+                error = None
+                if val_type not in ("date", "int", "float", "string"):
+                    try:
+                        json.dumps(value)
+                    except Exception as e:
+                        error = f"Unsupported data: {e}."
                 return (
                     value,
                     val_type,
                     None,
-                    None,
+                    error,
                 )
             except Exception as e:
                 return (None, None, None, f"read data_node: {e}")

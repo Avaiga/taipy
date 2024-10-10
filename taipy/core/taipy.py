@@ -865,7 +865,7 @@ def get_cycles() -> List[Cycle]:
 
 
 def can_create(config: Optional[Union[ScenarioConfig, DataNodeConfig]] = None) -> ReasonCollection:
-    """Indicate if a config can be created. The config should be a scenario or data node config.
+    """Indicate if a config section can be used to instantiate a scenario or a data node.
 
     If no config is provided, the function indicates if any scenario or data node config can be created.
 
