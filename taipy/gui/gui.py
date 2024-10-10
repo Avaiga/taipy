@@ -1587,7 +1587,7 @@ class Gui:
                     e,
                 )
         finally:
-            if this_sid and request:
+            if this_sid:
                 request.sid = this_sid  # type: ignore[attr-defined]
         return None
 
@@ -2916,15 +2916,16 @@ class Gui:
         ],
         with_state: t.Optional[bool] = False,
     ):
-        try:
-            _Hooks()._add_event_listener(event_name, listener, with_state)
-        except Exception as e:
-            _warn("Hooks: ", e)
+        _Hooks()._add_event_listener(event_name, listener, with_state)
 
     def _fire_event(
         self, event_name: str, client_id: t.Optional[str] = None, payload: t.Optional[t.Dict[str, t.Any]] = None
     ):
-        Timer(interval=0.1,
+        # fire event is executed after 0.1s to let the current state manipulation finish
+        # (that would change the credentials for example)
+        # in ts, we would use Promise.resolve(() => {__do_fire_event})
+        Timer(
+            interval=0.1,
             function=self.__do_fire_event,
             args=(event_name, client_id, payload),
         ).start()
@@ -2943,8 +2944,6 @@ class Gui:
                 if client_id:
                     setattr(g, Gui.__ARG_CLIENT_ID, client_id)
                 _Hooks()._fire_event(event_name, client_id, payload)
-        except Exception as e:
-            _warn("Hooks: ", e)
         finally:
-            if this_sid and request:
+            if this_sid:
                 request.sid = this_sid  # type: ignore[attr-defined]
