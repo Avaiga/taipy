@@ -245,7 +245,7 @@ class Task(_Entity, _Labeled):
     ) -> Submission:
         """Submit the task for execution.
 
-        Parameters:
+        Arguments:
             callbacks (List[Callable]): The list of callable functions to be called on status
                 change.
             force (bool): Force execution even if the data nodes are in cache.

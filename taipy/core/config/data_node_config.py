@@ -407,7 +407,7 @@ class DataNodeConfig(Section):
         where all data node configuration objects will find their default
         values when needed.
 
-        Parameters:
+        Arguments:
             storage_type (str): The default storage type for all data node configurations.
                 The possible values are *"pickle"* (the default value), *"csv"*, *"excel"*,
                 *"sql"*, *"mongo_collection"*, *"in_memory"*, *"json"*, *"parquet"*, *"generic"*,
@@ -438,7 +438,7 @@ class DataNodeConfig(Section):
     ) -> "DataNodeConfig":
         """Configure a new data node configuration from an existing one.
 
-        Parameters:
+        Arguments:
             source_configuration (DataNodeConfig): The source data node configuration.
             id (str): The unique identifier of the new data node configuration.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.<br/>
@@ -464,7 +464,7 @@ class DataNodeConfig(Section):
     ) -> "DataNodeConfig":
         """Configure a new data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new data node configuration.
             storage_type (Optional[str]): The data node configuration storage type. The possible values
                 are None (which is the default value of *"pickle"*, unless it has been overloaded by the
@@ -519,7 +519,7 @@ class DataNodeConfig(Section):
     ) -> "DataNodeConfig":
         """Configure a new CSV data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new CSV data node configuration.
             default_path (Optional[str]): The default path of the CSV file.
             encoding (Optional[str]): The encoding of the CSV file.
@@ -564,7 +564,7 @@ class DataNodeConfig(Section):
     ) -> "DataNodeConfig":
         """Configure a new JSON data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new JSON data node configuration.
             default_path (Optional[str]): The default path of the JSON file.
             encoding (Optional[str]): The encoding of the JSON file.
@@ -610,7 +610,7 @@ class DataNodeConfig(Section):
     ) -> "DataNodeConfig":
         """Configure a new Parquet data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new Parquet data node configuration.
             default_path (Optional[str]): The default path of the Parquet file.
             engine (Optional[str]): Parquet library to use. Possible values are *"fastparquet"* or
@@ -668,7 +668,7 @@ class DataNodeConfig(Section):
     ) -> "DataNodeConfig":
         """Configure a new Excel data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new Excel data node configuration.
             default_path (Optional[str]): The path of the Excel file.
             has_header (Optional[bool]): If True, indicates that the Excel file has a header.
@@ -714,7 +714,7 @@ class DataNodeConfig(Section):
     ) -> "DataNodeConfig":
         """Configure a new generic data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new generic data node configuration.
             read_fct (Optional[Callable]): The Python function called to read the data.
             write_fct (Optional[Callable]): The Python function called to write the data.
@@ -758,7 +758,7 @@ class DataNodeConfig(Section):
     ) -> "DataNodeConfig":
         """Configure a new *in-memory* data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new in_memory data node configuration.
             default_data (Optional[any]): The default data of the data nodes instantiated from
                 this in_memory data node configuration.
@@ -794,7 +794,7 @@ class DataNodeConfig(Section):
     ) -> "DataNodeConfig":
         """Configure a new pickle data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new pickle data node configuration.
             default_path (Optional[str]): The path of the pickle file.
             default_data (Optional[any]): The default data of the data nodes instantiated from
@@ -843,7 +843,7 @@ class DataNodeConfig(Section):
     ) -> "DataNodeConfig":
         """Configure a new SQL table data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new SQL data node configuration.
             db_name (str): The database name, or the name of the SQLite database file.
             db_engine (str): The database engine. Possible values are *"sqlite"*, *"mssql"*, *"mysql"*,
@@ -932,7 +932,7 @@ class DataNodeConfig(Section):
     ) -> "DataNodeConfig":
         """Configure a new SQL data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new SQL data node configuration.
             db_name (str): The database name, or the name of the SQLite database file.
             db_engine (str): The database engine. Possible values are *"sqlite"*, *"mssql"*, *"mysql"*,
@@ -1023,7 +1023,7 @@ class DataNodeConfig(Section):
     ) -> "DataNodeConfig":
         """Configure a new Mongo collection data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new Mongo collection data node configuration.
             db_name (str): The database name.
             collection_name (str): The collection in the database to read from and to write the data to.
@@ -1096,7 +1096,7 @@ class DataNodeConfig(Section):
     ) -> "DataNodeConfig":
         """Configure a new S3 object data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new S3 Object data node configuration.
             aws_access_key (str): Amazon Web Services ID for to identify account.
             aws_secret_access_key (str): Amazon Web Services access key to authenticate programmatic requests.
