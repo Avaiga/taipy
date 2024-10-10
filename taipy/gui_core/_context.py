@@ -352,11 +352,61 @@ class _GuiCoreContext(CoreEventConsumerBase):
         # remove empty cycles
         return [e for e in filtered_list if isinstance(e, Scenario) or (isinstance(e, (tuple, list)) and len(e[2]))]
 
+    def get_grouped_scenario_list(
+            self,
+            entities: t.List[t.Union[t.List, Scenario, None]],
+            group_by: t.Optional[str],
+    ):
+        if not group_by:
+            return entities
+        def get_group_key(scenario, group):
+            date = scenario.date
+            if group == "day":
+                return date.strftime("%Y-%m-%d")
+            elif group == "week":
+                return f"Week {date.isocalendar()[1]} of {date.year}"
+            elif group == "month":
+                return date.strftime("%B %Y")
+            elif group == "quarter":
+                quarter = (date.month - 1) // 3 + 1
+                return f"Q{quarter} {date.year}"
+            elif group == "year":
+                return date.strftime("%Y")
+            else:
+                raise ValueError(f"Unsupported group: {group}")
+            
+        grouped_scenarios = defaultdict(list)
+
+        if group_by == "auto":
+            # Implement auto grouping logic (e.g., by month)
+            group_by_list = ["year", "month", "day"]
+        elif group_by == "cycle":
+            group_by_list = ["year", "month", "cycle"]
+        else:
+            group_by_list = list(group_by)
+
+        for entity in entities:
+            if isinstance(entity, Scenario):
+                for group in group_by_list:
+                    key = get_group_key(entity, group)
+                    grouped_scenarios[key].append(entity)
+            elif isinstance(entity, list):
+                for sub_entity in entity:
+                    if isinstance(sub_entity, Scenario):
+                        for group in group_by_list:
+                            key = get_group_key(sub_entity, group)
+                            grouped_scenarios[key].append(sub_entity)
+
+
+        return grouped_scenarios
+            
+
     def get_scenarios(
         self,
         scenarios: t.Optional[t.List[t.Union[Cycle, Scenario]]],
         filters: t.Optional[t.List[t.Dict[str, t.Any]]],
         sorts: t.Optional[t.List[t.Dict[str, t.Any]]],
+        group_by: t.Optional[str],
     ):
         self.__lazy_start()
         cycles_scenarios: t.List[t.Union[Cycle, Scenario]] = []
@@ -374,6 +424,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
             cycles_scenarios = scenarios
         adapted_list = self.get_sorted_scenario_list(cycles_scenarios, sorts)
         adapted_list = self.get_filtered_scenario_list(adapted_list, filters)
+        adapted_list = self.get_grouped_scenario_list(adapted_list, group_by) # type: ignore
+
         return adapted_list
 
     def select_scenario(self, state: State, id: str, payload: t.Dict[str, str]):
@@ -713,7 +765,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         if datanodes is None:
             if scenarios is None:
                 base_list = (self.data_nodes_by_owner or {}).get(None, []) + (
-                    self.get_scenarios(None, None, None) or []
+                    self.get_scenarios(None, None, None) or [] # type: ignore
                 )
             else:
                 if isinstance(scenarios, (list, tuple)) and len(scenarios) > 1:
