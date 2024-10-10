@@ -2924,6 +2924,14 @@ class Gui:
     def _fire_event(
         self, event_name: str, client_id: t.Optional[str] = None, payload: t.Optional[t.Dict[str, t.Any]] = None
     ):
+        Timer(interval=0.1,
+            function=self.__do_fire_event,
+            args=(event_name, client_id, payload),
+        ).start()
+
+    def __do_fire_event(
+        self, event_name: str, client_id: t.Optional[str] = None, payload: t.Optional[t.Dict[str, t.Any]] = None
+    ):
         this_sid = None
         if request:
             # avoid messing with the client_id => Set(ws id)
