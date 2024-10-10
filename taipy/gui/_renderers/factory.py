@@ -698,5 +698,5 @@ class _Factory:
             else:
                 built = builder(gui, name, all_properties)
             if isinstance(built, _Builder):
-                return built._build_to_string() if is_html else built.el
+                return built._build_to_string() if is_html else built.get_element()
         return None

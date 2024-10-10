@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { MouseEvent } from "react";
+import { MouseEvent, ReactNode } from "react";
 import { SxProps } from "@mui/material";
 
 export interface TaipyActiveProps extends TaipyDynamicProps, TaipyHoverProps {
@@ -35,6 +35,8 @@ export interface TaipyBaseProps {
     libClassName?: string;
     className?: string;
     dynamicClassName?: string;
+    privateClassName?: string;
+    children?: ReactNode;
 }
 
 export interface TaipyMultiSelectProps {

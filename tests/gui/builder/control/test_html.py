@@ -20,6 +20,8 @@ def test_html_builder(gui: Gui, test_client, helpers):
         with tgb.html("p", "This is a paragraph.", style="color:green;"):
             tgb.html("a", "a text", href="https://www.w3schools.com", target="_blank")
             tgb.html("br")
+            tgb.html("BR")
+            tgb.html(None, "This is text")
             tgb.html("b", "This is bold text inside the paragraph.")
     expected_list = [
         '<h1 style="color:Tomato;">This is a header',

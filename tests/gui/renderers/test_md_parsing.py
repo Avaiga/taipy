@@ -32,7 +32,7 @@ def test_invalid_property_value(gui: Gui, helpers):
 
 def test_unclosed_block(gui: Gui, helpers):
     md_string = "<|"
-    expected_list = ["<Part", "</Part>"]
+    expected_list = ["<Part", "/>"]
     helpers.test_control_md(gui, md_string, expected_list)
 
 

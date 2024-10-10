@@ -23,6 +23,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
 import { getCssSize, TaipyInputProps } from "./utils";
 import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
+import { getComponentClassName } from "./TaipyStyle";
 
 const AUTHORIZED_KEYS = ["Enter", "Escape", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"];
 
@@ -328,12 +329,13 @@ const Input = (props: TaipyInputProps) => {
 
     return (
         <Tooltip title={hover || ""}>
+            <>
             <TextField
                 sx={textSx}
                 margin="dense"
                 hiddenLabel
                 value={value ?? ""}
-                className={className}
+                className={`${className} ${getComponentClassName(props.children)}`}
                 type={showPassword && type == "password" ? "text" : type}
                 id={id}
                 slotProps={inputProps}
@@ -344,6 +346,8 @@ const Input = (props: TaipyInputProps) => {
                 multiline={multiline}
                 minRows={linesShown}
             />
+            {props.children}
+            </>
         </Tooltip>
     );
 };
