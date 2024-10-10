@@ -1,6 +1,5 @@
 [![Hacktoberfest_clickable](https://github.com/user-attachments/assets/b1b5a430-6df9-40c2-999f-de3433f61251)](https://assorted-son-815.notion.site/Hacktoberfest-2024-with-Taipy-2a5032a3f01642709e88ffaa5d0d169e)
 
-
 <div align="center">
   <a href="https://taipy.io?utm_source=github" target="_blank">
   <picture>
@@ -9,6 +8,19 @@
   </picture>
   </a>
 </div>
+
+<div align="center">
+    <img src="https://img.shields.io/github/stars/Avaiga/taipy?style=plastic&color=ff371a" alt="GitHub stars" />
+    <img src="https://img.shields.io/github/issues/Avaiga/taipy?style=plastic&color=ff371a" alt="GitHub issues" />
+    <img src="https://img.shields.io/github/issues-pr/Avaiga/taipy?style=plastic&color=ff371a" alt="GitHub pull requests" />
+    <img src="https://img.shields.io/github/license/Avaiga/taipy?style=plastic&color=ff371a" alt="GitHub License" >
+    <br>
+    <a target="_blank" href="https://discord.com/invite/SJyz2VJGxV"><img alt="Discord" height="20px" src="https://img.shields.io/discord/1125797687476887563?style=plastic&label=Discord&color=ff371a&link=https%3A%2F%2Fdiscord.com%2Finvite%2FSJyz2VJGxV">
+    </a>
+    <a target="_blank" href="https://docs.taipy.io/en/latest/"> <img height="20px" src="https://img.shields.io/badge/Docs-Taipy-ff371a?style=plastic" alt="Docs" /></a>
+    <a target="_blank" href="https://discord.com/invite/SJyz2VJGxV"><img alt="GitHub Release" height="20px" src="https://img.shields.io/github/v/release/Avaiga/taipy?display_name=release&style=plastic&color=ff371a"></a>
+</div>
+<br>
 
 <h1 align="center">
 Build Python Data & AI web applications
