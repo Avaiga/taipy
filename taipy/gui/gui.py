@@ -1324,25 +1324,35 @@ class Gui:
             send_back_only=True,
         )
 
-    def __send_ws_alert(self, type: str, message: str, system_notification: bool, duration: int) -> None:
+    def __send_ws_alert(
+            self, type: str,
+            message: str,
+            system_notification: bool,
+            duration: int,
+            notification_id: t.Optional[str] = None
+        ) -> None:
+        payload = {
+            "type": _WsType.ALERT.value,
+            "atype": type,
+            "message": message,
+            "system": system_notification,
+            "duration": duration,
+        }
+
+        if notification_id:
+            payload["notification_id"] = notification_id
+
         self.__send_ws(
-            {
-                "type": _WsType.ALERT.value,
-                "atype": type,
-                "message": message,
-                "system": system_notification,
-                "duration": duration,
-            }
+            payload,
         )
 
-    def __send_ws_close_notification(self, notification_id: str) -> None:
-        """Send a WebSocket message to close a notification by ID."""
-        self.__send_ws(
-            {
-                "type": _WsType.CLOSE_NOTIFICATION.value,  # You should have a defined type for closing notifications
-                "notification_id": notification_id,
-            }
-    )
+    # def __send_ws_close_notification(self, notification_id: str) -> None:
+    #     """Send a WebSocket message to close a notification by ID."""
+    #     self.__send_ws(
+    #         {
+    #             "notification_id": notification_id,
+    #         }
+    # )
 
     def __send_ws_partial(self, partial: str):
         self.__send_ws(
@@ -2261,14 +2271,22 @@ class Gui:
             message,
             self._get_config("system_notification", False) if system_notification is None else system_notification,
             self._get_config("notification_duration", 3000) if duration is None else duration,
+            notification_id,
         )
 
     def _close_notification(
         self,
         notification_id: t.Optional[str] = None,
     ):
-        if notification_id is not None:  # Check if notification_id is not None
-            self.__send_ws_close_notification(notification_id)
+        if notification_id:  # Check if notification_id is not None
+            #close notification with the given notification_id dont need new __send_ws_alert
+            self.__send_ws(
+            {
+                "id": notification_id
+            }
+        )
+
+
 
 
     def _hold_actions(
