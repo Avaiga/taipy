@@ -370,14 +370,18 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                     <DialogActions>
                         <Stack direction="row" justifyContent="space-between" sx={ActionContentSx}>
                             {actionEdit && (
-                                <Button
-                                    variant="outlined"
-                                    color="error"
-                                    onClick={onConfirmDialogOpen}
-                                    disabled={!scenario || !scenario[ScFProps.deletable]}
-                                >
-                                    Delete
-                                </Button>
+                                <Tooltip title={scenario && scenario[ScFProps.deletable]}>
+                                    <span>
+                                        <Button
+                                            variant="outlined"
+                                            color="error"
+                                            onClick={onConfirmDialogOpen}
+                                            disabled={!scenario || !scenario[ScFProps.deletable]}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </span>
+                                </Tooltip>
                             )}
                             <Button variant="outlined" color="inherit" onClick={close}>
                                 Cancel
