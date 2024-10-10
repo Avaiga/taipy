@@ -11,7 +11,21 @@
 
 import typing as t
 from inspect import isclass
+from types import LambdaType
 
 
 def _is_function_like(s: t.Any) -> bool:
     return callable(s) and not isclass(s)
+
+
+def _get_function_like_name(s: t.Any) -> str:
+    if hasattr(s, "__name__"):
+        return s.__name__
+    elif callable(s):
+        return f"<instance of {type(s).__name__}>"
+    else:
+        return str(s)
+
+
+def _is_unnamed_function(s: t.Any):
+    return isinstance(s, LambdaType) or (callable(s) and not hasattr(s, "__name__"))

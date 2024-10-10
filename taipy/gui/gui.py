@@ -82,6 +82,7 @@ from .utils import (
     _get_client_var_name,
     _get_css_var_value,
     _get_expr_var_name,
+    _get_function_like_name,
     _get_lambda_id,
     _get_module_name_from_frame,
     _get_non_existent_file_path,
@@ -91,6 +92,7 @@ from .utils import (
     _hasscopeattr,
     _is_function_like,
     _is_in_notebook,
+    _is_unnamed_function,
     _LocalsContext,
     _MapDict,
     _setscopeattr,
@@ -903,7 +905,7 @@ class Gui:
                 else:
                     return (ret, 200)
             except Exception as e:  # pragma: no cover
-                if not self._call_on_exception(str(cb_function_name), e):
+                if not self._call_on_exception(cb_function_name, e):
                     _warn(f"{cb_function_name}() callback function raised an exception", e)
         return ("", 404)
 
@@ -1512,8 +1514,8 @@ class Gui:
                 self._call_function_with_state(t.cast(t.Callable, action_function), [args])
                 return True
             except Exception as e:  # pragma: no cover
-                if not self._call_on_exception(t.cast(t.Callable, action_function).__name__, e):
-                    _warn(f"on_action(): Exception raised in '{t.cast(t.Callable, action_function).__name__}()'", e)
+                if not self._call_on_exception(action_function, e):
+                    _warn(f"on_action(): Exception raised in '{_get_function_like_name(action_function)}()'", e)
         return False
 
     def _call_function_with_state(self, user_function: t.Callable, args: t.Optional[t.List[t.Any]] = None) -> t.Any:
@@ -1567,10 +1569,9 @@ class Gui:
                         return None
                     return self._call_function_with_state(t.cast(t.Callable, callback), list(args) if args else None)
         except Exception as e:  # pragma: no cover
-            if not self._call_on_exception(callback.__name__ if callable(callback) else callback, e):
+            if not self._call_on_exception(callback, e):
                 _warn(
-                    "Gui.invoke_callback(): Exception raised in "
-                    + f"'{callback.__name__ if callable(callback) else callback}()'",
+                    f"Gui.invoke_callback(): Exception raised in {_get_function_like_name(callback)}",
                     e,
                 )
         finally:
@@ -2212,10 +2213,10 @@ class Gui:
     def _download(
         self, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[t.Union[str, t.Callable]] = ""
     ):
-        if _is_function_like(on_action) and t.cast(t.Callable, on_action).__name__:
+        if _is_function_like(on_action):
             on_action_name = (
                 _get_lambda_id(t.cast(LambdaType, on_action))
-                if t.cast(t.Callable, on_action).__name__ == "<lambda>"
+                if _is_unnamed_function(on_action)
                 else _get_expr_var_name(t.cast(t.Callable, on_action).__name__)
             )
             if on_action_name:
@@ -2245,8 +2246,13 @@ class Gui:
         callback: t.Optional[t.Union[str, t.Callable]] = None,
         message: t.Optional[str] = "Work in Progress...",
     ):  # pragma: no cover
-        action_name = t.cast(t.Callable, callback).__name__ if _is_function_like(callback) else str(callback)
-        # TODO: what if lambda? (it does work)
+        action_name = (
+            callback
+            if isinstance(callback, str)
+            else _get_lambda_id(t.cast(LambdaType, callback))
+            if _is_unnamed_function(callback)
+            else callback.__name__ if callback is not None else None
+        )
         func = self.__get_on_cancel_block_ui(action_name)
         def_action_name = func.__name__
         _setscopeattr(self, def_action_name, func)
@@ -2301,8 +2307,9 @@ class Gui:
                         _warn("Exception raised in on_init()", e)
         return self._render_route()
 
-    def _call_on_exception(self, function_name: str, exception: Exception) -> bool:
+    def _call_on_exception(self, function: t.Any, exception: Exception) -> bool:
         if hasattr(self, "on_exception") and _is_function_like(self.on_exception):
+            function_name = _get_function_like_name(function) if callable(function) else str(function)
             try:
                 self._call_function_with_state(t.cast(t.Callable, self.on_exception), [function_name, exception])
             except Exception as e:  # pragma: no cover
