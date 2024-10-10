@@ -18,16 +18,15 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 
 import { MobileTimePicker } from '@mui/x-date-pickers/MobileTimePicker';
 import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps, getCssSize } from "./utils";
-import { getDateTime } from "../../utils";
-import { useClassNames, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
+
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import ErrorFallback from "../../utils/ErrorBoundary";
 import Field from "./Field";
 
 
 
 interface TimeSelectorProps extends TaipyActiveProps, TaipyChangeProps {
-  as_clock?: boolean;
-  withTime?: boolean;
+  asClock?: boolean;
   format?: string;
   defaultDate?: string;
   defaultTime?: string;
@@ -40,10 +39,10 @@ interface TimeSelectorProps extends TaipyActiveProps, TaipyChangeProps {
 
 const boxSx = { display: "inline-block" };
 const TimeSelector = (props: TimeSelectorProps) => {
-  const { withTime = true, as_clock = false, id } = props;
-  const formatConfig = useFormatConfig();
-  const tz = formatConfig.timeZone;
-  const [value] = useState(() => getDateTime(props.defaultDate, tz, withTime));
+  const { asClock = false, id } = props;
+  const [value] = useState(
+    () => { return new Date() }
+  );
 
   const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
   const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -56,7 +55,7 @@ const TimeSelector = (props: TimeSelectorProps) => {
       <Tooltip title={hover || ""}>
         <Box id={id} className={`${className}`} sx={boxSx}>
           {editable ? (
-            as_clock ? (
+            asClock ? (
               <MobileTimePicker  
                 value={value}
                 className={getSuffixedClassNames(className, "-picker")}
