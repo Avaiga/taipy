@@ -25,6 +25,7 @@ import { TaipyContext } from "../../context/taipyContext";
 import { createThemeAction } from "../../context/taipyReducers";
 import { useClassNames } from "../../utils/hooks";
 import { getLocalStorageValue } from "../../context/utils";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface ThemeToggleProps extends TaipyActiveProps {
     style?: SxProps;
@@ -75,7 +76,7 @@ const ThemeToggle = (props: ThemeToggleProps) => {
     );
 
     return (
-        <Box id={id} sx={mainSx} className={className}>
+        <Box id={id} sx={mainSx} className={`${className} ${getComponentClassName(props.children)}`}>
             <Typography>{label}</Typography>
             <ToggleButtonGroup
                 value={state.theme.palette.mode}
@@ -93,6 +94,7 @@ const ThemeToggle = (props: ThemeToggleProps) => {
                     <Brightness3 />
                 </ToggleButton>
             </ToggleButtonGroup>
+            {props.children}
         </Box>
     );
 };

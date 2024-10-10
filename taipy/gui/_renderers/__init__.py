@@ -89,7 +89,7 @@ class _Renderer(Page, ABC):
             if self._encoding is not None:
                 encoding = self._encoding
                 _TaipyLogger._get_logger().info(f"'{encoding}' encoding was used to decode file '{content}'.")
-            elif (detected_encoding := detect(file_content)["encoding"]) is not None:
+            elif (detected_encoding := t.cast(str, detect(file_content).get("encoding"))) is not None:
                 encoding = detected_encoding
                 _TaipyLogger._get_logger().info(f"Detected '{encoding}' encoding for file '{content}'.")
             else:

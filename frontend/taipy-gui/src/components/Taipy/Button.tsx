@@ -20,6 +20,7 @@ import { createSendActionNameAction } from "../../context/taipyReducers";
 import { getCssSize, getSuffixedClassNames, TaipyActiveProps } from "./utils";
 import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 import { stringIcon, Icon, IconAvatar } from "../../utils/icon";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface ButtonProps extends TaipyActiveProps {
     onAction?: string;
@@ -67,7 +68,7 @@ const Button = (props: ButtonProps) => {
             <MuiButton
                 id={id}
                 variant="outlined"
-                className={className}
+                className={`${className} ${getComponentClassName(props.children)}`}
                 onClick={handleClick}
                 disabled={!active}
                 sx={buttonSx}
@@ -87,6 +88,7 @@ const Button = (props: ButtonProps) => {
                 ) : (
                     <IconAvatar img={value as Icon} className={getSuffixedClassNames(className, "-image")} />
                 )}
+                {props.children}
             </MuiButton>
         </Tooltip>
     );
