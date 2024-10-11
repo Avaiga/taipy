@@ -1042,8 +1042,6 @@ class Gui:
                         setattr(self._bindings(), var_name, newvalue)
         return ("", 200)
 
-    _data_request_counter = 1
-
     def __send_var_list_update(  # noqa C901
         self,
         modified_vars: t.List[str],
@@ -1064,8 +1062,7 @@ class Gui:
             resource_handler = get_current_resource_handler()
             custom_page_filtered_types = resource_handler.data_layer_supported_types if resource_handler else ()
             if isinstance(newvalue, (_TaipyData)) or isinstance(newvalue, custom_page_filtered_types):
-                Gui._data_request_counter = (Gui._data_request_counter % 0xFFFFFFF0) + 1
-                newvalue = {"__taipy_refresh": Gui._data_request_counter}
+                newvalue = {"__taipy_refresh": True}
             else:
                 if isinstance(newvalue, (_TaipyContent, _TaipyContentImage)):
                     ret_value = self.__get_content_accessor().get_info(

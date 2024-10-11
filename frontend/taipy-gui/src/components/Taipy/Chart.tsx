@@ -47,6 +47,7 @@ import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
 import { Figure } from "react-plotly.js";
 import { lightenPayload } from "../../context/wsUtils";
 import { getComponentClassName } from "./TaipyStyle";
+import { nanoid } from "nanoid";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -298,7 +299,7 @@ const Chart = (props: ChartProp) => {
     const theme = useTheme();
     const module = useModule();
 
-    const refresh = typeof data?.__taipy_refresh === "number" ? data.__taipy_refresh : 0;
+    const refresh = useMemo(() => data?.__taipy_refresh !== undefined ? nanoid() : false, [data]);
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
@@ -348,10 +349,8 @@ const Chart = (props: ChartProp) => {
         if (updateVarName && (refresh || !data[dataKey])) {
             const backCols = Object.values(config.columns).map((col) => col.dfid);
             const dtKey = backCols.join("-") + (config.decimators ? `--${config.decimators.join("")}` : "");
-            console.log("dataKey", dtKey, "useEffect");
             setDataKey(dtKey);
             if (refresh || !data[dtKey]) {
-                console.log("Requesting new data", refresh, dtKey, data[dtKey]);
                 dispatch(
                     createRequestChartUpdateAction(
                         updateVarName,
@@ -443,7 +442,6 @@ const Chart = (props: ChartProp) => {
     const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
 
     const dataPl = useMemo(() => {
-        console.log("receive data", data, dataKey, lastDataPl.current);
         if (props.figure) {
             return lastDataPl.current;
         }
@@ -570,7 +568,6 @@ const Chart = (props: ChartProp) => {
                     (config.decimators ? `--${config.decimators.join("")}` : "") +
                     "--" +
                     eventDataKey;
-                console.log("dataKey", dtKey, "onRelayout");
                 setDataKey(dtKey);
                 dispatch(
                     createRequestChartUpdateAction(
