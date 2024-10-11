@@ -396,7 +396,30 @@ class Gui:
         if libraries is not None:
             for library in libraries:
                 Gui.add_library(library)
+    
+    def set_on_invalid_data_callback(self, callback: t.Callable[[t.Any], t.Optional[t.Any]]):
+        """
+        Set the callback function to handle unsupported data types.
+        :param callback: A function that takes in unsupported data and returns transformed data.
+        """
+        if callable(callback):
+            self._on_invalid_data_callback = callback
+        else:
+            raise ValueError("The callback must be a callable function.")
 
+    def on_invalid_data(self, value: t.Any) -> t.Optional[t.Any]:
+        """
+        Invokes the callback to transform unsupported data into a valid format.
+        :param value: The unsupported data type encountered.
+        :return: Transformed data or None if no transformation is possible.
+        """
+        if self._on_invalid_data_callback:
+            return self._on_invalid_data_callback(value)
+        else:
+            # Default behavior if no callback is set
+            print(f"Unsupported data type encountered: {type(value)}")
+            return None
+        
     @staticmethod
     def add_library(library: ElementLibrary) -> None:
         """Add a custom visual element library.

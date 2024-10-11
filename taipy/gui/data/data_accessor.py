@@ -25,6 +25,7 @@ class _DataAccessor(ABC):
     _WS_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
     def __init__(self, gui: "Gui") -> None:
+
         self._gui = gui
 
     @staticmethod
@@ -34,7 +35,11 @@ class _DataAccessor(ABC):
 
     @abstractmethod
     def get_data(
-        self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
+        self,
+        var_name: str,
+        value: t.Any,
+        payload: t.Dict[str, t.Any],
+        data_format: _DataFormat,
     ) -> t.Dict[str, t.Any]:
         pass
 
@@ -56,7 +61,10 @@ class _DataAccessor(ABC):
 
     @abstractmethod
     def on_add(
-        self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None
+        self,
+        value: t.Any,
+        payload: t.Dict[str, t.Any],
+        new_row: t.Optional[t.List[t.Any]] = None,
     ) -> t.Optional[t.Any]:
         pass
 
@@ -66,31 +74,66 @@ class _DataAccessor(ABC):
 
 
 class _InvalidDataAccessor(_DataAccessor):
+
+    def __init__(self, gui: "Gui") -> None:
+        super().__init__(gui)
+
     @staticmethod
     def get_supported_classes() -> t.List[t.Type]:
         return []
 
     def get_data(
-        self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
+        self,
+        var_name: str,
+        value: t.Any,
+        payload: t.Dict[str, t.Any],
+        data_format: _DataFormat,
     ) -> t.Dict[str, t.Any]:
+        transformed_value = self._gui.on_invalid_data(value)
+        if transformed_value is not None:
+            return {var_name: transformed_value}  
         return {}
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Dict[str, str]:
+        transformed_value = self._gui.on_invalid_data(value)
+        if transformed_value is not None:
+            return {
+                var_name: str(type(transformed_value))
+            } 
         return {}
 
     def to_pandas(self, value: t.Any) -> t.Union[t.List[t.Any], t.Any]:
+        transformed_value = self._gui.on_invalid_data(value)
+        if transformed_value is not None:
+            try:
+                import pandas as pd
+
+                return pd.DataFrame([transformed_value])  
+            except ImportError:
+                pass  
         return None
 
     def on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
-        return None
+        transformed_value = self._gui.on_invalid_data(value)
+        return transformed_value if transformed_value is not None else None
 
     def on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
-        return None
+        transformed_value = self._gui.on_invalid_data(value)
+        return transformed_value if transformed_value is not None else None
 
-    def on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
-        return None
+    def on_add(
+        self,
+        value: t.Any,
+        payload: t.Dict[str, t.Any],
+        new_row: t.Optional[t.List[t.Any]] = None,
+    ):
+        transformed_value = self._gui.on_invalid_data(value)
+        return transformed_value if transformed_value is not None else None
 
     def to_csv(self, var_name: str, value: t.Any):
+        transformed_value = self._gui.on_invalid_data(value)
+        if transformed_value is not None:
+            return str(transformed_value)
         return None
 
 
@@ -111,12 +154,16 @@ class _DataAccessors(object):
 
     def _register(self, cls: t.Type[_DataAccessor]) -> None:
         if not inspect.isclass(cls):
-            raise AttributeError("The argument of 'DataAccessors.register' should be a class")
+            raise AttributeError(
+                "The argument of 'DataAccessors.register' should be a class"
+            )
         if not issubclass(cls, _DataAccessor):
             raise TypeError(f"Class {cls.__name__} is not a subclass of DataAccessor")
         classes = cls.get_supported_classes()
         if not classes:
-            raise TypeError(f"method {cls.__name__}.get_supported_classes returned an invalid value")
+            raise TypeError(
+                f"method {cls.__name__}.get_supported_classes returned an invalid value"
+            )
         # check existence
         inst: t.Optional[_DataAccessor] = None
         for cl in classes:
@@ -141,8 +188,12 @@ class _DataAccessors(object):
             return self.__invalid_data_accessor
         return access
 
-    def get_data(self, var_name: str, value: _TaipyData, payload: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
-        return self.__get_instance(value).get_data(var_name, value.get(), payload, self.__data_format)
+    def get_data(
+        self, var_name: str, value: _TaipyData, payload: t.Dict[str, t.Any]
+    ) -> t.Dict[str, t.Any]:
+        return self.__get_instance(value).get_data(
+            var_name, value.get(), payload, self.__data_format
+        )
 
     def get_col_types(self, var_name: str, value: _TaipyData) -> t.Dict[str, str]:
         return self.__get_instance(value).get_col_types(var_name, value.get())
@@ -159,7 +210,12 @@ class _DataAccessors(object):
     def on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
         return self.__get_instance(value).on_delete(value, payload)
 
-    def on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
+    def on_add(
+        self,
+        value: t.Any,
+        payload: t.Dict[str, t.Any],
+        new_row: t.Optional[t.List[t.Any]] = None,
+    ):
         return self.__get_instance(value).on_add(value, payload, new_row)
 
     def to_csv(self, var_name: str, value: t.Any):
