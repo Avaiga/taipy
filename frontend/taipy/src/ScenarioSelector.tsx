@@ -43,6 +43,7 @@ import {
     getUpdateVar,
     createSendUpdateAction,
     useDynamicProperty,
+    getComponentClassName,
 } from "taipy-gui";
 
 import ConfirmDialog from "./utils/ConfirmDialog";
@@ -369,14 +370,18 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                     <DialogActions>
                         <Stack direction="row" justifyContent="space-between" sx={ActionContentSx}>
                             {actionEdit && (
-                                <Button
-                                    variant="outlined"
-                                    color="error"
-                                    onClick={onConfirmDialogOpen}
-                                    disabled={!scenario || !scenario[ScFProps.deletable]}
-                                >
-                                    Delete
-                                </Button>
+                                <Tooltip title={scenario && scenario[ScFProps.deletable]}>
+                                    <span>
+                                        <Button
+                                            variant="outlined"
+                                            color="error"
+                                            onClick={onConfirmDialogOpen}
+                                            disabled={!scenario || !!scenario[ScFProps.deletable]}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </span>
+                                </Tooltip>
                             )}
                             <Button variant="outlined" color="inherit" onClick={close}>
                                 Cancel
@@ -509,7 +514,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
     return (
         <>
-            <Box sx={MainTreeBoxSx} id={props.id} className={className}>
+            <Box sx={MainTreeBoxSx} id={props.id} className={`${className} ${getComponentClassName(props.children)}`}>
                 <CoreSelector
                     {...props}
                     entities={props.innerScenarios}
