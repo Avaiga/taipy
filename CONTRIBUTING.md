@@ -58,7 +58,7 @@ the community that you are working on it.
 ### Contribution workflow
 
 1. Make your [own fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) of the repository
-   target by the issue. Clone it on our local machine, then go inside the directory.
+   targeted by the issue. Clone it on your local machine, then go inside the directory.
 
 2. We are working with [Pipenv](https://github.com/pypa/pipenv) for our virtualenv.
    Create a local env and install development package by running `$ pipenv install --dev`, then run tests with
