@@ -47,6 +47,20 @@ import { TaipyActiveProps, TaipyMultiSelectProps, getSuffixedClassNames } from "
 /**
  * A column description as received by the backend.
  */
+
+/**
+ * Generates a unique CSS class name for a table header.
+ * @param columnName - The name of the column.
+ * @param index - The index of the column to ensure uniqueness.
+ * @returns A sanitized and unique CSS class name.
+ */
+
+export const generateHeaderClassName = (columnName: string, index: number): string => {
+    // Replace any character that's not A-Z, a-z, 0-9, hyphen, or underscore with a hyphen
+    const sanitizedColumnName = columnName.replace(/[^A-Za-z0-9-_]/g, '-');
+    return `taipy-table-header-${sanitizedColumnName}-${index}`;
+};
+
 export interface ColumnDesc {
     /** The unique column identifier. */
     dfid: string;

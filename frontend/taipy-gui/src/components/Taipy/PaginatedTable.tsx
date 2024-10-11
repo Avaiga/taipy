@@ -40,6 +40,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DataSaverOn from "@mui/icons-material/DataSaverOn";
 import DataSaverOff from "@mui/icons-material/DataSaverOff";
 import Download from "@mui/icons-material/Download";
+import { generateHeaderClassName } from "./tableUtils";
 
 import { createRequestTableUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
 import {
@@ -498,7 +499,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                         <Table sx={tableSx} aria-labelledby="tableTitle" size={size} stickyHeader={true}>
                             <TableHead>
                                 <TableRow>
-                                    {colsOrder.map((col) => (
+                                    {colsOrder.map((col, index) => (
                                         <TableCell
                                             key={`head${columns[col].dfid}`}
                                             sortDirection={orderBy === columns[col].dfid && order}
@@ -509,6 +510,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     ? { width: `${100 / nbWidth}%`, maxWidth: 0 }
                                                     : undefined
                                             }
+                                            className={generateHeaderClassName(columns[col].title || columns[col].dfid, index)}
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [

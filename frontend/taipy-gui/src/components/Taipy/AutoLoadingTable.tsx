@@ -31,6 +31,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DataSaverOn from "@mui/icons-material/DataSaverOn";
 import DataSaverOff from "@mui/icons-material/DataSaverOff";
 import Download from "@mui/icons-material/Download";
+import { generateHeaderClassName } from "./tableUtils";
 
 import {
     createRequestInfiniteTableUpdateAction,
@@ -600,11 +601,12 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         <MuiTable sx={tableSx} aria-labelledby="tableTitle" size={size} stickyHeader={true}>
                             <TableHead>
                                 <TableRow ref={headerRow}>
-                                    {colsOrder.map((col) => (
+                                    {colsOrder.map((col, index) => (
                                         <TableCell
                                             key={`head${columns[col].dfid}`}
                                             sortDirection={orderBy === columns[col].dfid && order}
                                             sx={columns[col].width ? { width: columns[col].width } : {}}
+                                            className={generateHeaderClassName(columns[col].title || columns[col].dfid, index)}
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [
