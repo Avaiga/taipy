@@ -14,8 +14,19 @@ from .._version._version_manager_factory import _VersionManagerFactory
 from ..data.operator import JoinOperator, Operator
 from ..exceptions.exceptions import InvalidCustomDocument, MissingRequiredProperty
 from .data_node import DataNode
+
 from .data_node_id import DataNodeId, Edit
 
+
+class CouchbaseDocument:
+    """Class to define the structure of documents stored in Couchbase."""
+
+    def __init__(self, field1: str, field2: int, **kwargs):
+        self.field1 = field1  # Example field of type string
+        self.field2 = field2  # Example field of type integer
+        # Additional fields can be added dynamically
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
 class CouchBaseCollectionDataNode(DataNode):
     """Data Node stored in a Couchbase collection.
@@ -90,12 +101,15 @@ class CouchBaseCollectionDataNode(DataNode):
             **properties,
         )
 
-        # Create a Couchbase connection using the provided properties.
+
+         # Create a Couchbase connection using the provided properties.
+         # For more information on connecting to Couchbase, see:
+    # https://docs.couchbase.com/python-sdk/current/hello-world/start-using-sdk.html
         try:
             self.cluster = Cluster(
                 f"couchbase://{properties.get(self.__DB_HOST_KEY, self.__DB_HOST_DEFAULT)}",
                 ClusterOptions(
-                    PasswordAuthenticator(
+                    PsswordAuthenticator(
                         properties.get(self.__DB_USERNAME_KEY, ""),
                         properties.get(self.__DB_PASSWORD_KEY, "")
                     )
@@ -126,7 +140,44 @@ class CouchBaseCollectionDataNode(DataNode):
     def _read(self):
         """Read all documents from the Couchbase collection."""
         try:
+            query = f"SELECT * FROM `{self.collection.name}`"
+            result = self.cluster.query(query)
+
             return [doc.content_as[dict] for doc in documents]
         except Exception as e:
              print(f"An error occurred: {e}")
+             return []
+
+    def _write(self,data : Union[Dict, List[Dict]]):
+           """Write Documents to the Couchbase collection."""
+        try:
+            if isinstance(data, dict):
+                self.collection.upsert(data['id'],data)
+            elif isinstance(data, list):
+                for item in data:
+                   self.collection.upsert(item['id'], item)
+       except CouchbaseException as e:
+            print(f"An error occurred while writing:{e}")
+
+   def _append(self,data: Union[Dict, List[Dict]]):
+         """Append data to the Couchbase collection without overwriting."""
+        try:
+            if isinstance(data, dict):
+              if not self.collection.exists(data['id']):
+                  self.collection.insert(data['id'], data)
+            elif isinstance(data, list):
+               for item in data:
+                  if not self.collection.exists(item['id']):
+                      self.collection.insert(item['id'], item)
+        except CouchbaseException as e:
+            print(f"An error occurred while appending: {e}")
+  def filter(self, criteria: Dict[str, Any]):
+         """Filter documents in the Couchbase collection based on criteria"""
+         try:
+             where_clause = " AND ".join([f"{key} = '{value}'" for key, value in criteria.items()])
+             query = f"SELECT * FROM `{self.collection.name}` WHERE {where_clause}"
+             result = self.cluster.query(query)
+             return [doc for doc in result]
+        except CouchbaseException as e:
+             print(f"An error occurred while filtering documents:{e}")
              return []
