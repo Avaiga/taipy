@@ -42,7 +42,7 @@ class _Hooks(object, metaclass=_Singleton):
                     func = getattr(hook, name)
                     if not callable(func):
                         raise Exception(f"'{name}' hook is not callable")
-                    res = getattr(hook, name)(*args, **kwargs)
+                    res = func(*args, **kwargs)
                 except Exception as e:
                     _TaipyLogger._get_logger().error(f"Error while calling hook '{name}': {e}")
                     return
