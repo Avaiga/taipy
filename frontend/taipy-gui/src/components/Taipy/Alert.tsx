@@ -70,7 +70,7 @@ const Alert = ({ alerts }: AlertProps) => {
                 });
                 alert.system && new Notification(document.title || "Taipy", { body: alert.message, icon: faviconUrl });
             }
-            dispatch(createDeleteAlertAction());
+            dispatch(createDeleteAlertAction(alert.notification_id));
         }
     }, [alert, enqueueSnackbar, closeSnackbar, notifAction, faviconUrl, dispatch]);
 

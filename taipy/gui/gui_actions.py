@@ -67,7 +67,7 @@ def notify(
     message: str = "",
     system_notification: t.Optional[bool] = None,
     duration: t.Optional[int] = None,
-    notification_id: t.Optional[str] = None,
+    notification_id: str = "",
 ):
     """Send a notification to the user interface.
 

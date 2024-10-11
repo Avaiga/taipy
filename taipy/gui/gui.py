@@ -2256,7 +2256,7 @@ class Gui:
         message: str = "",
         system_notification: t.Optional[bool] = None,
         duration: t.Optional[int] = None,
-        notification_id: t.Optional[str] = None,
+        notification_id: str = "",
     ):
         self.__send_ws_alert(
             notification_type,
@@ -2268,17 +2268,16 @@ class Gui:
 
     def _close_notification(
         self,
-        notification_id: t.Optional[str] = None,
+        notification_id: str,
     ):
-        if notification_id:  # Check if notification_id is not None
-            #close notification with the given notification_id dont need new __send_ws_alert
-            self.__send_ws(
-            {
-                "id": notification_id
-            }
-        )
-
-
+        if notification_id:
+            self.__send_ws_alert(
+                type="",  # Since you're closing, set type to an empty string or a predefined "close" type
+                message="",  # No need for a message when closing
+                system_notification=False,  # System notification not needed for closing
+                duration=0,  # No duration since it's an immediate close
+                notification_id=notification_id
+            )
 
 
     def _hold_actions(

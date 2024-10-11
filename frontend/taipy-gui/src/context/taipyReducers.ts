@@ -91,6 +91,7 @@ export interface AlertMessage {
     message: string;
     system: boolean;
     duration: number;
+    notification_id: string;
 }
 
 interface TaipyAction extends NamePayload, TaipyBaseAction {
@@ -107,6 +108,10 @@ interface TaipyMultipleMessageAction extends TaipyBaseAction {
 }
 
 interface TaipyAlertAction extends TaipyBaseAction, AlertMessage {}
+
+interface TaipyDeleteAlertAction extends TaipyBaseAction {
+    notification_id: string;
+}
 
 export const BLOCK_CLOSE = { action: "", message: "", close: true, noCancel: false } as BlockMessage;
 
@@ -379,14 +384,16 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                         message: alertAction.message,
                         system: alertAction.system,
                         duration: alertAction.duration,
+                        notification_id: alertAction.notification_id,
                     },
                 ],
             };
         case Types.DeleteAlert:
-            if (state.alerts.length) {
-                return { ...state, alerts: state.alerts.filter((_, i) => i) };
-            }
-            return state;
+            const deleteAlertAction = action as unknown as TaipyAlertAction;
+            return {
+                ...state,
+                alerts: state.alerts.filter(alert => alert.notification_id !== deleteAlertAction.notification_id),
+            };
         case Types.SetBlock:
             const blockAction = action as unknown as TaipyBlockAction;
             if (blockAction.close) {
@@ -812,16 +819,22 @@ const getAlertType = (aType: string) => {
     return aType;
 };
 
+const generateUniqueId = () => {
+    return '_' + Math.random().toString(36).substr(2, 9);
+};
+
 export const createAlertAction = (alert: AlertMessage): TaipyAlertAction => ({
     type: Types.SetAlert,
     atype: getAlertType(alert.atype),
     message: alert.message,
     system: alert.system,
     duration: alert.duration,
+    notification_id: alert.notification_id || generateUniqueId(),
 });
 
-export const createDeleteAlertAction = (): TaipyBaseAction => ({
+export const createDeleteAlertAction = (notification_id: string): TaipyDeleteAlertAction => ({
     type: Types.DeleteAlert,
+    notification_id,
 });
 
 export const createBlockAction = (block: BlockMessage): TaipyBlockAction => ({
