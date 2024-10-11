@@ -11,7 +11,13 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { CSSProperties, useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
+import React, { CSSProperties, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { useTheme } from "@mui/material";
+import Box from "@mui/material/Box";
+import Skeleton from "@mui/material/Skeleton";
+import Tooltip from "@mui/material/Tooltip";
+import { nanoid } from "nanoid";
 import {
     Config,
     Data,
@@ -23,18 +29,15 @@ import {
     PlotSelectionEvent,
     ScatterLine,
 } from "plotly.js";
-import Skeleton from "@mui/material/Skeleton";
-import Box from "@mui/material/Box";
-import Tooltip from "@mui/material/Tooltip";
-import { useTheme } from "@mui/material";
+import { Figure } from "react-plotly.js";
 
-import { getArrayValue, getUpdateVar, TaipyActiveProps, TaipyChangeProps } from "./utils";
 import {
     createRequestChartUpdateAction,
     createSendActionNameAction,
     createSendUpdateAction,
 } from "../../context/taipyReducers";
-import { ColumnDesc } from "./tableUtils";
+import { lightenPayload } from "../../context/wsUtils";
+import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
 import {
     useClassNames,
     useDispatch,
@@ -43,11 +46,9 @@ import {
     useDynamicProperty,
     useModule,
 } from "../../utils/hooks";
-import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
-import { Figure } from "react-plotly.js";
-import { lightenPayload } from "../../context/wsUtils";
+import { ColumnDesc } from "./tableUtils";
 import { getComponentClassName } from "./TaipyStyle";
-import { nanoid } from "nanoid";
+import { getArrayValue, getUpdateVar, TaipyActiveProps, TaipyChangeProps } from "./utils";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
