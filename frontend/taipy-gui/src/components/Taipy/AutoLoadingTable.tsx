@@ -601,12 +601,12 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         <MuiTable sx={tableSx} aria-labelledby="tableTitle" size={size} stickyHeader={true}>
                             <TableHead>
                                 <TableRow ref={headerRow}>
-                                    {colsOrder.map((col, index) => (
+                                    {colsOrder.map((col) => (
                                         <TableCell
                                             key={`head${columns[col].dfid}`}
                                             sortDirection={orderBy === columns[col].dfid && order}
                                             sx={columns[col].width ? { width: columns[col].width } : {}}
-                                            className={generateHeaderClassName(columns[col].title || columns[col].dfid, index)}
+                                            className={getSuffixedClassNames(className, generateHeaderClassName(columns[col].dfid))}
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [

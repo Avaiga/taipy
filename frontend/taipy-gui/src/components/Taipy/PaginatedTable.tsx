@@ -499,7 +499,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                         <Table sx={tableSx} aria-labelledby="tableTitle" size={size} stickyHeader={true}>
                             <TableHead>
                                 <TableRow>
-                                    {colsOrder.map((col, index) => (
+                                    {colsOrder.map((col) => (
                                         <TableCell
                                             key={`head${columns[col].dfid}`}
                                             sortDirection={orderBy === columns[col].dfid && order}
@@ -510,7 +510,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     ? { width: `${100 / nbWidth}%`, maxWidth: 0 }
                                                     : undefined
                                             }
-                                            className={generateHeaderClassName(columns[col].title || columns[col].dfid, index)}
+                                            className={getSuffixedClassNames(className, generateHeaderClassName(columns[col].dfid))}
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [
