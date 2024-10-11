@@ -70,6 +70,19 @@ class _Factory:
     __LIBRARIES: t.Dict[str, t.List["ElementLibrary"]] = {}
 
     __CONTROL_BUILDERS = {
+        "alert": 
+        lambda gui, control_type, attrs: _Builder(
+            gui=gui,
+            control_type=control_type,
+            element_name="Notification",
+            attributes=attrs,
+        )
+        .set_value_and_default(var_type=PropertyType.dynamic_string) 
+        .set_attributes(
+            [
+                ("severity", PropertyType.string)
+            ]
+        ),
         "button": lambda gui, control_type, attrs: _Builder(
             gui=gui,
             control_type=control_type,
@@ -619,20 +632,6 @@ class _Factory:
             ]
         )
         ._set_propagate(),
-        "alert": lambda gui, control_type, attrs: _Builder(
-            gui=gui,
-            control_type=control_type,
-            element_name="Notification",  
-            attributes=attrs,
-        )
-        .set_value_and_default(var_type=PropertyType.dynamic_string)  
-        .set_attributes(
-            [
-                ("severity", PropertyType.string),  
-                ("variant", PropertyType.string),  
-                ("defaultMessage", PropertyType.string),
-            ]
-        ),
     }
 
     # TODO: process \" in property value
