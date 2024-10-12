@@ -2,7 +2,6 @@ import React from "react";
 import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
-import { BrowserRouter as Router } from "react-router-dom";
 
 import Menu from "./Menu";
 import { INITIAL_STATE, TaipyState } from "../../context/taipyReducers";
@@ -20,83 +19,51 @@ const imageItem: LovItem = { id: "ii1", item: { path: "/img/fred.png", text: "Im
 
 describe("Menu Component", () => {
     it("renders", async () => {
-        const { getByText } = render(
-            <Router>
-                <Menu lov={lov} />
-            </Router>
-        );
+        const { getByText } = render(<Menu lov={lov} />);
         const elt = getByText("Item 1");
         expect(elt.tagName).toBe("SPAN");
     });
 
     it("uses the class", async () => {
-        const { getByText } = render(
-            <Router>
-                <Menu lov={lov} className="taipy-menu" />
-            </Router>
-        );
+        const { getByText } = render(<Menu lov={lov} className="taipy-menu" />);
         const elt = getByText("Item 1");
         expect(elt.closest(".taipy-menu")).not.toBeNull();
     });
 
     it("can display an avatar with initials", async () => {
         const lovWithImage = [...lov, imageItem];
-        const { getByText } = render(
-            <Router>
-                <Menu lov={lovWithImage} />
-            </Router>
-        );
+        const { getByText } = render(<Menu lov={lovWithImage} />);
         const elt = getByText("I2");
         expect(elt.tagName).toBe("DIV");
     });
 
     it("can display an image", async () => {
         const lovWithImage = [...lov, imageItem];
-        const { getByAltText } = render(
-            <Router>
-                <Menu lov={lovWithImage} />
-            </Router>
-        );
+        const { getByAltText } = render(<Menu lov={lovWithImage} />);
         const elt = getByAltText("Image");
         expect(elt.tagName).toBe("IMG");
     });
 
     it("is disabled", async () => {
-        const { getAllByRole } = render(
-            <Router>
-                <Menu lov={lov} active={false} />
-            </Router>
-        );
+        const { getAllByRole } = render(<Menu lov={lov} active={false} />);
         const elts = getAllByRole("button");
         elts.forEach((elt, idx) => idx > 0 && expect(elt).toHaveClass("Mui-disabled"));
     });
 
     it("is enabled by default", async () => {
-        const { getAllByRole } = render(
-            <Router>
-                <Menu lov={lov} />
-            </Router>
-        );
+        const { getAllByRole } = render(<Menu lov={lov} />);
         const elts = getAllByRole("button");
         elts.forEach((elt) => expect(elt).not.toHaveClass("Mui-disabled"));
     });
 
     it("is enabled by active", async () => {
-        const { getAllByRole } = render(
-            <Router>
-                <Menu lov={lov} active={true} />
-            </Router>
-        );
+        const { getAllByRole } = render(<Menu lov={lov} active={true} />);
         const elts = getAllByRole("button");
         elts.forEach((elt) => expect(elt).not.toHaveClass("Mui-disabled"));
     });
 
     it("can disable a specific item", async () => {
-        const { getByText } = render(
-            <Router>
-                <Menu lov={lov} inactiveIds={[lov[0].id]} />
-            </Router>
-        );
+        const { getByText } = render(<Menu lov={lov} inactiveIds={[lov[0].id]} />);
         const elt = getByText(lov[0].item as string);
         const button = elt.closest('[role="button"]');
         expect(button).toHaveClass("Mui-disabled");
@@ -106,11 +73,9 @@ describe("Menu Component", () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
-            <Router>
-                <TaipyContext.Provider value={{ state, dispatch }}>
-                    <Menu lov={lov} onAction="action" />
-                </TaipyContext.Provider>
-            </Router>
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <Menu lov={lov} onAction="action" />
+            </TaipyContext.Provider>
         );
         const elt = getByText(lov[0].item as string);
         await userEvent.click(elt);

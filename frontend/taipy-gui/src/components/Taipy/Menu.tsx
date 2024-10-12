@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useMemo, useState, MouseEvent, CSSProperties, useEffect } from "react";
+import React, { useCallback, useMemo, useState, MouseEvent, CSSProperties } from "react";
 import MenuIco from "@mui/icons-material/Menu";
 import ListItemButton from "@mui/material/ListItemButton";
 import Drawer from "@mui/material/Drawer";
@@ -28,8 +28,7 @@ import { createSendActionNameAction } from "../../context/taipyReducers";
 import { MenuProps } from "../../utils/lov";
 import { useClassNames, useDispatch, useModule } from "../../utils/hooks";
 import { getComponentClassName } from "./TaipyStyle";
-import { emptyArray, getBaseURL } from "../../utils";
-import { useLocation } from "react-router";
+import { emptyArray } from "../../utils";
 
 const boxDrawerStyle = { overflowX: "hidden" } as CSSProperties;
 const headerSx = { padding: 0 };
@@ -37,13 +36,12 @@ const avatarSx = { bgcolor: (theme: Theme) => theme.palette.text.primary };
 const baseTitleProps = { noWrap: true, variant: "h6" } as const;
 
 const Menu = (props: MenuProps) => {
-    const { label, onAction = "", lov, width, inactiveIds = emptyArray, active = true } = props;
+    const { label, onAction = "", lov, selectedItems, width, inactiveIds = emptyArray, active = true } = props;
     const [selectedValue, setSelectedValue] = useState("");
     const [opened, setOpened] = useState(false);
     const dispatch = useDispatch();
     const theme = useTheme();
     const module = useModule();
-    const location = useLocation();
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     const clickHandler = useCallback(
@@ -82,15 +80,6 @@ const Menu = (props: MenuProps) => {
         ];
     }, [opened, width, theme]);
 
-    useEffect(() => {
-        if (lov && lov.length) {
-            const value = lov.find((it) => getBaseURL() + it.id === location.pathname);
-            if (value) {
-                setSelectedValue(value.id);
-            }
-        }
-    }, [location.pathname, lov]);
-
     return lov && lov.length ? (
         <Drawer variant="permanent" anchor="left" sx={drawerSx} className={`${className} ${getComponentClassName(props.children)}`}>
             <Box style={boxDrawerStyle}>
@@ -121,6 +110,7 @@ const Menu = (props: MenuProps) => {
                             disabled={!active || inactiveIds.includes(elt.id)}
                             withAvatar={true}
                             titleTypographyProps={titleProps}
+                            isSelected={selectedItems?.some((item) => item.id === elt.id)}
                         />
                     ))}
                 </List>

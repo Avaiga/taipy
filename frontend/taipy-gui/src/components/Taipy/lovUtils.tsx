@@ -41,6 +41,8 @@ export interface LovProps<T = string | string[], U = string> extends TaipyActive
     defaultValue?: U;
     height?: string | number;
     valueById?: boolean;
+    selectedItems?: LoV;
+    defaultSelectedItems?: U;
 }
 
 /**
@@ -148,6 +150,7 @@ export interface ItemProps {
     disabled: boolean;
     withAvatar?: boolean;
     titleTypographyProps?: TypographyProps<"span", { component?: "span"; }>;
+    isSelected?: boolean;
 }
 
 export const SingleItem = ({
@@ -158,11 +161,12 @@ export const SingleItem = ({
     disabled,
     withAvatar = false,
     titleTypographyProps,
+    isSelected,
 }: ItemProps) => (
     <ListItemButton
         onClick={clickHandler}
         data-id={value}
-        selected={Array.isArray(selectedValue) ? selectedValue.indexOf(value) !== -1 : selectedValue === value}
+        selected={Array.isArray(selectedValue) ? selectedValue.indexOf(value) !== -1 : selectedValue === value || isSelected}
         disabled={disabled}
     >
         {typeof item === "string" ? (

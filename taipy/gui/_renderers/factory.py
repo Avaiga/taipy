@@ -343,6 +343,7 @@ class _Factory:
                 ("inactive_ids", PropertyType.dynamic_list),
                 ("hover_text", PropertyType.dynamic_string),
                 ("lov", PropertyType.lov),
+                ("selected_items", PropertyType.single_lov),
             ]
         )
         ._set_propagate(),

@@ -1513,6 +1513,11 @@
                         "doc": "Semicolon (';')-separated list or a list of menu items identifiers that are disabled."
                     },
                     {
+                        "name": "selected_items",
+                        "type": "dynamic(Union[str,list[str]])",
+                        "doc": "Semicolon (';')-separated list or a list of menu items identifiers that are selected."
+                    },
+                    {
                         "name": "width",
                         "type": "str",
                         "default_value": "\"15vw\"",
