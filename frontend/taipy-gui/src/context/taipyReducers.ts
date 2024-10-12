@@ -819,9 +819,6 @@ const getAlertType = (aType: string) => {
     return aType;
 };
 
-const generateUniqueId = () => {
-    return '_' + Math.random().toString(36).substr(2, 9);
-};
 
 export const createAlertAction = (alert: AlertMessage): TaipyAlertAction => ({
     type: Types.SetAlert,
@@ -829,7 +826,7 @@ export const createAlertAction = (alert: AlertMessage): TaipyAlertAction => ({
     message: alert.message,
     system: alert.system,
     duration: alert.duration,
-    notification_id: alert.notification_id || generateUniqueId(),
+    notification_id: alert.notification_id,
 });
 
 export const createDeleteAlertAction = (notification_id: string): TaipyDeleteAlertAction => ({

@@ -15,6 +15,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { SnackbarKey, useSnackbar, VariantType } from "notistack";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import { nanoid } from 'nanoid';
 
 import { AlertMessage, createDeleteAlertAction } from "../../context/taipyReducers";
 import { useDispatch } from "../../utils/hooks";
@@ -25,7 +26,6 @@ interface AlertProps {
 
 const Alert = ({ alerts }: AlertProps) => {
     const alert = alerts.length ? alerts[0] : undefined;
-    const lastKey = useRef<SnackbarKey>("");
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const dispatch = useDispatch();
 
@@ -57,20 +57,18 @@ const Alert = ({ alerts }: AlertProps) => {
 
     useEffect(() => {
         if (alert) {
+            const notificationId = alert.notification_id || nanoid();
             if (alert.atype === "") {
-                if (lastKey.current) {
-                    closeSnackbar(lastKey.current);
-                    lastKey.current = "";
-                }
+                closeSnackbar(notificationId);
             } else {
-                lastKey.current = enqueueSnackbar(alert.message, {
+                enqueueSnackbar(alert.message, {
                     variant: alert.atype as VariantType,
                     action: notifAction,
                     autoHideDuration: alert.duration,
                 });
                 alert.system && new Notification(document.title || "Taipy", { body: alert.message, icon: faviconUrl });
             }
-            dispatch(createDeleteAlertAction(alert.notification_id));
+            dispatch(createDeleteAlertAction(notificationId));
         }
     }, [alert, enqueueSnackbar, closeSnackbar, notifAction, faviconUrl, dispatch]);
 
