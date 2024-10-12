@@ -74,13 +74,14 @@ class _Factory:
         lambda gui, control_type, attrs: _Builder(
             gui=gui,
             control_type=control_type,
-            element_name="Notification",
+            element_name="Alert",
             attributes=attrs,
         )
         .set_value_and_default(var_type=PropertyType.dynamic_string) 
         .set_attributes(
             [
-                ("severity", PropertyType.string)
+                ("severity", PropertyType.string),
+                ("variant", PropertyType.string),
             ]
         ),
         "button": lambda gui, control_type, attrs: _Builder(

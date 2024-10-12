@@ -34,7 +34,7 @@ import {
     taipyInitialize,
     taipyReducer,
 } from "../context/taipyReducers";
-import Alert from "./Taipy/Alert";
+import Alert from "./Taipy/Notification";
 import UIBlocker from "./Taipy/UIBlocker";
 import Navigate from "./Taipy/Navigate";
 import Menu from "./Taipy/Menu";
