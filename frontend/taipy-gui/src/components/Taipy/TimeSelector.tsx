@@ -10,19 +10,18 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback} from "react";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import { ErrorBoundary } from "react-error-boundary";
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-
+import { isValid } from "date-fns";
 import { MobileTimePicker } from '@mui/x-date-pickers/MobileTimePicker';
 import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps, getCssSize } from "./utils";
-
-import { useClassNames, useDynamicProperty } from "../../utils/hooks";
+import { createSendUpdateAction } from "../../context/taipyReducers";
+import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 import ErrorFallback from "../../utils/ErrorBoundary";
 import Field from "./Field";
-
 
 
 interface TimeSelectorProps extends TaipyActiveProps, TaipyChangeProps {
@@ -39,16 +38,34 @@ interface TimeSelectorProps extends TaipyActiveProps, TaipyChangeProps {
 
 const boxSx = { display: "inline-block" };
 const TimeSelector = (props: TimeSelectorProps) => {
-  const { asClock = false, id } = props;
-  const [value] = useState(
-    () => { return new Date() }
-  );
+  const { asClock = false, id, updateVarName, propagate = true } = props;
+  const [value, setValue] = useState <Date | null> (null);
 
+  const dispatch = useDispatch();
+  const module = useModule();
   const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
   const active = useDynamicProperty(props.active, props.defaultActive, true);
   const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
   const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
   const timeSx = useMemo(() => (props.width ? { maxWidth: getCssSize(props.width) } : undefined), [props.width]);
+
+  const handleChange = useCallback(
+    (v: Date | null) => {
+        setValue(v);
+        if (v !== null && isValid(v)) {
+            dispatch(
+              createSendUpdateAction(
+                  updateVarName,
+                  v,
+                  module,
+                  props.onChange,
+                  propagate
+              )
+            );
+        }
+    },
+    [updateVarName, dispatch, propagate, props.onChange, module]
+  );
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -56,8 +73,9 @@ const TimeSelector = (props: TimeSelectorProps) => {
         <Box id={id} className={`${className}`} sx={boxSx}>
           {editable ? (
             asClock ? (
-              <MobileTimePicker  
+              <MobileTimePicker
                 value={value}
+                onChange={handleChange}
                 className={getSuffixedClassNames(className, "-picker")}
                 disabled={!active}
                 label={props.label}
@@ -67,6 +85,7 @@ const TimeSelector = (props: TimeSelectorProps) => {
             ):(
               <TimePicker 
                 value={value}
+                onChange={handleChange}
                 className={getSuffixedClassNames(className, "-picker")}
                 disabled={!active}
                 label={props.label}
