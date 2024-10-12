@@ -224,7 +224,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const baseColumns = useDynamicJsonProperty(props.columns, props.defaultColumns, defaultColumns);
 
-    const refresh = props.data && typeof props.data.__taipy_refresh === "boolean";
+    const refresh = props.data?.__taipy_refresh !== undefined;
 
     useEffect(() => {
         if (!refresh && props.data && page.current.key && props.data[page.current.key] !== undefined) {
