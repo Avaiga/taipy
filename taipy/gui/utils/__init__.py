@@ -23,6 +23,7 @@ from ._map_dict import _MapDict
 from ._runtime_manager import _RuntimeManager
 from ._variable_directory import _variable_decode, _variable_encode, _VariableDirectory
 from .boolean import _is_boolean, _is_true
+from .callable import _function_name, _is_function, _is_unnamed_function
 from .clientvarname import _get_broadcast_var_name, _get_client_var_name, _to_camel_case
 from .datatype import _get_data_type
 from .date import _date_to_string, _string_to_date
