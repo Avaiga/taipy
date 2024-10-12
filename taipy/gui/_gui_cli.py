@@ -37,7 +37,7 @@ class _GuiCLI(_AbstractCLI):
             "const": "",
             "help": "Specify server host",
         },
-        ("--client-url", "-H"): {
+        ("--client-url",): {
             "dest": "taipy_client_url",
             "metavar": "CLIENT_URL",
             "nargs": "?",
