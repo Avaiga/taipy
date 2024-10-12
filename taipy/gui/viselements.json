@@ -363,12 +363,6 @@
                 ],
                 "properties": [
                     {
-                        "name": "with_time",
-                        "type": "bool",
-                        "default_value": "False",
-                        "doc": "Whether or not to show the time part of the date."
-                    },
-                    {
                         "name": "as_clock",
                         "type": "bool",
                         "default_value": "False",
@@ -388,7 +382,7 @@
                     {
                         "name": "time",
                         "default_property": true,
-                        "type": "str",
+                        "type": "dynamic(str)",
                         "doc": "The time that this control represents and can modify"
                     },
                     {
