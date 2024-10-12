@@ -311,8 +311,8 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 });
                 addActionColumn(
                     (active && partialEditable && (onAdd || onDelete) ? 1 : 0) +
-                    (active && filter ? 1 : 0) +
-                    (active && downloadable ? 1 : 0),
+                        (active && filter ? 1 : 0) +
+                        (active && downloadable ? 1 : 0),
                     newCols
                 );
                 const colsOrder = Object.keys(newCols).sort(getSortByIndex(newCols));
@@ -395,12 +395,12 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     promises: { ...page.current.promises, [startIndex]: { resolve: resolve, reject: reject } },
                 };
                 const applies = aggregates.length
-                    ? colsOrder.reduce<Record<string, unknown>>((pv, col) => {
-                        if (columns[col].apply) {
-                            pv[columns[col].dfid] = columns[col].apply;
-                        }
-                        return pv;
-                    }, {})
+                    ? colsOrder.reduce<Record<string, unknown>>((pv, col) =>{
+                          if (columns[col].apply) {
+                              pv[columns[col].dfid] = columns[col].apply;
+                          }
+                          return pv;
+                      }, {}) 
                     : undefined;
                 dispatch(
                     createRequestInfiniteTableUpdateAction(
@@ -540,31 +540,31 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     );
 
     const rowData: RowData = useMemo(
-        () =>
-        ({
-            colsOrder: colsOrder,
-            columns: columns,
-            rows: rows,
-            classes: {},
-            tableClassName: className,
-            cellProps: colsOrder.map((col) => ({
-                sx: getCellSx(columns[col].width || columns[col].widthHint, size),
-                component: "div",
-                variant: "body",
-            })),
+       () =>
+            ({
+                colsOrder: colsOrder,
+                columns: columns,
+                rows: rows,
+                classes: {},
+                tableClassName: className,
+                cellProps: colsOrder.map((col) => ({
+                    sx: getCellSx(columns[col].width || columns[col].widthHint, size),
+                    component: "div",
+                    variant: "body",
+                })),
 
-            isItemLoaded: isItemLoaded,
-            selection: selected,
-            formatConfig: formatConfig,
-            onValidation: active && onEdit ? onCellValidation : undefined,
-            onDeletion: active && (editable || partialEditable) && onDelete ? onRowDeletion : undefined,
-            onRowSelection: active && onAction ? onRowSelection : undefined,
-            onRowClick: active && onAction ? onRowClick : undefined,
-            rowClassName: props.rowClassName,
-            nanValue: props.nanValue,
-            compRows: compRows,
-            useCheckbox: useCheckbox,
-        } as RowData),
+                isItemLoaded: isItemLoaded,
+                selection: selected,
+                formatConfig: formatConfig,
+                onValidation: active && onEdit ? onCellValidation : undefined,
+                onDeletion: active && (editable || partialEditable) && onDelete ? onRowDeletion : undefined,
+                onRowSelection: active && onAction ? onRowSelection : undefined,
+                onRowClick: active && onAction ? onRowClick : undefined,
+                rowClassName: props.rowClassName,
+                nanValue: props.nanValue,
+                compRows: compRows,
+                useCheckbox: useCheckbox,
+            } as RowData), 
         [
             rows,
             compRows,

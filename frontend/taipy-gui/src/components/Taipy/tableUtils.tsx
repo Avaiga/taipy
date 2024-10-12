@@ -160,9 +160,9 @@ export const DownloadAction = "__Taipy__download_csv";
 export type PageSizeOptionsType = (
     | number
     | {
-        value: number;
-        label: string;
-    }
+          value: number;
+          label: string;
+      } 
 )[];
 
 export interface TaipyPaginatedTableProps extends TaipyTableProps {
@@ -317,27 +317,27 @@ export const getPageKey = (
         order,
         aggregates?.length
             ? cols.reduce((pv, col, idx) => {
-                if (aggregates.includes(columns[col].dfid)) {
-                    return `${pv}${idx}`;
-                }
-                return pv;
-            }, "-")
+                  if (aggregates.includes(columns[col].dfid)) {
+                      return `${pv}${idx}`;
+                  }
+                  return pv;
+              }, "-") 
             : undefined,
         filters.map((filter) => `${filter.col}${filter.action}${filter.value}`).join(),
         [
             cellClassNames &&
-            Object.entries(cellClassNames)
-                .map((col, className) => `${col}:${className}`)
-                .join(),
+                Object.entries(cellClassNames)
+                    .map((col, className) => `${col}:${className}`)
+                    .join(),
             tooltips &&
-            Object.entries(tooltips)
-                .map((col, tooltip) => `${col}:${tooltip}`)
-                .join(),
+                Object.entries(tooltips)
+                    .map((col, tooltip) => `${col}:${tooltip}`)
+                    .join(),
             formats &&
-            Object.entries(formats)
-                .map((col, format) => `${col}:${format}`)
-                .join(),
-        ]
+                Object.entries(formats)
+                    .map((col, format) => `${col}:${format}`)
+                    .join(),
+        ] 
             .filter((v) => v)
             .join(";"),
     ]
@@ -550,11 +550,12 @@ export const EditableCell = (props: EditableCellProps) => {
                 onValidation ? getSuffixedClassNames(className || "tpc", edit ? "-editing" : "-editable") : className
             }
             title={
-                tooltip || comp
-                    ? `${tooltip ? tooltip : ""}${comp ? " " + formatValue(comp as RowValue, colDesc, formatConfig, nanValue) : ""
-                    }`
+               tooltip || comp
+                    ? `${tooltip ? tooltip : ""}${
+                          comp ? " " + formatValue(comp as RowValue, colDesc, formatConfig, nanValue) : ""
+                      }`
                     : undefined
-            }
+            } 
         >
             <Badge color="primary" variant="dot" invisible={comp === undefined || comp === null}>
                 {edit ? (

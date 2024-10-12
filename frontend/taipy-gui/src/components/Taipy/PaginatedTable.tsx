@@ -161,10 +161,10 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 });
                 addActionColumn(
                     (active && partialEditable && (onAdd || onDelete) ? 1 : 0) +
-                    (active && filter ? 1 : 0) +
-                    (active && downloadable ? 1 : 0),
+                        (active && filter ? 1 : 0) +
+                        (active && downloadable ? 1 : 0),
                     newCols
-                );
+                ); 
                 const colsOrder = Object.keys(newCols).sort(getSortByIndex(newCols));
                 let nbWidth = 0;
                 const functions = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
@@ -262,11 +262,11 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             setLoading(true);
             const applies = aggregates.length
                 ? colsOrder.reduce<Record<string, unknown>>((pv, col) => {
-                    if (columns[col].apply) {
-                        pv[columns[col].dfid] = columns[col].apply;
-                    }
-                    return pv;
-                }, {})
+                      if (columns[col].apply) {
+                          pv[columns[col].dfid] = columns[col].apply;
+                      }
+                      return pv;
+                  }, {}) 
                 : undefined;
             dispatch(
                 createRequestTableUpdateAction(
