@@ -6,8 +6,8 @@
  *
  *        http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
 
@@ -44,6 +44,14 @@ interface DateRangeProps extends TaipyActiveProps, TaipyChangeProps {
 
 const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotProps<Date>;
 
+// Function to round the date to the nearest 15 minutes
+const roundToNearest15Minutes = (date: Date): Date => {
+    const minutes = date.getMinutes();
+    const roundedMinutes = Math.round(minutes / 15) * 15;
+    date.setMinutes(roundedMinutes);
+    return date;
+};
+
 const getRangeDateTime = (
     json: string | string[] | undefined,
     tz: string,
@@ -54,7 +62,7 @@ const getRangeDateTime = (
         try {
             dates = JSON.parse(json);
         } catch {
-            // too bad
+            // Handle error if JSON parsing fails
         }
     } else {
         dates = json as string[];
@@ -86,7 +94,7 @@ const DateRange = (props: DateRangeProps) => {
         (v: Date | null, start: boolean) => {
             setValue((dates) => {
                 if (v !== null && isValid(v)) {
-                    const newDate = getTimeZonedDate(v, tz, withTime);
+                    const newDate = roundToNearest15Minutes(getTimeZonedDate(v, tz, withTime)); // Round to nearest 15 mins
                     const otherDate = start
                         ? dates[1] && getTimeZonedDate(dates[1], tz, withTime)
                         : dates[0] && getTimeZonedDate(dates[0], tz, withTime);
@@ -118,7 +126,7 @@ const DateRange = (props: DateRangeProps) => {
     const handleChangeStart = useCallback((v: Date | null) => handleChange(v, true), [handleChange]);
     const handleChangeEnd = useCallback((v: Date | null) => handleChange(v, false), [handleChange]);
 
-    // Run every time props.value get updated
+    // Update state when props.value get updated
     useEffect(() => {
         if (props.dates !== undefined || props.defaultDates) {
             const dates = getRangeDateTime(props.dates === undefined ? props.defaultDates : props.dates, tz, withTime);
@@ -218,20 +226,23 @@ const DateRange = (props: DateRangeProps) => {
                                 format={props.format}
                                 id={id && id + "-field"}
                                 className={getSuffixedClassNames(className, "-text")}
-                                width={props.width && "100%"}
+                                width={props.width}
+                                disabled
+                                label={props.labelStart}
                             />
                             <Typography>{separator}</Typography>
                             <Field
                                 dataType="datetime"
                                 value={value[1] && isValid(value[1]) ? value[1].toISOString() : ""}
                                 format={props.format}
-                                id={id && id + "-field"}
+                                id={id && id + "-field-end"}
                                 className={getSuffixedClassNames(className, "-text")}
-                                width={props.width && "100%"}
+                                width={props.width}
+                                disabled
+                                label={props.labelEnd}
                             />
                         </>
                     )}
-                    {props.children}
                 </Stack>
             </Tooltip>
         </ErrorBoundary>
