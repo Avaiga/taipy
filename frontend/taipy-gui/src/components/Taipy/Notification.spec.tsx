@@ -16,7 +16,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { SnackbarProvider } from "notistack";
 
-import Alert from "./Alert";
+import Alert from "./Notification";
 import { AlertMessage } from "../../context/taipyReducers";
 import userEvent from "@testing-library/user-event";
 

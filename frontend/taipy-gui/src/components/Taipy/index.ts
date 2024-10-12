@@ -13,6 +13,7 @@
 
 import { ComponentType } from "react";
 
+import Notification from "./Alert";
 import Button from "./Button";
 import Chat from "./Chat";
 import Chart from "./Chart";
@@ -43,7 +44,6 @@ import Table from "./Table";
 import TaipyStyle from "./TaipyStyle";
 import Toggle from "./Toggle";
 import TreeView from "./TreeView";
-import Notification from "./Notification";
 
 const registeredComponents: Record<string, ComponentType> = {};
 
