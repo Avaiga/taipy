@@ -161,8 +161,8 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 });
                 addActionColumn(
                     (active && partialEditable && (onAdd || onDelete) ? 1 : 0) +
-                        (active && filter ? 1 : 0) +
-                        (active && downloadable ? 1 : 0),
+                    (active && filter ? 1 : 0) +
+                    (active && downloadable ? 1 : 0),
                     newCols
                 );
                 const colsOrder = Object.keys(newCols).sort(getSortByIndex(newCols));
@@ -262,11 +262,11 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             setLoading(true);
             const applies = aggregates.length
                 ? colsOrder.reduce<Record<string, unknown>>((pv, col) => {
-                      if (columns[col].apply) {
-                          pv[columns[col].dfid] = columns[col].apply;
-                      }
-                      return pv;
-                  }, {})
+                    if (columns[col].apply) {
+                        pv[columns[col].dfid] = columns[col].apply;
+                    }
+                    return pv;
+                }, {})
                 : undefined;
             dispatch(
                 createRequestTableUpdateAction(
@@ -510,7 +510,10 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     ? { width: `${100 / nbWidth}%`, maxWidth: 0 }
                                                     : undefined
                                             }
-                                            className={getSuffixedClassNames(className, generateHeaderClassName(columns[col].dfid))}
+                                            className={col === "EDIT_COL"
+                                                ? getSuffixedClassNames(className, "-action")
+                                                : getSuffixedClassNames(className, generateHeaderClassName(columns[col].dfid))
+                                            }
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [

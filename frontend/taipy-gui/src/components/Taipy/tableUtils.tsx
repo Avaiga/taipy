@@ -54,10 +54,10 @@ import { TaipyActiveProps, TaipyMultiSelectProps, getSuffixedClassNames } from "
  * @returns for CSS class name.
  */
 
-export const generateHeaderClassName = (columnName: string, ): string => {
+export const generateHeaderClassName = (columnName: string,): string => {
     // logic for the css header classname
-    const sanitizedColumnName = columnName.replace(/\W+/g, '-').toLowerCase();
-    return sanitizedColumnName;
+    // added /-+/g to remove multiple hyphens into one (if it's not needed i will remove it)
+    return '-' + columnName.replace(/\W+/g, '-').replace(/-+/g, '-').toLowerCase();
 };
 
 export interface ColumnDesc {
@@ -160,9 +160,9 @@ export const DownloadAction = "__Taipy__download_csv";
 export type PageSizeOptionsType = (
     | number
     | {
-          value: number;
-          label: string;
-      }
+        value: number;
+        label: string;
+    }
 )[];
 
 export interface TaipyPaginatedTableProps extends TaipyTableProps {
@@ -317,26 +317,26 @@ export const getPageKey = (
         order,
         aggregates?.length
             ? cols.reduce((pv, col, idx) => {
-                  if (aggregates.includes(columns[col].dfid)) {
-                      return `${pv}${idx}`;
-                  }
-                  return pv;
-              }, "-")
+                if (aggregates.includes(columns[col].dfid)) {
+                    return `${pv}${idx}`;
+                }
+                return pv;
+            }, "-")
             : undefined,
         filters.map((filter) => `${filter.col}${filter.action}${filter.value}`).join(),
         [
             cellClassNames &&
-                Object.entries(cellClassNames)
-                    .map((col, className) => `${col}:${className}`)
-                    .join(),
+            Object.entries(cellClassNames)
+                .map((col, className) => `${col}:${className}`)
+                .join(),
             tooltips &&
-                Object.entries(tooltips)
-                    .map((col, tooltip) => `${col}:${tooltip}`)
-                    .join(),
+            Object.entries(tooltips)
+                .map((col, tooltip) => `${col}:${tooltip}`)
+                .join(),
             formats &&
-                Object.entries(formats)
-                    .map((col, format) => `${col}:${format}`)
-                    .join(),
+            Object.entries(formats)
+                .map((col, format) => `${col}:${format}`)
+                .join(),
         ]
             .filter((v) => v)
             .join(";"),
@@ -551,9 +551,8 @@ export const EditableCell = (props: EditableCellProps) => {
             }
             title={
                 tooltip || comp
-                    ? `${tooltip ? tooltip : ""}${
-                          comp ? " " + formatValue(comp as RowValue, colDesc, formatConfig, nanValue) : ""
-                      }`
+                    ? `${tooltip ? tooltip : ""}${comp ? " " + formatValue(comp as RowValue, colDesc, formatConfig, nanValue) : ""
+                    }`
                     : undefined
             }
         >

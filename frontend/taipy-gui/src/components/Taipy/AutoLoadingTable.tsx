@@ -311,8 +311,8 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 });
                 addActionColumn(
                     (active && partialEditable && (onAdd || onDelete) ? 1 : 0) +
-                        (active && filter ? 1 : 0) +
-                        (active && downloadable ? 1 : 0),
+                    (active && filter ? 1 : 0) +
+                    (active && downloadable ? 1 : 0),
                     newCols
                 );
                 const colsOrder = Object.keys(newCols).sort(getSortByIndex(newCols));
@@ -396,11 +396,11 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 };
                 const applies = aggregates.length
                     ? colsOrder.reduce<Record<string, unknown>>((pv, col) => {
-                          if (columns[col].apply) {
-                              pv[columns[col].dfid] = columns[col].apply;
-                          }
-                          return pv;
-                      }, {})
+                        if (columns[col].apply) {
+                            pv[columns[col].dfid] = columns[col].apply;
+                        }
+                        return pv;
+                    }, {})
                     : undefined;
                 dispatch(
                     createRequestInfiniteTableUpdateAction(
@@ -541,30 +541,30 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
 
     const rowData: RowData = useMemo(
         () =>
-            ({
-                colsOrder: colsOrder,
-                columns: columns,
-                rows: rows,
-                classes: {},
-                tableClassName: className,
-                cellProps: colsOrder.map((col) => ({
-                    sx: getCellSx(columns[col].width || columns[col].widthHint, size),
-                    component: "div",
-                    variant: "body",
-                })),
+        ({
+            colsOrder: colsOrder,
+            columns: columns,
+            rows: rows,
+            classes: {},
+            tableClassName: className,
+            cellProps: colsOrder.map((col) => ({
+                sx: getCellSx(columns[col].width || columns[col].widthHint, size),
+                component: "div",
+                variant: "body",
+            })),
 
-                isItemLoaded: isItemLoaded,
-                selection: selected,
-                formatConfig: formatConfig,
-                onValidation: active && onEdit ? onCellValidation : undefined,
-                onDeletion: active && (editable || partialEditable) && onDelete ? onRowDeletion : undefined,
-                onRowSelection: active && onAction ? onRowSelection : undefined,
-                onRowClick: active && onAction ? onRowClick : undefined,
-                rowClassName: props.rowClassName,
-                nanValue: props.nanValue,
-                compRows: compRows,
-                useCheckbox: useCheckbox,
-            } as RowData),
+            isItemLoaded: isItemLoaded,
+            selection: selected,
+            formatConfig: formatConfig,
+            onValidation: active && onEdit ? onCellValidation : undefined,
+            onDeletion: active && (editable || partialEditable) && onDelete ? onRowDeletion : undefined,
+            onRowSelection: active && onAction ? onRowSelection : undefined,
+            onRowClick: active && onAction ? onRowClick : undefined,
+            rowClassName: props.rowClassName,
+            nanValue: props.nanValue,
+            compRows: compRows,
+            useCheckbox: useCheckbox,
+        } as RowData),
         [
             rows,
             compRows,
@@ -606,7 +606,10 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                             key={`head${columns[col].dfid}`}
                                             sortDirection={orderBy === columns[col].dfid && order}
                                             sx={columns[col].width ? { width: columns[col].width } : {}}
-                                            className={getSuffixedClassNames(className, generateHeaderClassName(columns[col].dfid))}
+                                            className={col === "EDIT_COL"
+                                                ? getSuffixedClassNames(className, "-action")
+                                                : getSuffixedClassNames(className, generateHeaderClassName(columns[col].dfid))
+                                            }
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [
