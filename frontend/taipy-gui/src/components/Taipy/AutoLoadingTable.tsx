@@ -395,12 +395,12 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     promises: { ...page.current.promises, [startIndex]: { resolve: resolve, reject: reject } },
                 };
                 const applies = aggregates.length
-                    ? colsOrder.reduce<Record<string, unknown>>((pv, col) =>{
+                    ? colsOrder.reduce<Record<string, unknown>>((pv, col) => {
                           if (columns[col].apply) {
                               pv[columns[col].dfid] = columns[col].apply;
                           }
                           return pv;
-                      }, {}) 
+                      }, {})
                     : undefined;
                 dispatch(
                     createRequestInfiniteTableUpdateAction(
@@ -540,7 +540,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     );
 
     const rowData: RowData = useMemo(
-       () =>
+        () =>
             ({
                 colsOrder: colsOrder,
                 columns: columns,
@@ -564,7 +564,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 nanValue: props.nanValue,
                 compRows: compRows,
                 useCheckbox: useCheckbox,
-            } as RowData), 
+            } as RowData),
         [
             rows,
             compRows,

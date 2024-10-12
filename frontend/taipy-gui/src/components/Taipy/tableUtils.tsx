@@ -162,7 +162,7 @@ export type PageSizeOptionsType = (
     | {
           value: number;
           label: string;
-      } 
+      }
 )[];
 
 export interface TaipyPaginatedTableProps extends TaipyTableProps {
@@ -321,7 +321,7 @@ export const getPageKey = (
                       return `${pv}${idx}`;
                   }
                   return pv;
-              }, "-") 
+              }, "-")
             : undefined,
         filters.map((filter) => `${filter.col}${filter.action}${filter.value}`).join(),
         [
@@ -337,7 +337,7 @@ export const getPageKey = (
                 Object.entries(formats)
                     .map((col, format) => `${col}:${format}`)
                     .join(),
-        ] 
+        ]
             .filter((v) => v)
             .join(";"),
     ]
@@ -550,12 +550,12 @@ export const EditableCell = (props: EditableCellProps) => {
                 onValidation ? getSuffixedClassNames(className || "tpc", edit ? "-editing" : "-editable") : className
             }
             title={
-               tooltip || comp
+                tooltip || comp
                     ? `${tooltip ? tooltip : ""}${
                           comp ? " " + formatValue(comp as RowValue, colDesc, formatConfig, nanValue) : ""
                       }`
                     : undefined
-            } 
+            }
         >
             <Badge color="primary" variant="dot" invisible={comp === undefined || comp === null}>
                 {edit ? (

@@ -164,7 +164,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                         (active && filter ? 1 : 0) +
                         (active && downloadable ? 1 : 0),
                     newCols
-                ); 
+                );
                 const colsOrder = Object.keys(newCols).sort(getSortByIndex(newCols));
                 let nbWidth = 0;
                 const functions = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
@@ -266,7 +266,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                           pv[columns[col].dfid] = columns[col].apply;
                       }
                       return pv;
-                  }, {}) 
+                  }, {})
                 : undefined;
             dispatch(
                 createRequestTableUpdateAction(
