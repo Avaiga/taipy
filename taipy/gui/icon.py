@@ -52,15 +52,11 @@ class Icon:
             dark_path (Optional[str]): The path to the dark theme image (fallback to *path* if not defined).
         """
         self.path: str = path
-        """The path to the image file."""
         self.text: t.Optional[str] = text
-        """The text associated to the image or None if there is none."""
         if light_path is not None:
             self.light_path: t.Optional[str] = light_path
-            """The path to the light theme image (fallback to *path* if not defined)."""
         if dark_path is not None:
             self.dark_path: t.Optional[str] = dark_path
-            """The path to the dark theme image (fallback to *path* if not defined)."""
 
     def _to_dict(self, a_dict: t.Optional[dict] = None) -> dict:
         if a_dict is None:
