@@ -396,7 +396,6 @@ class Gui:
         if libraries is not None:
             for library in libraries:
                 Gui.add_library(library)
-    
     def set_on_invalid_data_callback(self, callback: t.Callable[[t.Any], t.Optional[t.Any]]):
         """
         Set the callback function to handle unsupported data types.
