@@ -413,7 +413,7 @@ class Gui:
         :param value: The unsupported data type encountered.
         :return: Transformed data or None if no transformation is possible.
         """
-        if self._on_invalid_data_callback:
+        if self._on_invalid_data_callback is not None:
             return self._on_invalid_data_callback(value)
         else:
             # Default behavior if no callback is set
