@@ -346,8 +346,7 @@ const Chat = (props: ChatProps) => {
         setShowMessage(false);
     }, []);
 
-    // const refresh = typeof props.messages === "number";
-    const refresh = props.messages && typeof props.messages.__taipy_refresh === "boolean";
+    const refresh = props.messages?.__taipy_refresh !== undefined;
 
     useEffect(() => {
         if (!refresh && props.messages && page.current.key && props.messages[page.current.key] !== undefined) {
