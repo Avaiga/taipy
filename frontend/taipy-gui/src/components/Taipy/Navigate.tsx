@@ -12,7 +12,9 @@
  */
 
 import { useContext, useEffect } from "react";
+import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+
 import { TaipyContext } from "../../context/taipyContext";
 import { createNavigateAction } from "../../context/taipyReducers";
 import { getBaseURL } from "../../utils";
@@ -65,9 +67,15 @@ const Navigate = ({ to, params, tab, force }: NavigateProps) => {
                     // Handle Resource Handler Id
                     const tprh = params?.tprh;
                     if (tprh !== undefined) {
-                        // Add a session cookie for the resource handler id
-                        document.cookie = `tprh=${tprh};path=/;`;
-                        navigate(0);
+                        axios.post(`taipy-rh`, { tprh, is_secure: window.location.protocol.includes("https") }).then(() => {
+                            localStorage.setItem("tprh", tprh);
+                            navigate(0);
+                        }).catch((error) => {
+                            console.error(
+                                "Cannot resolve resource handler. Route `/taipy-rh` might be missing.",
+                                error,
+                            );
+                        });
                     }
                 }
             } else {
