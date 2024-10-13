@@ -16,17 +16,18 @@
         alt="GitHub License" 
         height="20px" 
     />
+    &nbsp;
     <img 
         src="https://img.shields.io/badge/python%20version-3.8-ff371a?style=plastic&labelColor=1f1f1f" 
         alt="Python version needed: 3.8" 
     />
+    &nbsp;
     <a target="_blank" href="https://github.com/Avaiga/taipy/releases">
         <img 
             alt="GitHub Release" 
             height="20px" 
             src="https://img.shields.io/github/v/release/Avaiga/taipy?display_name=release&style=plastic&color=ff371a&labelColor=1f1f1f"
-        >
-    </a>
+        ></a>
 </div>
 <br>
 
@@ -36,22 +37,21 @@
             src="https://img.shields.io/badge/docs-ff371a?style=plastic&labelColor=1f1f1f&label=Explore" 
             height="20px" 
             alt="Explore the docs" 
-        >
-    </a>
+        ></a>
+    &nbsp;
     <a target="_blank" href="https://docs.taipy.io/en/latest/gallery/">
         <img 
             src="https://img.shields.io/badge/examples-ff371a?style=plastic&labelColor=1f1f1f&label=Check" 
             height="20px" 
             alt="Demos & Examples" 
-        >
-    </a>
+        ></a>
+    &nbsp;
     <a target="_blank" href="https://discord.com/invite/SJyz2VJGxV">
         <img 
             src="https://img.shields.io/discord/1125797687476887563?style=plastic&labelColor=1f1f1f&logo=discord&logoColor=ff371a&label=Discord&color=ff371a" 
             height="20px" 
             alt="Discord support" 
-        >
-    </a>
+        ></a>
 </div>
 <br>
 
