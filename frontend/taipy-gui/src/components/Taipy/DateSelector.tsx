@@ -26,6 +26,7 @@ import { dateToString, getDateTime, getTimeZonedDate } from "../../utils";
 import { useClassNames, useDispatch, useDynamicProperty, useFormatConfig, useModule } from "../../utils/hooks";
 import Field from "./Field";
 import ErrorFallback from "../../utils/ErrorBoundary";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
     withTime?: boolean;
@@ -105,7 +106,7 @@ const DateSelector = (props: DateSelectorProps) => {
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <Tooltip title={hover || ""}>
-                <Box id={id} className={className} sx={boxSx}>
+                <Box id={id} className={`${className} ${getComponentClassName(props.children)}`} sx={boxSx}>
                     {editable ? (
                         withTime ? (
                             <DateTimePicker
@@ -145,6 +146,7 @@ const DateSelector = (props: DateSelectorProps) => {
                             width={props.width}
                         />
                     )}
+                    {props.children}
                 </Box>
             </Tooltip>
         </ErrorBoundary>

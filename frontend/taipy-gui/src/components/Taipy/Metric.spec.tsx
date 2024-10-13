@@ -163,15 +163,15 @@ const lightTemplate = {
 
 describe("Metric Component", () => {
     it("renders", async () => {
-        const { getByTestId } = render(<Metric testId="test-id" />);
-        const elt = getByTestId("test-id");
-        expect(elt.tagName).toBe("DIV");
+        const { container } = render(<Metric className="test" />);
+        const elt = container.querySelector(".test");
+        expect(elt?.tagName).toBe("DIV");
     });
 
     it("displays the right info for class", async () => {
-        const { getByTestId } = render(<Metric testId="test-id" className={"taipy-gauge"} />);
-        const elt = getByTestId("test-id");
-        expect(elt).toHaveClass("taipy-gauge");
+        const { container } = render(<Metric className="test" />);
+        const elt = container.querySelector(".test");
+        expect(elt).toHaveClass("test");
     });
 
     it("sets the title when provided", async () => {
@@ -203,9 +203,9 @@ describe("Metric Component", () => {
     });
 
     it("sets the template when provided", async () => {
-        render(<Metric template={JSON.stringify(template)} />);
+        const { container } = render(<Metric template={JSON.stringify(template)} />);
         await waitFor(() => {
-            const elt = document.querySelector(".main-svg");
+            const elt = container.querySelector(".main-svg");
             expect(elt).toHaveStyle({
                 backgroundColor: "rgb(255, 0, 0)",
             });
@@ -213,23 +213,23 @@ describe("Metric Component", () => {
     });
 
     it("processes colorMap prop correctly", async () => {
-        render(<Metric colorMap={JSON.stringify(colorMap)} />);
+        const { container } = render(<Metric colorMap={JSON.stringify(colorMap)} />);
         await waitFor(() => {
-            const elts = document.querySelectorAll(".bg-arc");
-            const redElt = Array.from(elts[1].children);
+            const elements = container.querySelectorAll(".bg-arc");
+            const redElt = Array.from(elements[1].children);
             const redEltHasRedFill = redElt.some((elt) => (elt as HTMLElement).style.fill === "rgb(255, 0, 0)");
             expect(redEltHasRedFill).toBeTruthy();
 
-            const blueElt = Array.from(elts[2].children);
+            const blueElt = Array.from(elements[2].children);
             const blueEltHasBlueFill = blueElt.some((elt) => (elt as HTMLElement).style.fill === "rgb(0, 0, 255)");
             expect(blueEltHasBlueFill).toBeTruthy();
         });
     });
 
     it("processes delta prop correctly when delta is defined", async () => {
-        render(<Metric delta={10} testId="test-id" />);
+        const { container } = render(<Metric delta={10} />);
         await waitFor(() => {
-            const elt = document.querySelector(".delta");
+            const elt = container.querySelector(".delta");
             if (elt) {
                 expect(elt.textContent).toContain("10");
             } else {
@@ -239,45 +239,45 @@ describe("Metric Component", () => {
     });
 
     it("applies style correctly when deltaColor is set", async () => {
-        render(<Metric delta={10} deltaColor="#FF4136" testId="test-id" />);
+        const { container } = render(<Metric delta={10} deltaColor="#FF4136"  />);
         await waitFor(() => {
-            const elt = document.querySelector(".delta");
+            const elt = container.querySelector(".delta");
             expect(elt).toHaveStyle({
-                    fill: "rgb(255, 65, 54)"
-                });
+                fill: "rgb(255, 65, 54)",
+            });
         });
     });
 
     it("applies style correctly when deltaColor is set invert", async () => {
-        render(<Metric delta={10} deltaColor="invert" testId="test-id" />);
+        const { container } = render(<Metric delta={10} deltaColor="invert"  />);
         await waitFor(() => {
-            const elt = document.querySelector(".delta");
+            const elt = container.querySelector(".delta");
             expect(elt).toHaveStyle({
-                    fill: "rgb(255, 65, 54)"
-                });
+                fill: "rgb(255, 65, 54)",
+            });
         });
     });
 
     it("processes type and threshold props correctly when type is linear", async () => {
-        render(<Metric type="linear" threshold={50} testId="test-id" />);
+        const { container } = render(<Metric type="linear" threshold={50}  />);
         await waitFor(() => {
-            const elt = document.querySelector(".bullet");
+            const elt = container.querySelector(".bullet");
             expect(elt).toBeInTheDocument();
         });
     });
 
     it("processes type and threshold props correctly when type is not linear", async () => {
-        render(<Metric type="angular" threshold={50} testId="test-id" />);
+        const { container } = render(<Metric type="angular" threshold={50}  />);
         await waitFor(() => {
-            const elt = document.querySelector(".angular");
+            const elt = container.querySelector(".angular");
             expect(elt).toBeInTheDocument();
         });
     });
 
     it("applies style correctly when height is undefined", async () => {
-        render(<Metric testId="test-id" />);
+        const { container } = render(<Metric />);
         await waitFor(() => {
-            const elt = document.querySelector(".js-plotly-plot");
+            const elt = container.querySelector(".js-plotly-plot");
             expect(elt).toHaveStyle({
                 width: "100%",
                 position: "relative",
@@ -287,10 +287,10 @@ describe("Metric Component", () => {
     });
 
     it("processes type prop correctly when type is none", async () => {
-        render(<Metric type="none" testId="test-id" />);
+        const { container } = render(<Metric type="none"  />);
         await waitFor(() => {
-            const angularElm = document.querySelector(".angular");
-            const angularAxis = document.querySelector(".angularaxis");
+            const angularElm = container.querySelector(".angular");
+            const angularAxis = container.querySelector(".angularaxis");
             expect(angularElm).not.toBeInTheDocument();
             expect(angularAxis).not.toBeInTheDocument();
         });
@@ -303,13 +303,13 @@ describe("Metric Component", () => {
             },
         });
 
-        render(
+        const { container } = render(
             <ThemeProvider theme={darkTheme}>
-                <Metric template_Dark_={JSON.stringify(darkTemplate)} testId="test-id" />
-            </ThemeProvider>,
+                <Metric template_Dark_={JSON.stringify(darkTemplate)}  />
+            </ThemeProvider>
         );
         await waitFor(() => {
-            const elt = document.querySelector(".main-svg");
+            const elt = container.querySelector(".main-svg");
             expect(elt).toHaveStyle({
                 backgroundColor: "rgb(31, 47, 68)",
             });
@@ -323,13 +323,13 @@ describe("Metric Component", () => {
             },
         });
 
-        render(
+        const { container } = render(
             <ThemeProvider theme={lightTheme}>
-                <Metric template_Light_={JSON.stringify(lightTemplate)} testId="test-id" />
-            </ThemeProvider>,
+                <Metric template_Light_={JSON.stringify(lightTemplate)}  />
+            </ThemeProvider>
         );
         await waitFor(() => {
-            const elt = document.querySelector(".main-svg");
+            const elt = container.querySelector(".main-svg");
             expect(elt).toHaveStyle({
                 backgroundColor: "rgb(255, 255, 255)",
             });
@@ -338,14 +338,14 @@ describe("Metric Component", () => {
 
     it.skip("logs an error when template_Dark_ prop is not a valid JSON string", () => {
         const consoleSpy = jest.spyOn(console, "info");
-        render(<Metric template_Dark_="not a valid JSON string" testId="test-id" />);
+        render(<Metric template_Dark_="not a valid JSON string"/>);
         expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Error while parsing Metric.template"));
         consoleSpy.mockRestore();
     }); // TODO: Not working at the moment, need to fix
 
     it("logs an error when template_Light_ prop is not a valid JSON string", () => {
         const consoleSpy = jest.spyOn(console, "info");
-        render(<Metric template_Light_="not a valid JSON string" testId="test-id" />);
+        render(<Metric template_Light_="not a valid JSON string" />);
         expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Error while parsing Metric.template"));
         consoleSpy.mockRestore();
     });

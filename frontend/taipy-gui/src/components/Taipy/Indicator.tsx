@@ -17,6 +17,7 @@ import { sprintf } from "sprintf-js";
 
 import { TaipyBaseProps } from "./utils";
 import { useClassNames } from "../../utils/hooks";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface IndicatorProps extends TaipyBaseProps {
     min?: number;
@@ -55,47 +56,48 @@ const Indicator = (props: IndicatorProps) => {
 
     const sliderSx = useMemo(
         () => ({
-                "&": {
-                    width: horizontalOrientation ? width : undefined,
-                    height: horizontalOrientation ? undefined : height,
-                },
-                "&.Mui-disabled": {
-                    color: "transparent",
-                },
-                "& .MuiSlider-markLabel": {
-                    transform: "initial",
-                },
-                "& span:nth-of-type(6)": {
-                    transform: horizontalOrientation ? "translateX(-100%)" : "translateY(100%)",
-                },
-                "& .MuiSlider-rail": {
-                    background: `linear-gradient(${
-                        horizontalOrientation ? 90 : 0
-                    }deg, rgba(255,0,0,1) 0%, rgba(0,255,0,1) 100%)`,
-                    opacity: "unset",
-                },
-                "& .MuiSlider-track": {
-                    border: "none",
-                    backgroundColor: "transparent",
-                },
-                "& .MuiSlider-valueLabel": {
-                    top: "unset",
-                },
-                "& .MuiSlider-valueLabel.MuiSlider-valueLabelOpen": {
-                    transform: horizontalOrientation ? "" : "translate(calc(50% + 10px))",
-                },
-                "& .MuiSlider-valueLabel:before": {
-                    left: horizontalOrientation ? "50%" : "0",
-                    bottom: horizontalOrientation ? "0" : "50%",
-                },
-            }),
+            "&": {
+                width: horizontalOrientation ? width : undefined,
+                height: horizontalOrientation ? undefined : height,
+            },
+            "&.Mui-disabled": {
+                color: "transparent",
+            },
+            "& .MuiSlider-markLabel": {
+                transform: "initial",
+            },
+            "& span:nth-of-type(6)": {
+                transform: horizontalOrientation ? "translateX(-100%)" : "translateY(100%)",
+            },
+            "& .MuiSlider-rail": {
+                background: `linear-gradient(${
+                    horizontalOrientation ? 90 : 0
+                }deg, rgba(255,0,0,1) 0%, rgba(0,255,0,1) 100%)`,
+                opacity: "unset",
+            },
+            "& .MuiSlider-track": {
+                border: "none",
+                backgroundColor: "transparent",
+            },
+            "& .MuiSlider-valueLabel": {
+                top: "unset",
+            },
+            "& .MuiSlider-valueLabel.MuiSlider-valueLabelOpen": {
+                transform: horizontalOrientation ? "" : "translate(calc(50% + 10px))",
+            },
+            "& .MuiSlider-valueLabel:before": {
+                left: horizontalOrientation ? "50%" : "0",
+                bottom: horizontalOrientation ? "0" : "50%",
+            },
+        }),
         [horizontalOrientation, width, height]
     );
 
     return (
+        <>
             <Slider
                 id={props.id}
-                className={className}
+                className={`${className} ${getComponentClassName(props.children)}`}
                 min={0}
                 max={100}
                 value={getValue(value === undefined ? defaultValue : value, min, max)}
@@ -106,6 +108,8 @@ const Indicator = (props: IndicatorProps) => {
                 orientation={horizontalOrientation ? undefined : "vertical"}
                 sx={sliderSx}
             ></Slider>
+            {props.children}
+        </>
     );
 };
 

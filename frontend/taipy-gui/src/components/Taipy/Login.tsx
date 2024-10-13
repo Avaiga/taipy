@@ -30,6 +30,7 @@ import { SxProps, Theme } from "@mui/system";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { TaipyBaseProps, getSuffixedClassNames } from "./utils";
 import { useClassNames, useDispatch, useModule } from "../../utils/hooks";
+import { getComponentClassName } from "./TaipyStyle";
 
 // allow only one instance of this component
 let nbLogins = 0;
@@ -48,7 +49,7 @@ const closeSx: SxProps<Theme> = {
     alignSelf: "start",
 };
 const titleSx = { m: 0, p: 2, display: "flex", paddingRight: "0.1em" };
-const userProps = { htmlInput: { autoComplete: "username" }};
+const userProps = { htmlInput: { autoComplete: "username" } };
 const pwdProps = { autoComplete: "current-password" };
 
 const Login = (props: LoginProps) => {
@@ -97,20 +98,23 @@ const Login = (props: LoginProps) => {
         []
     );
     const passwordProps = useMemo(
-        () => ({input: {
-            endAdornment: (
-                <InputAdornment position="end">
-                    <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                    >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                </InputAdornment>
-            ),
-        }, htmlInput: pwdProps}),
+        () => ({
+            input: {
+                endAdornment: (
+                    <InputAdornment position="end">
+                        <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={handleClickShowPassword}
+                            onMouseDown={handleMouseDownPassword}
+                            edge="end"
+                        >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                    </InputAdornment>
+                ),
+            },
+            htmlInput: pwdProps,
+        }),
         [showPassword, handleClickShowPassword, handleMouseDownPassword]
     );
 
@@ -125,7 +129,7 @@ const Login = (props: LoginProps) => {
     }, []);
 
     return onlyOne ? (
-        <Dialog id={id} open={true} className={className}>
+        <Dialog id={id} open={true} className={`${className} ${getComponentClassName(props.children)}`}>
             <DialogTitle sx={titleSx}>
                 {title}
                 <IconButton aria-label="close" onClick={handleAction} sx={closeSx} title="close" data-close>
@@ -173,6 +177,7 @@ const Login = (props: LoginProps) => {
                     {showProgress ? <CircularProgress size="2rem" /> : "Log in"}
                 </Button>
             </DialogActions>
+            {props.children}
         </Dialog>
     ) : null;
 };

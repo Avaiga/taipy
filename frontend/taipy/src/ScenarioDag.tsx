@@ -23,6 +23,7 @@ import {
     createRequestUpdateAction,
     createSendActionNameAction,
     createSendUpdateAction,
+    getComponentClassName,
     getUpdateVar,
     useDispatch,
     useDynamicProperty,
@@ -176,7 +177,7 @@ const ScenarioDag = (props: ScenarioDagProps) => {
     }, []);
 
     return render && scenarioId ? (
-        <Paper sx={sizeSx} id={props.id} className={className}>
+        <Paper sx={sizeSx} id={props.id} className={`${className} ${getComponentClassName(props.children)}`}>
             {showToolbar ? <DagTitle zoomToFit={zoomToFit} /> : null}
             <CanvasWidget engine={engine} ref={canvasRef} />
             {props.children}
