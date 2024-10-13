@@ -91,36 +91,28 @@ class _InvalidDataAccessor(_DataAccessor):
     ) -> t.Dict[str, t.Any]:
         transformed_value = self._gui.on_invalid_data(value)
         if transformed_value is not None:
-            return {var_name: transformed_value}  
+            return {var_name: transformed_value}
         return {}
-
     def get_col_types(self, var_name: str, value: t.Any) -> t.Dict[str, str]:
         transformed_value = self._gui.on_invalid_data(value)
         if transformed_value is not None:
-            return {
-                var_name: str(type(transformed_value))
-            } 
+            return {var_name: str(type(transformed_value))}
         return {}
-
     def to_pandas(self, value: t.Any) -> t.Union[t.List[t.Any], t.Any]:
         transformed_value = self._gui.on_invalid_data(value)
         if transformed_value is not None:
             try:
                 import pandas as pd
-
-                return pd.DataFrame([transformed_value])  
+                return pd.DataFrame([transformed_value])
             except ImportError:
-                pass  
+                pass
         return None
-
     def on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
         transformed_value = self._gui.on_invalid_data(value)
         return transformed_value if transformed_value is not None else None
-
     def on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
         transformed_value = self._gui.on_invalid_data(value)
         return transformed_value if transformed_value is not None else None
-
     def on_add(
         self,
         value: t.Any,
@@ -129,13 +121,11 @@ class _InvalidDataAccessor(_DataAccessor):
     ):
         transformed_value = self._gui.on_invalid_data(value)
         return transformed_value if transformed_value is not None else None
-
     def to_csv(self, var_name: str, value: t.Any):
         transformed_value = self._gui.on_invalid_data(value)
         if transformed_value is not None:
             return str(transformed_value)
         return None
-
 
 class _DataAccessors(object):
     def __init__(self, gui: "Gui") -> None:

@@ -417,9 +417,8 @@ class Gui:
             return self._on_invalid_data_callback(value)
         else:
             # Default behavior if no callback is set
-            print(f"Unsupported data type encountered: {type(value)}")
+            # print(f"Unsupported data type encountered: {type(value)}")
             return None
-        
     @staticmethod
     def add_library(library: ElementLibrary) -> None:
         """Add a custom visual element library.
