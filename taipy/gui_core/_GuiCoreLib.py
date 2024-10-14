@@ -307,6 +307,41 @@ class _GuiCore(ElementLibrary):
                 ),
             },
         ),
+        "job_viewer": Element(
+            "value",
+            {
+                "id": ElementProperty(PropertyType.string),
+                "class_name": ElementProperty(PropertyType.dynamic_string),
+                "value": ElementProperty(PropertyType.lov_value),
+                "show_submit_id": ElementProperty(PropertyType.boolean, False),
+                "show_task_label": ElementProperty(PropertyType.boolean, True),
+                "show_submitted_label": ElementProperty(PropertyType.boolean, True),
+                "show_execution_duration": ElementProperty(PropertyType.boolean, True),
+                "show_pending_duration": ElementProperty(PropertyType.boolean, False),
+                "show_blocked_duration": ElementProperty(PropertyType.boolean, False),
+                "show_submission_duration": ElementProperty(PropertyType.boolean, True),
+                "show_cancel": ElementProperty(PropertyType.boolean, True),
+                "show_delete": ElementProperty(PropertyType.boolean, True),
+                "show_stack_trace": ElementProperty(PropertyType.boolean, True),
+                "height": ElementProperty(PropertyType.string, "50vh"),
+                "width": ElementProperty(PropertyType.string, "50vw"),
+            },
+            inner_properties={
+                "job": ElementProperty(
+                    PropertyType.react,
+                    f"{{{__CTX_VAR_NAME}.get_complete_job_details(" + f"{__JOB_DETAIL_ID_VAR}<tp:uniq:jb>)}}",
+                ),
+                "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
+                "type": ElementProperty(PropertyType.inner, __JOB_ADAPTER),
+                "on_job_action": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.act_on_jobs}}"),
+                "error": ElementProperty(PropertyType.dynamic_string, f"{{{__JOB_SELECTOR_ERROR_VAR}<tp:uniq:jb>}}"),
+                "update_jb_vars": ElementProperty(
+                    PropertyType.string,
+                    f"error_id={__JOB_SELECTOR_ERROR_VAR}<tp:uniq:jb>;"
+                    + f"detail_id={__JOB_DETAIL_ID_VAR}<tp:uniq:jb>;",
+                ),
+            },
+        ),
     }
 
     def get_name(self) -> str:
