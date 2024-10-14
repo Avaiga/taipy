@@ -421,7 +421,7 @@ class Gui:
         """
         try:
             if self.on_invalid_data is not None and _is_function(self.on_invalid_data):
-                return self.on_invalid_data(value) 
+                return self.on_invalid_data(value)
             else:
                 _warn(f"Unsupported data type encountered: {type(value)}")
                 return None
