@@ -83,7 +83,7 @@ describe("TimeSelector", () => {
                 <TimeSelector time={curDateStr} className="taipy-time" />
             </LocalizationProvider>
         );
-        const elt = getByTestId("CalendarIcon");
+        const elt = getByTestId("ClockIcon");
         expect(elt.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("taipy-time-picker");
         expect(elt.parentElement?.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("taipy-time");
     });
@@ -91,7 +91,7 @@ describe("TimeSelector", () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <TimeSelector
-                    defaultDate="2001-01-01T01:01:01.001Z"
+                    defaultTime="2001-01-01T01:01:01.001Z"
                     time={undefined as unknown as string}
                 />
             </LocalizationProvider>
@@ -104,7 +104,7 @@ describe("TimeSelector", () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <TimeSelector
-                    defaultDate="2001-01-01T01:01:01.001Z"
+                    defaultTime="2001-01-01T01:01:01.001Z"
                     time={undefined as unknown as string}
                     format="hh:mm a"
                 />
