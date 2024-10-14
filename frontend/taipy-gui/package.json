@@ -37,6 +37,10 @@
   },
   "scripts": {
     "inst": "npm i",
+    
+    
+      
+    
     "start": "echo no start see python",
     "build:dev": "webpack --mode development",
     "build": "webpack --mode production",
@@ -119,6 +123,7 @@
     "typedoc-plugin-markdown": "^4.1.1",
     "typescript": "^5.5.3",
     "webpack": "^5.61.0",
-    "webpack-cli": "^5.0.0"
+    "webpack-cli": "^5.0.0",
+    "webpack-dev-server": "^5.1.0"
   }
 }
