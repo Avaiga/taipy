@@ -34,11 +34,7 @@ class _DataAccessor(ABC):
 
     @abstractmethod
     def get_data(
-        self,
-        var_name: str,
-        value: t.Any,
-        payload: t.Dict[str, t.Any],
-        data_format: _DataFormat,
+        self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
     ) -> t.Dict[str, t.Any]:
         pass
 
@@ -60,10 +56,7 @@ class _DataAccessor(ABC):
 
     @abstractmethod
     def on_add(
-        self,
-        value: t.Any,
-        payload: t.Dict[str, t.Any],
-        new_row: t.Optional[t.List[t.Any]] = None,
+        self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None
     ) -> t.Optional[t.Any]:
         pass
 
@@ -78,11 +71,7 @@ class _InvalidDataAccessor(_DataAccessor):
         return []
 
     def get_data(
-        self,
-        var_name: str,
-        value: t.Any,
-        payload: t.Dict[str, t.Any],
-        data_format: _DataFormat,
+        self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
     ) -> t.Dict[str, t.Any]:
         return {}
 
@@ -98,12 +87,7 @@ class _InvalidDataAccessor(_DataAccessor):
     def on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
         return None
 
-    def on_add(
-        self,
-        value: t.Any,
-        payload: t.Dict[str, t.Any],
-        new_row: t.Optional[t.List[t.Any]] = None,
-    ):
+    def on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
         return None
 
     def to_csv(self, var_name: str, value: t.Any):
@@ -127,16 +111,12 @@ class _DataAccessors(object):
 
     def _register(self, cls: t.Type[_DataAccessor]) -> None:
         if not inspect.isclass(cls):
-            raise AttributeError(
-                "The argument of 'DataAccessors.register' should be a class"
-            )
+            raise AttributeError("The argument of 'DataAccessors.register' should be a class")
         if not issubclass(cls, _DataAccessor):
             raise TypeError(f"Class {cls.__name__} is not a subclass of DataAccessor")
         classes = cls.get_supported_classes()
         if not classes:
-            raise TypeError(
-                f"method {cls.__name__}.get_supported_classes returned an invalid value"
-            )
+            raise TypeError(f"method {cls.__name__}.get_supported_classes returned an invalid value")
         # check existence
         inst: t.Optional[_DataAccessor] = None
         for cl in classes:
@@ -152,27 +132,20 @@ class _DataAccessors(object):
                 for cl in classes:
                     self.__access_4_type[cl] = inst  # type: ignore
 
-
-    def __get_instance(self, value: _TaipyData) -> _DataAccessor:
+    def __get_instance(self, value: _TaipyData) -> _DataAccessor:  # type: ignore
         value = value.get() if isinstance(value, _TaipyData) else value
         access = self.__access_4_type.get(type(value))
         if access is None:
             if value is not None:
                 transformed_value = self.__gui.handle_invalid_data(value)
                 if transformed_value is not None:
-                    return (
-                        self.__invalid_data_accessor
-                    )
+                    return self.__invalid_data_accessor
                 _warn(f"Can't find Data Accessor for type {str(type(value))}.")
             return self.__invalid_data_accessor
         return access
 
-    def get_data(
-        self, var_name: str, value: _TaipyData, payload: t.Dict[str, t.Any]
-    ) -> t.Dict[str, t.Any]:
-        return self.__get_instance(value).get_data(
-            var_name, value.get(), payload, self.__data_format
-        )
+    def get_data(self, var_name: str, value: _TaipyData, payload: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
+        return self.__get_instance(value).get_data(var_name, value.get(), payload, self.__data_format)
 
     def get_col_types(self, var_name: str, value: _TaipyData) -> t.Dict[str, str]:
         return self.__get_instance(value).get_col_types(var_name, value.get())
@@ -189,12 +162,7 @@ class _DataAccessors(object):
     def on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
         return self.__get_instance(value).on_delete(value, payload)
 
-    def on_add(
-        self,
-        value: t.Any,
-        payload: t.Dict[str, t.Any],
-        new_row: t.Optional[t.List[t.Any]] = None,
-    ):
+    def on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
         return self.__get_instance(value).on_add(value, payload, new_row)
 
     def to_csv(self, var_name: str, value: t.Any):
