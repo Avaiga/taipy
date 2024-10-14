@@ -20,9 +20,10 @@ def test_date_md_1(gui: Gui, test_client, helpers):
     expected_list = [
         "<TimeSelector",
         'defaultTime="2020-12-',
-        'updateVarName="_TpDt_tpec_TpExPr_date_TPMDL_0"',
-        "time={_TpDt_tpec_TpExPr_date_TPMDL_0}",
+        'updateVarName="_TpTm_tpec_TpExPr_time_TPMDL_0"',
+        "time={_TpTm_tpec_TpExPr_time_TPMDL_0}",
     ]
+
     helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -32,22 +33,22 @@ def test_date_md_2(gui: Gui, test_client, helpers):
     expected_list = [
         "<TimeSelector",
         'defaultTime="2020-12-',
-        'updateVarName="_TpDt_tpec_TpExPr_date_TPMDL_0"',
-        "time={_TpDt_tpec_TpExPr_date_TPMDL_0}",
+        'updateVarName="_TpTm_tpec_TpExPr_time_TPMDL_0"',
+        "time={_TpTm_tpec_TpExPr_time_TPMDL_0}",
         'label="a label"',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
 def test_date_md_width(gui: Gui, test_client, helpers):
-    gui._bind_var_val("date", datetime.strptime("15 Dec 2020 18:18:18", "%d %b %Y %H:%M:%S"))
+    gui._bind_var_val("time", datetime.strptime("15 Dec 2020 18:18:18", "%d %b %Y %H:%M:%S"))
     md_string = "<|{time}|time|width=70%|>"
     expected_list = [
         "<TimeSelector",
         'defaultTime="2020-12-',
-        'updateVarName="_TpDt_tpec_TpExPr_date_TPMDL_0"',
+        'updateVarName="_TpTm_tpec_TpExPr_time_TPMDL_0"',
         'width="70%"',
-        "time={_TpDt_tpec_TpExPr_date_TPMDL_0}",
+        "time={_TpTm_tpec_TpExPr_time_TPMDL_0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -58,8 +59,8 @@ def test_date_html_1(gui: Gui, test_client, helpers):
     expected_list = [
         "<TimeSelector",
         'defaultTime="2020-12-',
-        'updateVarName="_TpDt_tpec_TpExPr_date_TPMDL_0"',
-        "time={_TpDt_tpec_TpExPr_date_TPMDL_0}",
+        'updateVarName="_TpTm_tpec_TpExPr_time_TPMDL_0"',
+        "time={_TpTm_tpec_TpExPr_time_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -70,7 +71,7 @@ def test_date_html_2(gui: Gui, test_client, helpers):
     expected_list = [
         "<TimeSelector",
         'defaultTime="2020-12-',
-        'updateVarName="_TpDt_tpec_TpExPr_date_TPMDL_0"',
-        "time={_TpDt_tpec_TpExPr_date_TPMDL_0}",
+        'updateVarName="_TpTm_tpec_TpExPr_time_TPMDL_0"',
+        "time={_TpTm_tpec_TpExPr_time_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
