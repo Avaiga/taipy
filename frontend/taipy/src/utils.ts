@@ -240,3 +240,19 @@ export const getUpdateVarNames = (updateVars: string, ...vars: string[]) =>
 
 export const EllipsisSx = { textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" };
 export const SecondaryEllipsisProps = { sx: EllipsisSx };
+
+export const calculateTimeDifference = (date1: Date, date2: Date) => {
+    const milliseconds1 = date1.getTime();
+    const milliseconds2 = date2.getTime();
+
+    const differenceInMilliseconds = milliseconds2 - milliseconds1;
+    const seconds = Math.floor(differenceInMilliseconds / 1000);
+  
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secondsRemaining = seconds % 60;
+  
+    const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secondsRemaining.toString().padStart(2, '0')}`;
+  
+    return formattedTime;
+  }
