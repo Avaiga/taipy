@@ -25,7 +25,6 @@ class _DataAccessor(ABC):
     _WS_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
     def __init__(self, gui: "Gui") -> None:
-
         self._gui = gui
 
     @staticmethod
@@ -74,10 +73,6 @@ class _DataAccessor(ABC):
 
 
 class _InvalidDataAccessor(_DataAccessor):
-
-    def __init__(self, gui: "Gui") -> None:
-        super().__init__(gui)
-
     @staticmethod
     def get_supported_classes() -> t.List[t.Type]:
         return []
@@ -89,43 +84,31 @@ class _InvalidDataAccessor(_DataAccessor):
         payload: t.Dict[str, t.Any],
         data_format: _DataFormat,
     ) -> t.Dict[str, t.Any]:
-        transformed_value = self._gui.on_invalid_data(value)
-        if transformed_value is not None:
-            return {var_name: transformed_value}
         return {}
+
     def get_col_types(self, var_name: str, value: t.Any) -> t.Dict[str, str]:
-        transformed_value = self._gui.on_invalid_data(value)
-        if transformed_value is not None:
-            return {var_name: str(type(transformed_value))}
         return {}
+
     def to_pandas(self, value: t.Any) -> t.Union[t.List[t.Any], t.Any]:
-        transformed_value = self._gui.on_invalid_data(value)
-        if transformed_value is not None:
-            try:
-                import pandas as pd
-                return pd.DataFrame([transformed_value])
-            except ImportError:
-                pass
         return None
+
     def on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
-        transformed_value = self._gui.on_invalid_data(value)
-        return transformed_value if transformed_value is not None else None
+        return None
+
     def on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
-        transformed_value = self._gui.on_invalid_data(value)
-        return transformed_value if transformed_value is not None else None
+        return None
+
     def on_add(
         self,
         value: t.Any,
         payload: t.Dict[str, t.Any],
         new_row: t.Optional[t.List[t.Any]] = None,
     ):
-        transformed_value = self._gui.on_invalid_data(value)
-        return transformed_value if transformed_value is not None else None
-    def to_csv(self, var_name: str, value: t.Any):
-        transformed_value = self._gui.on_invalid_data(value)
-        if transformed_value is not None:
-            return str(transformed_value)
         return None
+
+    def to_csv(self, var_name: str, value: t.Any):
+        return None
+
 
 class _DataAccessors(object):
     def __init__(self, gui: "Gui") -> None:
@@ -169,11 +152,17 @@ class _DataAccessors(object):
                 for cl in classes:
                     self.__access_4_type[cl] = inst  # type: ignore
 
-    def __get_instance(self, value: _TaipyData) -> _DataAccessor:  # type: ignore
+
+    def __get_instance(self, value: _TaipyData) -> _DataAccessor:
         value = value.get() if isinstance(value, _TaipyData) else value
         access = self.__access_4_type.get(type(value))
         if access is None:
             if value is not None:
+                transformed_value = self.__gui.handle_invalid_data(value)
+                if transformed_value is not None:
+                    return (
+                        self.__invalid_data_accessor
+                    )  
                 _warn(f"Can't find Data Accessor for type {str(type(value))}.")
             return self.__invalid_data_accessor
         return access
