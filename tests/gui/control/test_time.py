@@ -15,49 +15,49 @@ from taipy.gui import Gui
 
 
 def test_date_md_1(gui: Gui, test_client, helpers):
-    gui._bind_var_val("time", datetime.strptime("15 Dec 2020", "%d %b %Y"))
+    gui._bind_var_val("time", datetime.strptime("15 Dec 2020 18:18:18", "%Y-%m-%d %H:%M:%S"))
     md_string = "<|{time}|time|>"
     expected_list = [
         "<TimeSelector",
-        'defaultDate="2020-12-',
+        'defaultTime="2020-12-',
         'updateVarName="_TpDt_tpec_TpExPr_date_TPMDL_0"',
-        "date={_TpDt_tpec_TpExPr_date_TPMDL_0}",
+        "time={_TpDt_tpec_TpExPr_date_TPMDL_0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
 def test_date_md_2(gui: Gui, test_client, helpers):
-    gui._bind_var_val("time", datetime.strptime("15 Dec 2020", "%d %b %Y"))
+    gui._bind_var_val("time", datetime.strptime("15 Dec 2020 18:18:18", "%Y-%m-%d %H:%M:%S"))
     md_string = "<|{time}|time|label=a label|>"
     expected_list = [
         "<TimeSelector",
-        'defaultDate="2020-12-',
+        'defaultTime="2020-12-',
         'updateVarName="_TpDt_tpec_TpExPr_date_TPMDL_0"',
-        "date={_TpDt_tpec_TpExPr_date_TPMDL_0}",
+        "time={_TpDt_tpec_TpExPr_date_TPMDL_0}",
         'label="a label"',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
 def test_date_md_width(gui: Gui, test_client, helpers):
-    gui._bind_var_val("date", datetime.strptime("15 Dec 2020", "%d %b %Y"))
+    gui._bind_var_val("date", datetime.strptime("15 Dec 2020 18:18:18", "%Y-%m-%d %H:%M:%S"))
     md_string = "<|{time}|time|width=70%|>"
     expected_list = [
         "<TimeSelector",
-        'defaultDate="2020-12-',
+        'defaultTime="2020-12-',
         'updateVarName="_TpDt_tpec_TpExPr_date_TPMDL_0"',
         'width="70%"',
-        "date={_TpDt_tpec_TpExPr_date_TPMDL_0}",
+        "time={_TpDt_tpec_TpExPr_date_TPMDL_0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
 def test_date_html_1(gui: Gui, test_client, helpers):
-    gui._bind_var_val("time", datetime.strptime("15 Dec 2020", "%d %b %Y"))
+    gui._bind_var_val("time", datetime.strptime("15 Dec 2020 18:18:18", "%Y-%m-%d %H:%M:%S"))
     html_string = '<taipy:time time="{time}" />'
     expected_list = [
         "<TimeSelector",
-        'defaultDate="2020-12-',
+        'defaultTime="2020-12-',
         'updateVarName="_TpDt_tpec_TpExPr_date_TPMDL_0"',
         "time={_TpDt_tpec_TpExPr_date_TPMDL_0}",
     ]
@@ -69,7 +69,7 @@ def test_date_html_2(gui: Gui, test_client, helpers):
     html_string = "<taipy:time>{time}</taipy:time>"
     expected_list = [
         "<TimeSelector",
-        'defaultDate="2020-12-',
+        'defaultTime="2020-12-',
         'updateVarName="_TpDt_tpec_TpExPr_date_TPMDL_0"',
         "time={_TpDt_tpec_TpExPr_date_TPMDL_0}",
     ]
