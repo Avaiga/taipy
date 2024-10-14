@@ -45,14 +45,14 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     - *compression* (`Optional[str]`): Name of the compression to use. Possible values
         are *"snappy"*, *"gzip"*, *"brotli"*, or *"none"* (no compression).<br/>
         The default value is *"snappy"*.
-    - *read_kwargs* (`Optional[dict]`): Additional parameters passed to the
+    - *read_kwargs* (`Optional[dict]`): Additional arguments passed to the
         *pandas.read_parquet()* function when reading the data.<br/>
-        The parameters in *"read_kwargs"* have a **higher precedence** than the top-level
-        parameters which are also passed to Pandas.
-    - *write_kwargs* (`Optional[dict]`): Additional parameters passed to the
+        The arguments in *"read_kwargs"* have a **higher precedence** than the top-level
+        arguments which are also passed to Pandas.
+    - *write_kwargs* (`Optional[dict]`): Additional Arguments passed to the
         *pandas.DataFrame.write_parquet()* function when writing the data. <br/>
-        The parameters in *"write_kwargs"* have a **higher precedence** than the
-        top-level parameters which are also passed to Pandas.
+        The arguments in *"write_kwargs"* have a **higher precedence** than the
+        top-level arguments which are also passed to Pandas.
     """
 
     __STORAGE_TYPE = "parquet"
@@ -168,7 +168,7 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
         Keyword arguments here which are also present in the Data Node config will overwrite them.
 
-        Parameters:
+        Arguments:
             data (Any): The data to write.
             job_id (JobId): An optional identifier of the writer.
             **write_kwargs (dict[str, any]): The keyword arguments passed to the function
@@ -196,7 +196,7 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
         Keyword arguments here which are also present in the Data Node config will overwrite them.
 
-        Parameters:
+        Arguments:
             **read_kwargs (dict[str, any]): The keyword arguments passed to the function
                 `pandas.read_parquet()`.
         """
