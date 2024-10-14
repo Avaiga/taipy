@@ -39,7 +39,7 @@ No more compromise on performance, customization, and scalability.
 
   ## Table of Contents
 
-- [What's Taipy?](#-what&apos;s-taipy)
+- [What's Taipy?](#-what's-taipy)
 - [Key Features](#-key-features)
 - [Quickstart](#️-quickstart)
 - [Scenario and Data Management](#-scenario-and-data-management)
