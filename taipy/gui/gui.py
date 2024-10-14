@@ -412,14 +412,6 @@ class Gui:
         if libraries is not None:
             for library in libraries:
                 Gui.add_library(library)
-    def set_on_invalid_data_callback(self, callback: t.Callable[[t.Any], t.Optional[t.Any]]):
-        """
-        Set the callback function to handle unsupported data types.
-        :param callback: A function that takes in unsupported data and returns transformed data.
-        """
-        if not callable(callback):
-            raise ValueError("The callback must be a callable function.")
-        self.on_invalid_data = callback
 
     def handle_invalid_data(self, value: t.Any) -> t.Optional[t.Any]:
         """
@@ -428,8 +420,8 @@ class Gui:
         :return: Transformed data or None if no transformation is possible.
         """
         try:
-            if self.on_invalid_data:
-                return self.on_invalid_data(value)
+            if self.on_invalid_data is not None and _is_function(self.on_invalid_data):
+                return self.on_invalid_data(value) 
             else:
                 _warn(f"Unsupported data type encountered: {type(value)}")
                 return None

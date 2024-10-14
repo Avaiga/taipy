@@ -139,6 +139,9 @@ class _DataAccessors(object):
             if value is not None:
                 transformed_value = self.__gui.handle_invalid_data(value)
                 if transformed_value is not None:
+                    transformed_access = self.__access_4_type.get(type(transformed_value))
+                    if transformed_access is not None:
+                        return transformed_access
                     return self.__invalid_data_accessor
                 _warn(f"Can't find Data Accessor for type {str(type(value))}.")
             return self.__invalid_data_accessor
