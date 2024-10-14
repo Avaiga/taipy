@@ -16,11 +16,6 @@ If you are using a virtual environment, use:
 pipenv install taipy
 ```
 
-If you are running in a virtual environment, you will have to issue the command:
-```bash
-pipenv install taipy
-```
-
 Alternatively, you can use `venv` to create a virtual environment:
 ```bash
 python -m venv myenv
