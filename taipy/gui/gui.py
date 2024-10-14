@@ -1520,7 +1520,7 @@ class Gui:
                     args = [self._get_real_var_name(id)[0], payload]
                 except Exception:
                     args = [id, payload]
-                self._call_function_with_state(t.cast(t.Callable, action_function), [args])
+                self._call_function_with_state(t.cast(t.Callable, action_function), args)
                 return True
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception(action_function, e):
