@@ -889,6 +889,33 @@ class _GuiCoreContext(CoreEventConsumerBase):
         except Exception as e:
             _warn(f"Access to job ({job_id}) failed", e)
         return None
+    
+    def get_complete_job_details(self, job_id: t.Optional[JobId]):
+        try:
+            if job_id and is_readable(job_id) and (job := core_get(job_id)) is not None:
+                if isinstance(job, Job):
+                    entity = core_get(job.owner_id)
+                    return (
+                        job.id,
+                        job.creation_date,
+                        job.status.value,
+                        job.submit_id,
+                        job.get_simple_label(),
+                        entity.id if entity else "",
+                        entity.get_simple_label() if entity else "",
+                        job.pending_duration,
+                        job.blocked_duration,
+                        job.finished_at,
+                        job.is_cancellable,
+                        _get_reason(is_deletable(job)),
+                        ""
+                        if job.execution_duration is None
+                        else str(datetime.timedelta(seconds=job.execution_duration)),
+                        [] if job.stacktrace is None else job.stacktrace,
+                    )
+        except Exception as e:
+            _warn(f"Access to job ({job_id}) failed", e)
+        return None
 
     def edit_data_node(self, state: State, id: str, payload: t.Dict[str, str]):
         self.__lazy_start()
