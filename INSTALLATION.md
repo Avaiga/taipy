@@ -1,20 +1,19 @@
-# Installation
+# Taipy Installation Guide
 
-There are different ways to install Taipy, depending on how you plan to use it.
+Taipy can be installed in various ways depending on your needs. If you aim to modify the code or contribute to its development, refer to the [source installation](#installing-for-development) section. Ensure that you have Python 3.9 or above installed on your system.
 
-If your goal is to look into the code, modify and improve it, go straight
-to the [source installation](#installing-for-development) section.
+## Installing Taipy from PyPI
 
-Taipy needs your system to have Python 3.9 or above installed.
+The easiest way to install Taipy is through the [PyPI software repository](https://pypi.org/project/taipy/). You can do this by running the following command:
 
-## Installing from PyPI
-
-The easiest way to install Taipy is from the
-[Pypi software repository](https://pypi.org/project/taipy/).
-
-Run the command:
 ```bash
 pip install taipy
+```
+
+If you are using a virtual environment, use:
+
+```bash
+pipenv install taipy
 ```
 
 If you are running in a virtual environment, you will have to issue the command:
