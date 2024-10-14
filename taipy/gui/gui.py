@@ -357,7 +357,7 @@ class Gui:
         The returned HTML content can therefore use both the variables stored in the *state*
         and the parameters provided in the call to `get_user_content_url()^`.
         """
-        self.on_invalid_data: t.Optional[t.Callable] = None  
+        self.on_invalid_data: t.Optional[t.Callable] = None
         """
         The function that is called to transform data into a valid data type.
         Invokes the callback to transform unsupported data into a valid format.
@@ -419,7 +419,7 @@ class Gui:
         """
         if not callable(callback):
             raise ValueError("The callback must be a callable function.")
-        self.on_invalid_data = callback  
+        self.on_invalid_data = callback
 
     def handle_invalid_data(self, value: t.Any) -> t.Optional[t.Any]:
         """
@@ -428,13 +428,13 @@ class Gui:
         :return: Transformed data or None if no transformation is possible.
         """
         try:
-            if self.on_invalid_data:  
+            if self.on_invalid_data:
                 return self.on_invalid_data(value)
             else:
-                print(f"Unsupported data type encountered: {type(value)}")
+                _warn(f"Unsupported data type encountered: {type(value)}")
                 return None
         except Exception as e:
-            print(f"Error transforming data: {str(e)}")
+            _warn(f"Error transforming data: {str(e)}")
             return None
 
     @staticmethod

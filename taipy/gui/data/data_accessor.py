@@ -162,7 +162,7 @@ class _DataAccessors(object):
                 if transformed_value is not None:
                     return (
                         self.__invalid_data_accessor
-                    )  
+                    )
                 _warn(f"Can't find Data Accessor for type {str(type(value))}.")
             return self.__invalid_data_accessor
         return access
