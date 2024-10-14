@@ -208,7 +208,7 @@ class _TaipyTime(_TaipyBase):
 
     def cast_value(self, value: t.Any):
         if isinstance(value, str):
-            return _string_to_date(value)
+            return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ').time()
         return super().cast_value(value)
 
     @staticmethod
