@@ -200,7 +200,7 @@ class _TaipyDict(_TaipyBase):
 class _TaipyTime(_TaipyBase):
     def get(self):
         val = super().get()
-        if isinstance(val, time):
+        if isinstance(val, datetime):
             val = _date_to_string(val)
         elif val is not None:
             val = str(val)
@@ -208,7 +208,7 @@ class _TaipyTime(_TaipyBase):
 
     def cast_value(self, value: t.Any):
         if isinstance(value, str):
-            return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ').time()
+            return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ')
         return super().cast_value(value)
 
     @staticmethod
