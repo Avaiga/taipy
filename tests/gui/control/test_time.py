@@ -15,7 +15,7 @@ from taipy.gui import Gui
 
 
 def test_date_md_1(gui: Gui, test_client, helpers):
-    gui._bind_var_val("time", datetime.strptime("15 Dec 2020 18:18:18", "%Y-%m-%d %H:%M:%S"))
+    gui._bind_var_val("time", datetime.strptime("15 Dec 2020 18:18:18", "%d %b %Y %H:%M:%S"))
     md_string = "<|{time}|time|>"
     expected_list = [
         "<TimeSelector",
@@ -27,7 +27,7 @@ def test_date_md_1(gui: Gui, test_client, helpers):
 
 
 def test_date_md_2(gui: Gui, test_client, helpers):
-    gui._bind_var_val("time", datetime.strptime("15 Dec 2020 18:18:18", "%Y-%m-%d %H:%M:%S"))
+    gui._bind_var_val("time", datetime.strptime("15 Dec 2020 18:18:18", "%d %b %Y %H:%M:%S"))
     md_string = "<|{time}|time|label=a label|>"
     expected_list = [
         "<TimeSelector",
@@ -40,7 +40,7 @@ def test_date_md_2(gui: Gui, test_client, helpers):
 
 
 def test_date_md_width(gui: Gui, test_client, helpers):
-    gui._bind_var_val("date", datetime.strptime("15 Dec 2020 18:18:18", "%Y-%m-%d %H:%M:%S"))
+    gui._bind_var_val("date", datetime.strptime("15 Dec 2020 18:18:18", "%d %b %Y %H:%M:%S"))
     md_string = "<|{time}|time|width=70%|>"
     expected_list = [
         "<TimeSelector",
@@ -53,7 +53,7 @@ def test_date_md_width(gui: Gui, test_client, helpers):
 
 
 def test_date_html_1(gui: Gui, test_client, helpers):
-    gui._bind_var_val("time", datetime.strptime("15 Dec 2020 18:18:18", "%Y-%m-%d %H:%M:%S"))
+    gui._bind_var_val("time", datetime.strptime("15 Dec 2020 18:18:18", "%d %b %Y %H:%M:%S"))
     html_string = '<taipy:time time="{time}" />'
     expected_list = [
         "<TimeSelector",
