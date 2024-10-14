@@ -82,6 +82,7 @@ class _Factory:
             [
                 ("severity", PropertyType.string),
                 ("variant", PropertyType.string),
+                ("render", PropertyType.dynamic_boolean, True),
             ]
         ),
         "button": lambda gui, control_type, attrs: _Builder(
