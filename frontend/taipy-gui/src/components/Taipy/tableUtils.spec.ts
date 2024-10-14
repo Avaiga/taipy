@@ -16,8 +16,13 @@ describe("generateHeaderClassName", () => {
         expect(result).toBe("-column-name");
     });
 
-    it("should handle empty strings and return just a hyphen", () => {
+    it("should handle empty strings and return an empty string", () => {
         const result = generateHeaderClassName("");
-        expect(result).toBe("-");
+        expect(result).toBe("");
+    });
+
+    it("should return empty string for the undefined", () => {
+        const result = generateHeaderClassName(undefined);
+        expect(result).toBe("");
     });
 });

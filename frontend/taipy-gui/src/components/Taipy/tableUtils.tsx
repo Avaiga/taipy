@@ -54,9 +54,12 @@ import { TaipyActiveProps, TaipyMultiSelectProps, getSuffixedClassNames } from "
  * @returns for CSS class name.
  */
 
-export const generateHeaderClassName = (columnName: string,): string => {
+export const generateHeaderClassName = (columnName: string | undefined): string => {
     // logic for the css header classname
-    // added /-+/g to remove multiple hyphens into one (if it's not needed i will remove it)
+    if (!columnName){
+        // return an empty string if columname is undefined or empty
+        return "";
+    }
     return '-' + columnName.replace(/\W+/g, '-').replace(/-+/g, '-').toLowerCase();
 };
 
