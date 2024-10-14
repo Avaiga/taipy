@@ -80,8 +80,8 @@ class _Factory:
         .set_value_and_default(var_type=PropertyType.dynamic_string) 
         .set_attributes(
             [
-                ("severity", PropertyType.string),
-                ("variant", PropertyType.string),
+                ("severity", PropertyType.dynamic_string),
+                ("variant", PropertyType.dynamic_string),
                 ("render", PropertyType.dynamic_boolean, True),
             ]
         ),

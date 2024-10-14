@@ -19,11 +19,11 @@ import CloseIcon from "@mui/icons-material/Close";
 import { AlertMessage, createDeleteAlertAction } from "../../context/taipyReducers";
 import { useDispatch } from "../../utils/hooks";
 
-interface AlertProps {
+interface NotificationProps {
     alerts: AlertMessage[];
 }
 
-const Alert = ({ alerts }: AlertProps) => {
+const TaipyNotification = ({ alerts }: NotificationProps) => {
     const alert = alerts.length ? alerts[0] : undefined;
     const lastKey = useRef<SnackbarKey>("");
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
@@ -81,4 +81,4 @@ const Alert = ({ alerts }: AlertProps) => {
     return null;
 };
 
-export default Alert;
+export default TaipyNotification;
