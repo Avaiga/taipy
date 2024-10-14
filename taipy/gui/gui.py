@@ -1506,7 +1506,7 @@ class Gui:
                 return
             else:  # pragma: no cover
                 _warn(f"on_action(): '{action}' is not a valid function.")
-        if hasattr(self, "on_action"):
+        if getattr(self, "on_action", None) is not None:
             self.__call_function_with_args(action_function=self.on_action, id=id, payload=payload)
 
     def __call_function_with_args(self, **kwargs):
