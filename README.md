@@ -37,6 +37,18 @@ No more compromise on performance, customization, and scalability.
 </h4>
   </p>
 
+  ## Table of Contents
+
+- [What's Taipy?](#-whats-taipy)
+- [Key Features](#-key-features)
+- [Quickstart](#️-quickstart)
+- [Scenario and Data Management](#-scenario-and-data-management)
+- [Taipy Studio](#taipy-studio)
+- [User Interface Generation and Scenario & Data Management](#user-interface-generation-and-scenario--data-management)
+- [Contributing](#-contributing)
+- [Code of Conduct](#-code-of-conduct)
+- [License](#-license)
+
 &nbsp;
 
 ## ⭐️ What's Taipy?
