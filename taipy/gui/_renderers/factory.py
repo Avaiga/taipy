@@ -57,7 +57,7 @@ class _Factory:
         "status": "value",
         "table": "data",
         "text": "value",
-        "time": "value",
+        "time": "time",
         "toggle": "value",
         "tree": "value",
     }
