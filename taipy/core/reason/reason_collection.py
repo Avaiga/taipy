@@ -15,14 +15,14 @@ from .reason import Reason
 
 
 class ReasonCollection:
-    """This class is used to store all the reasons to explain why some Taipy operations are not allowed.
+    """Class used to store all the reasons to explain why some Taipy operations are not allowed.
 
     Because Taipy applications are natively multiuser, asynchronous, and dynamic,
     some functions might not be called in some specific contexts. You can protect
     such calls by calling other methods that return a `ReasonCollection`. It acts like a
     boolean: True if the operation can be performed and False otherwise.
-    If the action cannot be performed, the ReasonCollection holds all the individual reasons as a list
-    of `Reason` objects. Each `Reason` explains why the operation cannot be performed.
+    If the action cannot be performed, the ReasonCollection holds all the individual reasons as
+    a list of `Reason` objects. Each `Reason` explains why the operation cannot be performed.
     """
 
     def __init__(self) -> None:

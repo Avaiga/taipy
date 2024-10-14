@@ -12,4 +12,5 @@
 from typing import NewType
 
 ScenarioId = NewType("ScenarioId", str)
+"""Type that holds a `Scenario^` identifier."""
 ScenarioId.__doc__ = """Type that holds a `Scenario^` identifier."""

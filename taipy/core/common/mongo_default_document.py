@@ -16,13 +16,13 @@ class MongoDefaultDocument:
     """The default class for \"custom_document\" property to configure a `MongoCollectionDataNode^`.
 
     Attributes:
-        **kwargs: Attributes of the MongoDefaultDocument object.
+        **kwargs (dict[str, Any]): Attributes of the MongoDefaultDocument object.
 
     Example:
-        - `document = MongoDefaultDocument(name="example", age=30})`
+        - `document = MongoDefaultDocument(name="example", age=30)`
         will return a MongoDefaultDocument object so that `document.name` returns `"example"`,
         and `document.age` returns `30`.
-        - `document = MongoDefaultDocument(date="12/24/2018", temperature=20})`
+        - `document = MongoDefaultDocument(date="12/24/2018", temperature=20)`
         will return a MongoDefaultDocument object so that `document.date` returns `"12/24/2018"`,
         and `document.temperature` returns `20`.
     """

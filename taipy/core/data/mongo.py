@@ -31,41 +31,22 @@ from .data_node_id import DataNodeId, Edit
 class MongoCollectionDataNode(DataNode):
     """Data Node stored in a Mongo collection.
 
-    Attributes:
-        config_id (str): Identifier of the data node configuration. It must be a valid Python
-            identifier.
-        scope (Scope^): The scope of this data node.
-        id (str): The unique identifier of this data node.
-        owner_id (str): The identifier of the owner (sequence_id, scenario_id, cycle_id) or
-            None.
-        parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
-        last_edit_date (datetime): The date and time of the last modification.
-        edits (List[Edit^]): The ordered list of edits for that job.
-        version (str): The string indicates the application version of the data node to instantiate. If not provided,
-            the current version is used.
-        validity_period (Optional[timedelta]): The duration implemented as a timedelta since the last edit date for
-            which the data node can be considered up-to-date. Once the validity period has passed, the data node is
-            considered stale and relevant tasks will run even if they are skippable (see the
-            [Task management](../../userman/scenario_features/sdm/task/index.md) page for more details).
-            If _validity_period_ is set to `None`, the data node is always up-to-date.
-        edit_in_progress (bool): True if a task computing the data node has been submitted
-            and not completed yet. False otherwise.
-        editor_id (Optional[str]): The identifier of the user who is currently editing the data node.
-        editor_expiration_date (Optional[datetime]): The expiration date of the editor lock.
-        properties (dict[str, Any]): A dictionary of additional properties. Note that the
-            _properties_ parameter must at least contain an entry for _"db_name"_ and _"collection_name"_:
+    The *properties* attribute must contain the following mandatory entries:
 
-            - _"db_name"_ `(str)`: The database name.\n
-            - _"collection_name"_ `(str)`: The collection in the database to read from and to write the data to.\n
-            - _"custom_document"_ `(Any)`: The custom document class to store, encode, and decode data when reading and
-                writing to a Mongo collection.\n
-            - _"db_username"_ `(str)`: The database username.\n
-            - _"db_password"_ `(str)`: The database password.\n
-            - _"db_host"_ `(str)`: The database host. The default value is _"localhost"_.\n
-            - _"db_port"_ `(int)`: The database port. The default value is 27017.\n
-            - _"db_driver"_ `(str)`: The database driver.\n
-            - _"db_extra_args"_ `(Dict[str, Any])`: A dictionary of additional arguments to be passed into database
-                connection string.\n
+    - *db_name* (`str`): The database name.
+    - *collection_name* (`str`): The collection in the database to read from and to write the data to.
+
+    The *properties* attribute can also contain the following optional entries:
+
+    - *custom_document* (`Any`): The custom document class to store, encode, and decode data when reading
+        and writing to a Mongo collection.
+    - *db_username* (`str`): The database username.
+    - *db_password* (`str`): The database password.
+    - *db_host* (`str`): The database host. The default value is *"localhost"*.
+    - *db_port* (`str`): The database port. The default value is *27017*.
+    - *db_driver* (`str`): The database driver.
+    - *db_extra_args* (`Dict[str, Any]`): A dictionary of additional arguments to be passed into
+        database connection string.
     """
 
     __STORAGE_TYPE = "mongo_collection"
@@ -172,17 +153,12 @@ class MongoCollectionDataNode(DataNode):
             }
         )
 
-    def _check_custom_document(self, custom_document):
-        if not isclass(custom_document):
-            raise InvalidCustomDocument(
-                f"Invalid custom document of {custom_document}. Only custom class are supported."
-            )
-
     @classmethod
     def storage_type(cls) -> str:
+        """Return the storage type of the data node: "mongo_collection"."""
         return cls.__STORAGE_TYPE
 
-    def filter(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
+    def filter(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND) -> List:
         cursor = self._read_by_query(operators, join_operator)
         return [self._decoder(row) for row in cursor]
 
@@ -267,11 +243,18 @@ class MongoCollectionDataNode(DataNode):
 
         self.collection.insert_many(data)
 
+    def _check_custom_document(self, custom_document):
+        if not isclass(custom_document):
+            raise InvalidCustomDocument(
+                f"Invalid custom document of {custom_document}. Only custom class are supported."
+            )
+
     def _default_decoder(self, document: Dict) -> Any:
         """Decode a Mongo dictionary to a custom document object for reading.
 
         Parameters:
             document (Dict): the document dictionary return by Mongo query.
+
         Returns:
             A custom document object.
         """
@@ -287,3 +270,4 @@ class MongoCollectionDataNode(DataNode):
             The document dictionary.
         """
         return document_object.__dict__
+

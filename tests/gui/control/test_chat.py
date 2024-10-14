@@ -71,7 +71,7 @@ def test_chat_md_2(gui: Gui, test_client, helpers):
         'updateVarName="_TpD_tpec_TpExPr_messages_TPMDL_0"',
         'updateVars="users=_TpL_tp_TpExPr_gui_get_adapted_lov_users_list_TPMDL_0_0"',
         "users={_TpL_tp_TpExPr_gui_get_adapted_lov_users_list_TPMDL_0_0}",
-        "withInput={_TpB_tpec_TpExPr_winp_TPMDL_0}>",
+        "withInput={_TpB_tpec_TpExPr_winp_TPMDL_0}",
         "defaultWithInput={false}",
         "showSender={true}",
     ]

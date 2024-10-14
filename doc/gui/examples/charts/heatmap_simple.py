@@ -31,4 +31,4 @@ page = """
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="Chart - Heatmap - Basic")
+    Gui(page).run(title="Chart - Heatmap - Simple")

@@ -75,4 +75,4 @@ Precision:
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="File Download - Dynamic content")
+    Gui(page).run(title="File Download - Temporary file")

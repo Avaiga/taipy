@@ -12,7 +12,7 @@
 from importlib.util import find_spec
 
 if find_spec("taipy"):
-    if find_spec("taipy.common"):
+    if find_spec("taipy.common") and find_spec("taipy.common.config"):
         from taipy.common.config._init import *
 
     if find_spec("taipy.gui"):

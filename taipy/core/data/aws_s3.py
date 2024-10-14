@@ -29,41 +29,22 @@ from .data_node_id import DataNodeId, Edit
 class S3ObjectDataNode(DataNode):
     """Data Node object stored in an Amazon Web Service S3 Bucket.
 
-    Attributes:
-        config_id (str): Identifier of the data node configuration. It must be a valid Python
-            identifier.
-        scope (Scope^): The scope of this data node.
-        id (str): The unique identifier of this data node.
-        owner_id (str): The identifier of the owner (sequence_id, scenario_id, cycle_id) or
-            None.
-        parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
-        last_edit_date (datetime): The date and time of the last modification.
-        edits (List[Edit^]): The ordered list of edits for that job.
-        version (str): The string indicates the application version of the data node to instantiate. If not provided,
-            the current version is used.
-        validity_period (Optional[timedelta]): The duration implemented as a timedelta since the last edit date for
-            which the data node can be considered up-to-date. Once the validity period has passed, the data node is
-            considered stale and relevant tasks will run even if they are skippable (see the
-            [Task management](../../userman/scenario_features/sdm/task/index.md) page for more details).
-            If _validity_period_ is set to `None`, the data node is always up-to-date.
-        edit_in_progress (bool): True if a task computing the data node has been submitted
-            and not completed yet. False otherwise.
-        editor_id (Optional[str]): The identifier of the user who is currently editing the data node.
-        editor_expiration_date (Optional[datetime]): The expiration date of the editor lock.
-        properties (dict[str, Any]): A dictionary of additional properties. Note that the
-            _properties_ parameter must at least contain an entry for _"aws_access_key"_ , _"aws_secret_access_key"_ ,
-            _aws_s3_bucket_name_ and _aws_s3_object_key_ :
+    The *properties* attribute must contain the following required entries:
 
-            - _"aws_access_key"_ `(str)`: Amazon Web Services ID for to identify account\n
-            - _"aws_secret_access_key"_ `(str)`: Amazon Web Services access key to authenticate programmatic requests.\n
-            - _"aws_region"_ `(Any)`: Self-contained geographic area where Amazon Web Services (AWS) infrastructure is
-                    located.\n
-            - _"aws_s3_bucket_name"_ `(str)`: unique identifier for a container that stores objects in Amazon Simple
-                    Storage Service (S3).\n
-            - _"aws_s3_object_key"_ `(str)`:  unique idntifier for the name of the object(file) that has to be read
-                    or written. \n
-            - _"aws _s3_object_parameters"_ `(str)`: A dictionary of additional arguments to be passed to interact with
-                    the AWS service\n
+    - *aws_access_key* (`str`): Amazon Web Services ID for to identify account
+    - *aws_secret_access_key* (`str`): Amazon Web Services access key to
+        authenticate programmatic requests.
+    - *aws_s3_bucket_name*  (`str`): unique identifier for a container that stores
+        objects in Amazon Simple Storage Service (S3).
+    - *aws_s3_object_key* (`str`):  unique identifier for the name of the object (file)
+        that has to be read or written.
+
+    The *properties* attribute can also contain the following optional entries:
+
+    - *aws_region* (`Any`): Self-contained geographic area where Amazon Web Services
+        (AWS) infrastructure is located.
+    - *aws _s3_object_parameters* (`str`): A dictionary of additional arguments to be
+        passed to interact with the AWS service
     """
 
     __STORAGE_TYPE = "s3_object"
@@ -144,6 +125,7 @@ class S3ObjectDataNode(DataNode):
 
     @classmethod
     def storage_type(cls) -> str:
+        """Return the storage type of the data node: "s3_object"."""
         return cls.__STORAGE_TYPE
 
     def _read(self):

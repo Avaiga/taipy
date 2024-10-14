@@ -9,11 +9,10 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-"""# Taipy `core` Package
-
-The Taipy `core` package is a Python library designed to build powerful, customized, data-driven
-back-end applications. It provides the tools to help Python developers transform their algorithms
-into a complete back-end application. In particular, it helps with:
+"""
+The Taipy `core` package provides powerful, customized, data-driven back-end functionalities.
+It provides the tools to help data scientists and Python developers transform their algorithms
+into a complete back-end application. In  particular, it helps with:
 
 - Data Integration
 - Task Orchestration
@@ -25,9 +24,9 @@ More details on the Core functionalities are available in the user manual.
 To use such functionalities, the first step consists of setting up the Taipy configuration to design
 your application's characteristics and behaviors. Use the `Config^` singleton class (from `taipy.common.config`)
 to configure your application. Please refer to the
-[data nodes](../../../userman/scenario_features/data-integration/data-node-config.md),
-[tasks](../../../userman/scenario_features/task-orchestration/scenario-config.md),
-and [scenarios](../../../userman/scenario_features/sdm/scenario/scenario-config.md) pages.
+[data nodes](../../../../userman/scenario_features/data-integration/data-node-config.md),
+[tasks](../../../../userman/scenario_features/task-orchestration/scenario-config.md),
+and [scenarios](../../../../userman/scenario_features/sdm/scenario/scenario-config.md) pages.
 
 Once your application is configured, import module `import taipy as tp` so you can use any function described
 in the following section on [Function](#functions). In particular, the most used functions are `tp.create_scenario()`,
@@ -40,7 +39,7 @@ in the following section on [Function](#functions). In particular, the most used
     executor for their execution.
 
     In particular, this `Orchestrator^` service is automatically run when used with Taipy REST or Taipy GUI.
-    See the [running services](../../../userman/run-deploy/run/running_services.md) page of the user
+    See the [running services](../../../../userman/run-deploy/run/running_services.md) page of the user
     manual for more details.
 """
 

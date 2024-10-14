@@ -42,7 +42,7 @@ class Task(_Entity, _Labeled):
     A task's attributes (the input data nodes, the output data nodes, the Python
     function) are populated based on its task configuration `TaskConfig^`.
 
-    !!! Example
+    ??? Example
 
         ```python
         import taipy as tp
@@ -99,6 +99,9 @@ class Task(_Entity, _Labeled):
     _MANAGER_NAME = "task"
     __CHECK_INIT_DONE_ATTR_NAME = "_init_done"
 
+    id: TaskId
+    """The unique identifier of the task."""
+
     def __init__(
         self,
         config_id: str,
@@ -124,10 +127,11 @@ class Task(_Entity, _Labeled):
         self._properties = _Properties(self, **properties)
         self._init_done = True
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.id)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
+        """Check if a task is equal to another task."""
         return isinstance(other, Task) and self.id == other.id
 
     def __getstate__(self):
@@ -146,7 +150,7 @@ class Task(_Entity, _Labeled):
             except AttributeError:
                 return super().__setattr__(name, value)
 
-    def __getattr__(self, attribute_name):
+    def __getattr__(self, attribute_name) -> Any:
         protected_attribute_name = _validate_id(attribute_name)
         if protected_attribute_name in self.input:
             return self.input[protected_attribute_name]
@@ -155,74 +159,80 @@ class Task(_Entity, _Labeled):
         raise AttributeError(f"{attribute_name} is not an attribute of task {self.id}")
 
     @property
-    def properties(self):
+    def properties(self) -> _Properties:
+        """Dictionary of additional properties."""
         self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties
 
     @property
-    def config_id(self):
+    def config_id(self) -> str:
+        """The identifier of the `TaskConfig^`."""
         return self._config_id
 
     @property
-    def owner_id(self):
+    def owner_id(self) -> Optional[str]:
+        """The identifier of the owner (scenario_id or cycle_id) or None."""
         return self._owner_id
-
-    def get_parents(self):
-        """Get parents of the task."""
-        from ... import core as tp
-
-        return tp.get_parents(self)
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def parent_ids(self):
+    def parent_ids(self) -> Set[str]:
+        """The set of identifiers of the parent scenarios."""
         return self._parent_ids
 
     @property
     def input(self) -> Dict[str, DataNode]:
+        """The dictionary of input data nodes."""
         return self._input
 
     @property
     def output(self) -> Dict[str, DataNode]:
+        """The dictionary of output data nodes."""
         return self._output
 
     @property
     def data_nodes(self) -> Dict[str, DataNode]:
+        """The dictionary of input and output data nodes."""
         return {**self.input, **self.output}
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def function(self):
+    def function(self) -> Callable:
+        """The python function to execute."""
         return self._function
 
     @function.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
-    def function(self, val):
+    def function(self, val) -> None:
         self._function = val
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def skippable(self):
+    def skippable(self) -> bool:
+        """True if the task can be skipped if no change has been made on inputs. False otherwise"""
         return self._skippable
 
     @skippable.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
-    def skippable(self, val):
+    def skippable(self, val) -> None:
         self._skippable = val
 
     @property
     def scope(self) -> Scope:
-        """Retrieve the lowest scope of the task based on its data nodes.
+        """The lowest scope of the task's data nodes.
 
-        Returns:
-            The lowest scope present in input and output data nodes or GLOBAL if there are
-                either no input or no output.
+        The lowest scope present in input and output data nodes or GLOBAL if there are
+        either no input or no output.
         """
         data_nodes = list(self._input.values()) + list(self._output.values())
         return Scope(min(dn.scope for dn in data_nodes)) if len(data_nodes) != 0 else Scope.GLOBAL
 
     @property
-    def version(self):
+    def version(self) -> str:
+        """The application version of the task.
+
+        The string indicates the application version of the task. If not
+        provided, the latest version is used."""
         return self._version
 
     def submit(
@@ -245,12 +255,26 @@ class Task(_Entity, _Labeled):
                 returning.<br/>
                 If not provided and *wait* is True, the function waits indefinitely.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
             A `Submission^` containing the information of the submission.
         """
         from ._task_manager_factory import _TaskManagerFactory
 
         return _TaskManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout, **properties)
+
+    def get_parents(self) -> Dict[str, Set[_Entity]]:
+        """Get the parent scenarios of the task.
+
+        Returns:
+            The dictionary of all parent entities.
+                They are grouped by their type (Scenario^, Sequences^, or tasks^) so each key corresponds
+                to a level of the parents and the value is a set of the parent entities.
+                An empty dictionary is returned if the entity does not have parents.
+        """
+        from ... import core as tp
+
+        return tp.get_parents(self)
 
     def get_label(self) -> str:
         """Returns the task simple label prefixed by its owner label.

@@ -22,12 +22,6 @@ class IssueCollector:
     method. It contains all the collected issues separated by severity (ERROR, WARNING, INFO).
     Each issue is an instance of the class `Issue^` and contains the necessary information to
     understand the issue and help the user to fix it.
-
-    Attributes:
-        errors (List[Issue^]): List of ERROR issues collected.
-        warnings (List[Issue^]): List WARNING issues collected.
-        infos (List[Issue^]): List INFO issues collected.
-        all (List[Issue^]): List of all issues collected ordered by decreasing level (ERROR, WARNING and INFO).
     """
 
     _ERROR_LEVEL = "ERROR"
@@ -41,18 +35,22 @@ class IssueCollector:
 
     @property
     def all(self) -> List[Issue]:
+        """List of all issues collected ordered by decreasing level (ERROR, WARNING and INFO)."""
         return self._errors + self._warnings + self._infos
 
     @property
     def infos(self) -> List[Issue]:
+        """List INFO issues collected."""
         return self._infos
 
     @property
     def warnings(self) -> List[Issue]:
+        """List WARNING issues collected."""
         return self._warnings
 
     @property
     def errors(self) -> List[Issue]:
+        """List of ERROR issues collected."""
         return self._errors
 
     def _add_error(self, field: str, value: Any, message: str, checker_name: str) -> None:

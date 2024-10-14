@@ -119,6 +119,7 @@ class _JobDispatcher(threading.Thread):
 
         Parameters:
              task (Task^): The task to run.
+
         Returns:
              True if the task needs to run. False otherwise.
         """

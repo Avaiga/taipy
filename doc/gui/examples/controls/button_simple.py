@@ -15,16 +15,7 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-text = None
-
-def on_action(state, id: str, payload: dict):
-    # React to the button press action.
-    state.text = f"The button '{id}' was pressed and called action '{payload.get('action')}'."
-
-page = """
-<|Button Label|button|>
-<|{text}|>
-"""
+page = "<|Button Label|button|>"
 
 if __name__ == "__main__":
     Gui(page).run(title="Button - Simple")

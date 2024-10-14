@@ -19,14 +19,7 @@ from taipy.common.config.unique_section import UniqueSection
 
 
 class JobConfig(UniqueSection):
-    """
-    Configuration fields related to the jobs' executions.
-
-    Parameters:
-        mode (str): The Taipy operating mode. By default, the "development" mode is set for testing and debugging the
-            executions of jobs. A "standalone" mode is also available.
-        **properties (dict[str, any]): A dictionary of additional properties.
-    """
+    """ Configuration fields related to the task orchestration and the jobs' executions."""
 
     name = "JOB"
 
@@ -36,6 +29,15 @@ class JobConfig(UniqueSection):
     _DEFAULT_MODE = _DEVELOPMENT_MODE
     _DEFAULT_MAX_NB_OF_WORKERS = 2
     _MODES = [_DEVELOPMENT_MODE, _STANDALONE_MODE]
+
+    mode: Optional[str]
+    """The task orchestration mode.
+
+    By default, the "development" mode is set for testing and debugging the
+    executions of jobs. A "standalone" mode is also available.
+
+    In the Taipy Enterprise Edition, the "cluster" mode is available.
+    """
 
     def __init__(self, mode: Optional[str] = None, **properties):
         self.mode = mode
@@ -49,8 +51,23 @@ class JobConfig(UniqueSection):
     def __getattr__(self, key: str) -> Optional[Any]:
         return _tpl._replace_templates(self._properties.get(key))  # type: ignore[union-attr]
 
+    @property
+    def is_standalone(self) -> bool:
+        """True if the config is set to standalone mode"""
+        return self.mode == self._STANDALONE_MODE
+
+    @property
+    def is_development(self) -> bool:
+        """True if the config is set to development mode"""
+        return self.mode == self._DEVELOPMENT_MODE
+
     @classmethod
-    def default_config(cls):
+    def default_config(cls) -> "JobConfig":
+        """Return a default configuration for the job execution.
+
+        Returns:
+            The default job execution configuration.
+        """
         return JobConfig(cls._DEFAULT_MODE)
 
     def _clean(self):
@@ -103,16 +120,6 @@ class JobConfig(UniqueSection):
         section = JobConfig(mode=mode, **properties)
         Config._register(section)
         return Config.unique_sections[JobConfig.name]
-
-    @property
-    def is_standalone(self) -> bool:
-        """True if the config is set to standalone mode"""
-        return self.mode == self._STANDALONE_MODE
-
-    @property
-    def is_development(self) -> bool:
-        """True if the config is set to development mode"""
-        return self.mode == self._DEVELOPMENT_MODE
 
     def _update_default_max_nb_of_workers_properties(self):
         """If the job execution mode is standalone, set the default value for the max_nb_of_workers property"""

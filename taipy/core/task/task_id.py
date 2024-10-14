@@ -12,4 +12,5 @@
 from typing import NewType
 
 TaskId = NewType("TaskId", str)
+"""Type that holds a `Task^` identifier."""
 TaskId.__doc__ = """Type that holds a `Task^` identifier."""

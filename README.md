@@ -27,13 +27,14 @@ No more compromise on performance, customization, and scalability.
 
 </div>
 
-<p align="left">
+<p align="center"><h4>
     <br />
     <a href="https://docs.taipy.io/en/latest/"><strong>📚 Explore the docs </strong></a>
     <br />
     <a href="https://discord.com/invite/SJyz2VJGxV"><strong>  🫱🏼‍🫲🏼 Discord support </strong></a>
     <br />
     <a href="https://docs.taipy.io/en/latest/gallery/"><strong> 👀 Demos & Examples </strong></a>
+</h4>
   </p>
 
 &nbsp;
@@ -76,8 +77,16 @@ To install the Taipy stable release run:
 pip install taipy
 ```
 
-To install Taipy on a Conda Environment or from a source, please refer to the [Installation Guide](https://docs.taipy.io/en/latest/installation/).<br />
-To get started with Taipy, please refer to the [Getting Started Guide](https://docs.taipy.io/en/latest/getting_started/).
+
+Ready to Install Taipy? 🚀<br>
+Get everything set up in no time! Whether you're using a Conda environment or installing from
+source, follow our [Installation Guide](https://docs.taipy.io/en/latest/installation/) for
+step-by-step instructions.<br/>
+
+Excited to Dive In? 💡 <br>
+Start building with Taipy today! Our
+[Getting Started Guide](https://docs.taipy.io/en/latest/tutorials/getting_started/) is the
+perfect place to begin your journey and unlock the full potential of Taipy.
 
 &nbsp;
 
@@ -212,7 +221,7 @@ Copyright 2021-2024 Avaiga Private Limited
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 the License. You may obtain a copy of the License at
-(Apache License)[http://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+[Apache License](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the

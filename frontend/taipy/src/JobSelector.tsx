@@ -55,6 +55,7 @@ import {
     createRequestUpdateAction,
     createSendActionNameAction,
     createSendUpdateAction,
+    getComponentClassName,
     getUpdateVar,
     useDispatch,
     useDispatchRequestUpdateOnFirstRender,
@@ -787,7 +788,7 @@ const JobSelector = (props: JobSelectorProps) => {
     const tableHeightSx = useMemo(() => ({ maxHeight: props.height || "50vh" }), [props.height]);
 
     return (
-        <Box className={className}>
+        <Box className={`${className} ${getComponentClassName(props.children)}`}>
             {showDetails && props.details ? (
                 <Dialog open={true} onClose={closeDetails} scroll="paper" fullWidth>
                     <DialogTitle>{props.details[1]}</DialogTitle>

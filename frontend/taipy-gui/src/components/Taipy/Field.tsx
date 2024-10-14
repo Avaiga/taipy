@@ -19,6 +19,7 @@ import { formatWSValue } from "../../utils";
 import { getSuffixedClassNames } from "./utils";
 import { useClassNames, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import { TaipyBaseProps, TaipyHoverProps, getCssSize } from "./utils";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface TaipyFieldProps extends TaipyBaseProps, TaipyHoverProps {
     dataType?: string;
@@ -76,29 +77,37 @@ const Field = (props: TaipyFieldProps) => {
 
     return (
         <Tooltip title={hover || ""}>
-            {mode == "pre" ? (
-                <pre className={`${className} ${getSuffixedClassNames(className, '-' + mode)}`} id={id} style={style}>
-                    {value}
-                </pre>
-            ) : mode == "markdown" || mode == "md" ? (
-                <Markdown className={`${className} ${getSuffixedClassNames(className, '-' + mode)}`}>{value}</Markdown>
-            ) : raw || mode == "raw" ? (
-                <span className={`${className} ${getSuffixedClassNames(className, '-' + mode)}`} id={id} style={style}>
-                    {value}
-                </span>
-            ) : mode == 'latex' ? (
-                <Suspense fallback={<div>Loading LaTex...</div>}>
-                    <MathJaxContext config={mathJaxConfig}>
-                        <MathJax className={`${className} ${getSuffixedClassNames(className, '-' + mode)}`} id={id}>
+            <>
+                {mode == "pre" ? (
+                    <pre className={`${className} ${getComponentClassName(props.children)}`} id={id} style={style}>
+                        {value}
+                    </pre>
+                ) : mode == "markdown" || mode == "md" ? (
+                    <Markdown className={`${className} ${getComponentClassName(props.children)}`}>{value}</Markdown>
+                ) : raw || mode == "raw" ? (
+                    <span className={className} id={id} style={style}>
+                        {value}
+                    </span>
+                ) : mode == 'latex' ? (
+                    <Suspense fallback={<div>Loading LaTex...</div>}>
+                      <MathJaxContext config={mathJaxConfig}>
+                        <MathJax className={`${className} ${getComponentClassName(props.children)}`} id={id}>
                             {value}
                         </MathJax>
-                    </MathJaxContext>
-                </Suspense>
-            ) : (
-                <Typography className={className} id={id} component="span" sx={typoSx}>
-                    {value}
-                </Typography>
-            )}
+                      </MathJaxContext>
+                    </Suspense>
+                ) : (
+                    <Typography
+                        className={`${className} ${getComponentClassName(props.children)}`}
+                        id={id}
+                        component="span"
+                        sx={typoSx}
+                    >
+                        {value}
+                    </Typography>
+                )}
+                {props.children}
+            </>
         </Tooltip>
     );
 };

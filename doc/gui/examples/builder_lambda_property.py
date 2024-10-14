@@ -13,52 +13,19 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
+import taipy.gui.builder as tgb
 from taipy.gui import Gui
 
+persons = {"Albert": 1982, "Beatrix": 1955, "Cecilia": 2003}
 
-# Function to plot: x^3/3-x
-def f(x):
-    return x * x * x / 3 - x
+current_year = 2024
 
+with tgb.Page() as page:
+    tgb.text("Year: ", inline=True)
+    tgb.slider("{current_year}", min=1990, max=2050, inline=True)
 
-# x values: [-2.2, ..., 2.2]
-x = [(x - 10) / 4.5 for x in range(0, 21)]
-
-data = {
-    "x": x,
-    # y: [f(-2.2), ..., f(2.2)]
-    "y": [f(x) for x in x],
-}
-
-shape_size = 0.1
-
-layout = {
-    "shapes": [
-        # Shape for local maximum (x = -1)
-        {
-            "x0": -1 - shape_size,
-            "y0": f(-1) - 2 * shape_size,
-            "x1": -1 + shape_size,
-            "y1": f(-1) + 2 * shape_size,
-            "fillcolor": "green",
-            "opacity": 0.5,
-        },
-        # Shape for local minimum (x = 1)
-        {
-            "x0": 1 - shape_size,
-            "y0": f(1) - 2 * shape_size,
-            "x1": 1 + shape_size,
-            "y1": f(1) + 2 * shape_size,
-            "fillcolor": "red",
-            "opacity": 0.5,
-        },
-    ]
-}
-
-page = """
-<|{data}|chart|layout={layout}|>
-"""
-
+    for name, birth_year in persons.items():
+        tgb.text(lambda current_year: f"{name} would be {current_year-birth_year}")  # noqa: B023
 
 if __name__ == "__main__":
-    Gui(page).run(title="Chart - Advanced - Annotations")
+    Gui(page).run(title="Page Builder - Using lambdas in property values")

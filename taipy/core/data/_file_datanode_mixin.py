@@ -26,8 +26,7 @@ from .data_node_id import Edit
 
 
 class _FileDataNodeMixin(object):
-    """Mixin class designed to handle file-based data nodes
-    (CSVDataNode, ParquetDataNode, ExcelDataNode, PickleDataNode, JSONDataNode, etc.)."""
+    """Mixin class designed to handle file-based data nodes."""
 
     __EXTENSION_MAP = {"csv": "csv", "excel": "xlsx", "parquet": "parquet", "pickle": "p", "json": "json"}
 
@@ -51,51 +50,23 @@ class _FileDataNodeMixin(object):
         properties[self._IS_GENERATED_KEY] = self._is_generated
         properties[self._PATH_KEY] = self._path
 
-    def _write_default_data(self, default_value: Any):
-        if default_value is not None and not os.path.exists(self._path):
-            self._write(default_value)  # type: ignore[attr-defined]
-            self._last_edit_date = DataNode._get_last_modified_datetime(self._path) or datetime.now()
-            self._edits.append(  # type: ignore[attr-defined]
-                Edit(
-                    {
-                        "timestamp": self._last_edit_date,
-                        "editor": "TAIPY",
-                        "comment": "Default data written.",
-                    }
-                )
-            )
-
-        if not self._last_edit_date and isfile(self._path):
-            self._last_edit_date = datetime.now()
-
     @property  # type: ignore
     @_self_reload(DataNode._MANAGER_NAME)
     def is_generated(self) -> bool:
+        """Indicates if the file is generated."""
         return self._is_generated
 
     @property  # type: ignore
     @_self_reload(DataNode._MANAGER_NAME)
-    def path(self) -> Any:
+    def path(self) -> str:
+        """The path to the file data of the data node."""
         return self._path
 
     @path.setter
-    def path(self, value):
+    def path(self, value) -> None:
         self._path = value
         self.properties[self._PATH_KEY] = value
         self.properties[self._IS_GENERATED_KEY] = False
-
-    def _build_path(self, storage_type) -> str:
-        folder = f"{storage_type}s"
-        dir_path = pathlib.Path(Config.core.storage_folder) / folder
-        if not dir_path.exists():
-            dir_path.mkdir(parents=True, exist_ok=True)
-        return str(dir_path / f"{self.id}.{self.__EXTENSION_MAP.get(storage_type)}")  # type: ignore[attr-defined]
-
-    def _migrate_path(self, storage_type, old_path) -> str:
-        new_path = self._build_path(storage_type)
-        if os.path.exists(old_path):
-            shutil.move(old_path, new_path)
-        return new_path
 
     def is_downloadable(self) -> ReasonCollection:
         """Check if the data node is downloadable.
@@ -111,12 +82,11 @@ class _FileDataNodeMixin(object):
         return collection
 
     def is_uploadable(self) -> ReasonCollection:
-        """Check if the data node is uploadable.
+        """Check if the data node is upload-able.
 
         Returns:
-            A `ReasonCollection^` object containing the reasons why the data node is not uploadable.
+            A `ReasonCollection^` object containing the reasons why the data node is not upload-able.
         """
-
         return ReasonCollection()
 
     def _get_downloadable_path(self) -> str:
@@ -180,3 +150,33 @@ class _FileDataNodeMixin(object):
 
     def _read_from_path(self, path: Optional[str] = None, **read_kwargs) -> Any:
         raise NotImplementedError
+
+    def _write_default_data(self, default_value: Any):
+        if default_value is not None and not os.path.exists(self._path):
+            self._write(default_value)  # type: ignore[attr-defined]
+            self._last_edit_date = DataNode._get_last_modified_datetime(self._path) or datetime.now()
+            self._edits.append(  # type: ignore[attr-defined]
+                Edit(
+                    {
+                        "timestamp": self._last_edit_date,
+                        "editor": "TAIPY",
+                        "comment": "Default data written.",
+                    }
+                )
+            )
+
+        if not self._last_edit_date and isfile(self._path):
+            self._last_edit_date = datetime.now()
+
+    def _build_path(self, storage_type) -> str:
+        folder = f"{storage_type}s"
+        dir_path = pathlib.Path(Config.core.storage_folder) / folder
+        if not dir_path.exists():
+            dir_path.mkdir(parents=True, exist_ok=True)
+        return str(dir_path / f"{self.id}.{self.__EXTENSION_MAP.get(storage_type)}")  # type: ignore[attr-defined]
+
+    def _migrate_path(self, storage_type, old_path) -> str:
+        new_path = self._build_path(storage_type)
+        if os.path.exists(old_path):
+            shutil.move(old_path, new_path)
+        return new_path

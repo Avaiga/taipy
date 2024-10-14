@@ -18,22 +18,19 @@ from ..common._template_handler import _TemplateHandler as _tpl
 
 
 class GlobalAppConfig:
-    """Configuration attributes related to the global application.
-
-    Attributes:
-        **properties (Dict[str, Any]): A dictionary of additional properties.
-    """
+    """Configuration attributes related to the global application."""
 
     def __init__(self, **properties):
         self._properties = properties
 
     @property
-    def properties(self):
+    def properties(self) -> Dict[str, Any]:
+        """A dictionary of additional properties."""
         return {k: _tpl._replace_templates(v) for k, v in self._properties.items()}
 
     @properties.setter  # type: ignore
     @_ConfigBlocker._check()
-    def properties(self, val):
+    def properties(self, val) -> None:
         self._properties = val
 
     def __getattr__(self, item: str) -> Optional[Any]:
@@ -41,6 +38,11 @@ class GlobalAppConfig:
 
     @classmethod
     def default_config(cls) -> GlobalAppConfig:
+        """Return the GlobalAppConfig section used by default.
+
+        Returns:
+            The default configuration.
+        """
         return GlobalAppConfig()
 
     def _clean(self):

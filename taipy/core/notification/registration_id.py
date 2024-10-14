@@ -12,4 +12,5 @@
 from typing import NewType
 
 RegistrationId = NewType("RegistrationId", str)
+"""Registration identifier. It can be used to instantiate a `CoreEventConsumerBase^`."""
 RegistrationId.__doc__ = """Registration identifier. It can be used to instantiate a `CoreEventConsumerBase^`."""
