@@ -1,6 +1,6 @@
-import pytest
-from taipy.gui.data.data_accessor import _DataAccessors, _InvalidDataAccessor
 from taipy.gui import Gui
+
+from taipy.gui.data.data_accessor import _DataAccessors, _InvalidDataAccessor
 
 
 def test__get_instance_with_valid_data(gui: Gui):
