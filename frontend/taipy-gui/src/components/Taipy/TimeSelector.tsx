@@ -15,7 +15,7 @@ import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import { ErrorBoundary } from "react-error-boundary";
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import { isValid } from "date-fns";
+import { isValid, format } from "date-fns";
 import { MobileTimePicker } from '@mui/x-date-pickers/MobileTimePicker';
 import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps, getCssSize } from "./utils";
 import { createSendUpdateAction } from "../../context/taipyReducers";
@@ -51,10 +51,13 @@ const TimeSelector = (props: TimeSelectorProps) => {
     (v: Date | null) => {
         setValue(v);
         if (v !== null && isValid(v)) {
+            // Have to format the picked time value since it comes with timezone
+            const newDateTime = format(v, "yyyy-MM-dd'T'HH:mm:ss")
+
             dispatch(
               createSendUpdateAction(
                   updateVarName,
-                  v,
+                  newDateTime,
                   module,
                   props.onChange,
                   propagate
