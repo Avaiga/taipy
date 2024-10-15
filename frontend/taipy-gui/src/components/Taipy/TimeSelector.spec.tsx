@@ -67,7 +67,7 @@ const curDateStr = curDate.toISOString();
 
 const cleanText = (val: string) => val.replace(/\u200e|\u2066|\u2067|\u2068|\u2069/g, "");
 
-describe("TimeSelector component", () => {
+describe("TimeSelector component with digital time picker", () => {
     it("renders", async () => {
         const { getByTestId } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -77,15 +77,7 @@ describe("TimeSelector component", () => {
         const elt = getByTestId("ClockIcon");
         expect(elt.parentElement?.tagName).toBe("BUTTON");
     });
-    it("displays picker as a clock", async () => {
-        render(
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <TimeSelector time={curDateStr} asClock={true}/>
-            </LocalizationProvider>
-        );
-        const input = document.querySelector("input");
-        expect(input).toBeInTheDocument();
-    });
+
     it("displays the right info for string", async () => {
         const { getByTestId } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -147,6 +139,78 @@ describe("TimeSelector component", () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <TimeSelector time={curDateStr} active={true} />
+            </LocalizationProvider>
+        );
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        expect(input).not.toBeDisabled();
+    });
+});
+
+describe("TimeSelector component with analogue time picker", () => {
+    it("renders", async () => {
+        const { getByTestId } = render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <TimeSelector time={curDateStr} asClock={true} />
+            </LocalizationProvider>
+        );
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+    });
+
+    it("displays the default value", async () => {
+        render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <TimeSelector
+                    defaultTime="2001-01-01T01:01:01.001Z"
+                    time={undefined as unknown as string}
+                    asClock={true}
+                />
+            </LocalizationProvider>
+        );
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        expect(cleanText(input?.value || "").toLocaleLowerCase()).toEqual("01:01 am");
+    });
+    it("displays the default value with format", async () => {
+        render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <TimeSelector
+                    defaultTime="2001-01-01T14:20:01.001Z"
+                    time={undefined as unknown as string}
+                    asClock={true}
+                    format="hh aa"
+                />
+            </LocalizationProvider>
+        );
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        expect(cleanText(input?.value || "")).toEqual("02 PM");
+    });
+    it("is disabled", async () => {
+        render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <TimeSelector time={curDateStr} active={false} asClock={true} />
+            </LocalizationProvider>
+        );
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        expect(input).toBeDisabled();
+    });
+    it("is enabled by default", async () => {
+        render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <TimeSelector time={curDateStr} asClock={true} />
+            </LocalizationProvider>
+        );
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        expect(input).not.toBeDisabled();
+    });
+    it("is enabled by active", async () => {
+        render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <TimeSelector time={curDateStr} active={true} asClock={true} />
             </LocalizationProvider>
         );
         const input = document.querySelector("input");
