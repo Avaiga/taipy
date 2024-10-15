@@ -8,14 +8,14 @@ from taipy.gui import Markdown
 df = pd.DataFrame({
     "Name": ["Alice", "Bob", "Charlie"],
     "Age": [25, 30, 35],
-    "Occupation": ["Engineer", "Doctor", "Artist"]
+    "Occupation or Job": ["Engineer", "Doctor", "Artist"]
 })
 
 
 # Page content with table and header styling
 page = Markdown("""
 <|table|data={df}|columns={columns}|>
-""", sytle={".taipy-table-name": {"color": "blue"}, ".taipy-table-occupation": {"color": "green"}})
+""", sytle={".taipy-table-name": {"color": "blue"}, ".taipy-table-occupation-or-job": {"color": "green"}})
 
 if __name__ == "__main__":
     Gui(page).run(title="Column Name Styling Example")
