@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from taipy.config import Config
+from taipy.common.config import Config
 from taipy.core.common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 

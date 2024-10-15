@@ -16,7 +16,7 @@ from os import path
 
 from charset_normalizer import detect
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ..page import Page
 from ..utils import _is_in_notebook, _varname_from_content
@@ -89,7 +89,7 @@ class _Renderer(Page, ABC):
             if self._encoding is not None:
                 encoding = self._encoding
                 _TaipyLogger._get_logger().info(f"'{encoding}' encoding was used to decode file '{content}'.")
-            elif (detected_encoding := detect(file_content)["encoding"]) is not None:
+            elif (detected_encoding := t.cast(str, detect(file_content).get("encoding"))) is not None:
                 encoding = detected_encoding
                 _TaipyLogger._get_logger().info(f"Detected '{encoding}' encoding for file '{content}'.")
             else:
@@ -139,7 +139,7 @@ class Markdown(_Renderer):
     user interfaces.
 
     You can find details on the Taipy Markdown-specific syntax and how to add
-    Taipy Visual Elements in the [section on Markdown](../../userman/gui/pages/markdown.md)
+    Taipy Visual Elements in the [section on Markdown](../../../../../userman/gui/pages/markdown.md)
     of the User Manual.
     """
 
@@ -153,7 +153,7 @@ class Markdown(_Renderer):
                 template content.
 
         The `Markdown` constructor supports the *style* parameter as explained in the
-        [section on Styling](../../userman/gui/styling/index.md#style-sheets) and in the
+        [section on Styling](../../../../../userman/gui/styling/index.md#style-sheets) and in the
         `(taipy.gui.Page.)set_style()^` method.
         """
         kwargs["content"] = content
@@ -171,7 +171,7 @@ class Html(_Renderer):
     user interfaces.
 
     You can find details on HTML-specific constructs and how to add
-    Taipy Visual Elements in the [section on HTML](../../userman/gui/pages/html.md)
+    Taipy Visual Elements in the [section on HTML](../../../../../userman/gui/pages/html.md)
     of the User Manual.
     """
 
@@ -185,7 +185,7 @@ class Html(_Renderer):
                 template content.
 
         The `Html` constructor supports the *style* parameter as explained in the
-        [section on Styling](../../userman/gui/styling/index.md#style-sheets) and in the
+        [section on Styling](../../../../../userman/gui/styling/index.md#style-sheets) and in the
         `(taipy.gui.Page.)set_style()^` method.
         """
         kwargs["content"] = content

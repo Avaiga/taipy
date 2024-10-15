@@ -15,7 +15,7 @@ from unittest import mock
 import freezegun
 import pytest
 
-from taipy.config import Config
+from taipy.common.config import Config
 from taipy.core import taipy
 from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory

@@ -13,8 +13,8 @@ from concurrent.futures import Future, ProcessPoolExecutor
 from unittest import mock
 from unittest.mock import call
 
-from taipy import Config
-from taipy.config._serializer._toml_serializer import _TomlSerializer
+from taipy.common.config import Config
+from taipy.common.config._serializer._toml_serializer import _TomlSerializer
 from taipy.core import JobId
 from taipy.core._orchestrator._dispatcher import _StandaloneJobDispatcher
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory

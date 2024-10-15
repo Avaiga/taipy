@@ -25,7 +25,7 @@ jobs:
   fetch-versions:
     runs-on: ubuntu-latest
     outputs:
-        config_VERSION: ${{ steps.version-setup.outputs.config_VERSION }}
+        common_VERSION: ${{ steps.version-setup.outputs.common_VERSION }}
         core_VERSION: ${{ steps.version-setup.outputs.core_VERSION }}
         gui_VERSION: ${{ steps.version-setup.outputs.gui_VERSION }}
         rest_VERSION: ${{ steps.version-setup.outputs.rest_VERSION }}
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        package: [config, core, gui, rest, templates]
+        package: [common, core, gui, rest, templates]
       max-parallel: 1
     steps:
       - uses: actions/checkout@v4
@@ -71,11 +71,11 @@ jobs:
       - name: Set Build Variables
         id: set-variables
         run: |
-          if [ "${{ matrix.package }}" == "config" ]; then
-            echo "package_version=${{needs.fetch-versions.outputs.config_VERSION}}" >> $GITHUB_OUTPUT
-            echo "package_dir=./taipy/config" >> $GITHUB_OUTPUT
-            echo "release_name=${{needs.fetch-versions.outputs.config_VERSION}}-config" >> $GITHUB_OUTPUT
-            echo "tar_path=./dist/${{ github.event.repository.name }}-config-${{needs.fetch-versions.outputs.config_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
+          if [ "${{ matrix.package }}" == "common" ]; then
+            echo "package_version=${{needs.fetch-versions.outputs.common_VERSION}}" >> $GITHUB_OUTPUT
+            echo "package_dir=./taipy/common" >> $GITHUB_OUTPUT
+            echo "release_name=${{needs.fetch-versions.outputs.common_VERSION}}-common" >> $GITHUB_OUTPUT
+            echo "tar_path=./dist/${{ github.event.repository.name }}-common-${{needs.fetch-versions.outputs.common_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
           elif [ "${{ matrix.package }}" == "core" ]; then
             echo "package_version=${{needs.fetch-versions.outputs.core_VERSION}}" >> $GITHUB_OUTPUT
             echo "package_dir=./taipy/core" >> $GITHUB_OUTPUT
@@ -102,7 +102,7 @@ jobs:
       - name: Update setup.requirements.txt
         run: |
           python tools/release/update_setup_requirements.py taipy-${{ matrix.package }} \
-            ${{needs.fetch-versions.outputs.config_VERSION}} \
+            ${{needs.fetch-versions.outputs.common_VERSION}} \
             ${{needs.fetch-versions.outputs.core_VERSION}} \
             ${{needs.fetch-versions.outputs.gui_VERSION}} \
             ${{needs.fetch-versions.outputs.rest_VERSION}} \
@@ -141,15 +141,6 @@ jobs:
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
         run: |
           python tools/release/build_package_structure.py ${{ matrix.package }}
-
-      - name: Copy Taipy Logger
-        if: matrix.package == 'config'
-        run: |
-          cp -r taipy/logger/. ${{ steps.set-variables.outputs.package_dir }}/taipy/logger
-
-      - name: Copy _cli folder
-        run: |
-          cp -r taipy/_cli/. ${{ steps.set-variables.outputs.package_dir }}/taipy/_cli
 
       - name: Build package
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
@@ -192,7 +183,7 @@ jobs:
       - name: Update setup.requirements.txt
         run: |
           python tools/release/update_setup_requirements.py taipy \
-            ${{needs.fetch-versions.outputs.config_VERSION}} \
+            ${{needs.fetch-versions.outputs.common_VERSION}} \
             ${{needs.fetch-versions.outputs.core_VERSION}} \
             ${{needs.fetch-versions.outputs.gui_VERSION}} \
             ${{needs.fetch-versions.outputs.rest_VERSION}} \
@@ -233,7 +224,7 @@ jobs:
 
       - name: Download packages
         run: |
-          gh release download ${{ needs.fetch-versions.outputs.config_VERSION }}-config --skip-existing --dir dist
+          gh release download ${{ needs.fetch-versions.outputs.common_VERSION }}-common --skip-existing --dir dist
           gh release download ${{ needs.fetch-versions.outputs.core_VERSION }}-core --skip-existing --dir dist
           gh release download ${{ needs.fetch-versions.outputs.gui_VERSION }}-gui --skip-existing --dir dist
           gh release download ${{ needs.fetch-versions.outputs.rest_VERSION }}-rest --skip-existing --dir dist

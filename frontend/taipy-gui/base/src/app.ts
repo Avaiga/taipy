@@ -3,12 +3,13 @@ import { sendWsMessage, TAIPY_CLIENT_ID } from "../../src/context/wsUtils";
 import { uploadFile } from "../../src/workers/fileupload";
 
 import { Socket, io } from "socket.io-client";
-import { nanoid } from 'nanoid';
+import { nanoid } from "nanoid";
 import { DataManager, ModuleData, RequestDataOptions } from "./dataManager";
 import { initSocket } from "./socket";
 import { TaipyWsAdapter, WsAdapter } from "./wsAdapter";
 import { WsMessageType } from "../../src/context/wsUtils";
 import { getBase } from "./utils";
+import { CookieHandler } from "./cookieHandler";
 
 export type OnInitHandler = (taipyApp: TaipyApp) => void;
 export type OnChangeHandler = (taipyApp: TaipyApp, encodedName: string, value: unknown, dataEventKey?: string) => void;
@@ -26,7 +27,6 @@ export type OnEvent =
 type Route = [string, string];
 type RequestDataCallback = (taipyApp: TaipyApp, encodedName: string, dataEventKey: string, value: unknown) => void;
 
-
 export class TaipyApp {
     socket: Socket;
     _onInit: OnInitHandler | undefined;
@@ -37,6 +37,7 @@ export class TaipyApp {
     _onWsStatusUpdate: OnWsStatusUpdate | undefined;
     _ackList: string[];
     _rdc: Record<string, Record<string, RequestDataCallback>>;
+    _cookieHandler: CookieHandler | undefined;
     variableData: DataManager | undefined;
     functionData: DataManager | undefined;
     appId: string;
@@ -51,7 +52,8 @@ export class TaipyApp {
         onInit: OnInitHandler | undefined = undefined,
         onChange: OnChangeHandler | undefined = undefined,
         path: string | undefined = undefined,
-        socket: Socket | undefined = undefined
+        socket: Socket | undefined = undefined,
+        handleCookie: boolean = true,
     ) {
         socket = socket || io("/", { autoConnect: false, path: `${this.getBaseUrl()}socket.io` });
         this.onInit = onInit;
@@ -68,8 +70,10 @@ export class TaipyApp {
         this.wsAdapters = [new TaipyWsAdapter()];
         this._ackList = [];
         this._rdc = {};
-        // Init socket io connection
-        initSocket(socket, this);
+        this._cookieHandler = handleCookie ? new CookieHandler() : undefined;
+        // Init socket io connection only when cookie is not handled
+        // Socket will be initialized by cookie handler when it is used
+        this._cookieHandler ? this._cookieHandler?.init(socket, this) : initSocket(socket, this);
     }
 
     // Getter and setter
@@ -168,12 +172,16 @@ export class TaipyApp {
         this.routes = undefined;
         const id = getLocalStorageValue(TAIPY_CLIENT_ID, "");
         this.sendWsMessage("ID", TAIPY_CLIENT_ID, id);
-        this.sendWsMessage("AID", "connect", "");
-        this.sendWsMessage("GR", "", "");
         if (id !== "") {
             this.clientId = id;
+            this.initApp();
             this.updateContext(this.path);
         }
+    }
+
+    initApp() {
+        this.sendWsMessage("AID", "connect", "");
+        this.sendWsMessage("GR", "", "");
     }
 
     sendWsMessage(type: WsMessageType, id: string, payload: unknown, context: string | undefined = undefined) {
@@ -235,7 +243,6 @@ export class TaipyApp {
         this.sendWsMessage("U", encodedName, { value: value });
     }
 
-
     // Request Data from taipy backend
     // This will trigger the backend to send the data to the frontend
     requestData(encodedName: string, cb: RequestDataCallback, options?: RequestDataOptions) {
@@ -290,6 +297,12 @@ export class TaipyApp {
     }
 }
 
-export const createApp = (onInit?: OnInitHandler, onChange?: OnChangeHandler, path?: string, socket?: Socket) => {
-    return new TaipyApp(onInit, onChange, path, socket);
+export const createApp = (
+    onInit?: OnInitHandler,
+    onChange?: OnChangeHandler,
+    path?: string,
+    socket?: Socket,
+    handleCookie?: boolean,
+) => {
+    return new TaipyApp(onInit, onChange, path, socket, handleCookie);
 };

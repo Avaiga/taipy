@@ -12,6 +12,8 @@
 from typing import Any, Dict, NewType
 
 DataNodeId = NewType("DataNodeId", str)
+"""Type that holds a `DataNode^` identifier."""
 DataNodeId.__doc__ = """Type that holds a `DataNode^` identifier."""
 Edit = NewType("Edit", Dict[str, Any])
+"""Type that holds a `DataNode^` edit information."""
 Edit.__doc__ = """Type that holds a `DataNode^` edit information."""

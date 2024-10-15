@@ -23,7 +23,16 @@ import webbrowser
 from importlib import util
 from random import choices, randint
 
-from flask import Blueprint, Flask, json, jsonify, render_template, request, send_from_directory
+from flask import (
+    Blueprint,
+    Flask,
+    json,
+    jsonify,
+    make_response,
+    render_template,
+    request,
+    send_from_directory,
+)
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from gitignore_parser import parse_gitignore
@@ -31,7 +40,7 @@ from kthread import KThread
 from werkzeug.serving import is_running_from_reloader
 
 import __main__
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ._renderers.json import _TaipyJsonProvider
 from .config import ServerConfig
@@ -160,7 +169,13 @@ class _Server:
             if resource_handler_id is not None:
                 resource_handler = _ExternalResourceHandlerManager().get(resource_handler_id)
                 if resource_handler is None:
-                    return (f"Invalid value for query {_Server._RESOURCE_HANDLER_ARG}", 404)
+                    response = make_response(
+                        "Cookie was deleted due to invalid resource handler id. Please restart the page manually.", 400
+                    )
+                    response.set_cookie(
+                        _Server._RESOURCE_HANDLER_ARG, "", secure=request.is_secure, httponly=True, expires=0, path="/"
+                    )
+                    return response
                 try:
                     return resource_handler.get_resources(path, static_folder, base_url)
                 except Exception as e:

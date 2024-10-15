@@ -17,7 +17,7 @@ import typing as t
 import xml.etree.ElementTree as etree
 from datetime import date, datetime, time
 from enum import Enum
-from inspect import isclass, isroutine
+from inspect import isclass
 from types import LambdaType
 from urllib.parse import quote
 
@@ -34,7 +34,9 @@ from ..utils import (
     _getscopeattr,
     _getscopeattr_drill,
     _is_boolean,
+    _is_function,
     _is_true,
+    _is_unnamed_function,
     _MapDict,
     _to_camel_case,
 )
@@ -140,7 +142,7 @@ class _Builder:
             hash_value = gui._evaluate_expr(value)
             try:
                 func = gui._get_user_function(hash_value)
-                if isroutine(func):
+                if _is_function(func):
                     return (func, hash_value)
                 return (_getscopeattr_drill(gui, hash_value), hash_value)
             except AttributeError:
@@ -159,20 +161,17 @@ class _Builder:
             hash_name = hash_names.get(k)
             if hash_name is None:
                 if isinstance(v, str):
-                    looks_like_a_lambda = v.startswith("{lambda ") and v.endswith("}")
                     # need to unescape the double quotes that were escaped during preprocessing
                     (val, hash_name) = _Builder.__parse_attribute_value(gui, v.replace('\\"', '"'))
                 else:
-                    looks_like_a_lambda = False
                     val = v
-                if isroutine(val):
+                if _is_function(val) and not hash_name:
                     # if it's not a callable (and not a string), forget it
-                    if val.__name__ == "<lambda>":
-                        # if it is a lambda and it has already a hash_name, we're fine
-                        if looks_like_a_lambda or not hash_name:
-                            hash_name = _get_lambda_id(t.cast(LambdaType, val))
-                            gui._bind_var_val(hash_name, val)  # type: ignore[arg-type]
-                    elif not hash_name:
+                    if _is_unnamed_function(val):
+                        # lambda or callable instance
+                        hash_name = _get_lambda_id(t.cast(LambdaType, val))
+                        gui._bind_var_val(hash_name, val)  # type: ignore[arg-type]
+                    else:
                         hash_name = _get_expr_var_name(val.__name__)
 
                 if val is not None or hash_name:
@@ -297,7 +296,7 @@ class _Builder:
             except ValueError:
                 raise ValueError(f"Property {name} expects a number for control {self.__control_type}") from None
         elif isinstance(value, numbers.Number):
-            val = value  # type: ignore
+            val = value # type: ignore[assignment]
         else:
             raise ValueError(
                 f"Property {name} expects a number for control {self.__control_type}, received {type(value)}"
@@ -350,7 +349,7 @@ class _Builder:
             if not optional:
                 _warn(f"Property {name} is required for control {self.__control_type}.")
             return self
-        elif isroutine(str_attr):
+        elif _is_function(str_attr):
             str_attr = self.__hashes.get(name)
             if str_attr is None:
                 return self
@@ -406,12 +405,12 @@ class _Builder:
         adapter = self.__attributes.get("adapter", adapter)
         if adapter and isinstance(adapter, str):
             adapter = self.__gui._get_user_function(adapter)
-        if adapter and not callable(adapter):
+        if adapter and not _is_function(adapter):
             _warn(f"{self.__element_name}: adapter property value is invalid.")
             adapter = None
         var_type = self.__attributes.get("type", var_type)
         if isclass(var_type):
-            var_type = var_type.__name__  # type: ignore
+            var_type = var_type.__name__
 
         if isinstance(lov, list):
             if not isinstance(var_type, str):
@@ -428,30 +427,32 @@ class _Builder:
                 var_type = self.__gui._get_unique_type_adapter(type(elt).__name__)
             if adapter is None:
                 adapter = self.__gui._get_adapter_for_type(var_type)
-            elif var_type == str.__name__ and callable(adapter):
+            elif var_type == str.__name__ and _is_function(adapter):
                 var_type += (
-                    f"__lambda_{id(adapter)}"
-                    if adapter.__name__ == "<lambda>"
+                    _get_lambda_id(t.cast(LambdaType, adapter))
+                    if _is_unnamed_function(adapter)
                     else _get_expr_var_name(adapter.__name__)
                 )
             if lov_name:
                 if adapter is None:
                     adapter = self.__gui._get_adapter_for_type(lov_name)
                 else:
-                    self.__gui._add_type_for_var(lov_name, var_type)
+                    self.__gui._add_type_for_var(lov_name, t.cast(str, var_type))
             if value_name := self.__hashes.get("value"):
                 if adapter is None:
                     adapter = self.__gui._get_adapter_for_type(value_name)
                 else:
-                    self.__gui._add_type_for_var(value_name, var_type)
+                    self.__gui._add_type_for_var(value_name, t.cast(str, var_type))
             if adapter is not None:
-                self.__gui._add_adapter_for_type(var_type, adapter)  # type: ignore
+                self.__gui._add_adapter_for_type(var_type, adapter) # type: ignore[arg-type]
 
             if default_lov is not None and lov:
                 for elt in lov:
                     ret = self.__gui._run_adapter(
-                        t.cast(t.Callable, adapter), elt, adapter.__name__ if callable(adapter) else "adapter"
-                    )  # type: ignore
+                        t.cast(t.Callable, adapter),
+                        elt,
+                        adapter.__name__ if hasattr(adapter, "__name__") else "adapter",
+                    )
                     if ret is not None:
                         default_lov.append(ret)
 
@@ -460,8 +461,11 @@ class _Builder:
             val_list = value if isinstance(value, list) else [value]
             for val in val_list:
                 ret = self.__gui._run_adapter(
-                    t.cast(t.Callable, adapter), val, adapter.__name__ if callable(adapter) else "adapter", id_only=True
-                )  # type: ignore
+                    t.cast(t.Callable, adapter),
+                    val,
+                    adapter.__name__ if hasattr(adapter, "__name__") else "adapter",
+                    id_only=True,
+                )
                 if ret is not None:
                     ret_list.append(ret)
             if multi_selection:
@@ -575,7 +579,7 @@ class _Builder:
         if not isinstance(self.__attributes.get("style"), (type(None), dict, _MapDict)):
             _warn("Table: property 'style' has been renamed to 'row_class_name'.")
         if row_class_name := self.__attributes.get("row_class_name"):
-            if isroutine(row_class_name):
+            if _is_function(row_class_name):
                 value = self.__hashes.get("row_class_name")
             elif isinstance(row_class_name, str):
                 value = row_class_name.strip()
@@ -586,7 +590,7 @@ class _Builder:
             elif value:
                 self.set_attribute("rowClassName", value)
         if tooltip := self.__attributes.get("tooltip"):
-            if isroutine(tooltip):
+            if _is_function(tooltip):
                 value = self.__hashes.get("tooltip")
             elif isinstance(tooltip, str):
                 value = tooltip.strip()
@@ -713,6 +717,15 @@ class _Builder:
 
     def __set_class_names(self):
         self.set_attribute("libClassName", self.__lib_name + "-" + self.__control_type.replace("_", "-"))
+        if (private_css := self.__attributes.get("style")) and isinstance(private_css, (dict, _MapDict)):
+            taipy_style = etree.Element("TaipyStyle")
+            taipy_style.set("className", f"tpcss-{id(private_css)}")
+            taipy_style.set(
+                "content",
+                json.dumps(private_css if isinstance(private_css, dict) else private_css._dict),
+            )
+            taipy_style.text = "style"
+            self.el.append(taipy_style)
         return self.__set_dynamic_string_attribute("class_name", dynamic_property_name="dynamic_class_name")
 
     def _set_dataType(self):
@@ -781,7 +794,7 @@ class _Builder:
         var_name: str,
         value: t.Optional[t.Any] = None,
         native_type: bool = False,
-        var_type: t.Optional[PropertyType] = None,
+        var_type: t.Optional[t.Union[PropertyType, t.Type[_TaipyBase]]] = None,
     ):
         if value is None:
             value = self.__attributes.get(var_name)
@@ -797,7 +810,7 @@ class _Builder:
         elif var_type == PropertyType.lov_value:
             # Done by _get_adapter
             return self
-        elif isclass(var_type) and issubclass(var_type, _TaipyBase):  # type: ignore
+        elif isclass(var_type) and issubclass(var_type, _TaipyBase):
             return self.__set_default_value(var_name, t.cast(t.Callable, var_type)(value, "").get())
         else:
             return self.__set_json_attribute(default_var_name, value)
@@ -811,7 +824,7 @@ class _Builder:
         with_update=True,
         with_default=True,
         native_type=False,
-        var_type: t.Optional[PropertyType] = None,
+        var_type: t.Optional[t.Union[PropertyType, t.Type[_TaipyBase]]] = None,
         default_val: t.Any = None,
     ):
         """
@@ -932,7 +945,9 @@ class _Builder:
             self.set_attribute("mode", "theme")
         return self
 
-    def __get_typed_hash_name(self, hash_name: str, var_type: t.Optional[PropertyType]) -> str:
+    def __get_typed_hash_name(
+        self, hash_name: str, var_type: t.Optional[t.Union[PropertyType, t.Type[_TaipyBase]]]
+    ) -> str:
         if taipy_type := _get_taipy_type(var_type):
             expr = self.__gui._get_expr_from_hash(hash_name)
             hash_name = self.__gui._evaluate_bind_holder(t.cast(t.Type[_TaipyBase], taipy_type), expr)
@@ -1120,4 +1135,5 @@ class _Builder:
         el_str = str(etree.tostring(self.el, encoding="utf8").decode("utf8"))
         el_str = el_str.replace("<?xml version='1.0' encoding='utf8'?>\n", "")
         el_str = el_str.replace("/>", ">")
+        el_str = el_str.replace(">style</TaipyStyle>", "/>")
         return el_str, self.__element_name

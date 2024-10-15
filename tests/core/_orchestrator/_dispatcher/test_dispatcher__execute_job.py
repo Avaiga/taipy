@@ -12,7 +12,7 @@
 from unittest import mock
 
 import taipy
-from taipy.config.config import Config
+from taipy.common.config import Config
 from taipy.core import JobId, TaskId
 from taipy.core._orchestrator._dispatcher import _JobDispatcher
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
@@ -48,7 +48,7 @@ def test_execute_job():
             mck_2.assert_called_once_with(job.task)  # This should be called to check if job needs to run
             mck_1.assert_called_once_with(job)
             assert job.is_running()  # The job is not executed since the dispatch is mocked
-            assert scenario.dn.edit_in_progress  # outputs must NOT have been unlocked because the disptach is mocked
+            assert scenario.dn.edit_in_progress  # outputs must NOT have been unlocked because the dispatch is mocked
 
 
 def test_execute_job_to_skip():
@@ -85,7 +85,7 @@ def test_execute_job_skippable_with_force():
             mck_1.assert_called_once_with(job)  # This should be called to dispatch the job
             mck_2.assert_not_called()  # This should NOT be called since we force the execution anyway
             assert job.is_running()  # The job is not executed since the dispatch is mocked
-            assert scenario.dn.edit_in_progress  # outputs must NOT have been unlocked because the disptach is mocked
+            assert scenario.dn.edit_in_progress  # outputs must NOT have been unlocked because the dispatch is mocked
 
 
 def test_execute_jobs_synchronously():

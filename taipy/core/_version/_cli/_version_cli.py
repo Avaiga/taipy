@@ -12,10 +12,10 @@
 import sys
 from importlib.util import find_spec
 
-from taipy._cli._base_cli._abstract_cli import _AbstractCLI
-from taipy._cli._base_cli._taipy_parser import _TaipyParser
-from taipy.config import Config
-from taipy.config.exceptions.exceptions import InconsistentEnvVariableError
+from taipy.common._cli._base_cli._abstract_cli import _AbstractCLI
+from taipy.common._cli._base_cli._taipy_parser import _TaipyParser
+from taipy.common.config import Config
+from taipy.common.config.exceptions.exceptions import InconsistentEnvVariableError
 
 from ...data._data_manager_factory import _DataManagerFactory
 from ...job._job_manager_factory import _JobManagerFactory

@@ -17,7 +17,7 @@ Taipy is organised in two main repositories:
 
 ## Never contributed to an open source project before ?
 
-Have a look on this [GitHub documentation](https://docs.github.com/en/get-started/quickstart/contributing-to-projects).
+Have a look at this [GitHub documentation](https://docs.github.com/en/get-started/quickstart/contributing-to-projects).
 
 ## Report bugs
 
@@ -26,7 +26,7 @@ Reporting bugs is through [GitHub issues](https://github.com/Avaiga/taipy/issues
 Please report relevant information and preferably code that exhibits the problem. We provide templates to help you
 describe the issue.
 
-The Taipy team will analyse and try to reproduce the bug to provide feedback. If confirmed, we will add a priority
+The Taipy team will analyze and try to reproduce the bug to provide feedback. If confirmed, we will add a priority
 to the issue and add it in our backlog. Feel free to propose a pull request to fix it.
 
 ## Issue reporting, feedback, proposal, design or any other comment
@@ -44,12 +44,12 @@ Do not hesitate to create an issue or pull request directly on the
 ## Implement Features
 
 The Taipy team manages its backlog in private. Each issue that is or is going to be engaged by the
-Taipy team is attached to the "🔒 Staff only" label or has already assigned to a Taipy team member.
+Taipy team is attached to the "🔒 Staff only" label or has already been assigned to a Taipy team member.
 Please, do not work on it, the Taipy team is on it.
 
 All other issues are sorted by labels and are available for a contribution. If you are new to the
 project, you can start with the "good first issue" or "🆘 Help wanted" label. You can also start with
-issue with higher priority like "Critical" or "High". The higher the priority, the more value it
+issues with higher priority, like "Critical" or "High". The higher the priority, the more value it
 will bring to Taipy.
 
 If you want to work on an issue, please add a comment and wait to be assigned to the issue to inform
@@ -58,7 +58,7 @@ the community that you are working on it.
 ### Contribution workflow
 
 1. Make your [own fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) of the repository
-   target by the issue. Clone it on our local machine, then go inside the directory.
+   targeted by the issue. Clone it on your local machine, then go inside the directory.
 
 2. We are working with [Pipenv](https://github.com/pypa/pipenv) for our virtualenv.
    Create a local env and install development package by running `$ pipenv install --dev`, then run tests with
@@ -67,7 +67,7 @@ the community that you are working on it.
 3. For convention help, we provide a [pre-commit](https://pre-commit.com/hooks.html) file.
    This tool will run before each commit and will automatically reformat code or raise warnings and errors based on the
    code format or Python typing.
-   You can install and setup it up by doing:
+   You can install and set it up by doing:
    ```bash
    $ pipenv install pre-commit
    $ pipenv run python -m pre-commit install
@@ -84,13 +84,13 @@ the community that you are working on it.
    Before you submit a pull request for review from your forked repo, check that it meets these guidelines:
      - The code and the branch name follow the [Taipy coding style](#coding-style-and-best-practices).
      - Include tests.
-     - Code is [rebase](http://stackoverflow.com/a/7244456/1110993).
+     - Code is [rebased](http://stackoverflow.com/a/7244456/1110993).
      - License is present.
-     - pre-commit works - without mypy error.
+     - pre-commit works - without mypy errors.
      - Taipy tests are passing.
 
 6. The Taipy team will have a look at your Pull Request and will give feedback. If every requirement is valid, your
-   work will be added in the next release, congratulation!
+   work will be added in the next release, congratulations!
 
 ## Coding style and best practices
 
@@ -137,7 +137,7 @@ on it.
 ## Dependency management
 
 Taipy comes with multiple optional packages. You can find the list directly in the product or Taipy's packages.
-The back-end Pipfile does not install by default optional packages due to `pyodbc` requiring a driver's manual
+The back-end Pipfile does not install optional packages by default due to `pyodbc` requiring a driver's manual
 installation. This is not the behaviour for the front-end that installs all optional packages through its Pipfile.
 
 If you are a contributor on Taipy, be careful with dependencies, do not forget to install or uninstall depending on

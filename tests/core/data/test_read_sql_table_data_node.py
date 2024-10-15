@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 from taipy.core.data.operator import JoinOperator, Operator
 from taipy.core.data.sql_table import SQLTableDataNode
 

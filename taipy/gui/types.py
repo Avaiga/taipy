@@ -51,6 +51,7 @@ class _WsType(Enum):
     GET_DATA_TREE = "GDT"
     GET_ROUTES = "GR"
     FAVICON = "FV"
+    BROADCAST = "BC"
 
 
 NumberTypes = {"int", "int64", "float", "float64"}

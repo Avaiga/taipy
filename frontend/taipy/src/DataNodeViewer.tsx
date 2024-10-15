@@ -69,12 +69,14 @@ import {
     useModule,
     Store,
     FileSelector,
+    getComponentClassName,
 } from "taipy-gui";
 
 import { Cycle as CycleIcon, Scenario as ScenarioIcon } from "./icons";
 import {
     AccordionIconSx,
     AccordionSummarySx,
+    CoreProps,
     FieldNoMaxWidth,
     IconPaddingSx,
     MainBoxSx,
@@ -156,19 +158,12 @@ enum DatanodeDataProps {
     error,
 }
 
-interface DataNodeViewerProps {
-    id?: string;
+interface DataNodeViewerProps extends  CoreProps {
     expandable?: boolean;
     expanded?: boolean;
-    updateVarName?: string;
-    updateVars: string;
     defaultDataNode?: string;
     dataNode?: DataNodeFull | Array<DataNodeFull>;
     onEdit?: string;
-    error?: string;
-    coreChanged?: Record<string, unknown>;
-    defaultActive: boolean;
-    active: boolean;
     showConfig?: boolean;
     showOwner?: boolean;
     showEditDate?: boolean;
@@ -177,9 +172,6 @@ interface DataNodeViewerProps {
     showHistory?: boolean;
     showData?: boolean;
     chartConfigs?: string;
-    libClassName?: string;
-    className?: string;
-    dynamicClassName?: string;
     scenarios?: Scenarios;
     history?: Array<[string, string, string]>;
     data?: DatanodeData;
@@ -253,11 +245,12 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         fileDownload = false,
         fileUpload = false,
         showOwnerLabel = false,
+        coreChanged,
     } = props;
 
     const { state, dispatch } = useContext<Store>(Context);
     const module = useModule();
-    const uniqid = useUniqueId(id);
+    const uniqId = useUniqueId(id);
     const editorId = (state as { id: string }).id;
     const editLock = useRef(false);
     const [valid, setValid] = useState(false);
@@ -670,22 +663,23 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
 
     // Refresh on broadcast
     useEffect(() => {
-        const ids = props.coreChanged?.datanode;
+        const ids = coreChanged?.datanode;
         if ((typeof ids === "string" && ids === dnId) || (Array.isArray(ids) && ids.includes(dnId))) {
-            props.updateVarName && dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
+            props.updateVarName &&
+                dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
         }
-    }, [props.coreChanged, props.updateVarName, id, module, dispatch, dnId]);
+    }, [coreChanged, props.updateVarName, id, module, dispatch, dnId]);
 
     return (
         <>
-            <Box sx={dnMainBoxSx} id={id} onClick={onFocus} className={className}>
+            <Box sx={dnMainBoxSx} id={id} onClick={onFocus} className={`${className} ${getComponentClassName(props.children)}`}>
                 <Accordion defaultExpanded={expanded} expanded={userExpanded} onChange={onExpand} disabled={!valid}>
                     <AccordionSummary
                         expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
                         sx={AccordionSummarySx}
                     >
                         <Stack direction="row" spacing={1} alignItems="baseline">
-                            {showOwnerLabel ? <Typography>{dnOwnerLabel} &gt;</Typography>: null}
+                            {showOwnerLabel ? <Typography>{dnOwnerLabel} &gt;</Typography> : null}
                             <Typography>{dnLabel}</Typography>
                             <Typography fontSize="smaller">{dnType}</Typography>
                         </Stack>
@@ -714,19 +708,19 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                 ) : null}
                                             </Grid>
                                         }
-                                        id={`${uniqid}-data`}
-                                        aria-controls={`${uniqid}-dn-tabpanel-data`}
+                                        id={`${uniqId}-data`}
+                                        aria-controls={`${uniqId}-dn-tabpanel-data`}
                                         style={showData ? undefined : noDisplay}
                                     />
                                     <Tab
                                         label="Properties"
-                                        id={`${uniqid}-properties`}
-                                        aria-controls={`${uniqid}-dn-tabpanel-properties`}
+                                        id={`${uniqId}-properties`}
+                                        aria-controls={`${uniqId}-dn-tabpanel-properties`}
                                     />
                                     <Tab
                                         label="History"
-                                        id={`${uniqid}-history`}
-                                        aria-controls={`${uniqid}-dn-tabpanel-history`}
+                                        id={`${uniqId}-history`}
+                                        aria-controls={`${uniqId}-dn-tabpanel-history`}
                                         style={showHistory ? undefined : noDisplay}
                                     />
                                 </Tabs>
@@ -765,8 +759,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         <div
                             role="tabpanel"
                             hidden={tabValue !== TabValues.Properties}
-                            id={`${uniqid}-dn-tabpanel-properties`}
-                            aria-labelledby={`${uniqid}-properties`}
+                            id={`${uniqId}-dn-tabpanel-properties`}
+                            aria-labelledby={`${uniqId}-properties`}
                         >
                             <Grid container rowSpacing={2} sx={gridSx}>
                                 <Grid size={12} container justifyContent="space-between" spacing={1}>
@@ -786,30 +780,32 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                 sx={FieldNoMaxWidth}
                                                 value={label || ""}
                                                 onChange={onLabelChange}
-                                                slotProps={{input:{
-                                                    endAdornment: (
-                                                        <InputAdornment position="end">
-                                                            <Tooltip title="Apply">
-                                                                <IconButton
-                                                                    sx={IconPaddingSx}
-                                                                    onClick={editLabel}
-                                                                    size="small"
-                                                                >
-                                                                    <CheckCircle color="primary" />
-                                                                </IconButton>
-                                                            </Tooltip>
-                                                            <Tooltip title="Cancel">
-                                                                <IconButton
-                                                                    sx={IconPaddingSx}
-                                                                    onClick={cancelLabel}
-                                                                    size="small"
-                                                                >
-                                                                    <Cancel color="inherit" />
-                                                                </IconButton>
-                                                            </Tooltip>
-                                                        </InputAdornment>
-                                                    ),
-                                                }}}
+                                                slotProps={{
+                                                    input: {
+                                                        endAdornment: (
+                                                            <InputAdornment position="end">
+                                                                <Tooltip title="Apply">
+                                                                    <IconButton
+                                                                        sx={IconPaddingSx}
+                                                                        onClick={editLabel}
+                                                                        size="small"
+                                                                    >
+                                                                        <CheckCircle color="primary" />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                                <Tooltip title="Cancel">
+                                                                    <IconButton
+                                                                        sx={IconPaddingSx}
+                                                                        onClick={cancelLabel}
+                                                                        size="small"
+                                                                    >
+                                                                        <Cancel color="inherit" />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                            </InputAdornment>
+                                                        ),
+                                                    },
+                                                }}
                                                 disabled={!valid}
                                             />
                                         ) : (
@@ -910,7 +906,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                 </Grid>
                                 <PropertiesEditor
                                     entityId={dnId}
-                                    active={active}
+                                    active={!!active}
                                     isDefined={valid}
                                     entProperties={
                                         propertiesRequested && Array.isArray(props.dnProperties)
@@ -923,15 +919,15 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     onFocus={onFocus}
                                     onEdit={props.onEdit}
                                     notEditableReason={dnNotEditableReason}
-                                    updatePropVars={updateDnVars}
+                                    updateVars={updateDnVars}
                                 />
                             </Grid>
                         </div>
                         <div
                             role="tabpanel"
                             hidden={tabValue !== TabValues.History}
-                            id={`${uniqid}-dn-tabpanel-history`}
-                            aria-labelledby={`${uniqid}-history`}
+                            id={`${uniqId}-dn-tabpanel-history`}
+                            aria-labelledby={`${uniqId}-history`}
                         >
                             {historyRequested && Array.isArray(props.history) ? (
                                 <Grid container spacing={1}>
@@ -973,8 +969,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         <div
                             role="tabpanel"
                             hidden={tabValue !== TabValues.Data}
-                            id={`${uniqid}-dn-tabpanel-data`}
-                            aria-labelledby={`${uniqid}-data`}
+                            id={`${uniqId}-dn-tabpanel-data`}
+                            aria-labelledby={`${uniqId}-data`}
                         >
                             {dtValue !== undefined ? (
                                 <Grid container justifyContent="space-between" spacing={1}>
@@ -1067,30 +1063,32 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                                 ? "number"
                                                                 : undefined
                                                         }
-                                                        slotProps={{input: {
-                                                            endAdornment: (
-                                                                <InputAdornment position="end">
-                                                                    <Tooltip title="Apply">
-                                                                        <IconButton
-                                                                            sx={IconPaddingSx}
-                                                                            onClick={editDataValue}
-                                                                            size="small"
-                                                                        >
-                                                                            <CheckCircle color="primary" />
-                                                                        </IconButton>
-                                                                    </Tooltip>
-                                                                    <Tooltip title="Cancel">
-                                                                        <IconButton
-                                                                            sx={IconPaddingSx}
-                                                                            onClick={cancelDataValue}
-                                                                            size="small"
-                                                                        >
-                                                                            <Cancel color="inherit" />
-                                                                        </IconButton>
-                                                                    </Tooltip>
-                                                                </InputAdornment>
-                                                            ),
-                                                        }}}
+                                                        slotProps={{
+                                                            input: {
+                                                                endAdornment: (
+                                                                    <InputAdornment position="end">
+                                                                        <Tooltip title="Apply">
+                                                                            <IconButton
+                                                                                sx={IconPaddingSx}
+                                                                                onClick={editDataValue}
+                                                                                size="small"
+                                                                            >
+                                                                                <CheckCircle color="primary" />
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                        <Tooltip title="Cancel">
+                                                                            <IconButton
+                                                                                sx={IconPaddingSx}
+                                                                                onClick={cancelDataValue}
+                                                                                size="small"
+                                                                            >
+                                                                                <Cancel color="inherit" />
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                    </InputAdornment>
+                                                                ),
+                                                            },
+                                                        }}
                                                         disabled={!valid}
                                                     />
                                                 )}
@@ -1134,8 +1132,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     <>
                                         {viewType === TableViewType ? (
                                             <DataNodeTable
-                                                active={active}
-                                                uniqid={uniqid}
+                                                active={!!active}
+                                                uniqId={uniqId}
                                                 columns={tabularColumns}
                                                 data={props.tabularData}
                                                 nodeId={dnId}
@@ -1151,8 +1149,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                             />
                                         ) : (
                                             <DataNodeChart
-                                                active={active}
-                                                uniqid={uniqid}
+                                                active={!!active}
+                                                uniqId={uniqId}
                                                 columns={tabularColumns}
                                                 tabularData={props.tabularData}
                                                 configId={dnConfig}
@@ -1174,6 +1172,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                 </Accordion>
                 {props.error ? <Alert severity="error">{props.error}</Alert> : null}
             </Box>
+            {props.children}
         </>
     );
 };

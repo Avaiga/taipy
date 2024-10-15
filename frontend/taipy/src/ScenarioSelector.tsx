@@ -28,6 +28,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Dialog from "@mui/material/Dialog";
 import Select from "@mui/material/Select";
+import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { Close, DeleteOutline, Add, EditOutlined } from "@mui/icons-material";
@@ -42,10 +43,11 @@ import {
     getUpdateVar,
     createSendUpdateAction,
     useDynamicProperty,
+    getComponentClassName,
 } from "taipy-gui";
 
 import ConfirmDialog from "./utils/ConfirmDialog";
-import { MainTreeBoxSx, ScFProps, ScenarioFull, useClassNames, tinyIconButtonSx } from "./utils";
+import { MainTreeBoxSx, ScFProps, ScenarioFull, useClassNames, tinyIconButtonSx, CoreProps } from "./utils";
 import CoreSelector, { EditProps } from "./CoreSelector";
 import { Cycles, NodeType, Scenarios } from "./utils/types";
 
@@ -67,31 +69,20 @@ interface ScenarioDict {
     properties: Array<Property>;
 }
 
-interface ScenarioSelectorProps {
-    id?: string;
-    active?: boolean;
-    defaultActive?: boolean;
+interface ScenarioSelectorProps extends CoreProps {
     showAddButton?: boolean;
     displayCycles?: boolean;
     showPrimaryFlag?: boolean;
-    updateVarName?: string;
-    updateVars: string;
     innerScenarios?: Cycles | Scenarios;
     onScenarioCrud: string;
     onChange?: string;
     onCreation?: string;
-    coreChanged?: Record<string, unknown>;
     configs?: Array<[string, string]>;
-    error?: string;
-    propagate?: boolean;
     scenarioEdit?: ScenarioFull;
     onScenarioSelect: string;
     value?: string;
     defaultValue?: string;
     height: string;
-    libClassName?: string;
-    className?: string;
-    dynamicClassName?: string;
     showPins?: boolean;
     showDialog?: boolean;
     multiple?: boolean;
@@ -118,7 +109,7 @@ const emptyScenario: ScenarioDict = {
     properties: [],
 };
 
-const ActionContentSx = { mr: 2, ml: 2 };
+const ActionContentSx = { mr: 2, ml: 2, width: "100%" };
 
 const DialogContentSx = {
     maxHeight: "calc(100vh - 256px)",
@@ -135,10 +126,6 @@ const SquareButtonSx = {
     p: 0,
     minWidth: 0,
     aspectRatio: "1",
-};
-
-const CancelBtnSx = {
-    mr: 2,
 };
 
 const IconButtonSx = {
@@ -381,36 +368,32 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                     </DialogContent>
 
                     <DialogActions>
-                        <Grid container justifyContent="space-between" sx={ActionContentSx}>
+                        <Stack direction="row" justifyContent="space-between" sx={ActionContentSx}>
                             {actionEdit && (
-                                <Grid size={6}>
-                                    <Button
-                                        variant="outlined"
-                                        color="error"
-                                        onClick={onConfirmDialogOpen}
-                                        disabled={!scenario || !scenario[ScFProps.deletable]}
-                                    >
-                                        Delete
-                                    </Button>
-                                </Grid>
+                                <Tooltip title={scenario && scenario[ScFProps.deletable]}>
+                                    <span>
+                                        <Button
+                                            variant="outlined"
+                                            color="error"
+                                            onClick={onConfirmDialogOpen}
+                                            disabled={!scenario || !!scenario[ScFProps.deletable]}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </span>
+                                </Tooltip>
                             )}
-                            <Grid container size={actionEdit ? 6 : 12} justifyContent="flex-end">
-                                <Grid sx={CancelBtnSx}>
-                                    <Button variant="outlined" color="inherit" onClick={close}>
-                                        Cancel
-                                    </Button>
-                                </Grid>
-                                <Grid>
-                                    <Button
-                                        variant="contained"
-                                        type="submit"
-                                        disabled={!form.values.config || !form.values.name}
-                                    >
-                                        {actionEdit ? "Apply" : "Create"}
-                                    </Button>
-                                </Grid>
-                            </Grid>
-                        </Grid>
+                            <Button variant="outlined" color="inherit" onClick={close}>
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="contained"
+                                type="submit"
+                                disabled={!form.values.config || !form.values.name}
+                            >
+                                {actionEdit ? "Apply" : "Create"}
+                            </Button>
+                        </Stack>
                     </DialogActions>
                 </form>
             </Dialog>
@@ -500,18 +483,18 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     const openEditDialog = useCallback(
         (e: React.MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            const { id: scenId } = e.currentTarget?.dataset || {};
+            const { id: scId } = e.currentTarget?.dataset || {};
             const varName = getUpdateVar(updateScVars, "sc_id");
-            scenId &&
+            scId &&
                 props.onScenarioSelect &&
-                dispatch(createSendActionNameAction(props.id, module, props.onScenarioSelect, varName, scenId));
+                dispatch(createSendActionNameAction(props.id, module, props.onScenarioSelect, varName, scId));
             setOpen(true);
             setActionEdit(true);
         },
         [props.onScenarioSelect, props.id, dispatch, module, updateScVars]
     );
 
-    const EditScenario = useCallback(
+    const editScenario = useCallback(
         (props: EditProps) => (
             <Tooltip title={props.active ? "Edit Scenario" : "Can't edit Scenario"}>
                 <span>
@@ -519,7 +502,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                         data-id={props.id}
                         onClick={openEditDialog}
                         sx={tinyEditIconButtonSx}
-                        disabled={props.active}
+                        disabled={!props.active}
                     >
                         <EditOutlined />
                     </IconButton>
@@ -531,13 +514,13 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
     return (
         <>
-            <Box sx={MainTreeBoxSx} id={props.id} className={className}>
+            <Box sx={MainTreeBoxSx} id={props.id} className={`${className} ${getComponentClassName(props.children)}`}>
                 <CoreSelector
                     {...props}
                     entities={props.innerScenarios}
                     leafType={NodeType.SCENARIO}
                     lovPropertyName="innerScenarios"
-                    editComponent={EditScenario}
+                    editComponent={editScenario}
                     showPins={showPins}
                     multiple={multiple}
                     updateCoreVars={updateScVars}
@@ -569,6 +552,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                 scenario={props.scenarioEdit}
                 submit={onSubmit}
             ></ScenarioEditDialog>
+            {props.children}
         </>
     );
 };

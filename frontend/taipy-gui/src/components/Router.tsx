@@ -30,7 +30,7 @@ import {
     createSetLocationsAction,
     initializeWebSocket,
     INITIAL_STATE,
-    retreiveBlockUi,
+    retrieveBlockUi,
     taipyInitialize,
     taipyReducer,
 } from "../context/taipyReducers";
@@ -79,7 +79,7 @@ const Router = () => {
             .then((result) => {
                 dispatch(createSetLocationsAction(result.data.locations));
                 setRoutes(result.data.locations);
-                result.data.blockUI && dispatch(createBlockAction(retreiveBlockUi()));
+                result.data.blockUI && dispatch(createBlockAction(retrieveBlockUi()));
             })
             .catch((error) => {
                 // Fallback router if there is any error

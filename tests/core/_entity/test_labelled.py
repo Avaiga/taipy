@@ -13,7 +13,7 @@ from unittest import mock
 
 import pytest
 
-from taipy.config import Config, Frequency, Scope
+from taipy.common.config import Config, Frequency, Scope
 from taipy.core import taipy
 from taipy.core._entity._labeled import _Labeled
 

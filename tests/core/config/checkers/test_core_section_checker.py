@@ -9,8 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from taipy.config import Config
-from taipy.config.checker.issue_collector import IssueCollector
+from taipy.common.config import Config
+from taipy.common.config.checker.issue_collector import IssueCollector
 from taipy.core.config.checkers._core_section_checker import _CoreSectionChecker
 from taipy.core.config.core_section import CoreSection
 

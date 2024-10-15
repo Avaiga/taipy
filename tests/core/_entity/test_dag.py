@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 from typing import List
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 from taipy.core import DataNode, Sequence, SequenceId, Task, TaskId
 from taipy.core._entity._dag import _DAG
 

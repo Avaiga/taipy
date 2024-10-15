@@ -14,7 +14,7 @@ import os
 import shutil
 from typing import Dict
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ._utils import _migrate
 
@@ -98,7 +98,7 @@ def _migrate_fs_entities(path: str, backup: bool = True) -> bool:
         return False
 
     if backup:
-        backup_path = f"{path}_backup"
+        backup_path = path.rstrip("\\/") + "_backup"
         try:
             shutil.copytree(path, backup_path)
         except FileExistsError:

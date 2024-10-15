@@ -16,8 +16,8 @@ from threading import Lock
 from time import sleep
 from typing import Callable, Iterable, List, Optional, Set, Union
 
-from taipy.config.config import Config
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.config import Config
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from .._entity.submittable import Submittable
 from ..data._data_manager_factory import _DataManagerFactory
@@ -69,6 +69,7 @@ class _Orchestrator(_AbstractOrchestrator):
                 If not provided and *wait* is True, the function waits indefinitely.
              **properties (dict[str, any]): A key worded variable length list of user additional arguments
                 that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
+
         Returns:
             The created `Submission^` containing the information about the submission.
         """
@@ -124,6 +125,7 @@ class _Orchestrator(_AbstractOrchestrator):
                 If not provided and *wait* is True, the function waits indefinitely.
              **properties (dict[str, any]): A key worded variable length list of user additional arguments
                 that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
+
         Returns:
             The created `Submission^` containing the information about the submission.
         """

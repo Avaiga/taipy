@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "taipy-common"
+description = "A Taipy package dedicated to provide common data structures, types, classes and functions."
+readme = "package_desc.md"
+requires-python = ">=3.9"
+license = {text = "Apache License 2.0"}
+authors = [{name = "Avaiga", email = "dev@taipy.io"}]
+keywords = ["taipy-common"]
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dynamic = ["version", "dependencies"]
+
+[project.optional-dependencies]
+testing = ["pytest>=3.9"]
+
+[tool.setuptools.packages]
+find = {include = [
+    "taipy",
+    "taipy.common",
+    "taipy.common.*",
+    "taipy.common.config",
+    "taipy.common.config.*",
+    "taipy.common.logger",
+    "taipy.common.logger.*",
+    "taipy.common._cli",
+    "taipy.common._cli.*"
+]}
+
+[project.urls]
+homepage = "https://github.com/avaiga/taipy"

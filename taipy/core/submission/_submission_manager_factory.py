@@ -12,7 +12,7 @@ from functools import lru_cache
 from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
-from ..common._check_dependencies import _TAIPY_ENTERPRISE_CORE_MODULE, _using_enterprise
+from ..common._check_dependencies import EnterpriseEditionUtils
 from ..common._utils import _load_fct
 from ._submission_fs_repository import _SubmissionFSRepository
 from ._submission_manager import _SubmissionManager
@@ -24,12 +24,13 @@ class _SubmissionManagerFactory(_ManagerFactory):
     @classmethod
     @lru_cache
     def _build_manager(cls) -> Type[_SubmissionManager]:
-        if _using_enterprise():
+        if EnterpriseEditionUtils._using_enterprise():
             submission_manager = _load_fct(
-                _TAIPY_ENTERPRISE_CORE_MODULE + ".submission._submission_manager", "_SubmissionManager"
+                EnterpriseEditionUtils._TAIPY_ENTERPRISE_CORE_MODULE + ".submission._submission_manager",
+                "_SubmissionManager",
             )  # type: ignore
             build_repository = _load_fct(
-                _TAIPY_ENTERPRISE_CORE_MODULE + ".submission._submission_manager_factory",
+                EnterpriseEditionUtils._TAIPY_ENTERPRISE_CORE_MODULE + ".submission._submission_manager_factory",
                 "_SubmissionManagerFactory",
             )._build_repository  # type: ignore
         else:

@@ -38,7 +38,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        package: [ config, core, gui, rest, templates ]
+        package: [ common, core, gui, rest, templates ]
       max-parallel: 1
     environment: publish
     runs-on: ubuntu-latest

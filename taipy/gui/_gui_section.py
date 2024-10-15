@@ -12,14 +12,14 @@
 import typing as t
 from copy import copy
 
-from taipy.config import Config as TaipyConfig
-from taipy.config import UniqueSection
+from taipy.common.config import Config as TaipyConfig
+from taipy.common.config import UniqueSection
 
 from ._default_config import default_config
 
 
 class _GuiSection(UniqueSection):
-    name = "gui" # type: ignore[reportAssignmentType]
+    name = "gui"  # type: ignore[reportAssignmentType]
 
     def __init__(self, property_list: t.Optional[t.List] = None, **properties):
         self._property_list = property_list
@@ -48,18 +48,18 @@ class _GuiSection(UniqueSection):
 
     @staticmethod
     def _configure(**properties) -> "_GuiSection":
-        """NOT DOCUMENTED
-        Configure the Graphical User Interface.
+        """Configure the Graphical User Interface.
 
         Parameters:
             **properties (dict[str, any]): Keyword arguments that configure the behavior of the `Gui^` instances.<br/>
                 Please refer to the gui config section
-                [page](../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
+                [page](../../../../../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)
                 of the User Manual for more information on the accepted arguments.
+
         Returns:
             The GUI configuration.
 
-        """
+        """  # noqa: E501
         section = _GuiSection(property_list=list(default_config), **properties)
         TaipyConfig._register(section)
         return TaipyConfig.unique_sections[_GuiSection.name]

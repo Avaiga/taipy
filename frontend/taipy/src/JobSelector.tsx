@@ -55,6 +55,7 @@ import {
     createRequestUpdateAction,
     createSendActionNameAction,
     createSendUpdateAction,
+    getComponentClassName,
     getUpdateVar,
     useDispatch,
     useDispatchRequestUpdateOnFirstRender,
@@ -68,6 +69,7 @@ import {
     useClassNames,
     EllipsisSx,
     SecondaryEllipsisProps,
+    CoreProps,
 } from "./utils";
 import StatusChip, { Status } from "./StatusChip";
 import JobViewer, { JobDetail } from "./JobViewer";
@@ -81,17 +83,9 @@ const CloseDialogSx = {
 
 const RightButtonSx = { marginLeft: "auto !important" };
 
-interface JobSelectorProps {
-    updateVarName?: string;
-    coreChanged?: Record<string, unknown>;
-    error?: string;
+interface JobSelectorProps extends CoreProps {
     jobs: Jobs;
     onSelect?: string;
-    updateVars: string;
-    id?: string;
-    libClassName?: string;
-    className?: string;
-    dynamicClassName?: string;
     height: string;
     showId?: boolean;
     showSubmittedLabel?: boolean;
@@ -104,7 +98,6 @@ interface JobSelectorProps {
     onChange?: string;
     value?: string;
     defaultValue?: string;
-    propagate?: boolean;
     updateJbVars?: string;
     details?: JobDetail;
     onDetails?: string | boolean;
@@ -501,6 +494,7 @@ const JobSelector = (props: JobSelectorProps) => {
         showDelete = true,
         propagate = true,
         updateJbVars = "",
+        coreChanged,
     } = props;
     const [checked, setChecked] = useState<string[]>([]);
     const [selected, setSelected] = useState<string[]>([]);
@@ -785,16 +779,16 @@ const JobSelector = (props: JobSelectorProps) => {
     }, [props.value, props.defaultValue]);
 
     useEffect(() => {
-        if (props.coreChanged?.jobs) {
+        if (coreChanged?.jobs) {
             const updateVar = getUpdateVar(props.updateVars, "jobs");
             updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
         }
-    }, [props.coreChanged, props.updateVars, module, dispatch, id]);
+    }, [coreChanged, props.updateVars, module, dispatch, id]);
 
     const tableHeightSx = useMemo(() => ({ maxHeight: props.height || "50vh" }), [props.height]);
 
     return (
-        <Box className={className}>
+        <Box className={`${className} ${getComponentClassName(props.children)}`}>
             {showDetails && props.details ? (
                 <Dialog open={true} onClose={closeDetails} scroll="paper" fullWidth>
                     <DialogTitle>{props.details[1]}</DialogTitle>
@@ -802,7 +796,7 @@ const JobSelector = (props: JobSelectorProps) => {
                         <CloseIcon />
                     </IconButton>
                     <DialogContent dividers>
-                        <JobViewer job={props.details} inDialog={true}></JobViewer>
+                        <JobViewer job={props.details} inDialog={true} updateVars=""></JobViewer>
                     </DialogContent>
                     <DialogActions>
                         <Button variant="outlined" color="primary" onClick={deleteJob} data-id={props.details[0]}>
@@ -902,6 +896,7 @@ const JobSelector = (props: JobSelectorProps) => {
                     </Table>
                 </TableContainer>
             </Paper>
+            {props.children}
         </Box>
     );
 };

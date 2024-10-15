@@ -12,6 +12,7 @@
  */
 
 import { ComponentType } from "react";
+
 import Button from "./Button";
 import Chat from "./Chat";
 import Chart from "./Chart";
@@ -39,6 +40,7 @@ import Selector from "./Selector";
 import Slider from "./Slider";
 import StatusList from "./StatusList";
 import Table from "./Table";
+import TaipyStyle from "./TaipyStyle";
 import Toggle from "./Toggle";
 import TreeView from "./TreeView";
 
@@ -48,43 +50,44 @@ export const getRegisteredComponents = () => {
     if (registeredComponents.TreeView === undefined) {
         Object.entries({
             a: Link,
-            Button: Button,
-            Chat: Chat,
-            Chart: Chart,
-            DateRange: DateRange,
-            DateSelector: DateSelector,
-            Dialog: Dialog,
-            Expandable: Expandable,
-            Field: Field,
-            FileDownload: FileDownload,
-            FileSelector: FileSelector,
-            Image: Image,
-            Indicator: Indicator,
-            Input: Input,
-            Login: Login,
-            Layout: Layout,
-            MenuCtl: MenuCtl,
-            Metric: Metric,
-            NavBar: NavBar,
-            PageContent: PageContent,
-            Pane: Pane,
-            Part: Part,
-            Selector: Selector,
-            Slider: Slider,
+            Button,
+            Chat,
+            Chart,
+            DateRange,
+            DateSelector,
+            Dialog,
+            Expandable,
+            Field,
+            FileDownload,
+            FileSelector,
+            Image,
+            Indicator,
+            Input,
+            Login,
+            Layout,
+            MenuCtl,
+            Metric,
+            NavBar,
+            PageContent,
+            Pane,
+            Part,
+            Selector,
+            Slider,
             Status: StatusList,
-            Table: Table,
-            Toggle: Toggle,
-            TreeView: TreeView,
-            Progress: Progress,
+            Table,
+            TaipyStyle,
+            Toggle,
+            TreeView,
+            Progress,
         }).forEach(([name, comp]) => (registeredComponents[name] = comp  as ComponentType));
         if (window.taipyConfig?.extensions) {
-            Object.entries(window.taipyConfig.extensions).forEach(([libName, elts]) => {
-                if (elts && elts.length) {
+            Object.entries(window.taipyConfig.extensions).forEach(([libName, elements]) => {
+                if (elements && elements.length) {
                     const libParts = libName.split("/");
                     const modName = libParts.length > 2 ? libParts[2] : libName;
                     const mod: Record<string, ComponentType> = window[modName] as Record<string, ComponentType>;
                     if (mod) {
-                        elts.forEach((elt) => {
+                        elements.forEach((elt) => {
                             const comp = mod[elt];
                             if (comp) {
                                 registeredComponents[modName + "_" + elt] = comp;

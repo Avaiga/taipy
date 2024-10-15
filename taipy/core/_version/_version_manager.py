@@ -12,10 +12,10 @@
 import uuid
 from typing import List, Optional, Union
 
-from taipy.config import Config
-from taipy.config._config_comparator._comparator_result import _ComparatorResult
-from taipy.config.exceptions.exceptions import InconsistentEnvVariableError
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.config import Config
+from taipy.common.config._config_comparator._comparator_result import _ComparatorResult
+from taipy.common.config.exceptions.exceptions import InconsistentEnvVariableError
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from .._manager._manager import _Manager
 from ..exceptions.exceptions import (

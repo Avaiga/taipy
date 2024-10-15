@@ -17,6 +17,6 @@ def test_content_builder(gui: Gui, test_client, helpers):
         tgb.content()
     expected_list = [
         '<PageContent ',
-        '></PageContent>',
+        '/>',
     ]
     helpers.test_control_builder(gui, page, expected_list)

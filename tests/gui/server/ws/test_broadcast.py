@@ -36,4 +36,4 @@ def test_broadcast(gui: Gui, helpers):
     gui._broadcast("broadcast_name", "broadcast_value")
     received_messages = ws_client.get_received()
     assert len(received_messages)
-    helpers.assert_outward_simple_ws_message(received_messages[0], "U", "_bc_broadcast_name", "broadcast_value")
+    helpers.assert_outward_simple_ws_message(received_messages[0], "BC", "_bc_broadcast_name", "broadcast_value")

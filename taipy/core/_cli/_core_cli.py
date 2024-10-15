@@ -11,8 +11,8 @@
 
 from typing import Dict
 
-from taipy._cli._base_cli._abstract_cli import _AbstractCLI
-from taipy._cli._base_cli._taipy_parser import _TaipyParser
+from taipy.common._cli._base_cli._abstract_cli import _AbstractCLI
+from taipy.common._cli._base_cli._taipy_parser import _TaipyParser
 
 from ..config import CoreSection
 

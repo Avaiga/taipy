@@ -12,8 +12,8 @@
 
 import pytest
 
-from taipy.config import Config
-from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
+from taipy.common.config import Config
+from taipy.common.config.exceptions.exceptions import ConfigurationUpdateBlocked
 from taipy.core import Orchestrator
 from taipy.core._orchestrator._dispatcher import _DevelopmentJobDispatcher, _StandaloneJobDispatcher
 from taipy.core._orchestrator._orchestrator import _Orchestrator

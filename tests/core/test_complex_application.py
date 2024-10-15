@@ -16,7 +16,7 @@ from time import sleep
 import pandas as pd
 
 import taipy.core.taipy as tp
-from taipy.config import Config
+from taipy.common.config import Config
 from taipy.core import Orchestrator, Status
 
 # ################################  USER FUNCTIONS  ##################################

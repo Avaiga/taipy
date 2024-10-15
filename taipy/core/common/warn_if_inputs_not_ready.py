@@ -11,7 +11,7 @@
 
 from typing import Iterable
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ..data import DataNode
 

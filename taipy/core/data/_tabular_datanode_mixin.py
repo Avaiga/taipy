@@ -18,8 +18,7 @@ from ..exceptions.exceptions import InvalidExposedType
 
 
 class _TabularDataNodeMixin(object):
-    """Mixin class designed to handle tabular representable data nodes
-    (CSVDataNode, ParquetDataNode, ExcelDataNode, SQLTableDataNode and SQLDataNode)."""
+    """Mixin class designed to handle tabular representable data nodes."""
 
     _HAS_HEADER_PROPERTY = "has_header"
     _EXPOSED_TYPE_PROPERTY = "exposed_type"
@@ -44,6 +43,7 @@ class _TabularDataNodeMixin(object):
         custom_encoder = getattr(self.custom_document, "encode", None)
         if callable(custom_encoder):
             self._encoder = custom_encoder
+
 
     def _convert_data_to_dataframe(self, exposed_type: Any, data: Any) -> Union[pd.DataFrame, pd.Series]:
         if exposed_type == self._EXPOSED_TYPE_PANDAS and isinstance(data, (pd.DataFrame, pd.Series)):

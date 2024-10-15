@@ -34,7 +34,7 @@ export class TaipyWsAdapter extends WsAdapter {
                 for (const muPayload of message.payload as [MultipleUpdatePayload]) {
                     const encodedName = muPayload.name;
                     const { value } = muPayload.payload;
-                    if (value && typeof (value as any).__taipy_refresh === "boolean") {
+                    if (value && (value as any).__taipy_refresh !== undefined) {
                         // refresh all requested data for this encodedName var
                         const requestDataOptions = taipyApp.variableData?._requested_data[encodedName];
                         for (const dataKey in requestDataOptions) {
@@ -58,6 +58,7 @@ export class TaipyWsAdapter extends WsAdapter {
                 const { id } = message as unknown as IdMessage;
                 storeClientId(id);
                 taipyApp.clientId = id;
+                taipyApp.initApp();
                 taipyApp.updateContext(taipyApp.path);
             } else if (message.type === "GMC") {
                 const payload = message.payload as Record<string, unknown>;

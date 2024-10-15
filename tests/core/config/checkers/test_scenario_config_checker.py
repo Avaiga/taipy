@@ -13,9 +13,9 @@ from copy import copy
 
 import pytest
 
-from taipy.config.checker.issue_collector import IssueCollector
-from taipy.config.common.frequency import Frequency
-from taipy.config.config import Config
+from taipy.common.config import Config
+from taipy.common.config.checker.issue_collector import IssueCollector
+from taipy.common.config.common.frequency import Frequency
 from taipy.core.config import ScenarioConfig
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.config.task_config import TaskConfig

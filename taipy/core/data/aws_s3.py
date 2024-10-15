@@ -18,7 +18,7 @@ from ..common._check_dependencies import _check_dependency_is_installed
 if util.find_spec("boto3"):
     import boto3
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..exceptions.exceptions import MissingRequiredProperty
@@ -153,6 +153,7 @@ class S3ObjectDataNode(DataNode):
 
     @classmethod
     def storage_type(cls) -> str:
+        """Return the storage type of the data node: "s3_object"."""
         return cls.__STORAGE_TYPE
 
     def _read(self):

@@ -16,7 +16,7 @@ from importlib import import_module
 from operator import attrgetter
 from typing import Callable, Optional, Tuple
 
-from taipy.config import Config
+from taipy.common.config import Config
 
 
 @functools.lru_cache

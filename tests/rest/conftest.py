@@ -19,9 +19,9 @@ import pandas as pd
 import pytest
 from dotenv import load_dotenv
 
-from taipy.config import Config
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
+from taipy.common.config import Config
+from taipy.common.config.common.frequency import Frequency
+from taipy.common.config.common.scope import Scope
 from taipy.core import Cycle, DataNodeId, Job, JobId, Scenario, Sequence, Task
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.cycle._cycle_manager import _CycleManager

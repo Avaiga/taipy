@@ -16,8 +16,8 @@ from abc import abstractmethod
 from queue import Empty
 from typing import Optional
 
-from taipy.config.config import Config
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.config import Config
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ...data._data_manager_factory import _DataManagerFactory
 from ...job._job_manager_factory import _JobManagerFactory
@@ -119,6 +119,7 @@ class _JobDispatcher(threading.Thread):
 
         Parameters:
              task (Task^): The task to run.
+
         Returns:
              True if the task needs to run. False otherwise.
         """

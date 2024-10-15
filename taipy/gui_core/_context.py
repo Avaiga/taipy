@@ -21,7 +21,7 @@ from threading import Lock
 import pandas as pd
 from dateutil import parser
 
-from taipy.config import Config
+from taipy.common.config import Config
 from taipy.core import (
     Cycle,
     DataNode,
@@ -34,6 +34,7 @@ from taipy.core import (
     SequenceId,
     Submission,
     SubmissionId,
+    can_create,
     cancel_job,
     create_scenario,
     delete_job,
@@ -56,8 +57,7 @@ from taipy.core.notification.event import Event, EventOperation
 from taipy.core.notification.notifier import Notifier
 from taipy.core.reason import ReasonCollection
 from taipy.core.submission.submission_status import SubmissionStatus
-from taipy.core.taipy import can_create
-from taipy.gui import Gui, State
+from taipy.gui import Gui, State, get_state_id
 from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
 from taipy.gui.utils._map_dict import _MapDict
@@ -83,6 +83,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
     __ENTITY_PROPS = (__PROP_CONFIG_ID, __PROP_DATE, __PROP_ENTITY_NAME)
     __ACTION = "action"
     _CORE_CHANGED_NAME = "core_changed"
+    _AUTH_CHANGED_NAME = "auth_changed"
 
     def __init__(self, gui: Gui) -> None:
         self.gui = gui
@@ -98,8 +99,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
         self.submissions_lock = Lock()
         # lazy_start
         self.__started = False
+        # Gui event listener
+        gui._add_event_listener("authorization", self._auth_listener, with_state=True)
         # super
         super().__init__(reg_id, reg_queue)
+
+    def on_user_init(self, state: State):
+        self.gui._fire_event("authorization", get_state_id(state), {})
 
     def __lazy_start(self):
         if self.__started:
@@ -1200,10 +1206,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
         elif args[1]:
             _warn(f"dag.on_action(): Invalid function '{args[1]}()'.")
 
-    def get_creation_reason(self):
-        self.__lazy_start()
-        return "" if (reason := can_create()) else f"Cannot create scenario: {_get_reason(reason)}"
-
     def on_file_action(self, state: State, id: str, payload: t.Dict[str, t.Any]):
         args = t.cast(list, payload.get("args"))
         act_payload = t.cast(t.Dict[str, str], args[0])
@@ -1238,6 +1240,15 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 state.assign(error_id, f"Data node download error: {e}")
         else:
             state.assign(error_id, reason.reasons)
+
+    def _auth_listener(self, state: State, client_id: t.Optional[str], payload: t.Dict[str, t.Any]):
+        self.gui._broadcast(
+            _GuiCoreContext._AUTH_CHANGED_NAME,
+            payload.get("override", "")
+            if (reason := can_create())
+            else f"Cannot create scenario: {_get_reason(reason)}",
+            client_id,
+        )
 
 
 def _get_reason(reason: t.Union[bool, ReasonCollection]):
