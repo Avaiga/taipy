@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 
 from taipy.gui import Gui
@@ -39,7 +41,7 @@ def test_handle_invalid_data_callback_raises_exception(capfd, monkeypatch):
     def mock_warn(message: str):
         import sys
 
-        print(message, file=sys.stderr)  # Ensure the warning goes to stderr.
+        logging.warning(message)  # Ensure the warning goes to stderr.
 
     gui = Gui()
     gui.on_invalid_data = callback  # Set the callback
