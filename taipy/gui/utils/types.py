@@ -13,7 +13,7 @@
 import json
 import typing as t
 from abc import ABC, abstractmethod
-from datetime import datetime, time
+from datetime import datetime
 from importlib.util import find_spec
 
 from .._warnings import _warn
