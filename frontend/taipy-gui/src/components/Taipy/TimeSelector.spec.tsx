@@ -70,7 +70,7 @@ const cleanText = (val: string) => val.replace(/\u200e|\u2066|\u2067|\u2068|\u20
 describe("TimeSelector", () => {
     it("renders", async () => {
         const { getByTestId } = render(
-            <LocalizationProvider>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <TimeSelector time={curDateStr} />
             </LocalizationProvider>
         );
@@ -112,7 +112,7 @@ describe("TimeSelector", () => {
         );
         const input = document.querySelector("input");
         expect(input).toBeInTheDocument();
-        expect(cleanText(input?.value || "")).toEqual("10:01 am");
+        expect(cleanText(input?.value || "")).toEqual("01:01 AM");
     });
     it("is disabled", async () => {
         render(
