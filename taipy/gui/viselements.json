@@ -23,7 +23,7 @@
                     {
                         "name": "mode",
                         "type": "str",
-                        "doc": "Define the way the text is processed:\n<ul><li>&quot;raw&quot;: synonym for setting the <i>raw</i> property to True</li><li>&quot;pre&quot;: keeps spaces and new lines</li><li>&quot;markdown&quot; or &quot;md&quot;: basic support for Markdown."
+                        "doc": "Define the way the text is processed:\n<ul><li>&quot;raw&quot;: synonym for setting the <i>raw</i> property to True</li><li>&quot;pre&quot;: keeps spaces and new lines</li><li>&quot;markdown&quot; or &quot;md&quot;: basic support for Markdown</li><li>&quot;latex&quot;: LaTex support from in-built MathJax</li>"
                     },
                     {
                         "name": "format",
@@ -1395,7 +1395,7 @@
                         "type": "dynamic(str)",
                         "doc": "The title of the progress indicator."
                     },
-                                        {
+                    {
                         "name": "title_anchor",
                         "type": "str",
                         "default_value": "\"bottom\"",

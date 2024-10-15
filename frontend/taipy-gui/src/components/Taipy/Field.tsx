@@ -11,11 +11,12 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { lazy, useMemo } from "react";
+import React, { lazy, useMemo, Suspense } from "react";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 
 import { formatWSValue } from "../../utils";
+import { getSuffixedClassNames } from "./utils";
 import { useClassNames, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import { TaipyBaseProps, TaipyHoverProps, getCssSize } from "./utils";
 import { getComponentClassName } from "./TaipyStyle";
@@ -33,6 +34,16 @@ interface TaipyFieldProps extends TaipyBaseProps, TaipyHoverProps {
 const unsetWeightSx = { fontWeight: "unset" };
 
 const Markdown = lazy(() => import("react-markdown"));
+const MathJax = lazy(() => import("better-react-mathjax").then(module => ({ default: module.MathJax })));
+const MathJaxContext = lazy(() => import("better-react-mathjax").then(module => ({ default: module.MathJaxContext })));
+
+const mathJaxConfig = {
+    tex: {
+        inlineMath: [["$", "$"], ["\\(", "\\)"]],
+        displayMath: [["$$", "$$"], ["\\[", "\\]"]],
+    }
+}
+
 
 const Field = (props: TaipyFieldProps) => {
     const { id, dataType, format, defaultValue, raw } = props;
@@ -77,6 +88,14 @@ const Field = (props: TaipyFieldProps) => {
                     <span className={className} id={id} style={style}>
                         {value}
                     </span>
+                ) : mode == 'latex' ? (
+                    <Suspense fallback={<div>Loading LaTex...</div>}>
+                      <MathJaxContext config={mathJaxConfig}>
+                        <MathJax className={`${className} ${getComponentClassName(props.children)}`} id={id}>
+                            {value}
+                        </MathJax>
+                      </MathJaxContext>
+                    </Suspense>
                 ) : (
                     <Typography
                         className={`${className} ${getComponentClassName(props.children)}`}
