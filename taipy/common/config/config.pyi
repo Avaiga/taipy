@@ -847,7 +847,9 @@ class Config:
         aws_s3_bucket_name: str,
         aws_s3_object_key: str,
         aws_region: Optional[str] = None,
-        aws_s3_object_parameters: Optional[Dict[str, Any]] = None,
+        aws_s3_client_parameters: Optional[Dict[str, Any]] = None,
+        aws_s3_get_object_parameters: Optional[Dict[str, Any]] = None,
+        aws_s3_put_object_parameters: Optional[Dict[str, Any]] = None,
         scope: Optional[Scope] = None,
         validity_period: Optional[timedelta] = None,
         **properties,
@@ -856,13 +858,29 @@ class Config:
 
         Parameters:
             id (str): The unique identifier of the new S3 Object data node configuration.
-            aws_access_key (str): Amazon Web Services ID for to identify account.
-            aws_secret_access_key (str): Amazon Web Services access key to authenticate programmatic requests.
-            aws_s3_bucket_name (str): The bucket in S3 to read from and to write the data to.
+            aws_access_key (str): Amazon Web Services (AWS) ID for to identify account.
+            aws_secret_access_key (str): Amazon Web Services (AWS) access key to authenticate
+                programmatic requests.
+            aws_s3_bucket_name (str): The Amazon Web Services (AWS) S3 bucket to read from and
+                to write the data to.
+            aws_s3_object_key (str): The Amazon Web Services (AWS) S3 object key to read
+                or write.
             aws_region (Optional[str]): Self-contained geographic area where Amazon Web Services (AWS)
                 infrastructure is located.
-            aws_s3_object_parameters (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
-                into AWS S3 bucket access string.
+            aws_s3_client_parameters (Optional[dict]): Additional parameters for advanced use
+                cases to be passed to the Amazon Web Services (AWS) S3 client.<br/>
+                Each parameter key must match the name of a parameter of the
+                `boto3.session.Session.client` API.
+            aws_s3_get_object_parameters (Optional[dict]): Additional parameters to be
+                passed to the Amazon Web Services (AWS) S3 client get function for
+                advanced reading use cases. <br/>
+                Each parameter key must match the name of a parameter of the
+                `boto3.client.get_object` API.
+            aws_s3_put_object_parameters (Optional[dict]): Additional parameters to be
+                passed to the Amazon Web Services (AWS) S3 client put function for
+                advanced writing use cases. <br/>
+                Each parameter key must match the name of a parameter of the
+                `boto3.client.put_object` API.
             scope (Optional[Scope^]): The scope of the S3 Object data node configuration.<br/>
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
