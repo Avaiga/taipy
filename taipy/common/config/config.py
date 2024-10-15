@@ -25,6 +25,13 @@ from .global_app.global_app_config import GlobalAppConfig
 from .section import Section
 from .unique_section import UniqueSection
 
+class RestConfig:
+    def __init__(self):
+        self.port = 5000  # Default port
+        self.host = "127.0.0.1"  # Default host
+        self.use_https = False
+        self.ssl_cert = None
+        self.ssl_key = None
 
 class Config:
     """Singleton class that manages the configuration of a Taipy application.
@@ -332,6 +339,9 @@ class Config:
     @classmethod
     def _from_json(cls, config_as_str: str) -> _Config:
         return cls.__json_serializer._deserialize(config_as_str)
+    
+    rest = RestConfig()
+
 
 
 Config._override_env_file()

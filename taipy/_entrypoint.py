@@ -11,8 +11,9 @@
 
 import os
 import sys
+import argparse
 from importlib.util import find_spec
-
+from taipy.common.config import Config
 from taipy.common._cli._base_cli._taipy_parser import _TaipyParser
 from taipy.common._cli._create_cli import _CreateCLI
 from taipy.common._cli._help_cli import _HelpCLI
@@ -71,3 +72,25 @@ def _entrypoint():
 
     _TaipyParser._remove_argument("help")
     _TaipyParser._parser.print_help()
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Taipy server")
+    parser.add_argument("--port", type=int, help="Port to run the server on")
+    parser.add_argument("--host", type=str, help="Host to run the server on")
+    parser.add_argument("--use-https", action="store_true", help="Use HTTPS")
+    parser.add_argument("--ssl-cert", type=str, help="Path to SSL certificate")
+    parser.add_argument("--ssl-key", type=str, help="Path to SSL key")
+    return parser.parse_args()
+
+def main():
+    args = parse_args()
+    config = Config()
+    if args.port:
+        config.rest.port = args.port
+    if args.host:
+        config.rest.host = args.host
+    if args.use_https:
+        config.rest.use_https = True
+        config.rest.ssl_cert = args.ssl_cert
+        config.rest.ssl_key = args.ssl_key
