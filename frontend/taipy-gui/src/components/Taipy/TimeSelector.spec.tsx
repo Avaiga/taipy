@@ -67,11 +67,20 @@ const curDateStr = curDate.toISOString();
 
 const cleanText = (val: string) => val.replace(/\u200e|\u2066|\u2067|\u2068|\u2069/g, "");
 
-describe("TimeSelector", () => {
+describe("TimeSelector component", () => {
     it("renders", async () => {
         const { getByTestId } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <TimeSelector time={curDateStr} />
+            </LocalizationProvider>
+        );
+        const elt = getByTestId("ClockIcon");
+        expect(elt.parentElement?.tagName).toBe("BUTTON");
+    });
+    it("displays picker as a clock", async () => {
+        const { getByTestId } = render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <TimeSelector time={curDateStr} asClock={true}/>
             </LocalizationProvider>
         );
         const elt = getByTestId("ClockIcon");
