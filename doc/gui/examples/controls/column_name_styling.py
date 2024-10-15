@@ -2,6 +2,7 @@
 
 from taipy.gui import Gui
 import pandas as pd
+from taipy.gui import Markdown
 
 # Sample data in DataFrame format
 df = pd.DataFrame({
@@ -10,17 +11,11 @@ df = pd.DataFrame({
     "Occupation": ["Engineer", "Doctor", "Artist"]
 })
 
-# Define column properties
-columns = [
-    {"field": "Name", "header": "Name", "header_style": "color: blue; font-weight: bold;"},
-    {"field": "Age", "header": "Age", "header_style": "color: blue; font-weight: bold;"},
-    {"field": "Occupation", "header": "Occupation", "header_style": "color: blue; font-weight: bold;"}
-]
 
 # Page content with table and header styling
-page = """
+page = Markdown("""4
 <|table|data={df}|columns={columns}|>
-"""
+""", sytle={".taipy-table-name": {"color": "blue"}, ".taipy-table-occupation-or-job": {"color": "green"}})
 
 if __name__ == "__main__":
     Gui(page).run(title="Column Name Styling Example")
