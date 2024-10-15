@@ -39,7 +39,6 @@ def test_handle_invalid_data_callback_raises_exception(capfd, monkeypatch):
         raise ValueError("Transformation error")  # Simulate an error
 
     def mock_warn(message: str):
-        import sys
 
         logging.warning(message)  # Ensure the warning goes to stderr.
 
