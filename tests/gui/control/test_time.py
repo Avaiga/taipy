@@ -19,7 +19,7 @@ def test_date_md_1(gui: Gui, test_client, helpers):
     md_string = "<|{time}|time|>"
     expected_list = [
         "<TimeSelector",
-        'defaultTime="2020-12-',
+        'defaultTime="2020-12-15 18:18:18',
         'updateVarName="_TpTm_tpec_TpExPr_time_TPMDL_0"',
         "time={_TpTm_tpec_TpExPr_time_TPMDL_0}",
     ]
@@ -32,7 +32,7 @@ def test_date_md_2(gui: Gui, test_client, helpers):
     md_string = "<|{time}|time|label=a label|>"
     expected_list = [
         "<TimeSelector",
-        'defaultTime="2020-12-',
+        'defaultTime="2020-12-15 18:18:18',
         'updateVarName="_TpTm_tpec_TpExPr_time_TPMDL_0"',
         "time={_TpTm_tpec_TpExPr_time_TPMDL_0}",
         'label="a label"',
@@ -45,7 +45,7 @@ def test_date_md_width(gui: Gui, test_client, helpers):
     md_string = "<|{time}|time|width=70%|>"
     expected_list = [
         "<TimeSelector",
-        'defaultTime="2020-12-',
+        'defaultTime="2020-12-15 18:18:18',
         'updateVarName="_TpTm_tpec_TpExPr_time_TPMDL_0"',
         'width="70%"',
         "time={_TpTm_tpec_TpExPr_time_TPMDL_0}",
@@ -58,7 +58,7 @@ def test_date_html_1(gui: Gui, test_client, helpers):
     html_string = '<taipy:time time="{time}" />'
     expected_list = [
         "<TimeSelector",
-        'defaultTime="2020-12-',
+        'defaultTime="2020-12-15 18:18:18',
         'updateVarName="_TpTm_tpec_TpExPr_time_TPMDL_0"',
         "time={_TpTm_tpec_TpExPr_time_TPMDL_0}",
     ]
@@ -70,7 +70,7 @@ def test_date_html_2(gui: Gui, test_client, helpers):
     html_string = "<taipy:time>{time}</taipy:time>"
     expected_list = [
         "<TimeSelector",
-        'defaultTime="2020-12-',
+        'defaultTime="2020-12-15 18:18:18',
         'updateVarName="_TpTm_tpec_TpExPr_time_TPMDL_0"',
         "time={_TpTm_tpec_TpExPr_time_TPMDL_0}",
     ]
