@@ -17,7 +17,7 @@ Taipy is organised in two main repositories:
 
 ## Never contributed to an open source project before ?
 
-Have a look on this [GitHub documentation](https://docs.github.com/en/get-started/quickstart/contributing-to-projects).
+Have a look at this [GitHub documentation](https://docs.github.com/en/get-started/quickstart/contributing-to-projects).
 
 ## Report bugs
 
@@ -86,7 +86,7 @@ the community that you are working on it.
      - Include tests.
      - Code is [rebased](http://stackoverflow.com/a/7244456/1110993).
      - License is present.
-     - pre-commit works - without mypy error.
+     - pre-commit works - without mypy errors.
      - Taipy tests are passing.
 
 6. The Taipy team will have a look at your Pull Request and will give feedback. If every requirement is valid, your
@@ -137,7 +137,7 @@ on it.
 ## Dependency management
 
 Taipy comes with multiple optional packages. You can find the list directly in the product or Taipy's packages.
-The back-end Pipfile does not install by default optional packages due to `pyodbc` requiring a driver's manual
+The back-end Pipfile does not install optional packages by default due to `pyodbc` requiring a driver's manual
 installation. This is not the behaviour for the front-end that installs all optional packages through its Pipfile.
 
 If you are a contributor on Taipy, be careful with dependencies, do not forget to install or uninstall depending on

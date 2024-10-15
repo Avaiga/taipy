@@ -1528,7 +1528,7 @@ class Gui:
                 return
             else:  # pragma: no cover
                 _warn(f"on_action(): '{action}' is not a valid function.")
-        if hasattr(self, "on_action"):
+        if getattr(self, "on_action", None) is not None:
             self.__call_function_with_args(action_function=self.on_action, id=id, payload=payload)
 
     def __call_function_with_args(self, **kwargs):
@@ -1542,7 +1542,7 @@ class Gui:
                     args = [self._get_real_var_name(id)[0], payload]
                 except Exception:
                     args = [id, payload]
-                self._call_function_with_state(t.cast(t.Callable, action_function), [args])
+                self._call_function_with_state(t.cast(t.Callable, action_function), args)
                 return True
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception(action_function, e):
