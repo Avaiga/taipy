@@ -1114,7 +1114,11 @@ class DataNodeConfig(Section):
                 advanced reading use cases. <br/> 
                 Each parameter key must match the name of a parameter of the
                 `boto3.client.get_object` API.
-            aws_s3_put_object_parameters (Optional[dict]): Parameters for the PUT object request.
+            aws_s3_put_object_parameters (Optional[dict]): Additional parameters to be 
+                passed to the Amazon Web Services (AWS) S3 client put function for
+                advanced writing use cases. <br/> 
+                Each parameter key must match the name of a parameter of the
+                `boto3.client.put_object` API.
             scope (Optional[Scope^]): The scope of the S3 Object data node configuration.<br/>
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
