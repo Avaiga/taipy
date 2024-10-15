@@ -33,6 +33,7 @@ import { useClassNames, useDynamicProperty, useModule } from "../../utils/hooks"
 import { expandSx, getCssSize, noDisplayStyle, TaipyActiveProps } from "./utils";
 import { uploadFile } from "../../workers/fileupload";
 import { SxProps } from "@mui/material";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface FileSelectorProps extends TaipyActiveProps {
     onAction?: string;
@@ -185,7 +186,7 @@ const FileSelector = (props: FileSelectorProps) => {
     }, [handleDrop, handleDragLeave, handleDragOverWithLabel]);
 
     return (
-        <label htmlFor={inputId} className={className}>
+        <label htmlFor={inputId} className={`${className} ${getComponentClassName(props.children)}`}>
             <input
                 style={noDisplayStyle}
                 id={inputId}
@@ -212,6 +213,7 @@ const FileSelector = (props: FileSelectorProps) => {
                 </span>
             </Tooltip>
             {upload ? <LinearProgress value={progress} /> : null}
+            {props.children}
         </label>
     );
 };

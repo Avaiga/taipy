@@ -446,3 +446,12 @@ export declare const useDispatch: () => React.Dispatch<Action>;
  * @returns The page module.
  */
 export declare const useModule: () => string | undefined;
+
+/**
+ * A function that retrieves the dynamic className associated
+ * to an instance of component through the style property
+ *
+ * @param children - The react children of the component
+ * @returns The associated className.
+ */
+export declare const getComponentClassName: (children: React.ReactNode) => string;
