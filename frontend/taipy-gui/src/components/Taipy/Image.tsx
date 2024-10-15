@@ -19,6 +19,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 import { TaipyActiveProps } from "./utils";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface ImageProps extends TaipyActiveProps {
     onAction?: string;
@@ -65,7 +66,7 @@ const Image = (props: ImageProps) => {
             display: inlineSvg ? "inline-flex" : undefined,
             verticalAlign: inlineSvg ? "middle" : undefined,
         }),
-        [width, height, inlineSvg],
+        [width, height, inlineSvg]
     );
 
     useEffect(() => {
@@ -78,29 +79,44 @@ const Image = (props: ImageProps) => {
 
     return (
         <Tooltip title={hover || label}>
-            {onAction ? (
-                <span>
-                    <Button
+            <>
+                {onAction ? (
+                    <span>
+                        <Button
+                            id={id}
+                            className={`${className} ${getComponentClassName(props.children)}`}
+                            onClick={handleClick}
+                            aria-label={label}
+                            variant="outlined"
+                            disabled={!active}
+                            title={label}
+                        >
+                            {inlineSvg ? (
+                                <div ref={divRef} style={style} />
+                            ) : (
+                                <img src={content} style={style} alt={label} />
+                            )}
+                        </Button>
+                    </span>
+                ) : inlineSvg ? (
+                    <div
                         id={id}
-                        className={className}
-                        onClick={handleClick}
-                        aria-label={label}
-                        variant="outlined"
-                        disabled={!active}
+                        className={`${className} ${getComponentClassName(props.children)}`}
+                        style={style}
+                        ref={divRef}
                         title={label}
-                    >
-                        {inlineSvg ? (
-                            <div ref={divRef} style={style} />
-                        ) : (
-                            <img src={content} style={style} alt={label} />
-                        )}
-                    </Button>
-                </span>
-            ) : inlineSvg ? (
-                <div id={id} className={className} style={style} ref={divRef} title={label}></div>
-            ) : (
-                <img id={id} src={content} style={style} className={className} alt={label} />
-            )}
+                    ></div>
+                ) : (
+                    <img
+                        id={id}
+                        src={content}
+                        style={style}
+                        className={`${className} ${getComponentClassName(props.children)}`}
+                        alt={label}
+                    />
+                )}
+                {props.children}
+            </>
         </Tooltip>
     );
 };

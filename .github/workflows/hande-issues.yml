@@ -1,0 +1,35 @@
+name: Remove 'No response', 'NA', and 'N/A' Sections
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  clean_issue_body:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Remove 'No response', 'NA', and 'N/A' sections
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = context.payload.issue;
+            let body = issue.body;
+
+            // Regex to match '### <Title>' followed by '_No response_', 'NA', or 'N/A', including possible spaces or newlines
+            const noResponsePattern = /(###\s+[^\n]+\n\s*(_No response_|NA|N\/A)\s*\n?)/g;
+
+            // Replace all matched sections
+            let cleanedBody = body.replace(noResponsePattern, '');
+
+            // Update the issue body if changes were made
+            if (cleanedBody.trim() !== body.trim()) {
+              await github.rest.issues.update({
+                issue_number: issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: cleanedBody.trim()
+              });
+            }

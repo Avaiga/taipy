@@ -18,6 +18,7 @@ import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import TaipyRendered from "../pages/TaipyRendered";
 import { expandSx, getCssSize, TaipyBaseProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface PartProps extends TaipyBaseProps {
     render?: boolean;
@@ -38,7 +39,7 @@ const IframeStyle = {
 };
 
 const Part = (props: PartProps) => {
-    const { id, children, partial, defaultPartial } = props;
+    const { id, partial, defaultPartial } = props;
     const { state } = useContext(TaipyContext);
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
@@ -58,13 +59,13 @@ const Part = (props: PartProps) => {
 
     const boxSx = useMemo(() => expandSx(height ? { height: height } : undefined, props.width ? {width: getCssSize(props.width)}: undefined), [height, props.width]);
     return render ? (
-        <Box id={id} className={className} sx={boxSx}>
+        <Box id={id} className={`${className} ${getComponentClassName(props.children)}`} sx={boxSx}>
             {iFrame ? (
                 <iframe src={page} style={IframeStyle} />
             ) : page ? (
                 <TaipyRendered path={"/" + page} partial={partial} fromBlock={true} />
             ) : null}
-            {children}
+            {props.children}
         </Box>
     ) : null;
 };
