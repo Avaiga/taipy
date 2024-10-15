@@ -1107,24 +1107,24 @@ class DataNodeConfig(Section):
             aws_access_key (str): Amazon Web Services (AWS) ID for to identify account.
             aws_secret_access_key (str): Amazon Web Services (AWS) access key to authenticate
                 programmatic requests.
-            aws_s3_bucket_name (str): The Amazon Web Services (AWS) S3 bucket to read from and 
+            aws_s3_bucket_name (str): The Amazon Web Services (AWS) S3 bucket to read from and
                 to write the data to.
             aws_s3_object_key (str): The Amazon Web Services (AWS) S3 object key to read
                 or write.
             aws_region (Optional[str]): Self-contained geographic area where Amazon Web Services (AWS)
                 infrastructure is located.
-            aws_s3_client_parameters (Optional[dict]): Additional parameters for advanced use 
+            aws_s3_client_parameters (Optional[dict]): Additional parameters for advanced use
                 cases to be passed to the Amazon Web Services (AWS) S3 client.<br/>
                 Each parameter key must match the name of a parameter of the
                 `boto3.session.Session.client` API.
-            aws_s3_get_object_parameters (Optional[dict]): Additional parameters to be 
+            aws_s3_get_object_parameters (Optional[dict]): Additional parameters to be
                 passed to the Amazon Web Services (AWS) S3 client get function for
-                advanced reading use cases. <br/> 
+                advanced reading use cases. <br/>
                 Each parameter key must match the name of a parameter of the
                 `boto3.client.get_object` API.
-            aws_s3_put_object_parameters (Optional[dict]): Additional parameters to be 
+            aws_s3_put_object_parameters (Optional[dict]): Additional parameters to be
                 passed to the Amazon Web Services (AWS) S3 client put function for
-                advanced writing use cases. <br/> 
+                advanced writing use cases. <br/>
                 Each parameter key must match the name of a parameter of the
                 `boto3.client.put_object` API.
             scope (Optional[Scope^]): The scope of the S3 Object data node configuration.<br/>
