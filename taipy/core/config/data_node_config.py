@@ -1109,7 +1109,11 @@ class DataNodeConfig(Section):
                 cases to be passed to the Amazon Web Services (AWS) S3 client.<br/>
                 Each parameter key must match the name of a parameter of the
                 `boto3.session.Session.client` API.
-            aws_s3_get_object_parameters (Optional[dict]): Parameters for the GET object request.
+            aws_s3_get_object_parameters (Optional[dict]): Additional parameters to be 
+                passed to the Amazon Web Services (AWS) S3 client get function for
+                advanced reading use cases. <br/> 
+                Each parameter key must match the name of a parameter of the
+                `boto3.client.get_object` API.
             aws_s3_put_object_parameters (Optional[dict]): Parameters for the PUT object request.
             scope (Optional[Scope^]): The scope of the S3 Object data node configuration.<br/>
                 The default value is `Scope.SCENARIO`.
