@@ -1105,7 +1105,10 @@ class DataNodeConfig(Section):
                 or write.
             aws_region (Optional[str]): Self-contained geographic area where Amazon Web Services (AWS)
                 infrastructure is located.
-            aws_s3_client_parameters (Optional[dict]): Additional parameters for the S3 client.
+            aws_s3_client_parameters (Optional[dict]): Additional parameters for advanced use 
+                cases to be passed to the Amazon Web Services (AWS) S3 client.<br/>
+                Each parameter key must match the name of a parameter of the
+                `boto3.session.Session.client` API.
             aws_s3_get_object_parameters (Optional[dict]): Parameters for the GET object request.
             aws_s3_put_object_parameters (Optional[dict]): Parameters for the PUT object request.
             scope (Optional[Scope^]): The scope of the S3 Object data node configuration.<br/>
