@@ -1,4 +1,5 @@
 import pytest
+
 from taipy.gui import Gui
 
 
@@ -50,7 +51,7 @@ def test_handle_invalid_data_callback_raises_exception(capfd, monkeypatch):
     out, _ = capfd.readouterr()
 
     assert result is None  # Should return None on exception
-    assert "Error transforming data: Transformation error" 
+    assert "Error transforming data: Transformation error"
 
 
 @pytest.mark.parametrize("input_data", [None, 123, [], {}, set()])
