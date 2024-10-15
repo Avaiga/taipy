@@ -113,7 +113,7 @@ describe("TimeSelector component", () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <TimeSelector
-                    defaultTime="2001-01-01T01:01:01.001Z"
+                    defaultTime="2001-01-01T14:20:01.001Z"
                     time={undefined as unknown as string}
                     format="hh aa"
                 />
@@ -121,7 +121,7 @@ describe("TimeSelector component", () => {
         );
         const input = document.querySelector("input");
         expect(input).toBeInTheDocument();
-        expect(cleanText(input?.value || "")).toEqual("01 AM");
+        expect(cleanText(input?.value || "")).toEqual("02 PM");
     });
     it("is disabled", async () => {
         render(
