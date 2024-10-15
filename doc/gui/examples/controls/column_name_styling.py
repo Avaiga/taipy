@@ -13,9 +13,9 @@ df = pd.DataFrame({
 
 
 # Page content with table and header styling
-page = Markdown("""4
+page = Markdown("""
 <|table|data={df}|columns={columns}|>
-""", sytle={".taipy-table-name": {"color": "blue"}, ".taipy-table-occupation-or-job": {"color": "green"}})
+""", sytle={".taipy-table-name": {"color": "blue"}, ".taipy-table-occupation": {"color": "green"}})
 
 if __name__ == "__main__":
     Gui(page).run(title="Column Name Styling Example")
