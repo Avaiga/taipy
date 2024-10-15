@@ -39,7 +39,6 @@ class S3ObjectDataNode(DataNode):
         or write.
 
     The *properties* attribute can also contain the following optional entries:
-    
     - *aws_region* (`Optional[str]`): Self-contained geographic area where Amazon Web
         Services (AWS) infrastructure is located.
     - *aws_s3_object_parameters* (`Optional[dict[str, any]]`): A dictionary of
