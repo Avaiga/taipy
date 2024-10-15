@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useMemo, useState, MouseEvent, CSSProperties } from "react";
+import React, { useCallback, useMemo, useState, MouseEvent, CSSProperties, useEffect } from "react";
 import MenuIco from "@mui/icons-material/Menu";
 import ListItemButton from "@mui/material/ListItemButton";
 import Drawer from "@mui/material/Drawer";
@@ -23,21 +23,22 @@ import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import { Theme, useTheme } from "@mui/system";
 
-import { SingleItem } from "./lovUtils";
+import { LovImage } from "./lovUtils";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { MenuProps } from "../../utils/lov";
 import { useClassNames, useDispatch, useModule } from "../../utils/hooks";
 import { getComponentClassName } from "./TaipyStyle";
-import { emptyArray } from "../../utils";
+import { emptyArray, getInitials } from "../../utils";
 
 const boxDrawerStyle = { overflowX: "hidden" } as CSSProperties;
 const headerSx = { padding: 0 };
 const avatarSx = { bgcolor: (theme: Theme) => theme.palette.text.primary };
 const baseTitleProps = { noWrap: true, variant: "h6" } as const;
+const cardSx = { p: 0 } as CSSProperties;
 
 const Menu = (props: MenuProps) => {
-    const { label, onAction = "", lov, selectedItems, width, inactiveIds = emptyArray, active = true } = props;
-    const [selectedValue, setSelectedValue] = useState("");
+    const { label, onAction = "", lov, width, inactiveIds = emptyArray, active = true } = props;
+    const [selected, setSelected] = useState<boolean[]>([]);
     const [opened, setOpened] = useState(false);
     const dispatch = useDispatch();
     const theme = useTheme();
@@ -46,15 +47,18 @@ const Menu = (props: MenuProps) => {
 
     const clickHandler = useCallback(
         (evt: MouseEvent<HTMLElement>) => {
-            if (active) {
-                const { id: key = "" } = evt.currentTarget.dataset;
-                setSelectedValue(() => {
-                    dispatch(createSendActionNameAction("menu", module, onAction, key));
-                    return key;
-                });
-            }
+            if (!active) return;
+
+            const index = Number(evt.currentTarget.dataset.index);
+            setSelected((prevSelected) => {
+                const newSelected = prevSelected.map((isSelected, i) => (i === index ? !isSelected : isSelected));
+                const selectedElements = lov?.filter((_, idx) => newSelected[idx]) || [];
+                const keys = selectedElements.map((element) => element.id);
+                dispatch(createSendActionNameAction("menu", module, onAction, ...keys));
+                return newSelected;
+            });
         },
-        [onAction, dispatch, active, module]
+        [active, dispatch, lov, module, onAction]
     );
 
     const openHandler = useCallback((evt: MouseEvent<HTMLElement>) => {
@@ -80,8 +84,20 @@ const Menu = (props: MenuProps) => {
         ];
     }, [opened, width, theme]);
 
+    useEffect(() => {
+        const newSelected = (lov || []).map((item) =>
+            (props.selectedIds || []).some((selectedItem) => selectedItem.id === item.id)
+        );
+        setSelected(newSelected);
+    }, [lov, props.selectedIds]);
+
     return lov && lov.length ? (
-        <Drawer variant="permanent" anchor="left" sx={drawerSx} className={`${className} ${getComponentClassName(props.children)}`}>
+        <Drawer
+            variant="permanent"
+            anchor="left"
+            sx={drawerSx}
+            className={`${className} ${getComponentClassName(props.children)}`}
+        >
             <Box style={boxDrawerStyle}>
                 <List>
                     <ListItemButton key="taipy_menu_0" onClick={openHandler}>
@@ -100,18 +116,34 @@ const Menu = (props: MenuProps) => {
                             />
                         </ListItemAvatar>
                     </ListItemButton>
-                    {lov.map((elt) => (
-                        <SingleItem
+                    {lov.map((elt, index) => (
+                        <ListItemButton
                             key={elt.id}
-                            value={elt.id}
-                            item={elt.item}
-                            selectedValue={selectedValue}
-                            clickHandler={clickHandler}
+                            onClick={clickHandler}
+                            data-id={elt.id}
+                            data-index={index}
+                            selected={selected[index]}
                             disabled={!active || inactiveIds.includes(elt.id)}
-                            withAvatar={true}
-                            titleTypographyProps={titleProps}
-                            isSelected={selectedItems?.some((item) => item.id === elt.id)}
-                        />
+                        >
+                            {typeof elt.item === "string" ? (
+                                <ListItemAvatar>
+                                    <CardHeader
+                                        sx={cardSx}
+                                        avatar={
+                                            <Tooltip title={elt.item}>
+                                                <Avatar sx={avatarSx}>{getInitials(elt.item)}</Avatar>
+                                            </Tooltip>
+                                        }
+                                        title={elt.item}
+                                        titleTypographyProps={titleProps}
+                                    />
+                                </ListItemAvatar>
+                            ) : (
+                                <ListItemAvatar>
+                                    <LovImage item={elt.item} titleTypographyProps={titleProps} />
+                                </ListItemAvatar>
+                            )}
+                        </ListItemButton>
                     ))}
                 </List>
             </Box>

@@ -41,8 +41,8 @@ export interface LovProps<T = string | string[], U = string> extends TaipyActive
     defaultValue?: U;
     height?: string | number;
     valueById?: boolean;
-    selectedItems?: LoV;
-    defaultSelectedItems?: U;
+    selectedIds?: LoV;
+    defaultSelectedIds?: U;
 }
 
 /**
@@ -114,7 +114,7 @@ export const LovImage = ({
     item: Icon;
     disableTypo?: boolean;
     height?: string;
-    titleTypographyProps?: TypographyProps<"span", { component?: "span"; }>;
+    titleTypographyProps?: TypographyProps<"span", { component?: "span" }>;
 }) => {
     const sx = useMemo(
         () => (height ? { height: height, "& .MuiAvatar-img": { objectFit: "contain" } } : undefined) as SxProps,
@@ -123,9 +123,7 @@ export const LovImage = ({
     return (
         <CardHeader
             sx={cardSx}
-            avatar={
-                <IconAvatar img={item} sx={sx} />
-            }
+            avatar={<IconAvatar img={item} sx={sx} />}
             title={item.text}
             disableTypography={disableTypo}
             titleTypographyProps={titleTypographyProps}
@@ -149,8 +147,7 @@ export interface ItemProps {
     item: stringIcon;
     disabled: boolean;
     withAvatar?: boolean;
-    titleTypographyProps?: TypographyProps<"span", { component?: "span"; }>;
-    isSelected?: boolean;
+    titleTypographyProps?: TypographyProps<"span", { component?: "span" }>;
 }
 
 export const SingleItem = ({
@@ -161,12 +158,11 @@ export const SingleItem = ({
     disabled,
     withAvatar = false,
     titleTypographyProps,
-    isSelected,
 }: ItemProps) => (
     <ListItemButton
         onClick={clickHandler}
         data-id={value}
-        selected={Array.isArray(selectedValue) ? selectedValue.indexOf(value) !== -1 : selectedValue === value || isSelected}
+        selected={Array.isArray(selectedValue) ? selectedValue.indexOf(value) !== -1 : selectedValue === value}
         disabled={disabled}
     >
         {typeof item === "string" ? (

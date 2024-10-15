@@ -11,19 +11,19 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, {useMemo, useEffect} from "react";
+import React, { useMemo, useEffect } from "react";
 
-import {LovProps, useLovListMemo} from "./lovUtils";
+import { LovProps, useLovListMemo } from "./lovUtils";
 import {
     useClassNames,
     useDispatch,
     useDispatchRequestUpdateOnFirstRender,
     useDynamicProperty,
     useIsMobile,
-    useModule
+    useModule,
 } from "../../utils/hooks";
-import {createSetMenuAction} from "../../context/taipyReducers";
-import {MenuProps} from "../../utils/lov";
+import { createSetMenuAction } from "../../context/taipyReducers";
+import { MenuProps } from "../../utils/lov";
 
 interface MenuCtlProps extends LovProps<string> {
     label?: string;
@@ -42,7 +42,7 @@ const MenuCtl = (props: MenuCtlProps) => {
         defaultLov = "",
         width = "15vw",
         width_Mobile_ = "85vw",
-        defaultSelectedItems = "",
+        defaultSelectedIds = "",
     } = props;
     const dispatch = useDispatch();
     const isMobile = useIsMobile();
@@ -54,7 +54,7 @@ const MenuCtl = (props: MenuCtlProps) => {
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, props.updateVars, props.updateVarName);
 
     const lovList = useLovListMemo(props.lov, defaultLov, true);
-    const lovSelectedItems = useLovListMemo(props.selectedItems, defaultSelectedItems, true);
+    const lovSelectedIds = useLovListMemo(props.selectedIds, defaultSelectedIds, true);
 
     const inactiveIds = useMemo(() => {
         if (props.inactiveIds) {
@@ -80,7 +80,7 @@ const MenuCtl = (props: MenuCtlProps) => {
                 inactiveIds: inactiveIds,
                 width: isMobile ? width_Mobile_ : width,
                 className: className,
-                selectedItems: lovSelectedItems,
+                selectedIds: lovSelectedIds,
             } as MenuProps)
         );
         return () => dispatch(createSetMenuAction({}));
@@ -95,7 +95,7 @@ const MenuCtl = (props: MenuCtlProps) => {
         isMobile,
         className,
         dispatch,
-        lovSelectedItems
+        lovSelectedIds,
     ]);
 
     return <></>;

@@ -87,7 +87,7 @@ describe("MenuCtl Component", () => {
                     ],
                     onAction: "on_action",
                     width: "15vw",
-                    selectedItems: [],
+                    selectedIds: [],
                 },
                 type: "SET_MENU",
             });
