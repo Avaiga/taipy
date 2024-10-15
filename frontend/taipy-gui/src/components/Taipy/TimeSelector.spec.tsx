@@ -106,13 +106,13 @@ describe("TimeSelector", () => {
                 <TimeSelector
                     defaultTime="2001-01-01T01:01:01.001Z"
                     time={undefined as unknown as string}
-                    format="hh:mm a"
+                    format="hh aa"
                 />
             </LocalizationProvider>
         );
         const input = document.querySelector("input");
         expect(input).toBeInTheDocument();
-        expect(cleanText(input?.value || "")).toEqual("01:01 AM");
+        expect(cleanText(input?.value || "")).toEqual("01 AM");
     });
     it("is disabled", async () => {
         render(
