@@ -819,7 +819,6 @@ const getAlertType = (aType: string) => {
     return aType;
 };
 
-
 export const createAlertAction = (alert: AlertMessage): TaipyAlertAction => ({
     type: Types.SetAlert,
     atype: getAlertType(alert.atype),
