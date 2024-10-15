@@ -142,7 +142,6 @@ class _DataAccessors(object):
                     transformed_access = self.__access_4_type.get(type(transformed_value))
                     if transformed_access is not None:
                         return transformed_access
-                    return self.__invalid_data_accessor
                 _warn(f"Can't find Data Accessor for type {str(type(value))}.")
             return self.__invalid_data_accessor
         return access

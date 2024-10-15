@@ -420,10 +420,9 @@ class Gui:
         :return: Transformed data or None if no transformation is possible.
         """
         try:
-            if self.on_invalid_data is not None and _is_function(self.on_invalid_data):
-                return self.on_invalid_data(value)
+            if _is_function(self.on_invalid_data):
+                return self.on_invalid_data(value) # type: ignore
             else:
-                _warn(f"Unsupported data type encountered: {type(value)}")
                 return None
         except Exception as e:
             _warn(f"Error transforming data: {str(e)}")
