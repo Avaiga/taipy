@@ -359,6 +359,7 @@
             "time",
             {
                 "inherits": [
+                    "on_change",
                     "propagate"
                 ],
                 "properties": [
