@@ -30,29 +30,28 @@ class S3ObjectDataNode(DataNode):
     """Data Node object stored in an Amazon Web Service S3 Bucket.
 
     The *properties* attribute must contain the following required entries:
-    
     - *aws_access_key* (`str`): Amazon Web Services (AWS) ID to identify the account.
-    - *aws_secret_access_key* (`str`): Amazon Web Services (AWS) access key to 
+    - *aws_secret_access_key* (`str`): Amazon Web Services (AWS) access key to
         authenticate programmatic requests.
-    - *aws_s3_bucket_name* (`str`): The Amazon Web Services (AWS) S3 bucket to read 
+    - *aws_s3_bucket_name* (`str`): The Amazon Web Services (AWS) S3 bucket to read
         from and to write the data to.
     - *aws_s3_object_key* (`str`): The Amazon Web Services (AWS) S3 object key to read
         or write.
-       
+
     The *properties* attribute can also contain the following optional entries:
     
-    - *aws_region* (`Optional[str]`): Self-contained geographic area where Amazon Web 
+    - *aws_region* (`Optional[str]`): Self-contained geographic area where Amazon Web
         Services (AWS) infrastructure is located.
-    - *aws_s3_object_parameters* (`Optional[dict[str, any]]`): A dictionary of 
+    - *aws_s3_object_parameters* (`Optional[dict[str, any]]`): A dictionary of
         additional arguments to be passed into the AWS S3 bucket access string.
-    - *aws_s3_client_parameters* (`Optional[dict]`): Additional parameters for advanced 
+    - *aws_s3_client_parameters* (`Optional[dict]`): Additional parameters for advanced
         use cases to be passed to the Amazon Web Services (AWS) S3 client.<br/>
         Each parameter key must match the name of a parameter of the
         `boto3.session.Session.client` API.
     - *aws_s3_get_object_parameters* (`Optional[dict]`): Additional parameters to be
         passed to the Amazon Web Services (AWS) S3 client get function for
         advanced reading use cases. <br/>
-        Each parameter key must match the name of a parameter of the 
+        Each parameter key must match the name of a parameter of the
         `boto3.client.get_object` API.
     - *aws_s3_put_object_parameters* (`Optional[dict]`): Additional parameters to be
         passed to the Amazon Web Services (AWS) S3 client put function for advanced
