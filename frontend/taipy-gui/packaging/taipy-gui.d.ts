@@ -404,6 +404,16 @@ export declare const Context: React.Context<Store>;
  */
 export declare const useDynamicProperty: <T>(value: T, defaultValue: T, defaultStatic: T) => T;
 /**
+ * A React hook to manage classNames (dynamic and static).
+ * cf. useDynamicProperty
+ *
+ * @param libClassName - The default static className.
+ * @param dynamicClassName - The bound className.
+ * @param className - The default user set className.
+ * @returns The complete list of applicable classNames.
+ */
+export declare const useClassNames: (libClassName?: string, dynamicClassName?: string, className?: string) => string;
+/**
  * A React hook to manage a dynamic json property.
  *
  * A dynamic scalar property  is defined by a default property and a bound property.
@@ -455,3 +465,4 @@ export declare const useModule: () => string | undefined;
  * @returns The associated className.
  */
 export declare const getComponentClassName: (children: React.ReactNode) => string;
+
