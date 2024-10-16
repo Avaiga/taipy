@@ -11,6 +11,7 @@
     "@typescript-eslint/eslint-plugin": "^8.5.0",
     "@typescript-eslint/parser": "^8.5.0",
     "child_process": "^1.0.2",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.4.5",
     "eslint": "^8.20.0",
     "eslint-plugin-react": "^7.30.1",
@@ -42,6 +43,7 @@
   "scripts": {
     "postinstall": "node scripts/install.js",
     "build:dev": "webpack --mode development",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "test": "cross-env TZ=UTC jest"
   }
 }
