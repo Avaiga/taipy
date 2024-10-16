@@ -488,7 +488,7 @@ const Chat = (props: ChatProps) => {
                             <Box mb={1}>
                                 <Chip
                                     label={selectedFile.name}
-                                    avatar={<Avatar alt="Uploaded image" src={imagePreview}/>}
+                                    avatar={<Avatar alt="Image preview" src={imagePreview}/>}
                                     onDelete={() => setSelectedFile(null)}
                                     variant="outlined"
                                 />

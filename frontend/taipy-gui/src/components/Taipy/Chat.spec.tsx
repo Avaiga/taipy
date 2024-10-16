@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render, waitFor } from "@testing-library/react";
+import { render, waitFor, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -134,4 +134,50 @@ describe("Chat Component", () => {
             },
         });
     });
+    it("handle image upload",async()=>{
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByLabelText,getByText,getByAltText,queryByText,getByRole } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <Chat messages={messages} updateVarName="varName" defaultKey={valueKey} mode="raw"/>
+            </TaipyContext.Provider>
+        );
+        const attachButton = getByLabelText('upload image');
+        expect(attachButton).toBeInTheDocument();
+
+        const file = new File(['(⌐□_□)'], 'test.png', { type: 'image/png' });
+        URL.createObjectURL = jest.fn(() => 'mocked-url');
+
+        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+        expect(fileInput).toBeInTheDocument();
+        fireEvent.change(fileInput, { target: { files: [file] } });
+
+        await waitFor(() => {
+            const chipWithImage = getByText('test.png');
+            expect(chipWithImage).toBeInTheDocument();
+            const previewImg = getByAltText('Image preview');
+            expect(previewImg).toBeInTheDocument();
+            expect(previewImg).toHaveAttribute('src', 'mocked-url');
+          });
+
+          const elt = getByLabelText("message (taipy)");
+          await userEvent.click(elt);
+          await userEvent.keyboard("Test message with image");
+          await userEvent.click(getByRole("button",{ name: /send message/i }))
+
+          expect(dispatch).toHaveBeenNthCalledWith(2,
+            expect.objectContaining({
+              type: 'SEND_ACTION_ACTION',
+              payload: expect.objectContaining({
+                args: ['click', 'varName', 'Test message with image', 'taipy', 'mocked-url']
+              })
+            })
+          );
+          await waitFor(() => {
+            const chipWithImage = queryByText('test.png');
+            expect(chipWithImage).not.toBeInTheDocument();
+          });
+
+
+    })
 });
