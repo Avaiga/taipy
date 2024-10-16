@@ -108,7 +108,7 @@ describe("Chat Component", () => {
             context: undefined,
             payload: {
                 action: undefined,
-                args: ["Enter", "varName", "new message", "taipy"],
+                args: ["Enter", "varName", "new message", "taipy",null],
             },
         });
     });
@@ -123,14 +123,14 @@ describe("Chat Component", () => {
         const elt = getByLabelText("message (taipy)");
         await userEvent.click(elt);
         await userEvent.keyboard("new message");
-        await userEvent.click(getByRole("button"))
+        await userEvent.click(getByRole("button",{ name: /send message/i }))
         expect(dispatch).toHaveBeenCalledWith({
             type: "SEND_ACTION_ACTION",
             name: "",
             context: undefined,
             payload: {
                 action: undefined,
-                args: ["click", "varName", "new message", "taipy"],
+                args: ["click", "varName", "new message", "taipy",null],
             },
         });
     });
