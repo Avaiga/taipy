@@ -102,7 +102,7 @@ class ScenarioConfig(Section):
                     dag.add_edges_from([(task_cfg, successor)])
             if not has_inputs and not has_outputs:
                 dag.add_node(task_cfg)
-        # Remove tasks wit no input
+        # Remove tasks with no input
         to_remove = [t for t, degree in dict(dag.in_degree).items() if degree == 0 and isinstance(t, TaskConfig)]
         dag.remove_nodes_from(to_remove)
         # get data nodes in the dag
