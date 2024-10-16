@@ -65,8 +65,6 @@ jobs:
       - name: Install dependencies
         if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
         run: npm ci
-      - if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
-        run: npm run build --if-present
 
       - if: steps.cache-gui-fe-build.outputs.cache-hit != 'true'
         run: npm test
@@ -125,8 +123,6 @@ jobs:
       - name: Install dependencies
         if: steps.cache-gui-core-fe-build.outputs.cache-hit != 'true'
         run: npm ci --ignore-scripts
-      - if: steps.cache-gui-core-fe-build.outputs.cache-hit != 'true'
-        run: npm run build --if-present
 
       - if: steps.cache-gui-core-fe-build.outputs.cache-hit != 'true'
         run: npm test
