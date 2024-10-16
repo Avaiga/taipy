@@ -92,7 +92,7 @@ describe("TimeSelector component with digital time picker", () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <TimeSelector
-                    defaultTime="2001-01-01T01:01:01.001Z"
+                    defaultTime="2001-01-01T01:01:01"
                     time={undefined as unknown as string}
                 />
             </LocalizationProvider>
@@ -105,7 +105,7 @@ describe("TimeSelector component with digital time picker", () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <TimeSelector
-                    defaultTime="2001-01-01T14:20:01.001Z"
+                    defaultTime="2001-01-01T14:20:01"
                     time={undefined as unknown as string}
                     format="hh aa"
                 />
@@ -162,7 +162,7 @@ describe("TimeSelector component with analogue time picker", () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <TimeSelector
-                    defaultTime="2001-01-01T01:01:01.001Z"
+                    defaultTime="2001-01-01T01:01:01"
                     time={undefined as unknown as string}
                     asClock={true}
                 />
@@ -176,7 +176,7 @@ describe("TimeSelector component with analogue time picker", () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <TimeSelector
-                    defaultTime="2001-01-01T14:20:01.001Z"
+                    defaultTime="2001-01-01T14:20:01"
                     time={undefined as unknown as string}
                     asClock={true}
                     format="hh aa"
