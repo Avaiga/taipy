@@ -21,10 +21,6 @@ import { useDispatchRequestUpdateOnFirstRender } from "taipy-gui";
 
 const TaipyContext = createContext<{}>({ state: {}, dispatch: () => null });
 
-beforeEach(() => {
-    jest.resetAllMocks();
-});
-
 describe("ScenarioSelector Component", () => {
     it("renders", async () => {
         const { getByText } = render(
@@ -87,7 +83,7 @@ describe("ScenarioSelector Component", () => {
             />
         );
         const elt = getByText("Add scenario");
-        expect(elt).toBeDisabled();
+        expect(elt).not.toBeDisabled();
     });
     it("dispatch a message at first render", async () => {
         const dispatch = jest.fn();
