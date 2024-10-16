@@ -26,21 +26,10 @@
 <br>
 <div align="center">
    <img 
-        src="https://img.shields.io/badge/python%20version-3.9-ff371a?style=plastic&labelColor=1f1f1f" 
+      src="https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-ff371a?style=plastic&labelColor=1f1f1f" 
         alt="Python version needed: 3.9" 
     />
-   <img 
-        src="https://img.shields.io/badge/python%20version-3.10-ff371a?style=plastic&labelColor=1f1f1f" 
-        alt="Python version needed: 3.10" 
-    />
-    <img 
-        src="https://img.shields.io/badge/python%20version-3.11-ff371a?style=plastic&labelColor=1f1f1f" 
-        alt="Python version needed: 3.11" 
-    />
-        <img 
-        src="https://img.shields.io/badge/python%20version-3.12-ff371a?style=plastic&labelColor=1f1f1f" 
-        alt="Python version needed: 3.12" 
-    />
+  
 </div>
 <br>
 
