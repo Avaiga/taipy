@@ -25,7 +25,7 @@ import Field from "./Field";
 import { getTime } from "../../utils";
 
 interface TimeSelectorProps extends TaipyActiveProps, TaipyChangeProps {
-  asClock?: boolean;
+  analogic?: boolean;
   format?: string;
   defaultTime?: string;
   defaultEditable?: boolean;
@@ -37,7 +37,7 @@ interface TimeSelectorProps extends TaipyActiveProps, TaipyChangeProps {
 
 const boxSx = { display: "inline-block" };
 const TimeSelector = (props: TimeSelectorProps) => {
-  const { asClock = false, id, updateVarName, propagate = true } = props;
+  const { analogic = false, id, updateVarName, propagate = true } = props;
   const [value, setValue] = useState(() => getTime(props.defaultTime));
   const dispatch = useDispatch();
   const module = useModule();
@@ -83,7 +83,7 @@ const TimeSelector = (props: TimeSelectorProps) => {
       <Tooltip title={hover || ""}>
         <Box id={id} className={className} sx={boxSx}>
           {editable ? (
-            asClock ? (
+            analogic ? (
               <MobileTimePicker
                 value={value}
                 onChange={handleChange}

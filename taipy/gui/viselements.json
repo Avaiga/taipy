@@ -364,7 +364,7 @@
                 ],
                 "properties": [
                     {
-                        "name": "as_clock",
+                        "name": "analogic",
                         "type": "bool",
                         "default_value": "False",
                         "doc": "Whether or not to show timepicker as a clock."

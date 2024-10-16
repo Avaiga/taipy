@@ -586,7 +586,7 @@ class _Factory:
         .set_attributes(
             [
                 ("active", PropertyType.dynamic_boolean, True),
-                ("as_clock", PropertyType.boolean),
+                ("analogic", PropertyType.boolean),
                 ("editable", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
                 ("label",),

@@ -151,7 +151,7 @@ describe("TimeSelector component with analogue time picker", () => {
     it("renders", async () => {
         const { getByTestId } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <TimeSelector time={curDateStr} asClock={true} />
+                <TimeSelector time={curDateStr} analogic={true} />
             </LocalizationProvider>
         );
         const input = document.querySelector("input");
@@ -164,7 +164,7 @@ describe("TimeSelector component with analogue time picker", () => {
                 <TimeSelector
                     defaultTime="2001-01-01T01:01:01"
                     time={undefined as unknown as string}
-                    asClock={true}
+                    analogic={true}
                 />
             </LocalizationProvider>
         );
@@ -178,7 +178,7 @@ describe("TimeSelector component with analogue time picker", () => {
                 <TimeSelector
                     defaultTime="2001-01-01T14:20:01"
                     time={undefined as unknown as string}
-                    asClock={true}
+                    analogic={true}
                     format="hh aa"
                 />
             </LocalizationProvider>
@@ -190,7 +190,7 @@ describe("TimeSelector component with analogue time picker", () => {
     it("is disabled", async () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <TimeSelector time={curDateStr} active={false} asClock={true} />
+                <TimeSelector time={curDateStr} active={false} analogic={true} />
             </LocalizationProvider>
         );
         const input = document.querySelector("input");
@@ -200,7 +200,7 @@ describe("TimeSelector component with analogue time picker", () => {
     it("is enabled by default", async () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <TimeSelector time={curDateStr} asClock={true} />
+                <TimeSelector time={curDateStr} analogic={true} />
             </LocalizationProvider>
         );
         const input = document.querySelector("input");
@@ -210,7 +210,7 @@ describe("TimeSelector component with analogue time picker", () => {
     it("is enabled by active", async () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <TimeSelector time={curDateStr} active={true} asClock={true} />
+                <TimeSelector time={curDateStr} active={true} analogic={true} />
             </LocalizationProvider>
         );
         const input = document.querySelector("input");
