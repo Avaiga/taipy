@@ -13,7 +13,6 @@ import os
 from datetime import datetime, timedelta
 from time import sleep
 from unittest import mock
-from unittest.mock import patch
 
 import pytest
 
