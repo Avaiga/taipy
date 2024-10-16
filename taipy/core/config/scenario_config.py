@@ -13,6 +13,8 @@ from collections import defaultdict
 from copy import copy
 from typing import Any, Callable, Dict, List, Optional, Union
 
+import networkx as nx
+
 from taipy.common.config import Config
 from taipy.common.config._config import _Config
 from taipy.common.config.common._template_handler import _TemplateHandler as _tpl
@@ -86,6 +88,35 @@ class ScenarioConfig(Section):
                 else:
                     self.comparators[_validate_id(k)].append(v)
         super().__init__(id, **properties)
+        self.__build_datanode_configs_ranks()
+
+    def __build_datanode_configs_ranks(self):
+        # build the DAG
+        dag = nx.DiGraph()
+        for task_cfg in self._tasks:
+            if has_inputs := task_cfg.inputs:
+                for predecessor in task_cfg.inputs:
+                    dag.add_edges_from([(predecessor, task_cfg)])
+            if has_outputs := task_cfg.outputs:
+                for successor in task_cfg.outputs:
+                    dag.add_edges_from([(task_cfg, successor)])
+            if not has_inputs and not has_outputs:
+                dag.add_node(task_cfg)
+        # Remove tasks wit no input
+        to_remove = [t for t, degree in dict(dag.in_degree).items() if degree == 0 and isinstance(t, TaskConfig)]
+        dag.remove_nodes_from(to_remove)
+        # get data nodes in the dag
+        dn_cfgs = [nodes for nodes in nx.topological_generations(dag) if (DataNodeConfig in (type(n) for n in nodes))]
+
+        # assign ranks to data nodes configs starting from 1
+        rank = 1
+        for same_rank_datanode_cfgs in dn_cfgs:
+            for dn_cfg in same_rank_datanode_cfgs:
+                dn_cfg._ranks[self.id] = rank
+            rank += 1
+        # additional data nodes (not in the dag) have a rank of 0
+        for add_dn_cfg in self._additional_data_nodes:
+            add_dn_cfg._ranks[self.id] = 0
 
     def __copy__(self):
         comp = None if self.comparators is None else self.comparators
@@ -199,7 +230,8 @@ class ScenarioConfig(Section):
         }
 
     @classmethod
-    def _from_dict(cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config] = None) -> "ScenarioConfig":  # type: ignore
+    def _from_dict(cls, as_dict: Dict[str, Any], id: str,
+                   config: Optional[_Config] = None) -> "ScenarioConfig":  # type: ignore
         as_dict.pop(cls._ID_KEY, id)
 
         tasks = cls.__get_task_configs(as_dict.pop(cls._TASKS_KEY, []), config)

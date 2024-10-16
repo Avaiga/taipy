@@ -97,7 +97,7 @@ def test_scenario_creation():
     dn_config_4 = Config.configure_data_node("dn4")
     task_config_1 = Config.configure_task("task1", sum, [dn_config_1, dn_config_2], dn_config_3)
     task_config_2 = Config.configure_task("task2", print, dn_config_3)
-    scenario = Config.configure_scenario(
+    scenario_cfg = Config.configure_scenario(
         "scenarios1",
         [task_config_1, task_config_2],
         [dn_config_4],
@@ -105,10 +105,69 @@ def test_scenario_creation():
         sequences={"sequence": []},
     )
 
-    assert list(Config.scenarios) == ["default", scenario.id]
+    assert list(Config.scenarios.keys()) == ["default", scenario_cfg.id]
 
     scenario2 = Config.configure_scenario("scenarios2", [task_config_1], frequency=Frequency.MONTHLY)
-    assert list(Config.scenarios) == ["default", scenario.id, scenario2.id]
+    assert list(Config.scenarios.keys()) == ["default", scenario_cfg.id, scenario2.id]
+
+
+def test_datanode_config_ranks():
+    dn_config_1 = Config.configure_data_node("dn1")
+    dn_config_2 = Config.configure_data_node("dn2")
+    dn_config_3 = Config.configure_data_node("dn3")
+    dn_config_4 = Config.configure_data_node("dn4")
+    dn_config_5 = Config.configure_data_node("dn5")
+    dn_config_6 = Config.configure_data_node("dn6")
+
+    task_config_1 = Config.configure_task("task1", sum, dn_config_1, dn_config_2)
+    task_config_2 = Config.configure_task("task2", sum, dn_config_2, dn_config_3)
+    task_config_3 = Config.configure_task("task3", sum, [dn_config_1, dn_config_2], dn_config_3)
+    task_config_4 = Config.configure_task("task4", sum, dn_config_3, [dn_config_4, dn_config_5])
+    task_config_5 = Config.configure_task("task5", sum, dn_config_5, dn_config_6)
+
+    # s1 additional: dn3
+    # s1 dag:  dn1 -> dn2
+    Config.configure_scenario("s1", [task_config_1],[dn_config_3])
+    # s2 additional: dn4
+    # s2 dag:  dn2 -> dn3
+    Config.configure_scenario("s2", [task_config_2],[dn_config_4])
+    # s3 additional: None
+    # s3 dag:  dn1 -> dn2 -> dn3
+    Config.configure_scenario("s3", [task_config_1, task_config_2])
+    # s4 additional: None
+    # s4 dag:  dn1 --                 --> dn4
+    #                \               /
+    #                 |----> dn3 ---|
+    #                /               \
+    #          dn2 --                 --> dn5 ---> dn6
+    Config.configure_scenario("s4", [task_config_3, task_config_4, task_config_5])
+
+    assert len(dn_config_1._ranks) == 3
+    assert dn_config_1._ranks["s1"] == 1
+    assert dn_config_1._ranks["s3"] == 1
+    assert dn_config_1._ranks["s4"] == 1
+
+    assert len(dn_config_2._ranks) == 4
+    assert dn_config_2._ranks["s1"] == 2
+    assert dn_config_2._ranks["s2"] == 1
+    assert dn_config_2._ranks["s3"] == 2
+    assert dn_config_2._ranks["s4"] == 1
+
+    assert len(dn_config_3._ranks) == 4
+    assert dn_config_3._ranks["s1"] == 0
+    assert dn_config_3._ranks["s2"] == 2
+    assert dn_config_3._ranks["s3"] == 3
+    assert dn_config_3._ranks["s4"] == 2
+
+    assert len(dn_config_4._ranks) == 2
+    assert dn_config_4._ranks["s2"] == 0
+    assert dn_config_4._ranks["s4"] == 3
+
+    assert len(dn_config_5._ranks) == 2
+    assert dn_config_5._ranks["s4"] == 3
+
+    assert len(dn_config_6._ranks) == 2
+    assert dn_config_6._ranks["s4"] == 4
 
 
 def test_scenario_count():
