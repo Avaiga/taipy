@@ -37,6 +37,18 @@ No more compromise on performance, customization, and scalability.
 </h4>
   </p>
 
+  ## Table of Contents
+
+- [What's Taipy?](#%EF%B8%8F-whats-taipy)
+- [Key Features](#-key-features)
+- [Quickstart](#️-quickstart)
+- [Scenario and Data Management](#-scenario-and-data-management)
+- [Taipy Studio](#taipy-studio)
+- [User Interface Generation and Scenario & Data Management](#user-interface-generation-and-scenario--data-management)
+- [Contributing](#-contributing)
+- [Code of Conduct](#-code-of-conduct)
+- [License](#-license)
+
 &nbsp;
 
 ## ⭐️ What's Taipy?
@@ -85,10 +97,8 @@ step-by-step instructions.<br/>
 
 Excited to Dive In? 💡 <br>
 Start building with Taipy today! Our
-[Getting Started Guide]https://docs.taipy.io/en/develop/tutorials/getting_started/)
-is the perfect place to begin your journey and unlock the full potential of Taipy.
-
-
+[Getting Started Guide](https://docs.taipy.io/en/latest/tutorials/getting_started/) is the
+perfect place to begin your journey and unlock the full potential of Taipy.
 
 &nbsp;
 
