@@ -17,7 +17,7 @@ const { createJsWithTsPreset } = require('ts-jest')
 /** @type {import('ts-jest/dist/types').JestConfigWithTsJest} */
 module.exports = {
     testEnvironment: "jsdom",
-    setupFiles: [
+    setupFilesAfterEnv: [
         "./test-config/jest.env.js",
         "./test-config/createObjectUrl.js",
         "./test-config/Canvas.js",
