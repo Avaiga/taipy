@@ -22,8 +22,12 @@ from taipy.core._cli._core_cli_factory import _CoreCLIFactory
 from taipy.core._entity._migrate_cli import _MigrateCLI
 from taipy.core._version._cli._version_cli_factory import _VersionCLIFactory
 from taipy.gui._gui_cli import _GuiCLI
-
+from taipy.core.config.rest_config import RestSection, configure_rest  
+from taipy.gui import Gui
+from taipy.rest import Rest
+from taipy.config import Config
 from .version import _get_version
+from taipy.core.config.rest_config import configure_rest
 
 
 def _entrypoint():
@@ -74,23 +78,56 @@ def _entrypoint():
     _TaipyParser._parser.print_help()
 
 
+import argparse
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Taipy server")
-    parser.add_argument("--port", type=int, help="Port to run the server on")
-    parser.add_argument("--host", type=str, help="Host to run the server on")
-    parser.add_argument("--use-https", action="store_true", help="Use HTTPS")
-    parser.add_argument("--ssl-cert", type=str, help="Path to SSL certificate")
-    parser.add_argument("--ssl-key", type=str, help="Path to SSL key")
+    # REST server arguments
+    parser.add_argument("--rest-port", type=int, help="Port to run the REST server on")
+    parser.add_argument("--rest-host", type=str, help="Host to run the REST server on")
+    parser.add_argument("--rest-use-https", action="store_true", help="Use HTTPS for REST server")
+    parser.add_argument("--rest-ssl-cert", type=str, help="Path to SSL certificate for REST server")
+    parser.add_argument("--rest-ssl-key", type=str, help="Path to SSL key for REST server")
+    # GUI server arguments
+    parser.add_argument("--gui-port", type=int, help="Port to run the GUI server on")
+    parser.add_argument("--gui-host", type=str, help="Host to run the GUI server on")
+    parser.add_argument("--gui-use-https", action="store_true", help="Use HTTPS for GUI server")
+    parser.add_argument("--gui-ssl-cert", type=str, help="Path to SSL certificate for GUI server")
+    parser.add_argument("--gui-ssl-key", type=str, help="Path to SSL key for GUI server")
     return parser.parse_args()
 
 def main():
     args = parse_args()
-    config = Config()
-    if args.port:
-        config.rest.port = args.port
-    if args.host:
-        config.rest.host = args.host
-    if args.use_https:
-        config.rest.use_https = True
-        config.rest.ssl_cert = args.ssl_cert
-        config.rest.ssl_key = args.ssl_key
+
+    # Configure REST
+    rest_config = {
+        "port": args.rest_port or 5000,
+        "host": args.rest_host or "127.0.0.1",
+        "use_https": args.rest_use_https,
+        "ssl_cert": args.rest_ssl_cert,
+        "ssl_key": args.rest_ssl_key
+    }
+    rest = Rest(**rest_config)
+
+    # Configure GUI
+    gui_config = {
+        "port": args.gui_port or 5001,  # Note: different default port
+        "host": args.gui_host or "127.0.0.1",
+        "use_reloader": False,
+        "use_https": args.gui_use_https,
+        "ssl_certfile": args.gui_ssl_cert,
+        "ssl_keyfile": args.gui_ssl_key
+    }
+    gui = Gui()
+
+    # Run the application with both GUI and REST
+    gui.run(
+        run_server=True,
+        rest=rest,
+        **gui_config
+    )
+
+if __name__ == "__main__":
+    main()
+
+
