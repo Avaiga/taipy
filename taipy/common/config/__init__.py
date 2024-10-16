@@ -46,6 +46,7 @@ and attributes to configure the Taipy application and retrieve the configuration
 """
 
 import os
+from inspect import signature
 from typing import List
 
 from ._init import Config
@@ -56,7 +57,7 @@ from .section import Section
 from .unique_section import UniqueSection
 
 
-def __write_func_to_doc(section, attr_name, configuration_methods):
+def __write_method_to_doc(configuration_methods):
     if os.environ.get("GENERATING_TAIPY_DOC", None) and os.environ["GENERATING_TAIPY_DOC"] == "true":
         with open("config_doc.txt", "a") as f:
             from inspect import signature
@@ -69,6 +70,10 @@ def __write_func_to_doc(section, attr_name, configuration_methods):
                 content = "        pass\n\n"
                 f.write(annotation + sign + doc + content)
 
+
+def __write_section_to_doc(section, attr_name):
+    if os.environ.get("GENERATING_TAIPY_DOC", None) and os.environ["GENERATING_TAIPY_DOC"] == "true":
+        with open("config_doc.txt", "a") as f:
             # Add the documentation for the attribute
             annotation = "    @property\n"
             sign = f"    def {attr_name} (self) -> {section.__name__}:\n"
@@ -83,23 +88,24 @@ def __write_func_to_doc(section, attr_name, configuration_methods):
             f.write(annotation + sign + doc + content)
 
 
-def _config_doc_for_config_section(func):
+def _config_doc_for_section(func):
     def func_with_doc(section, attribute_name, default, configuration_methods, add_to_unconflicted_sections=False):
-        __write_func_to_doc(section, attribute_name, configuration_methods)
+        __write_section_to_doc(section, attribute_name)
+        __write_method_to_doc(configuration_methods)
         return func(section, attribute_name, default, configuration_methods, add_to_unconflicted_sections)
 
     return func_with_doc
 
 
-def _config_doc_for_config_method(func):
-    def func_with_doc(section, attribute_name, configuration_methods):
-        __write_func_to_doc(section, attribute_name, configuration_methods)
-        return func(attribute_name, configuration_methods)
+def _config_doc_for_method(func):
+    def func_with_doc(configuration_methods):
+        __write_method_to_doc(configuration_methods)
+        return func(configuration_methods)
 
     return func_with_doc
 
 
-@_config_doc_for_config_section
+@_config_doc_for_section
 def _inject_section(
     section_clazz,
     attribute_name: str,
@@ -123,7 +129,7 @@ def _inject_section(
         setattr(Config, exposed_configuration_method, configuration_method)
 
 
-@_config_doc_for_config_method
-def _inject_method(section, attribute_name, configuration_methods: List[tuple]):
+@_config_doc_for_method
+def _inject_method(configuration_methods: List[tuple]):
     for exposed_configuration_method, configuration_method in configuration_methods:
         setattr(Config, exposed_configuration_method, configuration_method)
