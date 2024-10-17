@@ -1,6 +1,7 @@
 # Example for column name styling for header
 
 import pandas as pd
+
 from taipy.gui import Gui, Markdown
 
 # Sample data in DataFrame format
