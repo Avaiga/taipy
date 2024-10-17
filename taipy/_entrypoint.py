@@ -11,8 +11,9 @@
 
 import os
 import sys
+import argparse
 from importlib.util import find_spec
-
+from taipy.common.config import Config
 from taipy.common._cli._base_cli._taipy_parser import _TaipyParser
 from taipy.common._cli._create_cli import _CreateCLI
 from taipy.common._cli._help_cli import _HelpCLI
@@ -21,53 +22,49 @@ from taipy.core._cli._core_cli_factory import _CoreCLIFactory
 from taipy.core._entity._migrate_cli import _MigrateCLI
 from taipy.core._version._cli._version_cli_factory import _VersionCLIFactory
 from taipy.gui._gui_cli import _GuiCLI
-
+from taipy.rest.rest_config import RestSection, configure_rest  
+from taipy.gui import Gui
+from taipy.rest import Rest
+from taipy.config import Config
+from taipy.core import Orchestrator
 from .version import _get_version
 
 
-def _entrypoint():
-    # Add the current working directory to path to execute version command on FS repo
-    sys.path.append(os.path.normpath(os.getcwd()))
+def parse_args():
+    parser = argparse.ArgumentParser(description="Taipy server")
+    # REST server arguments
+    parser.add_argument("--rest-port", type=int, help="Port to run the REST server on")
+    parser.add_argument("--rest-host", type=str, help="Host to run the REST server on")
+    parser.add_argument("--rest-use-https", action="store_true", help="Use HTTPS for REST server")
+    parser.add_argument("--rest-ssl-cert", type=str, help="Path to SSL certificate for REST server")
+    parser.add_argument("--rest-ssl-key", type=str, help="Path to SSL key for REST server")
+    return parser.parse_args()
 
-    _TaipyParser._parser.add_argument(
-        "-v",
-        "--version",
-        action="store_true",
-        help="Print the current Taipy version and exit.",
+def main():
+    gui = Gui()
+
+    gui_args = _GuiCLI.handle_command()
+
+    gui.run(
+        run_server=True,
+        **vars(gui_args)  
     )
 
-    if find_spec("taipy.enterprise"):
-        from taipy.enterprise._entrypoint import _entrypoint_initialize as _enterprise_entrypoint_initialize
+if __name__ == "__main__":
+    # Initialize and run Taipy Core
+    orchestrator = Orchestrator()
+    orchestrator.run()
 
-        _enterprise_entrypoint_initialize()
+    # Configure REST
+    rest_config = {
+        "port": 5000,
+        "host": "127.0.0.1",
+        "use_https": False,
+        "ssl_cert": None,
+        "ssl_key": None
+    }
+    rest = Rest()
 
-    _core_cli = _CoreCLIFactory._build_cli()
+    # Run the REST service
+    rest.run(**rest_config)
 
-    _RunCLI.create_parser()
-    _GuiCLI.create_run_parser()
-    _core_cli.create_run_parser()
-
-    _VersionCLIFactory._build_cli().create_parser()
-    _CreateCLI.generate_template_map()
-    _CreateCLI.create_parser()
-    _MigrateCLI.create_parser()
-    _HelpCLI.create_parser()
-
-    if find_spec("taipy.enterprise"):
-        from taipy.enterprise._entrypoint import _entrypoint_handling as _enterprise_entrypoint_handling
-
-        _enterprise_entrypoint_handling()
-
-    args, _ = _TaipyParser._parser.parse_known_args()
-    if args.version:
-        print(f"Taipy {_get_version()}")  # noqa: T201
-        sys.exit(0)
-
-    _RunCLI.handle_command()
-    _HelpCLI.handle_command()
-    _VersionCLIFactory._build_cli().handle_command()
-    _MigrateCLI.handle_command()
-    _CreateCLI.handle_command()
-
-    _TaipyParser._remove_argument("help")
-    _TaipyParser._parser.print_help()
