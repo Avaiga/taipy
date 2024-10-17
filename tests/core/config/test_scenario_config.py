@@ -163,10 +163,10 @@ def test_datanode_config_ranks():
     assert dn_config_4._ranks["s2"] == 0
     assert dn_config_4._ranks["s4"] == 3
 
-    assert len(dn_config_5._ranks) == 2
+    assert len(dn_config_5._ranks) == 1
     assert dn_config_5._ranks["s4"] == 3
 
-    assert len(dn_config_6._ranks) == 2
+    assert len(dn_config_6._ranks) == 1
     assert dn_config_6._ranks["s4"] == 4
 
 
