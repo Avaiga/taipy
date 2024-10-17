@@ -41,8 +41,7 @@ export interface LovProps<T = string | string[], U = string> extends TaipyActive
     defaultValue?: U;
     height?: string | number;
     valueById?: boolean;
-    selectedIds?: LoV;
-    defaultSelectedIds?: U;
+    selected?: T;
 }
 
 /**

@@ -1481,7 +1481,8 @@
             "menu",
             {
                 "inherits": [
-                    "active"
+                    "active",
+                    "on_change"
                 ],
                 "properties": [
                     {

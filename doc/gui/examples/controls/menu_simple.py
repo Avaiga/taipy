@@ -15,12 +15,12 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-lov = [("id1", "Menu option 1"), ("id2", "Menu option 2"), ("id3", "Menu option 3"), ("id4", "Menu option 4")]
+options = [("a", "Option A"), ("b", "Option B"), ("c", "Option C"), ("d", "Option D")]
 
 
-md = """
-<|menu|lov={lov}|>
+page = """
+<|menu|lov={options}|>
 """
 
 if __name__ == "__main__":
-    Gui(md).run()
+    Gui(page).run(title="Menu - Simple")

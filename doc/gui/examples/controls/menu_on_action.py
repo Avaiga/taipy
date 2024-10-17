@@ -13,24 +13,19 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-import logging
-
 from taipy.gui import Gui
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-
-lov = [("id1", "Menu option 1"), ("id2", "Menu option 2"), ("id3", "Menu option 3"), ("id4", "Menu option 4")]
-selected_ids = ["id1", "id2"]
+options = [("a", "Option A"), ("b", "Option B"), ("c", "Option C"), ("d", "Option D")]
+selected = ["a", "b"]
 
 def menu_action(state, id, payload):
     active = payload.get("args")
     for i in active:
-        logging.info(f"Menu option {i} selected")
+        print(f"Selected: {i}") # noqa: F401, T201
 
-md = """
-<|menu|lov={lov}|selected_ids={selected_ids}|on_action=menu_action|>
+page = """
+<|menu|lov={options}|selected={selected}|on_action=menu_action|>
 """
 
 if __name__ == "__main__":
-    Gui(md).run()
+    Gui(page).run(title="Menu - On Action")

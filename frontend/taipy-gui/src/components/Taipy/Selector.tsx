@@ -111,8 +111,8 @@ const getLovItemsFromStr = (value: string | string[] | undefined, lovList: LovIt
             ? value
             : [value]
         : Array.isArray(value) && value.length
-        ? value[0]
-        : value;
+          ? value[0]
+          : value;
     return Array.isArray(val)
         ? (val.map((v) => lovList.find((item) => item.id == "" + v)).filter((i) => i) as LovItem[])
         : (val && lovList.find((item) => item.id == "" + val)) || null;

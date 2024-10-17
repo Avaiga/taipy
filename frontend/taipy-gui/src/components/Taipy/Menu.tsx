@@ -24,7 +24,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { Theme, useTheme } from "@mui/system";
 
 import { LovImage } from "./lovUtils";
-import { createSendActionNameAction } from "../../context/taipyReducers";
+import { createSendUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
 import { MenuProps } from "../../utils/lov";
 import { useClassNames, useDispatch, useModule } from "../../utils/hooks";
 import { getComponentClassName } from "./TaipyStyle";
@@ -37,7 +37,7 @@ const baseTitleProps = { noWrap: true, variant: "h6" } as const;
 const cardSx = { p: 0 } as CSSProperties;
 
 const Menu = (props: MenuProps) => {
-    const { label, onAction = "", lov, width, inactiveIds = emptyArray, active = true } = props;
+    const { label, onAction = "", onChange = "", lov, width, inactiveIds = emptyArray, active = true } = props;
     const [selected, setSelected] = useState<boolean[]>([]);
     const [opened, setOpened] = useState(false);
     const dispatch = useDispatch();
@@ -54,11 +54,15 @@ const Menu = (props: MenuProps) => {
                 const newSelected = prevSelected.map((isSelected, i) => (i === index ? !isSelected : isSelected));
                 const selectedElements = lov?.filter((_, idx) => newSelected[idx]) || [];
                 const keys = selectedElements.map((element) => element.id);
-                dispatch(createSendActionNameAction("menu", module, onAction, ...keys));
+                const newKeys = [...keys];
+                props.selectedUpdateVars !== undefined &&
+                    onChange &&
+                    dispatch(createSendUpdateAction(props.selectedUpdateVars, newKeys, module, onChange));
+                onAction && dispatch(createSendActionNameAction("menu", module, onAction, ...keys));
                 return newSelected;
             });
         },
-        [active, dispatch, lov, module, onAction]
+        [active, dispatch, lov, module, onAction, onChange, props.selectedUpdateVars]
     );
 
     const openHandler = useCallback((evt: MouseEvent<HTMLElement>) => {
@@ -85,11 +89,9 @@ const Menu = (props: MenuProps) => {
     }, [opened, width, theme]);
 
     useEffect(() => {
-        const newSelected = (lov || []).map((item) =>
-            (props.selectedIds || []).some((selectedItem) => selectedItem.id === item.id)
-        );
+        const newSelected = (lov || []).map((item) => (props.selected || []).some((s) => s === item.id));
         setSelected(newSelected);
-    }, [lov, props.selectedIds]);
+    }, [lov, props.selected]);
 
     return lov && lov.length ? (
         <Drawer
