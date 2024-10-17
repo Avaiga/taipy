@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -88,6 +88,21 @@ describe("TimeSelector component with digital time picker", () => {
         expect(elt.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("taipy-time-picker");
         expect(elt.parentElement?.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("taipy-time");
     });
+
+    it("displays the right value after supplied by picker ", async () => {
+        render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <TimeSelector
+                    time={undefined as unknown as string}
+                />
+            </LocalizationProvider>
+        );
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        fireEvent.change(screen.getByRole("textbox"), {target: {value: '10:20 AM'}});
+        expect(screen.getByRole('textbox')).toHaveValue('10:20 AM');
+    });
+
     it("displays the default value", async () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -157,7 +172,6 @@ describe("TimeSelector component with analogue time picker", () => {
         const input = document.querySelector("input");
         expect(input).toBeInTheDocument();
     });
-
     it("displays the default value", async () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -187,6 +201,7 @@ describe("TimeSelector component with analogue time picker", () => {
         expect(input).toBeInTheDocument();
         expect(cleanText(input?.value || "")).toEqual("02 PM");
     });
+
     it("is disabled", async () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
