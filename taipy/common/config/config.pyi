@@ -1021,4 +1021,4 @@ class Config:
 
         Returns:
             The Core configuration.
-        """ 
+        """
