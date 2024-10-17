@@ -18,7 +18,7 @@ from taipy.gui import Gui
 options = [("a", "Option A"), ("b", "Option B"), ("c", "Option C"), ("d", "Option D")]
 selected = ["a", "b"]
 
-def menu_action(state, id, payload):
+def menu_action(_1, _2, payload):
     active = payload.get("args")
     for i in active:
         print(f"Selected: {i}") # noqa: F401, T201
