@@ -46,14 +46,14 @@ and attributes to configure the Taipy application and retrieve the configuration
 """
 
 from typing import List
+from taipy.common.config._init import Config
 
-from ._init import Config
 from .common.frequency import Frequency
 from .common.scope import Scope
 from .global_app.global_app_config import GlobalAppConfig
 from .section import Section
 from .unique_section import UniqueSection
-
+from .graph_visualizer import visualize_scenario_graph  # Importing the visualization function
 
 def _config_doc(func):
     def func_with_doc(section, attr_name, default, configuration_methods, add_to_unconflicted_sections=False):
@@ -110,3 +110,13 @@ def _inject_section(
 
     for exposed_configuration_method, configuration_method in configuration_methods:
         setattr(Config, exposed_configuration_method, configuration_method)
+
+def load_config():
+    # Example configuration loading
+    return {
+        'nodes': [{'id': 'node1', 'label': 'Node 1'}, {'id': 'node2', 'label': 'Node 2'}],
+        'edges': [{'from': 'node1', 'to': 'node2', 'label': 'Edge from Node 1 to Node 2'}]
+    }
+
+config = load_config()
+visualize_scenario_graph(config)
