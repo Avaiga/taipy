@@ -63,6 +63,9 @@ describe("MenuCtl Component", () => {
                     className: "",
                     inactiveIds: ["id1", "id2"],
                     label: "MenuCtl",
+                    onChange: undefined,
+                    selected: [],
+                    selectedUpdateVars: "",
                     lov: [
                         {
                             children: [],
@@ -87,7 +90,6 @@ describe("MenuCtl Component", () => {
                     ],
                     onAction: "on_action",
                     width: "15vw",
-                    selectedIds: [],
                 },
                 type: "SET_MENU",
             });
