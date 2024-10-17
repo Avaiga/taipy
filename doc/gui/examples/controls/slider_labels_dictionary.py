@@ -38,4 +38,4 @@ Value: <|{value}|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="Slider - Labels with Dictonary")
+    Gui(page).run(title="Slider - Labels with Dictionary")
