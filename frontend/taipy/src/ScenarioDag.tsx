@@ -25,11 +25,12 @@ import {
     createSendUpdateAction,
     getComponentClassName,
     getUpdateVar,
+    useClassNames,
     useDispatch,
     useDynamicProperty,
     useModule,
 } from "taipy-gui";
-import { CoreProps, useClassNames } from "./utils";
+import { CoreProps } from "./utils";
 import { TaipyDiagramModel } from "./projectstorm/models";
 
 interface ScenarioDagProps extends CoreProps {
