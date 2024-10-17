@@ -19,9 +19,9 @@ options = [("a", "Option A"), ("b", "Option B"), ("c", "Option C"), ("d", "Optio
 selected = ["a", "b"]
 
 def menu_action(_1, _2, payload):
-    active = payload.get("args")
-    for i in active:
-        print(f"Selected: {i}") # noqa: F401, T201
+    selected_options = payload["args"]
+    for option in selected_options:
+        print(f"Selected: {option}") # noqa: F401, T201
 
 page = """
 <|menu|lov={options}|selected={selected}|on_action=menu_action|>
