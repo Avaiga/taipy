@@ -94,7 +94,7 @@ is the perfect place to begin your journey and unlock the full potential of Taip
 
 ## 🔌 Scenario & Data Management
 
-Let's create a basic scenario in Taipy that allows you to filter movie data based on your chosen genre.<br />
+Let's create a simple scenario in Taipy that allows you to filter movie data based on your chosen genre.<br />
 This scenario is designed as a straightforward pipeline.<br />
 Every time you change your genre selection, the scenario runs to process your request.<br />
 It then displays the top seven most popular movies in that genre.
