@@ -15,34 +15,15 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-# Dictionary for slider labels
-labels_with_dict = {
-    0: "$0",
-    1: "$1",
-    2: "$2",
-    3: "$3",
-    4: "$4",
-    5: "$5",
-}
+# Initial value of the slider
+value=0
 
-# Initial values of the sliders
-value_dict = 0
-value_lov=0
-
+#If 'labels' is set to True, the slider uses the labels of the 'lov' if there are any.
 page = """
-Labels with Dictionary
+Labels with lov
 
-<|{value_dict}|slider|min=0|max=5|labels={labels_with_dict}|>
-
-Value (dict): <|{value_dict}|>
-
-Labels with List of Values (lov)
-
-<|{value_lov}|slider|lov=0;1;2;3;4;5|labels=True|>
-
-Value (lov): <|{value_lov}|>
+<|{value}|slider|lov=0;1;2;3;4;5|labels=True|>
 """
 
 if __name__ == "__main__":
-    Gui(page).run(title="Slider - Simple")
-
+    Gui(page).run(title="Slider - Labels with lov")
