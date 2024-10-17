@@ -1,4 +1,4 @@
-# Example for column name styling
+# Example for column name styling for header
 
 from taipy.gui import Gui
 import pandas as pd
