@@ -54,6 +54,6 @@ from .types import (
     _TaipyLovValue,
     _TaipyNumber,
     _TaipyTime,
-    _TaipyToJson    
+    _TaipyToJson
 )
 from .varnamefromcontent import _varname_from_content
