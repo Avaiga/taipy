@@ -1330,15 +1330,26 @@ class Gui:
             send_back_only=True,
         )
 
-    def __send_ws_alert(self, type: str, message: str, system_notification: bool, duration: int) -> None:
+    def __send_ws_alert(
+            self, type: str,
+            message: str,
+            system_notification: bool,
+            duration: int,
+            notification_id: t.Optional[str] = None
+        ) -> None:
+        payload = {
+            "type": _WsType.ALERT.value,
+            "atype": type,
+            "message": message,
+            "system": system_notification,
+            "duration": duration,
+        }
+
+        if notification_id:
+            payload["notification_id"] = notification_id
+
         self.__send_ws(
-            {
-                "type": _WsType.ALERT.value,
-                "atype": type,
-                "message": message,
-                "system": system_notification,
-                "duration": duration,
-            }
+            payload,
         )
 
     def __send_ws_partial(self, partial: str):
@@ -2242,13 +2253,29 @@ class Gui:
         message: str = "",
         system_notification: t.Optional[bool] = None,
         duration: t.Optional[int] = None,
+        notification_id: str = "",
     ):
         self.__send_ws_alert(
             notification_type,
             message,
             self._get_config("system_notification", False) if system_notification is None else system_notification,
             self._get_config("notification_duration", 3000) if duration is None else duration,
+            notification_id,
         )
+
+    def _close_notification(
+        self,
+        notification_id: str,
+    ):
+        if notification_id:
+            self.__send_ws_alert(
+                type="",  # Since you're closing, set type to an empty string or a predefined "close" type
+                message="",  # No need for a message when closing
+                system_notification=False,  # System notification not needed for closing
+                duration=0,  # No duration since it's an immediate close
+                notification_id=notification_id
+            )
+
 
     def _hold_actions(
         self,
