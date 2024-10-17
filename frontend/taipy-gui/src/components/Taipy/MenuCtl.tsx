@@ -11,37 +11,40 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 
 import { LovProps, useLovListMemo } from "./lovUtils";
-import { useClassNames, useDispatch, useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useIsMobile, useModule } from "../../utils/hooks";
+import {
+    useClassNames,
+    useDispatch,
+    useDispatchRequestUpdateOnFirstRender,
+    useDynamicProperty,
+    useIsMobile,
+    useModule,
+} from "../../utils/hooks";
 import { createSetMenuAction } from "../../context/taipyReducers";
 import { MenuProps } from "../../utils/lov";
+import { getUpdateVar } from "./utils";
 
 interface MenuCtlProps extends LovProps<string> {
     label?: string;
     width?: string;
     width_Mobile_?: string;
     onAction?: string;
+    onChange?: string;
     inactiveIds?: string[];
     defaultInactiveIds?: string;
 }
 
 const MenuCtl = (props: MenuCtlProps) => {
-    const {
-        id,
-        label,
-        onAction,
-        defaultLov = "",
-        width = "15vw",
-        width_Mobile_ = "85vw",
-    } = props;
+    const { id, label, onAction, onChange, defaultLov = "", width = "15vw", width_Mobile_ = "85vw" } = props;
+    const [selected, setSelected] = useState<string[]>([]);
     const dispatch = useDispatch();
     const isMobile = useIsMobile();
     const module = useModule();
-
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const selectedUpdateVars = getUpdateVar(props.updateVars ?? "", "selected");
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, props.updateVars, props.updateVarName);
 
@@ -62,15 +65,24 @@ const MenuCtl = (props: MenuCtlProps) => {
     }, [props.inactiveIds, props.defaultInactiveIds]);
 
     useEffect(() => {
+        if (props.selected !== undefined && props.selected !== null) {
+            setSelected(Array.isArray(props.selected) ? props.selected.map((v) => "" + v) : ["" + props.selected]);
+        }
+    }, [props.selected]);
+
+    useEffect(() => {
         dispatch(
             createSetMenuAction({
                 label: label,
                 onAction: onAction,
+                onChange: onChange,
                 active: active,
                 lov: lovList,
                 inactiveIds: inactiveIds,
                 width: isMobile ? width_Mobile_ : width,
                 className: className,
+                selected: selected,
+                selectedUpdateVars: selectedUpdateVars,
             } as MenuProps)
         );
         return () => dispatch(createSetMenuAction({}));
@@ -85,6 +97,9 @@ const MenuCtl = (props: MenuCtlProps) => {
         isMobile,
         className,
         dispatch,
+        selected,
+        selectedUpdateVars,
+        onChange,
     ]);
 
     return <></>;

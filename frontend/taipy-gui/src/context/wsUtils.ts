@@ -1,5 +1,5 @@
 import { Socket } from "socket.io-client";
-import { nanoid } from 'nanoid'
+import { nanoid } from "nanoid";
 
 export const TAIPY_CLIENT_ID = "TaipyClientId";
 
@@ -59,10 +59,13 @@ export const sendWsMessage = (
 };
 
 export const lightenPayload = (payload: Record<string, unknown>) => {
-    return Object.keys(payload || {}).reduce((pv, key) => {
-        if (payload[key] !== undefined) {
-            pv[key] = payload[key];
-        }
-        return pv;
-    }, {} as typeof payload);
+    return Object.keys(payload || {}).reduce(
+        (pv, key) => {
+            if (payload[key] !== undefined) {
+                pv[key] = payload[key];
+            }
+            return pv;
+        },
+        {} as typeof payload
+    );
 };

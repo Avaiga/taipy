@@ -24,7 +24,7 @@ export interface TaipyHoverProps {
     defaultHoverText?: string;
 }
 
-interface TaipyDynamicProps extends TaipyBaseProps {
+export interface TaipyDynamicProps extends TaipyBaseProps {
     updateVarName?: string;
     propagate?: boolean;
     updateVars?: string;
@@ -149,8 +149,8 @@ export const getProps = (p: DateProps, start: boolean, val: Date | null, withTim
             ? "minDateTime"
             : "maxDateTime"
         : start
-        ? "minDate"
-        : "maxDate";
+          ? "minDate"
+          : "maxDate";
     if (p[propName] == val) {
         return p;
     }

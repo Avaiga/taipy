@@ -335,14 +335,16 @@ class _Factory:
         )
         .set_attributes(
             [
-                ("active", PropertyType.dynamic_boolean, True),
+                ("lov", PropertyType.lov),
                 ("label",),
+                ("on_action", PropertyType.function),
+                ("on_change", PropertyType.function),
+                ("selected", PropertyType.lov_value, "optional"),
+                ("inactive_ids", PropertyType.dynamic_list),
+                ("active", PropertyType.dynamic_boolean, True),
+                ("hover_text", PropertyType.dynamic_string),
                 ("width",),
                 ("width[mobile]",),
-                ("on_action", PropertyType.function),
-                ("inactive_ids", PropertyType.dynamic_list),
-                ("hover_text", PropertyType.dynamic_string),
-                ("lov", PropertyType.lov),
             ]
         )
         ._set_propagate(),
@@ -649,7 +651,7 @@ class _Factory:
             if control_name.endswith(_Factory._END_SUFFIX)
             else control_name
         )
-        name = name[len(_Factory.__TAIPY_NAME_SPACE) :] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
+        name = name[len(_Factory.__TAIPY_NAME_SPACE):] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
         prop = _Factory.__CONTROL_DEFAULT_PROP_NAME.get(name)
         if prop is None:
             _, _, element = _Factory.__get_library_element(name)
@@ -681,7 +683,7 @@ class _Factory:
     def call_builder(
         gui: "Gui", name: str, all_properties: t.Optional[t.Dict[str, t.Any]] = None, is_html: t.Optional[bool] = False
     ) -> t.Optional[t.Union[t.Any, t.Tuple[str, str]]]:
-        name = name[len(_Factory.__TAIPY_NAME_SPACE) :] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
+        name = name[len(_Factory.__TAIPY_NAME_SPACE):] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
         builder = _Factory.__CONTROL_BUILDERS.get(name)
         built = None
         _Factory.__COUNTER += 1

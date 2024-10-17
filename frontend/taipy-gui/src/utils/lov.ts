@@ -30,7 +30,10 @@ export interface MenuProps extends TaipyBaseProps {
     label?: string;
     width?: string;
     onAction?: string;
+    onChange?: string;
     inactiveIds?: string[];
     lov?: LovItem[];
     active?: boolean;
+    selected?: string[];
+    selectedUpdateVars?: string;
 }
