@@ -11,36 +11,33 @@
  * specific language governing permissions and limitations under the License.
  */
 
-module.exports =  {
-    parser:  '@typescript-eslint/parser',  // Specifies the ESLint parser
-    extends:  [
-      'plugin:react/recommended',  // Uses the recommended rules from @eslint-plugin-react
-      'plugin:@typescript-eslint/recommended',  // Uses the recommended rules from @typescript-eslint/eslint-plugin
+module.exports = {
+    parser: "@typescript-eslint/parser", // Specifies the ESLint parser
+    extends: [
+        "plugin:react/recommended", // Uses the recommended rules from @eslint-plugin-react
+        "plugin:@typescript-eslint/recommended", // Uses the recommended rules from @typescript-eslint/eslint-plugin
+//        "plugin:react/jsx-runtime", //using the new JSX transform from React 17
     ],
-    plugins: [
-      "@typescript-eslint",
-      "react-hooks",
-      "eslint-plugin-tsdoc"
-    ],
-    parserOptions:  {
-      ecmaVersion:  2018,  // Allows for the parsing of modern ECMAScript features
-      sourceType:  'module',  // Allows for the use of imports
-      ecmaFeatures:  {
-        jsx:  true,  // Allows for the parsing of JSX
-      },
+    plugins: ["@typescript-eslint", "react-hooks", "eslint-plugin-tsdoc"],
+    parserOptions: {
+        ecmaVersion: 2018, // Allows for the parsing of modern ECMAScript features
+        sourceType: "module", // Allows for the use of imports
+        ecmaFeatures: {
+            jsx: true, // Allows for the parsing of JSX
+        },
     },
-    rules:  {
-      // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
-      "@typescript-eslint/explicit-function-return-type": "off",
-      "@typescript-eslint/explicit-module-boundary-types": "off",
-      "@typescript-eslint/no-unused-expressions": "off", // allows a && b()
-      "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
-      "react-hooks/exhaustive-deps": "error", // Checks effect dependencies
-      "tsdoc/syntax": "off", // "warn" to check tsdoc syntax
+    rules: {
+        // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/explicit-module-boundary-types": "off",
+        "@typescript-eslint/no-unused-expressions": "off", // allows a && b()
+        "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
+        "react-hooks/exhaustive-deps": "error", // Checks effect dependencies
+        "tsdoc/syntax": "off", // "warn" to check tsdoc syntax
     },
-    settings:  {
-      react:  {
-        version:  'detect',  // Tells eslint-plugin-react to automatically detect the version of React to use
-      },
+    settings: {
+        react: {
+            version: "detect", // Tells eslint-plugin-react to automatically detect the version of React to use
+        },
     },
-  };
+};

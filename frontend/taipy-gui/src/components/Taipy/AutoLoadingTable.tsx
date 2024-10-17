@@ -604,7 +604,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                         <TableCell
                                             key={`head${columns[col].dfid}`}
                                             sortDirection={orderBy === columns[col].dfid && order}
-                                            sx={columns[col].width ? { width: columns[col].width } : {}}
+                                            sx={columns[col].width ? { width: columns[col].width } : undefined}
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [
