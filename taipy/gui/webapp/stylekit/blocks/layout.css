@@ -1,0 +1,87 @@
+/*
+ * Copyright 2021-2024 Avaiga Private Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
+/**************************************************************
+
+                   TAIPY LAYOUT
+
+***************************************************************/
+
+/*************************************************
+              OVERRIDES / NORMALIZATION
+**************************************************/
+
+.taipy-layout {
+    max-width: 100%;
+}
+
+.taipy-layout>.taipy-part {
+    min-width: 0;
+}
+
+.taipy-layout>.md-para {
+    min-width: 0;
+}
+
+.taipy-layout.align-columns-stretch>.taipy-part>.md-para,
+.taipy-layout>.taipy-part.align-item-stretch>.md-para {
+    height: 100%;
+}
+
+/*************************************************
+              MODIFIER CLASSES
+**************************************************/
+
+/***** Assignable to the layout block *****/
+
+/* align-columns-top: vertically align every column's content to the top of the line  */
+.taipy-layout.align-columns-top {
+    align-items: start;
+}
+
+/* align-columns-center: vertically align every column's content to the center of the line  */
+.taipy-layout.align-columns-center {
+    align-items: center;
+}
+
+/* align-columns-bottom: vertically align every column's content to the bottom of the line  */
+.taipy-layout.align-columns-bottom {
+    align-items: end;
+}
+
+/* align-columns-stretch: stretch every column's content to fill the whole height of the line  */
+.taipy-layout.align-columns-stretch {
+    align-items: stretch;
+}
+
+/***** Assignable to the layout children parts *****/
+
+/* align-item-top: vertically align this column's content to the top of the line  */
+.taipy-part.align-item-top {
+    align-self: start;
+}
+
+/* align-item-center: vertically align this column's content to the center of the line  */
+.taipy-part.align-item-center {
+    align-self: center;
+}
+
+/* align-item-bottom: vertically align this column's content to the bottom of the line  */
+.taipy-part.align-item-bottom {
+    align-self: end;
+}
+
+/* align-item-stretch: stretch this column's content to fill the whole height of the line  */
+.taipy-part.align-item-stretch {
+    align-self: stretch;
+}
