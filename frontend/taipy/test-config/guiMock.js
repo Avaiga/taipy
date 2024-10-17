@@ -8,4 +8,5 @@ jest.mock("taipy-gui", () => ({
     getComponentClassName: jest.fn(),
     useDispatchRequestUpdateOnFirstRender: jest.fn(),
     useClassNames: jest.fn((a, b, c) => c || b || a || ""),
+    getSuffixedClassNames: jest.fn()
 }));
