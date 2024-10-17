@@ -65,6 +65,7 @@ import {
     createRequestUpdateAction,
     createSendActionNameAction,
     getUpdateVar,
+    useClassNames,
     useDynamicProperty,
     useModule,
     Store,
@@ -86,7 +87,6 @@ import {
     iconLabelSx,
     popoverOrigin,
     tinySelPinIconButtonSx,
-    useClassNames,
 } from "./utils";
 import PropertiesEditor, { DatanodeProperties } from "./PropertiesEditor";
 import { NodeType, Scenarios } from "./utils/types";
