@@ -610,4 +610,4 @@ class _GuiCoreDatanodeSort(_GuiCoreDatanodeProperties, _TaipyBase):
 
 
 def _is_debugging() -> bool:
-    return hasattr(sys, "gettrace") and sys.gettrace() is not None 
+    return hasattr(sys, "gettrace") and sys.gettrace() is not None
