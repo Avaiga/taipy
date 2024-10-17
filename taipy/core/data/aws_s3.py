@@ -163,4 +163,4 @@ class S3ObjectDataNode(DataNode):
             Key=properties[self.__AWS_S3_OBJECT_KEY],
             Body=data,
             **properties.get(self.__AWS_S3_PUT_OBJECT_PARAMETERS, {}),
-         )
+        )
