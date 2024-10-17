@@ -22,6 +22,15 @@ import * as React from "react";
  */
 export declare const getUpdateVar: (updateVars: string, name: string) => string | undefined;
 
+/**
+ * Appends a suffix to the class names.
+ *
+ * @param names - The class names.
+ * @param suffix - The suffix to append.
+ * @returns The new list of class names.
+ */
+export declare const getSuffixedClassNames: (names: string | undefined, suffix: string) => string;
+
 export interface TaipyActiveProps extends TaipyDynamicProps, TaipyHoverProps {
     defaultActive?: boolean;
     active?: boolean;
@@ -465,4 +474,3 @@ export declare const useModule: () => string | undefined;
  * @returns The associated className.
  */
 export declare const getComponentClassName: (children: React.ReactNode) => string;
-
