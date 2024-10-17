@@ -11,11 +11,13 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useEffect, useState, useCallback } from "react";
-import { Theme, Tooltip, alpha } from "@mui/material";
+import React, { useCallback, useEffect, useState } from "react";
 
+import { Theme, Tooltip, alpha } from "@mui/material";
+import { Add, Close, DeleteOutline, EditOutlined } from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -26,29 +28,28 @@ import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
-import Dialog from "@mui/material/Dialog";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { Close, DeleteOutline, Add, EditOutlined } from "@mui/icons-material";
-import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { useFormik } from "formik";
 
 import {
-    useDispatch,
-    useModule,
     createSendActionNameAction,
-    getUpdateVar,
     createSendUpdateAction,
-    useDynamicProperty,
     getComponentClassName,
+    getUpdateVar,
+    useClassNames,
+    useDispatch,
+    useDynamicProperty,
+    useModule,
 } from "taipy-gui";
 
-import ConfirmDialog from "./utils/ConfirmDialog";
-import { MainTreeBoxSx, ScFProps, ScenarioFull, useClassNames, tinyIconButtonSx, CoreProps } from "./utils";
 import CoreSelector, { EditProps } from "./CoreSelector";
+import { CoreProps, MainTreeBoxSx, ScFProps, ScenarioFull, tinyIconButtonSx } from "./utils";
+import ConfirmDialog from "./utils/ConfirmDialog";
 import { Cycles, NodeType, Scenarios } from "./utils/types";
 
 type Property = {
