@@ -16,13 +16,10 @@
 from taipy.gui import Gui
 
 # Initial value of the slider
-value=0
+value="One"
 
-#If 'labels' is set to True, the slider uses the labels of the 'lov' if there are any.
 page = """
-Labels with lov
-
-<|{value}|slider|lov=0;1;2;3;4;5|labels=True|>
+<|{value}|slider|lov=One;Two;Three;Four;Five|labels|>
 """
 
 if __name__ == "__main__":

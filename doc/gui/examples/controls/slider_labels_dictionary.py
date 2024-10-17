@@ -16,7 +16,7 @@
 from taipy.gui import Gui
 
 # Dictionary for slider labels
-labels_with_dict = {
+labels = {
     0: "$0",
     1: "$1",
     2: "$2",
@@ -26,15 +26,12 @@ labels_with_dict = {
 }
 
 # Initial value of the slider
-value = 0
+value = 2
 
-# The slider uses the dictionary keys as a lov key or index, and the associated value as the label
 page = """
-Labels with Dictionary
+<|{value}|slider|min=0|max=5|labels={labels}|>
 
-<|{value}|slider|min=0|max=5|labels={labels_with_dict}|>
-
-Value: <|{value}|>
+Value: <|${value}|>
 """
 
 if __name__ == "__main__":
