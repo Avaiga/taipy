@@ -1170,4 +1170,4 @@ class DataNodeConfig(Section):
     ):
         section = DataNodeConfig(id, storage_type, scope, validity_period, **properties)
         Config._register(section)
-        return Config.sections[DataNodeConfig.name][id] 
+        return Config.sections[DataNodeConfig.name][id]
