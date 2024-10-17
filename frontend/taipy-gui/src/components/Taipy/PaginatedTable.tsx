@@ -40,6 +40,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DataSaverOn from "@mui/icons-material/DataSaverOn";
 import DataSaverOff from "@mui/icons-material/DataSaverOff";
 import Download from "@mui/icons-material/Download";
+import { generateHeaderClassName } from "./tableUtils";
 
 import { createRequestTableUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
 import {
@@ -508,6 +509,10 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     : nbWidth
                                                     ? { width: `${100 / nbWidth}%`, maxWidth: 0 }
                                                     : undefined
+                                            }
+                                            className={col === "EDIT_COL"
+                                                ? getSuffixedClassNames(className, "-action")
+                                                : getSuffixedClassNames(className, generateHeaderClassName(columns[col].dfid))
                                             }
                                         >
                                             {columns[col].dfid === EDIT_COL ? (

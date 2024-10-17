@@ -31,6 +31,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DataSaverOn from "@mui/icons-material/DataSaverOn";
 import DataSaverOff from "@mui/icons-material/DataSaverOff";
 import Download from "@mui/icons-material/Download";
+import { generateHeaderClassName } from "./tableUtils";
 
 import {
     createRequestInfiniteTableUpdateAction,
@@ -605,6 +606,10 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                             key={`head${columns[col].dfid}`}
                                             sortDirection={orderBy === columns[col].dfid && order}
                                             sx={columns[col].width ? { width: columns[col].width } : {}}
+                                            className={col === "EDIT_COL"
+                                                ? getSuffixedClassNames(className, "-action")
+                                                : getSuffixedClassNames(className, generateHeaderClassName(columns[col].dfid))
+                                            }
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [
