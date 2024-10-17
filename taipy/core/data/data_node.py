@@ -14,7 +14,7 @@ import os
 import uuid
 from abc import abstractmethod
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
 import networkx as nx
 
@@ -316,7 +316,7 @@ class DataNode(_Entity, _Labeled):
     @_self_reload(_MANAGER_NAME)
     def job_ids(self) -> List[JobId]:
         """List of the jobs having edited this data node."""
-        return [edit.get("job_id") for edit in self.edits if edit.get("job_id")]
+        return [job_id for edit in self.edits if (job_id := edit.get("job_id"))]
 
     @property
     def properties(self):
@@ -376,7 +376,7 @@ class DataNode(_Entity, _Labeled):
                     if (
                         isinstance(ancestor_node, DataNode)
                         and ancestor_node.last_edit_date
-                        and ancestor_node.last_edit_date > self.last_edit_date
+                        and ancestor_node.last_edit_date > cast(datetime, self.last_edit_date)
                     ):
                         return False
             return True
@@ -465,7 +465,7 @@ class DataNode(_Entity, _Labeled):
                 self._get_last_modified_datetime(self._properties.get(self._PATH_KEY, None)) or datetime.now()
             )
         self.last_edit_date = edit.get("timestamp")
-        self._edits.append(edit)
+        self._edits.append(cast(Edit, edit))
 
     def lock_edit(self, editor_id: Optional[str] = None):
         """Lock the data node modification.
@@ -571,6 +571,19 @@ class DataNode(_Entity, _Labeled):
             None if there has been no `Edit` on this data node.
         """
         return self._edits[-1] if self._edits else None
+
+    def get_rank(self) -> int:
+        if not self.owner_id:
+            return 0xffff
+        config = Config.data_nodes.get(self.config_id, None)
+        if not config:
+            return 0xfffc
+
+        from ... import core as tp
+        owner = tp.get(self.owner_id)
+        if not isinstance(owner, tp.Scenario):
+            return 0xfffe
+        return config._ranks.get(owner.config_id, 0xfffb)
 
     @abstractmethod
     def _read(self):
