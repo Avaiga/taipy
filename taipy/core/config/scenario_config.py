@@ -94,13 +94,13 @@ class ScenarioConfig(Section):
         # build the DAG
         dag = nx.DiGraph()
         for task_cfg in self._tasks:
-            if has_inputs := task_cfg.inputs:
-                for predecessor in task_cfg.inputs:
+            if inputs := task_cfg.inputs:
+                for predecessor in inputs:
                     dag.add_edges_from([(predecessor, task_cfg)])
-            if has_outputs := task_cfg.outputs:
-                for successor in task_cfg.outputs:
+            if outputs := task_cfg.outputs:
+                for successor in outputs:
                     dag.add_edges_from([(task_cfg, successor)])
-            if not has_inputs and not has_outputs:
+            if not inputs and not outputs:
                 dag.add_node(task_cfg)
         # Remove tasks with no input
         to_remove = [t for t, degree in dict(dag.in_degree).items() if degree == 0 and isinstance(t, TaskConfig)]
