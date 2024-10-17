@@ -10,6 +10,51 @@
   </a>
 </div>
 
+<div align="center">
+    <a target="_blank" href="https://github.com/Avaiga/taipy/releases">
+        <img
+            src="https://img.shields.io/github/v/release/Avaiga/taipy?display_name=release&style=plastic&color=ff371a&labelColor=1f1f1f"
+            height="20px"
+            alt="GitHub Release"
+        ></a>
+    <img
+        src="https://img.shields.io/github/license/Avaiga/taipy?style=plastic&color=ff371a&labelColor=1f1f1f"
+        height="20px"
+        alt="GitHub License"
+    />
+</div>
+
+<div align="center">
+    <img
+        src="https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-ff371a?style=plastic&labelColor=1f1f1f"
+        height="20px"
+        alt="Python version needed: 3.9 | 3.10 | 3.11 | 3.12"
+    />
+</div>
+
+<div align="center">
+    <a target="_blank" href="https://docs.taipy.io/en/latest/">
+        <img
+            src="https://img.shields.io/badge/Docs-ff371a?style=plastic&labelColor=1f1f1f&label=Explore"
+            height="20px"
+            alt="Explore the docs"
+        ></a>
+    <a target="_blank" href="https://docs.taipy.io/en/latest/gallery/">
+        <img
+            src="https://img.shields.io/badge/Gallery-ff371a?style=plastic&labelColor=1f1f1f&label=Explore"
+            height="20px"
+            alt="Demos & Examples"
+        ></a>
+    <a target="_blank" href="https://discord.com/invite/SJyz2VJGxV">
+        <img
+            src="https://img.shields.io/discord/1125797687476887563?style=plastic&labelColor=1f1f1f&logo=discord&logoColor=ff371a&label=Discord&color=ff371a"
+            height="20px"
+            alt="Discord support"
+        ></a>
+</div>
+
+<br />
+
 <h1 align="center">
 Build Python Data & AI web applications
 </h1>
