@@ -70,7 +70,7 @@ class Orchestrator:
         """Stop the Orchestrator service.
         This function stops the dispatcher and unblock the Config for update.
 
-        Parameters:
+        Arguments:
             wait (bool): If True, the method will wait for the dispatcher to stop.
             timeout (Optional[float]): The maximum time to wait. If None, the method will wait indefinitely.
         """

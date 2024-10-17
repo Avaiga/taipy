@@ -44,7 +44,7 @@ def download(
         - *on_action*: this callback is triggered when the transfer of the content is achieved.</br>
           In this function, you can perform any clean-up operation that could be required after
           the download is completed.<br/>
-          This callback can use three optional parameters:
+          This callback can use three optional arguments:
             - *state*: the `State^` instance of the caller.
             - *id* (optional): a string representing the identifier of the caller. If this function
               is called directly, this will always be "Gui.download". Some controls may also trigger
@@ -165,7 +165,7 @@ def navigate(
         to: The name of the page to navigate to. This can be a page identifier (as created by
             `Gui.add_page()^` with no leading '/') or a URL.<br/>
             If omitted, the application navigates to the root page.
-        params: A dictionary of query parameters.
+        params: A dictionary of query arguments.
         tab: When navigating to a page that is not a known page, the page is opened in a tab identified by
             *tab* (as in [window.open](https://developer.mozilla.org/en-US/docs/Web/API/Window/open)).<br/>
             The default value creates a new tab for the page (which is equivalent to setting *tab* to "_blank").
@@ -190,7 +190,7 @@ def get_user_content_url(
         state (State^): The current user state as received in any callback.
         path: An optional additional path to the URL.
         params: An optional dictionary sent to the *on_user_content* callback.<br/>
-            These arguments are added as query parameters to the generated URL and converted into
+            These arguments are added as query arguments to the generated URL and converted into
             strings.
 
     Returns:
@@ -308,8 +308,8 @@ def broadcast_callback(
         callback: The user-defined function to be invoked.<br/>
             The first parameter of this function must be a `State^` object representing the
             client for which it is invoked.<br/>
-            The other parameters should reflect the ones provided in the *args* collection.
-        args: The parameters to send to *callback*, if any.
+            The other arguments should reflect the ones provided in the *args* collection.
+        args: The arguments to send to *callback*, if any.
     """
     if isinstance(gui, Gui):
         return gui.broadcast_callback(callback, args, module_context)

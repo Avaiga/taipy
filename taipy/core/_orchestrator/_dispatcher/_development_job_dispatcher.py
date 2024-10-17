@@ -41,7 +41,7 @@ class _DevelopmentJobDispatcher(_JobDispatcher):
     def _dispatch(self, job: Job):
         """Dispatches the given `Job^` on an available worker for execution.
 
-        Parameters:
+        Arguments:
             job (Job^): The job to submit on an executor with an available worker.
         """
         rs = _TaskFunctionWrapper(job.id, job.task).execute()

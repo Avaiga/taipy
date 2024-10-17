@@ -56,7 +56,7 @@ class CoreEventConsumerBase(threading.Thread):
     def __init__(self, registration_id: str, queue: SimpleQueue) -> None:
         """Initialize a CoreEventConsumerBase instance.
 
-        Parameters:
+        Arguments:
             registration_id (str): A unique identifier of the registration. You can get a
                 registration id invoking `Notifier.register()^` method.
             queue (SimpleQueue): The queue from which events will be consumed. You can get a

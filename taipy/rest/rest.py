@@ -24,13 +24,13 @@ class Rest:
         """
         Initialize a REST API server.
 
-        A Flask application is instantiated and configured using three parameters from the global
+        A Flask application is instantiated and configured using three arguments from the global
         config.
             - Config.global_config.testing (bool): Run the application on testing mode.
             - Config.global_config.env (Optional[str]): The application environment.
             - Config.global_config.secret_key (Optional[str]): Application server secret key.
 
-        However, editing these parameters is only recommended for advanced users. Indeed, the default behavior of the
+        However, editing these arguments is only recommended for advanced users. Indeed, the default behavior of the
         REST server without any required configuration satisfies all the standard and basic needs.
         """
         self._app: Flask = _create_app(
@@ -41,7 +41,7 @@ class Rest:
         """
         Start a REST API server. This method is blocking.
 
-        Parameters:
+        Arguments:
             **kwargs : Options to provide to the application server.
         """
         self._app.run(**kwargs)

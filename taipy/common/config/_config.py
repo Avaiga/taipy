@@ -77,7 +77,7 @@ class _Config:
         """Loop through attributes of a Section to find if any attribute has a list of Section as value.
         If there is, update each nested Section by the corresponding instance in self.
 
-        Args:
+        Arguments:
             section (Section): The Section to search for nested sections.
         """
         for _, attr_value in vars(section).items():

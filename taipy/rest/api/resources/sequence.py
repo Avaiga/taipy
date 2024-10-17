@@ -55,7 +55,7 @@ class SequenceResource(Resource):
           curl -X GET http://localhost:5000/api/v1/sequences/SEQUENCE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
         ```
 
-      parameters:
+      arguments:
         - in: path
           name: sequence_id
           schema:
@@ -88,7 +88,7 @@ class SequenceResource(Resource):
           curl -X DELETE http://localhost:5000/api/v1/sequences/SEQUENCE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
         ```
 
-      parameters:
+      arguments:
         - in: path
           name: sequence_id
           schema:
@@ -176,7 +176,7 @@ class SequenceList(Resource):
            http://localhost:5000/api/v1/sequences
         ```
 
-      parameters:
+      arguments:
         - in: query
           name: scenario_id
           schema:
@@ -261,7 +261,7 @@ class SequenceExecutor(Resource):
           curl -X POST http://localhost:5000/api/v1/sequences/submit/SEQUENCE_my_config_7575-4e09-4e00-958d-e352ee426cc9
         ```
 
-      parameters:
+      arguments:
         - in: path
           name: sequence_id
           schema:
