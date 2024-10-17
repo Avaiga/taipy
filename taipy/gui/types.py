@@ -28,8 +28,8 @@ from .utils import (
     _TaipyLov,
     _TaipyLovValue,
     _TaipyNumber,
-    _TaipyToJson,
-    _TaipyTime
+    _TaipyTime,
+    _TaipyToJson    
 )
 
 

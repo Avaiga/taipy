@@ -53,7 +53,7 @@ from .types import (
     _TaipyLov,
     _TaipyLovValue,
     _TaipyNumber,
-    _TaipyToJson,
-    _TaipyTime
+    _TaipyTime,
+    _TaipyToJson    
 )
 from .varnamefromcontent import _varname_from_content
