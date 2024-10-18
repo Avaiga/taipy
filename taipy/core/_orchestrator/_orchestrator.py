@@ -57,7 +57,7 @@ class _Orchestrator(_AbstractOrchestrator):
     ) -> Submission:
         """Submit the given `Scenario^` or `Sequence^` for an execution.
 
-        Parameters:
+        Arguments:
              submittable (Union[Scenario^, Sequence^]): The scenario or sequence to submit for execution.
              callbacks: The optional list of functions that should be executed on jobs status change.
              force (bool) : Enforce execution of the scenario's or sequence's tasks even if their output data
@@ -114,7 +114,7 @@ class _Orchestrator(_AbstractOrchestrator):
     ) -> Submission:
         """Submit the given `Task^` for an execution.
 
-        Parameters:
+        Arguments:
              task (Task^): The task to submit for execution.
              callbacks: The optional list of functions that should be executed on job status change.
              force (bool): Enforce execution of the task even if its output data nodes are cached.
@@ -226,7 +226,7 @@ class _Orchestrator(_AbstractOrchestrator):
     def _is_blocked(cls, obj: Union[Task, Job]) -> bool:
         """Returns True if the execution of the `Job^` or the `Task^` is blocked by the execution of another `Job^`.
 
-        Parameters:
+        Arguments:
              obj (Union[Task^, Job^]): The job or task entity to run.
 
         Returns:

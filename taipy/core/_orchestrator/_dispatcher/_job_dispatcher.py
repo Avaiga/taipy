@@ -52,7 +52,7 @@ class _JobDispatcher(threading.Thread):
     def stop(self, wait: bool = True, timeout: Optional[float] = None):
         """Stop the dispatcher.
 
-        Parameters:
+        Arguments:
             wait (bool): If True, the method will wait for the dispatcher to stop.
             timeout (Optional[float]): The maximum time to wait. If None, the method will wait indefinitely.
         """
@@ -117,7 +117,7 @@ class _JobDispatcher(threading.Thread):
         """
         Returns True if the task has no output or if at least one input was modified since the latest run.
 
-        Parameters:
+        Arguments:
              task (Task^): The task to run.
 
         Returns:
@@ -142,7 +142,7 @@ class _JobDispatcher(threading.Thread):
         """
         Dispatches the given `Job^` on an available worker for execution.
 
-        Parameters:
+        Arguments:
             job (Job^): The job to submit on an executor with an available worker.
         """
         raise NotImplementedError

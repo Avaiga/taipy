@@ -215,7 +215,7 @@ class MongoCollectionDataNode(DataNode):
     def _write(self, data) -> None:
         """Check data against a collection of types to handle insertion on the database.
 
-        Parameters:
+        Arguments:
             data (Any): the data to write to the database.
         """
         if not isinstance(data, list):
@@ -234,7 +234,7 @@ class MongoCollectionDataNode(DataNode):
         """
         This method will insert data contained in a list of dictionaries into a collection.
 
-        Parameters:
+        Arguments:
             data (List[Dict]): a list of dictionaries
             drop (bool): drop the collection before inserting the data to overwrite the data in the collection.
         """
@@ -252,7 +252,7 @@ class MongoCollectionDataNode(DataNode):
     def _default_decoder(self, document: Dict) -> Any:
         """Decode a Mongo dictionary to a custom document object for reading.
 
-        Parameters:
+        Arguments:
             document (Dict): the document dictionary return by Mongo query.
 
         Returns:
@@ -263,7 +263,7 @@ class MongoCollectionDataNode(DataNode):
     def _default_encoder(self, document_object: Any) -> Dict:
         """Encode a custom document object to a dictionary for writing to MongoDB.
 
-        Args:
+        Arguments:
             document_object: the custom document class.
 
         Returns:

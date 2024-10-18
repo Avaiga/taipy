@@ -103,7 +103,7 @@ class _FileDataNodeMixin(object):
     def _upload(self, path: str, upload_checker: Optional[Callable[[str, Any], bool]] = None) -> ReasonCollection:
         """Upload a file data to the data node.
 
-        Parameters:
+        Arguments:
             path (str): The path of the file to upload to the data node.
             upload_checker (Optional[Callable[[str, Any], bool]]): A function to check if the upload is allowed.
                 The function takes the title of the upload data and the data itself as arguments and returns

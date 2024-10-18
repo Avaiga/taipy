@@ -157,7 +157,7 @@ class DataNodeResource(Resource):
           When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_READER` role.
 
-      parameters:
+      arguments:
         - in: path
           name: datanode_id
           schema:
@@ -235,7 +235,7 @@ class DataNodeResource(Resource):
             When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_EDITOR` role.
 
-      parameters:
+      arguments:
         - in: path
           name: datanode_id
           schema:
@@ -433,7 +433,7 @@ class DataNodeList(Resource):
             When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_EDITOR` role.
 
-      parameters:
+      arguments:
         - in: query
           name: config_id
           schema:
@@ -549,7 +549,7 @@ class DataNodeReader(Resource):
             When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_READER` role.
 
-      parameters:
+      arguments:
         - in: path
           name: datanode_id
           schema:
@@ -625,7 +625,7 @@ class DataNodeWriter(Resource):
            http://localhost:5000/api/v1/datanodes/DATANODE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9/write
         ```
 
-      parameters:
+      arguments:
         - in: path
           name: datanode_id
           schema:

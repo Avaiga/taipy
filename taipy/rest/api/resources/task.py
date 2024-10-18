@@ -54,7 +54,7 @@ class TaskResource(Resource):
           curl -X GET http://localhost:5000/api/v1/tasks/TASK_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
         ```
 
-      parameters:
+      arguments:
         - in: path
           name: task_id
           schema:
@@ -86,7 +86,7 @@ class TaskResource(Resource):
         ```shell
           curl -X DELETE http://localhost:5000/api/v1/tasks/TASK_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
         ```
-      parameters:
+      arguments:
         - in: path
           name: task_id
           schema:
@@ -172,7 +172,7 @@ class TaskList(Resource):
         ```shell
           curl -X POST http://localhost:5000/api/v1/tasks?config_id=my_task_config
         ```
-      parameters:
+      arguments:
         - in: query
           name: config_id
           schema:
@@ -247,7 +247,7 @@ class TaskExecutor(Resource):
           curl -X POST http://localhost:5000/api/v1/tasks/submit/TASK_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
         ```
 
-      parameters:
+      arguments:
         - in: path
           name: task_id
           schema:
