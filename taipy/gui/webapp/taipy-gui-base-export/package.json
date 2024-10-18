@@ -1,0 +1,7 @@
+{
+  "name": "taipy-gui-base",
+  "version": "4.0.0",
+  "private": true,
+  "main": "./taipy-gui-base.js",
+  "types": "./taipy-gui-base.d.ts"
+}
