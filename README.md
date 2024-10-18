@@ -235,13 +235,12 @@ the License. You may obtain a copy of the License at
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
-specific language governing permissions and limitations under the License.
-# Contributors ✨
+specific language governing permissions and limitations under the License.Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-10-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
@@ -251,6 +250,15 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="https://github.com/faizalimam990"><img src="https://avatars.githubusercontent.com/faizalimam990?v=4" width="100px;" alt=""/><br /><sub><b>Faizak Imame</b></sub></a><br /><a href="#code-username" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/FredLL-Avaiga"><img src="https://avatars.githubusercontent.com/FredLL-Avaiga?v=4" width="100px;" alt=""/><br /><sub><b>FredLL-Avaiga</b></sub></a><br /><a href="#code-FredLL-Avaiga" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/jrobinAV"><img src="https://avatars.githubusercontent.com/jrobinAV?v=4" width="100px;" alt=""/><br /><sub><b>jrobinAV</b></sub></a><br /><a href="#code-jrobinAV" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/dinhlongviolin1"><img src="https://avatars.githubusercontent.com/dinhlongviolin1?v=4" width="100px;" alt=""/><br /><sub><b>dinhlongviolin1</b></sub></a><br /><a href="#code-dinhlongviolin1" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/joaoandre-avaiga"><img src="https://avatars.githubusercontent.com/joaoandre-avaiga?v=4" width="100px;" alt=""/><br /><sub><b>joaoandre-avaiga</b></sub></a><br /><a href="#code-joaoandre-avaiga" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/toan-quach"><img src="https://avatars.githubusercontent.com/toan-quach?v=4" width="100px;" alt=""/><br /><sub><b>toan-quach</b></sub></a><br /><a href="#code-toan-quach" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/FabienLelaquais"><img src="https://avatars.githubusercontent.com/FabienLelaquais?v=4" width="100px;" alt=""/><br /><sub><b>FabienLelaquais</b></sub></a><br /><a href="#code-FabienLelaquais" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/namnguyen20999"><img src="https://avatars.githubusercontent.com/namnguyen20999?v=4" width="100px;" alt=""/><br /><sub><b>namnguyen20999</b></sub></a><br /><a href="#code-namnguyen20999" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/khaitruong922"><img src="https://avatars.githubusercontent.com/khaitruong922?v=4" width="100px;" alt=""/><br /><sub><b>khaitruong922</b></sub></a><br /><a href="#code-khaitruong922" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/joaoandre"><img src="https://avatars.githubusercontent.com/joaoandre?v=4" width="100px;" alt=""/><br /><sub><b>joaoandre</b></sub></a><br /><a href="#code-joaoandre" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/Forchapeatl"><img src="https://avatars.githubusercontent.com/Forchapeatl?v=4" width="100px;" alt=""/><br /><sub><b>Forchapeatl</b></sub></a><br /><a href="#code-Forchapeatl" title="Code">💻</a></td>
   </tr>
 </table>
 <!-- markdownlint-restore -->
@@ -259,5 +267,3 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
-
-
