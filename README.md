@@ -248,7 +248,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/faizalimam990"><img src="https://avatars.githubusercontent.com/faizalimam990?v=4" width="100px;" alt=""/><br /><sub><b>Faizak Imame</b></sub></a><br /><a href="#code-username" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/faizalimam990"><img src="https://avatars.githubusercontent.com/faizalimam990?v=4" width="100px;" alt=""/><br /><sub><b>Faizak Imam</b></sub></a><br /><a href="#code-username" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/FredLL-Avaiga"><img src="https://avatars.githubusercontent.com/FredLL-Avaiga?v=4" width="100px;" alt=""/><br /><sub><b>FredLL-Avaiga</b></sub></a><br /><a href="#code-FredLL-Avaiga" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/jrobinAV"><img src="https://avatars.githubusercontent.com/jrobinAV?v=4" width="100px;" alt=""/><br /><sub><b>jrobinAV</b></sub></a><br /><a href="#code-jrobinAV" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/dinhlongviolin1"><img src="https://avatars.githubusercontent.com/dinhlongviolin1?v=4" width="100px;" alt=""/><br /><sub><b>dinhlongviolin1</b></sub></a><br /><a href="#code-dinhlongviolin1" title="Code">💻</a></td>
