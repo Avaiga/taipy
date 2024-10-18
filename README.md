@@ -249,7 +249,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/faizalimam990"><img src="https://avatars.githubusercontent.com/username?v=4" width="100px;" alt=""/><br /><sub><b>User Name</b></sub></a><br /><a href="#code-username" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/faizalimam990"><img src="https://avatars.githubusercontent.com/faizalimam990?v=4" width="100px;" alt=""/><br /><sub><b>User Name</b></sub></a><br /><a href="#code-username" title="Code">💻</a></td>
     <!-- Repeat similar <td> for each contributor -->
   </tr>
 </table>
