@@ -114,7 +114,6 @@ class State:
         val = attrgetter(name)(self)
         _attrsetter(self, name, val)
 
-
     def _set_context(self, gui: "Gui") -> t.ContextManager[None]:
         return nullcontext()
 
@@ -131,7 +130,6 @@ class State:
         with self._set_context(self._gui):
             encoded_name = self._gui._bind_var(name)
             self._gui._broadcast_all_clients(encoded_name, value)
-
 
     def __enter__(self):
         self._gui.__enter__()
@@ -184,7 +182,9 @@ class _GuiState(State):
     __excluded_attrs = __attrs + __methods + __placeholder_attrs
 
     def __init__(self, gui: "Gui", var_list: t.Iterable[str], context_list: t.Iterable[str]) -> None:
-        super().__setattr__(_GuiState.__attrs[1], list(_GuiState.__filter_var_list(var_list, _GuiState.__excluded_attrs)))
+        super().__setattr__(
+            _GuiState.__attrs[1], list(_GuiState.__filter_var_list(var_list, _GuiState.__excluded_attrs))
+        )
         super().__setattr__(_GuiState.__attrs[2], list(context_list))
         super().__setattr__(_GuiState.__attrs[0], gui)
         super().__init__()
