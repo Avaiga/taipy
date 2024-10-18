@@ -49,6 +49,8 @@ import {
     TableFilter,
     SortDesc,
     TableSort,
+    useClassNames,
+    getSuffixedClassNames,
 } from "taipy-gui";
 
 import { Cycles, Cycle, DataNodes, NodeType, Scenarios, Scenario, DataNode, Sequence, Sequences } from "./utils/types";
@@ -343,6 +345,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const dispatch = useDispatch();
     const module = useModule();
 
@@ -627,17 +630,18 @@ const CoreSelector = (props: CoreSelectorProps) => {
                             appliedFilters={filters}
                             filteredCount={0}
                             onValidate={applyFilters}
+                            className={className}
                         ></TableFilter>
                     </Grid>
                 ) : null}
                 {active && colSorts ? (
                     <Grid>
-                        <TableSort columns={colSorts} appliedSorts={sorts} onValidate={applySorts}></TableSort>
+                        <TableSort columns={colSorts} appliedSorts={sorts} onValidate={applySorts} className={className}></TableSort>
                     </Grid>
                 ) : null}
                 {showSearch ? (
                     <Grid>
-                        <IconButton onClick={onRevealSearch} size="small" sx={iconInRowSx}>
+                        <IconButton onClick={onRevealSearch} size="small" sx={iconInRowSx} className={getSuffixedClassNames(className, "-search")}>
                             {revealSearch ? (
                                 <SearchOffOutlined fontSize="inherit" />
                             ) : (
@@ -659,6 +663,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                             }
                             label="Pinned only"
                             sx={labelInRowSx}
+                            className={getSuffixedClassNames(className, "-pins")}
                         />
                     </Grid>
                 ) : null}
@@ -670,6 +675,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                             onChange={onSearch}
                             fullWidth
                             label="Search"
+                            className={getSuffixedClassNames(className, "-search-input")}
                         ></TextField>
                     </Grid>
                 ) : null}
