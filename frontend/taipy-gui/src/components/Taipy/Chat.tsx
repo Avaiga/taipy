@@ -141,7 +141,7 @@ interface key2Rows {
 interface ChatRowProps {
     senderId: string;
     message: string;
-    image: string|null;
+    image?: string;
     name: string;
     className?: string;
     getAvatar: (id: string, sender: boolean) => ReactNode;
@@ -463,7 +463,7 @@ const Chat = (props: ChatProps) => {
                                 senderId={senderId}
                                 message={`${row[columns[1]]}`}
                                 name={columns[2] ? `${row[columns[2]]}` : "Unknown"}
-                                image={row[columns[3]] ? `${row[columns[3]]}` : null}
+                                image={columns[3] && columns[3] != "_tp_index" && row[columns[3]] ? `${row[columns[3]]}` : undefined}
                                 className={className}
                                 getAvatar={getAvatar}
                                 index={idx}
