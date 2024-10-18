@@ -128,10 +128,9 @@ class State:
             name (str): The variable name to update.
             value (Any): The new variable value.
         """
-        gui: "Gui" = super().__getattribute__(_GuiState.__gui_attr)
-        with self._set_context(gui):
-            encoded_name = gui._bind_var(name)
-            gui._broadcast_all_clients(encoded_name, value)
+        with self._set_context(self._gui):
+            encoded_name = self._gui._bind_var(name)
+            self._gui._broadcast_all_clients(encoded_name, value)
 
 
     def __enter__(self):
