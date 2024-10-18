@@ -285,6 +285,7 @@ class DataNodeConfig(Section):
                 suggest="exposed_type='pandas'",
             )
             properties["exposed_type"] = DataNodeConfig._EXPOSED_TYPE_PANDAS
+        self._ranks: Dict[str, int] = {}
 
     def __copy__(self):
         return DataNodeConfig(self.id, self._storage_type, self._scope, self._validity_period, **copy(self._properties))
