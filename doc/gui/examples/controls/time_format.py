@@ -19,7 +19,7 @@ from taipy.gui import Gui
 
 time = datetime.today()
 
-page = "<|{time}|time|>"
+page = "<|{time}|time|format=hh aa>"
 
 if __name__ == "__main__":
-    Gui(page).run(title="Time - Simple")
+    Gui(page).run(title="Time - Format")

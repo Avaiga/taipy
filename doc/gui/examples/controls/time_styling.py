@@ -15,11 +15,17 @@
 # -----------------------------------------------------------------------------------------
 from datetime import datetime
 
-from taipy.gui import Gui
+from taipy.gui import Gui, Markdown
 
 time = datetime.today()
+color = {"color": "yellow"}
 
-page = "<|{time}|time|>"
+page = Markdown(
+    "<|{time}|time|>",
+    style={
+        ".taipy-time": {".MuiInputBase-root": {"&": color, ".MuiIconButton-root": color}}
+    },
+)
 
 if __name__ == "__main__":
-    Gui(page).run(title="Time - Simple")
+    Gui(page).run(title="Time - Styling")
