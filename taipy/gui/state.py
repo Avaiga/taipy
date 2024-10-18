@@ -11,6 +11,7 @@
 
 import inspect
 import typing as t
+from abc import abstractmethod
 from contextlib import nullcontext
 from operator import attrgetter
 from pathlib import Path
@@ -73,18 +74,17 @@ class State:
     ```
     """
 
-    def __init__(self, gui: "Gui", var_list: t.Iterable[str], context_list: t.Iterable[str]) -> None:
-        self._user_var_list = list(var_list)
-        self._context_list = list(context_list)
-        self._gui = gui
+    def __init__(self) -> None:
+        self._gui: "Gui"
 
+    @abstractmethod
     def get_gui(self) -> "Gui":
         """Return the Gui instance for this state object.
 
         Returns:
             Gui: The Gui instance for this state object.
         """
-        return self._gui
+        raise NotImplementedError
 
     def assign(self, name: str, value: t.Any) -> t.Any:
         """Assign a value to a state variable.
@@ -185,15 +185,21 @@ class _GuiState(State):
     __excluded_attrs = __attrs + __methods + __placeholder_attrs
 
     def __init__(self, gui: "Gui", var_list: t.Iterable[str], context_list: t.Iterable[str]) -> None:
-        super().__init__(gui, _GuiState.__filter_var_list(var_list, _GuiState.__excluded_attrs), context_list)
+        super().__setattr__(_GuiState.__attrs[1], list(_GuiState.__filter_var_list(var_list, _GuiState.__excluded_attrs)))
+        super().__setattr__(_GuiState.__attrs[2], list(context_list))
+        super().__setattr__(_GuiState.__attrs[0], gui)
+        super().__init__()
 
     @staticmethod
     def __filter_var_list(var_list: t.Iterable[str], excluded_attrs: t.Iterable[str]) -> t.Iterable[str]:
         return filter(lambda n: n not in excluded_attrs, var_list)
 
+    def get_gui(self) -> "Gui":
+        return super().__getattribute__(_GuiState.__gui_attr)
+
     def __getattribute__(self, name: str) -> t.Any:
         if name == "__class__":
-            return State
+            return _GuiState
         if name in _GuiState.__methods:
             return super().__getattribute__(name)
         gui: "Gui" = self.get_gui()

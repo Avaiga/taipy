@@ -18,7 +18,11 @@ class TestingState(State):
 
     def __init__(self, gui: Gui, **kwargs) -> None:
         super().__setattr__(TestingState.__VARS, kwargs)
-        super().__init__(gui, [], [])
+        self._gui = gui
+        super().__init__()
+
+    def get_gui(self) -> "Gui":
+        return self._gui
 
     def __getattribute__(self, name: str) -> t.Any:
         if attr := t.cast(dict, super().__getattribute__(TestingState.__VARS)).get(name):
