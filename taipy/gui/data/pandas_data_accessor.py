@@ -268,11 +268,17 @@ class _PandasDataAccessor(_DataAccessor):
                 val = fd.get("value")
                 action = fd.get("action")
                 if isinstance(val, str):
-                    if self.__is_date_column(t.cast(pd.DataFrame, df), col):
-                        val = datetime.fromisoformat(val[:-1])
+                    # Handle case-insensitive filtering for string 'contains'
+                    if action == "contains":
+                        val = val.lower()
+                        vars.append(val)
+                        right = f".str.contains({val}, case=False)"  # Add case=False for case-insensitive matching
+                    else:
+                        vars.append(val)
+                    val = f"@vars[{len(vars) - 1}]" if isinstance(val, (str, datetime)) else val
+                else:
                     vars.append(val)
-                val = f"@vars[{len(vars) - 1}]" if isinstance(val, (str, datetime)) else val
-                right = f".str.contains({val})" if action == "contains" else f" {action} {val}"
+                right = f" {action} {val}" if action != "contains" else right # type: ignore
                 if query:
                     query += " and "
                 query += f"`{col}`{right}"
