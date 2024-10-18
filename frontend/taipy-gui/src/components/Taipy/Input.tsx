@@ -138,6 +138,20 @@ const Input = (props: TaipyInputProps) => {
         [changeDelay, dispatch, updateVarName, module, onChange, propagate]
     );
 
+    const handleBlur = useCallback(
+        (e: React.FocusEvent<HTMLInputElement>) => {
+            const val = e.target.value;
+            if (changeDelay > 0 && delayCall.current > 0) {
+                clearTimeout(delayCall.current);
+                delayCall.current = -1;
+                dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
+            } else if (changeDelay === -1) {
+                dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
+            }
+        },
+        [dispatch, updateVarName, module, onChange, propagate, changeDelay]
+    );
+    
     const handleAction = useCallback(
         (evt: KeyboardEvent<HTMLDivElement>) => {
             if (evt.shiftKey && type === "number") {
@@ -340,6 +354,7 @@ const Input = (props: TaipyInputProps) => {
                 id={id}
                 slotProps={inputProps}
                 label={props.label}
+                onBlur={handleBlur}
                 onChange={handleInput}
                 disabled={!active}
                 onKeyDown={handleAction}
