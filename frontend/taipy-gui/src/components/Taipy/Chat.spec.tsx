@@ -178,6 +178,27 @@ describe("Chat Component", () => {
             const chipWithImage = queryByText('test.png');
             expect(chipWithImage).not.toBeInTheDocument();
           });
-          URL.createObjectURL.mockRestore()
+          jest.restoreAllMocks()
+    })
+    it("Not upload image over a file size limit",async()=>{
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByText,getByAltText } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <Chat messages={messages} updateVarName="varName" maxFileSize={0} defaultKey={valueKey} mode="raw"/>
+            </TaipyContext.Provider>
+        );
+        const file = new File(['(⌐□_□)'], 'test.png', { type: 'image/png' });
+        URL.createObjectURL = jest.fn(() => 'mocked-url');
+
+        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+        expect(fileInput).toBeInTheDocument();
+        fireEvent.change(fileInput, { target: { files: [file] } });
+
+        await waitFor(() => {
+            expect(() =>getByText('test.png')).toThrow()
+            expect(()=>getByAltText('Image preview')).toThrow();
+          });
+          jest.restoreAllMocks()
     })
 });
