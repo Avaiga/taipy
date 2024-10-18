@@ -241,7 +241,7 @@ specific language governing permissions and limitations under the License.
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
@@ -249,8 +249,8 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/faizalimam990"><img src="https://avatars.githubusercontent.com/faizalimam990?v=4" width="100px;" alt=""/><br /><sub><b>User Name</b></sub></a><br /><a href="#code-username" title="Code">💻</a></td>
-    <!-- Repeat similar <td> for each contributor -->
+    <td align="center"><a href="https://github.com/faizalimam990"><img src="https://avatars.githubusercontent.com/faizalimam990?v=4" width="100px;" alt=""/><br /><sub><b>Faizak Imame</b></sub></a><br /><a href="#code-username" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/FredLL-Avaiga"><img src="https://avatars.githubusercontent.com/FredLL-Avaiga?v=4" width="100px;" alt=""/><br /><sub><b>FredLL-Avaiga</b></sub></a><br /><a href="#code-FredLL-Avaiga" title="Code">💻</a></td>
   </tr>
 </table>
 <!-- markdownlint-restore -->
@@ -259,4 +259,5 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
 
