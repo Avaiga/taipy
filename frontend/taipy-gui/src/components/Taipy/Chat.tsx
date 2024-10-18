@@ -53,6 +53,7 @@ const Markdown = lazy(() => import("react-markdown"));
 
 interface ChatProps extends TaipyActiveProps {
     messages?: TableValueType;
+    maxFileSize?: number;
     withInput?: boolean;
     users?: LoVElt[];
     defaultUsers?: string;
@@ -225,6 +226,7 @@ const Chat = (props: ChatProps) => {
         onAction,
         withInput = true,
         defaultKey = "",
+        maxFileSize= 50 * 1024 * 1024, // 50MB
         pageSize = 50,
         showSender = false,
     } = props;
@@ -302,7 +304,7 @@ const Chat = (props: ChatProps) => {
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
             const file = event.target.files ? event.target.files[0] : null;
             if (file) {
-                if (file.type.startsWith("image/")) {
+                if (file.type.startsWith("image/") && file.size <= maxFileSize) {
                     setSelectedFile(file);
                     setImagePreview(URL.createObjectURL(file));
                 } else {
