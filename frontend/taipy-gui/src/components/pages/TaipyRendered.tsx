@@ -1,27 +1,14 @@
-/*
- * Copyright 2021-2024 Avaiga Private Limited
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- */
-
-import React, { useEffect, useState, useContext, ComponentType } from "react";
+import React, { ComponentType, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { Helmet } from "react-helmet-async";
 import JsxParser from "react-jsx-parser";
 import { useLocation } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { PageContext, TaipyContext } from "../../context/taipyContext";
-import { getRegisteredComponents } from "../Taipy";
-import { unregisteredRender, renderError } from "../Taipy/Unregistered";
 import { createPartialAction } from "../../context/taipyReducers";
+import { getRegisteredComponents } from "../Taipy";
+import { renderError, unregisteredRender } from "../Taipy/Unregistered";
 import ErrorFallback from "../../utils/ErrorBoundary";
 import { emptyArray, getBaseURL } from "../../utils";
 
@@ -44,21 +31,15 @@ interface AxiosRenderer {
     context: string;
 }
 
-// set global style the traditional way
+// Set global style in the traditional way
 const setStyle = (id: string, styleString: string): void => {
     let style = document.getElementById(id);
-    if (style && style.tagName !== "STYLE") {
-        style = null;
-        id = "TaiPy_" + id;
-    }
-    if (!style && styleString) {
+    if (!style || style.tagName !== "STYLE") {
         style = document.createElement("style");
-        style.id = id;
-        document.head.append(style);
+        style.id = `TaiPy_${id}`;
+        document.head.appendChild(style);
     }
-    if (style) {
-        style.textContent = styleString;
-    }
+    style.textContent = styleString || "";
 };
 
 interface PageState {
@@ -74,51 +55,57 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
     const { state, dispatch } = useContext(TaipyContext);
 
     const baseURL = getBaseURL();
-    const pathname = baseURL == "/" ? location.pathname : location.pathname.replace(baseURL, "/");
-    const path =
-        props.path || (state.locations && pathname in state.locations && state.locations[pathname]) || pathname;
+    const pathname = baseURL === "/" ? location.pathname : location.pathname.replace(baseURL, "/");
+
+    const computePath = (): string => {
+        if (props.path) return props.path;
+        if (state.locations && pathname in state.locations) {
+            return state.locations[pathname];
+        }
+        return pathname;
+    };
+
+    const path = computePath();
 
     useEffect(() => {
-        // Fetch JSX Flask Backend Render
         if (partial) {
             dispatch(createPartialAction(path.slice(1), false));
-        } else {
-            const searchParams = new URLSearchParams(location.search);
-            const params = Object.fromEntries(searchParams.entries());
-            axios
-                .get<AxiosRenderer>(`taipy-jsx${path}`, {
-                    params: { ...params, client_id: state.id || "", v: window.taipyVersion },
-                })
-                .then((result) => {
-                    // set rendered JSX and CSS style from fetch result
-                    if (typeof result.data.jsx === "string") {
-                        setPageState({ module: result.data.context, jsx: result.data.jsx });
-                    }
-                    if (!fromBlock) {
-                        setStyle("Taipy_style", result.data.style || "");
-                        Array.isArray(result.data.head) && setHead(result.data.head);
-                    }
-                })
-                .catch((error) => {
-                    const res =
-                        error.response?.data && /<p\sclass=\"errormsg\">([\s\S]*?)<\/p>/gm.exec(error.response?.data);
-                    setPageState({
-                        jsx: `<h1>${res ? res[0] : "Unknown Error"}</h1><h2>No data fetched from backend from ${
-                            path === "/TaiPy_root_page" ? baseURL : baseURL + path
-                        }</h2><br></br>${res[0] ? "" : error}`,
-                    });
-                });
+            return;
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [path, state.id, dispatch, partial, fromBlock, baseURL]);
+
+        const searchParams = new URLSearchParams(location.search);
+        const params = Object.fromEntries(searchParams.entries());
+
+        axios
+            .get<AxiosRenderer>(`taipy-jsx${path}`, {
+                params: { ...params, client_id: state.id || "", v: window.taipyVersion },
+            })
+            .then((result) => {
+                if (typeof result.data.jsx === "string") {
+                    setPageState({ module: result.data.context, jsx: result.data.jsx });
+                }
+                if (!fromBlock) {
+                    setStyle("Taipy_style", result.data.style || "");
+                    Array.isArray(result.data.head) && setHead(result.data.head);
+                }
+            })
+            .catch((error) => {
+                const res = error.response?.data && /<p\sclass=\"errormsg\">([\s\S]*?)<\/p>/gm.exec(error.response?.data);
+                setPageState({
+                    jsx: `<h1>${res ? res[0] : "Unknown Error"}</h1><h2>No data fetched from backend from ${
+                        path === "/TaiPy_root_page" ? baseURL : baseURL + path
+                    }</h2><br></br>${res ? "" : error}`,
+                });
+            });
+    }, [path, state.id, dispatch, partial, fromBlock, baseURL, location.search]);
+
+    const headElements = head.map((v, i) =>
+        React.createElement(v.tag, { key: `head${i}`, ...v.props }, v.content)
+    );
 
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
-            {head.length ? (
-                <Helmet>
-                    {head.map((v, i) => React.createElement(v.tag, { key: `head${i}`, ...v.props }, v.content))}
-                </Helmet>
-            ) : null}
+            {head.length ? <Helmet>{headElements}</Helmet> : null}
             <PageContext.Provider value={pageState}>
                 <JsxParser
                     disableKeyGeneration={true}
