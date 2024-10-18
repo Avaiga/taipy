@@ -33,6 +33,8 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { ColumnDesc, defaultDateFormat, getSortByIndex, iconInRowSx, FilterDesc } from "./tableUtils";
 import { getDateTime, getTypeFromDf } from "../../utils";
 import { getSuffixedClassNames } from "./utils";
+import SvgIcon from "@mui/icons-material/Check";
+import { FormControlLabel, Switch } from "@mui/material";
 
 interface TableFilterProps {
     columns: Record<string, ColumnDesc>;
@@ -92,8 +94,13 @@ const getActionsByType = (colType?: string) =>
     (colType && colType in actionsByType && actionsByType[colType]) ||
     (colType === "any" ? { ...actionsByType.string, ...actionsByType.number } : actionsByType.string);
 
-const caseInsensitive = true; // Temporary flag to enable case-insensitive filtering for testing
-const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?: string, val?: string) => {
+const getFilterDesc = (
+    columns: Record<string, ColumnDesc>,
+    colId?: string,
+    act?: string,
+    val?: string,
+    matchCase?: boolean
+) => {
     if (colId && act && val !== undefined) {
         const colType = getTypeFromDf(columns[colId].type);
         if (val === "" && (colType === "date" || colType === "number" || colType === "boolean")) {
@@ -105,8 +112,10 @@ const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?
                 action: act,
                 value:
                     typeof val === "string"
-                        ? colType === "string" && act === "contains" && caseInsensitive
-                            ? val.toLowerCase() // Convert to lowercase for case-insensitive filtering
+                        ? colType === "string" && act === "contains"
+                            ? matchCase // Apply case-sensitive filtering based on the toggle
+                                ? val
+                                : val.toLowerCase()
                             : val
                         : colType === "number"
                         ? parseFloat(val)
@@ -116,6 +125,7 @@ const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?
                         ? getDateTime(val)
                         : val,
                 type: colType,
+                matchCase, // Include matchCase in the filter description
             } as FilterDesc;
         } catch (e) {
             console.info("could not parse value ", val, e);
@@ -129,39 +139,48 @@ const FilterRow = (props: FilterRowProps) => {
     const [colId, setColId] = useState<string>("");
     const [action, setAction] = useState<string>("");
     const [val, setVal] = useState<string>("");
+    const [matchCase, setMatchCase] = useState<boolean>(true); // Case-sensitivity state
     const [enableCheck, setEnableCheck] = useState(false);
     const [enableDel, setEnableDel] = useState(false);
+
+    // Function to handle case-sensitivity toggle
+    const toggleMatchCase = () => setMatchCase(!matchCase);
 
     const onColSelect = useCallback(
         (e: SelectChangeEvent<string>) => {
             setColId(e.target.value);
-            setEnableCheck(!!getFilterDesc(columns, e.target.value, action, val));
+            setEnableCheck(!!getFilterDesc(columns, e.target.value, action, val, matchCase));
         },
-        [columns, action, val]
+        [columns, action, val, matchCase]
     );
+
     const onActSelect = useCallback(
         (e: SelectChangeEvent<string>) => {
             setAction(e.target.value);
-            setEnableCheck(!!getFilterDesc(columns, colId, e.target.value, val));
+            setEnableCheck(!!getFilterDesc(columns, colId, e.target.value, val, matchCase));
         },
-        [columns, colId, val]
+        [columns, colId, val, matchCase]
     );
+
     const onValueChange = useCallback(
         (e: ChangeEvent<HTMLInputElement>) => {
-            const value = caseInsensitive ? e.target.value.toLowerCase() : e.target.value; // Convert to lowercase if the flag is true
+            const value = matchCase ? e.target.value : e.target.value.toLowerCase();
             setVal(value);
-            setEnableCheck(!!getFilterDesc(columns, colId, action, value));
+            setEnableCheck(!!getFilterDesc(columns, colId, action, value, matchCase));
         },
-        [columns, colId, action]
+        [columns, colId, action, matchCase]
     );
+
     const onValueAutoComp = useCallback(
         (e: SyntheticEvent, value: string | null) => {
-            const lowerCaseValue = caseInsensitive ? (value || "").toLowerCase() : value || ""; // Convert input to lowercase if flag is true
-            setVal(lowerCaseValue);
-            setEnableCheck(!!getFilterDesc(columns, colId, action, lowerCaseValue));
+            const inputValue = value || "";
+            const processedValue = matchCase ? inputValue : inputValue.toLowerCase();
+            setVal(processedValue);
+            setEnableCheck(!!getFilterDesc(columns, colId, action, processedValue, matchCase));
         },
-        [columns, colId, action]
+        [columns, colId, action, matchCase]
     );
+
     const onValueSelect = useCallback(
         (e: SelectChangeEvent<string>) => {
             setVal(e.target.value);
@@ -169,6 +188,7 @@ const FilterRow = (props: FilterRowProps) => {
         },
         [columns, colId, action]
     );
+
     const onDateChange = useCallback(
         (v: Date | null) => {
             const dv = !(v instanceof Date) || isNaN(v.valueOf()) ? "" : v.toISOString();
@@ -179,10 +199,11 @@ const FilterRow = (props: FilterRowProps) => {
     );
 
     const onDeleteClick = useCallback(() => setFilter(idx, undefined as unknown as FilterDesc, true), [idx, setFilter]);
+
     const onCheckClick = useCallback(() => {
-        const fd = getFilterDesc(columns, colId, action, val);
+        const fd = getFilterDesc(columns, colId, action, val, matchCase);
         fd && setFilter(idx, fd);
-    }, [idx, setFilter, columns, colId, action, val]);
+    }, [idx, setFilter, columns, colId, action, val, matchCase]);
 
     useEffect(() => {
         if (filter && idx > -1) {
@@ -234,7 +255,8 @@ const FilterRow = (props: FilterRowProps) => {
                 </FormControl>
             </Grid>
             <Grid size={3.5}>
-                {colType == "number" ? (
+                {/* Input Field Based on Type */}
+                {colType === "number" ? (
                     <TextField
                         type="number"
                         value={typeof val === "number" ? val : val || ""}
@@ -242,7 +264,7 @@ const FilterRow = (props: FilterRowProps) => {
                         label="Number"
                         margin="dense"
                     />
-                ) : colType == "boolean" ? (
+                ) : colType === "boolean" ? (
                     <FormControl margin="dense">
                         <InputLabel>Boolean</InputLabel>
                         <Select
@@ -254,7 +276,7 @@ const FilterRow = (props: FilterRowProps) => {
                             <MenuItem value={"0"}>False</MenuItem>
                         </Select>
                     </FormControl>
-                ) : colType == "date" ? (
+                ) : colType === "date" ? (
                     <DateField
                         value={(val && new Date(val)) || null}
                         onChange={onDateChange}
@@ -288,6 +310,17 @@ const FilterRow = (props: FilterRowProps) => {
                     />
                 )}
             </Grid>
+
+            {/* Case Sensitivity Toggle */}
+            <Grid size={3}>
+                <FormControlLabel
+                    control={
+                        <Switch checked={matchCase} onChange={toggleMatchCase} data-testid="CaseSensitiveToggle" />
+                    }
+                    label="Match Case"
+                />
+            </Grid>
+
             <Grid size={1}>
                 <Tooltip title="Validate">
                     <span>
