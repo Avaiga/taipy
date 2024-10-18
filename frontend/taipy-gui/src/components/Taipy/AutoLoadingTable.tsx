@@ -225,7 +225,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const baseColumns = useDynamicJsonProperty(props.columns, props.defaultColumns, defaultColumns);
 
-    const refresh = props.data && typeof props.data.__taipy_refresh === "boolean";
+    const refresh = props.data?.__taipy_refresh !== undefined;
 
     useEffect(() => {
         if (!refresh && props.data && page.current.key && props.data[page.current.key] !== undefined) {
@@ -604,7 +604,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                         <TableCell
                                             key={`head${columns[col].dfid}`}
                                             sortDirection={orderBy === columns[col].dfid && order}
-                                            sx={columns[col].width ? { width: columns[col].width } : {}}
+                                            sx={columns[col].width ? { width: columns[col].width } : undefined}
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [
