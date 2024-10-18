@@ -142,11 +142,12 @@ describe("Chat Component", () => {
                 <Chat messages={messages} updateVarName="varName" defaultKey={valueKey} mode="raw"/>
             </TaipyContext.Provider>
         );
+        const file = new File(['(⌐□_□)'], 'test.png', { type: 'image/png' });
+        URL.createObjectURL = jest.fn(() => 'mocked-url');
+
         const attachButton = getByLabelText('upload image');
         expect(attachButton).toBeInTheDocument();
 
-        const file = new File(['(⌐□_□)'], 'test.png', { type: 'image/png' });
-        URL.createObjectURL = jest.fn(() => 'mocked-url');
 
         const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
         expect(fileInput).toBeInTheDocument();
@@ -177,7 +178,6 @@ describe("Chat Component", () => {
             const chipWithImage = queryByText('test.png');
             expect(chipWithImage).not.toBeInTheDocument();
           });
-
-
+          URL.createObjectURL.mockRestore()
     })
 });
