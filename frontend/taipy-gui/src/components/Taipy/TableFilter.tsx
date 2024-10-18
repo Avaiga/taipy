@@ -92,6 +92,7 @@ const getActionsByType = (colType?: string) =>
     (colType && colType in actionsByType && actionsByType[colType]) ||
     (colType === "any" ? { ...actionsByType.string, ...actionsByType.number } : actionsByType.string);
 
+const caseInsensitive = true; // Temporary flag to enable case-insensitive filtering for testing
 const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?: string, val?: string) => {
     if (colId && act && val !== undefined) {
         const colType = getTypeFromDf(columns[colId].type);
@@ -104,13 +105,15 @@ const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?
                 action: act,
                 value:
                     typeof val === "string"
-                        ? colType === "number"
-                            ? parseFloat(val)
-                            : colType === "boolean"
-                            ? val === "1"
-                            : colType === "date"
-                            ? getDateTime(val)
+                        ? colType === "string" && act === "contains" && caseInsensitive
+                            ? val.toLowerCase() // Convert to lowercase for case-insensitive filtering
                             : val
+                        : colType === "number"
+                        ? parseFloat(val)
+                        : colType === "boolean"
+                        ? val === "1"
+                        : colType === "date"
+                        ? getDateTime(val)
                         : val,
                 type: colType,
             } as FilterDesc;
@@ -145,15 +148,17 @@ const FilterRow = (props: FilterRowProps) => {
     );
     const onValueChange = useCallback(
         (e: ChangeEvent<HTMLInputElement>) => {
-            setVal(e.target.value);
-            setEnableCheck(!!getFilterDesc(columns, colId, action, e.target.value));
+            const value = caseInsensitive ? e.target.value.toLowerCase() : e.target.value; // Convert to lowercase if the flag is true
+            setVal(value);
+            setEnableCheck(!!getFilterDesc(columns, colId, action, value));
         },
         [columns, colId, action]
     );
     const onValueAutoComp = useCallback(
         (e: SyntheticEvent, value: string | null) => {
-            setVal(value || "");
-            setEnableCheck(!!getFilterDesc(columns, colId, action, value || ""));
+            const lowerCaseValue = caseInsensitive ? (value || "").toLowerCase() : value || ""; // Convert input to lowercase if flag is true
+            setVal(lowerCaseValue);
+            setEnableCheck(!!getFilterDesc(columns, colId, action, lowerCaseValue));
         },
         [columns, colId, action]
     );

@@ -245,3 +245,41 @@ describe("Table Filter Component", () => {
         expect(ddElts2).toHaveLength(2);
     });
 });
+
+describe("Table Filter Component - Case Insensitive Test", () => {
+    it("should validate case-insensitive string filtering", async () => {
+        const { getByTestId, getAllByTestId, findByRole, getByText, getAllByText } = render(
+            <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={jest.fn()} filteredCount={0} />
+        );
+        const elt = getByTestId("FilterListIcon");
+        await userEvent.click(elt);
+
+        // Open filter dropdown and select the StringCol column
+        const dropdownElts = getAllByTestId("ArrowDropDownIcon");
+        await userEvent.click(dropdownElts[0].parentElement?.firstElementChild || dropdownElts[0]);
+        await findByRole("listbox");
+        await userEvent.click(getByText("StringCol"));
+
+        // Select 'contains' action
+        await userEvent.click(dropdownElts[1].parentElement?.firstElementChild || dropdownElts[1]);
+        await findByRole("listbox");
+        await userEvent.click(getByText("contains"));
+
+        // Retrieve all matching "Empty String" elements
+        const inputs = getAllByText("Empty String");
+
+        // Simulate user input on the correct input element
+        const input = inputs[0].nextElementSibling?.firstElementChild || inputs[0]; // Use the first matching element
+        await userEvent.click(input);
+        await userEvent.type(input, "CASETEST");
+
+        // Expect the validate button to be enabled
+        const validate = getByTestId("CheckIcon").parentElement;
+        expect(validate).not.toBeDisabled();
+
+        // Test case-insensitivity by typing in different case
+        await userEvent.clear(input);
+        await userEvent.type(input, "casetest");
+        expect(validate).not.toBeDisabled();
+    });
+});
