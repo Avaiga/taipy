@@ -42,6 +42,7 @@ import StatusList from "./StatusList";
 import Table from "./Table";
 import TaipyStyle from "./TaipyStyle";
 import Toggle from "./Toggle";
+import TimeSelector from "./TimeSelector";
 import TreeView from "./TreeView";
 
 const registeredComponents: Record<string, ComponentType> = {};
@@ -76,6 +77,7 @@ export const getRegisteredComponents = () => {
             Status: StatusList,
             Table,
             TaipyStyle,
+            TimeSelector,
             Toggle,
             TreeView,
             Progress,

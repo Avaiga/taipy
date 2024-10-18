@@ -98,6 +98,17 @@ export const getDateTime = (value: string | null | undefined, tz?: string, withT
     }
 };
 
+export const getTime = (value: string | null | undefined): Date | null => {
+    if (value === null || value === undefined) {
+        return null;
+    }
+    try {
+        return new Date(value);
+    } catch {
+        return null;
+    }
+};
+
 export const getDateTimeString = (
     value: string,
     datetimeformat: string | undefined,
