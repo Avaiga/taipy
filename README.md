@@ -68,7 +68,7 @@ Taipy is a Two-in-One Tool for UI Generation and Scenario/Data Management
 
 | User Interface Generation                                                                       | Scenario and Data Management                                                                        |
 | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| <img src="readme_img/taipy_github_GUI_video.gif" alt="Interface Animation"  width="100%" /> | <img src="readme_img/taipy_github_scenarios_video.gif" alt="Back-End Animation"  width="100%"/> |
+| <img src="readme_img/readme_scenario_management.gif" alt="Interface Animation"  width="100%" /> | <img src="readme_img/taipy_github_scenarios_video.gif" alt="Back-End Animation"  width="100%"/> |
 
 &nbsp;
 
