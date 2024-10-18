@@ -1123,13 +1123,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
         self.__lazy_start()
         if id and is_readable(t.cast(DataNodeId, id)) and (dn := core_get(id)) and isinstance(dn, DataNode):
             try:
-                return (
-                    (
+                return [
                         (k, f"{v}")
                         for k, v in dn._get_user_properties().items()
                         if k != _GuiCoreContext.__PROP_ENTITY_NAME
-                    ),
-                )
+                    ]
             except Exception:
                 return None
         return None
