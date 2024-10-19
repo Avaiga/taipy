@@ -2,11 +2,10 @@ Welcome to the installation section of the Taipy web application builder! This s
 guide you through the seamless and straightforward process of setting up and deploying your
 own powerful web applications.
 
-!!! "Development kit installation"
+!!! note "Installation for Contributing to Taipy"
 
-    If you aim to modify the code or contribute to its development, please refer to the
-    contributing documentation to get more information.
-
+    If you aim to modify the Taipy source code or contribute to its development, please refer
+    to the contributing page to get more information.
 
 # Installing Taipy library
 

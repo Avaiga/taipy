@@ -218,9 +218,11 @@ There are two main JavaScript bundles to build:
 version 18 or higher installed. Node.js includes the
 [`npm` package manager](https://www.npmjs.com/).
 
-The build process is explained in the [Taipy GUI front-end](frontend/taipy-gui/README.md) and
- [Taipy front-end](frontend/taipy/README.md) README files. Build the Taipy GUI bundle first, as
-the Taipy front-end depends on it.
+The build process is explained in the
+[Taipy GUI front-end](https://github.com/Avaiga/taipy/blob/develop/frontend/taipy-gui/README.md)
+and
+[Taipy front-end](https://github.com/Avaiga/taipy/blob/develop/frontend/taipy/README.md) README
+files. Build the Taipy GUI bundle first, as the Taipy front-end depends on it.
 
 **Build instructions:** Run the following commands from the root directory of the repository:
 
