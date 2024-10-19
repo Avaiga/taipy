@@ -47,6 +47,19 @@ Do not hesitate to create an issue or pull request directly on the
 
 # Code contributions
 
+## Code organization
+
+The Taipy source code is located in the [taipy](https://github.com/Avaiga/taipy)
+repository, in the `taipy` directory.
+
+Packages sources are organized in subdirectories from there:
+
+- `taipy-common`
+- `taipy-core`
+- `taipy-gui`
+- `taipy-rest`
+- `taipy-templates`
+
 ## Process and workflow
 
 ### Issue assignment
@@ -157,7 +170,6 @@ uninstall depending on your issue.
 If you need to add a new dependency to Taipy, do not forget to add it in the `Pipfile` and the
 `setup.py`. Keep in mind that dependency is a vector of attack. The Taipy team limits the usage
 of external dependencies at the minimum.
-
 
 ## Installing the development kit
 
