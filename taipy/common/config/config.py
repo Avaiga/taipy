@@ -139,7 +139,7 @@ class Config:
 
         The current Python configuration is replaced and the Config compilation is triggered.
 
-        Parameters:
+        Arguments:
             filename (Union[str, Path]): The path of the toml configuration file to load.
         """
         cls.__logger.info(f"Loading configuration. Filename: '{filename}'")
@@ -157,7 +157,7 @@ class Config:
         Note:
             If *filename* already exists, it is overwritten.
 
-        Parameters:
+        Arguments:
             filename (Union[str, Path]): The path of the file to export.
         """
         cls._serializer._write(cls._python_config, filename)
@@ -175,7 +175,7 @@ class Config:
         Note:
             If *filename* already exists, it is overwritten.
 
-        Parameters:
+        Arguments:
             filename (Union[str, Path]): The path of the file to export.
         """
         cls._serializer._write(cls._applied_config, filename)
@@ -185,7 +185,7 @@ class Config:
     def restore(cls, filename: str) -> None:
         """Restore a configuration file and replace the current applied configuration.
 
-        Parameters:
+        Arguments:
             filename (Union[str, Path]): The path of the toml configuration file to load.
         """
         cls.__logger.info(f"Restoring configuration. Filename: '{filename}'")
@@ -197,7 +197,7 @@ class Config:
     def override(cls, filename: str) -> None:
         """Load a configuration from a file and overrides the current config.
 
-        Parameters:
+        Arguments:
             filename (Union[str, Path]): The path of the toml configuration file to load.
         """
         cls.__logger.info(f"Loading configuration. Filename: '{filename}'")
@@ -221,7 +221,7 @@ class Config:
     def configure_global_app(cls, **properties) -> GlobalAppConfig:
         """Configure the global application.
 
-        Parameters:
+        Arguments:
             **properties (Dict[str, Any]): A dictionary of additional properties.
 
         Returns:

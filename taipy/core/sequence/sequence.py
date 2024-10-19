@@ -163,7 +163,7 @@ class Sequence(_Entity, Submittable, _Labeled):
 
         The attribute can be a task or a data node.
 
-        Parameters:
+        Arguments:
             attribute_name (str): The attribute name.
 
         Returns:
@@ -264,7 +264,7 @@ class Sequence(_Entity, Submittable, _Labeled):
         Note:
             Notification will be available only for jobs created after this subscription.
 
-        Parameters:
+        Arguments:
             callback (Callable[[Sequence^, Job^], None]): The callable function to be called on
                 status change.
             params (Optional[List[Any]]): The parameters to be passed to the _callback_.
@@ -279,7 +279,7 @@ class Sequence(_Entity, Submittable, _Labeled):
         Note:
             The function will continue to be called for ongoing jobs.
 
-        Parameters:
+        Arguments:
             callback (Callable[[Sequence^, Job^], None]): The callable function to unsubscribe.
             params (Optional[List[Any]]): The parameters to be passed to the _callback_.
         """
@@ -299,7 +299,7 @@ class Sequence(_Entity, Submittable, _Labeled):
 
         All the `Task^`s of the sequence will be submitted for execution.
 
-        Parameters:
+        Arguments:
             callbacks (List[Callable]): The list of callable functions to be called on status
                 change.
             force (bool): Force execution even if the data nodes are in cache.

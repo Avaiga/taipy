@@ -322,7 +322,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         """
         Filter a list of scenarios by a given creation time period.
 
-        Parameters:
+        Arguments:
             created_start_time (Optional[datetime]): Start time of the period. The start time is inclusive.
             created_end_time (Optional[datetime]): End time of the period. The end time is exclusive.
 
