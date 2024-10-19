@@ -41,7 +41,7 @@ class _ConfigComparator:
     ):
         """Compare between 2 _Config object to check for compatibility.
 
-        Args:
+        Arguments:
             old_config (_Config): The old _Config.
             new_config (_Config): The new _Config.
             old_version_number (str, optional): The old version number for logging. Defaults to None.
@@ -79,7 +79,7 @@ class _ConfigComparator:
     ):
         """Compare between 2 _Config object to check for compatibility.
 
-        Args:
+        Arguments:
             config_1 (_Config): The old _Config.
             config_2 (_Config): The new _Config.
             version_number_1 (str): The old version number for logging.
