@@ -508,7 +508,7 @@ class Config:
                 function.
             write_kwargs (Optional[dict]): Additional parameters passed to the
                 `pandas.DataFrame.write_parquet()` function.<br/>
-                The parameters in *read_kwargs* and *write_kwargs* have a **higher precedence** 
+                The parameters in *read_kwargs* and *write_kwargs* have a **higher precedence**
                 than the top-level parameters which are also passed to Pandas.
             exposed_type (Optional[str]): The exposed type of the data read from Parquet file.<br/>
                 The default value is `pandas`.
