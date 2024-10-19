@@ -26,6 +26,7 @@ import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../..
 import { getCssSize, getSuffixedClassNames, getUpdateVar } from "./utils";
 import { Icon, IconAvatar } from "../../utils/icon";
 import { FormControlLabel, SxProps } from "@mui/material";
+import { getComponentClassName } from "./TaipyStyle";
 
 const baseGroupSx = { verticalAlign: "middle" };
 
@@ -118,7 +119,7 @@ const Toggle = (props: ToggleProps) => {
     return mode.toLowerCase() === "theme" ? (
         <ThemeToggle {...props} />
     ) : (
-        <Box id={id} sx={boxSx} className={className}>
+        <Box id={id} sx={boxSx} className={`${className} ${getComponentClassName(props.children)}`}>
             {label && !isSwitch ? <Typography>{label}</Typography> : null}
             <Tooltip title={hover || ""}>
                 {isSwitch ? (
@@ -152,6 +153,7 @@ const Toggle = (props: ToggleProps) => {
                     </ToggleButtonGroup>
                 )}
             </Tooltip>
+            {props.children}
         </Box>
     );
 };

@@ -420,7 +420,7 @@ class _PandasDataAccessor(_DataAccessor):
                 if isinstance(decimator_instance, PropertyType.decimator.value):
                     # Run the on_decimate method -> check if the decimator should be applied
                     # -> apply the decimator
-                    decimated_df, is_decimator_applied, is_copied = decimator_instance.on_decimate(
+                    decimated_df, is_decimator_applied, is_copied = decimator_instance._on_decimate(
                         df, decimator_pl, decimator_payload, is_copied
                     )
                     # add decimated dataframe to the list of decimated

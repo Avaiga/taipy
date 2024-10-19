@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { MouseEvent } from "react";
+import { MouseEvent, ReactNode } from "react";
 import { SxProps } from "@mui/material";
 
 export interface TaipyActiveProps extends TaipyDynamicProps, TaipyHoverProps {
@@ -35,6 +35,8 @@ export interface TaipyBaseProps {
     libClassName?: string;
     className?: string;
     dynamicClassName?: string;
+    privateClassName?: string;
+    children?: ReactNode;
 }
 
 export interface TaipyMultiSelectProps {
@@ -123,6 +125,13 @@ export const getCssSize = (val: string | number) => {
     return val;
 };
 
+/**
+ * Appends a suffix to the class names.
+ *
+ * @param names - The class names.
+ * @param suffix - The suffix to append.
+ * @returns The new list of class names.
+ */
 export const getSuffixedClassNames = (names: string | undefined, suffix: string) =>
     (names || "")
         .split(/\s+/)

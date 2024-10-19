@@ -34,7 +34,7 @@ export class TaipyWsAdapter extends WsAdapter {
                 for (const muPayload of message.payload as [MultipleUpdatePayload]) {
                     const encodedName = muPayload.name;
                     const { value } = muPayload.payload;
-                    if (value && typeof (value as any).__taipy_refresh === "boolean") {
+                    if (value && (value as any).__taipy_refresh !== undefined) {
                         // refresh all requested data for this encodedName var
                         const requestDataOptions = taipyApp.variableData?._requested_data[encodedName];
                         for (const dataKey in requestDataOptions) {
