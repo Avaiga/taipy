@@ -357,7 +357,7 @@ class _Server:
         }
         if self.__ssl_context is not None:
             run_config["ssl_context"] = self.__ssl_context
-        # flask-socketio specific conditions for 'allow_unsafe_werkzeug' arguments to be popped out of kwargs
+        # flask-socketio specific conditions for 'allow_unsafe_werkzeug' parameters to be popped out of kwargs
         if self._get_async_mode() == "threading" and (not sys.stdin or not sys.stdin.isatty()):
             run_config = {**run_config, "allow_unsafe_werkzeug": allow_unsafe_werkzeug}
         try:

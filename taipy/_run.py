@@ -34,7 +34,7 @@ def _run(*services: _AppType, **kwargs) -> t.Optional[Flask]:
         *services (Union[`Gui^`, `Rest^`, `Orchestrator^`]): Services to run, as separate arguments.<br/>
             If several services are provided, all the services run simultaneously.<br/>
             If this is empty or set to None, this method does nothing.
-        **kwargs: Other Arguments to provide to the services.
+        **kwargs: Other parameters to provide to the services.
     """
 
     gui = __get_app(services, Gui)

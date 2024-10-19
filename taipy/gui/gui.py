@@ -308,7 +308,7 @@ class Gui:
 
         - *state*: the `State^` instance of the caller.
         - *page_name*: the name of the page the user is navigating to.
-        - *params* (Optional): the query arguments provided in the URL.
+        - *params* (Optional): the query parameters provided in the URL.
 
         The *on_navigate* callback function must return the name of the page the user should be
         directed to.
@@ -352,10 +352,10 @@ class Gui:
 
         - *state*: the `State^` instance of the caller.
         - *path*: the path provided to the `get_user_content_url()^` to build the URL.
-        - *arguments*: An optional dictionary as defined in the `get_user_content_url()^` call.
+        - *parameters*: An optional dictionary as defined in the `get_user_content_url()^` call.
 
         The returned HTML content can therefore use both the variables stored in the *state*
-        and the arguments provided in the call to `get_user_content_url()^`.
+        and the parameters provided in the call to `get_user_content_url()^`.
         """
 
         # sid from client_id
@@ -1604,8 +1604,8 @@ class Gui:
             callback: The user-defined function to be invoked.<br/>
                 The first parameter of this function must be a `State^` object representing the
                 client for which it is invoked.<br/>
-                The other arguments should reflect the ones provided in the *args* collection.
-            args: The arguments to send to *callback*, if any.
+                The other parameters should reflect the ones provided in the *args* collection.
+            args: The parameters to send to *callback*, if any.
         """
         # Iterate over all the scopes
         res = {}

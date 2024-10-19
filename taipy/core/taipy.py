@@ -688,7 +688,7 @@ def subscribe_scenario(
     Arguments:
         callback (Callable[[Scenario^, Job^], None]): The function to be called on
             status change.
-        params (Optional[List[Any]]): The arguments to be passed to the _callback_.
+        params (Optional[List[Any]]): The parameters to be passed to the _callback_.
         scenario (Optional[Scenario^]): The scenario to which the callback is applied.
             If None, the subscription is registered for all scenarios.
 
@@ -708,7 +708,7 @@ def unsubscribe_scenario(
 
     Arguments:
         callback (Callable[[Scenario^, Job^], None]): The function to unsubscribe from.
-        params (Optional[List[Any]]): The arguments to be passed to the callback.
+        params (Optional[List[Any]]): The parameters to be passed to the callback.
         scenario (Optional[Scenario]): The scenario to unsubscribe from. If None, it
             applies to all scenarios.
 
@@ -728,7 +728,7 @@ def subscribe_sequence(
     Arguments:
         callback (Callable[[Sequence^, Job^], None]): The callable function to be called on
             status change.
-        params (Optional[List[Any]]): The arguments to be passed to the _callback_.
+        params (Optional[List[Any]]): The parameters to be passed to the _callback_.
         sequence (Optional[Sequence^]): The sequence to subscribe on. If None, the subscription
             is applied to all sequences.
 
@@ -746,7 +746,7 @@ def unsubscribe_sequence(
     Arguments:
         callback (Callable[[Sequence^, Job^], None]): The callable function to be called on
             status change.
-        params (Optional[List[Any]]): The arguments to be passed to the _callback_.
+        params (Optional[List[Any]]): The parameters to be passed to the _callback_.
         sequence (Optional[Sequence^]): The sequence to unsubscribe to. If None, it applies
             to all sequences.
 

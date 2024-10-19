@@ -618,12 +618,12 @@ class DataNodeConfig(Section):
                 The default value is *"pyarrow"*.
             compression (Optional[str]): Name of the compression to use. Possible values are *"snappy"*,
                 *"gzip"*, *"brotli"*, or *"none"* (no compression). The default value is *"snappy"*.
-            read_kwargs (Optional[dict]): Additional arguments passed to the `pandas.read_parquet()`
+            read_kwargs (Optional[dict]): Additional parameters passed to the `pandas.read_parquet()`
                 function.
-            write_kwargs (Optional[dict]): Additional arguments passed to the
+            write_kwargs (Optional[dict]): Additional parameters passed to the
                 `pandas.DataFrame.write_parquet()` function.<br/>
-                The arguments in *read_kwargs* and *write_kwargs* have a **higher precedence** than the
-                top-level arguments which are also passed to Pandas.
+                The parameters in *read_kwargs* and *write_kwargs* have a **higher precedence** than the
+                top-level parameters which are also passed to Pandas.
             exposed_type (Optional[str]): The exposed type of the data read from Parquet file.<br/>
                 The default value is `pandas`.
             scope (Optional[Scope^]): The scope of the Parquet data node configuration.<br/>
@@ -763,7 +763,7 @@ class DataNodeConfig(Section):
             default_data (Optional[any]): The default data of the data nodes instantiated from
                 this in_memory data node configuration.
                 If provided, note that the default_data will be stored as a configuration attribute.
-                So it is designed to handle small data values like arguments, and it must be Json serializable.
+                So it is designed to handle small data values like parameters, and it must be Json serializable.
             scope (Optional[Scope^]): The scope of the in_memory data node configuration.<br/>
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be

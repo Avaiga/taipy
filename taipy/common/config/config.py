@@ -283,8 +283,8 @@ class Config:
                 sections[section.id] = section
         else:
             cls._python_config._sections[section.name] = {section.id: section}
-            cls._serializer._section_class[section.name] = section.__class__
-            cls.__json_serializer._section_class[section.name] = section.__class__
+        cls._serializer._section_class[section.name] = section.__class__
+        cls.__json_serializer._section_class[section.name] = section.__class__
         cls._compile_configs()
 
     @classmethod
