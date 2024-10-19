@@ -18,11 +18,11 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
 import networkx as nx
 
+from taipy.common.config import Config
 from taipy.common.config.common._validate_id import _validate_id
 from taipy.common.config.common.scope import Scope
 from taipy.common.logger._taipy_logger import _TaipyLogger
 
-from ... import Config
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
@@ -573,16 +573,21 @@ class DataNode(_Entity, _Labeled):
         return self._edits[-1] if self._edits else None
 
     def get_rank(self) -> int:
+        """Get the rank of this data node regarding to its scenario owner
+
+        Returns:
+            The int value representing the rank.
+        """
         if not self.owner_id:
-            return 0xffff
+            return 0xfffe
         config = Config.data_nodes.get(self.config_id, None)
         if not config:
-            return 0xfffc
+            return 0xfffd
 
         from ... import core as tp
         owner = tp.get(self.owner_id)
         if not isinstance(owner, tp.Scenario):
-            return 0xfffe
+            return 0xfffc
         return config._ranks.get(owner.config_id, 0xfffb)
 
     @abstractmethod
