@@ -11,13 +11,14 @@
 import typing as t
 
 from ...gui import Gui, State
+from ...gui.utils import _MapDict
 
 
-class TestingState(State):
+class MockState(State):
     __VARS = "vars"
 
     def __init__(self, gui: Gui, **kwargs) -> None:
-        super().__setattr__(TestingState.__VARS, kwargs)
+        super().__setattr__(MockState.__VARS, {k: _MapDict(v) if isinstance(v, dict) else v for k, v in kwargs.items()})
         self._gui = gui
         super().__init__()
 
@@ -25,7 +26,7 @@ class TestingState(State):
         return self._gui
 
     def __getattribute__(self, name: str) -> t.Any:
-        if attr := t.cast(dict, super().__getattribute__(TestingState.__VARS)).get(name):
+        if attr := t.cast(dict, super().__getattribute__(MockState.__VARS)).get(name):
             return attr
         try:
             return super().__getattribute__(name)
@@ -33,7 +34,18 @@ class TestingState(State):
             return None
 
     def __setattr__(self, name: str, value: t.Any) -> None:
-        t.cast(dict, super().__getattribute__(TestingState.__VARS))[name] = value
+        t.cast(dict, super().__getattribute__(MockState.__VARS))[name] = (
+            _MapDict(value) if isinstance(value, dict) else value
+        )
 
     def __getitem__(self, key: str):
         return self
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        return True
+
+    def broadcast(self, name: str, value: t.Any):
+        pass
