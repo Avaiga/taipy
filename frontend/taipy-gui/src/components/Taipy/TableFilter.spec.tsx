@@ -246,7 +246,7 @@ describe("Table Filter Component", () => {
     });
 });
 describe("Table Filter Component - Case Insensitive Test", () => {
-    it("should validate case-insensitive string filtering", async () => {
+    it("renders the case sensitivity toggle switch", async () => {
         const { getByTestId, getAllByTestId, findByRole, getByText, getAllByText } = render(
             <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={jest.fn()} filteredCount={0} />
         );

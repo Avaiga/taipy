@@ -35,6 +35,7 @@ import { getDateTime, getTypeFromDf } from "../../utils";
 import { getSuffixedClassNames } from "./utils";
 import SvgIcon from "@mui/icons-material/Check";
 import { FormControlLabel, Switch } from "@mui/material";
+import { MatchCase } from "../icons/MatchCase";
 
 interface TableFilterProps {
     columns: Record<string, ColumnDesc>;
@@ -146,7 +147,7 @@ const FilterRow = (props: FilterRowProps) => {
     const onColSelect = useCallback(
         (e: SelectChangeEvent<string>) => {
             setColId(e.target.value);
-            setEnableCheck(!!getFilterDesc(columns, e.target.value, action, val, matchCase));
+            setEnableCheck(!!getFilterDesc(columns, e.target.value, action, val));
         },
         [columns, action, val]
     );
@@ -154,7 +155,7 @@ const FilterRow = (props: FilterRowProps) => {
     const onActSelect = useCallback(
         (e: SelectChangeEvent<string>) => {
             setAction(e.target.value);
-            setEnableCheck(!!getFilterDesc(columns, colId, e.target.value, val, matchCase));
+            setEnableCheck(!!getFilterDesc(columns, colId, e.target.value, val));
         },
         [columns, colId, val]
     );
@@ -162,7 +163,7 @@ const FilterRow = (props: FilterRowProps) => {
     const onValueChange = useCallback(
         (e: ChangeEvent<HTMLInputElement>) => {
             setVal(e.target.value);
-            setEnableCheck(!!getFilterDesc(columns, colId, action, e.target.value, false));
+            setEnableCheck(!!getFilterDesc(columns, colId, action, e.target.value));
         },
         [columns, colId, action]
     );
@@ -301,18 +302,22 @@ const FilterRow = (props: FilterRowProps) => {
                         onChange={onValueChange}
                         label={`${val ? "" : "Empty "}String`}
                         margin="dense"
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <Switch
+                                        onChange={toggleMatchCase}
+                                        checked={matchCase}
+                                        size="small"
+                                        checkedIcon={<MatchCase />}
+                                        icon={<MatchCase color="disabled" />}
+                                        data-testid="CaseSensitiveToggle"
+                                    />
+                                ),
+                            },
+                        }}
                     />
                 )}
-            </Grid>
-
-            <Grid size={1}>
-                <Tooltip title="Toggle Case Sensitivity">
-                    <IconButton onClick={toggleMatchCase} className="case-sensitive-toggle">
-                        <SvgIcon>
-                            <path d="M20 14c0-1.5-.5-2-2-2h-2v-1c0-1 0-1-2-1v9h4c1.5 0 2-.53 2-2zm-8-2c0-1.5-.53-2-2-2H6c-1.5 0-2 .5-2 2v7h2v-3h4v3h2zm-2-5h4V5h-4zm12 2v11c0 1.11-.89 2-2 2H4a2 2 0 0 1-2-2V9c0-1.11.89-2 2-2h4V5l2-2h4l2 2v2h4a2 2 0 0 1 2 2m-6 8h2v-3h-2zM6 12h4v2H6z" />
-                        </SvgIcon>
-                    </IconButton>
-                </Tooltip>
             </Grid>
 
             <Grid size={1}>
