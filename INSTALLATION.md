@@ -2,11 +2,10 @@ Welcome to the installation section of the Taipy web application builder! This s
 guide you through the seamless and straightforward process of setting up and deploying your
 own powerful web applications.
 
-- If you just want to use the package as is, please refer to the
-[Installing Taipy library](#installing-taipy-library) section.<br/>
+!!! "Development kit installation"
 
-- If you aim to modify the code or contribute to its development, refer to the
-[Installing development environment](#installing-development-environment) section.
+    If you aim to modify the code or contribute to its development, please refer to the
+    contributing documentation to get more information.
 
 
 # Installing Taipy library
@@ -171,118 +170,3 @@ steps:
 !!! tip
     Remember that Google Colab environments are ephemeral. If you disconnect or restart
     your Colab session, you will need to reinstall Taipy.
-
-# Installing the development kit
-
-If you need the source code for Taipy on your system to see how things are done or maybe
-contribute to the improvement of the packages, you can set your environment up by following
-the steps below.
-
-## Prerequisites
-Before installing the Taipy development kit, ensure you have
-[Python](http://docs.python-guide.org/en/latest/starting/installation/) (**version 3.9 or later**),
-[pip](https://pip.pypa.io/en/latest/installation/), and
-[git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) installed on your system.
-
-??? note "On Mac OS M1 pro"
-
-    If you are using a Mac OS M1 pro, you may need to install the `libmagic` library before.
-    Please run the commands below:
-    ```bash
-    brew install libmagic
-    pip install python-libmagic
-    ```
-
-## Cloning the repository
-
-First, clone the Taipy repository from GitHub using the following command:
-
-```bash
-git clone https://github.com/Avaiga/taipy.git
-```
-
-This creates the 'taipy' directory holding all the package's source code.
-
-## Building the JavaScript bundles
-
-Taipy (and Taipy GUI) includes client-side code for web applications, written in
-[TypeScript](https://www.typescriptlang.org/), and uses [React](https://reactjs.org/).
-The code is packaged into JavaScript bundles that are sent to browsers when accessing
-Taipy applications with a graphical interface.
-
-There are two main JavaScript bundles to build:
-- Taipy GUI: Contains the web application, the pages and all standard visual elements.
-- Taipy: Contains specific visual elements for Taipy back-end functionalities
-    (Scenario Management).
-
-**Prerequisites**: To build the JavaScript bundles, ensure you have [Node.js](https://nodejs.org/)
-version 18 or higher installed. Node.js includes the
-[`npm` package manager](https://www.npmjs.com/).
-
-The build process is explained in the [Taipy GUI front-end](frontend/taipy-gui/README.md) and
- [Taipy front-end](frontend/taipy/README.md) README files. Build the Taipy GUI bundle first, as
-the Taipy front-end depends on it.
-
-**Build instructions:** Run the following commands from the root directory of the repository:
-
-```bash
-# Build the Taipy GUI bundle
-cd frontend/taipy-gui
-cd dom
-npm i
-cd ..
-npm i
-npm run build
-#
-# Build the Taipy front-end bundle
-cd ../taipy # Current directory is [taipy-dir]/frontend/taipy
-npm i
-npm run build
-```
-
-These commands will create the `taipy/gui/webapp` and `taipy/gui_core/lib` directories in the root
-folder of the taipy repository.
-
-## Debugging the JavaScript bundles
-
-If you plan to modify the front-end code and need to debug the TypeScript code, you must use the
-following instead of the *standard* build option:
-```bash
-npm run build:dev
-```
-
-This will preserve the debugging symbols, and you will be able to navigate in the TypeScript code
-from your debugger.
-
-!!!note "Web application location"
-    When you are developing front-end code for the Taipy GUI package, it may be cumbersome to have
-    to install the package over and over when you know that all that has changed is the JavaScript
-    bundle that makes the Taipy web app.
-
-    By default, the Taipy GUI application searches for the front-end code in the
-    `[taipy-gui-package-dir]/taipy/gui/webapp` directory.
-    You can, however, set the environment variable `TAIPY_GUI_WEBAPP_PATH` to the location of your
-    choice, and Taipy GUI will look for the web app in that directory.
-    If you set this variable to the location where you build the web app repeatedly, you will no
-    longer have to reinstall Taipy GUI before you try your code again.
-
-## Running the tests
-
-The Taipy package includes a test suite to ensure the package's functionality is correct.
-The tests are written using the [pytest](https://docs.pytest.org/en/latest/) framework.
-They are located in the `tests` directory of the package.
-
-To run the tests, you need to install the required development packages. We recommend using
-[Pipenv](https://pipenv.pypa.io/en/latest/) to create a virtual environment and install the
-development packages.
-
-```bash
-pip install pipenv
-pipenv install --dev
-```
-
-Then you can run the tests with the following command:
-
-```bash
-pipenv run pytest
-```
