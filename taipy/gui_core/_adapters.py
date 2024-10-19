@@ -553,6 +553,7 @@ class _GuiCoreDatanodeProperties(_GuiCoreProperties):
         _GuiCorePropDesc(DataNodeFilter("Last edit date", datetime, "last_edit_date"), for_sort=True),
         _GuiCorePropDesc(DataNodeFilter("Expiration date", datetime, "expiration_date"), extended=True, for_sort=True),
         _GuiCorePropDesc(DataNodeFilter("Expired", bool, "is_expired"), extended=True),
+        _GuiCorePropDesc(DataNodeFilter("Rank", int, "get_rank()"), for_sort=True),
     ]
     __DN_VALIDITY = None
 
