@@ -800,7 +800,7 @@ class DataNodeConfig(Section):
             default_data (Optional[any]): The default data of the data nodes instantiated from
                 this pickle data node configuration.
                 If provided, note that the default_data will be stored as a configuration attribute.
-                So it is designed to handle small data values like arguments, and it must be Json serializable.
+                So it is designed to handle small data values like parameters, and it must be Json serializable.
             scope (Optional[Scope^]): The scope of the pickle data node configuration.<br/>
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
