@@ -267,16 +267,15 @@ class _PandasDataAccessor(_DataAccessor):
                 col = fd.get("col")
                 val = fd.get("value")
                 action = fd.get("action")
-                match_case = fd.get("matchCase", True)  # Retrieve matchCase from the frontend payload
-                
+                match_case = fd.get("matchCase", False)
+
                 if isinstance(val, str):
-                    # Handle case-sensitive/insensitive filtering for string 'contains'
                     if action == "contains":
                         if not match_case:
-                            val = val.lower()  # Lowercase the value if case-insensitive filtering
+                            val = val.lower()  # Convert value to lowercase for case-insensitive filtering
                         vars.append(val)
-                        # Apply case-sensitive or case-insensitive filtering based on match_case flag
-                        right = f".str.contains({val}, case={match_case})"
+                        # Apply case-sensitive or case-insensitive string filtering
+                        right = f".str.contains(@vars[{len(vars) - 1}], case={match_case})"
                     else:
                         vars.append(val)
                     val = f"@vars[{len(vars) - 1}]" if isinstance(val, (str, datetime)) else val

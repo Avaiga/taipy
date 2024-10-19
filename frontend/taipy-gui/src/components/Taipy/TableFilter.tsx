@@ -112,20 +112,15 @@ const getFilterDesc = (
                 action: act,
                 value:
                     typeof val === "string"
-                        ? colType === "string" && act === "contains"
-                            ? matchCase // Apply case-sensitive filtering based on the toggle
-                                ? val
-                                : val.toLowerCase()
+                        ? colType === "number"
+                            ? parseFloat(val)
+                            : colType === "boolean"
+                            ? val === "1"
+                            : colType === "date"
+                            ? getDateTime(val)
                             : val
-                        : colType === "number"
-                        ? parseFloat(val)
-                        : colType === "boolean"
-                        ? val === "1"
-                        : colType === "date"
-                        ? getDateTime(val)
                         : val,
                 type: colType,
-                matchCase, // Include matchCase in the filter description
             } as FilterDesc;
         } catch (e) {
             console.info("could not parse value ", val, e);
@@ -139,19 +134,21 @@ const FilterRow = (props: FilterRowProps) => {
     const [colId, setColId] = useState<string>("");
     const [action, setAction] = useState<string>("");
     const [val, setVal] = useState<string>("");
-    const [matchCase, setMatchCase] = useState<boolean>(true); // Case-sensitivity state
+    const [matchCase, setMatchCase] = useState<boolean>(false);
     const [enableCheck, setEnableCheck] = useState(false);
     const [enableDel, setEnableDel] = useState(false);
 
     // Function to handle case-sensitivity toggle
-    const toggleMatchCase = () => setMatchCase(!matchCase);
+    const toggleMatchCase = useCallback(() => {
+        setMatchCase((prev) => !prev);
+    }, []);
 
     const onColSelect = useCallback(
         (e: SelectChangeEvent<string>) => {
             setColId(e.target.value);
             setEnableCheck(!!getFilterDesc(columns, e.target.value, action, val, matchCase));
         },
-        [columns, action, val, matchCase]
+        [columns, action, val]
     );
 
     const onActSelect = useCallback(
@@ -159,26 +156,24 @@ const FilterRow = (props: FilterRowProps) => {
             setAction(e.target.value);
             setEnableCheck(!!getFilterDesc(columns, colId, e.target.value, val, matchCase));
         },
-        [columns, colId, val, matchCase]
+        [columns, colId, val]
     );
 
     const onValueChange = useCallback(
         (e: ChangeEvent<HTMLInputElement>) => {
-            const value = matchCase ? e.target.value : e.target.value.toLowerCase();
-            setVal(value);
-            setEnableCheck(!!getFilterDesc(columns, colId, action, value, matchCase));
+            setVal(e.target.value);
+            setEnableCheck(!!getFilterDesc(columns, colId, action, e.target.value, false));
         },
-        [columns, colId, action, matchCase]
+        [columns, colId, action]
     );
 
     const onValueAutoComp = useCallback(
         (e: SyntheticEvent, value: string | null) => {
             const inputValue = value || "";
-            const processedValue = matchCase ? inputValue : inputValue.toLowerCase();
-            setVal(processedValue);
-            setEnableCheck(!!getFilterDesc(columns, colId, action, processedValue, matchCase));
+            setVal(inputValue);
+            setEnableCheck(!!getFilterDesc(columns, colId, action, inputValue));
         },
-        [columns, colId, action, matchCase]
+        [columns, colId, action]
     );
 
     const onValueSelect = useCallback(
@@ -255,8 +250,7 @@ const FilterRow = (props: FilterRowProps) => {
                 </FormControl>
             </Grid>
             <Grid size={3.5}>
-                {/* Input Field Based on Type */}
-                {colType === "number" ? (
+                {colType == "number" ? (
                     <TextField
                         type="number"
                         value={typeof val === "number" ? val : val || ""}
@@ -264,7 +258,7 @@ const FilterRow = (props: FilterRowProps) => {
                         label="Number"
                         margin="dense"
                     />
-                ) : colType === "boolean" ? (
+                ) : colType == "boolean" ? (
                     <FormControl margin="dense">
                         <InputLabel>Boolean</InputLabel>
                         <Select
@@ -276,7 +270,7 @@ const FilterRow = (props: FilterRowProps) => {
                             <MenuItem value={"0"}>False</MenuItem>
                         </Select>
                     </FormControl>
-                ) : colType === "date" ? (
+                ) : colType == "date" ? (
                     <DateField
                         value={(val && new Date(val)) || null}
                         onChange={onDateChange}
