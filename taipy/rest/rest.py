@@ -37,11 +37,11 @@ class Rest:
             Config.global_config.testing or False, Config.global_config.env, Config.global_config.secret_key
         )
 
-    def run(self, **kwargs):
-        """
-        Start a REST API server. This method is blocking.
-
-        Parameters:
-            **kwargs : Options to provide to the application server.
-        """
+    def run(self):
+        rest_config = Config.rest
+        kwargs = {
+            "port": rest_config.port,
+            "host": rest_config.host,
+            "ssl_context": (rest_config.ssl_cert, rest_config.ssl_key) if rest_config.use_https else None
+        }
         self._app.run(**kwargs)

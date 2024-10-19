@@ -26,12 +26,6 @@ def create_app(testing=False, flask_env=None, secret_key=None) -> Flask:
         TESTING=os.getenv("TESTING", testing),
         SECRET_KEY=os.getenv("SECRET_KEY", secret_key),
     )
-    if __name__ == "__main__":
-        if config.rest.use_https:
-            run_simple(config.rest.host, config.rest.port, app, 
-                    ssl_context=(config.rest.ssl_cert, config.rest.ssl_key))
-        else:
-            app.run(host=config.rest.host, port=config.rest.port)
     app.url_map.strict_slashes = False
     app.config["RESTFUL_JSON"] = {"cls": _CustomEncoder}
 
@@ -41,6 +35,7 @@ def create_app(testing=False, flask_env=None, secret_key=None) -> Flask:
         api.views.register_views()
 
     return app
+
 
 
 def configure_apispec(app):
