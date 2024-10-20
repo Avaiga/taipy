@@ -11,7 +11,11 @@
 
 from __future__ import annotations
 
+import time
 import typing as t
+from dataclasses import dataclass, field
+from threading import Lock
+from weakref import WeakKeyDictionary
 
 from ._page import _Page
 from ._warnings import _warn
@@ -19,6 +23,13 @@ from .state import State
 
 if t.TYPE_CHECKING:
     from .page import Page
+
+
+@dataclass
+class UpdateQueue:
+    updates: WeakKeyDictionary = field(default_factory=WeakKeyDictionary)
+    last_update: float = field(default_factory=lambda: time.time())
+    lock: Lock = field(default_factory=Lock)
 
 
 class Partial(_Page):
@@ -45,6 +56,11 @@ class Partial(_Page):
 
     __partials: t.Dict[str, Partial] = {}
 
+    __update_queues: t.Dict[str, UpdateQueue] = {}
+
+    STREAM_MODE_BATCH_INTERVAL = 0.05
+    STANDARD_BATCH_INTERVAL = 0.2
+
     def __init__(self, route: t.Optional[str] = None):
         super().__init__()
         if route is None:
@@ -53,7 +69,10 @@ class Partial(_Page):
         else:
             self._route = route
 
-    def update_content(self, state: State, content: t.Union[str, "Page"]):
+        if self._route not in Partial.__update_queues:
+            Partial.__update_queues[self._route] = UpdateQueue()
+
+    def update_content(self, state: State, content: t.Union[str, "Page"], stream_mode: bool = False):
         """Update partial content.
 
         Arguments:
@@ -65,7 +84,28 @@ class Partial(_Page):
         else:
             _warn("'Partial.update_content()' must be called in the context of a callback.")
 
-    def __copy(self, content:  t.Union[str, "Page"]) -> Partial:
+        queue = Partial.__update_queues[self._route]
+        current_time = time.time()
+        batch_interval = self.STREAM_MODE_BATCH_INTERVAL if stream_mode else self.STANDARD_BATCH_INTERVAL
+
+        with queue.lock:
+            queue.updates.setdefault(state._gui, []).append((current_time, self.__copy(content)))
+            if current_time - queue.last_update >= batch_interval:
+                self._process_updates(state)
+                queue.last_update = current_time
+
+    def _process_updates(self, state: State):
+        queue = Partial.__update_queues[self._route]
+        with queue.lock:
+            gui_updates = queue.updates.get(state._gui, [])
+            if not gui_updates:
+                return
+
+            _, latest_content = gui_updates[-1]
+            gui_updates.clear()
+            state._gui._update_partial(latest_content)
+
+    def __copy(self, content: t.Union[str, "Page"]) -> Partial:
         new_partial = Partial(self._route)
         from .page import Page
 
@@ -78,3 +118,10 @@ class Partial(_Page):
                 else None
             )
         return new_partial
+
+    @classmethod
+    def force_update(cls, state: State, route: str):
+        if route in cls.__update_queues:
+            queue = cls.__update_queues[route]
+            with queue.lock:
+                cls.__partials[route]._process_updates(state)
