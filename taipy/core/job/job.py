@@ -460,6 +460,16 @@ class Job(_Entity, _Labeled):
         from ... import core as tp
 
         return tp.is_deletable(self)
+    
+    def is_cancellable(self) -> bool:
+        """Indicate if the job can be cancelled.
+
+        Returns:
+            A Boolean value, which is True if the job can be cancelled. False otherwise.
+        """
+
+        can_be_cancelled = self.is_pending or self.is_blocked or self.is_submitted
+        return bool(can_be_cancelled)
 
     def get_event_context(self):
         return {"task_config_id": self._task.config_id}
