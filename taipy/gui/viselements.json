@@ -1537,11 +1537,6 @@
                         "doc": "This property is required if <i>lov</i> contains a non-specific type of data (e.g., a dictionary).<br/>Then:<ul><li><i>value</i> must be of that type</li><li><i>lov</i> must be an iterable containing elements of this type</li><li>The function set to <i>adapter</i> will receive an object of this type.</li></ul><br/>The default value is the type of the first element in <i>lov</i>."
                     },
                     {
-                        "name": "label",
-                        "type": "str",
-                        "doc": "The title of the menu."
-                    },
-                    {
                         "name": "width",
                         "type": "str",
                         "default_value": "\"15vw\"",

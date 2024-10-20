@@ -41,6 +41,7 @@ export interface LovProps<T = string | string[], U = string> extends TaipyActive
     defaultValue?: U;
     height?: string | number;
     valueById?: boolean;
+    selected?: T;
 }
 
 /**
@@ -112,7 +113,7 @@ export const LovImage = ({
     item: Icon;
     disableTypo?: boolean;
     height?: string;
-    titleTypographyProps?: TypographyProps<"span", { component?: "span"; }>;
+    titleTypographyProps?: TypographyProps<"span", { component?: "span" }>;
 }) => {
     const sx = useMemo(
         () => (height ? { height: height, "& .MuiAvatar-img": { objectFit: "contain" } } : undefined) as SxProps,
@@ -121,9 +122,7 @@ export const LovImage = ({
     return (
         <CardHeader
             sx={cardSx}
-            avatar={
-                <IconAvatar img={item} sx={sx} />
-            }
+            avatar={<IconAvatar img={item} sx={sx} />}
             title={item.text}
             disableTypography={disableTypo}
             titleTypographyProps={titleTypographyProps}
@@ -147,7 +146,7 @@ export interface ItemProps {
     item: stringIcon;
     disabled: boolean;
     withAvatar?: boolean;
-    titleTypographyProps?: TypographyProps<"span", { component?: "span"; }>;
+    titleTypographyProps?: TypographyProps<"span", { component?: "span" }>;
 }
 
 export const SingleItem = ({
