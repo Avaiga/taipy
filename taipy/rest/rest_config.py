@@ -97,14 +97,14 @@ class RestSection(Section):
         ssl_key = as_dict.get("ssl_key", self._ssl_key)
         self._ssl_key = ssl_key if ssl_key is None or isinstance(ssl_key, str) else None
 
+    @classmethod
+    def configure_rest(cls, port: int = 5000, host: str = "127.0.0.1", use_https: bool = False,
+                       ssl_cert: Optional[str] = None, ssl_key: Optional[str] = None):
+        config = Config.rest
+        config.port = port
+        config.host = host
+        config.use_https = use_https
+        config.ssl_cert = ssl_cert
+        config.ssl_key = ssl_key
 
-def configure_rest(port: int = 5000, host: str = "127.0.0.1", use_https: bool = False,
-                   ssl_cert: Optional[str] = None, ssl_key: Optional[str] = None):
-    config = Config.rest
-    config.port = port
-    config.host = host
-    config.use_https = use_https
-    config.ssl_cert = ssl_cert
-    config.ssl_key = ssl_key
-
-_inject_section("rest", "rest", default=RestSection(), configuration_methods=[("configure_rest", configure_rest)])
+_inject_section("rest", "rest", default=RestSection(), configuration_methods=[("configure_rest", RestSection.configure_rest)])
