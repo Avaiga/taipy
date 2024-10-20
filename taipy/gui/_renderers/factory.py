@@ -338,7 +338,7 @@ class _Factory:
                 ("lov", PropertyType.lov),
                 ("label",),
                 ("on_action", PropertyType.function),
-                ("selected", PropertyType.lov_value, "optional"),
+                ("selected", PropertyType.dynamic_list),
                 ("inactive_ids", PropertyType.dynamic_list),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),

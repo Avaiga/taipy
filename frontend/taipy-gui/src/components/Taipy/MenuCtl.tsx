@@ -33,6 +33,7 @@ interface MenuCtlProps extends LovProps<string> {
     inactiveIds?: string[];
     defaultInactiveIds?: string;
     selected?: string[];
+    defaultSelected?: string;
 }
 
 const MenuCtl = (props: MenuCtlProps) => {
@@ -48,19 +49,34 @@ const MenuCtl = (props: MenuCtlProps) => {
 
     const lovList = useLovListMemo(props.lov, defaultLov, true);
 
-    const inactiveIds = useMemo(() => {
+    const { inactiveIds, selected } = useMemo(() => {
+        const result = {
+            inactiveIds: [] as string[],
+            selected: [] as string[],
+        };
+
         if (props.inactiveIds) {
-            return props.inactiveIds;
-        }
-        if (props.defaultInactiveIds) {
+            result.inactiveIds = props.inactiveIds;
+        } else if (props.defaultInactiveIds) {
             try {
-                return JSON.parse(props.defaultInactiveIds) as string[];
+                result.inactiveIds = JSON.parse(props.defaultInactiveIds) as string[];
             } catch {
-                // too bad
+                console.error("Failed to parse defaultInactiveIds");
             }
         }
-        return [];
-    }, [props.inactiveIds, props.defaultInactiveIds]);
+
+        if (props.selected) {
+            result.selected = props.selected;
+        } else if (props.defaultSelected) {
+            try {
+                result.selected = JSON.parse(props.defaultSelected) as string[];
+            } catch (error) {
+                console.error("Failed to parse defaultSelected:", error);
+            }
+        }
+
+        return result;
+    }, [props.inactiveIds, props.defaultInactiveIds, props.selected, props.defaultSelected]);
 
     useEffect(() => {
         dispatch(
@@ -72,23 +88,11 @@ const MenuCtl = (props: MenuCtlProps) => {
                 inactiveIds: inactiveIds,
                 width: isMobile ? width_Mobile_ : width,
                 className: className,
-                selected: props.selected,
+                selected: selected,
             } as MenuProps)
         );
         return () => dispatch(createSetMenuAction({}));
-    }, [
-        label,
-        onAction,
-        active,
-        lovList,
-        inactiveIds,
-        width,
-        width_Mobile_,
-        isMobile,
-        className,
-        dispatch,
-        props.selected,
-    ]);
+    }, [label, onAction, active, lovList, inactiveIds, width, width_Mobile_, isMobile, className, dispatch, selected]);
 
     return <></>;
 };
