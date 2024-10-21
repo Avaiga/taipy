@@ -37,12 +37,20 @@ def get_requirements():
 
 class NPMInstall(build_py):
     def run(self):
-        subprocess.run(
-            ["python", "bundle_build.py"],
-            cwd=root_folder / "tools" / "frontend",
-            check=True,
-            shell=platform.system() == "Windows",
-        )
+        try:
+            subprocess.run(
+                ["python", "bundle_build.py"],
+                cwd=root_folder / "tools" / "frontend",
+                check=True,
+                shell=platform.system() == "Windows",
+            )
+        except subprocess.CalledProcessError as e:
+            print(f"Error during frontend build: {e}")
+            raise
+        except FileNotFoundError as e:
+            print(f"File not found: {e}")
+            raise
+
         build_py.run(self)
 
 setup(
