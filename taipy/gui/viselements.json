@@ -351,6 +351,12 @@
                         "type": "Union[str,int]",
                         "default_value": "None",
                         "doc": "The width of the date element."
+                    },
+                    {
+                        "name": "analogic",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "Whether or not to show timepicker as a clock."
                     }
                 ]
             }

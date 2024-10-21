@@ -143,6 +143,7 @@ class _Factory:
             [
                 ("with_time", PropertyType.boolean),
                 ("active", PropertyType.dynamic_boolean, True),
+                ("analogic", PropertyType.boolean),
                 ("min", PropertyType.dynamic_date),
                 ("max", PropertyType.dynamic_date),
                 ("editable", PropertyType.dynamic_boolean, True),
