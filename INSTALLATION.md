@@ -112,7 +112,7 @@ branch is updated daily with changes from the Taipy R&D team and external contri
 praise for their input.
 
 The development version of Taipy can be installed using **pip**. After downloading Taipy source
-code from the **[GitHub repository](https://git@github.com/Avaiga/taipy) the following commands
+code from the **[GitHub repository](https://git@github.com/Avaiga/taipy)** the following commands
 build the package, and install it in the Python environment with all its dependencies.
 
 Open your terminal or command prompt and run the following command:
