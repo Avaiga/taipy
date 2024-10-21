@@ -2907,3 +2907,4 @@ class Gui:
             self._broadcast(
                 "taipy_favicon", url, self._get_client_id() if state else None, message_type=_WsType.FAVICON
             )
+            

@@ -430,3 +430,4 @@ def invoke_long_callback(
     thread.start()
     if isinstance(period, int) and period >= 500 and callable(user_status_function):
         thread_status(thread.name, period / 1000.0, 0)
+        
