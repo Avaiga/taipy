@@ -267,43 +267,33 @@ class _PandasDataAccessor(_DataAccessor):
                 col = fd.get("col")
                 val = fd.get("value")
                 action = fd.get("action")
-                match_case = fd.get("matchCase", False)
+                match_case = fd.get("matchCase", False) is not False  # Ensure it's a boolean
+                right = None
+                col_expr = f"`{col}`"
 
-                # Only test if the column is a date column if val is a string
-                if isinstance(val, str) and self.__is_date_column(t.cast(pd.DataFrame, df), col):
-                    val = datetime.fromisoformat(val[:-1])  # Convert to datetime
-                    if action == ">":
-                        df = df[df[col] > val]
-                    elif action == "<":
-                        df = df[df[col] < val]
-                    elif action == "==":
-                        df = df[df[col] == val]
-                    is_copied = True
-                    continue  # Skip query for dates since it's already applied
-
-                elif isinstance(val, str):
-                    # Handle string operations
-                    if not match_case:
-                        col_expr = f"`{col}`.str.lower()"
+                if isinstance(val, str):
+                    if self.__is_date_column(t.cast(pd.DataFrame, df), col):
+                        val = datetime.fromisoformat(val[:-1])
+                    elif not match_case:
+                        if action != "contains":
+                            col_expr = f"{col_expr}.str.lower()"
                         val = val.lower()
-                    else:
-                        col_expr = f"`{col}`"
                     vars.append(val)
+                    val_var = f"@vars[{len(vars) - 1}]"
                     if action == "contains":
-                        right = f".str.contains(@vars[{len(vars) - 1}], case={match_case})"
-                    else:
-                        right = f" {action} @vars[{len(vars) - 1}]"
+                        right = f".str.contains({val_var}{'' if match_case else ', case=False'})"
                 else:
-                    # Handle numeric or other types
-                    col_expr = f"`{col}`"
                     vars.append(val)
-                    right = f" {action} @vars[{len(vars) - 1}]"
+                    val_var = f"@vars[{len(vars) - 1}]"
+
+                if right is None:
+                    right = f" {action} {val_var}"
 
                 if query:
                     query += " and "
                 query += f"{col_expr}{right}"
 
-            # Apply string/numeric filters using df.query()
+            # Apply filters using df.query()
             try:
                 if query:
                     df = df.query(query)
