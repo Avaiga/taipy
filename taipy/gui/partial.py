@@ -23,10 +23,19 @@ from .state import State
 
 if t.TYPE_CHECKING:
     from .page import Page
+    from .gui import Gui
 
 
 @dataclass
 class UpdateQueue:
+    """
+    A queue system to manage partial content updates.
+
+    Arguments:
+        updates (WeakKeyDictionary): stores updates per GUI instance using weak references.
+        last_update (float): Timestamp of the last processed update.
+        lock (Lock): Thread lock for synchronization.
+    """
     updates: WeakKeyDictionary = field(default_factory=WeakKeyDictionary)
     last_update: float = field(default_factory=lambda: time.time())
     lock: Lock = field(default_factory=Lock)
@@ -64,7 +73,7 @@ class Partial(_Page):
     def __init__(self, route: t.Optional[str] = None):
         super().__init__()
         if route is None:
-            self._route = f"TaiPy_partials_{len(Partial.__partials)}"
+            self._route: str = f"TaiPy_partials_{len(Partial.__partials)}"
             Partial.__partials[self._route] = self
         else:
             self._route = route
@@ -78,12 +87,14 @@ class Partial(_Page):
         Arguments:
             state (State^): The current user state as received in any callback.
             content (str): The new content to use and display.
+            stream_mode (bool): If True, uses shorter batch interval for smoother streaming.
         """
         if state and state._gui and callable(state._gui._update_partial):
             state._gui._update_partial(self.__copy(content))
         else:
             _warn("'Partial.update_content()' must be called in the context of a callback.")
 
+        gui_id = get_state_id(state)
         queue = Partial.__update_queues[self._route]
         current_time = time.time()
         batch_interval = self.STREAM_MODE_BATCH_INTERVAL if stream_mode else self.STANDARD_BATCH_INTERVAL
@@ -94,10 +105,10 @@ class Partial(_Page):
                 self._process_updates(state)
                 queue.last_update = current_time
 
-    def _process_updates(self, state: State):
+    def _process_updates(self, state: State, gui_id: str):
         queue = Partial.__update_queues[self._route]
         with queue.lock:
-            gui_updates = queue.updates.get(state._gui, [])
+            gui_updates = t.list[t.Tuple[float, Partial]] = queue.updates.get(gui_id, [])
             if not gui_updates:
                 return
 
