@@ -14,13 +14,13 @@ from taipy.gui import Gui, Icon
 msgs = [
     ["1", "msg 1", "Alice", None],
     ["2", "msg From Another unknown User", "Charles", None],
-    ["3", "This from the sender User", "Taipy", "./sample.jpeg"],
+    ["3", "This from the sender User", "taipy", "./sample.jpeg"],
     ["4", "And from another known one", "Alice", None],
 ]
 users = [
     ["Alice", Icon("./alice-avatar.png", "Alice avatar")],
     ["Charles", Icon("./charles-avatar.png", "Charles avatar")],
-    ["Taipy", Icon("./beatrix-avatar.png", "Beatrix avatar")],
+    ["taipy", Icon("./beatrix-avatar.png", "Beatrix avatar")],
 ]
 
 
