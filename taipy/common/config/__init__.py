@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-""" The `taipy.common.config` package provides features to configure a Taipy application.
+"""The `taipy.common.config` package provides features to configure a Taipy application.
 
 Its main class is the `Config^` singleton. It exposes various static methods
 and attributes to configure the Taipy application and retrieve the configuration values.
@@ -45,6 +45,8 @@ and attributes to configure the Taipy application and retrieve the configuration
 
 """
 
+import os
+from inspect import signature
 from typing import List
 
 from ._init import Config
@@ -55,40 +57,55 @@ from .section import Section
 from .unique_section import UniqueSection
 
 
-def _config_doc(func):
-    def func_with_doc(section, attr_name, default, configuration_methods, add_to_unconflicted_sections=False):
-        import os
+def __write_method_to_doc(configuration_methods):
+    if os.environ.get("GENERATING_TAIPY_DOC", None) and os.environ["GENERATING_TAIPY_DOC"] == "true":
+        with open("config_doc.txt", "a") as f:
+            from inspect import signature
 
-        if os.environ.get("GENERATING_TAIPY_DOC", None) and os.environ["GENERATING_TAIPY_DOC"] == "true":
-            with (open("config_doc.txt", "a") as f):
-                from inspect import signature
-
-                # Add the documentation for configure methods
-                for exposed_configuration_method, configuration_method in configuration_methods:
-                    annotation = "    @staticmethod\n"
-                    sign = "    def " + exposed_configuration_method + str(signature(configuration_method)) + ":\n"
-                    doc = '        """' + configuration_method.__doc__ + '"""\n'
-                    content = "        pass\n\n"
-                    f.write(annotation + sign + doc + content)
-
-                # Add the documentation for the attribute
-                annotation = '    @property\n'
-                sign = f"    def {attr_name} (self) -> {section.__name__}:\n"
-                if issubclass(section, UniqueSection):
-                    doc = f'        """The configured {section.__name__} section."""\n'
-                elif issubclass(section, Section):
-                    doc = f'        """The configured {section.__name__} sections ."""\n'
-                else:
-                    print(f" ERROR - Invalid section class: {section.__name__}")  # noqa: T201
-                    return
+            # Add the documentation for configure methods
+            for exposed_configuration_method, configuration_method in configuration_methods:
+                annotation = "    @staticmethod\n"
+                sign = "    def " + exposed_configuration_method + str(signature(configuration_method)) + ":\n"
+                doc = '        """' + configuration_method.__doc__ + '"""\n'
                 content = "        pass\n\n"
                 f.write(annotation + sign + doc + content)
-        return func(section, attr_name, default, configuration_methods, add_to_unconflicted_sections)
+
+
+def __write_section_to_doc(section, attr_name):
+    if os.environ.get("GENERATING_TAIPY_DOC", None) and os.environ["GENERATING_TAIPY_DOC"] == "true":
+        with open("config_doc.txt", "a") as f:
+            # Add the documentation for the attribute
+            annotation = "    @property\n"
+            sign = f"    def {attr_name} (self) -> {section.__name__}:\n"
+            if issubclass(section, UniqueSection):
+                doc = f'        """The configured {section.__name__} section."""\n'
+            elif issubclass(section, Section):
+                doc = f'        """The configured {section.__name__} sections ."""\n'
+            else:
+                print(f" ERROR - Invalid section class: {section.__name__}")  # noqa: T201
+                return
+            content = "        pass\n\n"
+            f.write(annotation + sign + doc + content)
+
+
+def _config_doc_for_section(func):
+    def func_with_doc(section, attribute_name, default, configuration_methods, add_to_unconflicted_sections=False):
+        __write_section_to_doc(section, attribute_name)
+        __write_method_to_doc(configuration_methods)
+        return func(section, attribute_name, default, configuration_methods, add_to_unconflicted_sections)
 
     return func_with_doc
 
 
-@_config_doc
+def _config_doc_for_method(func):
+    def func_with_doc(configuration_methods):
+        __write_method_to_doc(configuration_methods)
+        return func(configuration_methods)
+
+    return func_with_doc
+
+
+@_config_doc_for_section
 def _inject_section(
     section_clazz,
     attribute_name: str,
@@ -108,5 +125,11 @@ def _inject_section(
     if add_to_unconflicted_sections:
         Config._comparator._add_unconflicted_section(section_clazz.name)  # type: ignore[attr-defined]
 
+    for exposed_configuration_method, configuration_method in configuration_methods:
+        setattr(Config, exposed_configuration_method, configuration_method)
+
+
+@_config_doc_for_method
+def _inject_method(configuration_methods: List[tuple]):
     for exposed_configuration_method, configuration_method in configuration_methods:
         setattr(Config, exposed_configuration_method, configuration_method)

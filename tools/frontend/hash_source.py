@@ -42,8 +42,11 @@ def hash_files_in_frontend_folder(frontend_folder):
     combined_hasher = hashlib.sha256()
     file_hashes = {}
     lookup_fe_folder = [f"{frontend_folder}{os.sep}taipy", f"{frontend_folder}{os.sep}taipy-gui"]
-    if len(sys.argv) > 1 and sys.argv[1] == "--taipy-gui-only":
-        lookup_fe_folder.pop(0)
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "--taipy-gui-only":
+            lookup_fe_folder.pop(0)
+        elif sys.argv[1] == "--taipy-gui-core-only":
+            lookup_fe_folder.pop(1)
     for root_folder in lookup_fe_folder:
         # Sort before looping to ensure consistent cache key
         for root, _, files in sorted(os.walk(root_folder)):

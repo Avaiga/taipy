@@ -23,12 +23,14 @@ import {
     createRequestUpdateAction,
     createSendActionNameAction,
     createSendUpdateAction,
+    getComponentClassName,
     getUpdateVar,
+    useClassNames,
     useDispatch,
     useDynamicProperty,
     useModule,
 } from "taipy-gui";
-import { CoreProps, useClassNames } from "./utils";
+import { CoreProps } from "./utils";
 import { TaipyDiagramModel } from "./projectstorm/models";
 
 interface ScenarioDagProps extends CoreProps {
@@ -176,7 +178,7 @@ const ScenarioDag = (props: ScenarioDagProps) => {
     }, []);
 
     return render && scenarioId ? (
-        <Paper sx={sizeSx} id={props.id} className={className}>
+        <Paper sx={sizeSx} id={props.id} className={`${className} ${getComponentClassName(props.children)}`}>
             {showToolbar ? <DagTitle zoomToFit={zoomToFit} /> : null}
             <CanvasWidget engine={engine} ref={canvasRef} />
             {props.children}

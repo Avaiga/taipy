@@ -46,6 +46,7 @@ import { IconAvatar, avatarSx } from "../../utils/icon";
 import { emptyArray, getInitials } from "../../utils";
 import { RowType, TableValueType } from "./tableUtils";
 import { Stack } from "@mui/material";
+import { getComponentClassName } from "./TaipyStyle";
 
 const Markdown = lazy(() => import("react-markdown"));
 
@@ -345,8 +346,7 @@ const Chat = (props: ChatProps) => {
         setShowMessage(false);
     }, []);
 
-    // const refresh = typeof props.messages === "number";
-    const refresh = props.messages && typeof props.messages.__taipy_refresh === "boolean";
+    const refresh = props.messages?.__taipy_refresh !== undefined;
 
     useEffect(() => {
         if (!refresh && props.messages && page.current.key && props.messages[page.current.key] !== undefined) {
@@ -402,7 +402,7 @@ const Chat = (props: ChatProps) => {
 
     return (
         <Tooltip title={hover || ""}>
-            <Paper className={className} sx={boxSx} id={id}>
+            <Paper className={`${className} ${getComponentClassName(props.children)}`} sx={boxSx} id={id}>
                 <Grid container rowSpacing={2} sx={gridSx} ref={scrollDivRef}>
                     {rows.length && !rows[0] ? (
                         <Grid className={getSuffixedClassNames(className, "-load")} size={12} sx={noAnchorSx}>
@@ -469,6 +469,7 @@ const Chat = (props: ChatProps) => {
                         sx={inputSx}
                     />
                 ) : null}
+                {props.children}
             </Paper>
         </Tooltip>
     );

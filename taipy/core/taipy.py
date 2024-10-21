@@ -61,7 +61,7 @@ def set(entity: Union[DataNode, Task, Sequence, Scenario, Cycle, Submission]):
 
     This function allows you to save or update an entity in Taipy.
 
-    Parameters:
+    Arguments:
         entity (Union[DataNode^, Task^, Sequence^, Scenario^, Cycle^, Submission^]): The
             entity to save or update.
     """
@@ -231,7 +231,7 @@ def submit(
     If the entity is a sequence or a scenario, all the tasks of the entity are
     submitted for execution.
 
-    Parameters:
+    Arguments:
         entity (Union[Scenario^, Sequence^, Task^]): The scenario, sequence or task to submit.
         force (bool): If True, the execution is forced even if for skippable tasks.
         wait (bool): Wait for the orchestrated jobs created from the submission to be finished
@@ -302,7 +302,7 @@ def exists(
     `DataNodeId`, `SequenceId`, `ScenarioId`, `JobId`, `CycleId`, `SubmissionId`, and string
     representations.
 
-    Parameters:
+    Arguments:
         entity_id (Union[DataNodeId, TaskId, SequenceId, ScenarioId, JobId, CycleId, SubmissionId, str]): The
             identifier of the entity to check for existence.
 
@@ -377,7 +377,7 @@ def get(
     `Task^`, `DataNode^`, `Sequence^`, `Job^`, `Cycle^`, `Submission^`, or `Scenario^`.
 
 
-    Parameters:
+    Arguments:
         entity_id (Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId, str]):
             The identifier of the entity to retrieve.<br/>
             It should conform to the identifier pattern of one of the entities (`Task^`, `DataNode^`,
@@ -424,7 +424,7 @@ def is_deletable(entity: Union[Scenario, Job, Submission, ScenarioId, JobId, Sub
     This function determines whether a scenario or a job can be safely
     deleted without causing conflicts or issues.
 
-    Parameters:
+    Arguments:
         entity (Union[Scenario, Job, Submission, ScenarioId, JobId, SubmissionId]): The scenario,
             job or submission to check.
 
@@ -465,7 +465,7 @@ def delete(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, C
       The submission can only be deleted if the execution has been finished.
     - If a `JobId` is provided, the job entity can only be deleted if the execution has been finished.
 
-    Parameters:
+    Arguments:
         entity_id (Union[TaskId, DataNodeId, SequenceId, ScenarioId, SubmissionId, JobId, CycleId]):
             The identifier of the entity to delete.
 
@@ -506,7 +506,7 @@ def get_scenarios(
     list contains scenarios that belong to the specified *cycle* and also
     have the specified *tag*.
 
-    Parameters:
+    Arguments:
         cycle (Optional[Cycle^]): The optional `Cycle^` to filter scenarios by.
         tag (Optional[str]): The optional tag to filter scenarios by.
         is_sorted (bool): If True, sort the output list of scenarios using the sorting key.
@@ -546,7 +546,7 @@ def get_scenarios(
 def get_primary(cycle: Cycle) -> Optional[Scenario]:
     """Retrieve the primary scenario associated with a cycle.
 
-    Parameters:
+    Arguments:
         cycle (Cycle^): The cycle for which to retrieve the primary scenario.
 
     Returns:
@@ -565,7 +565,7 @@ def get_primary_scenarios(
 ) -> List[Scenario]:
     """Retrieve a list of all primary scenarios.
 
-    Parameters:
+    Arguments:
         is_sorted (bool): If True, sort the output list of scenarios using the sorting key.
             The default value is False.
         descending (bool): If True, sort the output list of scenarios in descending order.
@@ -597,7 +597,7 @@ def is_promotable(scenario: Union[Scenario, ScenarioId]) -> ReasonCollection:
     This function checks whether the given scenario is eligible to be promoted
     as a primary scenario.
 
-    Parameters:
+    Arguments:
         scenario (Union[Scenario, ScenarioId]): The scenario to be evaluated for promotion.
 
     Returns:
@@ -614,7 +614,7 @@ def set_primary(scenario: Scenario):
     If the cycle already has a primary scenario, that scenario is demoted and is
     no longer considered the primary scenario for its cycle.
 
-    Parameters:
+    Arguments:
         scenario (Scenario^): The scenario to promote as the new _primary_ scenario.
     """
     return _ScenarioManagerFactory._build_manager()._set_primary(scenario)
@@ -625,7 +625,7 @@ def tag(scenario: Scenario, tag: str):
 
     This function adds a user-defined tag to the specified scenario.
 
-    Parameters:
+    Arguments:
         scenario (Scenario^): The scenario to which the tag will be added.
         tag (str): The tag to apply to the scenario.
     """
@@ -638,7 +638,7 @@ def untag(scenario: Scenario, tag: str):
     This function removes a specified tag from the given scenario. If the scenario does
     not have the specified tag, it has no effect.
 
-    Parameters:
+    Arguments:
         scenario (Scenario^): The scenario from which the tag will be removed.
         tag (str): The tag to remove from the scenario.
     """
@@ -651,7 +651,7 @@ def compare_scenarios(*scenarios: Scenario, data_node_config_id: Optional[str] =
     You can specify which data node config identifier should the comparison be performed
     on.
 
-    Parameters:
+    Arguments:
         *scenarios (*Scenario^): The list of the scenarios to compare.
         data_node_config_id (Optional[str]): The config identifier of the DataNode to perform
             the comparison on. <br/>
@@ -685,7 +685,7 @@ def subscribe_scenario(
     The subscription is applied to all jobs created for the execution of _scenario_.
     If no scenario is provided, the subscription applies to all scenarios.
 
-    Parameters:
+    Arguments:
         callback (Callable[[Scenario^, Job^], None]): The function to be called on
             status change.
         params (Optional[List[Any]]): The parameters to be passed to the _callback_.
@@ -706,7 +706,7 @@ def unsubscribe_scenario(
 
     If no scenario is provided, the subscription is removed for all scenarios.
 
-    Parameters:
+    Arguments:
         callback (Callable[[Scenario^, Job^], None]): The function to unsubscribe from.
         params (Optional[List[Any]]): The parameters to be passed to the callback.
         scenario (Optional[Scenario]): The scenario to unsubscribe from. If None, it
@@ -725,7 +725,7 @@ def subscribe_sequence(
 
     The subscription is applied to all jobs created for the execution of _sequence_.
 
-    Parameters:
+    Arguments:
         callback (Callable[[Sequence^, Job^], None]): The callable function to be called on
             status change.
         params (Optional[List[Any]]): The parameters to be passed to the _callback_.
@@ -743,7 +743,7 @@ def unsubscribe_sequence(
 ) -> None:
     """Unsubscribe a function that is called when the status of a Job changes.
 
-    Parameters:
+    Arguments:
         callback (Callable[[Sequence^, Job^], None]): The callable function to be called on
             status change.
         params (Optional[List[Any]]): The parameters to be passed to the _callback_.
@@ -789,7 +789,7 @@ def delete_job(job: Job, force: Optional[bool] = False):
     This function deletes the specified job. If the job is not completed and
     *force* is not set to True, a `JobNotDeletedException^` may be raised.
 
-    Parameters:
+    Arguments:
         job (Job^): The job to delete.
         force (Optional[bool]): If True, forces the deletion of _job_, even
             if it is not completed yet.
@@ -810,7 +810,7 @@ def cancel_job(job: Union[str, Job]):
 
     This function cancels the specified job and sets the status of any subsequent jobs to ABANDONED.
 
-    Parameters:
+    Arguments:
         job (Job^): The job to cancel.
     """
     _JobManagerFactory._build_manager()._cancel(job)
@@ -821,7 +821,7 @@ def get_latest_job(task: Task) -> Optional[Job]:
 
     This function retrieves the latest job associated with a task.
 
-    Parameters:
+    Arguments:
         task (Task^): The task to retrieve the latest job from.
 
     Returns:
@@ -835,7 +835,7 @@ def get_latest_submission(entity: Union[Scenario, Sequence, Task]) -> Optional[S
 
     This function retrieves the latest submission associated with a scenario, sequence or task.
 
-    Parameters:
+    Arguments:
         entity (Union[Scenario^, Sequence^, Task^]): The scenario, sequence or task to
             retrieve the latest submission from.
 
@@ -891,7 +891,7 @@ def create_scenario(
     If the scenario belongs to a cycle, the cycle (corresponding to the _creation_date_
     and the configuration frequency attribute) is created if it does not exist yet.
 
-    Parameters:
+    Arguments:
         config (ScenarioConfig^): The scenario configuration used to create a new scenario.
         creation_date (Optional[datetime.datetime]): The creation date of the scenario.
             If None, the current date time is used.
@@ -915,7 +915,7 @@ def create_global_data_node(config: DataNodeConfig) -> DataNode:
     This function checks and locks the configuration, manages application's version,
     and creates the new data node from the data node configuration provided.
 
-    Parameters:
+    Arguments:
         config (DataNodeConfig^): The data node configuration. It must have a `GLOBAL` scope.
 
     Returns:
@@ -940,7 +940,7 @@ def clean_all_entities(version_number: str) -> bool:
     """Deletes all entities associated with the specified version.
     This function cleans all entities, including jobs, submissions, scenarios, cycles, sequences, tasks, and data nodes.
 
-    Parameters:
+    Arguments:
         version_number (str): The version number of the entities to be deleted.<br/>
             - If the specified version does not exist, the operation will be aborted, and False will be returned.
 
@@ -975,7 +975,7 @@ def get_parents(
 ) -> Dict[str, Set[_Entity]]:
     """Get the parents of an entity from itself or its identifier.
 
-    Parameters:
+    Arguments:
         entity (Union[TaskId, DataNodeId, SequenceId, Task, DataNode, Sequence]): The entity or its
             identifier to get the parents.
 
@@ -1054,7 +1054,7 @@ def get_entities_by_config_id(
 ) -> Union[List, List[Task], List[DataNode], List[Sequence], List[Scenario]]:
     """Get the entities by its config id.
 
-    Parameters:
+    Arguments:
         config_id (str): The config id of the entities
 
     Returns:

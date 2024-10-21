@@ -424,7 +424,7 @@ class Job(_Entity, _Labeled):
         You can be triggered on each change through this function except for the _submitted_
         status.
 
-        Parameters:
+        Arguments:
             functions: Callables that will be called on each status change.
         """
         functions = list(functions)  # type: ignore
