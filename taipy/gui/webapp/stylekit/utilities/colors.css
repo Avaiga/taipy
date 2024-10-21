@@ -1,0 +1,139 @@
+/*
+ * Copyright 2021-2024 Avaiga Private Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
+/**************************************************************
+
+                   COLOR UTILITIES
+
+***************************************************************/
+
+/*************************************************
+              TEXT COLOR
+**************************************************/
+
+.color-primary {
+    color: var(--color-primary) !important;
+}
+
+.color-secondary {
+    color: var(--color-secondary) !important;
+}
+
+.color-error {
+    color: var(--color-error) !important;
+}
+
+.color-warning {
+    color: var(--color-warning) !important;
+}
+
+.color-success {
+    color: var(--color-success) !important;
+}
+
+.color-background-light {
+    color: var(--color-background-light) !important;
+}
+
+.color-background-dark {
+    color: var(--color-background-dark) !important;
+}
+
+.color-background {
+    color: var(--color-background) !important;
+}
+
+.color-paper-light {
+    color: var(--color-paper-light) !important;
+}
+
+.color-paper-dark {
+    color: var(--color-paper-dark) !important;
+}
+
+.color-paper {
+    color: var(--color-paper) !important;
+}
+
+.color-contrast-light {
+    color: var(--color-contrast-light) !important;
+}
+
+.color-contrast-dark {
+    color: var(--color-contrast-dark) !important;
+}
+
+.color-contrast {
+    color: var(--color-contrast) !important;
+}
+
+
+/*************************************************
+              BACKGROUND COLOR
+**************************************************/
+
+.bg-primary {
+    background-color: var(--color-primary) !important;
+}
+
+.bg-secondary {
+    background-color: var(--color-secondary) !important;
+}
+
+.bg-error {
+    background-color: var(--color-error) !important;
+}
+
+.bg-warning {
+    background-color: var(--color-warning) !important;
+}
+
+.bg-success {
+    background-color: var(--color-success) !important;
+}
+
+.bg-background-light {
+    background-color: var(--color-background-light) !important;
+}
+
+.bg-background-dark {
+    background-color: var(--color-background-dark) !important;
+}
+
+.bg-background {
+    background-color: var(--color-background) !important;
+}
+
+.bg-paper-light {
+    background-color: var(--color-paper-light) !important;
+}
+
+.bg-paper-dark {
+    background-color: var(--color-paper-dark) !important;
+}
+
+.bg-paper {
+    background-color: var(--color-paper) !important;
+}
+
+.bg-contrast-light {
+    background-color: var(--color-contrast-light) !important;
+}
+
+.bg-contrast-dark {
+    background-color: var(--color-contrast-dark) !important;
+}
+
+.bg-contrast {
+    background-color: var(--color-contrast) !important;
+}

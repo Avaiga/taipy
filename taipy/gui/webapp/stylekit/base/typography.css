@@ -1,0 +1,77 @@
+/*
+ * Copyright 2021-2024 Avaiga Private Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
+/**************************************************************
+
+                TYPOGRAPHY STYLES
+
+***************************************************************/
+
+h1,
+.h1,
+h2,
+.h2,
+h3,
+.h3,
+h4,
+.h4,
+h5,
+.h5,
+h6,
+.h6 {
+    display: block;
+    line-height: 1.2;
+    font-weight: var(--font-weight-heading);
+}
+
+h1,
+.h1 {
+    font-size: var(--font-size-h1);
+}
+
+h2,
+.h2 {
+    font-size: var(--font-size-h2);
+}
+
+h3,
+.h3 {
+    font-size: var(--font-size-h3);
+}
+
+h4,
+.h4 {
+    font-size: var(--font-size-h4);
+}
+
+h5,
+.h5 {
+    font-size: var(--font-size-h5);
+}
+
+h6,
+.h6 {
+    font-size: var(--font-size-h6);
+}
+
+.text-body {
+    font-size: var(--font-size-body);
+}
+
+.text-small {
+    font-size: var(--font-size-small);
+}
+
+.text-caption {
+    font-size: var(--font-size-caption);
+}
