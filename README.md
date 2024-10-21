@@ -11,7 +11,7 @@
 </div>
 
 <h1 align="center">
-Build Python Data & AI web applications
+    Build Python Data & AI web applications
 </h1>
 
 <div align="center">
@@ -21,8 +21,8 @@ No more compromises on performance, customization, and scalability.
 
 <br />
 
-<div align="center">
-**Go beyond existing libraries**
+<div align="center"> 
+     <strong> Go beyond existing libraries  </strong>
 </div>
 
 <p align="center"><h4>
