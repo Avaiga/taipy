@@ -81,6 +81,15 @@ describe("DateRange Component", () => {
         expect(elts).toHaveLength(2);
         expect(elts[0].parentElement?.tagName).toBe("BUTTON");
     });
+    it("renders with analog time picker", async () => {
+        const { getByTestId } = render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DateRange dates={curDates} withTime={true} analogic={true}/>
+            </LocalizationProvider>
+        );
+        const elt = getByTestId("CalendarIcon");
+        expect(elt.parentElement?.tagName).toBe("BUTTON");
+    });
     it("displays the right info for string", async () => {
         const { getAllByTestId } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
