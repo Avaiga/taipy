@@ -1,6 +1,6 @@
 {
   "name": "taipy-gui-core",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "private": true,
   "devDependencies": {
     "@testing-library/jest-dom": "^6.5.0",

@@ -122,7 +122,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None) -> None:
         """Write a set of columns.
 
-        Parameters:
+        Arguments:
             data (Any): The data to write.
             columns (List[str]): The list of column names to write.
             job_id (Optional[JobId]): An optional identifier of the writer.

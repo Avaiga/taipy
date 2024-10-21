@@ -27,7 +27,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         """
         Save an entity in the repository.
 
-        Parameters:
+        Arguments:
             entity: The data from an object.
         """
         raise NotImplementedError
@@ -36,7 +36,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
     def _exists(self, entity_id: str) -> bool:
         """
         Check if an entity with id entity_id exists in the repository.
-        Parameters:
+        Arguments:
             entity_id: The entity id, i.e., its primary key.
 
         Returns:
@@ -48,7 +48,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
     def _load(self, entity_id: str) -> Entity:
         """
         Retrieve the entity data from the repository.
-        Parameters:
+        Arguments:
             entity_id: The entity id, i.e., its primary key.
 
         Returns:
@@ -71,7 +71,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         """
         Delete an entity in the repository.
 
-        Parameters:
+        Arguments:
             entity_id: The id of the entity to be deleted.
         """
         raise NotImplementedError
@@ -88,7 +88,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         """
         Delete all entities from the list of ids from the repository.
 
-        Parameters:
+        Arguments:
             ids: List of ids to be deleted.
         """
         raise NotImplementedError
@@ -98,7 +98,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         """
         Delete all entities from the list of ids from the repository.
 
-        Parameters:
+        Arguments:
             attribute: The entity property that is the key to the search.
             value: The value of the attribute that are being searched.
         """
@@ -107,7 +107,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
     @abstractmethod
     def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> List[Entity]:
         """
-        Parameters:
+        Arguments:
             attribute: The entity property that is the key to the search.
             value: The value of the attribute that are being searched.
 
@@ -121,7 +121,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         """
         Export an entity from the repository.
 
-        Parameters:
+        Arguments:
             entity_id (str): The id of the entity to be exported.
             folder_path (Union[str, pathlib.Path]): The folder path to export the entity to.
         """
@@ -131,7 +131,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         """
         Import an entity from an exported file.
 
-        Parameters:
+        Arguments:
             folder_path (Union[str, pathlib.Path]): The folder path to export the entity to.
 
         Returns:
