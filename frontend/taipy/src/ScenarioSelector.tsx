@@ -537,7 +537,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                                 endIcon={<Add />}
                                 disabled={!active || !!creationNotAllowed}
                             >
-                                Add scenario
+                                Add scenario From Fred
                             </Button>
                         </span>
                     </Tooltip>

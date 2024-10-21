@@ -129,6 +129,7 @@ jobs:
           echo "HASH=$(cat hash.txt)" >> $GITHUB_OUTPUT
           rm hash.txt
         shell: bash
+
       - name: Restore cached core frontend build
         id: cache-gui-core-fe-build
         uses: actions/cache@v4
