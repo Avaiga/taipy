@@ -269,8 +269,8 @@ class _PandasDataAccessor(_DataAccessor):
                 action = fd.get("action")
                 match_case = fd.get("matchCase", False)
 
-                # Handle date columns separately from query
-                if self.__is_date_column(t.cast(pd.DataFrame, df), col):
+                # Only test if the column is a date column if val is a string
+                if isinstance(val, str) and self.__is_date_column(t.cast(pd.DataFrame, df), col):
                     val = datetime.fromisoformat(val[:-1])  # Convert to datetime
                     if action == ">":
                         df = df[df[col] > val]
@@ -283,26 +283,25 @@ class _PandasDataAccessor(_DataAccessor):
 
                 elif isinstance(val, str):
                     # Handle string operations
+                    if not match_case:
+                        col_expr = f"`{col}`.str.lower()"
+                        val = val.lower()
+                    else:
+                        col_expr = f"`{col}`"
+                    vars.append(val)
                     if action == "contains":
-                        if not match_case:
-                            col = f"`{col}`.str.lower()"
-                            val = val.lower()
-                        vars.append(val)
                         right = f".str.contains(@vars[{len(vars) - 1}], case={match_case})"
                     else:
-                        if not match_case:
-                            col = f"`{col}`.str.lower()"
-                            val = val.lower()
-                        vars.append(val)
                         right = f" {action} @vars[{len(vars) - 1}]"
                 else:
                     # Handle numeric or other types
+                    col_expr = f"`{col}`"
                     vars.append(val)
                     right = f" {action} @vars[{len(vars) - 1}]"
 
                 if query:
                     query += " and "
-                query += f"{col}{right}"
+                query += f"{col_expr}{right}"
 
             # Apply string/numeric filters using df.query()
             try:
