@@ -177,7 +177,7 @@ const ChatRow = (props: ChatRowProps) => {
                 </Grid>
                             ):null}
                 {(!sender || showSender) && avatar ? (
-                    <Stack direction="row" gap={1}>
+                    <Stack direction="row" gap={1} justifyContent={sender ? "flex-end" : undefined}>
                         {!sender ? <Box sx={avatarColSx}>{avatar}</Box> : null}
                         <Stack>
                             <Box sx={sender ? rightNameSx : leftNameSx}>{name}</Box>
