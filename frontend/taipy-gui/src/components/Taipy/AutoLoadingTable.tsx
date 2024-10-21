@@ -606,10 +606,6 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                             key={`head${columns[col].dfid}`}
                                             sortDirection={orderBy === columns[col].dfid && order}
                                             sx={columns[col].width ? { width: columns[col].width } : {}}
-                                            className={col === "EDIT_COL"
-                                                ? getSuffixedClassNames(className, "-action")
-                                                : getSuffixedClassNames(className, generateHeaderClassName(columns[col].dfid))
-                                            }
                                             sx={columns[col].width ? { width: columns[col].width } : undefined}
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
