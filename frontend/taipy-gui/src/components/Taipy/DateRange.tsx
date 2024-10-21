@@ -18,6 +18,7 @@ import Typography from "@mui/material/Typography";
 import { DatePicker, DatePickerProps } from "@mui/x-date-pickers/DatePicker";
 import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
 import { DateTimePicker, DateTimePickerProps } from "@mui/x-date-pickers/DateTimePicker";
+import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 import { isValid } from "date-fns";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -40,6 +41,7 @@ interface DateRangeProps extends TaipyActiveProps, TaipyChangeProps {
     labelEnd?: string;
     separator?: string;
     width?: string | number;
+    analogic?: boolean;
 }
 
 const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotProps<Date>;
@@ -66,7 +68,7 @@ const getRangeDateTime = (
 };
 
 const DateRange = (props: DateRangeProps) => {
-    const { updateVarName, withTime = false, id, propagate = true, separator = "-" } = props;
+    const { updateVarName, withTime = false, id, propagate = true, separator = "-", analogic = false } = props;
     const dispatch = useDispatch();
     const formatConfig = useFormatConfig();
     const tz = formatConfig.timeZone;
@@ -117,6 +119,11 @@ const DateRange = (props: DateRangeProps) => {
 
     const handleChangeStart = useCallback((v: Date | null) => handleChange(v, true), [handleChange]);
     const handleChangeEnd = useCallback((v: Date | null) => handleChange(v, false), [handleChange]);
+    const analogicRenderers = {
+        hours: renderTimeViewClock,
+        minutes: renderTimeViewClock,
+        seconds: renderTimeViewClock
+    }
 
     // Run every time props.value get updated
     useEffect(() => {
@@ -157,6 +164,7 @@ const DateRange = (props: DateRangeProps) => {
                                     label={props.labelStart}
                                     format={props.format}
                                     sx={dateSx}
+                                    viewRenderers={ analogic ? analogicRenderers : undefined }
                                 />
                                 <Typography>{separator}</Typography>
                                 <DateTimePicker
@@ -173,6 +181,7 @@ const DateRange = (props: DateRangeProps) => {
                                     label={props.labelEnd}
                                     format={props.format}
                                     sx={dateSx}
+                                    viewRenderers={ analogic ? analogicRenderers : undefined }
                                 />
                             </>
                         ) : (
