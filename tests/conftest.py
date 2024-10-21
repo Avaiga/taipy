@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import argparse
+import typing as t
 
 import pytest
 
@@ -54,7 +55,7 @@ def remove_subparser(name: str) -> None:
 
 
 @pytest.fixture
-def clean_argparser() -> callable:
+def clean_argparser() -> t.Callable:
     """Fixture to clean the argument parser."""
     def _clean_argparser() -> None:
         _TaipyParser._parser = argparse.ArgumentParser(conflict_handler="resolve")
@@ -68,7 +69,7 @@ def clean_argparser() -> callable:
 
 
 @pytest.fixture
-def reset_configuration_singleton() -> callable:
+def reset_configuration_singleton() -> t.Callable:
     """Fixture to reset the configuration singleton."""
     def _reset_configuration_singleton() -> None:
         Config.unblock_update()
@@ -87,7 +88,7 @@ def reset_configuration_singleton() -> callable:
 
 
 @pytest.fixture
-def inject_core_sections() -> callable:
+def inject_core_sections() -> t.Callable:
     """Fixture to inject core sections into the configuration."""
     def _inject_core_sections() -> None:
         _inject_section(
