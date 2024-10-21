@@ -67,6 +67,7 @@ def notify(
     message: str = "",
     system_notification: t.Optional[bool] = None,
     duration: t.Optional[int] = None,
+    notification_id: str = "",
 ):
     """Send a notification to the user interface.
 
@@ -96,9 +97,18 @@ def notify(
     feature.
     """
     if state and isinstance(state._gui, Gui):
-        state._gui._notify(notification_type, message, system_notification, duration)
+        return state._gui._notify(notification_type, message, system_notification, duration, notification_id)
     else:
         _warn("'notify()' must be called in the context of a callback.")
+
+
+def close_notification(state: State, notification_id: str):
+    """Close a specific notification by ID."""
+    if state and isinstance(state._gui, Gui):
+        # Send the close command with the notification_id
+        state._gui._close_notification(notification_id)
+    else:
+        _warn("'close_notification()' must be called in the context of a callback.")
 
 
 def hold_control(
