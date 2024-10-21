@@ -22,7 +22,7 @@ No more compromises on performance, customization, and scalability.
 <br />
 
 <div align="center">
-**Go beyond existing libraries**
+*Go beyond existing libraries*
 </div>
 
 <p align="center"><h4>
