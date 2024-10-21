@@ -90,7 +90,7 @@ pip install taipy
 
 **Ready to Install Taipy?** 🚀<br>
 Get everything set up in no time! Whether you're using a Conda environment or installing from
-source, follow our [Installation Guide](https://docs.taipy.io/en/latest/installation/) for
+source, follow our [Installation Guide](https://docs.taipy.io/en/latest/tutorials/getting_started/installation/) for
 step-by-step instructions.<br>
 
 **Excited to Dive In?** 💡 <br>
@@ -133,10 +133,10 @@ This is the execution graph of the scenario we are implementing:
 
 You can use the Taipy Studio extension in Visual Studio Code to configure your scenario with no code.<br />
 Your configuration is automatically saved as a TOML file.<br />
-Check out the Taipy Studio [Documentation](https://docs.taipy.io/en/latest/manuals/studio/).
+Check out the Taipy Studio [Documentation](https://docs.taipy.io/en/latest/userman/ecosystem/studio/).
 
 For more advanced use cases or if you prefer coding your configurations instead of using Taipy Studio,<br />
-check out the movie genre demo scenario creation with this [Demo](https://docs.taipy.io/en/latest/gallery/other/movie_genre_selector/).
+check out the movie genre demo scenario creation with this [Demo](https://docs.taipy.io/en/latest/gallery/articles/movie_genre_selector/).
 
 ![TaipyStudio](https://github.com/Avaiga/taipy/raw/develop/readme_img/readme_demo_studio.gif)
 
