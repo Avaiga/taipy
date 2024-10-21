@@ -50,7 +50,7 @@ class _GuiSection(UniqueSection):
     def _configure(**properties) -> "_GuiSection":
         """Configure the Graphical User Interface.
 
-        Parameters:
+        Arguments:
             **properties (dict[str, any]): Keyword arguments that configure the behavior of the `Gui^` instances.<br/>
                 Please refer to the gui config section
                 [page](../../../../../../userman/advanced_features/configuration/gui-config.md#configuring-the-gui-instance)

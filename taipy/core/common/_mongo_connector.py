@@ -22,7 +22,7 @@ def _connect_mongodb(
     The `"mongodb_extra_args"` passed by the user is originally a dictionary, but since `@lru_cache` wrapper only
     accepts hashable parameters, the `"mongodb_extra_args"` should be converted into a frozenset beforehand.
 
-    Parameters:
+    Arguments:
         db_host (str): the database host.
         db_port (int): the database port.
         db_username (str): the database username.

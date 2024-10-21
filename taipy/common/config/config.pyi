@@ -121,7 +121,7 @@ class Config:
 
         The current Python configuration is replaced and the Config compilation is triggered.
 
-        Parameters:
+        Arguments:
             filename (Union[str, Path]): The path of the toml configuration file to load.
         """
 
@@ -135,7 +135,7 @@ class Config:
         Note:
             If *filename* already exists, it is overwritten.
 
-        Parameters:
+        Arguments:
             filename (Union[str, Path]): The path of the file to export.
         """
 
@@ -152,7 +152,7 @@ class Config:
         Note:
             If *filename* already exists, it is overwritten.
 
-        Parameters:
+        Arguments:
             filename (Union[str, Path]): The path of the file to export.
         """
 
@@ -161,7 +161,7 @@ class Config:
     def restore(cls, filename: str) -> None:
         """Restore a configuration file and replace the current applied configuration.
 
-        Parameters:
+        Arguments:
             filename (Union[str, Path]): The path of the toml configuration file to load.
         """
 
@@ -170,7 +170,7 @@ class Config:
     def override(cls, filename: str) -> None:
         """Load a configuration from a file and overrides the current config.
 
-        Parameters:
+        Arguments:
             filename (Union[str, Path]): The path of the toml configuration file to load.
         """
 
@@ -187,7 +187,7 @@ class Config:
     def configure_global_app(cls, **properties) -> GlobalAppConfig:
         """Configure the global application.
 
-        Parameters:
+        Arguments:
             **properties (Dict[str, Any]): A dictionary of additional properties.
 
         Returns:
@@ -266,7 +266,7 @@ class Config:
     ) -> "ScenarioConfig":
         """Configure a new scenario configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new scenario configuration.
             task_configs (Optional[List[TaskConfig^]]): The list of task configurations used by this
                 scenario configuration. The default value is None.
@@ -306,7 +306,7 @@ class Config:
         where all scenario configuration objects will find their default
         values when needed.
 
-        Parameters:
+        Arguments:
             task_configs (Optional[List[TaskConfig^]]): The list of task configurations used by this
                 scenario configuration.
             additional_data_node_configs (Optional[List[DataNodeConfig^]]): The list of additional data nodes
@@ -339,7 +339,7 @@ class Config:
         where all data node configuration objects will find their default
         values when needed.
 
-        Parameters:
+        Arguments:
             storage_type (str): The default storage type for all data node configurations.
                 The possible values are *"pickle"* (the default value), *"csv"*, *"excel"*,
                 *"sql"*, *"mongo_collection"*, *"in_memory"*, *"json"*, *"parquet"*, *"generic"*,
@@ -367,7 +367,7 @@ class Config:
     ) -> "DataNodeConfig":
         """Configure a new data node configuration from an existing one.
 
-        Parameters:
+        Arguments:
             source_configuration (DataNodeConfig): The source data node configuration.
             id (str): The unique identifier of the new data node configuration.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.<br/>
@@ -388,7 +388,7 @@ class Config:
     ) -> "DataNodeConfig":
         """Configure a new data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new data node configuration.
             storage_type (Optional[str]): The data node configuration storage type. The possible values
                 are None (which is the default value of *"pickle"*, unless it has been overloaded by the
@@ -425,7 +425,7 @@ class Config:
     ) -> "DataNodeConfig":
         """Configure a new CSV data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new CSV data node configuration.
             default_path (Optional[str]): The default path of the CSV file.
             encoding (Optional[str]): The encoding of the CSV file.
@@ -460,7 +460,7 @@ class Config:
     ) -> "DataNodeConfig":
         """Configure a new JSON data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new JSON data node configuration.
             default_path (Optional[str]): The default path of the JSON file.
             encoding (Optional[str]): The encoding of the JSON file.
@@ -496,7 +496,7 @@ class Config:
     ) -> "DataNodeConfig":
         """Configure a new Parquet data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new Parquet data node configuration.
             default_path (Optional[str]): The default path of the Parquet file.
             engine (Optional[str]): Parquet library to use. Possible values are *"fastparquet"* or
@@ -540,7 +540,7 @@ class Config:
     ) -> "DataNodeConfig":
         """Configure a new Excel data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new Excel data node configuration.
             default_path (Optional[str]): The path of the Excel file.
             has_header (Optional[bool]): If True, indicates that the Excel file has a header.
@@ -576,7 +576,7 @@ class Config:
     ) -> "DataNodeConfig":
         """Configure a new generic data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new generic data node configuration.
             read_fct (Optional[Callable]): The Python function called to read the data.
             write_fct (Optional[Callable]): The Python function called to write the data.
@@ -610,7 +610,7 @@ class Config:
     ) -> "DataNodeConfig":
         """Configure a new *in-memory* data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new in_memory data node configuration.
             default_data (Optional[any]): The default data of the data nodes instantiated from
                 this in_memory data node configuration.
@@ -642,7 +642,7 @@ class Config:
     ) -> "DataNodeConfig":
         """Configure a new pickle data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new pickle data node configuration.
             default_path (Optional[str]): The path of the pickle file.
             default_data (Optional[any]): The default data of the data nodes instantiated from
@@ -685,7 +685,7 @@ class Config:
     ) -> "DataNodeConfig":
         """Configure a new SQL table data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new SQL data node configuration.
             db_name (str): The database name, or the name of the SQLite database file.
             db_engine (str): The database engine. Possible values are *"sqlite"*, *"mssql"*, *"mysql"*,
@@ -746,7 +746,7 @@ class Config:
     ) -> "DataNodeConfig":
         """Configure a new SQL data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new SQL data node configuration.
             db_name (str): The database name, or the name of the SQLite database file.
             db_engine (str): The database engine. Possible values are *"sqlite"*, *"mssql"*, *"mysql"*,
@@ -806,7 +806,7 @@ class Config:
     ) -> "DataNodeConfig":
         """Configure a new Mongo collection data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new Mongo collection data node configuration.
             db_name (str): The database name.
             collection_name (str): The collection in the database to read from and to write the data to.
@@ -856,7 +856,7 @@ class Config:
     ) -> "DataNodeConfig":
         """Configure a new S3 object data node configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of the new S3 Object data node configuration.
             aws_access_key (str): Amazon Web Services (AWS) ID for to identify account.
             aws_secret_access_key (str): Amazon Web Services (AWS) access key to authenticate
@@ -906,7 +906,7 @@ class Config:
     ) -> "TaskConfig":
         """Configure a new task configuration.
 
-        Parameters:
+        Arguments:
             id (str): The unique identifier of this task configuration.
             function (Callable): The python function called by Taipy to run the task.
             input (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
@@ -938,7 +938,7 @@ class Config:
         where all task configuration objects will find their default
         values when needed.
 
-        Parameters:
+        Arguments:
             function (Callable): The python function called by Taipy to run the task.
             input (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
                 input data node configurations. This can be a unique data node
@@ -962,7 +962,7 @@ class Config:
     ) -> "JobConfig":
         """Configure job execution.
 
-        Parameters:
+        Arguments:
             mode (Optional[str]): The job execution mode.
                 Possible values are: *"standalone"* or *"development"*.
             max_nb_of_workers (Optional[int, str]): Parameter used only in *"standalone"* mode.
@@ -992,7 +992,7 @@ class Config:
     ) -> "CoreSection":
         """Configure the Orchestrator service.
 
-        Parameters:
+        Arguments:
             root_folder (Optional[str]): Path of the base folder for the taipy application.
                 The default value is "./taipy/"
             storage_folder (str): Folder name used to store user data. The default value is "user_data/". It is used in
