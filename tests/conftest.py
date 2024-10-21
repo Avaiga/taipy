@@ -55,7 +55,7 @@ def remove_subparser(name: str) -> None:
 
 
 @pytest.fixture
-def clean_argparser() -> t.callable:
+def clean_argparser() -> t.Callable:
     """Fixture to clean the argument parser."""
     def _clean_argparser() -> None:
         _TaipyParser._parser = argparse.ArgumentParser(conflict_handler="resolve")
@@ -69,7 +69,7 @@ def clean_argparser() -> t.callable:
 
 
 @pytest.fixture
-def reset_configuration_singleton() -> t.callable:
+def reset_configuration_singleton() -> t.Callable:
     """Fixture to reset the configuration singleton."""
     def _reset_configuration_singleton() -> None:
         Config.unblock_update()
@@ -88,7 +88,7 @@ def reset_configuration_singleton() -> t.callable:
 
 
 @pytest.fixture
-def inject_core_sections() -> t.callable:
+def inject_core_sections() -> t.Callable:
     """Fixture to inject core sections into the configuration."""
     def _inject_core_sections() -> None:
         _inject_section(
