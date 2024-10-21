@@ -20,20 +20,21 @@ import Avatar from "@mui/material/Avatar";
 import CardHeader from "@mui/material/CardHeader";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Box from "@mui/material/Box";
-import Tooltip from '@mui/material/Tooltip';
+import Tooltip from "@mui/material/Tooltip";
 import { Theme, useTheme } from "@mui/system";
 
-import { SingleItem } from "./lovUtils";
+import { LovImage } from "./lovUtils";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { MenuProps } from "../../utils/lov";
 import { useClassNames, useDispatch, useModule } from "../../utils/hooks";
-import { emptyArray } from "../../utils";
+import { emptyArray, getInitials } from "../../utils";
 import { getComponentClassName } from "./TaipyStyle";
 
 const boxDrawerStyle = { overflowX: "hidden" } as CSSProperties;
 const headerSx = { padding: 0 };
 const avatarSx = { bgcolor: (theme: Theme) => theme.palette.text.primary };
 const baseTitleProps = { noWrap: true, variant: "h6" } as const;
+const cardSx = { p: 0 } as CSSProperties;
 
 const Menu = (props: MenuProps) => {
     const { label, onAction = "", lov, width, inactiveIds = emptyArray, active = true } = props;
@@ -49,13 +50,17 @@ const Menu = (props: MenuProps) => {
         (evt: MouseEvent<HTMLElement>) => {
             if (active) {
                 const { id: key = "" } = evt.currentTarget.dataset;
-                setSelectedValue(() => {
-                    dispatch(createSendActionNameAction("menu", module, onAction, key));
-                    return key;
-                });
+                if (props.selected) {
+                    dispatch(createSendActionNameAction("menu", module, onAction, ...props.selected));
+                } else {
+                    setSelectedValue(() => {
+                        dispatch(createSendActionNameAction("menu", module, onAction, key));
+                        return key;
+                    });
+                }
             }
         },
-        [onAction, dispatch, active, module]
+        [active, props.selected, dispatch, module, onAction]
     );
 
     const openHandler = useCallback((evt: MouseEvent<HTMLElement>) => {
@@ -65,21 +70,29 @@ const Menu = (props: MenuProps) => {
 
     const [drawerSx, titleProps] = useMemo(() => {
         const drawerWidth = opened ? width : `calc(${theme.spacing(9)} + 1px)`;
-        const titleWidth = opened ? `calc(${width} - ${theme.spacing(10)})`: undefined;
-        return [{
-            width: drawerWidth,
-            flexShrink: 0,
-            "& .MuiDrawer-paper": {
+        const titleWidth = opened ? `calc(${width} - ${theme.spacing(10)})` : undefined;
+        return [
+            {
                 width: drawerWidth,
-                boxSizing: "border-box",
+                flexShrink: 0,
+                "& .MuiDrawer-paper": {
+                    width: drawerWidth,
+                    boxSizing: "border-box",
+                    transition: "width 0.3s",
+                },
                 transition: "width 0.3s",
             },
-            transition: "width 0.3s",
-        }, {...baseTitleProps, width: titleWidth}];
+            { ...baseTitleProps, width: titleWidth },
+        ];
     }, [opened, width, theme]);
 
     return lov && lov.length ? (
-        <Drawer variant="permanent" anchor="left" sx={drawerSx} className={`${className} ${getComponentClassName(props.children)}`}>
+        <Drawer
+            variant="permanent"
+            anchor="left"
+            sx={drawerSx}
+            className={`${className} ${getComponentClassName(props.children)}`}
+        >
             <Box style={boxDrawerStyle}>
                 <List>
                     <ListItemButton key="taipy_menu_0" onClick={openHandler}>
@@ -87,9 +100,11 @@ const Menu = (props: MenuProps) => {
                             <CardHeader
                                 sx={headerSx}
                                 avatar={
-                                    <Tooltip title={label || false}><Avatar sx={avatarSx}>
-                                        <MenuIco />
-                                    </Avatar></Tooltip>
+                                    <Tooltip title={label || false}>
+                                        <Avatar sx={avatarSx}>
+                                            <MenuIco />
+                                        </Avatar>
+                                    </Tooltip>
                                 }
                                 title={label}
                                 titleTypographyProps={titleProps}
@@ -97,16 +112,32 @@ const Menu = (props: MenuProps) => {
                         </ListItemAvatar>
                     </ListItemButton>
                     {lov.map((elt) => (
-                        <SingleItem
+                        <ListItemButton
                             key={elt.id}
-                            value={elt.id}
-                            item={elt.item}
-                            selectedValue={selectedValue}
-                            clickHandler={clickHandler}
+                            onClick={clickHandler}
+                            data-id={elt.id}
+                            selected={props.selected ? props.selected.includes(elt.id) : selectedValue === elt.id}
                             disabled={!active || inactiveIds.includes(elt.id)}
-                            withAvatar={true}
-                            titleTypographyProps={titleProps}
-                        />
+                        >
+                            {typeof elt.item === "string" ? (
+                                <ListItemAvatar>
+                                    <CardHeader
+                                        sx={cardSx}
+                                        avatar={
+                                            <Tooltip title={elt.item}>
+                                                <Avatar sx={avatarSx}>{getInitials(elt.item)}</Avatar>
+                                            </Tooltip>
+                                        }
+                                        title={elt.item}
+                                        titleTypographyProps={titleProps}
+                                    />
+                                </ListItemAvatar>
+                            ) : (
+                                <ListItemAvatar>
+                                    <LovImage item={elt.item} titleTypographyProps={titleProps} />
+                                </ListItemAvatar>
+                            )}
+                        </ListItemButton>
                     ))}
                 </List>
             </Box>

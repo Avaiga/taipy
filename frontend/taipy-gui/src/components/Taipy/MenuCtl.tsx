@@ -14,7 +14,14 @@
 import React, { useMemo, useEffect } from "react";
 
 import { LovProps, useLovListMemo } from "./lovUtils";
-import { useClassNames, useDispatch, useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useIsMobile, useModule } from "../../utils/hooks";
+import {
+    useClassNames,
+    useDispatch,
+    useDispatchRequestUpdateOnFirstRender,
+    useDynamicProperty,
+    useIsMobile,
+    useModule,
+} from "../../utils/hooks";
 import { createSetMenuAction } from "../../context/taipyReducers";
 import { MenuProps } from "../../utils/lov";
 
@@ -25,17 +32,12 @@ interface MenuCtlProps extends LovProps<string> {
     onAction?: string;
     inactiveIds?: string[];
     defaultInactiveIds?: string;
+    selected?: string[];
+    defaultSelected?: string;
 }
 
 const MenuCtl = (props: MenuCtlProps) => {
-    const {
-        id,
-        label,
-        onAction,
-        defaultLov = "",
-        width = "15vw",
-        width_Mobile_ = "85vw",
-    } = props;
+    const { id, label, onAction, defaultLov = "", width = "15vw", width_Mobile_ = "85vw" } = props;
     const dispatch = useDispatch();
     const isMobile = useIsMobile();
     const module = useModule();
@@ -47,19 +49,34 @@ const MenuCtl = (props: MenuCtlProps) => {
 
     const lovList = useLovListMemo(props.lov, defaultLov, true);
 
-    const inactiveIds = useMemo(() => {
+    const { inactiveIds, selected } = useMemo(() => {
+        const result = {
+            inactiveIds: [] as string[],
+            selected: [] as string[],
+        };
+
         if (props.inactiveIds) {
-            return props.inactiveIds;
-        }
-        if (props.defaultInactiveIds) {
+            result.inactiveIds = props.inactiveIds;
+        } else if (props.defaultInactiveIds) {
             try {
-                return JSON.parse(props.defaultInactiveIds) as string[];
+                result.inactiveIds = JSON.parse(props.defaultInactiveIds) as string[];
             } catch {
-                // too bad
+                console.error("Failed to parse defaultInactiveIds");
             }
         }
-        return [];
-    }, [props.inactiveIds, props.defaultInactiveIds]);
+
+        if (props.selected) {
+            result.selected = props.selected;
+        } else if (props.defaultSelected) {
+            try {
+                result.selected = JSON.parse(props.defaultSelected) as string[];
+            } catch (error) {
+                console.error("Failed to parse defaultSelected:", error);
+            }
+        }
+
+        return result;
+    }, [props.inactiveIds, props.defaultInactiveIds, props.selected, props.defaultSelected]);
 
     useEffect(() => {
         dispatch(
@@ -71,21 +88,11 @@ const MenuCtl = (props: MenuCtlProps) => {
                 inactiveIds: inactiveIds,
                 width: isMobile ? width_Mobile_ : width,
                 className: className,
+                selected: selected,
             } as MenuProps)
         );
         return () => dispatch(createSetMenuAction({}));
-    }, [
-        label,
-        onAction,
-        active,
-        lovList,
-        inactiveIds,
-        width,
-        width_Mobile_,
-        isMobile,
-        className,
-        dispatch,
-    ]);
+    }, [label, onAction, active, lovList, inactiveIds, width, width_Mobile_, isMobile, className, dispatch, selected]);
 
     return <></>;
 };
