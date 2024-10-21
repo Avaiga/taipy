@@ -67,6 +67,12 @@ const getRangeDateTime = (
     return [null, null];
 };
 
+const analogicRenderers = {
+    hours: renderTimeViewClock,
+    minutes: renderTimeViewClock,
+    seconds: renderTimeViewClock
+}
+
 const DateRange = (props: DateRangeProps) => {
     const { updateVarName, withTime = false, id, propagate = true, separator = "-", analogic = false } = props;
     const dispatch = useDispatch();
@@ -119,11 +125,6 @@ const DateRange = (props: DateRangeProps) => {
 
     const handleChangeStart = useCallback((v: Date | null) => handleChange(v, true), [handleChange]);
     const handleChangeEnd = useCallback((v: Date | null) => handleChange(v, false), [handleChange]);
-    const analogicRenderers = {
-        hours: renderTimeViewClock,
-        minutes: renderTimeViewClock,
-        seconds: renderTimeViewClock
-    }
 
     // Run every time props.value get updated
     useEffect(() => {
