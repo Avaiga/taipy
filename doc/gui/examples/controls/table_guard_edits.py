@@ -88,7 +88,7 @@ def check_add(state: State, var_name: str, payload: dict):
 def force_salary(state: State, var_name: str, payload: dict):
     # Get the salary proposal from the callback's payload
     proposed_salary = payload["value"]
-    # Round it the the nearest multiple of 5000
+    # Round it the nearest multiple of 5000
     proposed_salary = round(proposed_salary / 500) * 500
     # Set it as the value to be stored in the dataset
     payload["value"] = proposed_salary
