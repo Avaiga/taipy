@@ -168,7 +168,7 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
         Keyword arguments here which are also present in the Data Node config will overwrite them.
 
-        Parameters:
+        Arguments:
             data (Any): The data to write.
             job_id (JobId): An optional identifier of the writer.
             **write_kwargs (dict[str, any]): The keyword arguments passed to the function
@@ -196,7 +196,7 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
         Keyword arguments here which are also present in the Data Node config will overwrite them.
 
-        Parameters:
+        Arguments:
             **read_kwargs (dict[str, any]): The keyword arguments passed to the function
                 `pandas.read_parquet()`.
         """

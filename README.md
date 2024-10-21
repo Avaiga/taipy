@@ -11,7 +11,7 @@
 </div>
 
 <h1 align="center">
-Build Python Data & AI web applications
+    Build Python Data & AI web applications
 </h1>
 
 <div align="center">
@@ -21,8 +21,8 @@ No more compromises on performance, customization, and scalability.
 
 <br />
 
-<div align="center">
-**Go beyond existing libraries**
+<div align="center"> 
+     <strong> Go beyond existing libraries  </strong>
 </div>
 
 <p align="center"><h4>
@@ -61,12 +61,12 @@ Taipy is designed for data scientists and machine learning engineers to build da
 &nbsp;
 
 <h4 align="left">
-Taipy is a Two-in-One Tool for UI Generation and Scenario/Data Management
+Taipy is a Two-in-One Tool for UI Generation and Scenario & Data Management
 </h4>
 
 <br />
 
-| User Interface Generation                                                                       | Scenario and Data Management                                                                        |
+| User Interface Generation                                                                       | Scenario & Data Management                                                                        |
 | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | <img src="readme_img/taipy_github_GUI_video.gif" alt="Interface Animation"  width="100%" /> | <img src="readme_img/taipy_github_scenarios_video.gif" alt="Back-End Animation"  width="100%"/> |
 
@@ -74,8 +74,8 @@ Taipy is a Two-in-One Tool for UI Generation and Scenario/Data Management
 
 ## ✨ Key Features
 
-<img src="readme_img/taipy_github_scenario.png" alt="Scenario Banner"  width="49%" />  <img src="readme_img/taipy-github-optimized.png" alt="Back-End Animation"  width="49.7%"/>
-<img src="readme_img/taipy_github_data_support.png" alt="Back-End Animation"  width="49.7%" />
+<img src="readme_img/taipy_github_scenario.png" alt="Scenario Banner"  width="49%" />  <img src="readme_img/taipy-github-optimized.png" alt="Front-End Animation"  width="49%"/>
+<img src="readme_img/taipy_github_data_support.png" alt="Back-End Animation"  width="49%" />
 
 &nbsp;
 
@@ -87,22 +87,23 @@ To install the stable release of Taipy, run:
 pip install taipy
 ```
 
+### Ready to Install Taipy? 🚀
 
-**Ready to Install Taipy?** 🚀<br>
 Get everything set up in no time! Whether you're using a Conda environment or installing from
-source, follow our [Installation Guide](https://docs.taipy.io/en/latest/installation/) for
+source, follow our [Installation Guide](https://docs.taipy.io/en/latest/tutorials/getting_started/installation/) for
 step-by-step instructions.<br>
 
-**Excited to Dive In?** 💡 <br>
+### Excited to Dive In? 💡
+
 Start building with Taipy today! Our
-[Getting Started Guide](https://docs.taipy.io/en/latest/tutorials/getting_started/) is the
-perfect place to begin your journey and unlock the full potential of Taipy.
+[Getting Started Guide](https://docs.taipy.io/en/develop/tutorials/getting_started/)
+is the perfect place to begin your journey and unlock the full potential of Taipy.
 
 &nbsp;
 
-## 🔌 Scenario and Data Management
+## 🔌 Scenario & Data Management
 
-Let's create a scenario in Taipy that allows you to filter movie data based on your chosen genre.<br />
+Let's create a simple scenario in Taipy that allows you to filter movie data based on your chosen genre.<br />
 This scenario is designed as a straightforward pipeline.<br />
 Every time you change your genre selection, the scenario runs to process your request.<br />
 It then displays the top seven most popular movies in that genre.
@@ -133,12 +134,14 @@ This is the execution graph of the scenario we are implementing:
 
 You can use the Taipy Studio extension in Visual Studio Code to configure your scenario with no code.<br />
 Your configuration is automatically saved as a TOML file.<br />
-Check out the Taipy Studio [Documentation](https://docs.taipy.io/en/latest/manuals/studio/).
+Check out the Taipy Studio [Documentation](https://docs.taipy.io/en/latest/userman/ecosystem/studio/).
 
 For more advanced use cases or if you prefer coding your configurations instead of using Taipy Studio,<br />
-check out the movie genre demo scenario creation with this [Demo](https://docs.taipy.io/en/latest/gallery/other/movie_genre_selector/).
+check out the movie genre demo scenario creation with this [Demo](https://docs.taipy.io/en/latest/gallery/articles/movie_genre_selector/).
 
-![TaipyStudio](https://github.com/Avaiga/taipy/raw/develop/readme_img/readme_demo_studio.gif)
+<p align="center">
+<img src="https://github.com/Avaiga/taipy/raw/develop/readme_img/readme_demo_studio.gif" alt="Back-End Animation"  width="80%" align="center" />
+</p>
 
 &nbsp;
 
@@ -148,6 +151,8 @@ This simple Taipy application demonstrates how to create a basic film recommenda
 The application filters a dataset of films based on the user's selected genre and displays the top seven films in that genre by popularity.
 Here is the full code for both the front end and back end of the application.
 
+<p align="center" width=80% >
+    
 ```python
 import taipy as tp
 import pandas as pd
@@ -211,9 +216,12 @@ if __name__ == "__main__":
 
     Gui(page=my_page).run()
 ```
+</p>
 
 And the final result:
-<img src="readme_img/readme_app.gif" />
+<p align="center">
+<img src="readme_img/readme_app.gif"  width="70%" align="center" />
+</p>
 
 &nbsp;
 
@@ -223,7 +231,7 @@ Want to help build Taipy? Check out our [**Contributing Guide**](https://github.
 
 ## 🪄 Code of Conduct
 
-Want to be part of the Taipy community? Check out our **[Code of Conduct](https://github.com/Avaiga/taipy/blob/develop/CODE_OF_CONDUCT.md)**.
+Want to be part of the Taipy community? Check out our [**Code of Conduct**](https://github.com/Avaiga/taipy/blob/develop/CODE_OF_CONDUCT.md)
 
 ## 🪪 License
 
