@@ -23,22 +23,25 @@ from taipy.common.config.checker.issue_collector import IssueCollector
 from taipy.core.config import CoreSection, DataNodeConfig, JobConfig, ScenarioConfig, TaskConfig
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser: pytest.Parser) -> None:
+    """Add custom command line options for pytest."""
     parser.addoption("--e2e-base-url", action="store", default="/", help="base url for e2e testing")
     parser.addoption("--e2e-port", action="store", default="5000", help="port for e2e testing")
 
 
 @pytest.fixture(scope="session")
-def e2e_base_url(request):
+def e2e_base_url(request: pytest.FixtureRequest) -> str:
+    """Fixture to get the base URL for e2e testing."""
     return request.config.getoption("--e2e-base-url")
 
 
 @pytest.fixture(scope="session")
-def e2e_port(request):
+def e2e_port(request: pytest.FixtureRequest) -> str:
+    """Fixture to get the port for e2e testing."""
     return request.config.getoption("--e2e-port")
 
 
-def remove_subparser(name: str):
+def remove_subparser(name: str) -> None:
     """Remove a subparser from argparse."""
     _TaipyParser._sub_taipyparsers.pop(name, None)
 
@@ -51,8 +54,9 @@ def remove_subparser(name: str):
 
 
 @pytest.fixture
-def clean_argparser():
-    def _clean_argparser():
+def clean_argparser() -> callable:
+    """Fixture to clean the argument parser."""
+    def _clean_argparser() -> None:
         _TaipyParser._parser = argparse.ArgumentParser(conflict_handler="resolve")
         _TaipyParser._subparser_action = None
         _TaipyParser._arg_groups = {}
@@ -64,8 +68,9 @@ def clean_argparser():
 
 
 @pytest.fixture
-def reset_configuration_singleton():
-    def _reset_configuration_singleton():
+def reset_configuration_singleton() -> callable:
+    """Fixture to reset the configuration singleton."""
+    def _reset_configuration_singleton() -> None:
         Config.unblock_update()
 
         Config._default_config = _Config()._default_config()
@@ -82,8 +87,9 @@ def reset_configuration_singleton():
 
 
 @pytest.fixture
-def inject_core_sections():
-    def _inject_core_sections():
+def inject_core_sections() -> callable:
+    """Fixture to inject core sections into the configuration."""
+    def _inject_core_sections() -> None:
         _inject_section(
             JobConfig,
             "job_config",
