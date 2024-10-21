@@ -207,6 +207,15 @@ describe("DateSelector with time Component", () => {
         const elt = getByTestId("CalendarIcon");
         expect(elt.parentElement?.tagName).toBe("BUTTON");
     });
+    it("renders with analog time picker", async () => {
+        const { getByTestId } = render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DateSelector date={curDateStr} withTime={true} analogic={true}/>
+            </LocalizationProvider>
+        );
+        const elt = getByTestId("CalendarIcon");
+        expect(elt.parentElement?.tagName).toBe("BUTTON");
+    });
     it("displays the right info for string", async () => {
         const { getByTestId } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
