@@ -415,7 +415,7 @@ class DataNode(_Entity, _Labeled):
             )
             return None
 
-    def append(self, data, job_id: Optional[JobId] = None, **kwargs: Dict[str, Any]):
+    def append(self, data, job_id: Optional[JobId] = None, editor_id: Optional[str] = None, **kwargs: Dict[str, Any]):
         """Append some data to this data node.
 
         Arguments:
@@ -426,12 +426,14 @@ class DataNode(_Entity, _Labeled):
         """
         from ._data_manager_factory import _DataManagerFactory
 
+        if self.edit_in_progress and self.editor_id != editor_id:
+            raise DataNodeIsBeingEdited(self.id, self.editor_id)
+
         self._append(data)
-        self.track_edit(job_id=job_id, **kwargs)
-        self.unlock_edit()
+        self.track_edit(job_id=job_id, editor_id=editor_id, **kwargs)
         _DataManagerFactory._build_manager()._set(self)
 
-    def write(self, data, job_id: Optional[JobId] = None, **kwargs: Dict[str, Any]):
+    def write(self, data, job_id: Optional[JobId] = None, editor_id: Optional[str] = None, **kwargs: Dict[str, Any]):
         """Write some data to this data node.
 
         Arguments:
@@ -442,10 +444,25 @@ class DataNode(_Entity, _Labeled):
         """
         from ._data_manager_factory import _DataManagerFactory
 
+        if self.edit_in_progress and editor_id and self.editor_id != editor_id:
+            raise DataNodeIsBeingEdited(self.id, self.editor_id)
+
+        if not editor_id and self.edit_in_progress:
+            print("Orchestrator writing without editor_id")
+
         self._write(data)
-        self.track_edit(job_id=job_id, **kwargs)
-        self.unlock_edit()
+        self.last_edit_date = datetime.now()
+        self.edit_in_progress = False  # Ensure it's not locked after writing
+        self.track_edit(job_id=job_id, editor_id=editor_id, **kwargs)
         _DataManagerFactory._build_manager()._set(self)
+
+    def _upload(self, data, job_id: Optional[JobId] = None, editor_id: Optional[str] = None, **kwargs: Dict[str, Any]):
+        """Handle file uploads with editor lock enforcement."""
+        if self.edit_in_progress and self.editor_id != editor_id:
+            raise DataNodeIsBeingEdited(self.id, self.editor_id)
+
+        self._write(data)  # Assuming _write is called for uploads
+        self.track_edit(job_id=job_id, editor_id=editor_id, **kwargs)
 
     def track_edit(self, **options):
         """Creates and adds a new entry in the edits attribute without writing the data.
@@ -471,6 +488,10 @@ class DataNode(_Entity, _Labeled):
         Arguments:
             editor_id (Optional[str]): The editor's identifier.
         """
+
+        if self._editor_expiration_date and datetime.now() > self._editor_expiration_date:
+            self.unlock_edit()
+
         if editor_id:
             if (
                 self.edit_in_progress

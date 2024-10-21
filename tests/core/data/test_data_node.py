@@ -745,3 +745,33 @@ class TestDataNode:
         # This new syntax will be the only one allowed: https://github.com/Avaiga/taipy-core/issues/806
         dn.properties["name"] = "baz"
         assert dn.name == "baz"
+
+    def test_locked_data_node_write_should_fail_with_wrong_editor(self):
+        dn = InMemoryDataNode("dn", Scope.SCENARIO)
+        dn.lock_edit("editor_1")
+
+        # Should raise exception for wrong editor
+        with pytest.raises(DataNodeIsBeingEdited):
+            dn.write("data", editor_id="editor_2")
+
+        # Should succeed with correct editor
+        dn.write("data", editor_id="editor_1")
+        assert dn.read() == "data"
+
+    def test_locked_data_node_append_should_fail_with_wrong_editor(self):
+        dn = InMemoryDataNode("dn", Scope.SCENARIO)
+        dn.lock_edit("editor_1")
+
+        with pytest.raises(DataNodeIsBeingEdited):
+            dn.append("data", editor_id="editor_2")
+
+        dn.append("data", editor_id="editor_1")
+        assert dn.read() == ["data"]
+
+    def test_orchestrator_write_without_editor_id(self):
+        dn = InMemoryDataNode("dn", Scope.SCENARIO)
+        dn.lock_edit("editor_1")
+
+        # Orchestrator write without editor_id should succeed
+        dn.write("orchestrator_data")
+        assert dn.read() == "orchestrator_data"
