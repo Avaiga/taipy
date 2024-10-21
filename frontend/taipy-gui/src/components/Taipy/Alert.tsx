@@ -57,21 +57,21 @@ const Alert = ({ alerts }: AlertProps) => {
 
     useEffect(() => {
         if (alert) {
-            const notificationId = alert.notification_id || nanoid();
+            const notificationId = nanoid(); 
             if (alert.atype === "") {
-                closeSnackbar(notificationId);
+                closeSnackbar(notificationId);  
             } else {
                 enqueueSnackbar(alert.message, {
                     variant: alert.atype as VariantType,
-                    action: notifAction,
+                    action: notifAction,  
                     autoHideDuration: alert.duration,
+                    key: notificationId,  
                 });
                 alert.system && new Notification(document.title || "Taipy", { body: alert.message, icon: faviconUrl });
             }
             dispatch(createDeleteAlertAction(notificationId));
         }
     }, [alert, enqueueSnackbar, closeSnackbar, notifAction, faviconUrl, dispatch]);
-
     useEffect(() => {
         alert?.system && window.Notification && Notification.requestPermission();
     }, [alert?.system]);

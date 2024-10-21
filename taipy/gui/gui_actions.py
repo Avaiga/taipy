@@ -98,6 +98,7 @@ def notify(
     """
     if state and isinstance(state._gui, Gui):
         state._gui._notify(notification_type, message, system_notification, duration, notification_id)
+        return notification_id
     else:
         _warn("'notify()' must be called in the context of a callback.")
 

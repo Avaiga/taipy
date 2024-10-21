@@ -21,6 +21,7 @@ import sys
 import tempfile
 import time
 import typing as t
+import uuid
 import warnings
 from importlib import metadata, util
 from importlib.util import find_spec
@@ -1346,7 +1347,7 @@ class Gui:
         }
 
         if notification_id:
-            payload["notification_id"] = notification_id
+            payload["notificationId"] = notification_id
 
         self.__send_ws(
             payload,
@@ -2253,8 +2254,11 @@ class Gui:
         message: str = "",
         system_notification: t.Optional[bool] = None,
         duration: t.Optional[int] = None,
-        notification_id: str = "",
+        notification_id: t.Optional[str] = None,
     ):
+        if not notification_id:
+            notification_id = str(uuid.uuid4())
+
         self.__send_ws_alert(
             notification_type,
             message,
@@ -2262,6 +2266,7 @@ class Gui:
             self._get_config("notification_duration", 3000) if duration is None else duration,
             notification_id,
         )
+        return notification_id
 
     def _close_notification(
         self,

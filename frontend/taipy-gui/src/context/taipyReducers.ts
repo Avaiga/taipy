@@ -16,6 +16,7 @@ import { createTheme, Theme } from "@mui/material/styles";
 import merge from "lodash/merge";
 import { Dispatch } from "react";
 import { io, Socket } from "socket.io-client";
+import { nanoid } from 'nanoid';
 
 import { FilterDesc } from "../components/Taipy/tableUtils";
 import { stylekitModeThemes, stylekitTheme } from "../themes/stylekit";
@@ -91,7 +92,7 @@ export interface AlertMessage {
     message: string;
     system: boolean;
     duration: number;
-    notification_id: string;
+    notificationId?: string;
 }
 
 interface TaipyAction extends NamePayload, TaipyBaseAction {
@@ -110,7 +111,7 @@ interface TaipyMultipleMessageAction extends TaipyBaseAction {
 interface TaipyAlertAction extends TaipyBaseAction, AlertMessage {}
 
 interface TaipyDeleteAlertAction extends TaipyBaseAction {
-    notification_id: string;
+    notificationId: string;
 }
 
 export const BLOCK_CLOSE = { action: "", message: "", close: true, noCancel: false } as BlockMessage;
@@ -384,7 +385,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                         message: alertAction.message,
                         system: alertAction.system,
                         duration: alertAction.duration,
-                        notification_id: alertAction.notification_id,
+                        notificationId: alertAction.notificationId || nanoid(),
                     },
                 ],
             };
@@ -392,7 +393,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             const deleteAlertAction = action as unknown as TaipyAlertAction;
             return {
                 ...state,
-                alerts: state.alerts.filter(alert => alert.notification_id !== deleteAlertAction.notification_id),
+                alerts: state.alerts.filter(alert => alert.notificationId !== deleteAlertAction.notificationId),
             };
         case Types.SetBlock:
             const blockAction = action as unknown as TaipyBlockAction;
@@ -825,12 +826,12 @@ export const createAlertAction = (alert: AlertMessage): TaipyAlertAction => ({
     message: alert.message,
     system: alert.system,
     duration: alert.duration,
-    notification_id: alert.notification_id,
+    notificationId: alert.notificationId,
 });
 
-export const createDeleteAlertAction = (notification_id: string): TaipyDeleteAlertAction => ({
+export const createDeleteAlertAction = (notificationId: string): TaipyDeleteAlertAction => ({
     type: Types.DeleteAlert,
-    notification_id,
+    notificationId,
 });
 
 export const createBlockAction = (block: BlockMessage): TaipyBlockAction => ({

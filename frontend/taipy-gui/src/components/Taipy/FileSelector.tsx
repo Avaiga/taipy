@@ -26,7 +26,6 @@ import Button from "@mui/material/Button";
 import LinearProgress from "@mui/material/LinearProgress";
 import Tooltip from "@mui/material/Tooltip";
 import UploadFile from "@mui/icons-material/UploadFile";
-import { nanoid } from 'nanoid';
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createAlertAction, createSendActionNameAction } from "../../context/taipyReducers";
@@ -117,14 +116,14 @@ const FileSelector = (props: FileSelectorProps) => {
                         onAction && dispatch(createSendActionNameAction(id, module, onAction));
                         notify &&
                             dispatch(
-                                createAlertAction({ atype: "success", message: value, system: false, duration: 3000, notification_id: nanoid() })
+                                createAlertAction({ atype: "success", message: value, system: false, duration: 3000 })
                             );
                     },
                     (reason) => {
                         setUpload(false);
                         notify &&
                             dispatch(
-                                createAlertAction({ atype: "error", message: reason, system: false, duration: 3000, notification_id: nanoid() })
+                                createAlertAction({ atype: "error", message: reason, system: false, duration: 3000 })
                             );
                     }
                 );
