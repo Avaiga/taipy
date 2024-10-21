@@ -41,12 +41,6 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { visuallyHidden } from "@mui/utils";
-
-import IconButton from "@mui/material/IconButton";
-import AddIcon from "@mui/icons-material/Add";
-import DataSaverOn from "@mui/icons-material/DataSaverOn";
-import DataSaverOff from "@mui/icons-material/DataSaverOff";
-import Download from "@mui/icons-material/Download";
 import { generateHeaderClassName } from "./tableUtils";
 
 import { createRequestTableUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
