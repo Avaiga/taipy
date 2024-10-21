@@ -244,6 +244,7 @@ const Chat = (props: ChatProps) => {
     const [anchorPopup, setAnchorPopup] = useState<HTMLDivElement | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [objectURLs, setObjectURLs] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
@@ -307,7 +308,9 @@ const Chat = (props: ChatProps) => {
             if (file) {
                 if (file.type.startsWith("image/") && file.size <= maxFileSize) {
                     setSelectedFile(file);
-                    setImagePreview(URL.createObjectURL(file));
+                    const newImagePreview = URL.createObjectURL(file);
+                    setImagePreview(newImagePreview);
+                    setObjectURLs((prevURLs) => [...prevURLs, newImagePreview]);
                 } else {
                     setSelectedFile(null);
                     setImagePreview(null);
@@ -431,6 +434,14 @@ const Chat = (props: ChatProps) => {
     useEffect(() => {
         loadMoreItems(0);
     }, [loadMoreItems]);
+
+    useEffect(() => {
+        return () => {
+            for (const objectURL of objectURLs) {
+                URL.revokeObjectURL(objectURL);
+            }
+        };
+    }, [objectURLs]);
 
     const loadOlder = useCallback(
         (evt: MouseEvent<HTMLElement>) => {
