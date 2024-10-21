@@ -12,8 +12,8 @@
 from unittest.mock import Mock
 
 from taipy.gui import Gui, State
+from taipy.gui.mock.mock_state import MockState
 from taipy.gui.utils import _MapDict
-from taipy.mock.gui.mock_state import MockState
 
 
 def test_gui():

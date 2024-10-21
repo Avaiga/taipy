@@ -11,7 +11,7 @@
 
 import inspect
 import typing as t
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from contextlib import nullcontext
 from operator import attrgetter
 from pathlib import Path
@@ -26,7 +26,7 @@ if t.TYPE_CHECKING:
     from .gui import Gui
 
 
-class State:
+class State(ABC):
     """Accessor to the bound variables from callbacks.
 
     `State` is used when you need to access the value of variables

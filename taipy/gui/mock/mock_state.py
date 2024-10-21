@@ -10,11 +10,22 @@
 # specific language governing permissions and limitations under the License.
 import typing as t
 
-from ...gui import Gui, State
-from ...gui.utils import _MapDict
+from .. import Gui, State
+from ..utils import _MapDict
 
 
 class MockState(State):
+    """A Mock implementation for `State`.
+    TODO
+    example of use:
+    ```py
+    def test_callback():
+        ms = MockState(Gui(""), a = 1)
+        on_action(ms) # function to test
+        assert ms.a == 2
+    ```
+    """
+
     __VARS = "vars"
 
     def __init__(self, gui: Gui, **kwargs) -> None:
