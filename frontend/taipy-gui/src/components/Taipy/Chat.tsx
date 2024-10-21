@@ -34,7 +34,8 @@ import Paper from "@mui/material/Paper";
 import Popper from "@mui/material/Popper";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
-import {Send, AttachFile} from "@mui/icons-material";
+import Send from "@mui/icons-material/Send";
+import AttachFile from "@mui/icons-material/AttachFile";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
 
