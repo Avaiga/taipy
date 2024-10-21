@@ -1,6 +1,6 @@
 {
   "name": "taipy-gui",
-  "version": "4.1.0",
+  "version": "4.1.0.fred",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.0",
