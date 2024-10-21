@@ -1701,7 +1701,7 @@
                     {
                         "name": "max_file_size",
                         "type": "int",
-                        "default_value": "50 * 1024 * 1024 (50MB)",
+                        "default_value": "1 * 1024 * 1024 (1MB)",
                         "doc": "The maximum file size can be uploaded to a chat message."
 
                     },

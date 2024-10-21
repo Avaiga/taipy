@@ -227,7 +227,7 @@ const Chat = (props: ChatProps) => {
         onAction,
         withInput = true,
         defaultKey = "",
-        maxFileSize= 50 * 1024 * 1024, // 50MB
+        maxFileSize= 1 * 1024 * 1024, // 1 MB
         pageSize = 50,
         showSender = false,
     } = props;

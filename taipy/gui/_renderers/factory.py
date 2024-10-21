@@ -99,7 +99,7 @@ class _Factory:
                 ("sender_id",),
                 ("height",),
                 ("page_size", PropertyType.number, 50),
-                ("max_file_size", PropertyType.number, 50 * 1024 * 1024),
+                ("max_file_size", PropertyType.number, 1 * 1024 * 1024),
                 ("show_sender", PropertyType.boolean, False),
                 ("mode",),
             ]
