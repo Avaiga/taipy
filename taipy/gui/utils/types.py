@@ -197,6 +197,23 @@ class _TaipyDict(_TaipyBase):
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "Di"
 
+class _TaipyTime(_TaipyBase):
+    def get(self):
+        val = super().get()
+        if isinstance(val, datetime):
+            val = _date_to_string(val)
+        elif val is not None:
+            val = str(val)
+        return val
+
+    def cast_value(self, value: t.Any):
+        if isinstance(value, str):
+            return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S')
+        return super().cast_value(value)
+
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "Tm"
 
 class _TaipyToJson(_TaipyBase):
     def get(self):
