@@ -166,6 +166,7 @@ class _Factory:
             [
                 ("with_time", PropertyType.boolean),
                 ("active", PropertyType.dynamic_boolean, True),
+                ("analogic", PropertyType.boolean),
                 ("editable", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
                 ("label_start",),
