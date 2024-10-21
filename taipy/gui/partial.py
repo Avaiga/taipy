@@ -81,7 +81,7 @@ class Partial(_Page):
         if self._route not in Partial.__update_queues:
             Partial.__update_queues[self._route] = UpdateQueue()
 
-    def update_content(self, state: State, content: t.Union[str, "Page"], stream_mode: bool = False):
+    def update_content(self, state: State, content: t.Union[str, "Page"], stream_mode: t.Optional[bool] = False):
         """Update partial content.
 
         Arguments:
@@ -94,7 +94,7 @@ class Partial(_Page):
         else:
             _warn("'Partial.update_content()' must be called in the context of a callback.")
 
-        gui_id = get_state_id(state)
+        state_id = get_state_id(state)
         queue = Partial.__update_queues[self._route]
         current_time = time.time()
         batch_interval = self.STREAM_MODE_BATCH_INTERVAL if stream_mode else self.STANDARD_BATCH_INTERVAL
@@ -105,10 +105,11 @@ class Partial(_Page):
                 self._process_updates(state)
                 queue.last_update = current_time
 
-    def _process_updates(self, state: State, gui_id: str):
+    def _process_updates(self, state: State):
         queue = Partial.__update_queues[self._route]
+        state_id = get_state_id(state)
         with queue.lock:
-            gui_updates = t.list[t.Tuple[float, Partial]] = queue.updates.get(gui_id, [])
+            gui_updates = t.list[t.Tuple[float, Partial]] = queue.updates.get(state_id, [])
             if not gui_updates:
                 return
 
