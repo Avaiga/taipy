@@ -37,11 +37,21 @@ class Rest:
             Config.global_config.testing or False, Config.global_config.env, Config.global_config.secret_key
         )
 
+    class Rest:
+    def __init__(self, port=None, host=None, use_https=None):
+        self._app: Flask = _create_app(
+            Config.global_config.testing or False, Config.global_config.env, Config.global_config.secret_key
+        )
+        self._port = port
+        self._host = host
+        self._use_https = use_https
+
     def run(self):
         rest_config = Config.rest
         kwargs = {
-            "port": rest_config.port,
-            "host": rest_config.host,
-            "ssl_context": (rest_config.ssl_cert, rest_config.ssl_key) if rest_config.use_https else None
+            "port": self._port or rest_config.port,
+            "host": self._host or rest_config.host,
+            "ssl_context": (rest_config.ssl_cert, rest_config.ssl_key) if (self._use_https or rest_config.use_https) else None
         }
         self._app.run(**kwargs)
+
