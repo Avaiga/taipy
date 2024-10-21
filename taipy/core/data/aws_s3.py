@@ -30,21 +30,33 @@ class S3ObjectDataNode(DataNode):
     """Data Node object stored in an Amazon Web Service S3 Bucket.
 
     The *properties* attribute must contain the following required entries:
-
-    - *aws_access_key* (`str`): Amazon Web Services ID for to identify account
-    - *aws_secret_access_key* (`str`): Amazon Web Services access key to
+    - *aws_access_key* (`str`): Amazon Web Services (AWS) ID to identify the account.
+    - *aws_secret_access_key* (`str`): Amazon Web Services (AWS) access key to
         authenticate programmatic requests.
-    - *aws_s3_bucket_name*  (`str`): unique identifier for a container that stores
-        objects in Amazon Simple Storage Service (S3).
-    - *aws_s3_object_key* (`str`):  unique identifier for the name of the object (file)
-        that has to be read or written.
+    - *aws_s3_bucket_name* (`str`): The Amazon Web Services (AWS) S3 bucket to read
+        from and to write the data to.
+    - *aws_s3_object_key* (`str`): The Amazon Web Services (AWS) S3 object key to read
+        or write.
 
     The *properties* attribute can also contain the following optional entries:
-
-    - *aws_region* (`Any`): Self-contained geographic area where Amazon Web Services
-        (AWS) infrastructure is located.
-    - *aws _s3_object_parameters* (`str`): A dictionary of additional arguments to be
-        passed to interact with the AWS service
+    - *aws_region* (`Optional[str]`): Self-contained geographic area where Amazon Web
+        Services (AWS) infrastructure is located.
+    - *aws_s3_object_parameters* (`Optional[dict[str, any]]`): A dictionary of
+        additional arguments to be passed into the AWS S3 bucket access string.
+    - *aws_s3_client_parameters* (`Optional[dict]`): Additional parameters for advanced
+        use cases to be passed to the Amazon Web Services (AWS) S3 client.<br/>
+        Each parameter key must match the name of a parameter of the
+        `boto3.session.Session.client` API.
+    - *aws_s3_get_object_parameters* (`Optional[dict]`): Additional parameters to be
+        passed to the Amazon Web Services (AWS) S3 client get function for
+        advanced reading use cases. <br/>
+        Each parameter key must match the name of a parameter of the
+        `boto3.client.get_object` API.
+    - *aws_s3_put_object_parameters* (`Optional[dict]`): Additional parameters to be
+        passed to the Amazon Web Services (AWS) S3 client put function for advanced
+        writing use cases. <br/>
+        Each parameter key must match the name of a parameter of the
+        `boto3.client.put_object` API.
     """
 
     __STORAGE_TYPE = "s3_object"
@@ -54,7 +66,10 @@ class S3ObjectDataNode(DataNode):
     __AWS_STORAGE_BUCKET_NAME = "aws_s3_bucket_name"
     __AWS_S3_OBJECT_KEY = "aws_s3_object_key"
     __AWS_REGION = "aws_region"
-    __AWS_S3_OBJECT_PARAMETERS = "aws_s3_object_parameters"
+    __AWS_S3_CLIENT_PARAMETERS = "aws_s3_client_parameters"
+    __AWS_S3_GET_OBJECT_PARAMETERS = "aws_s3_get_object_parameters"
+    __AWS_S3_PUT_OBJECT_PARAMETERS = "aws_s3_put_object_parameters"
+
 
     _REQUIRED_PROPERTIES: List[str] = [
         __AWS_ACCESS_KEY_ID,
@@ -107,6 +122,8 @@ class S3ObjectDataNode(DataNode):
             "s3",
             aws_access_key_id=properties.get(self.__AWS_ACCESS_KEY_ID),
             aws_secret_access_key=properties.get(self.__AWS_SECRET_ACCESS_KEY),
+            region_name=properties.get(self.__AWS_REGION),
+            **properties.get(self.__AWS_S3_CLIENT_PARAMETERS, {}),
         )
 
         if not self._last_edit_date:  # type: ignore
@@ -119,7 +136,9 @@ class S3ObjectDataNode(DataNode):
                 self.__AWS_STORAGE_BUCKET_NAME,
                 self.__AWS_S3_OBJECT_KEY,
                 self.__AWS_REGION,
-                self.__AWS_S3_OBJECT_PARAMETERS,
+                self.__AWS_S3_CLIENT_PARAMETERS,
+                self.__AWS_S3_GET_OBJECT_PARAMETERS,
+                self.__AWS_S3_PUT_OBJECT_PARAMETERS,
             }
         )
 
@@ -133,6 +152,7 @@ class S3ObjectDataNode(DataNode):
         aws_s3_object = self._s3_client.get_object(
             Bucket=properties[self.__AWS_STORAGE_BUCKET_NAME],
             Key=properties[self.__AWS_S3_OBJECT_KEY],
+            **properties.get(self.__AWS_S3_GET_OBJECT_PARAMETERS, {}),
         )
         return aws_s3_object["Body"].read()
 
@@ -142,4 +162,5 @@ class S3ObjectDataNode(DataNode):
             Bucket=properties[self.__AWS_STORAGE_BUCKET_NAME],
             Key=properties[self.__AWS_S3_OBJECT_KEY],
             Body=data,
+            **properties.get(self.__AWS_S3_PUT_OBJECT_PARAMETERS, {}),
         )
