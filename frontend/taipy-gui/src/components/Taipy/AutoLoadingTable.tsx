@@ -610,6 +610,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                                 ? getSuffixedClassNames(className, "-action")
                                                 : getSuffixedClassNames(className, generateHeaderClassName(columns[col].dfid))
                                             }
+                                            sx={columns[col].width ? { width: columns[col].width } : undefined}
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [

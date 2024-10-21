@@ -31,7 +31,7 @@ def _publish_event(
     It basically creates an event corresponding to the given arguments
     and send it using `Notifier.publish(event)`
 
-    Parameters:
+    Arguments:
         entity_type (EventEntityType^)
         operation (EventOperation^)
         entity_id (Optional[str])
@@ -84,7 +84,7 @@ class Notifier:
             )
             ```
 
-        Parameters:
+        Arguments:
             entity_type (Optional[EventEntityType^]): If provided, the listener will
                 be notified for all events related to this entity type. Otherwise,
                 the listener will be notified for events related to all entity types.
@@ -147,7 +147,7 @@ class Notifier:
             Notifier.unregister(registration_id)
             ```
 
-        Parameters:
+        Arguments:
             registration_id (`RegistrationId`): The registration id returned by the `register` method.
         """
         to_remove_registration: Optional[_Registration] = None
@@ -168,7 +168,7 @@ class Notifier:
     def publish(cls, event: Event) -> None:
         """Publish a Taipy application event to all registered listeners whose topic matches the event.
 
-        Parameters:
+        Arguments:
             event (`Event^`): The event to publish.
         """
         for topic, registrations in cls._topics_registrations_list.items():

@@ -390,7 +390,7 @@ class CoreSection(UniqueSection):
     ) -> "CoreSection":
         """Configure the Orchestrator service.
 
-        Parameters:
+        Arguments:
             root_folder (Optional[str]): Path of the base folder for the taipy application.
                 The default value is "./taipy/"
             storage_folder (str): Folder name used to store user data. The default value is "user_data/". It is used in

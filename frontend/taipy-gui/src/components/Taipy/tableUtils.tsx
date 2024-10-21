@@ -320,7 +320,7 @@ export const getPageKey = (
         order,
         aggregates?.length
             ? cols.reduce((pv, col, idx) => {
-                  if (aggregates.includes(columns[col].dfid)) {
+                  if (aggregates.includes(col)) {
                       return `${pv}${idx}`;
                   }
                   return pv;
