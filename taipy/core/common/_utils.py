@@ -31,7 +31,7 @@ def _retry_repository_operation(exceptions: Tuple, sleep_time: float = 0.2):
     in ``exceptions`` are thrown.
     The number of retries is defined by Config.core.read_entity_retry.
 
-    Parameters:
+    Arguments:
         exceptions (tuple): Tuple of exceptions that trigger a retry attempt.
         sleep_time (float): Time to sleep between retries.
     """

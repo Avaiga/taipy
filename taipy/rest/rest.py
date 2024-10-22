@@ -41,7 +41,7 @@ class Rest:
         """
         Start a REST API server. This method is blocking.
 
-        Parameters:
+        Arguments:
             **kwargs : Options to provide to the application server.
         """
         self._app.run(**kwargs)
