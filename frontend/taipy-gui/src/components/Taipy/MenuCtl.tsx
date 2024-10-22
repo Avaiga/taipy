@@ -11,9 +11,9 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useMemo, useEffect } from "react";
+import React, {useMemo, useEffect} from "react";
 
-import { LovProps, useLovListMemo } from "./lovUtils";
+import {LovProps, useLovListMemo} from "./lovUtils";
 import {
     useClassNames,
     useDispatch,
@@ -22,8 +22,8 @@ import {
     useIsMobile,
     useModule,
 } from "../../utils/hooks";
-import { createSetMenuAction } from "../../context/taipyReducers";
-import { MenuProps } from "../../utils/lov";
+import {createSetMenuAction} from "../../context/taipyReducers";
+import {MenuProps} from "../../utils/lov";
 
 interface MenuCtlProps extends LovProps<string> {
     label?: string;
@@ -37,7 +37,7 @@ interface MenuCtlProps extends LovProps<string> {
 }
 
 const MenuCtl = (props: MenuCtlProps) => {
-    const { id, label, onAction, defaultLov = "", width = "15vw", width_Mobile_ = "85vw" } = props;
+    const {id, label, onAction, defaultLov = "", width = "15vw", width_Mobile_ = "85vw"} = props;
     const dispatch = useDispatch();
     const isMobile = useIsMobile();
     const module = useModule();
@@ -49,34 +49,31 @@ const MenuCtl = (props: MenuCtlProps) => {
 
     const lovList = useLovListMemo(props.lov, defaultLov, true);
 
-    const { inactiveIds, selected } = useMemo(() => {
-        const result = {
-            inactiveIds: [] as string[],
-            selected: [] as string[],
-        };
-
+    const inactiveIds = useMemo(() => {
         if (props.inactiveIds) {
-            result.inactiveIds = props.inactiveIds;
+            return props.inactiveIds;
         } else if (props.defaultInactiveIds) {
             try {
-                result.inactiveIds = JSON.parse(props.defaultInactiveIds) as string[];
+                return JSON.parse(props.defaultInactiveIds) as string[];
             } catch {
                 console.error("Failed to parse defaultInactiveIds");
             }
         }
+        return [] as string[];
+    }, [props.inactiveIds, props.defaultInactiveIds]);
 
+    const selected = useMemo(() => {
         if (props.selected) {
-            result.selected = props.selected;
+            return props.selected;
         } else if (props.defaultSelected) {
             try {
-                result.selected = JSON.parse(props.defaultSelected) as string[];
+                return JSON.parse(props.defaultSelected) as string[];
             } catch (error) {
                 console.error("Failed to parse defaultSelected:", error);
             }
         }
-
-        return result;
-    }, [props.inactiveIds, props.defaultInactiveIds, props.selected, props.defaultSelected]);
+        return [] as string[];
+    }, [props.selected, props.defaultSelected]);
 
     useEffect(() => {
         dispatch(

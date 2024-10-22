@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useMemo, useState, MouseEvent, CSSProperties } from "react";
+import React, {useCallback, useMemo, useState, MouseEvent, CSSProperties, useEffect} from "react";
 import MenuIco from "@mui/icons-material/Menu";
 import ListItemButton from "@mui/material/ListItemButton";
 import Drawer from "@mui/material/Drawer";
@@ -23,22 +23,21 @@ import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import { Theme, useTheme } from "@mui/system";
 
-import { LovImage } from "./lovUtils";
+import { SingleItem } from "./lovUtils";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { MenuProps } from "../../utils/lov";
 import { useClassNames, useDispatch, useModule } from "../../utils/hooks";
-import { emptyArray, getInitials } from "../../utils";
+import { emptyArray } from "../../utils";
 import { getComponentClassName } from "./TaipyStyle";
 
 const boxDrawerStyle = { overflowX: "hidden" } as CSSProperties;
 const headerSx = { padding: 0 };
 const avatarSx = { bgcolor: (theme: Theme) => theme.palette.text.primary };
 const baseTitleProps = { noWrap: true, variant: "h6" } as const;
-const cardSx = { p: 0 } as CSSProperties;
 
 const Menu = (props: MenuProps) => {
     const { label, onAction = "", lov, width, inactiveIds = emptyArray, active = true } = props;
-    const [selectedValue, setSelectedValue] = useState("");
+    const [selectedValue, setSelectedValue] = useState<string | string[]>("");
     const [opened, setOpened] = useState(false);
     const dispatch = useDispatch();
     const theme = useTheme();
@@ -50,17 +49,16 @@ const Menu = (props: MenuProps) => {
         (evt: MouseEvent<HTMLElement>) => {
             if (active) {
                 const { id: key = "" } = evt.currentTarget.dataset;
-                if (props.selected) {
-                    dispatch(createSendActionNameAction("menu", module, onAction, ...props.selected));
-                } else {
-                    setSelectedValue(() => {
-                        dispatch(createSendActionNameAction("menu", module, onAction, key));
-                        return key;
-                    });
-                }
+                setSelectedValue(() => {
+                    dispatch(createSendActionNameAction("menu", module, onAction, key));
+                    if (props.selected) {
+                        return [...(props.selected ?? []), key];
+                    }
+                    return key;
+                });
             }
         },
-        [active, props.selected, dispatch, module, onAction]
+        [active, dispatch, module, onAction, props.selected]
     );
 
     const openHandler = useCallback((evt: MouseEvent<HTMLElement>) => {
@@ -85,6 +83,12 @@ const Menu = (props: MenuProps) => {
             { ...baseTitleProps, width: titleWidth },
         ];
     }, [opened, width, theme]);
+
+    useEffect(() => {
+        if (props.selected) {
+            setSelectedValue(props.selected);
+        }
+    }, [props.selected]);
 
     return lov && lov.length ? (
         <Drawer
@@ -112,32 +116,16 @@ const Menu = (props: MenuProps) => {
                         </ListItemAvatar>
                     </ListItemButton>
                     {lov.map((elt) => (
-                        <ListItemButton
+                        <SingleItem
                             key={elt.id}
-                            onClick={clickHandler}
-                            data-id={elt.id}
-                            selected={props.selected ? props.selected.includes(elt.id) : selectedValue === elt.id}
+                            value={elt.id}
+                            item={elt.item}
+                            selectedValue={selectedValue}
+                            clickHandler={clickHandler}
                             disabled={!active || inactiveIds.includes(elt.id)}
-                        >
-                            {typeof elt.item === "string" ? (
-                                <ListItemAvatar>
-                                    <CardHeader
-                                        sx={cardSx}
-                                        avatar={
-                                            <Tooltip title={elt.item}>
-                                                <Avatar sx={avatarSx}>{getInitials(elt.item)}</Avatar>
-                                            </Tooltip>
-                                        }
-                                        title={elt.item}
-                                        titleTypographyProps={titleProps}
-                                    />
-                                </ListItemAvatar>
-                            ) : (
-                                <ListItemAvatar>
-                                    <LovImage item={elt.item} titleTypographyProps={titleProps} />
-                                </ListItemAvatar>
-                            )}
-                        </ListItemButton>
+                            withAvatar={true}
+                            titleTypographyProps={titleProps}
+                        />
                     ))}
                 </List>
             </Box>
