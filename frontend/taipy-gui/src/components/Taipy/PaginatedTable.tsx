@@ -41,6 +41,7 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { visuallyHidden } from "@mui/utils";
+import { generateHeaderClassName } from "./tableUtils";
 
 import { createRequestTableUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
 import { emptyArray } from "../../utils";
@@ -527,6 +528,10 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     : nbWidth
                                                     ? { minWidth: `${100 / nbWidth}%` }
                                                     : undefined
+                                            }
+                                            className={col === "EDIT_COL"
+                                                ? getSuffixedClassNames(className, "-action")
+                                                : getSuffixedClassNames(className, generateHeaderClassName(columns[col].dfid))
                                             }
                                         >
                                             {columns[col].dfid === EDIT_COL ? (

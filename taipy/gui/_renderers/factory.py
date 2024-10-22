@@ -57,6 +57,7 @@ class _Factory:
         "status": "value",
         "table": "data",
         "text": "value",
+        "time": "time",
         "toggle": "value",
         "tree": "value",
     }
@@ -142,6 +143,7 @@ class _Factory:
             [
                 ("with_time", PropertyType.boolean),
                 ("active", PropertyType.dynamic_boolean, True),
+                ("analogic", PropertyType.boolean),
                 ("min", PropertyType.dynamic_date),
                 ("max", PropertyType.dynamic_date),
                 ("editable", PropertyType.dynamic_boolean, True),
@@ -164,6 +166,7 @@ class _Factory:
             [
                 ("with_time", PropertyType.boolean),
                 ("active", PropertyType.dynamic_boolean, True),
+                ("analogic", PropertyType.boolean),
                 ("editable", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
                 ("label_start",),
@@ -574,6 +577,26 @@ class _Factory:
                 ("width", PropertyType.string_or_number),
             ]
         ),
+        "time": lambda gui, control_type, attrs: _Builder(
+            gui=gui,
+            control_type=control_type,
+            element_name="TimeSelector",
+            attributes=attrs,
+            default_value=datetime.today().time(),
+        )
+        .set_value_and_default(var_type=PropertyType.time)
+        .set_attributes(
+            [
+                ("active", PropertyType.dynamic_boolean, True),
+                ("analogic", PropertyType.boolean),
+                ("editable", PropertyType.dynamic_boolean, True),
+                ("hover_text", PropertyType.dynamic_string),
+                ("label",),
+                ("format",),
+                ("width", PropertyType.string_or_number),
+            ]
+        )
+        ._set_propagate(),
         "toggle": lambda gui, control_type, attrs: _Builder(
             gui=gui, control_type=control_type, element_name="Toggle", attributes=attrs, default_value=None
         )

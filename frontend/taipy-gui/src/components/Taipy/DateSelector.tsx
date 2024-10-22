@@ -14,9 +14,14 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
+
 import { DatePicker, DatePickerProps } from "@mui/x-date-pickers/DatePicker";
-import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
+
 import { DateTimePicker, DateTimePickerProps } from "@mui/x-date-pickers/DateTimePicker";
+import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
+
+import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
+
 import { isValid } from "date-fns";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -41,13 +46,20 @@ interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
     editable?: boolean;
     label?: string;
     width?: string | number;
+    analogic? :boolean;
 }
 
 const boxSx = { display: "inline-block" };
 const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotProps<Date>;
 
+const analogicRenderers = {
+    hours: renderTimeViewClock,
+    minutes: renderTimeViewClock,
+    seconds: renderTimeViewClock
+}
+
 const DateSelector = (props: DateSelectorProps) => {
-    const { updateVarName, withTime = false, id, propagate = true } = props;
+    const { updateVarName, withTime = false, id, propagate = true, analogic = false } = props;
     const dispatch = useDispatch();
     const formatConfig = useFormatConfig();
     const tz = formatConfig.timeZone;
@@ -110,17 +122,18 @@ const DateSelector = (props: DateSelectorProps) => {
                     {editable ? (
                         withTime ? (
                             <DateTimePicker
-                                {...(startProps as DateTimePickerProps<Date>)}
-                                {...(endProps as DateTimePickerProps<Date>)}
-                                value={value}
-                                onChange={handleChange}
-                                className={getSuffixedClassNames(className, "-picker")}
-                                disabled={!active}
-                                slotProps={textFieldProps}
-                                label={props.label}
-                                format={props.format}
-                                sx={dateSx}
-                            />
+                                    {...(startProps as DateTimePickerProps<Date>)}
+                                    {...(endProps as DateTimePickerProps<Date>)}
+                                    value={value}
+                                    onChange={handleChange}
+                                    className={getSuffixedClassNames(className, "-picker")}
+                                    disabled={!active}
+                                    slotProps={textFieldProps}
+                                    label={props.label}
+                                    format={props.format}
+                                    sx={dateSx}
+                                    viewRenderers={ analogic ? analogicRenderers : undefined }
+                                />
                         ) : (
                             <DatePicker
                                 {...(startProps as DatePickerProps<Date>)}
