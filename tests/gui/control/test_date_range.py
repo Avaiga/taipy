@@ -44,6 +44,22 @@ def test_date_range_md_2(gui: Gui, test_client, helpers):
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
+def test_date_range_md_3(gui: Gui, test_client, helpers):
+    gui._bind_var_val(
+        "dates", [datetime.strptime("15 Dec 2020", "%d %b %Y"), datetime.strptime("31 Dec 2020", "%d %b %Y")]
+    )
+    md_string = "<|{dates}|date_range|with_time|analogic|label_start=start|label_end=end|>"
+    expected_list = [
+        "<DateRange",
+        'defaultDates="[&quot;2020-12-',
+        'updateVarName="_TpDr_tpec_TpExPr_dates_TPMDL_0"',
+        "dates={_TpDr_tpec_TpExPr_dates_TPMDL_0}",
+        "withTime={true}",
+        "analogic={true}",
+        'labelStart="start"',
+        'labelEnd="end"',
+    ]
+    helpers.test_control_md(gui, md_string, expected_list)
 
 def test_date_range_md_width(gui: Gui, test_client, helpers):
     # do not remove test_client: it brings an app context needed for this test
