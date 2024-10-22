@@ -47,6 +47,22 @@ import { TaipyActiveProps, TaipyMultiSelectProps, getSuffixedClassNames } from "
 /**
  * A column description as received by the backend.
  */
+
+/**
+ * Generates a  CSS class name for a table header.
+ * @param columnName - The name of the column.
+ * @returns for CSS class name.
+ */
+
+export const generateHeaderClassName = (columnName: string | undefined): string => {
+    // logic for the css header classname
+    if (!columnName){
+        // return an empty string if columname is undefined or empty
+        return "";
+    }
+    return '-' + columnName.replace(/\W+/g, '-').replace(/-+/g, '-').toLowerCase();
+};
+
 export interface ColumnDesc {
     /** The unique column identifier. */
     dfid: string;
