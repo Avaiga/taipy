@@ -1573,8 +1573,8 @@
                     },
                     {
                         "name": "selected",
-                        "type": "dynamic(Union[str,list[str]])",
-                        "doc": "Semicolon (';')-separated list or a list of menu items identifiers that are selected."
+                        "type": "dynamic(list[str])",
+                        "doc": "Semicolon (';')-separated list or a list of menu items identifiers that should be selected."
                     },
                     {
                         "name": "inactive_ids",
