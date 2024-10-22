@@ -37,7 +37,7 @@ const baseTitleProps = { noWrap: true, variant: "h6" } as const;
 
 const Menu = (props: MenuProps) => {
     const { label, onAction = "", lov, width, inactiveIds = emptyArray, active = true } = props;
-    const [selectedValue, setSelectedValue] = useState<string | string[]>("");
+    const [selectedValue, setSelectedValue] = useState<string>("");
     const [opened, setOpened] = useState(false);
     const dispatch = useDispatch();
     const theme = useTheme();
@@ -49,19 +49,27 @@ const Menu = (props: MenuProps) => {
         (evt: MouseEvent<HTMLElement>) => {
             if (active) {
                 const { id: key = "" } = evt.currentTarget.dataset;
-                const selected = props.selected || [];
-                const updatedSelected = selected.includes(key) ? [...selected] : [...selected, key];
-                setSelectedValue(updatedSelected);
-                dispatch(createSendActionNameAction("menu", module, onAction, key));
+                setSelectedValue(() => {
+                    dispatch(createSendActionNameAction("menu", module, onAction, key));
+                    return key;
+                });
             }
         },
-        [active, dispatch, module, onAction, props.selected]
+        [active, dispatch, module, onAction]
     );
 
     const openHandler = useCallback((evt: MouseEvent<HTMLElement>) => {
         evt.stopPropagation();
         setOpened((o) => !o);
     }, []);
+
+    const selected = useMemo(() => {
+        const selected = props.selected ?? [];
+        if (selectedValue && !selected.includes(selectedValue)) {
+            return [...selected, selectedValue];
+        }
+        return selected;
+    }, [props.selected, selectedValue]);
 
     const [drawerSx, titleProps] = useMemo(() => {
         const drawerWidth = opened ? width : `calc(${theme.spacing(9)} + 1px)`;
@@ -81,12 +89,7 @@ const Menu = (props: MenuProps) => {
         ];
     }, [opened, width, theme]);
 
-    useEffect(() => {
-        if (props.selected) {
-            setSelectedValue(props.selected);
-        }
-    }, [props.selected]);
-
+    console.log(selected);
 
     return lov && lov.length ? (
         <Drawer
@@ -118,7 +121,7 @@ const Menu = (props: MenuProps) => {
                             key={elt.id}
                             value={elt.id}
                             item={elt.item}
-                            selectedValue={selectedValue}
+                            selectedValue={selected}
                             clickHandler={clickHandler}
                             disabled={!active || inactiveIds.includes(elt.id)}
                             withAvatar={true}
