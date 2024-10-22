@@ -24,7 +24,7 @@ import {getComponentClassName} from "../components/Taipy/TaipyStyle";
 import Metric from "../components/Taipy/Metric";
 import { useLovListMemo, LoV, LoVElt } from "../components/Taipy/lovUtils";
 import { LovItem } from "../utils/lov";
-import { getUpdateVar } from "../components/Taipy/utils";
+import { getUpdateVar, getSuffixedClassNames } from "../components/Taipy/utils";
 import { ColumnDesc, RowType, RowValue } from "../components/Taipy/tableUtils";
 import { TaipyContext, TaipyStore } from "../context/taipyContext";
 import { TaipyBaseAction, TaipyState } from "../context/taipyReducers";
@@ -59,6 +59,7 @@ export {
     createSendActionNameAction,
     createSendUpdateAction,
     getComponentClassName,
+    getSuffixedClassNames,
     getUpdateVar,
     useClassNames,
     useDispatchRequestUpdateOnFirstRender,

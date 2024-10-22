@@ -42,6 +42,7 @@ import {
     createSendActionNameAction,
     getComponentClassName,
     getUpdateVar,
+    useClassNames,
     useDispatch,
     useDynamicProperty,
     useModule,
@@ -60,7 +61,6 @@ import {
     ScenarioFullLength,
     disableColor,
     hoverSx,
-    useClassNames,
 } from "./utils";
 import ConfirmDialog from "./utils/ConfirmDialog";
 import PropertiesEditor from "./PropertiesEditor";

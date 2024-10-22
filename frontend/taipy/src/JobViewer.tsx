@@ -23,12 +23,13 @@ import {
     createRequestUpdateAction,
     createSendActionNameAction,
     getUpdateVar,
+    useClassNames,
     useDispatch,
     useDispatchRequestUpdateOnFirstRender,
     useModule,
 } from "taipy-gui";
 
-import { useClassNames, EllipsisSx, SecondaryEllipsisProps, CoreProps } from "./utils";
+import { EllipsisSx, SecondaryEllipsisProps, CoreProps } from "./utils";
 import StatusChip from "./StatusChip";
 
 interface JobViewerProps extends CoreProps {

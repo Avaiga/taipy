@@ -6,10 +6,10 @@ body:
   - type: markdown
     attributes:
       value: |
-        - Thank you for using Taipy and taking the time to report a bug! 😄 
+        - Thank you for using Taipy and taking the time to report a bug! 😄
         - Please try to spend some time to understand the bug and reproduce it.
         - Take a look at our template and try to add as much detail as possible.
-        - The more details we have, the easier it would be to fix it. 
+        - The more details we have, the easier it would be to fix it.
         - If any heading is not applicable, please set it to `NA`.
 
   - type: textarea
@@ -121,9 +121,12 @@ body:
     attributes:
       label: "Acceptance Criteria"
       description: Do not edit the text area below.
-      value: |        
-        - [ ] Ensure new code is unit tested, and check code coverage is at least 90%.
-        - [ ] Create related issue in taipy-doc for documentation and Release Notes.
+      value: |
+        - [ ] A unit test reproducing the bug is added.
+        - [ ] Any new code is covered by a unit tested.
+        - [ ] Check code coverage is at least 90%.
+        - [ ] The bug reporter validated the fix.
+        - [ ] Related issue(s) in taipy-doc are created for documentation and Release Notes are updated.
 
   - type: checkboxes
     id: terms_checklist_bug
