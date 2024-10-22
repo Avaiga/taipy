@@ -516,11 +516,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             finally:
                 self.scenario_refresh(scenario_id)
                 if (scenario or user_scenario) and (sel_scenario_var := args[1] if isinstance(args[1], str) else None):
-                    try:
-                        var_name, _ = gui._get_real_var_name(sel_scenario_var)
-                        self.gui._update_var(var_name, scenario or user_scenario, on_change=args[2])
-                    except Exception as e:  # pragma: no cover
-                        _warn("Can't find value variable name in context", e)
+                    self.gui._update_var(sel_scenario_var, scenario or user_scenario, on_change=args[2])
         if scenario:
             if not (reason := is_editable(scenario)):
                 state.assign(error_var, f"Scenario {scenario_id or name} is not editable: {_get_reason(reason)}.")
@@ -1127,13 +1123,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
         self.__lazy_start()
         if id and is_readable(t.cast(DataNodeId, id)) and (dn := core_get(id)) and isinstance(dn, DataNode):
             try:
-                return (
-                    (
+                return [
                         (k, f"{v}")
                         for k, v in dn._get_user_properties().items()
                         if k != _GuiCoreContext.__PROP_ENTITY_NAME
-                    ),
-                )
+                    ]
             except Exception:
                 return None
         return None

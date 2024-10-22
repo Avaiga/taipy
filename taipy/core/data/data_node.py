@@ -418,7 +418,7 @@ class DataNode(_Entity, _Labeled):
     def append(self, data, job_id: Optional[JobId] = None, **kwargs: Dict[str, Any]):
         """Append some data to this data node.
 
-        Parameters:
+        Arguments:
             data (Any): The data to write to this data node.
             job_id (JobId): An optional identifier of the writer.
             **kwargs (dict[str, any]): Extra information to attach to the edit document
@@ -434,7 +434,7 @@ class DataNode(_Entity, _Labeled):
     def write(self, data, job_id: Optional[JobId] = None, **kwargs: Dict[str, Any]):
         """Write some data to this data node.
 
-        Parameters:
+        Arguments:
             data (Any): The data to write to this data node.
             job_id (JobId): An optional identifier of the writer.
             **kwargs (dict[str, any]): Extra information to attach to the edit document
@@ -450,7 +450,7 @@ class DataNode(_Entity, _Labeled):
     def track_edit(self, **options):
         """Creates and adds a new entry in the edits attribute without writing the data.
 
-        Parameters:
+        Arguments:
             options (dict[str, any]): track `timestamp`, `comments`, `job_id`. The others are user-custom, users can
                 use options to attach any information to an external edit of a data node.
         """
@@ -468,7 +468,7 @@ class DataNode(_Entity, _Labeled):
         Note:
             The data node can be unlocked with the method `(DataNode.)unlock_edit()^`.
 
-        Parameters:
+        Arguments:
             editor_id (Optional[str]): The editor's identifier.
         """
         if editor_id:
@@ -492,7 +492,7 @@ class DataNode(_Entity, _Labeled):
         Note:
             The data node can be locked with the method `(DataNode.)lock_edit()^`.
 
-        Parameters:
+        Arguments:
             editor_id (Optional[str]): The editor's identifier.
         """
         if (
@@ -515,7 +515,7 @@ class DataNode(_Entity, _Labeled):
         If multiple filter operators are provided, filtered data will be joined based on the
         join operator (*AND* or *OR*).
 
-        Parameters:
+        Arguments:
             operators (Union[List[Tuple], Tuple]): A 3-element tuple or a list of 3-element tuples,
                 each is in the form of (key, value, `Operator^`).
             join_operator (JoinOperator^): The operator used to join the multiple filter
