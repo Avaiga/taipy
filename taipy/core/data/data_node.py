@@ -456,14 +456,6 @@ class DataNode(_Entity, _Labeled):
         self.track_edit(job_id=job_id, editor_id=editor_id, **kwargs)
         _DataManagerFactory._build_manager()._set(self)
 
-    def _upload(self, data, job_id: Optional[JobId] = None, editor_id: Optional[str] = None, **kwargs: Dict[str, Any]):
-        """Handle file uploads with editor lock enforcement."""
-        if self.edit_in_progress and self.editor_id != editor_id:
-            raise DataNodeIsBeingEdited(self.id, self.editor_id)
-
-        self._write(data)  # Assuming _write is called for uploads
-        self.track_edit(job_id=job_id, editor_id=editor_id, **kwargs)
-
     def track_edit(self, **options):
         """Creates and adds a new entry in the edits attribute without writing the data.
 

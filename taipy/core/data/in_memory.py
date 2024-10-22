@@ -13,7 +13,6 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
 
 from taipy.common.config.common.scope import Scope
-from taipy.core.exceptions.exceptions import DataNodeIsBeingEdited
 from .._version._version_manager_factory import _VersionManagerFactory
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
@@ -104,10 +103,8 @@ class InMemoryDataNode(DataNode):
         if self.id not in in_memory_storage:
             in_memory_storage[self.id] = []
 
+        if not isinstance(in_memory_storage[self.id], list):
+            in_memory_storage[self.id] = [in_memory_storage[self.id]]
+
         in_memory_storage[self.id].append(data)  # Append new data
 
-    def _upload(self, data, editor_id: Optional[str] = None):
-        """Simulate uploading data with editor locking enforcement."""
-        if self.edit_in_progress and self.editor_id != editor_id:
-            raise DataNodeIsBeingEdited(self.id, self.editor_id)
-        self._write(data)
