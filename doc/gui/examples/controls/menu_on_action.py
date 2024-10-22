@@ -20,7 +20,7 @@ selected = ["a", "b"]
 
 def menu_action(state, id, payload):
     if payload.get("args")[0] in state.selected:
-        print(f"Option {payload.get('args')[0]} is already selected")
+        print(f"Option {payload.get('args')[0]} is already selected") # noqa: F401, T201
 
 page = """
 <|menu|lov={options}|selected={selected}|on_action=menu_action|>
