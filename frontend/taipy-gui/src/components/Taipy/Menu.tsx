@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, {useCallback, useMemo, useState, MouseEvent, CSSProperties, useEffect} from "react";
+import React, { useCallback, useMemo, useState, MouseEvent, CSSProperties, useEffect } from "react";
 import MenuIco from "@mui/icons-material/Menu";
 import ListItemButton from "@mui/material/ListItemButton";
 import Drawer from "@mui/material/Drawer";
@@ -38,7 +38,6 @@ const baseTitleProps = { noWrap: true, variant: "h6" } as const;
 const Menu = (props: MenuProps) => {
     const { label, onAction = "", lov, width, inactiveIds = emptyArray, active = true } = props;
     const [selectedValue, setSelectedValue] = useState<string | string[]>("");
-    const [currentSelection, setCurrentSelection] = useState<string>("");
     const [opened, setOpened] = useState(false);
     const dispatch = useDispatch();
     const theme = useTheme();
@@ -50,14 +49,13 @@ const Menu = (props: MenuProps) => {
         (evt: MouseEvent<HTMLElement>) => {
             if (active) {
                 const { id: key = "" } = evt.currentTarget.dataset;
-                setCurrentSelection(key);
-                setSelectedValue(() => {
-                    dispatch(createSendActionNameAction("menu", module, onAction, key));
-                    return key;
-                });
+                const selected = props.selected || [];
+                const updatedSelected = selected.includes(key) ? [...selected] : [...selected, key];
+                setSelectedValue(updatedSelected);
+                dispatch(createSendActionNameAction("menu", module, onAction, key));
             }
         },
-        [active, dispatch, module, onAction]
+        [active, dispatch, module, onAction, props.selected]
     );
 
     const openHandler = useCallback((evt: MouseEvent<HTMLElement>) => {
@@ -85,10 +83,10 @@ const Menu = (props: MenuProps) => {
 
     useEffect(() => {
         if (props.selected) {
-            const updatedSelected = [...props.selected, currentSelection];
-            setSelectedValue(updatedSelected);
+            setSelectedValue(props.selected);
         }
-    }, [currentSelection, props.selected]);
+    }, [props.selected]);
+
 
     return lov && lov.length ? (
         <Drawer

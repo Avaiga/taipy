@@ -18,10 +18,9 @@ from taipy.gui import Gui
 options = [("a", "Option A"), ("b", "Option B"), ("c", "Option C"), ("d", "Option D")]
 selected = ["a", "b"]
 
-def menu_action(_1, _2, payload):
-    selected_options = payload["args"]
-    for option in selected_options:
-        print(f"Selected: {option}") # noqa: F401, T201
+def menu_action(state, id, payload):
+    if payload.get("args")[0] in state.selected:
+        print(f"Option {payload.get('args')[0]} is already selected")
 
 page = """
 <|menu|lov={options}|selected={selected}|on_action=menu_action|>
