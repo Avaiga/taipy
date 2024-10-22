@@ -2,12 +2,42 @@
 
 
 <div align="center">
-  <a href="https://taipy.io?utm_source=github" target="_blank">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Avaiga/taipy/assets/100117126/509bf101-54c2-4321-adaf-a2af63af9682">
-    <img alt="Taipy" src="https://github.com/Avaiga/taipy/assets/100117126/4df8a733-d8d0-4893-acf0-d24ef9e8b58a" width="300" />
-  </picture>
-  </a>
+  <table>
+    <tr>
+      <td>
+        <a href="https://github.com/your-repo/releases" target="_blank">
+          <img alt="Version" src="https://img.shields.io/badge/Version-1.1.2-blue">
+        </a>
+      </td>
+      <td>
+        <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank">
+          <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg">
+        </a>
+      </td>
+      <td>
+        <a href="https://www.python.org/downloads/release/python-380/" target="_blank">
+          <img alt="Python Version" src="https://img.shields.io/badge/Python-3.8-blue">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://docs.taipy.io/en/latest/" target="_blank">
+          <img alt="Explore the Docs" src="https://img.shields.io/badge/Explore_the_Docs-📚-informational">
+        </a>
+      </td>
+      <td>
+        <a href="https://discord.com/invite/SJyz2VJGxV" target="_blank">
+          <img alt="Discord Support" src="https://img.shields.io/badge/Discord_Support-🫱🏼‍🫲🏼-blueviolet">
+        </a>
+      </td>
+      <td>
+        <a href="https://docs.taipy.io/en/latest/gallery/" target="_blank">
+          <img alt="Demos & Examples" src="https://img.shields.io/badge/Demos_%26_Examples-👀-yellow">
+        </a>
+      </td>
+    </tr>
+  </table>
 </div>
 
 <h1 align="center">
