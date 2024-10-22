@@ -1,0 +1,56 @@
+Feature or Bug Fix Description
+This PR introduces a new feature or resolves an existing bug. The key changes include:
+
+Example:
+"This PR implements user authentication via email and password, enabling secure login and sign-up features. It also fixes an existing bug where invalid credentials were not properly handled."
+
+Reproducible Path
+Detail the steps to reproduce the bug or test the feature:
+
+1.Navigate to the login page.
+2.Enter valid user credentials.
+3.Click on the "Submit" button.
+4.Confirm successful login and redirection to the user dashboard.
+
+Code Implementation
+Include a relevant code snippet from the implementation:
+--------------python code--------------------
+# Python example for user login
+def authenticate_user(username, password):
+    if valid_credentials(username, password):
+        return "Login successful"
+    return "Invalid credentials"
+
+------------HTML---------------------------
+<!-- HTML example for the login form -->
+<form action="/login" method="POST">
+  <label for="username">Username</label>
+  <input type="text" id="username" name="username" required>
+  
+  <label for="password">Password</label>
+  <input type="password" id="password" name="password" required>
+  
+  <button type="submit">Login</button>
+</form>
+--------------------------
+Chosen Solution
+Explain the approach used to solve the problem or implement the feature:
+
+Example:
+"I used session-based authentication to keep the login session persistent. Additionally, I integrated form validation to prevent SQL injection."
+
+Backport to Other Branches
+ Yes
+ No
+If yes, specify which branches/releases this needs to be backported to:
+
+Branch/Release Name
+--------------------------
+Checklist Before Merge
+Ensure that the following items are checked off:
+
+ -Global feature or fix is complete.
+ -Code is fully unit-tested.
+ -Integration tests (end-to-end tests) are automated.
+ -A new entry in the release notes has been added.
+ -Documentation is updated, or a new issue is created for documentation.
