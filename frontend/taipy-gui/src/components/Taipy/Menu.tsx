@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useMemo, useState, MouseEvent, CSSProperties, useEffect } from "react";
+import React, { useCallback, useMemo, useState, MouseEvent, CSSProperties } from "react";
 import MenuIco from "@mui/icons-material/Menu";
 import ListItemButton from "@mui/material/ListItemButton";
 import Drawer from "@mui/material/Drawer";
