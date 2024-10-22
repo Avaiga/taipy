@@ -177,7 +177,7 @@ class Scenario(_Entity, Submittable, _Labeled):
 
         The attribute can be a sequence, a task, or a data node.
 
-        Parameters:
+        Arguments:
             attribute_name (str): The name of the attribute to get.
 
         Returns:
@@ -342,7 +342,7 @@ class Scenario(_Entity, Submittable, _Labeled):
     def has_tag(self, tag: str) -> bool:
         """Indicate if the scenario has a given tag.
 
-        Parameters:
+        Arguments:
             tag (str): The tag to search among the set of scenario's tags.
 
         Returns:
@@ -358,7 +358,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         Note:
             Notification will be available only for jobs created after this subscription.
 
-        Parameters:
+        Arguments:
             callback (Callable[[Scenario^, Job^], None]): The callable function to be called
                 on status change.
             params (Optional[List[Any]]): The parameters to be passed to the _callback_.
@@ -373,7 +373,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         Note:
             The function will continue to be called for ongoing jobs.
 
-        Parameters:
+        Arguments:
             callback (Callable[[Scenario^, Job^], None]): The callable function to unsubscribe.
             params (Optional[List[Any]]): The parameters to be passed to the _callback_.
         """
@@ -393,7 +393,7 @@ class Scenario(_Entity, Submittable, _Labeled):
 
         All the `Task^`s of the scenario will be submitted for execution.
 
-        Parameters:
+        Arguments:
             callbacks (List[Callable]): The list of callable functions to be called on status
                 change.
             force (bool): Force execution even if the data nodes are in cache.
@@ -427,7 +427,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         If the scenario's cycle already have another scenario tagged with _tag_ the other
         scenario will be untagged.
 
-        Parameters:
+        Arguments:
             tag (str): The tag to add to this scenario.
         """
         from ... import core as tp
@@ -437,7 +437,7 @@ class Scenario(_Entity, Submittable, _Labeled):
     def remove_tag(self, tag: str) -> None:
         """Remove a tag from this scenario.
 
-        Parameters:
+        Arguments:
             tag (str): The tag to remove from the set of the scenario's tags.
         """
         from ... import core as tp
@@ -479,7 +479,7 @@ class Scenario(_Entity, Submittable, _Labeled):
     ) -> None:
         """Add a sequence to the scenario.
 
-        Parameters:
+        Arguments:
             name (str): The name of the sequence.
             tasks (Union[List[Task], List[TaskId]]): The list of scenario's tasks to add to the sequence.
             properties (Optional[Dict]): The optional properties of the sequence.
@@ -504,7 +504,7 @@ class Scenario(_Entity, Submittable, _Labeled):
     ) -> None:
         """Update an existing sequence.
 
-        Parameters:
+        Arguments:
             name (str): The name of the sequence to update.
             tasks (Union[List[Task], List[TaskId]]): The new list of scenario's tasks.
             properties (Optional[Dict]): The new properties of the sequence.
@@ -525,7 +525,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         Note:
             To provide properties and subscribers for the sequences, use `Scenario.add_sequence^` instead.
 
-        Parameters:
+        Arguments:
             sequences (Dict[str, Union[List[Task], List[TaskId]]]):
                 A dictionary containing sequences to add. Each key is a sequence name, and the value must
                 be a list of the scenario tasks.
@@ -545,7 +545,7 @@ class Scenario(_Entity, Submittable, _Labeled):
     def remove_sequence(self, name: str) -> None:
         """Remove a sequence from the scenario.
 
-        Parameters:
+        Arguments:
             name (str): The name of the sequence to remove.
         """
         seq_id = self.sequences[name].id
@@ -557,7 +557,7 @@ class Scenario(_Entity, Submittable, _Labeled):
     def remove_sequences(self, sequence_names: List[str]) -> None:
         """Remove multiple sequences from the scenario.
 
-        Parameters:
+        Arguments:
             sequence_names (List[str]): A list of sequence names to remove.
         """
         _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
@@ -576,7 +576,7 @@ class Scenario(_Entity, Submittable, _Labeled):
     def rename_sequence(self, old_name, new_name) -> None:
         """Rename a scenario sequence.
 
-        Parameters:
+        Arguments:
             old_name (str): The current name of the sequence to rename.
             new_name (str): The new name of the sequence.
 

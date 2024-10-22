@@ -106,7 +106,7 @@ class CycleResource(Resource):
           When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_READER` role.
 
-      parameters:
+      arguments:
         - in: path
           name: cycle_id
           schema:
@@ -179,7 +179,7 @@ class CycleResource(Resource):
             When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_EDITOR` role.
 
-      parameters:
+      arguments:
         - in: path
           name: cycle_id
           schema:
