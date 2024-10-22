@@ -22,6 +22,15 @@ import * as React from "react";
  */
 export declare const getUpdateVar: (updateVars: string, name: string) => string | undefined;
 
+/**
+ * Appends a suffix to the class names.
+ *
+ * @param names - The class names.
+ * @param suffix - The suffix to append.
+ * @returns The new list of class names.
+ */
+export declare const getSuffixedClassNames: (names: string | undefined, suffix: string) => string;
+
 export interface TaipyActiveProps extends TaipyDynamicProps, TaipyHoverProps {
     defaultActive?: boolean;
     active?: boolean;
@@ -403,6 +412,16 @@ export declare const Context: React.Context<Store>;
  * @returns The latest updated value.
  */
 export declare const useDynamicProperty: <T>(value: T, defaultValue: T, defaultStatic: T) => T;
+/**
+ * A React hook to manage classNames (dynamic and static).
+ * cf. useDynamicProperty
+ *
+ * @param libClassName - The default static className.
+ * @param dynamicClassName - The bound className.
+ * @param className - The default user set className.
+ * @returns The complete list of applicable classNames.
+ */
+export declare const useClassNames: (libClassName?: string, dynamicClassName?: string, className?: string) => string;
 /**
  * A React hook to manage a dynamic json property.
  *
