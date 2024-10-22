@@ -11,7 +11,7 @@
 
 from unittest.mock import Mock, patch
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 from taipy.core import Job, JobId, Scenario, Task
 from taipy.core.data.pickle import PickleDataNode
 from taipy.gui_core._context import _GuiCoreContext
@@ -48,8 +48,9 @@ class MockState:
 
 class TestGuiCoreContext_is_deletable:
     def test_crud_scenario(self):
-        with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get), patch(
-            "taipy.gui_core._context.is_deletable", side_effect=mock_is_true
+        with (
+            patch("taipy.gui_core._context.core_get", side_effect=mock_core_get),
+            patch("taipy.gui_core._context.is_deletable", side_effect=mock_is_true),
         ):
             gui_core_context = _GuiCoreContext(Mock())
             assign = Mock()
@@ -94,8 +95,9 @@ class TestGuiCoreContext_is_deletable:
                 assert "is not deletable" in str(assign.call_args.args[1])
 
     def test_act_on_jobs(self):
-        with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get), patch(
-            "taipy.gui_core._context.is_deletable", side_effect=mock_is_true
+        with (
+            patch("taipy.gui_core._context.core_get", side_effect=mock_core_get),
+            patch("taipy.gui_core._context.is_deletable", side_effect=mock_is_true),
         ):
             gui_core_context = _GuiCoreContext(Mock())
             assign = Mock()

@@ -15,7 +15,7 @@ from typing import Optional
 from flask import request
 from flask_restful import Resource
 
-from taipy.config.config import Config
+from taipy.common.config import Config
 from taipy.core import Job, JobId
 from taipy.core.exceptions.exceptions import NonExistingJob, NonExistingTaskConfig
 from taipy.core.job._job_manager_factory import _JobManagerFactory
@@ -54,7 +54,7 @@ class JobResource(Resource):
           curl -X GET http://localhost:5000/api/v1/jobs/JOB_my_task_config_75750ed8-4e09-4e00-958d-e352ee426cc9
         ```
 
-      parameters:
+      arguments:
         - in: path
           name: job_id
           schema:
@@ -87,7 +87,7 @@ class JobResource(Resource):
           curl -X DELETE http://localhost:5000/api/v1/jobs/JOB_my_task_config_75750ed8-4e09-4e00-958d-e352ee426cc9
         ```
 
-      parameters:
+      arguments:
         - in: path
           name: job_id
           schema:
@@ -174,7 +174,7 @@ class JobList(Resource):
           curl -X POST http://localhost:5000/api/v1/jobs?task_id=TASK_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
         ```
 
-      parameters:
+      arguments:
         - in: query
           name: task_id
           schema:
@@ -255,7 +255,7 @@ class JobExecutor(Resource):
           curl -X POST http://localhost:5000/api/v1/jobs/cancel/JOB_my_task_config_75750ed8-4e09-4e00-958d-e352ee426cc9
         ```
 
-      parameters:
+      arguments:
         - in: path
           name: job_id
           schema:

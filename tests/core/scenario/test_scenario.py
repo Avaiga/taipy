@@ -13,10 +13,9 @@ from unittest import mock
 
 import pytest
 
-from taipy.config import Frequency
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
-from taipy.config.exceptions.exceptions import InvalidConfigurationId
+from taipy.common.config import Config, Frequency
+from taipy.common.config.common.scope import Scope
+from taipy.common.config.exceptions.exceptions import InvalidConfigurationId
 from taipy.core import create_scenario
 from taipy.core.common._utils import _Subscriber
 from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory

@@ -11,8 +11,8 @@
 
 from datetime import timedelta
 
-from taipy.config import Config
-from taipy.config.common.scope import Scope
+from taipy.common.config import Config
+from taipy.common.config.common.scope import Scope
 
 
 class TestConfig:

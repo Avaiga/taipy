@@ -15,7 +15,7 @@ on:
         description: "The version of the package to be released"
         required: true
       target_package:
-        description: "The package to be released (gui, config, core, rest, templates, taipy)"
+        description: "The package to be released (gui, common, core, rest, templates, taipy)"
         required: true
 
 env:
@@ -28,7 +28,7 @@ jobs:
   fetch-versions:
     runs-on: ubuntu-latest
     outputs:
-        config_VERSION: ${{ steps.version-setup.outputs.config_VERSION }}
+        common_VERSION: ${{ steps.version-setup.outputs.common_VERSION }}
         core_VERSION: ${{ steps.version-setup.outputs.core_VERSION }}
         gui_VERSION: ${{ steps.version-setup.outputs.gui_VERSION }}
         rest_VERSION: ${{ steps.version-setup.outputs.rest_VERSION }}
@@ -73,11 +73,11 @@ jobs:
       - name: Set Build Variables
         id: set-variables
         run: |
-          if [ "${{ github.event.inputs.target_package }}" == "config" ]; then
-            echo "package_version=${{needs.fetch-versions.outputs.config_VERSION}}" >> $GITHUB_OUTPUT
-            echo "package_dir=./taipy/config" >> $GITHUB_OUTPUT
-            echo "release_name=${{needs.fetch-versions.outputs.config_VERSION}}-config" >> $GITHUB_OUTPUT
-            echo "tar_path=./dist/${{ github.event.repository.name }}-config-${{needs.fetch-versions.outputs.config_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
+          if [ "${{ github.event.inputs.target_package }}" == "common" ]; then
+            echo "package_version=${{needs.fetch-versions.outputs.common_VERSION}}" >> $GITHUB_OUTPUT
+            echo "package_dir=./taipy/common" >> $GITHUB_OUTPUT
+            echo "release_name=${{needs.fetch-versions.outputs.common_VERSION}}-common" >> $GITHUB_OUTPUT
+            echo "tar_path=./dist/${{ github.event.repository.name }}-common-${{needs.fetch-versions.outputs.common_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
           elif [ "${{ github.event.inputs.target_package }}" == "core" ]; then
             echo "package_version=${{needs.fetch-versions.outputs.core_VERSION}}" >> $GITHUB_OUTPUT
             echo "package_dir=./taipy/core" >> $GITHUB_OUTPUT
@@ -104,7 +104,7 @@ jobs:
       - name: Update setup.requirements.txt
         run: |
           python tools/release/update_setup_requirements.py taipy-${{ github.event.inputs.target_package }} \
-            ${{needs.fetch-versions.outputs.config_VERSION}} \
+            ${{needs.fetch-versions.outputs.common_VERSION}} \
             ${{needs.fetch-versions.outputs.core_VERSION}} \
             ${{needs.fetch-versions.outputs.gui_VERSION}} \
             ${{needs.fetch-versions.outputs.rest_VERSION}} \
@@ -145,7 +145,7 @@ jobs:
           python tools/release/build_package_structure.py  ${{ github.event.inputs.target_package }}
 
       - name: Copy Taipy Logger
-        if: github.event.inputs.target_package == 'config'
+        if: github.event.inputs.target_package == 'common'
         run: |
           cp -r taipy/logger/. ${{ steps.set-variables.outputs.package_dir }}/taipy/logger
 

@@ -46,6 +46,7 @@ export enum Types {
     DownloadFile = "DOWNLOAD_FILE",
     Partial = "PARTIAL",
     Acknowledgement = "ACKNOWLEDGEMENT",
+    Broadcast = "BROADCAST",
 }
 
 /**
@@ -173,7 +174,7 @@ const getUserTheme = (mode: PaletteMode) => {
                     },
                 },
             },
-        }),
+        })
     );
 };
 
@@ -218,7 +219,7 @@ export const messageToAction = (message: WsMessage) => {
                 (message as unknown as NavigateMessage).to,
                 (message as unknown as NavigateMessage).params,
                 (message as unknown as NavigateMessage).tab,
-                (message as unknown as NavigateMessage).force,
+                (message as unknown as NavigateMessage).force
             );
         } else if (message.type === "ID") {
             return createIdAction((message as unknown as IdMessage).id);
@@ -230,6 +231,8 @@ export const messageToAction = (message: WsMessage) => {
             return createAckAction((message as unknown as IdMessage).id);
         } else if (message.type === "FV") {
             changeFavicon((message.payload as Record<string, string>)?.value);
+        } else if (message.type == "BC") {
+            stackBroadcast((message as NamePayload).name, (message as NamePayload).payload.value);
         }
     }
     return {} as TaipyBaseAction;
@@ -240,8 +243,8 @@ export const getWsMessageListener = (dispatch: Dispatch<TaipyBaseAction>) => {
         if (message.type === "MU" && Array.isArray(message.payload)) {
             const payloads = message.payload as NamePayload[];
             Promise.all(payloads.map((pl) => parseData(pl.payload.value as Record<string, unknown>)))
-                .then((vals) => {
-                    vals.forEach((val, idx) => (payloads[idx].payload.value = val));
+                .then((values) => {
+                    values.forEach((val, idx) => (payloads[idx].payload.value = val));
                     dispatch(messageToAction(message));
                 })
                 .catch(console.warn);
@@ -253,6 +256,24 @@ export const getWsMessageListener = (dispatch: Dispatch<TaipyBaseAction>) => {
         dispatch(messageToAction(message));
     };
     return dispatchWsMessage;
+};
+
+// Broadcast
+const __BroadcastRepo: Record<string, Array<unknown>> = {};
+
+const stackBroadcast = (name: string, value: unknown) => (__BroadcastRepo[name] = __BroadcastRepo[name] || []).push(value);
+
+const broadcast_timeout = 250;
+
+const initializeBroadcastManagement = (dispatch: Dispatch<TaipyBaseAction>) => {
+    setInterval(() => {
+        Object.entries(__BroadcastRepo).forEach(([name, stack]) => {
+            const broadcastValue = stack.shift();
+            if (broadcastValue !== undefined) {
+                dispatch(createUpdateAction({ name, payload: { value: broadcastValue } }));
+            }
+        });
+    }, broadcast_timeout);
 };
 
 export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispatch<TaipyBaseAction>): void => {
@@ -280,7 +301,10 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
         socket.on("message", getWsMessageListener(dispatch));
         // only now does the socket tries to open/connect
         socket.connect();
+        // favicon
         changeFavicon();
+        // broadcast
+        initializeBroadcastManagement(dispatch);
     }
 };
 
@@ -300,7 +324,7 @@ export const storeBlockUi = (block?: BlockMessage) => () => {
     }
 };
 
-export const retreiveBlockUi = (): BlockMessage => {
+export const retrieveBlockUi = (): BlockMessage => {
     if (localStorage) {
         const val = localStorage.getItem("TaipyBlockUi");
         if (val) {
@@ -463,7 +487,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                 action.payload,
                 state.id,
                 action.context,
-                action.propagate,
+                action.propagate
             );
             break;
         case Types.Action:
@@ -513,7 +537,7 @@ export const createSendUpdateAction = (
     context: string | undefined,
     onChange?: string,
     propagate = true,
-    relName?: string,
+    relName?: string
 ): TaipyAction => ({
     type: Types.SendUpdate,
     name: name,
@@ -566,7 +590,7 @@ export const createRequestChartUpdateAction = (
     context: string | undefined,
     columns: string[],
     pageKey: string,
-    decimatorPayload: unknown | undefined,
+    decimatorPayload: unknown | undefined
 ): TaipyAction =>
     createRequestDataUpdateAction(
         name,
@@ -577,7 +601,7 @@ export const createRequestChartUpdateAction = (
         {
             decimatorPayload: decimatorPayload,
         },
-        true,
+        true
     );
 
 export const createRequestTableUpdateAction = (
@@ -599,7 +623,7 @@ export const createRequestTableUpdateAction = (
     filters?: Array<FilterDesc>,
     compare?: string,
     compareDatas?: string,
-    stateContext?: Record<string, unknown>,
+    stateContext?: Record<string, unknown>
 ): TaipyAction =>
     createRequestDataUpdateAction(
         name,
@@ -622,7 +646,7 @@ export const createRequestTableUpdateAction = (
             compare,
             compare_datas: compareDatas,
             state_context: stateContext,
-        }),
+        })
     );
 
 export const createRequestInfiniteTableUpdateAction = (
@@ -645,7 +669,7 @@ export const createRequestInfiniteTableUpdateAction = (
     compare?: string,
     compareDatas?: string,
     stateContext?: Record<string, unknown>,
-    reverse?: boolean,
+    reverse?: boolean
 ): TaipyAction =>
     createRequestDataUpdateAction(
         name,
@@ -670,7 +694,7 @@ export const createRequestInfiniteTableUpdateAction = (
             compare_datas: compareDatas,
             state_context: stateContext,
             reverse: !!reverse,
-        }),
+        })
     );
 
 /**
@@ -701,7 +725,7 @@ export const createRequestDataUpdateAction = (
     pageKey: string,
     payload: Record<string, unknown>,
     allData = false,
-    library?: string,
+    library?: string
 ): TaipyAction => {
     payload = payload || {};
     if (id !== undefined) {
@@ -739,7 +763,7 @@ export const createRequestUpdateAction = (
     context: string | undefined,
     names: string[],
     forceRefresh = false,
-    stateContext?: Record<string, unknown>,
+    stateContext?: Record<string, unknown>
 ): TaipyAction => ({
     type: Types.RequestUpdate,
     name: "",
@@ -812,7 +836,7 @@ export const createNavigateAction = (
     to?: string,
     params?: Record<string, string>,
     tab?: string,
-    force?: boolean,
+    force?: boolean
 ): TaipyNavigateAction => ({
     type: Types.Navigate,
     to,

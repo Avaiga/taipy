@@ -351,6 +351,57 @@
                         "type": "Union[str,int]",
                         "default_value": "None",
                         "doc": "The width of the date element."
+                    },
+                    {
+                        "name": "analogic",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "Whether or not to show timepicker as a clock."
+                    }
+                ]
+            }
+        ],
+        [
+            "time",
+            {
+                "inherits": [
+                    "on_change",
+                    "propagate"
+                ],
+                "properties": [
+                    {
+                        "name": "analogic",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "Whether or not to show timepicker as a clock."
+                    },
+                    {
+                        "name": "format",
+                        "type": "str",
+                        "doc": "The format to apply to the value. See below."
+                    },
+                    {
+                        "name": "editable",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "Shows the time as a formatted string if not editable."
+                    },
+                    {
+                        "name": "time",
+                        "default_property": true,
+                        "type": "dynamic(str)",
+                        "doc": "The time that this control represents and can modify"
+                    },
+                    {
+                        "name": "label",
+                        "type": "str",
+                        "doc": "The label associated with the input."
+                    },
+                    {
+                        "name": "width",
+                        "type": "Union[str,int]",
+                        "default_value": "None",
+                        "doc": "The width of the time element."
                     }
                 ]
             }
@@ -401,6 +452,12 @@
                         "type": "Union[str,int]",
                         "default_value": "None",
                         "doc": "The width of the date_range element."
+                    },
+                    {
+                        "name": "analogic",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "Whether or not to show timepicker as a clock."
                     }
                 ]
             }
@@ -1990,7 +2047,7 @@
                         "name": "adapter",
                         "type": "Union[str, Callable]",
                         "default_value": "<tt>lambda x: str(x)</tt>",
-                        "doc": "A function or the name of the function  that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>.<br/>The default value is a function that returns the string representation of the <i>lov</i> element."
+                        "doc": "A function or the name of the function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>.<br/>The default value is a function that returns the string representation of the <i>lov</i> element."
                     },
                     {
                         "name": "type",

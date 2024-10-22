@@ -49,6 +49,8 @@ import {
     TableFilter,
     SortDesc,
     TableSort,
+    useClassNames,
+    getSuffixedClassNames,
 } from "taipy-gui";
 
 import { Cycles, Cycle, DataNodes, NodeType, Scenarios, Scenario, DataNode, Sequence, Sequences } from "./utils/types";
@@ -62,6 +64,7 @@ import {
     BadgePos,
     BadgeSx,
     BaseTreeViewSx,
+    CoreProps,
     FlagSx,
     ParentItemSx,
     getUpdateVarNames,
@@ -81,25 +84,14 @@ type Entities = Cycles | Scenarios | DataNodes;
 type Entity = Cycle | Scenario | Sequence | DataNode;
 type Pinned = Record<string, boolean>;
 
-interface CoreSelectorProps {
-    id?: string;
-    active?: boolean;
-    defaultActive?: boolean;
-    updateVarName?: string;
+interface CoreSelectorProps extends CoreProps {
     entities?: Entities;
-    coreChanged?: Record<string, unknown>;
-    updateVars: string;
     onChange?: string;
-    error?: string;
     displayCycles?: boolean;
     showPrimaryFlag?: boolean;
-    propagate?: boolean;
     value?: string | string[];
     defaultValue?: string;
     height: string;
-    libClassName?: string;
-    className?: string;
-    dynamicClassName?: string;
     multiple?: boolean;
     lovPropertyName: string;
     leafType: NodeType;
@@ -145,7 +137,7 @@ const CoreItem = (props: {
     return !props.displayCycles && nodeType === NodeType.CYCLE ? (
         <>
             {items
-                ? items.map((item) => (
+                ? items.filter(v=>v).map((item) => (
                       <CoreItem
                           key={item[0]}
                           item={item}
@@ -167,7 +159,7 @@ const CoreItem = (props: {
             data-selectable={nodeType === props.leafType}
             label={
                 <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={1}>
-                    <Grid  size="grow" sx={iconLabelSx}>
+                    <Grid size="grow" sx={iconLabelSx}>
                         {nodeType === NodeType.CYCLE ? (
                             <CycleIcon fontSize="small" color="primary" />
                         ) : nodeType === NodeType.SCENARIO ? (
@@ -215,7 +207,7 @@ const CoreItem = (props: {
             sx={nodeType === NodeType.NODE ? undefined : ParentItemSx}
         >
             {items
-                ? items.map((item) => (
+                ? items.filter(v=>v).map((item) => (
                       <CoreItem
                           key={item[0]}
                           item={item}
@@ -353,6 +345,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const dispatch = useDispatch();
     const module = useModule();
 
@@ -444,7 +437,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
         if (coreChanged?.scenario) {
             const updateVar = getUpdateVar(updateVars, lovPropertyName);
             updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
-        }
+    }
     }, [coreChanged, updateVars, module, dispatch, id, lovPropertyName]);
 
     const treeViewSx = useMemo(() => ({ ...BaseTreeViewSx, maxHeight: props.height || "50vh" }), [props.height]);
@@ -637,17 +630,18 @@ const CoreSelector = (props: CoreSelectorProps) => {
                             appliedFilters={filters}
                             filteredCount={0}
                             onValidate={applyFilters}
+                            className={className}
                         ></TableFilter>
                     </Grid>
                 ) : null}
                 {active && colSorts ? (
                     <Grid>
-                        <TableSort columns={colSorts} appliedSorts={sorts} onValidate={applySorts}></TableSort>
+                        <TableSort columns={colSorts} appliedSorts={sorts} onValidate={applySorts} className={className}></TableSort>
                     </Grid>
                 ) : null}
                 {showSearch ? (
                     <Grid>
-                        <IconButton onClick={onRevealSearch} size="small" sx={iconInRowSx}>
+                        <IconButton onClick={onRevealSearch} size="small" sx={iconInRowSx} className={getSuffixedClassNames(className, "-search")}>
                             {revealSearch ? (
                                 <SearchOffOutlined fontSize="inherit" />
                             ) : (
@@ -669,6 +663,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                             }
                             label="Pinned only"
                             sx={labelInRowSx}
+                            className={getSuffixedClassNames(className, "-pins")}
                         />
                     </Grid>
                 ) : null}
@@ -680,6 +675,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                             onChange={onSearch}
                             fullWidth
                             label="Search"
+                            className={getSuffixedClassNames(className, "-search-input")}
                         ></TextField>
                     </Grid>
                 ) : null}
@@ -712,6 +708,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                       )
                     : null}
             </SimpleTreeView>
+            {props.children}
         </>
     );
 };

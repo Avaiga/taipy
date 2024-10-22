@@ -16,9 +16,9 @@ from unittest.mock import ANY, patch
 import freezegun
 import pytest
 
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
+from taipy.common.config import Config
+from taipy.common.config.common.frequency import Frequency
+from taipy.common.config.common.scope import Scope
 from taipy.core import Job
 from taipy.core import taipy as tp
 from taipy.core._orchestrator._orchestrator import _Orchestrator

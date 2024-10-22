@@ -80,7 +80,7 @@ unfixable = []
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401", "F403"]  # unused import
 "_init.py" = ["F401", "F403"]  # unused import
-"taipy/config/stubs/pyi_header.py" = ["F401", "F403"]  # unused import
+"taipy/common/config/stubs/pyi_header.py" = ["F401", "F403"]  # unused import
 "taipy/templates/*" = ["F401", "F403", "T201"]  # unused import, `print` found
 "taipy/gui/utils/types.py" = ["B024"] # abstract base class with no abstract methods
 

@@ -23,7 +23,16 @@ import webbrowser
 from importlib import util
 from random import choices, randint
 
-from flask import Blueprint, Flask, json, jsonify, render_template, request, send_from_directory
+from flask import (
+    Blueprint,
+    Flask,
+    json,
+    jsonify,
+    make_response,
+    render_template,
+    request,
+    send_from_directory,
+)
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from gitignore_parser import parse_gitignore
@@ -31,7 +40,7 @@ from kthread import KThread
 from werkzeug.serving import is_running_from_reloader
 
 import __main__
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ._renderers.json import _TaipyJsonProvider
 from .config import ServerConfig
@@ -160,7 +169,13 @@ class _Server:
             if resource_handler_id is not None:
                 resource_handler = _ExternalResourceHandlerManager().get(resource_handler_id)
                 if resource_handler is None:
-                    return (f"Invalid value for query {_Server._RESOURCE_HANDLER_ARG}", 404)
+                    response = make_response(
+                        "Cookie was deleted due to invalid resource handler id. Please restart the page manually.", 400
+                    )
+                    response.set_cookie(
+                        _Server._RESOURCE_HANDLER_ARG, "", secure=request.is_secure, httponly=True, expires=0, path="/"
+                    )
+                    return response
                 try:
                     return resource_handler.get_resources(path, static_folder, base_url)
                 except Exception as e:
@@ -246,6 +261,9 @@ class _Server:
     def get_flask(self):
         return self._flask
 
+    def get_port(self):
+        return self._port
+
     def test_client(self):
         return t.cast(Flask, self._flask).test_client()
 
@@ -286,6 +304,7 @@ class _Server:
         self,
         host,
         port,
+        client_url,
         debug,
         use_reloader,
         flask_log,
@@ -299,6 +318,7 @@ class _Server:
         if port == "auto":
             port = self._get_random_port(port_auto_ranges)
         self._port = port
+        client_url = client_url.format(port=port)
         if _is_in_notebook() and notebook_proxy:  # pragma: no cover
             from .utils.proxy import NotebookProxy
 
@@ -320,8 +340,9 @@ class _Server:
                 _TaipyLogger._get_logger().info(f" * Server starting on http://{host_value}:{port}")
             else:
                 _TaipyLogger._get_logger().info(f" * Server reloaded on http://{host_value}:{port}")
+            _TaipyLogger._get_logger().info(f" * Application is accessible at {client_url}")
         if not is_running_from_reloader() and self._gui._get_config("run_browser", False):
-            webbrowser.open(f"http://{host_value}{f':{port}' if port else ''}", new=2)
+            webbrowser.open(client_url, new=2)
         if _is_in_notebook() or run_in_thread:
             self._thread = KThread(target=self._run_notebook)
             self._thread.start()

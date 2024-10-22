@@ -12,4 +12,5 @@
 from typing import NewType
 
 SequenceId = NewType("SequenceId", str)
+"""Type that holds a `Sequence^` identifier."""
 SequenceId.__doc__ = """Type that holds a `Sequence^` identifier."""

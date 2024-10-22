@@ -40,7 +40,9 @@ import deepEqual from "fast-deep-equal/es6";
 import {
     createRequestUpdateAction,
     createSendActionNameAction,
+    getComponentClassName,
     getUpdateVar,
+    useClassNames,
     useDispatch,
     useDynamicProperty,
     useModule,
@@ -49,6 +51,7 @@ import {
 import {
     AccordionIconSx,
     AccordionSummarySx,
+    CoreProps,
     FieldNoMaxWidth,
     FlagSx,
     IconPaddingSx,
@@ -58,26 +61,19 @@ import {
     ScenarioFullLength,
     disableColor,
     hoverSx,
-    useClassNames,
 } from "./utils";
 import ConfirmDialog from "./utils/ConfirmDialog";
 import PropertiesEditor from "./PropertiesEditor";
 import StatusChip, { Status } from "./StatusChip";
 
-interface ScenarioViewerProps {
-    id?: string;
+interface ScenarioViewerProps extends CoreProps {
     expandable?: boolean;
     expanded?: boolean;
-    updateVarName?: string;
     defaultScenario?: string;
     scenario?: ScenarioFull | Array<ScenarioFull>;
     onSubmit?: string;
     onEdit?: string;
     onDelete?: string;
-    error?: string;
-    coreChanged?: Record<string, unknown>;
-    defaultActive: boolean;
-    active: boolean;
     showConfig?: boolean;
     showCreationDate?: boolean;
     showCycle?: boolean;
@@ -87,9 +83,6 @@ interface ScenarioViewerProps {
     showSubmit?: boolean;
     showSubmitSequences?: boolean;
     showTags?: boolean;
-    libClassName?: string;
-    className?: string;
-    dynamicClassName?: string;
     onSubmissionChange?: string;
     updateScVars?: string;
 }
@@ -348,6 +341,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         showSubmitSequences = true,
         showTags = true,
         updateScVars = "",
+        coreChanged,
     } = props;
 
     const dispatch = useDispatch();
@@ -389,8 +383,8 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         scSequences,
         scTasks,
         scAuthorizedTags,
-        scDeletable,
-        scPromotable,
+        scDeletableReason,
+        scPromotableReason,
         scNotSubmittableReason,
         scNotReadableReason,
         scNotEditableReason,
@@ -610,20 +604,21 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
     // Refresh on broadcast
     useEffect(() => {
-        const ids = props.coreChanged?.scenario;
+        const ids = coreChanged?.scenario;
         if (typeof ids === "string" ? ids === scId : Array.isArray(ids) ? ids.includes(scId) : ids) {
-            if (typeof props.coreChanged?.submission === "number") {
-                setSubmissionStatus(props.coreChanged?.submission as number);
+            const submission = coreChanged?.submission;
+            if (typeof submission === "number") {
+                setSubmissionStatus(submission as number);
             }
             props.updateVarName && dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
         }
-    }, [props.coreChanged, props.updateVarName, id, module, dispatch, scId]);
+    }, [coreChanged, props.updateVarName, id, module, dispatch, scId]);
 
     const disabled = !valid || !active || !!scNotSubmittableReason;
 
     return (
         <>
-            <Box sx={MainBoxSx} id={id} onClick={onFocus} className={className}>
+            <Box sx={MainBoxSx} id={id} onClick={onFocus} className={`${className} ${getComponentClassName(props.children)}`}>
                 <Accordion defaultExpanded={expanded} expanded={userExpanded} onChange={onExpand} disabled={!valid}>
                     <AccordionSummary
                         expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
@@ -712,31 +707,33 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                             sx={FieldNoMaxWidth}
                                             value={label || ""}
                                             onChange={onLabelChange}
-                                            slotProps={{input: {
-                                                onKeyDown: onLabelKeyDown,
-                                                endAdornment: (
-                                                    <InputAdornment position="end">
-                                                        <Tooltip title="Apply">
-                                                            <IconButton
-                                                                sx={IconPaddingSx}
-                                                                onClick={editLabel}
-                                                                size="small"
-                                                            >
-                                                                <CheckCircle color="primary" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                        <Tooltip title="Cancel">
-                                                            <IconButton
-                                                                sx={IconPaddingSx}
-                                                                onClick={cancelLabel}
-                                                                size="small"
-                                                            >
-                                                                <Cancel color="inherit" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    </InputAdornment>
-                                                ),
-                                            }}}
+                                            slotProps={{
+                                                input: {
+                                                    onKeyDown: onLabelKeyDown,
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <Tooltip title="Apply">
+                                                                <IconButton
+                                                                    sx={IconPaddingSx}
+                                                                    onClick={editLabel}
+                                                                    size="small"
+                                                                >
+                                                                    <CheckCircle color="primary" />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                            <Tooltip title="Cancel">
+                                                                <IconButton
+                                                                    sx={IconPaddingSx}
+                                                                    onClick={cancelLabel}
+                                                                    size="small"
+                                                                >
+                                                                    <Cancel color="inherit" />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
                                             disabled={!valid}
                                         />
                                     ) : (
@@ -787,32 +784,34 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                         label="Tags"
                                                         sx={tagsAutocompleteSx}
                                                         fullWidth
-                                                        slotProps={{input: {
-                                                            ...params.InputProps,
-                                                            onKeyDown: onTagsKeyDown,
-                                                            endAdornment: (
-                                                                <>
-                                                                    <Tooltip title="Apply">
-                                                                        <IconButton
-                                                                            sx={IconPaddingSx}
-                                                                            onClick={editTags}
-                                                                            size="small"
-                                                                        >
-                                                                            <CheckCircle color="primary" />
-                                                                        </IconButton>
-                                                                    </Tooltip>
-                                                                    <Tooltip title="Cancel">
-                                                                        <IconButton
-                                                                            sx={IconPaddingSx}
-                                                                            onClick={cancelTags}
-                                                                            size="small"
-                                                                        >
-                                                                            <Cancel color="inherit" />
-                                                                        </IconButton>
-                                                                    </Tooltip>
-                                                                </>
-                                                            ),
-                                                        }}}
+                                                        slotProps={{
+                                                            input: {
+                                                                ...params.InputProps,
+                                                                onKeyDown: onTagsKeyDown,
+                                                                endAdornment: (
+                                                                    <>
+                                                                        <Tooltip title="Apply">
+                                                                            <IconButton
+                                                                                sx={IconPaddingSx}
+                                                                                onClick={editTags}
+                                                                                size="small"
+                                                                            >
+                                                                                <CheckCircle color="primary" />
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                        <Tooltip title="Cancel">
+                                                                            <IconButton
+                                                                                sx={IconPaddingSx}
+                                                                                onClick={cancelTags}
+                                                                                size="small"
+                                                                            >
+                                                                                <Cancel color="inherit" />
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                    </>
+                                                                ),
+                                                            },
+                                                        }}
                                                     />
                                                 )}
                                                 disabled={!valid}
@@ -847,7 +846,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 onFocus={onFocus}
                                 onEdit={props.onEdit}
                                 notEditableReason={scNotEditableReason}
-                                updatePropVars={updateScVars}
+                                updateVars={updateScVars}
                             />
                             {showSequences ? (
                                 <>
@@ -866,7 +865,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         const [label, taskIds, notSubmittableReason, notEditableReason] = item;
                                         return (
                                             <SequenceRow
-                                                active={active}
+                                                active={!!active}
                                                 number={index}
                                                 label={label}
                                                 taskIds={taskIds}
@@ -893,23 +892,31 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             ) : null}
                             <Grid size={12} container justifyContent="space-between">
                                 {showDelete ? (
-                                    <Button
-                                        variant="outlined"
-                                        color="primary"
-                                        disabled={!active || !valid || !scDeletable}
-                                        onClick={openDeleteDialog}
-                                    >
-                                        DELETE
-                                    </Button>
+                                    <Tooltip title={scDeletableReason}>
+                                        <span>
+                                            <Button
+                                                variant="outlined"
+                                                color="primary"
+                                                disabled={!active || !valid || !!scDeletableReason}
+                                                onClick={openDeleteDialog}
+                                            >
+                                                DELETE
+                                            </Button>
+                                        </span>
+                                    </Tooltip>
                                 ) : null}
-                                <Button
-                                    variant="outlined"
-                                    color="primary"
-                                    disabled={!active || !valid || scPrimary || !scPromotable}
-                                    onClick={openPrimaryDialog}
-                                >
-                                    PROMOTE TO PRIMARY
-                                </Button>
+                                <Tooltip title={scPromotableReason}>
+                                    <span>
+                                        <Button
+                                            variant="outlined"
+                                            color="primary"
+                                            disabled={!active || !valid || scPrimary || !!scPromotableReason}
+                                            onClick={openPrimaryDialog}
+                                        >
+                                            PROMOTE TO PRIMARY
+                                        </Button>
+                                    </span>
+                                </Tooltip>
                             </Grid>
                         </Grid>
                     </AccordionDetails>
@@ -933,6 +940,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 onClose={closePrimaryDialog}
                 onConfirm={onPromote}
             />
+            {props.children}
         </>
     );
 };

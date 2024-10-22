@@ -14,14 +14,25 @@
 #     python <script>
 # -----------------------------------------------------------------------------------------
 import builtins
+import inspect
 
 from taipy.gui import Gui
 
-_python_builtins = dir(builtins)
-value = _python_builtins[0]
+# Create a list of Python builtins that:
+# - Are callable (i.e. functions)
+# - Are not classes (i.e. Exceptions)
+# - Do not start with "_" (i.e. internals)
+builtin_python_functions = [
+    func
+    for func in dir(builtins)
+    if callable(getattr(builtins, func)) and not inspect.isclass(getattr(builtins, func)) and not func.startswith("_")
+]
+
+# Initialize the bound value to the first Python builtin function
+selection = builtin_python_functions[0]
 
 page = """
-<|{value}|selector|lov={_python_builtins}|filter|multiple|>
+<|{selection}|selector|lov={builtin_python_functions}|filter|multiple|>
 """
 
 if __name__ == "__main__":

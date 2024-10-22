@@ -23,6 +23,7 @@ module.exports = {
         "./test-config/Canvas.js",
         "./test-config/mockFileUpload.js",
         "./test-config/intersectionObserver.js",
+        "./test-config/nanoid.js",
     ],
     coverageReporters: ["json", "html", "text"],
     modulePathIgnorePatterns: ["<rootDir>/packaging/"],

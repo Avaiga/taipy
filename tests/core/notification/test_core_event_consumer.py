@@ -11,7 +11,7 @@
 
 from queue import SimpleQueue
 
-from taipy.config import Config, Frequency
+from taipy.common.config import Config, Frequency
 from taipy.core import taipy as tp
 from taipy.core.notification.core_event_consumer import CoreEventConsumerBase
 from taipy.core.notification.event import Event, EventEntityType, EventOperation

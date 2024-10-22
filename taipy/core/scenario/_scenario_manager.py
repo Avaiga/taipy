@@ -13,7 +13,7 @@ from datetime import datetime
 from functools import partial
 from typing import Any, Callable, Dict, List, Literal, Optional, Union
 
-from taipy.config import Config
+from taipy.common.config import Config
 
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
@@ -322,7 +322,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         """
         Filter a list of scenarios by a given creation time period.
 
-        Parameters:
+        Arguments:
             created_start_time (Optional[datetime]): Start time of the period. The start time is inclusive.
             created_end_time (Optional[datetime]): End time of the period. The end time is exclusive.
 

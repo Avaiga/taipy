@@ -17,7 +17,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 from taipy.core.data.sql_table import SQLTableDataNode
 
 
@@ -88,9 +88,10 @@ class TestWriteSQLTableDataNode:
         custom_properties.pop("db_extra_args")
         sql_table_dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
-        with patch("sqlalchemy.engine.Engine.connect") as engine_mock, patch(
-            "taipy.core.data.sql_table.SQLTableDataNode._create_table"
-        ) as _:
+        with (
+            patch("sqlalchemy.engine.Engine.connect") as engine_mock,
+            patch("taipy.core.data.sql_table.SQLTableDataNode._create_table") as _,
+        ):
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 
@@ -119,9 +120,10 @@ class TestWriteSQLTableDataNode:
         custom_properties.pop("db_extra_args")
         sql_table_dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
-        with patch("sqlalchemy.engine.Engine.connect") as engine_mock, patch(
-            "taipy.core.data.sql_table.SQLTableDataNode._create_table"
-        ) as _:
+        with (
+            patch("sqlalchemy.engine.Engine.connect") as engine_mock,
+            patch("taipy.core.data.sql_table.SQLTableDataNode._create_table") as _,
+        ):
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 
@@ -146,9 +148,10 @@ class TestWriteSQLTableDataNode:
         custom_properties.pop("db_extra_args")
         sql_table_dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
-        with patch("sqlalchemy.engine.Engine.connect") as engine_mock, patch(
-            "taipy.core.data.sql_table.SQLTableDataNode._create_table"
-        ) as _:
+        with (
+            patch("sqlalchemy.engine.Engine.connect") as engine_mock,
+            patch("taipy.core.data.sql_table.SQLTableDataNode._create_table") as _,
+        ):
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 

@@ -12,7 +12,7 @@
 from flask import request
 from flask_restful import Resource
 
-from taipy.config.config import Config
+from taipy.common.config import Config
 from taipy.core import Scenario
 from taipy.core.exceptions.exceptions import NonExistingScenario, NonExistingScenarioConfig
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
@@ -118,7 +118,7 @@ class ScenarioResource(Resource):
             When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_READER` role.
 
-        parameters:
+        arguments:
         - in: path
           name: scenario_id
           schema:
@@ -193,7 +193,7 @@ class ScenarioResource(Resource):
             When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_EDITOR` role.
 
-      parameters:
+      arguments:
         - in: path
           name: scenario_id
           schema:
@@ -393,7 +393,7 @@ class ScenarioList(Resource):
             When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_EDITOR` role.
 
-      parameters:
+      arguments:
         - in: query
           name: config_id
           schema:
@@ -498,7 +498,7 @@ class ScenarioExecutor(Resource):
             When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_EXECUTOR` role.
 
-      parameters:
+      arguments:
         - in: path
           name: scenario_id
           schema:

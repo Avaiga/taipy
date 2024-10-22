@@ -17,9 +17,9 @@ from unittest import mock
 import pytest
 
 import taipy.core as tp
-from taipy.config import Config
-from taipy.config.common.scope import Scope
-from taipy.config.exceptions.exceptions import InvalidConfigurationId
+from taipy.common.config import Config
+from taipy.common.config.common.scope import Scope
+from taipy.common.config.exceptions.exceptions import InvalidConfigurationId
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node import DataNode
@@ -651,18 +651,6 @@ class TestDataNode:
         with mock.patch("taipy.core.get_parents") as mck:
             data_node.get_parents()
             mck.assert_called_once_with(data_node)
-
-    def test_cacheable_deprecated_false(self):
-        dn = FakeDataNode("foo")
-        with pytest.warns(DeprecationWarning):
-            _ = dn.cacheable
-        assert dn.cacheable is False
-
-    def test_cacheable_deprecated_true(self):
-        dn = FakeDataNode("foo", properties={"cacheable": True})
-        with pytest.warns(DeprecationWarning):
-            _ = dn.cacheable
-        assert dn.cacheable is True
 
     def test_data_node_with_env_variable_value_not_stored(self):
         dn_config = Config.configure_data_node("A", prop="ENV[FOO]")

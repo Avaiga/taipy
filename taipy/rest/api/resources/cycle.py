@@ -14,7 +14,7 @@ from datetime import datetime
 from flask import request
 from flask_restful import Resource
 
-from taipy.config.common.frequency import Frequency
+from taipy.common.config.common.frequency import Frequency
 from taipy.core import Cycle
 from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from taipy.core.exceptions.exceptions import NonExistingCycle
@@ -106,7 +106,7 @@ class CycleResource(Resource):
           When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_READER` role.
 
-      parameters:
+      arguments:
         - in: path
           name: cycle_id
           schema:
@@ -179,7 +179,7 @@ class CycleResource(Resource):
             When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
             requires the `TAIPY_EDITOR` role.
 
-      parameters:
+      arguments:
         - in: path
           name: cycle_id
           schema:

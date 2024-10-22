@@ -22,7 +22,7 @@ import { DeleteOutline, CheckCircle, Cancel } from "@mui/icons-material";
 
 import { createSendActionNameAction, getUpdateVar, useDispatch, useModule } from "taipy-gui";
 
-import { DeleteIconSx, FieldNoMaxWidth, IconPaddingSx, disableColor, hoverSx } from "./utils";
+import { CoreProps, DeleteIconSx, FieldNoMaxWidth, IconPaddingSx, disableColor, hoverSx } from "./utils";
 
 type Property = {
     id: string;
@@ -39,10 +39,8 @@ type PropertiesEditPayload = {
 
 export type DatanodeProperties = Array<[string, string]>;
 
-interface PropertiesEditorProps {
-    id?: string;
+interface PropertiesEditorProps extends CoreProps {
     entityId: string;
-    active: boolean;
     show: boolean;
     entProperties: DatanodeProperties;
     onFocus: (e: MouseEvent<HTMLElement>) => void;
@@ -51,7 +49,6 @@ interface PropertiesEditorProps {
     isDefined: boolean;
     onEdit?: string;
     notEditableReason: string;
-    updatePropVars?: string;
 }
 
 const PropertiesEditor = (props: PropertiesEditorProps) => {
@@ -66,7 +63,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
         setFocusName,
         entProperties,
         notEditableReason,
-        updatePropVars = "",
+        updateVars = "",
     } = props;
 
     const dispatch = useDispatch();
@@ -102,7 +99,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                     const payload: PropertiesEditPayload = {
                         id: entityId,
                         properties: [property],
-                        error_id: getUpdateVar(updatePropVars, "error_id"),
+                        error_id: getUpdateVar(updateVars, "error_id"),
                     };
                     if (oldId && oldId != property.key) {
                         payload.deleted_properties = [{ key: oldId }];
@@ -113,7 +110,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                 setFocusName("");
             }
         },
-        [isDefined, props.onEdit, entityId, properties, newProp, id, dispatch, module, setFocusName, updatePropVars]
+        [isDefined, props.onEdit, entityId, properties, newProp, id, dispatch, module, setFocusName, updateVars]
     );
     const cancelProperty = useCallback(
         (e?: MouseEvent<HTMLElement>, dataset?: DOMStringMap) => {

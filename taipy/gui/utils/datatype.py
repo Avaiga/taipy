@@ -22,4 +22,5 @@ def _get_data_type(value):
             return "int"
         elif pd.api.types.is_float_dtype(value):
             return "float"
-    return re.match(r"^<class '(.*\.)?(.*?)(\d\d)?'>", str(type(value))).group(2) # type: ignore[reportOptionalMemberAccess]
+    m = re.match(r"^<class '(.*\.)?(.*?)(\d\d)?'>", str(type(value)))
+    return m.group(2) if m else None

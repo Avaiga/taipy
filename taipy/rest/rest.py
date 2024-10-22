@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 from flask import Flask
 
-from taipy.config import Config
+from taipy.common.config import Config
 
 from .app import create_app as _create_app
 
@@ -41,7 +41,7 @@ class Rest:
         """
         Start a REST API server. This method is blocking.
 
-        Parameters:
+        Arguments:
             **kwargs : Options to provide to the application server.
         """
         self._app.run(**kwargs)

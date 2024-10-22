@@ -31,7 +31,7 @@ def _publish_event(
     It basically creates an event corresponding to the given arguments
     and send it using `Notifier.publish(event)`
 
-    Parameters:
+    Arguments:
         entity_type (EventEntityType^)
         operation (EventOperation^)
         entity_id (Optional[str])
@@ -51,7 +51,7 @@ def _publish_event(
 
 
 class Notifier:
-    """A class for managing event registrations and publishing `Orchestrator^` service events."""
+    """A class for managing event registrations and publishing a Taipy application events."""
 
     _topics_registrations_list: Dict[_Topic, Set[_Registration]] = {}
 
@@ -75,16 +75,16 @@ class Notifier:
         - A Scenario deletion
         - Job failures
 
-        Example usage:
+        !!! example "Standard usage"
 
-        ```python
-        registration_id, registered_queue = Notifier.register(
-            entity_type=EventEntityType.SCENARIO,
-            operation=EventOperation.CREATION
-        )
-        ```
+            ```python
+            registration_id, registered_queue = Notifier.register(
+                entity_type=EventEntityType.SCENARIO,
+                operation=EventOperation.CREATION
+            )
+            ```
 
-        Parameters:
+        Arguments:
             entity_type (Optional[EventEntityType^]): If provided, the listener will
                 be notified for all events related to this entity type. Otherwise,
                 the listener will be notified for events related to all entity types.
@@ -135,20 +135,20 @@ class Notifier:
     def unregister(cls, registration_id: str) -> None:
         """Unregister a listener.
 
-        Example usage:
+        !!! example "Standard usage"
 
-        ```python
-        registration_id, registered_queue = Notifier.register(
-            entity_type=EventEntityType.CYCLE,
-            entity_id="CYCLE_cycle_1",
-            operation=EventOperation.CREATION
-        )
+            ```python
+            registration_id, registered_queue = Notifier.register(
+                entity_type=EventEntityType.CYCLE,
+                entity_id="CYCLE_cycle_1",
+                operation=EventOperation.CREATION
+            )
 
-        Notifier.unregister(registration_id)
-        ```
+            Notifier.unregister(registration_id)
+            ```
 
-        Parameters:
-            registration_id (RegistrationId^): The registration id returned by the `register` method.
+        Arguments:
+            registration_id (`RegistrationId`): The registration id returned by the `register` method.
         """
         to_remove_registration: Optional[_Registration] = None
 
@@ -165,11 +165,11 @@ class Notifier:
                 del cls._topics_registrations_list[to_remove_registration.topic]
 
     @classmethod
-    def publish(cls, event) -> None:
-        """Publish a `Orchestrator^` service event to all registered listeners whose topic matches the event.
+    def publish(cls, event: Event) -> None:
+        """Publish a Taipy application event to all registered listeners whose topic matches the event.
 
-        Parameters:
-            event (Event^): The event to publish.
+        Arguments:
+            event (`Event^`): The event to publish.
         """
         for topic, registrations in cls._topics_registrations_list.items():
             if Notifier._is_matching(event, topic):

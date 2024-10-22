@@ -34,9 +34,7 @@ class Operator(Enum):
 
 
 class JoinOperator(Enum):
-    """
-    Enumeration of join operators for Data Node filtering. The possible values are `AND` and `OR`.
-    """
+    """Enumeration of join operators for Data Node filtering. The possible values are `AND` and `OR`."""
 
     AND = 1
     OR = 2

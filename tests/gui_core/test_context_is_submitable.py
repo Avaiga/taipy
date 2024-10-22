@@ -11,7 +11,7 @@
 
 from unittest.mock import Mock, patch
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 from taipy.core import Job, JobId, Scenario, Task
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.reason import ReasonCollection
@@ -51,8 +51,9 @@ class MockState:
 
 class TestGuiCoreContext_is_submittable:
     def test_submit_entity(self):
-        with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get), patch(
-            "taipy.gui_core._context.is_submittable", side_effect=mock_has_no_reason
+        with (
+            patch("taipy.gui_core._context.core_get", side_effect=mock_core_get),
+            patch("taipy.gui_core._context.is_submittable", side_effect=mock_has_no_reason),
         ):
             gui_core_context = _GuiCoreContext(Mock())
             assign = Mock()

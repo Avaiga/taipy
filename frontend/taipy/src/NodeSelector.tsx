@@ -14,27 +14,20 @@
 import React from "react";
 import Box from "@mui/material/Box";
 
-import { MainTreeBoxSx, useClassNames } from "./utils";
+import { CoreProps, MainTreeBoxSx } from "./utils";
 import { Cycles, DataNodes, NodeType, Scenarios } from "./utils/types";
 import CoreSelector from "./CoreSelector";
+import { getComponentClassName, useClassNames } from "taipy-gui";
 
-interface NodeSelectorProps {
-    id?: string;
-    updateVarName?: string;
+interface NodeSelectorProps extends CoreProps {
     innerDatanodes?: Cycles | Scenarios | DataNodes;
-    coreChanged?: Record<string, unknown>;
-    updateVars: string;
     onChange?: string;
     error?: string;
     displayCycles: boolean;
     showPrimaryFlag: boolean;
-    propagate?: boolean;
     value?: string;
     defaultValue?: string;
     height: string;
-    libClassName?: string;
-    className?: string;
-    dynamicClassName?: string;
     showPins?: boolean;
     multiple?: boolean;
     updateDnVars?: string;
@@ -47,7 +40,7 @@ const NodeSelector = (props: NodeSelectorProps) => {
     const { showPins = true, multiple = false, updateDnVars = "", showSearch = true } = props;
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     return (
-        <Box sx={MainTreeBoxSx} id={props.id} className={className}>
+        <Box sx={MainTreeBoxSx} id={props.id} className={`${className} ${getComponentClassName(props.children)}`}>
             <CoreSelector
                 {...props}
                 entities={props.innerDatanodes}
@@ -59,6 +52,7 @@ const NodeSelector = (props: NodeSelectorProps) => {
                 updateCoreVars={updateDnVars}
             />
             <Box>{props.error}</Box>
+            {props.children}
         </Box>
     );
 };

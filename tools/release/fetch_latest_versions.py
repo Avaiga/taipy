@@ -25,8 +25,8 @@ def fetch_latest_releases_from_github(dev=False, target_version="", target_packa
 
         if not dev and ".dev" in tag:
             continue
-        if "config" in tag:
-            releases["config"] = releases.get("config") or tag.split("-")[0]
+        if "common" in tag:
+            releases["common"] = releases.get("common") or tag.split("-")[0]
         elif "core" in tag:
             releases["core"] = releases.get("core") or tag.split("-")[0]
         elif "gui" in tag:
@@ -44,7 +44,7 @@ def fetch_latest_releases_from_github(dev=False, target_version="", target_packa
 def fetch_latest_releases_from_pypi(dev=False, target_version="", target_package=""):
     releases = {}
 
-    for pkg in ["config", "core", "gui", "rest", "templates"]:
+    for pkg in ["common", "core", "gui", "rest", "templates"]:
         url = f"https://pypi.org/pypi/taipy-{pkg}/json"
         response = requests.get(url)
         resp_json = response.json()

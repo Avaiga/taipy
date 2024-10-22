@@ -12,7 +12,7 @@ from functools import lru_cache
 from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
-from ..common._check_dependencies import _TAIPY_ENTERPRISE_CORE_MODULE, _using_enterprise
+from ..common._check_dependencies import EnterpriseEditionUtils
 from ..common._utils import _load_fct
 from ._data_fs_repository import _DataFSRepository
 from ._data_manager import _DataManager
@@ -24,10 +24,13 @@ class _DataManagerFactory(_ManagerFactory):
     @classmethod
     @lru_cache
     def _build_manager(cls) -> Type[_DataManager]:
-        if _using_enterprise():
-            data_manager = _load_fct(_TAIPY_ENTERPRISE_CORE_MODULE + ".data._data_manager", "_DataManager")  # type: ignore
+        if EnterpriseEditionUtils._using_enterprise():
+            data_manager = _load_fct(
+                EnterpriseEditionUtils._TAIPY_ENTERPRISE_CORE_MODULE + ".data._data_manager", "_DataManager"
+            )  # type: ignore
             build_repository = _load_fct(
-                _TAIPY_ENTERPRISE_CORE_MODULE + ".data._data_manager_factory", "_DataManagerFactory"
+                EnterpriseEditionUtils._TAIPY_ENTERPRISE_CORE_MODULE + ".data._data_manager_factory",
+                "_DataManagerFactory",
             )._build_repository  # type: ignore
         else:
             data_manager = _DataManager

@@ -28,3 +28,15 @@ def test_builder_on_lambda(gui: Gui, test_client, helpers):
         tgb.slider(value="{value}", on_change=lambda s: notify(s, "success", f"Lambda Value: {s.value}"))  # type: ignore[attr-defined] # noqa: B023
     expected_list = ['<Slider','onChange="__lambda_']
     helpers.test_control_builder(gui, page, expected_list)
+
+def test_builder_callable_lambda(gui: Gui, test_client, helpers):
+    with tgb.Page(frame=None) as page:
+        table = tgb.table("{value}", row_class_name=lambda s: f"Lambda Value: {s.value}")  # type: ignore[attr-defined] # noqa: B023
+        assert table._is_callable("row_class_name")
+    expected_list = ['<Table','rowClassName="__lambda_']
+    helpers.test_control_builder(gui, page, expected_list)
+
+def test_builder_indexed_callable_lambda(gui: Gui, test_client, helpers):
+    with tgb.Page(frame=None):
+        table = tgb.table("{value}", cell_class_name__A=lambda s: f"Lambda Value: {s.value}")  # type: ignore[attr-defined] # noqa: B023
+        assert table._is_callable("cell_class_name__A")

@@ -206,11 +206,17 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                 )
                 if isinstance(value, float) and math.isnan(value):
                     value = None
+                error = None
+                if val_type not in ("date", "int", "float", "string"):
+                    try:
+                        json.dumps(value)
+                    except Exception as e:
+                        error = f"Unsupported data: {e}."
                 return (
                     value,
                     val_type,
                     None,
-                    None,
+                    error,
                 )
             except Exception as e:
                 return (None, None, None, f"read data_node: {e}")
@@ -344,7 +350,7 @@ def _get_entity_property(col: str, *types: t.Type):
     col_parts = col.split("(", 2)  # handle the case where the col is a method (ie get_simple_label())
     col_fn = (
         next(
-            (col_parts[0] for i in inspect.getmembers(types[0], predicate=inspect.isfunction) if i[0] == col_parts[0]),
+            (col_parts[0] for i in inspect.getmembers(types[0], predicate=inspect.isroutine) if i[0] == col_parts[0]),
             None,
         )
         if len(col_parts) > 1
@@ -545,9 +551,6 @@ class _GuiCoreDatanodeProperties(_GuiCoreProperties):
         _GuiCorePropDesc(DataNodeFilter("Label", str, "get_simple_label()"), for_sort=True),
         _GuiCorePropDesc(DataNodeFilter("Up to date", bool, "is_up_to_date")),
         _GuiCorePropDesc(DataNodeFilter("Last edit date", datetime, "last_edit_date"), for_sort=True),
-        _GuiCorePropDesc(DataNodeFilter("Input", bool, "is_input")),
-        _GuiCorePropDesc(DataNodeFilter("Output", bool, "is_output")),
-        _GuiCorePropDesc(DataNodeFilter("Intermediate", bool, "is_intermediate")),
         _GuiCorePropDesc(DataNodeFilter("Expiration date", datetime, "expiration_date"), extended=True, for_sort=True),
         _GuiCorePropDesc(DataNodeFilter("Expired", bool, "is_expired"), extended=True),
     ]

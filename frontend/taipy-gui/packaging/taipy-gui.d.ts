@@ -22,6 +22,15 @@ import * as React from "react";
  */
 export declare const getUpdateVar: (updateVars: string, name: string) => string | undefined;
 
+/**
+ * Appends a suffix to the class names.
+ *
+ * @param names - The class names.
+ * @param suffix - The suffix to append.
+ * @returns The new list of class names.
+ */
+export declare const getSuffixedClassNames: (names: string | undefined, suffix: string) => string;
+
 export interface TaipyActiveProps extends TaipyDynamicProps, TaipyHoverProps {
     defaultActive?: boolean;
     active?: boolean;
@@ -323,6 +332,7 @@ export declare const createRequestUpdateAction: (
     forceRefresh?: boolean,
     stateContext?: Record<string, unknown>
 ) => Action;
+
 /**
  * A column description as received by the backend.
  */
@@ -403,6 +413,16 @@ export declare const Context: React.Context<Store>;
  */
 export declare const useDynamicProperty: <T>(value: T, defaultValue: T, defaultStatic: T) => T;
 /**
+ * A React hook to manage classNames (dynamic and static).
+ * cf. useDynamicProperty
+ *
+ * @param libClassName - The default static className.
+ * @param dynamicClassName - The bound className.
+ * @param className - The default user set className.
+ * @returns The complete list of applicable classNames.
+ */
+export declare const useClassNames: (libClassName?: string, dynamicClassName?: string, className?: string) => string;
+/**
  * A React hook to manage a dynamic json property.
  *
  * A dynamic scalar property  is defined by a default property and a bound property.
@@ -445,3 +465,12 @@ export declare const useDispatch: () => React.Dispatch<Action>;
  * @returns The page module.
  */
 export declare const useModule: () => string | undefined;
+
+/**
+ * A function that retrieves the dynamic className associated
+ * to an instance of component through the style property
+ *
+ * @param children - The react children of the component
+ * @returns The associated className.
+ */
+export declare const getComponentClassName: (children: React.ReactNode) => string;

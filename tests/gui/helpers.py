@@ -151,6 +151,7 @@ class Helpers:
             gui._server.run(
                 host=gui._get_config("host", "127.0.0.1"),
                 port=gui._get_config("port", 5000),
+                client_url=gui._get_config("client_url", "http://localhost:{port}"),
                 debug=False,
                 use_reloader=False,
                 flask_log=False,

@@ -12,8 +12,25 @@
  */
 import { Theme, alpha } from "@mui/material";
 import { PopoverOrigin } from "@mui/material/Popover";
+import { ReactNode } from "react";
 
-import { getUpdateVar, useDynamicProperty } from "taipy-gui";
+import { getUpdateVar } from "taipy-gui";
+
+
+export interface CoreProps {
+    id?: string;
+    updateVarName?: string;
+    active?: boolean;
+    defaultActive?: boolean;
+    coreChanged?: Record<string, unknown>;
+    error?: string;
+    updateVars: string;
+    libClassName?: string;
+    className?: string;
+    dynamicClassName?: string;
+    propagate?: boolean;
+    children?: ReactNode;
+}
 
 export type ScenarioFull = [
     string, // id
@@ -135,9 +152,6 @@ export const tinyIconButtonSx = {
         fontSize: "inherit",
     },
 };
-
-export const useClassNames = (libClassName?: string, dynamicClassName?: string, className?: string) =>
-    ((libClassName || "") + " " + (useDynamicProperty(dynamicClassName, className, undefined) || "")).trim();
 
 export const disableColor = <T>(color: T, disabled: boolean) => (disabled ? ("disabled" as T) : color);
 

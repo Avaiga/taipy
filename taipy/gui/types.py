@@ -28,6 +28,7 @@ from .utils import (
     _TaipyLov,
     _TaipyLovValue,
     _TaipyNumber,
+    _TaipyTime,
     _TaipyToJson,
 )
 
@@ -51,6 +52,7 @@ class _WsType(Enum):
     GET_DATA_TREE = "GDT"
     GET_ROUTES = "GR"
     FAVICON = "FV"
+    BROADCAST = "BC"
 
 
 NumberTypes = {"int", "int64", "float", "float64"}
@@ -79,6 +81,7 @@ class PropertyType(Enum):
     date = _TaipyDate
     date_range = _TaipyDateRange
     dict = "dict"
+    time = _TaipyTime
     """
     The property holds a dictionary.
     """

@@ -18,6 +18,7 @@ import Typography from "@mui/material/Typography";
 import { DatePicker, DatePickerProps } from "@mui/x-date-pickers/DatePicker";
 import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
 import { DateTimePicker, DateTimePickerProps } from "@mui/x-date-pickers/DateTimePicker";
+import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 import { isValid } from "date-fns";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -27,6 +28,7 @@ import { dateToString, getDateTime, getTimeZonedDate } from "../../utils";
 import { useClassNames, useDispatch, useDynamicProperty, useFormatConfig, useModule } from "../../utils/hooks";
 import Field from "./Field";
 import ErrorFallback from "../../utils/ErrorBoundary";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface DateRangeProps extends TaipyActiveProps, TaipyChangeProps {
     withTime?: boolean;
@@ -39,6 +41,7 @@ interface DateRangeProps extends TaipyActiveProps, TaipyChangeProps {
     labelEnd?: string;
     separator?: string;
     width?: string | number;
+    analogic?: boolean;
 }
 
 const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotProps<Date>;
@@ -64,8 +67,14 @@ const getRangeDateTime = (
     return [null, null];
 };
 
+const analogicRenderers = {
+    hours: renderTimeViewClock,
+    minutes: renderTimeViewClock,
+    seconds: renderTimeViewClock
+}
+
 const DateRange = (props: DateRangeProps) => {
-    const { updateVarName, withTime = false, id, propagate = true, separator = "-" } = props;
+    const { updateVarName, withTime = false, id, propagate = true, separator = "-", analogic = false } = props;
     const dispatch = useDispatch();
     const formatConfig = useFormatConfig();
     const tz = formatConfig.timeZone;
@@ -132,7 +141,7 @@ const DateRange = (props: DateRangeProps) => {
             <Tooltip title={hover || ""}>
                 <Stack
                     id={id}
-                    className={className}
+                    className={`${className} ${getComponentClassName(props.children)}`}
                     gap={0.5}
                     direction="row"
                     display="inline-flex"
@@ -156,6 +165,7 @@ const DateRange = (props: DateRangeProps) => {
                                     label={props.labelStart}
                                     format={props.format}
                                     sx={dateSx}
+                                    viewRenderers={ analogic ? analogicRenderers : undefined }
                                 />
                                 <Typography>{separator}</Typography>
                                 <DateTimePicker
@@ -172,6 +182,7 @@ const DateRange = (props: DateRangeProps) => {
                                     label={props.labelEnd}
                                     format={props.format}
                                     sx={dateSx}
+                                    viewRenderers={ analogic ? analogicRenderers : undefined }
                                 />
                             </>
                         ) : (
@@ -230,6 +241,7 @@ const DateRange = (props: DateRangeProps) => {
                             />
                         </>
                     )}
+                    {props.children}
                 </Stack>
             </Tooltip>
         </ErrorBoundary>

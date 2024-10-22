@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 from sqlalchemy import create_engine, text
 
-from taipy.config.common.scope import Scope
+from taipy.common.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..data.operator import JoinOperator, Operator
@@ -135,6 +135,19 @@ class _AbstractSQLDataNode(DataNode, _TabularDataNodeMixin):
             }
         )
 
+    def __setattr__(self, key: str, value) -> None:
+        if key in self.__ENGINE_PROPERTIES:
+            self._engine = None
+        return super().__setattr__(key, value)
+
+    def filter(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
+        properties = self.properties
+        if properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
+            return self._read_as_pandas_dataframe(operators=operators, join_operator=join_operator)
+        if properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
+            return self._read_as_numpy(operators=operators, join_operator=join_operator)
+        return self._read_as(operators=operators, join_operator=join_operator)
+
     def _check_required_properties(self, properties: Dict):
         db_engine = properties.get(self.__DB_ENGINE_KEY)
         if not db_engine:
@@ -191,14 +204,6 @@ class _AbstractSQLDataNode(DataNode, _TabularDataNodeMixin):
             file_extension = properties.get(self.__SQLITE_FILE_EXTENSION, self.__SQLITE_FILE_EXTENSION_DEFAULT)
             return "sqlite:///" + os.path.join(folder_path, f"{db_name}{file_extension}")
         raise UnknownDatabaseEngine(f"Unknown engine: {engine}")
-
-    def filter(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
-        properties = self.properties
-        if properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
-            return self._read_as_pandas_dataframe(operators=operators, join_operator=join_operator)
-        if properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
-            return self._read_as_numpy(operators=operators, join_operator=join_operator)
-        return self._read_as(operators=operators, join_operator=join_operator)
 
     def _read(self):
         properties = self.properties
@@ -306,7 +311,3 @@ class _AbstractSQLDataNode(DataNode, _TabularDataNodeMixin):
     def _do_write(self, data, engine, connection) -> None:
         raise NotImplementedError
 
-    def __setattr__(self, key: str, value) -> None:
-        if key in self.__ENGINE_PROPERTIES:
-            self._engine = None
-        return super().__setattr__(key, value)

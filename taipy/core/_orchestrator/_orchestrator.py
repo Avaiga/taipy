@@ -16,8 +16,8 @@ from threading import Lock
 from time import sleep
 from typing import Callable, Iterable, List, Optional, Set, Union
 
-from taipy.config.config import Config
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.config import Config
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from .._entity.submittable import Submittable
 from ..data._data_manager_factory import _DataManagerFactory
@@ -57,7 +57,7 @@ class _Orchestrator(_AbstractOrchestrator):
     ) -> Submission:
         """Submit the given `Scenario^` or `Sequence^` for an execution.
 
-        Parameters:
+        Arguments:
              submittable (Union[Scenario^, Sequence^]): The scenario or sequence to submit for execution.
              callbacks: The optional list of functions that should be executed on jobs status change.
              force (bool) : Enforce execution of the scenario's or sequence's tasks even if their output data
@@ -69,6 +69,7 @@ class _Orchestrator(_AbstractOrchestrator):
                 If not provided and *wait* is True, the function waits indefinitely.
              **properties (dict[str, any]): A key worded variable length list of user additional arguments
                 that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
+
         Returns:
             The created `Submission^` containing the information about the submission.
         """
@@ -113,7 +114,7 @@ class _Orchestrator(_AbstractOrchestrator):
     ) -> Submission:
         """Submit the given `Task^` for an execution.
 
-        Parameters:
+        Arguments:
              task (Task^): The task to submit for execution.
              callbacks: The optional list of functions that should be executed on job status change.
              force (bool): Enforce execution of the task even if its output data nodes are cached.
@@ -124,6 +125,7 @@ class _Orchestrator(_AbstractOrchestrator):
                 If not provided and *wait* is True, the function waits indefinitely.
              **properties (dict[str, any]): A key worded variable length list of user additional arguments
                 that will be stored within the `Submission^`. It can be accessed via `Submission.properties^`.
+
         Returns:
             The created `Submission^` containing the information about the submission.
         """
@@ -224,7 +226,7 @@ class _Orchestrator(_AbstractOrchestrator):
     def _is_blocked(cls, obj: Union[Task, Job]) -> bool:
         """Returns True if the execution of the `Job^` or the `Task^` is blocked by the execution of another `Job^`.
 
-        Parameters:
+        Arguments:
              obj (Union[Task^, Job^]): The job or task entity to run.
 
         Returns:

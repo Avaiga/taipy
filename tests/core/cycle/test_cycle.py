@@ -12,7 +12,7 @@
 import datetime
 from datetime import timedelta
 
-from taipy.config.common.frequency import Frequency
+from taipy.common.config.common.frequency import Frequency
 from taipy.core import CycleId
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory

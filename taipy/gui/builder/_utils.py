@@ -57,18 +57,28 @@ class _LambdaByName(ast.NodeVisitor):
 
     def visit_Call(self, node):
         if getattr(node.func, "attr", None) == self.element_name:
-            if self.lambdas.get(_LambdaByName._DEFAULT_NAME, None) is None:
-                self.lambdas[_LambdaByName._DEFAULT_NAME] = next(
+            if self.lambdas.get(_LambdaByName._DEFAULT_NAME, None) is None and (
+                a_lambda := next(
                     (
                         arg
                         for arg in node.args
-                        if isinstance(arg, ast.Lambda) and self.lineno >= arg.lineno and self.lineno <= arg.end_lineno
+                        if isinstance(arg, ast.Lambda)
+                        and arg.lineno is not None
+                        and arg.end_lineno is not None
+                        and self.lineno >= arg.lineno
+                        and self.lineno <= arg.end_lineno
                     ),
                     None,
                 )
+            ):
+                self.lambdas[_LambdaByName._DEFAULT_NAME] = a_lambda
+
             for kwd in node.keywords:
                 if (
-                    isinstance(kwd.value, ast.Lambda)
+                    kwd.arg is not None
+                    and isinstance(kwd.value, ast.Lambda)
+                    and kwd.value.lineno is not None
+                    and kwd.value.end_lineno is not None
                     and self.lineno >= kwd.value.lineno
                     and self.lineno <= kwd.value.end_lineno
                 ):

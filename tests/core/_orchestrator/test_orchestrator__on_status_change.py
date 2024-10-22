@@ -12,7 +12,7 @@ from unittest import mock
 
 import taipy
 from taipy import Job, JobId, Status
-from taipy.config import Config
+from taipy.common.config import Config
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.task._task_manager_factory import _TaskManagerFactory

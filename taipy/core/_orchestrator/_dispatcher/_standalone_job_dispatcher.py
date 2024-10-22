@@ -15,8 +15,8 @@ from functools import partial
 from threading import Lock
 from typing import Callable, Optional
 
-from taipy.config._serializer._toml_serializer import _TomlSerializer
-from taipy.config.config import Config
+from taipy.common.config import Config
+from taipy.common.config._serializer._toml_serializer import _TomlSerializer
 
 from ...job.job import Job
 from .._abstract_orchestrator import _AbstractOrchestrator
@@ -52,7 +52,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
     def _dispatch(self, job: Job):
         """Dispatches the given `Job^` on an available worker for execution.
 
-        Parameters:
+        Arguments:
             job (Job^): The job to submit on an executor with an available worker.
         """
         with self._nb_available_workers_lock:

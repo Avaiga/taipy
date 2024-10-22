@@ -47,7 +47,7 @@ interface DataNodeChartProps {
     columns?: Record<string, ColumnDesc>;
     defaultConfig?: string;
     updateVarName?: string;
-    uniqid: string;
+    uniqId: string;
     chartConfigs?: string;
     onViewTypeChange: (e: MouseEvent, value?: string) => void;
 }
@@ -240,7 +240,7 @@ const getBaseConfig = (defaultConfig?: string, chartConfigs?: string, configId?:
 };
 
 const DataNodeChart = (props: DataNodeChartProps) => {
-    const { defaultConfig = "", uniqid, configId, chartConfigs = "", onViewTypeChange } = props;
+    const { defaultConfig = "", uniqId, configId, chartConfigs = "", onViewTypeChange } = props;
 
     const [config, setConfig] = useState<ChartConfig | undefined>(undefined);
     useEffect(() => {
@@ -406,7 +406,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                 <Grid container alignItems="center">
                     {config?.traces && config?.types
                         ? config?.traces.map((tc, idx) => {
-                              const baseLabelId = `${uniqid}-trace${idx}-"`;
+                              const baseLabelId = `${uniqId}-trace${idx}-"`;
                               return (
                                   <Fragment key={idx}>
                                       <Grid size={2} sx={TraceSx}>

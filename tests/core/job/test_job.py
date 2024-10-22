@@ -18,8 +18,8 @@ from unittest.mock import MagicMock
 import freezegun
 import pytest
 
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
+from taipy.common.config import Config
+from taipy.common.config.common.scope import Scope
 from taipy.core import JobId, TaskId
 from taipy.core._orchestrator._abstract_orchestrator import _AbstractOrchestrator
 from taipy.core._orchestrator._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher

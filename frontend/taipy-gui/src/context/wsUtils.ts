@@ -1,5 +1,5 @@
 import { Socket } from "socket.io-client";
-import { v4 as uuidv4 } from "uuid";
+import { nanoid } from 'nanoid'
 
 export const TAIPY_CLIENT_ID = "TaipyClientId";
 
@@ -21,7 +21,8 @@ export type WsMessageType =
     | "GDT"
     | "AID"
     | "GR"
-    | "FV";
+    | "FV"
+    | "BC";
 
 export interface WsMessage {
     type: WsMessageType;
@@ -43,7 +44,7 @@ export const sendWsMessage = (
     propagate = true,
     serverAck?: (val: unknown) => void
 ): string => {
-    const ackId = uuidv4();
+    const ackId = nanoid();
     const msg: WsMessage = {
         type: type,
         name: name,

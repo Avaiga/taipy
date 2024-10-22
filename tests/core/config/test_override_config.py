@@ -14,8 +14,8 @@ from unittest import mock
 
 import pytest
 
-from taipy.config.config import Config
-from taipy.config.exceptions.exceptions import InconsistentEnvVariableError, MissingEnvVariableError
+from taipy.common.config import Config
+from taipy.common.config.exceptions.exceptions import InconsistentEnvVariableError, MissingEnvVariableError
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 

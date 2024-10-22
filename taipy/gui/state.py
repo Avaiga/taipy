@@ -29,14 +29,14 @@ class State:
     """Accessor to the bound variables from callbacks.
 
     `State` is used when you need to access the value of variables
-    bound to visual elements (see [Binding](../../userman/gui/binding.md)).<br/>
+    bound to visual elements (see [Binding](../../../../../userman/gui/binding.md)).<br/>
     Because each browser connected to the application server may represent and
     modify any variable at any moment as the result of user interaction, each
     connection holds its own set of variables along with their values. We call
     the set of these the application variables the application _state_, as seen
     by a given client.
 
-    Each callback (see [Callbacks](../../userman/gui/callbacks.md)) receives a specific
+    Each callback (see [Callbacks](../../../../../userman/gui/callbacks.md)) receives a specific
     instance of the `State` class, where you can find all the variables bound to
     visual elements in your application.
 
@@ -251,9 +251,14 @@ class State:
     def set_favicon(self, favicon_path: t.Union[str, Path]):
         """Change the favicon for the client of this state.
 
-        This function dynamically changes the favicon of Taipy GUI pages for a specific client.
-        favicon_path can be an URL (relative or not) or a file path.
-        TODO The *favicon* parameter to `(Gui.)run()^` can also be used to change
-         the favicon when the application starts.
+        This function dynamically changes the favicon (the icon associated with the application's
+        pages) of Taipy GUI pages for the specific client of this state.
+
+        Note that the *favicon* parameter to `(Gui.)run()^` can also be used to change
+        the favicon when the application starts.
+
+        Arguments:
+            favicon_path: The path to the image file to use.<br/>
+                This can be expressed as a path name or a URL (relative or not).
         """
         super().__getattribute__(State.__gui_attr).set_favicon(favicon_path, self)

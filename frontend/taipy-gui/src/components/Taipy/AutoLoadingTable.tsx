@@ -31,6 +31,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DataSaverOn from "@mui/icons-material/DataSaverOn";
 import DataSaverOff from "@mui/icons-material/DataSaverOff";
 import Download from "@mui/icons-material/Download";
+import { generateHeaderClassName } from "./tableUtils";
 
 import {
     createRequestInfiniteTableUpdateAction,
@@ -79,6 +80,7 @@ import {
 import TableFilter from "./TableFilter";
 import { getSuffixedClassNames, getUpdateVar } from "./utils";
 import { emptyArray } from "../../utils";
+import { getComponentClassName } from "./TaipyStyle";
 
 interface RowData {
     colsOrder: string[];
@@ -224,7 +226,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const baseColumns = useDynamicJsonProperty(props.columns, props.defaultColumns, defaultColumns);
 
-    const refresh = props.data && typeof props.data.__taipy_refresh === "boolean";
+    const refresh = props.data?.__taipy_refresh !== undefined;
 
     useEffect(() => {
         if (!refresh && props.data && page.current.key && props.data[page.current.key] !== undefined) {
@@ -592,7 +594,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const boxSx = useMemo(() => ({ ...baseBoxSx, width: width }), [width]);
 
     return (
-        <Box id={id} sx={boxSx} className={`${className} ${getSuffixedClassNames(className, "-autoloading")}`}>
+        <Box id={id} sx={boxSx} className={`${className} ${getSuffixedClassNames(className, "-autoloading")} ${getComponentClassName(props.children)}`}>
             <Paper sx={paperSx}>
                 <Tooltip title={hover || ""}>
                     <TableContainer>
@@ -604,6 +606,10 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                             key={`head${columns[col].dfid}`}
                                             sortDirection={orderBy === columns[col].dfid && order}
                                             sx={columns[col].width ? { width: columns[col].width } : {}}
+                                            className={col === "EDIT_COL"
+                                                ? getSuffixedClassNames(className, "-action")
+                                                : getSuffixedClassNames(className, generateHeaderClassName(columns[col].dfid))
+                                            }
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [
@@ -715,6 +721,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     </TableContainer>
                 </Tooltip>
             </Paper>
+            {props.children}
         </Box>
     );
 };

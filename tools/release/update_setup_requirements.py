@@ -41,7 +41,7 @@ def update_setup_requirements(package: str, versions: Dict, publish_on_py_pi: bo
 if __name__ == "__main__":
     _package = sys.argv[1]
     _versions = {
-        "taipy-config": sys.argv[2],
+        "taipy-common": sys.argv[2],
         "taipy-core": sys.argv[3],
         "taipy-gui": sys.argv[4],
         "taipy-rest": sys.argv[5],

@@ -20,8 +20,8 @@ import pytest
 from bson import ObjectId
 from bson.errors import InvalidDocument
 
-from taipy.config import Config
-from taipy.config.common.scope import Scope
+from taipy.common.config import Config
+from taipy.common.config.common.scope import Scope
 from taipy.core import MongoDefaultDocument
 from taipy.core.common._mongo_connector import _connect_mongodb
 from taipy.core.data._data_manager_factory import _DataManagerFactory

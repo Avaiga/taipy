@@ -82,6 +82,8 @@ def _enhance_columns(  # noqa: C901
                 col_desc["apply"] = value
         else:
             _warn(f"{elt_name}: '{k}' is not a displayed column in apply[].")
+    if _get_name_indexed_property(attributes, "style"):
+        _warn("Table: property 'style[]' has been renamed to 'cell_class_name[]'.")
     cell_class_names = _get_name_indexed_property(attributes, "cell_class_name")
     for k, v in cell_class_names.items():  # pragma: no cover
         if col_desc := _get_column_desc(columns, k):

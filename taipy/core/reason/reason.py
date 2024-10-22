@@ -15,7 +15,7 @@ from typing import Any, Optional
 class Reason:
     """A reason explains why a specific action cannot be performed.
 
-    This is a parent class aiming at being implemented by specific sub-classes.
+    This is a parent class aiming at being implemented by specific subclasses.
 
     Because Taipy applications are natively multiuser, asynchronous, and dynamic,
     some functions might not be called in some specific contexts. You can protect

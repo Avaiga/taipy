@@ -12,10 +12,10 @@
 import random
 import string
 
-from taipy.config import Config
-from taipy.config._serializer._toml_serializer import _TomlSerializer
-from taipy.config.common.scope import Scope
-from taipy.config.exceptions import ConfigurationUpdateBlocked
+from taipy.common.config import Config
+from taipy.common.config._serializer._toml_serializer import _TomlSerializer
+from taipy.common.config.common.scope import Scope
+from taipy.common.config.exceptions import ConfigurationUpdateBlocked
 from taipy.core._orchestrator._dispatcher._task_function_wrapper import _TaskFunctionWrapper
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.task.task import Task
@@ -100,7 +100,7 @@ def test_data_node_not_written_due_to_wrong_result_nb():
 
 def test_cannot_exec_task_that_update_config():
     def update_config_fct(n, m):
-        from taipy.config import Config
+        from taipy.common.config import Config
 
         Config.core.storage_folder = ".new_storage_folder/"
         return n * m
@@ -115,7 +115,7 @@ def test_cannot_exec_task_that_update_config():
 
 def test_can_execute_task_with_a_modified_config():
     def assert_config_is_correct_after_serialization(n, m):
-        from taipy.config import Config
+        from taipy.common.config import Config
 
         assert Config.core.storage_folder == ".my_data/"
         assert Config.core.custom_property == "custom_property"

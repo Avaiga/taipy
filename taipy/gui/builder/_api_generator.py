@@ -16,7 +16,7 @@ import sys
 import types
 import typing as t
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ..utils.singleton import _Singleton
 from ..utils.viselements import VisElementProperties, VisElements, resolve_inherits
@@ -42,6 +42,8 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
         return {prop["name"]: prop.get("type", "str") for prop in property_list}
 
     def add_default(self):
+        if self.__module is not None:
+            return
         current_frame = inspect.currentframe()
         error_message = "Cannot generate elements API for the current module"
         if current_frame is None:
@@ -142,6 +144,8 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
             {
                 "_ELEMENT_NAME": element_name,
                 "_DEFAULT_PROPERTY": default_property,
-                "_TYPES": {f"{parts[0]}__" if len(parts := k.split("[")) > 1 else k: v for k, v in properties.items()},
+                "_PROPERTY_TYPES": {
+                    f"{parts[0]}__" if len(parts := k.split("[")) > 1 else k: v for k, v in properties.items()
+                },
             },
         )
