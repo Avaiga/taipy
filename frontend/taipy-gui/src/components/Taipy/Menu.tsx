@@ -64,7 +64,7 @@ const Menu = (props: MenuProps) => {
     }, []);
 
     const selected = useMemo(() => {
-        const selected = props.selected ?? [];
+        const selected = Array.isArray(props.selected) ? props.selected : [];
         if (selectedValue && !selected.includes(selectedValue)) {
             return [...selected, selectedValue];
         }
