@@ -218,10 +218,8 @@ class _Config(object):
             config["run_browser"] = True
         if args.taipy_no_run_browser:
             config["run_browser"] = False
-        if args.taipy_dark_mode:
-            config["dark_mode"] = True
-        if args.taipy_light_mode:
-            config["dark_mode"] = False
+        if args.taipy_dark_mode or args.taipy_light_mode:
+            config["dark_mode"] = not args.taipy_light_mode
         if args.taipy_ngrok_token:
             config["ngrok_token"] = args.taipy_ngrok_token
         if args.taipy_webapp_path:
