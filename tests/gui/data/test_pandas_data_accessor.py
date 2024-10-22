@@ -13,18 +13,18 @@ import inspect
 import os
 from datetime import datetime
 from importlib import util
+from unittest.mock import Mock
 
 import pandas
-from flask import g
 import pandas as pd
+import pytest
+from flask import g
 
 from taipy.gui import Gui
 from taipy.gui.data.data_format import _DataFormat
 from taipy.gui.data.decimator import ScatterDecimator
 from taipy.gui.data.pandas_data_accessor import _PandasDataAccessor
 
-import pytest
-from unittest.mock import Mock
 
 # Define a mock to simulate _DataFormat behavior with a 'value' attribute
 class MockDataFormat:
@@ -33,7 +33,7 @@ class MockDataFormat:
 
 @pytest.fixture
 def pandas_accessor():
-    gui = Mock()  
+    gui = Mock()
     return _PandasDataAccessor(gui=gui)
 
 @pytest.fixture
@@ -284,7 +284,7 @@ def test_contains_case_sensitive(pandas_accessor, sample_df):
     }
     result = pandas_accessor.get_data("test_var", sample_df, payload, MockDataFormat.LIST)
     filtered_data = pd.DataFrame(result['value']['data'])
-    
+
     assert len(filtered_data) == 1
     assert filtered_data.iloc[0]['StringCol'] == 'Apple'
 
@@ -294,7 +294,7 @@ def test_contains_case_insensitive(pandas_accessor, sample_df):
     }
     result = pandas_accessor.get_data("test_var", sample_df, payload, MockDataFormat.LIST)
     filtered_data = pd.DataFrame(result['value']['data'])
-    
+
     assert len(filtered_data) == 2
     assert 'Apple' in filtered_data['StringCol'].values
     assert 'apple' in filtered_data['StringCol'].values
@@ -305,7 +305,7 @@ def test_equals_case_sensitive(pandas_accessor, sample_df):
     }
     result = pandas_accessor.get_data("test_var", sample_df, payload, MockDataFormat.LIST)
     filtered_data = pd.DataFrame(result['value']['data'])
-    
+
     assert len(filtered_data) == 1
     assert filtered_data.iloc[0]['StringCol'] == 'Apple'
 
@@ -315,7 +315,7 @@ def test_equals_case_insensitive(pandas_accessor, sample_df):
     }
     result = pandas_accessor.get_data("test_var", sample_df, payload, MockDataFormat.LIST)
     filtered_data = pd.DataFrame(result['value']['data'])
-    
+
     assert len(filtered_data) == 2
     assert 'Apple' in filtered_data['StringCol'].values
     assert 'apple' in filtered_data['StringCol'].values
@@ -326,7 +326,7 @@ def test_not_equals_case_insensitive(pandas_accessor, sample_df):
     }
     result = pandas_accessor.get_data("test_var", sample_df, payload, MockDataFormat.LIST)
     filtered_data = pd.DataFrame(result['value']['data'])
-    
+
     assert len(filtered_data) == 2
     assert 'Banana' in filtered_data['StringCol'].values
     assert 'Cherry' in filtered_data['StringCol'].values
