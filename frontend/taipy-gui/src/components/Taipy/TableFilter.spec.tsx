@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -48,7 +48,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     delete window.matchMedia;
 });
 
@@ -115,7 +116,7 @@ describe("Table Filter Component", () => {
         expect(validate).not.toBeDisabled();
     });
     it("behaves on boolean column", async () => {
-        const { getByTestId, getAllByTestId, findByRole, getByText, getAllByText } = render(
+        const { getByTestId, getAllByTestId, findByRole, getByText } = render(
             <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={jest.fn()} filteredCount={0} />
         );
         const elt = getByTestId("FilterListIcon");
@@ -243,5 +244,47 @@ describe("Table Filter Component", () => {
         await userEvent.click(elt);
         const ddElts2 = getAllByTestId("ArrowDropDownIcon");
         expect(ddElts2).toHaveLength(2);
+    });
+});
+describe("Table Filter Component - Case Insensitive Test", () => {
+    it("renders the case sensitivity toggle switch", async () => {
+        const { getByTestId, getAllByTestId, findByRole, getByText, getAllByText } = render(
+            <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={jest.fn()} filteredCount={0} />
+        );
+
+        // Open filter popover
+        const filterIcon = getByTestId("FilterListIcon");
+        await userEvent.click(filterIcon);
+
+        // Select string column from dropdown
+        const dropdownIcons = getAllByTestId("ArrowDropDownIcon");
+        await userEvent.click(dropdownIcons[0].parentElement?.firstElementChild || dropdownIcons[0]);
+        await findByRole("listbox");
+        await userEvent.click(getByText("StringCol"));
+
+        // Select 'contains' filter action
+        await userEvent.click(dropdownIcons[1].parentElement?.firstElementChild || dropdownIcons[1]);
+        await findByRole("listbox");
+        await userEvent.click(getByText("contains"));
+
+        // Check for the case-sensitive toggle and interact with it
+        const caseSensitiveToggle = screen.getByRole("checkbox", { name: /case sensitive toggle/i });
+        expect(caseSensitiveToggle).toBeInTheDocument(); // Ensure the toggle is rendered
+        await userEvent.click(caseSensitiveToggle); // Toggle case sensitivity off
+
+        // Input some test text and validate case insensitivity
+        const inputs = getAllByText("Empty String");
+        const inputField = inputs[0].nextElementSibling?.firstElementChild || inputs[0];
+        await userEvent.click(inputField);
+        await userEvent.type(inputField, "CASETEST");
+
+        // Ensure the validate button is enabled
+        const validateButton = getByTestId("CheckIcon").parentElement;
+        expect(validateButton).not.toBeDisabled();
+
+        // Test case-insensitivity by changing input case
+        await userEvent.clear(inputField);
+        await userEvent.type(inputField, "casetest");
+        expect(validateButton).not.toBeDisabled();
     });
 });
