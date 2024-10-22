@@ -125,6 +125,13 @@ export const getCssSize = (val: string | number) => {
     return val;
 };
 
+/**
+ * Appends a suffix to the class names.
+ *
+ * @param names - The class names.
+ * @param suffix - The suffix to append.
+ * @returns The new list of class names.
+ */
 export const getSuffixedClassNames = (names: string | undefined, suffix: string) =>
     (names || "")
         .split(/\s+/)
