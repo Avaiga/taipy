@@ -28,7 +28,7 @@ from .task_id import TaskId
 
 
 class Task(_Entity, _Labeled):
-    """Hold a user function that will be executed, its parameters and the results.
+    """Hold a user function that will be executed, its parameters, and the results.
 
     A `Task` brings together the user code as function, the inputs and the outputs
     as data nodes (instances of the `DataNode^` class).
@@ -245,7 +245,7 @@ class Task(_Entity, _Labeled):
     ) -> Submission:
         """Submit the task for execution.
 
-        Parameters:
+        Arguments:
             callbacks (List[Callable]): The list of callable functions to be called on status
                 change.
             force (bool): Force execution even if the data nodes are in cache.
