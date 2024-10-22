@@ -35,6 +35,7 @@ import Popper from "@mui/material/Popper";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Send from "@mui/icons-material/Send";
+import AttachFile from "@mui/icons-material/AttachFile";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
 
@@ -47,11 +48,13 @@ import { emptyArray, getInitials } from "../../utils";
 import { RowType, TableValueType } from "./tableUtils";
 import { Stack } from "@mui/material";
 import { getComponentClassName } from "./TaipyStyle";
+import { noDisplayStyle } from "./utils";
 
 const Markdown = lazy(() => import("react-markdown"));
 
 interface ChatProps extends TaipyActiveProps {
     messages?: TableValueType;
+    maxFileSize?: number;
     withInput?: boolean;
     users?: LoVElt[];
     defaultUsers?: string;
@@ -132,7 +135,7 @@ const defaultBoxSx = {
 } as SxProps<Theme>;
 const noAnchorSx = { overflowAnchor: "none", "& *": { overflowAnchor: "none" } } as SxProps<Theme>;
 const anchorSx = { overflowAnchor: "auto", height: "1px", width: "100%" } as SxProps<Theme>;
-
+const imageSx = {width:3/5, height:"auto"}
 interface key2Rows {
     key: string;
 }
@@ -140,6 +143,7 @@ interface key2Rows {
 interface ChatRowProps {
     senderId: string;
     message: string;
+    image?: string;
     name: string;
     className?: string;
     getAvatar: (id: string, sender: boolean) => ReactNode;
@@ -149,7 +153,7 @@ interface ChatRowProps {
 }
 
 const ChatRow = (props: ChatRowProps) => {
-    const { senderId, message, name, className, getAvatar, index, showSender, mode } = props;
+    const { senderId, message, image, name, className, getAvatar, index, showSender, mode } = props;
     const sender = senderId == name;
     const avatar = getAvatar(name, sender);
 
@@ -162,8 +166,18 @@ const ChatRow = (props: ChatRowProps) => {
             justifyContent={sender ? "flex-end" : undefined}
         >
             <Grid sx={sender ? senderMsgSx : undefined}>
+            {image?(
+                <Grid container justifyContent={sender ? "flex-end" : undefined}>
+                <Box
+                                component="img"
+                                sx={imageSx}
+                                alt="Uploaded image"
+                                src={image}
+                            />
+                </Grid>
+                            ):null}
                 {(!sender || showSender) && avatar ? (
-                    <Stack direction="row" gap={1}>
+                    <Stack direction="row" gap={1} justifyContent={sender ? "flex-end" : undefined}>
                         {!sender ? <Box sx={avatarColSx}>{avatar}</Box> : null}
                         <Stack>
                             <Box sx={sender ? rightNameSx : leftNameSx}>{name}</Box>
@@ -213,6 +227,7 @@ const Chat = (props: ChatProps) => {
         onAction,
         withInput = true,
         defaultKey = "",
+        maxFileSize= 1 * 1024 * 1024, // 1 MB
         pageSize = 50,
         showSender = false,
     } = props;
@@ -227,6 +242,10 @@ const Chat = (props: ChatProps) => {
     const isAnchorDivVisible = useElementVisible(anchorDivRef);
     const [showMessage, setShowMessage] = useState(false);
     const [anchorPopup, setAnchorPopup] = useState<HTMLDivElement | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [objectURLs, setObjectURLs] = useState<string[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -256,14 +275,16 @@ const Chat = (props: ChatProps) => {
                 const elt = evt.currentTarget.querySelector("input");
                 if (elt?.value) {
                     dispatch(
-                        createSendActionNameAction(id, module, onAction, evt.key, updateVarName, elt?.value, senderId)
+                        createSendActionNameAction(id, module, onAction, evt.key, updateVarName, elt?.value,senderId, imagePreview)
                     );
                     elt.value = "";
+                    setSelectedFile(null);
+                    setImagePreview(null);
                 }
                 evt.preventDefault();
             }
         },
-        [updateVarName, onAction, senderId, id, dispatch, module]
+        [imagePreview, updateVarName, onAction, senderId, id, dispatch, module]
     );
 
     const handleClick = useCallback(
@@ -271,14 +292,38 @@ const Chat = (props: ChatProps) => {
             const elt = evt.currentTarget.parentElement?.parentElement?.querySelector("input");
             if (elt?.value) {
                 dispatch(
-                    createSendActionNameAction(id, module, onAction, "click", updateVarName, elt?.value, senderId)
+                    createSendActionNameAction(id, module, onAction, "click", updateVarName, elt?.value,senderId,imagePreview)
                 );
                 elt.value = "";
+                setSelectedFile(null);
+                setImagePreview(null);
             }
             evt.preventDefault();
         },
-        [updateVarName, onAction, senderId, id, dispatch, module]
+        [imagePreview,updateVarName, onAction, senderId, id, dispatch, module]
     );
+
+    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+            const file = event.target.files ? event.target.files[0] : null;
+            if (file) {
+                if (file.type.startsWith("image/") && file.size <= maxFileSize) {
+                    setSelectedFile(file);
+                    const newImagePreview = URL.createObjectURL(file);
+                    setImagePreview(newImagePreview);
+                    setObjectURLs((prevURLs) => [...prevURLs, newImagePreview]);
+                } else {
+                    setSelectedFile(null);
+                    setImagePreview(null);
+                }
+            }
+        };
+
+    const handleAttachClick = useCallback(() => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    }, [fileInputRef]);
+
 
     const avatars = useMemo(() => {
         return users.reduce((pv, elt) => {
@@ -390,6 +435,14 @@ const Chat = (props: ChatProps) => {
         loadMoreItems(0);
     }, [loadMoreItems]);
 
+    useEffect(() => {
+        return () => {
+            for (const objectURL of objectURLs) {
+                URL.revokeObjectURL(objectURL);
+            }
+        };
+    }, [objectURLs]);
+
     const loadOlder = useCallback(
         (evt: MouseEvent<HTMLElement>) => {
             const { start } = evt.currentTarget.dataset;
@@ -424,6 +477,7 @@ const Chat = (props: ChatProps) => {
                                 senderId={senderId}
                                 message={`${row[columns[1]]}`}
                                 name={columns[2] ? `${row[columns[2]]}` : "Unknown"}
+                                image={columns[3] && columns[3] != "_tp_index" && row[columns[3]] ? `${row[columns[3]]}` : undefined}
                                 className={className}
                                 getAvatar={getAvatar}
                                 index={idx}
@@ -443,6 +497,25 @@ const Chat = (props: ChatProps) => {
                     />
                 </Popper>
                 {withInput ? (
+                    <>
+                    {imagePreview && selectedFile && (
+                            <Box mb={1}>
+                                <Chip
+                                    label={selectedFile.name}
+                                    avatar={<Avatar alt="Image preview" src={imagePreview}/>}
+                                    onDelete={() => setSelectedFile(null)}
+                                    variant="outlined"
+                                />
+                            </Box>
+                        )}
+                    <input
+                            type="file"
+                            ref={fileInputRef}
+                            style={noDisplayStyle}
+                            onChange={(e) => handleFileSelect(e)}
+                            accept="image/*"
+                        />
+
                     <TextField
                         margin="dense"
                         fullWidth
@@ -452,6 +525,17 @@ const Chat = (props: ChatProps) => {
                         onKeyDown={handleAction}
                         slotProps={{
                             input: {
+                                startAdornment: (<InputAdornment position="start">
+                                    <IconButton
+                                            aria-label="upload image"
+                                            onClick={handleAttachClick}
+                                            edge="start"
+                                            disabled={!active}
+                                        >
+                                       <AttachFile color={disableColor("primary", !active)} />
+                                    </IconButton>
+
+                                </InputAdornment>),
                                 endAdornment: (
                                     <InputAdornment position="end">
                                         <IconButton
@@ -468,6 +552,7 @@ const Chat = (props: ChatProps) => {
                         }}
                         sx={inputSx}
                     />
+                    </>
                 ) : null}
                 {props.children}
             </Paper>
