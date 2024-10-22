@@ -391,3 +391,10 @@ class AttributeKeyAlreadyExisted(Exception):
 
     def __init__(self, key: str):
         self.message = f"Attribute key '{key}' already existed."
+
+
+class ValidationError(Exception):
+    """Raised when a validation error occurs."""
+
+    def __init__(self, message: str):
+        self.message = message
