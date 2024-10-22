@@ -27,14 +27,13 @@ import Popover, { PopoverOrigin } from "@mui/material/Popover";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
+import Switch from "@mui/material/Switch";
 import { DateField, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 
 import { ColumnDesc, defaultDateFormat, getSortByIndex, iconInRowSx, FilterDesc } from "./tableUtils";
 import { getDateTime, getTypeFromDf } from "../../utils";
 import { getSuffixedClassNames } from "./utils";
-import SvgIcon from "@mui/icons-material/Check";
-import { FormControlLabel, Switch } from "@mui/material";
 import { MatchCase } from "../icons/MatchCase";
 
 interface TableFilterProps {
@@ -100,6 +99,7 @@ const getFilterDesc = (
     colId?: string,
     act?: string,
     val?: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     matchCase?: boolean
 ) => {
     if (colId && act && val !== undefined) {
@@ -311,7 +311,7 @@ const FilterRow = (props: FilterRowProps) => {
                                         size="small"
                                         checkedIcon={<MatchCase />}
                                         icon={<MatchCase color="disabled" />}
-                                        data-testid="CaseSensitiveToggle"
+                                        inputProps={{ "aria-label": "Case Sensitive Toggle" }}
                                     />
                                 ),
                             },

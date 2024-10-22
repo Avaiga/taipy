@@ -48,7 +48,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     delete window.matchMedia;
 });
 
@@ -115,7 +116,7 @@ describe("Table Filter Component", () => {
         expect(validate).not.toBeDisabled();
     });
     it("behaves on boolean column", async () => {
-        const { getByTestId, getAllByTestId, findByRole, getByText, getAllByText } = render(
+        const { getByTestId, getAllByTestId, findByRole, getByText } = render(
             <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={jest.fn()} filteredCount={0} />
         );
         const elt = getByTestId("FilterListIcon");
@@ -267,7 +268,7 @@ describe("Table Filter Component - Case Insensitive Test", () => {
         await userEvent.click(getByText("contains"));
 
         // Check for the case-sensitive toggle and interact with it
-        const caseSensitiveToggle = await screen.findByTestId("CaseSensitiveToggle");
+        const caseSensitiveToggle = screen.getByRole("checkbox", { name: /case sensitive toggle/i });
         expect(caseSensitiveToggle).toBeInTheDocument(); // Ensure the toggle is rendered
         await userEvent.click(caseSensitiveToggle); // Toggle case sensitivity off
 
