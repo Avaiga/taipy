@@ -103,8 +103,8 @@ class _FileDataNodeMixin(object):
 
     def _upload(
         self,
-        data: Any,
-        path: str,
+        data: Optional[Any] = None,
+        path: str = "",
         upload_checker: Optional[Callable[[str, Any], bool]] = None,
         job_id: Optional["JobId"] = None,
         editor_id: Optional[str] = None,
