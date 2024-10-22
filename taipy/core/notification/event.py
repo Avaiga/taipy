@@ -132,7 +132,7 @@ def _make_event(
     """Helper function to make an event for this entity with the given `EventOperation^` type.
     In case of `EventOperation.UPDATE^` events, an attribute name and value must be given.
 
-    Parameters:
+    Arguments:
         entity (Any): The entity object to generate an event for.
         operation (EventOperation^): The operation of the event. The possible values are:
             <ul>

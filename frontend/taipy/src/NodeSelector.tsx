@@ -14,10 +14,10 @@
 import React from "react";
 import Box from "@mui/material/Box";
 
-import { CoreProps, MainTreeBoxSx, useClassNames } from "./utils";
+import { CoreProps, MainTreeBoxSx } from "./utils";
 import { Cycles, DataNodes, NodeType, Scenarios } from "./utils/types";
 import CoreSelector from "./CoreSelector";
-import { getComponentClassName } from "taipy-gui";
+import { getComponentClassName, useClassNames } from "taipy-gui";
 
 interface NodeSelectorProps extends CoreProps {
     innerDatanodes?: Cycles | Scenarios | DataNodes;
