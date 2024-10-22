@@ -1701,7 +1701,14 @@
                         "default_property": true,
                         "required": true,
                         "type": "dynamic(list[str])",
-                        "doc": "The list of messages. Each item of this list must consist of a list of three strings: a message identifier, a message content, and a user identifier."
+                        "doc": "The list of messages. Each item of this list must consist of a list of three strings: a message identifier, a message content, a user identifier, and an image URL."
+                    },
+                    {
+                        "name": "max_file_size",
+                        "type": "int",
+                        "default_value": "1 * 1024 * 1024 (1MB)",
+                        "doc": "The maximum file size can be uploaded to a chat message."
+
                     },
                     {
                         "name": "users",
