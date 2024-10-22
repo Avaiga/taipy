@@ -144,6 +144,7 @@ describe("Chat Component", () => {
         );
         const file = new File(['(⌐□_□)'], 'test.png', { type: 'image/png' });
         URL.createObjectURL = jest.fn(() => 'mocked-url');
+        URL.revokeObjectURL = jest.fn();
 
         const attachButton = getByLabelText('upload image');
         expect(attachButton).toBeInTheDocument();
