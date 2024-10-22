@@ -99,7 +99,6 @@ const getFilterDesc = (
     colId?: string,
     act?: string,
     val?: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     matchCase?: boolean
 ) => {
     if (colId && act && val !== undefined) {
@@ -122,6 +121,7 @@ const getFilterDesc = (
                             : val
                         : val,
                 type: colType,
+                matchCase: !!matchCase,
             } as FilterDesc;
         } catch (e) {
             console.info("could not parse value ", val, e);
