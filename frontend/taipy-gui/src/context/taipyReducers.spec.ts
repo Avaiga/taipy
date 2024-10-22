@@ -50,6 +50,7 @@ import { Socket } from "socket.io-client";
 import { Dispatch } from "react";
 import { parseData } from "../utils/dataFormat";
 import * as wsUtils from "./wsUtils";
+import { nanoid } from 'nanoid';
 
 jest.mock("./utils", () => ({
     ...jest.requireActual("./utils"),
@@ -575,6 +576,7 @@ describe("taipyReducer function", () => {
             message: "some error message",
             system: true,
             duration: 3000,
+            notificationId: nanoid(),
         };
         const newState = taipyReducer({ ...INITIAL_STATE }, action);
         expect(newState.alerts).toContainEqual({
@@ -582,19 +584,37 @@ describe("taipyReducer function", () => {
             message: action.message,
             system: action.system,
             duration: action.duration,
+            notificationId: action.notificationId,
         });
     });
     it("should handle DELETE_ALERT action", () => {
+        const notificationId1 = nanoid();
+        const notificationId2 = nanoid();
         const initialState = {
             ...INITIAL_STATE,
             alerts: [
-                { atype: "error", message: "First Alert", system: true, duration: 5000 },
-                { atype: "warning", message: "Second Alert", system: false, duration: 3000 },
+                { atype: "error", message: "First Alert", system: true, duration: 5000, notificationId: notificationId1 },
+                { atype: "warning", message: "Second Alert", system: false, duration: 3000, notificationId: notificationId2 },
             ],
         };
-        const action = { type: Types.DeleteAlert };
+        const action = { type: Types.DeleteAlert, notificationId: notificationId1 };
         const newState = taipyReducer(initialState, action);
-        expect(newState.alerts).toEqual([{ atype: "warning", message: "Second Alert", system: false, duration: 3000 }]);
+        expect(newState.alerts).toEqual([{ atype: "warning", message: "Second Alert", system: false, duration: 3000, notificationId: notificationId2 }]);
+    });
+    it('should not modify state if DELETE_ALERT does not match any notificationId', () => {
+        const notificationId1 = nanoid();
+        const notificationId2 = nanoid();
+        const nonExistentId = nanoid();
+        const initialState = {
+            ...INITIAL_STATE,
+            alerts: [
+                { atype: "error", message: "First Alert", system: true, duration: 5000, notificationId: notificationId1 },
+                { atype: "warning", message: "Second Alert", system: false, duration: 3000, notificationId: notificationId2 },
+            ],
+        };
+        const action = { type: Types.DeleteAlert, notificationId: nonExistentId };
+        const newState = taipyReducer(initialState, action);
+        expect(newState).toEqual(initialState);
     });
     it("should not modify state if no alerts are present", () => {
         const initialState = { ...INITIAL_STATE, alerts: [] };
