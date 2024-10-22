@@ -568,7 +568,105 @@
                     }
                 ]
             }
-        ]
+        ],
+        [
+            "job_viewer",
+            {
+                "inherits": [
+                    "core_gui_shared"
+                ],
+                "properties": [
+                    {
+                        "name": "value",
+                        "default_property": true,
+                        "type": "dynamic(Job)",
+                        "doc": "Bound to the selected <code>Job^</code>, or None if there is none."
+                    },
+                    {
+                        "name": "show_submit_id",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the submit id is shown in the viewer."
+                    },
+                    {
+                        "name": "show_task_label",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the task label is not shown in the viewer."
+                    },
+                    {
+                        "name": "show_submitted_label",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the submitted label is not shown in the viewer."
+                    },
+                    {
+                        "name": "show_execution_duration",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the execution duration is not shown in the viewer."
+                    },
+                    {
+                        "name": "show_pending_duration",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the pending duration is shown in the viewer."
+                    },
+                    {
+                        "name": "show_blocked_duration",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the blocked duration is shown in the viewer."
+                    },
+                    {
+                        "name": "show_submission_duration",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the submission duration is not shown in the viewer."
+                    },
+                    {
+                        "name": "show_cancel",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the Cancel button is not shown in the viewer."
+                    },
+                    {
+                        "name": "show_delete",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the Delete button is not shown in the viewer."
+                    },
+                    {
+                        "name": "show_stack_trace",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the stack trace is not shown in the viewer."
+                    },
+                    {
+                        "name": "height",
+                        "type": "str",
+                        "default_value": "\"50vh\"",
+                        "doc": "The maximum height, in CSS units, of the viewer."
+                    },
+                    {
+                        "name": "width",
+                        "type": "str",
+                        "default_value": "\"50vw\"",
+                        "doc": "The maximum width, in CSS units, of the viewer."
+                    },
+                    {
+                        "name": "on_job_action",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function that is triggered for job actions."
+                    },
+                    {
+                        "name": "error",
+                        "type": "str",
+                        "doc": "The error message related to the job viewer."
+                    }
+                ]
+            }
+        ]        
     ],
     "undocumented": [
         [
