@@ -89,8 +89,6 @@ const Menu = (props: MenuProps) => {
         ];
     }, [opened, width, theme]);
 
-    console.log(selected);
-
     return lov && lov.length ? (
         <Drawer
             variant="permanent"
