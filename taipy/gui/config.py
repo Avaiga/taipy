@@ -214,6 +214,14 @@ class _Config(object):
             config["use_reloader"] = True
         if args.taipy_no_reloader:
             config["use_reloader"] = False
+        if args.taipy_run_browser:
+            config["run_browser"] = True
+        if args.taipy_no_run_browser:
+            config["run_browser"] = False
+        if args.taipy_dark_mode:
+            config["dark_mode"] = True
+        if args.taipy_light_mode:
+            config["dark_mode"] = False
         if args.taipy_ngrok_token:
             config["ngrok_token"] = args.taipy_ngrok_token
         if args.taipy_webapp_path:
