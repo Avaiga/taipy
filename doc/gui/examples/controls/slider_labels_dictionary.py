@@ -18,18 +18,18 @@ from taipy.gui import Gui
 # Dictionary for slider labels
 labels = {
     0: "$0",
-    1: "$1",
-    2: "$2",
-    3: "$3",
-    4: "$4",
-    5: "$5",
+    20: "$20",
+    40: "$40",
+    60: "$60",
+    80: "$80",
+    100: "$100",
 }
 
 # Initial value of the slider
-value = 2
+value = 20
 
 page = """
-<|{value}|slider|min=0|max=5|labels={labels}|>
+<|{value}|slider|labels={labels}|>
 
 Value: <|${value}|>
 """
