@@ -38,6 +38,7 @@ const baseTitleProps = { noWrap: true, variant: "h6" } as const;
 const Menu = (props: MenuProps) => {
     const { label, onAction = "", lov, width, inactiveIds = emptyArray, active = true } = props;
     const [selectedValue, setSelectedValue] = useState<string | string[]>("");
+    const [currentSelection, setCurrentSelection] = useState<string>("");
     const [opened, setOpened] = useState(false);
     const dispatch = useDispatch();
     const theme = useTheme();
@@ -49,16 +50,14 @@ const Menu = (props: MenuProps) => {
         (evt: MouseEvent<HTMLElement>) => {
             if (active) {
                 const { id: key = "" } = evt.currentTarget.dataset;
+                setCurrentSelection(key);
                 setSelectedValue(() => {
                     dispatch(createSendActionNameAction("menu", module, onAction, key));
-                    if (props.selected) {
-                        return [...(props.selected ?? []), key];
-                    }
                     return key;
                 });
             }
         },
-        [active, dispatch, module, onAction, props.selected]
+        [active, dispatch, module, onAction]
     );
 
     const openHandler = useCallback((evt: MouseEvent<HTMLElement>) => {
@@ -86,9 +85,10 @@ const Menu = (props: MenuProps) => {
 
     useEffect(() => {
         if (props.selected) {
-            setSelectedValue(props.selected);
+            const updatedSelected = [...props.selected, currentSelection];
+            setSelectedValue(updatedSelected);
         }
-    }, [props.selected]);
+    }, [currentSelection, props.selected]);
 
     return lov && lov.length ? (
         <Drawer
