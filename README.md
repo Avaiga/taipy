@@ -2,6 +2,15 @@
 
 
 <div align="center">
+  <a href="https://taipy.io?utm_source=github" target="_blank">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Avaiga/taipy/assets/100117126/509bf101-54c2-4321-adaf-a2af63af9682">
+    <img alt="Taipy" src="https://github.com/Avaiga/taipy/assets/100117126/4df8a733-d8d0-4893-acf0-d24ef9e8b58a" width="300" />
+  </picture>
+  </a>
+</div>
+
+<div align="center">
   <table>
     <tr>
       <td>
