@@ -1,38 +1,50 @@
+from unittest.mock import MagicMock
 from taipy.gui import Gui
 from taipy.gui.data.data_accessor import _DataAccessors, _InvalidDataAccessor
+from taipy.gui.utils.types import _TaipyData
+from unittest.mock import Mock
 
 
-def test__get_instance_with_valid_data(gui: Gui):
-    """Test if __get_instance returns the correct accessor for valid data."""
+def mock_taipy_data(value):
+    """Helper to mock _TaipyData objects."""
+    mock_data = Mock(spec=_TaipyData)
+    mock_data.get.return_value = value
+    return mock_data
+
+
+def test_get_data_with_valid_data(gui: Gui):
+    """Test if get_data() returns the correct accessor for valid data."""
     data_accessors = _DataAccessors(gui)
+    data_accessors._DataAccessors__access_4_type = {int: Mock(get_data=lambda *args: "valid_data")}  # type: ignore
+    result = data_accessors.get_data("var_name", mock_taipy_data(123), {})
 
-    # Simulate valid data being passed
-    data_accessors._DataAccessors__access_4_type = {int: "valid_accessor"}  # type: ignore
-
-    result = data_accessors._DataAccessors__get_instance(123)  # type: ignore
-    assert result == "valid_accessor"  # Valid accessor should be returned
+    assert result == "valid_data"  
 
 
-def test__get_instance_with_invalid_data(gui: Gui):
-    """Test if __get_instance handles invalid data correctly."""
+
+
+def test_get_data_with_invalid_data(gui: Gui):
+    """Test if get_data() handles invalid data correctly."""
     data_accessors = _DataAccessors(gui)
-
-    # No valid data accessor, should return None
     gui.handle_invalid_data = lambda x: None  # type: ignore
-    result = data_accessors._DataAccessors__get_instance("invalid_data")  # type: ignore
+    mock_taipy_data = MagicMock()
+    mock_taipy_data.get.return_value = "invalid_data" 
+    instance = data_accessors._DataAccessors__get_instance(mock_taipy_data)  # type: ignore
+    assert isinstance(
+        instance, _InvalidDataAccessor
+    ), f"Expected _InvalidDataAccessor but got {type(instance)}"
+    result = data_accessors.get_data("var_name", mock_taipy_data, {})
+    print(f"Result from get_data: {result}")
+    
+    assert result == {}, f"Expected {{}} but got {result}"
 
-    assert isinstance(result, _InvalidDataAccessor)  # Should return InvalidDataAccessor
 
-
-def test__get_instance_transformation_successful(gui: Gui):
-    """Test if __get_instance transforms invalid data correctly when callback is set."""
+def test_get_data_transformation_successful(gui: Gui):
+    """Test if get_data() transforms invalid data correctly when a callback is set."""
     data_accessors = _DataAccessors(gui)
 
-    # Mock invalid data transformation to return valid data
-    gui.handle_invalid_data = lambda x: 123  # type: ignore # Transformation success
-    data_accessors._DataAccessors__access_4_type = {int: "valid_accessor"}  # type: ignore
+    gui.handle_invalid_data = lambda x: 123  # type: ignore
+    data_accessors._DataAccessors__access_4_type = {int: Mock(get_data=lambda *args: "valid_data")}  # type: ignore
+    result = data_accessors.get_data("var_name", mock_taipy_data("invalid_data"), {})
 
-    result = data_accessors._DataAccessors__get_instance("invalid_data")  # type: ignore
-    assert (
-        result == "valid_accessor"
-    )  # Transformed data should now return the valid accessor
+    assert result == "valid_data"  
