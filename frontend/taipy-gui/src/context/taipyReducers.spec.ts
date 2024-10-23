@@ -588,8 +588,8 @@ describe("taipyReducer function", () => {
         });
     });
     it("should handle DELETE_ALERT action", () => {
-        const notificationId1 = nanoid();
-        const notificationId2 = nanoid();
+        const notificationId1 = "id-1234";
+        const notificationId2 = "id-5678";
         const initialState = {
             ...INITIAL_STATE,
             alerts: [
@@ -602,9 +602,9 @@ describe("taipyReducer function", () => {
         expect(newState.alerts).toEqual([{ atype: "warning", message: "Second Alert", system: false, duration: 3000, notificationId: notificationId2 }]);
     });
     it('should not modify state if DELETE_ALERT does not match any notificationId', () => {
-        const notificationId1 = nanoid();
-        const notificationId2 = nanoid();
-        const nonExistentId = nanoid();
+        const notificationId1 = "id-1234";
+        const notificationId2 = "id-5678";
+        const nonExistentId = "000000";
         const initialState = {
             ...INITIAL_STATE,
             alerts: [
@@ -622,7 +622,10 @@ describe("taipyReducer function", () => {
         const newState = taipyReducer(initialState, action);
         expect(newState).toEqual(initialState);
     });
-    it("should handle DELETE_ALERT action", () => {
+    it("should handle DELETE_ALERT action even when no notificationId is passed", () => {
+        const notificationId1 = "id-1234";
+        const notificationId2 = "id-5678";
+
         const initialState = {
             ...INITIAL_STATE,
             alerts: [
@@ -631,16 +634,18 @@ describe("taipyReducer function", () => {
                     atype: "type1",
                     system: true,
                     duration: 5000,
+                    notificationId: notificationId1,
                 },
                 {
                     message: "alert2",
                     atype: "type2",
                     system: false,
                     duration: 3000,
+                    notificationId: notificationId2,
                 },
             ],
         };
-        const action = { type: Types.DeleteAlert };
+        const action = { type: Types.DeleteAlert, notificationId: notificationId1 };
         const newState = taipyReducer(initialState, action);
         expect(newState.alerts).toEqual([
             {
@@ -648,6 +653,7 @@ describe("taipyReducer function", () => {
                 atype: "type2",
                 system: false,
                 duration: 3000,
+                notificationId: notificationId2,
             },
         ]);
     });
