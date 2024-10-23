@@ -12,7 +12,7 @@
 from typing import Optional
 
 from ..exceptions.exceptions import InvalidEventOperation
-from .event import _UNSUBMITTABLE_ENTITY_TYPES, EventEntityType, EventOperation
+from .event import Event, EventEntityType, EventOperation
 
 
 class _Topic:
@@ -35,7 +35,7 @@ class _Topic:
         if (
             entity_type
             and operation
-            and entity_type in _UNSUBMITTABLE_ENTITY_TYPES
+            and entity_type in Event._UNSUBMITTABLE_ENTITY_TYPES
             and operation == EventOperation.SUBMISSION
         ):
             raise InvalidEventOperation

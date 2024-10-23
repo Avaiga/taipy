@@ -62,23 +62,20 @@ class EventEntityType(_ReprEnum):
     JOB = 6
     SUBMISSION = 7
 
+    @classmethod
+    def add_member(cls, name, value):
+        # Check if the member already exists to prevent duplication
+        if name in cls._member_map_:
+            return
 
-_NO_ATTRIBUTE_NAME_OPERATIONS = {EventOperation.CREATION, EventOperation.DELETION, EventOperation.SUBMISSION}
-_UNSUBMITTABLE_ENTITY_TYPES = (
-    EventEntityType.CYCLE,
-    EventEntityType.DATA_NODE,
-    EventEntityType.JOB,
-    EventEntityType.SUBMISSION,
-)
-_ENTITY_TO_EVENT_ENTITY_TYPE = {
-    "scenario": EventEntityType.SCENARIO,
-    "sequence": EventEntityType.SEQUENCE,
-    "task": EventEntityType.TASK,
-    "data": EventEntityType.DATA_NODE,
-    "job": EventEntityType.JOB,
-    "cycle": EventEntityType.CYCLE,
-    "submission": EventEntityType.SUBMISSION,
-}
+        # Create a new enum member
+        new_member = object.__new__(cls)
+        new_member._name_ = name
+        new_member._value_ = value
+        # Update the class dictionary and member maps
+        setattr(cls, name, new_member)
+        cls._member_map_[name] = new_member
+        cls._value2member_map_[value] = new_member
 
 
 @dataclass(frozen=True)
@@ -87,6 +84,23 @@ class Event:
 
     An event holds the necessary attributes to identify the change.
     """
+
+    _NO_ATTRIBUTE_NAME_OPERATIONS = {EventOperation.CREATION, EventOperation.DELETION, EventOperation.SUBMISSION}
+    _UNSUBMITTABLE_ENTITY_TYPES = {
+        EventEntityType.CYCLE,
+        EventEntityType.DATA_NODE,
+        EventEntityType.JOB,
+        EventEntityType.SUBMISSION,
+    }
+    _ENTITY_TO_EVENT_ENTITY_TYPE = {
+        "scenario": EventEntityType.SCENARIO,
+        "sequence": EventEntityType.SEQUENCE,
+        "task": EventEntityType.TASK,
+        "data": EventEntityType.DATA_NODE,
+        "job": EventEntityType.JOB,
+        "cycle": EventEntityType.CYCLE,
+        "submission": EventEntityType.SUBMISSION,
+    }
 
     entity_type: EventEntityType
     """Type of the entity that was changed (`DataNode^`, `Scenario^`, `Cycle^`, etc. )."""
@@ -112,11 +126,11 @@ class Event:
         super().__setattr__("creation_date", datetime.now())
 
         # Check operation:
-        if self.entity_type in _UNSUBMITTABLE_ENTITY_TYPES and self.operation == EventOperation.SUBMISSION:
+        if self.entity_type in self._UNSUBMITTABLE_ENTITY_TYPES and self.operation == EventOperation.SUBMISSION:
             raise InvalidEventOperation
 
         # Check attribute name:
-        if self.operation in _NO_ATTRIBUTE_NAME_OPERATIONS and self.attribute_name is not None:
+        if self.operation in self._NO_ATTRIBUTE_NAME_OPERATIONS and self.attribute_name is not None:
             raise InvalidEventAttributeName
 
 
