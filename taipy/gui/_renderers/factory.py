@@ -339,14 +339,15 @@ class _Factory:
         )
         .set_attributes(
             [
-                ("active", PropertyType.dynamic_boolean, True),
+                ("lov", PropertyType.lov),
                 ("label",),
+                ("on_action", PropertyType.function),
+                ("selected", PropertyType.dynamic_list),
+                ("inactive_ids", PropertyType.dynamic_list),
+                ("active", PropertyType.dynamic_boolean, True),
+                ("hover_text", PropertyType.dynamic_string),
                 ("width",),
                 ("width[mobile]",),
-                ("on_action", PropertyType.function),
-                ("inactive_ids", PropertyType.dynamic_list),
-                ("hover_text", PropertyType.dynamic_string),
-                ("lov", PropertyType.lov),
             ]
         )
         ._set_propagate(),

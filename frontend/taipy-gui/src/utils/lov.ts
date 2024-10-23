@@ -33,4 +33,5 @@ export interface MenuProps extends TaipyBaseProps {
     inactiveIds?: string[];
     lov?: LovItem[];
     active?: boolean;
+    selected?: string[];
 }

@@ -11,12 +11,19 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useMemo, useEffect } from "react";
+import React, {useMemo, useEffect} from "react";
 
-import { LovProps, useLovListMemo } from "./lovUtils";
-import { useClassNames, useDispatch, useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useIsMobile, useModule } from "../../utils/hooks";
-import { createSetMenuAction } from "../../context/taipyReducers";
-import { MenuProps } from "../../utils/lov";
+import {LovProps, useLovListMemo} from "./lovUtils";
+import {
+    useClassNames,
+    useDispatch,
+    useDispatchRequestUpdateOnFirstRender,
+    useDynamicProperty,
+    useIsMobile,
+    useModule,
+} from "../../utils/hooks";
+import {createSetMenuAction} from "../../context/taipyReducers";
+import {MenuProps} from "../../utils/lov";
 
 interface MenuCtlProps extends LovProps<string> {
     label?: string;
@@ -25,17 +32,12 @@ interface MenuCtlProps extends LovProps<string> {
     onAction?: string;
     inactiveIds?: string[];
     defaultInactiveIds?: string;
+    selected?: string[];
+    defaultSelected?: string;
 }
 
 const MenuCtl = (props: MenuCtlProps) => {
-    const {
-        id,
-        label,
-        onAction,
-        defaultLov = "",
-        width = "15vw",
-        width_Mobile_ = "85vw",
-    } = props;
+    const {id, label, onAction, defaultLov = "", width = "15vw", width_Mobile_ = "85vw"} = props;
     const dispatch = useDispatch();
     const isMobile = useIsMobile();
     const module = useModule();
@@ -50,16 +52,28 @@ const MenuCtl = (props: MenuCtlProps) => {
     const inactiveIds = useMemo(() => {
         if (props.inactiveIds) {
             return props.inactiveIds;
-        }
-        if (props.defaultInactiveIds) {
+        } else if (props.defaultInactiveIds) {
             try {
                 return JSON.parse(props.defaultInactiveIds) as string[];
             } catch {
-                // too bad
+                console.error("Failed to parse defaultInactiveIds");
             }
         }
-        return [];
+        return [] as string[];
     }, [props.inactiveIds, props.defaultInactiveIds]);
+
+    const selected = useMemo(() => {
+        if (props.selected) {
+            return props.selected;
+        } else if (props.defaultSelected) {
+            try {
+                return JSON.parse(props.defaultSelected) as string[];
+            } catch (error) {
+                console.error("Failed to parse defaultSelected:", error);
+            }
+        }
+        return [] as string[];
+    }, [props.selected, props.defaultSelected]);
 
     useEffect(() => {
         dispatch(
@@ -71,21 +85,11 @@ const MenuCtl = (props: MenuCtlProps) => {
                 inactiveIds: inactiveIds,
                 width: isMobile ? width_Mobile_ : width,
                 className: className,
+                selected: selected,
             } as MenuProps)
         );
         return () => dispatch(createSetMenuAction({}));
-    }, [
-        label,
-        onAction,
-        active,
-        lovList,
-        inactiveIds,
-        width,
-        width_Mobile_,
-        isMobile,
-        className,
-        dispatch,
-    ]);
+    }, [label, onAction, active, lovList, inactiveIds, width, width_Mobile_, isMobile, className, dispatch, selected]);
 
     return <></>;
 };

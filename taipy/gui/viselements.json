@@ -1452,7 +1452,7 @@
                         "type": "dynamic(str)",
                         "doc": "The title of the progress indicator."
                     },
-                                        {
+                    {
                         "name": "title_anchor",
                         "type": "str",
                         "default_value": "\"bottom\"",
@@ -1548,38 +1548,9 @@
                         "doc": "The list of menu option values."
                     },
                     {
-                        "name": "adapter",
-                        "type": "Union[str, Callable]",
-                        "default_value": "<tt>lambda x: str(x)</tt>",
-                        "doc": "A function or the name of the function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>.<br/>The default value is a function that returns the string representation of the <i>lov</i> element."
-                    },
-                    {
-                        "name": "type",
-                        "type": "str",
-                        "default_value": "<i>Type name of the first lov element</i>",
-                        "doc": "This property is required if <i>lov</i> contains a non-specific type of data (e.g., a dictionary).<br/>Then:<ul><li><i>value</i> must be of that type</li><li><i>lov</i> must be an iterable containing elements of this type</li><li>The function set to <i>adapter</i> will receive an object of this type.</li></ul><br/>The default value is the type of the first element in <i>lov</i>."
-                    },
-                    {
                         "name": "label",
                         "type": "str",
                         "doc": "The title of the menu."
-                    },
-                    {
-                        "name": "inactive_ids",
-                        "type": "dynamic(Union[str,list[str]])",
-                        "doc": "Semicolon (';')-separated list or a list of menu items identifiers that are disabled."
-                    },
-                    {
-                        "name": "width",
-                        "type": "str",
-                        "default_value": "\"15vw\"",
-                        "doc": "The width of the menu when unfolded, in CSS units.<br/>Note that when running on a mobile device, the property <i>width[active]</i> is used instead."
-                    },
-                    {
-                        "name": "width[mobile]",
-                        "type": "str",
-                        "default_value": "\"85vw\"",
-                        "doc": "The width of the menu when unfolded, in CSS units, when running on a mobile device."
                     },
                     {
                         "name": "on_action",
@@ -1599,6 +1570,40 @@
                                 "dict"
                             ]
                         ]
+                    },
+                    {
+                        "name": "selected",
+                        "type": "dynamic(list[str])",
+                        "doc": "Semicolon (';')-separated list or a list of menu items identifiers that should be selected."
+                    },
+                    {
+                        "name": "inactive_ids",
+                        "type": "dynamic(Union[str,list[str]])",
+                        "doc": "Semicolon (';')-separated list or a list of menu items identifiers that are disabled."
+                    },
+                    {
+                        "name": "adapter",
+                        "type": "Union[str, Callable]",
+                        "default_value": "<tt>lambda x: str(x)</tt>",
+                        "doc": "A function or the name of the function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:Union[str,Icon])</i>.<br/>The default value is a function that returns the string representation of the <i>lov</i> element."
+                    },
+                    {
+                        "name": "type",
+                        "type": "str",
+                        "default_value": "<i>Type name of the first lov element</i>",
+                        "doc": "This property is required if <i>lov</i> contains a non-specific type of data (e.g., a dictionary).<br/>Then:<ul><li><i>value</i> must be of that type</li><li><i>lov</i> must be an iterable containing elements of this type</li><li>The function set to <i>adapter</i> will receive an object of this type.</li></ul><br/>The default value is the type of the first element in <i>lov</i>."
+                    },
+                    {
+                        "name": "width",
+                        "type": "str",
+                        "default_value": "\"15vw\"",
+                        "doc": "The width of the menu when unfolded, in CSS units.<br/>Note that when running on a mobile device, the property <i>width[active]</i> is used instead."
+                    },
+                    {
+                        "name": "width[mobile]",
+                        "type": "str",
+                        "default_value": "\"85vw\"",
+                        "doc": "The width of the menu when unfolded, in CSS units, when running on a mobile device."
                     }
                 ]
             }
