@@ -1,6 +1,7 @@
 # Copyright 2021-2024 Avaiga Private Limited
 #
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
 #
 #        http://www.apache.org/licenses/LICENSE-2.0
@@ -19,32 +20,34 @@ from setuptools.command.build_py import build_py
 
 root_folder = Path(__file__).parent
 
-# get current version
-with open(os.path.join("taipy", "version.json")) as version_file:
+# Get current version from version.json
+with open(root_folder / "taipy" / "version.json") as version_file:
     version = json.load(version_file)
-    version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
-    if vext := version.get("ext"):
-        version_string = f"{version_string}.{vext}"
+    version_string = f'{version["major"]}.{version["minor"]}.{version["patch"]}'
+    if "ext" in version:
+        version_string += f'.{version["ext"]}'
 
+# Function to get all package requirements
 def get_requirements():
     reqs = set()
     for pkg in (root_folder / "tools" / "packages").iterdir():
         requirements_file = pkg / "setup.requirements.txt"
         if requirements_file.exists():
-            reqs.update(requirements_file.read_text("UTF-8").splitlines())
-
+            reqs.update(requirements_file.read_text(encoding="UTF-8").splitlines())
     return [r for r in reqs if r and not r.startswith("taipy")]
 
+# Custom build class to handle NPM install before build
 class NPMInstall(build_py):
     def run(self):
         subprocess.run(
             ["python", "bundle_build.py"],
             cwd=root_folder / "tools" / "frontend",
             check=True,
-            shell=platform.system() == "Windows",
+            shell=(platform.system() == "Windows")
         )
-        build_py.run(self)
+        super().run()
 
+# Setup script
 setup(
     version=version_string,
     install_requires=get_requirements(),
