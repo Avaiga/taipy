@@ -80,6 +80,30 @@ def test_taipy_no_reload(gui: Gui):
         assert gui._config.config.get("use_reloader") is False
 
 
+def test_taipy_run_browser(gui: Gui):
+    with patch("sys.argv", ["prog", "--run-browser"]):
+        gui.run(run_server=False, use_reloader=False)
+        assert gui._config.config.get("run_browser") is True
+
+
+def test_taipy_no_run_browser(gui: Gui):
+    with patch("sys.argv", ["prog", "--no-run-browser"]):
+        gui.run(run_server=False, use_reloader=True)
+        assert gui._config.config.get("run_browser") is False
+
+
+def test_taipy_dark_mode(gui: Gui):
+    with patch("sys.argv", ["prog", "--dark-mode"]):
+        gui.run(run_server=False)
+        assert gui._config.config.get("dark_mode") is True
+
+
+def test_taipy_light_mode(gui: Gui):
+    with patch("sys.argv", ["prog", "--light-mode"]):
+        gui.run(run_server=False)
+        assert gui._config.config.get("dark_mode") is False
+
+
 def test_ngrok_token(gui: Gui):
     with patch("sys.argv", ["prog", "--ngrok-token", "token"]):
         gui.run(run_server=False)
