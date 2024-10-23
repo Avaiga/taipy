@@ -15,7 +15,6 @@ import React, { useCallback, useEffect, useMemo } from "react";
 import { SnackbarKey, useSnackbar, VariantType } from "notistack";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
-import { nanoid } from "nanoid";
 
 import { AlertMessage, createDeleteAlertAction } from "../../context/taipyReducers";
 import { useDispatch } from "../../utils/hooks";
@@ -57,7 +56,7 @@ const TaipyNotification = ({ alerts }: NotificationProps) => {
 
     useEffect(() => {
         if (alert) {
-            const notificationId = nanoid();
+            const notificationId = alert.notificationId || "";
             if (alert.atype === "") {
                 closeSnackbar(notificationId);
             } else {
