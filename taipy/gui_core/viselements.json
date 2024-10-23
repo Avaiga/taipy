@@ -100,7 +100,7 @@
                     },
                     {
                         "name": "filter",
-                        "type": "bool|str|ScenarioFilter|list[str|ScenarioFilter]",
+                        "type": "bool|str|taipy.gui_core.filters.ScenarioFilter|list[str|taipy.gui_core.filters.ScenarioFilter]",
                         "default_value": "\"*\"",
                         "doc": "TODO: a list of <code>Scenario^</code> attributes to filter on. If False, do not allow filter."
                     },
@@ -112,7 +112,7 @@
                     },
                     {
                         "name": "sort",
-                        "type": "bool|str|ScenarioFilter|list[str|ScenarioFilter]",
+                        "type": "bool|str|taipy.gui_core.filters.ScenarioFilter|list[str|taipy.gui_core.filters.ScenarioFilter]",
                         "default_value": "\"*\"",
                         "doc": "TODO: a list of <code>Scenario^</code> attributes to sort on. If False, do not allow sort."
                     }
@@ -355,7 +355,7 @@
                     },
                     {
                         "name": "filter",
-                        "type": "bool|str|DataNodeFilter|list[str|DataNodeFilter]",
+                        "type": "bool|str|taipy.gui_core.filters.DataNodeFilter|list[str|taipy.gui_core.filters.DataNodeFilter]",
                         "default_value": "\"*\"",
                         "doc": "TODO: a list of <code>DataNode^</code> attributes to filter on. If False, do not allow filter."
                     },
@@ -367,7 +367,7 @@
                     },
                     {
                         "name": "sort",
-                        "type": "bool|str|DataNodeFilter|list[str|DataNodeFilter]",
+                        "type": "bool|str|taipy.gui_core.filters.DataNodeFilter|list[str|taipy.gui_core.filters.DataNodeFilter]",
                         "default_value": "\"*\"",
                         "doc": "TODO: a list of <code>DataNode^</code> attributes to sort on. If False, do not allow sort."
                     }
@@ -548,7 +548,7 @@
                     },
                     {
                         "name": "on_details",
-                        "type": "Union[str, Callback, bool]",
+                        "type": "Union[str, Callable, bool]",
                         "doc": "The name of a function that is triggered when the details icon is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the id of the control.</li>\n<li>payload (<code>dict</code>): a dictionary that contains the Job Id in the value for key <i>args<i>.</li>\n</ul></br>If False, the icon is not shown.",
                         "signature": [
                             [
