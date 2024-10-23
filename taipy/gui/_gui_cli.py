@@ -97,12 +97,12 @@ class _GuiCLI(_AbstractCLI):
     __DARK_LIGHT_MODE_ARGS: Dict[str, Dict] = {
         "--dark-mode": {
             "dest": "taipy_dark_mode",
-            "help": "Apply the dark mode to the GUI application",
+            "help": "Apply dark mode to the GUI application",
             "action": "store_true",
         },
         "--light-mode": {
             "dest": "taipy_light_mode",
-            "help": "Apply the light mode to the GUI application",
+            "help": "Apply light mode to the GUI application",
             "action": "store_true",
         },
     }

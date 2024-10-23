@@ -256,7 +256,7 @@ class _Config(object):
                         config[key] = value if config.get(key) is None else type(config.get(key))(value)  # type: ignore[reportCallIssue]
                 except Exception as e:
                     _warn(
-                        f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse value to the correct type",  # noqa: E501
+                        f"Invalid keyword arguments value in Gui.run(): {key} - {value}. Unable to parse value to the correct type",  # noqa: E501
                         e,
                     )
         # Load config from env file
