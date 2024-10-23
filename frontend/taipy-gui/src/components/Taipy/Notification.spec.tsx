@@ -119,14 +119,14 @@ describe("Alert Component", () => {
     });
 
     it("Alert disappears when alert type is empty", async () => {
-        const alerts = [{ atype: "success", message: "Test Alert", duration: 3000, system: false }];
+        const alerts = [{ atype: "success", message: "Test Alert", duration: 3000, system: false, notificationId: "aNotificationId" }];
         const { rerender } = render(
             <SnackbarProvider>
                 <Alert alerts={alerts} />
             </SnackbarProvider>,
         );
         await screen.findByRole("button", { name: /close/i });
-        const newAlerts = [{ atype: "", message: "Test Alert", duration: 3000, system: false }];
+        const newAlerts = [{ atype: "", message: "Test Alert", duration: 3000, system: false, notificationId: "aNotificationId" }];
         rerender(
             <SnackbarProvider>
                 <Alert alerts={newAlerts} />
