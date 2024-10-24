@@ -358,6 +358,13 @@ class Gui:
         The returned HTML content can therefore use both the variables stored in the *state*
         and the parameters provided in the call to `get_user_content_url()^`.
         """
+        self.on_invalid_data: t.Optional[t.Callable] = None
+        """
+        The function that is called to transform data into a valid data type.
+        Invokes the callback to transform unsupported data into a valid format.
+        :param value: The unsupported data type encountered.
+        :return: Transformed data or None if no transformation is possible.
+        """
 
         # sid from client_id
         self.__client_id_2_sid: t.Dict[str, t.Set[str]] = {}
@@ -406,6 +413,21 @@ class Gui:
         if libraries is not None:
             for library in libraries:
                 Gui.add_library(library)
+
+    def _handle_invalid_data(self, value: t.Any) -> t.Optional[t.Any]:
+        """
+        Handles unsupported data by invoking the callback if available.
+        :param value: The unsupported data encountered.
+        :return: Transformed data or None if no transformation is possible.
+        """
+        try:
+            if _is_function(self.on_invalid_data):
+                return self.on_invalid_data(value) # type: ignore
+            else:
+                return None
+        except Exception as e:
+            _warn(f"Error transforming data: {str(e)}")
+            return None
 
     @staticmethod
     def add_library(library: ElementLibrary) -> None:
@@ -2624,6 +2646,7 @@ class Gui:
             self.__bind_local_func("on_exception")
             self.__bind_local_func("on_status")
             self.__bind_local_func("on_user_content")
+            self.__bind_local_func("on_invalid_data")
 
     def __register_blueprint(self):
         # add en empty main page if it is not defined
