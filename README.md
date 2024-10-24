@@ -10,6 +10,45 @@
   </a>
 </div>
 
+<div align="center">
+  <table>
+    <tr>
+      <td>
+        <a href="https://github.com/your-repo/releases" target="_blank">
+          <img alt="Version" src="https://img.shields.io/badge/Version-1.1.2-blue">
+        </a>
+      </td>
+      <td>
+        <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank">
+          <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg">
+        </a>
+      </td>
+      <td>
+        <a href="https://www.python.org/downloads/release/python-380/" target="_blank">
+          <img alt="Python Version" src="https://img.shields.io/badge/Python-3.8-blue">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://docs.taipy.io/en/latest/" target="_blank">
+          <img alt="Explore the Docs" src="https://img.shields.io/badge/Explore_the_Docs-📚-informational">
+        </a>
+      </td>
+      <td>
+        <a href="https://discord.com/invite/SJyz2VJGxV" target="_blank">
+          <img alt="Discord Support" src="https://img.shields.io/badge/Discord_Support-🫱🏼‍🫲🏼-blueviolet">
+        </a>
+      </td>
+      <td>
+        <a href="https://docs.taipy.io/en/latest/gallery/" target="_blank">
+          <img alt="Demos & Examples" src="https://img.shields.io/badge/Demos_%26_Examples-👀-yellow">
+        </a>
+      </td>
+    </tr>
+  </table>
+</div>
+
 <h1 align="center">
     Build Python Data & AI web applications
 </h1>
