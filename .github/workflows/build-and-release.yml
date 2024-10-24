@@ -20,6 +20,7 @@ env:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   fetch-versions:
@@ -238,10 +239,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Bump Version
+        if: github.event.inputs.release_type == 'dev'
+        id: bump-version
+        run: |
+          python tools/release/bump_version.py
+
       - uses: stefanzweifel/git-auto-commit-action@v5
+        if: github.event.inputs.release_type == 'dev'
         with:
-          file_pattern: '*/version.json'
+          branch: "feature/update-dev-version-${{ github.run_id }}"
+          create_branch: 'true'
+          file_pattern: '**/version.json'
           commit_message: Update version to ${{ needs.fetch-versions.outputs.NEW_VERSION }}
+
+      - name: create pull request
+        if: github.event.inputs.release_type == 'dev'
+        run: gh pr create -B develop -H "feature/update-dev-version-${{ github.run_id }}" --title 'Update Dev Version' --body 'Created by Github action'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Reset changes
         run: |

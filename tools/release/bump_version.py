@@ -12,7 +12,6 @@
 import json
 import os
 import re
-import sys
 from dataclasses import asdict, dataclass
 from typing import Optional
 
@@ -73,37 +72,15 @@ def extract_version(base_path: str) -> Version:
     return __load_version_from_path(base_path)
 
 
-def __setup_dev_version(version: Version, _base_path: str, name: Optional[str] = None) -> None:
-    version.validate_suffix()
-
-    name = f"{name}_VERSION" if name else "VERSION"
-
-    print(f"{name}={version.dev_name}")  # noqa: T201
-
-
 def bump_ext_version(version: Version, _base_path: str) -> None:
     version.bump_ext_version()
     __write_version_to_path(_base_path, version)
 
 
-def __setup_prod_version(version: Version, target_version: str, branch_name: str, name: str = None) -> None:
-    if str(version) != target_version:
-        raise ValueError(f"Current version={version} does not match target version={target_version}")
-
-    if target_branch_name := f"release/{version.major}.{version.minor}" != branch_name:
-        raise ValueError(
-            f"Branch name mismatch branch={branch_name} does not match target branch name={target_branch_name}"
-        )
-
-    name = f"{name}_VERSION" if name else "VERSION"
-    print(f"{name}={version.name}")  # noqa: T201
-
 
 if __name__ == "__main__":
     paths = (
-        [sys.argv[1]]
-        if sys.argv[1] != "ALL"
-        else [
+         [
             f"taipy{os.sep}common",
             f"taipy{os.sep}core",
             f"taipy{os.sep}rest",
@@ -112,14 +89,9 @@ if __name__ == "__main__":
             "taipy",
         ]
     )
-    _environment = sys.argv[2]
 
     for _path in paths:
         _version = extract_version(_path)
-        _name = None if _path == "taipy" else _path.split(os.sep)[-1]
+        bump_ext_version(_version, _path)
+    print(f"NEW_VERSION={_version.dev_name}")
 
-        if _environment == "dev":
-            __setup_dev_version(_version, _path, _name)
-
-        if _environment == "production":
-            __setup_prod_version(_version, sys.argv[3], sys.argv[4], _name)
