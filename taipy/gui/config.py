@@ -214,6 +214,12 @@ class _Config(object):
             config["use_reloader"] = True
         if args.taipy_no_reloader:
             config["use_reloader"] = False
+        if args.taipy_run_browser:
+            config["run_browser"] = True
+        if args.taipy_no_run_browser:
+            config["run_browser"] = False
+        if args.taipy_dark_mode or args.taipy_light_mode:
+            config["dark_mode"] = not args.taipy_light_mode
         if args.taipy_ngrok_token:
             config["ngrok_token"] = args.taipy_ngrok_token
         if args.taipy_webapp_path:
@@ -250,7 +256,7 @@ class _Config(object):
                         config[key] = value if config.get(key) is None else type(config.get(key))(value)  # type: ignore[reportCallIssue]
                 except Exception as e:
                     _warn(
-                        f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse value to the correct type",  # noqa: E501
+                        f"Invalid keyword arguments value in Gui.run(): {key} - {value}. Unable to parse value to the correct type",  # noqa: E501
                         e,
                     )
         # Load config from env file
