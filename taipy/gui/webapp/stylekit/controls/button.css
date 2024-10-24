@@ -1,0 +1,82 @@
+/*
+ * Copyright 2021-2024 Avaiga Private Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
+/**************************************************************
+
+                   TAIPY BUTTON
+
+***************************************************************/
+
+/*************************************************
+              MODIFIER CLASSES
+**************************************************/
+
+/* fullwidth :  */
+.taipy-button.fullwidth {
+    display: flex;
+    width: 100%;
+}
+
+/***** Other color variants for default "outline" button  *****/
+
+/* secondary : secondary color button */
+.taipy-button:where(:not(.Mui-disabled)).secondary {
+    border-color: var(--color-secondary);
+    color: var(--color-secondary);
+}
+
+/* error : error color button */
+.taipy-button:where(:not(.Mui-disabled)).error {
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+/* warning : warning color button */
+.taipy-button:where(:not(.Mui-disabled)).warning {
+    border-color: var(--color-warning);
+    color: var(--color-warning);
+}
+
+/* success : success color button */
+.taipy-button:where(:not(.Mui-disabled)).success {
+    border-color: var(--color-success);
+    color: var(--color-success);
+}
+
+/***** Plain color button  *****/
+
+/* plain : apply plain color instead of just an outline */
+.taipy-button:where(:not(.Mui-disabled)).plain {
+    background-color: var(--button-bg, var(--color-primary));
+    color: var(--button-color, white);
+}
+
+/* plain secondary : apply secondary color to plain button */
+.taipy-button:where(:not(.Mui-disabled)).plain.secondary {
+    --button-bg: var(--color-secondary);
+}
+
+/* plain error : apply error color to plain button */
+.taipy-button:where(:not(.Mui-disabled)).plain.error {
+    --button-bg: var(--color-error);
+}
+
+/* plain warning : apply warning color to plain button */
+.taipy-button:where(:not(.Mui-disabled)).plain.warning {
+    --button-bg: var(--color-secondary);
+}
+
+/* plain success : apply success color to plain button */
+.taipy-button:where(:not(.Mui-disabled)).plain.success {
+    --button-bg: var(--color-success);
+}

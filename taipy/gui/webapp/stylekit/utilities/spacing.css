@@ -1,0 +1,366 @@
+/*
+ * Copyright 2021-2024 Avaiga Private Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
+/**************************************************************
+
+                   SPACING UTILITIES
+
+***************************************************************/
+
+/*************************************************
+              MARGINS
+**************************************************/
+
+.m0 {
+    margin: 0 !important;
+}
+
+.m-auto {
+    margin: auto !important;
+}
+
+.m-half {
+    margin: var(--spacing-half) !important;
+}
+
+.m1 {
+    margin: var(--spacing1) !important;
+}
+
+.m2 {
+    margin: var(--spacing2) !important;
+}
+
+.m3 {
+    margin: var(--spacing3) !important;
+}
+
+.m4 {
+    margin: var(--spacing4) !important;
+}
+
+.m5 {
+    margin: var(--spacing5) !important;
+}
+
+.m6 {
+    margin: var(--spacing6) !important;
+}
+
+.mt0 {
+    margin-top: 0 !important;
+}
+
+.mt-auto {
+    margin-top: auto !important;
+}
+
+.mt-half {
+    margin-top: var(--spacing-half) !important;
+}
+
+.mt1 {
+    margin-top: var(--spacing1) !important;
+}
+
+.mt2 {
+    margin-top: var(--spacing2) !important;
+}
+
+.mt3 {
+    margin-top: var(--spacing3) !important;
+}
+
+.mt4 {
+    margin-top: var(--spacing4) !important;
+}
+
+.mt5 {
+    margin-top: var(--spacing5) !important;
+}
+
+.mt6 {
+    margin-top: var(--spacing6) !important;
+}
+
+.mb0 {
+    margin-bottom: 0 !important;
+}
+
+.mb-auto {
+    margin-bottom: auto !important;
+}
+
+.mb-half {
+    margin-bottom: var(--spacing-half) !important;
+}
+
+.mb1 {
+    margin-bottom: var(--spacing1) !important;
+}
+
+.mb2 {
+    margin-bottom: var(--spacing2) !important;
+}
+
+.mb3 {
+    margin-bottom: var(--spacing3) !important;
+}
+
+.mb4 {
+    margin-bottom: var(--spacing4) !important;
+}
+
+.mb5 {
+    margin-bottom: var(--spacing5) !important;
+}
+
+.mb6 {
+    margin-bottom: var(--spacing6) !important;
+}
+
+.ml0 {
+    margin-left: 0 !important;
+}
+
+.ml-auto {
+    margin-left: auto !important;
+}
+
+.ml-half {
+    margin-left: var(--spacing-half) !important;
+}
+
+.ml1 {
+    margin-left: var(--spacing1) !important;
+}
+
+.ml2 {
+    margin-left: var(--spacing2) !important;
+}
+
+.ml3 {
+    margin-left: var(--spacing3) !important;
+}
+
+.ml4 {
+    margin-left: var(--spacing4) !important;
+}
+
+.ml5 {
+    margin-left: var(--spacing5) !important;
+}
+
+.ml6 {
+    margin-left: var(--spacing6) !important;
+}
+
+.mr0 {
+    margin-right: 0 !important;
+}
+
+.mr-auto {
+    margin-right: auto !important;
+}
+
+.mr-half {
+    margin-right: var(--spacing-half) !important;
+}
+
+.mr1 {
+    margin-right: var(--spacing1) !important;
+}
+
+.mr2 {
+    margin-right: var(--spacing2) !important;
+}
+
+.mr3 {
+    margin-right: var(--spacing3) !important;
+}
+
+.mr4 {
+    margin-right: var(--spacing4) !important;
+}
+
+.mr5 {
+    margin-right: var(--spacing5) !important;
+}
+
+.mr6 {
+    margin-right: var(--spacing6) !important;
+}
+
+/*************************************************
+              PADDINGS
+**************************************************/
+
+.p0 {
+    padding: 0 !important;
+}
+
+.p-half {
+    padding: var(--spacing-half) !important;
+}
+
+.p1 {
+    padding: var(--spacing1) !important;
+}
+
+.p2 {
+    padding: var(--spacing2) !important;
+}
+
+.p3 {
+    padding: var(--spacing3) !important;
+}
+
+.p4 {
+    padding: var(--spacing4) !important;
+}
+
+.p5 {
+    padding: var(--spacing5) !important;
+}
+
+.p6 {
+    padding: var(--spacing6) !important;
+}
+
+.pt0 {
+    padding-top: 0 !important;
+}
+
+.pt-half {
+    padding-top: var(--spacing-half) !important;
+}
+
+.pt1 {
+    padding-top: var(--spacing1) !important;
+}
+
+.pt2 {
+    padding-top: var(--spacing2) !important;
+}
+
+.pt3 {
+    padding-top: var(--spacing3) !important;
+}
+
+.pt4 {
+    padding-top: var(--spacing4) !important;
+}
+
+.pt5 {
+    padding-top: var(--spacing5) !important;
+}
+
+.pt6 {
+    padding-top: var(--spacing6) !important;
+}
+
+.pb0 {
+    padding-bottom: 0 !important;
+}
+
+.pb-half {
+    padding-bottom: var(--spacing-half) !important;
+}
+
+.pb1 {
+    padding-bottom: var(--spacing1) !important;
+}
+
+.pb2 {
+    padding-bottom: var(--spacing2) !important;
+}
+
+.pb3 {
+    padding-bottom: var(--spacing3) !important;
+}
+
+.pb4 {
+    padding-bottom: var(--spacing4) !important;
+}
+
+.pb5 {
+    padding-bottom: var(--spacing5) !important;
+}
+
+.pb6 {
+    padding-bottom: var(--spacing6) !important;
+}
+
+.pl0 {
+    padding-left: 0 !important;
+}
+
+.pl-half {
+    padding-left: var(--spacing-half) !important;
+}
+
+.pl1 {
+    padding-left: var(--spacing1) !important;
+}
+
+.pl2 {
+    padding-left: var(--spacing2) !important;
+}
+
+.pl3 {
+    padding-left: var(--spacing3) !important;
+}
+
+.pl4 {
+    padding-left: var(--spacing4) !important;
+}
+
+.pl5 {
+    padding-left: var(--spacing5) !important;
+}
+
+.pl6 {
+    padding-left: var(--spacing6) !important;
+}
+
+.pr0 {
+    padding-right: 0 !important;
+}
+
+.pr-half {
+    padding-right: var(--spacing-half) !important;
+}
+
+.pr1 {
+    padding-right: var(--spacing1) !important;
+}
+
+.pr2 {
+    padding-right: var(--spacing2) !important;
+}
+
+.pr3 {
+    padding-right: var(--spacing3) !important;
+}
+
+.pr4 {
+    padding-right: var(--spacing4) !important;
+}
+
+.pr5 {
+    padding-right: var(--spacing5) !important;
+}
+
+.pr6 {
+    padding-right: var(--spacing6) !important;
+}

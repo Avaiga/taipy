@@ -1,0 +1,72 @@
+/*
+ * Copyright 2021-2024 Avaiga Private Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
+html,
+body {
+    min-height: 100%;
+}
+
+#root {
+    height: 100%;
+    margin: var(--root-margin, 0) !important;
+}
+
+/* Color mode body */
+.taipy-dark,
+.taipy-light {
+    min-height: 100%;
+}
+
+#root main {
+    min-width: 0;
+}
+
+.main {
+    min-width: 0;
+    max-width: 100%;
+}
+
+/*************************************************
+              CUSTOM SCROLLBAR
+**************************************************/
+
+* {
+    -webkit-overflow-scrolling: touch;
+
+    /* Firefox scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--custom-scrollbar-thumb-color) var(--custom-scrollbar-rail-color);
+}
+
+/* Webkit scrollbar */
+*::-webkit-scrollbar {
+    width: var(--custom-scrollbar-width);
+}
+
+*::-webkit-scrollbar-track {
+    background: var(--custom-scrollbar-rail-color);
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: var(--custom-scrollbar-thumb-color);
+    border-radius: 20px;
+    border: none;
+}
+
+/*************************************************
+              TABLES
+**************************************************/
+
+table {
+    max-width: 100%;
+}
