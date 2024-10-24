@@ -10,9 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 import os
-
+from ..common.config import config
 from flask import Flask
-
+from werkzeug.serving import run_simple
 from . import api
 from .commons.encoder import _CustomEncoder
 from .extensions import apispec
@@ -35,6 +35,7 @@ def create_app(testing=False, flask_env=None, secret_key=None) -> Flask:
         api.views.register_views()
 
     return app
+
 
 
 def configure_apispec(app):
