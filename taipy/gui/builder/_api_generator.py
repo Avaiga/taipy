@@ -136,12 +136,18 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
         properties: t.Dict[str, str],
         ElementBaseClass: t.Union[t.Type[_Block], t.Type[_Control]],
     ):
+        # Adjust properties to allow None as a type
+        adjusted_properties = {
+            k: "none" if v is None else v  # If type is None, set it to "none"
+            for k, v in properties.items()
+        }
+
         return type(
             classname,
             (ElementBaseClass,),
             {
                 "_ELEMENT_NAME": element_name,
                 "_DEFAULT_PROPERTY": default_property,
-                "_TYPES": {f"{parts[0]}__" if len(parts := k.split("[")) > 1 else k: v for k, v in properties.items()},
+                "_TYPES": {f"{parts[0]}__" if len(parts := k.split("[")) > 1 else k: v for k, v in adjusted_properties.items()},
             },
         )
