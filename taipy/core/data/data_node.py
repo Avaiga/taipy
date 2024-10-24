@@ -14,10 +14,11 @@ import os
 import uuid
 from abc import abstractmethod
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
 import networkx as nx
 
+from taipy.common.config import Config
 from taipy.common.config.common._validate_id import _validate_id
 from taipy.common.config.common.scope import Scope
 from taipy.common.logger._taipy_logger import _TaipyLogger
@@ -103,9 +104,9 @@ class DataNode(_Entity, _Labeled):
 
     _ID_PREFIX = "DATANODE"
     __ID_SEPARATOR = "_"
+    _MANAGER_NAME: str = "data"
     _logger = _TaipyLogger._get_logger()
     _REQUIRED_PROPERTIES: List[str] = []
-    _MANAGER_NAME: str = "data"
     _PATH_KEY = "path"
     __EDIT_TIMEOUT = 30
 
@@ -146,6 +147,8 @@ class DataNode(_Entity, _Labeled):
         self._edits: List[Edit] = edits or []
 
         self._properties: _Properties = _Properties(self, **kwargs)
+        dn_cfg = Config.data_nodes.get(self._config_id, None)
+        self._ranks: Dict[str, int] = dn_cfg._ranks if dn_cfg else {}
 
     def __eq__(self, other) -> bool:
         """Check if two data nodes are equal."""
@@ -176,7 +179,7 @@ class DataNode(_Entity, _Labeled):
 
     @property
     def owner_id(self) -> Optional[str]:
-        """The identifier of the owner (sequence_id, scenario_id, cycle_id) or None."""
+        """The identifier of the owner (scenario_id, cycle_id or None)."""
         return self._owner_id
 
     @property  # type: ignore
@@ -205,7 +208,7 @@ class DataNode(_Entity, _Labeled):
     def last_edit_date(self) -> Optional[datetime]:
         """The date and time of the last modification."""
         last_modified_datetime = self._get_last_modified_datetime(self._properties.get(self._PATH_KEY, None))
-        if last_modified_datetime and last_modified_datetime > self._last_edit_date: # type: ignore
+        if last_modified_datetime and last_modified_datetime > self._last_edit_date:  # type: ignore
             return last_modified_datetime
         else:
             return self._last_edit_date
@@ -313,7 +316,7 @@ class DataNode(_Entity, _Labeled):
     @_self_reload(_MANAGER_NAME)
     def job_ids(self) -> List[JobId]:
         """List of the jobs having edited this data node."""
-        return [edit.get("job_id") for edit in self.edits if edit.get("job_id")]
+        return [job_id for edit in self.edits if (job_id := edit.get("job_id"))]
 
     @property
     def properties(self):
@@ -373,7 +376,7 @@ class DataNode(_Entity, _Labeled):
                     if (
                         isinstance(ancestor_node, DataNode)
                         and ancestor_node.last_edit_date
-                        and ancestor_node.last_edit_date > self.last_edit_date
+                        and ancestor_node.last_edit_date > cast(datetime, self.last_edit_date)
                     ):
                         return False
             return True
@@ -434,6 +437,8 @@ class DataNode(_Entity, _Labeled):
     def write(self, data, job_id: Optional[JobId] = None, **kwargs: Dict[str, Any]):
         """Write some data to this data node.
 
+        once the data is written, the data node is unlocked and the edit is tracked.
+
         Arguments:
             data (Any): The data to write to this data node.
             job_id (JobId): An optional identifier of the writer.
@@ -460,7 +465,7 @@ class DataNode(_Entity, _Labeled):
                 self._get_last_modified_datetime(self._properties.get(self._PATH_KEY, None)) or datetime.now()
             )
         self.last_edit_date = edit.get("timestamp")
-        self._edits.append(edit)
+        self._edits.append(cast(Edit, edit))
 
     def lock_edit(self, editor_id: Optional[str] = None):
         """Lock the data node modification.
@@ -566,6 +571,24 @@ class DataNode(_Entity, _Labeled):
             None if there has been no `Edit` on this data node.
         """
         return self._edits[-1] if self._edits else None
+
+    def get_rank(self) -> int:
+        """Get the rank of this data node regarding to its scenario owner
+
+        Returns:
+            The int value representing the rank.
+        """
+        if not self.owner_id:
+            return 0xfffe
+        config = Config.data_nodes.get(self.config_id, None)
+        if not config:
+            return 0xfffd
+
+        from ... import core as tp
+        owner = tp.get(self.owner_id)
+        if not isinstance(owner, tp.Scenario):
+            return 0xfffc
+        return config._ranks.get(owner.config_id, 0xfffb)
 
     @abstractmethod
     def _read(self):
