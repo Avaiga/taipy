@@ -20,6 +20,7 @@ from taipy.common.config import Config
 from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from .._entity._reload import _self_reload
+from ..exceptions import DataNodeIsBeingEdited
 from ..reason import InvalidUploadFile, NoFileToDownload, NotAFile, ReasonCollection, UploadFileCanNotBeRead
 from .data_node import DataNode
 from .data_node_id import Edit
@@ -100,7 +101,15 @@ class _FileDataNodeMixin(object):
 
         return ""
 
-    def _upload(self, path: str, upload_checker: Optional[Callable[[str, Any], bool]] = None) -> ReasonCollection:
+    def _upload(
+        self,
+        data: Optional[Any] = None,
+        path: str = "",
+        upload_checker: Optional[Callable[[str, Any], bool]] = None,
+        job_id: Optional["JobId"] = None,
+        editor_id: Optional[str] = None,
+        **kwargs: Dict[str, Any]
+    ) -> None:
         """Upload a file data to the data node.
 
         Arguments:
@@ -112,6 +121,9 @@ class _FileDataNodeMixin(object):
         Returns:
             True if the upload was successful, otherwise False.
         """
+        if self.edit_in_progress and self.editor_id != editor_id:
+            raise DataNodeIsBeingEdited(self.id, self.editor_id)
+
         from ._data_manager_factory import _DataManagerFactory
 
         reason_collection = ReasonCollection()
@@ -141,8 +153,8 @@ class _FileDataNodeMixin(object):
                 return reason_collection
 
         shutil.copy(upload_path, self.path)
-
-        self.track_edit(timestamp=datetime.now())  # type: ignore[attr-defined]
+        self._write(data)
+        self.track_edit(job_id=job_id, editor_id=editor_id, **kwargs)  # type: ignore[attr-defined]
         self.unlock_edit()  # type: ignore[attr-defined]
         _DataManagerFactory._build_manager()._set(self)  # type: ignore[arg-type]
 

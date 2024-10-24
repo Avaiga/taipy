@@ -13,7 +13,6 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
 
 from taipy.common.config.common.scope import Scope
-
 from .._version._version_manager_factory import _VersionManagerFactory
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
@@ -98,3 +97,14 @@ class InMemoryDataNode(DataNode):
 
     def _write(self, data):
         in_memory_storage[self.id] = data
+
+    def _append(self, data):
+        """Append data to the existing data in the in-memory storage."""
+        if self.id not in in_memory_storage:
+            in_memory_storage[self.id] = []
+
+        if not isinstance(in_memory_storage[self.id], list):
+            in_memory_storage[self.id] = [in_memory_storage[self.id]]
+
+        in_memory_storage[self.id].append(data)  # Append new data
+
