@@ -1,6 +1,5 @@
 [![Hacktoberfest_clickable](https://github.com/user-attachments/assets/b1b5a430-6df9-40c2-999f-de3433f61251)](https://assorted-son-815.notion.site/Hacktoberfest-2024-with-Taipy-2a5032a3f01642709e88ffaa5d0d169e)
 
-
 <div align="center">
   <a href="https://taipy.io?utm_source=github" target="_blank">
   <picture>
@@ -9,6 +8,52 @@
   </picture>
   </a>
 </div>
+
+<br>
+<div align="center">
+    <img 
+        src="https://img.shields.io/github/license/Avaiga/taipy?style=plastic&color=ff371a&labelColor=1f1f1f" 
+        alt="GitHub License" 
+        height="20px" 
+    />
+    <a target="_blank" href="https://github.com/Avaiga/taipy/releases">
+        <img 
+            alt="GitHub Release" 
+            height="20px" 
+            src="https://img.shields.io/github/v/release/Avaiga/taipy?display_name=release&style=plastic&color=ff371a&labelColor=1f1f1f"
+        ></a>
+</div>
+<br>
+<div align="center">
+   <img 
+      src="https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-ff371a?style=plastic&labelColor=1f1f1f" 
+        alt="Python version needed: 3.9" 
+    />
+  
+</div>
+<br>
+
+<div align="center">
+    <a target="_blank" href="https://docs.taipy.io/en/latest/">
+        <img 
+            src="https://img.shields.io/badge/docs-ff371a?style=plastic&labelColor=1f1f1f&label=Explore" 
+            height="20px" 
+            alt="Explore the docs" 
+        ></a>
+       <a target="_blank" href="https://docs.taipy.io/en/latest/gallery/">
+        <img 
+            src="https://img.shields.io/badge/gallery-ff371a?style=plastic&labelColor=1f1f1f&label=Explore" 
+            height="20px" 
+            alt="Explore Gallery" 
+        ></a>
+    <a target="_blank" href="https://discord.com/invite/SJyz2VJGxV">
+        <img 
+            src="https://img.shields.io/discord/1125797687476887563?style=plastic&labelColor=1f1f1f&logo=discord&logoColor=ff371a&label=Discord&color=ff371a" 
+            height="20px" 
+            alt="Discord support" 
+        ></a>
+</div>
+<br>
 
 <h1 align="center">
     Build Python Data & AI web applications
