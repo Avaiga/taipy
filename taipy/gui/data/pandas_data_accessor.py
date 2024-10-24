@@ -267,18 +267,37 @@ class _PandasDataAccessor(_DataAccessor):
                 col = fd.get("col")
                 val = fd.get("value")
                 action = fd.get("action")
+                match_case = fd.get("matchCase", False) is not False  # Ensure it's a boolean
+                right = None
+                col_expr = f"`{col}`"
+
                 if isinstance(val, str):
                     if self.__is_date_column(t.cast(pd.DataFrame, df), col):
                         val = datetime.fromisoformat(val[:-1])
+                    elif not match_case:
+                        if action != "contains":
+                            col_expr = f"{col_expr}.str.lower()"
+                        val = val.lower()
                     vars.append(val)
-                val = f"@vars[{len(vars) - 1}]" if isinstance(val, (str, datetime)) else val
-                right = f".str.contains({val})" if action == "contains" else f" {action} {val}"
+                    val_var = f"@vars[{len(vars) - 1}]"
+                    if action == "contains":
+                        right = f".str.contains({val_var}{'' if match_case else ', case=False'})"
+                else:
+                    vars.append(val)
+                    val_var = f"@vars[{len(vars) - 1}]"
+
+                if right is None:
+                    right = f" {action} {val_var}"
+
                 if query:
                     query += " and "
-                query += f"`{col}`{right}"
+                query += f"{col_expr}{right}"
+
+            # Apply filters using df.query()
             try:
-                df = df.query(query)
-                is_copied = True
+                if query:
+                    df = df.query(query)
+                    is_copied = True
             except Exception as e:
                 _warn(f"Dataframe filtering: invalid query '{query}' on {df.head()}", e)
 

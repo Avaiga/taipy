@@ -77,4 +77,4 @@ types-tzlocal = "*"
 python_version = "3"
 
 [pipenv]
-allow_prereleases = true
+allow_prereleases = false
