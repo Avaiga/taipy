@@ -43,7 +43,7 @@ class _GuiCLI(_AbstractCLI):
             "nargs": "?",
             "default": "",
             "const": "",
-            "help": "Specify client url",
+            "help": "Specify client URL",
         },
         ("--ngrok-token",): {
             "dest": "taipy_ngrok_token",
@@ -81,21 +81,55 @@ class _GuiCLI(_AbstractCLI):
         "--no-reloader": {"dest": "taipy_no_reloader", "help": "No reload on code changes", "action": "store_true"},
     }
 
+    __BROWSER_ARGS: Dict[str, Dict] = {
+        "--run-browser": {
+            "dest": "taipy_run_browser",
+            "help": "Open a new tab in the system browser",
+            "action": "store_true",
+        },
+        "--no-run-browser": {
+            "dest": "taipy_no_run_browser",
+            "help": "Don't open a new tab for the application",
+            "action": "store_true",
+        },
+    }
+
+    __DARK_LIGHT_MODE_ARGS: Dict[str, Dict] = {
+        "--dark-mode": {
+            "dest": "taipy_dark_mode",
+            "help": "Apply dark mode to the GUI application",
+            "action": "store_true",
+        },
+        "--light-mode": {
+            "dest": "taipy_light_mode",
+            "help": "Apply light mode to the GUI application",
+            "action": "store_true",
+        },
+    }
+
     @classmethod
     def create_parser(cls):
         gui_parser = _TaipyParser._add_groupparser("Taipy GUI", "Optional arguments for Taipy GUI service")
 
         for args, arg_dict in cls.__GUI_ARGS.items():
-            taipy_arg = (args[0], cls.__add_taipy_prefix(args[0]), *args[1:])
-            gui_parser.add_argument(*taipy_arg, **arg_dict)
+            arg = (args[0], cls.__add_taipy_prefix(args[0]), *args[1:])
+            gui_parser.add_argument(*arg, **arg_dict)
 
         debug_group = gui_parser.add_mutually_exclusive_group()
-        for debug_arg, debug_arg_dict in cls.__DEBUG_ARGS.items():
-            debug_group.add_argument(debug_arg, cls.__add_taipy_prefix(debug_arg), **debug_arg_dict)
+        for arg, arg_dict in cls.__DEBUG_ARGS.items():
+            debug_group.add_argument(arg, cls.__add_taipy_prefix(arg), **arg_dict)
 
         reloader_group = gui_parser.add_mutually_exclusive_group()
-        for reloader_arg, reloader_arg_dict in cls.__RELOADER_ARGS.items():
-            reloader_group.add_argument(reloader_arg, cls.__add_taipy_prefix(reloader_arg), **reloader_arg_dict)
+        for arg, arg_dict in cls.__RELOADER_ARGS.items():
+            reloader_group.add_argument(arg, cls.__add_taipy_prefix(arg), **arg_dict)
+
+        browser_group = gui_parser.add_mutually_exclusive_group()
+        for arg, arg_dict in cls.__BROWSER_ARGS.items():
+            browser_group.add_argument(arg, cls.__add_taipy_prefix(arg), **arg_dict)
+
+        dark_light_mode_group = gui_parser.add_mutually_exclusive_group()
+        for arg, arg_dict in cls.__DARK_LIGHT_MODE_ARGS.items():
+            dark_light_mode_group.add_argument(arg, cls.__add_taipy_prefix(arg), **arg_dict)
 
         if (hook_cli_arg := _Hooks()._get_cli_args()) is not None:
             hook_group = gui_parser.add_mutually_exclusive_group()
@@ -109,12 +143,20 @@ class _GuiCLI(_AbstractCLI):
             run_parser.add_argument(*args, **arg_dict)
 
         debug_group = run_parser.add_mutually_exclusive_group()
-        for debug_arg, debug_arg_dict in cls.__DEBUG_ARGS.items():
-            debug_group.add_argument(debug_arg, **debug_arg_dict)
+        for arg, arg_dict in cls.__DEBUG_ARGS.items():
+            debug_group.add_argument(arg, **arg_dict)
 
         reloader_group = run_parser.add_mutually_exclusive_group()
-        for reloader_arg, reloader_arg_dict in cls.__RELOADER_ARGS.items():
-            reloader_group.add_argument(reloader_arg, **reloader_arg_dict)
+        for arg, arg_dict in cls.__RELOADER_ARGS.items():
+            reloader_group.add_argument(arg, **arg_dict)
+
+        browser_group = run_parser.add_mutually_exclusive_group()
+        for arg, arg_dict in cls.__BROWSER_ARGS.items():
+            browser_group.add_argument(arg, **arg_dict)
+
+        dark_light_mode_group = run_parser.add_mutually_exclusive_group()
+        for arg, arg_dict in cls.__DARK_LIGHT_MODE_ARGS.items():
+            dark_light_mode_group.add_argument(arg, **arg_dict)
 
         if (hook_cli_arg := _Hooks()._get_cli_args()) is not None:
             hook_group = run_parser.add_mutually_exclusive_group()
