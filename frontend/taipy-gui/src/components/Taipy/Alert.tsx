@@ -11,74 +11,40 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { SnackbarKey, useSnackbar, VariantType } from "notistack";
-import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
+import React from "react";
+import Alert from "@mui/material/Alert";
+import { TaipyBaseProps } from "./utils";
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 
-import { AlertMessage, createDeleteAlertAction } from "../../context/taipyReducers";
-import { useDispatch } from "../../utils/hooks";
-
-interface AlertProps {
-    alerts: AlertMessage[];
+interface AlertProps extends TaipyBaseProps {
+    severity?: "error" | "warning" | "info" | "success";
+    message?: string;
+    variant?: "filled" | "outlined";
+    render?: boolean;
+    defaultMessage?: string;
+    defaultSeverity?: string;
+    defaultVariant?: string;
+    defaultRender?: boolean;
 }
 
-const Alert = ({ alerts }: AlertProps) => {
-    const alert = alerts.length ? alerts[0] : undefined;
-    const lastKey = useRef<SnackbarKey>("");
-    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-    const dispatch = useDispatch();
+const TaipyAlert = (props: AlertProps) => {
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
+    const render = useDynamicProperty(props.render, props.defaultRender, true);
+    const severity = useDynamicProperty(props.severity, props.defaultSeverity, "error") as
+        | "error"
+        | "warning"
+        | "info"
+        | "success";
+    const variant = useDynamicProperty(props.variant, props.defaultVariant, "filled") as "filled" | "outlined";
+    const message = useDynamicProperty(props.message, props.defaultMessage, "");
 
-    const resetAlert = useCallback(
-        (key: SnackbarKey) => () => {
-            closeSnackbar(key);
-        },
-        [closeSnackbar]
+    if (!render) return null;
+
+    return (
+        <Alert severity={severity} variant={variant} id={props.id} className={className}>
+            {message}
+        </Alert>
     );
-
-    const notifAction = useCallback(
-        (key: SnackbarKey) => (
-            <IconButton size="small" aria-label="close" color="inherit" onClick={resetAlert(key)}>
-                <CloseIcon fontSize="small" />
-            </IconButton>
-        ),
-        [resetAlert]
-    );
-
-    const faviconUrl = useMemo(() => {
-        const nodeList = document.getElementsByTagName("link");
-        for (let i = 0; i < nodeList.length; i++) {
-            if (nodeList[i].getAttribute("rel") == "icon" || nodeList[i].getAttribute("rel") == "shortcut icon") {
-                return nodeList[i].getAttribute("href") || "/favicon.png";
-            }
-        }
-        return "/favicon.png";
-    }, []);
-
-    useEffect(() => {
-        if (alert) {
-            if (alert.atype === "") {
-                if (lastKey.current) {
-                    closeSnackbar(lastKey.current);
-                    lastKey.current = "";
-                }
-            } else {
-                lastKey.current = enqueueSnackbar(alert.message, {
-                    variant: alert.atype as VariantType,
-                    action: notifAction,
-                    autoHideDuration: alert.duration,
-                });
-                alert.system && new Notification(document.title || "Taipy", { body: alert.message, icon: faviconUrl });
-            }
-            dispatch(createDeleteAlertAction());
-        }
-    }, [alert, enqueueSnackbar, closeSnackbar, notifAction, faviconUrl, dispatch]);
-
-    useEffect(() => {
-        alert?.system && window.Notification && Notification.requestPermission();
-    }, [alert?.system]);
-
-    return null;
 };
 
-export default Alert;
+export default TaipyAlert;

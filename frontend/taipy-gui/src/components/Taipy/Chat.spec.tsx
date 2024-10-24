@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render, waitFor } from "@testing-library/react";
+import { render, waitFor, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -108,7 +108,7 @@ describe("Chat Component", () => {
             context: undefined,
             payload: {
                 action: undefined,
-                args: ["Enter", "varName", "new message", "taipy"],
+                args: ["Enter", "varName", "new message", "taipy",null],
             },
         });
     });
@@ -123,15 +123,83 @@ describe("Chat Component", () => {
         const elt = getByLabelText("message (taipy)");
         await userEvent.click(elt);
         await userEvent.keyboard("new message");
-        await userEvent.click(getByRole("button"))
+        await userEvent.click(getByRole("button",{ name: /send message/i }))
         expect(dispatch).toHaveBeenCalledWith({
             type: "SEND_ACTION_ACTION",
             name: "",
             context: undefined,
             payload: {
                 action: undefined,
-                args: ["click", "varName", "new message", "taipy"],
+                args: ["click", "varName", "new message", "taipy",null],
             },
         });
     });
+    it("handle image upload",async()=>{
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByLabelText,getByText,getByAltText,queryByText,getByRole } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <Chat messages={messages} updateVarName="varName" defaultKey={valueKey} mode="raw"/>
+            </TaipyContext.Provider>
+        );
+        const file = new File(['(⌐□_□)'], 'test.png', { type: 'image/png' });
+        URL.createObjectURL = jest.fn(() => 'mocked-url');
+        URL.revokeObjectURL = jest.fn();
+
+        const attachButton = getByLabelText('upload image');
+        expect(attachButton).toBeInTheDocument();
+
+
+        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+        expect(fileInput).toBeInTheDocument();
+        fireEvent.change(fileInput, { target: { files: [file] } });
+
+        await waitFor(() => {
+            const chipWithImage = getByText('test.png');
+            expect(chipWithImage).toBeInTheDocument();
+            const previewImg = getByAltText('Image preview');
+            expect(previewImg).toBeInTheDocument();
+            expect(previewImg).toHaveAttribute('src', 'mocked-url');
+          });
+
+          const elt = getByLabelText("message (taipy)");
+          await userEvent.click(elt);
+          await userEvent.keyboard("Test message with image");
+          await userEvent.click(getByRole("button",{ name: /send message/i }))
+
+          expect(dispatch).toHaveBeenNthCalledWith(2,
+            expect.objectContaining({
+              type: 'SEND_ACTION_ACTION',
+              payload: expect.objectContaining({
+                args: ['click', 'varName', 'Test message with image', 'taipy', 'mocked-url']
+              })
+            })
+          );
+          await waitFor(() => {
+            const chipWithImage = queryByText('test.png');
+            expect(chipWithImage).not.toBeInTheDocument();
+          });
+          jest.restoreAllMocks()
+    })
+    it("Not upload image over a file size limit",async()=>{
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByText,getByAltText } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <Chat messages={messages} updateVarName="varName" maxFileSize={0} defaultKey={valueKey} mode="raw"/>
+            </TaipyContext.Provider>
+        );
+        const file = new File(['(⌐□_□)'], 'test.png', { type: 'image/png' });
+        URL.createObjectURL = jest.fn(() => 'mocked-url');
+
+        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+        expect(fileInput).toBeInTheDocument();
+        fireEvent.change(fileInput, { target: { files: [file] } });
+
+        await waitFor(() => {
+            expect(() =>getByText('test.png')).toThrow()
+            expect(()=>getByAltText('Image preview')).toThrow();
+          });
+          jest.restoreAllMocks()
+    })
 });

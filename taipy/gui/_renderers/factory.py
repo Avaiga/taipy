@@ -30,6 +30,7 @@ class _Factory:
     __TAIPY_NAME_SPACE = "taipy."
 
     __CONTROL_DEFAULT_PROP_NAME = {
+        "alert": "message",
         "button": "label",
         "chat": "messages",
         "chart": "data",
@@ -70,6 +71,21 @@ class _Factory:
     __LIBRARIES: t.Dict[str, t.List["ElementLibrary"]] = {}
 
     __CONTROL_BUILDERS = {
+        "alert":
+        lambda gui, control_type, attrs: _Builder(
+            gui=gui,
+            control_type=control_type,
+            element_name="Alert",
+            attributes=attrs,
+        )
+        .set_value_and_default(var_type=PropertyType.dynamic_string)
+        .set_attributes(
+            [
+                ("severity", PropertyType.dynamic_string),
+                ("variant", PropertyType.dynamic_string),
+                ("render", PropertyType.dynamic_boolean, True),
+            ]
+        ),
         "button": lambda gui, control_type, attrs: _Builder(
             gui=gui,
             control_type=control_type,
@@ -99,6 +115,7 @@ class _Factory:
                 ("sender_id",),
                 ("height",),
                 ("page_size", PropertyType.number, 50),
+                ("max_file_size", PropertyType.number, 1 * 1024 * 1024),
                 ("show_sender", PropertyType.boolean, False),
                 ("mode",),
             ]

@@ -1621,6 +1621,39 @@
             }
         ],
         [
+            "alert",  
+            {
+                "inherits": ["shared"],
+                "properties": [
+                    {
+                        "name": "message",
+                        "default_property": true,
+                        "type": "dynamic(str)",
+                        "default_value": "\"\"",
+                        "doc": "The message displayed in the notification. Can be a dynamic string."
+                    },
+                    {
+                        "name": "severity",
+                        "type": "dynamic(str)",
+                        "default_value": "\"error\"",
+                        "doc": "The severity level of the alert. Valid values: \"error\", \"warning\", \"info\", \"success\".\nThe default is \"error\"."
+                    },
+                    {
+                        "name": "variant",
+                        "type": "dynamic(str)",
+                        "default_value": "\"filled\"",
+                        "doc": "The variant of the alert. Valid values: \"filled\", \"outlined\".\nThe default is \"filled\"."
+                    },
+                    {
+                        "name": "render",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "If False, the alert is hidden."
+                    }
+                ]
+            }                       
+        ],
+        [
             "status",
             {
                 "inherits": [
@@ -1696,7 +1729,14 @@
                         "default_property": true,
                         "required": true,
                         "type": "dynamic(list[str])",
-                        "doc": "The list of messages. Each item of this list must consist of a list of three strings: a message identifier, a message content, and a user identifier."
+                        "doc": "The list of messages. Each item of this list must consist of a list of three strings: a message identifier, a message content, a user identifier, and an image URL."
+                    },
+                    {
+                        "name": "max_file_size",
+                        "type": "int",
+                        "default_value": "1 * 1024 * 1024 (1MB)",
+                        "doc": "The maximum file size can be uploaded to a chat message."
+
                     },
                     {
                         "name": "users",
@@ -1792,7 +1832,7 @@
                     }
                 ]
             }
-        ]
+        ]                                       
     ],
     "blocks": [
         [
