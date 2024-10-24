@@ -87,7 +87,7 @@ const Metric = (props: MetricProps) => {
     }, [props.colorMap, props.max]);
 
     const data = useMemo(() => {
-        const mode = props.type === "none" || props.type == null ? [] : ["gauge"];
+        const mode = props.type == null || props.type.toLowerCase() === "none" ? [] : ["gauge"];
         showValue && mode.push("number");
         delta !== undefined && mode.push("delta");
         const deltaIncreasing = props.deltaColor
