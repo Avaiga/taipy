@@ -197,6 +197,11 @@ const Input = (props: TaipyInputProps) => {
         ]
     );
 
+    const handleBlur = (e : React.FocusEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
+    };
+
     const roundBasedOnStep = useMemo(() => {
         const stepString = (step || 1).toString();
         const decimalPlaces = stepString.includes(".") ? stepString.split(".")[1].length : 0;
@@ -341,6 +346,7 @@ const Input = (props: TaipyInputProps) => {
                 slotProps={inputProps}
                 label={props.label}
                 onChange={handleInput}
+                onBlur={handleBlur}
                 disabled={!active}
                 onKeyDown={handleAction}
                 multiline={multiline}
