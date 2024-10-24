@@ -34,10 +34,10 @@ import {
     taipyInitialize,
     taipyReducer,
 } from "../context/taipyReducers";
-import Alert from "./Taipy/Alert";
 import UIBlocker from "./Taipy/UIBlocker";
 import Navigate from "./Taipy/Navigate";
 import Menu from "./Taipy/Menu";
+import TaipyNotification from "./Taipy/Notification";
 import GuiDownload from "./Taipy/GuiDownload";
 import ErrorFallback from "../utils/ErrorBoundary";
 import MainPage from "./pages/MainPage";
@@ -152,7 +152,7 @@ const Router = () => {
                                         ) : null}
                                     </Box>
                                     <ErrorBoundary FallbackComponent={ErrorFallback}>
-                                        <Alert alerts={state.alerts} />
+                                        <TaipyNotification alerts={state.alerts} />
                                         <UIBlocker block={state.block} />
                                         <Navigate
                                             to={state.navigateTo}
