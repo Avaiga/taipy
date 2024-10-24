@@ -11,6 +11,7 @@
 
 from taipy.gui import Gui
 
+
 def test_metric_md_none(gui: Gui, helpers):
     md_string = "<|metric|type=None|value=42|>"
     expected_list = ["<Metric", 'type="None"', 'value="42"']
