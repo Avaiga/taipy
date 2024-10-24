@@ -413,7 +413,7 @@ class Gui:
             for library in libraries:
                 Gui.add_library(library)
 
-    def handle_invalid_data(self, value: t.Any) -> t.Optional[t.Any]:
+    def _handle_invalid_data(self, value: t.Any) -> t.Optional[t.Any]:
         """
         Handles unsupported data by invoking the callback if available.
         :param value: The unsupported data encountered.

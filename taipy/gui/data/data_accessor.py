@@ -137,7 +137,7 @@ class _DataAccessors(object):
         access = self.__access_4_type.get(type(value))
         if access is None:
             if value is not None:
-                transformed_value = self.__gui.handle_invalid_data(value)
+                transformed_value = self.__gui._handle_invalid_data(value)
                 if transformed_value is not None:
                     transformed_access = self.__access_4_type.get(type(transformed_value))
                     if transformed_access is not None:
