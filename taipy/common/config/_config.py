@@ -75,7 +75,6 @@ class _Config:
 
     def __point_nested_section_to_self(self, section) -> None:
         """Loop through attributes of a Section to find if any attribute has a list of Section as value.
-
         If there is, update each nested Section by the corresponding instance in self.
 
         Arguments:
