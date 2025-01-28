@@ -33,7 +33,7 @@ class _BaseSerializer(object):
     _registered_types: Dict[str, type] = {}
 
     @classmethod
-    def _register(cls, section: Section):
+    def _register(cls, section):
         cls._section_class[section.name] = section.__class__
         for clazz in section._types_to_register():
             if not hasattr(clazz, "_type_identifier"):
