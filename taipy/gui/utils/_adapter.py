@@ -70,7 +70,8 @@ class _Adapter:
         adapter = self.__get_for_var(var_name, value)
         if isclass(lov) and issubclass(lov, Enum):
             lov = list(lov)
-        if isinstance(lov, (list, tuple)):
+        # list or Lov value
+        if isinstance(lov, list) or (isinstance(lov, tuple) and not id_only):
             res = []
             for elt in lov:
                 v = self._run(adapter, elt, var_name, id_only)
