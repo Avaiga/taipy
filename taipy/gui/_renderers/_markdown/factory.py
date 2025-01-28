@@ -22,11 +22,11 @@ class _MarkdownFactory(_Factory):
     _TAIPY_BLOCK_TAGS = ["layout", "part", "expandable", "dialog", "pane"]
 
     @staticmethod
-    def create_element(gui, control_type: str, all_properties: str) -> t.Union[t.Any, str]:
+    def create_element(gui, element_type: str, all_properties: str) -> t.Union[t.Any, str]:
         # Create properties dict from all_properties
         property_pairs = _Factory._PROPERTY_RE.findall(all_properties)
         properties = {property[0]: property[1] for property in property_pairs}
-        builder_md = _Factory.call_builder(gui, control_type, properties)
+        builder_md = _Factory.call_builder(gui, element_type, properties)
         if builder_md is None:
-            return f"<|INVALID SYNTAX - Control is '{control_type}'|>"
+            return f"<|UNKNOWN ELEMENT TYPE '{element_type}'|>"
         return builder_md
