@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from abc import abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from .common._config_blocker import _ConfigBlocker
 from .common._template_handler import _TemplateHandler as _tpl
@@ -53,6 +53,14 @@ class Section:
     def __init__(self, id, **properties):
         self.id = _validate_id(id)
         self._properties = properties or {}
+
+    def _stringify(self):
+        return f"{self.id}:SECTION"
+
+    @staticmethod
+    def _types_to_register() -> List[type]:
+        """Return a list of types to register for serialization."""
+        return []
 
     @abstractmethod
     def __copy__(self):

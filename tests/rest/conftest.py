@@ -20,10 +20,10 @@ import pytest
 from dotenv import load_dotenv
 
 from taipy.common.config import Config
-from taipy.common.config.common.frequency import Frequency
-from taipy.common.config.common.scope import Scope
 from taipy.core import Cycle, DataNodeId, Job, JobId, Scenario, Sequence, Task
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core.common.frequency import Frequency
+from taipy.core.common.scope import Scope
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.job._job_manager import _JobManager

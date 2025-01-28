@@ -19,8 +19,8 @@ import pandas as pd
 import pytest
 
 import taipy.core as tp
+from taipy import Scope
 from taipy.common.config import Config
-from taipy.common.config.common.scope import Scope
 from taipy.common.config.exceptions.exceptions import InvalidConfigurationId
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data._data_manager_factory import _DataManagerFactory

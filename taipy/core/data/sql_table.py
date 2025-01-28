@@ -15,9 +15,8 @@ from typing import Any, Dict, List, Optional, Set, Union
 import pandas as pd
 from sqlalchemy import MetaData, Table
 
-from taipy.common.config.common.scope import Scope
-
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..common.scope import Scope
 from ..exceptions.exceptions import MissingRequiredProperty
 from ._abstract_sql import _AbstractSQLDataNode
 from .data_node_id import DataNodeId, Edit

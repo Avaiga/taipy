@@ -14,12 +14,11 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from taipy.common.config.common.frequency import Frequency
-
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
+from ..common.frequency import Frequency
 from ..exceptions.exceptions import _SuspiciousFileOperation
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
 from .cycle_id import CycleId

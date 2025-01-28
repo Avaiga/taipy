@@ -20,9 +20,8 @@ import numpy as np
 import pandas as pd
 from sqlalchemy import create_engine, text
 
-from taipy.common.config.common.scope import Scope
-
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..common.scope import Scope
 from ..data.operator import JoinOperator, Operator
 from ..exceptions.exceptions import MissingRequiredProperty, UnknownDatabaseEngine
 from ._tabular_datanode_mixin import _TabularDataNodeMixin

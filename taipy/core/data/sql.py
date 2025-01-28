@@ -14,9 +14,8 @@ from typing import Dict, List, Optional, Set
 
 from sqlalchemy import text
 
-from taipy.common.config.common.scope import Scope
-
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..common.scope import Scope
 from ..exceptions.exceptions import MissingAppendQueryBuilder, MissingRequiredProperty
 from ._abstract_sql import _AbstractSQLDataNode
 from .data_node_id import DataNodeId, Edit

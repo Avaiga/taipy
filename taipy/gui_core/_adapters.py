@@ -23,6 +23,7 @@ from operator import attrgetter, contains, eq, ge, gt, le, lt, ne
 
 import pandas as pd
 
+from taipy.common.config import Config
 from taipy.core import (
     Cycle,
     DataNode,
@@ -35,7 +36,6 @@ from taipy.core import (
     is_submittable,
 )
 from taipy.core import get as core_get
-from taipy.core.config import Config
 from taipy.core.data import JSONDataNode
 from taipy.core.data._file_datanode_mixin import _FileDataNodeMixin
 from taipy.core.data._tabular_datanode_mixin import _TabularDataNodeMixin

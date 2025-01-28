@@ -13,8 +13,7 @@ from unittest.mock import Mock, patch
 
 import pandas as pd
 
-from taipy import DataNode, Gui
-from taipy.common.config.common.scope import Scope
+from taipy import DataNode, Gui, Scope
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.reason import Reason, ReasonCollection
