@@ -30,7 +30,7 @@ class _BaseSerializer(object):
 
     _GLOBAL_NODE_NAME = "TAIPY"
     _section_class = {_GLOBAL_NODE_NAME: GlobalAppConfig}
-    _registered_types = {}
+    _registered_types: Dict[str, type] = {}
 
     @classmethod
     def _register(cls, section: Section):
