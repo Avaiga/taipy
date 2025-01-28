@@ -112,6 +112,7 @@ def _inject_section(
     add_to_unconflicted_sections: bool = False,
 ):
     Config._register_default(default)
+    
     if issubclass(section_clazz, UniqueSection):
         setattr(Config, attribute_name, Config.unique_sections[section_clazz.name])
     elif issubclass(section_clazz, Section):
