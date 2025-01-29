@@ -44,4 +44,12 @@ class Rest:
         Arguments:
             **kwargs : Options to provide to the application server.
         """
+        rest_config = Config.rest
+        kwargs.update(
+            {
+                "port": rest_config.port,
+                "host": rest_config.host,
+                "ssl_context": rest_config.ssl_context,
+            }
+        )
         self._app.run(**kwargs)
