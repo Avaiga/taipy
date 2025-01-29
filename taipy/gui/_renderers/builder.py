@@ -556,9 +556,12 @@ class _Builder:
                     + "}"
                 )
                 self.__update_vars.append(f"comparedatas={','.join(cmp_datas_hash)}")
-        col_types = self.__gui._get_accessor().get_col_types(data_hash, _TaipyData(data, data_hash))
+        cols_description = self.__gui._get_accessor().get_cols_description(data_hash, _TaipyData(data, data_hash))
         col_dict = _get_columns_dict(
-            data, self.__attributes.get("columns", {}), col_types, date_format, self.__attributes.get("number_format")
+            self.__attributes.get("columns", {}),
+            cols_description,
+            date_format,
+            self.__attributes.get("number_format"),
         )
 
         rebuild_fn_hash = self.__build_rebuild_fn(
@@ -588,7 +591,7 @@ class _Builder:
                 value = row_class_name.strip()
             else:
                 value = None
-            if value in col_types.keys():
+            if value in cols_description.keys():
                 _warn(f"{self.__element_name}: row_class_name={value} must not be a column name.")
             elif value:
                 self.set_attribute("rowClassName", value)
@@ -599,7 +602,7 @@ class _Builder:
                 value = tooltip.strip()
             else:
                 value = None
-            if value in col_types.keys():
+            if value in cols_description.keys():
                 _warn(f"{self.__element_name}: tooltip={value} must not be a column name.")
             elif value:
                 self.set_attribute("tooltip", value)
@@ -618,7 +621,7 @@ class _Builder:
         # read column definitions
         data = self.__attributes.get("data")
         data_hash = self.__hashes.get("data", "")
-        col_types = [self.__gui._get_accessor().get_col_types(data_hash, _TaipyData(data, data_hash))]
+        cols_description = [self.__gui._get_accessor().get_cols_description(data_hash, _TaipyData(data, data_hash))]
 
         if data_hash:
             data_updates: t.List[str] = []
@@ -627,16 +630,16 @@ class _Builder:
             while add_data_hash := self.__hashes.get(name_idx):
                 typed_hash = self.__get_typed_hash_name(add_data_hash, _TaipyData)
                 data_updates.append(typed_hash)
-                self.__set_react_attribute(f"data{data_idx}",_get_client_var_name(typed_hash))
+                self.__set_react_attribute(f"data{data_idx}", _get_client_var_name(typed_hash))
                 add_data = self.__attributes.get(name_idx)
                 data_idx += 1
                 name_idx = f"data[{data_idx}]"
-                col_types.append(
-                    self.__gui._get_accessor().get_col_types(add_data_hash, _TaipyData(add_data, add_data_hash))
+                cols_description.append(
+                    self.__gui._get_accessor().get_cols_description(add_data_hash, _TaipyData(add_data, add_data_hash))
                 )
             self.set_attribute("dataVarNames", ";".join(data_updates))
 
-        config = _build_chart_config(self.__gui, self.__attributes, col_types)
+        config = _build_chart_config(self.__gui, self.__attributes, cols_description)
 
         self.__set_json_attribute("defaultConfig", config)
         self._set_chart_selected(max=len(config.get("traces", [])))

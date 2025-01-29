@@ -39,7 +39,7 @@ class _DataAccessor(ABC):
         pass
 
     @abstractmethod
-    def get_col_types(self, var_name: str, value: t.Any) -> t.Dict[str, str]:
+    def get_cols_description(self, var_name: str, value: t.Any) -> t.Dict[str, t.Dict[str, str]]:
         pass
 
     @abstractmethod
@@ -75,7 +75,7 @@ class _InvalidDataAccessor(_DataAccessor):
     ) -> t.Dict[str, t.Any]:
         return {}
 
-    def get_col_types(self, var_name: str, value: t.Any) -> t.Dict[str, str]:
+    def get_cols_description(self, var_name: str, value: t.Any) -> t.Dict[str, t.Dict[str, str]]:
         return {}
 
     def to_pandas(self, value: t.Any) -> t.Union[t.List[t.Any], t.Any]:
@@ -104,12 +104,14 @@ class _DataAccessors(object):
         from .array_dict_data_accessor import _ArrayDictDataAccessor
         from .numpy_data_accessor import _NumpyDataAccessor
         from .pandas_data_accessor import _PandasDataAccessor
+        from .pandas_multi_data_accessor import _PandasMultiDataAccessor
 
         self._register(_PandasDataAccessor)
+        self._register(_PandasMultiDataAccessor)
         self._register(_ArrayDictDataAccessor)
         self._register(_NumpyDataAccessor)
 
-    def _register(self, cls: t.Type[_DataAccessor]) -> None:
+    def _register(self, cls: t.Type[_DataAccessor], force: t.Optional[bool] = False) -> None:
         """Register a new DataAccessor type."""
         if not inspect.isclass(cls):
             raise AttributeError("The argument of 'DataAccessors.register()' should be a class")
@@ -120,10 +122,11 @@ class _DataAccessors(object):
             raise TypeError(f"{cls.__name__}.get_supported_classes() returned an invalid value")
         # check existence
         inst: t.Optional[_DataAccessor] = None
-        for cl in classes:
-            inst = self.__access_4_type.get(cl)
-            if inst:
-                break
+        if force:
+            for cl in classes:
+                inst = self.__access_4_type.get(cl)
+                if inst:
+                    break
         if inst is None:
             try:
                 inst = cls(self.__gui)
@@ -134,7 +137,7 @@ class _DataAccessors(object):
                     self.__access_4_type[cl] = inst  # type: ignore
 
     def _unregister(self, cls: t.Type[_DataAccessor]) -> None:
-        """Unregisters a DataAccessor type."""
+        """Unregister a DataAccessor type."""
         if cls in self.__access_4_type:
             del self.__access_4_type[cls]
 
@@ -155,8 +158,8 @@ class _DataAccessors(object):
     def get_data(self, var_name: str, value: _TaipyData, payload: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
         return self.__get_instance(value).get_data(var_name, value.get(), payload, self.__data_format)
 
-    def get_col_types(self, var_name: str, value: _TaipyData) -> t.Dict[str, str]:
-        return self.__get_instance(value).get_col_types(var_name, value.get())
+    def get_cols_description(self, var_name: str, value: _TaipyData) -> t.Dict[str, t.Dict[str, str]]:
+        return self.__get_instance(value).get_cols_description(var_name, value.get())
 
     def set_data_format(self, data_format: _DataFormat):
         self.__data_format = data_format

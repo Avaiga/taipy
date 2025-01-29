@@ -64,8 +64,8 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
                 return tuple(value.iloc[:, 0].to_list())
         return super()._from_pandas(value, data_type)
 
-    def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
-        return super().get_col_types(var_name, self.to_pandas(value))
+    def get_cols_description(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, t.Dict[str, str]]]:  # type: ignore
+        return super().get_cols_description(var_name, self.to_pandas(value))
 
     def get_data(  # noqa: C901
         self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat

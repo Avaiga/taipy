@@ -40,10 +40,14 @@ class _PandasDataAccessor(_DataAccessor):
 
     __AGGREGATE_FUNCTIONS: t.List[str] = ["count", "sum", "mean", "median", "min", "max", "std", "first", "last"]
 
-    def to_pandas(self, value: t.Union[pd.DataFrame, pd.Series]) -> t.Union[t.List[pd.DataFrame], pd.DataFrame]:
-        return self.__to_dataframe(value)
+    @staticmethod
+    def get_supported_classes() -> t.List[t.Type]:
+        return list(_PandasDataAccessor.__types)
 
-    def __to_dataframe(self, value: t.Union[pd.DataFrame, pd.Series]) -> pd.DataFrame:
+    def to_pandas(self, value: t.Union[pd.DataFrame, pd.Series]) -> t.Union[t.List[pd.DataFrame], pd.DataFrame]:
+        return self._to_dataframe(value)
+
+    def _to_dataframe(self, value: t.Union[pd.DataFrame, pd.Series]) -> pd.DataFrame:
         if isinstance(value, pd.Series):
             return pd.DataFrame(value)
         return t.cast(pd.DataFrame, value)
@@ -52,10 +56,6 @@ class _PandasDataAccessor(_DataAccessor):
         if data_type is pd.Series:
             return value.iloc[:, 0]
         return value
-
-    @staticmethod
-    def get_supported_classes() -> t.List[t.Type]:
-        return list(_PandasDataAccessor.__types)
 
     @staticmethod
     def __user_function(
@@ -73,11 +73,14 @@ class _PandasDataAccessor(_DataAccessor):
             _warn(f"Exception raised when calling user function {function_name}()", e)
         return ""
 
-    def __is_date_column(self, data: pd.DataFrame, col_name: str) -> bool:
-        col_types = data.dtypes[data.dtypes.index.astype(str) == col_name]
-        return len(col_types[col_types.astype(str).str.startswith("datetime")]) > 0  # type: ignore
+    def __get_column_names(self, df: pd.DataFrame, *cols: str):
+        col_names = [t for t in df.columns if str(t) in cols]
+        return (col_names[0] if len(cols) == 1 else col_names) if col_names else None
 
-    def __build_transferred_cols(
+    def get_dataframe_with_cols(self, df: pd.DataFrame, cols: t.List[str]) -> pd.DataFrame:
+        return df.loc[:, df.dtypes[df.columns.astype(str).isin(cols)].index]  # type: ignore[index]
+
+    def __build_transferred_cols(  # noqa: C901
         self,
         payload_cols: t.Any,
         dataframe: pd.DataFrame,
@@ -90,10 +93,10 @@ class _PandasDataAccessor(_DataAccessor):
     ) -> pd.DataFrame:
         dataframe = dataframe.iloc[new_indexes] if new_indexes is not None else dataframe
         if isinstance(payload_cols, list) and len(payload_cols):
-            col_types = dataframe.dtypes[dataframe.dtypes.index.astype(str).isin(payload_cols)]
+            cols_description = {k: v for k, v in self.get_cols_description("", dataframe).items() if k in payload_cols}
         else:
-            col_types = dataframe.dtypes
-        cols = col_types.index.astype(str).tolist()
+            cols_description = self.get_cols_description("", dataframe)
+        cols = list(cols_description.keys())
         new_cols = {}
         if styles:
             for k, v in styles.items():
@@ -124,19 +127,20 @@ class _PandasDataAccessor(_DataAccessor):
                     if col_applied:
                         new_cols[col_applied] = new_data
         # deal with dates
-        date_cols = col_types[col_types.astype(str).str.startswith("datetime")].index.tolist()
+        date_cols = [c for c, d in cols_description.items() if d.get("type", "").startswith("datetime")]
         if len(date_cols) != 0:
             if not is_copied:
                 # copy the df so that we don't "mess" with the user's data
                 dataframe = dataframe.copy()
             tz = Gui._get_timezone()
             for col in date_cols:
+                col_name = self.__get_column_names(dataframe, col)
                 new_col = _get_date_col_str_name(cols, col)
-                re_type = _RE_PD_TYPE.match(str(col_types[col]))
+                re_type = _RE_PD_TYPE.match(cols_description[col].get("type", ""))
                 groups = re_type.groups() if re_type else ()
                 if len(groups) > 4 and groups[4]:
                     new_cols[new_col] = (
-                        dataframe[col]
+                        dataframe[col_name]
                         .dt.tz_convert("UTC")
                         .dt.strftime(_DataAccessor._WS_DATE_FORMAT)
                         .astype(str)
@@ -144,7 +148,7 @@ class _PandasDataAccessor(_DataAccessor):
                     )
                 else:
                     new_cols[new_col] = (
-                        dataframe[col]
+                        dataframe[col_name]
                         .dt.tz_localize(tz)
                         .dt.tz_convert("UTC")
                         .dt.strftime(_DataAccessor._WS_DATE_FORMAT)
@@ -157,8 +161,7 @@ class _PandasDataAccessor(_DataAccessor):
         if new_cols:
             dataframe = dataframe.assign(**new_cols)
         cols += list(new_cols.keys())
-        dataframe = dataframe.loc[:, dataframe.dtypes[dataframe.dtypes.index.astype(str).isin(cols)].index]  # type: ignore[index]
-        return dataframe
+        return self.get_dataframe_with_cols(dataframe, cols)
 
     def __apply_user_function(
         self,
@@ -173,13 +176,18 @@ class _PandasDataAccessor(_DataAccessor):
             return new_col_name, data.apply(
                 _PandasDataAccessor.__user_function,
                 axis=1,
-                args=(self._gui, column_name, user_function, function_name),
+                args=(
+                    self._gui,
+                    self.__get_column_names(data, column_name) if column_name else column_name,
+                    user_function,
+                    function_name,
+                ),
             )
         except Exception as e:
             _warn(f"Exception raised when invoking user function {function_name}()", e)
         return "", data
 
-    def __format_data(
+    def _format_data(
         self,
         data: pd.DataFrame,
         data_format: _DataFormat,
@@ -223,15 +231,22 @@ class _PandasDataAccessor(_DataAccessor):
             ret["data"] = data.replace([np.nan, pd.NA], [None, None]).to_dict(orient=orient)  # type: ignore
         return ret
 
-    def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
+    def get_cols_description(self, var_name: str, value: t.Any) -> t.Dict[str, t.Dict[str, str]]:
         if isinstance(value, list):
-            ret_dict: t.Dict[str, str] = {}
+            ret_dict: t.Dict[str, t.Dict[str, str]] = {}
             for i, v in enumerate(value):
-                ret_dict.update(
-                    {f"{i}/{k}": v for k, v in self.__to_dataframe(v).dtypes.apply(lambda x: x.name.lower()).items()}
-                )
+                res = self.get_cols_description("", v)
+                if res:
+                    ret_dict.update({f"{i}/{k}": desc for k, desc in res.items()})
             return ret_dict
-        return {str(k): v for k, v in self.__to_dataframe(value).dtypes.apply(lambda x: x.name.lower()).items()}
+        df = self._to_dataframe(value)
+        return {str(k): {"type": v} for k, v in df.dtypes.apply(lambda x: x.name.lower()).items()}
+
+    def add_optional_columns(self, df: pd.DataFrame, columns: t.List[str]) -> t.Tuple[pd.DataFrame, t.List[str]]:
+        return df, []
+
+    def is_dataframe_supported(self, df: pd.DataFrame) -> bool:
+        return not isinstance(df.columns, pd.MultiIndex)
 
     def __get_data(  # noqa: C901
         self,
@@ -241,10 +256,15 @@ class _PandasDataAccessor(_DataAccessor):
         data_format: _DataFormat,
         col_prefix: t.Optional[str] = "",
     ) -> t.Dict[str, t.Any]:
+        ret_payload = {"pagekey": payload.get("pagekey", "unknown page")}
+        if not self.is_dataframe_supported(df):
+            ret_payload["value"] = {}
+            ret_payload["error"] = "MultiIndex columns are not supported."
+            _warn("MultiIndex columns are not supported.")
+            return ret_payload
         columns = payload.get("columns", [])
         if col_prefix:
             columns = [c[len(col_prefix) :] if c.startswith(col_prefix) else c for c in columns]
-        ret_payload = {"pagekey": payload.get("pagekey", "unknown page")}
         paged = not payload.get("alldata", False)
         is_copied = False
 
@@ -256,6 +276,9 @@ class _PandasDataAccessor(_DataAccessor):
                 df = df.assign(**{_PandasDataAccessor.__INDEX_COL: df.index})
             if columns and _PandasDataAccessor.__INDEX_COL not in columns:
                 columns.append(_PandasDataAccessor.__INDEX_COL)
+        # optional columns
+        df, optional_columns = self.add_optional_columns(df, columns)
+        is_copied = is_copied or bool(optional_columns)
 
         fullrowcount = len(df)
         # filtering
@@ -263,6 +286,7 @@ class _PandasDataAccessor(_DataAccessor):
         if isinstance(filters, list) and len(filters) > 0:
             query = ""
             vars = []
+            cols_description = self.get_cols_description(var_name, df)
             for fd in filters:
                 col = fd.get("col")
                 val = fd.get("value")
@@ -272,7 +296,7 @@ class _PandasDataAccessor(_DataAccessor):
                 col_expr = f"`{col}`"
 
                 if isinstance(val, str):
-                    if self.__is_date_column(t.cast(pd.DataFrame, df), col):
+                    if cols_description.get(col, {}).get("type", "").startswith("datetime"):
                         val = datetime.fromisoformat(val[:-1])
                     elif not match_case:
                         if action != "contains":
@@ -307,15 +331,21 @@ class _PandasDataAccessor(_DataAccessor):
             applies = payload.get("applies")
             if isinstance(aggregates, list) and len(aggregates) and isinstance(applies, dict):
                 applies_with_fn = {
-                    k: v if v in _PandasDataAccessor.__AGGREGATE_FUNCTIONS else self._gui._get_user_function(v)
+                    self.__get_column_names(df, k): v
+                    if v in _PandasDataAccessor.__AGGREGATE_FUNCTIONS
+                    else self._gui._get_user_function(v)
                     for k, v in applies.items()
                 }
 
-                for col in columns:
-                    if col not in applies_with_fn.keys():
+                for col in df.columns:
+                    if col not in applies_with_fn:
                         applies_with_fn[col] = "first"
                 try:
-                    df = t.cast(pd.DataFrame, df).groupby(aggregates).agg(applies_with_fn)
+                    col_names = self.__get_column_names(df, *aggregates)
+                    if col_names:
+                        df = t.cast(pd.DataFrame, df).groupby(aggregates).agg(applies_with_fn)
+                    else:
+                        raise Exception()
                 except Exception:
                     _warn(f"Cannot aggregate {var_name} with groupby {aggregates} and aggregates {applies}.")
             inf = payload.get("infinite")
@@ -355,20 +385,22 @@ class _PandasDataAccessor(_DataAccessor):
             order_by = payload.get("orderby")
             if isinstance(order_by, str) and len(order_by):
                 try:
-                    if df.columns.dtype.name == "int64":
-                        order_by = int(order_by)
-                    new_indexes = t.cast(pd.DataFrame, df)[order_by].values.argsort(axis=0)
-                    if payload.get("sort") == "desc":
-                        # reverse order
-                        new_indexes = new_indexes[::-1]
-                    new_indexes = new_indexes[slice(start, end + 1)]
+                    col_name = self.__get_column_names(df, order_by)
+                    if col_name:
+                        new_indexes = t.cast(pd.DataFrame, df)[col_name].values.argsort(axis=0)
+                        if payload.get("sort") == "desc":
+                            # reverse order
+                            new_indexes = new_indexes[::-1]
+                        new_indexes = new_indexes[slice(start, end + 1)]
+                    else:
+                        raise Exception()
                 except Exception:
                     _warn(f"Cannot sort {var_name} on columns {order_by}.")
                     new_indexes = slice(start, end + 1)  # type: ignore
             else:
                 new_indexes = slice(start, end + 1)  # type: ignore
             df = self.__build_transferred_cols(
-                columns,
+                columns + optional_columns,
                 t.cast(pd.DataFrame, df),
                 styles=payload.get("styles"),
                 tooltips=payload.get("tooltips"),
@@ -377,7 +409,7 @@ class _PandasDataAccessor(_DataAccessor):
                 handle_nan=payload.get("handlenan", False),
                 formats=payload.get("formats"),
             )
-            dict_ret = self.__format_data(
+            dict_ret = self._format_data(
                 df,
                 data_format,
                 "records",
@@ -401,7 +433,7 @@ class _PandasDataAccessor(_DataAccessor):
                         comp_df = self.__build_transferred_cols(
                             columns, comp_df, new_indexes=t.cast(np.ndarray, new_indexes)
                         )
-                        dict_ret["comp"] = self.__format_data(comp_df, data_format, "records").get("data")
+                        dict_ret["comp"] = self._format_data(comp_df, data_format, "records").get("data")
                     except Exception as e:
                         _warn("Pandas accessor compare raised an exception", e)
 
@@ -454,7 +486,7 @@ class _PandasDataAccessor(_DataAccessor):
                     cols_to_combine = merged_df.loc[:, col].columns
                     merged_df[col] = merged_df[cols_to_combine].bfill(axis=1).iloc[:, 0]
                 # drop duplicated col since they are now the same
-                df = merged_df.loc[:,~merged_df.columns.duplicated()]
+                df = merged_df.loc[:, ~merged_df.columns.duplicated()]
             elif len(decimated_dfs) == 1:
                 df = decimated_dfs[0]
             if data_format is _DataFormat.CSV:
@@ -476,7 +508,7 @@ class _PandasDataAccessor(_DataAccessor):
                     handle_nan=payload.get("handlenan", False),
                     formats=payload.get("formats"),
                 )
-                dict_ret = self.__format_data(df, data_format, "list", data_extraction=True)
+                dict_ret = self._format_data(df, data_format, "list", data_extraction=True)
 
         ret_payload["value"] = dict_ret
         return ret_payload
@@ -495,7 +527,7 @@ class _PandasDataAccessor(_DataAccessor):
                 data = []
                 for i, v in enumerate(value):
                     ret = (
-                        self.__get_data(var_name, self.__to_dataframe(v), payload, data_format, f"{i}/")
+                        self.__get_data(var_name, self._to_dataframe(v), payload, data_format, f"{i}/")
                         if isinstance(v, _PandasDataAccessor.__types)
                         else {}
                     )
@@ -506,7 +538,7 @@ class _PandasDataAccessor(_DataAccessor):
                 return ret_payload
             else:
                 value = value[0]
-        return self.__get_data(var_name, self.__to_dataframe(value), payload, data_format)
+        return self.__get_data(var_name, self._to_dataframe(value), payload, data_format)
 
     def on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
         df = self.to_pandas(value)
@@ -528,12 +560,11 @@ class _PandasDataAccessor(_DataAccessor):
         # Save the insertion index
         index = payload["index"]
         # Create the new row (Column value types must match the original DataFrame's)
-        col_types = self.get_col_types("", df)
-        if col_types:
-            new_row = [0 if is_numeric_dtype(df[c]) else "" for c in list(col_types)] if new_row is None else new_row
+        if list(df.columns):
+            new_row = [0 if is_numeric_dtype(dt) else "" for dt in df.dtypes] if new_row is None else new_row
             if index > 0:
                 # Column names and value types must match the original DataFrame
-                new_df = pd.DataFrame([new_row], columns=list(col_types))
+                new_df = pd.DataFrame([new_row], columns=df.columns.copy())
                 # Split the DataFrame
                 rows_before = df.iloc[:index]
                 rows_after = df.iloc[index:]

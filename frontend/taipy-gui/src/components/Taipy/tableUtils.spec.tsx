@@ -2,7 +2,7 @@ import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
-import { EditableCell, generateHeaderClassName, RowValue } from "./tableUtils";
+import { ColumnDesc, EditableCell, generateHeaderClassName, getSortByIndex, RowValue } from "./tableUtils";
 
 describe("generateHeaderClassName", () => {
     it("should generate a CSS class name with a hyphen prefix and convert to lowercase", () => {
@@ -114,5 +114,23 @@ describe("Editable cell", () => {
             expect(elt.closest(".MuiSwitch-root")).toBeNull();
             expect(elt).toHaveClass("taipy-table-bool");
         });
+    });
+});
+
+describe("getSortByIndex", () => {
+    it("should return a sorted list for indexed columns", () => {
+        const columns = { col0: { index: 0 } as ColumnDesc, col1: { index: 1 } as ColumnDesc, col2: { index: 2 } as ColumnDesc };
+        const result = Object.keys(columns).sort(getSortByIndex(columns));
+        expect(result).toEqual(["col0", "col1", "col2"]);
+    });
+    it("should return a sorted list for multi columns", () => {
+        const columns = { col0: { multi: 0 } as ColumnDesc, col1: { multi: 1 } as ColumnDesc, col2: { multi: 2 } as ColumnDesc };
+        const result = Object.keys(columns).sort(getSortByIndex(columns));
+        expect(result).toEqual(["col0", "col1", "col2"]);
+    });
+    it("should return a sorted list for indexed and multi columns", () => {
+        const columns = { col0: { index: 0 } as ColumnDesc, col1: { index: 1 } as ColumnDesc, col2: { multi: 1, index: 2 } as ColumnDesc, col3: { multi: 0, index: 3 } as ColumnDesc };
+        const result = Object.keys(columns).sort(getSortByIndex(columns));
+        expect(result).toEqual(["col3", "col2", "col0", "col1"]);
     });
 });

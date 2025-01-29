@@ -66,6 +66,7 @@ import {
     FilterDesc,
     generateHeaderClassName,
     getClassName,
+    getColumnHeader,
     getFormatFn,
     getPageKey,
     getRowIndex,
@@ -139,111 +140,150 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const baseColumns = useDynamicJsonProperty(props.columns, props.defaultColumns, defaultColumns);
 
-    const [colsOrder, columns, cellClassNames, tooltips, formats, handleNan, filter, partialEditable, calcWidth] =
-        useMemo(() => {
-            let hNan = !!props.nanValue;
-            if (baseColumns) {
-                try {
-                    let filter = false;
-                    let partialEditable = editable;
-                    const newCols: Record<string, ColumnDesc> = {};
-                    Object.entries(baseColumns).forEach(([cId, cDesc]) => {
-                        const nDesc = (newCols[cId] = { ...cDesc });
-                        if (typeof nDesc.filter != "boolean") {
-                            nDesc.filter = !!props.filter;
-                        }
-                        filter = filter || nDesc.filter;
-                        if (typeof nDesc.notEditable == "boolean") {
-                            partialEditable = partialEditable || !nDesc.notEditable;
-                        } else {
-                            nDesc.notEditable = !editable;
-                        }
-                        if (nDesc.tooltip === undefined) {
-                            nDesc.tooltip = props.tooltip;
-                        }
-                        if (typeof nDesc.sortable != "boolean") {
-                            nDesc.sortable = sortable;
-                        }
-                    });
-                    addActionColumn(
-                        (active && partialEditable && (onAdd || onDelete) ? 1 : 0) +
-                            (active && filter ? 1 : 0) +
-                            (active && downloadable ? 1 : 0),
-                        newCols
-                    );
-                    const colsOrder = Object.keys(newCols).sort(getSortByIndex(newCols));
-                    let nbWidth = 0;
-                    let widthRate = 0;
-                    const functions = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
-                        if (newCols[col].className) {
-                            pv.classNames = pv.classNames || {};
-                            pv.classNames[newCols[col].dfid] = newCols[col].className;
-                        }
-                        hNan = hNan || !!newCols[col].nanValue;
-                        if (newCols[col].tooltip) {
-                            pv.tooltips = pv.tooltips || {};
-                            pv.tooltips[newCols[col].dfid] = newCols[col].tooltip;
-                        }
-                        if (newCols[col].formatFn) {
-                            pv.formats = pv.formats || {};
-                            pv.formats[newCols[col].dfid] = newCols[col].formatFn;
-                        }
-                        if (newCols[col].width !== undefined) {
-                            const cssWidth = getCssSize(newCols[col].width);
-                            if (cssWidth) {
-                                newCols[col].width = cssWidth;
-                                nbWidth++;
-                                if (cssWidth.endsWith("%")) {
-                                    widthRate += parseInt(cssWidth, 10);
-                                }
+    const [
+        colsOrder,
+        columns,
+        cellClassNames,
+        tooltips,
+        formats,
+        handleNan,
+        filter,
+        partialEditable,
+        calcWidth,
+        nbColHeaders,
+        headersInfo,
+    ] = useMemo(() => {
+        let hNan = !!props.nanValue;
+        let nbColHeaders = 1;
+        if (baseColumns) {
+            try {
+                let filter = false;
+                let partialEditable = editable;
+                const newCols: Record<string, ColumnDesc> = {};
+                Object.entries(baseColumns).forEach(([cId, cDesc]) => {
+                    const nDesc = (newCols[cId] = { ...cDesc });
+                    if (typeof nDesc.filter != "boolean") {
+                        nDesc.filter = !!props.filter;
+                    }
+                    filter = filter || nDesc.filter;
+                    if (typeof nDesc.notEditable == "boolean") {
+                        partialEditable = partialEditable || !nDesc.notEditable;
+                    } else {
+                        nDesc.notEditable = !editable;
+                    }
+                    if (nDesc.tooltip === undefined) {
+                        nDesc.tooltip = props.tooltip;
+                    }
+                    if (nDesc.multi !== undefined) {
+                        nDesc.sortable = false;
+                    } else if (typeof nDesc.sortable != "boolean") {
+                        nDesc.sortable = sortable;
+                    }
+                    nbColHeaders = Math.max(nbColHeaders, nDesc.headers?.length || 0);
+                });
+                addActionColumn(
+                    (active && partialEditable && (onAdd || onDelete) ? 1 : 0) +
+                        (active && filter ? 1 : 0) +
+                        (active && downloadable ? 1 : 0),
+                    newCols
+                );
+                const colsOrder = Object.keys(newCols).sort(getSortByIndex(newCols));
+                const headersInfo = [];
+                if (nbColHeaders > 1) {
+                    for (let i = 0; i < nbColHeaders; i++) {
+                        const headers = colsOrder.map((col, idx) => {
+                            const header = getColumnHeader(newCols, col, i);
+                            return idx > 0 && header === getColumnHeader(newCols, colsOrder[idx - 1], i)
+                                ? undefined
+                                : header;
+                        });
+                        const colSpans = headers.map((header, idx) => {
+                            if (header === undefined) {
+                                return 0;
+                            }
+                            const nh = headers.slice(idx + 1);
+                            const nb = nh.findIndex((h) => h !== undefined);
+                            return nb == -1 ? nh.length + 1 : nb + 1;
+                        });
+                        headersInfo.push({ headers, colSpans });
+                    }
+                }
+                let nbWidth = 0;
+                let widthRate = 0;
+                const functions = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
+                    if (newCols[col].className) {
+                        pv.classNames = pv.classNames || {};
+                        pv.classNames[newCols[col].dfid] = newCols[col].className;
+                    }
+                    hNan = hNan || !!newCols[col].nanValue;
+                    if (newCols[col].tooltip) {
+                        pv.tooltips = pv.tooltips || {};
+                        pv.tooltips[newCols[col].dfid] = newCols[col].tooltip;
+                    }
+                    if (newCols[col].formatFn) {
+                        pv.formats = pv.formats || {};
+                        pv.formats[newCols[col].dfid] = newCols[col].formatFn;
+                    }
+                    if (newCols[col].width !== undefined) {
+                        const cssWidth = getCssSize(newCols[col].width);
+                        if (cssWidth) {
+                            newCols[col].width = cssWidth;
+                            nbWidth++;
+                            if (cssWidth.endsWith("%")) {
+                                widthRate += parseInt(cssWidth, 10);
                             }
                         }
-                        return pv;
-                    }, {});
-                    nbWidth = nbWidth ? colsOrder.length - nbWidth : 0;
-                    if (props.rowClassName) {
-                        functions.classNames = functions.classNames || {};
-                        functions.classNames[ROW_CLASS_NAME] = props.rowClassName;
                     }
-                    return [
-                        colsOrder,
-                        newCols,
-                        functions.classNames,
-                        functions.tooltips,
-                        functions.formats,
-                        hNan,
-                        filter,
-                        partialEditable,
-                        nbWidth > 0 ? `${(100 - widthRate) / nbWidth}%` : undefined
-                    ];
-                } catch (e) {
-                    console.info("PaginatedTable.columns: ", (e as Error).message || e);
+                    return pv;
+                }, {});
+                nbWidth = nbWidth ? colsOrder.length - nbWidth : 0;
+                if (props.rowClassName) {
+                    functions.classNames = functions.classNames || {};
+                    functions.classNames[ROW_CLASS_NAME] = props.rowClassName;
                 }
+                return [
+                    colsOrder,
+                    newCols,
+                    functions.classNames,
+                    functions.tooltips,
+                    functions.formats,
+                    hNan,
+                    filter,
+                    partialEditable,
+                    nbWidth > 0 ? `${(100 - widthRate) / nbWidth}%` : undefined,
+                    nbColHeaders,
+                    headersInfo,
+                ];
+            } catch (e) {
+                console.info("PaginatedTable.columns: ", (e as Error).message || e);
             }
-            return [
-                [] as string[],
-                {} as Record<string, ColumnDesc>,
-                {} as Record<string, string>,
-                {} as Record<string, string>,
-                {} as Record<string, string>,
-                hNan,
-                false,
-                false,
-                ""
-            ];
-        }, [
-            active,
-            editable,
-            onAdd,
-            onDelete,
-            baseColumns,
-            props.rowClassName,
-            props.tooltip,
-            props.nanValue,
-            props.filter,
-            downloadable,
-            sortable,
-        ]);
+        }
+        return [
+            [] as string[],
+            {} as Record<string, ColumnDesc>,
+            {} as Record<string, string>,
+            {} as Record<string, string>,
+            {} as Record<string, string>,
+            hNan,
+            false,
+            false,
+            "",
+            1,
+            [],
+        ];
+    }, [
+        active,
+        editable,
+        onAdd,
+        onDelete,
+        baseColumns,
+        props.rowClassName,
+        props.tooltip,
+        props.nanValue,
+        props.filter,
+        downloadable,
+        sortable,
+    ]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
 
@@ -482,7 +522,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             dispatch(
                 createSendActionNameAction(updateVarName, module, {
                     action: onDelete,
-                    index: rows ? getRowIndex(rows[rowIndex], rowIndex, startIndex): startIndex,
+                    index: rows ? getRowIndex(rows[rowIndex], rowIndex, startIndex) : startIndex,
                     user_data: userData,
                 })
             ),
@@ -494,7 +534,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             dispatch(
                 createSendActionNameAction(updateVarName, module, {
                     action: onAction,
-                    index: rows ? getRowIndex(rows[rowIndex], rowIndex, startIndex): startIndex,
+                    index: rows ? getRowIndex(rows[rowIndex], rowIndex, startIndex) : startIndex,
                     col: colName === undefined ? null : colName,
                     value,
                     reason: value === undefined ? "click" : "button",
@@ -517,6 +557,28 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
 
     const boxSx = useMemo(() => ({ ...baseBoxSx, width: width }), [width]);
 
+    const rowSpans = useMemo(
+        () =>
+            rows
+                ? colsOrder
+                      .filter((col) => columns[col].multi !== undefined)
+                      .map((col) => {
+                          const values = rows.map((r, idx) =>
+                              idx > 0 && rows[idx - 1][col] == r[col] ? undefined : r[col]
+                          );
+                          return values.map((value, idx) => {
+                              if (value === undefined) {
+                                  return 0;
+                              }
+                              const nv = values.slice(idx + 1);
+                              const nb = nv.findIndex((v) => v !== undefined);
+                              return nb == -1 ? nv.length + 1 : nb + 1;
+                          });
+                      })
+                : [],
+        [colsOrder, columns, rows]
+    );
+
     return (
         <Box
             id={id}
@@ -530,101 +592,153 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     <TableContainer sx={tableContainerSx}>
                         <Table sx={tableSx} aria-labelledby="tableTitle" size={size} stickyHeader={true}>
                             <TableHead>
-                                <TableRow>
-                                    {colsOrder.map((col) => (
-                                        <TableCell
-                                            key={`head${columns[col].dfid}`}
-                                            sortDirection={orderBy === columns[col].dfid && order}
-                                            sx={
-                                                columns[col].width
-                                                    ? { minWidth:columns[col].width }
-                                                    : calcWidth
-                                                    ? { width: calcWidth }
-                                                    : undefined
-                                            }
-                                            className={col === "EDIT_COL"
-                                                ? getSuffixedClassNames(className, "-action")
-                                                : getSuffixedClassNames(className, generateHeaderClassName(columns[col].dfid))
-                                            }
-                                        >
-                                            {columns[col].dfid === EDIT_COL ? (
-                                                [
-                                                    active && (editable || partialEditable) && onAdd ? (
-                                                        <Tooltip title="Add a row" key="addARow">
-                                                            <IconButton
-                                                                onClick={onAddRowClick}
-                                                                size="small"
-                                                                sx={iconInRowSx}
-                                                            >
-                                                                <AddIcon fontSize="inherit" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    ) : null,
-                                                    active && filter ? (
-                                                        <TableFilter
-                                                            key="filter"
-                                                            columns={columns}
-                                                            colsOrder={colsOrder}
-                                                            onValidate={setAppliedFilters}
-                                                            appliedFilters={appliedFilters}
-                                                            className={className}
-                                                            filteredCount={filteredCount}
-                                                        />
-                                                    ) : null,
-                                                    active && downloadable ? (
-                                                        <Tooltip title="Download as CSV" key="downloadCsv">
-                                                            <IconButton
-                                                                onClick={onDownload}
-                                                                size="small"
-                                                                sx={iconInRowSx}
-                                                            >
-                                                                <Download fontSize="inherit" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    ) : null,
-                                                ]
-                                            ) : (
-                                                <TableSortLabel
-                                                    active={orderBy === columns[col].dfid}
-                                                    direction={orderBy === columns[col].dfid ? order : "asc"}
-                                                    data-dfid={columns[col].dfid}
-                                                    onClick={onSort}
-                                                    disabled={!active || !columns[col].sortable}
-                                                    hideSortIcon={!active || !columns[col].sortable}
-                                                >
-                                                    <Box sx={headBoxSx}>
-                                                        {columns[col].groupBy ? (
-                                                            <IconButton
-                                                                onClick={onAggregate}
-                                                                size="small"
-                                                                title="aggregate"
+                                {Array.from(Array(nbColHeaders).keys()).map((idx) => {
+                                    if (idx < nbColHeaders - 1) {
+                                        return (
+                                            <TableRow key={`rowheader${idx}`}>
+                                                {colsOrder.map((col, i) => {
+                                                    const colSpan =
+                                                        headersInfo[idx] && headersInfo[idx].colSpans.length > i
+                                                            ? headersInfo[idx].colSpans[i]
+                                                            : 1;
+                                                    return colSpan == 0 ? null : (
+                                                        <TableCell
+                                                            colSpan={colSpan}
+                                                            key={`head${columns[col].dfid}`}
+                                                            sx={
+                                                                columns[col].width
+                                                                    ? { minWidth: columns[col].width }
+                                                                    : calcWidth
+                                                                    ? { width: calcWidth }
+                                                                    : undefined
+                                                            }
+                                                            className={
+                                                                col === "EDIT_COL"
+                                                                    ? getSuffixedClassNames(className, "-action")
+                                                                    : getSuffixedClassNames(
+                                                                          className,
+                                                                          generateHeaderClassName(columns[col].dfid)
+                                                                      )
+                                                            }
+                                                        >
+                                                            {(headersInfo[idx] &&
+                                                                headersInfo[idx].headers.length > i &&
+                                                                headersInfo[idx].headers[i]) ||
+                                                                ""}
+                                                        </TableCell>
+                                                    );
+                                                })}
+                                            </TableRow>
+                                        );
+                                    } else {
+                                        return (
+                                            <TableRow key={`rowheader${idx}`}>
+                                                {colsOrder.map((col, i) => (
+                                                    <TableCell
+                                                        key={`head${columns[col].dfid}`}
+                                                        sortDirection={orderBy === columns[col].dfid && order}
+                                                        sx={
+                                                            columns[col].width
+                                                                ? { minWidth: columns[col].width }
+                                                                : calcWidth
+                                                                ? { width: calcWidth }
+                                                                : undefined
+                                                        }
+                                                        className={
+                                                            col === "EDIT_COL"
+                                                                ? getSuffixedClassNames(className, "-action")
+                                                                : getSuffixedClassNames(
+                                                                      className,
+                                                                      generateHeaderClassName(columns[col].dfid)
+                                                                  )
+                                                        }
+                                                    >
+                                                        {columns[col].dfid === EDIT_COL ? (
+                                                            [
+                                                                active && (editable || partialEditable) && onAdd ? (
+                                                                    <Tooltip title="Add a row" key="addARow">
+                                                                        <IconButton
+                                                                            onClick={onAddRowClick}
+                                                                            size="small"
+                                                                            sx={iconInRowSx}
+                                                                        >
+                                                                            <AddIcon fontSize="inherit" />
+                                                                        </IconButton>
+                                                                    </Tooltip>
+                                                                ) : null,
+                                                                active && filter ? (
+                                                                    <TableFilter
+                                                                        key="filter"
+                                                                        columns={columns}
+                                                                        colsOrder={colsOrder}
+                                                                        onValidate={setAppliedFilters}
+                                                                        appliedFilters={appliedFilters}
+                                                                        className={className}
+                                                                        filteredCount={filteredCount}
+                                                                    />
+                                                                ) : null,
+                                                                active && downloadable ? (
+                                                                    <Tooltip title="Download as CSV" key="downloadCsv">
+                                                                        <IconButton
+                                                                            onClick={onDownload}
+                                                                            size="small"
+                                                                            sx={iconInRowSx}
+                                                                        >
+                                                                            <Download fontSize="inherit" />
+                                                                        </IconButton>
+                                                                    </Tooltip>
+                                                                ) : null,
+                                                            ]
+                                                        ) : (
+                                                            <TableSortLabel
+                                                                active={orderBy === columns[col].dfid}
+                                                                direction={
+                                                                    orderBy === columns[col].dfid ? order : "asc"
+                                                                }
                                                                 data-dfid={columns[col].dfid}
-                                                                disabled={!active}
-                                                                sx={iconInRowSx}
+                                                                onClick={onSort}
+                                                                disabled={!active || !columns[col].sortable}
+                                                                hideSortIcon={!active || !columns[col].sortable}
                                                             >
-                                                                {aggregates.includes(columns[col].dfid) ? (
-                                                                    <DataSaverOff fontSize="inherit" />
-                                                                ) : (
-                                                                    <DataSaverOn fontSize="inherit" />
-                                                                )}
-                                                            </IconButton>
-                                                        ) : null}
-                                                        {columns[col].title === undefined
-                                                            ? columns[col].dfid
-                                                            : columns[col].title}
-                                                    </Box>
-                                                    {orderBy === columns[col].dfid ? (
-                                                        <Box component="span" sx={visuallyHidden}>
-                                                            {order === "desc"
-                                                                ? "sorted descending"
-                                                                : "sorted ascending"}
-                                                        </Box>
-                                                    ) : null}
-                                                </TableSortLabel>
-                                            )}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
+                                                                <Box sx={headBoxSx}>
+                                                                    {columns[col].groupBy ? (
+                                                                        <IconButton
+                                                                            onClick={onAggregate}
+                                                                            size="small"
+                                                                            title="aggregate"
+                                                                            data-dfid={columns[col].dfid}
+                                                                            disabled={!active}
+                                                                            sx={iconInRowSx}
+                                                                        >
+                                                                            {aggregates.includes(columns[col].dfid) ? (
+                                                                                <DataSaverOff fontSize="inherit" />
+                                                                            ) : (
+                                                                                <DataSaverOn fontSize="inherit" />
+                                                                            )}
+                                                                        </IconButton>
+                                                                    ) : null}
+                                                                    {columns[col].title === undefined
+                                                                        ? (headersInfo[idx] &&
+                                                                              headersInfo[idx].headers.length > i &&
+                                                                              headersInfo[idx].headers[i]) ||
+                                                                          columns[col].dfid
+                                                                        : columns[col].title}
+                                                                </Box>
+                                                                {orderBy === columns[col].dfid ? (
+                                                                    <Box component="span" sx={visuallyHidden}>
+                                                                        {order === "desc"
+                                                                            ? "sorted descending"
+                                                                            : "sorted ascending"}
+                                                                    </Box>
+                                                                ) : null}
+                                                            </TableSortLabel>
+                                                        )}
+                                                    </TableCell>
+                                                ))}
+                                            </TableRow>
+                                        );
+                                    }
+                                })}
                             </TableHead>
                             <TableBody>
                                 {rows?.map((row, index) => {
@@ -647,33 +761,37 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                             data-index={index}
                                             onClick={active && onAction ? onRowClick : undefined}
                                         >
-                                            {colsOrder.map((col) => (
-                                                <EditableCell
-                                                    key={`cell${index}${columns[col].dfid}`}
-                                                    className={getClassName(row, columns[col].className, col)}
-                                                    tableClassName={className}
-                                                    colDesc={columns[col]}
-                                                    value={row[col]}
-                                                    formattedVal={getFormatFn(row, columns[col].formatFn, col)}
-                                                    formatConfig={formatConfig}
-                                                    rowIndex={index}
-                                                    onValidation={
-                                                        active && !columns[col].notEditable && onEdit
-                                                            ? onCellValidation
-                                                            : undefined
-                                                    }
-                                                    onDeletion={
-                                                        active && (editable || partialEditable) && onDelete
-                                                            ? onRowDeletion
-                                                            : undefined
-                                                    }
-                                                    onSelection={active && onAction ? onRowSelection : undefined}
-                                                    nanValue={columns[col].nanValue || props.nanValue}
-                                                    tooltip={getTooltip(row, columns[col].tooltip, col)}
-                                                    comp={compRows && compRows[index] && compRows[index][col]}
-                                                    useCheckbox={useCheckbox}
-                                                />
-                                            ))}
+                                            {colsOrder.map((col, idx) => {
+                                                const rowSpan = idx < rowSpans.length && index < rowSpans[idx].length ? rowSpans[idx][index] : 1;
+                                                return (
+                                                    <EditableCell
+                                                        key={`cell${index}${columns[col].dfid}`}
+                                                        className={getClassName(row, columns[col].className, col)}
+                                                        tableClassName={className}
+                                                        colDesc={columns[col]}
+                                                        value={row[col]}
+                                                        formattedVal={getFormatFn(row, columns[col].formatFn, col)}
+                                                        formatConfig={formatConfig}
+                                                        rowIndex={index}
+                                                        onValidation={
+                                                            active && !columns[col].notEditable && onEdit
+                                                                ? onCellValidation
+                                                                : undefined
+                                                        }
+                                                        onDeletion={
+                                                            active && (editable || partialEditable) && onDelete
+                                                                ? onRowDeletion
+                                                                : undefined
+                                                        }
+                                                        onSelection={active && onAction ? onRowSelection : undefined}
+                                                        nanValue={columns[col].nanValue || props.nanValue}
+                                                        tooltip={getTooltip(row, columns[col].tooltip, col)}
+                                                        comp={compRows && compRows[index] && compRows[index][col]}
+                                                        useCheckbox={useCheckbox}
+                                                        rowSpan={rowSpan}
+                                                    />
+                                                );
+                                            })}
                                         </TableRow>
                                     );
                                 })}

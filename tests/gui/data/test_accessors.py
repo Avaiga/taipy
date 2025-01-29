@@ -25,7 +25,7 @@ class MyDataAccessor(_DataAccessor):
     ) -> t.Dict[str, t.Any]:
         return {"value": 2 * int(value)}
 
-    def get_col_types(self, var_name: str, value: t.Any) -> t.Dict[str, str]:  # type: ignore
+    def get_cols_description(self, var_name: str, value: t.Any) -> t.Dict[str, t.Dict[str, str]]:  # type: ignore
         pass
 
     def to_pandas(self, value: t.Any) -> t.Union[t.List[t.Any], t.Any]:
