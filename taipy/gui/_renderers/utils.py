@@ -77,8 +77,7 @@ def _get_columns_dict(  # noqa: C901
         col_dict = {}
     nb_cols = len(col_dict)
     if nb_cols == 0:
-        nb_index = 0
-        for col, col_description in cols_description.items():
+        for col in cols_description:
             col_dict[str(col)] = {"index": nb_cols}
             nb_cols += 1
     else:
