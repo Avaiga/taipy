@@ -13,7 +13,6 @@ import datetime
 import typing as t
 from pathlib import Path
 
-import pandas as pd
 from watchdog.events import FileSystemEventHandler
 
 from taipy.common.logger._taipy_logger import _TaipyLogger
