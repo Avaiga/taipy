@@ -273,7 +273,7 @@ class _PandasDataAccessor(_DataAccessor):
         if paged:
             if _PandasDataAccessor.__INDEX_COL not in df.columns:
                 is_copied = True
-                df = df.assign(**{_PandasDataAccessor.__INDEX_COL: df.index})
+                df = df.assign(**{_PandasDataAccessor.__INDEX_COL: df.index.to_numpy()})
             if columns and _PandasDataAccessor.__INDEX_COL not in columns:
                 columns.append(_PandasDataAccessor.__INDEX_COL)
         # optional columns
@@ -541,7 +541,7 @@ class _PandasDataAccessor(_DataAccessor):
         return self.__get_data(var_name, self._to_dataframe(value), payload, data_format)
 
     def _get_index_value(self, index: t.Any) -> t.Any:
-        tuple(*index) if isinstance(index, list) else index
+        return tuple(index) if isinstance(index, list) else index
 
     def on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
         df = self.to_pandas(value)
