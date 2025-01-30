@@ -1938,7 +1938,9 @@ class Gui:
                         self,
                         attributes,
                         [
-                            self._get_accessor().get_cols_description(data_hash, _TaipyData(kwargs.get(data_hash), data_hash))
+                            self._get_accessor().get_cols_description(
+                                data_hash, _TaipyData(kwargs.get(data_hash), data_hash)
+                            )
                             for data_hash in data_hashes
                         ],
                     )
