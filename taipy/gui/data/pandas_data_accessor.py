@@ -273,7 +273,7 @@ class _PandasDataAccessor(_DataAccessor):
         if paged:
             if _PandasDataAccessor.__INDEX_COL not in df.columns:
                 is_copied = True
-                df = df.assign(**{_PandasDataAccessor.__INDEX_COL: df.index})
+                df = df.assign(**{_PandasDataAccessor.__INDEX_COL: df.index.to_numpy()})
             if columns and _PandasDataAccessor.__INDEX_COL not in columns:
                 columns.append(_PandasDataAccessor.__INDEX_COL)
         # optional columns
@@ -540,25 +540,28 @@ class _PandasDataAccessor(_DataAccessor):
                 value = value[0]
         return self.__get_data(var_name, self._to_dataframe(value), payload, data_format)
 
+    def _get_index_value(self, index: t.Any) -> t.Any:
+        tuple(*index) if isinstance(index, list) else index
+
     def on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
         df = self.to_pandas(value)
-        if not isinstance(df, pd.DataFrame):
-            raise ValueError(f"Cannot edit {type(value)}.")
-        df.at[payload["index"], payload["col"]] = payload["value"]
+        if not isinstance(df, pd.DataFrame) or not isinstance(payload.get("index"), (int, float)):
+            raise ValueError(f"Cannot edit {type(value)} at {payload.get('index')}.")
+        df.at[self._get_index_value(payload.get("index", 0)), payload["col"]] = payload["value"]
         return self._from_pandas(df, type(value))
 
     def on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
         df = self.to_pandas(value)
-        if not isinstance(df, pd.DataFrame):
-            raise ValueError(f"Cannot delete a row from {type(value)}.")
-        return self._from_pandas(df.drop(payload["index"]), type(value))
+        if not isinstance(df, pd.DataFrame) or not isinstance(payload.get("index"), (int, float)):
+            raise ValueError(f"Cannot delete a row from {type(value)} at {payload.get('index')}.")
+        return self._from_pandas(df.drop(self._get_index_value(payload.get("index", 0))), type(value))
 
     def on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
         df = self.to_pandas(value)
-        if not isinstance(df, pd.DataFrame):
-            raise ValueError(f"Cannot add a row to {type(value)}.")
+        if not isinstance(df, pd.DataFrame) or not isinstance(payload.get("index"), (int, float)):
+            raise ValueError(f"Cannot add a row to {type(value)} at {payload.get('index')}.")
         # Save the insertion index
-        index = payload["index"]
+        index = payload.get("index", 0)
         # Create the new row (Column value types must match the original DataFrame's)
         if list(df.columns):
             new_row = [0 if is_numeric_dtype(dt) else "" for dt in df.dtypes] if new_row is None else new_row
