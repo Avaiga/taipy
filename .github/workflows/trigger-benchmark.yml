@@ -10,7 +10,7 @@ jobs:
       - name: Trigger taipy-benchmark computation
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{secrets.TAIPY_INTEGRATION_TESTING_ACCESS_TOKEN}}
+          token: ${{secrets.TAIPY_BENCHMARK_ACCESS_TOKEN}}
           repository: avaiga/taipy-benchmark
           event-type: benchmark
           client-payload: '{"repo": "taipy", "commitSHA": "${{ github.sha }}"}'
