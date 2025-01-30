@@ -94,18 +94,20 @@ def _get_columns_dict(  # noqa: C901
             col_type = groups[0] if groups else col_type
             if len(groups) > 4 and groups[4]:
                 col_dict[col]["tz"] = groups[4]
+            old_col = None
             if col_type == "datetime":
                 if date_format:
                     _add_to_dict_and_get(col_dict[col], "format", date_format)
-                new_col = _get_date_col_str_name(cols_description.keys(), col)
-                col_dict[new_col] = col_dict.pop(col)
-                col = new_col
+                old_col = col
+                col = _get_date_col_str_name(cols_description.keys(), col)
+                col_dict[col] = col_dict.pop(old_col)
             elif number_format and col_type in NumberTypes:
                 _add_to_dict_and_get(col_dict[col], "format", number_format)
-            col_dict[col]["index"] = idx
+            if "index" not in col_dict[col]:
+                col_dict[col]["index"] = idx
             idx += 1
             col_dict[col]["type"] = col_type
-            col_dict[col]["dfid"] = col
+            col_dict[col]["dfid"] = old_col or col
     return col_dict
 
 
