@@ -40,8 +40,6 @@ def _get_columns_dict_from_list(
 ):
     col_dict: t.Dict[str, t.Dict[str, t.Any]] = {}
     idx = 0
-    cols = None
-
     for col in col_list:
         if col in cols_description:
             col_dict[col] = cols_description[col].copy()
