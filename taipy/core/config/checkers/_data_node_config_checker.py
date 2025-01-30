@@ -218,21 +218,22 @@ class _DataNodeConfigChecker(_ConfigChecker):
                 prop_value = data_node_config.properties.get(prop_key) if data_node_config.properties else None
 
                 if prop_value:
-                    if isclass(prop_type) and isclass(prop_value) and not issubclass(prop_value, prop_type):
-                        self._error(
-                            prop_key,
-                            prop_value,
-                            f"`{prop_key}` of DataNodeConfig `{data_node_config_id}` must be"
-                            f" populated with a subclass of {prop_type}.",
-                        )
-                    if not isinstance(prop_value, prop_type):
+                    if isclass(prop_type) and isclass(prop_value):
+                        if not issubclass(prop_value, prop_type):
+                            self._error(
+                                prop_key,
+                                prop_value,
+                                f"`{prop_key}` of DataNodeConfig `{data_node_config_id}` must be"
+                                f" populated with a subclass of {prop_type}.",
+                            )
+                    elif not isinstance(prop_value, prop_type):
                         self._error(
                             prop_key,
                             prop_value,
                             f"`{prop_key}` of DataNodeConfig `{data_node_config_id}` must be"
                             f" populated with a {prop_type}.",
                         )
-                    if prop_type == Callable and callable(prop_value) and prop_value.__name__ == "<lambda>":
+                    elif prop_type == Callable and callable(prop_value) and prop_value.__name__ == "<lambda>":
                         self._error(
                             prop_key,
                             prop_value,
