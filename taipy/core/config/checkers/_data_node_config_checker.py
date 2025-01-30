@@ -216,7 +216,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
             for prop_key, prop_type in property_types.items():
                 prop_value = data_node_config.properties.get(prop_key) if data_node_config.properties else None
 
-                if prop_value and not isinstance(prop_value, prop_type):
+                if prop_value and not isinstance(prop_value, prop_type) and not issubclass(prop_value, prop_type):
                     self._error(
                         prop_key,
                         prop_value,

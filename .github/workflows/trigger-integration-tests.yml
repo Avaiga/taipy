@@ -1,4 +1,4 @@
-name: Integration testings on taipy-integration-testing
+name: trigger Integration testings
 on:
   push:
     branches: [ develop, dev/* ]

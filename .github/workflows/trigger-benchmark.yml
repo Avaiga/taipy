@@ -1,4 +1,4 @@
-name: Benchmark on taipy-integration-testing
+name: trigger Benchmark
 on:
   push:
     branches: [develop]
