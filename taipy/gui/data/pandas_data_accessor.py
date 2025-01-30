@@ -273,7 +273,7 @@ class _PandasDataAccessor(_DataAccessor):
         if paged:
             if _PandasDataAccessor.__INDEX_COL not in df.columns:
                 is_copied = True
-                df = df.assign(**{_PandasDataAccessor.__INDEX_COL: df.index.to_numpy()})
+                df = df.assign(**{_PandasDataAccessor.__INDEX_COL: df.index})
             if columns and _PandasDataAccessor.__INDEX_COL not in columns:
                 columns.append(_PandasDataAccessor.__INDEX_COL)
         # optional columns
