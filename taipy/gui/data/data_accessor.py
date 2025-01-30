@@ -104,10 +104,8 @@ class _DataAccessors(object):
         from .array_dict_data_accessor import _ArrayDictDataAccessor
         from .numpy_data_accessor import _NumpyDataAccessor
         from .pandas_data_accessor import _PandasDataAccessor
-        from .pandas_multi_data_accessor import _PandasMultiDataAccessor
 
         self._register(_PandasDataAccessor)
-        self._register(_PandasMultiDataAccessor)
         self._register(_ArrayDictDataAccessor)
         self._register(_NumpyDataAccessor)
 
