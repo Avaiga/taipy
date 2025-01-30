@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import timedelta
+from inspect import isclass
 from typing import Callable, Dict, List, cast
 
 from taipy.common.config._config import _Config
@@ -216,21 +217,28 @@ class _DataNodeConfigChecker(_ConfigChecker):
             for prop_key, prop_type in property_types.items():
                 prop_value = data_node_config.properties.get(prop_key) if data_node_config.properties else None
 
-                if prop_value and not isinstance(prop_value, prop_type) and not issubclass(prop_value, prop_type):
-                    self._error(
-                        prop_key,
-                        prop_value,
-                        f"`{prop_key}` of DataNodeConfig `{data_node_config_id}` must be"
-                        f" populated with a {prop_type}.",
-                    )
-
-                if prop_type == Callable and callable(prop_value) and prop_value.__name__ == "<lambda>":
-                    self._error(
-                        prop_key,
-                        prop_value,
-                        f"`{prop_key}` of DataNodeConfig `{data_node_config_id}` must be"
-                        f" populated with a serializable typing.Callable function but not a lambda.",
-                    )
+                if prop_value:
+                    if isclass(prop_type) and isclass(prop_value) and not issubclass(prop_value, prop_type):
+                        self._error(
+                            prop_key,
+                            prop_value,
+                            f"`{prop_key}` of DataNodeConfig `{data_node_config_id}` must be"
+                            f" populated with a subclass of {prop_type}.",
+                        )
+                    if not isinstance(prop_value, prop_type):
+                        self._error(
+                            prop_key,
+                            prop_value,
+                            f"`{prop_key}` of DataNodeConfig `{data_node_config_id}` must be"
+                            f" populated with a {prop_type}.",
+                        )
+                    if prop_type == Callable and callable(prop_value) and prop_value.__name__ == "<lambda>":
+                        self._error(
+                            prop_key,
+                            prop_value,
+                            f"`{prop_key}` of DataNodeConfig `{data_node_config_id}` must be"
+                            f" populated with a serializable typing.Callable function but not a lambda.",
+                        )
 
     def _check_exposed_type(self, data_node_config_id: str, data_node_config: DataNodeConfig):
         if not isinstance(data_node_config.exposed_type, str):
