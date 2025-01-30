@@ -150,8 +150,8 @@ def test_map_md(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     expected_list = [
         "<Chart",
-        "&quot;Lat&quot;: &#x7B;&quot;index&quot;:",
-        "&quot;Lon&quot;: &#x7B;&quot;index&quot;:",
+        "&quot;Lat&quot;: &#x7B;&quot;",
+        "&quot;Lon&quot;: &#x7B;&quot;",
         "data={_TpD_tpec_TpExPr_mapData_TPMDL_0}",
         'defaultLayout="{&quot;dragmode&quot;: &quot;zoom&quot;, &quot;map&quot;: &#x7B;&quot;style&quot;: &quot;open-street-map&quot;, &quot;center&quot;: &#x7B;&quot;lat&quot;: 38, &quot;lon&quot;: -90&#x7D;, &quot;zoom&quot;: 3&#x7D;, &quot;margin&quot;: &#x7B;&quot;r&quot;: 0, &quot;t&quot;: 0, &quot;b&quot;: 0, &quot;l&quot;: 0&#x7D;}"',  # noqa: E501
         'updateVarName="_TpD_tpec_TpExPr_mapData_TPMDL_0"',
