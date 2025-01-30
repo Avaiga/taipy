@@ -112,7 +112,9 @@ def __get_col_from_indexed(col_name: str, idx: int) -> t.Optional[str]:
     return col_name
 
 
-def _build_chart_config(gui: "Gui", attributes: t.Dict[str, t.Any], cols_descriptions_list: t.List[t.Dict[str, t.Dict[str, str]]]):  # noqa: C901
+def _build_chart_config(  # noqa: C901
+    gui: "Gui", attributes: t.Dict[str, t.Any], cols_descriptions_list: t.List[t.Dict[str, t.Dict[str, str]]]
+):
     if "data" not in attributes and "figure" in attributes:
         return {"traces": []}
     default_type = attributes.get("_default_type", "scatter")
