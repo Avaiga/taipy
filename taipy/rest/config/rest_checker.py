@@ -25,36 +25,36 @@ class _RestConfigChecker(_ConfigChecker):
     def _check(self) -> IssueCollector:
         if rest_configs := self._config._unique_sections.get(RestConfig.name):
             rest_config = cast(RestConfig, rest_configs)
-            self._check_port(RestConfig.DEFAULT_KEY, rest_config)
-            self._check_host(RestConfig.DEFAULT_KEY, rest_config)
-            self._check_https_settings(RestConfig.DEFAULT_KEY, rest_config)
+            self._check_port(rest_config)
+            self._check_host(rest_config)
+            self._check_https_settings(rest_config)
         return self._collector
 
-    def _check_port(self, rest_config_id: str, rest_config: RestConfig):
+    def _check_port(self, rest_config: RestConfig):
         if not isinstance(rest_config.port, int) or not (1 <= rest_config.port <= 65535):
             self._error(
                 "port",
                 rest_config.port,
-                f"The port of RestConfig `{rest_config_id}` must be an integer between 1 and 65535.",
+                "The port of the RestConfig must be an integer between 1 and 65535.",
             )
 
-    def _check_host(self, rest_config_id: str, rest_config: RestConfig):
+    def _check_host(self, rest_config: RestConfig):
         if not isinstance(rest_config.host, str) or not rest_config.host:
             self._error(
-                "host", rest_config.host, f"The host of RestConfig `{rest_config_id}` must be a non-empty string."
+                "host", rest_config.host, "The host of the RestConfig must be a non-empty string."
             )
 
-    def _check_https_settings(self, rest_config_id: str, rest_config: RestConfig):
+    def _check_https_settings(self, rest_config: RestConfig):
         if rest_config.use_https:
             if not rest_config.ssl_cert or not rest_config.ssl_key:
                 self._error(
                     "ssl_cert/ssl_key",
                     (rest_config.ssl_cert, rest_config.ssl_key),
-                    f"When HTTPS is enabled in RestConfig `{rest_config_id}`, both ssl_cert and ssl_key must be set.",
+                    "When HTTPS is enabled in the RestConfig both ssl_cert and ssl_key must be set.",
                 )
             elif not isinstance(rest_config.ssl_cert, str) or not isinstance(rest_config.ssl_key, str):
                 self._error(
                     "ssl_cert/ssl_key",
                     (rest_config.ssl_cert, rest_config.ssl_key),
-                    f"The ssl_cert and ssl_key of RestConfig `{rest_config_id}` must be valid strings.",
+                    "The ssl_cert and ssl_key of the RestConfig must be valid strings.",
                 )
