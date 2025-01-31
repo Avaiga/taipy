@@ -23,14 +23,11 @@ class _RestConfigChecker(_ConfigChecker):
         super().__init__(config, collector)
 
     def _check(self) -> IssueCollector:
-        rest_configs = cast(dict, self._config._sections.get(RestConfig.name, {}))
-
-        for rest_config_id, rest_config in rest_configs.items():
-            if rest_config_id != _Config.DEFAULT_KEY:
-                self._check_port(rest_config_id, rest_config)
-                self._check_host(rest_config_id, rest_config)
-                self._check_https_settings(rest_config_id, rest_config)
-
+        if rest_configs := self._config._unique_sections.get(RestConfig.name):
+            rest_config = cast(RestConfig, rest_configs)
+            self._check_port(RestConfig.DEFAULT_KEY, rest_config)
+            self._check_host(RestConfig.DEFAULT_KEY, rest_config)
+            self._check_https_settings(RestConfig.DEFAULT_KEY, rest_config)
         return self._collector
 
     def _check_port(self, rest_config_id: str, rest_config: RestConfig):

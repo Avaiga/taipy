@@ -22,6 +22,7 @@ from taipy.common.config._serializer._toml_serializer import _TomlSerializer
 from taipy.common.config.checker._checker import _Checker
 from taipy.common.config.checker.issue_collector import IssueCollector
 from taipy.core.config import CoreSection, DataNodeConfig, JobConfig, ScenarioConfig, TaskConfig
+from taipy.rest.config import RestConfig
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
@@ -57,6 +58,7 @@ def remove_subparser(name: str) -> None:
 @pytest.fixture
 def clean_argparser() -> t.Callable:
     """Fixture to clean the argument parser."""
+
     def _clean_argparser() -> None:
         _TaipyParser._parser = argparse.ArgumentParser(conflict_handler="resolve")
         _TaipyParser._subparser_action = None
@@ -71,6 +73,7 @@ def clean_argparser() -> t.Callable:
 @pytest.fixture
 def reset_configuration_singleton() -> t.Callable:
     """Fixture to reset the configuration singleton."""
+
     def _reset_configuration_singleton() -> None:
         Config.unblock_update()
 
@@ -90,6 +93,7 @@ def reset_configuration_singleton() -> t.Callable:
 @pytest.fixture
 def inject_core_sections() -> t.Callable:
     """Fixture to inject core sections into the configuration."""
+
     def _inject_core_sections() -> None:
         _inject_section(
             JobConfig,
@@ -142,6 +146,13 @@ def inject_core_sections() -> t.Callable:
                 ("configure_scenario", ScenarioConfig._configure),
                 ("set_default_scenario_configuration", ScenarioConfig._set_default_configuration),
             ],
+        )
+
+        _inject_section(
+            RestConfig,
+            "rest",
+            default=RestConfig.default_config(),
+            configuration_methods=[("configure_rest", RestConfig._configure)],
         )
 
     return _inject_core_sections

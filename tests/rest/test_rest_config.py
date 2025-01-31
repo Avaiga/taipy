@@ -11,12 +11,13 @@
 
 from taipy.common.config._config import _Config
 from taipy.common.config.checker.issue_collector import IssueCollector
+from taipy.common.config.config import Config
 from taipy.rest.config.rest_checker import _RestConfigChecker
 from taipy.rest.config.rest_config import RestConfig
 
 
 def test_rest_config_default_values():
-    rest_config = RestConfig()
+    rest_config = Config.configure_rest()
     assert rest_config.port == 5000
     assert rest_config.host == "127.0.0.1"
     assert rest_config.use_https is False
@@ -25,8 +26,9 @@ def test_rest_config_default_values():
 
 
 def test_rest_config_custom_values():
-    rest_config = RestConfig()
-    rest_config.configure_rest(port=8080, host="0.0.0.0", use_https=True, ssl_cert="cert.pem", ssl_key="key.pem")
+    rest_config = Config.configure_rest(
+        port=8080, host="0.0.0.0", use_https=True, ssl_cert="cert.pem", ssl_key="key.pem"
+    )
 
     assert rest_config.port == 8080
     assert rest_config.host == "0.0.0.0"
@@ -36,8 +38,9 @@ def test_rest_config_custom_values():
 
 
 def test_rest_config_copy():
-    rest_config = RestConfig()
-    rest_config.configure_rest(port=8080, host="0.0.0.0", use_https=True, ssl_cert="cert.pem", ssl_key="key.pem")
+    rest_config = Config.configure_rest(
+        port=8080, host="0.0.0.0", use_https=True, ssl_cert="cert.pem", ssl_key="key.pem"
+    )
     rest_config_copy = rest_config.__copy__()
 
     assert rest_config_copy.port == 8080
@@ -55,7 +58,7 @@ def test_rest_config_checker_valid_config():
     config = _Config()
     collector = IssueCollector()
     rest_config = RestConfig()
-    rest_config.configure_rest(port=8080, host="0.0.0.0", use_https=True, ssl_cert="cert.pem", ssl_key="key.pem")
+    rest_config._configure(port=8080, host="0.0.0.0", use_https=True, ssl_cert="cert.pem", ssl_key="key.pem")
 
     config._sections[RestConfig.name] = {"test_rest_config": rest_config}
     checker = _RestConfigChecker(config, collector)
@@ -69,7 +72,7 @@ def test_rest_config_checker_invalid_port():
     config = _Config()
     collector = IssueCollector()
     rest_config = RestConfig()
-    rest_config.configure_rest(port=70000)  # Invalid port
+    rest_config._configure(port=70000)  # Invalid port
 
     config._sections[RestConfig.name] = {"test_rest_config": rest_config}
     checker = _RestConfigChecker(config, collector)
@@ -83,7 +86,7 @@ def test_rest_config_checker_invalid_host():
     config = _Config()
     collector = IssueCollector()
     rest_config = RestConfig()
-    rest_config.configure_rest(host="")  # Invalid host
+    rest_config._configure(host="")  # Invalid host
 
     config._sections[RestConfig.name] = {"test_rest_config": rest_config}
     checker = _RestConfigChecker(config, collector)
@@ -97,7 +100,7 @@ def test_rest_config_checker_https_missing_cert_and_key():
     config = _Config()
     collector = IssueCollector()
     rest_config = RestConfig()
-    rest_config.configure_rest(use_https=True)  # Missing ssl_cert and ssl_key
+    rest_config._configure(use_https=True)  # Missing ssl_cert and ssl_key
 
     config._sections[RestConfig.name] = {"test_rest_config": rest_config}
     checker = _RestConfigChecker(config, collector)
@@ -111,7 +114,7 @@ def test_rest_config_checker_https_invalid_cert_and_key():
     config = _Config()
     collector = IssueCollector()
     rest_config = RestConfig()
-    rest_config.configure_rest(use_https=True, ssl_cert=123, ssl_key=456)  # Invalid types for ssl_cert and ssl_key
+    rest_config._configure(use_https=True, ssl_cert=123, ssl_key=456)  # Invalid types for ssl_cert and ssl_key
 
     config._sections[RestConfig.name] = {"test_rest_config": rest_config}
     checker = _RestConfigChecker(config, collector)
