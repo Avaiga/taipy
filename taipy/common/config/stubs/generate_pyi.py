@@ -150,6 +150,7 @@ if __name__ == "__main__":
     scenario_filename = "taipy/core/config/scenario_config.py"
     task_filename = "taipy/core/config/task_config.py"
     core_filename = "taipy/core/config/core_section.py"
+    rest_filename = "taipy/rest/config/rest_config.py"
 
     entities_map, property_map = _generate_entity_and_property_maps(config_init)
     pyi = _build_header(header_file)
@@ -160,6 +161,7 @@ if __name__ == "__main__":
     pyi = _build_entity_config_pyi(pyi, task_filename, entities_map["TaskConfig"])
     pyi = _build_entity_config_pyi(pyi, job_filename, entities_map["JobConfig"])
     pyi = _build_entity_config_pyi(pyi, core_filename, entities_map["CoreSection"])
+    pyi = _build_entity_config_pyi(pyi, rest_filename, entities_map["RestConfig"])
 
     # Remove the final redundant \n
     pyi = pyi[:-1]
