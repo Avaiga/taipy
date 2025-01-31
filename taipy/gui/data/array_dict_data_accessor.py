@@ -39,9 +39,11 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
                         if len(lengths) == 1
                         else [pd.DataFrame({f"{i}/0": v}) for i, v in enumerate(value)]
                     )
-                elif type_elt is dict:
+                elif type_elt is dict and isinstance(next(iter(t.cast(dict, value[0]).values()), None), (list, tuple)):
                     return [pd.DataFrame(v) for v in value]
-                elif type_elt is _MapDict:
+                elif type_elt is _MapDict and isinstance(
+                    next(iter(t.cast(_MapDict, value[0])._dict.values()), None), (list, tuple)
+                ):
                     return [pd.DataFrame(v._dict) for v in value]
                 elif type_elt is pd.DataFrame:
                     return t.cast(t.List[pd.DataFrame], value)

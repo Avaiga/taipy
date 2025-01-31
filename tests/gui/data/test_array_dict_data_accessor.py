@@ -138,6 +138,29 @@ def test_array_of_dicts(gui: Gui, helpers, small_dataframe):
     assert len(data[1]["seasons"]) == 4
 
 
+def test_array_of_dicts_of_scalar(gui: Gui, helpers, small_dataframe):
+    accessor = _ArrayDictDataAccessor(gui)
+    an_array_of_dicts = [
+        {
+            "temperature": 17.2,
+            "city": "Hanoi",
+        },
+        {
+            "temperature": 5.62,
+            "city": "Paris",
+        },
+    ]
+    ret_data = accessor.get_data("x", an_array_of_dicts, {"start": 0, "end": -1, "alldata": True}, _DataFormat.JSON)
+    assert ret_data
+    value = ret_data["value"]
+    assert value
+    assert "multi" not in value
+    data = value["data"]
+    assert len(data) == 2
+    assert len(data["temperature"]) == 2
+    assert len(data["city"]) == 2
+
+
 def test_array_of_Mapdicts(gui: Gui, helpers, small_dataframe):
     accessor = _ArrayDictDataAccessor(gui)
     dict1 = _MapDict(
@@ -164,6 +187,29 @@ def test_array_of_Mapdicts(gui: Gui, helpers, small_dataframe):
     assert len(data[1]["seasons"]) == 4
 
 
+def test_array_of_Mapdicts_of_scalar(gui: Gui, helpers, small_dataframe):
+    accessor = _ArrayDictDataAccessor(gui)
+    an_array_of_dicts = [
+        {
+            "temperature": 17.2,
+            "city": "Hanoi",
+        },
+        {
+            "temperature": 5.62,
+            "city": "Paris",
+        },
+    ]
+    ret_data = accessor.get_data("x", an_array_of_dicts, {"start": 0, "end": -1, "alldata": True}, _DataFormat.JSON)
+    assert ret_data
+    value = ret_data["value"]
+    assert value
+    assert "multi" not in value
+    data = value["data"]
+    assert len(data) == 2
+    assert len(data["temperature"]) == 2
+    assert len(data["city"]) == 2
+
+
 def test_edit_dict(gui, small_dataframe):
     accessor = _ArrayDictDataAccessor(gui)
     pd = small_dataframe
@@ -178,7 +224,7 @@ def test_edit_dict(gui, small_dataframe):
 def test_delete_dict(gui, small_dataframe):
     accessor = _ArrayDictDataAccessor(gui)
     pd = small_dataframe
-    ln = len(pd['name'])
+    ln = len(pd["name"])
     ret_data = accessor.on_delete(pd, {"index": 0})
     assert isinstance(ret_data, dict)
     assert len(ret_data["name"]) == ln - 1
