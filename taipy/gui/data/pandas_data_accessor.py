@@ -32,6 +32,8 @@ if util.find_spec("pyarrow"):
     _has_arrow_module = True
     import pyarrow as pa
 
+_ORIENT_TYPE = t.Literal["records", "list"]
+
 
 class _PandasDataAccessor(_DataAccessor):
     __types = (pd.DataFrame, pd.Series)
@@ -191,7 +193,7 @@ class _PandasDataAccessor(_DataAccessor):
         self,
         data: pd.DataFrame,
         data_format: _DataFormat,
-        orient: str,
+        orient: _ORIENT_TYPE,
         start: t.Optional[int] = None,
         rowcount: t.Optional[int] = None,
         data_extraction: t.Optional[bool] = None,
@@ -228,8 +230,11 @@ class _PandasDataAccessor(_DataAccessor):
             ret["orient"] = orient
         else:
             # Workaround for Python built in JSON encoder that does not yet support ignore_nan
-            ret["data"] = data.replace([np.nan, pd.NA], [None, None]).to_dict(orient=orient)  # type: ignore
+            ret["data"] = self.get_json_ready_dict(data.replace([np.nan, pd.NA], [None, None]), orient)
         return ret
+
+    def get_json_ready_dict(self, df: pd.DataFrame, orient: _ORIENT_TYPE) -> t.Dict[t.Hashable, t.Any]:
+        return df.to_dict(orient=orient)  # type: ignore[return-value]
 
     def get_cols_description(self, var_name: str, value: t.Any) -> t.Dict[str, t.Dict[str, str]]:
         if isinstance(value, list):
