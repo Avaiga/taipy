@@ -111,8 +111,7 @@ class _BaseSerializer(object):
         res = {}
         for key, value in config_as_dict.get(node, {}).items():  # my_task, {input=[], output=[my_data_node], ...}
             key = _validate_id(key)
-            res[key] = cls_config._from_dict(value, key, config)  # if config is None else cls_config._from_dict(key,
-            # value, config)
+            res[key] = cls_config._from_dict(value, key, config)
         return res
 
     @classmethod
