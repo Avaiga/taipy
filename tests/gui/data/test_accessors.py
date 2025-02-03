@@ -62,7 +62,7 @@ def test_custom_accessor(gui: Gui):
     data = mock_taipy_data(123)
 
     # Testing when accessor is not registered
-    data_accessor = data_accessors._DataAccessors__get_instance(mock_taipy_data)  # type: ignore
+    data_accessor = data_accessors._get_instance(mock_taipy_data)  # type: ignore
     assert isinstance(
         data_accessor, _InvalidDataAccessor
     ), f"Expected _InvalidDataAccessor but got {type(data_accessor)}"

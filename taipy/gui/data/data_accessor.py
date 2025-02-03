@@ -139,7 +139,7 @@ class _DataAccessors(object):
         if cls in self.__access_4_type:
             del self.__access_4_type[cls]
 
-    def __get_instance(self, value: _TaipyData) -> _DataAccessor:  # type: ignore
+    def _get_instance(self, value: _TaipyData) -> _DataAccessor:  # type: ignore
         value = value.get() if isinstance(value, _TaipyData) else value
         access = self.__access_4_type.get(type(value))
         if access is None:
@@ -154,28 +154,28 @@ class _DataAccessors(object):
         return access
 
     def get_data(self, var_name: str, value: _TaipyData, payload: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
-        return self.__get_instance(value).get_data(var_name, value.get(), payload, self.__data_format)
+        return self._get_instance(value).get_data(var_name, value.get(), payload, self.__data_format)
 
     def get_cols_description(self, var_name: str, value: _TaipyData) -> t.Dict[str, t.Dict[str, str]]:
-        return self.__get_instance(value).get_cols_description(var_name, value.get())
+        return self._get_instance(value).get_cols_description(var_name, value.get())
 
     def set_data_format(self, data_format: _DataFormat):
         self.__data_format = data_format
 
     def get_dataframe(self, value: t.Any):
-        return self.__get_instance(value).to_pandas(value)
+        return self._get_instance(value).to_pandas(value)
 
     def on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
-        return self.__get_instance(value).on_edit(value, payload)
+        return self._get_instance(value).on_edit(value, payload)
 
     def on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
-        return self.__get_instance(value).on_delete(value, payload)
+        return self._get_instance(value).on_delete(value, payload)
 
     def on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
-        return self.__get_instance(value).on_add(value, payload, new_row)
+        return self._get_instance(value).on_add(value, payload, new_row)
 
     def to_csv(self, var_name: str, value: t.Any):
-        return self.__get_instance(value).to_csv(var_name, value.get())
+        return self._get_instance(value).to_csv(var_name, value.get())
 
     def to_pandas(self, value: t.Any):
-        return self.__get_instance(value).to_pandas(value.get())
+        return self._get_instance(value).to_pandas(value.get())
