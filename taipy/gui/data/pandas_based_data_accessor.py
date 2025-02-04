@@ -50,7 +50,9 @@ class _PandasBasedDataAccessor(_DataAccessor):
     def on_add(
         self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None
     ) -> t.Optional[t.Any]:
-        return self._from_pandas(self._get_pandas_accessor().on_add(self.to_pandas(value), payload, new_row), type(value))
+        return self._from_pandas(
+            self._get_pandas_accessor().on_add(self.to_pandas(value), payload, new_row), type(value)
+        )
 
     def to_csv(self, var_name: str, value: t.Any) -> t.Optional[str]:
         return self._get_pandas_accessor().to_csv(var_name, self.to_pandas(value))
