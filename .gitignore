@@ -1,6 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*\.py[cod]
+*.py[cod]
 *$py.class
 
 # C extensions
@@ -86,7 +86,7 @@ dist/
 .taipy/
 user_data/
 .my_data/
-Data
+/Data
 
 # demo files
 demo[_\-]*
