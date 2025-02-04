@@ -12,6 +12,8 @@
 import os
 from importlib import util
 
+import pandas
+
 from taipy.gui import Gui
 from taipy.gui.data.array_dict_data_accessor import _ArrayDictDataAccessor
 from taipy.gui.data.data_format import _DataFormat
@@ -266,3 +268,37 @@ def test_csv(gui, small_dataframe):
     path = accessor.to_csv("", pd)
     assert path is not None
     assert os.path.getsize(path) > 0
+
+def test__from_pandas_dict(gui, small_dataframe):
+    accessor = _ArrayDictDataAccessor(gui)
+    pd = small_dataframe
+    ad = accessor._from_pandas(pandas.DataFrame(pd), dict)
+    assert isinstance(ad, dict)
+    assert len(ad) == 2
+    assert len(ad["name"]) == len(pd["name"])
+    assert len(ad["value"]) == len(pd["value"])
+    assert ad["name"][0] == pd["name"][0]
+    assert ad["value"][0] == pd["value"][0]
+    assert ad["name"][-1] == pd["name"][-1]
+    assert ad["value"][-1] == pd["value"][-1]
+
+def test__from_pandas_MapDict(gui, small_dataframe):
+    accessor = _ArrayDictDataAccessor(gui)
+    pd = small_dataframe
+    ad = accessor._from_pandas(pandas.DataFrame(pd), _MapDict)
+    assert isinstance(ad, _MapDict)
+    assert len(ad) == 2
+    assert len(ad["name"]) == len(pd["name"])
+    assert len(ad["value"]) == len(pd["value"])
+    assert ad["name"][0] == pd["name"][0]
+    assert ad["value"][0] == pd["value"][0]
+    assert ad["name"][-1] == pd["name"][-1]
+    assert ad["value"][-1] == pd["value"][-1]
+
+def test__from_pandas_list(gui, small_dataframe):
+    accessor = _ArrayDictDataAccessor(gui)
+    pd = {"name": small_dataframe["name"]}
+    ad = accessor._from_pandas(pandas.DataFrame(pd), list)
+    assert isinstance(ad, list)
+    assert len(ad) == 3
+    assert ad[0] == pd["name"][0]
