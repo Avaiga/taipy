@@ -431,7 +431,7 @@ class TestCSVDataNode:
         # The upload should succeed when check_data_is_positive() return True
         assert dn._upload(new_csv_path, upload_checker=check_data_is_positive)
 
-    def test_clone_data_file(self):
+    def test_duplicate_data_file(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "pandas"})
         _DataManager._set(dn)
@@ -450,7 +450,7 @@ class TestCSVDataNode:
         dn.id = dn._new_id("foo")
         dn.path = new_file_path
         new_file_path_2 = str(dn._duplicate_data())
-        assert len(new_file_path_2.split("TAIPY_CLONED")) == 2
+        assert len(new_file_path_2.split("TAIPY_DUPLICATED")) == 2
         os.unlink(new_file_path)
         os.unlink(new_file_path_2)
 

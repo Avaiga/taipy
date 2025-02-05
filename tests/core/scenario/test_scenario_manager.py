@@ -1555,7 +1555,25 @@ def test_filter_scenarios_by_creation_datetime():
     assert [s_1_1] == filtered_scenarios
 
 
-def test_clone_scenario():
+def test_can_duplicate_scenario():
+    dn_config = Config.configure_pickle_data_node("dn", scope=Scope.SCENARIO)
+    task_config = Config.configure_task("task_1", print, [dn_config])
+    scenario_config = Config.configure_scenario("scenario_1", [task_config])
+    scenario = _ScenarioManager._create(scenario_config)
+
+    reasons = _ScenarioManager._can_duplicate(scenario)
+    assert bool(reasons)
+    assert reasons._reasons == {}
+
+    reasons = _ScenarioManager._can_duplicate("1")
+    assert not bool(reasons)
+    assert reasons._reasons["1"] == {EntityDoesNotExist(1)}
+    assert str(list(reasons._reasons["1"])[0]) == "Entity 1 does not exist in the repository"
+    with pytest.raises(AttributeError):
+        _ScenarioManager._duplicate("1")
+
+
+def test_duplicate_scenario():
     dn_config_1 = Config.configure_pickle_data_node("dn_1", scope=Scope.SCENARIO)
     dn_config_2 = Config.configure_pickle_data_node("dn_2", scope=Scope.SCENARIO)
     additional_dn_config_1 = Config.configure_data_node("additional_dn_1", scope=Scope.SCENARIO)
@@ -1586,7 +1604,7 @@ def test_clone_scenario():
     assert all(new_scenario.id == dn.owner_id for dn in new_scenario.data_nodes.values())
 
 
-def test_clone_scenario_with_single_GLOBAL_dn_scope():
+def test_duplicate_scenario_with_single_GLOBAL_dn_scope():
     dn_config_1 = Config.configure_pickle_data_node("dn_1", scope=Scope.SCENARIO)
     dn_config_2 = Config.configure_pickle_data_node("dn_2", scope=Scope.GLOBAL)
     additional_dn_config_1 = Config.configure_data_node("additional_dn_1", scope=Scope.SCENARIO)
@@ -1616,7 +1634,7 @@ def test_clone_scenario_with_single_GLOBAL_dn_scope():
     assert all((new_scenario.id == dn.owner_id or dn.owner_id is None) for dn in new_scenario.data_nodes.values())
 
 
-def test_clone_scenario_with_all_GLOBAL_dn_scope():
+def test_duplicate_scenario_with_all_GLOBAL_dn_scope():
     dn_config_1 = Config.configure_pickle_data_node("dn_1", scope=Scope.GLOBAL)
     dn_config_2 = Config.configure_pickle_data_node("dn_2", scope=Scope.GLOBAL)
     additional_dn_config_1 = Config.configure_data_node("additional_dn_1", scope=Scope.SCENARIO)
@@ -1646,7 +1664,7 @@ def test_clone_scenario_with_all_GLOBAL_dn_scope():
     assert all((new_scenario.id == dn.owner_id or dn.owner_id is None) for dn in new_scenario.data_nodes.values())
 
 
-def test_clone_scenario_with_single_CYCLE_dn_scope():
+def test_duplicate_scenario_with_single_CYCLE_dn_scope():
     dn_config_1 = Config.configure_pickle_data_node("dn_1", scope=Scope.SCENARIO)
     dn_config_2 = Config.configure_pickle_data_node("dn_2", scope=Scope.CYCLE)
     additional_dn_config_1 = Config.configure_data_node("additional_dn_1", scope=Scope.SCENARIO)
@@ -1676,7 +1694,7 @@ def test_clone_scenario_with_single_CYCLE_dn_scope():
     assert all((new_scenario.id == dn.owner_id or dn.owner_id is None) for dn in new_scenario.data_nodes.values())
 
 
-def test_clone_scenario_with_all_CYCLE_dn_scope():
+def test_duplicate_scenario_with_all_CYCLE_dn_scope():
     dn_config_1 = Config.configure_pickle_data_node("dn_1", scope=Scope.CYCLE)
     dn_config_2 = Config.configure_pickle_data_node("dn_2", scope=Scope.CYCLE)
     additional_dn_config_1 = Config.configure_data_node("additional_dn_1", scope=Scope.SCENARIO)
@@ -1706,7 +1724,7 @@ def test_clone_scenario_with_all_CYCLE_dn_scope():
     assert all((new_scenario.id == dn.owner_id or dn.owner_id is None) for dn in new_scenario.data_nodes.values())
 
 
-def test_clone_scenario_with_same_cycle():
+def test_duplicate_scenario_with_same_cycle():
     dn_config_1 = Config.configure_pickle_data_node("dn_1", scope=Scope.SCENARIO)
     dn_config_2 = Config.configure_pickle_data_node("dn_2", scope=Scope.SCENARIO)
     additional_dn_config_1 = Config.configure_data_node("additional_dn_1", scope=Scope.SCENARIO)
@@ -1742,7 +1760,7 @@ def test_clone_scenario_with_same_cycle():
     assert new_scenario.cycle == scenario.cycle
 
 
-def test_clone_scenario_with_separate_cycle():
+def test_duplicate_scenario_with_separate_cycle():
     dn_config_1 = Config.configure_pickle_data_node("dn_1", scope=Scope.SCENARIO)
     dn_config_2 = Config.configure_pickle_data_node("dn_2", scope=Scope.SCENARIO)
     additional_dn_config_1 = Config.configure_data_node("additional_dn_1", scope=Scope.SCENARIO)
@@ -1776,19 +1794,38 @@ def test_clone_scenario_with_separate_cycle():
     assert all(new_scenario.id == dn.owner_id for dn in new_scenario.data_nodes.values())
 
 
-def test_duplicate_scenario():
-    dn_config = Config.configure_pickle_data_node("dn", scope=Scope.SCENARIO)
-    task_config = Config.configure_task("task_1", print, [dn_config])
-    scenario_config = Config.configure_scenario("scenario_1", [task_config])
-    scenario = _ScenarioManager._create(scenario_config)
+def test_duplicate_scenario_with_sequences():
+    dn_config_1 = Config.configure_pickle_data_node("dn_1", scope=Scope.SCENARIO)
+    dn_config_2 = Config.configure_pickle_data_node("dn_2", scope=Scope.SCENARIO)
+    dn_config_3 = Config.configure_pickle_data_node("dn_3", scope=Scope.SCENARIO)
+    task_config_1 = Config.configure_task("task_1", print, [dn_config_1], [dn_config_2])
+    task_config_2 = Config.configure_task("task_2", print, [dn_config_2], [dn_config_3])
 
-    reasons = _ScenarioManager._can_duplicate(scenario)
-    assert bool(reasons)
-    assert reasons._reasons == {}
+    scenario_config_1 = Config.configure_scenario("scenario_1", [task_config_1, task_config_2])
+    scenario = _ScenarioManager._create(scenario_config_1)
 
-    reasons = _ScenarioManager._can_duplicate("1")
-    assert not bool(reasons)
-    assert reasons._reasons["1"] == {EntityDoesNotExist(1)}
-    assert str(list(reasons._reasons["1"])[0]) == "Entity 1 does not exist in the repository"
-    with pytest.raises(AttributeError):
-        _ScenarioManager._duplicate("1")
+    tasks_dict = scenario.tasks
+    scenario.add_sequence("seq_1", [tasks_dict["task_1"], tasks_dict["task_2"]], {"some_properties_1": "some_values_1"})
+    scenario.add_sequence("seq_2", [tasks_dict["task_2"]], {"some_properties_2": "some_values_2"})
+
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_DataManager._get_all()) == 3
+    assert len(_TaskManager._get_all()) == 2
+
+    duplicated_scenario = _ScenarioManager._duplicate(scenario, name="New Scenario")
+
+    assert scenario.id != duplicated_scenario.id
+    assert duplicated_scenario.name == "New Scenario"
+    assert len(_ScenarioManager._get_all()) == 2
+    assert len(_DataManager._get_all()) == 7
+    assert len(_TaskManager._get_all()) == 4
+
+    duplicated_tasks = duplicated_scenario.tasks
+    tasks_duplicated_tasks_ids = {
+        task.id: duplicated_tasks[task_config].id for task_config, task in scenario.tasks.items()
+    }
+
+    assert duplicated_scenario.sequences["seq_1"].id != scenario.sequences["seq_1"].id
+    assert {task.id for task in duplicated_scenario.sequences["seq_1"].tasks.values()} == {
+        tasks_duplicated_tasks_ids[task.id] for task in scenario.sequences["seq_1"].tasks.values()
+    }

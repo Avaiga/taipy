@@ -732,7 +732,7 @@ class TestDataManager:
         assert len(_DataManager._get_by_config_id(dn_config_1.id)) == 3
         assert len(_DataManager._get_by_config_id(dn_config_2.id)) == 2
 
-    def test_clone_data_node_with_differnt_owner_id(self):
+    def test_duplicate_data_node_with_differnt_owner_id(self):
         csv_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         dn_config = Config.configure_csv_data_node("dn_csv_in_1", default_path=csv_path_inp)
         dn = _DataManager._create_and_set(dn_config, None, None)
@@ -747,7 +747,7 @@ class TestDataManager:
         assert os.path.exists(str(new_dn.properties["path"]))
         os.remove(str(new_dn.properties["path"]))
 
-    def test_clone_data_node_with_same_owner_id(self):
+    def test_duplicate_data_node_with_same_owner_id(self):
         csv_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         dn_config = Config.configure_csv_data_node("dn_csv_in_1", default_path=csv_path_inp)
         dn = _DataManager._create_and_set(dn_config, None, None)

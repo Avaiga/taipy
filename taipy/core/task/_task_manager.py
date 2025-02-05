@@ -238,10 +238,10 @@ class _TaskManager(_Manager[Task], _VersionMixin):
     ) -> Task:
         data_manager = _DataManagerFactory._build_manager()
 
-        cloned_task = cls._get(task)
+        duplicated_task = cls._get(task)
 
-        inputs = [data_manager._duplicate(i, cycle_id, scenario_id) for i in cloned_task.input.values()]
-        outputs = [data_manager._duplicate(o, cycle_id, scenario_id) for o in cloned_task.output.values()]
+        inputs = [data_manager._duplicate(i, cycle_id, scenario_id) for i in duplicated_task.input.values()]
+        outputs = [data_manager._duplicate(o, cycle_id, scenario_id) for o in duplicated_task.output.values()]
 
         scope = min(dn.scope for dn in (inputs + outputs)) if (len(inputs) + len(outputs)) != 0 else Scope.GLOBAL
         owner_id = cls._get_owner_id(scope, cycle_id, scenario_id)
@@ -253,19 +253,19 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         if existing_task := tasks_by_config.get((task.config_id, owner_id)):
             return existing_task
 
-        cloned_task.id = cloned_task._new_id(cloned_task.config_id)
-        cloned_task._parent_ids = set()
-        cloned_task._owner_id = owner_id
+        duplicated_task.id = duplicated_task._new_id(duplicated_task.config_id)
+        duplicated_task._parent_ids = set()
+        duplicated_task._owner_id = owner_id
 
-        cloned_task._input = {i.config_id: i for i in inputs}
-        cloned_task._output = {o.config_id: o for o in outputs}
+        duplicated_task._input = {i.config_id: i for i in inputs}
+        duplicated_task._output = {o.config_id: o for o in outputs}
 
         for dn in set(inputs + outputs):
-            dn._parent_ids.update([cloned_task.id])
+            dn._parent_ids.update([duplicated_task.id])
             data_manager._set(dn)
 
-        cls._set(cloned_task)
-        return cloned_task
+        cls._set(duplicated_task)
+        return duplicated_task
 
     @classmethod
     def _can_duplicate(cls, task: Task) -> ReasonCollection:

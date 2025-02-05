@@ -191,16 +191,16 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         if existing_dn := data_nodes.get((dn.config_id, dn.owner_id)):
             return existing_dn
         else:
-            cloned_dn = cls._get(dn)
+            duplicated_dn = cls._get(dn)
 
-            cloned_dn.id = cloned_dn._new_id(cloned_dn._config_id)
-            cloned_dn._owner_id = cls._get_owner_id(cloned_dn._scope, cycle_id, scenario_id)
-            cloned_dn._parent_ids = set()
+            duplicated_dn.id = duplicated_dn._new_id(duplicated_dn._config_id)
+            duplicated_dn._owner_id = cls._get_owner_id(duplicated_dn._scope, cycle_id, scenario_id)
+            duplicated_dn._parent_ids = set()
 
-            cloned_dn._duplicate_data()
+            duplicated_dn._duplicate_data()
 
-            cls._set(cloned_dn)
-            return cloned_dn
+            cls._set(duplicated_dn)
+            return duplicated_dn
 
     @classmethod
     def _can_duplicate(cls, dn: DataNode) -> ReasonCollection:

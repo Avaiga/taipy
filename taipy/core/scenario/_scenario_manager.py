@@ -527,59 +527,70 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         cls, scenario: Scenario, creation_date: Optional[datetime] = None, name: Optional[str] = None
     ) -> Scenario:
         """
-        Clone a scenario.
+        Duplicate a scenario.
 
         Arguments:
-            scenario (Scenario): The scenario to clone.
+            scenario (Scenario): The scenario to duplicate.
 
         Returns:
-            Scenario: The cloned scenario.
+            Scenario: The duplicated scenario.
         """
         creation_date = creation_date or datetime.now()
-        cloned_scenario = cls._get(scenario)
-        cloned_scenario.id = cloned_scenario._new_id(cloned_scenario.config_id)
+        duplicated_scenario = cls._get(scenario)
+        duplicated_scenario.id = duplicated_scenario._new_id(duplicated_scenario.config_id)
 
         frequency = cls.__get_config(scenario).frequency
         cycle = _CycleManagerFactory._build_manager()._get_or_create(frequency, creation_date) if frequency else None
         cycle_id = cycle.id if cycle else None
 
-        # TODO: update sequences
-
-        # Clone tasks and data nodes
+        # Duplicate tasks and data nodes and sequences
         _task_manager = _TaskManagerFactory._build_manager()
         _data_manager = _DataManagerFactory._build_manager()
 
-        cloned_tasks = set()
-        for task in cloned_scenario.tasks.values():
-            cloned_tasks.add(_task_manager._duplicate(task, cycle_id, cloned_scenario.id))
-        cloned_scenario._tasks = cloned_tasks
+        duplicated_tasks = set()
+        task_ids_to_duplicated_tasks_dict = {}
+        for task in duplicated_scenario.tasks.values():
+            duplicated_task = _task_manager._duplicate(task, cycle_id, duplicated_scenario.id)
+            duplicated_tasks.add(duplicated_task)
+            task_ids_to_duplicated_tasks_dict[task.id] = duplicated_task
+        duplicated_scenario._tasks = duplicated_tasks
 
-        cloned_additional_data_nodes = set()
-        for data_node in cloned_scenario.additional_data_nodes.values():
-            cloned_additional_data_nodes.add(_data_manager._duplicate(data_node, None, cloned_scenario.id))
-        cloned_scenario._additional_data_nodes = cloned_additional_data_nodes
+        duplicated_sequences = {}
+        for sequence_name, sequence_values in duplicated_scenario._sequences.items():
+            sequence_values[duplicated_scenario._SEQUENCE_TASKS_KEY] = {
+                task_ids_to_duplicated_tasks_dict[sequence_task_id]
+                for sequence_task_id in sequence_values[duplicated_scenario._SEQUENCE_TASKS_KEY]
+            }
+            duplicated_sequences[sequence_name] = sequence_values
+        duplicated_scenario._sequences = duplicated_sequences
 
-        for task in cloned_tasks:
-            if cloned_scenario.id not in task._parent_ids:
-                task._parent_ids.update([cloned_scenario.id])
+        # Duplicate additional data nodes
+        duplicated_additional_data_nodes = set()
+        for data_node in duplicated_scenario.additional_data_nodes.values():
+            duplicated_additional_data_nodes.add(_data_manager._duplicate(data_node, None, duplicated_scenario.id))
+        duplicated_scenario._additional_data_nodes = duplicated_additional_data_nodes
+
+        for task in duplicated_tasks:
+            if duplicated_scenario.id not in task._parent_ids:
+                task._parent_ids.update([duplicated_scenario.id])
                 _task_manager._set(task)
 
-        for dn in cloned_additional_data_nodes:
-            if cloned_scenario.id not in dn._parent_ids:
-                dn._parent_ids.update([cloned_scenario.id])
+        for dn in duplicated_additional_data_nodes:
+            if duplicated_scenario.id not in dn._parent_ids:
+                dn._parent_ids.update([duplicated_scenario.id])
                 _data_manager._set(dn)
 
         if name:
-            if hasattr(cloned_scenario._properties, "_entity_owner"):
-                del cloned_scenario._properties._entity_owner
-            cloned_scenario._properties["name"] = name
-        cloned_scenario._cycle = cycle
-        cloned_scenario._creation_date = creation_date
-        cloned_scenario._primary_scenario = len(cls._get_all_by_cycle(cycle)) == 0 if cycle else False
+            if hasattr(duplicated_scenario._properties, "_entity_owner"):
+                del duplicated_scenario._properties._entity_owner
+            duplicated_scenario._properties["name"] = name
+        duplicated_scenario._cycle = cycle
+        duplicated_scenario._creation_date = creation_date
+        duplicated_scenario._primary_scenario = len(cls._get_all_by_cycle(cycle)) == 0 if cycle else False
 
-        cls._set(cloned_scenario)
+        cls._set(duplicated_scenario)
 
-        return cloned_scenario
+        return duplicated_scenario
 
     @classmethod
     def _can_duplicate(cls, scenario: Optional[Scenario]) -> ReasonCollection:

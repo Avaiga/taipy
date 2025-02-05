@@ -486,7 +486,7 @@ def _create_task_from_config(task_config, *args, **kwargs):
     return _TaskManager._bulk_get_or_create([task_config], *args, **kwargs)[0]
 
 
-def test_clone_task_wit_different_owner_id():
+def test_duplicate_task_wit_different_owner_id():
     dn_input_config_1 = Config.configure_pickle_data_node("my_input_1", scope=Scope.SCENARIO, default_data="testing")
     dn_output_config_1 = Config.configure_pickle_data_node("my_output_1", scope=Scope.SCENARIO)
     task_config_1 = Config.configure_task("task_config_1", print, dn_input_config_1, dn_output_config_1)
@@ -510,7 +510,7 @@ def test_clone_task_wit_different_owner_id():
     assert all(dn.owner_id == "scenario_id" for dn in new_task.data_nodes.values())
 
 
-def test_clone_task_wit_same_owner_id():
+def test_duplicate_task_wit_same_owner_id():
     dn_input_config_1 = Config.configure_pickle_data_node("my_input_1", scope=Scope.SCENARIO, default_data="testing")
     dn_output_config_1 = Config.configure_pickle_data_node("my_output_1", scope=Scope.SCENARIO)
     task_config_1 = Config.configure_task("task_config_1", print, dn_input_config_1, dn_output_config_1)

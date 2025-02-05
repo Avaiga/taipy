@@ -42,7 +42,7 @@ class _FileDataNodeMixin:
     _PATH_KEY = "path"
     _DEFAULT_PATH_KEY = "default_path"
     _IS_GENERATED_KEY = "is_generated"
-    __TAIPY_CLONED_PREFIX = "TAIPY_CLONED"
+    __TAIPY_DUPLICATED_PREFIX = "TAIPY_DUPLICATED"
 
     __logger = _TaipyLogger._get_logger()
 
@@ -226,9 +226,9 @@ class _FileDataNodeMixin:
     def _duplicate_data_file(self, id: str) -> Optional[str]:
         if os.path.exists(self.path):
             folder_path, base_name = os.path.split(self.path)
-            if base_name.startswith(self.__TAIPY_CLONED_PREFIX):
+            if base_name.startswith(self.__TAIPY_DUPLICATED_PREFIX):
                 base_name = "".join(base_name.split("_")[5:])
-            new_base_path = os.path.join(folder_path, f"{self.__TAIPY_CLONED_PREFIX}_{id}_{base_name}")
+            new_base_path = os.path.join(folder_path, f"{self.__TAIPY_DUPLICATED_PREFIX}_{id}_{base_name}")
             if os.path.isdir(self.path):
                 shutil.copytree(self.path, new_base_path)
             else:
