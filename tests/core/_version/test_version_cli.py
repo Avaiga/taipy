@@ -16,11 +16,11 @@ import pytest
 
 from taipy._entrypoint import _entrypoint
 from taipy.common.config import Config
-from taipy.common.config.common.frequency import Frequency
-from taipy.common.config.common.scope import Scope
 from taipy.core import Orchestrator
 from taipy.core._version._cli._version_cli_factory import _VersionCLIFactory
 from taipy.core._version._version_manager import _VersionManager
+from taipy.core.common.frequency import Frequency
+from taipy.core.common.scope import Scope
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.scenario._scenario_manager import _ScenarioManager

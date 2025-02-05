@@ -13,7 +13,6 @@ import datetime
 import typing as t
 from pathlib import Path
 
-import pandas as pd
 from watchdog.events import FileSystemEventHandler
 
 from taipy.common.logger._taipy_logger import _TaipyLogger
@@ -37,56 +36,35 @@ def _get_tuple_val(attr: tuple, index: int, default_val: t.Any) -> t.Any:
 
 
 def _get_columns_dict_from_list(
-    col_list: t.Union[t.List[str], t.Tuple[str]], col_types_keys: t.List[str], value: t.Any
+    col_list: t.Union[t.List[str], t.Tuple[str]], cols_description: t.Dict[str, t.Dict[str, str]]
 ):
-    col_dict = {}
+    col_dict: t.Dict[str, t.Dict[str, t.Any]] = {}
     idx = 0
-    cols = None
-
     for col in col_list:
-        if col in col_types_keys:
-            col_dict[col] = {"index": idx}
+        if col in cols_description:
+            col_dict[col] = cols_description[col].copy()
+            col_dict[col]["index"] = idx
             idx += 1
-        elif col:
-            if cols is None:
-                cols = (
-                    list(value.columns)
-                    if isinstance(value, pd.DataFrame)
-                    else list(value.keys())
-                    if isinstance(value, (dict, _MapDict))
-                    else value
-                    if isinstance(value, (list, tuple))
-                    else []
-                )
-
-            if cols and (col not in cols):
-                _warn(
-                    f'Column "{col}" is not present. Available columns: {cols}.'  # noqa: E501
-                )
-            else:
-                _warn(
-                    "The 'data' property value is of an unsupported type."
-                    + " Only DataFrame, dict, list, or tuple are supported."
-                )
+        elif col and col not in cols_description:
+            _warn(f'Column "{col}" is not present. Available columns: {list(cols_description)}.')
     return col_dict
 
 
 def _get_columns_dict(  # noqa: C901
-    value: t.Any,
     columns: t.Union[str, t.List[str], t.Tuple[str], t.Dict[str, t.Any], _MapDict],
-    col_types: t.Optional[t.Dict[str, str]] = None,
+    cols_description: t.Optional[t.Dict[str, t.Dict[str, str]]] = None,
     date_format: t.Optional[str] = None,
     number_format: t.Optional[str] = None,
     opt_columns: t.Optional[t.Set[str]] = None,
 ):
-    if col_types is None:
+    if cols_description is None:
         return None
-    col_types_keys = [str(c) for c in col_types.keys()]
+    col_types_keys = [str(c) for c in cols_description.keys()]
     col_dict: t.Optional[dict] = None
     if isinstance(columns, str):
-        col_dict = _get_columns_dict_from_list([s.strip() for s in columns.split(";")], col_types_keys, value)
+        col_dict = _get_columns_dict_from_list([s.strip() for s in columns.split(";")], cols_description)
     elif isinstance(columns, (list, tuple)):
-        col_dict = _get_columns_dict_from_list(columns, col_types_keys, value)  # type: ignore[arg-type]
+        col_dict = _get_columns_dict_from_list(columns, cols_description)
     elif isinstance(columns, _MapDict):
         col_dict = columns._dict.copy()
     elif isinstance(columns, dict):
@@ -96,8 +74,8 @@ def _get_columns_dict(  # noqa: C901
         col_dict = {}
     nb_cols = len(col_dict)
     if nb_cols == 0:
-        for col in col_types_keys:
-            col_dict[col] = {"index": nb_cols}
+        for col in cols_description:
+            col_dict[str(col)] = {"index": nb_cols}
             nb_cols += 1
     else:
         col_dict = {str(k): v for k, v in col_dict.items()}
@@ -107,23 +85,29 @@ def _get_columns_dict(  # noqa: C901
                     col_dict[col] = {"index": nb_cols}
                     nb_cols += 1
     idx = 0
-    for col, ctype in col_types.items():
+    for col, col_description in cols_description.items():
         col = str(col)
         if col in col_dict:
-            re_type = _RE_PD_TYPE.match(ctype)
-            grps = re_type.groups() if re_type else ()
-            ctype = grps[0] if grps else ctype
-            col_dict[col]["type"] = ctype
-            col_dict[col]["dfid"] = col
-            if len(grps) > 4 and grps[4]:
-                col_dict[col]["tz"] = grps[4]
-            idx = _add_to_dict_and_get(col_dict[col], "index", idx) + 1
-            if ctype == "datetime":
+            col_type = col_description.get("type", "")
+            re_type = _RE_PD_TYPE.match(col_type)
+            groups = re_type.groups() if re_type else ()
+            col_type = groups[0] if groups else col_type
+            if len(groups) > 4 and groups[4]:
+                col_dict[col]["tz"] = groups[4]
+            old_col = None
+            if col_type == "datetime":
                 if date_format:
                     _add_to_dict_and_get(col_dict[col], "format", date_format)
-                col_dict[_get_date_col_str_name(col_types.keys(), col)] = col_dict.pop(col)  # type: ignore
-            elif number_format and ctype in NumberTypes:
+                old_col = col
+                col = _get_date_col_str_name(cols_description.keys(), col)
+                col_dict[col] = col_dict.pop(old_col)
+            elif number_format and col_type in NumberTypes:
                 _add_to_dict_and_get(col_dict[col], "format", number_format)
+            if "index" not in col_dict[col]:
+                col_dict[col]["index"] = idx
+            idx += 1
+            col_dict[col]["type"] = col_type
+            col_dict[col]["dfid"] = old_col or col
     return col_dict
 
 

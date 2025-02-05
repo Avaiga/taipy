@@ -50,8 +50,6 @@ from inspect import signature
 from typing import List
 
 from ._init import Config
-from .common.frequency import Frequency
-from .common.scope import Scope
 from .global_app.global_app_config import GlobalAppConfig
 from .section import Section
 from .unique_section import UniqueSection

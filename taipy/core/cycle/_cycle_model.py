@@ -12,9 +12,8 @@
 from dataclasses import dataclass
 from typing import Any, Dict
 
-from taipy.common.config.common.frequency import Frequency
-
 from .._repository._base_taipy_model import _BaseModel
+from ..common.frequency import Frequency
 from .cycle_id import CycleId
 
 

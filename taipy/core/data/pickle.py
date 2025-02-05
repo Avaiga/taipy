@@ -13,10 +13,9 @@ import pickle
 from datetime import datetime, timedelta
 from typing import Any, List, Optional, Set
 
-from taipy.common.config.common.scope import Scope
-
 from .._entity._reload import _Reloader
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..common.scope import Scope
 from ._file_datanode_mixin import _FileDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit

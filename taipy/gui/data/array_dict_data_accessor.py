@@ -14,11 +14,10 @@ import typing as t
 import pandas as pd
 
 from ..utils import _MapDict
-from .data_format import _DataFormat
-from .pandas_data_accessor import _PandasDataAccessor
+from .pandas_based_data_accessor import _PandasBasedDataAccessor
 
 
-class _ArrayDictDataAccessor(_PandasDataAccessor):
+class _ArrayDictDataAccessor(_PandasBasedDataAccessor):
     __types = (dict, list, tuple, _MapDict)
 
     @staticmethod
@@ -39,9 +38,11 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
                         if len(lengths) == 1
                         else [pd.DataFrame({f"{i}/0": v}) for i, v in enumerate(value)]
                     )
-                elif type_elt is dict:
+                elif type_elt is dict and isinstance(next(iter(t.cast(dict, value[0]).values()), None), (list, tuple)):
                     return [pd.DataFrame(v) for v in value]
-                elif type_elt is _MapDict:
+                elif type_elt is _MapDict and isinstance(
+                    next(iter(t.cast(_MapDict, value[0])._dict.values()), None), (list, tuple)
+                ):
                     return [pd.DataFrame(v._dict) for v in value]
                 elif type_elt is pd.DataFrame:
                     return t.cast(t.List[pd.DataFrame], value)
@@ -62,12 +63,4 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
                 return value.iloc[:, 0].to_list()
             if data_type is tuple:
                 return tuple(value.iloc[:, 0].to_list())
-        return super()._from_pandas(value, data_type)
-
-    def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
-        return super().get_col_types(var_name, self.to_pandas(value))
-
-    def get_data(  # noqa: C901
-        self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
-    ) -> t.Dict[str, t.Any]:
-        return super().get_data(var_name, self.to_pandas(value), payload, data_format)
+        return self._get_pandas_accessor()._from_pandas(value, data_type)

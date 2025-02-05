@@ -14,12 +14,12 @@ from unittest.mock import patch
 import pytest
 
 from taipy.common.config import Config
-from taipy.common.config.common.frequency import Frequency
-from taipy.common.config.common.scope import Scope
 from taipy.core import Orchestrator, taipy
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core._version._version_manager_factory import _VersionManagerFactory
 from taipy.core.common._utils import _load_fct
+from taipy.core.common.frequency import Frequency
+from taipy.core.common.scope import Scope
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.exceptions.exceptions import NonExistingVersion

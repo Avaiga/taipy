@@ -21,12 +21,12 @@ from taipy.common.config import Config
 from taipy.common.config._config import _Config
 from taipy.common.config.common._config_blocker import _ConfigBlocker
 from taipy.common.config.common._template_handler import _TemplateHandler as _tpl
-from taipy.common.config.common.scope import Scope
 from taipy.common.config.section import Section
 
 from ..common._utils import _normalize_path
 from ..common._warnings import _warn_deprecated
 from ..common.mongo_default_document import MongoDefaultDocument
+from ..common.scope import Scope
 
 
 class DataNodeConfig(Section):
@@ -504,6 +504,10 @@ class DataNodeConfig(Section):
             for optional_property, default_value in self._OPTIONAL_PROPERTIES[self._storage_type].items():
                 if default_value is not None and self._properties.get(optional_property) is None:
                     self._properties[optional_property] = default_value
+
+    @staticmethod
+    def _types_to_register() -> List[type]:
+        return [Scope]
 
     @staticmethod
     def _set_default_configuration(

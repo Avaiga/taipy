@@ -42,7 +42,8 @@
 
 /* Soft header on rows as Stylekit default */
 /* "header-plain" class to return to MUI default plain header */
-.taipy-table:where(:not(.header-plain)) thead th {
+.taipy-table:where(:not(.header-plain)) thead th,
+.taipy-table:where(:not(.header-plain)) tbody th {
   background: var(--color-paper);
   font-weight: bold;
 }
@@ -50,7 +51,8 @@
 /* No borders on rows as Stylekit default */
 /* "rows-bordered" class to return to MUI default rows with borders */
 .taipy-table:where(:not(.rows-bordered)) thead th,
-.taipy-table:where(:not(.rows-bordered)) tbody td {
+.taipy-table:where(:not(.rows-bordered)) tbody td,
+.taipy-table:where(:not(.rows-bordered)) tbody th {
   border-bottom: none;
 }
 

@@ -14,10 +14,10 @@ import typing as t
 import numpy
 import pandas as pd
 
-from .pandas_data_accessor import _PandasDataAccessor
+from .pandas_based_data_accessor import _PandasBasedDataAccessor
 
 
-class _NumpyDataAccessor(_PandasDataAccessor):
+class _NumpyDataAccessor(_PandasBasedDataAccessor):
     __types = (numpy.ndarray,)
 
     @staticmethod
@@ -27,7 +27,7 @@ class _NumpyDataAccessor(_PandasDataAccessor):
     def to_pandas(self, value: t.Any) -> pd.DataFrame:
         return pd.DataFrame(value)
 
-    def _from_pandas(self, value: pd.DataFrame, type: t.Type):
-        if type is numpy.ndarray:
+    def _from_pandas(self, value: pd.DataFrame, data_type: t.Type):
+        if data_type is numpy.ndarray:
             return value.to_numpy()
-        return super()._from_pandas(value, type)
+        return self._get_pandas_accessor()._from_pandas(value, data_type)

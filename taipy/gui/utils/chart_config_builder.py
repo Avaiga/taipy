@@ -112,7 +112,9 @@ def __get_col_from_indexed(col_name: str, idx: int) -> t.Optional[str]:
     return col_name
 
 
-def _build_chart_config(gui: "Gui", attributes: t.Dict[str, t.Any], col_types_list: t.List[t.Dict[str, str]]):  # noqa: C901
+def _build_chart_config(  # noqa: C901
+    gui: "Gui", attributes: t.Dict[str, t.Any], cols_descriptions_list: t.List[t.Dict[str, t.Dict[str, str]]]
+):
     if "data" not in attributes and "figure" in attributes:
         return {"traces": []}
     default_type = attributes.get("_default_type", "scatter")
@@ -200,11 +202,10 @@ def _build_chart_config(gui: "Gui", attributes: t.Dict[str, t.Any], col_types_li
 
     # Validate the column names
     col_dicts = []
-    for idx, col_types in enumerate(col_types_list):
+    for idx, cols_description in enumerate(cols_descriptions_list):
         if add_col_dict := _get_columns_dict(
-            attributes.get("data" if idx == 0 else f"data[{idx}]"),
             list(columns[idx] if idx < len(columns) else columns[0]),
-            col_types,
+            cols_description,
             opt_columns=opt_cols[idx] if idx < len(opt_cols) else opt_cols[0],
         ):
             col_dicts.append(add_col_dict)

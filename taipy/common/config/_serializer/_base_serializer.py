@@ -19,9 +19,7 @@ from typing import Any, Dict, Optional
 from .._config import _Config
 from ..common._template_handler import _TemplateHandler
 from ..common._validate_id import _validate_id
-from ..common.frequency import Frequency
-from ..common.scope import Scope
-from ..exceptions.exceptions import LoadingError
+from ..exceptions.exceptions import InvalidConfigurationType, LoadingError
 from ..global_app.global_app_config import GlobalAppConfig
 from ..section import Section
 from ..unique_section import UniqueSection
@@ -32,6 +30,19 @@ class _BaseSerializer(object):
 
     _GLOBAL_NODE_NAME = "TAIPY"
     _section_class = {_GLOBAL_NODE_NAME: GlobalAppConfig}
+    _registered_types: Dict[str, type] = {}
+
+    @classmethod
+    def _register(cls, section):
+        cls._section_class[section.name] = section.__class__
+        for clazz in section._types_to_register():
+            if not hasattr(clazz, "_type_identifier"):
+                raise InvalidConfigurationType(f"Type {clazz.__name__} must have a `_type_identifier` method.")
+            if not hasattr(clazz, "_stringify"):
+                raise InvalidConfigurationType(f"Type {clazz.__name__} must have a `_stringify` method.")
+            if not hasattr(clazz, "_pythonify"):
+                raise InvalidConfigurationType(f"Type {clazz.__name__} must have a `_pythonify` method.")
+            cls._registered_types[clazz._type_identifier()] = clazz
 
     @classmethod
     @abstractmethod
@@ -44,23 +55,19 @@ class _BaseSerializer(object):
         for u_sect_name, u_sect in configuration._unique_sections.items():
             config_as_dict[u_sect_name] = u_sect._to_dict()
         for sect_name, sections in configuration._sections.items():
-            config_as_dict[sect_name] = cls._to_dict(sections)
-        return cls._stringify(config_as_dict)
+            config_as_dict[sect_name] = cls.__to_dict(sections)
+        return cls.__stringify(config_as_dict)
 
     @classmethod
-    def _to_dict(cls, sections: Dict[str, Any]):
+    def __to_dict(cls, sections: Dict[str, Any]):
         return {section_id: section._to_dict() for section_id, section in sections.items()}
 
     @classmethod
-    def _stringify(cls, as_dict):
+    def __stringify(cls, as_dict):
         if as_dict is None:
             return None
-        if isinstance(as_dict, Section):
-            return f"{as_dict.id}:SECTION"
-        if isinstance(as_dict, Scope):
-            return f"{as_dict.name}:SCOPE"
-        if isinstance(as_dict, Frequency):
-            return f"{as_dict.name}:FREQUENCY"
+        if hasattr(as_dict, '_stringify') and callable(as_dict._stringify):
+            return as_dict._stringify()
         if isinstance(as_dict, bool):
             return f"{str(as_dict)}:bool"
         if isinstance(as_dict, int):
@@ -76,23 +83,14 @@ class _BaseSerializer(object):
         if inspect.isclass(as_dict):
             return f"{as_dict.__module__}.{as_dict.__qualname__}:class"
         if isinstance(as_dict, dict):
-            return {str(key): cls._stringify(val) for key, val in as_dict.items()}
+            return {str(key): cls.__stringify(val) for key, val in as_dict.items()}
         if isinstance(as_dict, list):
-            return [cls._stringify(val) for val in as_dict]
+            return [cls.__stringify(val) for val in as_dict]
         if isinstance(as_dict, tuple):
-            return [cls._stringify(val) for val in as_dict]
+            return [cls.__stringify(val) for val in as_dict]
         if isinstance(as_dict, set):
-            return [cls._stringify(val) for val in as_dict]
+            return [cls.__stringify(val) for val in as_dict]
         return as_dict
-
-    @staticmethod
-    def _extract_node(config_as_dict, cls_config, node, config: Optional[Any]) -> Dict[str, Section]:
-        res = {}
-        for key, value in config_as_dict.get(node, {}).items():  # my_task, {input=[], output=[my_data_node], ...}
-            key = _validate_id(key)
-            res[key] = cls_config._from_dict(value, key, config)  # if config is None else cls_config._from_dict(key,
-            # value, config)
-        return res
 
     @classmethod
     def _from_dict(cls, as_dict) -> _Config:
@@ -105,8 +103,16 @@ class _BaseSerializer(object):
                         sect_as_dict, None, None
                     )
                 elif issubclass(section_class, Section):
-                    config._sections[section_name] = cls._extract_node(as_dict, section_class, section_name, config)
+                    config._sections[section_name] = cls.__extract_node(as_dict, section_class, section_name, config)
         return config
+
+    @staticmethod
+    def __extract_node(config_as_dict, cls_config, node, config: Optional[Any]) -> Dict[str, Section]:
+        res = {}
+        for key, value in config_as_dict.get(node, {}).items():  # my_task, {input=[], output=[my_data_node], ...}
+            key = _validate_id(key)
+            res[key] = cls_config._from_dict(value, key, config)
+        return res
 
     @classmethod
     def _pythonify(cls, val):
@@ -122,10 +128,8 @@ class _BaseSerializer(object):
                     dynamic_type = match.group(2)
                     if dynamic_type == "SECTION":
                         return actual_val
-                    if dynamic_type == "FREQUENCY":
-                        return Frequency[actual_val]
-                    if dynamic_type == "SCOPE":
-                        return Scope[actual_val]
+                    if dynamic_type in cls._registered_types.keys():
+                        return cls._registered_types[dynamic_type]._pythonify(actual_val)
                     if dynamic_type == "bool":
                         return _TemplateHandler._to_bool(actual_val)
                     elif dynamic_type == "int":

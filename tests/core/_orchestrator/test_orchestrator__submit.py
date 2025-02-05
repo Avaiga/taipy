@@ -16,10 +16,8 @@ from unittest import mock
 import freezegun
 import pytest
 
-from taipy import Scenario, Task
 from taipy.common.config import Config
-from taipy.common.config.common import Scope
-from taipy.core import Orchestrator, taipy
+from taipy.core import Orchestrator, Scenario, Scope, Task, taipy
 from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.config import JobConfig

@@ -1909,9 +1909,8 @@ class Gui:
                     data_hash = hashes.get("data", "")
                     data = kwargs.get(data_hash)
                     col_dict = _get_columns_dict(
-                        data,
                         attributes.get("columns", {}),
-                        self._get_accessor().get_col_types(data_hash, _TaipyData(data, data_hash)),
+                        self._get_accessor().get_cols_description(data_hash, _TaipyData(data, data_hash)),
                         attributes.get("date_format"),
                         attributes.get("number_format"),
                     )
@@ -1939,7 +1938,9 @@ class Gui:
                         self,
                         attributes,
                         [
-                            self._get_accessor().get_col_types(data_hash, _TaipyData(kwargs.get(data_hash), data_hash))
+                            self._get_accessor().get_cols_description(
+                                data_hash, _TaipyData(kwargs.get(data_hash), data_hash)
+                            )
                             for data_hash in data_hashes
                         ],
                     )

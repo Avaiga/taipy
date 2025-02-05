@@ -18,8 +18,6 @@ from operator import attrgetter
 from pydoc import locate
 
 from ..exceptions.exceptions import InconsistentEnvVariableError, MissingEnvVariableError
-from .frequency import Frequency
-from .scope import Scope
 
 
 class _TemplateHandler:
@@ -57,10 +55,6 @@ class _TemplateHandler:
                 return cls._to_int(val)
             elif type is float:
                 return cls._to_float(val)
-            elif type is Scope:
-                return cls._to_scope(val)
-            elif type is Frequency:
-                return cls._to_frequency(val)
             else:
                 if dynamic_type == "bool":
                     return cls._to_bool(val)
@@ -75,7 +69,7 @@ class _TemplateHandler:
     def _to_bool(val: str) -> bool:
         possible_values = ["true", "false"]
         if str.lower(val) not in possible_values:
-            raise InconsistentEnvVariableError("{val} is not a Boolean.")
+            raise InconsistentEnvVariableError(f"{val} is not a Boolean.")
         return str.lower(val) == "true" or str.lower(val) != "false"
 
     @staticmethod
@@ -118,20 +112,6 @@ class _TemplateHandler:
             raise InconsistentEnvVariableError(f"{val} is not a valid timedelta.")
         time_params = {name: float(param) for name, param in parts.groupdict().items() if param}
         return timedelta(**time_params)  # type: ignore
-
-    @staticmethod
-    def _to_scope(val: str) -> Scope:
-        try:
-            return Scope[str.upper(val)]
-        except Exception:
-            raise InconsistentEnvVariableError(f"{val} is not a valid scope.") from None
-
-    @staticmethod
-    def _to_frequency(val: str) -> Frequency:
-        try:
-            return Frequency[str.upper(val)]
-        except Exception:
-            raise InconsistentEnvVariableError(f"{val} is not a valid frequency.") from None
 
     @staticmethod
     def _to_function(val: str):

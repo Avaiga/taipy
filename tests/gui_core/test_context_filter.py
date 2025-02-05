@@ -12,7 +12,7 @@
 import typing as t
 from unittest.mock import Mock, patch
 
-from taipy.common.config.common.scope import Scope
+from taipy import Scope
 from taipy.core import DataNode, Scenario
 from taipy.core.data.pickle import PickleDataNode
 from taipy.gui_core._context import _GuiCoreContext

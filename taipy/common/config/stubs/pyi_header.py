@@ -13,13 +13,13 @@ from datetime import timedelta
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from taipy.common.config._config import _Config
+from taipy.core.common.frequency import Frequency
+from taipy.core.common.scope import Scope
 from taipy.core.config import CoreSection, DataNodeConfig, JobConfig, ScenarioConfig, TaskConfig
 
 from .checker.issue_collector import IssueCollector
 from .common._classproperty import _Classproperty
 from .common._config_blocker import _ConfigBlocker
-from .common.frequency import Frequency
-from .common.scope import Scope
 from .global_app.global_app_config import GlobalAppConfig
 from .section import Section
 from .unique_section import UniqueSection

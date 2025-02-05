@@ -17,7 +17,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from taipy.common.config.common.scope import Scope
+from taipy import Scope
 from taipy.core.data.sql_table import SQLTableDataNode
 
 

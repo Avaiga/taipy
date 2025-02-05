@@ -17,14 +17,14 @@ import freezegun
 import pytest
 
 from taipy.common.config import Config
-from taipy.common.config.common.frequency import Frequency
-from taipy.common.config.common.scope import Scope
 from taipy.core import Job
 from taipy.core import taipy as tp
 from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._version._version_manager import _VersionManager
 from taipy.core.common import _utils
 from taipy.core.common._utils import _Subscriber
+from taipy.core.common.frequency import Frequency
+from taipy.core.common.scope import Scope
 from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data._data_manager import _DataManager

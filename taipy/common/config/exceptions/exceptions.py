@@ -25,6 +25,8 @@ class MissingEnvVariableError(Exception):
 class InvalidConfigurationId(Exception):
     """Configuration id is not valid."""
 
+class InvalidConfigurationType(Exception):
+    """Configuration attribute has an invalid type."""
 
 class ConfigurationUpdateBlocked(Exception):
     """The configuration is being blocked from update by other Taipy services."""

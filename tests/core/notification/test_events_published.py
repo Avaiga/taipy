@@ -15,8 +15,9 @@ from typing import Any, Dict, List
 import pytest
 
 from taipy import Orchestrator
-from taipy.common.config import Config, Frequency
+from taipy.common.config import Config
 from taipy.core import taipy as tp
+from taipy.core.common.frequency import Frequency
 from taipy.core.job.status import Status
 from taipy.core.notification.core_event_consumer import CoreEventConsumerBase
 from taipy.core.notification.event import Event, EventEntityType, EventOperation

@@ -16,8 +16,6 @@ import pytest
 
 import taipy.core.taipy as tp
 from taipy.common.config import Config
-from taipy.common.config.common.frequency import Frequency
-from taipy.common.config.common.scope import Scope
 from taipy.common.config.exceptions.exceptions import ConfigurationUpdateBlocked
 from taipy.core import (
     Cycle,
@@ -36,6 +34,8 @@ from taipy.core import (
 )
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core._version._version_manager import _VersionManager
+from taipy.core.common.frequency import Frequency
+from taipy.core.common.scope import Scope
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.cycle._cycle_manager import _CycleManager
