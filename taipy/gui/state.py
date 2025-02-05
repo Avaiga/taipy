@@ -149,6 +149,10 @@ class State(SimpleNamespace, metaclass=ABCMeta):
         """
         self._gui.set_favicon(favicon_path, self)
 
+    @abstractmethod
+    def __getitem__(self, key: str):
+        return self
+
 
 class _GuiState(State):
     __gui_attr = "_gui"
