@@ -251,8 +251,4 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         self._write_with_kwargs(data)
 
     def _duplicate_data(self):
-        new_data_path = self._duplicate_data_file(self.id)
-        if hasattr(self._properties, "_entity_owner"):
-            del self._properties._entity_owner
-        self._properties[self._PATH_KEY] = new_data_path
-        return new_data_path
+        return self._duplicate_data_file(self.id)

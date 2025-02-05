@@ -226,12 +226,19 @@ class _FileDataNodeMixin:
     def _duplicate_data_file(self, id: str) -> Optional[str]:
         if os.path.exists(self.path):
             folder_path, base_name = os.path.split(self.path)
+
             if base_name.startswith(self.__TAIPY_DUPLICATED_PREFIX):
                 base_name = "".join(base_name.split("_")[5:])
             new_base_path = os.path.join(folder_path, f"{self.__TAIPY_DUPLICATED_PREFIX}_{id}_{base_name}")
+
             if os.path.isdir(self.path):
                 shutil.copytree(self.path, new_base_path)
             else:
                 shutil.copy(self.path, new_base_path)
+
+            if hasattr(self._properties, "_entity_owner"):  # type: ignore[attr-defined]
+                del self._properties._entity_owner  # type: ignore[attr-defined]
+            self._properties[self._PATH_KEY] = new_base_path  # type: ignore[attr-defined]
+
             return new_base_path
         return ""
