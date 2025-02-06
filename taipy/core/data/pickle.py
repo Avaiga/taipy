@@ -110,4 +110,4 @@ class PickleDataNode(DataNode, _FileDataNodeMixin):
             pickle.dump(data, pf)
 
     def _duplicate_data(self):
-        return self._duplicate_data_file(self.id)
+        return self._duplicate_file(self.id)

@@ -194,4 +194,4 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         )
 
     def _duplicate_data(self):
-        return self._duplicate_data_file(self.id)
+        return self._duplicate_file(self.id)

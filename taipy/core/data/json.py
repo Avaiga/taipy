@@ -159,7 +159,7 @@ class JSONDataNode(DataNode, _FileDataNodeMixin):
             json.dump(data, f, indent=4, cls=self._encoder)
 
     def _duplicate_data(self):
-        return self._duplicate_data_file(self.id)
+        return self._duplicate_file(self.id)
 
 
 class _DefaultJSONEncoder(json.JSONEncoder):

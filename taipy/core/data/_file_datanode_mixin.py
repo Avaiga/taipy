@@ -145,9 +145,9 @@ class _FileDataNodeMixin:
             and self.editor_id != editor_id  # type: ignore[attr-defined]
             and (
                 not self.editor_expiration_date  # type: ignore[attr-defined]
-                or self.editor_expiration_date > datetime.now()
+                or self.editor_expiration_date > datetime.now()  # type: ignore[attr-defined]
             )
-        ):  # type: ignore[attr-defined]
+        ):
             reasons._add_reason(self.id, DataNodeEditInProgress(self.id))  # type: ignore[attr-defined]
             return reasons
 
@@ -167,8 +167,8 @@ class _FileDataNodeMixin:
                 self.__logger.error(
                     f"Error with the upload checker `{upload_checker.__name__}` "
                     f"while checking `{up_path.name}` file for upload to the data "
-                    f"node `{self.id}`:"
-                )  # type: ignore[attr-defined]
+                    f"node `{self.id}`:"  # type: ignore[attr-defined]
+                )
                 self.__logger.error(f"Error: {err}")
                 can_upload = False
 
@@ -178,8 +178,8 @@ class _FileDataNodeMixin:
 
         shutil.copy(up_path, self.path)
 
-        self.track_edit(
-            timestamp=datetime.now(),  # type: ignore[attr-defined]
+        self.track_edit(  # type: ignore[attr-defined]
+            timestamp=datetime.now(),
             editor_id=editor_id,
             comment=comment,
             **kwargs,
@@ -223,7 +223,7 @@ class _FileDataNodeMixin:
             shutil.move(old_path, new_path)
         return new_path
 
-    def _duplicate_data_file(self, id: str) -> Optional[str]:
+    def _duplicate_file(self, id: str) -> Optional[str]:
         if os.path.exists(self.path):
             folder_path, base_name = os.path.split(self.path)
 
