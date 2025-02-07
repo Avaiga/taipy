@@ -29,6 +29,19 @@ class _BaseSerializer(object):
     """Base serializer class for taipy configuration."""
 
     _GLOBAL_NODE_NAME = "TAIPY"
+    _SERIALIZABLE_TYPES = [
+        "bool",
+        "str",
+        "int",
+        "float",
+        "datetime",
+        "timedelta",
+        "function",
+        "class",
+        "SCOPE",
+        "FREQUENCY",
+        "SECTION",
+    ]
     _section_class = {_GLOBAL_NODE_NAME: GlobalAppConfig}
     _registered_types: Dict[str, type] = {}
 
@@ -66,7 +79,7 @@ class _BaseSerializer(object):
     def __stringify(cls, as_dict):
         if as_dict is None:
             return None
-        if hasattr(as_dict, '_stringify') and callable(as_dict._stringify):
+        if hasattr(as_dict, "_stringify") and callable(as_dict._stringify):
             return as_dict._stringify()
         if isinstance(as_dict, bool):
             return f"{str(as_dict)}:bool"
@@ -119,10 +132,7 @@ class _BaseSerializer(object):
         match = re.fullmatch(_TemplateHandler._PATTERN, str(val))
         if not match:
             if isinstance(val, str):
-                TYPE_PATTERN = (
-                    r"^(.+):(\bbool\b|\bstr\b|\bint\b|\bfloat\b|\bdatetime\b||\btimedelta\b|"
-                    r"\bfunction\b|\bclass\b|\bSCOPE\b|\bFREQUENCY\b|\bSECTION\b)?$"
-                )
+                TYPE_PATTERN = r"^(.+):(" + r"\b|\b".join(cls._SERIALIZABLE_TYPES) + r")?$"
                 if match := re.fullmatch(TYPE_PATTERN, str(val)):
                     actual_val = match.group(1)
                     dynamic_type = match.group(2)
