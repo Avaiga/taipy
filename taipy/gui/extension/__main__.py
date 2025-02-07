@@ -23,8 +23,9 @@ def generate_doc(library: ElementLibrary) -> str:  # noqa: C901F
             return None
         lines = doc_string.splitlines()
         first_line = lines.pop(0) if len(lines[0]) == len(lines[0].lstrip()) else None
-        min_indent = min((len(line) - len(line.lstrip())) for line in lines if line.strip())
-        lines = [line[min_indent:] if line.strip() else "" for line in lines]
+        if lines:
+            min_indent = min((len(line) - len(line.lstrip())) for line in lines if line.strip())
+            lines = [line[min_indent:] if line.strip() else "" for line in lines]
         if first_line:
             lines.insert(0, first_line)
         while lines and not lines[0].strip():
