@@ -18,6 +18,7 @@ def error(message):
 
 I = "    "  # noqa: E741 - Indentation is 4 spaces
 
+
 def generate_doc(library: ElementLibrary) -> str:  # noqa: C901F
     stream = StringIO()
 
@@ -62,11 +63,11 @@ def generate_doc(library: ElementLibrary) -> str:  # noqa: C901F
             elif property.property_type in [PropertyType.string, PropertyType.dynamic_string]:
                 prop_type = "str"
                 if prop_def_value:
-                    prop_def_value = f"\"{str(prop_def_value)}\""
+                    prop_def_value = f'"{str(prop_def_value)}"'
             elif property.property_type in [PropertyType.dict, PropertyType.dynamic_dict]:
                 prop_type = "t.Union[dict, str]"
                 if prop_def_value:
-                    prop_def_value = f"\"{str(prop_def_value)}\""
+                    prop_def_value = f'"{str(prop_def_value)}"'
             if prop_def_value is None:
                 prop_def_value = "None"
             desc = f"{property_name}: t.Optional[{prop_type}] = {prop_def_value}"
@@ -83,7 +84,7 @@ def generate_doc(library: ElementLibrary) -> str:  # noqa: C901F
         documentation = ""
         if doc_string:
             lines = doc_string.splitlines()
-            documentation = f"{I}\"\"\"{lines.pop(0)}\n"
+            documentation = f'{I}"""{lines.pop(0)}\n'
             while lines:
                 line = lines.pop(0)
                 documentation += f"{I}{line}\n" if line else "\n"
@@ -100,7 +101,7 @@ def generate_doc(library: ElementLibrary) -> str:  # noqa: C901F
                     documentation += f"{I}`{property_name}`: ...\n"
                 documentation += "\n"
         if documentation:
-            documentation += f"{I}\"\"\"\n"
+            documentation += f'{I}"""\n'
         parameters_list = ",\n".join([f"{I}{p}" for p in parameters])
         print(f"def {element_name}(\n{parameters_list},\n):\n{documentation}{I}...", file=stream)
 
@@ -113,28 +114,28 @@ def generate_tgb(args) -> int:
 
     package_root_dir = args.package_root_dir[0]
     # Remove potential directory separator at the end of the package root dir
-    if package_root_dir[-1] == "/" or package_root_dir[-1] == "\\":
+    if package_root_dir[-1] == "/" or package_root_dir[-1] == "\\":  # pragma: no cover
         package_root_dir = package_root_dir[:-1]
     module = None
     try:
         module = import_module(package_root_dir)
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         error(f"Couldn't open module '{package_root_dir}' ({e})")
     library: t.Optional[ElementLibrary] = None
     for _, member in getmembers(module, lambda o: isclass(o) and issubclass(o, ElementLibrary)):
-        if library:
+        if library:  # pragma: no cover
             error("Extension contains more than one ElementLibrary")
         library = member()
-    if library is None:
+    if library is None:  # pragma: no cover
         error("Extension does not contain any ElementLibrary")
         return 1  # To avoid having to deal with this case in the following code
 
-    if (pyi_path := args.output_path) is None:
+    if (pyi_path := args.output_path) is None:  # pragma: no cover
         pyi_path = os.path.join(package_root_dir, "__init__.pyi")
     pyi_file = None
     try:
         pyi_file = open(pyi_path, "w")
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         error(f"Couldn't open Python Interface Definition file '{pyi_path}' ({e})")
 
     print(f"Inspecting extension library '{library.get_name()}'")  # noqa: T201
@@ -174,5 +175,5 @@ def main(argv=None) -> int:
     return args.func(args)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     exit(main())
