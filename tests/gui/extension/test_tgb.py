@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 import re
 import typing as t
+from unittest.mock import patch
 
 from taipy.gui import Gui
 from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
@@ -63,3 +64,16 @@ def test_tgb_generation(gui: Gui, test_client, helpers):
     assert "e1 doc" in api, "Missing doc for e1"
     assert "def e2(" in api, "Missing element e2"
     assert re.search(r"\(\s*p1\s*:", api), "Wrong default property in e2"
+
+# Run 
+def test_tgb_generation_entry_point(gui: Gui, test_client, helpers):
+    import os
+    import tempfile
+
+    from taipy.gui.extension.__main__ import main
+
+    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    temp_file.close()
+    with patch("sys.argv", ["main", "generate_tgb", "extlib_test", temp_file.name]):
+        assert main() == 0
+    os.remove(temp_file.name)
