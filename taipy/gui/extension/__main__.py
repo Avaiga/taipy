@@ -15,7 +15,7 @@ def error(message):
     exit(1)
 
 
-I = "    "  # Indentation is 4 spaces
+I = "    "  # noqa: E741 - Indentation is 4 spaces
 
 def generate_doc(library: ElementLibrary) -> str:  # noqa: C901F
     stream = StringIO()
@@ -101,8 +101,8 @@ def generate_doc(library: ElementLibrary) -> str:  # noqa: C901F
                 documentation += "\n"
         if documentation:
             documentation += f"{I}\"\"\"\n"
-        parameters = [f"{I}{p}" for p in parameters]
-        print(f"def {element_name}(\n{',\n'.join(parameters)},\n):\n{documentation}{I}...", file=stream)
+        parameters_list = ",\n".join([f"{I}{p}" for p in parameters])
+        print(f"def {element_name}(\n{parameters_list},\n):\n{documentation}{I}...", file=stream)
 
     return stream.getvalue()
 
