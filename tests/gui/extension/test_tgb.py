@@ -28,7 +28,8 @@ class TgbLibrary(ElementLibrary):
                 "d1": ElementProperty(PropertyType.dict),
                 "d2": ElementProperty(PropertyType.dynamic_dict),
             },
-            "E1", doc_string="e1 doc",
+            "E1",
+            doc_string="e1 doc",
         ),
         "e2": Element(
             "x",
@@ -65,7 +66,7 @@ def test_tgb_generation(gui: Gui, test_client, helpers):
     assert "def e2(" in api, "Missing element e2"
     assert re.search(r"\(\s*p1\s*:", api), "Wrong default property in e2"
 
-# Run 
+
 def test_tgb_generation_entry_point(gui: Gui, test_client, helpers):
     import os
     import tempfile
