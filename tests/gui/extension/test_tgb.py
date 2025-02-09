@@ -36,6 +36,7 @@ class TgbLibrary(ElementLibrary):
             {
                 "p1": ElementProperty(PropertyType.any),
                 "p2": ElementProperty(PropertyType.any),
+                "p3": ElementProperty(PropertyType.any, type_hint="Union[bool,str]"),
             },
             "E2",
         ),
@@ -55,16 +56,17 @@ def test_tgb_generation(gui: Gui, test_client, helpers):
     api = generate_doc(library)
     assert "def e1(" in api, "Missing element e1"
     assert "s1" in api, "Missing property s1"
-    assert re.search(r"s1:\s*t.Optional\[str\]", api), "Incorrect property type for s1"
     assert re.search(r"\(\s*s1\s*:", api), "Property s1 should be the default property"
     assert re.search(r"b1:\s*t.Optional\[t.Union\[bool", api), "Incorrect property type for b1"
     assert re.search(r"b2:\s*t.Optional\[t.Union\[bool", api), "Incorrect property type for b2"
+    assert re.search(r"s1:\s*t.Optional\[str\]", api), "Incorrect property type for s1"
     assert re.search(r"s2:\s*t.Optional\[str\]", api), "Incorrect property type for s2"
     assert re.search(r"d1:\s*t.Optional\[t.Union\[dict", api), "Incorrect property type for d1"
     assert re.search(r"d2:\s*t.Optional\[t.Union\[dict", api), "Incorrect property type for d2"
     assert "e1 doc" in api, "Missing doc for e1"
     assert "def e2(" in api, "Missing element e2"
     assert re.search(r"\(\s*p1\s*:", api), "Wrong default property in e2"
+    assert re.search(r"p3:\s*t\.Union", api), "Wrong type hint for property p3 in e2"
 
 
 def test_tgb_generation_entry_point(gui: Gui, test_client, helpers):
