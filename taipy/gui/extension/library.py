@@ -45,6 +45,7 @@ class ElementProperty:
         with_update: t.Optional[bool] = None,
         *,
         doc_string: t.Optional[str] = None,
+        type_hint: t.Optional[str] = None,
     ) -> None:
         """Initializes a new custom property declaration for an `Element^`.
 
@@ -56,6 +57,8 @@ class ElementProperty:
                 "my_property_name", then this property is referred to as "myPropertyName" in the
                 JavaScript code.
             doc_string: An optional string that holds documentation for that property.<br/>
+                This is used when generating the stub classes for extension libraries.
+            type_hint: An optional string describing the Python type of that property.<br/>
                 This is used when generating the stub classes for extension libraries.
         """
         self.default_value = default_value
@@ -71,6 +74,7 @@ class ElementProperty:
         self._js_name = js_name
         self.with_update = with_update
         self.doc_string = doc_string
+        self.type_hint = type_hint
         super().__init__()
 
     def check(self, element_name: str, prop_name: str):

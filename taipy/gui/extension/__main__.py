@@ -4,6 +4,7 @@
 
 import argparse
 import os
+import re
 import textwrap
 import typing as t
 from io import StringIO
@@ -55,22 +56,27 @@ def generate_doc(library: ElementLibrary) -> str:  # noqa: C901F
         default_property_found = False
         for property_name, property in element.attributes.items():
             property_names.append(property_name)
-            # Could use 'match' with Python >= 3.10
-            prop_type = "t.Union[str, any]"
             prop_def_value = property.default_value
-            if property.property_type in [PropertyType.boolean, PropertyType.dynamic_boolean]:
-                prop_type = "t.Union[bool, str]"
-            elif property.property_type in [PropertyType.string, PropertyType.dynamic_string]:
-                prop_type = "str"
-                if prop_def_value:
-                    prop_def_value = f'"{str(prop_def_value)}"'
-            elif property.property_type in [PropertyType.dict, PropertyType.dynamic_dict]:
-                prop_type = "t.Union[dict, str]"
-                if prop_def_value:
-                    prop_def_value = f'"{str(prop_def_value)}"'
-            if prop_def_value is None:
-                prop_def_value = "None"
-            desc = f"{property_name}: t.Optional[{prop_type}] = {prop_def_value}"
+            prop_type = property.type_hint
+            if prop_type:
+                prop_type = re.sub(r"\b(?<!t\.)\b(Optional|Union)\[", r"t.\1[", prop_type)
+            else:
+                # Could use 'match' with Python >= 3.10
+                prop_type = "t.Union[str, any]"
+                if property.property_type in [PropertyType.boolean, PropertyType.dynamic_boolean]:
+                    prop_type = "t.Union[bool, str]"
+                elif property.property_type in [PropertyType.string, PropertyType.dynamic_string]:
+                    prop_type = "str"
+                    if prop_def_value:
+                        prop_def_value = f'"{str(prop_def_value)}"'
+                elif property.property_type in [PropertyType.dict, PropertyType.dynamic_dict]:
+                    prop_type = "t.Union[dict, str]"
+                    if prop_def_value:
+                        prop_def_value = f'"{str(prop_def_value)}"'
+                if prop_def_value is None:
+                    prop_def_value = "None"
+                prop_type = f"t.Optional[{prop_type}]"
+            desc = f"{property_name}: {prop_type} = {prop_def_value}"
             if property_name == element.default_attribute:
                 parameters.insert(0, desc)
                 default_property_found = True
