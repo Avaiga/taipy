@@ -38,8 +38,6 @@ class _BaseSerializer(object):
         "timedelta",
         "function",
         "class",
-        "SCOPE",
-        "FREQUENCY",
         "SECTION",
     ]
     _section_class = {_GLOBAL_NODE_NAME: GlobalAppConfig}

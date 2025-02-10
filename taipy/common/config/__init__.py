@@ -111,6 +111,8 @@ def _inject_section(
     configuration_methods: List[tuple],
     add_to_unconflicted_sections: bool = False,
 ):
+    from ._serializer._base_serializer import _BaseSerializer
+
     Config._register_default(default)
 
     if issubclass(section_clazz, UniqueSection):
@@ -125,6 +127,10 @@ def _inject_section(
 
     for exposed_configuration_method, configuration_method in configuration_methods:
         setattr(Config, exposed_configuration_method, configuration_method)
+
+    for type_to_register in section_clazz._types_to_register():
+        if type_to_register._type_identifier() not in _BaseSerializer._SERIALIZABLE_TYPES:
+            _BaseSerializer._SERIALIZABLE_TYPES.append(type_to_register._type_identifier())
 
 
 @_config_doc_for_method
