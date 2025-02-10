@@ -130,7 +130,7 @@ class _BaseSerializer(object):
         match = re.fullmatch(_TemplateHandler._PATTERN, str(val))
         if not match:
             if isinstance(val, str):
-                TYPE_PATTERN = r"^(.+):(" + r"\b|\b".join(cls._SERIALIZABLE_TYPES) + r")?$"
+                TYPE_PATTERN = r"^(.+):(\b" + r"\b|\b".join(cls._SERIALIZABLE_TYPES) + r"\b)?$"
                 if match := re.fullmatch(TYPE_PATTERN, str(val)):
                     actual_val = match.group(1)
                     dynamic_type = match.group(2)
