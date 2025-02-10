@@ -10,11 +10,12 @@
 # specific language governing permissions and limitations under the License.
 
 from copy import copy
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from taipy.common.config import Config, Section
 from taipy.common.config._config import _Config
 from taipy.common.config.common._config_blocker import _ConfigBlocker
+from tests.common.config.utils.serializable_object_for_test import SerializableObjectForTest
 
 
 class SectionForTest(Section):
@@ -61,6 +62,10 @@ class SectionForTest(Section):
         self._properties.update(as_dict)
         if default_section:
             self._properties = {**default_section.properties, **self._properties}
+
+    @staticmethod
+    def _types_to_register() -> List[type]:
+        return [SerializableObjectForTest]
 
     @staticmethod
     def _configure(id: str, attribute: str, **properties):
