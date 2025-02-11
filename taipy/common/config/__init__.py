@@ -54,7 +54,7 @@ from .section import Section
 from .unique_section import UniqueSection
 
 
-def __write_method_to_doc(configuration_methods):
+def __write_method_to_doc(configuration_methods):  # pragma: no cover
     if os.environ.get("GENERATING_TAIPY_DOC", None) and os.environ["GENERATING_TAIPY_DOC"] == "true":
         with open("config_doc.txt", "a") as f:
             from inspect import signature
@@ -68,7 +68,7 @@ def __write_method_to_doc(configuration_methods):
                 f.write(annotation + sign + doc + content)
 
 
-def __write_section_to_doc(section, attr_name):
+def __write_section_to_doc(section, attr_name):  # pragma: no cover
     if os.environ.get("GENERATING_TAIPY_DOC", None) and os.environ["GENERATING_TAIPY_DOC"] == "true":
         with open("config_doc.txt", "a") as f:
             # Add the documentation for the attribute
@@ -85,7 +85,7 @@ def __write_section_to_doc(section, attr_name):
             f.write(annotation + sign + doc + content)
 
 
-def _config_doc_for_section(func):
+def _config_doc_for_section(func):  # pragma: no cover
     def func_with_doc(section, attribute_name, default, configuration_methods, add_to_unconflicted_sections=False):
         __write_section_to_doc(section, attribute_name)
         __write_method_to_doc(configuration_methods)
@@ -94,7 +94,7 @@ def _config_doc_for_section(func):
     return func_with_doc
 
 
-def _config_doc_for_method(func):
+def _config_doc_for_method(func):  # pragma: no cover
     def func_with_doc(configuration_methods):
         __write_method_to_doc(configuration_methods)
         return func(configuration_methods)
