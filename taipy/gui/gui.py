@@ -852,7 +852,7 @@ class Gui:
             module_name
             and self._config.root_page
             and self._config.root_page._renderer
-            and self._config.root_page._renderer._get_module_name() == module_name
+            and self._config.root_page._renderer._get_module_name(self) == module_name
         ):
             return f"{var_name_decode}.{suffix_var_name}" if suffix_var_name else var_name_decode, module_name
         if module_name == current_context:
@@ -2048,7 +2048,7 @@ class Gui:
         if page is None:
             return None
         return (
-            (page._renderer._get_module_name() or self.__default_module_name)
+            (page._renderer._get_module_name(self) or self.__default_module_name)
             if page._renderer is not None
             else self.__default_module_name
         )
@@ -2133,16 +2133,23 @@ class Gui:
         # Validate Page
         _Hooks().validate_page(self, page)
         # Update locals context
-        self.__locals_context.add(page._get_module_name(), page._get_locals())
-        # Update variable directory
-        if not page._is_class_module():
-            self.__var_dir.add_frame(page._frame)
+        self._add_page_context(page)
         # Special case needed for page to access gui to trigger reload in notebook
         if _is_in_notebook():
             page._notebook_gui = self
             page._notebook_page = new_page
         # add page to hook
         _Hooks().add_page(self, page)
+
+    def _add_page_context(self, page: Page) -> t.Optional[str]:
+        # Update locals context
+        module_name = page._get_module_name(self)
+        if not self._get_locals_context_obj().has_context(module_name):
+            self._get_locals_context_obj().add(module_name, page._get_locals())
+        # Update variable directory
+        if not page._is_class_module():
+            self._get_variable_directory_obj().add_frame(page._frame)
+        return module_name
 
     def add_pages(self, pages: t.Optional[t.Union[t.Mapping[str, t.Union[str, Page]], str]] = None) -> None:
         """Add several pages to the Graphical User Interface.
@@ -2270,9 +2277,7 @@ class Gui:
         self._config.partials.append(new_partial)
         self._config.partial_routes.append(str(new_partial._route))
         # Update locals context
-        self.__locals_context.add(page._get_module_name(), page._get_locals())
-        # Update variable directory
-        self.__var_dir.add_frame(page._frame)
+        self._add_page_context(page)
         return new_partial
 
     def _update_partial(self, partial: Partial):
@@ -2513,6 +2518,17 @@ class Gui:
                         self._bind_custom_page_variables(page._renderer, self._get_client_id())
                     else:
                         page.render(self, silent=True)
+        if additional_pages := _Hooks()._get_additional_pages():
+            for page in additional_pages:
+                if isinstance(page, Page):
+                    with contextlib.suppress(Exception):
+                        if isinstance(page, CustomPage):
+                            self._bind_custom_page_variables(page, self._get_client_id())
+                        else:
+                            new_page = _Page()
+                            new_page._renderer = page
+                            new_page.render(self, silent=True)
+
         scope_metadata[_DataScopes._META_PRE_RENDER] = True
 
     def _get_navigated_page(self, page_name: str) -> t.Any:
@@ -2522,7 +2538,12 @@ class Gui:
                 params = request.args.to_dict() if hasattr(request, "args") else {}
                 params.pop("client_id", None)
                 params.pop("v", None)
-                nav_page = self._call_function_with_state(t.cast(t.Callable, self.on_navigate), [page_name, params])
+                nav_page = self._call_function_with_state(
+                    t.cast(t.Callable, self.on_navigate),
+                    ["/" if page_name == Gui.__root_page_name else page_name, params],
+                )
+                if nav_page == "/":
+                    nav_page = Gui.__root_page_name
                 if nav_page != page_name:
                     if isinstance(nav_page, str):
                         if self._navigate(nav_page):
@@ -2556,7 +2577,7 @@ class Gui:
             return
         with self.get_flask_app().app_context() if has_app_context() else contextlib.nullcontext():  # type: ignore[attr-defined]
             self.__set_client_id_in_context(client_id)
-            with self._set_locals_context(page._get_module_name()):
+            with self._set_locals_context(page._get_module_name(self)):
                 for k, v in self._get_locals_bind().items():
                     if (
                         (not page._binding_variables or k in page._binding_variables)
@@ -2751,6 +2772,11 @@ class Gui:
 
     def __bind_default_function(self):
         with self.get_flask_app().app_context():
+            if additional_pages := _Hooks()._get_additional_pages():
+                # add page context for additional pages so that they can be managed by the variable directory
+                for page in additional_pages:
+                    if isinstance(page, Page)and not isinstance(page, CustomPage):
+                        self._add_page_context(page)
             self.__var_dir.process_imported_var()
             # bind on_* function if available
             self.__bind_local_func("on_init")

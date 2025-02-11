@@ -131,7 +131,7 @@ class Page:
             raise RuntimeError(f"Page '{type(self).__name__}' was not registered correctly.")
         return self._frame
 
-    def _get_module_name(self) -> t.Optional[str]:
+    def _get_module_name(self, gui: t.Optional[Gui] = None) -> t.Optional[str]:
         return (
             None
             if (frame := self._get_frame()) is None

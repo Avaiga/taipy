@@ -42,6 +42,9 @@ class _LocalsContext:
     def get_all_context(self):
         return self._locals_map.keys()
 
+    def has_context(self, context: t.Optional[str]) -> bool:
+        return context is None or context in self._locals_map
+
     def add(self, context: t.Optional[str], locals_dict: t.Optional[t.Dict[str, t.Any]]):
         if context is not None and locals_dict is not None and context not in self._locals_map:
             self._locals_map[context] = locals_dict

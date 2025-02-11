@@ -36,19 +36,18 @@ class _Page(object):
         self._route: t.Optional[str] = None
         self._head: t.Optional[list] = None
         self._script_paths: t.Optional[t.Union[str, Path, t.List[t.Union[str, Path]]]] = None
+        self.__pre_rendered = False
 
     def render(self, gui: Gui, silent: t.Optional[bool] = False):
         if self._renderer is None:
             raise RuntimeError(f"Can't render page {self._route}: no renderer found")
         with warnings.catch_warnings(record=True) as w:
             warnings.resetwarnings()
-            module_name = self._renderer._get_module_name()
+            module_name = self._renderer._get_module_name(gui)
+            if silent and self.__pre_rendered:
+                return module_name
             with gui._set_locals_context(module_name):
-                render_return = self._renderer.render(gui)
-                if isinstance(render_return, tuple):
-                    self._rendered_jsx, module_name = render_return
-                else:
-                    self._rendered_jsx = render_return
+                self._rendered_jsx = self._renderer.render(gui)
             if silent:
                 s = ""
                 for wm in w:
@@ -82,5 +81,6 @@ class _Page(object):
                     logging.warning(s)
         if hasattr(self._renderer, "head"):
             self._head = list(self._renderer.head)  # type: ignore
+        self.__pre_rendered = True
         # return renderer module_name from frame
         return module_name
