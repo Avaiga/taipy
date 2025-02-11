@@ -152,7 +152,7 @@ def inject_core_sections() -> t.Callable:
             RestConfig,
             "rest",
             default=RestConfig.default_config(),
-            configuration_methods=[("configure_rest", RestConfig._configure)],
+            configuration_methods=[("configure_rest", RestConfig._configure_rest)],
         )
 
     return _inject_core_sections

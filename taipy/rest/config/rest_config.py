@@ -165,14 +165,14 @@ class RestConfig(UniqueSection):
         return (self.ssl_cert, self.ssl_key) if self.use_https else None
 
     @staticmethod
-    def _configure(
-        port: int = _DEFAULT_PORT,
-        host: str = _DEFAULT_HOST,
-        use_https: bool = _DEFAULT_USE_HTTPS,
-        ssl_cert: Optional[str] = _DEFAULT_SSL_CERT,
-        ssl_key: Optional[str] = _DEFAULT_SSL_KEY,
-        **properties,
-    ):
+    def _configure_rest(
+        port: Optional[int] = None,
+        host: Optional[str] = None,
+        use_https: Optional[bool] = None,
+        ssl_cert: Optional[str] = None,
+        ssl_key: Optional[str] = None,
+        **properties
+    ) -> "RestConfig":
         """Configure the Rest service.
 
         Arguments:

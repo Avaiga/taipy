@@ -16,6 +16,7 @@ from taipy.common.config._config import _Config
 from taipy.core.common.frequency import Frequency
 from taipy.core.common.scope import Scope
 from taipy.core.config import CoreSection, DataNodeConfig, JobConfig, ScenarioConfig, TaskConfig
+from taipy.rest.config import RestConfig
 
 from .checker.issue_collector import IssueCollector
 from .common._classproperty import _Classproperty

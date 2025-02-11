@@ -8,13 +8,18 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+"""Configuration of the rest service."""
+
 from taipy.common.config import _inject_section
 from taipy.common.config.checker._checker import _Checker
-from taipy.rest.config.rest_checker import _RestConfigChecker
-from taipy.rest.config.rest_config import RestConfig
+from .rest_checker import _RestConfigChecker
+from .rest_config import RestConfig
 
 _inject_section(
-    RestConfig, "rest", default=RestConfig.default_config(), configuration_methods=[("configure_rest", RestConfig._configure)]
+    RestConfig,
+    "rest",
+    RestConfig.default_config(),
+    [("configure_rest", RestConfig._configure_rest)]
 )
 
 _Checker.add_checker(_RestConfigChecker)

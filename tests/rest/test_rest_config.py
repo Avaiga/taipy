@@ -57,7 +57,7 @@ def test_rest_config_checker_valid_config():
     config = _Config()
     collector = IssueCollector()
     rest_config = RestConfig()
-    rest_config._configure(port=8080, host="0.0.0.0", use_https=True, ssl_cert="cert.pem", ssl_key="key.pem")
+    rest_config._configure_rest(port=8080, host="0.0.0.0", use_https=True, ssl_cert="cert.pem", ssl_key="key.pem")
 
     config._sections[RestConfig.name] = {"test_rest_config": rest_config}
     checker = _RestConfigChecker(config, collector)
