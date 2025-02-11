@@ -13,7 +13,6 @@ from taipy.common.config.checker._checker import _Checker
 from taipy.rest.config.rest_checker import _RestConfigChecker
 from taipy.rest.config.rest_config import RestConfig
 
-# At the end of the file
 _inject_section(
     RestConfig, "rest", default=RestConfig.default_config(), configuration_methods=[("configure_rest", RestConfig._configure)]
 )
