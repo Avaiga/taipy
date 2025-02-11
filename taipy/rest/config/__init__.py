@@ -12,9 +12,9 @@
 
 from taipy.common.config import _inject_section
 from taipy.common.config.checker._checker import _Checker
+
 from .rest_checker import _RestConfigChecker
 from .rest_config import RestConfig
-
 
 _inject_section(
     RestConfig,
