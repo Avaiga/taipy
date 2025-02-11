@@ -2144,11 +2144,11 @@ class Gui:
     def _add_page_context(self, page: Page) -> t.Optional[str]:
         # Update locals context
         module_name = page._get_module_name(self)
-        if not self._get_locals_context_obj().has_context(module_name):
-            self._get_locals_context_obj().add(module_name, page._get_locals())
+        if not self.__locals_context.has_context(module_name):
+            self.__locals_context.add(module_name, page._get_locals())
         # Update variable directory
         if not page._is_class_module():
-            self._get_variable_directory_obj().add_frame(page._frame)
+            self.__var_dir.add_frame(page._frame)
         return module_name
 
     def add_pages(self, pages: t.Optional[t.Union[t.Mapping[str, t.Union[str, Page]], str]] = None) -> None:
