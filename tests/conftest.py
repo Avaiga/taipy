@@ -18,6 +18,7 @@ from taipy.common._cli._base_cli._taipy_parser import _TaipyParser
 from taipy.common.config import Config, _inject_section
 from taipy.common.config._config import _Config
 from taipy.common.config._config_comparator._config_comparator import _ConfigComparator
+from taipy.common.config._serializer._base_serializer import _BaseSerializer
 from taipy.common.config._serializer._toml_serializer import _TomlSerializer
 from taipy.common.config.checker._checker import _Checker
 from taipy.common.config.checker.issue_collector import IssueCollector
@@ -57,6 +58,7 @@ def remove_subparser(name: str) -> None:
 @pytest.fixture
 def clean_argparser() -> t.Callable:
     """Fixture to clean the argument parser."""
+
     def _clean_argparser() -> None:
         _TaipyParser._parser = argparse.ArgumentParser(conflict_handler="resolve")
         _TaipyParser._subparser_action = None
@@ -71,6 +73,7 @@ def clean_argparser() -> t.Callable:
 @pytest.fixture
 def reset_configuration_singleton() -> t.Callable:
     """Fixture to reset the configuration singleton."""
+
     def _reset_configuration_singleton() -> None:
         Config.unblock_update()
 
@@ -82,6 +85,17 @@ def reset_configuration_singleton() -> t.Callable:
         Config._collector = IssueCollector()
         Config._serializer = _TomlSerializer()
         Config._comparator = _ConfigComparator()
+        _BaseSerializer._SERIALIZABLE_TYPES = [
+            "bool",
+            "str",
+            "int",
+            "float",
+            "datetime",
+            "timedelta",
+            "function",
+            "class",
+            "SECTION",
+        ]
         _Checker._checkers = []
 
     return _reset_configuration_singleton
@@ -90,6 +104,7 @@ def reset_configuration_singleton() -> t.Callable:
 @pytest.fixture
 def inject_core_sections() -> t.Callable:
     """Fixture to inject core sections into the configuration."""
+
     def _inject_core_sections() -> None:
         _inject_section(
             JobConfig,
