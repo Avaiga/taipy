@@ -17,7 +17,6 @@ from taipy.rest.config.rest_config import RestConfig
 
 
 def test_rest_config_default_values():
-    rest_config = Config.configure_rest()
     assert rest_config.port == 5000
     assert rest_config.host == "127.0.0.1"
     assert rest_config.use_https is False

@@ -21,10 +21,15 @@ class RestConfig(UniqueSection):
 
     name: str = "REST"
 
+    _PORT_KEY: str = "port"
     _DEFAULT_PORT: int = 5000
+    _HOST_KEY: str = "host"
     _DEFAULT_HOST: str = "127.0.0.1"
+    _USE_HTTP_KEY: str = "use_http"
     _DEFAULT_USE_HTTPS: bool = False
+    _SSL_CERT_KEY: str = "ssl_cert"
     _DEFAULT_SSL_CERT: Optional[str] = None
+    _SSL_KEY_KEY: str = "ssl_key"
     _DEFAULT_SSL_KEY: Optional[str] = None
 
     def __init__(
@@ -59,13 +64,14 @@ class RestConfig(UniqueSection):
         self.use_https = self._DEFAULT_USE_HTTPS
         self.ssl_cert = self._DEFAULT_SSL_CERT
         self.ssl_key = self._DEFAULT_SSL_KEY
+        self._properties.clear()
 
     def _update(self, config_as_dict: Dict, default_section=None):
-        self.port = config_as_dict.pop("port", self.port)
-        self.host = config_as_dict.pop("host", self.host)
-        self.use_https = config_as_dict.pop("use_https", self.use_https)
-        self.ssl_cert = config_as_dict.pop("ssl_cert", self.ssl_cert)
-        self.ssl_key = config_as_dict.pop("ssl_key", self.ssl_key)
+        self.port = config_as_dict.pop(self._PORT_KEY, self.port)
+        self.host = config_as_dict.pop(self._HOST_KEY, self.host)
+        self.use_https = config_as_dict.pop(self._HTTPS_KEY, self.use_https)
+        self.ssl_cert = config_as_dict.pop(self._SSL_CERT_KEY, self.ssl_cert)
+        self.ssl_key = config_as_dict.pop(self._SSL_KEY_KEY, self.ssl_key)
 
         self._properties.update(config_as_dict)
 
@@ -73,20 +79,26 @@ class RestConfig(UniqueSection):
         return {
             key: value
             for key, value in {
-                "port": self.port,
-                "host": self.host,
-                "use_https": self.use_https,
-                "ssl_cert": self.ssl_cert,
+                self._PORT_KEY: self.port,
+                self._HOST_KEY: self.host,
+                self._USE_HTTPS_KEY: self.use_https,
+                self._SSL_CERT_KEY: self.ssl_cert,
+                self._SSL_KEY_KEY: self.ssl_key
             }.items()
             if value is not None
         }
 
     @classmethod
-    def _from_dict(cls, data: Dict):
+    def _from_dict(cls, data: Dict[str, Any], id=None, config = None):
         return RestConfig(**data)
 
     @classmethod
     def default_config(cls) -> "RestConfig":
+        """Return a RestConfig with all the default values.
+
+        Returns:
+            The default rest configuration.
+        """
         return RestConfig(
             cls._DEFAULT_PORT,
             cls._DEFAULT_HOST,
@@ -142,7 +154,8 @@ class RestConfig(UniqueSection):
 
     @property
     def ssl_context(self) -> Optional[Tuple[Optional[str], Optional[str]]]:
-        return (self._ssl_cert, self._ssl_key) if self._use_https else None
+    """The ssl_context as a tuple of the certificate and the key files"""
+        return (self.ssl_cert, self.ssl_key) if self._use_https else None
 
     @staticmethod
     def _configure(
@@ -152,6 +165,20 @@ class RestConfig(UniqueSection):
         ssl_cert: Optional[str] = _DEFAULT_SSL_CERT,
         ssl_key: Optional[str] = _DEFAULT_SSL_KEY,
     ):
+        """Configure the Rest service.
+
+        Arguments:
+            port (Optional[int]): The port on which the REST service will be running
+            host (Optional[str]): The host on which the REST service will be running
+            use_https (Optional[bool]): Whether to use HTTPS for the REST service
+            ssl_cert (Optional[str]): The path to the SSL certificate file
+            ssl_key (Optional[str]): The path to the SSL key file
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments configure the behavior of the `Rest^` service.
+
+        Returns:
+            The Rest configuration.
+        """
         section = RestConfig(
             port=port,
             host=host,

@@ -15,7 +15,7 @@ from taipy.rest.config.rest_config import RestConfig
 
 # At the end of the file
 _inject_section(
-    RestConfig, "rest", default=RestConfig(), configuration_methods=[("configure_rest", RestConfig._configure)]
+    RestConfig, "rest", default=RestConfig.default_config(), configuration_methods=[("configure_rest", RestConfig._configure)]
 )
 
 _Checker.add_checker(_RestConfigChecker)
