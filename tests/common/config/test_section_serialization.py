@@ -16,8 +16,6 @@ from unittest import mock
 
 from taipy.common.config import Config
 from taipy.common.config._serializer._json_serializer import _JsonSerializer
-from taipy.core.common.frequency import Frequency
-from taipy.core.common.scope import Scope
 from tests.common.config.utils.named_temporary_file import NamedTemporaryFile
 from tests.common.config.utils.section_for_tests import SectionForTest
 from tests.common.config.utils.unique_section_for_tests import UniqueSectionForTest
@@ -62,8 +60,6 @@ prop = "my_prop"
 prop_int = "1:int"
 prop_bool = "False:bool"
 prop_list = [ "p1", "1991-01-01T00:00:00:datetime", "1d0h0m0s:timedelta",]
-prop_scope = "SCENARIO:SCOPE"
-prop_freq = "QUARTERLY:FREQUENCY"
 baz = "ENV[QUX]"
 quux = "ENV[QUUZ]:bool"
 corge = [ "grault", "ENV[GARPLY]", "ENV[WALDO]:int", "3.0:float",]
@@ -79,7 +75,6 @@ prop = "default_prop"
 prop_int = "1:int"
 prop_bool = "False:bool"
 prop_list = [ "unique_section_name:SECTION",]
-prop_scope = "SCENARIO"
 baz = "ENV[QUX]"
     """.strip()
     tf = NamedTemporaryFile()
@@ -92,8 +87,6 @@ baz = "ENV[QUX]"
             prop_int=1,
             prop_bool=False,
             prop_list=["p1", datetime.datetime(1991, 1, 1), datetime.timedelta(days=1)],
-            prop_scope=Scope.SCENARIO,
-            prop_freq=Frequency.QUARTERLY,
             baz="ENV[QUX]",
             quux="ENV[QUUZ]:bool",
             corge=("grault", "ENV[GARPLY]", "ENV[WALDO]:int", 3.0),
@@ -104,7 +97,6 @@ baz = "ENV[QUX]"
             prop_int=1,
             prop_bool=False,
             prop_list=[unique_section],
-            prop_scope="SCENARIO",
             baz="ENV[QUX]",
         )
 
@@ -124,8 +116,6 @@ prop = "my_prop"
 prop_int = "1:int"
 prop_bool = "False:bool"
 prop_list = [ "p1", "1991-01-01T00:00:00:datetime", "1d0h0m0s:timedelta",]
-prop_scope = "SCENARIO:SCOPE"
-prop_freq = "QUARTERLY:FREQUENCY"
 baz = "ENV[QUX]"
 quux = "ENV[QUUZ]:bool"
 corge = [ "grault", "ENV[GARPLY]", "ENV[WALDO]:int", "3.0:float",]
@@ -144,7 +134,6 @@ prop = "default_prop"
 prop_int = "1:int"
 prop_bool = "False:bool"
 prop_list = [ "unique_section_name", "section_name.my_id",]
-prop_scope = "SCENARIO:SCOPE"
 baz = "ENV[QUX]"
     """.strip()
     tf = NamedTemporaryFile(toml_config)
@@ -167,8 +156,6 @@ baz = "ENV[QUX]"
             datetime.datetime(1991, 1, 1),
             datetime.timedelta(days=1),
         ]
-        assert Config.unique_sections[UniqueSectionForTest.name].prop_scope == Scope.SCENARIO
-        assert Config.unique_sections[UniqueSectionForTest.name].prop_freq == Frequency.QUARTERLY
         assert Config.unique_sections[UniqueSectionForTest.name].baz == "qux"
         assert Config.unique_sections[UniqueSectionForTest.name].quux is True
         assert Config.unique_sections[UniqueSectionForTest.name].corge == [
@@ -192,7 +179,6 @@ baz = "ENV[QUX]"
         assert Config.sections[SectionForTest.name]["my_id"].prop_int == 1
         assert Config.sections[SectionForTest.name]["my_id"].prop_bool is False
         assert Config.sections[SectionForTest.name]["my_id"].prop_list == ["unique_section_name", "section_name.my_id"]
-        assert Config.sections[SectionForTest.name]["my_id"].prop_scope == Scope.SCENARIO
         assert Config.sections[SectionForTest.name]["my_id"].baz == "qux"
 
         tf2 = NamedTemporaryFile()
@@ -274,9 +260,7 @@ def test_write_json_configuration_file():
 "p1",
 "1991-01-01T00:00:00:datetime",
 "1d0h0m0s:timedelta"
-],
-"prop_scope": "SCENARIO:SCOPE",
-"prop_freq": "QUARTERLY:FREQUENCY"
+]
 },
 "section_name": {
 "default": {
@@ -292,7 +276,6 @@ def test_write_json_configuration_file():
 "prop_list": [
 "unique_section_name:SECTION"
 ],
-"prop_scope": "SCENARIO",
 "baz": "ENV[QUX]"
 }
 }
@@ -307,8 +290,6 @@ def test_write_json_configuration_file():
         prop_int=1,
         prop_bool=False,
         prop_list=["p1", datetime.datetime(1991, 1, 1), datetime.timedelta(days=1)],
-        prop_scope=Scope.SCENARIO,
-        prop_freq=Frequency.QUARTERLY,
     )
     Config.configure_section_for_tests(
         "my_id",
@@ -316,7 +297,6 @@ def test_write_json_configuration_file():
         prop_int=1,
         prop_bool=False,
         prop_list=[unique_section],
-        prop_scope="SCENARIO",
         baz="ENV[QUX]",
     )
     Config.backup(tf.filename)
@@ -341,9 +321,7 @@ def test_read_json_configuration_file():
 "p1",
 "1991-01-01T00:00:00:datetime",
 "1d0h0m0s:timedelta"
-],
-"prop_scope": "SCENARIO:SCOPE",
-"prop_freq": "QUARTERLY:FREQUENCY"
+]
 },
 "section_name": {
 "default": {
@@ -358,8 +336,7 @@ def test_read_json_configuration_file():
 "prop_bool": "False:bool",
 "prop_list": [
 "unique_section_name"
-],
-"prop_scope": "SCENARIO"
+]
 }
 }
 }
@@ -380,8 +357,6 @@ def test_read_json_configuration_file():
         datetime.datetime(1991, 1, 1),
         datetime.timedelta(days=1),
     ]
-    assert Config.unique_sections[UniqueSectionForTest.name].prop_scope == Scope.SCENARIO
-    assert Config.unique_sections[UniqueSectionForTest.name].prop_freq == Frequency.QUARTERLY
 
     assert Config.sections is not None
     assert len(Config.sections) == 1
