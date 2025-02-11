@@ -57,6 +57,7 @@ class _Chart_iprops(Enum):
     decimator = 30
     measure = 31
     parents = 32
+    animate_on = 33
 
 
 __CHART_AXIS: t.Dict[str, t.Tuple[_Chart_iprops, ...]] = {
@@ -84,7 +85,8 @@ __CHART_AXIS: t.Dict[str, t.Tuple[_Chart_iprops, ...]] = {
     "waterfall": (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.measure),
 }
 __CHART_DEFAULT_AXIS: t.Tuple[_Chart_iprops, ...] = (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.z)
-__CHART_MARKER_TO_COLS: t.Tuple[str, ...] = ("color", "size", "symbol", "opacity", "colors")
+__CHART_MARKER_TO_COLS: t.Tuple[str, ...] = ("color", "size", "symbol", "opacity", "colors", "animate_on")
+__CHART_ANIMATION_CONFIG: t.Tuple[str, ...] = ("frame", "transition")
 __CHART_NO_INDEX: t.Tuple[str, ...] = ("pie", "histogram", "heatmap", "funnelarea")
 _CHART_NAMES: t.Tuple[str, ...] = tuple(e.name[1:] if e.name[0] == "_" else e.name for e in _Chart_iprops)
 
@@ -192,6 +194,13 @@ def _build_chart_config(  # noqa: C901
         or ({"color": t[_Chart_iprops.color.value]} if t[_Chart_iprops.color.value] else None)
         for t in traces
     ]
+
+    # add animation column if any
+    animate_on = [
+        t[_Chart_iprops.animate_on.value] or None
+        for t in traces
+    ]
+
     opt_cols: t.List[t.Set[str]] = [set()] * len(traces)
     for idx, m in enumerate(markers):
         if isinstance(m, (dict, _MapDict)):
@@ -199,6 +208,8 @@ def _build_chart_config(  # noqa: C901
                 val = m.get(prop1)
                 if isinstance(val, str) and val not in columns[idx]:
                     opt_cols[idx].add(val)
+        if animate_on[idx] and animate_on[idx] not in columns[idx]:
+            opt_cols[idx].add(t.cast(str, animate_on[idx]))
 
     # Validate the column names
     col_dicts = []
@@ -227,9 +238,9 @@ def _build_chart_config(  # noqa: C901
         [
             c2
             for c2 in [
-                __get_col_from_indexed(c1, i)
-                for c1 in t.cast(dict, col_dicts[i] if i < len(col_dicts) else col_dicts[0]).keys()
-            ]
+            __get_col_from_indexed(c1, i)
+            for c1 in t.cast(dict, col_dicts[i] if i < len(col_dicts) else col_dicts[0]).keys()
+        ]
             if c2
         ]
         for i in range(len(traces))
@@ -298,6 +309,7 @@ def _build_chart_config(  # noqa: C901
             "options": [tr[_Chart_iprops.options.value] for tr in traces],
             "axisNames": [[e.name for e in ax] for ax in used_axis],
             "addIndex": [tr[_Chart_iprops.type.value] not in __CHART_NO_INDEX for tr in traces],
+            "animateOn": [tr[_Chart_iprops.animate_on.value] for tr in traces],
         }
         if len([d for d in decimators if d]):
             ret_dict.update(decimators=decimators)
