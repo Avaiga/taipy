@@ -2775,7 +2775,7 @@ class Gui:
             if additional_pages := _Hooks()._get_additional_pages():
                 # add page context for additional pages so that they can be managed by the variable directory
                 for page in additional_pages:
-                    if isinstance(page, Page)and not isinstance(page, CustomPage):
+                    if isinstance(page, Page) and not isinstance(page, CustomPage):
                         self._add_page_context(page)
             self.__var_dir.process_imported_var()
             # bind on_* function if available
