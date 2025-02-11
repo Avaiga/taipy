@@ -55,6 +55,9 @@ class _BaseSerializer(object):
                 raise InvalidConfigurationType(f"Type {clazz.__name__} must have a `_pythonify` method.")
             cls._registered_types[clazz._type_identifier()] = clazz
 
+            if clazz._type_identifier() not in cls._SERIALIZABLE_TYPES:
+                cls._SERIALIZABLE_TYPES.append(clazz._type_identifier())
+
     @classmethod
     @abstractmethod
     def _write(cls, configuration: _Config, filename: str):

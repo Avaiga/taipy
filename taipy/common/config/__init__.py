@@ -46,7 +46,6 @@ and attributes to configure the Taipy application and retrieve the configuration
 """
 
 import os
-from inspect import signature
 from typing import List
 
 from ._init import Config
@@ -127,10 +126,6 @@ def _inject_section(
 
     for exposed_configuration_method, configuration_method in configuration_methods:
         setattr(Config, exposed_configuration_method, configuration_method)
-
-    for type_to_register in section_clazz._types_to_register():
-        if type_to_register._type_identifier() not in _BaseSerializer._SERIALIZABLE_TYPES:
-            _BaseSerializer._SERIALIZABLE_TYPES.append(type_to_register._type_identifier())
 
 
 @_config_doc_for_method

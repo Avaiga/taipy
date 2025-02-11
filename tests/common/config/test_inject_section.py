@@ -9,10 +9,19 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import pytest
+
 from taipy.common.config import Config, _inject_section
 from taipy.common.config._serializer._base_serializer import _BaseSerializer
 from tests.common.config.utils.section_for_tests import SectionForTest
 from tests.common.config.utils.serializable_object_for_test import SerializableObjectForTest
+
+
+@pytest.fixture(scope="function", autouse=True)
+def reset(reset_configuration_singleton):
+    reset_configuration_singleton()
+
+    yield
 
 
 def test_inject_section():
