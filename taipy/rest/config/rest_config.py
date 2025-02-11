@@ -9,9 +9,10 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 from copy import copy
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Any
 
 from taipy.common.config import UniqueSection
+from taipy.common.config._config import _Config
 from taipy.common.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.common.config.config import Config
 
@@ -34,9 +35,9 @@ class RestConfig(UniqueSection):
 
     def __init__(
         self,
-        port: int = _DEFAULT_PORT,
-        host: str = _DEFAULT_HOST,
-        use_https: bool = _DEFAULT_USE_HTTPS,
+        port: Optional[int] = _DEFAULT_PORT,
+        host: Optional[str] = _DEFAULT_HOST,
+        use_https: Optional[bool] = _DEFAULT_USE_HTTPS,
         ssl_cert: Optional[str] = _DEFAULT_SSL_CERT,
         ssl_key: Optional[str] = _DEFAULT_SSL_KEY,
         **properties,
@@ -50,47 +51,53 @@ class RestConfig(UniqueSection):
 
     def __copy__(self) -> "RestConfig":
         return RestConfig(
-            self.port,
-            self.host,
-            self.use_https,
-            self.ssl_cert,
-            self.ssl_key,
+            self._port,
+            self._host,
+            self._use_https,
+            self._ssl_cert,
+            self._ssl_key,
             **copy(self._properties),
         )
 
     def _clean(self):
-        self.port = self._DEFAULT_PORT
-        self.host = self._DEFAULT_HOST
-        self.use_https = self._DEFAULT_USE_HTTPS
-        self.ssl_cert = self._DEFAULT_SSL_CERT
-        self.ssl_key = self._DEFAULT_SSL_KEY
+        self._port = self._DEFAULT_PORT
+        self._host = self._DEFAULT_HOST
+        self._use_https = self._DEFAULT_USE_HTTPS
+        self._ssl_cert = self._DEFAULT_SSL_CERT
+        self._ssl_key = self._DEFAULT_SSL_KEY
         self._properties.clear()
 
     def _update(self, config_as_dict: Dict, default_section=None):
-        self.port = config_as_dict.pop(self._PORT_KEY, self.port)
-        self.host = config_as_dict.pop(self._HOST_KEY, self.host)
-        self.use_https = config_as_dict.pop(self._HTTPS_KEY, self.use_https)
-        self.ssl_cert = config_as_dict.pop(self._SSL_CERT_KEY, self.ssl_cert)
-        self.ssl_key = config_as_dict.pop(self._SSL_KEY_KEY, self.ssl_key)
-
+        self._port = config_as_dict.pop(self._PORT_KEY, self.port)
+        self._host = config_as_dict.pop(self._HOST_KEY, self.host)
+        self._use_https = config_as_dict.pop(self._HTTPS_KEY, self.use_https)
+        self._ssl_cert = config_as_dict.pop(self._SSL_CERT_KEY, self.ssl_cert)
+        self._ssl_key = config_as_dict.pop(self._SSL_KEY_KEY, self.ssl_key)
         self._properties.update(config_as_dict)
 
     def _to_dict(self):
-        return {
+        as_dict = {
             key: value
             for key, value in {
-                self._PORT_KEY: self.port,
-                self._HOST_KEY: self.host,
-                self._USE_HTTPS_KEY: self.use_https,
-                self._SSL_CERT_KEY: self.ssl_cert,
-                self._SSL_KEY_KEY: self.ssl_key
+                self._PORT_KEY: self._port,
+                self._HOST_KEY: self._host,
+                self._USE_HTTPS_KEY: self._use_https,
+                self._SSL_CERT_KEY: self._ssl_cert,
+                self._SSL_KEY_KEY: self._ssl_key
             }.items()
             if value is not None
         }
+        as_dict.update(self._properties)
+        return as_dict
 
     @classmethod
-    def _from_dict(cls, data: Dict[str, Any], id=None, config = None):
-        return RestConfig(**data)
+    def _from_dict(cls, as_dict: Dict[str, Any], id=None, config: Optional[_Config] = None):
+        port = as_dict.pop(cls._PORT_KEY, None)
+        host = as_dict.pop(cls._HOST_KEY, None)
+        use_https = as_dict.pop(cls._USE_HTTPS_KEY, None)
+        ssl_cert = as_dict.pop(cls._SSL_CERT_KEY, None)
+        ssl_key = as_dict.pop(cls._SSL_KEY_KEY, None)
+        return RestConfig(port, host, use_https, ssl_cert, ssl_key, **as_dict)
 
     @classmethod
     def default_config(cls) -> "RestConfig":
@@ -154,8 +161,8 @@ class RestConfig(UniqueSection):
 
     @property
     def ssl_context(self) -> Optional[Tuple[Optional[str], Optional[str]]]:
-    """The ssl_context as a tuple of the certificate and the key files"""
-        return (self.ssl_cert, self.ssl_key) if self._use_https else None
+        """The ssl_context as a tuple of the certificate and the key files"""
+        return (self.ssl_cert, self.ssl_key) if self.use_https else None
 
     @staticmethod
     def _configure(
@@ -164,6 +171,7 @@ class RestConfig(UniqueSection):
         use_https: bool = _DEFAULT_USE_HTTPS,
         ssl_cert: Optional[str] = _DEFAULT_SSL_CERT,
         ssl_key: Optional[str] = _DEFAULT_SSL_KEY,
+        **properties,
     ):
         """Configure the Rest service.
 
@@ -185,6 +193,7 @@ class RestConfig(UniqueSection):
             use_https=use_https,
             ssl_cert=ssl_cert,
             ssl_key=ssl_key,
+            **properties
         )
         Config._register(section)
         return Config.unique_sections[RestConfig.name]
