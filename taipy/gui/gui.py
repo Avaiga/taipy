@@ -852,7 +852,7 @@ class Gui:
             module_name
             and self._config.root_page
             and self._config.root_page._renderer
-            and self._config.root_page._renderer._get_module_name(self) == module_name
+            and self._config.root_page._renderer._get_module_name() == module_name
         ):
             return f"{var_name_decode}.{suffix_var_name}" if suffix_var_name else var_name_decode, module_name
         if module_name == current_context:
@@ -2048,7 +2048,7 @@ class Gui:
         if page is None:
             return None
         return (
-            (page._renderer._get_module_name(self) or self.__default_module_name)
+            (page._renderer._get_module_name() or self.__default_module_name)
             if page._renderer is not None
             else self.__default_module_name
         )
@@ -2143,7 +2143,7 @@ class Gui:
 
     def _add_page_context(self, page: Page) -> t.Optional[str]:
         # Update locals context
-        module_name = page._get_module_name(self)
+        module_name = page._get_module_name()
         if not self.__locals_context.has_context(module_name):
             self.__locals_context.add(module_name, page._get_locals())
         # Update variable directory
@@ -2577,7 +2577,7 @@ class Gui:
             return
         with self.get_flask_app().app_context() if has_app_context() else contextlib.nullcontext():  # type: ignore[attr-defined]
             self.__set_client_id_in_context(client_id)
-            with self._set_locals_context(page._get_module_name(self)):
+            with self._set_locals_context(page._get_module_name()):
                 for k, v in self._get_locals_bind().items():
                     if (
                         (not page._binding_variables or k in page._binding_variables)
@@ -2974,6 +2974,8 @@ class Gui:
 
         self.__var_dir.set_default(self.__frame)
 
+        self.__bind_default_function()
+
         if self.__state is None or is_reloading:
             self.__state = _GuiState(
                 self, self.__locals_context.get_all_keys(), self.__locals_context.get_all_context()
@@ -2987,8 +2989,6 @@ class Gui:
             The unique instance of State that you can use to change bound variables directly,
             potentially impacting the user interface in real-time.
             """
-
-        self.__bind_default_function()
 
         # Base global ctx is TaipyHolder classes + script modules and callables
         glob_ctx: t.Dict[str, t.Any] = {t.__name__: t for t in _TaipyBase.__subclasses__()}
