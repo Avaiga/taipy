@@ -977,7 +977,7 @@ class Gui:
         return ("", 404)
 
     def __get_version(self) -> str:
-        return f'{self.__version.get("major", 0)}.{self.__version.get("minor", 0)}.{self.__version.get("patch", 0)}'
+        return f"{self.__version.get('major', 0)}.{self.__version.get('minor', 0)}.{self.__version.get('patch', 0)}"
 
     def __append_libraries_to_status(self, status: t.Dict[str, t.Any]):
         libraries: t.Dict[str, t.Any] = {}
@@ -1009,7 +1009,7 @@ class Gui:
                 {
                     "flask_version": str(metadata.version("flask") or ""),
                     "backend_version": self.__get_version(),
-                    "host": f'{self._get_config("host", "localhost")}:{self._get_config("port", "default")}',
+                    "host": f"{self._get_config('host', 'localhost')}:{self._get_config('port', 'default')}",
                     "python_version": sys.version,
                 }
             )
@@ -2116,7 +2116,7 @@ class Gui:
             page = Markdown(page, frame=None)
         elif not isinstance(page, Page):  # pragma: no cover
             raise Exception(
-                f'Parameter "page" is invalid for page name "{name if name != Gui.__root_page_name else "/"}.'
+                f'Parameter "page" is invalid for page name "{name if name != Gui.__root_page_name else "/"}".'
             )
         # Init a new page
         new_page = _Page()
@@ -2724,7 +2724,7 @@ class Gui:
         css_vars = []
         if stylekit := self._get_config("stylekit", _default_stylekit):
             for k, v in stylekit.items():
-                css_vars.append(f'--{k.replace("_", "-")}:{_get_css_var_value(v)};')
+                css_vars.append(f"--{k.replace('_', '-')}:{_get_css_var_value(v)};")
         return " ".join(css_vars)
 
     def __init_server(self):
