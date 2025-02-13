@@ -103,25 +103,25 @@ def _build_entity_config_pyi(base_pyi, filename, entity_map) -> str:
     return base_pyi
 
 
-def _generate_entity_and_property_maps(filename):
+def _generate_entity_and_property_maps(filenames):
     entities_map = {}
     property_map = {}
-    entity_tree = _get_file_ast(filename)
-    functions = [
-        f for f in ast.walk(entity_tree) if isinstance(f, ast.Call) and getattr(f.func, "id", "") == "_inject_section"
-    ]
+    for filename in filenames:
+        etty_tree = _get_file_ast(filename)
+        functions = [
+            f for f in ast.walk(etty_tree) if isinstance(f, ast.Call) and getattr(f.func, "id", "") == "_inject_section"
+        ]
+        for f in functions:
+            entity = ast.unparse(f.args[0])
+            entities_map[entity] = {}
+            property_map[eval(ast.unparse(f.args[1]))] = entity
+            # Remove class name from function map
+            text = ast.unparse(f.args[-1]).replace(f"{entity}.", "")
+            matches = re.findall(r"\((.*?)\)", text)
 
-    for f in functions:
-        entity = ast.unparse(f.args[0])
-        entities_map[entity] = {}
-        property_map[eval(ast.unparse(f.args[1]))] = entity
-        # Remove class name from function map
-        text = ast.unparse(f.args[-1]).replace(f"{entity}.", "")
-        matches = re.findall(r"\((.*?)\)", text)
-
-        for m in matches:
-            v, k = m.replace("'", "").split(",")
-            entities_map[entity][k.strip()] = v
+            for m in matches:
+                v, k = m.replace("'", "").split(",")
+                entities_map[entity][k.strip()] = v
     return entities_map, property_map
 
 
@@ -142,14 +142,16 @@ def _build_header(filename) -> str:
 
 if __name__ == "__main__":
     header_file = "taipy/common/config/stubs/pyi_header.py"
-    config_init = Path("taipy/core/config/__init__.py")
     base_config = "taipy/common/config/config.py"
+    config_init = [Path("taipy/core/config/__init__.py"), Path("taipy/rest/config/__init__.py")]
 
     dn_filename = "taipy/core/config/data_node_config.py"
     job_filename = "taipy/core/config/job_config.py"
     scenario_filename = "taipy/core/config/scenario_config.py"
     task_filename = "taipy/core/config/task_config.py"
     core_filename = "taipy/core/config/core_section.py"
+
+    rest_filename = "taipy/rest/config/rest_config.py"
 
     entities_map, property_map = _generate_entity_and_property_maps(config_init)
     pyi = _build_header(header_file)
@@ -160,6 +162,8 @@ if __name__ == "__main__":
     pyi = _build_entity_config_pyi(pyi, task_filename, entities_map["TaskConfig"])
     pyi = _build_entity_config_pyi(pyi, job_filename, entities_map["JobConfig"])
     pyi = _build_entity_config_pyi(pyi, core_filename, entities_map["CoreSection"])
+
+    pyi = _build_entity_config_pyi(pyi, rest_filename, entities_map["RestConfig"])
 
     # Remove the final redundant \n
     pyi = pyi[:-1]

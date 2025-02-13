@@ -16,6 +16,7 @@ from taipy.common.config._config import _Config
 from taipy.core.common.frequency import Frequency
 from taipy.core.common.scope import Scope
 from taipy.core.config import CoreSection, DataNodeConfig, JobConfig, ScenarioConfig, TaskConfig
+from taipy.rest.config import RestConfig
 
 from .checker.issue_collector import IssueCollector
 from .common._classproperty import _Classproperty
@@ -252,6 +253,10 @@ class Config:
 
     @_Classproperty
     def core(cls) -> Dict[str, CoreSection]:
+        """"""
+
+    @_Classproperty
+    def rest(cls) -> Dict[str, RestConfig]:
         """"""
 
     @staticmethod
@@ -1021,4 +1026,28 @@ class Config:
 
         Returns:
             The Core configuration.
+        """
+
+    @staticmethod
+    def configure_rest(
+        port: Optional[int] = None,
+        host: Optional[str] = None,
+        use_https: Optional[bool] = None,
+        ssl_cert: Optional[str] = None,
+        ssl_key: Optional[str] = None,
+        **properties
+    ) -> "RestConfig":
+        """Configure the Rest service.
+
+        Arguments:
+            port (Optional[int]): The port on which the REST service will be running
+            host (Optional[str]): The host on which the REST service will be running
+            use_https (Optional[bool]): Whether to use HTTPS for the REST service
+            ssl_cert (Optional[str]): The path to the SSL certificate file
+            ssl_key (Optional[str]): The path to the SSL key file
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments configure the behavior of the `Rest^` service.
+
+        Returns:
+            The Rest configuration.
         """

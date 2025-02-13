@@ -20,6 +20,7 @@ import pytest
 from dotenv import load_dotenv
 
 from taipy.common.config import Config
+from taipy.common.config.checker._checker import _Checker
 from taipy.core import Cycle, DataNodeId, Job, JobId, Scenario, Sequence, Task
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.common.frequency import Frequency
@@ -29,6 +30,7 @@ from taipy.core.data.pickle import PickleDataNode
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.task._task_manager import _TaskManager
 from taipy.rest.app import create_app
+from taipy.rest.config import _RestConfigChecker
 
 from .setup.shared.algorithms import evaluate, forecast
 
@@ -309,24 +311,6 @@ def create_job_list():
         manager._set(c)
     return jobs
 
-
-@pytest.fixture(scope="function", autouse=True)
-def cleanup_files(reset_configuration_singleton, inject_core_sections):
-    reset_configuration_singleton()
-    inject_core_sections()
-
-    Config.configure_core(repository_type="filesystem")
-    if os.path.exists(".data"):
-        shutil.rmtree(".data", ignore_errors=True)
-    if os.path.exists(".my_data"):
-        shutil.rmtree(".my_data", ignore_errors=True)
-
-    yield
-    for path in [".data", ".my_data", "user_data", ".taipy"]:
-        if os.path.exists(path):
-            shutil.rmtree(path, ignore_errors=True)
-
-
 @pytest.fixture
 def init_orchestrator():
     def _init_orchestrator():
@@ -339,3 +323,22 @@ def init_orchestrator():
         _OrchestratorFactory._orchestrator.blocked_jobs = []
 
     return _init_orchestrator
+
+@pytest.fixture(scope="function", autouse=True)
+def cleanup_files(reset_configuration_singleton, inject_rest_sections, inject_core_sections):
+    reset_configuration_singleton()
+    inject_core_sections()
+    inject_rest_sections()
+
+    _Checker.add_checker(_RestConfigChecker)
+
+    Config.configure_core(repository_type="filesystem")
+    if os.path.exists(".data"):
+        shutil.rmtree(".data", ignore_errors=True)
+    if os.path.exists(".my_data"):
+        shutil.rmtree(".my_data", ignore_errors=True)
+
+    yield
+    for path in [".data", ".my_data", "user_data", ".taipy"]:
+        if os.path.exists(path):
+            shutil.rmtree(path, ignore_errors=True)

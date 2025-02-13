@@ -82,7 +82,7 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
                     ),
                 )
 
-    def add_library(self, library: "ElementLibrary"):
+    def add_library(self, library: "ElementLibrary") -> None:
         library_name = library.get_name()
         if self.__module is None:
             _TaipyLogger._get_logger().info(
@@ -90,24 +90,25 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
             )
             return
         library_module = sys.modules[library.__module__]
+        if not library_module.__package__:
+            _TaipyLogger._get_logger().info(f"Cannot locate package for extension library `{library_name}`.")
+            return
+        package_module = sys.modules[library_module.__package__]
         for element_name, element in library.get_elements().items():
-            setattr(
-                library_module,
+            element_api = _ElementApiGenerator().create_control_api(
                 element_name,
-                _ElementApiGenerator().create_control_api(
-                    element_name,
-                    f"{library_name}.{element_name}",
-                    element.default_attribute,
-                    {name: str(prop.property_type) for name, prop in element.attributes.items()},
-                ),
+                f"{library_name}.{element_name}",
+                element.default_attribute,
+                {name: str(prop.property_type) for name, prop in element.attributes.items()},
             )
+            setattr(package_module, element_name, element_api)
             # Allow element to be accessed from this module (taipy.gui.builder)
             if hasattr(self.__module, element_name):
                 _TaipyLogger._get_logger().info(
                     f"Can't add element `{element_name}` of library `{library_name}` to the root of Builder API as another element with the same name already exists."  # noqa: E501
                 )
             else:
-                setattr(self.__module, element_name, getattr(library_module, element_name))
+                setattr(self.__module, element_name, element_api)
 
     @staticmethod
     def create_block_api(
