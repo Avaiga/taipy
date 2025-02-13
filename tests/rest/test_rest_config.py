@@ -13,11 +13,8 @@ from unittest.mock import patch
 
 import pytest
 
-from taipy.common.config._config import _Config
-from taipy.common.config.checker.issue_collector import IssueCollector
 from taipy.common.config.config import Config
 from taipy.common.config.exceptions import MissingEnvVariableError
-from taipy.rest.config.rest_checker import _RestConfigChecker
 from taipy.rest.config.rest_config import RestConfig
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
