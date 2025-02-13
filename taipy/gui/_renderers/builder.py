@@ -704,7 +704,7 @@ class _Builder:
         self.__prop_values["_default_mode"] = default_mode
         rebuild_fn_hash = self.__build_rebuild_fn(
             self.__gui._get_call_method_name("_chart_conf"),
-            _CHART_NAMES + ("_default_type", "_default_mode"),
+            _CHART_NAMES + ("_default_type", "_default_mode", "data"),
         )
         if rebuild_fn_hash:
             self.__set_react_attribute("config", rebuild_fn_hash)

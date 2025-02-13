@@ -17,7 +17,7 @@
     "lodash": "^4.17.21",
     "nanoid": "^5.0.7",
     "notistack": "^3.0.0",
-    "plotly.js": "^2.33.0",
+    "plotly.js": "^3.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-error-boundary": "^5.0.0",
