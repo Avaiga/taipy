@@ -46,15 +46,27 @@ class _RestConfigChecker(_ConfigChecker):
 
     def _check_https_settings(self, rest_config: RestConfig):
         if rest_config.use_https:
-            if not rest_config.ssl_cert or not rest_config.ssl_key:
+            if not rest_config.ssl_cert:
                 self._error(
-                    "ssl_cert/ssl_key",
-                    (rest_config.ssl_cert, rest_config.ssl_key),
-                    "When HTTPS is enabled in the RestConfig both ssl_cert and ssl_key must be set.",
+                    "ssl_cert",
+                    rest_config.ssl_cert,
+                    "When HTTPS is enabled in the RestConfig ssl_cert must be set.",
                 )
-            elif not isinstance(rest_config.ssl_cert, str) or not isinstance(rest_config.ssl_key, str):
+            elif not isinstance(rest_config.ssl_cert, str):
                 self._error(
-                    "ssl_cert/ssl_key",
-                    (rest_config.ssl_cert, rest_config.ssl_key),
-                    "The ssl_cert and ssl_key of the RestConfig must be valid strings.",
+                    "ssl_cert",
+                    rest_config.ssl_cert,
+                    "The ssl_cert of the RestConfig must be valid string.",
+                )
+            if not rest_config.ssl_key:
+                self._error(
+                    "ssl_key",
+                    rest_config.ssl_key,
+                    "When HTTPS is enabled in the RestConfig ssl_key must be set.",
+                )
+            elif not isinstance(rest_config.ssl_key, str):
+                self._error(
+                    "ssl_key",
+                    rest_config.ssl_key,
+                    "The ssl_key of the RestConfig must be valid string.",
                 )

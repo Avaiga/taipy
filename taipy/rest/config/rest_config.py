@@ -26,7 +26,7 @@ class RestConfig(UniqueSection):
     _DEFAULT_PORT: int = 5000
     _HOST_KEY: str = "host"
     _DEFAULT_HOST: str = "127.0.0.1"
-    _USE_HTTP_KEY: str = "use_http"
+    _USE_HTTPS_KEY: str = "use_https"
     _DEFAULT_USE_HTTPS: bool = False
     _SSL_CERT_KEY: str = "ssl_cert"
     _DEFAULT_SSL_CERT: Optional[str] = None
@@ -70,7 +70,7 @@ class RestConfig(UniqueSection):
     def _update(self, config_as_dict: Dict, default_section=None):
         self._port = config_as_dict.pop(self._PORT_KEY, self.port)
         self._host = config_as_dict.pop(self._HOST_KEY, self.host)
-        self._use_https = config_as_dict.pop(self._HTTPS_KEY, self.use_https)
+        self._use_https = config_as_dict.pop(self._USE_HTTPS_KEY, self.use_https)
         self._ssl_cert = config_as_dict.pop(self._SSL_CERT_KEY, self.ssl_cert)
         self._ssl_key = config_as_dict.pop(self._SSL_KEY_KEY, self.ssl_key)
         self._properties.update(config_as_dict)

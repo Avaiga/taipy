@@ -148,6 +148,13 @@ def inject_core_sections() -> t.Callable:
             ],
         )
 
+    return _inject_core_sections
+
+@pytest.fixture
+def inject_rest_sections() -> t.Callable:
+    """Fixture to inject core sections into the configuration."""
+
+    def _inject_rest_sections() -> None:
         _inject_section(
             RestConfig,
             "rest",
@@ -155,4 +162,4 @@ def inject_core_sections() -> t.Callable:
             configuration_methods=[("configure_rest", RestConfig._configure_rest)],
         )
 
-    return _inject_core_sections
+    return _inject_rest_sections
