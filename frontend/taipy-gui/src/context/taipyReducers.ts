@@ -24,7 +24,7 @@ import { getBaseURL, TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 import { MenuProps } from "../utils/lov";
 import { changeFavicon, getLocalStorageValue, IdMessage, storeClientId } from "./utils";
-import { lightenPayload, sendWsMessage, TAIPY_CLIENT_ID, WsMessage } from "./wsUtils";
+import { lightenPayload, sendWsMessage, TAIPY_APP_ID, TAIPY_CLIENT_ID, WsMessage } from "./wsUtils";
 
 export enum Types {
     SocketConnected = "SOCKET_CONNECTED",
@@ -181,7 +181,7 @@ const getUserTheme = (mode: PaletteMode) => {
                     },
                 },
             },
-        }),
+        })
     );
 };
 
@@ -226,7 +226,7 @@ export const messageToAction = (message: WsMessage) => {
                 (message as unknown as NavigateMessage).to,
                 (message as unknown as NavigateMessage).params,
                 (message as unknown as NavigateMessage).tab,
-                (message as unknown as NavigateMessage).force,
+                (message as unknown as NavigateMessage).force
             );
         } else if (message.type === "ID") {
             return createIdAction((message as unknown as IdMessage).id);
@@ -240,6 +240,8 @@ export const messageToAction = (message: WsMessage) => {
             changeFavicon((message.payload as Record<string, string>)?.value);
         } else if (message.type == "BC") {
             stackBroadcast((message as NamePayload).name, (message as NamePayload).payload.value);
+        } else if (message.type == "AID") {
+            checkAppId((message.payload as Record<string, string>).id);
         }
     }
     return {} as TaipyBaseAction;
@@ -284,24 +286,46 @@ const initializeBroadcastManagement = (dispatch: Dispatch<TaipyBaseAction>) => {
     }, broadcast_timeout);
 };
 
+// App id
+const checkAppId = (appId: string) => {
+    if (!appId) {
+        return;
+    }
+    appId = `${appId}`;
+    const localAppId = getLocalStorageValue(TAIPY_APP_ID, "");
+    if (!localAppId || localAppId !== appId) {
+        localStorage && localStorage.setItem(TAIPY_APP_ID, appId);
+        localAppId && window.location.assign(getBaseURL());
+    }
+};
+
+let lastReasonServer = false;
+
+// web socket
 export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispatch<TaipyBaseAction>): void => {
     if (socket) {
         // Websocket confirm successful initialization
         socket.on("connect", () => {
             const id = getLocalStorageValue(TAIPY_CLIENT_ID, "");
-            sendWsMessage(socket, "ID", TAIPY_CLIENT_ID, id, id, undefined, false, () => {
+            const payload: Record<string, unknown> = { id };
+            if (lastReasonServer) {
+                payload["app_id"] = Number(getLocalStorageValue(TAIPY_APP_ID, ""));
+            }
+            sendWsMessage(socket, "ID", TAIPY_CLIENT_ID, payload, id, undefined, false, () => {
                 dispatch({ type: Types.SocketConnected });
             });
         });
         // try to reconnect on connect_error
-        socket.on("connect_error", () => {
-            setTimeout(() => {
-                socket.connect();
-            }, 500);
+        socket.on("connect_error", (error) => {
+            if ((error as unknown as Record<string, unknown>).type === "TransportError") {
+                lastReasonServer = true;
+            }
+            setTimeout(() => socket.connect(), 500);
         });
         // try to reconnect on server disconnection
         socket.on("disconnect", (reason) => {
             if (reason === "io server disconnect") {
+                lastReasonServer = true;
                 socket.connect();
             }
         });
@@ -395,7 +419,9 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             const deleteNotificationAction = action as unknown as TaipyNotificationAction;
             return {
                 ...state,
-                notifications: state.notifications.filter(notification => notification.notificationId !== deleteNotificationAction.notificationId),
+                notifications: state.notifications.filter(
+                    (notification) => notification.notificationId !== deleteNotificationAction.notificationId
+                ),
             };
         case Types.SetBlock:
             const blockAction = action as unknown as TaipyBlockAction;
@@ -497,7 +523,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                 action.payload,
                 state.id,
                 action.context,
-                action.propagate,
+                action.propagate
             );
             break;
         case Types.Action:
@@ -550,7 +576,7 @@ export const createSendUpdateAction = (
     context: string | undefined,
     onChange?: string,
     propagate = true,
-    relName?: string,
+    relName?: string
 ): TaipyAction => ({
     type: Types.SendUpdate,
     name: name,
@@ -603,7 +629,7 @@ export const createRequestChartUpdateAction = (
     context: string | undefined,
     columns: string[],
     pageKey: string,
-    decimatorPayload: unknown | undefined,
+    decimatorPayload: unknown | undefined
 ): TaipyAction =>
     createRequestDataUpdateAction(
         name,
@@ -614,7 +640,7 @@ export const createRequestChartUpdateAction = (
         {
             decimatorPayload: decimatorPayload,
         },
-        true,
+        true
     );
 
 export const createRequestTableUpdateAction = (
@@ -636,7 +662,7 @@ export const createRequestTableUpdateAction = (
     filters?: Array<FilterDesc>,
     compare?: string,
     compareDatas?: string,
-    stateContext?: Record<string, unknown>,
+    stateContext?: Record<string, unknown>
 ): TaipyAction =>
     createRequestDataUpdateAction(
         name,
@@ -659,7 +685,7 @@ export const createRequestTableUpdateAction = (
             compare,
             compare_datas: compareDatas,
             state_context: stateContext,
-        }),
+        })
     );
 
 export const createRequestInfiniteTableUpdateAction = (
@@ -682,7 +708,7 @@ export const createRequestInfiniteTableUpdateAction = (
     compare?: string,
     compareDatas?: string,
     stateContext?: Record<string, unknown>,
-    reverse?: boolean,
+    reverse?: boolean
 ): TaipyAction =>
     createRequestDataUpdateAction(
         name,
@@ -707,7 +733,7 @@ export const createRequestInfiniteTableUpdateAction = (
             compare_datas: compareDatas,
             state_context: stateContext,
             reverse: !!reverse,
-        }),
+        })
     );
 
 /**
@@ -738,7 +764,7 @@ export const createRequestDataUpdateAction = (
     pageKey: string,
     payload: Record<string, unknown>,
     allData = false,
-    library?: string,
+    library?: string
 ): TaipyAction => {
     payload = payload || {};
     if (id !== undefined) {
@@ -776,7 +802,7 @@ export const createRequestUpdateAction = (
     context: string | undefined,
     names: string[],
     forceRefresh = false,
-    stateContext?: Record<string, unknown>,
+    stateContext?: Record<string, unknown>
 ): TaipyAction => ({
     type: Types.RequestUpdate,
     name: "",
@@ -851,7 +877,7 @@ export const createNavigateAction = (
     to?: string,
     params?: Record<string, string>,
     tab?: string,
-    force?: boolean,
+    force?: boolean
 ): TaipyNavigateAction => ({
     type: Types.Navigate,
     to,

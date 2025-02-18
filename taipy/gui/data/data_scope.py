@@ -14,6 +14,8 @@ from __future__ import annotations
 import typing as t
 from types import SimpleNamespace
 
+from taipy.common.logger._taipy_logger import _TaipyLogger
+
 from .._warnings import _warn
 
 if t.TYPE_CHECKING:
@@ -56,7 +58,7 @@ class _DataScopes:
             _warn("Empty session id, using global scope instead.")
             return self.__scopes[_DataScopes._GLOBAL_ID], self.__scopes_metadata[_DataScopes._GLOBAL_ID]
         if client_id not in self.__scopes:
-            _warn(
+            _TaipyLogger._get_logger().debug(
                 f"Session id {client_id} not found in data scope. Taipy will automatically create a scope for this session id but you may have to reload your page."  # noqa: E501
             )
             self.create_scope(client_id)

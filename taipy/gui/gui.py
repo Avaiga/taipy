@@ -700,8 +700,15 @@ class Gui:
         try:
             client_id = None
             if msg_type == _WsType.CLIENT_ID.value:
-                res = self._bindings()._get_or_create_scope(message.get("payload", ""))
+                payload = message.get("payload", {})
+                res = self._bindings()._get_or_create_scope(
+                    payload.get("id", "") if isinstance(payload, dict) else str(payload)
+                )
                 client_id = res[0] if res[1] else None
+                if self._config.config.get("app_id", False):
+                    front_app_id = payload.get("app_id", None) if isinstance(payload, dict) else None
+                    if front_app_id is not None:
+                        self.__handle_ws_app_id({"name": message.get("name"), "payload": front_app_id})
             expected_client_id = client_id or message.get(Gui.__ARG_CLIENT_ID)
             self.__set_client_id_in_context(expected_client_id)
             g.ws_client_id = expected_client_id
