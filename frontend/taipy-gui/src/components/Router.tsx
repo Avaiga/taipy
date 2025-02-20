@@ -64,7 +64,7 @@ const Router = () => {
     const themeClass = "taipy-" + state.theme.palette.mode;
     const baseURL = getBaseURL();
 
-    useLocalStorageWithEvent(dispatch);
+    useLocalStorageWithEvent(dispatch, state.id);
 
     useEffect(() => {
         if (refresh) {
