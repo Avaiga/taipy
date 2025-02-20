@@ -11,7 +11,16 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { CSSProperties, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    CSSProperties,
+    lazy,
+    Suspense,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 
 import { useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
@@ -22,16 +31,17 @@ import { nanoid } from "nanoid";
 import {
     Config,
     Data,
-    Datum,
+    Datum, Frame,
     Layout,
-    ModeBarButtonAny, PlotData,
-    PlotDatum,
+    ModeBarButtonAny,
+    PlotDatum, PlotlyHTMLElement,
     PlotMarker as OriginalPlotMarker,
     PlotRelayoutEvent,
-    PlotSelectionEvent,
+    PlotSelectionEvent, ScatterData,
     ScatterLine,
 } from "plotly.js";
 import { Figure } from "react-plotly.js";
+import Plotly from "plotly.js/lib/core";
 
 import {
     createRequestChartUpdateAction,
@@ -56,11 +66,16 @@ const Plot = lazy(() => import("react-plotly.js"));
 
 interface PlotMarker extends OriginalPlotMarker {
     animateOn?: string[];
+    animateTo?: never[];
 }
 
 type ExtendedPlotData = {
     [K in keyof Data]: Data[K];
-} & { animateOn?: string[] };
+} & {
+    animateOn?: string[];
+    animateTo?: never[];
+    x?: Datum[];
+};
 
 interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     title?: string;
@@ -69,11 +84,9 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     height?: string | number;
     defaultConfig: string;
     config?: string;
-    animateFrom?: string;
-    defaultAnimateFrom?: string;
-    animateTo?: string;
-    defaultAnimateTo?: string;
     data?: Record<string, TraceValueType>;
+    animationData?: string;
+    defaultAnimationData: string;
     //data${number}?: Record<string, TraceValueType>;
     defaultLayout?: string;
     layout?: string;
@@ -89,6 +102,12 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     onClick?: string;
     dataVarNames?: string;
     smoothToggle?: boolean;
+}
+
+interface AnimationConfig {
+    animate_from?: string[];
+    animate_to?: string[];
+    on?: string;
 }
 
 interface ChartConfig {
@@ -110,7 +129,7 @@ interface ChartConfig {
     axisNames: Array<string[]>;
     addIndex: Array<boolean>;
     decimators?: string[];
-    animateOn: string[];
+    animation: AnimationConfig;
 }
 
 export type TraceValueType = Record<string, (string | number)[]>;
@@ -254,7 +273,7 @@ const defaultConfig = {
     options: [],
     axisNames: [],
     addIndex: [],
-    animateOn: [],
+    animation: {} as Record<string, AnimationConfig>,
 } as ChartConfig;
 
 const emptyLayout = {} as Partial<Layout>;
@@ -326,11 +345,30 @@ const Chart = (props: ChartProp) => {
         onRangeChange,
         propagate = true,
         onClick,
+        animationData,
     } = props;
     const dispatch = useDispatch();
     const [selected, setSelected] = useState<number[][]>([]);
-    const plotRef = useRef<HTMLDivElement>(null);
+    const plotRef = useRef<HTMLDivElement | null>(null);
     const [dataKeys, setDataKeys] = useState<string[]>([]);
+    const [frames, setFrames] = useState<{ from: Frame; to: Frame }>({
+        from: {
+            name: "from",
+            data: [],
+            traces: [],
+            layout: {},
+            group: "",
+            baseframe: "",
+        },
+        to: {
+            name: "to",
+            data: [],
+            traces: [],
+            layout: {},
+            group: "",
+            baseframe: "",
+        },
+    });
     const lastDataPl = useRef<ExtendedPlotData[]>([]);
     const theme = useTheme();
     const module = useModule();
@@ -516,6 +554,8 @@ const Chart = (props: ChartProp) => {
     );
     const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
 
+    const animationDataValues = useDynamicJsonProperty(animationData, props.defaultAnimationData, "");
+
     const dataPl = useMemo(() => {
         if (props.figure) {
             return lastDataPl.current || [];
@@ -614,7 +654,7 @@ const Chart = (props: ChartProp) => {
             ret.orientation = getArrayValue(config.orientations, idx);
             ret.line = getArrayValue(config.lines, idx);
             ret.textposition = getArrayValue(config.textAnchors, idx);
-            ret.animateOn = getValueFromCol(datum, getArrayValue(config.animateOn, idx) || "");
+            ret.animateTo = animationDataValues[Object.keys(animationDataValues || {}).find((e) => trace.includes(e)) as keyof typeof animationDataValues];
             const selectedMarker = getArrayValue(config.selectedMarkers, idx);
             if (selectedMarker) {
                 ret.selected = { marker: selectedMarker };
@@ -628,7 +668,7 @@ const Chart = (props: ChartProp) => {
             lastDataPl.current = newDataPl;
         }
         return lastDataPl.current;
-    }, [props.figure, selected, data, additionalDatas, config, dataKeys]);
+    }, [props.figure, selected, data, additionalDatas, config, dataKeys, animationDataValues]);
 
     const plotConfig = useMemo(() => {
         let plConf: Partial<Config> = {};
@@ -744,6 +784,7 @@ const Chart = (props: ChartProp) => {
     const onInitialized = useCallback(
         (figure: Readonly<Figure>, graphDiv: Readonly<HTMLElement>) => {
             onClick && graphDiv.addEventListener("click", clickHandler);
+            plotRef.current = graphDiv as HTMLDivElement;
         },
         [onClick, clickHandler],
     );
@@ -811,221 +852,72 @@ const Chart = (props: ChartProp) => {
         [getRealIndex, dispatch, updateVars, propagate, props.onChange, config.traces.length, module],
     );
 
-    const uniqueValues = useMemo(() => {
-        return [...new Set(dataPl.flatMap(trace => {
-            if (trace) {
-                return trace.animateOn || [];
-            }
-            return [];
-        }))];
-    }, [dataPl]);
+    useEffect(() => {
+        if (!dataPl.length || !animationDataValues) return;
 
-    const frames = useMemo(() => {
-        return uniqueValues.map((value, index) => {
-            const frameData = dataPl.map(trace => {
-                const { x, y, mode } = trace as Partial<PlotData>;
+        const filteredData = dataPl.filter((trace) =>
+            Object.keys(animationDataValues)?.includes(String(trace.name)),
+        );
 
-                const xArray = Array.isArray(x) ? x : Array.from(x || []);
-                const yArray = Array.isArray(y) ? y : Array.from(y || []);
+        const toFramesData = filteredData.map((trace: ExtendedPlotData) => ({
+            name: trace.name,
+            x: trace.x,
+            y: trace.animateTo ?? [],
+        }));
 
-                // Keep all values from the start up to the current index
-                const filteredX: Datum[] = [];
-                const filteredY: Datum[] = [];
-                for (let idx = 0; idx < xArray.length; idx++) {
-                    if (uniqueValues.slice(0, index + 1).includes(trace.animateOn?.[idx] as string)) {
-                        filteredX.push(xArray[idx] as Datum);
-                        filteredY.push(yArray[idx] as Datum);
-                    }
-                }
-
-                return {
-                    x: filteredX,
-                    y: filteredY,
-                    mode: mode,
-                    type: "scatter" as const,
-                };
-            });
-
-            const allX = frameData.flatMap(trace => trace.x);
-            const allY = frameData.flatMap(trace => trace.y);
-
-            const determineAxisType = (values: Datum[]): "linear" | "category" | "date" => {
-                if (values.length === 0) return "linear";
-
-                if (values.every(v => typeof v === "number")) {
-                    const uniqueValues = Array.from(new Set(values)).sort((a, b) => Number(a) - Number(b));
-                    const isContinuous = uniqueValues.every((val, i, arr) =>
-                        i === 0 || (typeof val === "number" && typeof arr[i - 1] === "number" && val - (arr[i - 1] as number) === 1),
-                    );
-                    return isContinuous ? "linear" : "category";
-                }
-
-                if (values.every(v => typeof v === "string" || v instanceof Date)) {
-                    return "date";
-                }
-
-                return "linear";
-            };
-
-            const computeRange = (values: Datum[]) => {
-                if (values.length === 0) return undefined;
-
-                if (values.every(v => typeof v === "number")) {
-                    return [Math.min(...(values as number[])), Math.max(...(values as number[]))];
-                } else if (values.every(v => typeof v === "string" || v instanceof Date)) {
-                    const timestamps = values
-                        .map(date => new Date(date as string).getTime())
-                        .filter(Boolean);
-                    if (timestamps.length > 0) {
-                        return [new Date(Math.min(...timestamps)), new Date(Math.max(...timestamps))];
-                    }
-                }
-                return undefined;
-            };
-
+        setFrames((prevFrames) => {
+            console.log("prevFrames", prevFrames);
             return {
-                name: String(value),
-                baseframe: index === 0 ? "" : String(uniqueValues[index - 1]),
-                data: frameData,
-                traces: dataPl.map((_, idx) => idx),
-                layout: {
-                    xaxis: {
-                        range: computeRange(allX),
-                        type: determineAxisType(allX),
-                    },
-                    yaxis: { range: computeRange(allY) },
+                from: prevFrames.to
+                    ? { ...prevFrames.to, name: "from" }
+                    : { name: "from", data: [], traces: [], layout: {}, group: "", baseframe: "" },
+                to: {
+                    name: "to",
+                    data: toFramesData,
+                    traces: toFramesData.map((_, idx) => idx),
+                    layout: {},
+                    group: "",
+                    baseframe: "from",
                 },
-                group: "",
             };
         });
-    }, [uniqueValues, dataPl]);
+    }, [dataPl, animationDataValues]);
 
-    const animateFrom = useDynamicJsonProperty(props.animateFrom, props.defaultAnimateFrom || "", "");
-    const animateTo = useDynamicJsonProperty(props.animateTo, props.defaultAnimateTo || "", "");
+    const initFrames = [frames.from, frames.to];
+    const updatedFrames = [{ ...frames.from, name: "from" }, frames.to];
 
-    const perFrames = useMemo(() => {
-        const computeRange = (values: Datum[]) => {
-            if (values.length === 0) return undefined;
+    useEffect(() => {
+        if (!plotRef.current || !frames.to) return;
 
-            if (values.every(v => typeof v === "number")) {
-                return [Math.min(...(values as number[])), Math.max(...(values as number[]))];
-            } else if (values.every(v => typeof v === "string" || v instanceof Date)) {
-                const timestamps = values
-                    .map(date => new Date(date as string).getTime())
-                    .filter(v => !isNaN(v));
-                if (timestamps.length > 0) {
-                    return [new Date(Math.min(...timestamps)), new Date(Math.max(...timestamps))];
-                }
-            }
-            return undefined;
-        };
-
-        const extractData = (traces: Partial<PlotData>[], key: "x" | "y") =>
-            traces.reduce<number[]>((acc, trace) => {
-                if (Array.isArray(trace[key])) {
-                    acc.push(...(trace[key] as number[]));
-                }
-                return acc;
-            }, []);
-
-        // Filter frame data
-        const fromFrameData = dataPl
-            .filter((_, idx) => animateFrom.includes(String(dataPl[idx].name)))
-            .map((trace: Partial<PlotData>) => ({
-                name: trace.name,
-                x: trace.x,
-                y: trace.y,
-            }));
-
-        const toFrameData = dataPl
-            .filter((_, idx) => animateTo.includes(String(dataPl[idx].name)))
-            .map((trace: Partial<PlotData>) => ({
-                name: trace.name,
-                x: trace.x,
-                y: trace.y,
-            }));
-
-        // Compute ranges correctly
-        const allFromX = extractData(fromFrameData, "x");
-        const allFromY = extractData(fromFrameData, "y");
-        const allToX = extractData(toFrameData, "x");
-        const allToY = extractData(toFrameData, "y");
-
-        // Create frames
         const fromFrame = {
-            name: "from",
-            data: fromFrameData,
-            traces: dataPl.map((_, idx) => idx),
-            layout: {
-                xaxis: { range: computeRange(allFromX) },
-                yaxis: { range: computeRange(allFromY) },
-            },
-            group: "",
-            baseframe: "",
+            ...frames.from,
+            data: frames.from.data as ScatterData[],
         };
 
         const toFrame = {
-            name: "to",
-            data: toFrameData,
-            traces: dataPl.map((_, idx) => idx),
-            layout: {
-                xaxis: { range: computeRange(allToX) },
-                yaxis: { range: computeRange(allToY) },
-            },
-            group: "",
-            baseframe: "from",
+            ...frames.to,
+            data: frames.to.data as ScatterData[],
         };
 
-        return [fromFrame, toFrame];
-    }, [dataPl, animateFrom, animateTo]);
-
-    const perFramesV2 = useMemo(() => {
-        const fromFrameData = dataPl
-            .filter((_, idx) => animateFrom.includes(String(dataPl[idx].name)))
-            .map((trace: Partial<PlotData>) => ({
-                name: trace.name,
-                x: trace.x,
-                y: trace.y,
-            }));
-
-        const toFrameData = dataPl
-            .filter((_, idx) => animateTo.includes(String(dataPl[idx].name)))
-            .map((trace: Partial<PlotData>) => ({
-                name: trace.name,
-                x: trace.x,
-                y: trace.y,
-            }));
-
-        const fromFrame = {
-            name: "from",
-            data: fromFrameData,
-            traces: dataPl.map((_, idx) => idx),
-            layout: {
-                xaxis: { autorange: true },
-                yaxis: { autorange: true },
-            },
-            group: "",
-            baseframe: "to",
-        };
-
-        const toFrame = {
-            name: "to",
-            data: toFrameData,
-            traces: dataPl.map((_, idx) => idx),
-            layout: {
-                xaxis: { autorange: true },
-                yaxis: { autorange: true },
-            },
-            group: "",
-            baseframe: "from",
-        };
-
-        return [fromFrame, toFrame];
-    }, [dataPl, animateFrom, animateTo]);
+        const plotElement = plotRef.current as unknown as PlotlyHTMLElement;
+        if (!plotElement || !plotElement.data) {
+            return;
+        } else {
+            const addFramesAsync = async () => {
+                try {
+                    await Plotly.react(plotElement, fromFrame.data, layout, {});
+                    await Plotly.addFrames(plotElement, [fromFrame, toFrame]);
+                } catch (error) {
+                    console.error("Error adding frames:", error);
+                }
+            };
+            addFramesAsync().catch(console.error);
+        }
+    }, [layout, frames.to, frames.from]);
 
     return render ? (
         <Tooltip title={hover || ""}>
-            <Box id={id} className={`${className} ${getComponentClassName(props.children)}`} ref={plotRef}>
+            <Box id={"graph"} className={`${className} ${getComponentClassName(props.children)}`} ref={plotRef}>
                 <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
                     {Array.isArray(props.figure) && props.figure.length && props.figure[0].data !== undefined ? (
                         <Plot
@@ -1041,11 +933,11 @@ const Chart = (props: ChartProp) => {
                         />
                     ) : (
                         <Plot
-                            data={props.smoothToggle ? perFramesV2[0].data : perFrames[0].data}
+                            data={dataPl}
                             layout={layout}
                             style={style}
                             onRelayout={onRelayout}
-                            frames={props.smoothToggle ? perFramesV2 : perFrames}
+                            frames={animationData ? (updatedFrames[0]?.data ? updatedFrames : initFrames) : undefined}
                             onSelected={isOnClick(config.types) ? undefined : onSelect}
                             onDeselect={isOnClick(config.types) ? undefined : onSelect}
                             onClick={isOnClick(config.types) ? onSelect : undefined}
