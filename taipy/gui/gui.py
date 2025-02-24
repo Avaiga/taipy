@@ -2315,7 +2315,9 @@ class Gui:
                 self._bind(encoded_var_name, bind_locals[var_name])
             else:
                 _warn(
-                    f"Variable '{var_name}' is not available in either the '{self._get_locals_context()}' or '__main__' modules."  # noqa: E501
+                    f"Variable '{var_name}' is not available in the '__main__' module."
+                    if self._get_locals_context() == "__main__"
+                    else f"Variable '{var_name}' is not available in either the '{self._get_locals_context()}' or '__main__' modules."  # noqa: E501
                 )
         return encoded_var_name
 
