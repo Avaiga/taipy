@@ -607,7 +607,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                             key={`head${columns[col].dfid}`}
                                                             sx={
                                                                 columns[col].width
-                                                                    ? { minWidth: columns[col].width }
+                                                                    ? { minWidth: columns[col].width, maxWidth: columns[col].width }
                                                                     : calcWidth
                                                                     ? { width: calcWidth }
                                                                     : undefined
@@ -639,7 +639,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                         sortDirection={orderBy === columns[col].dfid && order}
                                                         sx={
                                                             columns[col].width
-                                                                ? { minWidth: columns[col].width }
+                                                                ? { minWidth: columns[col].width, maxWidth: columns[col].width }
                                                                 : calcWidth
                                                                 ? { width: calcWidth }
                                                                 : undefined
