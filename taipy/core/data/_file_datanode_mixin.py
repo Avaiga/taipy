@@ -155,7 +155,8 @@ class _FileDataNodeMixin:
         try:
             upload_data = self._read_from_path(str(up_path))
         except Exception as err:
-            self.__logger.error(f"Error uploading `{up_path.name}` to data " f"node `{self.id}`:")  # type: ignore[attr-defined]
+            self.__logger.error(f"Error uploading `{up_path.name}` to data "
+                                f"node `{self.id}`:")  # type: ignore[attr-defined]
             self.__logger.error(f"Error: {err}")
             reasons._add_reason(self.id, UploadFileCanNotBeRead(up_path.name, self.id))  # type: ignore[attr-defined]
             return reasons
