@@ -179,7 +179,7 @@ class _FileDataNodeMixin:
 
         shutil.copy(up_path, self.path)
 
-       self.track_edit(timestamp=datetime.now(),  # type: ignore[attr-defined]
+        self.track_edit(timestamp=datetime.now(),  # type: ignore[attr-defined]
                         editor_id=editor_id,
                         comment=comment, **kwargs)
         self.unlock_edit()  # type: ignore[attr-defined]
