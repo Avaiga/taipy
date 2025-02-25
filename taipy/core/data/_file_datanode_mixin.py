@@ -179,12 +179,9 @@ class _FileDataNodeMixin:
 
         shutil.copy(up_path, self.path)
 
-        self.track_edit(  # type: ignore[attr-defined]
-            timestamp=datetime.now(),
-            editor_id=editor_id,
-            comment=comment,
-            **kwargs,
-        )
+       self.track_edit(timestamp=datetime.now(),  # type: ignore[attr-defined]
+                        editor_id=editor_id,
+                        comment=comment, **kwargs)
         self.unlock_edit()  # type: ignore[attr-defined]
 
         _DataManagerFactory._build_manager()._set(self)  # type: ignore[arg-type]
