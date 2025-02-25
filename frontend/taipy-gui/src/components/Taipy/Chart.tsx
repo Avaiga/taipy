@@ -102,7 +102,6 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     figure?: Array<Record<string, unknown>>;
     onClick?: string;
     dataVarNames?: string;
-    smoothToggle?: boolean;
 }
 
 interface AnimationConfig {
