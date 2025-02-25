@@ -206,6 +206,7 @@ def _build_chart_config(  # noqa: C901
 
     # Animation Config
     animation = {}
+    #TODO: Add animation config properties
     for key in __CHART_ANIMATION_CONFIG:
         if any(key in tr[_Chart_iprops.animation.value] for tr in traces):
             animation[key] = next(tr[_Chart_iprops.animation.value][key] for tr in traces if

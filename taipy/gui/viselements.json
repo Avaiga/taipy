@@ -509,6 +509,11 @@
                         "doc": "Chart type.<br/>See the Plotly <a href=\"https://plotly.com/javascript/reference/\">chart type</a> documentation for more details."
                     },
                     {
+                        "name": "animation_data",
+                        "type": "dynamic(dict[str, Any])",
+                        "doc": "Column name and its associated data for the animation."
+                    },
+                    {
                         "name": "mode",
                         "type": "indexed(str)",
                         "default_value": "\"lines+markers\"",

@@ -242,6 +242,13 @@ interface PlotlyDiv extends HTMLDivElement {
     };
 }
 
+interface ExtendedPlotData extends Plotly.PlotData {
+    meta?: {
+        xAxisName?: string;
+        yAxisName?: string;
+    };
+}
+
 interface WithPointNumbers {
     pointNumbers: number[];
 }
@@ -647,6 +654,10 @@ const Chart = (props: ChartProp) => {
             ret.xaxis = config.xaxis[idx];
             ret.yaxis = config.yaxis[idx];
             ret.hovertext = getValue(datum, config.labels, idx, true);
+            ret.meta = {
+                xAxisName: config.traces[idx][0],
+                yAxisName: config.traces[idx][1],
+            };
             const selPoints = getArrayValue(selected, idx, []);
             if (selPoints?.length) {
                 ret.selectedpoints = selPoints;
@@ -781,13 +792,37 @@ const Chart = (props: ChartProp) => {
         [dispatch, module, id, onClick],
     );
 
-    const onInitialized = useCallback(
-        (figure: Readonly<Figure>, graphDiv: Readonly<HTMLElement>) => {
-            onClick && graphDiv.addEventListener("click", clickHandler);
-            plotRef.current = graphDiv as HTMLDivElement;
-        },
-        [onClick, clickHandler],
-    );
+    const onInitialized = useCallback((figure: Readonly<Figure>, graphDiv: Readonly<HTMLElement>) => {
+        onClick && graphDiv.addEventListener("click", clickHandler);
+        plotRef.current = graphDiv as HTMLDivElement;
+
+        if (animationDataValues) {
+            const runAnimation = async () => {
+                if (plotRef.current && frames?.to?.data && frames.to.traces.length > 0) {
+                    await Plotly.animate(
+                        plotRef.current,
+                        {
+                            data: frames.to.data,
+                            traces: frames.to.traces,
+                            layout: layout,
+                        },
+                        {
+                            transition: {
+                                duration: 500,
+                                easing: "cubic-in-out",
+                            },
+                            frame: {
+                                duration: 500,
+                            },
+                            mode: "immediate",
+                        },
+                    );
+                }
+            };
+
+            runAnimation().catch(console.error);
+        }
+    }, [onClick, clickHandler, animationDataValues, frames?.to?.data, frames?.to?.traces, layout]);
 
     const getRealIndex = useCallback(
         (dataIdx: number, index?: number) => {
@@ -855,64 +890,84 @@ const Chart = (props: ChartProp) => {
     useEffect(() => {
         if (!dataPl.length || !animationDataValues) return;
 
-        const filteredData = dataPl.filter((trace) =>
-            Object.keys(animationDataValues)?.includes(String(trace.name)),
-        );
+        const toFramesData = dataPl.map((trace) => {
+            const isYaxisAnimated = Object.prototype.hasOwnProperty.call(animationDataValues, (trace as ScatterData).name);
+            const isXaxisAnimated = (trace as ExtendedPlotData).meta?.xAxisName &&
+                Object.prototype.hasOwnProperty.call(animationDataValues, (trace as ExtendedPlotData).meta?.xAxisName as PropertyKey);
 
-        const toFramesData = filteredData.map((trace: ExtendedPlotData) => ({
-            name: trace.name,
-            x: trace.x,
-            y: trace.animateTo ?? [],
-        }));
-
-        setFrames((prevFrames) => {
-            console.log("prevFrames", prevFrames);
             return {
-                from: prevFrames.to
-                    ? { ...prevFrames.to, name: "from" }
-                    : { name: "from", data: [], traces: [], layout: {}, group: "", baseframe: "" },
-                to: {
-                    name: "to",
-                    data: toFramesData,
-                    traces: toFramesData.map((_, idx) => idx),
-                    layout: {},
-                    group: "",
-                    baseframe: "from",
-                },
+                name: (trace as ScatterData).name,
+                x: isXaxisAnimated ? animationDataValues[(trace as ExtendedPlotData).meta?.xAxisName as keyof typeof animationDataValues] ?? [] : (trace as ScatterData).x,
+                y: isYaxisAnimated ? animationDataValues[(trace as ScatterData).name as keyof typeof animationDataValues] ?? [] : (trace as ScatterData).y,
             };
         });
+
+        setFrames((prevFrames) => ({
+            from: prevFrames.to
+                ? { ...prevFrames.to, name: "from" }
+                : { name: "from", data: [], traces: [], layout: {}, group: "", baseframe: "" },
+            to: {
+                name: "to",
+                data: toFramesData,
+                traces: dataPl.map((_, idx) => idx),
+                layout: {},
+                group: "",
+                baseframe: "from",
+            },
+        }));
     }, [dataPl, animationDataValues]);
 
     const initFrames = [frames.from, frames.to];
     const updatedFrames = [{ ...frames.from, name: "from" }, frames.to];
 
     useEffect(() => {
-        if (!plotRef.current || !frames.to) return;
-
-        const fromFrame = {
-            ...frames.from,
-            data: frames.from.data as ScatterData[],
-        };
-
-        const toFrame = {
-            ...frames.to,
-            data: frames.to.data as ScatterData[],
-        };
+        if (!plotRef.current || !frames.to || !frames.to.data?.length) return;
 
         const plotElement = plotRef.current as unknown as PlotlyHTMLElement;
-        if (!plotElement || !plotElement.data) {
-            return;
-        } else {
-            const addFramesAsync = async () => {
-                try {
-                    await Plotly.react(plotElement, fromFrame.data, layout, {});
-                    await Plotly.addFrames(plotElement, [fromFrame, toFrame]);
-                } catch (error) {
-                    console.error("Error adding frames:", error);
+        if (!plotElement || !plotElement.data) return;
+
+        let animationTimeout: NodeJS.Timeout | null = null;
+
+        const addFramesAsync = async () => {
+            try {
+                await Plotly.react(plotElement, frames.from.data, layout, {});
+                if (plotRef.current && frames?.to?.data && frames.to.traces.length > 0) {
+                    await Plotly.animate(
+                        plotElement,
+                        {
+                            data: frames.to.data,
+                            traces: frames.to.traces,
+                            layout: {},
+                        },
+                        {
+                            transition: {
+                                duration: 500,
+                                easing: "cubic-in-out",
+                            },
+                            frame: {
+                                duration: 500,
+                            },
+                            mode: "immediate",
+                        },
+                    );
                 }
-            };
-            addFramesAsync().catch(console.error);
-        }
+            } catch (error) {
+                console.error("Error adding frames:", error);
+            }
+        };
+
+        // Debounce or delay to prevent overlapping calls
+        animationTimeout = setTimeout(() => {
+            if (plotRef.current) {
+                addFramesAsync().catch(console.error);
+            }
+        }, 300);
+
+        return () => {
+            if (animationTimeout) {
+                clearTimeout(animationTimeout);
+            }
+        };
     }, [layout, frames.to, frames.from]);
 
     return render ? (
@@ -937,7 +992,7 @@ const Chart = (props: ChartProp) => {
                             layout={layout}
                             style={style}
                             onRelayout={onRelayout}
-                            frames={animationData ? (updatedFrames[0]?.data ? updatedFrames : initFrames) : undefined}
+                            frames={[frames.from, frames.to]}
                             onSelected={isOnClick(config.types) ? undefined : onSelect}
                             onDeselect={isOnClick(config.types) ? undefined : onSelect}
                             onClick={isOnClick(config.types) ? onSelect : undefined}
